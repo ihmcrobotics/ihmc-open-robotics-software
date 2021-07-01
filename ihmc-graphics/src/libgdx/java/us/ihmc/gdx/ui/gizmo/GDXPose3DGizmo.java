@@ -28,6 +28,7 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.mesh.GDXMeshBuilder;
 import us.ihmc.gdx.mesh.GDXMeshDataInterpreter;
+import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -88,10 +89,10 @@ public class GDXPose3DGizmo implements RenderableProvider
       {
          Color color = AXIS_COLORS[axis.ordinal()];
          normalMaterials[axis.ordinal()] = new Material();
-         normalMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(new Texture(Gdx.files.classpath("palette.png"))));
+         normalMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
          normalMaterials[axis.ordinal()].set(new BlendingAttribute(true, color.a));
          highlightedMaterials[axis.ordinal()] = new Material();
-         highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(new Texture(Gdx.files.classpath("palette.png"))));
+         highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
          highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, AXIS_SELECTED_COLORS[axis.ordinal()].a));
          arrowModels[axis.ordinal()] = new DynamicGDXModel();
          arrowModels[axis.ordinal()].setMesh(meshBuilder ->

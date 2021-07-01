@@ -99,7 +99,7 @@ public class FocusBasedGDXCamera extends Camera
       Mesh mesh = meshBuilder.generateMesh();
       MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL20.GL_TRIANGLES);
       Material material = new Material();
-      Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+      Texture paletteTexture = GDXMultiColorMeshBuilder.loadPaletteTexture();
       material.set(TextureAttribute.createDiffuse(paletteTexture));
       material.set(ColorAttribute.createDiffuse(com.badlogic.gdx.graphics.Color.WHITE));
       modelBuilder.part(meshPart, material);

@@ -1,7 +1,9 @@
 package us.ihmc.gdx.mesh;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -12,7 +14,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.gdx.mesh.GDXMeshBuilder;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
@@ -942,12 +943,46 @@ public class GDXMultiColorMeshBuilder
 
    public float[] getTextureLocation(Color color)
    {
-      float x;
+      // texture 64 vertical pixels of white to black fully saturated hues
+      // then, 12 pixels of grayscale blacl left to right white
+      // texture is 256 pixels wide to span the different hues red to violet
+      // texture is 76 pixels tall
       float[] hsv = new float[3];
       color.toHsv(hsv);
-      x = (float) (hsv[0] / 360.0);
-      float y = 0.5f;
+
+      float hue = hsv[0];
+      float saturation = hsv[1];
+      float value = hsv[2];
+      float x;
+      float y;
+//      LogTools.info("H: {} S: {} V: {}", hue, saturation, value);
+
+      if (saturation < 0.1) // black and white
+      {
+         x = value;
+         y = 0.98f;
+      }
+      else
+      {
+         float percentHeightIsHues = 64.0f / 76.0f;
+         x = hue / 360.0f;
+         y = percentHeightIsHues - percentHeightIsHues * value / 2.0f;
+      }
+//      LogTools.info("X: {} Y: {}", x, y);
+
+      // x is 0.0 -> 1.0 is left to right
+      // y is 0.0 -> 1.0 top to bottom
       return new float[] {x, y};
+   }
+
+   public static String getPalletImagePath()
+   {
+      return "RGB_24bits_hue_value_palette.png";
+   }
+
+   public static Texture loadPaletteTexture()
+   {
+      return new Texture(Gdx.files.classpath(getPalletImagePath()));
    }
 
    public Mesh generateMesh()
@@ -959,13 +994,4 @@ public class GDXMultiColorMeshBuilder
    {
       meshBuilder.clear();
    }
-
-//   public Material generateMaterial(AssetManager assetManager)
-//   {
-//      Material material = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-//      Texture texture = assetManager.loadTexture("palette.png");
-//      material.setTexture("DiffuseMap", texture);
-//      material.createMeshDataWithColor("Diffuse", ColorRGBA.White);
-//      return material;
-//   }
 }

@@ -76,7 +76,7 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
       {
          modelBuilder.begin();
          Material material = new Material();
-         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+         Texture paletteTexture = GDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
 

@@ -84,7 +84,7 @@ public class GDXBodyPathPlanGraphic implements RenderableProvider
          Mesh mesh = meshBuilder.generateMesh();
          MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
          com.badlogic.gdx.graphics.g3d.Material material = new Material();
-         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+         Texture paletteTexture = GDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
          modelBuilder.part(meshPart, material);
