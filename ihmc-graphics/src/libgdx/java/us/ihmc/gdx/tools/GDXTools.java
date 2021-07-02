@@ -303,6 +303,16 @@ public class GDXTools
       return javafx.scene.paint.Color.color(gdxColor.r, gdxColor.g, gdxColor.b, gdxColor.a);
    }
 
+   /**
+    * @param hue 0.0 to 360.0
+    * @param saturation 0.0 to 1.0
+    * @param value 0.0 to 1.0
+    */
+   public static Color hueSaturationValue(double hue, double saturation, double value)
+   {
+      return new Color().fromHsv((float) hue, (float) saturation, (float) value);
+   }
+
    public static Color toGDX(AppearanceDefinition appearanceDefinition)
    {
       Color gdxColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);

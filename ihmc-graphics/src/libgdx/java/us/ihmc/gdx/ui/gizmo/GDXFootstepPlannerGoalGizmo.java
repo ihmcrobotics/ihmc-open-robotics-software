@@ -28,10 +28,13 @@ import us.ihmc.gdx.tools.GDXTools;
 
 public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 {
-   public static final Color DISC_NORMAL_COLOR = Color.LIGHT_GRAY;
-   public static final Color DISC_HIGHLIGHTED_COLOR = Color.LIGHT_GRAY;
-   public static final Color ARROW_NORMAL_COLOR = Color.YELLOW;
-   public static final Color ARROW_HIGHLIGHTED_COLOR = Color.YELLOW;
+   public static final Color LIGHT_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.836f);
+   public static final Color LIGHTER_GRAY = new Color().fromHsv(0.0f, 0.0f, 0.95f);
+   public static final Color YELLOW_HIGHLIGHT = new Color().fromHsv(61.5f, 0.783f, 0.892f);
+   public static final Color DISC_NORMAL_COLOR = LIGHT_GRAY;
+   public static final Color DISC_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
+   public static final Color ARROW_NORMAL_COLOR = LIGHT_GRAY;
+   public static final Color ARROW_HIGHLIGHTED_COLOR = LIGHTER_GRAY;
    static
    {
       DISC_NORMAL_COLOR.a = 0.4f;
