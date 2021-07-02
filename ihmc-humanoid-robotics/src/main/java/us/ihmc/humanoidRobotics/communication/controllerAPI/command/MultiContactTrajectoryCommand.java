@@ -1,14 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.WholeBodyMultiContactTrajectoryMessage;
+import controller_msgs.msg.dds.MultiContactTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 
-public class WholeBodyMultiContactTrajectoryCommand
-      implements Command<WholeBodyMultiContactTrajectoryCommand, WholeBodyMultiContactTrajectoryMessage>, EpsilonComparable<WholeBodyMultiContactTrajectoryCommand>
+public class MultiContactTrajectoryCommand
+      implements Command<MultiContactTrajectoryCommand, MultiContactTrajectoryMessage>, EpsilonComparable<MultiContactTrajectoryCommand>
 {
    private long sequenceId;
    private double trajectoryDuration;
@@ -25,7 +25,7 @@ public class WholeBodyMultiContactTrajectoryCommand
    }
 
    @Override
-   public void setFromMessage(WholeBodyMultiContactTrajectoryMessage message)
+   public void setFromMessage(MultiContactTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();
       trajectoryDuration = message.getTrajectoryDuration();
@@ -38,9 +38,9 @@ public class WholeBodyMultiContactTrajectoryCommand
    }
 
    @Override
-   public Class<WholeBodyMultiContactTrajectoryMessage> getMessageClass()
+   public Class<MultiContactTrajectoryMessage> getMessageClass()
    {
-      return WholeBodyMultiContactTrajectoryMessage.class;
+      return MultiContactTrajectoryMessage.class;
    }
 
    public double getTrajectoryDuration()
@@ -71,7 +71,7 @@ public class WholeBodyMultiContactTrajectoryCommand
    }
 
    @Override
-   public boolean epsilonEquals(WholeBodyMultiContactTrajectoryCommand other, double epsilon)
+   public boolean epsilonEquals(MultiContactTrajectoryCommand other, double epsilon)
    {
       if (!EuclidCoreTools.epsilonEquals(trajectoryDuration, other.trajectoryDuration, epsilon))
       {
@@ -98,7 +98,7 @@ public class WholeBodyMultiContactTrajectoryCommand
    }
 
    @Override
-   public void set(WholeBodyMultiContactTrajectoryCommand other)
+   public void set(MultiContactTrajectoryCommand other)
    {
       this.sequenceId = other.sequenceId;
       this.trajectoryDuration = other.trajectoryDuration;
