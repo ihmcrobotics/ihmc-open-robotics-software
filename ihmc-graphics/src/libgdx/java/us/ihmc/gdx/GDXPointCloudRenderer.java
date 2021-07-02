@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 
 import java.nio.FloatBuffer;
@@ -37,7 +38,12 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private final int vertexSizeAndPositionOffset = (short) (vertexAttributes.findByUsage(SIZE_AND_ROTATION_USAGE).offset / 4);
 
    private RecyclingArrayList<Point3D32> pointsToRender;
-   private float pointSize = 50.0f;
+   private float pointSize = 0.02f; //NOT in pixels
+   private Color color = Color.RED;
+
+   public void setColor(Color c) {
+      this.color = c;
+   }
 
    private static void enablePointSprites()
    {
@@ -55,14 +61,14 @@ public class GDXPointCloudRenderer implements RenderableProvider
          enablePointSprites();
 
       renderable = new Renderable();
-      renderable.meshPart.primitiveType = GL30.GL_POINTS;
+      renderable.meshPart.primitiveType = GL30.GL_TRIANGLES;
       renderable.meshPart.offset = 0;
       renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
-      vertices = new float[size * vertexSize];
+      vertices = new float[size * vertexSize * 6];
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
-      renderable.meshPart.mesh = new Mesh(false, size, 0, vertexAttributes);
+      renderable.meshPart.mesh = new Mesh(false, size * 6, 0, vertexAttributes);
 
       ShaderProgram.pedantic = true;
       final String vertexShader = "attribute vec3 a_position;\n" +
@@ -73,7 +79,6 @@ public class GDXPointCloudRenderer implements RenderableProvider
                                   "void main() {\n" +
                                   "   v_color = a_color;\n" +
                                   "   gl_Position = u_proj * vec4(a_position, 1.0);\n" +
-                                  "   gl_PointSize = a_sizeAndRotation.x;\n" +
                                   "}\n";
 
       final String fragmentShader = "varying vec4 v_color;" +
@@ -108,28 +113,63 @@ public class GDXPointCloudRenderer implements RenderableProvider
       {
          Random rand = new Random(0);
 
+         Vector3D transformUp = new Vector3D(0, 0, pointSize / 2);
+         Vector3D transformLeft = new Vector3D(pointSize / 2, 0, 0);
+
+         //TODO transform transforms to point towards camera
+
          for (int i = 0; i < pointsToRender.size(); i++)
          {
-            int offset = i * vertexSize;
+            float r = rand.nextFloat();
+            float g = rand.nextFloat();
+            float b = rand.nextFloat();
 
             Point3D32 point = pointsToRender.get(i);
-            vertices[offset] = point.getX32();
-            vertices[offset + 1] = point.getY32();
-            vertices[offset + 2] = point.getZ32();
 
-            // color [0.0f - 1.0f]
-            vertices[offset + 3] = rand.nextFloat(); // red
-            vertices[offset + 4] = rand.nextFloat(); // green
-            vertices[offset + 5] = rand.nextFloat(); // blue
-            vertices[offset + 6] = alpha; // alpha
+            for (int j = 0; j < 6; j++) {
+               int offset = (i * vertexSize * 6) + j * vertexSize;
 
-            vertices[offset + 7] = pointSize; // size
-            vertices[offset + 8] = 1.0f; // cosine [0-1]
-            vertices[offset + 9] = 0.0f; // sine [0-1]
+               Point3D32 toDraw = new Point3D32(point);
+
+               switch(j) {
+                  case 0:
+                  case 5:
+                     toDraw.add(transformUp);
+                     toDraw.add(transformLeft);
+                     break;
+                  case 1:
+                     toDraw.add(transformUp);
+                     toDraw.sub(transformLeft);
+                     break;
+                  case 4:
+                     toDraw.sub(transformUp);
+                     toDraw.add(transformLeft);
+                     break;
+                  case 2:
+                  case 3:
+                     toDraw.sub(transformUp);
+                     toDraw.sub(transformLeft);
+                     break;
+               }
+
+               vertices[offset] = toDraw.getX32();
+               vertices[offset + 1] = toDraw.getY32();
+               vertices[offset + 2] = toDraw.getZ32();
+
+               // color [0.0f - 1.0f]
+               vertices[offset + 3] = r; // red
+               vertices[offset + 4] = g; // green
+               vertices[offset + 5] = b; // blue
+               vertices[offset + 6] = alpha; // alpha
+
+               vertices[offset + 7] = 1.0f; // size - unused
+               vertices[offset + 8] = 1.0f; // cosine [0-1]
+               vertices[offset + 9] = 0.0f; // sine [0-1]
+            }
          }
 
-         renderable.meshPart.size = pointsToRender.size();
-         renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * vertexSize);
+         renderable.meshPart.size = pointsToRender.size() * 6;
+         renderable.meshPart.mesh.setVertices(vertices, 0, vertices.length);
          renderable.meshPart.update();
       }
    }
