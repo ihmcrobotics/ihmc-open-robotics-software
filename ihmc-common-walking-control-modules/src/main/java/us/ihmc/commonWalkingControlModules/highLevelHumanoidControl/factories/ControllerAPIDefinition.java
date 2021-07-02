@@ -31,41 +31,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandWrenchTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HighLevelControllerStateCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyJointspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WholeBodyMultiContactTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
@@ -116,7 +82,8 @@ public class ControllerAPIDefinition
       commands.add(HandWrenchTrajectoryCommand.class);
 
       /** Commands supported by multi-contact controller, not in this repo */
-      commands.add(WholeBodyMultiContactTrajectoryCommand.class);
+      commands.add(MultiContactTrajectoryCommand.class);
+      commands.add(MultiContactTrajectorySequenceCommand.class);
 
       /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);
