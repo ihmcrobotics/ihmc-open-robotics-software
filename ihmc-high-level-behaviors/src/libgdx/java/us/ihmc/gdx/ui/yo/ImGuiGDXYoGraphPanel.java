@@ -160,10 +160,46 @@ public class ImGuiGDXYoGraphPanel
       return output;
    }
 
-   public void renderImGuiWidgets()
-   {
-      ImGui.columns(showAllVariables.get() ? 2 : 1);
+   public void renderImGuiWidgetsVariablePanel() {
+      if (graphRequesting == null) {
+         ImGui.text("Select a graph by right clicking it to add a variable.");
+         return;
+      }
 
+      List<YoVariable> vars = getAllVariables(registry);
+      vars.sort(Comparator.comparing(YoVariable::getName));
+
+      ImGui.inputText("Variable Search", searchBar);
+
+      ImGui.sameLine();
+      if (ImGui.button("Cancel"))
+      {
+         showAllVariables.set(false);
+         graphRequesting.cancelWantVariable();
+         graphRequesting = null;
+      }
+
+      if (ImGui.beginListBox("##YoVariables", ImGui.getColumnWidth(), ImGui.getWindowSizeY() - 100))
+      {
+         for (YoVariable variable : vars)
+         {
+            if (!variable.getName().toLowerCase().contains(searchBar.get().toLowerCase()))
+               continue;
+
+            ImGui.selectable(variable.getName());
+            if (ImGui.isItemClicked())
+            {
+               graphRequesting.addVariable(variable);
+               showAllVariables.set(false);
+               graphRequesting = null;
+            }
+         }
+         ImGui.endListBox();
+      }
+   }
+
+   public void renderImGuiWidgetsGraphPanel()
+   {
       ImGui.text("Controller host: " + controllerHost);
 
       ImGui.combo(ImGuiTools.uniqueIDOnly(this, "Profile"), graphGroupSelectedIndex, graphGroupNames, graphGroupNames.length);
@@ -211,42 +247,6 @@ public class ImGuiGDXYoGraphPanel
       if (ImGui.button("Add new graph"))
       {
          graphs.add(new GDXYoGraphRunnable(context, registry, bufferSize));
-      }
-
-      if (showAllVariables.get())
-      {
-         ImGui.nextColumn();
-
-         List<YoVariable> vars = getAllVariables(registry);
-         vars.sort(Comparator.comparing(YoVariable::getName));
-
-         ImGui.inputText("Variable Search", searchBar);
-
-         ImGui.sameLine();
-         if (ImGui.button("Cancel"))
-         {
-            showAllVariables.set(false);
-            graphRequesting.cancelWantVariable();
-            graphRequesting = null;
-         }
-
-         if (ImGui.beginListBox("##YoVariables", ImGui.getColumnWidth(), ImGui.getWindowSizeY() - 100))
-         {
-            for (YoVariable variable : vars)
-            {
-               if (!variable.getName().toLowerCase().contains(searchBar.get().toLowerCase()))
-                  continue;
-
-               ImGui.selectable(variable.getName());
-               if (ImGui.isItemClicked())
-               {
-                  graphRequesting.addVariable(variable);
-                  showAllVariables.set(false);
-                  graphRequesting = null;
-               }
-            }
-            ImGui.endListBox();
-         }
       }
    }
 
