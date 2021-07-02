@@ -82,7 +82,7 @@ public class GDXYoGraphRunnable implements Runnable
       ImPlot.setCurrentContext(context);
 
       int currentValueIndex = currentIndex.getAndIncrement();
-      float graphWidth = ImGui.getColumnWidth() - 60;
+      float graphWidth = ImGui.getColumnWidth();
       float graphHeight = 60;
       ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, new ImVec2(0, 0));
       ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, new ImVec2(5, 0));
@@ -99,6 +99,7 @@ public class GDXYoGraphRunnable implements Runnable
 
          Iterator<YoVariable> itVar = variables.iterator();
          Iterator<Double[]> itVal = values.iterator();
+         boolean showingLegendPopup = false;
          while (itVar.hasNext())
          {
             YoVariable variable = itVar.next();
@@ -109,6 +110,7 @@ public class GDXYoGraphRunnable implements Runnable
             ImPlot.plotLine(variable.getName(), ImPlotTools.createIndex(data), data);
             if (ImPlot.beginLegendPopup(variable.getName()))
             {
+               showingLegendPopup = true;
                ImGui.text(variable.getFullNameString());
                if (variable.getDescription() != null && !variable.getDescription().isEmpty())
                {
@@ -124,6 +126,20 @@ public class GDXYoGraphRunnable implements Runnable
             }
          }
 
+         if (!showingLegendPopup && ImGui.beginPopupContextWindow()) {
+            if (ImGui.button("Add a variable...##" + plotID))
+            {
+               requestAddVariable = true;
+            }
+
+            if (ImGui.button("Remove graph##" + plotID))
+            {
+               shouldGraphExist = false;
+            }
+
+            ImGui.endPopup();
+         }
+
          if (ImPlot.beginDragDropTarget())
          {
             String payload = ImGui.acceptDragDropPayload(String.class);
@@ -136,18 +152,6 @@ public class GDXYoGraphRunnable implements Runnable
          ImPlot.endPlot();
       }
       ImPlot.popStyleVar(2);
-
-      ImGui.sameLine();
-      if (ImGui.button("+##" + plotID, 20, graphHeight))
-      {
-         requestAddVariable = true;
-      }
-
-      ImGui.sameLine();
-      if (ImGui.button("X##" + plotID, 20, graphHeight))
-      {
-         shouldGraphExist = false;
-      }
 
       if (currentValueIndex >= bufferSize - 1)
       {
