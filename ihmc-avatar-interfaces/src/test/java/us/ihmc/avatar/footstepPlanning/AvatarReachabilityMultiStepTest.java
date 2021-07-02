@@ -47,7 +47,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
       FLAT_FORWARD, FLAT_BACKWARDS, FLAT_LEFT, FLAT_RIGHT, FLAT_RANDOM, STAIRS_FORWARD, STAIRS_BACKWARDS, RANDOM
    }
 
-   private static final Mode mode = Mode.STAIRS_FORWARD;
+   private static final Mode mode = Mode.STAIRS_BACKWARDS;
 
    private static final boolean visualize = true;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -58,9 +58,9 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    private static final double solutionQualityThreshold = 2.2;
    private static final double initialStanceTime = 1.0;
    private static final double swingDuration = 2;
+   private static final double transferDuration = 0.5;
    private static final double stepTime = numberOfStepsToTake * swingDuration * 1.5;
-   private static final double finalStanceTime = 2.0;
-   private static final Random random = new Random(1000);
+   private static final Random random = new Random(250);
 
    @BeforeEach
    public void setup()
@@ -150,7 +150,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
       for (int i = 0; i < numberOfStepsToTake; i++)
       {
          RobotSide robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
-         int stepIndex = getNextStep(feasibleSolutions, robotSide);
+         int stepIndex = getNextStep(feasibleSolutions, previousPose, robotSide);
          KinematicsToolboxSnapshotDescription snapshotToStep = feasibleSolutions.get(stepIndex);
          feasibleSolutions.remove(stepIndex);
 
@@ -160,7 +160,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          Quaternion desiredOrientation = footstep.getInputMessage().getDesiredOrientationInWorld();
 
          // Adjust candidate foot position if right step
-         if (robotSide == RobotSide.RIGHT)
+         if (robotSide == RobotSide.LEFT)
          {
             double stepY = desiredPose.getY();
             desiredPose.setY(-stepY);
@@ -222,7 +222,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          Assertions.assertTrue(success);
    }
 
-   private int getNextStep(List<KinematicsToolboxSnapshotDescription> feasibleSolutions, RobotSide robotSide)
+   private int getNextStep(List<KinematicsToolboxSnapshotDescription> feasibleSolutions, Point3D previousPose, RobotSide robotSide)
    {
       int stepIndex = -1;
       int maxNumOfIterations = 1000;
@@ -236,23 +236,23 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          switch (mode)
          {
             case FLAT_FORWARD:
-               if (leftFootDesiredPosition.getX() >= 0 && leftFootDesiredPosition.getZ() == 0)
-                  return randIndex;
-               break;
-            case FLAT_BACKWARDS:
                if (leftFootDesiredPosition.getX() <= 0 && leftFootDesiredPosition.getZ() == 0)
                   return randIndex;
                break;
-            case FLAT_LEFT:
-               if (robotSide == RobotSide.LEFT && leftFootDesiredPosition.getY() >= 0 && leftFootDesiredPosition.getZ() == 0)
-                  return randIndex;
-               if (robotSide == RobotSide.RIGHT && leftFootDesiredPosition.getY() <= 0 && leftFootDesiredPosition.getZ() == 0)
+            case FLAT_BACKWARDS:
+               if (leftFootDesiredPosition.getX() >= 0 && leftFootDesiredPosition.getZ() == 0)
                   return randIndex;
                break;
-            case FLAT_RIGHT:
+            case FLAT_LEFT:
                if (robotSide == RobotSide.LEFT && leftFootDesiredPosition.getY() <= 0 && leftFootDesiredPosition.getZ() == 0)
                   return randIndex;
                if (robotSide == RobotSide.RIGHT && leftFootDesiredPosition.getY() >= 0 && leftFootDesiredPosition.getZ() == 0)
+                  return randIndex;
+               break;
+            case FLAT_RIGHT:
+               if (robotSide == RobotSide.LEFT && leftFootDesiredPosition.getY() >= 0 && leftFootDesiredPosition.getZ() == 0)
+                  return randIndex;
+               if (robotSide == RobotSide.RIGHT && leftFootDesiredPosition.getY() <= 0 && leftFootDesiredPosition.getZ() == 0)
                   return randIndex;
                break;
             case FLAT_RANDOM:
@@ -260,11 +260,17 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
                   return randIndex;
                break;
             case STAIRS_FORWARD:
-               if (leftFootDesiredPosition.getX() >= 0 && leftFootDesiredPosition.getZ() > 0)
+               // Make sure that the next step isn't right above the previous one (i.e. when both x and y are too close)
+               boolean xTooCloseAbove = Math.abs(leftFootDesiredPosition.getX()) <= 0.1;
+               boolean yTooCloseAbove = Math.abs(leftFootDesiredPosition.getY()) <= 0.1;
+               if (leftFootDesiredPosition.getX() >= 0 && leftFootDesiredPosition.getZ() > 0 && !(xTooCloseAbove && yTooCloseAbove))
                   return randIndex;
                break;
             case STAIRS_BACKWARDS:
-               if (leftFootDesiredPosition.getX() <= 0 && leftFootDesiredPosition.getZ() > 0)
+               // Make sure that the next step isn't right below the previous one (i.e. when both x and y are too close)
+               boolean xTooCloseBelow = Math.abs(leftFootDesiredPosition.getX()) <= 0.1;
+               boolean yTooCloseBelow = Math.abs(leftFootDesiredPosition.getY()) <= 0.1;
+               if (leftFootDesiredPosition.getX() <= 0 && leftFootDesiredPosition.getZ() > 0 && !(xTooCloseBelow && yTooCloseBelow))
                   return randIndex;
                break;
             case RANDOM:
@@ -273,7 +279,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          count++;
       }
       if (stepIndex == -1)
-         LogTools.error("Could not find valid next step in multi-step sequence in " + mode + "mode. Increase solution quality or maxNumOfIterations.");
+         LogTools.error("Could not find valid next step in multi-step sequence in " + mode + " mode. Increase solution quality or maxNumOfIterations.");
       return stepIndex;
    }
 }
