@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 
 public class DiscreteArrowRayIntersection
 {
-   private final DiscreteCylinderRayIntersection cylinderIntersection = new DiscreteCylinderRayIntersection();
+   private final CylinderRayIntersection cylinderIntersection = new CylinderRayIntersection();
    private final DiscreteConeRayIntersection coneRayIntersection = new DiscreteConeRayIntersection();
    private final Point3D intersection = new Point3D();
 

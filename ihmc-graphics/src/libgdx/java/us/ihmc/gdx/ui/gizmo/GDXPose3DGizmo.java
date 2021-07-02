@@ -56,6 +56,8 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final Axis3DRotations axisRotations = new Axis3DRotations();
    private final DynamicGDXModel[] arrowModels = new DynamicGDXModel[3];
    private final DynamicGDXModel[] torusModels = new DynamicGDXModel[3];
+   private final Point3D closestCollision = new Point3D();
+   private SixDoFSelection closestCollisionSelection;
    private final BoundingSphereIntersection boundingSphereIntersection = new BoundingSphereIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
@@ -63,8 +65,6 @@ public class GDXPose3DGizmo implements RenderableProvider
    /** The main, source, true, base transform that this thing represents. */
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final Point3D closestCollision = new Point3D();
-   private SixDoFSelection closestCollisionSelection;
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private boolean dragging = false;
    private final LineMouseDragAlgorithm lineDragAlgorithm = new LineMouseDragAlgorithm();

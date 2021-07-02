@@ -6,7 +6,7 @@ import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 
-public class DiscreteCylinderRayIntersection
+public class CylinderRayIntersection
 {
    private final Cylinder3D cylinder = new Cylinder3D();
    private final Point3D firstIntersectionToPack = new Point3D();

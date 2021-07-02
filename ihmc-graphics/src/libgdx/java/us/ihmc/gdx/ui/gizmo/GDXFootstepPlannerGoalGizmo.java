@@ -49,26 +49,28 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private final ImFloat arrowWidth = new ImFloat(0.257f);
    private final ImFloat arrowHeight = new ImFloat(0.137f);
    private final ImFloat arrowSpacing = new ImFloat(0.079f);
-   private final Pose3D pose = new Pose3D();
-   /** The main, source, true, base transform that this thing represents. */
-   private final RigidBodyTransform transform = new RigidBodyTransform();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final Point3D closestCollision = new Point3D();
-   private SixDoFSelection closestCollisionSelection;
-   private boolean dragging = false;
-   private final String imGuiWindowName;
-   private FocusBasedGDXCamera camera3D;
-   private final Point3D cameraPosition = new Point3D();
-   private double lastDistanceToCamera = -1.0;
+   private Material normalDiscMaterial;
+   private Material normalArrowMaterial;
+   private Material highlightedDiscMaterial;
+   private Material highlightedArrowMaterial;
    private DynamicGDXModel discModel = new DynamicGDXModel();
    private DynamicGDXModel positiveXArrowModel = new DynamicGDXModel();
    private DynamicGDXModel positiveYArrowModel = new DynamicGDXModel();
    private DynamicGDXModel negativeXArrowModel = new DynamicGDXModel();
    private DynamicGDXModel negativeYArrowModel = new DynamicGDXModel();
-   private Material normalDiscMaterial;
-   private Material normalArrowMaterial;
-   private Material highlightedDiscMaterial;
-   private Material highlightedArrowMaterial;
+   private final Point3D closestCollision = new Point3D();
+   private int closestCollisionSelection = -1;
+   private final BoundingSphereIntersection boundingSphereIntersection = new BoundingSphereIntersection();
+   private final HollowCylinderRayIntersection hollowCylinderIntersection = new HollowCylinderRayIntersection();
+   private final Pose3D pose = new Pose3D();
+   /** The main, source, true, base transform that this thing represents. */
+   private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private boolean dragging = false;
+   private final String imGuiWindowName;
+   private FocusBasedGDXCamera camera3D;
+   private final Point3D cameraPosition = new Point3D();
+   private double lastDistanceToCamera = -1.0;
 
    public GDXFootstepPlannerGoalGizmo(String name)
    {
@@ -186,15 +188,28 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
    {
-      closestCollisionSelection = null;
+      closestCollisionSelection = -1;
       double closestCollisionDistance = Double.POSITIVE_INFINITY;
+
+      boundingSphereIntersection.setup(discOuterRadius.get() + arrowSpacing.get() + arrowHeight.get() + 0.05, transform);
+      if (boundingSphereIntersection.intersect(pickRay))
+      {
+         hollowCylinderIntersection.setup(discThickness.get(), discOuterRadius.get(), discInnerRadius.get(), 0.0, transform);
+         double distance = hollowCylinderIntersection.intersect(pickRay);
+         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+         {
+            closestCollisionDistance = distance;
+            closestCollisionSelection = 0;
+            closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
+         }
+      }
 
       updateMaterialHighlighting();
    }
 
    private void updateMaterialHighlighting()
    {
-      discModel.setMaterial(normalDiscMaterial);
+      discModel.setMaterial(closestCollisionSelection == 0 ? highlightedDiscMaterial : normalDiscMaterial);
       positiveXArrowModel.setMaterial(normalArrowMaterial);
       positiveYArrowModel.setMaterial(normalArrowMaterial);
       negativeXArrowModel.setMaterial(normalArrowMaterial);
