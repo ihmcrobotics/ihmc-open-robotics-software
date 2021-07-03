@@ -17,6 +17,16 @@ public class StepCheckIsPointInsideAlgorithm
       boundingSphereIntersection.setup(radius, transform);
    }
 
+   public void setup(double radius, Point3DReadOnly offset, RigidBodyTransformReadOnly transform)
+   {
+      boundingSphereIntersection.setup(radius, offset, transform);
+   }
+
+   public void setup(double radius, Point3DReadOnly positionInWorld)
+   {
+      boundingSphereIntersection.setup(radius, positionInWorld);
+   }
+
    public double intersect(Line3DReadOnly pickRay, int resolution, Function<Point3DReadOnly, Boolean> isPointInside)
    {
       if (boundingSphereIntersection.intersect(pickRay))
