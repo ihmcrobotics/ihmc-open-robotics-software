@@ -27,6 +27,21 @@ public class BoundingSphereIntersection
       boundingSphere.applyTransform(transform);
    }
 
+   public void setup(double radius, Point3DReadOnly offset, RigidBodyTransformReadOnly transform)
+   {
+      boundingSphere.setToZero();
+      boundingSphere.setRadius(radius);
+      boundingSphere.getPosition().add(offset);
+      boundingSphere.applyTransform(transform);
+   }
+
+   public void setup(double radius, Point3DReadOnly positionInWorld)
+   {
+      boundingSphere.setToZero();
+      boundingSphere.setRadius(radius);
+      boundingSphere.getPosition().set(positionInWorld);
+   }
+
    public boolean intersect(Line3DReadOnly pickRay)
    {
       rayOriginInSphereFrame.setX(pickRay.getPoint().getX() - boundingSphere.getPosition().getX());
