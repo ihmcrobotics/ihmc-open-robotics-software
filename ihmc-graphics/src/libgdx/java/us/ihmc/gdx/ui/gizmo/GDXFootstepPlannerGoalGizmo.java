@@ -62,6 +62,10 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private int closestCollisionSelection = -1;
    private final BoundingSphereIntersection boundingSphereIntersection = new BoundingSphereIntersection();
    private final HollowCylinderRayIntersection hollowCylinderIntersection = new HollowCylinderRayIntersection();
+   private final DiscreteIsoscelesTriangularPrismRayIntersection positiveXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
+   private final DiscreteIsoscelesTriangularPrismRayIntersection positiveYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
+   private final DiscreteIsoscelesTriangularPrismRayIntersection negativeXArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
+   private final DiscreteIsoscelesTriangularPrismRayIntersection negativeYArrowIntersection = new DiscreteIsoscelesTriangularPrismRayIntersection();
    private final Pose3D pose = new Pose3D();
    /** The main, source, true, base transform that this thing represents. */
    private final RigidBodyTransform transform = new RigidBodyTransform();
@@ -202,6 +206,20 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
             closestCollisionSelection = 0;
             closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
          }
+
+         positiveXArrowIntersection.setup(arrowWidth.get(),
+                                          arrowHeight.get(),
+                                          discThickness.get(),
+                                          new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, 0.0),
+                                          new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
+                                          transform);
+         distance = positiveXArrowIntersection.intersect(pickRay, 100);
+         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+         {
+            closestCollisionDistance = distance;
+            closestCollisionSelection = 1;
+            closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
+         }
       }
 
       updateMaterialHighlighting();
@@ -210,7 +228,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private void updateMaterialHighlighting()
    {
       discModel.setMaterial(closestCollisionSelection == 0 ? highlightedDiscMaterial : normalDiscMaterial);
-      positiveXArrowModel.setMaterial(normalArrowMaterial);
+      positiveXArrowModel.setMaterial(closestCollisionSelection == 1 ? highlightedArrowMaterial : normalArrowMaterial);
       positiveYArrowModel.setMaterial(normalArrowMaterial);
       negativeXArrowModel.setMaterial(normalArrowMaterial);
       negativeYArrowModel.setMaterial(normalArrowMaterial);
