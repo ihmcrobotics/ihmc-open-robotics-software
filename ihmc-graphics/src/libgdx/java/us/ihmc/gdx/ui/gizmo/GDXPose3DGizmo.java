@@ -195,6 +195,7 @@ public class GDXPose3DGizmo implements RenderableProvider
          for (Axis3D axis : Axis3D.values)
          {
             GDXTools.toEuclid(torusModels[axis.ordinal()].getOrCreateModelInstance().transform, tempTransform);
+            // TODO: Only setup when shape changes?
             torusIntersection.setupTorus(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), tempTransform);
             double distance = torusIntersection.intersect(pickRay, 100);
             if (!Double.isNaN(distance) && distance < closestCollisionDistance)
@@ -213,6 +214,7 @@ public class GDXPose3DGizmo implements RenderableProvider
             for (RobotSide side : RobotSide.values)
             {
                double zOffset = side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
+               // TODO: Only setup when shape changes?
                arrowIntersection.setupShapes(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, tempTransform);
                double distance = arrowIntersection.intersect(pickRay, 100, side == RobotSide.LEFT); // only show the cones in the positive direction
 
