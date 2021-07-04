@@ -159,6 +159,11 @@ public class FramePlane3d implements ReferenceFrameHolder
       return plane3d.isOnOrAbove(pointToTest);
    }
 
+   public boolean isOnOrAbove(Point3DReadOnly pointToTest, double epsilon)
+   {
+      return plane3d.isOnOrAbove(pointToTest, epsilon);
+   }
+
    public boolean isOnOrBelow(FramePoint3D pointToTest)
    {
       checkReferenceFrameMatch(pointToTest);
