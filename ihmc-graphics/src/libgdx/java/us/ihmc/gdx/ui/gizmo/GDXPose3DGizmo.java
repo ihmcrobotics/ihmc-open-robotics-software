@@ -67,8 +67,8 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private boolean dragging = false;
-   private final LineMouseDragAlgorithm lineDragAlgorithm = new LineMouseDragAlgorithm();
-   private final ClockFaceRotationMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotationMouseDragAlgorithm();
+   private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
+   private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
    private final String imGuiWindowName;
    private FocusBasedGDXCamera camera3D;
    private final Point3D cameraPosition = new Point3D();

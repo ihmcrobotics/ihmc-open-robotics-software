@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
-public class LineMouseDragAlgorithm
+public class Line3DMouseDragAlgorithm
 {
    private final Line3D dragLine = new Line3D();
    private final Plane3D perpendicularPlane = new Plane3D();
