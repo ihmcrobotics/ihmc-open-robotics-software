@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
-public class ClockFaceRotationMouseDragAlgorithm
+public class ClockFaceRotation3DMouseDragAlgorithm
 {
    private final Line3D axisLineAtObjectZero = new Line3D();
    private final Plane3D pickClockPlane = new Plane3D();
