@@ -29,9 +29,9 @@ public class ClockFaceRotation3DMouseDragAlgorithm
    }
 
    public boolean calculate(Line3DReadOnly pickRay,
-                         Point3D objectRayCollision,
-                         RotationMatrix axisOrientationInObjectFrame,
-                         RigidBodyTransformReadOnly objectTransform)
+                            Point3D objectRayCollision,
+                            RotationMatrix axisOrientationInObjectFrame,
+                            RigidBodyTransformReadOnly objectTransform)
    {
       axisLineAtObjectZero.getPoint().set(objectTransform.getTranslation());
       axisLineAtObjectZero.getDirection().set(Axis3D.Z);
