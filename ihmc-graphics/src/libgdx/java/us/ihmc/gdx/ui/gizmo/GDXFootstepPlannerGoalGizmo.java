@@ -12,11 +12,14 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
@@ -72,6 +75,9 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private FocusBasedGDXCamera camera3D;
    private final Point3D cameraPosition = new Point3D();
    private double lastDistanceToCamera = -1.0;
+   private final Plane3D dragPlane = new Plane3D();
+   private final Point3D dragPoint = new Point3D();
+   private final Vector3D dragVector = new Vector3D();
 
    public GDXFootstepPlannerGoalGizmo(String name)
    {
@@ -167,6 +173,16 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
+         if (closestCollisionSelection == 0)
+         {
+            dragPlane.set(closestCollision, Axis3D.Z);
+
+            dragPlane.intersectionWith(pickRay, dragPoint);
+            dragVector.sub(dragPoint, closestCollision);
+
+            transform.getTranslation().add(dragVector);
+            closestCollision.add(dragVector);
+         }
       }
 
       // after things have been modified, update the derivative stuff
@@ -185,6 +201,11 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private void updateFromSourceTransform()
    {
       pose.set(transform);
+      GDXTools.toGDX(transform, discModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transform, positiveXArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transform, positiveYArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transform, negativeXArrowModel.getOrCreateModelInstance().transform);
+      GDXTools.toGDX(transform, negativeYArrowModel.getOrCreateModelInstance().transform);
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
