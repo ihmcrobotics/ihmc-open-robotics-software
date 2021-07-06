@@ -84,7 +84,6 @@ public class TrajectoryPointOptimizer
 
    private final DMatrixRMaj tempCoeffs = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj tempLine = new DMatrixRMaj(1, 1);
-   private final boolean useNativeCommonOps;
 
    public TrajectoryPointOptimizer(int dimensions, YoRegistry parentRegistry) {
       this(dimensions, parentRegistry, true);
@@ -129,7 +128,6 @@ public class TrajectoryPointOptimizer
       this.computeTimer = new ExecutionTimer(namePrefix + "ComputeTimer", 0.0, registry);
       this.timeUpdateTimer = new ExecutionTimer(namePrefix + "TimeUpdateTimer", 0.0, registry);
       this.timeGain = new YoDouble(namePrefix + "TimeGain", registry);
-      this.useNativeCommonOps = useNativeCommonOps;
 
       solver = new MultiCubicSpline1DSolver(useNativeCommonOps);
 
