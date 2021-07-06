@@ -458,7 +458,6 @@ public class PelvisLinearStateUpdater
          if (imuBasedLinearStateCalculator.isEstimationEnabled())
          {
             computeLinearStateFromMergingMeasurements();
-            kinematicsBasedLinearStateCalculator.correctTrustedLegJointStates(listOfTrustedFeet, yoRootJointPosition, yoRootJointVelocity);
          }
          else
          {

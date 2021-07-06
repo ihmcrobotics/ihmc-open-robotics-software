@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -24,15 +22,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -92,9 +86,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final BooleanProvider trustCoPAsNonSlippingContactPoint;
 
    private final BooleanParameter assumeTrustedFootAtZeroHeight = new BooleanParameter("assumeTrustedFootAtZeroHeight", registry, false);
-
-   private final DoubleProvider jointPositionCorrectionAlpha = new DoubleParameter("jointPositionCorrectionAlpha", registry, 0.0);
-   private final DoubleProvider jointVelocityCorrectionAlpha = new DoubleParameter("jointVelocityCorrectionAlpha", registry, 0.0);
 
    public PelvisKinematicsBasedLinearStateCalculator(FullInverseDynamicsStructure inverseDynamicsStructure,
                                                      Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
@@ -265,23 +256,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
       kinematicsIsUpToDate.set(false);
    }
 
-   public void correctTrustedLegJointStates(List<RigidBodyBasics> trustedFeet,
-                                            FramePoint3DReadOnly actualPelvisPosition,
-                                            FrameVector3DReadOnly actualPelvisLinearVelocity)
-   {
-      tempRootBodyTwist.setIncludingFrame(rootJoint.getJointTwist());
-      tempRootBodyTwist.getLinearPart().setMatchingFrame(actualPelvisLinearVelocity);
-
-      for (int i = 0; i < trustedFeet.size(); i++)
-      {
-         FootEstimatorData footEstimatorData = footEstimatorDataMap.get(trustedFeet.get(i));
-         footEstimatorData.correctTrustedLegJointStates(jointPositionCorrectionAlpha.getValue(),
-                                                        jointVelocityCorrectionAlpha.getValue(),
-                                                        actualPelvisPosition,
-                                                        tempRootBodyTwist);
-      }
-   }
-
    public void setPelvisPosition(FramePoint3DReadOnly pelvisPosition)
    {
       rootJointPosition.set(pelvisPosition);
@@ -331,7 +305,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private static class FootEstimatorData
    {
       private final RigidBodyBasics foot;
-      private final OneDoFJointBasics[] legJoints;
 
       private final ReferenceFrame rootJointFrame;
       private final ReferenceFrame soleFrame;
@@ -349,19 +322,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
       private final FrameLineSegment2D footCenterCoPLineSegment;
       private final FootSwitchInterface footSwitch;
       private final CenterOfPressureDataHolder centerOfPressureDataHolderFromController;
-
-      private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
-      private final YoFrameVector3D rootJointPositionError;
-      private final YoFrameVector3D rootJointLinearVelocityError;
-      private final YoDouble[] jointPositionCorrections;
-      private final YoDouble[] adjustedJointPositions;
-      private final YoDouble[] jointVelocityCorrections;
-      private final YoDouble[] adjustedJointVelocities;
-
-      private final DMatrixRMaj jointPositionUpdate = new DMatrixRMaj(6, 1);
-      private final DMatrixRMaj jointVelocityUpdate = new DMatrixRMaj(6, 1);
-      private final DMatrixRMaj correctionObjective = new DMatrixRMaj(6, 1);
-      private final DampedLeastSquaresSolver solver = new DampedLeastSquaresSolver(6, 0.005);
 
       private final FramePoint2DBasics[] intersectionPoints = new FramePoint2DBasics[] {new FramePoint2D(), new FramePoint2D()};
 
@@ -396,26 +356,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
          copFilteredInFootFrame.update(0.0, 0.0);
          copPositionInWorld = new YoFramePoint3D(namePrefix + "CoPPositionsInWorld", worldFrame, registry);
          footVelocityInWorld = new YoFrameVector3D(namePrefix + "VelocityInWorld", worldFrame, registry);
-
-         legJoints = MultiBodySystemTools.createOneDoFJointPath(rootJoint.getSuccessor(), foot);
-         geometricJacobianCalculator.setKinematicChain(legJoints);
-         geometricJacobianCalculator.setJacobianFrame(soleFrame);
-         jointPositionUpdate.reshape(geometricJacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-         jointVelocityUpdate.reshape(geometricJacobianCalculator.getNumberOfDegreesOfFreedom(), 1);
-         jointPositionCorrections = new YoDouble[legJoints.length];
-         adjustedJointPositions = new YoDouble[legJoints.length];
-         jointVelocityCorrections = new YoDouble[legJoints.length];
-         adjustedJointVelocities = new YoDouble[legJoints.length];
-
-         for (int i = 0; i < legJoints.length; i++)
-         {
-            jointPositionCorrections[i] = new YoDouble("q_correction_" + legJoints[i].getName(), registry);
-            adjustedJointPositions[i] = new YoDouble("q_est_" + legJoints[i].getName(), registry);
-            jointVelocityCorrections[i] = new YoDouble("qd_correction_" + legJoints[i].getName(), registry);
-            adjustedJointVelocities[i] = new YoDouble("qd_est_" + legJoints[i].getName(), registry);
-         }
-         rootJointPositionError = new YoFrameVector3D(namePrefix + "RootJointPositionError", worldFrame, registry);
-         rootJointLinearVelocityError = new YoFrameVector3D(namePrefix + "RootJointLinearVelocityError", worldFrame, registry);
       }
 
       public void createVisualization(YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -436,7 +376,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
          copFilteredInFootFrame.reset();
          copFilteredInFootFrame.update(0.0, 0.0);
          footVelocityInWorld.setToZero();
-         geometricJacobianCalculator.reset();
       }
 
       private final FramePoint3D tempFramePoint = new FramePoint3D();
@@ -590,8 +529,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
          tempFrameVector.changeFrame(worldFrame);
 
          footToRootJointPosition.update(tempFrameVector);
-
-         geometricJacobianCalculator.reset();
       }
 
       private final Twist tempRootBodyTwist = new Twist();
@@ -614,54 +551,6 @@ public class PelvisKinematicsBasedLinearStateCalculator
          footTwistInWorld.changeFrame(worldFrame);
 
          footTwistInWorld.getLinearVelocityAt(copPositionInWorld, footLinearVelocityToPack);
-      }
-
-      /**
-       * Adjust the leg joint configuration to compensate for inconsistency in the estimated pelvis
-       * position.
-       */
-      public void correctTrustedLegJointStates(double alphaPosition, double alphaVelocity, FramePoint3DReadOnly pelvisPosition, TwistReadOnly pelvisTwist)
-      {
-         // TODO Need to cleanup, add parameters, and consider disabling when robot is in the air.
-         // Computing correction for joint positions
-         tempFrameVector.sub(rootJointPositionPerFoot, pelvisPosition);
-         rootJointPositionError.set(tempFrameVector);
-         tempFrameVector.scale(alphaPosition);
-         tempFrameVector.changeFrame(geometricJacobianCalculator.getJacobianFrame());
-         tempFrameVector.get(3, correctionObjective);
-
-         solver.setA(geometricJacobianCalculator.getJacobianMatrix());
-         solver.solve(correctionObjective, jointPositionUpdate);
-
-         // Computing correction for joint velocities
-         tempFrameVector.setReferenceFrame(worldFrame);
-         computeFootLinearVelocityInWorld(pelvisTwist, tempFrameVector);
-         tempFrameVector.sub(footVelocityInWorld, tempFrameVector);
-         rootJointLinearVelocityError.set(tempFrameVector);
-         tempFrameVector.scale(alphaVelocity);
-         tempFrameVector.changeFrame(geometricJacobianCalculator.getJacobianFrame());
-         tempFrameVector.get(3, correctionObjective);
-
-         solver.setA(geometricJacobianCalculator.getJacobianMatrix());
-         solver.solve(correctionObjective, jointVelocityUpdate);
-
-         for (int i = 0; i < legJoints.length; i++)
-         {
-            double q_correction = jointPositionUpdate.get(i, 0);
-            double qd_correction = jointVelocityUpdate.get(i, 0);
-            double q = legJoints[i].getQ() + q_correction;
-            double qd = legJoints[i].getQd() + qd_correction;
-            jointPositionCorrections[i].set(q_correction);
-            jointVelocityCorrections[i].set(qd_correction);
-            adjustedJointPositions[i].set(q);
-            adjustedJointVelocities[i].set(qd);
-            legJoints[i].setQ(q);
-            legJoints[i].setQd(qd);
-            legJoints[i].updateFrame();
-         }
-
-         updateKinematics();
-         rootJointPositionPerFoot.add(footToRootJointPosition, footPositionInWorld);
       }
    }
 }
