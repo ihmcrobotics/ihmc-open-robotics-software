@@ -8,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
-import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
