@@ -12,6 +12,7 @@ import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.valkyrie.ValkyrieKinematicsCollisionModel;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.ValkyrieSimulationCollisionModel;
 
@@ -94,8 +95,6 @@ public class ValkyrieStepReachabilityCalculator extends HumanoidStepReachability
    @Override
    protected RobotCollisionModel getRobotCollisionModel(HumanoidJointNameMap jointMap)
    {
-      ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(jointMap);
-      collisionModel.setCollidableHelper(new CollidableHelper(), "robot", "ground");
-      return collisionModel;
+      return new ValkyrieKinematicsCollisionModel(jointMap);
    }
 }
