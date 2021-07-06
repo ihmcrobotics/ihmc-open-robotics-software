@@ -30,7 +30,14 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private final int vertexSize = 10;
 
    private RecyclingArrayList<Point3D32> pointsToRender;
+   private ColorProvider colorProvider;
    private float pointScale = 1.0f;
+
+   public interface ColorProvider {
+      public float getNextR();
+      public float getNextG();
+      public float getNextB();
+   }
 
    private static void enablePointSprites()
    {
@@ -89,8 +96,6 @@ public class GDXPointCloudRenderer implements RenderableProvider
    {
       if (pointsToRender != null && !pointsToRender.isEmpty())
       {
-         Random rand = new Random(0);
-
          for (int i = 0; i < pointsToRender.size(); i++)
          {
             int offset = i * vertexSize;
@@ -101,9 +106,9 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + 2] = point.getZ32();
 
             // color [0.0f - 1.0f]
-            vertices[offset + 3] = rand.nextFloat(); // red
-            vertices[offset + 4] = rand.nextFloat(); // green
-            vertices[offset + 5] = rand.nextFloat(); // blue
+            vertices[offset + 3] = colorProvider.getNextR();
+            vertices[offset + 4] = colorProvider.getNextG();
+            vertices[offset + 5] = colorProvider.getNextB();
             vertices[offset + 6] = alpha; // alpha
 
             vertices[offset + 7] = pointScale * 0.01f; // size
@@ -131,7 +136,59 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender)
    {
+      setPointsToRender(pointsToRender, new ColorProvider()
+      {
+         private final Random rand = new Random(0);
+
+         @Override
+         public float getNextR()
+         {
+            return rand.nextFloat();
+         }
+
+         @Override
+         public float getNextG()
+         {
+            return rand.nextFloat();
+         }
+
+         @Override
+         public float getNextB()
+         {
+            return rand.nextFloat();
+         }
+      });
+   }
+
+   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender, Color color) {
+      setPointsToRender(pointsToRender, new ColorProvider()
+      {
+         private final Random rand = new Random(0);
+
+         @Override
+         public float getNextR()
+         {
+            return color.r;
+         }
+
+         @Override
+         public float getNextG()
+         {
+            return color.g;
+         }
+
+         @Override
+         public float getNextB()
+         {
+            return color.b;
+         }
+      });
+   }
+
+   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender, ColorProvider provider)
+   {
       this.pointsToRender = pointsToRender;
+      this.colorProvider = provider;
    }
 
    public void setPointScale(float size)
