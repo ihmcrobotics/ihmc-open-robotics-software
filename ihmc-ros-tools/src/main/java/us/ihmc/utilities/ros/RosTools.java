@@ -54,8 +54,8 @@ public class RosTools
    public static final String SLAM_POSE = "/mapsense/slam/pose";
    public static final String L515_COLOR_CAMERA_INFO = "/chest_l515/color/camera_info";
    public static final String L515_DEPTH_CAMERA_INFO = "/chest_l515/depth/camera_info";
-   public static final String MAPSENSE_DEPTH_IMAGE = "/chest_l515/depth/image_rect_raw";
-   public static final String MAPSENSE_DEPTH_CAMERA_INFO = "/chest_l515/depth/camera_info";
+   public static final String MAPSENSE_DEPTH_IMAGE = L515_DEPTH;
+   public static final String MAPSENSE_DEPTH_CAMERA_INFO = L515_DEPTH_CAMERA_INFO;
    public static final String MAPSENSE_REGIONS = "/map/regions/test";
    public static final String MAPSENSE_CONFIGURATION = "/map/config";
 
