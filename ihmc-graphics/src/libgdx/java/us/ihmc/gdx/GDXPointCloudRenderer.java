@@ -33,7 +33,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    private RecyclingArrayList<Point3D32> pointsToRender;
    private ColorProvider colorProvider;
-   private float pointScale = 1.0f;
+   private float pointScale = 0.01f;
 
    public interface ColorProvider
    {
@@ -117,7 +117,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + 5] = colorProvider.getNextB();
             vertices[offset + 6] = alpha; // alpha
 
-            vertices[offset + 7] = pointScale * 0.01f; // size
+            vertices[offset + 7] = pointScale; // size
             vertices[offset + 8] = 1.0f; // cosine [0-1]
             vertices[offset + 9] = 0.0f; // sine [0-1]
          }
@@ -144,24 +144,24 @@ public class GDXPointCloudRenderer implements RenderableProvider
    {
       setPointsToRender(pointsToRender, new ColorProvider()
       {
-         private final Random rand = new Random(0);
+         private final Random random = new Random(0);
 
          @Override
          public float getNextR()
          {
-            return rand.nextFloat();
+            return random.nextFloat();
          }
 
          @Override
          public float getNextG()
          {
-            return rand.nextFloat();
+            return random.nextFloat();
          }
 
          @Override
          public float getNextB()
          {
-            return rand.nextFloat();
+            return random.nextFloat();
          }
       });
    }
@@ -170,8 +170,6 @@ public class GDXPointCloudRenderer implements RenderableProvider
    {
       setPointsToRender(pointsToRender, new ColorProvider()
       {
-         private final Random rand = new Random(0);
-
          @Override
          public float getNextR()
          {
