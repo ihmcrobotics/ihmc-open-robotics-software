@@ -22,20 +22,25 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private Renderable renderable;
    private float[] vertices;
 
-   private final VertexAttributes vertexAttributes = new VertexAttributes(
-         new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
-         new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4, ShaderProgram.COLOR_ATTRIBUTE),
-         new VertexAttribute(SIZE_AND_ROTATION_USAGE, 3, "a_sizeAndRotation")
-   );
+   private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position,
+                                                                                              3,
+                                                                                              ShaderProgram.POSITION_ATTRIBUTE),
+                                                                          new VertexAttribute(VertexAttributes.Usage.ColorUnpacked,
+                                                                                              4,
+                                                                                              ShaderProgram.COLOR_ATTRIBUTE),
+                                                                          new VertexAttribute(SIZE_AND_ROTATION_USAGE, 3, "a_sizeAndRotation"));
    private final int vertexSize = 10;
 
    private RecyclingArrayList<Point3D32> pointsToRender;
    private ColorProvider colorProvider;
    private float pointScale = 1.0f;
 
-   public interface ColorProvider {
+   public interface ColorProvider
+   {
       public float getNextR();
+
       public float getNextG();
+
       public float getNextB();
    }
 
@@ -69,7 +74,8 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
       ShaderProgram.pedantic = true;
 
-      final String fragmentShader = ParticleShader.getDefaultFragmentShader().replace("gl_FragColor = texture2D(u_diffuseTexture, texCoord)* v_color", "gl_FragColor = v_color");
+      final String fragmentShader = ParticleShader.getDefaultFragmentShader()
+                                                  .replace("gl_FragColor = texture2D(u_diffuseTexture, texCoord)* v_color", "gl_FragColor = v_color");
 
       ShaderProgram shader = new ShaderProgram(prefix + ParticleShader.getDefaultVertexShader(), prefix + fragmentShader);
       for (String s : shader.getLog().split("\n"))
@@ -160,7 +166,8 @@ public class GDXPointCloudRenderer implements RenderableProvider
       });
    }
 
-   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender, Color color) {
+   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender, Color color)
+   {
       setPointsToRender(pointsToRender, new ColorProvider()
       {
          private final Random rand = new Random(0);

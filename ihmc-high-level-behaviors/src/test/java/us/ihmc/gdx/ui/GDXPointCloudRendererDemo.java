@@ -37,7 +37,8 @@ public class GDXPointCloudRendererDemo
          public void render()
          {
             points.clear();
-            for (int i = 0; i < 5000; i++) {
+            for (int i = 0; i < 5000; i++)
+            {
                Point3D32 point = points.add();
                point.set(new Point3D32(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
             }
