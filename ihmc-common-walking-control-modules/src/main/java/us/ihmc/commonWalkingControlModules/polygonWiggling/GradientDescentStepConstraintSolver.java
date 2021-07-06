@@ -51,7 +51,7 @@ public class GradientDescentStepConstraintSolver
    private final YoFrameVector3D gradient = new YoFrameVector3D("gradient", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D footPlacementGradient = new YoFrameVector3D("footPlacementGradient", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D legCollisionGradient = new YoFrameVector3D("legCollisionGradient", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector3D accumulatedTransform = new YoFrameVector3D("accumulatedTransformient", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D accumulatedTransform = new YoFrameVector3D("accumulatedTransform", ReferenceFrame.getWorldFrame(), registry);
    private final YoEnum<Constraint> activeConstraint = new YoEnum<>("activeConstraint", "Active constraint", registry, Constraint.class, true);
 
    private final RecyclingArrayList<Point2D> transformedVertices = new RecyclingArrayList<>(5, Point2D::new);

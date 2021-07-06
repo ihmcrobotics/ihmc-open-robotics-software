@@ -10,7 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * This message is part of the IHMC multi-contact controller API.
        * Experimental mode of specifying a desired configuration in terms of root pose and joint angles.
        */
-public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMultiContactTrajectoryMessage> implements Settable<WholeBodyMultiContactTrajectoryMessage>, EpsilonComparable<WholeBodyMultiContactTrajectoryMessage>
+public class MultiContactTrajectoryMessage extends Packet<MultiContactTrajectoryMessage> implements Settable<MultiContactTrajectoryMessage>, EpsilonComparable<MultiContactTrajectoryMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -33,20 +33,20 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
             */
    public int joint_name_hash_;
 
-   public WholeBodyMultiContactTrajectoryMessage()
+   public MultiContactTrajectoryMessage()
    {
       joint_angles_ = new us.ihmc.idl.IDLSequence.Double (50, "type_6");
 
       root_joint_pose_ = new us.ihmc.euclid.geometry.Pose3D();
    }
 
-   public WholeBodyMultiContactTrajectoryMessage(WholeBodyMultiContactTrajectoryMessage other)
+   public MultiContactTrajectoryMessage(MultiContactTrajectoryMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(WholeBodyMultiContactTrajectoryMessage other)
+   public void set(MultiContactTrajectoryMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -122,19 +122,19 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
    }
 
 
-   public static Supplier<WholeBodyMultiContactTrajectoryMessagePubSubType> getPubSubType()
+   public static Supplier<MultiContactTrajectoryMessagePubSubType> getPubSubType()
    {
-      return WholeBodyMultiContactTrajectoryMessagePubSubType::new;
+      return MultiContactTrajectoryMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return WholeBodyMultiContactTrajectoryMessagePubSubType::new;
+      return MultiContactTrajectoryMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(WholeBodyMultiContactTrajectoryMessage other, double epsilon)
+   public boolean epsilonEquals(MultiContactTrajectoryMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -157,9 +157,9 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof WholeBodyMultiContactTrajectoryMessage)) return false;
+      if(!(other instanceof MultiContactTrajectoryMessage)) return false;
 
-      WholeBodyMultiContactTrajectoryMessage otherMyClass = (WholeBodyMultiContactTrajectoryMessage) other;
+      MultiContactTrajectoryMessage otherMyClass = (MultiContactTrajectoryMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -178,7 +178,7 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("WholeBodyMultiContactTrajectoryMessage {");
+      builder.append("MultiContactTrajectoryMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("trajectory_duration=");
