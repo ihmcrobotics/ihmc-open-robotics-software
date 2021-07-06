@@ -1,0 +1,37 @@
+#ifndef __controller_msgs__msg__MultiContactTrajectoryStatus__idl__
+#define __controller_msgs__msg__MultiContactTrajectoryStatus__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet TRAJECTORY_STATUS_STARTED =
+      0;
+
+      const octet TRAJECTORY_STATUS_COMPLETED =
+      1;
+
+
+      /**
+       * This message is part of the IHMC multi-contact controller API.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::MultiContactTrajectoryStatus_")
+      struct MultiContactTrajectoryStatus
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Reports the status of the trajectory
+         */
+        @defaultValue(value=255)
+        octet trajectory_status;
+      };
+    };
+  };
+};
+
+#endif
