@@ -1,5 +1,8 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,8 +15,12 @@ import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -43,7 +50,7 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
 
    private static final int numberOfStancesToCheck = 10;
    private static final double solutionQualityThreshold = 2.2;
-   private static final double simulationTime = 5.0;
+   private static final double simulationTime = 7.0;
    private static final Random random = new Random(3920);
 
    @BeforeEach
@@ -150,10 +157,42 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.setInitialSetup(initialSetup);
       drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(10);
+      holdCurrentPosition(fullRobotModel);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
+
       if (!visualize)
       {
          Assertions.assertTrue(success);
       }
+   }
+
+   private void holdCurrentPosition(FullHumanoidRobotModel fullRobotModel)
+   {
+      long sequenceId = 10;
+
+      FramePoint3D pelvisPosition = new FramePoint3D(fullRobotModel.getRootJoint().getFrameAfterJoint());
+      pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(0.001, pelvisPosition.getZ());
+      pelvisHeightTrajectoryMessage.setEnableUserPelvisControl(true);
+      pelvisHeightTrajectoryMessage.setSequenceId(sequenceId++);
+      drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePose3D handPose = new FramePose3D(fullRobotModel.getHandControlFrame(robotSide));
+         handPose.changeFrame(ReferenceFrame.getWorldFrame());
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide, 0.001, handPose, ReferenceFrame.getWorldFrame());
+         handTrajectoryMessage.setForceExecution(true);
+         handTrajectoryMessage.setSequenceId(sequenceId++);
+         drcSimulationTestHelper.publishToController(handTrajectoryMessage);
+      }
+
+      FramePose3D headPose = new FramePose3D(fullRobotModel.getHead().getBodyFixedFrame());
+      headPose.changeFrame(ReferenceFrame.getWorldFrame());
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(0.001, headPose.getOrientation(), ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
+      headTrajectoryMessage.setSequenceId(sequenceId++);
+      drcSimulationTestHelper.publishToController(headTrajectoryMessage);
    }
 }
