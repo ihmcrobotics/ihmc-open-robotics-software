@@ -42,8 +42,8 @@ public class ButterworthFusedYoVariable extends YoDouble
    {
       super(name, registry);
 
-      lowPassFilteredSlowVariable = new ButterworthFilteredYoVariable(name + "lowPass", registry, alphaVariable, slowSignal, ButterworthFilterType.LOW_PASS);
-      highPassFilteredFastVariable = new ButterworthFilteredYoVariable(name + "highPass", registry, alphaVariable, fastSignal, ButterworthFilterType.HIGH_PASS);
+      lowPassFilteredSlowVariable = new ButterworthFilteredYoVariable(name + "LowPass", registry, alphaVariable, slowSignal, ButterworthFilterType.LOW_PASS);
+      highPassFilteredFastVariable = new ButterworthFilteredYoVariable(name + "HighPass", registry, alphaVariable, fastSignal, ButterworthFilterType.HIGH_PASS);
       reset();
    }
 
