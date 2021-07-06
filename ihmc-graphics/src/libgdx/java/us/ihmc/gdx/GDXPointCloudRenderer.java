@@ -6,17 +6,13 @@ import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleShader;
-import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 
-import java.nio.FloatBuffer;
 import java.util.Random;
 
 public class GDXPointCloudRenderer implements RenderableProvider
@@ -32,12 +28,9 @@ public class GDXPointCloudRenderer implements RenderableProvider
          new VertexAttribute(SIZE_AND_ROTATION_USAGE, 3, "a_sizeAndRotation")
    );
    private final int vertexSize = 10;
-   private final int vertexPositionOffset = (short) (vertexAttributes.findByUsage(VertexAttributes.Usage.Position).offset / 4);
-   private final int vertexColorOffset = (short) (vertexAttributes.findByUsage(VertexAttributes.Usage.ColorUnpacked).offset / 4);
-   private final int vertexSizeAndPositionOffset = (short) (vertexAttributes.findByUsage(SIZE_AND_ROTATION_USAGE).offset / 4);
 
    private RecyclingArrayList<Point3D32> pointsToRender;
-   private float pointSize = 50.0f;
+   private float pointScale = 1.0f;
 
    private static void enablePointSprites()
    {
@@ -113,7 +106,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + 5] = rand.nextFloat(); // blue
             vertices[offset + 6] = alpha; // alpha
 
-            vertices[offset + 7] = pointSize; // size
+            vertices[offset + 7] = pointScale * 0.01f; // size
             vertices[offset + 8] = 1.0f; // cosine [0-1]
             vertices[offset + 9] = 0.0f; // sine [0-1]
          }
@@ -141,8 +134,8 @@ public class GDXPointCloudRenderer implements RenderableProvider
       this.pointsToRender = pointsToRender;
    }
 
-   public void setPointSize(float size)
+   public void setPointScale(float size)
    {
-      this.pointSize = size;
+      this.pointScale = size;
    }
 }
