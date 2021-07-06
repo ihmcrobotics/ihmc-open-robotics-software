@@ -3,9 +3,7 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.particles.ParticleShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -13,6 +11,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.log.LogTools;
+
+import java.util.Random;
 
 public class GDXPointCloudRenderer implements RenderableProvider
 {
@@ -23,24 +24,27 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    private final VertexAttributes vertexAttributes = new VertexAttributes(
          new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
-         new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4,ShaderProgram.COLOR_ATTRIBUTE),
+         new VertexAttribute(VertexAttributes.Usage.ColorUnpacked, 4, ShaderProgram.COLOR_ATTRIBUTE),
          new VertexAttribute(SIZE_AND_ROTATION_USAGE, 3, "a_sizeAndRotation")
    );
    private final int vertexSize = 10;
-   private final int vertexPositionOffset = (short) (vertexAttributes.findByUsage(VertexAttributes.Usage.Position).offset / 4);
-   private final int vertexColorOffset = (short) (vertexAttributes.findByUsage(VertexAttributes.Usage.ColorUnpacked).offset / 4);
-   private final int vertexSizeAndPositionOffset = (short) (vertexAttributes.findByUsage(SIZE_AND_ROTATION_USAGE).offset / 4);
 
    private RecyclingArrayList<Point3D32> pointsToRender;
-   private Color color = Color.RED;
-   private float pointSize = 0.11f;
+   private ColorProvider colorProvider;
+   private float pointScale = 1.0f;
+
+   public interface ColorProvider {
+      public float getNextR();
+      public float getNextG();
+      public float getNextB();
+   }
 
    private static void enablePointSprites()
    {
-      Gdx.gl.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
+      Gdx.gl30.glEnable(GL30.GL_VERTEX_PROGRAM_POINT_SIZE);
       if (Gdx.app.getType() == Application.ApplicationType.Desktop)
       {
-         Gdx.gl.glEnable(0x8861); // GL_POINT_OES
+         Gdx.gl30.glEnable(0x8861); // GL_POINT_OES
       }
       POINT_SPRITES_ENABLED = true;
    }
@@ -51,7 +55,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
          enablePointSprites();
 
       renderable = new Renderable();
-      renderable.meshPart.primitiveType = GL20.GL_POINTS;
+      renderable.meshPart.primitiveType = GL30.GL_POINTS;
       renderable.meshPart.offset = 0;
       renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
@@ -59,9 +63,27 @@ public class GDXPointCloudRenderer implements RenderableProvider
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
       renderable.meshPart.mesh = new Mesh(false, size, 0, vertexAttributes);
+
       ParticleShader.Config config = new ParticleShader.Config(ParticleShader.ParticleType.Point);
-      renderable.shader = new ParticleShader(renderable, config);
-//      ((ParticleShader) renderable.shader).set(ShaderProgram.COLOR_ATTRIBUTE., Color.RED);
+      String prefix = ParticleShader.createPrefix(renderable, config);
+
+      ShaderProgram.pedantic = true;
+
+      final String fragmentShader = ParticleShader.getDefaultFragmentShader().replace("gl_FragColor = texture2D(u_diffuseTexture, texCoord)* v_color", "gl_FragColor = v_color");
+
+      ShaderProgram shader = new ShaderProgram(prefix + ParticleShader.getDefaultVertexShader(), prefix + fragmentShader);
+      for (String s : shader.getLog().split("\n"))
+      {
+         if (s.isEmpty())
+            continue;
+
+         if (s.contains("error"))
+            LogTools.error(s);
+         else
+            LogTools.info(s);
+      }
+
+      renderable.shader = new ParticleShader(renderable, config, shader);
       renderable.shader.init();
    }
 
@@ -84,12 +106,12 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + 2] = point.getZ32();
 
             // color [0.0f - 1.0f]
-            vertices[offset + 3] = 0.5f; // red (not working yet)
-            vertices[offset + 4] = 0.7f; // blue
-            vertices[offset + 5] = 0.5f; // green
+            vertices[offset + 3] = colorProvider.getNextR();
+            vertices[offset + 4] = colorProvider.getNextG();
+            vertices[offset + 5] = colorProvider.getNextB();
             vertices[offset + 6] = alpha; // alpha
 
-            vertices[offset + 7] = pointSize; // size
+            vertices[offset + 7] = pointScale * 0.01f; // size
             vertices[offset + 8] = 1.0f; // cosine [0-1]
             vertices[offset + 9] = 0.0f; // sine [0-1]
          }
@@ -114,16 +136,63 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender)
    {
+      setPointsToRender(pointsToRender, new ColorProvider()
+      {
+         private final Random rand = new Random(0);
+
+         @Override
+         public float getNextR()
+         {
+            return rand.nextFloat();
+         }
+
+         @Override
+         public float getNextG()
+         {
+            return rand.nextFloat();
+         }
+
+         @Override
+         public float getNextB()
+         {
+            return rand.nextFloat();
+         }
+      });
+   }
+
+   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender, Color color) {
+      setPointsToRender(pointsToRender, new ColorProvider()
+      {
+         private final Random rand = new Random(0);
+
+         @Override
+         public float getNextR()
+         {
+            return color.r;
+         }
+
+         @Override
+         public float getNextG()
+         {
+            return color.g;
+         }
+
+         @Override
+         public float getNextB()
+         {
+            return color.b;
+         }
+      });
+   }
+
+   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender, ColorProvider provider)
+   {
       this.pointsToRender = pointsToRender;
+      this.colorProvider = provider;
    }
 
-   public void setColor(Color color)
+   public void setPointScale(float size)
    {
-      this.color = color;
-   }
-
-   public void setPointSize(float size)
-   {
-      this.pointSize = size;
+      this.pointScale = size;
    }
 }
