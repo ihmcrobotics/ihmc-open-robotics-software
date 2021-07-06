@@ -14,7 +14,7 @@ import java.util.Random;
 public class GDXPointCloudRendererDemo
 {
    private final RecyclingArrayList<Point3D32> points = new RecyclingArrayList<>(500, Point3D32::new);
-   private final Random rand = new Random();
+   private final Random random = new Random();
 
    public GDXPointCloudRendererDemo()
    {
@@ -40,7 +40,7 @@ public class GDXPointCloudRendererDemo
             for (int i = 0; i < 5000; i++)
             {
                Point3D32 point = points.add();
-               point.set(new Point3D32(rand.nextFloat(), rand.nextFloat(), rand.nextFloat()));
+               point.set(new Point3D32(random.nextFloat(), random.nextFloat(), random.nextFloat()));
             }
 
             pointCloudRenderer.setPointsToRender(points);
