@@ -125,17 +125,8 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
          startTime = realtimeBuffer.getStartTime();
       }
 
-      if (ImGui.checkbox("Log Planar Regions", logPlanarRegions))
-      {
-         if (logPlanarRegions.get())
-         {
-            logger.start();
-            mustUpdateFiles = true;
-         }
-      }
-
-      //Realtime buffer
-      ImGui.text("View current session's regions:");
+      // Realtime buffer
+      ImGui.text("Current session's regions buffer:");
       ImGui.checkbox("Show##1", showRealtime);
       boolean realtime = ImGui.sliderInt("Time:##realtimeSlider",
                                          timeRealtime.getData(),
@@ -181,9 +172,19 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
          }
       }
 
-      //Log buffer
-      ImGui.text("View logged regions:");
-      ImGui.checkbox("Show##2", showLog);
+      ImGui.separator();
+
+      // Log buffer
+      if (ImGui.checkbox("Log Planar Regions", logPlanarRegions))
+      {
+         if (logPlanarRegions.get())
+         {
+            logger.start();
+            mustUpdateFiles = true;
+         }
+      }
+
+      ImGui.checkbox("Show regions from log##2", showLog);
       if (logBuffer != null)
       {
          boolean log = ImGui.sliderInt("Time:##logSlider", timeLog.getData(), 0, (int) (logBuffer.getEndTime() - logBuffer.getStartTime()), "");
