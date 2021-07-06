@@ -87,22 +87,12 @@ public class StepReachabilityFileTools
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       StepReachabilityData reachabilityData = new StepReachabilityData();
 
-      // TODO figure out a way to export this.
-      // It can be a small header file that sits next to the .json file, and we can add a method in DRCRobotModel for it's file name
-      // Or it it's possible to have MultiContactScriptWriter to export it into the json. Maybe MultiContactWriter.writeScript could optionally
-      // take in an extra json node, but it'll need to stay backwards compatible so that might get tricky.
-
-//      double spacingXYZ = 0.1;
-//      int yawDivisions = 6;
-//      double minimumOffsetYaw = - Math.toRadians(70.0);
-//      double maximumOffsetYaw = Math.toRadians(80.0);
-//      double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
-
       double spacingXYZ = gridData[0];
       double gridSizeYaw = gridData[1];
       int yawDivisions = (int) gridData[2];
 
       reachabilityData.setGridData(spacingXYZ, gridSizeYaw, yawDivisions);
+
       for (int i = 0; i < kinematicsSnapshots.size(); i++)
       {
          KinematicsToolboxSnapshotDescription snapshot = kinematicsSnapshots.get(i);
@@ -126,7 +116,6 @@ public class StepReachabilityFileTools
          double solutionQuality = snapshot.getIkSolution().getSolutionQuality();
          reachabilityData.getLegReachabilityMap().put(latticePoint, solutionQuality);
       }
-
       return reachabilityData;
    }
 }
