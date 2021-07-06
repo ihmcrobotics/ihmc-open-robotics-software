@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__WholeBodyMultiContactTrajectoryMessage__idl__
-#define __controller_msgs__msg__WholeBodyMultiContactTrajectoryMessage__idl__
+#ifndef __controller_msgs__msg__MultiContactTrajectoryMessage__idl__
+#define __controller_msgs__msg__MultiContactTrajectoryMessage__idl__
 
 #include "geometry_msgs/msg/./Pose_.idl"
 module controller_msgs
@@ -13,8 +13,8 @@ module controller_msgs
        * This message is part of the IHMC multi-contact controller API.
        * Experimental mode of specifying a desired configuration in terms of root pose and joint angles.
        */
-      @TypeCode(type="controller_msgs::msg::dds_::WholeBodyMultiContactTrajectoryMessage_")
-      struct WholeBodyMultiContactTrajectoryMessage
+      @TypeCode(type="controller_msgs::msg::dds_::MultiContactTrajectoryMessage_")
+      struct MultiContactTrajectoryMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
