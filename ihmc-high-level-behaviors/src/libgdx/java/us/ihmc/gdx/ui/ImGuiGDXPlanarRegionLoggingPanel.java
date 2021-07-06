@@ -6,9 +6,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImInt;
+import imgui.type.ImFloat;
 import us.ihmc.avatar.logging.PlanarRegionsListBuffer;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
+import us.ihmc.commons.Conversions;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.log.LogTools;
@@ -26,10 +27,12 @@ import java.util.Objects;
 
 public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements RenderableProvider
 {
+   private static final int REALTIME_BUFFER_LEN = 3000;
+
    public static final String WINDOW_NAME = "Planar Region Logging";
 
    private final PlanarRegionsListLogger logger;
-   private final PlanarRegionsListBuffer realtimeBuffer;
+   private PlanarRegionsListBuffer realtimeBuffer;
    private PlanarRegionsListBuffer logBuffer;
 
    private final GDXPlanarRegionsGraphic realtimeGraphic;
@@ -37,9 +40,12 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
 
    private final ImBoolean logPlanarRegions = new ImBoolean(false);
    private final ImBoolean showRealtime = new ImBoolean(false);
+   private final ImBoolean enableRealtime = new ImBoolean(false);
    private final ImBoolean showLog = new ImBoolean(false);
-   private final ImInt timeRealtime = new ImInt(0);
-   private final ImInt timeLog = new ImInt(0);
+   private final ImFloat timeRealtimeFloat = new ImFloat(0);
+   private long timeRealtime = 0;
+   private final ImFloat timeLogFloat = new ImFloat(0);
+   private long timeLog = 0;
 
    private boolean firstRun = true;
    private boolean mustUpdateFiles = false;
@@ -53,7 +59,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
       logger = new PlanarRegionsListLogger(this.getClass().getSimpleName(), Integer.MAX_VALUE);
-      realtimeBuffer = new PlanarRegionsListBuffer(3000);
+      realtimeBuffer = new PlanarRegionsListBuffer(REALTIME_BUFFER_LEN);
 
       realtimeGraphic = new GDXPlanarRegionsGraphic();
       logGraphic = new GDXPlanarRegionsGraphic();
@@ -66,11 +72,9 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
 
    public void update(long time, PlanarRegionsList planarRegionsList)
    {
-      long currentTimeMillis = System.currentTimeMillis(); // TODO: Fix, but probably not too important until we sync it with something else
-
       if (logPlanarRegions.get())
       {
-         logger.update(currentTimeMillis, planarRegionsList);
+         logger.update(time, planarRegionsList);
          if (mustUpdateFiles)
          {
             mustUpdateFiles = false;
@@ -78,7 +82,8 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
          }
       }
 
-      realtimeBuffer.putAndTick(currentTimeMillis, planarRegionsList);
+      if (enableRealtime.get())
+         realtimeBuffer.putAndTick(time, planarRegionsList);
    }
 
    private void updateAvailableLogFiles()
@@ -118,6 +123,14 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
                  });
    }
 
+   private float getFloatSecondsFromNanos(long nanos) {
+      return (float)Conversions.nanosecondsToSeconds(nanos - startTime);
+   }
+
+   private long getNanosFromFloatSeconds(float seconds) {
+      return Conversions.secondsToNanoseconds(seconds) + startTime;
+   }
+
    public void renderImGuiWidgets()
    {
       if (firstRun)
@@ -128,44 +141,54 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       // Realtime buffer
       ImGui.text("Current session's regions buffer:");
       ImGui.checkbox("Show##1", showRealtime);
-      boolean realtime = ImGui.sliderInt("Time:##realtimeSlider",
-                                         timeRealtime.getData(),
-                                         (int) (realtimeBuffer.getStartTime() - startTime),
-                                         (int) (realtimeBuffer.getEndTime() - realtimeBuffer.getStartTime()),
+      ImGui.sameLine();
+      if (ImGui.button("Clear")) {
+         realtimeBuffer = new PlanarRegionsListBuffer(REALTIME_BUFFER_LEN);
+      }
+      ImGui.sameLine();
+      ImGui.checkbox("Enable", enableRealtime);
+      boolean realtime = ImGui.sliderFloat("Time:##realtimeSlider",
+                                         timeRealtimeFloat.getData(),
+                                         getFloatSecondsFromNanos(realtimeBuffer.getStartTime()),
+                                         getFloatSecondsFromNanos(realtimeBuffer.getEndTime()),
                                          "");
       ImGui.sameLine();
-      realtime |= ImGui.inputInt("##realtimeInput", timeRealtime);
+      realtime |= ImGui.inputFloat("##realtimeInput", timeRealtimeFloat);
+
+      if (realtime) {
+         timeRealtime = getNanosFromFloatSeconds(timeRealtimeFloat.get());
+      }
 
       if (ImGui.button("<<<##realtime"))
       {
-         timeRealtime.set(Math.max(timeRealtime.get() - 3000, 0));
+         timeRealtime = Math.max(timeRealtime - 3000, 0);
          realtime = true;
       }
       ImGui.sameLine();
       if (ImGui.button("<-##realtime"))
       {
          long start = realtimeBuffer.getStartTime();
-         timeRealtime.set(Math.max((int) (realtimeBuffer.getPreviousTime(start + timeRealtime.get()) - start), 0));
+         timeRealtime = Math.max((int) (realtimeBuffer.getPreviousTime(start + timeRealtime) - start), 0);
          realtime = true;
       }
       ImGui.sameLine();
       if (ImGui.button("->##realtime"))
       {
          long start = realtimeBuffer.getStartTime();
-         timeRealtime.set(Math.min((int) (realtimeBuffer.getNextTime(start + timeRealtime.get()) - start),
-                                   (int) (realtimeBuffer.getEndTime() - realtimeBuffer.getStartTime())));
+         timeRealtime = Math.min((int) (realtimeBuffer.getNextTime(start + timeRealtime) - start),
+                                   (int) (realtimeBuffer.getEndTime() - realtimeBuffer.getStartTime()));
          realtime = true;
       }
       ImGui.sameLine();
       if (ImGui.button(">>>##realtime"))
       {
-         timeRealtime.set(Math.min(timeRealtime.get() + 3000, (int) (realtimeBuffer.getEndTime() - realtimeBuffer.getStartTime())));
+         timeRealtime = Math.min(timeRealtime + 3000, (int) (realtimeBuffer.getEndTime() - realtimeBuffer.getStartTime()));
          realtime = true;
       }
 
       if (realtime || firstRun)
       {
-         PlanarRegionsList regions = realtimeBuffer.getNearTime(realtimeBuffer.getStartTime() + timeRealtime.get());
+         PlanarRegionsList regions = realtimeBuffer.getNearTime(startTime + timeRealtime);
          if (regions != null)
          {
             realtimeGraphic.generateMeshesAsync(regions);
@@ -187,39 +210,39 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       ImGui.checkbox("Show regions from log##2", showLog);
       if (logBuffer != null)
       {
-         boolean log = ImGui.sliderInt("Time:##logSlider", timeLog.getData(), 0, (int) (logBuffer.getEndTime() - logBuffer.getStartTime()), "");
+         boolean log = ImGui.sliderFloat("Time:##logSlider", timeLogFloat.getData(), 0, (int) (logBuffer.getEndTime() - logBuffer.getStartTime()), "");
          ImGui.sameLine();
-         log |= ImGui.inputInt("##logInput", timeLog);
+         log |= ImGui.inputFloat("##logInput", timeLogFloat);
 
          if (ImGui.button("<<<##log"))
          {
-            timeLog.set(Math.max(timeLog.get() - 3000, 0));
+            timeLog = Math.max(timeLog - 3000, 0);
             log = true;
          }
          ImGui.sameLine();
          if (ImGui.button("<-##log"))
          {
             long start = logBuffer.getStartTime();
-            timeLog.set(Math.max((int) (logBuffer.getPreviousTime(start + timeLog.get()) - start), 0));
+            timeLog = Math.max((int) (logBuffer.getPreviousTime(start + timeLog) - start), 0);
             log = true;
          }
          ImGui.sameLine();
          if (ImGui.button("->##log"))
          {
             long start = logBuffer.getStartTime();
-            timeLog.set(Math.min((int) (logBuffer.getNextTime(start + timeLog.get()) - start), (int) (logBuffer.getEndTime() - logBuffer.getStartTime())));
+            timeLog = Math.min((int) (logBuffer.getNextTime(start + timeLog) - start), (int) (logBuffer.getEndTime() - logBuffer.getStartTime()));
             log = true;
          }
          ImGui.sameLine();
          if (ImGui.button(">>>##log"))
          {
-            timeLog.set(Math.min(timeLog.get() + 3000, (int) (logBuffer.getEndTime() - logBuffer.getStartTime())));
+            timeLog = Math.min(timeLog + 3000, (int) (logBuffer.getEndTime() - logBuffer.getStartTime()));
             log = true;
          }
 
          if (log || firstRun)
          { //Use bitwise or to make sure both are called
-            PlanarRegionsList list = logBuffer.getNearTime(logBuffer.getStartTime() + timeLog.get());
+            PlanarRegionsList list = logBuffer.getNearTime(logBuffer.getStartTime() + timeLog);
             if (list != null)
             {
                logGraphic.generateMeshesAsync(list);
@@ -228,9 +251,9 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       }
       else
       {
-         ImGui.sliderInt("Time:##logSlider", timeLog.getData(), 0, 0, "");
+         ImGui.sliderFloat("Time:##logSlider", timeLogFloat.getData(), 0, 0, "");
          ImGui.sameLine();
-         ImGui.inputInt("##logInput", timeLog);
+         ImGui.inputFloat("##logInput", timeLogFloat);
 
          ImGui.button("<<<##log");
          ImGui.sameLine();
