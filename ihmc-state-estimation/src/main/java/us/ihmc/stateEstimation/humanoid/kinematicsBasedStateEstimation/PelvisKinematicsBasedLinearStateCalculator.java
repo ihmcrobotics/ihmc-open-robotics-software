@@ -59,8 +59,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final FloatingJointBasics rootJoint;
    private final RigidBodyBasics[] feetRigidBodies;
-   private final FootEstimatorData[] footEstimatorDatas;
-   private final Map<RigidBodyBasics, FootEstimatorData> footEstimatorDataMap = new HashMap<>();
+   private final SingleFootEstimator[] footEstimators;
+   private final Map<RigidBodyBasics, SingleFootEstimator> footEstimatorMap = new HashMap<>();
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -112,21 +112,21 @@ public class PelvisKinematicsBasedLinearStateCalculator
       copFilterBreakFrequency = new DoubleParameter("CopFilterBreakFrequency", registry, stateEstimatorParameters.getCoPFilterFreqInHertz());
       correctTrustedFeetPositions = new BooleanParameter("correctTrustedFeetPositions", registry, stateEstimatorParameters.correctTrustedFeetPositions());
 
-      footEstimatorDatas = new FootEstimatorData[feetRigidBodies.length];
+      footEstimators = new SingleFootEstimator[feetRigidBodies.length];
       for (int i = 0; i < feetRigidBodies.length; i++)
       {
          RigidBodyBasics footRigidBody = feetRigidBodies[i];
          ContactablePlaneBody contactableFoot = feetContactablePlaneBodies.get(footRigidBody);
          FootSwitchInterface footSwitch = footSwitches.get(footRigidBody);
-         footEstimatorDatas[i] = new FootEstimatorData(rootJoint,
-                                                       contactableFoot,
-                                                       footSwitch,
-                                                       footToRootJointPositionBreakFrequency,
-                                                       copFilterBreakFrequency,
-                                                       centerOfPressureDataHolderFromController,
-                                                       estimatorDT,
-                                                       registry);
-         footEstimatorDataMap.put(footRigidBody, footEstimatorDatas[i]);
+         footEstimators[i] = new SingleFootEstimator(rootJoint,
+                                                     contactableFoot,
+                                                     footSwitch,
+                                                     footToRootJointPositionBreakFrequency,
+                                                     copFilterBreakFrequency,
+                                                     centerOfPressureDataHolderFromController,
+                                                     estimatorDT,
+                                                     registry);
+         footEstimatorMap.put(footRigidBody, footEstimators[i]);
       }
 
       /*
@@ -147,9 +147,9 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       if (VISUALIZE)
       {
-         for (FootEstimatorData footEstimatorData : footEstimatorDatas)
+         for (SingleFootEstimator footEstimator : footEstimators)
          {
-            footEstimatorData.createVisualization(yoGraphicsListRegistry);
+            footEstimator.createVisualization(yoGraphicsListRegistry);
          }
       }
 
@@ -163,18 +163,18 @@ public class PelvisKinematicsBasedLinearStateCalculator
     */
    public void initialize(FramePoint3D pelvisPosition)
    {
-      for (FootEstimatorData footEstimatorData : footEstimatorDatas)
+      for (SingleFootEstimator footEstimator : footEstimators)
       {
-         footEstimatorData.initialize();
+         footEstimator.initialize();
       }
       setPelvisLinearVelocityToZero();
 
       updateKinematics();
       setPelvisPosition(pelvisPosition);
 
-      for (FootEstimatorData footEstimatorData : footEstimatorDatas)
+      for (SingleFootEstimator footEstimator : footEstimators)
       {
-         footEstimatorData.updateUntrustedFootPosition(pelvisPosition);
+         footEstimator.updateUntrustedFootPosition(pelvisPosition);
       }
       kinematicsIsUpToDate.set(false);
    }
@@ -187,8 +187,8 @@ public class PelvisKinematicsBasedLinearStateCalculator
       rootJointPosition.setToZero();
       updateKinematicsNewTwist();
 
-      for (FootEstimatorData footEstimatorData : footEstimatorDatas)
-         footEstimatorData.updateKinematics();
+      for (SingleFootEstimator footEstimator : footEstimators)
+         footEstimator.updateKinematics();
 
       kinematicsIsUpToDate.set(true);
    }
@@ -200,15 +200,15 @@ public class PelvisKinematicsBasedLinearStateCalculator
       tempRootBodyTwist.setIncludingFrame(rootJoint.getJointTwist());
       tempRootBodyTwist.getLinearPart().setMatchingFrame(rootJointLinearVelocityNewTwist);
 
-      for (FootEstimatorData footEstimatorData : footEstimatorDatas)
-         footEstimatorData.updateFootLinearVelocityInWorld(tempRootBodyTwist);
+      for (SingleFootEstimator footEstimator : footEstimators)
+         footEstimator.updateFootLinearVelocityInWorld(tempRootBodyTwist);
    }
 
    public void updateFeetPositionsWhenTrustingIMUOnly(FramePoint3DReadOnly pelvisPosition)
    {
-      for (FootEstimatorData footEstimatorData : footEstimatorDatas)
+      for (SingleFootEstimator footEstimator : footEstimators)
       {
-         footEstimatorData.updateUntrustedFootPosition(pelvisPosition);
+         footEstimator.updateUntrustedFootPosition(pelvisPosition);
       }
    }
 
@@ -221,19 +221,19 @@ public class PelvisKinematicsBasedLinearStateCalculator
       {
          for (int i = 0; i < trustedFeet.size(); i++)
          {
-            footEstimatorDataMap.get(trustedFeet.get(i)).footPositionInWorld.setZ(0.0);
+            footEstimatorMap.get(trustedFeet.get(i)).footPositionInWorld.setZ(0.0);
          }
       }
 
       for (int i = 0; i < trustedFeet.size(); i++)
       {
-         FootEstimatorData footEstimatorData = footEstimatorDataMap.get(trustedFeet.get(i));
-         footEstimatorData.updateCoPPosition(trustCoPAsNonSlippingContactPoint.getValue(), useControllerDesiredCoP.getValue());
-         footEstimatorData.correctFootPositionsUsingCoP(trustCoPAsNonSlippingContactPoint.getValue());
-         footEstimatorData.updatePelvisWithKinematics(trustedFeet.size(),
-                                                      alphaRootJointLinearVelocityNewTwist.getValue(),
-                                                      rootJointPosition,
-                                                      rootJointLinearVelocityNewTwist);
+         SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeet.get(i));
+         footEstimator.updateCoPPosition(trustCoPAsNonSlippingContactPoint.getValue(), useControllerDesiredCoP.getValue());
+         footEstimator.correctFootPositionsUsingCoP(trustCoPAsNonSlippingContactPoint.getValue());
+         footEstimator.updatePelvisWithKinematics(trustedFeet.size(),
+                                                  alphaRootJointLinearVelocityNewTwist.getValue(),
+                                                  rootJointPosition,
+                                                  rootJointLinearVelocityNewTwist);
       }
 
       rootJointLinearVelocityBacklashKinematics.update();
@@ -242,15 +242,15 @@ public class PelvisKinematicsBasedLinearStateCalculator
       {
          for (int i = 0; i < trustedFeet.size(); i++)
          {
-            FootEstimatorData footEstimatorData = footEstimatorDataMap.get(trustedFeet.get(i));
-            footEstimatorData.updateTrustedFootPosition(trustCoPAsNonSlippingContactPoint.getValue(), rootJointPosition);
+            SingleFootEstimator footEstimator = footEstimatorMap.get(trustedFeet.get(i));
+            footEstimator.updateTrustedFootPosition(trustCoPAsNonSlippingContactPoint.getValue(), rootJointPosition);
          }
       }
 
       for (int i = 0; i < unTrustedFeet.size(); i++)
       {
-         FootEstimatorData footEstimatorData = footEstimatorDataMap.get(unTrustedFeet.get(i));
-         footEstimatorData.updateUntrustedFootPosition(pelvisPosition);
+         SingleFootEstimator footEstimator = footEstimatorMap.get(unTrustedFeet.get(i));
+         footEstimator.updateUntrustedFootPosition(pelvisPosition);
       }
 
       kinematicsIsUpToDate.set(false);
@@ -285,24 +285,17 @@ public class PelvisKinematicsBasedLinearStateCalculator
       return rootJointLinearVelocityNewTwist;
    }
 
-   /** Call {@link #getFootToRootJointPosition(FramePoint3D, RigidBodyBasics)} instead */
-   @Deprecated
-   public void getFootToPelvisPosition(FramePoint3D positionToPack, RigidBodyBasics foot)
-   {
-      getFootToRootJointPosition(positionToPack, foot);
-   }
-
    public void getFootToRootJointPosition(FramePoint3D positionToPack, RigidBodyBasics foot)
    {
-      positionToPack.setIncludingFrame(footEstimatorDataMap.get(foot).footToRootJointPosition);
+      positionToPack.setIncludingFrame(footEstimatorMap.get(foot).footToRootJointPosition);
    }
 
    public FrameVector3DReadOnly getFootVelocityInWorld(RigidBodyBasics foot)
    {
-      return footEstimatorDataMap.get(foot).footVelocityInWorld;
+      return footEstimatorMap.get(foot).footVelocityInWorld;
    }
 
-   private static class FootEstimatorData
+   private static class SingleFootEstimator
    {
       private final RigidBodyBasics foot;
 
@@ -325,14 +318,14 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
       private final FramePoint2DBasics[] intersectionPoints = new FramePoint2DBasics[] {new FramePoint2D(), new FramePoint2D()};
 
-      public FootEstimatorData(FloatingJointBasics rootJoint,
-                               ContactablePlaneBody contactableFoot,
-                               FootSwitchInterface footSwitch,
-                               DoubleProvider footToRootJointPositionBreakFrequency,
-                               DoubleProvider copFilterBreakFrequency,
-                               CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-                               double estimatorDT,
-                               YoRegistry registry)
+      public SingleFootEstimator(FloatingJointBasics rootJoint,
+                                 ContactablePlaneBody contactableFoot,
+                                 FootSwitchInterface footSwitch,
+                                 DoubleProvider footToRootJointPositionBreakFrequency,
+                                 DoubleProvider copFilterBreakFrequency,
+                                 CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
+                                 double estimatorDT,
+                                 YoRegistry registry)
       {
          this.rootJointFrame = rootJoint.getFrameAfterJoint();
          this.footSwitch = footSwitch;
