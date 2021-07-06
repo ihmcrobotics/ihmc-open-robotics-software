@@ -3,7 +3,9 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +51,21 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
     * Desired VRP value at the beginning of the segment.
     */
    private final FramePoint3D startVRP = new FramePoint3D();
+
    /**
     * Desired VRP value at the end of the segment.
     */
    private final FramePoint3D endVRP = new FramePoint3D();
+
+   /**
+    * Desired VRP velocity value at the beginning of the segment.
+    */
+   private final FrameVector3D startVRPVelocity = new FrameVector3D();
+
+   /**
+    * Desired VRP velocity value at the end of the segment.
+    */
+   private final FrameVector3D endVRPVelocity = new FrameVector3D();
 
    /**
     * Consumer for the computed cost to go on the output of the MPC function.
@@ -70,6 +83,8 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
       segmentNumber = -1;
       startVRP.setToNaN();
       endVRP.setToNaN();
+      startVRPVelocity.containsNaN();
+      endVRPVelocity.containsNaN();
    }
 
    /**
@@ -88,6 +103,16 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
       this.endVRP.set(endVRP);
    }
 
+   public void setStartVRPVelocity(FrameVector3DReadOnly startVRPVelocity)
+   {
+      this.startVRPVelocity.set(startVRPVelocity);
+   }
+
+   public void setEndVRPVelocity(FrameVector3DReadOnly endVRPVelocity)
+   {
+      this.endVRPVelocity.set(endVRPVelocity);
+   }
+
    public FramePoint3DReadOnly getStartVRP()
    {
       return startVRP;
@@ -96,6 +121,16 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    public FramePoint3DReadOnly getEndVRP()
    {
       return endVRP;
+   }
+
+   public FrameVector3DReadOnly getStartVRPVelocity()
+   {
+      return startVRPVelocity;
+   }
+
+   public FrameVector3DReadOnly getEndVRPVelocity()
+   {
+      return endVRPVelocity;
    }
 
    /**
