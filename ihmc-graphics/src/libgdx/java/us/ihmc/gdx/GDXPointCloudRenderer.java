@@ -64,24 +64,14 @@ public class GDXPointCloudRenderer implements RenderableProvider
          renderable.meshPart.mesh.dispose();
       renderable.meshPart.mesh = new Mesh(false, size, 0, vertexAttributes);
 
+      ParticleShader.Config config = new ParticleShader.Config(ParticleShader.ParticleType.Point);
+      String prefix = ParticleShader.createPrefix(renderable, config);
+
       ShaderProgram.pedantic = true;
-      final String vertexShader = "attribute vec3 a_position;\n" +
-                                  "attribute vec4 a_color;\n" +
-                                  "attribute vec3 a_sizeAndRotation;\n" +
-                                  "varying vec4 v_color;\n" +
-                                  "uniform mat4 u_proj;\n" +
-                                  "void main() {\n" +
-                                  "   v_color = a_color;\n" +
-                                  "   gl_Position = u_proj * vec4(a_position, 1.0);\n" +
-                                  "   gl_PointSize = a_sizeAndRotation.x;\n" +
-                                  "}\n";
 
-      final String fragmentShader = "varying vec4 v_color;" +
-                                    "void main() {\n" +
-                                    "   gl_FragColor = v_color;\n" +
-                                    "}";
+      final String fragmentShader = ParticleShader.getDefaultFragmentShader().replace("gl_FragColor = texture2D(u_diffuseTexture, texCoord)* v_color", "gl_FragColor = v_color");
 
-      ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
+      ShaderProgram shader = new ShaderProgram(prefix + ParticleShader.getDefaultVertexShader(), prefix + fragmentShader);
       for (String s : shader.getLog().split("\n"))
       {
          if (s.isEmpty())
@@ -93,8 +83,8 @@ public class GDXPointCloudRenderer implements RenderableProvider
             LogTools.info(s);
       }
 
-      renderable.shader = null;
-      renderable.meshPart.mesh.bind(shader);
+      renderable.shader = new ParticleShader(renderable, config, shader);
+      renderable.shader.init();
    }
 
    public void updateMesh()
