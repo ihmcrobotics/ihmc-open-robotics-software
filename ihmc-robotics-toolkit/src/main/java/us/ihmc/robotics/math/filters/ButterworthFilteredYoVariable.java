@@ -34,7 +34,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
    private final DoubleProvider alphaVariable;
    private final ButterworthFilterType butterworthFilterType;
 
-   private final YoDouble position;
+   private final DoubleProvider position;
    private final YoDouble previousInput;
 
    private final YoBoolean hasBeenCalled;
@@ -44,7 +44,11 @@ public class ButterworthFilteredYoVariable extends YoDouble
       this(name, registry, AlphaFilteredYoVariable.createAlphaYoDouble(name, alpha, registry), butterworthFilterType);
    }
 
-   public ButterworthFilteredYoVariable(String name, YoRegistry registry, double alpha, YoDouble positionVariable, ButterworthFilterType butterworthFilterType)
+   public ButterworthFilteredYoVariable(String name,
+                                        YoRegistry registry,
+                                        double alpha,
+                                        DoubleProvider positionVariable,
+                                        ButterworthFilterType butterworthFilterType)
    {
       this(name, registry, AlphaFilteredYoVariable.createAlphaYoDouble(name, alpha, registry), positionVariable, butterworthFilterType);
    }
@@ -57,7 +61,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
    public ButterworthFilteredYoVariable(String name,
                                         YoRegistry registry,
                                         DoubleProvider alphaVariable,
-                                        YoDouble positionVariable,
+                                        DoubleProvider positionVariable,
                                         ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
