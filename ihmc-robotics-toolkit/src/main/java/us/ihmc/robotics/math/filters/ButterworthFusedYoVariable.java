@@ -38,6 +38,11 @@ public class ButterworthFusedYoVariable extends YoDouble
       this(name, registry, AlphaFilteredYoVariable.createAlphaYoDouble(name, alpha, registry), slowSignal, fastSignal);
    }
 
+   public ButterworthFusedYoVariable(String name, YoRegistry registry, DoubleProvider alphaVariable)
+   {
+      this(name, registry, alphaVariable, null, null);
+   }
+
    public ButterworthFusedYoVariable(String name, YoRegistry registry, DoubleProvider alphaVariable, DoubleProvider slowSignal, DoubleProvider fastSignal)
    {
       super(name, registry);
