@@ -94,7 +94,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final ResettableExceptionHandlingExecutorService pointCloudExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ResettableExceptionHandlingExecutorService colorROS2Executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final double publishRateHz;
-   private boolean debugCoordinateFrame;
+   private final ImBoolean debugCoordinateFrame = new ImBoolean(false);
    private ModelInstance coordinateFrame;
    private RigidBodyTransform sensorFrameToWorldTransform;
 
@@ -190,7 +190,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       addChild(depthSensorSimulator.getDepthPanel());
       addChild(depthSensorSimulator.getColorPanel());
       pointCloudRenderer.create(imageWidth * imageHeight);
-      if (debugCoordinateFrame)
+      if (debugCoordinateFrame.get())
          coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
    }
 
@@ -410,6 +410,8 @@ catch (IndexOutOfBoundsException e)
    {
       tuning = true;
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Sensor Enabled"), sensorEnabled);
+      ImGui.sameLine();
+      ImGui.checkbox("Show frame graphic", debugCoordinateFrame);
       ImGui.text("Render:");
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Point cloud"), renderPointCloudDirectly);
@@ -421,14 +423,13 @@ catch (IndexOutOfBoundsException e)
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth image (ROS 1)"), publishDepthImageROS1);
       ImGui.sameLine();
+      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Point cloud (ROS 2)"), publishPointCloudROS2);
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 1)"), publishColorImageROS1);
       if (flippedColorByteBuffer != null)
       {
          ImGui.sameLine();
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 2)"), publishColorImageROS2);
       }
-      ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Point cloud (ROS 2)"), publishPointCloudROS2);
       getLowLevelSimulator().renderTuningSliders();
       ImGui.sliderFloat("Fx", fx.getData(), -1000.0f, 1000.0f);
       ImGui.sliderFloat("Fy", fy.getData(), -1000.0f, 1000.0f);
@@ -499,8 +500,12 @@ catch (IndexOutOfBoundsException e)
    {
       if (renderPointCloudDirectly.get())
          pointCloudRenderer.getRenderables(renderables, pool);
-      if (debugCoordinateFrame)
+      if (debugCoordinateFrame.get())
+      {
+         if (coordinateFrame == null)
+            coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
          coordinateFrame.getRenderables(renderables, pool);
+      }
    }
 
    public void setSensorEnabled(boolean sensorEnabled)
@@ -545,7 +550,7 @@ catch (IndexOutOfBoundsException e)
 
    public void setDebugCoordinateFrame(boolean debugCoordinateFrame)
    {
-      this.debugCoordinateFrame = debugCoordinateFrame;
+      this.debugCoordinateFrame.set(debugCoordinateFrame);
    }
 
    public void setSensorFrameToWorldTransform(RigidBodyTransform sensorFrameToWorldTransform)
