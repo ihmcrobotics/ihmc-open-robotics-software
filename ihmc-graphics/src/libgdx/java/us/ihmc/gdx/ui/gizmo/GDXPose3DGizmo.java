@@ -11,6 +11,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -22,6 +23,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.mesh.GDXMeshBuilder;
@@ -44,6 +46,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final ImFloat arrowHeadBodyLengthRatio = new ImFloat(0.480f);
    private final ImFloat arrowHeadBodyRadiusRatio = new ImFloat(2.0f);
    private final ImFloat arrowSpacingFactor = new ImFloat(2.22f);
+   private final ImBoolean resizeAutomatically = new ImBoolean(true);
    private double animationSpeed = 0.25 * Math.PI;
    private double arrowBodyRadius;
    private double arrowLength;
@@ -69,14 +72,12 @@ public class GDXPose3DGizmo implements RenderableProvider
    private boolean dragging = false;
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
-   private final String imGuiWindowName;
    private FocusBasedGDXCamera camera3D;
    private final Point3D cameraPosition = new Point3D();
    private double lastDistanceToCamera = -1.0;
 
-   public GDXPose3DGizmo(String name)
+   public GDXPose3DGizmo()
    {
-      imGuiWindowName = ImGuiTools.uniqueLabel("3D Widget (" + name + ")");
    }
 
    public void create(FocusBasedGDXCamera camera3D)
@@ -160,13 +161,16 @@ public class GDXPose3DGizmo implements RenderableProvider
       // after things have been modified, update the derivative stuff
       updateFromSourceTransform();
 
-      GDXTools.toEuclid(camera3D.position, cameraPosition);
-      double distanceToCamera = cameraPosition.distance(pose.getPosition());
-      if (lastDistanceToCamera != distanceToCamera)
+      if (resizeAutomatically.get())
       {
-         lastDistanceToCamera = distanceToCamera;
-         recreateGraphics();
-         updateFromSourceTransform();
+         GDXTools.toEuclid(camera3D.position, cameraPosition);
+         double distanceToCamera = cameraPosition.distance(pose.getPosition());
+         if (lastDistanceToCamera != distanceToCamera)
+         {
+            lastDistanceToCamera = distanceToCamera;
+            recreateGraphics();
+            updateFromSourceTransform();
+         }
       }
    }
 
@@ -256,10 +260,13 @@ public class GDXPose3DGizmo implements RenderableProvider
       }
    }
 
+   public ImGuiPanel createTunerPanel(String name)
+   {
+      return new ImGuiPanel("Pose3D Gizmo Tuner (" + name + ")", this::renderImGuiTuner);
+   }
+
    public void renderImGuiTuner()
    {
-      ImGui.begin(imGuiWindowName);
-
       ImGui.text("Use the right mouse button to manipulate the widget.");
 
       if (ImGui.button("Reset"))
@@ -267,6 +274,7 @@ public class GDXPose3DGizmo implements RenderableProvider
          transform.setToZero();
       }
 
+      ImGui.checkbox("Resize based on camera distance", resizeAutomatically);
       ImGui.pushItemWidth(100.00f);
       boolean proportionsChanged = false;
       proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Torus radius"), torusRadius.getData(), 0.001f, 0.0f, 1000.0f);
@@ -280,8 +288,6 @@ public class GDXPose3DGizmo implements RenderableProvider
 
       if (proportionsChanged)
          recreateGraphics();
-
-      ImGui.end();
 
       updateFromSourceTransform();
    }
