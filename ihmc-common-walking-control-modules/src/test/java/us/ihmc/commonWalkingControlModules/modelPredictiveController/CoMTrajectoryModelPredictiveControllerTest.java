@@ -21,6 +21,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -144,7 +145,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, 0.8);
 
-      DMatrixRMaj solutionCoefficients = mpc.qpSolver.getSolution();
+      NativeMatrix solutionCoefficients = mpc.qpSolver.getSolution();
 
       DMatrixRMaj expectedSolutionMatrix = MPCTestHelper.getVectorOfCoefficients(gravityZ, rhoHelper, solutionCoefficients);
       DMatrixRMaj expectedContactForceMatrix = MPCTestHelper.getContactForceCoefficients(rhoHelper, solutionCoefficients);
