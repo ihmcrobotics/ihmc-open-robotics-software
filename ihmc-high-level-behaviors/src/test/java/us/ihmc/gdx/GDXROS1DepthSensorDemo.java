@@ -87,6 +87,7 @@ public class GDXROS1DepthSensorDemo
                                                         false);
             globalVisualizersUI = new ImGuiGDXGlobalVisualizersPanel();
             globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Depth Video", RosTools.L515_DEPTH));
+            globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Color Video", RosTools.L515_VIDEO));
 
 
             baseUI.getImGuiPanelManager().addPanel(l515);
