@@ -169,6 +169,7 @@ public class LookAndStepFootstepPlanningTask
          planarRegionsInput.set(planarRegionsList);
          planarRegionsExpirationTimer.reset();
       }
+
       public void acceptLidarREARegions(PlanarRegionsListMessage lidarREAPlanarRegionsListMessage)
       {
          acceptLidarREARegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(lidarREAPlanarRegionsListMessage));

@@ -28,7 +28,6 @@ public class GDXDepthSensorDemo
             depthSensorSimulator.getCamera().direction.set(0.0f, 0.0f, -1.0f);
 
             pointCloudRenderer.create((int) depthSensorSimulator.getCamera().viewportHeight * (int) depthSensorSimulator.getCamera().viewportWidth);
-            pointCloudRenderer.setPointSize(0.01f);
             sceneManager.addRenderableProvider(pointCloudRenderer, GDXSceneLevel.VIRTUAL);
          }
 
