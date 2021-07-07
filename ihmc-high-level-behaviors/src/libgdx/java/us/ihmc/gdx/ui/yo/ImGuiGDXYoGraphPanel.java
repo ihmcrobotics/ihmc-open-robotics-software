@@ -4,13 +4,13 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.ImPlotStyle;
-import imgui.extension.implot.flag.ImPlotAxisFlags;
-import imgui.extension.implot.flag.ImPlotFlags;
-import imgui.extension.implot.flag.ImPlotLocation;
-import imgui.extension.implot.flag.ImPlotStyleVar;
+import imgui.extension.implot.flag.*;
+import imgui.flag.ImGuiDragDropFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import imgui.type.ImString;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
@@ -25,8 +25,7 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImGuiGDXYoGraphPanel
@@ -34,10 +33,11 @@ public class ImGuiGDXYoGraphPanel
    private final String title;
    private final String controllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
    private final int bufferSize;
-   private final ArrayList<Runnable> graphs = new ArrayList<>();
+   private final ArrayList<GDXYoGraphRunnable> graphs = new ArrayList<>();
    private volatile boolean handshakeComplete = false;
    private volatile boolean disconnecting = false;
    private volatile boolean connecting = false;
+   private YoRegistry registry;
    private YoVariableClient yoVariableClient;
 
    private final ImInt graphGroupSelectedIndex = new ImInt(0);
@@ -45,6 +45,11 @@ public class ImGuiGDXYoGraphPanel
    private HashMap<String, GDXYoGraphGroup> graphGroups = new HashMap<>();
 
    private ImPlotContext context = null;
+
+   private final ImBoolean showAllVariables = new ImBoolean(false);
+   private final ImString searchBar = new ImString();
+
+   private GDXYoGraphRunnable graphRequesting = null;
 
    public ImGuiGDXYoGraphPanel(String title, int bufferSize)
    {
@@ -54,21 +59,21 @@ public class ImGuiGDXYoGraphPanel
 
    public void startYoVariableClient()
    {
-//      Set<String> graphGroupNameKeySet = graphGroups.keySet();
-//      String robotControllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
-//      String graphGroupName;
-//      if (robotControllerHost.trim().toLowerCase().contains("cpu4") && graphGroupNameKeySet.contains("Real robot"))
-//      {
-//         Arrays.asList(graphGroupNames).indexOf("Real robot");
-//         graphGroupSelectedIndex.set(graphGroupNames.);
-//      }
+      //      Set<String> graphGroupNameKeySet = graphGroups.keySet();
+      //      String robotControllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
+      //      String graphGroupName;
+      //      if (robotControllerHost.trim().toLowerCase().contains("cpu4") && graphGroupNameKeySet.contains("Real robot"))
+      //      {
+      //         Arrays.asList(graphGroupNames).indexOf("Real robot");
+      //         graphGroupSelectedIndex.set(graphGroupNames.);
+      //      }
    }
 
    public void startYoVariableClient(String graphGroupName)
    {
       connecting = true;
       handshakeComplete = false;
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      this.registry = new YoRegistry(getClass().getSimpleName());
       BasicYoVariablesUpdatedListener clientUpdateListener = new BasicYoVariablesUpdatedListener(registry);
       yoVariableClient = new YoVariableClient(clientUpdateListener);
       MissingThreadTools.startAsDaemon("YoVariableClient", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
@@ -103,7 +108,7 @@ public class ImGuiGDXYoGraphPanel
          LogTools.info("Handshake complete.");
          handshakeComplete = true;
 
-//         listVariables(registry, 4);
+         //         listVariables(registry, 4);
       });
 
       context = ImPlot.createContext();
@@ -124,49 +129,9 @@ public class ImGuiGDXYoGraphPanel
             {
                LogTools.info("Setting up graph for variable: {}", variable.getFullName());
                Double[] values = new Double[bufferSize];
-               AtomicInteger currentIndex = new AtomicInteger(0);
                synchronized (graphs)
                {
-                  int graphWidth = -1;
-                  int graphHeight = 50;
-                  final ImVec2 size = new ImVec2(graphWidth, graphHeight);
-                  final ImVec2 labelPadding = new ImVec2(0, 0);
-                  final ImVec2 legendPadding = new ImVec2(0, 0);
-                  int flags = ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect;
-                  int xFlags = ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit;
-                  int yFlags = ImPlotAxisFlags.NoLabel
-                             | ImPlotAxisFlags.NoGridLines
-                             | ImPlotAxisFlags.NoTickMarks
-                             | ImPlotAxisFlags.NoTickLabels
-                             | ImPlotAxisFlags.AutoFit;
-                  String xLabel = "";
-                  String yLabel = "";
-                  graphs.add(() ->
-                  {
-                     ImPlot.setCurrentContext(context);
-                     ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, labelPadding);
-                     ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, legendPadding);
-
-                     int currentValueIndex = currentIndex.getAndIncrement();
-                     values[currentValueIndex] = variable.getValueAsDouble();
-                     if (ImPlot.beginPlot("##" + variable.getName() + "Plot", xLabel, yLabel, size, flags, xFlags, yFlags))
-                     {
-                        Double[] data = ImPlotTools.removeNullElements(values);
-                        ImPlot.plotLine(variable.getName(), ImPlotTools.createIndex(data), data);
-                        if (ImPlot.beginLegendPopup(variable.getName()))
-                        {
-                           ImGui.text(variable.getFullNameString());
-                           ImPlot.endLegendPopup();
-                        }
-                        ImPlot.endPlot();
-                     }
-                     ImPlot.popStyleVar(2);
-
-                     if (currentValueIndex >= bufferSize - 1)
-                     {
-                        currentIndex.set(0);
-                     }
-                  });
+                  graphs.add(new GDXYoGraphRunnable(context, variable, values, registry, bufferSize));
                }
             }
             else
@@ -178,23 +143,64 @@ public class ImGuiGDXYoGraphPanel
       }
    }
 
-   private void listVariables(YoRegistry registry, int depth)
+   private void getAllVariablesHelper(YoRegistry registry, ArrayList<YoVariable> output)
    {
-      for (YoVariable variable : registry.getVariables())
-      {
-         System.out.println(variable.getFullNameString());
-      }
+      output.addAll(registry.getVariables());
 
-      if (depth > 0)
+      for (YoRegistry child : registry.getChildren())
       {
-         for (YoRegistry child : registry.getChildren())
-         {
-            listVariables(child, depth - 1);
-         }
+         getAllVariablesHelper(child, output);
       }
    }
 
-   public void renderImGuiWidgets()
+   private List<YoVariable> getAllVariables(YoRegistry registry)
+   {
+      ArrayList<YoVariable> output = new ArrayList<>();
+      getAllVariablesHelper(registry, output);
+      return output;
+   }
+
+   public void renderImGuiWidgetsVariablePanel()
+   {
+      if (graphRequesting == null)
+      {
+         ImGui.text("Select a graph by right clicking it to add a variable.");
+         return;
+      }
+
+      List<YoVariable> variables = getAllVariables(registry);
+      variables.sort(Comparator.comparing(YoVariable::getName));
+
+      ImGui.inputText("Variable Search", searchBar);
+
+      ImGui.sameLine();
+      if (ImGui.button("Cancel"))
+      {
+         showAllVariables.set(false);
+         graphRequesting.cancelWantVariable();
+         graphRequesting = null;
+      }
+
+      if (ImGui.beginListBox("##YoVariables", ImGui.getColumnWidth(), ImGui.getWindowSizeY() - 100))
+      {
+         for (YoVariable variable : variables)
+         {
+            if (!variable.getName().toLowerCase().contains(searchBar.get().toLowerCase()))
+               continue;
+
+            ImGui.selectable(variable.getName());
+            if (ImGui.isItemClicked())
+            {
+               graphRequesting.addVariable(variable);
+               showAllVariables.set(false);
+               graphRequesting = null;
+            }
+         }
+         ImGui.endListBox();
+      }
+   }
+
+   public void renderImGuiWidgetsGraphPanel()
    {
       ImGui.text("Controller host: " + controllerHost);
 
@@ -225,10 +231,24 @@ public class ImGuiGDXYoGraphPanel
 
       synchronized (graphs)
       {
-         for (Runnable graph : graphs)
+         Iterator<GDXYoGraphRunnable> graphsIterator = graphs.iterator();
+         while (graphsIterator.hasNext())
          {
+            GDXYoGraphRunnable graph = graphsIterator.next();
             graph.run();
+            if (!graph.shouldGraphExist())
+               graphsIterator.remove();
+            else if (graph.graphWantsVariable())
+            {
+               showAllVariables.set(true);
+               graphRequesting = graph;
+            }
          }
+      }
+
+      if (ImGui.button("Add new graph"))
+      {
+         graphs.add(new GDXYoGraphRunnable(context, registry, bufferSize));
       }
    }
 
@@ -259,5 +279,10 @@ public class ImGuiGDXYoGraphPanel
    public String getWindowName()
    {
       return title;
+   }
+
+   public String getVarWindowName()
+   {
+      return title + " List";
    }
 }
