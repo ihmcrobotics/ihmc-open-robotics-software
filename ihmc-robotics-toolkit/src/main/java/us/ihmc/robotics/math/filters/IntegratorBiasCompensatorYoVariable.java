@@ -5,12 +5,34 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * This filter aims at merging two measurements:
+ * <ul>
+ * <li>position measurement that is drift free but contains high frequency noise.
+ * <li>rate measurement that can be integrated into a less noisy position measurement but is thus
+ * sensitive to bias accumulation.
+ * </ul>
+ * A single update to this filter does the following:
+ *
+ * <pre>
+ * xDot_est^{n+1}  = xDot_meas + xDot_bias^{n}
+ * x_prediction    = x_est^{n} + xDot_est^{n+1} * dt
+ * x_error         = x_meas - x_pred
+ * x_est^{n+1}     = x_prediction + kp * x_error
+ * xDot_bias^{n+1} = xDot_bias^{n} + ki * x_error
+ * </pre>
+ *
+ * In words, the filter integrates the rate measurement to compute the position estimate and uses
+ * the position measurement to continuously correct for the bias in the rate.
+ *
+ * @author Sylvain
+ */
 public class IntegratorBiasCompensatorYoVariable extends YoDouble implements ProcessingYoVariable
 {
    private final double dt;
    private final DoubleProvider kp, ki;
-   private final YoDouble rawPosition;
-   private final YoDouble rawRate;
+   private final DoubleProvider rawPosition;
+   private final DoubleProvider rawRate;
    private final YoDouble error, biasEstimate;
    private final YoDouble estimatedRate;
    private final YoBoolean hasBeenCalled;
@@ -33,8 +55,8 @@ public class IntegratorBiasCompensatorYoVariable extends YoDouble implements Pro
                                               YoRegistry registry,
                                               double kp,
                                               double ki,
-                                              YoDouble rawPositionVariable,
-                                              YoDouble rawRateVariable,
+                                              DoubleProvider rawPositionVariable,
+                                              DoubleProvider rawRateVariable,
                                               double dt)
    {
       this(name, registry, createKpYoDouble(name, kp, registry), createKiYoDouble(name, ki, registry), rawPositionVariable, rawRateVariable, dt);
@@ -44,8 +66,8 @@ public class IntegratorBiasCompensatorYoVariable extends YoDouble implements Pro
                                               YoRegistry registry,
                                               DoubleProvider kp,
                                               DoubleProvider ki,
-                                              YoDouble rawPositionVariable,
-                                              YoDouble rawRateVariable,
+                                              DoubleProvider rawPositionVariable,
+                                              DoubleProvider rawRateVariable,
                                               double dt)
    {
       super(name, registry);
@@ -77,6 +99,11 @@ public class IntegratorBiasCompensatorYoVariable extends YoDouble implements Pro
       return estimatedRate;
    }
 
+   public YoDouble getBiasEstimation()
+   {
+      return biasEstimate;
+   }
+
    @Override
    public void update()
    {
@@ -95,18 +122,16 @@ public class IntegratorBiasCompensatorYoVariable extends YoDouble implements Pro
          return;
       }
 
-      double kp = this.kp.getValue();
-      double ki = this.ki.getValue();
-      double x_meas = rawPosition;
-      double xd_meas = rawRate;
       double x_filt = this.getValue();
-      double xd_filt = xd_meas + biasEstimate.getValue();
-      double x_pred = x_filt + xd_filt * dt;
-      double error = x_meas - x_pred;
-      x_filt = x_pred + kp * error;
+
+      double xd_filt_new = rawRate + biasEstimate.getValue();
+      double xd_filt_old = estimatedRate.getValue();
+      double x_pred = x_filt + 0.5 * (xd_filt_old + xd_filt_new) * dt;
+      double error = rawPosition - x_pred;
+      x_filt = x_pred + kp.getValue() * error;
       this.error.set(error);
-      biasEstimate.add(ki * error);
+      biasEstimate.add(ki.getValue() * error);
+      estimatedRate.set(rawRate + biasEstimate.getValue());
       set(x_filt);
-      estimatedRate.set(xd_meas + biasEstimate.getValue());
    }
 }
