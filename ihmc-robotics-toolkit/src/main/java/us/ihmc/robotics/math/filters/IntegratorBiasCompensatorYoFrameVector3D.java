@@ -97,6 +97,11 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
       return estimatedRate;
    }
 
+   public YoFrameVector3D getBiasEstimation()
+   {
+      return biasEstimate;
+   }
+
    @Override
    public void update()
    {
@@ -124,16 +129,13 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
          return;
       }
 
-      double kp = this.kp.getValue();
-      double ki = this.ki.getValue();
-      Tuple3DReadOnly x_meas = rawPosition;
-      Tuple3DReadOnly xd_meas = rawRate;
       Vector3DBasics x_filt = this;
-      xd_filt.add(xd_meas, biasEstimate);
+      xd_filt.add(rawRate, biasEstimate); // = xd_filt_new
+      xd_filt.interpolate(estimatedRate, 0.5); // = 0.5 * (xd_filt_new + xd_filt_old)
       x_pred.scaleAdd(dt, xd_filt, x_filt);
-      error.sub(x_meas, x_pred);
-      x_filt.scaleAdd(kp, error, x_pred);
-      biasEstimate.scaleAdd(ki, error, biasEstimate);
-      estimatedRate.add(xd_meas, biasEstimate);
+      error.sub(rawPosition, x_pred);
+      x_filt.scaleAdd(kp.getValue(), error, x_pred);
+      biasEstimate.scaleAdd(ki.getValue(), error, biasEstimate);
+      estimatedRate.add(rawRate, biasEstimate);
    }
 }
