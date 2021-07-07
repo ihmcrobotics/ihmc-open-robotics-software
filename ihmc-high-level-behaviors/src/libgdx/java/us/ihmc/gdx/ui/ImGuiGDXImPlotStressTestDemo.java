@@ -1,24 +1,10 @@
 package us.ihmc.gdx.ui;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
-import imgui.type.ImInt;
-import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
-import us.ihmc.avatar.logging.PlanarRegionsListBuffer;
-import us.ihmc.avatar.logging.PlanarRegionsListLogger;
-import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.yoVariables.buffer.YoBuffer;
-import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,14 +18,14 @@ public class ImGuiGDXImPlotStressTestDemo //Seizure warning - this stress test g
 
    private AtomicInteger numPlotsToShow = new AtomicInteger(50);
 
-   private final Timer t = new Timer();
+   private final Timer timer = new Timer();
 
    private final Double[] xs = new Double[500];
    private final Double[] ys = new Double[500];
 
-   private final Random rand = new Random();
+   private final Random random = new Random();
 
-   private boolean recalc = true;
+   private boolean recalculate = true;
 
    public ImGuiGDXImPlotStressTestDemo()
    {
@@ -57,7 +43,7 @@ public class ImGuiGDXImPlotStressTestDemo //Seizure warning - this stress test g
             baseUI.create();
             ImPlot.createContext();
 
-            t.scheduleAtFixedRate(new TimerTask()
+            timer.scheduleAtFixedRate(new TimerTask()
             {
                @Override
                public void run()
@@ -66,12 +52,12 @@ public class ImGuiGDXImPlotStressTestDemo //Seizure warning - this stress test g
                }
             }, 1000, 1500);
 
-            t.scheduleAtFixedRate(new TimerTask()
+            timer.scheduleAtFixedRate(new TimerTask()
             {
                @Override
                public void run()
                {
-                  recalc = true;
+                  recalculate = true;
                }
             }, 0, 50);
          }
@@ -82,12 +68,14 @@ public class ImGuiGDXImPlotStressTestDemo //Seizure warning - this stress test g
             baseUI.renderBeforeOnScreenUI();
             ImGui.begin(WINDOW_NAME);
 
-            if (recalc) {
-               for (int i = 0; i < 500; i++) {
-                  xs[i] = rand.nextInt(500) + rand.nextDouble();
-                  ys[i] = rand.nextInt(500) + rand.nextDouble();
+            if (recalculate)
+            {
+               for (int i = 0; i < 500; i++)
+               {
+                  xs[i] = random.nextInt(500) + random.nextDouble();
+                  ys[i] = random.nextInt(500) + random.nextDouble();
                }
-               recalc = false;
+               recalculate = false;
             }
 
             int max = numPlotsToShow.get();
@@ -96,16 +84,16 @@ public class ImGuiGDXImPlotStressTestDemo //Seizure warning - this stress test g
                if (i % 8 != 0)
                   ImGui.sameLine();
 
-               ImPlot.pushColormap(rand.nextInt(16));
+               ImPlot.pushColormap(random.nextInt(16));
                if (ImPlot.beginPlot("Plot " + i, "X", "Y", new ImVec2(225, 150)))
                {
-                  if (rand.nextBoolean())
+                  if (random.nextBoolean())
                      ImPlot.plotLine("line" + i, xs, ys);
-                  if (rand.nextBoolean())
+                  if (random.nextBoolean())
                      ImPlot.plotBars("bars" + i, xs, ys);
-                  if (rand.nextBoolean())
+                  if (random.nextBoolean())
                      ImPlot.plotScatter("bars" + i, xs, ys);
-                  if (rand.nextBoolean())
+                  if (random.nextBoolean())
                      ImPlot.plotBarsH("bars" + i, xs, ys);
 
                   ImPlot.endPlot();

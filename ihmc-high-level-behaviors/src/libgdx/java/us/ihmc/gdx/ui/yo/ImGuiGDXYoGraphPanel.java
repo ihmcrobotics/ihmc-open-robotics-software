@@ -160,14 +160,16 @@ public class ImGuiGDXYoGraphPanel
       return output;
    }
 
-   public void renderImGuiWidgetsVariablePanel() {
-      if (graphRequesting == null) {
+   public void renderImGuiWidgetsVariablePanel()
+   {
+      if (graphRequesting == null)
+      {
          ImGui.text("Select a graph by right clicking it to add a variable.");
          return;
       }
 
-      List<YoVariable> vars = getAllVariables(registry);
-      vars.sort(Comparator.comparing(YoVariable::getName));
+      List<YoVariable> variables = getAllVariables(registry);
+      variables.sort(Comparator.comparing(YoVariable::getName));
 
       ImGui.inputText("Variable Search", searchBar);
 
@@ -181,7 +183,7 @@ public class ImGuiGDXYoGraphPanel
 
       if (ImGui.beginListBox("##YoVariables", ImGui.getColumnWidth(), ImGui.getWindowSizeY() - 100))
       {
-         for (YoVariable variable : vars)
+         for (YoVariable variable : variables)
          {
             if (!variable.getName().toLowerCase().contains(searchBar.get().toLowerCase()))
                continue;
@@ -229,13 +231,13 @@ public class ImGuiGDXYoGraphPanel
 
       synchronized (graphs)
       {
-         Iterator<GDXYoGraphRunnable> graphsIt = graphs.iterator();
-         while (graphsIt.hasNext())
+         Iterator<GDXYoGraphRunnable> graphsIterator = graphs.iterator();
+         while (graphsIterator.hasNext())
          {
-            GDXYoGraphRunnable graph = graphsIt.next();
+            GDXYoGraphRunnable graph = graphsIterator.next();
             graph.run();
             if (!graph.shouldGraphExist())
-               graphsIt.remove();
+               graphsIterator.remove();
             else if (graph.graphWantsVariable())
             {
                showAllVariables.set(true);
