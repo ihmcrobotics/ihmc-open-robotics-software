@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logging;
 
 import org.apache.commons.io.IOUtils;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -15,17 +16,18 @@ public class PlanarRegionsListBuffer
    private int buffer_length;
    private HashMap<Integer, Container> indexBuffer;
    private TreeSet<Container> timeBuffer;
+   private long firstEverTime = Long.MAX_VALUE;
 
    private int index = 0;
-   private long start_time;
-   private long end_time;
 
-   private static class Container {
+   private static class Container
+   {
       private PlanarRegionsList list;
       private long time;
       private int index;
 
-      Container(int index, long time, PlanarRegionsList list) {
+      Container(int index, long time, PlanarRegionsList list)
+      {
          this.list = list;
          this.index = index;
          this.time = time;
@@ -86,14 +88,18 @@ public class PlanarRegionsListBuffer
          indexBuffer.put(index, container);
          timeBuffer.add(container);
 
+         firstEverTime = getStartTime();
+
          index++;
       }
 
       if (buffer_length < indexBuffer.size())
          buffer_length = indexBuffer.size();
 
-      start_time = timeBuffer.first().getTime();
-      end_time = timeBuffer.last().getTime();
+      if (buffer_length <= 0)
+      {
+         LogTools.warn("Loaded empty log into PlanarRegionsListBuffer");
+      }
    }
 
    public PlanarRegionsListBuffer(File planarRegionListLog) throws IOException
@@ -135,10 +141,8 @@ public class PlanarRegionsListBuffer
          timeBuffer.remove(timeBuffer.first());
       }
 
-      if (time < start_time)
-         start_time = time;
-      else if (time > end_time)
-         end_time = time;
+      if (time < firstEverTime)
+         firstEverTime = time;
 
       index++;
    }
@@ -157,12 +161,14 @@ public class PlanarRegionsListBuffer
 
       Container value;
 
-      if (lower == null) {
+      if (lower == null)
+      {
          if (higher == null)
             return null;
          else
             value = higher;
-      } else if (higher == null)
+      }
+      else if (higher == null)
          value = lower;
       else if (Math.abs(lower.getTime() - time) > Math.abs(higher.getTime() - time))
          value = higher;
@@ -172,12 +178,14 @@ public class PlanarRegionsListBuffer
       return value;
    }
 
-   public PlanarRegionsList getNearTime(long time) {
+   public PlanarRegionsList getNearTime(long time)
+   {
       Container c = getNearTimeInternal(time);
       return c != null ? c.getList() : null;
    }
 
-   public long getNextTime(long currentTime) {
+   public long getNextTime(long currentTime)
+   {
       if (indexBuffer.size() < 1)
          return -1;
 
@@ -186,7 +194,8 @@ public class PlanarRegionsListBuffer
       return container == null ? Long.MAX_VALUE : container.getTime();
    }
 
-   public long getPreviousTime(long currentTime) {
+   public long getPreviousTime(long currentTime)
+   {
       if (indexBuffer.size() < 1)
          return -1;
 
@@ -205,13 +214,24 @@ public class PlanarRegionsListBuffer
       return buffer_length;
    }
 
+   public long getFirstEverTime()
+   {
+      return firstEverTime;
+   }
+
    public long getStartTime()
    {
-      return start_time;
+      if (timeBuffer.size() == 0)
+         return -1;
+
+      return timeBuffer.first().getTime();
    }
 
    public long getEndTime()
    {
-      return end_time;
+      if (timeBuffer.size() == 0)
+         return -1;
+
+      return timeBuffer.last().getTime();
    }
 }
