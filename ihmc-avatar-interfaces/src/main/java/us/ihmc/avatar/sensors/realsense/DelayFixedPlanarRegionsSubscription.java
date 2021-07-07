@@ -3,6 +3,7 @@ package us.ihmc.avatar.sensors.realsense;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jfree.util.Log;
 import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -53,7 +54,7 @@ public class DelayFixedPlanarRegionsSubscription
    private final ROS2NodeInterface ros2Node;
    private final DRCRobotModel robotModel;
    private final String topic;
-   private final Consumer<PlanarRegionsList> callback;
+   private final Consumer<Pair<Long, PlanarRegionsList>> callback;
    private final MutableDouble delayOffset = new MutableDouble(INITIAL_DELAY_OFFSET);
    private final FullHumanoidRobotModel fullRobotModel;
    private final RobotROSClockCalculator rosClockCalculator;
@@ -72,7 +73,7 @@ public class DelayFixedPlanarRegionsSubscription
    public DelayFixedPlanarRegionsSubscription(ROS2NodeInterface ros2Node,
                                               DRCRobotModel robotModel,
                                               String topic,
-                                              Consumer<PlanarRegionsList> callback)
+                                              Consumer<Pair<Long, PlanarRegionsList>> callback)
    {
       this.ros2Node = ros2Node;
       this.robotModel = robotModel;
@@ -203,7 +204,7 @@ public class DelayFixedPlanarRegionsSubscription
                {
                   LogTools.error(e.getMessage());
                }
-               callback.accept(planarRegionsList);
+               callback.accept(Pair.of(currentTimeInWall, planarRegionsList));
             }
          });
       }

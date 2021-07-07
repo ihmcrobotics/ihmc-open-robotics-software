@@ -1,6 +1,7 @@
 package us.ihmc.avatar.sensors.realsense;
 
 import map_sense.RawGPUPlanarRegionList;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -23,7 +24,7 @@ public class MapsenseTools
 
    public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(ROS2NodeInterface ros2Node,
                                                                                                    DRCRobotModel robotModel,
-                                                                                                   Consumer<PlanarRegionsList> callback)
+                                                                                                   Consumer<Pair<Long, PlanarRegionsList>> callback)
    {
       return subscribeToPlanarRegionsWithDelayCompensation(ros2Node, robotModel, RosTools.MAPSENSE_REGIONS, callback);
    }
@@ -31,7 +32,7 @@ public class MapsenseTools
    public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(ROS2NodeInterface ros2Node,
                                                                                                    DRCRobotModel robotModel,
                                                                                                    String topic,
-                                                                                                   Consumer<PlanarRegionsList> callback)
+                                                                                                   Consumer<Pair<Long, PlanarRegionsList>> callback)
    {
       return new DelayFixedPlanarRegionsSubscription(ros2Node, robotModel, topic, callback);
    }
