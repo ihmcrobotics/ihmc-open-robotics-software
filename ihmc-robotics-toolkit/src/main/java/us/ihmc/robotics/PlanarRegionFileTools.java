@@ -471,17 +471,20 @@ public class PlanarRegionFileTools
       float zOrigin = Float.parseFloat(values[i++]);
       originToPack.set(xOrigin, yOrigin, zOrigin);
 
-      double xOrientation = Double.parseDouble(values[i++]);
-      double yOrientation = Double.parseDouble(values[i++]);
-      double zOrientation = Double.parseDouble(values[i++]);
       if (version2)
       {
+         double xOrientation = Double.parseDouble(values[i++]);
+         double yOrientation = Double.parseDouble(values[i++]);
+         double zOrientation = Double.parseDouble(values[i++]);
          double angleOrientation = Double.parseDouble(values[i++]);
          orientationToPack.set(xOrientation, yOrientation, zOrientation, angleOrientation);
       }
       else
       {
-         orientationToPack.set(EuclidGeometryTools.axisAngleFromZUpToVector3D(new Vector3D(xOrientation, yOrientation, zOrientation)));
+         float xNormal = Float.parseFloat(values[i++]);
+         float yNormal = Float.parseFloat(values[i++]);
+         float zNormal = Float.parseFloat(values[i++]);
+         orientationToPack.set(EuclidGeometryTools.axisAngleFromZUpToVector3D(new Vector3D(xNormal, yNormal, zNormal)));
       }
 
       concaveHullSizeToPack.setValue(Integer.parseInt(values[i++]));
