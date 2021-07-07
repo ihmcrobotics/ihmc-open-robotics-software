@@ -123,11 +123,13 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
                  });
    }
 
-   private float getFloatSecondsFromNanos(long nanos, long startTime) {
-      return (float)Conversions.nanosecondsToSeconds(nanos - startTime);
+   private float getFloatSecondsFromNanos(long nanos, long startTime)
+   {
+      return (float) Conversions.nanosecondsToSeconds(nanos - startTime);
    }
 
-   private long getNanosFromFloatSeconds(float seconds, long startTime) {
+   private long getNanosFromFloatSeconds(float seconds, long startTime)
+   {
       return Conversions.secondsToNanoseconds(seconds) + startTime;
    }
 
@@ -140,20 +142,22 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       ImGui.text("Current session's regions buffer:");
       ImGui.checkbox("Show##1", showRealtime);
       ImGui.sameLine();
-      if (ImGui.button("Clear")) {
+      if (ImGui.button("Clear"))
+      {
          realtimeBuffer = new PlanarRegionsListBuffer(REALTIME_BUFFER_LEN);
       }
       ImGui.sameLine();
       ImGui.checkbox("Enable", enableRealtime);
       boolean realtime = ImGui.sliderFloat("Time:##realtimeSlider",
-                                         timeRealtimeFloat.getData(),
-                                         realtimeBuffer.getStartTime() == -1 ? 0 : getFloatSecondsFromNanos(realtimeBuffer.getStartTime(), realtimeStartTime),
+                                           timeRealtimeFloat.getData(),
+                                           realtimeBuffer.getStartTime() == -1 ? 0 : getFloatSecondsFromNanos(realtimeBuffer.getStartTime(), realtimeStartTime),
                                            realtimeBuffer.getEndTime() == -1 ? 0 : getFloatSecondsFromNanos(realtimeBuffer.getEndTime(), realtimeStartTime),
-                                         "");
+                                           "");
       ImGui.sameLine();
       realtime |= ImGui.inputFloat("##realtimeInput", timeRealtimeFloat);
 
-      if (realtime) {
+      if (realtime)
+      {
          timeRealtime = getNanosFromFloatSeconds(timeRealtimeFloat.get(), realtimeStartTime);
       }
 
@@ -210,7 +214,13 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       ImGui.checkbox("Show regions from log##2", showLog);
       if (logBuffer != null)
       {
-         boolean log = ImGui.sliderFloat("Time:##logSlider", timeLogFloat.getData(), 0, logBuffer.getFirstEverTime() == Long.MAX_VALUE ? 0 : getFloatSecondsFromNanos(logBuffer.getEndTime(), logBuffer.getFirstEverTime()), "");
+         boolean log = ImGui.sliderFloat("Time:##logSlider",
+                                         timeLogFloat.getData(),
+                                         0,
+                                         logBuffer.getFirstEverTime() == Long.MAX_VALUE ?
+                                               0 :
+                                               getFloatSecondsFromNanos(logBuffer.getEndTime(), logBuffer.getFirstEverTime()),
+                                         "");
          ImGui.sameLine();
          log |= ImGui.inputFloat("##logInput", timeLogFloat);
 

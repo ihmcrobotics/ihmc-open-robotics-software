@@ -214,7 +214,8 @@ public class PlanarRegionsListBuffer
       return buffer_length;
    }
 
-   public long getFirstEverTime() {
+   public long getFirstEverTime()
+   {
       return firstEverTime;
    }
 
