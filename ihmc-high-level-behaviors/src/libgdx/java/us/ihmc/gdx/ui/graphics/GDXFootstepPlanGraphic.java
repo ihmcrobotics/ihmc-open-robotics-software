@@ -144,7 +144,7 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
          Mesh mesh = meshBuilder.generateMesh();
          MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
          Material material = new Material();
-         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+         Texture paletteTexture = GDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          float shade = 0.6f;
          material.set(ColorAttribute.createDiffuse(shade, shade, shade, 1.0f));

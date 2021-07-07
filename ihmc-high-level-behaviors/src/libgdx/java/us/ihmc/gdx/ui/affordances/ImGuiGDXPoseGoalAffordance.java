@@ -24,7 +24,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.gdx.imgui.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;

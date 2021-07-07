@@ -5,10 +5,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.gdx.imgui.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.GDXPose3DWidget;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,7 +16,7 @@ public class GDXPoseModifiableObject
 {
    private final static AtomicInteger INDEX = new AtomicInteger();
 
-   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget(getClass().getSimpleName() + INDEX.getAndIncrement());
+   private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo(getClass().getSimpleName() + INDEX.getAndIncrement());
    private boolean isSelected = false;
    private boolean showCollisionMesh = false;
    private GDXEnvironmentObject object;
@@ -25,9 +25,9 @@ public class GDXPoseModifiableObject
    public void create(GDXImGuiBasedUI baseUI, GDXEnvironmentObject object)
    {
       this.object = object;
-      pose3DWidget.create();
+      pose3DGizmo.create(baseUI.get3DSceneManager().getCamera3D());
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
-      object.set(pose3DWidget.getTransform());
+      object.set(pose3DGizmo.getTransform());
    }
 
    private void process3DViewInput(ImGui3DViewInput viewInput)
@@ -35,8 +35,8 @@ public class GDXPoseModifiableObject
       showCollisionMesh = false;
       if (isSelected)
       {
-         pose3DWidget.process3DViewInput(viewInput);
-         object.set(pose3DWidget.getTransform());
+         pose3DGizmo.process3DViewInput(viewInput);
+         object.set(pose3DGizmo.getTransform());
 
          if (viewInput.isWindowHovered()
           && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left)
@@ -55,7 +55,7 @@ public class GDXPoseModifiableObject
             if (viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && intesects)
             {
                isSelected = true;
-               pose3DWidget.getTransform().set(object.getObjectTransform());
+               pose3DGizmo.getTransform().set(object.getObjectTransform());
             }
          }
       }
@@ -66,7 +66,7 @@ public class GDXPoseModifiableObject
       if (showCollisionMesh)
          object.getCollisionModelInstance().getRenderables(renderables, pool);
       if (isSelected)
-         pose3DWidget.getRenderables(renderables, pool);
+         pose3DGizmo.getRenderables(renderables, pool);
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
