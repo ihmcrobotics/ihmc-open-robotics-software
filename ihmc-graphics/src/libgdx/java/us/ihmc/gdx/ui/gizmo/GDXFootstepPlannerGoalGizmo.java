@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
@@ -71,7 +72,6 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private boolean dragging = false;
-   private final String imGuiWindowName;
    private FocusBasedGDXCamera camera3D;
    private final Point3D cameraPosition = new Point3D();
    private double lastDistanceToCamera = -1.0;
@@ -79,9 +79,8 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private final Point3D dragPoint = new Point3D();
    private final Vector3D dragVector = new Vector3D();
 
-   public GDXFootstepPlannerGoalGizmo(String name)
+   public GDXFootstepPlannerGoalGizmo()
    {
-      imGuiWindowName = ImGuiTools.uniqueLabel("3D Widget (" + name + ")");
    }
 
    public void create(FocusBasedGDXCamera camera3D)
@@ -287,9 +286,13 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       negativeYArrowModel.setMaterial(closestCollisionSelection == 4 ? highlightedArrowMaterial : normalArrowMaterial);
    }
 
+   public ImGuiPanel createTunerPanel(String name)
+   {
+      return new ImGuiPanel("Footstep Ring Gizmo Tuner (" + name + ")", this::renderImGuiTuner);
+   }
+
    public void renderImGuiTuner()
    {
-      ImGui.begin(imGuiWindowName);
       ImGui.text("Use the right mouse button to manipulate the widget.");
 
       if (ImGui.button("Reset"))
@@ -309,8 +312,6 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 
       if (proportionsChanged)
          recreateGraphics();
-
-      ImGui.end();
 
       updateFromSourceTransform();
    }
