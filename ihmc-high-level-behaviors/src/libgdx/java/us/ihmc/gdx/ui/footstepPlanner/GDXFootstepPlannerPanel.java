@@ -30,7 +30,7 @@ import java.util.ArrayList;
 
 public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderableProvider
 {
-   private final GDXFootstepPlannerGoalGizmo goalGizmo = new GDXFootstepPlannerGoalGizmo(getClass().getSimpleName());
+   private final GDXFootstepPlannerGoalGizmo goalGizmo = new GDXFootstepPlannerGoalGizmo();
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final GDXFootstepGraphic leftStanceFootstepGraphic;
    private final GDXFootstepGraphic rightStanceFootstepGraphic;
@@ -61,6 +61,7 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       foostepPlanGraphic = new GDXFootstepPlanGraphic(contactPoints);
+      addChild(goalGizmo.createTunerPanel(getClass().getSimpleName()));
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -118,8 +119,6 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
       {
 
       }
-
-      goalGizmo.renderImGuiTuner();
    }
 
    @Override

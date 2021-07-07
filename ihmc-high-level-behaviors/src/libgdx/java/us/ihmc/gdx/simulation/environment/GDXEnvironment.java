@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -23,6 +22,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.GDXDoorSimulator;
@@ -38,14 +38,14 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.*;
 
-public class GDXEnvironment implements RenderableProvider
+public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironment.class, "Environment");
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
    private GDXEnvironmentObject selectedObject;
    private GDXEnvironmentObject intersectedObject;
-   private ImBoolean show3DWidgetTuner = new ImBoolean(false);
-   private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo(getClass().getSimpleName());
+   private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo();
+   private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
    private boolean placing = false;
    private boolean loadedFilesOnce = false;
    private Path selectedEnvironmentFile = null;
@@ -59,12 +59,16 @@ public class GDXEnvironment implements RenderableProvider
 
    public GDXEnvironment()
    {
-
+      this(null, null);
    }
 
    public GDXEnvironment(ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
    {
-      doorSimulator = new GDXDoorSimulator(syncedRobot, helper);
+      super(WINDOW_NAME);
+      if (syncedRobot != null)
+         doorSimulator = new GDXDoorSimulator(syncedRobot, helper);
+      setRenderMethod(this::renderImGuiWidgets);
+      addChild(poseGizmoTunerPanel);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -254,9 +258,7 @@ public class GDXEnvironment implements RenderableProvider
          reindexScripts();
       }
 
-      ImGui.checkbox("Show 3D Widget Tuner", show3DWidgetTuner);
-      if (show3DWidgetTuner.get())
-         pose3DGizmo.renderImGuiTuner();
+      ImGui.checkbox("Show 3D Widget Tuner", poseGizmoTunerPanel.getIsShowing());
 
       if (doorSimulator != null)
          doorSimulator.renderImGuiWidgets();
