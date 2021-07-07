@@ -41,7 +41,7 @@ public class GDXVRManager implements RenderableProvider
    private final Point3D resultVRSpacePosition = new Point3D();
    private final Point3D lastVRSpacePosition = new Point3D();
    private final ArrayList<Runnable> thingsToCreateOnEnable = new ArrayList<>();
-   private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo("VR Space");
+   private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo();
 
    public void create(FocusBasedGDXCamera camera3D)
    {

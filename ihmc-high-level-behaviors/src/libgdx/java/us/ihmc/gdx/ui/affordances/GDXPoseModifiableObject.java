@@ -16,7 +16,7 @@ public class GDXPoseModifiableObject
 {
    private final static AtomicInteger INDEX = new AtomicInteger();
 
-   private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo(getClass().getSimpleName() + INDEX.getAndIncrement());
+   private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo();
    private boolean isSelected = false;
    private boolean showCollisionMesh = false;
    private GDXEnvironmentObject object;
