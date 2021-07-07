@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui;
+package us.ihmc.gdx.ui.gizmo;
 
 import us.ihmc.euclid.Axis3D;
 

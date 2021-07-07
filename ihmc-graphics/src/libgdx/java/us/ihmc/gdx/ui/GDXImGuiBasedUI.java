@@ -19,6 +19,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.input.GDXInputMode;
+import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -153,7 +154,7 @@ public class GDXImGuiBasedUI
 
    private void enableVR()
    {
-      vrManager.create();
+      vrManager.create(sceneManager.getCamera3D());
       sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
       addImGui3DViewInputProcessor(vrManager::process3DViewInput);
    }
