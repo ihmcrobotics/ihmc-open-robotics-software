@@ -382,4 +382,9 @@ public class GDXPose3DGizmo implements RenderableProvider
 
       return meshBuilder.generateMeshDataHolder();
    }
+
+   public void setResizeAutomatically(boolean resizeAutomatically)
+   {
+      this.resizeAutomatically.set(resizeAutomatically);
+   }
 }
