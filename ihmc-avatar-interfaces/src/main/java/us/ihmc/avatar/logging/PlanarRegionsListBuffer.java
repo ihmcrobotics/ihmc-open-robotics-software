@@ -16,6 +16,7 @@ public class PlanarRegionsListBuffer
    private int buffer_length;
    private HashMap<Integer, Container> indexBuffer;
    private TreeSet<Container> timeBuffer;
+   private long firstEverTime = Long.MAX_VALUE;
 
    private int index = 0;
 
@@ -87,6 +88,8 @@ public class PlanarRegionsListBuffer
          indexBuffer.put(index, container);
          timeBuffer.add(container);
 
+         firstEverTime = getStartTime();
+
          index++;
       }
 
@@ -137,6 +140,9 @@ public class PlanarRegionsListBuffer
          indexBuffer.remove(index - buffer_length);
          timeBuffer.remove(timeBuffer.first());
       }
+
+      if (time < firstEverTime)
+         firstEverTime = time;
 
       index++;
    }
@@ -206,6 +212,10 @@ public class PlanarRegionsListBuffer
    public int getBufferLength()
    {
       return buffer_length;
+   }
+
+   public long getFirstEverTime() {
+      return firstEverTime;
    }
 
    public long getStartTime()
