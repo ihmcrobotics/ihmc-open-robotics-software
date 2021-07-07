@@ -6,16 +6,22 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
+import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -35,6 +41,8 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
    private final FramePose3D leftGoalFootPose = new FramePose3D();
    private final FramePose3D rightGoalFootPose = new FramePose3D();
    private final ReferenceFrame goalFrame;
+   private final FootstepPlanningModule footstepPlanner;
+   private final GDXFootstepPlanGraphic foostepPlanGraphic;
    private double halfIdealFootstepWidth;
 
    public GDXFootstepPlannerPanel(DRCRobotModel robotModel)
@@ -50,6 +58,9 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
       rightGoalFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
 
       goalFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("goalPose", ReferenceFrame.getWorldFrame(), goalGizmo.getTransform());
+
+      footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
+      foostepPlanGraphic = new GDXFootstepPlanGraphic(contactPoints);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -80,6 +91,25 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
       rightGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       leftGoalFootstepGraphic.setPose(leftGoalFootPose);
       rightGoalFootstepGraphic.setPose(rightGoalFootPose);
+
+      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+      footstepPlannerRequest.setPlanBodyPath(false);
+      footstepPlannerRequest.setStartFootPoses(leftStanceFootPose, rightStanceFootPose);
+      footstepPlannerRequest.setGoalFootPoses(leftGoalFootPose, rightGoalFootPose);
+      footstepPlannerRequest.setAssumeFlatGround(true);
+      try
+      {
+         FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
+         if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() > 0)
+         {
+            foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "plan"));
+         }
+      }
+      catch (RuntimeException e)
+      {
+
+      }
+      foostepPlanGraphic.update();
    }
 
    private void renderImGuiWidgets()
@@ -100,5 +130,11 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
       rightStanceFootstepGraphic.getRenderables(renderables, pool);
       leftGoalFootstepGraphic.getRenderables(renderables, pool);
       rightGoalFootstepGraphic.getRenderables(renderables, pool);
+      foostepPlanGraphic.getRenderables(renderables, pool);
+   }
+
+   public void destroy()
+   {
+      foostepPlanGraphic.destroy();
    }
 }
