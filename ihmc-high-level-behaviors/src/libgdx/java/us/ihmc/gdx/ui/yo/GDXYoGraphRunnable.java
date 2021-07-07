@@ -97,12 +97,12 @@ public class GDXYoGraphRunnable implements Runnable
       {
          ImPlot.setLegendLocation(ImPlotLocation.SouthWest, ImPlotOrientation.Horizontal, true);
 
-         Iterator<YoVariable> itVar = variables.iterator();
+         Iterator<YoVariable> iteratorVariable = variables.iterator();
          Iterator<Double[]> itVal = values.iterator();
          boolean showingLegendPopup = false;
-         while (itVar.hasNext())
+         while (iteratorVariable.hasNext())
          {
-            YoVariable variable = itVar.next();
+            YoVariable variable = iteratorVariable.next();
             Double[] varValues = itVal.next();
             varValues[currentValueIndex] = variable.getValueAsDouble();
             Double[] data = ImPlotTools.removeNullElements(varValues);
@@ -119,14 +119,15 @@ public class GDXYoGraphRunnable implements Runnable
                }
                if (ImGui.button("Stop tracking variable##" + variable.getName()))
                {
-                  itVar.remove();
+                  iteratorVariable.remove();
                   itVal.remove();
                }
                ImPlot.endLegendPopup();
             }
          }
 
-         if (!showingLegendPopup && ImGui.beginPopupContextWindow()) {
+         if (!showingLegendPopup && ImGui.beginPopupContextWindow())
+         {
             if (ImGui.button("Add a variable...##" + plotID))
             {
                requestAddVariable = true;
