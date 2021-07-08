@@ -16,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  *
  * <pre>
  * xDot_est^{n+1}  = xDot_meas + xDot_bias^{n}
- * x_prediction    = x_est^{n} + xDot_est^{n+1} * dt
+ * x_prediction    = x_est^{n} + 0.5 * (xDot_est^{n} + xDot_est^{n+1}) * dt
  * x_error         = x_meas - x_pred
  * x_est^{n+1}     = x_prediction + kp * x_error
  * xDot_bias^{n+1} = xDot_bias^{n} + ki * x_error
