@@ -6,7 +6,9 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 
@@ -31,12 +33,16 @@ public class IntegratorBiasCompensatorYoFrameVector3DTest
                + "]", null, kp, ki, () -> position.getElement(axisFinal), () -> rate.getElement(axisFinal), dt);
       }
 
+      ReferenceFrame biasFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("biasFrame",
+                                                                                                   ReferenceFrame.getWorldFrame(),
+                                                                                                   EuclidCoreRandomTools.nextRigidBodyTransform(random));
       IntegratorBiasCompensatorYoFrameVector3D threeDimensionFilter = new IntegratorBiasCompensatorYoFrameVector3D("filter3D",
                                                                                                                    null,
                                                                                                                    kp,
                                                                                                                    ki,
                                                                                                                    position,
                                                                                                                    rate,
+                                                                                                                   biasFrame,
                                                                                                                    dt);
 
       for (int i = 0; i < 5000; i++)
@@ -50,6 +56,8 @@ public class IntegratorBiasCompensatorYoFrameVector3DTest
          }
 
          threeDimensionFilter.update();
+         FrameVector3D bias = new FrameVector3D(threeDimensionFilter.getBiasEstimation());
+         bias.changeFrame(ReferenceFrame.getWorldFrame());
 
          double epsilon = 1.0e-12;
 
@@ -58,7 +66,7 @@ public class IntegratorBiasCompensatorYoFrameVector3DTest
             IntegratorBiasCompensatorYoVariable oneDimensionFilter = oneDimensionFilters[axis];
 
             assertEquals(oneDimensionFilter.getValue(), threeDimensionFilter.getElement(axis), epsilon);
-            assertEquals(oneDimensionFilter.getBiasEstimation().getValue(), threeDimensionFilter.getBiasEstimation().getElement(axis), epsilon);
+            assertEquals(oneDimensionFilter.getBiasEstimation().getValue(), bias.getElement(axis), epsilon);
             assertEquals(oneDimensionFilter.getRateEstimation().getValue(), threeDimensionFilter.getRateEstimation().getElement(axis), epsilon);
          }
       }
