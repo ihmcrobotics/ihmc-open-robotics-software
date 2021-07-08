@@ -33,8 +33,9 @@ public class IntegratorBiasCompensatorYoVariable extends YoDouble implements Pro
    private final DoubleProvider kp, ki;
    private final DoubleProvider rawPosition;
    private final DoubleProvider rawRate;
-   private final YoDouble error, biasEstimate;
+   private final YoDouble error;
    private final YoDouble estimatedRate;
+   private final YoDouble estimatedRateBias;
    private final YoBoolean hasBeenCalled;
 
    public static DoubleProvider createKpYoDouble(String namePrefix, double initialValue, YoRegistry registry)
@@ -77,8 +78,8 @@ public class IntegratorBiasCompensatorYoVariable extends YoDouble implements Pro
       this.rawPosition = rawPositionVariable;
       this.rawRate = rawRateVariable;
       this.error = new YoDouble(name + "PositionError", registry);
-      this.biasEstimate = new YoDouble(name + "BiasEstimate", registry);
       this.estimatedRate = new YoDouble(name + "EstimatedRate", registry);
+      this.estimatedRateBias = new YoDouble(name + "EstimatedRateBias", registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
       reset();
    }
@@ -101,7 +102,7 @@ public class IntegratorBiasCompensatorYoVariable extends YoDouble implements Pro
 
    public YoDouble getBiasEstimation()
    {
-      return biasEstimate;
+      return estimatedRateBias;
    }
 
    @Override
@@ -118,20 +119,20 @@ public class IntegratorBiasCompensatorYoVariable extends YoDouble implements Pro
          set(rawPosition);
          estimatedRate.set(rawRate);
          error.set(0.0);
-         biasEstimate.set(0.0);
+         estimatedRateBias.set(0.0);
          return;
       }
 
       double x_filt = this.getValue();
 
-      double xd_filt_new = rawRate + biasEstimate.getValue();
+      double xd_filt_new = rawRate + estimatedRateBias.getValue();
       double xd_filt_old = estimatedRate.getValue();
       double x_pred = x_filt + 0.5 * (xd_filt_old + xd_filt_new) * dt;
       double error = rawPosition - x_pred;
       x_filt = x_pred + kp.getValue() * error;
       this.error.set(error);
-      biasEstimate.add(ki.getValue() * error);
-      estimatedRate.set(rawRate + biasEstimate.getValue());
+      estimatedRateBias.add(ki.getValue() * error);
+      estimatedRate.set(rawRate + estimatedRateBias.getValue());
       set(x_filt);
    }
 }

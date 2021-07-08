@@ -115,6 +115,31 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    /** The smaller the value, the more it trusts the IMU **/
    public abstract double getPelvisLinearVelocityFusingFrequency();
 
+   public boolean usePelvisLinearStateNewFusingFilter()
+   {
+      return false;
+   }
+
+   public double getPelvisPositionNewFusingFilterKp()
+   {
+      return 0.1;
+   }
+   
+   public double getPelvisPositionNewFusingFilterKi()
+   {
+      return 1.0e-3;
+   }
+   
+   public double getPelvisLinearVelocityNewFusingFilterKp()
+   {
+      return 0.1;
+   }
+   
+   public double getPelvisLinearVelocityNewFusingFilterKi()
+   {
+      return 1.0e-3;
+   }
+
    /** The smaller the value, the more it trusts the IMU **/
    public abstract double getCenterOfMassVelocityFusingFrequency();
 
