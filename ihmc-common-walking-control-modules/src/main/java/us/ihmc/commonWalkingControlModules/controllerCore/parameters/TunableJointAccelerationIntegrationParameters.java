@@ -113,7 +113,7 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
             + VELOCITY_INTEGRATION_MAX_ERROR_NAME, registry, maxVelocityError, 0.0, SUGGESTED_MAXIMUM_VELOCITY);
       this.velocityReferenceAlpha = new DoubleParameter(namePrefix + VELOCITY_REFERENCE_ALPHA_NAME, registry, velocityReferenceAlpha, 0.0, 1.0);
       this.velocityResetMode = new EnumParameter<>(namePrefix
-            + VELOCITY_RESET_MODE_NAME, registry, JointVelocityIntegratorResetMode.class, false, velocityResetMode);
+            + VELOCITY_RESET_MODE_NAME, registry, JointVelocityIntegratorResetMode.class, true, velocityResetMode);
    }
 
    /** {@inheritDoc} */
