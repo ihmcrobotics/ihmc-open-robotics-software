@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameEllipsoid3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -177,6 +178,12 @@ public class ValkyrieSDFLoadingDemo
          PointShape3DReadOnly pointShape = (PointShape3DReadOnly) shape;
          graphics.translate(pointShape);
          graphics.addSphere(0.01, appearance);
+      }
+      else if (shape instanceof FrameEllipsoid3DReadOnly)
+      {
+         FrameEllipsoid3DReadOnly ellipsoidShape = (FrameEllipsoid3DReadOnly) shape;
+         graphics.transform(new RigidBodyTransform(ellipsoidShape.getPose()));
+         graphics.addEllipsoid(ellipsoidShape.getRadiusX(), ellipsoidShape.getRadiusY(), ellipsoidShape.getRadiusZ(), appearance);
       }
       else
       {
