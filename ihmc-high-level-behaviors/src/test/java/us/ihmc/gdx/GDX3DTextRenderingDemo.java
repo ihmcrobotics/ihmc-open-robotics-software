@@ -1,6 +1,5 @@
 package us.ihmc.gdx;
 
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.BoxesDemoModel;
@@ -11,9 +10,10 @@ public class GDX3DTextRenderingDemo
    public GDX3DTextRenderingDemo()
    {
       GDX3DSceneManager sceneManager = new GDX3DSceneManager();
-      //GDXTextRenderer textRenderer = new GDXTextRenderer();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
+         private GDXTextObject text;
+
          @Override
          public void create()
          {
@@ -22,18 +22,18 @@ public class GDX3DTextRenderingDemo
             sceneManager.addCoordinateFrame(0.3);
             sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
 
-            //textRenderer.create();
-            //sceneManager.addRenderableProvider(textRenderer);
+            text = new GDXTextObject("test");
+            sceneManager.addRenderableProvider(text);
          }
 
          @Override
          public void render()
          {
-            //textRenderer.setTextAtPosition(new Point3D(0.5, 0.5, 0.5), "Text rendering demo (very cool)");
-
             GDX3DSceneTools.glClearGray();
-            //textRenderer.update();
             sceneManager.setViewportBoundsToWindow();
+
+            text.modelInstance.transform.rotate(0, 0, 1, 1);
+
             sceneManager.render();
          }
       }, "GDX3DDemo", 1100, 800);

@@ -4,12 +4,17 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.lwjgl.opengl.GL30;
 import us.ihmc.log.LogTools;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -79,7 +84,8 @@ public class GDXTextObject implements RenderableProvider
       Texture texture;
       try
       {
-         File temp = File.createTempFile("GDXTextObject", "png");
+         File temp = File.createTempFile("GDXTextObject", ".png");
+         ImageIO.write(image, "png", temp);
          texture = new Texture(new FileHandle(temp));
       } catch (IOException ex) {
          LogTools.error("Could not create model for GDXTextObject");
@@ -87,10 +93,17 @@ public class GDXTextObject implements RenderableProvider
 
          return null;
       }
-      Material material = new Material(TextureAttribute.createDiffuse(texture));
+      Material material = new Material(TextureAttribute.createDiffuse(texture),
+                                       ColorAttribute.createSpecular(1, 1, 1, 1),
+                                       new BlendingAttribute(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA));
       long attributes = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates;
 
-      return BUILDER.createBox(width, height, 1.0f, material, attributes);
+      return BUILDER.createRect(0, 0, 0,
+                                width, 0, 0,
+                                width, height, 0,
+                                0, height, 0,
+                                0, 0, 1,
+                                material, attributes);
    }
 
    private static Model getModel(String text) {
