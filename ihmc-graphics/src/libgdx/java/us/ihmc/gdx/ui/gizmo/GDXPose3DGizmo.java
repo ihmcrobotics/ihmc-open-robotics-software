@@ -61,7 +61,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final DynamicGDXModel[] torusModels = new DynamicGDXModel[3];
    private final Point3D closestCollision = new Point3D();
    private SixDoFSelection closestCollisionSelection;
-   private final BoundingSphereIntersection boundingSphereIntersection = new BoundingSphereIntersection();
+   private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
    private final Pose3D pose = new Pose3D();

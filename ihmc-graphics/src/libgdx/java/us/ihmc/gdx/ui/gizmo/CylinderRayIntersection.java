@@ -12,6 +12,12 @@ public class CylinderRayIntersection
    private final Point3D firstIntersectionToPack = new Point3D();
    private final Point3D secondIntersectionToPack = new Point3D();
 
+   public void setup(double length, double radius)
+   {
+      cylinder.setToZero();
+      cylinder.setSize(length, radius);
+   }
+
    public void setup(double length, double radius, double zOffset, RigidBodyTransformReadOnly transform)
    {
       cylinder.setToZero();

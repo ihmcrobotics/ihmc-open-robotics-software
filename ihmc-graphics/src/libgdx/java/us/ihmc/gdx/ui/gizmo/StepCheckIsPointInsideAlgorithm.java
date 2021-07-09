@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 public class StepCheckIsPointInsideAlgorithm
 {
-   private final BoundingSphereIntersection boundingSphereIntersection = new BoundingSphereIntersection();
+   private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
    private final Point3D interpolatedPoint = new Point3D();
 
    public void setup(double radius, RigidBodyTransformReadOnly transform)

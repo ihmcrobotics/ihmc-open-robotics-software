@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -70,6 +71,19 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
       {
          collisionLink.update();
+      }
+   }
+
+   // This happens after update.
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
+      {
+         collisionLink.process3DViewInput(input);
+      }
+      for (GDXRobotCollisionLink collisionLink : environmentCollisionLinks)
+      {
+         collisionLink.process3DViewInput(input);
       }
    }
 
