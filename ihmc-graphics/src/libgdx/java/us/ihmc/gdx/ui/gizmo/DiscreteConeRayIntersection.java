@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 
 public class DiscreteConeRayIntersection
 {
-   private final BoundingSphereIntersection boundingSphereIntersection = new BoundingSphereIntersection();
+   private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
    private final Plane3D coneBasePlaneFacingTip = new Plane3D();
    private final Plane3D coneTipPlaneFacingBase = new Plane3D();
    private final Line3D coneBaseTowardsTipAxis = new Line3D();
