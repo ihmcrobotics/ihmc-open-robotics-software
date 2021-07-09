@@ -7,15 +7,12 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.physics.Collidable;
@@ -23,18 +20,13 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXRobotCollisionLink implements RenderableProvider
 {
-   private static final Color COLOR = GDXTools.toGDX(YoAppearance.DarkGreen());
-   static
-   {
-      COLOR.a = 0.5f;
-   }
    private final ReferenceFrame shapeFrame;
    private final ModelInstance modelInstance;
    private final RigidBodyTransform transformToJoint;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ReferenceFrame collisionMeshFrame;
 
-   public GDXRobotCollisionLink(Collidable collidable)
+   public GDXRobotCollisionLink(Collidable collidable, Color color)
    {
       Shape3DReadOnly shape = collidable.getShape();
       shapeFrame = collidable.getShape().getReferenceFrame();
@@ -50,7 +42,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
          if (shape instanceof Sphere3DReadOnly)
          {
             Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
-            meshBuilder.addSphere((float) sphere.getRadius(), sphere.getPosition(), COLOR);
+            meshBuilder.addSphere((float) sphere.getRadius(), sphere.getPosition(), color);
          }
          else if (shape instanceof Capsule3DReadOnly)
          {
@@ -65,7 +57,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
                                    capsule.getRadius(),
                                    50,
                                    50,
-                                   COLOR);
+                                   color);
          }
          else if (shape instanceof Box3DReadOnly)
          {
@@ -75,19 +67,19 @@ public class GDXRobotCollisionLink implements RenderableProvider
             meshBuilder.addBox(box.getSizeX(),
                                box.getSizeY(),
                                box.getSizeZ(),
-                               COLOR);
+                               color);
          }
          else if (shape instanceof PointShape3DReadOnly)
          {
             PointShape3DReadOnly pointShape = (PointShape3DReadOnly) shape;
-            meshBuilder.addSphere((float) 0.01, pointShape, COLOR);
+            meshBuilder.addSphere((float) 0.01, pointShape, color);
          }
          else
          {
             LogTools.warn("Shape not handled: {}", shape);
          }
       }, collidable.getRigidBody().getName());
-      GDXTools.setTransparency(modelInstance, COLOR.a);
+      GDXTools.setTransparency(modelInstance, color.a);
    }
 
    public void update()
