@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,9 +70,9 @@ public class DCMPositionCommandTest
       FramePoint3D solvedPositionAtConstraint = new FramePoint3D();
       FramePoint3D solvedObjectivePositionTuple = new FramePoint3D();
       DMatrixRMaj rhoValueVector = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
-      DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
+      NativeMatrix solvedObjectivePosition = new NativeMatrix(3, 1);
 
-      DMatrixRMaj solution = solver.getSolution();
+      NativeMatrix solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
       solvedPositionAtConstraint.addX((timeOfConstraint + 1.0 / omega) * solution.get(0, 0));
       solvedPositionAtConstraint.addX(solution.get(1, 0));
@@ -86,16 +87,16 @@ public class DCMPositionCommandTest
       CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution, rhoValueVector);
       CommonOps_DDRM.multAdd(1.0 / omega, helper.getVelocityJacobianMatrix(), rhoSolution, rhoValueVector);
 
-      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
+      solvedObjectivePosition.mult(solver.qpInputTypeA.taskJacobian, solution);
       solvedObjectivePositionTuple.set(solvedObjectivePosition);
       solvedObjectivePositionTuple.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint + timeOfConstraint / omega, gravityVector, solvedObjectivePositionTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
-      DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
+      NativeMatrix achievedObjective = new NativeMatrix(3, 1);
       objectivePosition.get(taskObjectiveExpected);
       taskObjectiveExpected.add(2, 0, (-0.5 * timeOfConstraint * timeOfConstraint  + -timeOfConstraint / omega) * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = MPCTestHelper.getDCMPositionJacobian(timeOfConstraint, omega, rhoHelper);
+      NativeMatrix taskJacobianExpected = MPCTestHelper.getDCMPositionJacobian(timeOfConstraint, omega, rhoHelper);
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
       {
@@ -113,14 +114,14 @@ public class DCMPositionCommandTest
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
-      CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
+      achievedObjective.mult(new NativeMatrix(taskJacobianExpected), solution);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
-      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
-      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
+      NativeMatrix solverInput_H_Expected = new NativeMatrix(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
+      NativeMatrix solverInput_f_Expected = new NativeMatrix(taskJacobianExpected.getNumCols(), 1);
 
-      CommonOps_DDRM.multInner(taskJacobianExpected, solverInput_H_Expected);
-      CommonOps_DDRM.multTransA(-1.0, taskJacobianExpected, taskObjectiveExpected, solverInput_f_Expected);
+      solverInput_H_Expected.multTransA(taskJacobianExpected, taskJacobianExpected);
+      solverInput_f_Expected.multTransA(-1.0, taskJacobianExpected, new NativeMatrix(taskObjectiveExpected));
 
       MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
 
@@ -176,8 +177,8 @@ public class DCMPositionCommandTest
       solver.solve();
 
 
-      DMatrixRMaj solution = solver.getSolution();
-      DMatrixRMaj secondSegmentSolution = new DMatrixRMaj(LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(1), 1);
+      NativeMatrix solution = solver.getSolution();
+      NativeMatrix secondSegmentSolution = new NativeMatrix(LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(1), 1);
       DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
 
 
@@ -185,16 +186,16 @@ public class DCMPositionCommandTest
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, indexHandler.getRhoCoefficientStartIndex(1), 0, indexHandler.getRhoCoefficientsInSegment(1), 1, 1.0);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
-      DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
+      NativeMatrix achievedObjective = new NativeMatrix(3, 1);
       objectivePosition.get(taskObjectiveExpected);
       taskObjectiveExpected.add(2, 0, -(0.5 * timeOfConstraint * timeOfConstraint + timeOfConstraint / omega) * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = MPCTestHelper.getDCMPositionJacobian(timeOfConstraint, omega, contactPlaneHelper);
+      NativeMatrix taskJacobianExpected = MPCTestHelper.getDCMPositionJacobian(timeOfConstraint, omega, contactPlaneHelper);
 
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
-      CommonOps_DDRM.mult(taskJacobianExpected, secondSegmentSolution, achievedObjective);
+      achievedObjective.mult(new NativeMatrix(taskJacobianExpected), secondSegmentSolution);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
 

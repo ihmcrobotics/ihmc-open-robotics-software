@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class VRPTrackingCommandTest
@@ -69,7 +70,7 @@ public class VRPTrackingCommandTest
 
       solver.solve();
 
-      DMatrixRMaj solution = solver.getSolution();
+      NativeMatrix solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj(contactPlaneHelper.getRhoSize() * 4, 1);
 
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, indexHandler.getRhoCoefficientStartIndex(0), 0, contactPlaneHelper.getCoefficientSize(), 1, 1.0);
@@ -77,8 +78,8 @@ public class VRPTrackingCommandTest
       FramePoint3D assembledValue = new FramePoint3D();
       FramePoint3D expectedValue = new FramePoint3D();
 
-      DMatrixRMaj solutionPosition = new DMatrixRMaj(3, 1);
-      DMatrixRMaj jacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+      NativeMatrix solutionPosition = new NativeMatrix(3, 1);
+      NativeMatrix jacobian = new NativeMatrix(3, indexHandler.getTotalProblemSize());
 
       for (double time = 0.0; time <= duration; time += 0.001)
       {
@@ -93,10 +94,10 @@ public class VRPTrackingCommandTest
 
          CoMCoefficientJacobianCalculator.calculateVRPJacobian(0, omega, time, jacobian, 0, 1.0);
 
-         MatrixTools.multAddBlock(rhoHelper.getLinearJacobianInWorldFrame(), jacobianHelper.getPositionJacobianMatrix(), jacobian, 0, 6);
-         MatrixTools.multAddBlock(-1.0 / omega2, rhoHelper.getLinearJacobianInWorldFrame(), jacobianHelper.getAccelerationJacobianMatrix(), jacobian, 0, 6);
+         jacobian.multAddBlock(new NativeMatrix(rhoHelper.getLinearJacobianInWorldFrame()), new NativeMatrix(jacobianHelper.getPositionJacobianMatrix()), 0, 6);
+         jacobian.multAddBlock(-1.0 / omega2, new NativeMatrix(rhoHelper.getLinearJacobianInWorldFrame()), new NativeMatrix(jacobianHelper.getAccelerationJacobianMatrix()), 0, 6);
 
-         CommonOps_DDRM.mult(jacobian, solution, solutionPosition);
+         solutionPosition.mult(jacobian, solution);
 
          for (int pointIdx = 0; pointIdx < contactPlaneHelper.getNumberOfContactPoints(); pointIdx++)
          {

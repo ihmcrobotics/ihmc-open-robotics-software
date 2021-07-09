@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
@@ -15,6 +16,7 @@ import java.util.List;
  * This tracking function can be computed as a convex quadratic cost term.
  *
  * TODO improve this cost calculator to allow tracking cubic VRP trajectories, rather than just linear ones.
+ * TODO review class to make it more efficient for column-wise operations, such as what happens in the sparse matrices
  */
 public class VRPTrackingCostCalculator
 {
@@ -39,7 +41,7 @@ public class VRPTrackingCostCalculator
     * @param objective objective object containing the desired VRP trajectory information
     * @return whether the computation was successful
     */
-   public boolean calculateVRPTrackingObjective(DMatrixRMaj costHessianToPack, DMatrixRMaj costGradientToPack, VRPTrackingCommand objective)
+   public boolean calculateVRPTrackingObjective(DMatrix costHessianToPack, DMatrix costGradientToPack, VRPTrackingCommand objective)
    {
       int segmentNumber = objective.getSegmentNumber();
       int startCoMIdx = indexHandler.getComCoefficientStartIndex(segmentNumber, 0);
@@ -48,13 +50,13 @@ public class VRPTrackingCostCalculator
       return calculateVRPTrackingObjectiveInternal(costHessianToPack, costGradientToPack, objective, startCoMIdx, startRhoIdx);
    }
 
-   public boolean calculateCompactVRPTrackingObjective(DMatrixRMaj costHessianToPack, DMatrixRMaj costGradientToPack, VRPTrackingCommand objective)
+   public boolean calculateCompactVRPTrackingObjective(DMatrix costHessianToPack, DMatrix costGradientToPack, VRPTrackingCommand objective)
    {
       return calculateVRPTrackingObjectiveInternal(costHessianToPack, costGradientToPack, objective, 0, LinearMPCIndexHandler.comCoefficientsPerSegment);
    }
 
-   private boolean calculateVRPTrackingObjectiveInternal(DMatrixRMaj costHessianToPack,
-                                                        DMatrixRMaj costGradientToPack,
+   private boolean calculateVRPTrackingObjectiveInternal(DMatrix costHessianToPack,
+                                                         DMatrix costGradientToPack,
                                                         VRPTrackingCommand objective,
                                                         int startCoMIdx,
                                                         int startRhoIdx)
@@ -92,8 +94,8 @@ public class VRPTrackingCostCalculator
       costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 4, c0c1);
       costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 5, t);
 
-      costGradientToPack.add(startCoMIdx + 4, 0, gc0 * gravityZ);
-      costGradientToPack.add(startCoMIdx + 5, 0, gc1 * gravityZ);
+      costGradientToPack.set(startCoMIdx + 4, 0, gc0 * gravityZ);
+      costGradientToPack.set(startCoMIdx + 5, 0, gc1 * gravityZ);
 
       allBasisVectors.clear();
       for (int contactPlaneIdx = 0; contactPlaneIdx < objective.getNumberOfContacts(); contactPlaneIdx++)
@@ -129,14 +131,15 @@ public class VRPTrackingCostCalculator
       vrpStart.set(objective.getStartVRP());
       vrpDelta.sub(objective.getEndVRP(), objective.getStartVRP());
 
+      // TODO review to see if the set vs add methods are correct
       for (int ordinal = 0; ordinal < 3; ordinal++)
       {
          int offset = 2 * ordinal + startCoMIdx;
          double c0 = t2 / 3.0 * vrpDelta.getElement(ordinal) + t2 / 2.0 * vrpStart.getElement(ordinal);
          double c1 = t / 2.0 * vrpDelta.getElement(ordinal) + t * vrpStart.getElement(ordinal);
 
-         costGradientToPack.add(offset, 0, -c0);
-         costGradientToPack.add(offset + 1, 0, -c1);
+         unsafe_add(costGradientToPack, offset, 0, -c0);
+         unsafe_add(costGradientToPack, offset + 1, 0, -c1);
       }
 
 
@@ -146,10 +149,10 @@ public class VRPTrackingCostCalculator
 
          FrameVector3DReadOnly basisVector = allBasisVectors.get(i);
 
-         costHessianToPack.add(idxI, idxI, a2a2);
-         costHessianToPack.add(idxI, idxI + 1, a2a3);
-         costHessianToPack.add(idxI + 1, idxI, a2a3);
-         costHessianToPack.add(idxI + 1, idxI + 1, a3a3);
+         unsafe_add(costHessianToPack, idxI, idxI, a2a2);
+         unsafe_add(costHessianToPack, idxI, idxI + 1, a2a3);
+         unsafe_add(costHessianToPack, idxI + 1, idxI, a2a3);
+         unsafe_add(costHessianToPack, idxI + 1, idxI + 1, a3a3);
 
          for (int j = i + 1; j < allBasisVectors.size(); j++)
          {
@@ -159,16 +162,16 @@ public class VRPTrackingCostCalculator
 
             int idxJ = 4 * j + startRhoIdx + 2;
 
-            costHessianToPack.add(idxI, idxJ, basisDot * a2a2);
-            costHessianToPack.add(idxI, idxJ + 1, basisDot * a2a3);
-            costHessianToPack.add(idxI + 1, idxJ, basisDot * a2a3);
-            costHessianToPack.add(idxI + 1, idxJ + 1, basisDot * a3a3);
+            unsafe_add(costHessianToPack, idxI, idxJ, basisDot * a2a2);
+            unsafe_add(costHessianToPack, idxI, idxJ + 1, basisDot * a2a3);
+            unsafe_add(costHessianToPack, idxI + 1, idxJ, basisDot * a2a3);
+            unsafe_add(costHessianToPack, idxI + 1, idxJ + 1, basisDot * a3a3);
 
             // we know it's symmetric, and this way we can avoid iterating as much
-            costHessianToPack.add(idxJ, idxI, basisDot * a2a2);
-            costHessianToPack.add(idxJ + 1, idxI, basisDot * a2a3);
-            costHessianToPack.add(idxJ, idxI + 1, basisDot * a2a3);
-            costHessianToPack.add(idxJ + 1, idxI + 1, basisDot * a3a3);
+            unsafe_add(costHessianToPack, idxJ, idxI, basisDot * a2a2);
+            unsafe_add(costHessianToPack, idxJ + 1, idxI, basisDot * a2a3);
+            unsafe_add(costHessianToPack, idxJ, idxI + 1, basisDot * a2a3);
+            unsafe_add(costHessianToPack, idxJ + 1, idxI + 1, basisDot * a3a3);
          }
 
 
@@ -176,26 +179,32 @@ public class VRPTrackingCostCalculator
          {
             int offset = startCoMIdx + 2 * ordinal;
             double value = basisVector.getElement(ordinal);
-            costHessianToPack.add(offset, idxI, a2c0 * value);
-            costHessianToPack.add(offset, idxI + 1, a3c0 * value);
-            costHessianToPack.add(offset + 1, idxI, a2c1 * value);
-            costHessianToPack.add(offset + 1, idxI + 1, a3c1 * value);
+            unsafe_add(costHessianToPack, offset, idxI, a2c0 * value);
+            unsafe_add(costHessianToPack, offset, idxI + 1, a3c0 * value);
+            unsafe_add(costHessianToPack, offset + 1, idxI, a2c1 * value);
+            unsafe_add(costHessianToPack, offset + 1, idxI + 1, a3c1 * value);
 
             // symmetric...
-            costHessianToPack.add(idxI, offset, a2c0 * value);
-            costHessianToPack.add(idxI + 1, offset,  a3c0 * value);
-            costHessianToPack.add(idxI, offset + 1, a2c1 * value);
-            costHessianToPack.add(idxI + 1, offset + 1, a3c1 * value);
+            unsafe_add(costHessianToPack, idxI, offset, a2c0 * value);
+            unsafe_add(costHessianToPack, idxI + 1, offset,  a3c0 * value);
+            unsafe_add(costHessianToPack, idxI, offset + 1, a2c1 * value);
+            unsafe_add(costHessianToPack, idxI + 1, offset + 1, a3c1 * value);
          }
 
          double basisDotDelta = vrpDelta.dot(basisVector);
          double basisDotStart = vrpStart.dot(basisVector);
          double basisDotG = basisVector.getZ() * gravityZ;
 
-         costGradientToPack.add(idxI, 0, -basisDotDelta * a2Delta - basisDotStart * a2Start + basisDotG * ga2);
-         costGradientToPack.add(idxI + 1, 0, -basisDotDelta * a3Delta - basisDotStart * a3Start + basisDotG * ga3);
+         unsafe_add(costGradientToPack, idxI, 0, -basisDotDelta * a2Delta - basisDotStart * a2Start + basisDotG * ga2);
+         unsafe_add(costGradientToPack, idxI + 1, 0, -basisDotDelta * a3Delta - basisDotStart * a3Start + basisDotG * ga3);
       }
 
       return true;
    }
+
+   private static  void unsafe_add(DMatrix matrixToPack, int row, int col, double value)
+   {
+      matrixToPack.unsafe_set(row, col, matrixToPack.unsafe_get(row, col) + value);
+   }
+
 }

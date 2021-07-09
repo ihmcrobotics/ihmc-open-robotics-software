@@ -5,14 +5,20 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.yoVariables.providers.IntegerProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 import java.util.function.IntUnaryOperator;
 
 public class SE3MPCIndexHandler extends LinearMPCIndexHandler
 {
-   private static final double intermediateDt = 0.01;
+   private static final double intermediateDt = 0.05;
    public static final int variablesPerOrientationTick = 6;
+
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoDouble orientationDt = new YoDouble("orientationDt", registry);
 
    private int totalNumberOfOrientationTicks = 0;
    private final TIntArrayList orientationStartIndices = new TIntArrayList();
@@ -23,6 +29,8 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
    public SE3MPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
    {
       super(numberOfBasisVectorsPerContactPoint);
+
+      orientationDt.set(intermediateDt);
    }
 
    /**
@@ -63,6 +71,11 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
       }
    }
 
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
+
    public int getTotalNumberOfOrientationTicks()
    {
       return totalNumberOfOrientationTicks;
@@ -83,11 +96,11 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
       return tickDurations.get(segment);
    }
 
-   private static int computeTicksInSegment(double segmentDuration)
+   private int computeTicksInSegment(double segmentDuration)
    {
-      if (segmentDuration > 0.0 && segmentDuration < intermediateDt)
+      if (segmentDuration > 0.0 && segmentDuration < orientationDt.getValue())
          return 1;
       else
-         return (int) Math.floor(segmentDuration / intermediateDt);
+         return (int) Math.floor(segmentDuration / orientationDt.getValue());
    }
 }
