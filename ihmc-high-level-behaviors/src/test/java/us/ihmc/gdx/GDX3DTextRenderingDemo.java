@@ -11,7 +11,7 @@ public class GDX3DTextRenderingDemo
    public GDX3DTextRenderingDemo()
    {
       GDX3DSceneManager sceneManager = new GDX3DSceneManager();
-      GDXTextRenderer textRenderer = new GDXTextRenderer();
+      //GDXTextRenderer textRenderer = new GDXTextRenderer();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -22,17 +22,17 @@ public class GDX3DTextRenderingDemo
             sceneManager.addCoordinateFrame(0.3);
             sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
 
-            textRenderer.create();
-            sceneManager.addRenderableProvider(textRenderer);
+            //textRenderer.create();
+            //sceneManager.addRenderableProvider(textRenderer);
          }
 
          @Override
          public void render()
          {
-            textRenderer.setTextAtPosition(new Point3D(0.5, 0.5, 0.5), "Text rendering demo (very cool)");
+            //textRenderer.setTextAtPosition(new Point3D(0.5, 0.5, 0.5), "Text rendering demo (very cool)");
 
             GDX3DSceneTools.glClearGray();
-            textRenderer.update();
+            //textRenderer.update();
             sceneManager.setViewportBoundsToWindow();
             sceneManager.render();
          }
