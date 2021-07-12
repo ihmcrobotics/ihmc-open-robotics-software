@@ -32,6 +32,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private final ReferenceFrame collisionMeshFrame;
    private final Shape3DReadOnly shape;
    private CapsuleRayIntersection capsuleIntersection;
+   private ModelInstance coordinateFrame;
 
    public GDXRobotCollisionLink(Collidable collidable, Color color)
    {
@@ -88,18 +89,22 @@ public class GDXRobotCollisionLink implements RenderableProvider
          }
       }, collidable.getRigidBody().getName());
       GDXTools.setTransparency(modelInstance, color.a);
+
+      coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);
    }
 
    public void update()
    {
       collisionMeshFrame.update();
       GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), modelInstance.transform);
+      GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), coordinateFrame.transform);
    }
 
+   // Happens after update
    public void process3DViewInput(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-
+      RigidBodyTransform transformToWorldFrame = collisionMeshFrame.getTransformToWorldFrame();
       if (shape instanceof Sphere3DReadOnly)
       {
          Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
@@ -112,20 +117,22 @@ public class GDXRobotCollisionLink implements RenderableProvider
          Point3DReadOnly position = capsule.getPosition();
          double length = capsule.getLength();
          double radius = capsule.getRadius();
-         capsuleIntersection.setup(radius, length, position, axis);
+         capsuleIntersection.setup(radius, length, position, axis, transformToWorldFrame);
          boolean intersects = capsuleIntersection.intersect(pickRayInWorld);
-         GDXTools.setTransparency(modelInstance, intersects ? 0.6f : 0.4f);
+         GDXTools.setTransparency(modelInstance, intersects ? 1.0f : 0.4f);
       }
       else if (shape instanceof Box3DReadOnly)
       {
          Box3DReadOnly box = (Box3DReadOnly) shape;
          Point3DReadOnly position = box.getPosition();
-         transformToJoint.appendTranslation(position);
          RotationMatrixReadOnly orientation = box.getOrientation();
-         transformToJoint.appendOrientation(orientation);
+         tempTransform.set(transformToJoint);
+         tempTransform.appendTranslation(position);
+         tempTransform.appendOrientation(orientation);
          double sizeX = box.getSizeX();
          double sizeY = box.getSizeY();
          double sizeZ = box.getSizeZ();
+
       }
       else if (shape instanceof PointShape3DReadOnly)
       {
@@ -141,5 +148,6 @@ public class GDXRobotCollisionLink implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       modelInstance.getRenderables(renderables, pool);
+      coordinateFrame.getRenderables(renderables, pool);
    }
 }
