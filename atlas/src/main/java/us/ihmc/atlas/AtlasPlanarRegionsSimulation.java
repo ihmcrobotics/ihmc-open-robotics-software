@@ -27,6 +27,6 @@ public class AtlasPlanarRegionsSimulation
          robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS);
       }
 
-      new AvatarPlanarRegionsSimulation(robotModel, DATA_SET_TO_USE, GENERATE_GROUND_PLANE);
+      AvatarPlanarRegionsSimulation.startSimulation(robotModel, DATA_SET_TO_USE, GENERATE_GROUND_PLANE);
    }
 }
