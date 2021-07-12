@@ -19,22 +19,16 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -44,7 +38,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterface
 {
@@ -62,8 +55,7 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
    @BeforeEach
    public void setup()
    {
-      simulationTestingParameters.getKeepSCSUp();
-//      simulationTestingParameters.setKeepSCSUp(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.setKeepSCSUp(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -106,7 +98,7 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
 
       for (int i = 0; i < numberOfStancesToCheck; i++)
       {
-         testSteps(robotModel, feasibleSolutions);
+         testStep(robotModel, feasibleSolutions);
 
          drcSimulationTestHelper.getBlockingSimulationRunner().destroySimulation();
          drcSimulationTestHelper.getAvatarSimulation().dispose();
@@ -115,27 +107,10 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
       }
    }
 
-   private void testSteps(DRCRobotModel robotModel, List<KinematicsToolboxSnapshotDescription> feasibleSolutions)
+   private void testStep(DRCRobotModel robotModel, List<KinematicsToolboxSnapshotDescription> feasibleSolutions)
          throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      int indexToTest = random.nextInt(feasibleSolutions.size());
-
-      KinematicsToolboxSnapshotDescription snapshotToTest = feasibleSolutions.get(indexToTest);
-      feasibleSolutions.remove(indexToTest);
-
-      IDLSequence.Float jointAngles = snapshotToTest.getIkSolution().getDesiredJointAngles();
-      Vector3D rootPosition = snapshotToTest.getIkSolution().getDesiredRootTranslation();
-      Quaternion rootOrientation = snapshotToTest.getIkSolution().getDesiredRootOrientation();
-
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      OneDoFJointBasics[] ikJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      for (int i = 0; i < jointAngles.size(); i++)
-      {
-         ikJoints[i].setQ(jointAngles.get(i));
-      }
-
-      fullRobotModel.getRootJoint().setJointConfiguration(rootOrientation, rootPosition);
-      fullRobotModel.updateFrames();
 
       LogTools.info("Starting to generate regions");
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -157,9 +132,14 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
       Point3D desiredPose = leftStep.getInputMessage().getDesiredPositionInWorld();
       Quaternion orientation = leftStep.getInputMessage().getDesiredOrientationInWorld();
 
+      RigidBodyTransform rightSole = fullRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
+
       // Create a stepping stone at the end of the step
       generator.identity();
-      FramePoint3D step = new FramePoint3D(ReferenceFrame.getWorldFrame(), desiredPose.getX(), desiredPose.getY(), desiredPose.getZ());
+      FramePoint3D step = new FramePoint3D(ReferenceFrame.getWorldFrame(),
+                                           rightSole.getTranslationX() + desiredPose.getX(),
+                                           rightSole.getTranslationY() + desiredPose.getY(),
+                                           rightSole.getTranslationZ() + desiredPose.getZ());
       generator.translate(step.getX(), step.getY(), step.getZ());
       generator.addRectangle(0.4, 0.4);
 
@@ -167,13 +147,6 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.015, false);
 
       HumanoidRobotMutableInitialSetup initialSetup = createInitialSetup(robotModel.getJointMap());
-      initialSetup.getRootJointPosition().set(rootPosition);
-      initialSetup.getRootJointOrientation().set(rootOrientation);
-
-      for (int i = 0; i < ikJoints.length; i++)
-      {
-         initialSetup.getJointPositions().put(ikJoints[i].getName(), ikJoints[i].getQ());
-      }
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.setInitialSetup(initialSetup);
