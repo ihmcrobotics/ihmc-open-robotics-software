@@ -106,11 +106,11 @@ public class FixedBaseRobotArm extends Robot
       shoulderRollLink = new RigidBody("shoulderRollLink", shoulderRoll, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
       shoulderPitch = new RevoluteJoint("shoulderPitch", shoulderRollLink, shoulderPitchOffset, Y_AXIS);
 
-      upperArm = new RigidBody("upperArm", shoulderPitch, upperArmInertia, upperArmMass, upperArmCoM);
+      upperArm = new RigidBody("upperArmLink", shoulderPitch, upperArmInertia, upperArmMass, upperArmCoM);
 
       elbowPitch = new RevoluteJoint("elbowPitch", upperArm, elbowPitchOffset, Y_AXIS);
 
-      lowerArm = new RigidBody("lowerArm", elbowPitch, lowerArmInertia, lowerArmMass, lowerArmCoM);
+      lowerArm = new RigidBody("lowerArmLink", elbowPitch, lowerArmInertia, lowerArmMass, lowerArmCoM);
 
       wristPitch = new RevoluteJoint("wristPitch", lowerArm, wristPitchOffset, Y_AXIS);
       wristPitchLink = new RigidBody("wristPitchLink", wristPitch, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
@@ -118,7 +118,7 @@ public class FixedBaseRobotArm extends Robot
       wristRollLink = new RigidBody("wristRollLink", wristRoll, createNullMOI(), SMALL_MASS, new RigidBodyTransform());
       wristYaw = new RevoluteJoint("wristYaw", wristRollLink, wristYawOffset, Z_AXIS);
 
-      hand = new RigidBody("hand", wristYaw, handInertia, handMass, handCoM);
+      hand = new RigidBody("handLink", wristYaw, handInertia, handMass, handCoM);
 
       handControlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
