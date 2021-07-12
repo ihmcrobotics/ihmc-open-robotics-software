@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import javafx.util.Pair;
@@ -25,125 +24,36 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class GDXTextObject implements RenderableProvider
+public class GDX3DSituatedText implements RenderableProvider
 {
    private static final HashMap<Pair<String, String>, Model> MODELS = new HashMap<>();
    private static final HashMap<Model, Pair<Integer, Integer>> MODEL_SIZES = new HashMap<>();
    private static final HashMap<Model, Integer> MODEL_USAGES = new HashMap<>();
    private static final Timer TIMER = new Timer();
-
    private static final ModelBuilder BUILDER = new ModelBuilder();
-   private static final Font DEFAULTFONT = new Font("Arial", Font.PLAIN, 72);
+   private static final Font DEFAULT_FONT = new Font("Arial", Font.PLAIN, 72);
 
    //Storing some of the models (such as commonly stored ones, like numbers) helps reduce stuttering when creating GDXTextObjects
-   private static boolean enableCacheing = true;
-
-   public static boolean isCacheingEnabled()
-   {
-      return enableCacheing;
-   }
-
-   /**
-    * Disabling cacheing here will not clear existing items in the cache - if this is desired, call clearCache()
-    */
-   public static void setCacheingEnabled(boolean value)
-   {
-      enableCacheing = value;
-   }
-
-   public static void clearCache()
-   {
-      MODELS.clear();
-      MODEL_USAGES.clear();
-   }
-
-   private static Model createModel(String text, Font font)
-   { // Mostly following this method: https://stackoverflow.com/a/18800845/3503725
-      //Create temporary image here in order to get Graphics2D instance
-      BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
-      Graphics2D g2d = image.createGraphics();
-      g2d.setFont(font != null ? font : DEFAULTFONT);
-
-      FontMetrics fm = g2d.getFontMetrics();
-      int width = fm.stringWidth(text);
-      int height = fm.getHeight();
-      g2d.dispose();
-
-      //Create image for use in texture
-      image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-      g2d = image.createGraphics();
-
-      g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
-      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
-      g2d.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
-      g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
-      g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-      g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-      g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-
-      g2d.setFont(font != null ? font : DEFAULTFONT);
-      fm = g2d.getFontMetrics();
-      g2d.setColor(Color.BLACK);
-      g2d.drawString(text, 0, fm.getAscent());
-      g2d.dispose();
-
-      //Create model
-      Texture texture;
-      try
-      {
-         File temp = File.createTempFile("GDXTextObject", ".png");
-         ImageIO.write(image, "png", temp);
-         texture = new Texture(new FileHandle(temp));
-      }
-      catch (IOException ex)
-      {
-         LogTools.error("Could not create model for GDXTextObject");
-         LogTools.error(ex);
-
-         return null;
-      }
-      Material material = new Material(TextureAttribute.createDiffuse(texture),
-                                       ColorAttribute.createSpecular(1, 1, 1, 1),
-                                       new BlendingAttribute(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA));
-      long attributes = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates;
-
-      Model model = BUILDER.createRect(0, 0, 0, width, 0, 0, width, height, 0, 0, height, 0, 0, 0, 1, material, attributes);
-      MODEL_SIZES.put(model, new Pair<Integer, Integer>(width, height));
-      return model;
-   }
-
-   private static Model getModel(String text, Font font)
-   {
-      Pair<String, String> modelPair = new Pair<>(text, font.getName());
-
-      if (MODELS.containsKey(modelPair))
-         return MODELS.get(modelPair);
-      else
-      {
-         Model model = createModel(text, font);
-         if (enableCacheing && model != null)
-         {
-            MODELS.put(modelPair, model);
-            MODEL_USAGES.compute(model, (m, integer) -> integer == null ? integer = 1 : integer++);
-         }
-         return model;
-      }
-   }
+   private static boolean enableCaching = true;
 
    private final Model model;
    private final ModelInstance modelInstance;
 
-   public GDXTextObject(String text)
+   public GDX3DSituatedText(String text)
    {
-      this.model = getModel(text, DEFAULTFONT);
-      this.modelInstance = new ModelInstance(model);
+      this(text, DEFAULT_FONT);
    }
 
-   public GDXTextObject(String text, String font)
+   public GDX3DSituatedText(String text, String font)
    {
-      this.model = getModel(text, new Font(font, Font.PLAIN, 72));
+      this(text, new Font(font, Font.PLAIN, 72));
+   }
+
+   public GDX3DSituatedText(String text, Font font)
+   {
+      this.model = getModel(text, font);
       this.modelInstance = new ModelInstance(model);
+      setSize(0.1f);
    }
 
    /**
@@ -214,5 +124,98 @@ public class GDXTextObject implements RenderableProvider
       }
 
       super.finalize();
+   }
+
+   public static boolean isCachingEnabled()
+   {
+      return enableCaching;
+   }
+
+   /**
+    * Disabling cacheing here will not clear existing items in the cache - if this is desired, call clearCache()
+    */
+   public static void setCachingEnabled(boolean value)
+   {
+      enableCaching = value;
+   }
+
+   public static void clearCache()
+   {
+      MODELS.clear();
+      MODEL_USAGES.clear();
+   }
+
+   private static Model createModel(String text, Font font)
+   { // Mostly following this method: https://stackoverflow.com/a/18800845/3503725
+      //Create temporary image here in order to get Graphics2D instance
+      BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
+      Graphics2D g2d = image.createGraphics();
+      g2d.setFont(font != null ? font : DEFAULT_FONT);
+
+      FontMetrics fm = g2d.getFontMetrics();
+      int width = fm.stringWidth(text);
+      int height = fm.getHeight();
+      g2d.dispose();
+
+      //Create image for use in texture
+      image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+      g2d = image.createGraphics();
+
+      g2d.setRenderingHint(RenderingHints.KEY_ALPHA_INTERPOLATION, RenderingHints.VALUE_ALPHA_INTERPOLATION_QUALITY);
+      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      g2d.setRenderingHint(RenderingHints.KEY_COLOR_RENDERING, RenderingHints.VALUE_COLOR_RENDER_QUALITY);
+      g2d.setRenderingHint(RenderingHints.KEY_DITHERING, RenderingHints.VALUE_DITHER_ENABLE);
+      g2d.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+      g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+      g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+      g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+
+      g2d.setFont(font != null ? font : DEFAULT_FONT);
+      fm = g2d.getFontMetrics();
+      g2d.setColor(Color.BLACK);
+      g2d.drawString(text, 0, fm.getAscent());
+      g2d.dispose();
+
+      //Create model
+      Texture texture;
+      try
+      {
+         File temp = File.createTempFile("GDXTextObject", ".png");
+         ImageIO.write(image, "png", temp);
+         texture = new Texture(new FileHandle(temp));
+      }
+      catch (IOException ex)
+      {
+         LogTools.error("Could not create model for GDXTextObject");
+         LogTools.error(ex);
+
+         return null;
+      }
+      Material material = new Material(TextureAttribute.createDiffuse(texture),
+                                       ColorAttribute.createSpecular(1, 1, 1, 1),
+                                       new BlendingAttribute(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA));
+      long attributes = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates;
+
+      Model model = BUILDER.createRect(0, 0, 0, width, 0, 0, width, height, 0, 0, height, 0, 0, 0, 1, material, attributes);
+      MODEL_SIZES.put(model, new Pair<Integer, Integer>(width, height));
+      return model;
+   }
+
+   private static Model getModel(String text, Font font)
+   {
+      Pair<String, String> modelPair = new Pair<>(text, font.getName());
+
+      if (MODELS.containsKey(modelPair))
+         return MODELS.get(modelPair);
+      else
+      {
+         Model model = createModel(text, font);
+         if (enableCaching && model != null)
+         {
+            MODELS.put(modelPair, model);
+            MODEL_USAGES.compute(model, (m, integer) -> integer == null ? integer = 1 : integer++);
+         }
+         return model;
+      }
    }
 }
