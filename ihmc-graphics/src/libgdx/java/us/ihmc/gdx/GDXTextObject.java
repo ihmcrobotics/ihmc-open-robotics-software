@@ -6,11 +6,11 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import javafx.util.Pair;
 import org.lwjgl.opengl.GL30;
 import us.ihmc.log.LogTools;
 
@@ -25,12 +25,12 @@ import java.util.TimerTask;
 
 public class GDXTextObject implements RenderableProvider
 {
-   private static final HashMap<String, Model> MODELS = new HashMap<>();
+   private static final HashMap<Pair<String, String>, Model> MODELS = new HashMap<>();
    private static final HashMap<Model, Integer> MODEL_USAGES = new HashMap<>();
    private static final Timer TIMER = new Timer();
 
    private static final ModelBuilder BUILDER = new ModelBuilder();
-   private static final Font FONT = new Font("Arial", Font.PLAIN, 72);
+   private static final Font DEFAULTFONT = new Font("Arial", Font.PLAIN, 72);
 
    //Storing some of the models (such as commonly stored ones, like numbers) helps reduce stuttering when creating GDXTextObjects
    private static boolean enableCacheing = true;
@@ -51,14 +51,15 @@ public class GDXTextObject implements RenderableProvider
    public static void clearCache()
    {
       MODELS.clear();
+      MODEL_USAGES.clear();
    }
 
-   private static Model createModel(String text)
+   private static Model createModel(String text, Font font)
    { // Mostly following this method: https://stackoverflow.com/a/18800845/3503725
       //Create temporary image here in order to get Graphics2D instance
       BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
       Graphics2D g2d = image.createGraphics();
-      g2d.setFont(FONT);
+      g2d.setFont(font != null ? font : DEFAULTFONT);
 
       FontMetrics fm = g2d.getFontMetrics();
       int width = fm.stringWidth(text);
@@ -78,7 +79,7 @@ public class GDXTextObject implements RenderableProvider
       g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
       g2d.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
 
-      g2d.setFont(FONT);
+      g2d.setFont(font != null ? font : DEFAULTFONT);
       fm = g2d.getFontMetrics();
       g2d.setColor(Color.BLACK);
       g2d.drawString(text, 0, fm.getAscent());
@@ -107,16 +108,18 @@ public class GDXTextObject implements RenderableProvider
       return BUILDER.createRect(0, 0, 0, width, 0, 0, width, height, 0, 0, height, 0, 0, 0, 1, material, attributes);
    }
 
-   private static Model getModel(String text)
+   private static Model getModel(String text, Font font)
    {
-      if (MODELS.containsKey(text))
-         return MODELS.get(text);
+      Pair<String, String> modelPair = new Pair<>(text, font.getName());
+
+      if (MODELS.containsKey(modelPair))
+         return MODELS.get(modelPair);
       else
       {
-         Model model = createModel(text);
+         Model model = createModel(text, font);
          if (enableCacheing && model != null)
          {
-            MODELS.put(text, model);
+            MODELS.put(modelPair, model);
             MODEL_USAGES.compute(model, (m, integer) -> integer == null ? integer = 1 : integer++);
          }
          return model;
@@ -128,7 +131,13 @@ public class GDXTextObject implements RenderableProvider
 
    public GDXTextObject(String text)
    {
-      this.model = getModel(text);
+      this.model = getModel(text, DEFAULTFONT);
+      this.modelInstance = new ModelInstance(model);
+   }
+
+   public GDXTextObject(String text, String font)
+   {
+      this.model = getModel(text, new Font(font, Font.PLAIN, 72));
       this.modelInstance = new ModelInstance(model);
    }
 
