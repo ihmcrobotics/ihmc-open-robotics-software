@@ -19,6 +19,7 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.CapsuleRayIntersection;
+import us.ihmc.gdx.ui.gizmo.SphereRayIntersection;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.physics.Collidable;
@@ -31,6 +32,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ReferenceFrame collisionMeshFrame;
    private final Shape3DReadOnly shape;
+   private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
    private ModelInstance coordinateFrame;
 
@@ -51,6 +53,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
          {
             Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
             meshBuilder.addSphere((float) sphere.getRadius(), sphere.getPosition(), color);
+            sphereRayIntersection = new SphereRayIntersection();
          }
          else if (shape instanceof Capsule3DReadOnly)
          {
@@ -132,6 +135,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
          double sizeX = box.getSizeX();
          double sizeY = box.getSizeY();
          double sizeZ = box.getSizeZ();
+//         EuclidGeometryTools.inRa
 
       }
       else if (shape instanceof PointShape3DReadOnly)
