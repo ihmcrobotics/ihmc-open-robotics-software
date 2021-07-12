@@ -161,7 +161,7 @@ public class ValkyrieContactPointProjectorTest
 
       FloatingRootJointRobot valkyrieRobot = robotModel.createHumanoidFloatingRootJointRobot(true);
       valkyrieRobot.setPositionInWorld(new Vector3D());
-      addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
+      addKinematicsCollisionGraphics(fullRobotModel.getElevator(), valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
 
       SimulationConstructionSet scs = new SimulationConstructionSet(valkyrieRobot);
       scs.addStaticLinkGraphics(graphics3DObject);
