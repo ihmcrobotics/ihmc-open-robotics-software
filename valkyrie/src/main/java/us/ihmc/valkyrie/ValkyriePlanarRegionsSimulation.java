@@ -31,6 +31,6 @@ public class ValkyriePlanarRegionsSimulation
          robotModel.setSimulationContactPoints(simulationContactPoints);
       }
 
-      new AvatarPlanarRegionsSimulation(robotModel, DATA_SET_TO_USE, GENERATE_GROUND_PLANE);
+      AvatarPlanarRegionsSimulation.startSimulation(robotModel, DATA_SET_TO_USE, GENERATE_GROUND_PLANE);
    }
 }

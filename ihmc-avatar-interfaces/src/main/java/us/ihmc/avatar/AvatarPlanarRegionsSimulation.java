@@ -14,13 +14,17 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 
 public class AvatarPlanarRegionsSimulation
 {
-   public AvatarPlanarRegionsSimulation(DRCRobotModel robotModel, DataSetName dataSetName, boolean generateGroundPlane)
+   public static DRCSimulationStarter startSimulation(DRCRobotModel robotModel, DataSetName dataSetName, boolean generateGroundPlane)
    {
       DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
-      startSimulation(robotModel, dataSet.getPlanarRegionsList(), dataSet.getPlannerInput().getStartPosition(), dataSet.getPlannerInput().getStartYaw(), generateGroundPlane);
+      return startSimulation(robotModel,
+                             dataSet.getPlanarRegionsList(),
+                             dataSet.getPlannerInput().getStartPosition(),
+                             dataSet.getPlannerInput().getStartYaw(),
+                             generateGroundPlane);
    }
 
-   public static void startSimulation(DRCRobotModel robotModel, PlanarRegionsList planarRegionsList, Tuple3DReadOnly startPosition, double startOrientation, boolean generateGroundPlane)
+   public static DRCSimulationStarter startSimulation(DRCRobotModel robotModel, PlanarRegionsList planarRegionsList, Tuple3DReadOnly startPosition, double startOrientation, boolean generateGroundPlane)
    {
       PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.025, generateGroundPlane);
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, simEnvironment);
@@ -44,5 +48,7 @@ public class AvatarPlanarRegionsSimulation
       // spoof and publish planar regions
       ConstantPlanarRegionsPublisher constantPlanarRegionsPublisher = new ConstantPlanarRegionsPublisher(planarRegionsList);
       constantPlanarRegionsPublisher.start(2000);
+
+      return simulationStarter;
    }
 }
