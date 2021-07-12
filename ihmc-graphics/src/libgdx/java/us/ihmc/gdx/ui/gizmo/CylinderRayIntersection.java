@@ -18,6 +18,13 @@ public class CylinderRayIntersection
       cylinder.setSize(length, radius);
    }
 
+   public void setup(double length, double radius, RigidBodyTransformReadOnly transform)
+   {
+      cylinder.setToZero();
+      cylinder.setSize(length, radius);
+      cylinder.applyTransform(transform);
+   }
+
    public void setup(double length, double radius, double zOffset, RigidBodyTransformReadOnly transform)
    {
       cylinder.setToZero();
