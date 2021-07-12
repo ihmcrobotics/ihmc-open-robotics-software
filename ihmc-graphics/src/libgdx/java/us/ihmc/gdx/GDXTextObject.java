@@ -35,22 +35,26 @@ public class GDXTextObject implements RenderableProvider
    //Storing some of the models (such as commonly stored ones, like numbers) helps reduce stuttering when creating GDXTextObjects
    private static boolean enableCacheing = true;
 
-   public static boolean isCacheingEnabled() {
+   public static boolean isCacheingEnabled()
+   {
       return enableCacheing;
    }
 
    /**
     * Disabling cacheing here will not clear existing items in the cache - if this is desired, call clearCache()
     */
-   public static void setCacheingEnabled(boolean value) {
+   public static void setCacheingEnabled(boolean value)
+   {
       enableCacheing = value;
    }
 
-   public static void clearCache() {
+   public static void clearCache()
+   {
       MODELS.clear();
    }
 
-   private static Model createModel(String text) { // Mostly following this method: https://stackoverflow.com/a/18800845/3503725
+   private static Model createModel(String text)
+   { // Mostly following this method: https://stackoverflow.com/a/18800845/3503725
       //Create temporary image here in order to get Graphics2D instance
       BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB);
       Graphics2D g2d = image.createGraphics();
@@ -87,7 +91,9 @@ public class GDXTextObject implements RenderableProvider
          File temp = File.createTempFile("GDXTextObject", ".png");
          ImageIO.write(image, "png", temp);
          texture = new Texture(new FileHandle(temp));
-      } catch (IOException ex) {
+      }
+      catch (IOException ex)
+      {
          LogTools.error("Could not create model for GDXTextObject");
          LogTools.error(ex);
 
@@ -98,15 +104,11 @@ public class GDXTextObject implements RenderableProvider
                                        new BlendingAttribute(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA));
       long attributes = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates;
 
-      return BUILDER.createRect(0, 0, 0,
-                                width, 0, 0,
-                                width, height, 0,
-                                0, height, 0,
-                                0, 0, 1,
-                                material, attributes);
+      return BUILDER.createRect(0, 0, 0, width, 0, 0, width, height, 0, 0, height, 0, 0, 0, 1, material, attributes);
    }
 
-   private static Model getModel(String text) {
+   private static Model getModel(String text)
+   {
       if (MODELS.containsKey(text))
          return MODELS.get(text);
       else
@@ -124,7 +126,8 @@ public class GDXTextObject implements RenderableProvider
    private Model model;
    public ModelInstance modelInstance;
 
-   public GDXTextObject(String text) {
+   public GDXTextObject(String text)
+   {
       this.model = getModel(text);
       this.modelInstance = new ModelInstance(model);
    }
@@ -142,7 +145,8 @@ public class GDXTextObject implements RenderableProvider
       MODEL_USAGES.computeIfPresent(model, (m, integer) -> integer--);
 
       //If model is unused after two minutes, remove it from the cache
-      if (model != null && MODEL_USAGES.get(model) == 0) {
+      if (model != null && MODEL_USAGES.get(model) == 0)
+      {
          TIMER.schedule(new TimerTask()
          {
             @Override
