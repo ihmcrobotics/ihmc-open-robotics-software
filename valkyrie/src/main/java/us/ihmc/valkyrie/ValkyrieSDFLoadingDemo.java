@@ -17,6 +17,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
@@ -67,13 +68,13 @@ public class ValkyrieSDFLoadingDemo
       }
 
       if (SHOW_KINEMATICS_COLLISIONS)
-         addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
+         addKinematicsCollisionGraphics(fullRobotModel.getElevator(), valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
 
       if (SHOW_SIM_COLLISIONS)
       {
          ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(robotModel.getJointMap());
          collisionModel.setCollidableHelper(new CollidableHelper(), "robot", "ground");
-         addKinematicsCollisionGraphics(fullRobotModel, valkyrieRobot, collisionModel);
+         addKinematicsCollisionGraphics(fullRobotModel.getElevator(), valkyrieRobot, collisionModel);
       }
 
       scs = new SimulationConstructionSet(valkyrieRobot);
@@ -128,14 +129,21 @@ public class ValkyrieSDFLoadingDemo
       }
    }
 
-   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
+   public static void addKinematicsCollisionGraphics(RigidBodyBasics rootBody, Robot robot, RobotCollisionModel collisionModel)
    {
-      List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getElevator());
+      List<Collidable> robotCollidables = collisionModel.getRobotCollidables(rootBody);
 
       for (Collidable collidable : robotCollidables)
       {
          Link link = robot.getLink(collidable.getRigidBody().getName());
-         link.getLinkGraphics().combine(getGraphics(collidable));
+         if (link.getLinkGraphics() == null)
+         {
+            link.setLinkGraphics(getGraphics(collidable));
+         }
+         else
+         {
+            link.getLinkGraphics().combine(getGraphics(collidable));
+         }
       }
    }
 
@@ -184,6 +192,16 @@ public class ValkyrieSDFLoadingDemo
          FrameEllipsoid3DReadOnly ellipsoidShape = (FrameEllipsoid3DReadOnly) shape;
          graphics.transform(new RigidBodyTransform(ellipsoidShape.getPose()));
          graphics.addEllipsoid(ellipsoidShape.getRadiusX(), ellipsoidShape.getRadiusY(), ellipsoidShape.getRadiusZ(), appearance);
+      }
+      else if (shape instanceof Cylinder3DReadOnly)
+      {
+         Cylinder3DReadOnly cylinder = (Cylinder3DReadOnly) shape;
+         RigidBodyTransform transform = new RigidBodyTransform();
+         EuclidGeometryTools.orientation3DFromZUpToVector3D(cylinder.getAxis(), transform.getRotation());
+         transform.getTranslation().set(cylinder.getPosition());
+         graphics.transform(transform);
+         graphics.translate(0.0, 0.0, -0.5 * cylinder.getLength());
+         graphics.addCylinder(cylinder.getLength(), cylinder.getRadius(), appearance);
       }
       else
       {
