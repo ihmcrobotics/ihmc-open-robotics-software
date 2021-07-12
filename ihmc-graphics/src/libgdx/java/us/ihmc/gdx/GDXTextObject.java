@@ -150,13 +150,15 @@ public class GDXTextObject implements RenderableProvider
     * Sets the size of the contained ModelInstance in meters
     * Note that this will warp/stretch the text to fill the whole area. Use {@link #setSize(float)} instead to maintain relative size
     */
-   public void setSize(float width, float height) {
+   public void setSize(float width, float height)
+   {
       Pair<Integer, Integer> modelSize = MODEL_SIZES.get(this.model);
 
       modelInstance.transform.setToScaling(width / modelSize.getKey(), height / modelSize.getValue(), 1);
    }
 
-   public void setSize(float height) {
+   public void setSize(float height)
+   {
       Pair<Integer, Integer> modelSize = MODEL_SIZES.get(this.model);
 
       float scale = height / modelSize.getValue();
@@ -164,7 +166,8 @@ public class GDXTextObject implements RenderableProvider
       modelInstance.transform.setToScaling(scale, scale, scale);
    }
 
-   public ModelInstance getModelInstance() {
+   public ModelInstance getModelInstance()
+   {
       return modelInstance;
    }
 
@@ -191,8 +194,10 @@ public class GDXTextObject implements RenderableProvider
                if (MODEL_USAGES.get(model) == 0)
                {
                   Pair<String, String> key = null;
-                  for (Map.Entry<Pair<String, String>, Model> e : MODELS.entrySet()) {
-                     if (e.getValue().equals(model)) {
+                  for (Map.Entry<Pair<String, String>, Model> e : MODELS.entrySet())
+                  {
+                     if (e.getValue().equals(model))
+                     {
                         key = e.getKey();
                         break;
                      }
