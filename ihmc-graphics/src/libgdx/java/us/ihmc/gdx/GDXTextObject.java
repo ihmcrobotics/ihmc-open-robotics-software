@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import javafx.util.Pair;
@@ -20,12 +21,14 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class GDXTextObject implements RenderableProvider
 {
    private static final HashMap<Pair<String, String>, Model> MODELS = new HashMap<>();
+   private static final HashMap<Model, Pair<Integer, Integer>> MODEL_SIZES = new HashMap<>();
    private static final HashMap<Model, Integer> MODEL_USAGES = new HashMap<>();
    private static final Timer TIMER = new Timer();
 
@@ -105,7 +108,9 @@ public class GDXTextObject implements RenderableProvider
                                        new BlendingAttribute(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA));
       long attributes = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates;
 
-      return BUILDER.createRect(0, 0, 0, width, 0, 0, width, height, 0, 0, height, 0, 0, 0, 1, material, attributes);
+      Model model = BUILDER.createRect(0, 0, 0, width, 0, 0, width, height, 0, 0, height, 0, 0, 0, 1, material, attributes);
+      MODEL_SIZES.put(model, new Pair<Integer, Integer>(width, height));
+      return model;
    }
 
    private static Model getModel(String text, Font font)
@@ -126,7 +131,7 @@ public class GDXTextObject implements RenderableProvider
       }
    }
 
-   private Model model;
+   private final Model model;
    public ModelInstance modelInstance;
 
    public GDXTextObject(String text)
@@ -139,6 +144,24 @@ public class GDXTextObject implements RenderableProvider
    {
       this.model = getModel(text, new Font(font, Font.PLAIN, 72));
       this.modelInstance = new ModelInstance(model);
+   }
+
+   /**
+    * Sets the size of the contained ModelInstance in meters
+    * Note that this will warp/stretch the text to fill the whole area. Use {@link #setSize(float)} instead to maintain relative size
+    */
+   public void setSize(float width, float height) {
+      Pair<Integer, Integer> modelSize = MODEL_SIZES.get(this.model);
+
+      modelInstance.transform.setToScaling(width / modelSize.getKey(), height / modelSize.getValue(), 1);
+   }
+
+   public void setSize(float height) {
+      Pair<Integer, Integer> modelSize = MODEL_SIZES.get(this.model);
+
+      float scale = height / modelSize.getValue();
+
+      modelInstance.transform.setToScaling(scale, scale, scale);
    }
 
    @Override
@@ -162,7 +185,21 @@ public class GDXTextObject implements RenderableProvider
             public void run()
             {
                if (MODEL_USAGES.get(model) == 0)
+               {
+                  Pair<String, String> key = null;
+                  for (Map.Entry<Pair<String, String>, Model> e : MODELS.entrySet()) {
+                     if (e.getValue().equals(model)) {
+                        key = e.getKey();
+                        break;
+                     }
+                  }
+
+                  if (key != null)
+                     MODELS.remove(key);
+
+                  MODEL_SIZES.remove(model);
                   MODEL_USAGES.remove(model);
+               }
             }
          }, 2 * 60000); //2 minutes
       }
