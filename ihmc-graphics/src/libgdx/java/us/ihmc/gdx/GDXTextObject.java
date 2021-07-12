@@ -132,7 +132,7 @@ public class GDXTextObject implements RenderableProvider
    }
 
    private final Model model;
-   public ModelInstance modelInstance;
+   private final ModelInstance modelInstance;
 
    public GDXTextObject(String text)
    {
@@ -162,6 +162,10 @@ public class GDXTextObject implements RenderableProvider
       float scale = height / modelSize.getValue();
 
       modelInstance.transform.setToScaling(scale, scale, scale);
+   }
+
+   public ModelInstance getModelInstance() {
+      return modelInstance;
    }
 
    @Override

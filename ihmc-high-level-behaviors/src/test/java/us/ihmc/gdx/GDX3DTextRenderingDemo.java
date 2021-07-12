@@ -32,7 +32,7 @@ public class GDX3DTextRenderingDemo
             GDX3DSceneTools.glClearGray();
             sceneManager.setViewportBoundsToWindow();
 
-            text.modelInstance.transform.rotate(0, 0, 1, 1);
+            text.getModelInstance().transform.rotate(0, 0, 1, 1);
 
             sceneManager.render();
          }
