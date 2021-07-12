@@ -3,21 +3,15 @@ package us.ihmc.valkyrie.stepReachability;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.reachabilityMap.footstep.HumanoidStepReachabilityCalculator;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.valkyrie.ValkyrieKinematicsCollisionModel;
+import us.ihmc.valkyrie.ValkyrieFootstepPlannerCollisionModel;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.ValkyrieSimulationCollisionModel;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public class ValkyrieStepReachabilityCalculator extends HumanoidStepReachabilityCalculator
 {
@@ -95,6 +89,6 @@ public class ValkyrieStepReachabilityCalculator extends HumanoidStepReachability
    @Override
    protected RobotCollisionModel getRobotCollisionModel(HumanoidJointNameMap jointMap)
    {
-      return new ValkyrieKinematicsCollisionModel(jointMap);
+      return new ValkyrieFootstepPlannerCollisionModel(jointMap);
    }
 }
