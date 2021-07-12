@@ -12,7 +12,7 @@ public class GDX3DTextRenderingDemo
       GDX3DSceneManager sceneManager = new GDX3DSceneManager();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
-         private GDXTextObject text;
+         private GDX3DSituatedText text;
 
          @Override
          public void create()
@@ -22,7 +22,7 @@ public class GDX3DTextRenderingDemo
             sceneManager.addCoordinateFrame(0.3);
             sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
 
-            text = new GDXTextObject("test");
+            text = new GDX3DSituatedText("test");
             sceneManager.addRenderableProvider(text);
          }
 
