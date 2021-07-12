@@ -13,9 +13,51 @@ public class ValkyrieReachabilityMultiStepTest extends AvatarReachabilityMultiSt
 {
    @Test
    @Override
-   public void testMultipleSteps() throws Exception
+   public void testFlatForwards() throws Exception
    {
-      super.testMultipleSteps();
+      super.testFlatForwards();
+   }
+
+   @Test
+   @Override
+   public void testFlatBackwards() throws Exception
+   {
+      super.testFlatBackwards();
+   }
+
+   @Test
+   @Override
+   public void testFlatLeft() throws Exception
+   {
+      super.testFlatLeft();
+   }
+
+   @Test
+   @Override
+   public void testFlatRight() throws Exception
+   {
+      super.testFlatRight();
+   }
+
+   @Test
+   @Override
+   public void testFlatRandom() throws Exception
+   {
+      super.testFlatRandom();
+   }
+
+   @Test
+   @Override
+   public void testStairsForwards() throws Exception
+   {
+      super.testStairsForwards();
+   }
+
+   @Test
+   @Override
+   public void testStairsBackwards() throws Exception
+   {
+      super.testStairsBackwards();
    }
 
    @Override
