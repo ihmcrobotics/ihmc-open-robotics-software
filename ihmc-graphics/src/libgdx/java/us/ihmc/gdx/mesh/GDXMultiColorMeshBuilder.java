@@ -45,6 +45,19 @@ public class GDXMultiColorMeshBuilder
     * @param lx     box length along the x-axis.
     * @param ly     box length along the y-axis.
     * @param lz     box length along the z-axis.
+    * @param color  color of the box. Color accuracy depends on the color palette in use.
+    */
+   public void addBox(double lx, double ly, double lz, Color color)
+   {
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), color);
+   }
+
+   /**
+    * Add a box to this builder.
+    *
+    * @param lx     box length along the x-axis.
+    * @param ly     box length along the y-axis.
+    * @param lz     box length along the z-axis.
     * @param offset coordinate of the box center. Not modified.
     * @param color  color of the box. Color accuracy depends on the color palette in use.
     */
@@ -472,6 +485,16 @@ public class GDXMultiColorMeshBuilder
    public void addLine(Tuple3DReadOnly start, Tuple3DReadOnly end, float lineWidth, Color startColor, Color endColor)
    {
       addLine(start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ(), lineWidth, startColor, endColor);
+   }
+
+   public void addCapsule(double height, double xRadius, double yRadius, double zRadius, int latitudeN, int longitudeN, Color color)
+   {
+      addCapsule((float) height, (float) xRadius, (float) yRadius, (float) zRadius, latitudeN, longitudeN, color);
+   }
+
+   public void addCapsule(float height, float xRadius, float yRadius, float zRadius, int latitudeN, int longitudeN, Color color)
+   {
+      addMesh(MeshDataGenerator.Capsule(height, xRadius, yRadius, zRadius, latitudeN, longitudeN), color);
    }
 
    /**
