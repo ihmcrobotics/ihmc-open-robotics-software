@@ -3,6 +3,8 @@ package us.ihmc.gdx.tools;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -326,5 +328,10 @@ public class GDXTools
       gdxColor.g = appearanceDefinition.getColor().getY();
       gdxColor.b = appearanceDefinition.getColor().getZ();
       gdxColor.a = 1.0f - (float) appearanceDefinition.getTransparency();
+   }
+
+   public static void setTransparency(ModelInstance modelInstance, float transparency)
+   {
+      modelInstance.materials.get(0).set(new BlendingAttribute(true, transparency));
    }
 }

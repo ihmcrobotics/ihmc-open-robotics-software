@@ -7,9 +7,9 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
-public class BoundingSphereIntersection
+public class SphereRayIntersection
 {
-   private final Sphere3D boundingSphere = new Sphere3D();
+   private final Sphere3D sphere = new Sphere3D();
    private final Point3D rayOriginInSphereFrame = new Point3D();
    private final Point3D firstIntersectionToPack = new Point3D();
    private final Point3D secondIntersectionToPack = new Point3D();
@@ -21,40 +21,40 @@ public class BoundingSphereIntersection
 
    public void setup(double radius, double zOffset, RigidBodyTransformReadOnly transform)
    {
-      boundingSphere.setToZero();
-      boundingSphere.setRadius(radius);
-      boundingSphere.getPosition().addZ(zOffset);
-      boundingSphere.applyTransform(transform);
+      sphere.setToZero();
+      sphere.setRadius(radius);
+      sphere.getPosition().addZ(zOffset);
+      sphere.applyTransform(transform);
    }
 
    public void setup(double radius, Point3DReadOnly offset, RigidBodyTransformReadOnly transform)
    {
-      boundingSphere.setToZero();
-      boundingSphere.setRadius(radius);
-      boundingSphere.getPosition().add(offset);
-      boundingSphere.applyTransform(transform);
+      sphere.setToZero();
+      sphere.setRadius(radius);
+      sphere.getPosition().add(offset);
+      sphere.applyTransform(transform);
    }
 
    public void setup(double radius, Point3DReadOnly positionInWorld)
    {
-      boundingSphere.setToZero();
-      boundingSphere.setRadius(radius);
-      boundingSphere.getPosition().set(positionInWorld);
+      sphere.setToZero();
+      sphere.setRadius(radius);
+      sphere.getPosition().set(positionInWorld);
    }
 
    public boolean intersect(Line3DReadOnly pickRay)
    {
-      rayOriginInSphereFrame.setX(pickRay.getPoint().getX() - boundingSphere.getPosition().getX());
-      rayOriginInSphereFrame.setY(pickRay.getPoint().getY() - boundingSphere.getPosition().getY());
-      rayOriginInSphereFrame.setZ(pickRay.getPoint().getZ() - boundingSphere.getPosition().getZ());
-      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndEllipsoid3D(boundingSphere.getRadius(),
-                                                                                             boundingSphere.getRadius(),
-                                                                                             boundingSphere.getRadius(), rayOriginInSphereFrame,
+      rayOriginInSphereFrame.setX(pickRay.getPoint().getX() - sphere.getPosition().getX());
+      rayOriginInSphereFrame.setY(pickRay.getPoint().getY() - sphere.getPosition().getY());
+      rayOriginInSphereFrame.setZ(pickRay.getPoint().getZ() - sphere.getPosition().getZ());
+      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndEllipsoid3D(sphere.getRadius(),
+                                                                                             sphere.getRadius(),
+                                                                                             sphere.getRadius(), rayOriginInSphereFrame,
                                                                                              pickRay.getDirection(),
                                                                                              firstIntersectionToPack,
                                                                                              secondIntersectionToPack);
-      firstIntersectionToPack.add(boundingSphere.getPosition());
-      secondIntersectionToPack.add(boundingSphere.getPosition());
+      firstIntersectionToPack.add(sphere.getPosition());
+      secondIntersectionToPack.add(sphere.getPosition());
       return numberOfIntersections == 2;
    }
 
