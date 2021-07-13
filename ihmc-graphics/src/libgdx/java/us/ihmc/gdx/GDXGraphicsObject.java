@@ -90,7 +90,10 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
          String modelFileName = graphics3DAddModelFile.getFileName();
 
          if (!modelFileName.endsWith(".obj"))
+         {
+            LogTools.warn("Not loading {}", modelFileName);
             return;
+         }
 
          String[] splitSlash = modelFileName.split("/");
          String objFileName = splitSlash[splitSlash.length - 1];
