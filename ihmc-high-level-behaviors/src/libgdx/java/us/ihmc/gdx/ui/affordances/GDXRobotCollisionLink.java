@@ -8,7 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -18,6 +18,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.gizmo.BoxRayIntersection;
 import us.ihmc.gdx.ui.gizmo.CapsuleRayIntersection;
 import us.ihmc.gdx.ui.gizmo.SphereRayIntersection;
 import us.ihmc.log.LogTools;
@@ -31,9 +32,11 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private final RigidBodyTransform transformToJoint;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ReferenceFrame collisionMeshFrame;
+   private final FramePose3D boxPose = new FramePose3D();
    private final Shape3DReadOnly shape;
    private SphereRayIntersection sphereRayIntersection;
    private CapsuleRayIntersection capsuleIntersection;
+   private BoxRayIntersection boxRayIntersection;
    private ModelInstance coordinateFrame;
 
    public GDXRobotCollisionLink(Collidable collidable, Color color)
@@ -80,6 +83,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
                                box.getSizeY(),
                                box.getSizeZ(),
                                color);
+            boxRayIntersection = new BoxRayIntersection();
          }
          else if (shape instanceof PointShape3DReadOnly)
          {
@@ -108,10 +112,12 @@ public class GDXRobotCollisionLink implements RenderableProvider
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
       RigidBodyTransform transformToWorldFrame = collisionMeshFrame.getTransformToWorldFrame();
+      boolean intersects = false;
       if (shape instanceof Sphere3DReadOnly)
       {
          Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
          Point3DReadOnly position = sphere.getPosition();
+         // TODO: Implement
       }
       else if (shape instanceof Capsule3DReadOnly)
       {
@@ -121,22 +127,18 @@ public class GDXRobotCollisionLink implements RenderableProvider
          double length = capsule.getLength();
          double radius = capsule.getRadius();
          capsuleIntersection.setup(radius, length, position, axis, transformToWorldFrame);
-         boolean intersects = capsuleIntersection.intersect(pickRayInWorld);
+         intersects = capsuleIntersection.intersect(pickRayInWorld);
          GDXTools.setTransparency(modelInstance, intersects ? 1.0f : 0.4f);
       }
       else if (shape instanceof Box3DReadOnly)
       {
          Box3DReadOnly box = (Box3DReadOnly) shape;
-         Point3DReadOnly position = box.getPosition();
-         RotationMatrixReadOnly orientation = box.getOrientation();
-         tempTransform.set(transformToJoint);
-         tempTransform.appendTranslation(position);
-         tempTransform.appendOrientation(orientation);
+         boxPose.setToZero(collisionMeshFrame);
+         boxPose.changeFrame(ReferenceFrame.getWorldFrame());
          double sizeX = box.getSizeX();
          double sizeY = box.getSizeY();
          double sizeZ = box.getSizeZ();
-//         EuclidGeometryTools.inRa
-
+         intersects = boxRayIntersection.intersect(sizeX, sizeY, sizeZ, boxPose, pickRayInWorld);
       }
       else if (shape instanceof PointShape3DReadOnly)
       {
@@ -146,6 +148,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
       {
          LogTools.warn("Shape not handled: {}", shape);
       }
+      GDXTools.setTransparency(modelInstance, intersects ? 1.0f : 0.4f);
    }
 
    @Override
