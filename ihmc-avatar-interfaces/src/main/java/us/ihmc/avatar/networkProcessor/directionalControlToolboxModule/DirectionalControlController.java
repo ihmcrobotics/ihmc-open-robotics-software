@@ -265,6 +265,9 @@ public class DirectionalControlController extends ToolboxController
     */
    public void updateRobotConfigurationData(RobotConfigurationData message)
    {
+      // Always update the robot configuration
+      robotUpdater.updateConfiguration(message);
+
       RobotMotionStatus newStatus = RobotMotionStatus.fromByte(message.getRobotMotionStatus());
       // We only want to verify that the last PauseWalking sent has been successfully executed once.
       // Considering that the user may use a separate app to get the robot to walk, we do not want to interfere with the other app.
@@ -274,8 +277,6 @@ public class DirectionalControlController extends ToolboxController
          return;
       if (newStatus == RobotMotionStatus.STANDING)
          hasSuccessfullyStoppedWalking.set(true);
-
-      robotUpdater.updateConfiguration(message);
    }
 
    // Status on whether a footstep started/completed
