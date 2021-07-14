@@ -88,17 +88,18 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
       startICP.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
       stanceCMP.setToZero(ReferenceFrame.getWorldFrame());
 
+      FramePoint3DReadOnly leftFootPosition = state.getFootPose(RobotSide.LEFT).getPosition();
+      FramePoint3DReadOnly rightFootPosition = state.getFootPose(RobotSide.RIGHT).getPosition();
       if (combinedPolygon.isPointInside(startICP))
       {
-         stanceCMP.set(startICP);
+         stanceCMP.setX(InterpolationTools.linearInterpolate(leftFootPosition.getX(), rightFootPosition.getX(), 0.5));
+         stanceCMP.setY(InterpolationTools.linearInterpolate(leftFootPosition.getY(), rightFootPosition.getY(), 0.5));
       }
       else
       {
          combinedPolygon.orthogonalProjection(startICP, stanceCMP);
       }
 
-      FramePoint3DReadOnly leftFootPosition = state.getFootPose(RobotSide.LEFT).getPosition();
-      FramePoint3DReadOnly rightFootPosition = state.getFootPose(RobotSide.RIGHT).getPosition();
       double percentageAlongFoot = EuclidGeometryTools.percentageAlongLineSegment2D(stanceCMP.getX(),
                                                                                     stanceCMP.getY(),
                                                                                     leftFootPosition.getX(),
