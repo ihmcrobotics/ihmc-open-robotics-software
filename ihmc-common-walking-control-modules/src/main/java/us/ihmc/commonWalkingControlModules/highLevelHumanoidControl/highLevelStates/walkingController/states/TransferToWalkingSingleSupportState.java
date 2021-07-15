@@ -152,6 +152,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       if (resubmitStepsInTransferEveryTick.getBooleanValue())
       {
+         balanceManager.clearICPPlan();
+
          int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
          for (int i = 0; i < stepsToAdd; i++)
          {
