@@ -19,13 +19,13 @@ public class GDX3DSceneTools
    public static final String TUNING_WINDOW_NAME = "Lighting";
 
    private static ImBoolean ambientEnabled = new ImBoolean(true);
-   private static ImFloat ambientColor = new ImFloat(1.0f);
-   private static ImBoolean pointEnabled = new ImBoolean(true);
+   private static ImFloat ambientColor = new ImFloat(0.1f);
+   private static ImBoolean pointEnabled = new ImBoolean(false);
    private static ImFloat pointColor = new ImFloat(1.0f);
    private static ImFloat pointDistance = new ImFloat(10.0f);
-   private static ImFloat pointIntensity = new ImFloat(43.280f);
-   private static ImBoolean directionEnabled = new ImBoolean(false);
-   private static ImFloat directionColor = new ImFloat(0.025f);
+   private static ImFloat pointIntensity = new ImFloat(120.0f);
+   private static ImBoolean directionEnabled = new ImBoolean(true);
+   private static ImFloat directionColor = new ImFloat(1.0f);
    private static ImFloat directionDistance = new ImFloat(20.0f);
 
    public static void glClearGray()
@@ -65,9 +65,6 @@ public class GDX3DSceneTools
       {
          DirectionalLightsAttribute directionalLights = new DirectionalLightsAttribute();
          directionalLights.lights.add(new DirectionalLight().set(directionColor, directionColor, directionColor, -directionDistance, -directionDistance, -directionDistance));
-         directionalLights.lights.add(new DirectionalLight().set(directionColor, directionColor, directionColor,  directionDistance, -directionDistance, -directionDistance));
-         directionalLights.lights.add(new DirectionalLight().set(directionColor, directionColor, directionColor,  directionDistance,  directionDistance, -directionDistance));
-         directionalLights.lights.add(new DirectionalLight().set(directionColor, directionColor, directionColor, -directionDistance,  directionDistance, -directionDistance));
          environment.set(directionalLights);
       }
 //      DirectionalLightsAttribute directionalLights = new DirectionalLightsAttribute();
