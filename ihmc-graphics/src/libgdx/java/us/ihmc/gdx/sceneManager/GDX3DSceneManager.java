@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
+import com.badlogic.gdx.tests.g3d.shadows.system.ShadowSystem;
 import com.badlogic.gdx.tests.g3d.shadows.system.classical.ClassicalShadowSystem;
 import com.badlogic.gdx.tests.g3d.shadows.utils.AABBNearFarAnalyzer;
 import com.badlogic.gdx.tests.g3d.shadows.utils.BoundingSphereDirectionalAnalyzer;
@@ -40,11 +41,10 @@ public class GDX3DSceneManager
    private FocusBasedGDXCamera camera3D;
    private Environment environment;
    private ScreenViewport viewport;
-   private ModelBatch modelBatch;
 
-   private ClassicalShadowSystem shadowSystem;
+   private ShadowSystem shadowSystem;
    private final Array<ModelBatch> passBatches = new Array<ModelBatch>();
-   private ModelBatch mainShadowBatch;
+   private ModelBatch modelBatch;
 
    private int x = 0;
    private int y = 0;
@@ -80,6 +80,8 @@ public class GDX3DSceneManager
          passBatches.add(new ModelBatch(shadowSystem.getPassShaderProvider(i)));
       }
 
+      //modelBatch = new ModelBatch(shadowSystem.getShaderProvider());
+
       for (Attribute attribute : environment) {
          if (attribute instanceof PointLightsAttribute) {
             PointLightsAttribute pointLights = (PointLightsAttribute) attribute;
@@ -93,8 +95,6 @@ public class GDX3DSceneManager
             }
          }
       }
-
-      mainShadowBatch = new ModelBatch(shadowSystem.getShaderProvider());
 
       if (inputMode == GDXInputMode.libGDX)
       {
@@ -124,6 +124,8 @@ public class GDX3DSceneManager
 
    public void renderBefore(GDXSceneLevel sceneLevel)
    {
+      sceneLevel = GDXSceneLevel.REAL_ENVIRONMENT;
+
       if (!firstRenderStarted)
       {
          firstRenderStarted = true;
@@ -136,37 +138,6 @@ public class GDX3DSceneManager
          height = getCurrentWindowHeight();
 
       viewport.update(width, height);
-
-      Gdx.gl.glViewport(x, y, width, height);
-      Gdx.gl.glClearColor(0, 0, 0, 1);
-      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
-      modelBatch.begin(camera3D);
-
-      renderRegisteredObjectsWithEnvironment(modelBatch, sceneLevel);
-   }
-
-   public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch)
-   {
-      renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.VIRTUAL);
-   }
-
-   public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch, GDXSceneLevel sceneLevel)
-   {
-      //environment = GDX3DSceneTools.createDefaultEnvironment();
-
-      for (GDXRenderable renderable : renderables)
-      {
-         if (sceneLevel.ordinal() >= renderable.getSceneType().ordinal())
-         {
-            modelBatch.render(renderable.getRenderableProvider(), environment);
-         }
-      }
-   }
-
-   public void renderAfter()
-   {
-      modelBatch.end();
 
       shadowSystem.begin(camera3D, modelInstances);
       shadowSystem.update();
@@ -184,14 +155,43 @@ public class GDX3DSceneManager
 
       shadowSystem.end();
 
-      mainShadowBatch.begin(camera3D);
-      mainShadowBatch.render(modelInstances, environment);
-      mainShadowBatch.end();
+      Gdx.gl.glViewport(x, y, width, height);
+      GDX3DSceneTools.glClearGray(0);
+
+      modelBatch.begin(camera3D);
+
+      renderRegisteredObjectsWithEnvironment(modelBatch, sceneLevel);
+   }
+
+   public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch)
+   {
+      renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.VIRTUAL);
+   }
+
+   public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch, GDXSceneLevel sceneLevel)
+   {
+      //environment = GDX3DSceneTools.createDefaultEnvironment();
+
+      for (GDXRenderable renderable : renderables)
+      {
+         modelBatch.render(renderable.getRenderableProvider(), environment);
+
+//         if (sceneLevel.ordinal() >= renderable.getSceneType().ordinal())
+//         {
+//            modelBatch.render(renderable.getRenderableProvider(), environment);
+//         }
+      }
+   }
+
+   public void renderAfter()
+   {
+      modelBatch.end();
    }
 
    public void renderToCamera(Camera camera)
    {
-      modelBatch.begin(camera);
+      //modelBatch.begin(camera);
+      renderBefore();
       renderRegisteredObjectsWithEnvironment(modelBatch);
       renderAfter();
    }
@@ -219,8 +219,6 @@ public class GDX3DSceneManager
       for (ModelBatch batch : passBatches) {
          batch.dispose();
       }
-      mainShadowBatch.dispose();
-      shadowSystem.dispose();
 
       modelBatch.dispose();
    }
