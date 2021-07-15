@@ -159,7 +159,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
       goalPoint.interpolate(lastStep, secondToLastStep, 0.5);
       goalPoint.addZ(getNominalHeight());
 
-      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(goalPoint, new Vector3D(0.3, 0.3, 0.4));
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(goalPoint, new Vector3D(1.0, 0.3, 0.4));
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
    }
 
