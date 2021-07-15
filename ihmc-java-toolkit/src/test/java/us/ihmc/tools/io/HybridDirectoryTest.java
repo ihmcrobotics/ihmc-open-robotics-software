@@ -14,15 +14,17 @@ public class HybridDirectoryTest
       Path dotIHMC = Paths.get(System.getProperty("user.home")).resolve(".ihmc");
       String openRobotics = "ihmc-open-robotics-software";
       String subsequentPathToResourceFolder = "ihmc-java-toolkit/src/test/resources";
-      HybridDirectory directory = new HybridDirectory(dotIHMC, openRobotics, subsequentPathToResourceFolder, "/");
-      LogTools.info(directory.getWorkspaceDirectory());
-      LogTools.info(directory.getExternalDirectory());
-      LogTools.info(directory.getClassForLoading());
-      LogTools.info(directory.getPathNecessaryForClasspathLoading());
-      HybridFile file = new HybridFile(directory, "testRootResource.txt");
-      LogTools.info(file.getWorkspaceFile());
-      LogTools.info(file.getExternalFile());
-      LogTools.info(file.getClasspathResource());
+      HybridDirectory directory;
+      HybridFile file;
+//      directory = new HybridDirectory(dotIHMC, openRobotics, subsequentPathToResourceFolder, "/");
+//      LogTools.info(directory.getWorkspaceDirectory());
+//      LogTools.info(directory.getExternalDirectory());
+//      LogTools.info(directory.getClassForLoading());
+//      LogTools.info(directory.getPathNecessaryForClasspathLoading());
+//      file = new HybridFile(directory, "testRootResource.txt");
+//      LogTools.info(file.getWorkspaceFile());
+//      LogTools.info(file.getExternalFile());
+//      LogTools.info(file.getClasspathResource());
 
       directory = new HybridDirectory(dotIHMC, openRobotics, subsequentPathToResourceFolder, getClass(), "/");
       LogTools.info(directory.getWorkspaceDirectory());
