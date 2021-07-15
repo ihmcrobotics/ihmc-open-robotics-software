@@ -135,10 +135,15 @@ public class RecoveryTransferState extends PushRecoveryState
       comHeightManager.initialize(transferToAndNextFootstepsData, 0.0);
    }
 
+   public boolean isICPPlanDone()
+   {
+      return balanceManager.isICPPlanDone();
+   }
+
    @Override
    public boolean isDone(double timeInState)
    {
-      return balanceManager.isICPPlanDone();
+      return isICPPlanDone() && (pushRecoveryControlModule.isRobotFallingFromDoubleSupport() == transferToSide.getOppositeSide());
    }
 
    @Override

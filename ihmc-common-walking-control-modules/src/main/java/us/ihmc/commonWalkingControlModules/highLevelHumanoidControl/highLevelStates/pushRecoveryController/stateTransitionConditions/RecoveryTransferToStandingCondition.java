@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.RecoveryTransferState;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 public class RecoveryTransferToStandingCondition implements StateTransitionCondition
@@ -18,6 +19,12 @@ public class RecoveryTransferToStandingCondition implements StateTransitionCondi
    @Override
    public boolean testCondition(double timeInState)
    {
+      RobotSide swingSide = pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
+
+      // if falling and next support foot is not the transfer to side, go to standing to re-route state machine
+      if (transferState.isBalanceICPPlanDone() && (swingSide != transferState.getTransferToSide().getOppositeSide()))
+         return true;
+
       if (!transferState.isDone(timeInState))
          return false;
 
