@@ -78,6 +78,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -440,6 +441,7 @@ public class CrossRobotCommandRandomTools
       next.setVelocityBreakFrequency(random.nextDouble());
       next.setMaxPositionError(random.nextDouble());
       next.setMaxVelocity(random.nextDouble());
+      next.setZeroVelocityReset(RandomNumbers.nextBoolean(random, 0.5));
       return next;
    }
 
