@@ -5,21 +5,10 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
-import com.badlogic.gdx.tests.g3d.shadows.system.classical.ClassicalShadowSystem;
-import com.badlogic.gdx.tests.g3d.shadows.utils.AABBNearFarAnalyzer;
-import com.badlogic.gdx.tests.g3d.shadows.utils.BoundingSphereDirectionalAnalyzer;
-import com.badlogic.gdx.tests.g3d.shadows.utils.FixedShadowMapAllocator;
-import com.badlogic.gdx.tests.g3d.shadows.utils.FrustumLightFilter;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -41,10 +30,6 @@ public class GDX3DSceneManager
    private Environment environment;
    private ScreenViewport viewport;
    private ModelBatch modelBatch;
-
-   private ClassicalShadowSystem shadowSystem;
-   private final Array<ModelBatch> passBatches = new Array<ModelBatch>();
-   private ModelBatch mainShadowBatch;
 
    private int x = 0;
    private int y = 0;
@@ -72,29 +57,6 @@ public class GDX3DSceneManager
       DefaultShader.Config defaultShaderConfig = new DefaultShader.Config();
       // we could set shader options or even swap out the shader here
       modelBatch = new ModelBatch(new DefaultShaderProvider(defaultShaderConfig));
-
-      this.shadowSystem = new ClassicalShadowSystem(new AABBNearFarAnalyzer(), new FixedShadowMapAllocator(2048, 4),
-                                                    new BoundingSphereDirectionalAnalyzer(), new FrustumLightFilter());
-      shadowSystem.init();
-      for (int i = 0; i < shadowSystem.getPassQuantity(); i++) {
-         passBatches.add(new ModelBatch(shadowSystem.getPassShaderProvider(i)));
-      }
-
-      for (Attribute attribute : environment) {
-         if (attribute instanceof PointLightsAttribute) {
-            PointLightsAttribute pointLights = (PointLightsAttribute) attribute;
-            for (PointLight light : pointLights.lights) {
-               shadowSystem.addLight(light);
-            }
-         } else if (attribute instanceof DirectionalLightsAttribute) {
-            DirectionalLightsAttribute directionalLights = (DirectionalLightsAttribute) attribute;
-            for (DirectionalLight light : directionalLights.lights) {
-               shadowSystem.addLight(light);
-            }
-         }
-      }
-
-      mainShadowBatch = new ModelBatch(shadowSystem.getShaderProvider());
 
       if (inputMode == GDXInputMode.libGDX)
       {
@@ -137,11 +99,10 @@ public class GDX3DSceneManager
 
       viewport.update(width, height);
 
-      Gdx.gl.glViewport(x, y, width, height);
-      Gdx.gl.glClearColor(0, 0, 0, 1);
-      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
-
       modelBatch.begin(camera3D);
+
+      Gdx.gl.glViewport(x, y, width, height);
+      GDX3DSceneTools.glClearGray();
 
       renderRegisteredObjectsWithEnvironment(modelBatch, sceneLevel);
    }
@@ -153,7 +114,7 @@ public class GDX3DSceneManager
 
    public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch, GDXSceneLevel sceneLevel)
    {
-      //environment = GDX3DSceneTools.createDefaultEnvironment();
+      environment = GDX3DSceneTools.createDefaultEnvironment();
 
       for (GDXRenderable renderable : renderables)
       {
@@ -167,26 +128,6 @@ public class GDX3DSceneManager
    public void renderAfter()
    {
       modelBatch.end();
-
-      shadowSystem.begin(camera3D, modelInstances);
-      shadowSystem.update();
-
-      for (int i = 0; i < shadowSystem.getPassQuantity(); i++) {
-         shadowSystem.begin(i);
-         Camera camera;
-         while ((camera = shadowSystem.next()) != null) {
-            passBatches.get(i).begin(camera);
-            passBatches.get(i).render(modelInstances, environment);
-            passBatches.get(i).end();
-         }
-         shadowSystem.end(i);
-      }
-
-      shadowSystem.end();
-
-      mainShadowBatch.begin(camera3D);
-      mainShadowBatch.render(modelInstances, environment);
-      mainShadowBatch.end();
    }
 
    public void renderToCamera(Camera camera)
@@ -215,13 +156,6 @@ public class GDX3DSceneManager
       }
 
       ExceptionTools.handle(() -> camera3D.dispose(), DefaultExceptionHandler.PRINT_MESSAGE);
-
-      for (ModelBatch batch : passBatches) {
-         batch.dispose();
-      }
-      mainShadowBatch.dispose();
-      shadowSystem.dispose();
-
       modelBatch.dispose();
    }
 
