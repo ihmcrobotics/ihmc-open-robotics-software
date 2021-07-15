@@ -670,6 +670,14 @@ public class SwingState extends AbstractFootControlState
       return computeSwingTimeRemaining(currentTime.getValue());
    }
 
+   public double getFractionThroughSwing()
+   {
+      if (!currentTimeWithSwingSpeedUp.isNaN())
+         return currentTimeWithSwingSpeedUp.getDoubleValue() / swingDuration.getValue();
+      else
+         return currentTime.getDoubleValue() / swingDuration.getValue();
+   }
+
    private double computeSwingTimeRemaining(double timeInState)
    {
       double swingDuration = this.swingDuration.getDoubleValue();

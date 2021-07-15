@@ -458,6 +458,14 @@ public class FootControlModule
          return swingState.getSwingTimeRemaining();
    }
 
+   public double getFractionThroughSwing()
+   {
+      if (stateMachine.getCurrentState() != swingState)
+         return Double.NaN;
+      else
+         return swingState.getFractionThroughSwing();
+   }
+
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       inverseDynamicsCommandList.clear();
