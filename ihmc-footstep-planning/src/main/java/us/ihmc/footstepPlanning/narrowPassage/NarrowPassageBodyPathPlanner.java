@@ -148,6 +148,7 @@ public class NarrowPassageBodyPathPlanner
 
       initializeBodyPoints();
       adjustBodyPointPositions();
+      adjustBodyPointOrientations();
       recomputeWaypoints();
 
       List<Pose3DReadOnly> bodyPath = new ArrayList<>();
@@ -175,12 +176,14 @@ public class NarrowPassageBodyPathPlanner
       Vector3D vectorToNextWaypoint = new Vector3D();
       for (int i = 0; i < numberOfWaypoints; i++)
       {
+         // TODO Fix orientation of collision boxes during init
          bodyCollisionPoints.get(i).initialize(waypoints[i]);
          if (i < numberOfWaypoints - 1)
             vectorToNextWaypoint.set(waypoints[i + 1].getX() - waypoints[i].getX(),
                                      waypoints[i + 1].getY() - waypoints[i].getY(),
                                      waypoints[i + 1].getZ() - waypoints[i].getZ());
          bodyCollisionPoints.get(i).initializeWaypointAdjustmentFrame(vectorToNextWaypoint);
+
          convolutionWeights.add(exp(0.65, i));
          bodyCollisionPoints.get(i).updateGraphics(true);
       }
@@ -255,13 +258,40 @@ public class NarrowPassageBodyPathPlanner
 
          if (visualize)
          {
-            LogTools.info("iteration " + i);
+//            LogTools.info("iteration " + i);
             tickAndUpdatable.tickAndUpdate();
          }
 
          if (!intersectionFound)
          {
             break;
+         }
+      }
+   }
+
+   private void adjustBodyPointOrientations()
+   {
+      LogTools.info("Entering orientation adjustment");
+      int maxIterations = 30;
+
+      for (int i = 0; i < maxIterations; i++)
+      {
+         LogTools.info("iteration " + i);
+         for (int j = 0; j < numberOfWaypoints; j++)
+         {
+            BodyCollisionPoint bodyCollisionPoint = bodyCollisionPoints.get(j);
+
+            boolean collisionDetected = bodyCollisionPoint.doCollisionCheck(collisionDetector, planarRegionsList);
+            if (collisionDetected)
+            {
+               LogTools.info("Entering orientation adjustment");
+               bodyCollisionPoints.get(j).adjustOrientationSlightly();
+               bodyCollisionPoints.get(j).updateGraphics(bodyCollisionPoints.get(j).getCollisionResult().areShapesColliding());
+            }
+         }
+         if (visualize)
+         {
+            tickAndUpdatable.tickAndUpdate();
          }
       }
    }
