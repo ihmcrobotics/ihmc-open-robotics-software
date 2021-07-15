@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.OrientationTrajectoryConstructor;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.customPolicies.CustomMPCPolicy;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
@@ -33,6 +34,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
 
@@ -89,6 +91,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    private final YoDouble finalOrientationWeight = new YoDouble("finalOrientationWeight", registry);
 
    private final IntUnaryOperator firstVariableIndex;
+
+   private final List<CustomMPCPolicy> customMPCPoliciesToProcess = new ArrayList<>();
 
    public SE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
                                        double gravityZ,
@@ -151,6 +155,11 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
       parentRegistry.addChild(registry);
    }
+   
+   public void addCustomPolicyToProcess(CustomMPCPolicy policyToProcess)
+   {
+      customMPCPoliciesToProcess.add(policyToProcess);
+   }
 
 
    @Override
@@ -198,6 +207,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       super.computeObjectives(contactSequence);
 
       computeOrientationObjectives();
+
+      computeCustomMPCPolicyObjectives(contactSequence);
    }
 
    private final DMatrixRMaj initialError = new DMatrixRMaj(6, 1);
@@ -223,6 +234,16 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
       mpcCommands.addCommand(computeInitialOrientationErrorCommand(commandProvider.getNextDirectOrientationValueCommand()));
       mpcCommands.addCommand(computeFinalOrientationMinimizationCommand(commandProvider.getNextOrientationValueCommand()));
+   }
+
+   private void computeCustomMPCPolicyObjectives(List<ContactPlaneProvider> contactSequence)
+   {
+      for (int i = 0; i < customMPCPoliciesToProcess.size(); i++)
+      {
+         mpcCommands.addCommand(customMPCPoliciesToProcess.get(i).computeMPCCommand(contactHandler, contactSequence, omega.getValue()));
+      }
+
+      customMPCPoliciesToProcess.clear();
    }
 
    private void computeInitialError()
