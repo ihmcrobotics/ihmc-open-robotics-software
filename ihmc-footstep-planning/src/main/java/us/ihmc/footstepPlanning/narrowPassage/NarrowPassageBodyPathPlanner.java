@@ -1,16 +1,27 @@
 package us.ihmc.footstepPlanning.narrowPassage;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import sun.rmi.runtime.Log;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
+import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingKnotPoint;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,13 +30,14 @@ import java.util.List;
 public class NarrowPassageBodyPathPlanner
 {
    // can make this dependent on the path length later
-   private static int numberOfWaypoints = 20;
+   private static int numberOfWaypoints = 15;
 
    private static final double bodyDepth = 0.4;
    private static final double bodyWidth = 0.7;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry;
+   private final YoBoolean collisionFound = new YoBoolean("collisionFound", registry);
    private final VisibilityGraphsParametersReadOnly parameters;
    private final boolean visualize;
 
@@ -34,6 +46,13 @@ public class NarrowPassageBodyPathPlanner
    private final YoFramePose3D startPose = new YoFramePose3D("startPose", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D endPose = new YoFramePose3D("endPose", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D[] waypoints = new YoFramePose3D[numberOfWaypoints];
+   private final List<BodyCollisionPoint> bodyCollisionPoints = new ArrayList<>();
+
+   private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
+   private static final double collisionGradientScale = 0.5;
+   private final List<Vector3D> collisionGradients = new ArrayList<>();
+   private final List<Vector3D> convolvedGradients = new ArrayList<>();
+   private final TDoubleArrayList convolutionWeights = new TDoubleArrayList();
 
    // for visualization only
    private final TickAndUpdatable tickAndUpdatable;
@@ -41,12 +60,13 @@ public class NarrowPassageBodyPathPlanner
    private final YoFrameVector3D endOrientation = new YoFrameVector3D("endOrientation", ReferenceFrame.getWorldFrame(), registry);
    private final BagOfBalls waypointPointGraphic;
 
-   public NarrowPassageBodyPathPlanner(VisibilityGraphsParametersReadOnly parameters)
+   public NarrowPassageBodyPathPlanner(VisibilityGraphsParametersReadOnly parameters, FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
-      this(parameters, null, null, null);
+      this(parameters, footstepPlannerParameters, null, null, null);
    }
 
    public NarrowPassageBodyPathPlanner(VisibilityGraphsParametersReadOnly parameters,
+                                       FootstepPlannerParametersReadOnly footstepPlannerParameters,
                                        YoGraphicsListRegistry graphicsListRegistry,
                                        TickAndUpdatable tickAndUpdatable,
                                        YoRegistry parentRegistry)
@@ -59,6 +79,9 @@ public class NarrowPassageBodyPathPlanner
       for (int i = 0; i < numberOfWaypoints; i++)
       {
          waypoints[i] = new YoFramePose3D("waypoint" + i, ReferenceFrame.getWorldFrame(), registry);
+         bodyCollisionPoints.add(new BodyCollisionPoint(i, footstepPlannerParameters, graphicsListRegistry, registry));
+         collisionGradients.add(new Vector3D());
+         convolvedGradients.add(new Vector3D());
       }
 
       if (parentRegistry != null)
@@ -80,8 +103,11 @@ public class NarrowPassageBodyPathPlanner
          for (int i = 0; i < numberOfWaypoints; i++)
          {
             YoFramePose3D waypointPose = waypoints[i];
-            YoGraphicCoordinateSystem waypointOrientation = new YoGraphicCoordinateSystem("waypointOrientation" + i, waypointPose.getPosition(), waypointPose.getOrientation(), 0.15);
-            graphicsList.add(waypointOrientation);
+            //            YoGraphicCoordinateSystem waypointOrientation = new YoGraphicCoordinateSystem("waypointOrientation" + i,
+            //                                                                                          waypointPose.getPosition(),
+            //                                                                                          waypointPose.getOrientation(),
+            //                                                                                          0.15);
+            //            graphicsList.add(waypointOrientation);
          }
 
          graphicsList.add(startPosition);
@@ -120,8 +146,9 @@ public class NarrowPassageBodyPathPlanner
       }
       updateWaypointPointGraphics();
 
-      // TODO adjust waypoints to avoid regions
-      // iteratively adjust waypoint positions and call updateWaypointPointGraphics
+      initializeBodyPoints();
+      adjustBodyPointPositions();
+      recomputeWaypoints();
 
       List<Pose3DReadOnly> bodyPath = new ArrayList<>();
       bodyPath.add(startPose);
@@ -143,6 +170,112 @@ public class NarrowPassageBodyPathPlanner
       tickAndUpdatable.tickAndUpdate();
    }
 
+   private void initializeBodyPoints()
+   {
+      Vector3D vectorToNextWaypoint = new Vector3D();
+      for (int i = 0; i < numberOfWaypoints; i++)
+      {
+         bodyCollisionPoints.get(i).initialize(waypoints[i]);
+         if (i < numberOfWaypoints - 1)
+            vectorToNextWaypoint.set(waypoints[i + 1].getX() - waypoints[i].getX(),
+                                     waypoints[i + 1].getY() - waypoints[i].getY(),
+                                     waypoints[i + 1].getZ() - waypoints[i].getZ());
+         bodyCollisionPoints.get(i).initializeWaypointAdjustmentFrame(vectorToNextWaypoint);
+         convolutionWeights.add(exp(0.65, i));
+         bodyCollisionPoints.get(i).updateGraphics(true);
+      }
+
+      if (visualize)
+      {
+         /* Show one collision box at a time */
+         for (int boxToShow = 0; boxToShow < numberOfWaypoints; boxToShow++)
+         {
+            bodyCollisionPoints.forEach(kp -> kp.updateGraphics(false));
+            bodyCollisionPoints.get(boxToShow).updateGraphics(true);
+            tickAndUpdatable.tickAndUpdate();
+         }
+      }
+   }
+
+   private void adjustBodyPointPositions()
+   {
+      collisionFound.set(false);
+      int maxIterations = 30;
+
+      for (int i = 0; i < maxIterations; i++)
+      {
+         boolean intersectionFound = false;
+         for (int j = 0; j < numberOfWaypoints; j++)
+         {
+            BodyCollisionPoint bodyCollisionPoint = bodyCollisionPoints.get(j);
+
+            boolean collisionDetected = bodyCollisionPoint.doCollisionCheck(collisionDetector, planarRegionsList);
+            if (collisionDetected)
+            {
+               collisionFound.set(true);
+               intersectionFound = true;
+
+               EuclidShape3DCollisionResult collisionResult = bodyCollisionPoint.getCollisionResult();
+               collisionGradients.get(j).sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
+               collisionGradients.get(j).scale(collisionGradientScale);
+               bodyCollisionPoints.get(j).project(collisionGradients.get(j));
+            }
+            else
+            {
+               collisionGradients.get(j).setToZero();
+               continue;
+            }
+
+//            if (bodyCollisionPoints.get(j).getCollisionResult().areShapesColliding())
+//            {
+//               double scale = bodyCollisionPoints.get(j).computeMaximumDisplacementScale(collisionGradients.get(j));
+//               collisionGradients.get(j).scale(scale);
+//            }
+         }
+
+         for (int j = 0; j < numberOfWaypoints; j++)
+         {
+            convolvedGradients.get(j).setToZero();
+            for (int k = 0; k < numberOfWaypoints; k++)
+            {
+               int indexDifference = Math.abs(j - k);
+               double scale = convolutionWeights.get(indexDifference);
+               scaleAdd(convolvedGradients.get(j), scale, collisionGradients.get(k));
+            }
+
+//            LogTools.info("waypoint number " + j);
+            bodyCollisionPoints.get(j).project(convolvedGradients.get(j));
+            bodyCollisionPoints.get(j).shiftWaypoint(convolvedGradients.get(j));
+
+            if (visualize)
+            {
+               bodyCollisionPoints.get(j).updateGraphics(bodyCollisionPoints.get(j).getCollisionResult().areShapesColliding());
+            }
+         }
+
+         if (visualize)
+         {
+            LogTools.info("iteration " + i);
+            tickAndUpdatable.tickAndUpdate();
+         }
+
+         if (!intersectionFound)
+         {
+            break;
+         }
+      }
+   }
+
+   private void recomputeWaypoints()
+   {
+      for (int i = 0; i < numberOfWaypoints; i++)
+      {
+         waypoints[i].set(bodyCollisionPoints.get(i).getOptimizedWaypoint());
+         bodyCollisionPoints.get(i).hide();
+      }
+      updateWaypointPointGraphics();
+   }
+
    private void updateWaypointPointGraphics()
    {
       if (!visualize)
@@ -157,5 +290,31 @@ public class NarrowPassageBodyPathPlanner
       }
 
       tickAndUpdatable.tickAndUpdate();
+   }
+
+   /*
+    * Different from the Vector3DBasics.scaleAdd, which scales the mutated vector
+    * a = a + alpha * b
+    */
+   static void scaleAdd(Vector3DBasics vectorA, double alpha, Vector3DReadOnly vectorB)
+   {
+      vectorA.addX(alpha * vectorB.getX());
+      vectorA.addY(alpha * vectorB.getY());
+      vectorA.addZ(alpha * vectorB.getZ());
+   }
+
+   /* exponent function assuming non-negative positive exponent */
+   static double exp(double base, int exponent)
+   {
+      double value = 1.0;
+      int i = 0;
+
+      while (i < exponent)
+      {
+         value *= base;
+         i++;
+      }
+
+      return value;
    }
 }
