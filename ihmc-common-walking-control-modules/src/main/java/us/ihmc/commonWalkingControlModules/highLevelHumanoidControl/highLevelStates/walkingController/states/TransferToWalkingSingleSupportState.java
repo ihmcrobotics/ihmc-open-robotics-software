@@ -162,12 +162,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
             walkingMessageHandler.peekFootstep(i, footstep);
             walkingMessageHandler.peekTiming(i, timing);
 
-            if (i == 0)
-            {
-               adjustTiming(timing);
-               walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
-            }
-
             balanceManager.addFootstepToPlan(footstep, timing);
          }
       }
