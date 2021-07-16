@@ -14,9 +14,6 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 
 public class GDX3DWith2DUIDemo
 {
-   private ModelInstance boxes;
-   private ModelInstance coordinateFrame;
-
    private Stage stage;
    private Table table;
 
@@ -35,8 +32,8 @@ public class GDX3DWith2DUIDemo
                               (int) (sceneManager.getCurrentWindowWidth() * 1.0),
                               (int) (sceneManager.getCurrentWindowHeight() * 3.0 / 4.0));
 
-            coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
-            boxes = new BoxesDemoModel().newInstance();
+            sceneManager.addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
 
             stage = new Stage(new ScreenViewport());
             sceneManager.addLibGDXInputProcessor(stage);
@@ -60,12 +57,7 @@ public class GDX3DWith2DUIDemo
          @Override
          public void render()
          {
-            sceneManager.renderBefore();
-
-            sceneManager.getModelBatch().render(coordinateFrame, sceneManager.getEnvironment());
-            sceneManager.getModelBatch().render(boxes, sceneManager.getEnvironment());
-
-            sceneManager.renderAfter();
+            sceneManager.render();
 
             Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 1 / 4);
             stage.getViewport().update(sceneManager.getCurrentWindowWidth(), sceneManager.getCurrentWindowHeight() * 1 / 4, true);

@@ -104,7 +104,7 @@ public class GDXLowLevelImageSensorSimulator
       modelBatch.begin(camera);
       Gdx.gl.glViewport(0, 0, imageWidth, imageHeight);
 
-      sceneManager.renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
+      sceneManager.renderFromBatch(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
 
       modelBatch.end();
 
