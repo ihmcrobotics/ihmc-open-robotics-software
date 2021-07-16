@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
@@ -440,14 +439,14 @@ public abstract class EuclideanModelPredictiveController
       // set terminal constraint
       ContactStateProvider<ContactPlaneProvider> lastContactPhase = contactSequence.get(numberOfPhases - 1);
       double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), sufficientlyLongTime);
-      mpcCommands.addCommand(computeCoMPositionObjective(commandProvider.getNextCoMPositionCommand(),
-                                                         comPositionAtEndOfWindow,
+      mpcCommands.addCommand(computeFinalCoMPositionObjective(commandProvider.getNextCoMPositionCommand(),
+                                                              comPositionAtEndOfWindow,
                                                          numberOfPhases - 1,
-                                                         finalDuration));
-      mpcCommands.addCommand(computeCoMVelocityObjective(commandProvider.getNextCoMVelocityCommand(),
-                                                         comVelocityAtEndOfWindow,
+                                                              finalDuration));
+      mpcCommands.addCommand(computeFinalCoMVelocityObjective(commandProvider.getNextCoMVelocityCommand(),
+                                                              comVelocityAtEndOfWindow,
                                                          numberOfPhases - 1,
-                                                         finalDuration));
+                                                              finalDuration));
 
       //      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), dcmAtEndOfWindow, numberOfPhases - 1, finalDuration));
       mpcCommands.addCommand(computeVRPPositionObjective(commandProvider.getNextVRPPositionCommand(), vrpAtEndOfWindow, numberOfPhases - 1, finalDuration));
@@ -458,7 +457,7 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
       objectiveToPack.setWeight(mpcParameters.getInitialComWeight());
-      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      objectiveToPack.setConstraintType(mpcParameters.getInitialCoMPositionConstraintType());
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMPosition);
@@ -474,7 +473,7 @@ public abstract class EuclideanModelPredictiveController
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
-      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      objectiveToPack.setConstraintType(mpcParameters.getInitialCoMVelocityConstraintType());
       objectiveToPack.setWeight(mpcParameters.getInitialComVelocityWeight());
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
@@ -608,10 +607,10 @@ public abstract class EuclideanModelPredictiveController
       return objectiveToPack;
    }
 
-   private MPCCommand<?> computeCoMPositionObjective(CoMPositionCommand objectiveToPack,
-                                                     FramePoint3DReadOnly desiredPosition,
-                                                     int segmentNumber,
-                                                     double timeOfObjective)
+   private MPCCommand<?> computeFinalCoMPositionObjective(CoMPositionCommand objectiveToPack,
+                                                          FramePoint3DReadOnly desiredPosition,
+                                                          int segmentNumber,
+                                                          double timeOfObjective)
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
@@ -619,17 +618,17 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
       objectiveToPack.setWeight(mpcParameters.getFinalComWeight());
-      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      objectiveToPack.setConstraintType(mpcParameters.getFinalCoMPositionConstraintType());
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
          objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return objectiveToPack;
    }
 
-   private MPCCommand<?> computeCoMVelocityObjective(CoMVelocityCommand objectiveToPack,
-                                                     FrameVector3DReadOnly desiredVelocity,
-                                                     int segmentNumber,
-                                                     double timeOfObjective)
+   private MPCCommand<?> computeFinalCoMVelocityObjective(CoMVelocityCommand objectiveToPack,
+                                                          FrameVector3DReadOnly desiredVelocity,
+                                                          int segmentNumber,
+                                                          double timeOfObjective)
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
@@ -637,7 +636,7 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredVelocity);
       objectiveToPack.setWeight(mpcParameters.getFinalComWeight());
-      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      objectiveToPack.setConstraintType(mpcParameters.getFinalCoMVelocityConstraintType());
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
          objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
@@ -656,7 +655,7 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
       objectiveToPack.setWeight(mpcParameters.getFinalVRPWeight());
-      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      objectiveToPack.setConstraintType(mpcParameters.getFinalVRPPositionConstraintType());
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
          objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -27,6 +28,12 @@ public class MPCParameters
 
    private static final double defaultInitialOrientationWeight = 1e6;
    private static final double defaultFinalOrientationWeight = 1e-6;
+
+   private static final ConstraintType initialCoMPositionConstraintType = ConstraintType.OBJECTIVE;
+   private static final ConstraintType initialCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
+   private static final ConstraintType finalCoMPositionConstraintType = ConstraintType.EQUALITY;
+   private static final ConstraintType finalCoMVelocityConstraintType = ConstraintType.EQUALITY;
+   private static final ConstraintType finalVRPPositionConstraintType = ConstraintType.EQUALITY;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -86,6 +93,31 @@ public class MPCParameters
    public boolean includeRhoMinimization()
    {
       return includeRhoMinimization;
+   }
+
+   public ConstraintType getInitialCoMPositionConstraintType()
+   {
+      return initialCoMPositionConstraintType;
+   }
+
+   public ConstraintType getInitialCoMVelocityConstraintType()
+   {
+      return initialCoMVelocityConstraintType;
+   }
+
+   public ConstraintType getFinalCoMPositionConstraintType()
+   {
+      return finalCoMPositionConstraintType;
+   }
+
+   public ConstraintType getFinalCoMVelocityConstraintType()
+   {
+      return finalCoMVelocityConstraintType;
+   }
+
+   public ConstraintType getFinalVRPPositionConstraintType()
+   {
+      return finalVRPPositionConstraintType;
    }
 
    public double getMinRhoValue()
