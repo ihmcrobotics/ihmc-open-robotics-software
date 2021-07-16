@@ -7,11 +7,8 @@ import java.util.List;
 import java.util.function.DoubleConsumer;
 
 /**
- * This command is designed to minimize the force exerted over the course of the segment duration. The exact cost is the integral of the squared force magnitude.
- * This can be thought of as minimizing the absolute work done.
- *
- * Whereas many other MPC algorithms provide some regularization by minimizing the CoM acceleration, this minimizes the force, so as to account for the force
- * that must be exerted to counter gravity.
+ * This command is designed to track a specified value for all the generalized contact accelerations along a basis vector over the course of the segment duration.
+ * The exact cost is the integral of the squared difference of this generalized contact acceleration value from the objective value.
  */
 public class RhoTrackingCommand implements MPCCommand<RhoTrackingCommand>
 {
@@ -33,9 +30,13 @@ public class RhoTrackingCommand implements MPCCommand<RhoTrackingCommand>
     * Weight of this minimization command in the optimizer.
     */
    private double weight;
-
+   /**
+    * Duration of the specified segment.
+    */
    private double segmentDuration;
-
+   /**
+    * Desired value for each generalized contact acceleration in the contact plane.
+    */
    private double objectiveValue = 0.0;
 
    /**

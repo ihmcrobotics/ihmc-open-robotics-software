@@ -102,7 +102,7 @@ public class IntegrationInputCalculator
                                                  MPCContactPlane contactPlane,
                                                  double duration,
                                                  double omega,
-                                                 double goalNormalForce)
+                                                 FrameVector3DReadOnly goalForce)
    {
       duration = Math.min(duration, sufficientlyLongTime);
 
@@ -135,7 +135,7 @@ public class IntegrationInputCalculator
       {
          int startIdxI = startCol + basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
-         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexI);
+         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVector(basisVectorIndexI);
 
          hessianToPack.unsafe_set(startIdxI, startIdxI, c00);
          hessianToPack.unsafe_set(startIdxI, startIdxI + 1, c01);
@@ -156,7 +156,7 @@ public class IntegrationInputCalculator
 
          for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < contactPlane.getRhoSize(); basisVectorIndexJ++)
          {
-            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexJ);
+            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVector(basisVectorIndexJ);
 
             double basisDot = basisVectorI.dot(basisVectorJ);
 
@@ -198,7 +198,7 @@ public class IntegrationInputCalculator
             hessianToPack.unsafe_set(startIdxJ + 3, startIdxI + 3, basisDot * c33);
          }
 
-         double basisValue = basisVectorI.getZ() * goalNormalForce;
+         double basisValue = goalForce.dot(basisVectorI);
 
          gradientToPack.unsafe_set(startIdxI, 0, -g0 * basisValue);
          gradientToPack.unsafe_set(startIdxI + 1, 0, -g1 * basisValue);
@@ -213,7 +213,7 @@ public class IntegrationInputCalculator
                                                  MPCContactPlane contactPlane,
                                                  double duration,
                                                  double omega,
-                                                 double goalNormalForceRate)
+                                                 FrameVector3DReadOnly goalForceRate)
    {
       duration = Math.min(duration, sufficientlyLongTime);
 
@@ -241,7 +241,7 @@ public class IntegrationInputCalculator
       {
          int startIdxI = startCol + basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
-         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexI);
+         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVector(basisVectorIndexI);
 
          hessianToPack.unsafe_set(startIdxI, startIdxI, c00);
          hessianToPack.unsafe_set(startIdxI, startIdxI + 1, c01);
@@ -255,7 +255,7 @@ public class IntegrationInputCalculator
 
          for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < contactPlane.getRhoSize(); basisVectorIndexJ++)
          {
-            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexJ);
+            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVector(basisVectorIndexJ);
 
             double basisDot = basisVectorI.dot(basisVectorJ);
 
@@ -283,7 +283,7 @@ public class IntegrationInputCalculator
             hessianToPack.unsafe_set(startIdxJ + 2, startIdxI + 2, basisDot * c22);
          }
 
-         double basisValue = basisVectorI.getZ() * goalNormalForceRate;
+         double basisValue = basisVectorI.dot(goalForceRate);
 
          gradientToPack.unsafe_set(startIdxI, 0, -g0 * basisValue);
          gradientToPack.unsafe_set(startIdxI + 1, 0, -g1 * basisValue);

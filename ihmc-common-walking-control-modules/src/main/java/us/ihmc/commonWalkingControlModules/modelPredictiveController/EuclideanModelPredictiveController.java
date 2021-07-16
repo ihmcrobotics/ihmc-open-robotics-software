@@ -593,6 +593,7 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setWeight(mpcParameters.getRhoMinimizationWeight());
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setSegmentDuration(segmentDuration);
+      objectiveToPack.setObjectiveValue(mpcParameters.getMinRhoValue());
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
