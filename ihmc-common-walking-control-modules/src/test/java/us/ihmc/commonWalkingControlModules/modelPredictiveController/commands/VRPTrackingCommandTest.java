@@ -125,7 +125,7 @@ public class VRPTrackingCommandTest
          double alpha = time / duration;
          expectedValue.interpolate(startVRP, endVRP, alpha);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expectedValue, assembledValue, 2e-3);
+         EuclidCoreTestTools.assertTuple3DEquals(expectedValue, assembledValue, 1e-3);
       }
    }
 

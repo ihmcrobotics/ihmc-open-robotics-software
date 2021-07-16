@@ -16,8 +16,6 @@ import java.util.function.DoubleConsumer;
  * {@link #getSegmentNumber()} over a duration {@link #getSegmentDuration()}. This motion function always takes the form of a linear function that goes from
  * {@link #getStartVRP()} to {@link #getEndVRP()}.
  *
- * TODO: this tracking function should be improved to allow cubic VRP trajectories, not just linear ones.
- *
  * This tracking command can be formulated into a closed-form quadratic cost for the optimizer, and always represents an
  * {@link us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType#OBJECTIVE}
  */
@@ -67,6 +65,11 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
     */
    private final FrameVector3D endVRPVelocity = new FrameVector3D();
 
+   {
+      startVRPVelocity.setToNaN();
+      endVRPVelocity.setToNaN();
+   }
+
    /**
     * Consumer for the computed cost to go on the output of the MPC function.
     */
@@ -83,8 +86,8 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
       segmentNumber = -1;
       startVRP.setToNaN();
       endVRP.setToNaN();
-      startVRPVelocity.containsNaN();
-      endVRPVelocity.containsNaN();
+      startVRPVelocity.setToNaN();
+      endVRPVelocity.setToNaN();
    }
 
    /**
