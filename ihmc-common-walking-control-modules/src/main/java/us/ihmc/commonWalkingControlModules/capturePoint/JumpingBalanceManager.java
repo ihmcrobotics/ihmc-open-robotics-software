@@ -102,7 +102,7 @@ public class JumpingBalanceManager
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      desiredWeightForStateChangeHeights.set(1e1);
+      desiredWeightForStateChangeHeights.set(1e-2);
 
       yoTime = controllerToolbox.getYoTime();
       this.controllerToolbox = controllerToolbox;
@@ -343,7 +343,7 @@ public class JumpingBalanceManager
       touchdownPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 
       comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
-      comTrajectoryPlanner.addCustomPolicyToProcess(touchdownPolicy);
+//      comTrajectoryPlanner.addCustomPolicyToProcess(touchdownPolicy);
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
 
