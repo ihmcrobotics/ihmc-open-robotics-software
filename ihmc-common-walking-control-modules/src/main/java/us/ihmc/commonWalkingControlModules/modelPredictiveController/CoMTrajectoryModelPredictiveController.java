@@ -68,8 +68,6 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
          assembleActiveSet(firstVariableIndex);
          qpSolver.setPreviousSolution(previousSolution);
          qpSolver.setActiveInequalityIndices(activeInequalityConstraints);
-         qpSolver.setActiveLowerBoundIndices(activeUpperBoundConstraints);
-         qpSolver.setActiveUpperBoundIndices(activeLowerBoundConstraints);
       }
 
       if (!qpSolver.solve())
