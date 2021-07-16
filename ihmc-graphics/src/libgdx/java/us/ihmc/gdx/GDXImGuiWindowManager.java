@@ -114,8 +114,11 @@ public class GDXImGuiWindowManager implements RenderableProvider
 
       drawData.getDisplayPos(displayPos);
 
-      FrameBuffer buffer = new FrameBuffer(Pixmap.Format.RGB888, fbWidth, fbHeight, false);
-      buffer.bind();
+      GLFrameBuffer.FrameBufferBuilder builder = new GLFrameBuffer.FrameBufferBuilder(fbWidth, fbHeight);
+      builder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
+
+      FrameBuffer buffer = builder.build();
+      buffer.begin();
 
       // Render command lists
       for (int cmdListIdx = 0; cmdListIdx < drawData.getCmdListsCount(); cmdListIdx++) {
@@ -149,7 +152,7 @@ public class GDXImGuiWindowManager implements RenderableProvider
          }
       }
 
-      FrameBuffer.unbind();
+      buffer.end();
 
       Texture texture = buffer.getColorBufferTexture();
       Material material = new Material(TextureAttribute.createDiffuse(texture),
