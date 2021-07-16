@@ -5,11 +5,8 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
-import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.FocusBasedGDXCamera;
@@ -52,21 +49,12 @@ public class GDX3DSceneManager
       new GLProfiler(Gdx.graphics).enable();
       GDXTools.syncLogLevelWithLogTools();
 
-      this.environment = GDX3DSceneTools.createDefaultEnvironment();
-
-      DefaultShader.Config defaultShaderConfig = new DefaultShader.Config();
-      // we could set shader options or even swap out the shader here
-      modelBatch = new ModelBatch(new DefaultShaderProvider(defaultShaderConfig));
-
+      camera3D = new FocusBasedGDXCamera();
       if (inputMode == GDXInputMode.libGDX)
       {
          inputMultiplexer = new InputMultiplexer();
          Gdx.input.setInputProcessor(inputMultiplexer);
-      }
 
-      camera3D = new FocusBasedGDXCamera();
-      if (inputMode == GDXInputMode.libGDX)
-      {
          inputMultiplexer.addProcessor(camera3D.setInputForLibGDX());
       }
 
@@ -75,16 +63,15 @@ public class GDX3DSceneManager
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
-      GDX3DSceneTools.glClearGray();
-      Gdx.gl.glEnable(GL32.GL_TEXTURE_2D);
+      //Do stuff here
    }
 
-   public void renderBefore()
+   private void preRender()
    {
-      renderBefore(GDXSceneLevel.VIRTUAL);
+      preRender(GDXSceneLevel.VIRTUAL);
    }
 
-   public void renderBefore(GDXSceneLevel sceneLevel)
+   private void preRender(GDXSceneLevel sceneLevel)
    {
       if (!firstRenderStarted)
       {
@@ -100,41 +87,35 @@ public class GDX3DSceneManager
       viewport.update(width, height);
 
       modelBatch.begin(camera3D);
-
-      Gdx.gl.glViewport(x, y, width, height);
-      GDX3DSceneTools.glClearGray();
-
-      renderRegisteredObjectsWithEnvironment(modelBatch, sceneLevel);
    }
 
-   public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch)
+   private void renderInternal(ModelBatch modelBatch)
    {
-      renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.VIRTUAL);
+      renderInternal(modelBatch, GDXSceneLevel.VIRTUAL);
    }
 
-   public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch, GDXSceneLevel sceneLevel)
+   private void renderInternal(ModelBatch modelBatch, GDXSceneLevel sceneLevel)
    {
-      environment = GDX3DSceneTools.createDefaultEnvironment();
+      //All rendering except modelBatch.begin() and end()
 
       for (GDXRenderable renderable : renderables)
       {
          if (sceneLevel.ordinal() >= renderable.getSceneType().ordinal())
-         {
             modelBatch.render(renderable.getRenderableProvider(), environment);
-         }
       }
    }
 
-   public void renderAfter()
+   private void postRender()
    {
-      modelBatch.end();
+      modelBatch.end(); //this is actually where all the rendering happens despite the function name
    }
 
+   //Render public API
    public void renderToCamera(Camera camera)
    {
       modelBatch.begin(camera);
-      renderRegisteredObjectsWithEnvironment(modelBatch);
-      renderAfter();
+      renderInternal(modelBatch);
+      postRender();
    }
 
    public void render()
@@ -144,9 +125,15 @@ public class GDX3DSceneManager
 
    public void render(GDXSceneLevel sceneLevel)
    {
-      renderBefore(sceneLevel);
-      renderAfter();
+      preRender(sceneLevel);
+      renderInternal(modelBatch);
+      postRender();
    }
+
+   public void renderFromBatch(ModelBatch batch, GDXSceneLevel sceneLevel) {
+      renderInternal(batch, sceneLevel);
+   }
+   //End render public API
 
    public void dispose()
    {
