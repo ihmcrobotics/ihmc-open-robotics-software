@@ -37,7 +37,7 @@ public class LinearMPCQPSolver
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("mpcSolverTimer", 0.5, registry);
-   private final SimpleEfficientActiveSetQPSolver qpSolver;
+   private final MPCQPSolver qpSolver;
 
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
    private final YoBoolean foundSolution = new YoBoolean("foundSolution", registry);
@@ -110,7 +110,7 @@ public class LinearMPCQPSolver
       rhoRateCoefficientRegularization.set(1e-10);
       comRateCoefficientRegularization.set(1e-10);
 
-      qpSolver = new SimpleEfficientActiveSetQPSolver();
+      qpSolver = new MPCQPSolver();
       qpSolver.setConvergenceThreshold(5e-6);
       qpSolver.setConvergenceThresholdForLagrangeMultipliers(1e-4);
       if (inverseMatrixCalculator != null)
@@ -681,28 +681,8 @@ public class LinearMPCQPSolver
       qpSolver.setActiveInequalityIndices(activeInequalityIndices);
    }
 
-   public void setActiveLowerBoundIndices(TIntList activeLowerBoundIndices)
-   {
-      qpSolver.setActiveLowerBoundIndices(activeLowerBoundIndices);
-   }
-
-   public void setActiveUpperBoundIndices(TIntList activeUpperBoundIndices)
-   {
-      qpSolver.setActiveUpperBoundIndices(activeUpperBoundIndices);
-   }
-
    public TIntList getActiveInequalityIndices()
    {
       return qpSolver.getActiveInequalityIndices();
-   }
-
-   public TIntList getActiveLowerBoundIndices()
-   {
-      return qpSolver.getActiveLowerBoundIndices();
-   }
-
-   public TIntList getActiveUpperBoundIndices()
-   {
-      return qpSolver.getActiveUpperBoundIndices();
    }
 }
