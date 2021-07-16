@@ -9,14 +9,16 @@ import us.ihmc.scs2.simulation.SimulationSession;
 
 public class GDXPhysicsSimulator
 {
-   private final SimulationSession simulationSession = new SimulationSession();
+   private final SimulationSession simulationSession;
+   private final ImBoolean runAtRealtimeRate;
+   private final ImDouble playbackRealtimeRate;
    private final ImGuiPanel controlPanel = new ImGuiPanel("Physics Simulator", this::renderImGuiWidgets);
-   private final ImBoolean runAtRealtimeRate = new ImBoolean(simulationSession.getRunAtRealTimeRate());
-   private final ImDouble playbackRealtimeRate = new ImDouble(simulationSession.getPlaybackRealTimeRate());
 
    public GDXPhysicsSimulator()
    {
-
+      simulationSession = new SimulationSession();
+      runAtRealtimeRate = new ImBoolean(simulationSession.getRunAtRealTimeRate());
+      playbackRealtimeRate = new ImDouble(simulationSession.getPlaybackRealTimeRate());
    }
 
    private void renderImGuiWidgets()
