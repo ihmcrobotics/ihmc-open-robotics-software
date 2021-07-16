@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrixSparseCSC;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
@@ -10,7 +11,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeC;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 /**
  * This is a helper class that is meant to convert {@link MPCCommand}s to QP inputs that can be consumed by quadratic program solver.
@@ -23,6 +26,11 @@ public class MPCQPInputCalculator
    private final LinearMPCIndexHandler indexHandler;
 
    private final VRPTrackingCostCalculator vrpTrackingCostCalculator;
+
+   private final DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 3);
+
+   private final DMatrixRMaj selectedJacobian = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj selectedObjective = new DMatrixRMaj(0, 0);
 
    private final DMatrixRMaj tempJacobian = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempObjective = new DMatrixRMaj(0, 0);
@@ -647,6 +655,7 @@ public class MPCQPInputCalculator
       double omega = objective.getOmega();
       double weight = objective.getWeight();
 
+
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(comStartCol, timeOfObjective, tempJacobian, objective.getDerivativeOrder(), 1.0);
 
       for (int i = 0; i < objective.getNumberOfContacts(); i++)
@@ -665,8 +674,25 @@ public class MPCQPInputCalculator
       objective.getObjective().get(tempObjective);
       tempObjective.add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), timeOfObjective));
 
-      inputToPack.getTaskJacobian().set(tempJacobian);
-      inputToPack.getTaskObjective().set(tempObjective);
+      if (objective.getSelectionMatrix().getNumberOfSelectedAxes() != 3)
+      {
+         selectionMatrix.reshape(3, 3);
+         objective.getSelectionMatrix().getCompactSelectionMatrixInFrame(ReferenceFrame.getWorldFrame(), 0, 0, selectionMatrix);
+
+         selectedJacobian.reshape(selectionMatrix.getNumRows(), numberOfVariables);
+         selectedObjective.reshape(selectionMatrix.getNumRows(), 1);
+
+         CommonOps_DDRM.mult(selectionMatrix, tempJacobian, selectedJacobian);
+         CommonOps_DDRM.mult(selectionMatrix, tempObjective, selectedObjective);
+
+         inputToPack.getTaskJacobian().set(selectedJacobian);
+         inputToPack.getTaskObjective().set(selectedObjective);
+      }
+      else
+      {
+         inputToPack.getTaskJacobian().set(tempJacobian);
+         inputToPack.getTaskObjective().set(tempObjective);
+      }
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
@@ -723,8 +749,24 @@ public class MPCQPInputCalculator
       tempObjective.add(2, 0, -getGravityZObjective(objectiveOrder, timeOfObjective));
       tempObjective.add(2, 0, -getGravityZObjective(objectiveHigherOrder, timeOfObjective) / omega);
 
-      inputToPack.getTaskJacobian().set(tempJacobian);
-      inputToPack.getTaskObjective().set(tempObjective);
+      if (objective.getSelectionMatrix().getNumberOfSelectedAxes() != 3)
+      {
+         objective.getSelectionMatrix().getCompactSelectionMatrixInFrame(ReferenceFrame.getWorldFrame(), 0, 0, selectionMatrix);
+
+         selectedJacobian.reshape(selectionMatrix.getNumRows(), numberOfVariables);
+         selectedObjective.reshape(selectionMatrix.getNumRows(), 1);
+
+         CommonOps_DDRM.mult(selectionMatrix, tempJacobian, selectedJacobian);
+         CommonOps_DDRM.mult(selectionMatrix, tempObjective, selectedObjective);
+
+         inputToPack.getTaskJacobian().set(selectedJacobian);
+         inputToPack.getTaskObjective().set(selectedObjective);
+      }
+      else
+      {
+         inputToPack.getTaskJacobian().set(tempJacobian);
+         inputToPack.getTaskObjective().set(tempObjective);
+      }
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);
@@ -784,8 +826,24 @@ public class MPCQPInputCalculator
       tempObjective.add(2, 0, -getGravityZObjective(objective.getDerivativeOrder(), timeOfObjective));
       tempObjective.add(2, 0, getGravityZObjective(objective.getDerivativeOrder() + 2, timeOfObjective) / omega2);
 
-      inputToPack.getTaskJacobian().set(tempJacobian);
-      inputToPack.getTaskObjective().set(tempObjective);
+      if (objective.getSelectionMatrix().getNumberOfSelectedAxes() != 3)
+      {
+         objective.getSelectionMatrix().getCompactSelectionMatrixInFrame(ReferenceFrame.getWorldFrame(), 0, 0, selectionMatrix);
+
+         selectedJacobian.reshape(selectionMatrix.getNumRows(), numberOfVariables);
+         selectedObjective.reshape(selectionMatrix.getNumRows(), 1);
+
+         CommonOps_DDRM.mult(selectionMatrix, tempJacobian, selectedJacobian);
+         CommonOps_DDRM.mult(selectionMatrix, tempObjective, selectedObjective);
+
+         inputToPack.getTaskJacobian().set(selectedJacobian);
+         inputToPack.getTaskObjective().set(selectedObjective);
+      }
+      else
+      {
+         inputToPack.getTaskJacobian().set(tempJacobian);
+         inputToPack.getTaskObjective().set(tempObjective);
+      }
 
       inputToPack.setUseWeightScalar(true);
       inputToPack.setWeight(weight);

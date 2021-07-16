@@ -73,6 +73,7 @@ public class SE3ModelPredictiveControllerTest
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
       SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia,
+                                                                                                        new MPCParameters(testRegistry),
                                                                                                         gravityZ,
                                                                                                         nominalHeight,
                                                                                                         mass,
@@ -207,11 +208,12 @@ public class SE3ModelPredictiveControllerTest
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
       SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia,
-                                                                                                        gravityZ,
-                                                                                                        nominalHeight,
-                                                                                                        mass,
-                                                                                                        dt,
-                                                                                                        testRegistry);
+                                                                          new MPCParameters(testRegistry),
+                                                                          gravityZ,
+                                                                          nominalHeight,
+                                                                          mass,
+                                                                          dt,
+                                                                          testRegistry);
 
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
@@ -393,7 +395,8 @@ public class SE3ModelPredictiveControllerTest
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
       SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia,
-                                                                                                        gravityZ,
+                                                                          new MPCParameters(testRegistry),
+                                                                          gravityZ,
                                                                                                         nominalHeight,
                                                                                                         mass,
                                                                                                         dt,
@@ -610,6 +613,7 @@ public class SE3ModelPredictiveControllerTest
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
       SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia,
+                                                                                                        new MPCParameters(testRegistry),
                                                                                                         gravityZ,
                                                                                                         nominalHeight,
                                                                                                         mass,
@@ -796,7 +800,8 @@ public class SE3ModelPredictiveControllerTest
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
       SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia,
-                                                                                                        gravityZ,
+                                                                          new MPCParameters(testRegistry),
+                                                                          gravityZ,
                                                                                                         nominalHeight,
                                                                                                         mass,
                                                                                                         dt,

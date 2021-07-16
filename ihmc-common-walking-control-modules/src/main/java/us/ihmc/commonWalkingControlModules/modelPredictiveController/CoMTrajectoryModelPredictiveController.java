@@ -19,19 +19,20 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
 
    private final IntUnaryOperator firstVariableIndex;
 
-   public CoMTrajectoryModelPredictiveController(double mass, double gravityZ, double nominalCoMHeight, double dt, YoRegistry parentRegistry)
+   public CoMTrajectoryModelPredictiveController(MPCParameters mpcParameters, double mass, double gravityZ, double nominalCoMHeight, double dt, YoRegistry parentRegistry)
    {
-      this(new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint), mass, gravityZ, nominalCoMHeight, dt, parentRegistry);
+      this(new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint), mpcParameters, mass, gravityZ, nominalCoMHeight, dt, parentRegistry);
    }
 
    public CoMTrajectoryModelPredictiveController(LinearMPCIndexHandler indexHandler,
+                                                 MPCParameters mpcParameters,
                                                  double mass,
                                                  double gravityZ,
                                                  double nominalCoMHeight,
                                                  double dt,
                                                  YoRegistry parentRegistry)
    {
-      super(indexHandler, mass, gravityZ, nominalCoMHeight, parentRegistry);
+      super(indexHandler, mpcParameters, mass, gravityZ, nominalCoMHeight, parentRegistry);
 
       this.indexHandler = indexHandler;
       firstVariableIndex = indexHandler::getComCoefficientStartIndex;
