@@ -399,6 +399,8 @@ public abstract class EuclideanModelPredictiveController
          }
          if (mpcParameters.includeRhoMinimization())
             mpcCommands.addCommand(computeRhoMinimizationObjective(commandProvider.getRhoMinimizationCommand(), 0, initialDuration));
+         if (mpcParameters.includeRhoRateMinimization())
+            mpcCommands.addCommand(computeRhoRateMinimizationObjective(commandProvider.getRhoRateMinimizationCommand(), 0, initialDuration));
          if (mpcParameters.includeRhoMinInequality())
             mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), 0, initialDuration));
          if (mpcParameters.includeRhoMaxInequality())
@@ -442,6 +444,8 @@ public abstract class EuclideanModelPredictiveController
             }
             if (mpcParameters.includeRhoMinimization())
                mpcCommands.addCommand(computeRhoMinimizationObjective(commandProvider.getRhoMinimizationCommand(), nextSequence, nextDuration));
+            if (mpcParameters.includeRhoRateMinimization())
+               mpcCommands.addCommand(computeRhoRateMinimizationObjective(commandProvider.getRhoRateMinimizationCommand(), nextSequence, nextDuration));
             if (mpcParameters.includeRhoMinInequality())
                mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), nextSequence, nextDuration));
             if (mpcParameters.includeRhoMaxInequality())
@@ -597,6 +601,23 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
       objectiveToPack.setWeight(mpcParameters.getRhoMinimizationWeight());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setSegmentDuration(segmentDuration);
+      objectiveToPack.setObjectiveValue(mpcParameters.getMinRhoValue());
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
+      }
+
+      return objectiveToPack;
+   }
+
+
+   private MPCCommand<?> computeRhoRateMinimizationObjective(RhoRateTrackingCommand objectiveToPack, int segmentNumber, double segmentDuration)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(mpcParameters.getRhoRateMinimizationWeight());
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setSegmentDuration(segmentDuration);
       objectiveToPack.setObjectiveValue(mpcParameters.getMinRhoValue());
