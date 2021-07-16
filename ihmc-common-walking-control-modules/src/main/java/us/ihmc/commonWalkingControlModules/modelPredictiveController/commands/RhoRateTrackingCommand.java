@@ -7,10 +7,10 @@ import java.util.List;
 import java.util.function.DoubleConsumer;
 
 /**
- * This command is designed to track a specified value for all the generalized contact accelerations along a basis vector over the course of the segment duration.
- * The exact cost is the integral of the squared difference of this generalized contact acceleration value from the objective value.
+ * This command is designed to track a specified value for all the generalized contact jerks along a basis vector over the course of the segment duration.
+ * The exact cost is the integral of the squared difference of this generalized contact jerk value from the objective value.
  */
-public class RhoTrackingCommand implements MPCCommand<RhoTrackingCommand>
+public class RhoRateTrackingCommand implements MPCCommand<RhoRateTrackingCommand>
 {
    private int commandId;
    /**
@@ -49,7 +49,7 @@ public class RhoTrackingCommand implements MPCCommand<RhoTrackingCommand>
     */
    public MPCCommandType getCommandType()
    {
-      return MPCCommandType.RHO_TRACKING;
+      return MPCCommandType.RHO_RATE_TRACKING;
    }
 
    /**
@@ -158,7 +158,7 @@ public class RhoTrackingCommand implements MPCCommand<RhoTrackingCommand>
    }
 
    @Override
-   public void set(RhoTrackingCommand other)
+   public void set(RhoRateTrackingCommand other)
    {
       clear();
       setCommandId(other.getCommandId());
@@ -191,9 +191,9 @@ public class RhoTrackingCommand implements MPCCommand<RhoTrackingCommand>
       {
          return true;
       }
-      else if (object instanceof RhoTrackingCommand)
+      else if (object instanceof RhoRateTrackingCommand)
       {
-         RhoTrackingCommand other = (RhoTrackingCommand) object;
+         RhoRateTrackingCommand other = (RhoRateTrackingCommand) object;
          if (commandId != other.commandId)
             return false;
          if (segmentNumber != other.segmentNumber)

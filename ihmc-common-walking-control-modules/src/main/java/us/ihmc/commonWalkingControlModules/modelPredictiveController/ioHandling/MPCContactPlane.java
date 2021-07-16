@@ -122,6 +122,10 @@ public class MPCContactPlane
       return contactPoints[index].getRhoNormalZ();
    }
 
+   public ReferenceFrame getContactFrame()
+   {
+      return planeFrame;
+   }
 
    private final Point3D point = new Point3D();
 

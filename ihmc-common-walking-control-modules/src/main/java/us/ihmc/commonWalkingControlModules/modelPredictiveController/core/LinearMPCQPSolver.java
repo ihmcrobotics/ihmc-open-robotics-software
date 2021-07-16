@@ -317,6 +317,9 @@ public class LinearMPCQPSolver
          case RHO_TRACKING:
             submitRhoTrackingCommand((RhoTrackingCommand) command);
             break;
+         case RHO_RATE_TRACKING:
+            submitRhoRateTrackingCommand((RhoRateTrackingCommand) command);
+            break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
       }
@@ -388,6 +391,13 @@ public class LinearMPCQPSolver
    public void submitRhoTrackingCommand(RhoTrackingCommand command)
    {
       int offset = inputCalculator.calculateRhoTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
+         addInput(qpInputTypeC, offset);
+   }
+
+   public void submitRhoRateTrackingCommand(RhoRateTrackingCommand command)
+   {
+      int offset = inputCalculator.calculateRhoRateTrackingObjective(qpInputTypeC, command);
       if (offset != -1)
          addInput(qpInputTypeC, offset);
    }
