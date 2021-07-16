@@ -28,6 +28,8 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
     */
    private final List<MPCContactPlane> contactPlaneHelpers = new ArrayList<>();
 
+   private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
+
    /**
     * What segment number this objective corresponds to.
     */
@@ -171,6 +173,11 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
    public FrameTuple3DReadOnly getObjective()
    {
       return objective;
+   }
+
+   public SelectionMatrix3D getSelectionMatrix()
+   {
+      return selectionMatrix;
    }
 
    public int getNumberOfContacts()
