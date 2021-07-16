@@ -12,6 +12,7 @@ public class MPCParameters
    private static final boolean includeRhoMaxInequality = false;
    private static final boolean includeForceMinimization = false;
    private static final boolean includeRhoMinimization = true;
+   private static final boolean includeRhoRateMinimization = true;
 
    private static final double defaultMinRhoValue = 0.0;//05;
 
@@ -21,7 +22,8 @@ public class MPCParameters
    public static final double defaultFinalVRPWeight = 5e1;
    public static final double defaultVrpTrackingWeight = 1e2;
    public static final double defaultRhoMinimizationWeight = 1e-3;
-   public static final double defaultForceMinimizationWeight = 1e-1;
+   public static final double defaultRhoRateMinimizationWeight = 1e-6;
+   public static final double defaultForceMinimizationWeight = 1e-4;
 
    private static final double defaultOrientationAngleTrackingWeight = 1e-2;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
@@ -44,6 +46,7 @@ public class MPCParameters
    private final YoDouble finalVRPWeight = new YoDouble("finalVRPWeight", registry);
    private final YoDouble vrpTrackingWeight = new YoDouble("vrpTrackingWeight", registry);
    private final YoDouble rhoMinimizationWeight = new YoDouble("rhoMinimizationWeight", registry);
+   private final YoDouble rhoRateMinimizationWeight = new YoDouble("rhoRateMinimizationWeight", registry);
    private final YoDouble forceMinimizationWeight = new YoDouble("forceMinimizationWeight", registry);
 
    private final YoDouble orientationAngleTrackingWeight = new YoDouble("orientationAngleTrackingWeight", registry);
@@ -60,6 +63,7 @@ public class MPCParameters
       finalVRPWeight.set(defaultFinalVRPWeight);
       vrpTrackingWeight.set(defaultVrpTrackingWeight);
       rhoMinimizationWeight.set(defaultRhoMinimizationWeight);
+      rhoRateMinimizationWeight.set(defaultRhoRateMinimizationWeight);
       forceMinimizationWeight.set(defaultForceMinimizationWeight);
 
       orientationAngleTrackingWeight.set(defaultOrientationAngleTrackingWeight);
@@ -93,6 +97,11 @@ public class MPCParameters
    public boolean includeRhoMinimization()
    {
       return includeRhoMinimization;
+   }
+
+   public boolean includeRhoRateMinimization()
+   {
+      return includeRhoRateMinimization;
    }
 
    public ConstraintType getInitialCoMPositionConstraintType()
@@ -155,6 +164,10 @@ public class MPCParameters
       return rhoMinimizationWeight.getDoubleValue();
    }
 
+   public double getRhoRateMinimizationWeight()
+   {
+      return rhoRateMinimizationWeight.getDoubleValue();
+   }
    public double getForceMinimizationWeight()
    {
       return forceMinimizationWeight.getDoubleValue();

@@ -11,6 +11,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -23,6 +24,7 @@ import us.ihmc.matrixlib.NativeCommonOps;
 import java.util.Random;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLargeValue;
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 import static us.ihmc.robotics.Assert.assertEquals;
 
 public class IntegrationInputCalculatorTest
@@ -46,7 +48,7 @@ public class IntegrationInputCalculatorTest
       double omega = 3.0;
       double duration = 0.7;
       double goalValueForPoint = 0.2;
-      Vector3D goalForceForPoint = new Vector3D(0.0, 0.0, goalValueForPoint);
+      FrameVector3D goalForceForPoint = new FrameVector3D(worldFrame, 0.0, 0.0, goalValueForPoint);
 
       DMatrixRMaj accelerationIntegrationHessian = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho,
                                                                    numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho);
@@ -61,7 +63,7 @@ public class IntegrationInputCalculatorTest
                                                             contactPlane,
                                                             duration,
                                                             omega,
-                                                            goalValueForPoint);
+                                                            goalForceForPoint);
 
       double tEnd = duration;
       double tStart = 0.0;
@@ -86,7 +88,7 @@ public class IntegrationInputCalculatorTest
       {
          int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
-         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexI);
+         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVector(basisVectorIndexI);
 
          accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
          accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1,  c01);
@@ -107,7 +109,7 @@ public class IntegrationInputCalculatorTest
 
          for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
          {
-            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexJ);
+            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVector(basisVectorIndexJ);
 
             double basisDot = basisVectorI.dot(basisVectorJ);
 
@@ -175,7 +177,7 @@ public class IntegrationInputCalculatorTest
       for (double time = 0; time <= duration; time += 0.05)
       {
          contactPlane.computeContactForce(omega, time);
-         FrameVector3DReadOnly acceleration = contactPlane.getContactJerk();
+         FrameVector3DReadOnly acceleration = contactPlane.getContactAcceleration();
          assertEquals(goalValueForPoint, acceleration.getZ(), 1e-3);
          EuclidCoreTestTools.assertVector3DGeometricallyEquals(goalForceForPoint, acceleration, 1e-3);
       }
@@ -198,7 +200,7 @@ public class IntegrationInputCalculatorTest
       double omega = 3.0;
       double duration = 0.7;
       double goalValueForPoint = 0.2;
-      Vector3D goalForceForPoint = new Vector3D(0.0, 0.0, goalValueForPoint);
+      FrameVector3D goalForceRateForPoint = new FrameVector3D(worldFrame, 0.0, 0.0, goalValueForPoint);
 
       DMatrixRMaj accelerationIntegrationHessian = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho,
                                                                    numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho);
@@ -213,7 +215,7 @@ public class IntegrationInputCalculatorTest
                                                             contactPlane,
                                                             duration,
                                                             omega,
-                                                            goalValueForPoint);
+                                                                goalForceRateForPoint);
 
       double tEnd = duration;
       double tStart = 0.0;
@@ -238,7 +240,7 @@ public class IntegrationInputCalculatorTest
       {
          int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
-         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexI);
+         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVector(basisVectorIndexI);
 
          accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
          accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1,  c01);
@@ -259,7 +261,7 @@ public class IntegrationInputCalculatorTest
 
          for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
          {
-            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexJ);
+            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVector(basisVectorIndexJ);
 
             double basisDot = basisVectorI.dot(basisVectorJ);
 
@@ -305,7 +307,7 @@ public class IntegrationInputCalculatorTest
             accelerationIntegrationHessian.unsafe_set(startIdxJ + 3, startIdxI + 3, basisDot * c33);
          }
 
-         double goal = basisVectorI.dot(goalForceForPoint);
+         double goal = basisVectorI.dot(goalForceRateForPoint);
 
          accelerationIntegrationGradient.unsafe_set(startIdxI, 0, g0 * goal);
          accelerationIntegrationGradient.unsafe_set(startIdxI + 1, 0, g1 * goal);
@@ -336,7 +338,7 @@ public class IntegrationInputCalculatorTest
          contactPlane.computeContactForce(omega, time);
          FrameVector3DReadOnly jerk = contactPlane.getContactJerk();
          assertEquals(goalValueForPoint, jerk.getZ(), 1e-3);
-         EuclidCoreTestTools.assertVector3DGeometricallyEquals(goalForceForPoint, jerk, 1e-3);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(goalForceRateForPoint, jerk, 1e-3);
       }
    }
 

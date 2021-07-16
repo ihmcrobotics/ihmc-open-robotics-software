@@ -393,9 +393,14 @@ public abstract class EuclideanModelPredictiveController
                                                             initialDuration,
                                                             null));
          if (mpcParameters.includeForceMinimization())
-            mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceMinimizationCommand(), 0));
+         {
+            for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(0); i++)
+               mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceTrackingCommand(), 0, initialDuration, i));
+         }
          if (mpcParameters.includeRhoMinimization())
             mpcCommands.addCommand(computeRhoMinimizationObjective(commandProvider.getRhoMinimizationCommand(), 0, initialDuration));
+         if (mpcParameters.includeRhoRateMinimization())
+            mpcCommands.addCommand(computeRhoRateMinimizationObjective(commandProvider.getRhoRateMinimizationCommand(), 0, initialDuration));
          if (mpcParameters.includeRhoMinInequality())
             mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), 0, initialDuration));
          if (mpcParameters.includeRhoMaxInequality())
@@ -433,9 +438,14 @@ public abstract class EuclideanModelPredictiveController
                                                                nextDuration,
                                                                null));
             if (mpcParameters.includeForceMinimization())
-               mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceMinimizationCommand(), nextSequence));
+            {
+               for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(nextSequence); i++)
+                  mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceTrackingCommand(), nextSequence, nextDuration, i));
+            }
             if (mpcParameters.includeRhoMinimization())
                mpcCommands.addCommand(computeRhoMinimizationObjective(commandProvider.getRhoMinimizationCommand(), nextSequence, nextDuration));
+            if (mpcParameters.includeRhoRateMinimization())
+               mpcCommands.addCommand(computeRhoRateMinimizationObjective(commandProvider.getRhoRateMinimizationCommand(), nextSequence, nextDuration));
             if (mpcParameters.includeRhoMinInequality())
                mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), nextSequence, nextDuration));
             if (mpcParameters.includeRhoMaxInequality())
@@ -572,16 +582,16 @@ public abstract class EuclideanModelPredictiveController
       return objectiveToPack;
    }
 
-   private MPCCommand<?> computeForceMinimizationObjective(ForceObjectiveCommand objectiveToPack, int segmentNumber)
+   private final FrameVector3DReadOnly zeroVector = new FrameVector3D();
+   private MPCCommand<?> computeForceMinimizationObjective(ForceTrackingCommand objectiveToPack, int segmentNumber, double segmentDuration, int contactNumber)
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
       objectiveToPack.setWeight(mpcParameters.getForceMinimizationWeight());
       objectiveToPack.setSegmentNumber(segmentNumber);
-      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
-      }
+      objectiveToPack.setSegmentDuration(segmentDuration);
+      objectiveToPack.setObjectiveValue(zeroVector);
+      objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, contactNumber));
 
       return objectiveToPack;
    }
@@ -593,6 +603,24 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setWeight(mpcParameters.getRhoMinimizationWeight());
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setSegmentDuration(segmentDuration);
+      objectiveToPack.setObjectiveValue(mpcParameters.getMinRhoValue());
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
+      }
+
+      return objectiveToPack;
+   }
+
+
+   private MPCCommand<?> computeRhoRateMinimizationObjective(RhoRateTrackingCommand objectiveToPack, int segmentNumber, double segmentDuration)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(mpcParameters.getRhoRateMinimizationWeight());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setSegmentDuration(segmentDuration);
+      objectiveToPack.setObjectiveValue(mpcParameters.getMinRhoValue());
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
