@@ -8,13 +8,10 @@ public class CustomPolicyTools
 {
    static int getSegmentNumber(double time, List<? extends ContactStateProvider<?>> contactStateProviders)
    {
-      double startTime = 0.0;
       for (int i = 0; i < contactStateProviders.size(); i++)
       {
-         if (contactStateProviders.get(i).getTimeInterval().intervalContains(time - startTime))
+         if (contactStateProviders.get(i).getTimeInterval().intervalContains(time))
             return i;
-
-         startTime += contactStateProviders.get(i).getTimeInterval().getDuration();
       }
 
       return -1;

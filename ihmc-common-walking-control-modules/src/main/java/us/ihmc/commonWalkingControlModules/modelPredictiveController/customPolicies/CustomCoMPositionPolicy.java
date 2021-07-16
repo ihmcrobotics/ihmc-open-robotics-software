@@ -54,13 +54,17 @@ public class CustomCoMPositionPolicy implements CustomMPCPolicy
       double timeInSegment = CustomPolicyTools.getTimeInSegment(segmentNumber, timeOfPolicy, contactStateProviders);
       timeInSegment = Math.min(timeInSegment, CoMTrajectoryPlannerTools.sufficientlyLongTime);
 
+      if (segmentNumber < 0)
+         return null;
+
       mpcCommand.clear();
       mpcCommand.setSegmentNumber(segmentNumber);
       mpcCommand.setTimeOfObjective(timeInSegment);
       mpcCommand.setObjective(desiredCoMPosition);
       mpcCommand.setWeight(weight);
       mpcCommand.setOmega(omega);
-      mpcCommand.setConstraintType(ConstraintType.OBJECTIVE);
+      mpcCommand.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+      mpcCommand.getSelectionMatrix().set(selectionMatrix);
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
          mpcCommand.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 

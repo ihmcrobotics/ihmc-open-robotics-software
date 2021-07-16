@@ -164,6 +164,8 @@ public class MPCContactHandler
 
    public List<MPCContactPlane> getContactPlanesForSegment(int segmentId)
    {
+      if (segmentId < 0)
+         throw new RuntimeException("shit.");
       return contactPlanes.get(segmentId);
    }
 
