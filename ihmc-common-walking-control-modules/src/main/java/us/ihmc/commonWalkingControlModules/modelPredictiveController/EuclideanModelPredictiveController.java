@@ -84,7 +84,9 @@ public abstract class EuclideanModelPredictiveController
    private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
+   private final RecyclingArrayList<FrameVector3D> startVRPVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
+   private final RecyclingArrayList<FrameVector3D> endVRPVelocities = new RecyclingArrayList<>(FrameVector3D::new);
 
    protected final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    protected final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
@@ -231,6 +233,7 @@ public abstract class EuclideanModelPredictiveController
                                                     startVRPPositions,
                                                     endVRPPositions,
                                                     false);
+      CoMTrajectoryPlannerTools.computeVRPVelocites(planningWindow, startVRPVelocities, endVRPVelocities);
 
       commandProvider.reset();
       mpcCommands.clear();
@@ -412,7 +415,9 @@ public abstract class EuclideanModelPredictiveController
       {
          mpcCommands.addCommand(computeVRPTrackingObjective(commandProvider.getNextVRPTrackingCommand(),
                                                             startVRPPositions.get(0),
+                                                            startVRPVelocities.get(0),
                                                             endVRPPositions.get(0),
+                                                            endVRPVelocities.get(0),
                                                             0,
                                                             initialDuration,
                                                             null));
@@ -450,7 +455,9 @@ public abstract class EuclideanModelPredictiveController
          {
             mpcCommands.addCommand(computeVRPTrackingObjective(commandProvider.getNextVRPTrackingCommand(),
                                                                startVRPPositions.get(nextSequence),
+                                                               startVRPVelocities.get(nextSequence),
                                                                endVRPPositions.get(nextSequence),
+                                                               endVRPVelocities.get(nextSequence),
                                                                nextSequence,
                                                                nextDuration,
                                                                null));
@@ -571,7 +578,9 @@ public abstract class EuclideanModelPredictiveController
 
    private MPCCommand<?> computeVRPTrackingObjective(VRPTrackingCommand objectiveToPack,
                                                      FramePoint3DReadOnly desiredStartVRPPosition,
+                                                     FrameVector3DReadOnly desiredStartVRPVelocity,
                                                      FramePoint3DReadOnly desiredEndVRPPosition,
+                                                     FrameVector3DReadOnly desiredEndVRPVelocity,
                                                      int segmentNumber,
                                                      double segmentDuration,
                                                      DoubleConsumer costToGoConsumer)
@@ -582,7 +591,9 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setSegmentDuration(segmentDuration);
       objectiveToPack.setStartVRP(desiredStartVRPPosition);
+      objectiveToPack.setStartVRPVelocity(desiredStartVRPVelocity);
       objectiveToPack.setEndVRP(desiredEndVRPPosition);
+      objectiveToPack.setEndVRPVelocity(desiredEndVRPVelocity);
       objectiveToPack.setCostToGoConsumer(costToGoConsumer);
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
          objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
