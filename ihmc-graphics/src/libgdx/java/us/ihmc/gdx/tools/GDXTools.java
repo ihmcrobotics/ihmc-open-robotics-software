@@ -322,6 +322,11 @@ public class GDXTools
       return gdxColor;
    }
 
+   public static Color toGDX(double red, double green, double blue, double alpha)
+   {
+      return new Color((float) red, (float) green, (float) blue, (float) alpha);
+   }
+
    public static void toGDX(AppearanceDefinition appearanceDefinition, Color gdxColor)
    {
       gdxColor.r = appearanceDefinition.getColor().getX();
