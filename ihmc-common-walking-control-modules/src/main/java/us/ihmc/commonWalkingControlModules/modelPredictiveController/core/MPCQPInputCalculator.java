@@ -520,6 +520,47 @@ public class MPCQPInputCalculator
       return indexHandler.getRhoCoefficientStartIndex(segmentNumber);
    }
 
+   public int calculateRhoRateTrackingObjective(NativeQPInputTypeC inputToPack, RhoRateTrackingCommand objective)
+   {
+      int segmentNumber = objective.getSegmentNumber();
+
+      int numberOfVariables = indexHandler.getRhoCoefficientsInSegment(segmentNumber);
+      inputToPack.setNumberOfVariables(numberOfVariables);
+      inputToPack.reshape();
+
+      tempHessian.reshape(numberOfVariables, numberOfVariables);
+      tempGradient.reshape(numberOfVariables, 1);
+      tempHessian.zero();
+      tempGradient.zero();
+
+      double weight = objective.getWeight();
+      double duration = objective.getSegmentDuration();
+
+      int startCol = 0;
+      for (int i = 0; i < objective.getNumberOfContacts(); i++)
+      {
+         MPCContactPlane contactPlane = objective.getContactPlaneHelper(i);
+
+         IntegrationInputCalculator.computeRhoJerkTrackingMatrix(startCol,
+                                                                         tempGradient,
+                                                                         tempHessian,
+                                                                         contactPlane.getRhoSize(),
+                                                                         duration,
+                                                                         objective.getOmega(),
+                                                                         objective.getObjectiveValue());
+
+         startCol += contactPlane.getCoefficientSize();
+      }
+
+      inputToPack.getDirectCostHessian().set(tempHessian);
+      inputToPack.getDirectCostGradient().set(tempGradient);
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
+
+      return indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+   }
+
    /**
     * Processes a {@link MPCValueCommand} to compute a {@link NativeQPInputTypeA}. This can then be fed to MPC QP solver.
     * @param inputToPack QP input to calculate

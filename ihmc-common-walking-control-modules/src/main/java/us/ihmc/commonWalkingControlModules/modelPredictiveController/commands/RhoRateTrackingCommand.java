@@ -7,9 +7,10 @@ import java.util.List;
 import java.util.function.DoubleConsumer;
 
 /**
- * FIXME this command is not yet used.
+ * This command is designed to track a specified value for all the generalized contact jerks along a basis vector over the course of the segment duration.
+ * The exact cost is the integral of the squared difference of this generalized contact jerk value from the objective value.
  */
-public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
+public class RhoRateTrackingCommand implements MPCCommand<RhoRateTrackingCommand>
 {
    private int commandId;
    /**
@@ -29,6 +30,14 @@ public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
     * Weight of this minimization command in the optimizer.
     */
    private double weight;
+   /**
+    * Duration of the specified segment.
+    */
+   private double segmentDuration;
+   /**
+    * Desired value for each generalized contact acceleration in the contact plane.
+    */
+   private double objectiveValue = 0.0;
 
    /**
     * Consumer for the computed cost to go on the output of the MPC function.
@@ -40,7 +49,7 @@ public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
     */
    public MPCCommandType getCommandType()
    {
-      return MPCCommandType.FORCE_VALUE;
+      return MPCCommandType.RHO_RATE_TRACKING;
    }
 
    /**
@@ -50,6 +59,8 @@ public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
    {
       segmentNumber = -1;
       costToGoConsumer = null;
+      segmentDuration = Double.NaN;
+      objectiveValue = 0.0;
       contactPlaneHelpers.clear();
    }
 
@@ -59,6 +70,16 @@ public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
    public void setWeight(double weight)
    {
       this.weight = weight;
+   }
+
+   public void setSegmentDuration(double duration)
+   {
+      this.segmentDuration = duration;
+   }
+
+   public void setObjectiveValue(double objectiveValue)
+   {
+      this.objectiveValue = objectiveValue;
    }
 
    /**
@@ -95,6 +116,16 @@ public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
       return weight;
    }
 
+   public double getSegmentDuration()
+   {
+      return segmentDuration;
+   }
+
+   public double getObjectiveValue()
+   {
+      return objectiveValue;
+   }
+
    public double getOmega()
    {
       return omega;
@@ -127,7 +158,7 @@ public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
    }
 
    @Override
-   public void set(ForceObjectiveCommand other)
+   public void set(RhoRateTrackingCommand other)
    {
       clear();
       setCommandId(other.getCommandId());
@@ -135,6 +166,8 @@ public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
       setOmega(other.getOmega());
       setWeight(other.getWeight());
       setCostToGoConsumer(other.getCostToGoConsumer());
+      setSegmentDuration(other.getSegmentDuration());
+      setObjectiveValue(other.getObjectiveValue());
       for (int i = 0; i < other.getNumberOfContacts(); i++)
          addContactPlaneHelper(other.getContactPlaneHelper(i));
    }
@@ -158,9 +191,9 @@ public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
       {
          return true;
       }
-      else if (object instanceof ForceObjectiveCommand)
+      else if (object instanceof RhoRateTrackingCommand)
       {
-         ForceObjectiveCommand other = (ForceObjectiveCommand) object;
+         RhoRateTrackingCommand other = (RhoRateTrackingCommand) object;
          if (commandId != other.commandId)
             return false;
          if (segmentNumber != other.segmentNumber)
@@ -169,7 +202,11 @@ public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
             return false;
          if (weight != other.weight)
             return false;
+         if (segmentDuration != other.segmentDuration)
+            return false;
          if (contactPlaneHelpers.size() != other.contactPlaneHelpers.size())
+            return false;
+         if (objectiveValue != other.objectiveValue)
             return false;
          for (int i = 0; i < contactPlaneHelpers.size(); i++)
          {
