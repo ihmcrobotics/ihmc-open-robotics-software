@@ -2,12 +2,10 @@ package us.ihmc.gdx.simulation;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import imgui.ImGui;
-import imgui.type.ImBoolean;
-import imgui.type.ImDouble;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.gdx.simulation.environment.GDXPhysicsSimulator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -16,8 +14,6 @@ import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
-import us.ihmc.scs2.session.SessionMode;
-import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.yoVariables.registry.YoNamespace;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -28,7 +24,7 @@ public class GDXPhysicsDemo
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
 
-   private final SimulationSession simulationSession = new SimulationSession();
+   private GDXPhysicsSimulator physicsSimulator = new GDXPhysicsSimulator();
    private ModelInstance boxModelInstance;
    private ModelInstance slopeModelInstance;
 
@@ -39,9 +35,9 @@ public class GDXPhysicsDemo
       initialJointState.setConfiguration(new Pose3D(0.0, 0.0, 1.0, 0.0, 0.0, 0.0));
       boxRobot.getRootJointDefinitions().get(0).setInitialJointState(initialJointState);
 
-      simulationSession.addRobot(boxRobot);
+      physicsSimulator.getSession().addRobot(boxRobot);
       SlopeGroundDefinition slopeTerrain = new SlopeGroundDefinition();
-      simulationSession.addTerrainObject(slopeTerrain);
+      physicsSimulator.getSession().addTerrainObject(slopeTerrain);
 
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -78,17 +74,14 @@ public class GDXPhysicsDemo
             baseUI.get3DSceneManager().addModelInstance(slopeModelInstance);
             GDXTools.toGDX(slopeVisual.getOriginPose(), slopeModelInstance.transform);
 
-            baseUI.getImGuiPanelManager().addPanel("Simulation", GDXPhysicsDemo.this::renderWindow1);
-
-            simulationSession.submitRunAtRealTimeRate(false);
-            simulationSession.submitPlaybackRealTimeRate(1.0);
-            simulationSession.startSessionThread();
+            physicsSimulator.getSession().startSessionThread();
+            baseUI.getImGuiPanelManager().addPanel(physicsSimulator.getControlPanel());
          }
 
          @Override
          public void render()
          {
-            YoRegistry boxRegistry = simulationSession.getPhysicsEngine().getPhysicsEngineRegistry().findRegistry(new YoNamespace("root.Box"));
+            YoRegistry boxRegistry = physicsSimulator.getSession().getPhysicsEngine().getPhysicsEngineRegistry().findRegistry(new YoNamespace("root.Box"));
             YoDouble x = (YoDouble) boxRegistry.getVariable("rootJointX");
             YoDouble y = (YoDouble) boxRegistry.getVariable("rootJointY");
             YoDouble z = (YoDouble) boxRegistry.getVariable("rootJointZ");
@@ -112,50 +105,6 @@ public class GDXPhysicsDemo
             baseUI.dispose();
          }
       });
-   }
-
-   String[] items = new String[] {"Simulate", "Pause", "Playback"};
-   int currentItem = 1;
-   ImBoolean runAtRealtimeRate = new ImBoolean(false);
-   ImDouble playbackRealtimeRate = new ImDouble(1.0);
-
-   private void renderWindow1()
-   {
-      if (ImGui.radioButton("Simulate", currentItem == 0))
-      {
-         currentItem = 0;
-      }
-      if (ImGui.radioButton("Pause", currentItem == 1))
-      {
-         currentItem = 1;
-      }
-      if (ImGui.radioButton("Playback", currentItem == 2))
-      {
-         currentItem = 2;
-      }
-
-      if (currentItem == 0)
-      {
-         simulationSession.setSessionMode(SessionMode.RUNNING);
-      }
-      else if (currentItem == 1)
-      {
-         simulationSession.setSessionMode(SessionMode.PAUSE);
-      }
-      else
-      {
-         simulationSession.setSessionMode(SessionMode.PLAYBACK);
-      }
-
-      if (ImGui.checkbox("Run at real-time rate", runAtRealtimeRate))
-      {
-         simulationSession.submitRunAtRealTimeRate(runAtRealtimeRate.get());
-      }
-
-      if (ImGui.inputDouble("Playback real-time rate", playbackRealtimeRate))
-      {
-         simulationSession.submitPlaybackRealTimeRate(playbackRealtimeRate.get());
-      }
    }
 
    public static void main(String[] args)
