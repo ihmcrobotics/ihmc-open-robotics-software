@@ -345,7 +345,7 @@ public class JumpingBalanceManager
       takeoffPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration());
       touchdownPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 
-      comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
+//      comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
 //      comTrajectoryPlanner.addCustomPolicyToProcess(touchdownPolicy);
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
