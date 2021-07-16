@@ -22,7 +22,7 @@ public class CommandProvider
    private final RecyclingArrayList<OrientationValueCommand> orientationValueCommandPool = new RecyclingArrayList<>(OrientationValueCommand::new);
    private final RecyclingArrayList<DirectOrientationValueCommand> directOrientationValueCommandPool = new RecyclingArrayList<>(DirectOrientationValueCommand::new);
    private final RecyclingArrayList<OrientationContinuityCommand> orientationContinuityCommandPool = new RecyclingArrayList<>(OrientationContinuityCommand::new);
-   private final RecyclingArrayList<ForceObjectiveCommand> forceMinimizationCommandPool = new RecyclingArrayList<>(ForceObjectiveCommand::new);
+   private final RecyclingArrayList<ForceTrackingCommand> forceTrackingCommandPool = new RecyclingArrayList<>(ForceTrackingCommand::new);
    private final RecyclingArrayList<RhoTrackingCommand> rhoTrackingCommandPool = new RecyclingArrayList<>(RhoTrackingCommand::new);
 
    /**
@@ -45,7 +45,7 @@ public class CommandProvider
       orientationValueCommandPool.clear();
       directOrientationValueCommandPool.clear();
       orientationContinuityCommandPool.clear();
-      forceMinimizationCommandPool.clear();
+      forceTrackingCommandPool.clear();
       rhoTrackingCommandPool.clear();
    }
 
@@ -124,9 +124,9 @@ public class CommandProvider
       return orientationContinuityCommandPool.add();
    }
 
-   public ForceObjectiveCommand getForceMinimizationCommand()
+   public ForceTrackingCommand getForceTrackingCommand()
    {
-      return forceMinimizationCommandPool.add();
+      return forceTrackingCommandPool.add();
    }
 
    public RhoTrackingCommand getRhoMinimizationCommand()

@@ -96,6 +96,57 @@ public class IntegrationInputCalculator
       }
    }
 
+   public static void computeRhoJerkTrackingMatrix(int startCol,
+                                                   DMatrixRMaj gradientToPack,
+                                                   DMatrixRMaj hessianToPack,
+                                                   int numberOfBasisVectors,
+                                                   double duration,
+                                                   double omega,
+                                                   double goalValueForBasis)
+   {
+      duration = Math.min(duration, sufficientlyLongTime);
+
+      double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLargeValue);
+      double positiveExponential2 = Math.min(positiveExponential * positiveExponential, sufficientlyLargeValue);
+      double negativeExponential = 1.0 / positiveExponential;
+      double negativeExponential2 = negativeExponential * negativeExponential;
+      double omega2 = omega * omega;
+      double omega3 = omega * omega2;
+      double omega4 = omega2 * omega2;
+      double omega8 = omega4 * omega2;
+      double omega9 = omega3 * omega3;
+
+      double c00 = omega8 / 2.0 * (positiveExponential2 - 1.0);
+      double c01 = -omega9 * duration;
+      double c02 = 6.0 * omega2 * (positiveExponential - 1.0);
+      double c11 = -omega8 / 2.0 * (negativeExponential2 - 1.0);
+      double c12 = 6.0 * omega2 * (negativeExponential - 1.0);
+      double c22 = 36.0 * duration;
+
+      double g0 = omega2 * (positiveExponential - 1.0) * goalValueForBasis;
+      double g1 = omega2 * (negativeExponential - 1.0) * goalValueForBasis;
+      double g2 = 6.0 * duration * goalValueForBasis;
+
+      for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectors; basisVectorIndexI++)
+      {
+         hessianToPack.unsafe_set(startCol, startCol, c00);
+         hessianToPack.unsafe_set(startCol, startCol + 1, c01);
+         hessianToPack.unsafe_set(startCol, startCol + 2, c02);
+         hessianToPack.unsafe_set(startCol + 1, startCol, c01);
+         hessianToPack.unsafe_set(startCol + 1, startCol + 1, c11);
+         hessianToPack.unsafe_set(startCol + 1, startCol + 2, c12);
+         hessianToPack.unsafe_set(startCol + 2, startCol, c02);
+         hessianToPack.unsafe_set(startCol + 2, startCol + 1, c12);
+         hessianToPack.unsafe_set(startCol + 2, startCol + 2, c22);
+
+         gradientToPack.unsafe_set(startCol, 0, -g0);
+         gradientToPack.unsafe_set(startCol + 1, 0, -g1);
+         gradientToPack.unsafe_set(startCol + 2, 0, -g2);
+
+         startCol += LinearMPCIndexHandler.coefficientsPerRho;
+      }
+   }
+
    public static void computeForceTrackingMatrix(int startCol,
                                                  DMatrixRMaj gradientToPack,
                                                  DMatrixRMaj hessianToPack,
