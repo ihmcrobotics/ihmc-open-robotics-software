@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCParameters;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -43,7 +44,7 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    /**
     *  weight to scale the cost of the VRP tracking objective.
     */
-   private double weight = CoMTrajectoryModelPredictiveController.defaultVrpTrackingWeight;
+   private double weight = MPCParameters.defaultVrpTrackingWeight;
 
    /**
     * Desired VRP value at the beginning of the segment.
