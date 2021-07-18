@@ -7,7 +7,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.convexOptimization.IntermediateSolutionListener;
-import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeMatrix;
@@ -27,6 +26,8 @@ import java.util.List;
  */
 public class MPCQPSolver
 {
+   private static  final boolean debug = false;
+
    private static final double violationFractionToAdd = 0.8;
    private static final double violationFractionToRemove = 0.95;
    //private static final double violationFractionToAdd = 1.0;
@@ -38,7 +39,9 @@ public class MPCQPSolver
    private boolean reportFailedConvergenceAsNaN = true;
    private boolean resetActiveSetOnSizeChange = true;
 
-   protected double quadraticCostScalar;
+//   protected double quadraticCostScalar;
+
+   private final RowMajorNativeMatrixGrower nativeMatrixGrower = new RowMajorNativeMatrixGrower();
 
    private final DMatrixRMaj activeVariables = new DMatrixRMaj(0, 0);
 
@@ -46,18 +49,17 @@ public class MPCQPSolver
 
    // Some temporary matrices:
    protected final NativeMatrix nativexSolutionMatrix = new NativeMatrix(0, 0);
-   protected final NativeMatrix costQuadraticMatrix = new NativeMatrix(0, 0);
-   protected final NativeMatrix symmetricCostQuadraticMatrix = new NativeMatrix(0, 0);
+   public final NativeMatrix costQuadraticMatrix = new NativeMatrix(0, 0);
 
    private final NativeMatrix linearInequalityConstraintsCheck = new NativeMatrix(0, 0);
 
-   protected final NativeMatrix quadraticCostQVector = new NativeMatrix(0, 0);
-   protected final NativeMatrix quadraticCostQMatrix = new NativeMatrix(0, 0);
-   protected final NativeMatrix linearEqualityConstraintsAMatrix = new NativeMatrix(0, 0);
-   protected final NativeMatrix linearEqualityConstraintsBVector = new NativeMatrix(0, 0);
+   public final NativeMatrix quadraticCostQVector = new NativeMatrix(0, 0);
+   public final NativeMatrix quadraticCostQMatrix = new NativeMatrix(0, 0);
+   public final NativeMatrix linearEqualityConstraintsAMatrix = new NativeMatrix(0, 0);
+   public final NativeMatrix linearEqualityConstraintsBVector = new NativeMatrix(0, 0);
 
-   protected final NativeMatrix linearInequalityConstraintsCMatrixO = new NativeMatrix(0, 0);
-   protected final NativeMatrix linearInequalityConstraintsDVectorO = new NativeMatrix(0, 0);
+   public final NativeMatrix linearInequalityConstraintsCMatrixO = new NativeMatrix(0, 0);
+   public final NativeMatrix linearInequalityConstraintsDVectorO = new NativeMatrix(0, 0);
 
    /** Active inequality constraints */
    private final NativeMatrix CBar = new NativeMatrix(0, 0);
@@ -151,30 +153,200 @@ public class MPCQPSolver
       linearInequalityConstraintsDVectorO.reshape(0, 0);
    }
 
-   public void setQuadraticCostFunction(DMatrix H, DMatrix f)
+   public void reshape(int problemSize)
    {
-      setQuadraticCostFunction(H, f, 0.0);
+      costQuadraticMatrix.reshape(problemSize, problemSize);
+      quadraticCostQVector.reshape(problemSize, 1);
+
+      linearEqualityConstraintsAMatrix.zero();
+      linearEqualityConstraintsBVector.zero();
+
+      linearInequalityConstraintsCMatrixO.zero();
+      linearInequalityConstraintsDVectorO.zero();
+
+      linearEqualityConstraintsAMatrix.reshape(0, problemSize);
+      linearEqualityConstraintsBVector.reshape(0, 1);
+
+      linearInequalityConstraintsCMatrixO.reshape(0, problemSize);
+      linearInequalityConstraintsDVectorO.reshape(0, 1);
+
+      costQuadraticMatrix.zero();
+      quadraticCostQVector.zero();
    }
 
-   public void setQuadraticCostFunction(DMatrix costQuadraticMatrix, DMatrix costLinearVector, double quadraticCostScalar)
+   public void addRegularization(int startIndex, int numberOfVariables, double value)
    {
-      if (costLinearVector.getNumCols() != 1)
-         throw new RuntimeException("costLinearVector.getNumCols() != 1");
-      if (costQuadraticMatrix.getNumRows() != costLinearVector.getNumRows())
-         throw new RuntimeException("costQuadraticMatrix.getNumRows() != costLinearVector.getNumRows()");
-      if (costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols())
-         throw new RuntimeException("costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols()");
+      for (int i = 0; i < numberOfVariables; i++)
+         costQuadraticMatrix.add(startIndex + i, startIndex + i, value);
+   }
 
-      this.costQuadraticMatrix.set(costQuadraticMatrix);
-      symmetricCostQuadraticMatrix.transpose(this.costQuadraticMatrix);
+   public void addRateRegularization(int startIndex, int numberOfVariables, double value, DMatrix previousSolution)
+   {
+      for (int i = 0; i < numberOfVariables; i++)
+      {
+         double previousValue = previousSolution.get(startIndex + i, 0);
+         if (Double.isNaN(previousValue))
+            continue;
+         costQuadraticMatrix.add(startIndex + i, startIndex + i, value);
+         quadraticCostQVector.add(startIndex + i, 0, -previousValue * value);
+      }
+   }
 
-      symmetricCostQuadraticMatrix.add(this.costQuadraticMatrix, symmetricCostQuadraticMatrix);
 
-      quadraticCostQMatrix.set(symmetricCostQuadraticMatrix);
-      quadraticCostQMatrix.scale(0.5);
+   public void addObjective(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight, int offset)
+   {
+      addObjective(taskJacobian, taskObjective, taskWeight, taskJacobian.getNumCols(), offset);
+   }
 
-      quadraticCostQVector.set(costLinearVector);
-      this.quadraticCostScalar = quadraticCostScalar;
+   public void addObjective(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight, int problemSize, int offset)
+   {
+      if (taskJacobian.getNumCols() != problemSize)
+      {
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
+      }
+      int variables = taskJacobian.getNumCols();
+      if (variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      // Compute: H += J^T W J
+      // TODO figure out an efficient inner product in eigen
+      costQuadraticMatrix.multAddBlockTransA(taskWeight, taskJacobian, taskJacobian, offset, offset);
+      if (debug && costQuadraticMatrix.containsNaN())
+         throw new RuntimeException("error");
+
+      // Compute: f += - J^T W Objective
+      quadraticCostQVector.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, offset, 0);
+      if (debug && quadraticCostQVector.containsNaN())
+         throw new RuntimeException("error");
+   }
+
+   private final NativeMatrix tempJtW = new NativeMatrix(0, 0);
+
+   public void addObjective(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight, int offset)
+   {
+      addObjective(taskJacobian, taskObjective, taskWeight, taskJacobian.getNumCols(), offset);
+   }
+
+   public void addObjective(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight, int problemSize, int offset)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      if (taskJacobian.getNumCols() != problemSize)
+      {
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
+      }
+      int variables = taskJacobian.getNumCols();
+      if (variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      tempJtW.reshape(variables, taskSize);
+
+      // J^T W
+      tempJtW.multTransA(taskJacobian, taskWeight);
+
+      // Compute: H += J^T W J
+      costQuadraticMatrix.multAddBlock(tempJtW, taskJacobian, offset, offset);
+      if (debug && costQuadraticMatrix.containsNaN())
+         throw new RuntimeException("error");
+
+      // Compute: f += - J^T W Objective
+      quadraticCostQVector.multAddBlock(-1.0, tempJtW, taskObjective, offset, 0);
+      if (debug && quadraticCostQVector.containsNaN())
+         throw new RuntimeException("error");
+   }
+
+   public void addDirectObjective(NativeMatrix directCostHessian, NativeMatrix directCostGradient, double weightScalar, int offset)
+   {
+      int size = directCostHessian.getNumCols();
+      costQuadraticMatrix.addBlock(directCostHessian, offset, offset, 0, 0, size, size, weightScalar);
+      if (debug && costQuadraticMatrix.containsNaN())
+         throw new RuntimeException("error");
+      quadraticCostQVector.addBlock(directCostGradient, offset, 0, 0, 0, size, 1, weightScalar);
+      if (debug && quadraticCostQVector.containsNaN())
+         throw new RuntimeException("Error");
+   }
+
+   public void addEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, int problemSize, int taskColOffset)
+   {
+      addEqualityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, taskColOffset);
+   }
+
+   public void addEqualityConstraint(NativeMatrix taskJacobian,
+                                     NativeMatrix taskObjective,
+                                     int problemSize,
+                                     int totalProblemSize,
+                                     int colOffset)
+   {
+      if (taskJacobian.getNumCols() != problemSize)
+      {
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
+      }
+
+      int variables = taskJacobian.getNumCols();
+      if (variables + colOffset > totalProblemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      nativeMatrixGrower.appendRows(linearEqualityConstraintsAMatrix, colOffset, taskJacobian);
+      nativeMatrixGrower.appendRows(linearEqualityConstraintsBVector, taskObjective);
+
+      if (debug && linearEqualityConstraintsAMatrix.containsNaN())
+         throw new RuntimeException("error");
+      if (debug && linearEqualityConstraintsBVector.containsNaN())
+         throw new RuntimeException("error");
+   }
+
+   public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, int problemSize, int colOffset)
+   {
+      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset);
+   }
+
+   public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian,
+                                                          NativeMatrix taskObjective,
+                                                          int problemSize,
+                                                          int totalProblemSize,
+                                                          int colOffset)
+   {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, problemSize, totalProblemSize, colOffset);
+   }
+
+   public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, int problemSize, int colOffset)
+   {
+      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset);
+   }
+
+   public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian,
+                                                           NativeMatrix taskObjective,
+                                                           int problemSize,
+                                                           int totalProblemSize,
+                                                           int colOffset)
+   {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, problemSize, totalProblemSize, colOffset);
+   }
+
+   private void addInequalityConstraintInternal(NativeMatrix taskJacobian,
+                                                NativeMatrix taskObjective,
+                                                double sign,
+                                                int problemSize,
+                                                int totalProblemSize,
+                                                int colOffset)
+   {
+      int variables = taskJacobian.getNumCols();
+      if (taskJacobian.getNumCols() != problemSize)
+      {
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
+      }
+      if (variables > totalProblemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      nativeMatrixGrower.appendRows(linearInequalityConstraintsCMatrixO, colOffset, sign, taskJacobian);
+      nativeMatrixGrower.appendRows(linearInequalityConstraintsDVectorO, sign, taskObjective);
    }
 
    public double getObjectiveCost(DMatrixRMaj x)
@@ -185,33 +357,48 @@ public class MPCQPSolver
       computedObjectiveFunctionValue.scale(0.5);
 
       computedObjectiveFunctionValue.multAddTransA(quadraticCostQVector, nativexSolutionMatrix);
-      return computedObjectiveFunctionValue.get(0, 0) + quadraticCostScalar;
+      return computedObjectiveFunctionValue.get(0, 0);// + quadraticCostScalar;
    }
 
-   public void setLinearEqualityConstraints(DMatrix linearEqualityConstraintsAMatrix, DMatrix linearEqualityConstraintsBVector)
+   public int getNumberOfEqualityConstraints()
    {
+      return linearEqualityConstraintsAMatrix.getNumRows();
+   }
+
+   public int getNumberOfInequalityConstraints()
+   {
+      return linearInequalityConstraintsCMatrixO.getNumRows();
+   }
+
+   private void assertSizesCorrect()
+   {
+      if (quadraticCostQVector.getNumCols() != 1)
+         throw new RuntimeException("costLinearVector.getNumCols() != 1");
+      if (costQuadraticMatrix.getNumRows() != quadraticCostQVector.getNumRows())
+         throw new RuntimeException("costQuadraticMatrix.getNumRows() != costLinearVector.getNumRows()");
+      if (costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols())
+         throw new RuntimeException("costQuadraticMatrix.getNumRows() != costQuadraticMatrix.getNumCols()");
+
       if (linearEqualityConstraintsBVector.getNumCols() != 1)
          throw new RuntimeException("linearEqualityConstraintsBVector.getNumCols() != 1");
       if (linearEqualityConstraintsAMatrix.getNumRows() != linearEqualityConstraintsBVector.getNumRows())
          throw new RuntimeException("linearEqualityConstraintsAMatrix.getNumRows() != linearEqualityConstraintsBVector.getNumRows()");
-      if (linearEqualityConstraintsAMatrix.getNumCols() != quadraticCostQMatrix.getNumCols())
+      if (linearEqualityConstraintsAMatrix.getNumCols() != costQuadraticMatrix.getNumCols())
          throw new RuntimeException("linearEqualityConstraintsAMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
 
-      this.linearEqualityConstraintsBVector.set(linearEqualityConstraintsBVector);
-      this.linearEqualityConstraintsAMatrix.set(linearEqualityConstraintsAMatrix);
+      if (linearInequalityConstraintsDVectorO.getNumCols() != 1)
+         throw new RuntimeException("linearInequalityConstraintDVector.getNumCols() != 1");
+      if (linearInequalityConstraintsCMatrixO.getNumRows() != linearInequalityConstraintsDVectorO.getNumRows())
+         throw new RuntimeException("linearInequalityConstraintCMatrix.getNumRows() != linearInequalityConstraintDVector.getNumRows()");
+      if (linearInequalityConstraintsCMatrixO.getNumCols() != costQuadraticMatrix.getNumCols())
+         throw new RuntimeException("linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
    }
 
-   public void setLinearInequalityConstraints(DMatrix linearInequalityConstraintCMatrix, DMatrix linearInequalityConstraintDVector)
+   private void computeSymmetricHessian()
    {
-      if (linearInequalityConstraintDVector.getNumCols() != 1)
-         throw new RuntimeException("linearInequalityConstraintDVector.getNumCols() != 1");
-      if (linearInequalityConstraintCMatrix.getNumRows() != linearInequalityConstraintDVector.getNumRows())
-         throw new RuntimeException("linearInequalityConstraintCMatrix.getNumRows() != linearInequalityConstraintDVector.getNumRows()");
-      if (linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols())
-         throw new RuntimeException("linearInequalityConstraintCMatrix.getNumCols() != quadraticCostQMatrix.getNumCols()");
-
-      linearInequalityConstraintsDVectorO.set(linearInequalityConstraintDVector);
-      linearInequalityConstraintsCMatrixO.set(linearInequalityConstraintCMatrix);
+      quadraticCostQMatrix.transpose(this.costQuadraticMatrix);
+      quadraticCostQMatrix.addEquals(this.costQuadraticMatrix);
+      quadraticCostQMatrix.scale(0.5);
    }
 
    public void setUseWarmStart(boolean useWarmStart)
@@ -232,6 +419,10 @@ public class MPCQPSolver
 
    public int solve(DMatrix solutionToPack)
    {
+      // TODO CHECK SIZE
+      assertSizesCorrect();
+      computeSymmetricHessian();
+
       if (!useWarmStart || (resetActiveSetOnSizeChange && problemSizeChanged()))
          resetActiveSet();
       else
