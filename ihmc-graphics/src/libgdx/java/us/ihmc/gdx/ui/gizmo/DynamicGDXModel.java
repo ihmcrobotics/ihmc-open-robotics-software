@@ -75,7 +75,7 @@ public class DynamicGDXModel
       if (needsRebuild)
       {
          needsRebuild = false;
-         if (mesh != null)
+         if (mesh != null && buildMesh != null)
          {
             node.parts.removeIndex(0);
             dispose();

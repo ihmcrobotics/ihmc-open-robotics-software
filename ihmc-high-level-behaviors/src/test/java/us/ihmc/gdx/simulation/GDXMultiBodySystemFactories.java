@@ -142,12 +142,12 @@ public class GDXMultiBodySystemFactories
       return GDXRigidBody;
    }
 
-   private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions, GDXRigidBody GDXRigidBody, ClassLoader resourceClassLoader)
+   private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions, GDXRigidBody gdxRigidBody, ClassLoader resourceClassLoader)
    {
       ModelInstance graphicNode = GDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
-      ReferenceFrame graphicFrame = GDXRigidBody.isRootBody() ? GDXRigidBody.getBodyFixedFrame() : GDXRigidBody.getParentJoint().getFrameAfterJoint();
+      ReferenceFrame graphicFrame = gdxRigidBody.isRootBody() ? gdxRigidBody.getBodyFixedFrame() : gdxRigidBody.getParentJoint().getFrameAfterJoint();
 
       if (graphicNode != null)
-         GDXRigidBody.setGraphics(new FrameGDXNode(graphicFrame, graphicNode));
+         gdxRigidBody.setGraphics(new FrameGDXNode(graphicFrame, graphicNode));
    }
 }

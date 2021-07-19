@@ -72,7 +72,7 @@ public class GDXVisualTools
 
       DynamicGDXModel gdxModel = new DynamicGDXModel(); // TODO: Should just pass DynamicGDXModel around?
       gdxModel.setMaterial(toMaterial(materialDefinition));
-      gdxModel.setMesh(GDXTriangleMesh3DDefinitionInterpreter.interpretDefinition(geometryDefinition));
+      gdxModel.setMesh(GDXTriangleMesh3DDefinitionInterpreter.interpretDefinition(TriangleMesh3DFactories.TriangleMesh(geometryDefinition), false));
       return gdxModel.getOrCreateModelInstance();
    }
 

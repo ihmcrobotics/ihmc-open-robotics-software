@@ -18,6 +18,8 @@ import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.sharedMemory.tools.YoMirroredRegistryTools;
+import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.yoVariables.registry.YoNamespace;
@@ -35,6 +37,7 @@ public class GDXPhysicsDemo
    private final GDXPhysicsSimulator physicsSimulator = new GDXPhysicsSimulator();
    private ModelInstance boxModelInstance;
    private ModelInstance slopeModelInstance;
+   private GDXRigidBody rootBody;
 
    public GDXPhysicsDemo()
    {
@@ -53,6 +56,7 @@ public class GDXPhysicsDemo
       //            physicsSimulator.getSession().getPhysicsEngine().
       YoRegistry rootRegistry = physicsSimulator.getSession().getPhysicsEngine().getPhysicsEngineRegistry();
       YoRegistry boxRegistry = rootRegistry.findRegistry(new YoNamespace("root.Box"));
+      YoRegistry mirroredBoxRegistry = YoMirroredRegistryTools.newRegistryFromNamespace(SimulationSession.ROOT_REGISTRY_NAME, boxRobot.getName());
       RigidBodyBasics originalRigidBody = boxRobot.newIntance(ReferenceFrameTools.constructARootFrame("dummy"));
       ReferenceFrame cloneStationaryFrame = ReferenceFrame.getWorldFrame(); // TODO: Check
 
@@ -62,11 +66,6 @@ public class GDXPhysicsDemo
 //                                                                                            "",
 //                                                                                              rigidBodyBuilder,
 //                                                                                            YoMultiBodySystemFactories.newYoJointBuilder(rootRegistry));
-      GDXMultiBodySystemFactories.toYoGDXMultiBodySystem(originalRigidBody,
-                                                         cloneStationaryFrame,
-                                                         boxRobot,
-                                                         rootRegistry,
-                                                         executor);
 
       YoDouble x = (YoDouble) boxRegistry.getVariable("rootJointX");
       YoDouble y = (YoDouble) boxRegistry.getVariable("rootJointY");
@@ -85,6 +84,19 @@ public class GDXPhysicsDemo
             baseUI.create();
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
 
+            rootBody = GDXMultiBodySystemFactories.toYoGDXMultiBodySystem(originalRigidBody,
+                                                                          cloneStationaryFrame,
+                                                                          boxRobot,
+                                                                          mirroredBoxRegistry);
+            for (GDXRigidBody rigidBody : rootBody.subtreeIterable())
+            {
+               if (rigidBody.getGraphics() != null)
+               {
+                  baseUI.get3DSceneManager().addModelInstance(rigidBody.getGraphics().getModelInstance());
+               }
+            }
+
+
             VisualDefinition boxVisual = boxRobot.getRigidBodyDefinition("Box").getVisualDefinitions().get(0);
             GeometryDefinition geometryDefinition = boxVisual.getGeometryDefinition();
             if (geometryDefinition instanceof Box3DDefinition)
@@ -98,7 +110,7 @@ public class GDXPhysicsDemo
 //                  meshBuilder.addBox(1.0f, 1.0f, 1.0f, Color.GREEN);
                }, boxGeometry.getName() + "231");
             }
-            baseUI.get3DSceneManager().addModelInstance(boxModelInstance);
+//            baseUI.get3DSceneManager().addModelInstance(boxModelInstance);
             GDXTools.toGDX(boxRobot.getRootBodyDefinition().getInertiaPose(), boxModelInstance.transform);
 
             VisualDefinition slopeVisual = slopeTerrain.getVisualDefinitions().get(0);
@@ -123,6 +135,17 @@ public class GDXPhysicsDemo
             rigidBodyTransform.getRotation().setQuaternion(qx.getValue(), qy.getValue(), qz.getValue(), qs.getValue());
 
             GDXTools.toGDX(rigidBodyTransform, boxModelInstance.transform);
+
+
+            rootBody.updateFramesRecursively();
+            rootBody.updateSubtreeGraphics();
+//            for (GDXRigidBody rigidBody : rootBody.subtreeIterable())
+//            {
+//               if (rigidBody.getGraphics() != null)
+//               {
+//                  rigidBody.getGraphics().updatePose();
+//               }
+//            }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
