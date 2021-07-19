@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
@@ -32,11 +31,10 @@ public class DiscreteTimeExternalTorqueEstimator implements ExternalTorqueEstima
    private final DMatrixRMaj tau;
    private final DMatrixRMaj qd;
    private final DMatrixRMaj massMatrix;
-   private final DMatrixRMaj massMatrixPrev;
-   private final DMatrixRMaj massMatrixDot;
-   private final DMatrixRMaj hqd;
-   private final DMatrixRMaj hdqd;
-   private final DMatrixRMaj coriolisGravityTerm;
+   /* p = M*qd */
+   private final DMatrixRMaj generalizedMomentum;
+   private final DMatrixRMaj coriolisMatrix;
+   private final DMatrixRMaj gravityMatrix;
    private final DMatrixRMaj estimatedExternalTorque;
 
    private final DMatrixRMaj sampledFilterValue;
@@ -46,8 +44,6 @@ public class DiscreteTimeExternalTorqueEstimator implements ExternalTorqueEstima
 
    private final YoDouble[] yoObservedExternalJointTorque;
    private final YoDouble[] yoSimulatedTorqueSensingError;
-
-   private boolean firstTick = true;
 
    public DiscreteTimeExternalTorqueEstimator(JointBasics[] joints,
                                               double dt,
@@ -61,12 +57,10 @@ public class DiscreteTimeExternalTorqueEstimator implements ExternalTorqueEstima
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
       this.tau = new DMatrixRMaj(dofs, 1);
       this.qd = new DMatrixRMaj(dofs, 1);
-      this.coriolisGravityTerm = new DMatrixRMaj(dofs, 1);
-      this.hqd = new DMatrixRMaj(dofs, 1);
-      this.hdqd = new DMatrixRMaj(dofs, 1);
+      this.coriolisMatrix = new DMatrixRMaj(dofs, 1);
+      this.gravityMatrix = new DMatrixRMaj(dofs, 1);
+      this.generalizedMomentum = new DMatrixRMaj(dofs, 1);
       this.massMatrix = new DMatrixRMaj(dofs, dofs);
-      this.massMatrixPrev = new DMatrixRMaj(dofs, dofs);
-      this.massMatrixDot = new DMatrixRMaj(dofs, dofs);
       this.sampledFilterValue = new DMatrixRMaj(dofs, 1);
       this.runningFilteredValue = new DMatrixRMaj(dofs, 1);
       this.estimatedExternalTorque = new DMatrixRMaj(dofs, 1);
@@ -107,7 +101,6 @@ public class DiscreteTimeExternalTorqueEstimator implements ExternalTorqueEstima
    @Override
    public void initialize()
    {
-      firstTick = true;
       CommonOps_DDRM.fill(estimatedExternalTorque, 0.0);
       CommonOps_DDRM.fill(runningFilteredValue, 0.0);
    }
@@ -121,38 +114,28 @@ public class DiscreteTimeExternalTorqueEstimator implements ExternalTorqueEstima
          requestInitialize.set(false);
       }
 
-      massMatrixPrev.set(massMatrix);
-      dynamicMatrixUpdater.update(massMatrix, coriolisGravityTerm, tau);
+      dynamicMatrixUpdater.update(massMatrix, coriolisMatrix, gravityMatrix, tau);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
-
-      if (firstTick)
-      {
-         firstTick = false;
-      }
-      else
-      {
-         CommonOps_DDRM.subtract(massMatrix, massMatrixPrev, massMatrixDot);
-         CommonOps_DDRM.scale(1.0 / dt, massMatrixDot);
-      }
 
       for (int i = 0; i < dofs; i++)
       {
          tau.set(i, 0, tau.get(i, 0) - yoSimulatedTorqueSensingError[i].getValue());
       }
 
-      CommonOps_DDRM.mult(massMatrix, qd, hqd);
-      CommonOps_DDRM.mult(massMatrixDot, qd, hdqd);
+      CommonOps_DDRM.mult(massMatrix, qd, generalizedMomentum);
 
-      sampledFilterValue.set(hqd);
+      sampledFilterValue.set(generalizedMomentum);
       CommonOps_DDRM.scale(beta.getValue(), sampledFilterValue);
       CommonOps_DDRM.addEquals(sampledFilterValue, tau);
-      CommonOps_DDRM.subtractEquals(sampledFilterValue, coriolisGravityTerm);
-      CommonOps_DDRM.addEquals(sampledFilterValue, hdqd);
+      CommonOps_DDRM.subtractEquals(sampledFilterValue, coriolisMatrix);
+      CommonOps_DDRM.multAddTransA(coriolisMatrix, qd, sampledFilterValue);
+      CommonOps_DDRM.subtractEquals(sampledFilterValue, gravityMatrix);
+
       CommonOps_DDRM.scale(1.0 - discreteTimeGain.getValue(), sampledFilterValue);
       CommonOps_DDRM.scale(discreteTimeGain.getValue(), runningFilteredValue);
       CommonOps_DDRM.addEquals(runningFilteredValue, sampledFilterValue);
 
-      estimatedExternalTorque.set(hqd);
+      estimatedExternalTorque.set(generalizedMomentum);
       CommonOps_DDRM.scale(beta.getValue(), estimatedExternalTorque);
       CommonOps_DDRM.subtractEquals(estimatedExternalTorque, runningFilteredValue);
 

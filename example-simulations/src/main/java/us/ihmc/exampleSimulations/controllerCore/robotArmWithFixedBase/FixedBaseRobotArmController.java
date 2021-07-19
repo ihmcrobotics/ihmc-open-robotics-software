@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
@@ -380,5 +381,10 @@ public class FixedBaseRobotArmController implements RobotController
    public WholeBodyControlCoreToolbox getControlCoreToolbox()
    {
       return controlCoreToolbox;
+   }
+
+   public ControllerCoreOutputReadOnly getControllerCoreOutput()
+   {
+      return controllerCore.getControllerCoreOutput();
    }
 }

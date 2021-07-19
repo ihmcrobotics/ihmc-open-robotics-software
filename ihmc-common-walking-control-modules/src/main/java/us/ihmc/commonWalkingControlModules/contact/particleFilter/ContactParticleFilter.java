@@ -36,7 +36,7 @@ import java.util.*;
  */
 public class ContactParticleFilter
 {
-   private static final int numberOfParticles = 150;
+   private static final int numberOfParticles = 30;
    private static final int estimationVariables = 3;
 
    private final String name = getClass().getSimpleName();
@@ -549,5 +549,10 @@ public class ContactParticleFilter
    public DMatrixRMaj getJointResiduals()
    {
       return externalTorqueEstimator.getEstimatedExternalTorque();
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
    }
 }

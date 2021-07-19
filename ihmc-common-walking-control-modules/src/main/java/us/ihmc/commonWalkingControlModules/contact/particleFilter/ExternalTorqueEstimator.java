@@ -8,7 +8,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -16,7 +15,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.Arrays;
 
 /**
- * Module to estimate unknown external contact. This class estimates an array of joint torques based on the discrepency between
+ * Module to estimate unknown external contact. This class estimates an array of joint torques based on the discrepancy between
  * the expected and actual system behavior. In the below paper, this module tau_ext, i.e. the "generalized external forces", which
  * can in turn be used to estimate taskspace forces in a number of different ways.
  *
@@ -45,16 +44,13 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
    private final DMatrixRMaj hqd0;
    private final DMatrixRMaj hqd;
    private final DMatrixRMaj massMatrix;
-   private final DMatrixRMaj massMatrixPrev;
-   private final DMatrixRMaj massMatrixDot;
-   private final DMatrixRMaj coriolisGravityTerm;
+   private final DMatrixRMaj coriolisMatrix;
+   private final DMatrixRMaj gravityMatrix;
 
    private final ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater;
 
    private final YoDouble[] yoObservedExternalJointTorque;
    private final YoDouble[] yoSimulatedTorqueSensingError;
-
-   private boolean firstTick = true;
 
    public ExternalTorqueEstimator(JointBasics[] joints,
                                   double dt,
@@ -73,9 +69,8 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
       this.estimatedExternalTorque = new DMatrixRMaj(dofs, 1);
       this.hqd = new DMatrixRMaj(dofs, 1);
       this.massMatrix = new DMatrixRMaj(dofs, dofs);
-      this.massMatrixPrev = new DMatrixRMaj(dofs, dofs);
-      this.massMatrixDot = new DMatrixRMaj(dofs, dofs);
-      this.coriolisGravityTerm = new DMatrixRMaj(dofs, 1);
+      this.coriolisMatrix = new DMatrixRMaj(dofs, dofs);
+      this.gravityMatrix = new DMatrixRMaj(dofs, 1);
       this.tau = new DMatrixRMaj(dofs, 1);
       this.qd = new DMatrixRMaj(dofs, 1);
       this.hqd0 = new DMatrixRMaj(dofs, 1);
@@ -107,7 +102,6 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
    @Override
    public void initialize()
    {
-      firstTick = true;
       CommonOps_DDRM.fill(estimatedExternalTorque, 0.0);
       CommonOps_DDRM.fill(currentIntegratedValue, 0.0);
    }
@@ -133,21 +127,8 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
 
    private void computeForceEstimate()
    {
-      massMatrixPrev.set(massMatrix);
-
-      dynamicMatrixUpdater.update(massMatrix, coriolisGravityTerm, tau);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
-
-      if (firstTick)
-      {
-         CommonOps_DDRM.mult(massMatrix, qd, hqd0);
-         firstTick = false;
-      }
-      else
-      {
-         CommonOps_DDRM.subtract(massMatrix, massMatrixPrev, massMatrixDot);
-         CommonOps_DDRM.scale(1.0 / dt, massMatrixDot);
-      }
+      dynamicMatrixUpdater.update(massMatrix, coriolisMatrix, gravityMatrix, tau);
 
       for (int i = 0; i < dofs; i++)
       {
@@ -156,8 +137,8 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
 
       // update integral
       currentIntegrandValue.set(tau);
-      CommonOps_DDRM.subtractEquals(currentIntegrandValue, coriolisGravityTerm);
-      CommonOps_DDRM.multAdd(massMatrixDot, qd, currentIntegrandValue);
+      CommonOps_DDRM.subtractEquals(currentIntegrandValue, gravityMatrix);
+      CommonOps_DDRM.multAddTransA(-1.0, coriolisMatrix, qd, currentIntegrandValue);
       CommonOps_DDRM.addEquals(currentIntegrandValue, estimatedExternalTorque);
       CommonOps_DDRM.addEquals(currentIntegratedValue, dt, currentIntegrandValue);
 

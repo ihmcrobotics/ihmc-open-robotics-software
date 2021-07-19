@@ -28,6 +28,7 @@ import us.ihmc.humanoidRobotics.communication.externalForceEstimationToolboxAPI.
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -71,8 +72,12 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private final DynamicsMatrixCalculator dynamicsMatrixCalculator;
    private final DMatrixRMaj controllerDesiredQdd;
    private final DMatrixRMaj controllerDesiredTau;
-   private final DMatrixRMaj massMatrix;
-   private final DMatrixRMaj coriolisGravityMatrix;
+   private final DMatrixRMaj gravityMatrix;
+   private final DMatrixRMaj cqd;
+   private final DMatrixRMaj qd;
+
+   // Computed by DynamicsMatrixCalculator: C * qd + g
+   private final DMatrixRMaj coriolisAndGravityMatrix;
 
    private final CommandInputManager commandInputManager;
    private final ExternalForceEstimationOutputStatus outputStatus = new ExternalForceEstimationOutputStatus();
@@ -126,19 +131,33 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       controlCoreToolbox.setupForInverseDynamicsSolver(contactablePlaneBodies);
 
       this.dynamicsMatrixCalculator = new DynamicsMatrixCalculator(controlCoreToolbox);
+      dynamicsMatrixCalculator.getMassMatrixCalculator().setEnableCoriolisMatrixCalculation(true);
+
       this.degreesOfFreedom = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
       this.controllerDesiredQdd = new DMatrixRMaj(degreesOfFreedom, 1);
       this.controllerDesiredTau = new DMatrixRMaj(degreesOfFreedom, 1);
 
-      this.massMatrix = new DMatrixRMaj(degreesOfFreedom, degreesOfFreedom);
-      this.coriolisGravityMatrix = new DMatrixRMaj(degreesOfFreedom, 1);
+      this.gravityMatrix = new DMatrixRMaj(degreesOfFreedom, 1);
+      this.coriolisAndGravityMatrix = new DMatrixRMaj(degreesOfFreedom, 1);
+      this.cqd = new DMatrixRMaj(degreesOfFreedom, 1);
+      this.qd = new DMatrixRMaj(degreesOfFreedom, 1);
 
-      ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater = (massMatrix, coriolisGravityMatrix, tau) ->
+      ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater = (massMatrix, coriolisMatrix, gravityMatrix, tau) ->
       {
-         massMatrix.set(this.massMatrix);
-         coriolisGravityMatrix.set(this.coriolisGravityMatrix);
-         tau.set(controllerDesiredTau);
+         dynamicsMatrixCalculator.reset();
+         dynamicsMatrixCalculator.compute();
+         dynamicsMatrixCalculator.getBodyCoriolisMatrix(coriolisAndGravityMatrix);
+
+         dynamicsMatrixCalculator.getMassMatrixCalculator().reset();
+         massMatrix.set(dynamicsMatrixCalculator.getMassMatrixCalculator().getMassMatrix());
+         coriolisMatrix.set(dynamicsMatrixCalculator.getMassMatrixCalculator().getCoriolisMatrix());
+
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
+
+         CommonOps_DDRM.mult(coriolisMatrix, qd, cqd);
+         CommonOps_DDRM.subtract(coriolisAndGravityMatrix, cqd, gravityMatrix);
       };
 
       RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
@@ -245,13 +264,6 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          contactParticleFilter.initializeParticleFilter();
          contactParticleFilterHasInitialized.set(true);
       }
-
-      dynamicsMatrixCalculator.compute();
-      dynamicsMatrixCalculator.getMassMatrix(massMatrix);
-      dynamicsMatrixCalculator.getCoriolisMatrix(coriolisGravityMatrix);
-
-      CommonOps_DDRM.mult(massMatrix, controllerDesiredQdd, controllerDesiredTau);
-      CommonOps_DDRM.addEquals(controllerDesiredTau, coriolisGravityMatrix);
 
       if (estimateContactPosition.getBooleanValue())
       {

@@ -73,11 +73,11 @@ public class PredefinedContactExternalForceSolverTest
       gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-gravity);
       CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody);
 
-      this.dynamicMatrixUpdater = (m, cqg, tau) ->
+      this.dynamicMatrixUpdater = (m, c, g, tau) ->
       {
          m.set(massMatrixCalculator.getMassMatrix());
          gravityCoriolisExternalWrenchMatrixCalculator.compute();
-         cqg.set(gravityCoriolisExternalWrenchMatrixCalculator.getJointTauMatrix());
+         c.set(gravityCoriolisExternalWrenchMatrixCalculator.getJointTauMatrix());
          MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       };
 

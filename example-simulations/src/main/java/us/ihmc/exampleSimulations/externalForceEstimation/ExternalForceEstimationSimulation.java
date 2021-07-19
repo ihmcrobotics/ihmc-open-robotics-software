@@ -1,5 +1,7 @@
 package us.ihmc.exampleSimulations.externalForceEstimation;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.contact.particleFilter.ForceEstimatorDynamicMatrixUpdater;
 import us.ihmc.commonWalkingControlModules.contact.particleFilter.PredefinedContactExternalForceSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -14,6 +16,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -75,12 +78,27 @@ import us.ihmc.yoVariables.registry.YoRegistry;
    private void setupDynamicMatrixSolverWithControllerCoreToolbox(WholeBodyControlCoreToolbox toolbox)
    {
       DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox);
-      this.dynamicMatrixUpdater = (m, cqg, tau) ->
+      dynamicsMatrixCalculator.getMassMatrixCalculator().setEnableCoriolisMatrixCalculation(true);
+
+      DMatrixRMaj cqd_g = new DMatrixRMaj(0);
+      DMatrixRMaj qd = new DMatrixRMaj(0);
+      DMatrixRMaj cqd = new DMatrixRMaj(0);
+
+      this.dynamicMatrixUpdater = (m, c, g, tau) ->
       {
+         dynamicsMatrixCalculator.reset();
          dynamicsMatrixCalculator.compute();
-         dynamicsMatrixCalculator.getBodyMassMatrix(m);
-         dynamicsMatrixCalculator.getBodyCoriolisMatrix(cqg);
+         dynamicsMatrixCalculator.getBodyCoriolisMatrix(cqd_g);
+
+         dynamicsMatrixCalculator.getMassMatrixCalculator().reset();
+         m.set(dynamicsMatrixCalculator.getMassMatrixCalculator().getMassMatrix());
+         c.set(dynamicsMatrixCalculator.getMassMatrixCalculator().getCoriolisMatrix());
+
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
          MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
+
+         CommonOps_DDRM.mult(c, qd, cqd);
+         CommonOps_DDRM.subtract(cqd_g, cqd, g);
       };
    }
 
