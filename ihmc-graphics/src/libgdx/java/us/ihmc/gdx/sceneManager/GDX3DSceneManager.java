@@ -49,8 +49,7 @@ public class GDX3DSceneManager
    private ScreenViewport viewport;
    private ModelBatch modelBatch;
 
-   private DirectionalShadowLight shadowLight;
-   private ModelBatch shadowBatch;
+   private GDXMultiSourceShadowMap shadowMap;
 
    private int x = 0;
    private int y = 0;
@@ -67,6 +66,21 @@ public class GDX3DSceneManager
       IntBuffer buffer = BufferUtils.newIntBuffer(1);
       Gdx.gl.glGetIntegerv(GL30.GL_DRAW_FRAMEBUFFER_BINDING, buffer);
       return buffer.get();
+   }
+
+   private void createEnvironment() {
+      environment = new Environment();
+      environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.0f));
+
+      shadowMap = new GDXMultiSourceShadowMap(environment);
+      shadowMap.add((DirectionalShadowLight) new DirectionalShadowLight(1024, 1024, 5f, 5f, 1f, 100f)
+               .set(0.8f, 0.8f, 0.8f, -1f, -.8f, -.2f));
+
+      environment.shadowMap = shadowMap;
+
+      PointLight light = new PointLight();
+      light.set(1, 1, 1, 0, 0, 20, 100);
+      environment.add(light);
    }
 
    public void create()
@@ -93,20 +107,10 @@ public class GDX3DSceneManager
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
-      //Environment setup
-      environment = new Environment();
-      environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.0f));
-
-      environment.add((shadowLight = new DirectionalShadowLight(1024, 1024, 5f, 5f, 1f, 100f))
-                            .set(0.8f, 0.8f, 0.8f, -1f, -.8f, -.2f));
-      environment.shadowMap = shadowLight;
-
-      PointLight light = new PointLight();
-      light.set(1, 1, 1, 0, 0, 20, 100);
-      environment.add(light);
+      createEnvironment();
 
       modelBatch = new ModelBatch();
-      shadowBatch = new ModelBatch(new DepthShaderProvider());
+      shadowMap.create();
    }
 
    private void preRender()
@@ -126,13 +130,7 @@ public class GDX3DSceneManager
 
       GDX3DSceneTools.glClearGray();
 
-      shadowLight.begin(Vector3.Zero, camera3D.direction);
-      shadowBatch.begin(shadowLight.getCamera());
-
-      shadowBatch.render(renderables);
-
-      shadowBatch.end();
-      shadowLight.end();
+      shadowMap.update(camera3D, renderables);
 
       modelBatch.begin(camera3D);
    }
