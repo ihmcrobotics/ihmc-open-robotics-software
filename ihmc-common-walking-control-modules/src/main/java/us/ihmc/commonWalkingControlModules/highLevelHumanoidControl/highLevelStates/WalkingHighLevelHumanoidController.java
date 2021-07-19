@@ -432,13 +432,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       // Setup transition condition for push recovery, when recovering from double support.
       Set<WalkingStateEnum> allDoubleSupportStates = Stream.of(WalkingStateEnum.values).filter(state -> state.isDoubleSupport()).collect(Collectors.toSet());
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         WalkingStateEnum singleSupportStateEnum = WalkingStateEnum.getWalkingSingleSupportState(robotSide);
-         RobotSide swingSide = singleSupportStateEnum.getSupportSide().getOppositeSide();
-         factory.addTransition(allDoubleSupportStates, singleSupportStateEnum, new DoubSuppToSingSuppCond4DistRecov(swingSide, balanceManager));
-      }
-
       // Update the previous state info for each state using state changed listeners.
       factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousWalkingStateEnum(from)));
       factory.addStateChangedListener((from, to) -> controllerToolbox.reportControllerStateChangeToListeners(from, to));
