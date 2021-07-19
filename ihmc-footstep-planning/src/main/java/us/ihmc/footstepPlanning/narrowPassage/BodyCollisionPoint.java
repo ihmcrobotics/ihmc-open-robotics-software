@@ -1,20 +1,15 @@
 package us.ihmc.footstepPlanning.narrowPassage;
 
-import javafx.geometry.Orientation;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameShape3DPoseBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -22,7 +17,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -60,7 +54,10 @@ public class BodyCollisionPoint
    private final YoGraphicShape yoCollisionBoxGraphic;
    private final YoGraphicCoordinateSystem adjustmentGraphic;
 
-   public BodyCollisionPoint(int index, FootstepPlannerParametersReadOnly footstepPlannerParameters, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
+   public BodyCollisionPoint(int index,
+                             FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                             YoGraphicsListRegistry graphicsListRegistry,
+                             YoRegistry registry)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       startingWaypoint = new YoFramePose3D("waypoint_init" + index, ReferenceFrame.getWorldFrame(), registry);
@@ -91,7 +88,7 @@ public class BodyCollisionPoint
 
          Graphics3DObject collisionBoxGraphic = new Graphics3DObject();
          AppearanceDefinition collisionBoxColor = YoAppearance.Color(Color.GREEN);
-         collisionBoxColor.setTransparency(0.8);
+         collisionBoxColor.setTransparency(0.9);
          collisionBoxGraphic.addCube(collisionBox.getSizeX(), collisionBox.getSizeY(), collisionBox.getSizeZ(), true, collisionBoxColor);
          yoCollisionBoxGraphic = new YoGraphicShape("collisionGraphic" + index, collisionBoxGraphic, collisionBoxPose, 1.0);
          graphicsListRegistry.registerYoGraphic(boxListName, yoCollisionBoxGraphic);
@@ -99,7 +96,10 @@ public class BodyCollisionPoint
          adjustmentGraphic = new YoGraphicCoordinateSystem("waypointAdjGraphic" + index, waypointAdjustmentPose, 0.1);
          graphicsListRegistry.registerYoGraphic(waypointFrameListName, adjustmentGraphic);
 
-         YoGraphicPosition waypointPositionGraphic = new YoGraphicPosition("waypointGraphic" + index, optimizedWaypoint.getPosition(), 0.01, YoAppearance.Black());
+         YoGraphicPosition waypointPositionGraphic = new YoGraphicPosition("waypointGraphic" + index,
+                                                                           optimizedWaypoint.getPosition(),
+                                                                           0.01,
+                                                                           YoAppearance.Black());
          graphicsListRegistry.registerYoGraphic(waypointListName, waypointPositionGraphic);
       }
    }
@@ -111,7 +111,7 @@ public class BodyCollisionPoint
       double boxSizeY = 0.85;  //footstepPlannerParameters.getBodyBoxWidth();
       double boxSizeZ = 1.5;   //footstepPlannerParameters.getBodyBoxHeight();
       collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
-      boxCenterInSoleFrame.set(footstepPlannerParameters.getBodyBoxBaseX(), footstepPlannerParameters.getBodyBoxBaseY(), boxSizeZ/2 + 0.1);
+      boxCenterInSoleFrame.set(footstepPlannerParameters.getBodyBoxBaseX(), footstepPlannerParameters.getBodyBoxBaseY(), boxSizeZ / 2 + 0.1);
    }
 
    private final Vector3D adjustmentFrameX = new Vector3D();
@@ -152,6 +152,7 @@ public class BodyCollisionPoint
    {
       this.startingWaypoint.set(startingWaypoint);
       optimizedWaypoint.set(startingWaypoint);
+      optimizedWaypoint.getOrientation().set(waypointAdjustmentPose.getOrientation());
       updateCollisionBox();
    }
 
@@ -166,28 +167,41 @@ public class BodyCollisionPoint
    public void shiftWaypoint(Vector3DReadOnly displacement)
    {
       double scale = computeMaximumDisplacementScale(displacement);
-//      if (scale < 1e-8)
-//      {
-//         return;
-//      }
+      //      if (scale < 1e-8)
+      //      {
+      //         return;
+      //      }
 
       optimizedWaypoint.getPosition().set(tempPose.getPosition());
       waypointDisplacement.set(startingWaypoint.getPosition().distance(optimizedWaypoint.getPosition()));
       updateCollisionBox();
    }
 
-   public void adjustOrientationSlightly()
+   public void adjustOrientation(int rotationDirection, Vector3D collisionVector)
    {
+      // Scale turning angle based on collision vector
+      double scale = collisionVector.length() * 200;
+      if (scale < 2)
+         scale = 2;
+
       QuaternionReadOnly orientation = optimizedWaypoint.getOrientation();
-      optimizedWaypoint.getOrientation().setYawPitchRoll(orientation.getYaw() + Math.toRadians(5),
-                                                         orientation.getPitch(),
-                                                         orientation.getRoll());
+      optimizedWaypoint.getOrientation()
+                       .setYawPitchRoll(orientation.getYaw() + Math.toRadians(rotationDirection * scale), orientation.getPitch(), orientation.getRoll());
       updateCollisionBox();
+   }
+
+   public int getRotationDirection(Vector3D collisionVector)
+   {
+      double yAlpha = adjustmentFrameY.dot(collisionVector);
+      return yAlpha < 0 ? 1 : -1;
    }
 
    public double computeMaximumDisplacementScale(Vector3DReadOnly displacement)
    {
       double adjustmentScale = 1.0;
+
+      // TODO Find a better place to set this
+      maxDisplacementSquared.set(0.05);
 
       // try max of 5 times to scale down and check if valid to shift
       int maxAttempts = 5;
@@ -200,7 +214,7 @@ public class BodyCollisionPoint
          boolean validShift = tempPose.getPosition().distanceSquared(startingWaypoint.getPosition()) < maxDisplacementSquared.getDoubleValue();
          if (validShift)
             break;
-         adjustmentScale *= 0.7;
+         adjustmentScale *= 0.5;
          if (i == maxAttempts - 1)
          {
             return 0.0;
@@ -218,6 +232,8 @@ public class BodyCollisionPoint
       boxCenterPose.changeFrame(ReferenceFrame.getWorldFrame());
       collisionBox.getPose().set(boxCenterPose);
       collisionBox.getOrientation().set(optimizedWaypoint.getOrientation());
+      adjustmentGraphic.setPosition(optimizedWaypoint.getPosition());
+      adjustmentGraphic.setOrientation(optimizedWaypoint.getOrientation());
    }
 
    public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList)
