@@ -29,6 +29,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootPoseProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -89,7 +90,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  * changes need to be sent (however, streaming still works fine).
  * <p>
  * Bear in mind that this class controls step generation. The long pole in terms of walking is often
- * physically taking the step. It does not make sense to stream directional inputs at 100Hz if steps
+ * physically taking the step. It might not make sense to stream directional inputs at 100Hz if steps
  * take 1 second to complete; this drives fruitless re-computation. At the other extreme, the
  * toolbox will timeout if it does not receive a command within the timeout interval, so a rate of
  * at least 3Hz is needed.
@@ -110,7 +111,7 @@ public class DirectionalControlController extends ToolboxController
 {
 
    /* Class constants */
-   private final int MAIN_TASK_RATE_MS = 100; // How often to consider publishing footsteps to the controller in milliseconds.
+   private final int MAIN_TASK_RATE_MS = 500; // How often to consider publishing footsteps to the controller in milliseconds.
                                               // XBox controller uses 500ms for the equivalent value.
 
    /*
@@ -134,6 +135,10 @@ public class DirectionalControlController extends ToolboxController
 
    // Whether robot has stopped walking on request. Needed because sometimes request messages are lost.
    private final AtomicBoolean hasSuccessfullyStoppedWalking = new AtomicBoolean(false);
+   
+   // Whether to ignore planar region information. This is on by default because it tends to block
+   // side and rear stepping in a non-obvious way.
+   private final AtomicBoolean ignorePlanarRegions = new AtomicBoolean(true);
 
    // Support for "profiles" that determine how aggressive or conservative the steps will be	
    private JoystickStepParameters controlParameters;
@@ -223,7 +228,7 @@ public class DirectionalControlController extends ToolboxController
 
       continuousStepGenerator.setFootstepAdjustment(this::adjustFootstep);
       continuousStepGenerator.setFootstepMessenger(this::prepareFootsteps);
-      continuousStepGenerator.setFootPoseProvider(robotSide -> lastSupportFootPoses.get(robotSide));
+      continuousStepGenerator.setFootPoseProvider(robotSide -> new FramePose3D(getSoleFrame(robotSide)));
       continuousStepGenerator.addFootstepValidityIndicator(this::isStepSnappable);
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeStepHeight);
@@ -241,6 +246,7 @@ public class DirectionalControlController extends ToolboxController
       collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight);
 
       setupLowBandwidthTasks();
+      LogTools.info("Ignoring REA planes is " + ignorePlanarRegions.toString());
    }
 
    public void setFootstepPublisher(Consumer<FootstepDataListMessage> footstepPublisher)
@@ -339,7 +345,7 @@ public class DirectionalControlController extends ToolboxController
    public void updateInputs(DirectionalControlInputCommand command)
    {
       controlInputCommand.set(command);
-      LogTools.info("Input is now " + controlInputCommand.toString());
+      // LogTools.info("Input is now " + controlInputCommand.toString());
    }
 
    public void updateInputs(DirectionalControlInputMessage message)
@@ -350,16 +356,10 @@ public class DirectionalControlController extends ToolboxController
    }
 
    /**
-    * Set up to send footsteps to controller at 2Hz
+    * Set up to send footsteps to controller every MAIN_TASK_RATE_MS milliseconds
     */
    private void setupLowBandwidthTasks()
    {
-      /*
-       * Main update task. Duties include: - handling incoming joystick control messages to control
-       * walking speed and direction - handling planar regions messages to guide footstep planning over
-       * terrain - calling the footstep generator to generate a new set of footsteps based on current
-       * parameters
-       */
       final Runnable task = new Runnable()
       {
          @Override
@@ -459,7 +459,7 @@ public class DirectionalControlController extends ToolboxController
 
       // If there are planar regions, attempt to modify the pose such that the foot
       // fits on a plane.
-      if (planarRegionsList.get() != null && planarRegionsList.get().getNumberOfPlanarRegions() > 0)
+      if (!ignorePlanarRegions.get() && planarRegionsList.get() != null && planarRegionsList.get().getNumberOfPlanarRegions() > 0)
       {
          FramePose3D wiggledPose = new FramePose3D(adjustedBasedOnStanceFoot);
          footPolygonToWiggle.set(footPolygons.get(footSide));
@@ -569,26 +569,10 @@ public class DirectionalControlController extends ToolboxController
       {
          if (isWalking.get())
          {
-            // Publishing too often to the controller is wasted effort and sometimes causes halts in the plan execution. 
-            // Here, we impose two filter conditions
-            // - we will not republish a plan that is identical to the previous plan
-            // - we publish plans only if we are either beginning walking and have not yet published a plan or in single support.
-            // The single support condition solves the following situation.
-            // - the robot completes a walking step and begins transition to single support on the landed foot
-            // - the step is no longer in the next generated plan, so a new plan needs to be published
-            // - publishing a new plan while in transition from double to single support causes the controller to rebalance,
-            // interrupting the flow of movement
-            if (!footstepsToSend.equals(lastPublishedFootstepPlan) && (isNotYetWalking() || !isInDoubleSupport.getValue()))
-            {
-               long millis = System.currentTimeMillis();
-               LogTools.info(String.format("%d.%d: Publishing Footsteps", millis / 1000, millis % 1000));
-               footstepPublisher.accept(footstepsToSend);
-               lastPublishedFootstepPlan = footstepsToSend;
-            }
-            else
-            {
-               LogTools.info("Skipped sending identical plan");
-            }
+           long millis = System.currentTimeMillis();
+           LogTools.info(String.format("%d.%d: Publishing Footsteps", millis / 1000, millis % 1000));
+           footstepPublisher.accept(footstepsToSend);
+           lastPublishedFootstepPlan = footstepsToSend;
          }
       }
 
@@ -603,8 +587,8 @@ public class DirectionalControlController extends ToolboxController
    /**
     * Determine whether this step is stepping up or down too far to be safe
     * 
-    * @param touchdownPose -- expected pose of the foot when it touches down
-    * @param stancePose    -- pose of the current planted foot
+    * @param touchdownPose -- expected pose of the swing foot when it touches down
+    * @param stancePose    -- pose of the current support foot
     * @param swingSide     -- which foot will be taking the step
     * @return -- True if the the step is safe; false otherwise
     */
@@ -617,8 +601,8 @@ public class DirectionalControlController extends ToolboxController
    /**
     * Determine whether the footstep places the robot too close to an obstacle
     * 
-    * @param touchdownPose -- expected pose of the foot when it touches down
-    * @param stancePose    -- pose of the current planted foot
+    * @param touchdownPose -- expected pose of the swing foot when it touches down
+    * @param stancePose    -- pose of the current support foot
     * @param swingSide     -- which foot will be taking the step
     * @return -- True if the step is safe; false otherwise
     */
@@ -716,6 +700,9 @@ public class DirectionalControlController extends ToolboxController
       }
    }
 
+   /**
+    * Process configuration and control messages
+    */
    protected void handleIncomingMessages()
    {
       updateDirectionalInputs();
@@ -743,9 +730,10 @@ public class DirectionalControlController extends ToolboxController
 
    /**
     * Main loop update function called from the toolbox or from a scheduled task if bypassing the
-    * toolbox. This function handles: - changing walking parameters based on input messages - updating
-    * our planar regions list - updating step generator control parameters and getting a new footstep
-    * plan - publishing the new footstep plan
+    * toolbox. This function handles: 
+    * - changing walking parameters based on input messages 
+    * - updating the planar regions list 
+    * - updating step generator control parameters and getting a new footstep plan 
     */
    @Override
    public void updateInternal() throws Exception
