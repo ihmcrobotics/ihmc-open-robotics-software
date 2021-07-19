@@ -238,25 +238,10 @@ public class WalkingSingleSupportState extends SingleSupportState
    {
       super.onEntry();
 
-      double defaultSwingTime = walkingMessageHandler.getDefaultSwingTime();
-      double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
-      if (balanceManager.isRecoveringFromDoubleSupportFall())
-      {
-         swingTime = defaultSwingTime;
-         footstepTiming.setTimings(swingTime, defaultTransferTime);
-         balanceManager.packFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime, nextFootstep);
-         nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
-         nextFootstep.setIsAdjustable(true);
-         walkingMessageHandler.reportWalkingAbortRequested();
-         walkingMessageHandler.clearFootsteps();
-      }
-      else
-      {
-         swingTime = walkingMessageHandler.getNextSwingTime();
-         walkingMessageHandler.poll(nextFootstep, footstepTiming);
-      }
+      swingTime = walkingMessageHandler.getNextSwingTime();
+      walkingMessageHandler.poll(nextFootstep, footstepTiming);
 
       /**
        * 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the
@@ -297,11 +282,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
 
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
-      if (balanceManager.isRecoveringFromDoubleSupportFall())
-      {
-         balanceManager.computeICPPlan();
-         balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
-      }
 
       legConfigurationManager.startSwing(swingSide);
       legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
@@ -463,14 +443,6 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    protected boolean hasMinimumTimePassed(double timeInState)
    {
-      if (balanceManager.isRecoveringFromDoubleSupportFall())
-      {
-         double minimumSwingTime = 0.15;
-         return timeInState > minimumSwingTime;
-      }
-      else
-      {
-         return feetManager.getFractionThroughSwing(swingSide) > minimumSwingFraction.getDoubleValue();
-      }
+      return feetManager.getFractionThroughSwing(swingSide) > minimumSwingFraction.getDoubleValue();
    }
 }

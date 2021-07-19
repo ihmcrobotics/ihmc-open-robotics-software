@@ -11,12 +11,10 @@ import java.util.List;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
-import org.ojalgo.matrix.store.BigDenseStore;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
-import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -32,8 +30,6 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.FlamingoCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.WalkingCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.PushRecoveryStateEnum;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
@@ -64,7 +60,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -84,7 +79,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 
 public class BalanceManager
 {
@@ -298,8 +292,6 @@ public class BalanceManager
       copTrajectory.registerState(copTrajectoryState);
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
-
-//      pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, new PushRecoveryControllerParameters(), registry); //FIXME clean up
 
       stepAdjustmentController = new StepAdjustmentController(walkingControllerParameters,
                                                               controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
@@ -648,29 +640,14 @@ public class BalanceManager
       icpVelocityReductionFactor.set(Math.max(0.0, scaleUpdated));
    }
 
-   public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
-   {
-//      pushRecoveryControlModule.packFootstepForRecoveringFromDisturbance(swingSide, swingTimeRemaining, footstepToPack);
-   }
-
    public void disablePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.disable();
    }
 
-   public void disablePushRecovery()
-   {
-//      pushRecoveryControlModule.setIsEnabled(false);
-   }
-
    public void enablePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.enable();
-   }
-
-   public void enablePushRecovery()
-   {
-//      pushRecoveryControlModule.setIsEnabled(true);
    }
 
    public double estimateTimeRemainingForSwingUnderDisturbance()
@@ -808,11 +785,6 @@ public class BalanceManager
       stepAdjustmentController.reset();
       comTrajectoryPlanner.reset();
       angularMomentumHandler.resetAngularMomentum();
-   }
-
-   public void prepareForDoubleSupportPushRecovery()
-   {
-//      pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
    public void initializeICPPlanForSingleSupport()
@@ -963,47 +935,6 @@ public class BalanceManager
    public boolean isICPPlanDone()
    {
       return icpPlannerDone.getValue();
-   }
-
-   public boolean isPushRecoveryEnabled()
-   {
-//      return pushRecoveryControlModule.isEnabled();
-      return false;
-   }
-
-   public boolean isRecovering()
-   {
-//      return pushRecoveryControlModule.isRecovering();
-      return false;
-   }
-
-   public boolean isRecoveringFromDoubleSupportFall()
-   {
-//      return pushRecoveryControlModule.isEnabled() && pushRecoveryControlModule.isRecoveringFromDoubleSupportFall();
-      return false;
-   }
-
-   public boolean isRecoveryImpossible()
-   {
-//      return pushRecoveryControlModule.isCaptureRegionEmpty();
-      return false;
-   }
-
-   public boolean isRobotBackToSafeState()
-   {
-//      return pushRecoveryControlModule.isRobotBackToSafeState();
-      return false;
-   }
-
-   public RobotSide isRobotFallingFromDoubleSupport()
-   {
-//      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
-      return null;
-   }
-
-   public void resetPushRecovery()
-   {
-//      pushRecoveryControlModule.reset();
    }
 
    public void requestICPPlannerToHoldCurrentCoMInNextDoubleSupport()

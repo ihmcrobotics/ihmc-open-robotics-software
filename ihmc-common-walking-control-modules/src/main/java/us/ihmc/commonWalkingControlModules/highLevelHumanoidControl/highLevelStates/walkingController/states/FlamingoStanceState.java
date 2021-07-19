@@ -124,11 +124,7 @@ public class FlamingoStanceState extends SingleSupportState
    @Override
    protected boolean hasMinimumTimePassed(double timeInState)
    {
-      double minimumSwingTime;
-      if (balanceManager.isRecoveringFromDoubleSupportFall())
-         minimumSwingTime = 0.15;
-      else
-         minimumSwingTime = walkingMessageHandler.getDefaultSwingTime() * minimumSwingFraction.getDoubleValue();
+      double minimumSwingTime = walkingMessageHandler.getDefaultSwingTime() * minimumSwingFraction.getDoubleValue();
 
       return timeInState > minimumSwingTime;
    }
