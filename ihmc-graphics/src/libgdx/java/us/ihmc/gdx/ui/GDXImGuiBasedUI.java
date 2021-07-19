@@ -3,7 +3,9 @@ package us.ihmc.gdx.ui;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
+import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiStyleVar;
@@ -77,6 +79,7 @@ public class GDXImGuiBasedUI
    private final ImBoolean perspectiveDefaultMode = new ImBoolean(false);
    private final ArrayList<String> perspectives = new ArrayList<>();
    private String currentPerspective = "Main";
+   private Texture currentGDXTexture = null;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -362,11 +365,19 @@ public class GDXImGuiBasedUI
       frameBuffer.begin();
       sceneManager.setViewportBounds(0, 0, (int) renderSizeX, (int) renderSizeY);
       sceneManager.render();
+
+      if (currentGDXTexture != null)
+         currentGDXTexture.dispose();
+
+      currentGDXTexture = new Texture( //workaround for getColorBufferTexture() not working properly
+            new PixmapTextureData(Pixmap.createFromFrameBuffer(0, 0, frameBuffer.getWidth(), frameBuffer.getHeight()), null, false, true));
+      int textureID = currentGDXTexture.getTextureObjectHandle();
+
       frameBuffer.end();
 
-      float percentOfFramebufferUsedX = renderSizeX / frameBuffer.getWidth();
-      float percentOfFramebufferUsedY = renderSizeY / frameBuffer.getHeight();
-      int textureId = frameBuffer.getColorBufferTexture().getTextureObjectHandle();
+      float percentOfFramebufferUsedX = 0.5f; //renderSizeX / currentGDXTexture.getWidth();
+      float percentOfFramebufferUsedY = 0.5f; //renderSizeY / currentGDXTexture.getHeight();
+      //int textureID = frameBuffer.getColorBufferTexture().getTextureObjectHandle(); //TODO this solution is best, but currently doesn't work for an unknown reason. Using Pixmap.createFromFrameBuffer is marginally less efficient
       float pMinX = posX;
       float pMinY = posY;
       float pMaxX = posX + sizeX;
@@ -375,7 +386,7 @@ public class GDXImGuiBasedUI
       float uvMinY = percentOfFramebufferUsedY; // flip Y
       float uvMaxX = percentOfFramebufferUsedX;
       float uvMaxY = 0.0f;
-      ImGui.getWindowDrawList().addImage(textureId, pMinX, pMinY, pMaxX, pMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
+      ImGui.getWindowDrawList().addImage(textureID, pMinX, pMinY, pMaxX, pMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
 
       ImGui.end();
       ImGui.popStyleVar();
