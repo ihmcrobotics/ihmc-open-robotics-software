@@ -497,7 +497,7 @@ public abstract class EuclideanModelPredictiveController
       {
          MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
          valueObjective.addContactPlane(contactPlane, mpcParameters.getMinRhoValue());
-         contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(contactPlane.getRhoSize());
+         contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(4 * contactPlane.getRhoSize());
       }
 
       return valueObjective;
@@ -515,6 +515,7 @@ public abstract class EuclideanModelPredictiveController
       {
          MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
          valueObjective.addContactPlane(contactPlane, maxContactForce);
+         // FIXME This is wrong
          contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(contactPlane.getRhoSize());
       }
 
