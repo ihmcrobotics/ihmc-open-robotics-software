@@ -11,10 +11,25 @@ public interface RootJointDesiredConfigurationDataReadOnly
 
    boolean hasDesiredAcceleration();
 
+   /**
+    * Desired root joint position and orientation as a 7x1 matrix
+    * Elements 0 - 3 are desired orientation of the root joint as a quaternion
+    * Elements 4 - 6 are desired position of the root joint
+    */
    DMatrixRMaj getDesiredConfiguration();
 
+   /**
+    * Desired root joint velocity as a 6x1 matrix
+    * Elements 0 - 2 are desired angular velocity of the root joint
+    * Elements 3 - 5 are desired linear velocity of the root joint
+    */
    DMatrixRMaj getDesiredVelocity();
 
+   /**
+    * Desired root joint acceleration as a 6x1 matrix.
+    * Elements 0 - 2 are desired angular acceleration of the root joint
+    * Elements 3 - 5 are desired linear acceleration of the root joint
+    */
    DMatrixRMaj getDesiredAcceleration();
 
    default void copyToMessage(RobotDesiredConfigurationData desiredConfigurationData)
