@@ -101,7 +101,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
    private final YoInteger numberOfRecoveryStepsTaken = new YoInteger("numberOfRecoveryStepsTaken", registry);
-   private final IntegerParameter maxNumberOfRecoveryStepsToTake = new IntegerParameter("maxNumberOfRecoveryStepsToTake", registry, 3);
+   private final IntegerParameter maxNumberOfRecoveryStepsToTake = new IntegerParameter("maxNumberOfRecoveryStepsToTake", registry, 5);
 
    private boolean firstTick = true;
 
@@ -400,6 +400,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, balanceManager.getDesiredICP());
 
+      //TODO add !pushRecoveryControlModule.isEnabled() to 'if' statement
       if (pushRecoveryControlModule.isRecoveryImpossible() || numberOfRecoveryStepsTaken.getValue() > maxNumberOfRecoveryStepsToTake.getValue())
       {
          walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
