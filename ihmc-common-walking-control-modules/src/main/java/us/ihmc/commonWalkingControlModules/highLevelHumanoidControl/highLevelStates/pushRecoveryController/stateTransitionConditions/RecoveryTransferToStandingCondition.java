@@ -22,7 +22,7 @@ public class RecoveryTransferToStandingCondition implements StateTransitionCondi
       RobotSide swingSide = pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
 
       // if falling and next support foot is not the transfer to side, go to standing to re-route state machine
-      if (transferState.isBalanceICPPlanDone() && (swingSide != transferState.getTransferToSide().getOppositeSide()))
+      if (transferState.isICPPlanDone() && (swingSide != transferState.getTransferToSide().getOppositeSide()))
          return true;
 
       if (!transferState.isDone(timeInState))
