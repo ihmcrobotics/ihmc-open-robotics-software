@@ -577,8 +577,6 @@ public class MPCQPSolver
          }
       }
 
-
-
       double minViolationToAdd = (1.0 - violationFractionToAdd) * maxInequalityViolation + convergenceThreshold;
 
       // check inequality constraints
