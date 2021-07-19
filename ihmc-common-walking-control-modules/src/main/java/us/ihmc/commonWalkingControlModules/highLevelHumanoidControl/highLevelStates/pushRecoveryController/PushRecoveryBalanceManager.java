@@ -65,7 +65,6 @@ public class PushRecoveryBalanceManager
 
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
-//   private final PushRecoveryControlModule pushRecoveryControlModule;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredRecoveryICP", worldFrame, registry);
