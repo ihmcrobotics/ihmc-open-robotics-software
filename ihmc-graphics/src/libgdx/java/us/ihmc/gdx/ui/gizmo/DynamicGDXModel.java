@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL32;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class DynamicGDXModel
 {
@@ -19,7 +20,7 @@ public class DynamicGDXModel
    private MeshPart meshPart;
    private ModelInstance modelInstance;
    private Material material;
-   private Consumer<GDXMultiColorMeshBuilder> buildMesh;
+   private Supplier<Mesh> buildMesh;
    private Mesh mesh;
    private boolean needsRebuild = true;
 
@@ -33,7 +34,25 @@ public class DynamicGDXModel
 
    public void setMesh(Consumer<GDXMultiColorMeshBuilder> buildMesh)
    {
+      this.buildMesh = () ->
+      {
+         GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
+         buildMesh.accept(meshBuilder);
+         return meshBuilder.generateMesh();
+      };
+      needsRebuild = true;
+   }
+
+   public void setMesh(Supplier<Mesh> buildMesh)
+   {
       this.buildMesh = buildMesh;
+      needsRebuild = true;
+   }
+
+   public void setMesh(Mesh mesh)
+   {
+      this.mesh = mesh;
+      this.buildMesh = null;
       needsRebuild = true;
    }
 
@@ -62,9 +81,8 @@ public class DynamicGDXModel
             dispose();
          }
 
-         GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
-         buildMesh.accept(meshBuilder);
-         mesh = meshBuilder.generateMesh();
+         if (buildMesh != null)
+            mesh = buildMesh.get();
          meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
          node.parts.add(new NodePart(meshPart, material));
       }
