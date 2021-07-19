@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXDoorSimulator;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
@@ -38,7 +39,7 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.*;
 
-public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
+public class GDXEnvironment extends ImGuiPanel
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironment.class, "Environment");
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
@@ -73,7 +74,8 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      baseUI.get3DSceneManager().addRenderableProvider(this);
+      baseUI.get3DSceneManager().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
       pose3DGizmo.create(baseUI.get3DSceneManager().getCamera3D());
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
@@ -334,14 +336,16 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
       });
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       for (GDXEnvironmentObject object : objects)
       {
          object.getRealisticModelInstance().getRenderables(renderables, pool);
       }
+   }
 
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
       if (selectedObject != null)
       {
          selectedObject.getCollisionModelInstance().getRenderables(renderables, pool);

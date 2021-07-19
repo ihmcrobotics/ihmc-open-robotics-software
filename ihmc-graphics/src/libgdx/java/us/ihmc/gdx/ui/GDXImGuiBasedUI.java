@@ -362,22 +362,18 @@ public class GDXImGuiBasedUI
          frameBuffer = frameBufferBuilder.build();
       }
 
+      sceneManager.renderShadowMap();
+
       frameBuffer.begin();
       sceneManager.setViewportBounds(0, 0, (int) renderSizeX, (int) renderSizeY);
       sceneManager.render();
-
-      if (currentGDXTexture != null)
-         currentGDXTexture.dispose();
-
-      currentGDXTexture = new Texture( //workaround for getColorBufferTexture() not working properly
-            new PixmapTextureData(Pixmap.createFromFrameBuffer(0, 0, frameBuffer.getWidth(), frameBuffer.getHeight()), null, false, true));
-      int textureID = currentGDXTexture.getTextureObjectHandle();
-
       frameBuffer.end();
 
-      float percentOfFramebufferUsedX = 0.5f; //renderSizeX / currentGDXTexture.getWidth();
-      float percentOfFramebufferUsedY = 0.5f; //renderSizeY / currentGDXTexture.getHeight();
-      //int textureID = frameBuffer.getColorBufferTexture().getTextureObjectHandle(); //TODO this solution is best, but currently doesn't work for an unknown reason. Using Pixmap.createFromFrameBuffer is marginally less efficient
+      int frameBufferWidth = frameBuffer.getWidth();
+      int frameBufferHeight = frameBuffer.getHeight();
+      float percentOfFramebufferUsedX = renderSizeX / frameBufferWidth;
+      float percentOfFramebufferUsedY = renderSizeY / frameBufferHeight;
+      int textureID = frameBuffer.getColorBufferTexture().getTextureObjectHandle();
       float pMinX = posX;
       float pMinY = posY;
       float pMaxX = posX + sizeX;
