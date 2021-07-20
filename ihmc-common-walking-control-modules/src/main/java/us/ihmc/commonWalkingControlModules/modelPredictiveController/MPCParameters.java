@@ -23,8 +23,8 @@ public class MPCParameters
    public static final double defaultInitialComWeight = 5e3;
    public static final double defaultInitialComVelocityWeight = 5e1;
    public static final double defaultFinalComWeight = 1e1;
-   public static final double defaultFinalVRPWeight = 5e1;
-   public static final double defaultVrpTrackingWeight = 1e2;
+   public static final double defaultFinalVRPWeight = 1e2;
+   public static final double defaultVrpTrackingWeight = 1e3;
    public static final double defaultRhoTrackingWeight = 1e-3;
    public static final double defaultRhoRateTrackingWeight = 1e-6;
    public static final double defaultForceTrackingWeight = 1e-4;
@@ -40,7 +40,7 @@ public class MPCParameters
    private static final ConstraintType finalCoMPositionConstraintType = ConstraintType.EQUALITY;
    private static final ConstraintType finalCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
    private static final ConstraintType finalDCMPositionConstraintType = ConstraintType.EQUALITY;
-   private static final ConstraintType finalVRPPositionConstraintType = ConstraintType.EQUALITY;
+   private static final ConstraintType finalVRPPositionConstraintType = ConstraintType.OBJECTIVE;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
