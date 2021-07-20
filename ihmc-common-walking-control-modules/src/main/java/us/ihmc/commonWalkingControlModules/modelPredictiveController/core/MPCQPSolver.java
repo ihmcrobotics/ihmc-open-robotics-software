@@ -6,12 +6,14 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.convexOptimization.IntermediateSolutionListener;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeMatrix;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,11 +62,14 @@ public class MPCQPSolver
 
    public final NativeMatrix linearInequalityConstraintsCMatrixO = new NativeMatrix(0, 0);
    public final NativeMatrix linearInequalityConstraintsDVectorO = new NativeMatrix(0, 0);
+   public final DMatrixRMaj linearInequalityConstraintsSlackVariableCost = new DMatrixRMaj(0, 0);
 
    /** Active inequality constraints */
    private final NativeMatrix CBar = new NativeMatrix(0, 0);
    private final NativeMatrix DBar = new NativeMatrix(0, 0);
+   private final DMatrixRMaj slackBar = new DMatrixRMaj(0, 0);
 
+   private final NativeMatrix inverseSlackHessian = new NativeMatrix(0, 0);
    private final NativeMatrix QInverse = new NativeMatrix(0, 0);
    private final NativeMatrix AQInverse = new NativeMatrix(0, 0);
    private final NativeMatrix QInverseATranspose = new NativeMatrix(0, 0);
@@ -151,6 +156,7 @@ public class MPCQPSolver
 
       linearInequalityConstraintsCMatrixO.reshape(0, 0);
       linearInequalityConstraintsDVectorO.reshape(0, 0);
+      linearInequalityConstraintsSlackVariableCost.reshape(0, 0);
    }
 
    public void reshape(int problemSize)
@@ -163,12 +169,14 @@ public class MPCQPSolver
 
       linearInequalityConstraintsCMatrixO.zero();
       linearInequalityConstraintsDVectorO.zero();
+      linearInequalityConstraintsSlackVariableCost.zero();
 
       linearEqualityConstraintsAMatrix.reshape(0, problemSize);
       linearEqualityConstraintsBVector.reshape(0, 1);
 
       linearInequalityConstraintsCMatrixO.reshape(0, problemSize);
       linearInequalityConstraintsDVectorO.reshape(0, 1);
+      linearInequalityConstraintsSlackVariableCost.reshape(0, 1);
 
       costQuadraticMatrix.zero();
       quadraticCostQVector.zero();
@@ -335,6 +343,17 @@ public class MPCQPSolver
                                                 int totalProblemSize,
                                                 int colOffset)
    {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, sign, Double.NaN, problemSize, totalProblemSize, colOffset);
+   }
+
+   private void addInequalityConstraintInternal(NativeMatrix taskJacobian,
+                                                NativeMatrix taskObjective,
+                                                double sign,
+                                                double slackVariableWeight,
+                                                int problemSize,
+                                                int totalProblemSize,
+                                                int colOffset)
+   {
       int variables = taskJacobian.getNumCols();
       if (taskJacobian.getNumCols() != problemSize)
       {
@@ -347,6 +366,11 @@ public class MPCQPSolver
 
       nativeMatrixGrower.appendRows(linearInequalityConstraintsCMatrixO, colOffset, sign, taskJacobian);
       nativeMatrixGrower.appendRows(linearInequalityConstraintsDVectorO, sign, taskObjective);
+
+      int previousSize = linearInequalityConstraintsSlackVariableCost.getNumRows();
+      int taskSize = taskObjective.getNumRows();
+      linearInequalityConstraintsSlackVariableCost.reshape(previousSize + taskSize, 1, true);
+      Arrays.fill(linearInequalityConstraintsSlackVariableCost.data, previousSize, previousSize + taskSize, slackVariableWeight);
    }
 
    public double getObjectiveCost(DMatrixRMaj x)
@@ -530,7 +554,8 @@ public class MPCQPSolver
 
    private void computeCBarTempMatrices()
    {
-      if (CBar.getNumRows() > 0)
+      int size = CBar.getNumRows();
+      if (size > 0)
       {
          CBarQInverseATranspose.mult(CBar, QInverseATranspose);
          AQInverseCBarTranspose.transpose(CBarQInverseATranspose);
@@ -539,6 +564,18 @@ public class MPCQPSolver
          QInverseCBarTranspose.transpose(CBarQInverse);
 
          CBarQInverseCBarTranspose.mult(CBar, QInverseCBarTranspose);
+
+         inverseSlackHessian.reshape(size, size);
+         inverseSlackHessian.zero();
+
+         for (int i = 0; i < size; i++)
+         {
+            double slackCost = slackBar.get(i, 0);
+            if (!MathTools.epsilonEquals(slackCost, 0.0, 1e-5) && Double.isFinite(slackCost))
+               inverseSlackHessian.set(i, i, 1.0 / slackCost);
+         }
+
+         CBarQInverseCBarTranspose.addEquals(inverseSlackHessian);
       }
       else
       {
@@ -653,12 +690,14 @@ public class MPCQPSolver
 
       CBar.reshape(sizeOfActiveSet, numberOfVariables);
       DBar.reshape(sizeOfActiveSet, 1);
+      slackBar.reshape(sizeOfActiveSet, 1);
 
       for (int i = 0; i < sizeOfActiveSet; i++)
       {
          int inequalityConstraintIndex = activeInequalityIndices.get(i);
          CBar.insert(linearInequalityConstraintsCMatrixO, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, numberOfVariables, i, 0);
          DBar.insert(linearInequalityConstraintsDVectorO, inequalityConstraintIndex, inequalityConstraintIndex + 1, 0, 1, i, 0);
+         slackBar.set(i, 0, linearInequalityConstraintsSlackVariableCost.get(inequalityConstraintIndex, 0));
       }
 
       //printSetChanges();
