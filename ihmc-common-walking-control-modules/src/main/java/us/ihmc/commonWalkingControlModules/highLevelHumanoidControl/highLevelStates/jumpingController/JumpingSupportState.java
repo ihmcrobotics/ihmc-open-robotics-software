@@ -17,8 +17,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JumpingSupportState extends JumpingState
 {
-   private static final double swingHeight = 0.05;
-
    private final JumpingControllerToolbox controllerToolbox;
    private final JumpingParameters jumpingParameters;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -92,7 +90,7 @@ public class JumpingSupportState extends JumpingState
          footGoalPose.setIncludingFrame(jumpingGoalFootholdCalculator.getFootGoalPose(robotSide));
          footGoalPose.changeFrame(touchdownCoMFrame);
 
-         feetManager.initializeSwingTrajectoryPreview(robotSide, footGoalPose, swingHeight, jumpingGoal.getFlightDuration());
+         feetManager.initializeSwingTrajectoryPreview(robotSide, footGoalPose, jumpingParameters.getSwingHeight(), jumpingGoal.getFlightDuration());
          balanceManager.setSwingFootTrajectory(robotSide, feetManager.getSwingTrajectory(robotSide));
       }
 
