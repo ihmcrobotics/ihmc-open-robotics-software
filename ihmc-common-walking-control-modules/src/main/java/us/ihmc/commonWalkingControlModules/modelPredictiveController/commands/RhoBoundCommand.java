@@ -37,6 +37,7 @@ public class RhoBoundCommand implements MPCCommand<RhoBoundCommand>
     */
    private double omega;
 
+   private double slackVariableWeight = Double.NaN;
 
    /**
     * Resets this command.
@@ -47,6 +48,7 @@ public class RhoBoundCommand implements MPCCommand<RhoBoundCommand>
       rhoValues.reset();;
       segmentNumber = -1;
       segmentDuration = Double.NaN;
+      slackVariableWeight = Double.NaN;
       constraintType = null;
    }
 
@@ -83,6 +85,11 @@ public class RhoBoundCommand implements MPCCommand<RhoBoundCommand>
       this.omega = omega;
    }
 
+   public void setSlackVariableWeight(double slackVariableWeight)
+   {
+      this.slackVariableWeight = slackVariableWeight;
+   }
+
    public int getSegmentNumber()
    {
       return segmentNumber;
@@ -113,6 +120,11 @@ public class RhoBoundCommand implements MPCCommand<RhoBoundCommand>
       return rhoValues.get(i);
    }
 
+   public double getSlackVariableWeight()
+   {
+      return slackVariableWeight;
+   }
+
    public void setConstraintType(ConstraintType constraintType)
    {
       this.constraintType = constraintType;
@@ -138,6 +150,7 @@ public class RhoBoundCommand implements MPCCommand<RhoBoundCommand>
       setSegmentDuration(other.getSegmentDuration());
       setOmega(other.getOmega());
       setConstraintType(other.getConstraintType());
+      setSlackVariableWeight(other.getSlackVariableWeight());
       for (int i = 0; i < other.getNumberOfContacts(); i++)
          addContactPlane(other.getContactPlane(i), other.getRhoValue(i));
    }
@@ -175,6 +188,8 @@ public class RhoBoundCommand implements MPCCommand<RhoBoundCommand>
          if (constraintType != other.constraintType)
             return false;
          if (getNumberOfContacts() != other.getNumberOfContacts())
+            return false;
+         if (slackVariableWeight != other.slackVariableWeight)
             return false;
          for (int i = 0; i < getNumberOfContacts(); i++)
          {

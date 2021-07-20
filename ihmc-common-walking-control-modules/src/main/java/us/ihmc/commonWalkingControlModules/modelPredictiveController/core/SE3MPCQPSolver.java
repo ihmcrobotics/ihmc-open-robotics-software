@@ -76,11 +76,8 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
       {
          int startVar = indexHandler.getOrientationStartIndex(segmentId);
 
-         for (int var = startVar; var < startVar + 3; var++)
-         {
-            solverInput_H.add(var, var, firstOrientationCoefficientFactor);
-            solverInput_H.add(var + 3, var + 3, secondOrientationCoefficientFactor);
-         }
+         qpSolver.addRegularization(startVar, 3, firstOrientationCoefficientFactor);
+         qpSolver.addRegularization(startVar + 3, 3, secondOrientationCoefficientFactor);
       }
    }
 
@@ -95,20 +92,8 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
       {
          int startVar = indexHandler.getOrientationStartIndex(segmentId);
 
-         for (int var = startVar; var < startVar + 3; var++)
-         {
-            if (!Double.isNaN(previousSolution.get(var, 0)))
-            {
-               solverInput_H.add(var, var, firstOrientationCoefficientFactor);
-               solverInput_f.add(var, 0, -previousSolution.get(var, 0) * firstOrientationCoefficientFactor);
-            }
-
-            if (!Double.isNaN(previousSolution.get(var + 3, 0)))
-            {
-               solverInput_H.add(var + 3, var + 3, secondOrientationCoefficientFactor);
-               solverInput_f.add(var + 3, 0, -previousSolution.get(var + 3, 0) * secondOrientationCoefficientFactor);
-            }
-         }
+         qpSolver.addRateRegularization(startVar, 3, firstOrientationCoefficientFactor, previousSolution);
+         qpSolver.addRateRegularization(startVar + 3, 3, secondOrientationCoefficientFactor, previousSolution);
       }
    }
 

@@ -217,8 +217,8 @@ public class LinearMPCQPSolverTest
       NativeMatrix solution = solver.getSolution();
 
       MatrixTools.addDiagonal(solverH_Expected, regularization);
-      EjmlUnitTests.assertEquals(solverH_Expected, solver.solverInput_H, 1e-6);
-      EjmlUnitTests.assertEquals(solverf_Expected, solver.solverInput_f, 1e-6);
+      EjmlUnitTests.assertEquals(solverH_Expected, solver.qpSolver.costQuadraticMatrix, 1e-6);
+      EjmlUnitTests.assertEquals(solverf_Expected, solver.qpSolver.quadraticCostQVector, 1e-6);
 
       double c0_Start = timeAtStart;
       double c1_Start = 1.0;
@@ -1211,21 +1211,21 @@ public class LinearMPCQPSolverTest
          inequalityJacobianExpected.set(rhoIdxEnd2, startColIdx2 + 3, a3End);
       }
 
-      EjmlUnitTests.assertEquals(equalityJacobianExpected, solver.solverInput_Aeq, 1e-5);
+      EjmlUnitTests.assertEquals(equalityJacobianExpected, solver.qpSolver.linearEqualityConstraintsAMatrix, 1e-5);
 
 
       CommonOps_DDRM.scale(-1.0, inequalityJacobianExpected);
       CommonOps_DDRM.scale(-1.0, inequalityObjectiveExpected);
-      EjmlUnitTests.assertEquals(inequalityJacobianExpected, solver.solverInput_Ain, 1e-5);
-      EjmlUnitTests.assertEquals(inequalityObjectiveExpected, solver.solverInput_bin, 1e-5);
+      EjmlUnitTests.assertEquals(inequalityJacobianExpected, solver.qpSolver.linearInequalityConstraintsCMatrixO, 1e-5);
+      EjmlUnitTests.assertEquals(inequalityObjectiveExpected, solver.qpSolver.linearInequalityConstraintsDVectorO, 1e-5);
 
       DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(inequalityJacobianExpected.getNumCols(), inequalityJacobianExpected.getNumCols());
       DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(inequalityJacobianExpected.getNumCols(), 1);
 
       MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
 
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.qpSolver.costQuadraticMatrix, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.qpSolver.quadraticCostQVector, 1e-10);
    }
 
    private static void addTask(NativeQPInputTypeA input, NativeMatrix hessianToPack, NativeMatrix gradientToPack)
