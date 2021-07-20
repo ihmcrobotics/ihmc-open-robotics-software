@@ -44,6 +44,9 @@ public abstract class EuclideanModelPredictiveController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private static final boolean useSlackVariablesForRhoBounds = true;
+   private static final double firstSegmentSlackWeight = 1e7;
+
    protected static final int numberOfBasisVectorsPerContactPoint = 4;
    private final double maxContactForce;
 
@@ -489,6 +492,8 @@ public abstract class EuclideanModelPredictiveController
          return null;
 
       valueObjective.clear();
+      if (useSlackVariablesForRhoBounds)
+         valueObjective.setSlackVariableWeight(firstSegmentSlackWeight / MathTools.pow(10.0, segmentNumber));
       valueObjective.setOmega(omega.getValue());
       valueObjective.setSegmentDuration(segmentDuration);
       valueObjective.setSegmentNumber(segmentNumber);
