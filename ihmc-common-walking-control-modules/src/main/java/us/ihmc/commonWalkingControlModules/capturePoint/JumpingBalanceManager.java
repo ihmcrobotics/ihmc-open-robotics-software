@@ -246,7 +246,6 @@ public class JumpingBalanceManager
       yoReferenceCoMVelocity.set(comTrajectoryPlanner.getReferenceCoMVelocity());
       yoReferenceVRP.set(comTrajectoryPlanner.getReferenceVRPPosition());
 
-
       double omega0 = controllerToolbox.getOmega0();
       if (Double.isNaN(omega0))
          throw new RuntimeException("omega0 is NaN");
@@ -329,6 +328,7 @@ public class JumpingBalanceManager
    {
       plannerTimer.startMeasurement();
       copTrajectoryState.setJumpingGoal(jumpingGoal);
+      copTrajectoryState.setCurrentTimeInState(timeInSupportSequence.getDoubleValue());
 
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
       double width = Double.isNaN(jumpingGoal.getGoalFootWidth()) ? jumpingParameters.getDefaultFootWidth() : jumpingGoal.getGoalFootWidth();
@@ -354,7 +354,7 @@ public class JumpingBalanceManager
 
       }
 
-
+      copTrajectoryState.setIsInFlight(jumpingMomentumRateControlModuleInput.getInFlight());
       copTrajectoryForJumping.compute(copTrajectoryState);
 
       MovingReferenceFrame chestFrame = controllerToolbox.getFullRobotModel().getChest().getBodyFixedFrame();
@@ -537,6 +537,8 @@ public class JumpingBalanceManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
       totalStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
+      copTrajectoryState.setTimeAtStartOfState(timeInSupportSequence.getDoubleValue());
+
 
       jumpingMomentumRateControlModuleInput.setInFlight(false);
 
@@ -547,6 +549,8 @@ public class JumpingBalanceManager
    {
       currentStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
       totalStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
+
+      copTrajectoryState.setTimeAtStartOfState(timeInSupportSequence.getDoubleValue());
 
       comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue());
       touchdownCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());

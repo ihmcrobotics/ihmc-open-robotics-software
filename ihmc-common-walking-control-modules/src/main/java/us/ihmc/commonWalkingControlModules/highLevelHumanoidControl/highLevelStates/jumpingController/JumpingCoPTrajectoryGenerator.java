@@ -108,6 +108,8 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
       contactState.setStartFromEnd(previousContactState);
       contactState.setEndECMPPosition(footMidpoint);
       contactState.setDuration(supportDuration - segmentDuration);
+      if (state.getIsInFlight())
+         contactState.setEndTime(state.getTimeAtStartOfState());
       contactState.setLinearECMPVelocity();
       for (RobotSide robotSide : RobotSide.values)
          contactState.addContact(state.getFootPose(robotSide), state.getFootPolygonInSole(robotSide));
@@ -121,6 +123,8 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
       ContactPlaneProvider contactSate = contactStateProviders.add();
       contactSate.setStartTime(previousContactState.getTimeInterval().getEndTime());
       contactSate.setDuration(flightDuration);
+      if (state.getIsInFlight())
+         contactSate.setEndTime(Math.max(state.getCurrentTimeInState() + 0.01, contactSate.getTimeInterval().getEndTime()));
       contactSate.setContactState(ContactState.FLIGHT);
    }
 
