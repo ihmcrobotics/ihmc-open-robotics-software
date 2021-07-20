@@ -207,7 +207,10 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       }
       else if (distanceFromPathSquared < MathTools.square(parameters.getDistanceFromPathTolerance()))
       {
-         desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading);
+//         desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading);
+
+         // TODO temporary, don't merge into develop. Follows the body path orientations but doesn't give great results when waypoints are sparse.
+         desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(projectionPose.getYaw());
       }
       else
       {
@@ -218,7 +221,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
          desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(desiredYaw + desiredHeading);
       }
 
-      // Clamp target yaw to what's achieveable by step parameters
+      // Clamp target yaw to what's achievable by step parameters
 
       double deltaYaw = AngleTools.computeAngleDifferenceMinusPiToPi(desiredYaw, stanceStep.getYaw());
       RobotSide stepSide = stanceSide.getOppositeSide();
