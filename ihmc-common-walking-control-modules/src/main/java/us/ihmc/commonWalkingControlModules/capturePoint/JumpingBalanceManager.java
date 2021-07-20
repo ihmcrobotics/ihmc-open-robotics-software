@@ -61,6 +61,7 @@ public class JumpingBalanceManager
    private final YoFrameVector3D yoDesiredBodyAngularAcceleration = new YoFrameVector3D("desiredBodyAngularAcceleration", worldFrame, registry);
    private final YoFramePoint3D touchdownCoMPosition = new YoFramePoint3D("touchdownCoMPosition", worldFrame, registry);
    private final YoFramePoint3D touchdownDCMPosition = new YoFramePoint3D("touchdownDCMPosition", worldFrame, registry);
+   private final YoFramePoint3D updatedTouchdownCoMPosition = new YoFramePoint3D("updatedTouchdownCoMPosition", worldFrame, registry);
    private final YoFramePoint3D yoPerfectVRP = new YoFramePoint3D("perfectVRP", worldFrame, registry);
 
    private final YoFixedFrameWrench desiredWrench;
@@ -350,8 +351,8 @@ public class JumpingBalanceManager
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
 
-      comTrajectoryPlanner.compute(Math.max(totalStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue(), 0.0));
-      touchdownCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
+      comTrajectoryPlanner.compute(Math.max(totalStateDuration.getDoubleValue(), timeInSupportSequence.getDoubleValue()));
+      updatedTouchdownCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
       touchdownDCMPosition.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
@@ -489,6 +490,9 @@ public class JumpingBalanceManager
    {
       currentStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
       totalStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
+
+      comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue());
+      touchdownCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
 
       jumpingMomentumRateControlModuleInput.setInFlight(true);
 
