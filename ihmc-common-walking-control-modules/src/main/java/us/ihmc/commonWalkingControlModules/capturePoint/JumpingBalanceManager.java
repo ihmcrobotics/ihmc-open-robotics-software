@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepVisualizer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
@@ -10,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.customPolic
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -17,6 +19,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -96,6 +100,11 @@ public class JumpingBalanceManager
    private final CustomCoMPositionPolicy takeoffPolicy = new CustomCoMPositionPolicy();
    private final CustomCoMPositionPolicy touchdownPolicy = new CustomCoMPositionPolicy();
 
+   private final JumpingParameters jumpingParameters;
+
+   private final SideDependentList<FootstepVisualizer> footstepVisualizers = new SideDependentList<>();
+
+
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
                                 JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters,
@@ -108,6 +117,7 @@ public class JumpingBalanceManager
 
       yoTime = controllerToolbox.getYoTime();
       this.controllerToolbox = controllerToolbox;
+      this.jumpingParameters = jumpingParameters;
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
@@ -184,6 +194,16 @@ public class JumpingBalanceManager
          yoGraphicsListRegistry.registerArtifact(graphicListName, perfectVRPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredTouchdownCoMViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredTouchdownDCMViz.createArtifact());
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            FootstepVisualizer footstepVisualizer = new FootstepVisualizer(robotSide.getLowerCaseName() + "footstepVisualizer",
+                                                                           graphicListName,
+                                                                           robotSide,
+                                                                           controllerToolbox.getDefaultFootPolygon().getPolygonVerticesView(),
+                                                                           YoAppearance.Green(), yoGraphicsListRegistry, registry);
+            footstepVisualizers.put(robotSide, footstepVisualizer);
+         }
       }
       yoDesiredDCM.setToNaN();
       yoPerfectVRP.setToNaN();
@@ -237,11 +257,14 @@ public class JumpingBalanceManager
       touchdownCoMPosition.setToNaN();
       touchdownDCMPosition.setToNaN();
 
+
       // update online to account for foot slip
       for (RobotSide robotSide : RobotSide.values)
       {
          if (controllerToolbox.getFootContactState(robotSide).inContact())
             copTrajectoryState.initializeStance(robotSide, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame().get(robotSide), soleFrames.get(robotSide));
+
+         footstepVisualizers.get(robotSide).hide();
       }
       copTrajectoryForStanding.compute(copTrajectoryState);
 
@@ -284,6 +307,10 @@ public class JumpingBalanceManager
    }
 
    private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FramePose3D midstancePose = new FramePose3D();
+   private final PoseReferenceFrame midstanceFrame = new PoseReferenceFrame("midstanceFrame", worldFrame);
+   private final ZUpFrame midstanceZUpFrame = new ZUpFrame(worldFrame, midstanceFrame, "midstanceZUpFrame");
+   private final JumpingGoalFootholdCalculator jumpingGoalFootholdCalculator = new JumpingGoalFootholdCalculator();
 
    public void computeCoMPlanForJumping(JumpingGoal jumpingGoal)
    {
@@ -291,6 +318,7 @@ public class JumpingBalanceManager
       copTrajectoryState.setJumpingGoal(jumpingGoal);
 
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
+      double width = Double.isNaN(jumpingGoal.getGoalFootWidth()) ? jumpingParameters.getDefaultFootWidth() : jumpingGoal.getGoalFootWidth();
 
       // update online to account for foot slip
       for (RobotSide robotSide : RobotSide.values)
@@ -298,6 +326,22 @@ public class JumpingBalanceManager
          if (controllerToolbox.getFootContactState(robotSide).inContact())
             copTrajectoryState.initializeStance(robotSide, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame().get(robotSide), soleFrames.get(robotSide));
       }
+
+      midstancePose.interpolate(copTrajectoryState.getFootPose(RobotSide.LEFT), copTrajectoryState.getFootPose(RobotSide.RIGHT), 0.5);
+      midstanceFrame.setPoseAndUpdate(midstancePose);
+      midstanceZUpFrame.update();
+      jumpingGoalFootholdCalculator.computeGoalPose(midstanceZUpFrame,
+                                                    jumpingGoal.getGoalLength(),
+                                                    width,
+                                                    jumpingGoal.getGoalHeight(),
+                                                    jumpingGoal.getGoalRotation());
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footstepVisualizers.get(robotSide).update(jumpingGoalFootholdCalculator.getFootGoalPose(robotSide));
+
+      }
+
+
       copTrajectoryForJumping.compute(copTrajectoryState);
 
       MovingReferenceFrame chestFrame = controllerToolbox.getFullRobotModel().getChest().getBodyFixedFrame();
