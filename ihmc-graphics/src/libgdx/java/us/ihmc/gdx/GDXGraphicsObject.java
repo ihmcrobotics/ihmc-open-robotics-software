@@ -89,12 +89,9 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
       {
          String modelFileName = graphics3DAddModelFile.getFileName();
 
-         if (!modelFileName.endsWith(".obj"))
+         String modifiedFileName = GDXModelLoader.modifyFileName(modelFileName);
+         if (modifiedFileName == null)
             return;
-
-         String[] splitSlash = modelFileName.split("/");
-         String objFileName = splitSlash[splitSlash.length - 1];
-         String modifiedFileName = objFileName.replace(".obj", "") + ".g3dj";
 
          Model model = GDXModelLoader.loadG3DModel(modifiedFileName);
          models.add(model);
