@@ -232,8 +232,6 @@ public class BodyCollisionPoint
       boxCenterPose.changeFrame(ReferenceFrame.getWorldFrame());
       collisionBox.getPose().set(boxCenterPose);
       collisionBox.getOrientation().set(optimizedWaypoint.getOrientation());
-      adjustmentGraphic.setPosition(optimizedWaypoint.getPosition());
-      adjustmentGraphic.setOrientation(optimizedWaypoint.getOrientation());
    }
 
    public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList)
@@ -266,6 +264,9 @@ public class BodyCollisionPoint
 
    public void updateGraphics(boolean showBox)
    {
+      adjustmentGraphic.setPosition(optimizedWaypoint.getPosition());
+      adjustmentGraphic.setOrientation(optimizedWaypoint.getOrientation());
+
       if (showBox)
       {
          yoCollisionBoxGraphic.setPose(boxCenterPose);

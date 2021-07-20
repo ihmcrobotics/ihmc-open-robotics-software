@@ -173,7 +173,6 @@ public class NarrowPassageBodyPathPlanner
       Vector3D vectorToNextWaypoint = new Vector3D();
       for (int i = 0; i < numberOfWaypoints; i++)
       {
-         // TODO Fix orientation of collision boxes during init
          if (i < numberOfWaypoints - 1)
             vectorToNextWaypoint.set(waypoints[i + 1].getX() - waypoints[i].getX(),
                                      waypoints[i + 1].getY() - waypoints[i].getY(),
@@ -238,10 +237,6 @@ public class NarrowPassageBodyPathPlanner
                int indexDifference = Math.abs(j - k);
                double scale = convolutionWeights.get(indexDifference);
                scaleAdd(convolvedGradients.get(j), scale, collisionGradients.get(k));
-               LogTools.info(k);
-               LogTools.info("collision gradient " + collisionGradients.get(k));
-               LogTools.info("convolved gradient" + convolvedGradients.get(j));
-               LogTools.info("scale " + scale);
             }
 
             bodyCollisionPoints.get(j).project(convolvedGradients.get(j));
@@ -295,7 +290,6 @@ public class NarrowPassageBodyPathPlanner
                intersectionFound = true;
 
                bodyCollisionPoints.get(j).adjustOrientation(rotationDirection, yaws.get(j));
-               bodyCollisionPoints.get(j).updateGraphics(bodyCollisionPoints.get(j).getCollisionResult().areShapesColliding());
 
             }
             else
