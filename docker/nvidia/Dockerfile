@@ -4,6 +4,8 @@
 # Refer to the NVIDIA/CUDA base image here: (https://hub.docker.com/r/nvidia/cuda/)
 # This is currently based on Ubuntu 20.04 Focal Fossa.
 FROM nvidia/cuda:11.2.2-cudnn8-devel
+# Max: swapping out base images
+#FROM pytorch/pytorch:1.8.1-cuda11.1-cudnn8-runtime
 
 ARG DEBIAN_FRONTEND=noninteractive
 

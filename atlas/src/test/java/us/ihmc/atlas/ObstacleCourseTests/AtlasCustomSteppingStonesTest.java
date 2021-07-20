@@ -18,7 +18,7 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
         /**
          *  TODO remove as it assimilates {@link us.ihmc.atlas.roughTerrainWalking.AtlasEndToEndStairsTest#testUpStairs(TestInfo)}
          */
-        changeWalkingParameters(0.3, 0.95);
+        changeWalkingParameters(0.3, 1.05);
         setNumberOfSteps(4);
         super.testTakingStep(testInfo, 0.25);
     }
