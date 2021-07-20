@@ -662,4 +662,8 @@ public class FullRobotModelFromDescription implements FullRobotModel
       return totalMass;
    }
 
+   public RobotDescription getDescription()
+   {
+      return description;
+   }
 }
