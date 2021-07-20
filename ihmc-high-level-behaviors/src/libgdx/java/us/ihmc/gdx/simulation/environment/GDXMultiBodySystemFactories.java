@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation;
+package us.ihmc.gdx.simulation.environment;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
