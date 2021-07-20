@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation;
+package us.ihmc.gdx.simulation.environment;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;

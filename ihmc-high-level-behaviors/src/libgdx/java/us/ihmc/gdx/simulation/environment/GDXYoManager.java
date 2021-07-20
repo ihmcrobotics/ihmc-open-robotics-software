@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation;
+package us.ihmc.gdx.simulation.environment;
 
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleLongProperty;

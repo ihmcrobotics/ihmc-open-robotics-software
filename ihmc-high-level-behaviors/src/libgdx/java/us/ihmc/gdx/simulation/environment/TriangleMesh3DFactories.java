@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation;
+package us.ihmc.gdx.simulation.environment;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
