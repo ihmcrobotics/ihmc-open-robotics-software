@@ -725,6 +725,7 @@ public abstract class EuclideanModelPredictiveController
                        FixedFramePoint3DBasics ecmpPositionToPack)
    {
       linearTrajectoryHandler.compute(timeInPhase);
+      linearTrajectoryHandler.computeOutsidePreview(timeInPhase);
       wrenchTrajectoryHandler.compute(timeInPhase);
 
       comPositionToPack.setMatchingFrame(linearTrajectoryHandler.getDesiredCoMPosition());
@@ -811,6 +812,26 @@ public abstract class EuclideanModelPredictiveController
    public FrameVector3DReadOnly getDesiredVRPVelocity()
    {
       return desiredVRPVelocity;
+   }
+
+   public FramePoint3DReadOnly getReferenceCoMPosition()
+   {
+      return linearTrajectoryHandler.getDesiredCoMPositionOutsidePreview();
+   }
+
+   public FrameVector3DReadOnly getReferenceCoMVelocity()
+   {
+      return linearTrajectoryHandler.getDesiredCoMVelocityOutsidePreview();
+   }
+
+   public FramePoint3DReadOnly getReferenceDCMPosition()
+   {
+      return linearTrajectoryHandler.getDesiredDCMPositionOutsidePreview();
+   }
+
+   public FramePoint3DReadOnly getReferenceVRPPosition()
+   {
+      return linearTrajectoryHandler.getDesiredVRPPositionOutsidePreview();
    }
 
    /**

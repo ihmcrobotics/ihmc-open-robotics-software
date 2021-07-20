@@ -352,6 +352,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                        FixedFramePoint3DBasics ecmpPositionToPack)
    {
       linearTrajectoryHandler.compute(timeInPhase);
+      linearTrajectoryHandler.computeOutsidePreview(timeInPhase);
       wrenchTrajectoryHandler.compute(timeInPhase);
       orientationTrajectoryHandler.compute(timeInPhase);
 
