@@ -163,7 +163,7 @@ public class LinearMPCQPSolver
 
       resetRateRegularization();
 
-      qpSolver.reshape(problemSize);
+      qpSolver.initialize(problemSize);
    }
 
    public void resetRateRegularization()

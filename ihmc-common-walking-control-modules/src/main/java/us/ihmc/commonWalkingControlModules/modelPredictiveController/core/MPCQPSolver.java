@@ -146,20 +146,7 @@ public class MPCQPSolver
       return activeInequalityIndices;
    }
 
-   public void clear()
-   {
-      quadraticCostQMatrix.reshape(0, 0);
-      quadraticCostQVector.reshape(0, 0);
-
-      linearEqualityConstraintsAMatrix.reshape(0, 0);
-      linearEqualityConstraintsBVector.reshape(0, 0);
-
-      linearInequalityConstraintsCMatrixO.reshape(0, 0);
-      linearInequalityConstraintsDVectorO.reshape(0, 0);
-      linearInequalityConstraintsSlackVariableCost.reshape(0, 0);
-   }
-
-   public void reshape(int problemSize)
+   public void initialize(int problemSize)
    {
       costQuadraticMatrix.reshape(problemSize, problemSize);
       quadraticCostQVector.reshape(problemSize, 1);
