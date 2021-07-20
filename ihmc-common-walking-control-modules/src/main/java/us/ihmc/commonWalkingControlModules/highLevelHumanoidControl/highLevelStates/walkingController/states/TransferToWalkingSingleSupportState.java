@@ -152,6 +152,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       if (resubmitStepsInTransferEveryTick.getBooleanValue())
       {
+         balanceManager.clearICPPlan();
+
          int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
          for (int i = 0; i < stepsToAdd; i++)
          {
@@ -159,12 +161,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
             FootstepTiming timing = footstepTimings[i];
             walkingMessageHandler.peekFootstep(i, footstep);
             walkingMessageHandler.peekTiming(i, timing);
-
-            if (i == 0)
-            {
-               adjustTiming(timing);
-               walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
-            }
 
             balanceManager.addFootstepToPlan(footstep, timing);
          }

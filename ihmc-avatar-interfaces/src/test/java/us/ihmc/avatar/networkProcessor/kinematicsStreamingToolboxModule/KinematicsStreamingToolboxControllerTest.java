@@ -64,6 +64,7 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -627,6 +628,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
          graphics.addCapsule(capsule.getRadius(),
                              capsule.getLength() + 2.0 * capsule.getRadius(), // the 2nd term is removed internally.
                              appearance);
+      }
+      else if (shape instanceof FrameSTPBox3DReadOnly)
+      {
+         FrameSTPBox3DReadOnly box = (FrameSTPBox3DReadOnly) shape;
+         RigidBodyTransform transform = new RigidBodyTransform();
+         transform.getRotation().set(box.getOrientation());
+         transform.getTranslation().set(box.getPosition());
+         graphics.transform(transform);
+         graphics.addCube(box.getSizeX(), box.getSizeY(), box.getSizeZ(), appearance);
       }
       else
       {

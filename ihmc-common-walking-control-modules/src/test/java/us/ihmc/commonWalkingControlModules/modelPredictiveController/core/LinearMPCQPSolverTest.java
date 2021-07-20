@@ -6,6 +6,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.EuclideanModelPredictiveController;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCParameters;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
@@ -501,7 +502,7 @@ public class LinearMPCQPSolverTest
       startVRPCommand.setSegmentNumber(0);
       startVRPCommand.setOmega(omega);
       startVRPCommand.setSegmentDuration(firstSegmentDuration);
-      startVRPCommand.setWeight(EuclideanModelPredictiveController.defaultVrpTrackingWeight);
+      startVRPCommand.setWeight(MPCParameters.defaultVrpTrackingWeight);
       startVRPCommand.setStartVRP(startPosition);
       startVRPCommand.setEndVRP(startPosition);
       startVRPCommand.addContactPlaneHelper(contactPlaneHelper1);
@@ -510,7 +511,7 @@ public class LinearMPCQPSolverTest
       endVRPCommand.setSegmentNumber(2);
       endVRPCommand.setOmega(omega);
       endVRPCommand.setSegmentDuration(thirdSegmentDuration);
-      endVRPCommand.setWeight(EuclideanModelPredictiveController.defaultVrpTrackingWeight);
+      endVRPCommand.setWeight(MPCParameters.defaultVrpTrackingWeight);
       endVRPCommand.setStartVRP(endPosition);
       endVRPCommand.setEndVRP(endPosition);
       endVRPCommand.addContactPlaneHelper(contactPlaneHelper3);
@@ -788,7 +789,7 @@ public class LinearMPCQPSolverTest
       startVRPCommand.setSegmentNumber(0);
       startVRPCommand.setOmega(omega);
       startVRPCommand.setSegmentDuration(firstSegmentDuration);
-      startVRPCommand.setWeight(EuclideanModelPredictiveController.defaultVrpTrackingWeight);
+      startVRPCommand.setWeight(MPCParameters.defaultVrpTrackingWeight);
       startVRPCommand.setStartVRP(startPosition);
       startVRPCommand.setEndVRP(startPosition);
       startVRPCommand.addContactPlaneHelper(leftContactPlaneHelper1);
@@ -798,7 +799,7 @@ public class LinearMPCQPSolverTest
       endVRPCommand.setSegmentNumber(2);
       endVRPCommand.setOmega(omega);
       endVRPCommand.setSegmentDuration(thirdSegmentDuration);
-      endVRPCommand.setWeight(EuclideanModelPredictiveController.defaultVrpTrackingWeight);
+      endVRPCommand.setWeight(MPCParameters.defaultVrpTrackingWeight);
       endVRPCommand.setStartVRP(endPosition);
       endVRPCommand.setEndVRP(endPosition);
       endVRPCommand.addContactPlaneHelper(leftContactPlaneHelper3);
