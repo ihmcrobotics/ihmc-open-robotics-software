@@ -1,14 +1,12 @@
 package us.ihmc.footstepPlanning;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
@@ -28,6 +26,8 @@ import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.VariableDescriptor;
+import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageAdjuster;
+import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageBodyPathPlanner;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
@@ -63,6 +63,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final VisibilityGraphPathPlanner bodyPathPlanner;
+   private final NarrowPassageBodyPathPlanner bodyPathPlannerNarrowPassage;
+   private final NarrowPassageAdjuster narrowPassageAdjuster;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
 
    private final PlanThenSnapPlanner planThenSnapPlanner;
@@ -107,10 +109,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.footstepPlannerParameters = footstepPlannerParameters;
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters,
-                                                            pathPostProcessor,
-                                                            registry);
-
+      this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, registry);
+      this.bodyPathPlannerNarrowPassage = new NarrowPassageBodyPathPlanner(visibilityGraphParameters, footstepPlannerParameters, registry);
+      this.narrowPassageAdjuster = new NarrowPassageAdjuster(visibilityGraphParameters, footstepPlannerParameters, registry);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
@@ -173,12 +174,15 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
       PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
+      bodyPathPlannerNarrowPassage.setPlanarRegionsList(planarRegionsList);
+      narrowPassageAdjuster.setPlanarRegionsList(planarRegionsList);
 
       // record time
       output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
 
       if (request.getPlanBodyPath() && !flatGroundMode)
       {
+         LogTools.info("Entering body path planning");
          bodyPathPlanner.setStanceFootPoses(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT));
          bodyPathPlanner.setGoal(goalMidFootPose);
 
@@ -199,6 +203,20 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             bodyPathPlanner.computeBestEffortPlan(horizonLength);
          }
 
+         if (request.getPlanNarrowPassage())
+         {
+            List<FramePose3D> waypointFrames = new ArrayList<>();
+            for (int i = 0; i < waypoints.size(); i++)
+            {
+               FramePose3D waypointFrame = new FramePose3D(ReferenceFrame.getWorldFrame(), waypoints.get(i).getPosition(), waypoints.get(i).getOrientation());
+               waypointFrames.add(waypointFrame);
+            }
+            FramePose3D[] waypointsArray = new FramePose3D[waypoints.size()];
+            waypointFrames.toArray(waypointsArray);
+            narrowPassageAdjuster.setWaypoints(waypointsArray);
+            waypoints = narrowPassageAdjuster.makeAdjustments();
+         }
+
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);
          if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
@@ -209,8 +227,37 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
          reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
+      else if (request.getPlanNarrowPassage())
+      {
+         LogTools.info("Entering Narrow Passage planning");
+         FramePose3D bodyStartPose = new FramePose3D();
+         bodyStartPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
+
+         List<Pose3DReadOnly> waypoints = bodyPathPlannerNarrowPassage.computePlan(bodyStartPose, goalMidFootPose);
+
+         if (waypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails())
+         {
+            reportBodyPathPlan(BodyPathPlanningResult.EXCEPTION);
+            output.setBodyPathPlanningResult(BodyPathPlanningResult.EXCEPTION);
+            statusCallbacks.forEach(callback -> callback.accept(output));
+            isPlanning.set(false);
+            return;
+         }
+
+         bodyPathPlanHolder.setPoseWaypoints(waypoints);
+         // TODO Find out what this does
+//         double pathLength = bodyPathPlanHolder.computePathLength(0.0);
+//         if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
+//         {
+//            double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
+//            bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
+//         }
+
+         reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
+      }
       else
       {
+         LogTools.info("Entering straight path");
          List<Pose3DReadOnly> waypoints = new ArrayList<>();
          waypoints.add(startMidFootPose);
          waypoints.addAll(request.getBodyPathWaypoints());
@@ -283,10 +330,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       {
          swingReplanRequestCallbacks.forEach(callback -> callback.accept(swingPlannerType));
          aStarFootstepPlanner.getSwingPlanningModule()
-                             .computeSwingWaypoints(request.getPlanarRegionsList(),
-                                                    output.getFootstepPlan(),
-                                                    request.getStartFootPoses(),
-                                                    swingPlannerType);
+                             .computeSwingWaypoints(request.getPlanarRegionsList(), output.getFootstepPlan(), request.getStartFootPoses(), swingPlannerType);
          swingReplanStatusCallbacks.forEach(callback -> callback.accept(output.getFootstepPlan()));
          return output.getFootstepPlan();
       }

@@ -43,6 +43,7 @@ public class FootstepPathCalculatorModule
    private final AtomicReference<Pose3DReadOnly> rightFootGoalPose;
    private final AtomicReference<Boolean> performAStarSearch;
    private final AtomicReference<Boolean> planBodyPath;
+   private final AtomicReference<Boolean> planNarrowPassage;
 
    private final AtomicReference<Double> plannerTimeoutReference;
    private final AtomicReference<Integer> plannerMaxIterationsReference;
@@ -72,6 +73,7 @@ public class FootstepPathCalculatorModule
       visibilityGraphsParameters = messager.createInput(VisibilityGraphsParameters, new DefaultVisibilityGraphParameters());
       performAStarSearch = messager.createInput(PerformAStarSearch, false);
       planBodyPath = messager.createInput(PlanBodyPath, true);
+      planNarrowPassage = messager.createInput(PlanNarrowPassage, true);
       plannerTimeoutReference = messager.createInput(PlannerTimeout, 5.0);
       plannerHorizonLengthReference = messager.createInput(PlannerHorizonLength, 1.0);
 
@@ -147,6 +149,7 @@ public class FootstepPathCalculatorModule
          request.setStartFootPoses(leftFootStartPose.get(), rightFootStartPose.get());
          request.setGoalFootPoses(leftFootGoalPose.get(), rightFootGoalPose.get());
          request.setPlanBodyPath(planBodyPath.get());
+         request.setPlanNarrowPassage(planNarrowPassage.get());
          request.setPerformAStarSearch(performAStarSearch.get());
          request.setSnapGoalSteps(snapGoalSteps.get());
          request.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());

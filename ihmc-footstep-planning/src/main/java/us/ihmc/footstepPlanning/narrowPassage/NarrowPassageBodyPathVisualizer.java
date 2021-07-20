@@ -61,8 +61,8 @@ public class NarrowPassageBodyPathVisualizer
    public static void main(String[] args)
    {
 //      DataSetName dataSetName = DataSetName._20191007_200400_Corridor1Wall;
-      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_JSC_78cm;
-//      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_IHMC_65cm;
+//      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_JSC_78cm;
+      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_IHMC_65cm;
 //      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_IHMC_55cm;
 
       new NarrowPassageBodyPathVisualizer(dataSetName);

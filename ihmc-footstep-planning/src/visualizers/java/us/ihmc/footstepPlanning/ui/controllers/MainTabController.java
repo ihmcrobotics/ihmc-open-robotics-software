@@ -58,6 +58,8 @@ public class MainTabController
    @FXML
    private CheckBox planBodyPath;
    @FXML
+   private CheckBox planNarrowPassage;
+   @FXML
    private CheckBox performAStarSearch;
    @FXML
    private CheckBox planSingleStep;
@@ -277,6 +279,7 @@ public class MainTabController
       messager.bindBidirectional(GoalMidFootOrientation, goalRotationProperty, false);
 
       messager.bindBidirectional(PlanBodyPath, planBodyPath.selectedProperty(), true);
+      messager.bindBidirectional(PlanNarrowPassage, planNarrowPassage.selectedProperty(), true);
       messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
       messager.bindBidirectional(RequestedSwingPlannerType, swingPlannerType.valueProperty(), true);
 
