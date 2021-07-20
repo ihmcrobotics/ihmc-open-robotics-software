@@ -14,7 +14,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class JumpingFlightState extends JumpingState
 {
-   private static final double swingHeight = 0.05;
    private final JumpingControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
@@ -103,7 +102,7 @@ public class JumpingFlightState extends JumpingState
          else
             flightDuration = jumpingParameters.getDefaultFlightDuration();
 
-         feetManager.requestSwing(robotSide, footGoalPose, swingHeight, flightDuration);
+         feetManager.requestSwing(robotSide, footGoalPose, jumpingParameters.getSwingHeight(), flightDuration);
          balanceManager.setSwingFootTrajectory(robotSide, feetManager.getSwingTrajectory(robotSide));
          controllerToolbox.setFootContactStateFree(robotSide);
       }
