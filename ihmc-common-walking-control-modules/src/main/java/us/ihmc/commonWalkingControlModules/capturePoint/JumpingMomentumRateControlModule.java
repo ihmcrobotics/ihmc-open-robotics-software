@@ -41,7 +41,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 public class JumpingMomentumRateControlModule
 {
-   private static final boolean useLinearLQR = true;
+   private static final boolean useLinearLQR = false;
    private static final boolean useAngularLQR = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
