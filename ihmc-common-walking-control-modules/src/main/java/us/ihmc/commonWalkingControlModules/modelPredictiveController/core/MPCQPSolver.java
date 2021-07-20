@@ -313,6 +313,11 @@ public class MPCQPSolver
       addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset);
    }
 
+   public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, double slackVariableWeight, int problemSize, int colOffset)
+   {
+      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, slackVariableWeight, taskJacobian.getNumCols(), problemSize, colOffset);
+   }
+
    public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian,
                                                           NativeMatrix taskObjective,
                                                           int problemSize,
@@ -322,9 +327,24 @@ public class MPCQPSolver
       addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, problemSize, totalProblemSize, colOffset);
    }
 
+   public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian,
+                                                          NativeMatrix taskObjective,
+                                                          double slackVariableWeight,
+                                                          int problemSize,
+                                                          int totalProblemSize,
+                                                          int colOffset)
+   {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, slackVariableWeight, problemSize, totalProblemSize, colOffset);
+   }
+
    public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, int problemSize, int colOffset)
    {
       addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset);
+   }
+
+   public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, double slackVariableWeight, int problemSize, int colOffset)
+   {
+      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, slackVariableWeight, taskJacobian.getNumCols(), problemSize, colOffset);
    }
 
    public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian,
@@ -334,6 +354,16 @@ public class MPCQPSolver
                                                            int colOffset)
    {
       addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, problemSize, totalProblemSize, colOffset);
+   }
+   
+   public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian,
+                                                           NativeMatrix taskObjective,
+                                                           double slackVariableWeight,
+                                                           int problemSize,
+                                                           int totalProblemSize,
+                                                           int colOffset)
+   {
+      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, slackVariableWeight, problemSize, totalProblemSize, colOffset);
    }
 
    private void addInequalityConstraintInternal(NativeMatrix taskJacobian,

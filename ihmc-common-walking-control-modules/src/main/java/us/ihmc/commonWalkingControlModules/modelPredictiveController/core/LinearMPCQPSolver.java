@@ -348,7 +348,9 @@ public class LinearMPCQPSolver
    {
       int offset = inputCalculator.calculateRhoBoundCommandCompact(qpInputTypeA, command);
       if (offset != -1)
-         addInput(qpInputTypeA, offset);
+      {
+         addInput(qpInputTypeA, offset, 1e5);
+      }
    }
 
    public void submitNormalForceBoundCommand(NormalForceBoundCommand command)
@@ -400,6 +402,11 @@ public class LinearMPCQPSolver
 
    public void addInput(NativeQPInputTypeA input, int offset)
    {
+      addInput(input, offset, Double.NaN);
+   }
+
+   public void addInput(NativeQPInputTypeA input, int offset, double slackVariableWeight)
+   {
       switch (input.getConstraintType())
       {
          case OBJECTIVE:
@@ -412,10 +419,10 @@ public class LinearMPCQPSolver
             qpSolver.addEqualityConstraint(input.taskJacobian, input.taskObjective, problemSize, offset);
             break;
          case LEQ_INEQUALITY:
-            qpSolver.addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, problemSize, offset);
+            qpSolver.addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, slackVariableWeight, problemSize, offset);
             break;
          case GEQ_INEQUALITY:
-            qpSolver.addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, problemSize, offset);
+            qpSolver.addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, slackVariableWeight, problemSize, offset);
             break;
          default:
             throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
