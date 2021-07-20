@@ -7,7 +7,11 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MPCParameters
 {
-   private static final boolean includeVelocityObjective = true;
+   private static final boolean includeInitialCoMVelocityObjective = true;
+   private static final boolean includeFinalCoMPositionObjective = false;
+   private static final boolean includeFinalCoMVelocityObjective = true;
+   private static final boolean includeFinalDCMPositionObjective = true;
+
    private static final boolean includeRhoMinInequality = true;
    private static final boolean includeRhoMaxInequality = false;
    private static final boolean includeForceMinimization = false;
@@ -18,7 +22,7 @@ public class MPCParameters
 
    public static final double defaultInitialComWeight = 5e3;
    public static final double defaultInitialComVelocityWeight = 5e1;
-   public static final double defaultFinalComWeight = 5e2;
+   public static final double defaultFinalComWeight = 1e1;
    public static final double defaultFinalVRPWeight = 5e1;
    public static final double defaultVrpTrackingWeight = 1e2;
    public static final double defaultRhoTrackingWeight = 1e-3;
@@ -34,7 +38,8 @@ public class MPCParameters
    private static final ConstraintType initialCoMPositionConstraintType = ConstraintType.EQUALITY;
    private static final ConstraintType initialCoMVelocityConstraintType = ConstraintType.EQUALITY;
    private static final ConstraintType finalCoMPositionConstraintType = ConstraintType.EQUALITY;
-   private static final ConstraintType finalCoMVelocityConstraintType = ConstraintType.EQUALITY;
+   private static final ConstraintType finalCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
+   private static final ConstraintType finalDCMPositionConstraintType = ConstraintType.EQUALITY;
    private static final ConstraintType finalVRPPositionConstraintType = ConstraintType.EQUALITY;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -74,9 +79,24 @@ public class MPCParameters
       parentRegistry.addChild(registry);
    }
 
-   public boolean includeVelocityObjective()
+   public boolean includeInitialCoMVelocityObjective()
    {
-      return includeVelocityObjective;
+      return includeInitialCoMVelocityObjective;
+   }
+
+   public boolean includeFinalCoMPositionObjective()
+   {
+      return includeFinalCoMPositionObjective;
+   }
+
+   public boolean includeFinalCoMVelocityObjective()
+   {
+      return includeFinalCoMVelocityObjective;
+   }
+
+   public boolean includeFinalDCMPositionObjective()
+   {
+      return includeFinalDCMPositionObjective;
    }
 
    public boolean includeRhoMinInequality()
@@ -122,6 +142,11 @@ public class MPCParameters
    public ConstraintType getFinalCoMVelocityConstraintType()
    {
       return finalCoMVelocityConstraintType;
+   }
+
+   public ConstraintType getFinalDCMPositionConstraintType()
+   {
+      return finalDCMPositionConstraintType;
    }
 
    public ConstraintType getFinalVRPPositionConstraintType()
