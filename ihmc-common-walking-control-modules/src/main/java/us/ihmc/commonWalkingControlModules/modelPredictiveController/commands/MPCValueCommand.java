@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,8 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
     * Defines the contact planes to be used to achieve the objective.
     */
    private final List<MPCContactPlane> contactPlaneHelpers = new ArrayList<>();
+
+   private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
 
    /**
     * What segment number this objective corresponds to.
@@ -170,6 +173,11 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
    public FrameTuple3DReadOnly getObjective()
    {
       return objective;
+   }
+
+   public SelectionMatrix3D getSelectionMatrix()
+   {
+      return selectionMatrix;
    }
 
    public int getNumberOfContacts()

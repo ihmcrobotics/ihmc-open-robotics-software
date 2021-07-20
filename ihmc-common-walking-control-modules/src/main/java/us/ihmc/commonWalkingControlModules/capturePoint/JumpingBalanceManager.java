@@ -4,7 +4,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCParameters;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.customPolicies.CustomCoMPositionPolicy;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -45,6 +47,8 @@ public class JumpingBalanceManager
    private final JumpingMomentumRateControlModuleInput jumpingMomentumRateControlModuleInput = new JumpingMomentumRateControlModuleInput();
 
    private final JumpingControllerToolbox controllerToolbox;
+
+   private final YoDouble desiredWeightForStateChangeHeights = new YoDouble("desiredWeightForStateChangeHeights", registry);
 
    private final YoFramePoint3D yoDesiredDCM = new YoFramePoint3D("desiredDCM", worldFrame, registry);
    private final YoFrameVector3D yoDesiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
@@ -88,6 +92,9 @@ public class JumpingBalanceManager
    private final AngularMomentumHandler<ContactPlaneProvider> angularMomentumHandler;
    private final SE3ModelPredictiveController comTrajectoryPlanner;
 
+   private final CustomCoMPositionPolicy takeoffPolicy = new CustomCoMPositionPolicy();
+   private final CustomCoMPositionPolicy touchdownPolicy = new CustomCoMPositionPolicy();
+
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
                                 JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters,
@@ -95,6 +102,8 @@ public class JumpingBalanceManager
                                 YoRegistry parentRegistry)
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
+
+      desiredWeightForStateChangeHeights.set(1e-2);
 
       yoTime = controllerToolbox.getYoTime();
       this.controllerToolbox = controllerToolbox;
@@ -116,7 +125,9 @@ public class JumpingBalanceManager
                                                             registry,
                                                             yoGraphicsListRegistry);
 
+      MPCParameters mpcParameters = new MPCParameters(registry);
       comTrajectoryPlanner = new SE3ModelPredictiveController(chest.getInertia().getMomentOfInertia(),
+                                                                      mpcParameters,
                                                                       gravityZ,
                                                                       nominalHeight,
                                                                       totalMass,
@@ -139,6 +150,11 @@ public class JumpingBalanceManager
 
       ReferenceFrame comFrame = controllerToolbox.getCenterOfMassFrame();
       desiredWrench = new YoFixedFrameWrench("DesiredCoMWrench", worldFrame, comFrame, registry);
+
+      takeoffPolicy.getSelectionMatrix().clearSelection();
+      takeoffPolicy.getSelectionMatrix().selectZAxis(true);
+      touchdownPolicy.getSelectionMatrix().clearSelection();
+      touchdownPolicy.getSelectionMatrix().selectZAxis(true);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -183,7 +199,6 @@ public class JumpingBalanceManager
    {
       comTrajectoryPlanner.setNominalCoMHeight(height);
    }
-
 
 
    public void compute()
@@ -267,6 +282,8 @@ public class JumpingBalanceManager
       plannerTimer.stopMeasurement();
    }
 
+   private final FramePoint3D tempPoint = new FramePoint3D();
+
    public void computeCoMPlanForJumping(JumpingGoal jumpingGoal)
    {
       plannerTimer.startMeasurement();
@@ -314,6 +331,22 @@ public class JumpingBalanceManager
       {
          comTrajectoryPlanner.reset();
       }
+
+      // update the takeoff and touchdown policies
+      tempPoint.setToZero(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame());
+      tempPoint.changeFrame(worldFrame);
+
+      takeoffPolicy.getDesiredComPosition().setZ(tempPoint.getZ() + controllerToolbox.getStandingHeight());
+      touchdownPolicy.getDesiredComPosition().setZ(jumpingGoal.getGoalHeight() + controllerToolbox.getStandingHeight());
+
+      takeoffPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
+      touchdownPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
+
+      takeoffPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration());
+      touchdownPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
+
+//      comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
+//      comTrajectoryPlanner.addCustomPolicyToProcess(touchdownPolicy);
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
 
