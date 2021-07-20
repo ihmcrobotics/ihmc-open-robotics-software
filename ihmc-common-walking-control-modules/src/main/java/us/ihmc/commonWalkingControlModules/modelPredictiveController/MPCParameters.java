@@ -21,9 +21,9 @@ public class MPCParameters
    public static final double defaultFinalComWeight = 5e2;
    public static final double defaultFinalVRPWeight = 5e1;
    public static final double defaultVrpTrackingWeight = 1e2;
-   public static final double defaultRhoMinimizationWeight = 1e-3;
-   public static final double defaultRhoRateMinimizationWeight = 1e-6;
-   public static final double defaultForceMinimizationWeight = 1e-4;
+   public static final double defaultRhoTrackingWeight = 1e-3;
+   public static final double defaultRhoRateTrackingWeight = 1e-6;
+   public static final double defaultForceTrackingWeight = 1e-4;
 
    private static final double defaultOrientationAngleTrackingWeight = 1e-2;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
@@ -45,9 +45,9 @@ public class MPCParameters
    private final YoDouble finalComWeight = new YoDouble("finalComWeight", registry);
    private final YoDouble finalVRPWeight = new YoDouble("finalVRPWeight", registry);
    private final YoDouble vrpTrackingWeight = new YoDouble("vrpTrackingWeight", registry);
-   private final YoDouble rhoMinimizationWeight = new YoDouble("rhoMinimizationWeight", registry);
-   private final YoDouble rhoRateMinimizationWeight = new YoDouble("rhoRateMinimizationWeight", registry);
-   private final YoDouble forceMinimizationWeight = new YoDouble("forceMinimizationWeight", registry);
+   private final YoDouble rhoTrackingWeight = new YoDouble("rhoTrackingWeight", registry);
+   private final YoDouble rhoRateTrackingWeight = new YoDouble("rhoRateTrackingWeight", registry);
+   private final YoDouble forceTrackingWeight = new YoDouble("forceTrackingWeight", registry);
 
    private final YoDouble orientationAngleTrackingWeight = new YoDouble("orientationAngleTrackingWeight", registry);
    private final YoDouble orientationVelocityTrackingWeight = new YoDouble("orientationVelocityTrackingWeight", registry);
@@ -62,9 +62,9 @@ public class MPCParameters
       finalComWeight.set(defaultFinalComWeight);
       finalVRPWeight.set(defaultFinalVRPWeight);
       vrpTrackingWeight.set(defaultVrpTrackingWeight);
-      rhoMinimizationWeight.set(defaultRhoMinimizationWeight);
-      rhoRateMinimizationWeight.set(defaultRhoRateMinimizationWeight);
-      forceMinimizationWeight.set(defaultForceMinimizationWeight);
+      rhoTrackingWeight.set(defaultRhoTrackingWeight);
+      rhoRateTrackingWeight.set(defaultRhoRateTrackingWeight);
+      forceTrackingWeight.set(defaultForceTrackingWeight);
 
       orientationAngleTrackingWeight.set(defaultOrientationAngleTrackingWeight);
       orientationVelocityTrackingWeight.set(defaultOrientationVelocityTrackingWeight);
@@ -159,18 +159,19 @@ public class MPCParameters
       return vrpTrackingWeight.getDoubleValue();
    }
 
-   public double getRhoMinimizationWeight()
+   public double getRhoTrackingWeight()
    {
-      return rhoMinimizationWeight.getDoubleValue();
+      return rhoTrackingWeight.getDoubleValue();
    }
 
-   public double getRhoRateMinimizationWeight()
+   public double getRhoRateTrackingWeight()
    {
-      return rhoRateMinimizationWeight.getDoubleValue();
+      return rhoRateTrackingWeight.getDoubleValue();
    }
-   public double getForceMinimizationWeight()
+
+   public double getForceTrackingWeight()
    {
-      return forceMinimizationWeight.getDoubleValue();
+      return forceTrackingWeight.getDoubleValue();
    }
 
    public double getInitialOrientationWeight()
