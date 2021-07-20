@@ -27,9 +27,12 @@ public class JumpingFootControlHelper
 
    private final FrameVector3D fullyConstrainedNormalContactVector;
 
+   private final JumpingSwingTrajectoryCalculator swingTrajectoryCalculator;
+
    public JumpingFootControlHelper(RobotSide robotSide,
                                    WalkingControllerParameters walkingControllerParameters,
-                                   JumpingControllerToolbox controllerToolbox)
+                                   JumpingControllerToolbox controllerToolbox,
+                                   YoRegistry registry)
    {
       this.robotSide = robotSide;
       this.controllerToolbox = controllerToolbox;
@@ -39,6 +42,8 @@ public class JumpingFootControlHelper
       RigidBodyBasics foot = contactableFoot.getRigidBody();
 
       fullyConstrainedNormalContactVector = new FrameVector3D(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
+
+      swingTrajectoryCalculator = new JumpingSwingTrajectoryCalculator(robotSide, controllerToolbox, walkingControllerParameters, registry);
    }
 
    public RobotSide getRobotSide()
@@ -72,5 +77,10 @@ public class JumpingFootControlHelper
          fullyConstrainedNormalContactVector.setIncludingFrame(normalContactVector);
       else
          fullyConstrainedNormalContactVector.setIncludingFrame(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
+   }
+
+   public JumpingSwingTrajectoryCalculator getSwingTrajectoryCalculator()
+   {
+      return swingTrajectoryCalculator;
    }
 }

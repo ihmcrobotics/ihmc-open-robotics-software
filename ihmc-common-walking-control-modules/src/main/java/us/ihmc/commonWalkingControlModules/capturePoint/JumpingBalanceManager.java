@@ -40,6 +40,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 public class JumpingBalanceManager
 {
+   private static final boolean offsetECMPWithAngularMomentum = false;
    private static final double nominalHeight = 1.0;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -375,7 +376,9 @@ public class JumpingBalanceManager
             angularMomentumHandler.solveForAngularMomentumTrajectory(copTrajectoryState,
                                                                      contactStateProviders,
                                                                      comTrajectoryPlanner.getCoMTrajectory());
-            contactStateProviders = angularMomentumHandler.computeECMPTrajectory(contactStateProviders);
+            // FIXME this doesn't currently work
+            if (offsetECMPWithAngularMomentum)
+               contactStateProviders = angularMomentumHandler.computeECMPTrajectory(contactStateProviders);
          }
          else
          {
@@ -504,6 +507,7 @@ public class JumpingBalanceManager
       currentStateDuration.set(Double.POSITIVE_INFINITY);
       totalStateDuration.set(Double.POSITIVE_INFINITY);
 
+      copTrajectoryState.setIsInFlight(false);
       jumpingMomentumRateControlModuleInput.setInFlight(false);
 
       comPlannerDone.set(false);
@@ -521,6 +525,7 @@ public class JumpingBalanceManager
       currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
       totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
 
+      copTrajectoryState.setIsInFlight(false);
       jumpingMomentumRateControlModuleInput.setInFlight(false);
 
       comPlannerDone.set(false);
@@ -539,7 +544,7 @@ public class JumpingBalanceManager
       totalStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
       copTrajectoryState.setTimeAtStartOfState(timeInSupportSequence.getDoubleValue());
 
-
+      copTrajectoryState.setIsInFlight(false);
       jumpingMomentumRateControlModuleInput.setInFlight(false);
 
       comPlannerDone.set(false);
@@ -555,6 +560,7 @@ public class JumpingBalanceManager
       comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue());
       touchdownCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
 
+      copTrajectoryState.setIsInFlight(true);
       jumpingMomentumRateControlModuleInput.setInFlight(true);
 
       comPlannerDone.set(false);
