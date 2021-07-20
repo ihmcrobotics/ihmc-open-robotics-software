@@ -31,11 +31,11 @@ public class MPCParameters
    public static final double defaultRhoRateTrackingWeight = 1e-6;
    public static final double defaultForceTrackingWeight = 1e-4;
 
-   private static final double defaultOrientationAngleTrackingWeight = 1e-1;
+   private static final double defaultOrientationAngleTrackingWeight = 1e-2;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
-   private static final double defaultInitialOrientationWeight = 1e6;
-   private static final double defaultFinalOrientationWeight = 1e-6;
+   private static final double defaultInitialOrientationWeight = 1e3;
+   private static final double defaultFinalOrientationWeight = 1e2;
 
    private static final ConstraintType initialCoMPositionConstraintType = ConstraintType.EQUALITY;
    private static final ConstraintType initialCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
