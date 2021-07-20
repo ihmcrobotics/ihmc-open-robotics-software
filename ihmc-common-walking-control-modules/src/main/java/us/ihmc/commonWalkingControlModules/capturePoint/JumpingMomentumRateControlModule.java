@@ -14,18 +14,14 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.orientationControl.VariationalLQRController;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
-import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
@@ -86,7 +82,7 @@ public class JumpingMomentumRateControlModule
    private final YoFramePoint3D yoDesiredVRP = new YoFramePoint3D("desiredVRP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
-   private final YoBoolean minimizeAngularMomentumRate = new YoBoolean("minimizeAngularMomentumRate", registry);
+   private final YoBoolean includeAngularMomentumRate = new YoBoolean("minimizeAngularMomentumRate", registry);
 
    private final JumpingControllerToolbox controllerToolbox;
 
@@ -99,9 +95,9 @@ public class JumpingMomentumRateControlModule
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight1", new Vector3D(10, 10, 10), registry);
-      angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight1", new Vector3D(1e-3, 1e-3, 0.0), registry);
+      angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight1", new Vector3D(5e-1, 5e-1, 1e-1), registry);
 
-      minimizeAngularMomentumRate.set(true);
+      includeAngularMomentumRate.set(true);
 
       centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", worldFrame, registry);
@@ -174,8 +170,7 @@ public class JumpingMomentumRateControlModule
       computeDesiredAngularMomentumRateOfChange();
 
       selectionMatrix.resetSelection();
-//      selectionMatrix.clearLinearSelection();
-      if (!minimizeAngularMomentumRate.getBooleanValue())
+      if (!includeAngularMomentumRate.getBooleanValue())
          selectionMatrix.clearAngularSelection();
 
 //      momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
