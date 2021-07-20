@@ -18,6 +18,8 @@ import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.sharedMemory.LinkedYoRegistry;
+import us.ihmc.scs2.sharedMemory.interfaces.LinkedYoVariableFactory;
 import us.ihmc.scs2.sharedMemory.tools.YoMirroredRegistryTools;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -38,6 +40,8 @@ public class GDXPhysicsDemo
    private ModelInstance boxModelInstance;
    private ModelInstance slopeModelInstance;
    private GDXRigidBody rootBody;
+   private boolean initialize = true;
+   private LinkedYoRegistry robotLinkedYoRegistry;
 
    public GDXPhysicsDemo()
    {
@@ -57,6 +61,8 @@ public class GDXPhysicsDemo
       YoRegistry rootRegistry = physicsSimulator.getSession().getPhysicsEngine().getPhysicsEngineRegistry();
       YoRegistry boxRegistry = rootRegistry.findRegistry(new YoNamespace("root.Box"));
       YoRegistry mirroredBoxRegistry = YoMirroredRegistryTools.newRegistryFromNamespace(SimulationSession.ROOT_REGISTRY_NAME, boxRobot.getName());
+      GDXYoManager yoManager = new GDXYoManager();
+      yoManager.startSession(physicsSimulator.getSession());
       RigidBodyBasics originalRigidBody = boxRobot.newIntance(ReferenceFrameTools.constructARootFrame("dummy"));
       ReferenceFrame cloneStationaryFrame = ReferenceFrame.getWorldFrame(); // TODO: Check
 
@@ -88,6 +94,8 @@ public class GDXPhysicsDemo
                                                                           cloneStationaryFrame,
                                                                           boxRobot,
                                                                           mirroredBoxRegistry);
+            robotLinkedYoRegistry = yoManager.newLinkedYoRegistry(mirroredBoxRegistry);
+            yoManager.linkNewYoVariables();
             for (GDXRigidBody rigidBody : rootBody.subtreeIterable())
             {
                if (rigidBody.getGraphics() != null)
@@ -137,8 +145,17 @@ public class GDXPhysicsDemo
             GDXTools.toGDX(rigidBodyTransform, boxModelInstance.transform);
 
 
-            rootBody.updateFramesRecursively();
-            rootBody.updateSubtreeGraphics();
+            yoManager.update();
+            if (robotLinkedYoRegistry.pull() || initialize)
+            {
+               rootBody.updateFramesRecursively();
+               rootBody.updateSubtreeGraphics();
+               initialize = false;
+            }
+
+
+//            rootBody.updateFramesRecursively();
+//            rootBody.updateSubtreeGraphics();
 //            for (GDXRigidBody rigidBody : rootBody.subtreeIterable())
 //            {
 //               if (rigidBody.getGraphics() != null)
