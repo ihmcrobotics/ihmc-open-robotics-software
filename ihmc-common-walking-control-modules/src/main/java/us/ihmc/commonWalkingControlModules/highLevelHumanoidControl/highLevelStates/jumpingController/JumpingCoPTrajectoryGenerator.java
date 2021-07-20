@@ -32,6 +32,8 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
    private final PoseReferenceFrame midstanceFrame = new PoseReferenceFrame("midstanceFrame", worldFrame);
    private final ZUpFrame midstanceZUpFrame = new ZUpFrame(worldFrame, midstanceFrame, "midstanceZUpFrame");
 
+   private final JumpingGoalFootholdCalculator jumpingGoalFootholdCalculator = new JumpingGoalFootholdCalculator();
+
    private final JumpingParameters regularParameters;
    private final ConvexPolygon2DReadOnly defaultSupportPolygon;
 
@@ -122,53 +124,30 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
       contactSate.setContactState(ContactState.FLIGHT);
    }
 
-   private final FramePose3D goalPose = new FramePose3D();
-   private final PoseReferenceFrame goalPoseFrame = new PoseReferenceFrame("goalPoseFrame", ReferenceFrame.getWorldFrame());
-   private final SideDependentList<FramePose3D> footGoalPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-
    private void computeForFinalTransfer()
    {
       ContactPlaneProvider previousContactState = contactStateProviders.getLast();
       ContactPlaneProvider contactState = contactStateProviders.add();
 
-      double goalLength = state.getJumpingGoal().getGoalLength();
-      goalLength = Double.isNaN(goalLength) ? 0.0 : goalLength;
+      JumpingGoalVariable goal = state.getJumpingGoal();
+      double goalLength = Double.isNaN(goal.getGoalLength()) ? 0.0 : goal.getGoalLength();
+      double width = Double.isNaN(goal.getGoalFootWidth()) ? regularParameters.getDefaultFootWidth() : goal.getGoalFootWidth();
+      double goalHeight = Double.isNaN(goal.getGoalHeight()) ? 0.0 : goal.getGoalHeight();
+      double goalRotation = Double.isNaN(goal.getGoalRotation()) ? 0.0 : goal.getGoalRotation();
 
-      midFootPose.setToZero(midstanceZUpFrame);
-      goalPose.setIncludingFrame(midFootPose);
-      goalPose.setX(goalLength);
-      if (!Double.isNaN(state.getJumpingGoal().getGoalHeight()))
-         goalPose.setZ(state.getJumpingGoal().getGoalHeight());
-      if (!Double.isNaN(state.getJumpingGoal().getGoalRotation()))
-         goalPose.getOrientation().setToYawOrientation(state.getJumpingGoal().getGoalRotation());
-      goalPose.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPoseFrame.setPoseAndUpdate(goalPose);
+      jumpingGoalFootholdCalculator.computeGoalPose(midstanceZUpFrame, goalLength, width, goalHeight, goalRotation);
 
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         FramePose3D footGoalPose = footGoalPoses.get(robotSide);
-         footGoalPose.setToZero(goalPoseFrame);
-         double width;
-         if (!Double.isNaN(state.getJumpingGoal().getGoalFootWidth()))
-            width = 0.5 * state.getJumpingGoal().getGoalFootWidth();
-         else
-            width = 0.5 * regularParameters.getDefaultFootWidth();
-         width = robotSide.negateIfRightSide(width);
-
-         footGoalPose.setY(width);
-         footGoalPose.changeFrame(worldFrame);
-      }
 
       double segmentDuration = parameters.getDefaultFinalTransferSplitFraction() * state.getFinalTransferDuration();
       contactState.reset();
-      contactState.setStartECMPPosition(goalPose.getPosition());
-      contactState.setEndECMPPosition(goalPose.getPosition());
+      contactState.setStartECMPPosition(jumpingGoalFootholdCalculator.getGoalPose().getPosition());
+      contactState.setEndECMPPosition(jumpingGoalFootholdCalculator.getGoalPose().getPosition());
       contactState.setStartTime(previousContactState.getTimeInterval().getEndTime());
       contactState.setDuration(segmentDuration);
       contactState.setLinearECMPVelocity();
       for (RobotSide robotSide : RobotSide.values)
       {
-         contactState.addContact(footGoalPoses.get(robotSide), defaultSupportPolygon);
+         contactState.addContact(jumpingGoalFootholdCalculator.getFootGoalPose(robotSide), defaultSupportPolygon);
       }
 
       previousContactState = contactState;
@@ -176,12 +155,12 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
       contactState = contactStateProviders.add();
       contactState.reset();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndECMPPosition(goalPose.getPosition());
+      contactState.setEndECMPPosition(jumpingGoalFootholdCalculator.getGoalPose().getPosition());
       contactState.setDuration(segmentDuration);
       contactState.setLinearECMPVelocity();
       for (RobotSide robotSide : RobotSide.values)
       {
-         contactState.addContact(footGoalPoses.get(robotSide), defaultSupportPolygon);
+         contactState.addContact(jumpingGoalFootholdCalculator.getFootGoalPose(robotSide), defaultSupportPolygon);
       }
 
 
@@ -195,7 +174,7 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
       // TODO contact pose
       for (RobotSide robotSide : RobotSide.values)
       {
-         contactState.addContact(footGoalPoses.get(robotSide), defaultSupportPolygon);
+         contactState.addContact(jumpingGoalFootholdCalculator.getFootGoalPose(robotSide), defaultSupportPolygon);
       }
 
    }
