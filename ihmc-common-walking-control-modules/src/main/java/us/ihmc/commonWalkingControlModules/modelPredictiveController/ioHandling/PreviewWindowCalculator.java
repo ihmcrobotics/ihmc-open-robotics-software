@@ -76,7 +76,9 @@ public class PreviewWindowCalculator
       for (int i = 0; i < fullContactSequence.size(); i++)
       {
          TimeIntervalReadOnly timeInterval = fullContactSequence.get(i).getTimeInterval();
-         if (timeInterval.intervalContains(timeAtStartOfWindow))
+         boolean segmentIsValid = timeInterval.intervalContains(timeAtStartOfWindow);
+         boolean notAtEndOfSegment = i >= fullContactSequence.size() - 1 || timeAtStartOfWindow < timeInterval.getEndTime();
+         if (segmentIsValid && notAtEndOfSegment)
          {
             activeSegment = i;
             break;
