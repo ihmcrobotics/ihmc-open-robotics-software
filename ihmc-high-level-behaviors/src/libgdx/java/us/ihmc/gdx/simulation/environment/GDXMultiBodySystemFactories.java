@@ -127,19 +127,19 @@ public class GDXMultiBodySystemFactories
                                              Executor graphicLoader,
                                              ClassLoader resourceClassLoader)
    {
-      GDXRigidBody GDXRigidBody = new GDXRigidBody(rigidBody);
+      GDXRigidBody gdxRigidBody = new GDXRigidBody(rigidBody);
       List<VisualDefinition> visualDefinitions = rigidBodyDefinition.getVisualDefinitions();
 
       if (graphicLoader != null)
       {
-         graphicLoader.execute(() -> loadRigidBodyGraphic(visualDefinitions, GDXRigidBody, resourceClassLoader));
+         graphicLoader.execute(() -> loadRigidBodyGraphic(visualDefinitions, gdxRigidBody, resourceClassLoader));
       }
       else
       {
-         loadRigidBodyGraphic(visualDefinitions, GDXRigidBody, resourceClassLoader);
+         loadRigidBodyGraphic(visualDefinitions, gdxRigidBody, resourceClassLoader);
       }
 
-      return GDXRigidBody;
+      return gdxRigidBody;
    }
 
    private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions, GDXRigidBody gdxRigidBody, ClassLoader resourceClassLoader)
