@@ -66,6 +66,7 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Boolean> abortIfGoalStepSnapFails;
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<Boolean> planBodyPath;
+   private final AtomicReference<Boolean> planNarrowPassage;
    private final AtomicReference<Boolean> performAStarSearch;
    private final AtomicReference<SwingPlannerType> requestedSwingPlanner;
    private final AtomicReference<Double> plannerTimeoutReference;
@@ -139,6 +140,7 @@ public class RemoteUIMessageConverter
       abortIfGoalStepSnapFails = messager.createInput(FootstepPlannerMessagerAPI.AbortIfGoalStepSnapFails);
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       planBodyPath = messager.createInput(FootstepPlannerMessagerAPI.PlanBodyPath, false);
+      planNarrowPassage = messager.createInput(FootstepPlannerMessagerAPI.PlanNarrowPassage, false);
       performAStarSearch = messager.createInput(FootstepPlannerMessagerAPI.PerformAStarSearch, true);
       requestedSwingPlanner = messager.createInput(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.NONE);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
@@ -311,6 +313,7 @@ public class RemoteUIMessageConverter
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, packet.getPerformAStarSearch());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, packet.getPlanBodyPath());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlanNarrowPassage, packet.getPlanNarrowPassage());
       messager.submitMessage(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.fromByte(packet.getRequestedSwingPlanner()));
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
@@ -516,6 +519,7 @@ public class RemoteUIMessageConverter
          packet.setTimeout(plannerTimeoutReference.get());
 
       packet.setPlanBodyPath(planBodyPath.get());
+      packet.setPlanNarrowPassage(planNarrowPassage.get());
       packet.setPerformAStarSearch(performAStarSearch.get());
       packet.setRequestedSwingPlanner(requestedSwingPlanner.get().toByte());
 

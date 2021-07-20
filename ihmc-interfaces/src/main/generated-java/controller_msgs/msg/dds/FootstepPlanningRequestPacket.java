@@ -59,6 +59,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public boolean plan_body_path_;
    /**
+            * If true, will plan a body path. If false, will follow a straight-line path to the goal
+            */
+   public boolean plan_narrow_passage_;
+   /**
             * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
             */
    public boolean perform_a_star_search_ = true;
@@ -152,6 +156,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       abort_if_body_path_planner_fails_ = other.abort_if_body_path_planner_fails_;
 
       plan_body_path_ = other.plan_body_path_;
+
+      plan_narrow_passage_ = other.plan_narrow_passage_;
 
       perform_a_star_search_ = other.perform_a_star_search_;
 
@@ -299,12 +305,27 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    {
       plan_body_path_ = plan_body_path;
    }
+
+   /**
+            * If true, will plan a body path using narrow passage calculator. If false, will follow a straight-line path to the goal
+            */
+   public void setPlanNarrowPassage(boolean plan_narrow_passage)
+   {
+      plan_narrow_passage_ = plan_narrow_passage;
+   }
    /**
             * If true, will plan a body path. If false, will follow a straight-line path to the goal
             */
    public boolean getPlanBodyPath()
    {
       return plan_body_path_;
+   }
+   /**
+            * If true, will plan a body path using narrow passage calculator. If false, will follow a straight-line path to the goal
+            */
+   public boolean getPlanNarrowPassage()
+   {
+      return plan_narrow_passage_;
    }
 
    /**
@@ -545,6 +566,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_body_path_, other.plan_body_path_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_narrow_passage_, other.plan_narrow_passage_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_a_star_search_, other.perform_a_star_search_, epsilon)) return false;
 
       if (this.body_path_waypoints_.size() != other.body_path_waypoints_.size()) { return false; }
@@ -606,6 +629,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.plan_body_path_ != otherMyClass.plan_body_path_) return false;
 
+      if(this.plan_narrow_passage_ != otherMyClass.plan_narrow_passage_) return false;
+
       if(this.perform_a_star_search_ != otherMyClass.perform_a_star_search_) return false;
 
       if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
@@ -662,6 +687,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.abort_if_body_path_planner_fails_);      builder.append(", ");
       builder.append("plan_body_path=");
       builder.append(this.plan_body_path_);      builder.append(", ");
+      builder.append("plan_narrow_passage=");
+      builder.append(this.plan_narrow_passage_);      builder.append(", ");
       builder.append("perform_a_star_search=");
       builder.append(this.perform_a_star_search_);      builder.append(", ");
       builder.append("body_path_waypoints=");
