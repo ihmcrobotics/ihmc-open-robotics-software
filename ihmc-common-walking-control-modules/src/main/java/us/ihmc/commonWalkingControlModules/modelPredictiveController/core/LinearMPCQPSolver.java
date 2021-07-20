@@ -348,9 +348,7 @@ public class LinearMPCQPSolver
    {
       int offset = inputCalculator.calculateRhoBoundCommandCompact(qpInputTypeA, command);
       if (offset != -1)
-      {
-         addInput(qpInputTypeA, offset, 1e5);
-      }
+         addInput(qpInputTypeA, offset, command.getSlackVariableWeight());
    }
 
    public void submitNormalForceBoundCommand(NormalForceBoundCommand command)
