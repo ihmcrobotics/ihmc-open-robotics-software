@@ -18,10 +18,12 @@ public class MPCParameters
    private static final boolean includeRhoMinimization = true;
    private static final boolean includeRhoRateMinimization = true;
 
+   private static final boolean includeIntermediateOrientationTracking = true;
+
    private static final double defaultMinRhoValue = 0.0;//05;
 
    public static final double defaultInitialComWeight = 5e3;
-   public static final double defaultInitialComVelocityWeight = 5e1;
+   public static final double defaultInitialComVelocityWeight = 1e3;
    public static final double defaultFinalComWeight = 1e1;
    public static final double defaultFinalVRPWeight = 1e2;
    public static final double defaultVrpTrackingWeight = 1e3;
@@ -29,14 +31,14 @@ public class MPCParameters
    public static final double defaultRhoRateTrackingWeight = 1e-6;
    public static final double defaultForceTrackingWeight = 1e-4;
 
-   private static final double defaultOrientationAngleTrackingWeight = 1e-2;
+   private static final double defaultOrientationAngleTrackingWeight = 1e-1;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
    private static final double defaultInitialOrientationWeight = 1e6;
    private static final double defaultFinalOrientationWeight = 1e-6;
 
    private static final ConstraintType initialCoMPositionConstraintType = ConstraintType.EQUALITY;
-   private static final ConstraintType initialCoMVelocityConstraintType = ConstraintType.EQUALITY;
+   private static final ConstraintType initialCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
    private static final ConstraintType finalCoMPositionConstraintType = ConstraintType.EQUALITY;
    private static final ConstraintType finalCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
    private static final ConstraintType finalDCMPositionConstraintType = ConstraintType.EQUALITY;
@@ -122,6 +124,11 @@ public class MPCParameters
    public boolean includeRhoRateMinimization()
    {
       return includeRhoRateMinimization;
+   }
+
+   public boolean includeIntermediateOrientationTracking()
+   {
+      return includeIntermediateOrientationTracking;
    }
 
    public ConstraintType getInitialCoMPositionConstraintType()

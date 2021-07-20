@@ -42,8 +42,6 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final boolean defaultIncludeIntermediateOrientationTracking = true;
-
    private final double gravityZ;
    protected final double mass;
 
@@ -140,7 +138,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       qpSolver.setFirstOrientationVariableRegularization(1e-10);
       qpSolver.setSecondOrientationVariableRegularization(1e-10);
 
-      includeIntermediateOrientationTracking.set(defaultIncludeIntermediateOrientationTracking);
+      includeIntermediateOrientationTracking.set(mpcParameters.includeIntermediateOrientationTracking());
 
       parentRegistry.addChild(registry);
    }
