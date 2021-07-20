@@ -1,6 +1,7 @@
 package us.ihmc.gdx.simulation.environment;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -67,12 +68,19 @@ public class GDXVisualTools
       if (geometryDefinition instanceof ModelFileGeometryDefinition)
       {
          ModelFileGeometryDefinition modelFileGeometryDefinition = (ModelFileGeometryDefinition) geometryDefinition;
-         return new ModelInstance(GDXModelLoader.loadG3DModel(modelFileGeometryDefinition.getFileName()));
+         String fileName = modelFileGeometryDefinition.getFileName();
+
+         String modifiedFileName = GDXModelLoader.modifyFileName(fileName);
+         if (modifiedFileName == null)
+            return null;
+
+         return new ModelInstance(GDXModelLoader.loadG3DModel(modifiedFileName));
       }
 
       DynamicGDXModel gdxModel = new DynamicGDXModel(); // TODO: Should just pass DynamicGDXModel around?
       gdxModel.setMaterial(toMaterial(materialDefinition));
-      gdxModel.setMesh(GDXTriangleMesh3DDefinitionInterpreter.interpretDefinition(TriangleMesh3DFactories.TriangleMesh(geometryDefinition), false));
+      Mesh mesh = GDXTriangleMesh3DDefinitionInterpreter.interpretDefinition(TriangleMesh3DFactories.TriangleMesh(geometryDefinition), false);
+      gdxModel.setMesh(mesh);
       return gdxModel.getOrCreateModelInstance();
    }
 
