@@ -64,6 +64,8 @@ public class JumpingBalanceManager
    private final YoFrameYawPitchRoll yoDesiredBodyYawPitchRoll = new YoFrameYawPitchRoll("desiredBodyOrientation", worldFrame, registry);
    private final YoFrameVector3D yoDesiredBodyAngularVelocity = new YoFrameVector3D("desiredBodyAngularVelocity", worldFrame, registry);
    private final YoFrameVector3D yoDesiredBodyAngularAcceleration = new YoFrameVector3D("desiredBodyAngularAcceleration", worldFrame, registry);
+   private final YoFrameVector3D yoDesiredInternalAngularMomentum = new YoFrameVector3D("yoDesiredInternalAngularMomentum", worldFrame, registry);
+   private final YoFrameVector3D yoDesiredInternalAngularMomentumRate = new YoFrameVector3D("yoDesiredInternalAngularMomentumRate", worldFrame, registry);
    private final YoFramePoint3D touchdownCoMPosition = new YoFramePoint3D("touchdownCoMPosition", worldFrame, registry);
    private final YoFramePoint3D touchdownDCMPosition = new YoFramePoint3D("touchdownDCMPosition", worldFrame, registry);
    private final YoFramePoint3D updatedTouchdownCoMPosition = new YoFramePoint3D("updatedTouchdownCoMPosition", worldFrame, registry);
@@ -241,6 +243,8 @@ public class JumpingBalanceManager
       yoDesiredBodyYawPitchRoll.set(comTrajectoryPlanner.getDesiredBodyOrientationSolution());
       yoDesiredBodyAngularVelocity.set(comTrajectoryPlanner.getDesiredBodyAngularVelocitySolution());
       yoDesiredBodyAngularAcceleration.set(comTrajectoryPlanner.getDesiredBodyAngularAccelerationSolution());
+      yoDesiredInternalAngularMomentum.set(comTrajectoryPlanner.getDesiredInternalAngularMomentum());
+      yoDesiredInternalAngularMomentumRate.set(comTrajectoryPlanner.getDesiredInternalAngularMomentumRate());
 
       yoReferenceDCMPosition.set(comTrajectoryPlanner.getReferenceDCMPosition());
       yoReferenceCoMPosition.set(comTrajectoryPlanner.getReferenceCoMPosition());
