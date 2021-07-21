@@ -129,18 +129,15 @@ public class OrientationMPCTrajectoryHandler
 
             FrameQuaternionBasics orientation = desiredOrientationSolution.add();
             orientation.set(discretizedReferenceOrientation.get(globalTick));
-            orientation.append(axisAngleErrorSolutions.get(globalTick));
 
             FrameVector3DBasics angularVelocity = desiredAngularVelocitySolution.add();
             angularVelocity.set(angularVelocityInBodyErrorSolutions.get(globalTick));
 
             orientation.inverseTransform(angularVelocity);
-            if (debug && indexHandler.getRhoCoefficientsInSegment(segment) == 0)
-            {
-
-            }
 
             angularVelocity.add(discretizedReferenceAngularVelocity.get(globalTick));
+
+            orientation.append(axisAngleErrorSolutions.get(globalTick));
 
             bodyOrientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
          }
