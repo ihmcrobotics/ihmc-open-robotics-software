@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Or
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.OrientationTrajectoryConstructor;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
@@ -15,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.core.FramePolynomial3D;
@@ -39,6 +41,8 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
  */
 public class OrientationMPCTrajectoryHandler
 {
+   private static final boolean debug = true;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final OrientationTrajectoryCalculator referenceOrientationCalculator;
 
@@ -131,9 +135,18 @@ public class OrientationMPCTrajectoryHandler
             angularVelocity.set(angularVelocityInBodyErrorSolutions.get(globalTick));
 
             orientation.inverseTransform(angularVelocity);
+            if (debug && indexHandler.getRhoCoefficientsInSegment(segment) == 0)
+            {
+
+            }
+
             angularVelocity.add(discretizedReferenceAngularVelocity.get(globalTick));
 
             bodyOrientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
+         }
+         if (debug && indexHandler.getRhoCoefficientsInSegment(segment) == 0)
+         {
+            LogTools.info("Inspect.");
          }
       }
 
@@ -176,6 +189,19 @@ public class OrientationMPCTrajectoryHandler
             valueAtTick.set(command.getCMatrix(tick));
             CommonOps_DDRM.multAdd(command.getAMatrix(tick), errorAtStartOfState, valueAtTick);
             CommonOps_DDRM.multAdd(command.getBMatrix(tick), segmentCoefficients, valueAtTick);
+
+            if (debug && indexHandler.getRhoCoefficientsInSegment(segment) == 0)
+            {
+               if (MatrixTools.isEmptyMatrix(command.getBMatrix(tick)))
+                  throw new RuntimeException("B should be zero.");
+               if (MatrixTools.isEmptyMatrix(command.getCMatrix(tick)))
+                  throw new RuntimeException("C should be zero.");
+               for (int row = 3; row < 6; row++)
+               {
+                  if (!MathTools.epsilonEquals(valueAtTick.get(row, 0), errorAtStartOfState.get(row, 0), 1e-5))
+                     throw new RuntimeException("Error shouldn't change.");
+               }
+            }
 
             AxisAngleBasics axisAngleErrorSolution = axisAngleErrorSolutions.add();
             FrameVector3DBasics angularVelocityErrorSolution = angularVelocityInBodyErrorSolutions.add();

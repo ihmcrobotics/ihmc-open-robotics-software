@@ -14,7 +14,7 @@ import java.util.function.IntUnaryOperator;
 
 public class SE3MPCIndexHandler extends LinearMPCIndexHandler
 {
-   private static final double intermediateDt = 0.05;
+   private static final double intermediateDt = 0.01;
    public static final int variablesPerOrientationTick = 6;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
