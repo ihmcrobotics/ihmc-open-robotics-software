@@ -18,11 +18,19 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.HashMap;
 
 public class IdealStepCalculator implements IdealStepCalculatorInterface
 {
+   private enum IdealStepMode
+   {
+      GOAL,
+      ON_PATH,
+      TOWARDS_PATH;
+   }
+
    // TODO extract these to parameters once they're stable
    private static final double idealStepLengthWhenUpOrDownMultiplier = 0.7;
    private static final double maxDistanceAdjustmentTowardsPath = 0.15;
@@ -43,6 +51,9 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    private final YoDouble correctiveDistanceX;
    private final YoDouble correctiveDistanceY;
    private final YoDouble correctiveYaw;
+   private final YoDouble idealStepYaw;
+   private final YoEnum<IdealStepMode> yawMode;
+   private final YoEnum<IdealStepMode> stepMode;
 
    private final Pose2D goalMidFootPose = new Pose2D();
    private final Pose2D stanceFootPose = new Pose2D();
@@ -69,6 +80,10 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       correctiveDistanceX = new YoDouble("correctiveDistanceX", registry);
       correctiveDistanceY = new YoDouble("correctiveDistanceY", registry);
       correctiveYaw = new YoDouble("correctiveYaw", registry);
+
+      idealStepYaw = new YoDouble("idealStepYaw", registry);
+      yawMode = new YoEnum<>("idealStepYawMode", registry, IdealStepMode.class);
+      stepMode = new YoEnum<>("idealStepPositionMode", registry, IdealStepMode.class);
    }
 
    public void initialize(SideDependentList<DiscreteFootstep> goalSteps, double desiredHeading)
@@ -203,10 +218,12 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       double desiredYaw;
       if (distanceFromGoalSquared < MathTools.square(finalTurnProximity))
       {
+         yawMode.set(IdealStepMode.GOAL);
          desiredYaw = goalMidFootPose.getYaw();
       }
       else if (distanceFromPathSquared < MathTools.square(parameters.getDistanceFromPathTolerance()))
       {
+         yawMode.set(IdealStepMode.ON_PATH);
 //         desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading);
 
          // TODO temporary, don't merge into develop. Follows the body path orientations but doesn't give great results when waypoints are sparse.
@@ -214,6 +231,8 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       }
       else
       {
+         yawMode.set(IdealStepMode.TOWARDS_PATH);
+
          int numberOfCorrectiveStepsWhenOffPath = 2;
          double alphaLookAhead = MathTools.clamp(alphaMidFoot + numberOfCorrectiveStepsWhenOffPath * parameters.getIdealFootstepLength() / pathLength, 0.0, 1.0);
          bodyPathPlanHolder.getPointAlongPath(alphaLookAhead, projectionPose);
@@ -222,7 +241,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       }
 
       // Clamp target yaw to what's achievable by step parameters
-
+      idealStepYaw.set(desiredYaw);
       double deltaYaw = AngleTools.computeAngleDifferenceMinusPiToPi(desiredYaw, stanceStep.getYaw());
       RobotSide stepSide = stanceSide.getOppositeSide();
       double yawLowerLimit = stepSide == RobotSide.LEFT ? parameters.getMinimumStepYaw() : - parameters.getMaximumStepYaw();
@@ -238,15 +257,18 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       if (distanceFromGoalSquared <= MathTools.square(finalTurnProximity))
       {
          // turn in place at goal
+         stepMode.set(IdealStepMode.GOAL);
          return turnInPlaceStep(stanceStep, goalMidFootPose.getPosition(), stanceSide, 0.5 * parameters.getIdealFootstepWidth(), achievableStepYaw);
       }
       else if (Math.abs(deltaYaw) > parameters.getDeltaYawFromReferenceTolerance())
       {
          // turn in place towards goal
+         stepMode.set(IdealStepMode.TOWARDS_PATH);
          return turnInPlaceStep(stanceStep, midFootPoint, stanceSide, 0.5 * parameters.getIdealFootstepWidth(), achievableStepYaw);
       }
       else
       {
+         stepMode.set(IdealStepMode.ON_PATH);
          double idealStepLength = idealStepLengths.get(stanceSide).getDoubleValue();
          double idealStepWidth = idealStepWidths.get(stanceSide).getDoubleValue();
 
