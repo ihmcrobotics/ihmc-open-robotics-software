@@ -233,10 +233,10 @@ public class OrientationDynamicsCalculator
       desiredContactForce.set(desiredCoMAcceleration);
       desiredContactForce.addZ(-gravityVector.get(2, 0));
       desiredContactForce.scale(mass);
-      if (debug && contactPlanes.size() < 1)
+      if (debug && contactPlanes.size() == 0)
       {
          if (desiredContactForce.length() > 1e-4)
-            throw new RuntimeException("Should have zero desired force.");
+            throw new RuntimeException("Should have zero desired force. Force is actually "+ desiredContactForce);
       }
 
 

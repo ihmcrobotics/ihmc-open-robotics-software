@@ -21,7 +21,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
@@ -44,8 +48,9 @@ public abstract class EuclideanModelPredictiveController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private static final boolean debug = true;
    private static final boolean useSlackVariablesForRhoBounds = true;
-   private static final double firstSegmentSlackWeight = 1e7;
+   private static final double firstSegmentSlackWeight = 1e5;
 
    protected static final int numberOfBasisVectorsPerContactPoint = 4;
    private final double maxContactForce;
@@ -80,8 +85,8 @@ public abstract class EuclideanModelPredictiveController
    protected final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
 
    protected final YoDouble currentTimeInState = new YoDouble("currentTimeInState", registry);
-   private final YoFramePoint3D comPositionAtEndOfWindow = new YoFramePoint3D("comPositionAtEndOfWindow", worldFrame, registry);
-   private final YoFrameVector3D comVelocityAtEndOfWindow = new YoFrameVector3D("comVelocityAtEndOfWindow", worldFrame, registry);
+   protected final YoFramePoint3D comPositionAtEndOfWindow = new YoFramePoint3D("comPositionAtEndOfWindow", worldFrame, registry);
+   protected final YoFrameVector3D comVelocityAtEndOfWindow = new YoFrameVector3D("comVelocityAtEndOfWindow", worldFrame, registry);
    private final YoFramePoint3D dcmAtEndOfWindow = new YoFramePoint3D("dcmAtEndOfWindow", worldFrame, registry);
    private final YoFramePoint3D vrpAtEndOfWindow = new YoFramePoint3D("vrpAtEndOfWindow", worldFrame, registry);
 
@@ -148,6 +153,11 @@ public abstract class EuclideanModelPredictiveController
    public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       trajectoryViewer = new LinearMPCTrajectoryViewer(registry, yoGraphicsListRegistry);
+      YoGraphicPosition previewEndPosition = new YoGraphicPosition("Preview End CoM Position", comPositionAtEndOfWindow, 0.02, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL);
+      YoGraphicVector previewEndVelocity = new YoGraphicVector("Preview End CoM Velocity", comPositionAtEndOfWindow, comVelocityAtEndOfWindow, 0.05, YoAppearance.Red());
+
+      yoGraphicsListRegistry.registerYoGraphic("End Of preview Window", previewEndPosition);
+      yoGraphicsListRegistry.registerYoGraphic("End Of preview Window", previewEndVelocity);
    }
 
    public void setContactPlaneViewers(Supplier<ContactPlaneForceViewer> viewerSupplier)
@@ -224,12 +234,20 @@ public abstract class EuclideanModelPredictiveController
          this.solutionCoefficients.reshape(indexHandler.getTotalProblemSize(), 1);
          solutionCoefficients.get(this.solutionCoefficients);
          extractSolution(this.solutionCoefficients);
+
+         if (debug)
+         {
+            linearTrajectoryHandler.compute(currentTimeInState.getDoubleValue() + previewWindowCalculator.getPreviewWindowDuration());
+            if (mpcParameters.getFinalCoMPositionConstraintType() == ConstraintType.EQUALITY && !linearTrajectoryHandler.getDesiredCoMPosition().epsilonEquals(comPositionAtEndOfWindow, 1e-4))
+               LogTools.error("CoM at the end of the preview window  is " + linearTrajectoryHandler.getDesiredCoMPosition() + " but should be " + comPositionAtEndOfWindow);
+         }
       }
 
       if (cornerPointViewer != null)
          cornerPointViewer.updateCornerPoints(linearTrajectoryHandler, previewWindowCalculator.getFullPlanningSequence());
 
       updateCoMTrajectoryViewer();
+
 
       mpcExtractionTime.stopMeasurement();
       mpcTotalTime.stopMeasurement();
@@ -444,7 +462,8 @@ public abstract class EuclideanModelPredictiveController
                                                                  numberOfPhases - 1,
                                                                  finalDuration));
       }
-      mpcCommands.addCommand(computeVRPPositionObjective(commandProvider.getNextVRPPositionCommand(), vrpAtEndOfWindow, numberOfPhases - 1, finalDuration));
+      if (lastContactPhase.getContactState().isLoadBearing())
+         mpcCommands.addCommand(computeVRPPositionObjective(commandProvider.getNextVRPPositionCommand(), vrpAtEndOfWindow, numberOfPhases - 1, finalDuration));
    }
 
    private MPCCommand<?> computeInitialCoMPositionObjective(CoMPositionCommand objectiveToPack)
@@ -711,7 +730,7 @@ public abstract class EuclideanModelPredictiveController
    protected void updateCoMTrajectoryViewer()
    {
       if (trajectoryViewer != null)
-         trajectoryViewer.compute(this, currentTimeInState.getDoubleValue());
+         trajectoryViewer.compute(this, currentTimeInState.getDoubleValue(), previewWindowCalculator.getPreviewWindowDuration());
    }
 
    public void compute(double timeInPhase,

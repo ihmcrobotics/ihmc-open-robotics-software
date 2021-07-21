@@ -86,7 +86,7 @@ public class CoMCoefficientJacobianCalculator
 
       if (!MathTools.epsilonEquals(time, 0.0, 1e-5))
       {
-         time = Math.min(MPCQPInputCalculator.sufficientlyLongTime, time);
+//         time = Math.min(MPCQPInputCalculator.sufficientlyLongTime, time);
          double c0 = time * c1;
          MatrixMissingTools.unsafe_add(positionJacobianToPack, 0, startIndex, c0);
          MatrixMissingTools.unsafe_add(positionJacobianToPack, 1, startIndex + 2, c0);

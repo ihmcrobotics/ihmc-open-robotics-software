@@ -18,6 +18,9 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeMatrix;
@@ -300,12 +303,18 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       trajectoryViewer = new SE3MPCTrajectoryViewer(registry, yoGraphicsListRegistry);
+
+      YoGraphicPosition previewEndPosition = new YoGraphicPosition("Preview End CoM Position", comPositionAtEndOfWindow, 0.02, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL);
+      YoGraphicVector previewEndVelocity = new YoGraphicVector("Preview End CoM Velocity", comPositionAtEndOfWindow, comVelocityAtEndOfWindow, 0.05, YoAppearance.Red());
+
+      yoGraphicsListRegistry.registerYoGraphic("End Of preview Window", previewEndPosition);
+      yoGraphicsListRegistry.registerYoGraphic("End Of preview Window", previewEndVelocity);
    }
 
    protected void updateCoMTrajectoryViewer()
    {
       if (trajectoryViewer != null)
-         trajectoryViewer.compute(this, currentTimeInState.getDoubleValue());
+         trajectoryViewer.compute(this, currentTimeInState.getDoubleValue(), 1.0);
    }
 
    @Override

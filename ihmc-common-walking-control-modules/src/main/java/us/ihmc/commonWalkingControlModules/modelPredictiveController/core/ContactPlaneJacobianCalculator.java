@@ -58,7 +58,7 @@ public class ContactPlaneJacobianCalculator
    {
       double t2 = scale * time * time;
       double t3 = time * t2;
-      double positiveExponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
+      double positiveExponential = Math.exp(omega * time);
       double negativeExponential = scale / positiveExponential;
 
       addLinearJacobianCoefficients(contactPlane, scale * positiveExponential, negativeExponential, t3, t2, startColumn, positionJacobianToPack);
