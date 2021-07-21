@@ -6,19 +6,11 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.tests.g3d.shadows.system.ShadowSystem;
-import com.badlogic.gdx.tests.g3d.shadows.system.classical.ClassicalShadowSystem;
-import com.badlogic.gdx.tests.g3d.shadows.utils.AABBNearFarAnalyzer;
-import com.badlogic.gdx.tests.g3d.shadows.utils.BoundingSphereDirectionalAnalyzer;
-import com.badlogic.gdx.tests.g3d.shadows.utils.FixedShadowMapAllocator;
-import com.badlogic.gdx.tests.g3d.shadows.utils.FrustumLightFilter;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -43,8 +35,8 @@ public class GDX3DSceneManager
    private ScreenViewport viewport;
    private ModelBatch modelBatch;
 
-   private ShadowSystem shadowSystem;
-   private Array<ModelBatch> passBatches = new Array<ModelBatch>();
+   private DirectionalShadowLight shadowLight;
+   private ModelBatch shadowBatch;
 
    private int x = 0;
    private int y = 0;
@@ -88,41 +80,32 @@ public class GDX3DSceneManager
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
-      shadowSystem = new ClassicalShadowSystem(new AABBNearFarAnalyzer(), new FixedShadowMapAllocator(2048, 4), new BoundingSphereDirectionalAnalyzer(), new FrustumLightFilter());
-
       // Environment setup
       environment = new Environment();
       environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.0f));
 
+      shadowLight = new DirectionalShadowLight(1024, 1024, 5.0f, 5.0f, 1.0f, 100.0f);
+      shadowLight.set(0.8f, 0.8f, 0.8f, -1.0f, -0.8f, -0.2f);
+      environment.add(shadowLight);
+      environment.shadowMap = shadowLight;
+
       PointLight light = new PointLight();
-      light.set(1, 1, 1, 0, 0, 20, 0);
+      light.set(1, 1, 1, 0, 0, 20, 100);
       environment.add(light);
-      shadowSystem.addLight(light);
 
-      // ShadowSystem init must come after lights are added
-      shadowSystem.init();
-      for (int i = 0; i < shadowSystem.getPassQuantity(); i++) {
-         passBatches.add(new ModelBatch(shadowSystem.getPassShaderProvider(i)));
-      }
-
-      modelBatch = new ModelBatch(shadowSystem.getShaderProvider());
+      modelBatch = new ModelBatch();
+      shadowBatch = new ModelBatch(new DepthShaderProvider());
    }
 
    public void renderShadowMap()
    {
-      shadowSystem.begin(camera3D, renderables); //maybe change
-      shadowSystem.update();
-      for (int i = 0; i < shadowSystem.getPassQuantity(); i++) {
-         shadowSystem.begin(i);
-         Camera camera;
-         while ((camera = shadowSystem.next()) != null) {
-            passBatches.get(i).begin(camera);
-            renderFromBatch(passBatches.get(i), GDXSceneLevel.REAL_ENVIRONMENT);
-            passBatches.get(i).end();
-         }
-         shadowSystem.end(i);
-      }
-      shadowSystem.end();
+      shadowLight.begin(Vector3.Zero, camera3D.direction);
+      shadowBatch.begin(shadowLight.getCamera());
+
+      renderFromBatch(shadowBatch, GDXSceneLevel.REAL_ENVIRONMENT);
+
+      shadowBatch.end();
+      shadowLight.end();
    }
 
    private void preRender()
