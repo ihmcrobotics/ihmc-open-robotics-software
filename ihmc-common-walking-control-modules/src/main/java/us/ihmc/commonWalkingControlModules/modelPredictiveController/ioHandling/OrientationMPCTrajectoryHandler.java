@@ -141,10 +141,6 @@ public class OrientationMPCTrajectoryHandler
 
             bodyOrientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
          }
-         if (debug && indexHandler.getRhoCoefficientsInSegment(segment) == 0)
-         {
-            LogTools.info("Inspect.");
-         }
       }
 
       overwriteTrajectoryOutsidePreviewWindow();

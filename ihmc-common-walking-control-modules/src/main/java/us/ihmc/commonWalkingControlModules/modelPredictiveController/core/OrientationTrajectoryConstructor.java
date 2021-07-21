@@ -112,8 +112,7 @@ public class OrientationTrajectoryConstructor
             FrameVector3D acceleration = new FrameVector3D(linearTrajectoryHandler.getDesiredCoMAcceleration());
             if (debug && contactPlaneHelpers.get(segmentNumber).size() == 0)
             {
-               if (!acceleration.epsilonEquals(gravityVector, 1e-3))
-                  acceleration.set(gravityVector);
+               acceleration.set(gravityVector);
             }
 
             dynamicsCalculator.compute(linearTrajectoryHandler.getDesiredCoMPosition(),
