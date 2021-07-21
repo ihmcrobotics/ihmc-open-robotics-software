@@ -98,7 +98,7 @@ public class JumpingBalanceManager
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
    private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
 
-   private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, true);
+   private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, false);
    private final BooleanProvider useAngularMomentumOffsetInStanding = new BooleanParameter("useAngularMomentumOffsetInStanding", registry, true);
    private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
 
@@ -394,7 +394,7 @@ public class JumpingBalanceManager
       }
       else
       {
-         comTrajectoryPlanner.reset();
+//         comTrajectoryPlanner.reset();
       }
 
       // update the takeoff and touchdown policies
@@ -491,7 +491,7 @@ public class JumpingBalanceManager
 
    public void setSwingFootTrajectory(RobotSide swingSide, MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
-      angularMomentumHandler.setSwingFootTrajectory(swingSide, swingTrajectory);
+//      angularMomentumHandler.setSwingFootTrajectory(swingSide, swingTrajectory);
    }
 
    public void clearSwingFootTrajectory()

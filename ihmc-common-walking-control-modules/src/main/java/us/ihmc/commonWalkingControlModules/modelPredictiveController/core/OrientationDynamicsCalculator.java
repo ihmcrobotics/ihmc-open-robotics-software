@@ -22,6 +22,8 @@ import java.util.List;
 
 public class OrientationDynamicsCalculator
 {
+   private static final boolean debug = true;
+
    private final DMatrixRMaj gravityVector = new DMatrixRMaj(3, 1);
 
    private final FrameVector3D desiredNetAngularMomentumRate = new FrameVector3D();
@@ -96,7 +98,8 @@ public class OrientationDynamicsCalculator
                           double omega)
    {
       reset(contactPlanes);
-      getAllTheTermsFromTheCommandInput(desiredCoMAcceleration,
+      getAllTheTermsFromTheCommandInput(contactPlanes,
+                                        desiredCoMAcceleration,
                                         desiredBodyOrientation,
                                         desiredBodyAngularVelocityInBodyFrame,
                                         desiredNetAngularMomentumRate,
@@ -104,7 +107,8 @@ public class OrientationDynamicsCalculator
 
       calculateStateJacobians(desiredComPosition, contactPlanes, timeOfConstraint, omega);
 
-      calculateAffineAxisAngleErrorTerms(desiredComPosition,
+      calculateAffineAxisAngleErrorTerms(contactPlanes,
+                                         desiredComPosition,
                                          desiredBodyAngularVelocityInBodyFrame,
                                          desiredNetAngularMomentumRate);
 
@@ -211,7 +215,8 @@ public class OrientationDynamicsCalculator
       Cd.zero();
    }
 
-   private void getAllTheTermsFromTheCommandInput(FrameVector3DReadOnly desiredCoMAcceleration,
+   private void getAllTheTermsFromTheCommandInput(List<MPCContactPlane> contactPlanes,
+                                                  FrameVector3DReadOnly desiredCoMAcceleration,
                                                   FrameOrientation3DReadOnly desiredBodyOrientation,
                                                   Vector3DReadOnly desiredBodyAngularVelocityInBodyFrame,
                                                   Vector3DReadOnly desiredNetAngularMomentumRate,
@@ -228,6 +233,12 @@ public class OrientationDynamicsCalculator
       desiredContactForce.set(desiredCoMAcceleration);
       desiredContactForce.addZ(-gravityVector.get(2, 0));
       desiredContactForce.scale(mass);
+      if (debug && contactPlanes.size() < 1)
+      {
+         if (desiredContactForce.length() > 1e-4)
+            throw new RuntimeException("Should have zero desired force.");
+      }
+
 
       MatrixMissingTools.toSkewSymmetricMatrix(desiredContactForce, skewDesiredContactForce);
       MatrixMissingTools.toSkewSymmetricMatrix(desiredBodyAngularVelocityInBodyFrame, skewDesiredBodyAngularVelocity);
@@ -260,7 +271,8 @@ public class OrientationDynamicsCalculator
    private final Vector3D torqueAboutPoint = new Vector3D();
    private final DMatrixRMaj torqueAboutPointVector = new DMatrixRMaj(3, 1);
 
-   private void calculateAffineAxisAngleErrorTerms(FramePoint3DReadOnly desiredCoMPosition,
+   private void calculateAffineAxisAngleErrorTerms(List<MPCContactPlane> contactPlanes,
+                                                   FramePoint3DReadOnly desiredCoMPosition,
                                                    Vector3DReadOnly desiredBodyAngularVelocityInBodyFrame,
                                                    Vector3DReadOnly desiredNetAngularMomentumRate)
    {
@@ -279,6 +291,15 @@ public class OrientationDynamicsCalculator
       crossSub(skewAngularMomentum, desiredBodyAngularVelocityInBodyFrame, inertiaMatrixInBody);
       CommonOps_DDRM.mult(inverseInertia, skewAngularMomentum, b4);
 
+      if (debug && contactPlanes.size() < 1)
+      {
+         if (desiredBodyAngularMomentumRate.length() > 1e-4)
+            throw new RuntimeException("This should be zero.");
+         if (desiredContactForce.length() > 1e-4)
+            throw new RuntimeException("Should have zero desired force.");
+         if (desiredNetAngularMomentumRate.length() > 1e-4)
+            throw new RuntimeException("Should be zero in flight.");
+      }
       torqueAboutPoint.cross(desiredContactForce, desiredCoMPosition);
       torqueAboutPoint.add(desiredNetAngularMomentumRate);
       torqueAboutPoint.scale(-1.0);
