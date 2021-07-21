@@ -10,8 +10,10 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.convexOptimization.IntermediateSolutionListener;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.log.LogTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
 
+import java.lang.annotation.Native;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +30,7 @@ import java.util.List;
  */
 public class MPCQPSolver
 {
-   private static  final boolean debug = false;
+   private static  final boolean debug = true;
 
    private static final double violationFractionToAdd = 0.8;
    private static final double violationFractionToRemove = 0.95;
@@ -591,7 +593,7 @@ public class MPCQPSolver
             if (!MathTools.epsilonEquals(slackCost, 0.0, 1e-5) && Double.isFinite(slackCost))
                inverseSlackHessian.set(i, i, 1.0 / slackCost);
          }
-
+//
          CBarQInverseCBarTranspose.addEquals(inverseSlackHessian);
       }
       else
@@ -778,8 +780,19 @@ public class MPCQPSolver
 
       bigVectorForLagrangeMultiplierSolution.scale(-1.0, bigVectorForLagrangeMultiplierSolution);
 
-      augmentedLagrangeMultipliers.solve(bigMatrixForLagrangeMultiplierSolution, bigVectorForLagrangeMultiplierSolution);
-      
+      boolean wasInvertible = augmentedLagrangeMultipliers.solveCheck(bigMatrixForLagrangeMultiplierSolution, bigVectorForLagrangeMultiplierSolution);
+
+      if (debug)
+      {
+         NativeMatrix enforcementCheck = new NativeMatrix(bigVectorForLagrangeMultiplierSolution);
+         enforcementCheck.mult(bigMatrixForLagrangeMultiplierSolution, augmentedLagrangeMultipliers);
+         for (int i = 0; i < bigMatrixForLagrangeMultiplierSolution.getNumRows(); i++)
+         {
+            if (!MathTools.epsilonEquals(enforcementCheck.get(i, 0), bigVectorForLagrangeMultiplierSolution.get(i, 0), 1e-5))
+               LogTools.info("Crap." + wasInvertible);
+         }
+      }
+
       AAndC.reshape(numberOfAugmentedEqualityConstraints, numberOfVariables);
       AAndC.insert(linearEqualityConstraintsAMatrix, 0, 0);
       AAndC.insert(CBar, numberOfOriginalEqualityConstraints, 0);

@@ -5,7 +5,9 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeC;
+import us.ihmc.commons.MathTools;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -20,7 +22,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class LinearMPCQPSolver
 {
-   private static  final boolean debug = false;
+   private static  final boolean debug = true;
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -414,6 +416,17 @@ public class LinearMPCQPSolver
       foundSolution.set(true);
 
       addRateRegularization.set(true);
+
+      if (debug)
+      {
+         NativeMatrix constructedB = new NativeMatrix(qpSolver.linearEqualityConstraintsAMatrix.getNumRows(), 1);
+         constructedB.mult(qpSolver.linearEqualityConstraintsAMatrix, solverOutput);
+         for (int i = 0; i < constructedB.getNumRows(); i++)
+         {
+            if (!MathTools.epsilonEquals(constructedB.get(i, 0), qpSolver.linearEqualityConstraintsBVector.get(i, 0), 1e-5))
+               LogTools.info("The equality constraints weren't satisfied.");
+         }
+      }
 
       return true;
    }
