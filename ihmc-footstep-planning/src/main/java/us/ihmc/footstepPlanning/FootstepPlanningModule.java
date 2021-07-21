@@ -16,6 +16,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -28,6 +29,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.VariableDescriptor;
 import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageAdjuster;
 import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageBodyPathPlanner;
+import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageBodyPathVisualizer;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
@@ -35,6 +37,9 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -110,8 +115,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, registry);
-      this.bodyPathPlannerNarrowPassage = new NarrowPassageBodyPathPlanner(visibilityGraphParameters, footstepPlannerParameters, registry);
-      this.narrowPassageAdjuster = new NarrowPassageAdjuster(visibilityGraphParameters, footstepPlannerParameters, registry);
+      this.bodyPathPlannerNarrowPassage = new NarrowPassageBodyPathPlanner(footstepPlannerParameters, registry);
+      this.narrowPassageAdjuster = new NarrowPassageAdjuster(footstepPlannerParameters, registry);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
@@ -205,15 +210,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
          if (request.getPlanNarrowPassage())
          {
-            List<FramePose3D> waypointFrames = new ArrayList<>();
-            for (int i = 0; i < waypoints.size(); i++)
-            {
-               FramePose3D waypointFrame = new FramePose3D(ReferenceFrame.getWorldFrame(), waypoints.get(i).getPosition(), waypoints.get(i).getOrientation());
-               waypointFrames.add(waypointFrame);
-            }
-            FramePose3D[] waypointsArray = new FramePose3D[waypoints.size()];
-            waypointFrames.toArray(waypointsArray);
-            narrowPassageAdjuster.setWaypoints(waypointsArray);
+            LogTools.info("with Narrow Passage adjustment");
+
+            List<FramePose3D> waypointsList = bodyPathPlanner.getWaypointsAsFramePoseList();
+
+            narrowPassageAdjuster.setWaypoints(waypointsList);
             waypoints = narrowPassageAdjuster.makeAdjustments();
          }
 
@@ -230,28 +231,24 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       else if (request.getPlanNarrowPassage())
       {
          LogTools.info("Entering Narrow Passage planning");
-         FramePose3D bodyStartPose = new FramePose3D();
-         bodyStartPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
-
-         List<Pose3DReadOnly> waypoints = bodyPathPlannerNarrowPassage.computePlan(bodyStartPose, goalMidFootPose);
-
-         if (waypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails())
-         {
-            reportBodyPathPlan(BodyPathPlanningResult.EXCEPTION);
-            output.setBodyPathPlanningResult(BodyPathPlanningResult.EXCEPTION);
-            statusCallbacks.forEach(callback -> callback.accept(output));
-            isPlanning.set(false);
-            return;
-         }
+         List<Pose3DReadOnly> waypoints = bodyPathPlannerNarrowPassage.computePlan(startMidFootPose, goalMidFootPose);
+//         if (waypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails())
+//         {
+//            reportBodyPathPlan();
+//            output.setBodyPathPlanningResult();
+//            statusCallbacks.forEach(callback -> callback.accept(output));
+//            isPlanning.set(false);
+//            return;
+//         }
 
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
-         // TODO Find out what this does
-//         double pathLength = bodyPathPlanHolder.computePathLength(0.0);
-//         if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
-//         {
-//            double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
-//            bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
-//         }
+
+         double pathLength = bodyPathPlanHolder.computePathLength(0.0);
+         if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
+         {
+            double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
+            bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
+         }
 
          reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
