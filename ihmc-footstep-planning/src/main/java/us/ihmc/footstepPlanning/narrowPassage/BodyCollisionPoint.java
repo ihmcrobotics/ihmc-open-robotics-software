@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.narrowPassage;
 
+import sun.rmi.runtime.Log;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -17,6 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -108,7 +110,7 @@ public class BodyCollisionPoint
    {
       // set default size
       double boxSizeX = 0.4;   //footstepPlannerParameters.getBodyBoxDepth();
-      double boxSizeY = 0.85;  //footstepPlannerParameters.getBodyBoxWidth();
+      double boxSizeY = 0.9;  //footstepPlannerParameters.getBodyBoxWidth();
       double boxSizeZ = 1.5;   //footstepPlannerParameters.getBodyBoxHeight();
       collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
       boxCenterInSoleFrame.set(footstepPlannerParameters.getBodyBoxBaseX(), footstepPlannerParameters.getBodyBoxBaseY(), boxSizeZ / 2 + 0.1);
@@ -201,7 +203,7 @@ public class BodyCollisionPoint
       double adjustmentScale = 1.0;
 
       // TODO Find a better place to set this
-      maxDisplacementSquared.set(0.05);
+      maxDisplacementSquared.set(0.01);
 
       // try max of 5 times to scale down and check if valid to shift
       int maxAttempts = 5;
@@ -227,6 +229,7 @@ public class BodyCollisionPoint
    private void updateCollisionBox()
    {
       waypointPoseFrame.setPoseAndUpdate(optimizedWaypoint);
+//      LogTools.info("waypointPoseFrame: " + waypointPoseFrame);
       boxCenterPose.setToZero(waypointPoseFrame);
       boxCenterPose.getPosition().set(boxCenterInSoleFrame);
       boxCenterPose.changeFrame(ReferenceFrame.getWorldFrame());
