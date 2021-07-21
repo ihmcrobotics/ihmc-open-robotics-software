@@ -73,6 +73,7 @@ public class SE3ModelPredictiveControllerTest
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
       SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia,
+                                                                                                        new MPCParameters(testRegistry),
                                                                                                         gravityZ,
                                                                                                         nominalHeight,
                                                                                                         mass,
@@ -207,11 +208,12 @@ public class SE3ModelPredictiveControllerTest
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
       SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia,
-                                                                                                        gravityZ,
-                                                                                                        nominalHeight,
-                                                                                                        mass,
-                                                                                                        dt,
-                                                                                                        testRegistry);
+                                                                          new MPCParameters(testRegistry),
+                                                                          gravityZ,
+                                                                          nominalHeight,
+                                                                          mass,
+                                                                          dt,
+                                                                          testRegistry);
 
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
@@ -393,7 +395,8 @@ public class SE3ModelPredictiveControllerTest
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
       SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia,
-                                                                                                        gravityZ,
+                                                                          new MPCParameters(testRegistry),
+                                                                          gravityZ,
                                                                                                         nominalHeight,
                                                                                                         mass,
                                                                                                         dt,
@@ -610,6 +613,7 @@ public class SE3ModelPredictiveControllerTest
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
       SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia,
+                                                                                                        new MPCParameters(testRegistry),
                                                                                                         gravityZ,
                                                                                                         nominalHeight,
                                                                                                         mass,
@@ -796,7 +800,8 @@ public class SE3ModelPredictiveControllerTest
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
       SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia,
-                                                                                                        gravityZ,
+                                                                          new MPCParameters(testRegistry),
+                                                                          gravityZ,
                                                                                                         nominalHeight,
                                                                                                         mass,
                                                                                                         dt,
@@ -901,7 +906,7 @@ public class SE3ModelPredictiveControllerTest
 
       for (int i = 0; i < 22; i++)
       {
-         assertNotEquals(0.0, mpc.qpSolver.solverInput_H.get(i, i), epsilon);
+         assertNotEquals(0.0, mpc.qpSolver.qpSolver.costQuadraticMatrix.get(i, i), epsilon);
       }
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredCoMPosition(), epsilon);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
