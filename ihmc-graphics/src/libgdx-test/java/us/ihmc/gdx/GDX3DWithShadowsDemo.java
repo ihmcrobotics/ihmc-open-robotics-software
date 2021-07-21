@@ -17,22 +17,22 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.BaseLight;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
+import com.badlogic.gdx.graphics.g3d.environment.SpotLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.tests.g3d.shadows.system.ShadowSystem;
 import com.badlogic.gdx.tests.g3d.shadows.system.classical.ClassicalShadowSystem;
-import com.badlogic.gdx.tests.g3d.shadows.utils.AABBNearFarAnalyzer;
-import com.badlogic.gdx.tests.g3d.shadows.utils.BoundingSphereDirectionalAnalyzer;
-import com.badlogic.gdx.tests.g3d.shadows.utils.FixedShadowMapAllocator;
-import com.badlogic.gdx.tests.g3d.shadows.utils.FrustumLightFilter;
+import com.badlogic.gdx.tests.g3d.shadows.system.realistic.RealisticShadowSystem;
+import com.badlogic.gdx.tests.g3d.shadows.utils.*;
 import com.badlogic.gdx.utils.Array;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -56,6 +56,9 @@ public class GDX3DWithShadowsDemo {
    private Array<ModelBatch> passBatches = new Array<ModelBatch>();
 
    public void create () {
+      //OpenGL setup
+      Gdx.gl.glDisable( GL30.GL_CULL_FACE);
+
       //Camera initialization
       cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
       cam.position.set(0f, 7f, 10f);
@@ -98,11 +101,11 @@ public class GDX3DWithShadowsDemo {
                                                                 {
                                                                    meshBuilder.addBox(1, 0.1, 1, new Point3D(0, -0.1, 0), Color.DARK_GRAY);
                                                                 }, "box"));
-      normalInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
+      shadowInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
                                                                 {
                                                                    meshBuilder.addSphere(0.04f, new Point3D(1, 1, 1), Color.WHITE);
                                                                 }, "light"));
-      normalInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
+      shadowInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
                                                                 {
                                                                    meshBuilder.addSphere(0.04f, new Point3D(-1, 1, -1), Color.WHITE);
                                                                 }, "light"));
