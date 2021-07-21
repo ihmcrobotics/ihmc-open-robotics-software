@@ -113,7 +113,7 @@ public class BodyCollisionPoint
       double boxSizeY = 0.9;  //footstepPlannerParameters.getBodyBoxWidth();
       double boxSizeZ = 1.5;   //footstepPlannerParameters.getBodyBoxHeight();
       collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
-      boxCenterInSoleFrame.set(footstepPlannerParameters.getBodyBoxBaseX(), footstepPlannerParameters.getBodyBoxBaseY(), boxSizeZ / 2 + 0.1);
+      boxCenterInSoleFrame.set(0.0, 0.0, boxSizeZ / 2 + 0.3);
    }
 
    private final Vector3D adjustmentFrameX = new Vector3D();
