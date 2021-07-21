@@ -17,24 +17,26 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.BaseLight;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
-import com.badlogic.gdx.graphics.g3d.environment.SpotLight;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.tests.g3d.shadows.system.ShadowSystem;
-import com.badlogic.gdx.tests.g3d.shadows.system.classical.ClassicalShadowSystem;
-import com.badlogic.gdx.tests.g3d.shadows.system.realistic.RealisticShadowSystem;
-import com.badlogic.gdx.tests.g3d.shadows.utils.*;
+import com.badlogic.gdx.tests.utils.GdxTest;
 import com.badlogic.gdx.utils.Array;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
@@ -43,22 +45,14 @@ public class GDX3DWithShadowsDemo {
    private PerspectiveCamera cam;
    private CameraInputController camController;
 
-   private ModelBatch shadowBatch;
-   private ModelBatch normalBatch;
-   private Array<ModelInstance> shadowInstances = new Array<>();
-   private Array<ModelInstance> normalInstances = new Array<>();
-   private ModelInstance shadowBox;
-   private ModelInstance normalBox;
-   private Environment shadowEnvironment;
-   private Environment normalEnvironment;
+   private ModelBatch modelBatch;
+   private Array<ModelInstance> instances = new Array<>();
+   private Environment environment;
 
-   private ShadowSystem system;
-   private Array<ModelBatch> passBatches = new Array<ModelBatch>();
+   private DirectionalShadowLight shadowLight;
+   private ModelBatch shadowBatch;
 
    public void create () {
-      //OpenGL setup
-      Gdx.gl.glDisable( GL30.GL_CULL_FACE);
-
       //Camera initialization
       cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
       cam.position.set(0f, 7f, 10f);
@@ -67,129 +61,51 @@ public class GDX3DWithShadowsDemo {
       cam.far = 50f;
       cam.update();
 
+      //Model batch stuff
+      modelBatch = new ModelBatch();
+
       //Environment initialization
-      shadowEnvironment = new Environment();
-      shadowEnvironment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.0f));
-
-      normalEnvironment = new Environment();
-      normalEnvironment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.0f));
-      normalEnvironment.add(new PointLight().set(Color.WHITE, new Vector3(-2, 1, 1), 1.5f));
-      normalEnvironment.add(new PointLight().set(Color.WHITE, new Vector3(-4, 1, -1), 1.5f));
-
-      system = new ClassicalShadowSystem(new AABBNearFarAnalyzer(), new FixedShadowMapAllocator(2048, 4), new BoundingSphereDirectionalAnalyzer(), new FrustumLightFilter());
-
-      PointLight light1 = new PointLight();
-      light1.set(Color.WHITE, new Vector3(1, 1, 1), 1.5f);
-      shadowEnvironment.add(light1);
-      system.addLight(light1);
-
-      PointLight light2 = new PointLight();
-      light2.set(Color.WHITE, new Vector3(-1, 1, -1), 1.5f);
-      shadowEnvironment.add(light2);
-      system.addLight(light2);
+      environment = new Environment();
+      environment.set(new ColorAttribute(ColorAttribute.AmbientLight, .4f, .4f, .4f, 1f));
+      environment.add((shadowLight = new DirectionalShadowLight(1024, 1024, 5f, 5f, 1f, 100f))
+                            .set(0.8f, 0.8f, 0.8f, -1f, -.8f, -.2f));
+      environment.shadowMap = shadowLight;
 
       //Add model instances
-      shadowInstances.add(shadowBox = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+      instances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
                                                           {
-                                                             meshBuilder.addBox(0.2, 0.2, 0.2, new Point3D(0, 0.15, 0), Color.BLUE);
+                                                             meshBuilder.addBox(0.2, 0.2, 0.2, new Point3D(0, 0.15, 0), Color.RED);
                                                           }, "box"));
-      shadowInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
+      instances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
                                                           {
-                                                             meshBuilder.addBox(1, 0.1, 1, new Point3D(), Color.GREEN);
+                                                             meshBuilder.addBox(1, 0.1, 1, new Point3D(), Color.YELLOW);
                                                           }, "box"));
-      shadowInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                {
-                                                                   meshBuilder.addBox(1, 0.1, 1, new Point3D(0, -0.1, 0), Color.DARK_GRAY);
-                                                                }, "box"));
-      shadowInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                {
-                                                                   meshBuilder.addSphere(0.04f, new Point3D(1, 1, 1), Color.WHITE);
-                                                                }, "light"));
-      shadowInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                {
-                                                                   meshBuilder.addSphere(0.04f, new Point3D(-1, 1, -1), Color.WHITE);
-                                                                }, "light"));
 
-      normalInstances.add(normalBox = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                      {
-                                                                         meshBuilder.addBox(0.2, 0.2, 0.2, new Point3D(-3, 0.15, 0), Color.BLUE);
-                                                                      }, "box"));
-      normalInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                {
-                                                                   meshBuilder.addBox(1, 0.1, 1, new Point3D(-3, 0, 0), Color.GREEN);
-                                                                }, "box"));
-      normalInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                {
-                                                                   meshBuilder.addBox(1, 0.1, 1, new Point3D(-3, -0.1, 0), Color.RED);
-                                                                }, "box"));
-      normalInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                {
-                                                                   meshBuilder.addSphere(0.04f, new Point3D(-2, 1, 1), Color.WHITE);
-                                                                }, "light"));
-      normalInstances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                {
-                                                                   meshBuilder.addSphere(0.04f, new Point3D(-4, 1, -1), Color.WHITE);
-                                                                }, "light"));
-
-      system.init();
-
-      for (int i = 0; i < system.getPassQuantity(); i++) {
-         passBatches.add(new ModelBatch(system.getPassShaderProvider(i)));
-      }
-
-      shadowBatch = new ModelBatch(system.getShaderProvider());
-      normalBatch = new ModelBatch();
+      shadowBatch = new ModelBatch(new DepthShaderProvider());
 
       Gdx.input.setInputProcessor(camController = new CameraInputController(cam));
-
-      time = System.currentTimeMillis();
    }
 
-   private long time;
-   private long prev;
-   private double polar = 0;
-
    public void render () {
-      prev = time;
-      time = System.currentTimeMillis();
-      double delta = (time - prev) / 1000f;
-      double pos = time / 1000f;
-      polar += delta * 3;
-
       camController.update();
-
-      shadowBox.transform.setToTranslation((float) Math.sin(polar) / 4, 0, (float) Math.cos(polar) / 4);
-      normalBox.transform.setToTranslation((float) Math.sin(polar) / 4, 0, (float) Math.cos(polar) / 4);
 
       Gdx.gl.glViewport(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
 
       GDX3DSceneTools.glClearGray();
 
-      system.begin(cam, shadowInstances);
-      system.update();
-      for (int i = 0; i < system.getPassQuantity(); i++) {
-         system.begin(i);
-         Camera camera;
-         while ((camera = system.next()) != null) {
-            passBatches.get(i).begin(camera);
-            passBatches.get(i).render(shadowInstances, shadowEnvironment);
-            passBatches.get(i).end();
-         }
-         system.end(i);
-      }
-      system.end();
-
-      shadowBatch.begin(cam);
-      shadowBatch.render(shadowInstances, shadowEnvironment);
+      shadowLight.begin(Vector3.Zero, cam.direction);
+      shadowBatch.begin(shadowLight.getCamera());
+      shadowBatch.render(instances);
       shadowBatch.end();
+      shadowLight.end();
 
-      normalBatch.begin(cam);
-      normalBatch.render(normalInstances, normalEnvironment);
-      normalBatch.end();
+      modelBatch.begin(cam);
+      modelBatch.render(instances, environment);
+      modelBatch.end();
    }
 
    public void dispose () {
-      shadowBatch.dispose();
+      modelBatch.dispose();
    }
 
    public static void main(String[] args)

@@ -174,5 +174,4 @@ void main()
 	#endif
 
 	gl_FragColor.rgb = ((diffuse.rgb * lightDiffuse) + (specular * lightSpecular));
-	gl_FragColor.a = 1.0; //debug - may have other ramifications?
 }
