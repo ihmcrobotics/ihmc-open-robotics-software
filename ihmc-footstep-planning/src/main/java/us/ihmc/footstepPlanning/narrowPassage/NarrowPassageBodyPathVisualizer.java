@@ -65,9 +65,6 @@ public class NarrowPassageBodyPathVisualizer
          BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
          VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, scs.getRootRegistry());
          bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
-
-         startPose.getPosition().set(-0.819,  3.885, -0.010);
-
          bodyPathPlanner.setStart(startPose);
          bodyPathPlanner.setGoal(endPose);
          bodyPathPlanner.planWaypoints();
