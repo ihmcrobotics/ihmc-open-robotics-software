@@ -583,14 +583,14 @@ public class MPCQPInputCalculatorTest
             qpSolver2.addInput(comPositionQPInputCompact, positionOffset);
             qpSolver2.addInput(comVelocityQPInputCompact, velocityOffset);
 
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_H, qpSolver2.solverInput_H, 1e-5);
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_f, qpSolver2.solverInput_f, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.costQuadraticMatrix, qpSolver2.qpSolver.costQuadraticMatrix, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.quadraticCostQVector, qpSolver2.qpSolver.quadraticCostQVector, 1e-5);
 
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Aeq, qpSolver2.solverInput_Aeq, 1e-5);
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_beq, qpSolver2.solverInput_beq, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearEqualityConstraintsAMatrix, qpSolver2.qpSolver.linearEqualityConstraintsAMatrix, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearEqualityConstraintsBVector, qpSolver2.qpSolver.linearEqualityConstraintsBVector, 1e-5);
 
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Ain, qpSolver2.solverInput_Ain, 1e-5);
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_bin, qpSolver2.solverInput_bin, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearInequalityConstraintsCMatrixO, qpSolver2.qpSolver.linearInequalityConstraintsCMatrixO, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearInequalityConstraintsDVectorO, qpSolver2.qpSolver.linearInequalityConstraintsDVectorO, 1e-5);
          }
       }
    }
@@ -668,14 +668,14 @@ public class MPCQPInputCalculatorTest
             qpSolver2.addInput(dcmPositionQPInputCompact, positionOffset);
             qpSolver2.addInput(dcmVelocityQPInputCompact, velocityOffset);
 
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_H, qpSolver2.solverInput_H, 1e-5);
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_f, qpSolver2.solverInput_f, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.costQuadraticMatrix, qpSolver2.qpSolver.costQuadraticMatrix, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.quadraticCostQVector, qpSolver2.qpSolver.quadraticCostQVector, 1e-5);
 
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Aeq, qpSolver2.solverInput_Aeq, 1e-5);
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_beq, qpSolver2.solverInput_beq, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearEqualityConstraintsAMatrix, qpSolver2.qpSolver.linearEqualityConstraintsAMatrix, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearEqualityConstraintsBVector, qpSolver2.qpSolver.linearEqualityConstraintsBVector, 1e-5);
 
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Ain, qpSolver2.solverInput_Ain, 1e-5);
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_bin, qpSolver2.solverInput_bin, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearInequalityConstraintsCMatrixO, qpSolver2.qpSolver.linearInequalityConstraintsCMatrixO, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearInequalityConstraintsDVectorO, qpSolver2.qpSolver.linearInequalityConstraintsDVectorO, 1e-5);
          }
       }
    }
@@ -753,14 +753,14 @@ public class MPCQPInputCalculatorTest
             qpSolver2.addInput(vrpPositionQPInputCompact, positionOffset);
             qpSolver2.addInput(vrpVelocityQPInputCompact, velocityOffset);
 
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_H, qpSolver2.solverInput_H, 1e-5);
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_f, qpSolver2.solverInput_f, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.costQuadraticMatrix, qpSolver2.qpSolver.costQuadraticMatrix, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.quadraticCostQVector, qpSolver2.qpSolver.quadraticCostQVector, 1e-5);
 
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Aeq, qpSolver2.solverInput_Aeq, 1e-5);
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_beq, qpSolver2.solverInput_beq, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearEqualityConstraintsAMatrix, qpSolver2.qpSolver.linearEqualityConstraintsAMatrix, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearEqualityConstraintsBVector, qpSolver2.qpSolver.linearEqualityConstraintsBVector, 1e-5);
 
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_Ain, qpSolver2.solverInput_Ain, 1e-5);
-            EjmlUnitTests.assertEquals(qpSolver1.solverInput_bin, qpSolver2.solverInput_bin, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearInequalityConstraintsCMatrixO, qpSolver2.qpSolver.linearInequalityConstraintsCMatrixO, 1e-5);
+            EjmlUnitTests.assertEquals(qpSolver1.qpSolver.linearInequalityConstraintsDVectorO, qpSolver2.qpSolver.linearInequalityConstraintsDVectorO, 1e-5);
          }
       }
    }
