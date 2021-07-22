@@ -9,8 +9,8 @@ import com.badlogic.gdx.math.Vector3;
 public abstract class GDXLight
 {
    public static final int DEPTHMAP_SIZE = 4096;
-   public static final float CAMERA_NEAR = 0.1f;
-   public static final float CAMERA_FAR = 10f;
+   public static final float CAMERA_NEAR = 1f;
+   public static final float CAMERA_FAR = 100f;
 
    protected ShaderProgram shaderProgram = null;
    protected ModelBatch modelBatch = null;
