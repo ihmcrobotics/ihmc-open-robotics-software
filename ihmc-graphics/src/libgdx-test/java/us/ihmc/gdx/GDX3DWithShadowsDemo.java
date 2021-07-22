@@ -47,6 +47,7 @@ public class GDX3DWithShadowsDemo {
 
    private ModelBatch modelBatch;
    private Array<ModelInstance> instances = new Array<>();
+   private ModelInstance box;
 
    private GDXShadowManager manager;
 
@@ -78,7 +79,7 @@ public class GDX3DWithShadowsDemo {
       manager.addLight(light);
 
       //Add model instances
-      instances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
+      instances.add(box = GDXModelPrimitives.buildModelInstance(meshBuilder ->
                                                           {
                                                              meshBuilder.addBox(0.2, 0.2, 0.2, new Point3D(0, 0.15, 0), Color.RED);
                                                           }, "box"));
@@ -91,6 +92,8 @@ public class GDX3DWithShadowsDemo {
    }
 
    public void render () {
+      box.transform.setToTranslation((float) Math.sin(System.currentTimeMillis() / 500d) / 4, 0, (float) Math.cos(System.currentTimeMillis() / 500d) / 4);
+
       camController.update();
 
       Gdx.gl.glViewport(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
