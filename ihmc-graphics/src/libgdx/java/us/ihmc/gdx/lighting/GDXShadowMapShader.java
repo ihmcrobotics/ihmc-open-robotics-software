@@ -21,23 +21,7 @@ import us.ihmc.log.LogTools;
 public class GDXShadowMapShader extends BaseShader
 {
    private Renderable renderable;
-   private GDXShadowManager manager;
-
-   protected static ShaderProgram buildShaderProgram() {
-      ShaderProgram.pedantic = false;
-      final String directory = "us/ihmc/gdx/shadows";
-      final String prefix = "shadows";
-
-      final ShaderProgram shaderProgram = new ShaderProgram(Gdx.files.classpath(directory + "/" + prefix + "_v.glsl"), Gdx.files.classpath(directory + "/" + prefix + "_f.glsl"));
-      if (!shaderProgram.isCompiled())
-      {
-         LogTools.fatal("Error with shader " + prefix + ": " + shaderProgram.getLog());
-         System.exit(1);
-      } else {
-         LogTools.info("Shader " + prefix + " compiled");
-      }
-      return shaderProgram;
-   }
+   private final GDXShadowManager manager;
 
    protected GDXShadowMapShader(final Renderable renderable, final ShaderProgram shader, final GDXShadowManager manager)
    {
@@ -47,7 +31,26 @@ public class GDXShadowMapShader extends BaseShader
       register(Inputs.worldTrans, Setters.worldTrans);
       register(Inputs.projViewTrans, Setters.projViewTrans);
       register(Inputs.normalMatrix, Setters.normalMatrix);
+   }
 
+   protected static ShaderProgram buildShaderProgram()
+   {
+      ShaderProgram.pedantic = false;
+      final String directory = "us/ihmc/gdx/shadows";
+      final String prefix = "shadows";
+
+      final ShaderProgram shaderProgram = new ShaderProgram(Gdx.files.classpath(directory + "/" + prefix + "_v.glsl"),
+                                                            Gdx.files.classpath(directory + "/" + prefix + "_f.glsl"));
+      if (!shaderProgram.isCompiled())
+      {
+         LogTools.fatal("Error with shader " + prefix + ": " + shaderProgram.getLog());
+         System.exit(1);
+      }
+      else
+      {
+         LogTools.info("Shader " + prefix + " compiled");
+      }
+      return shaderProgram;
    }
 
    @Override

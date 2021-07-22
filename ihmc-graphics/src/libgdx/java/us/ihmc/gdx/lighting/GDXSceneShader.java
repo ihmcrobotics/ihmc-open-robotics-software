@@ -15,7 +15,8 @@ public class GDXSceneShader extends BaseShader
    private Renderable renderable;
    private ShaderProgram program;
 
-   public GDXSceneShader(Renderable renderable, ShaderProgram shaderProgram) {
+   public GDXSceneShader(Renderable renderable, ShaderProgram shaderProgram)
+   {
       this.renderable = renderable;
       this.program = shaderProgram;
       register(DefaultShader.Inputs.worldTrans, DefaultShader.Setters.worldTrans);
@@ -56,14 +57,7 @@ public class GDXSceneShader extends BaseShader
    @Override
    public void render(final Renderable renderable)
    {
-      if (!renderable.material.has(BlendingAttribute.Type))
-      {
-         context.setBlending(false, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-      }
-      else
-      {
-         context.setBlending(true, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-      }
+      context.setBlending(renderable.material.has(BlendingAttribute.Type), GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
       super.render(renderable);
    }
 }

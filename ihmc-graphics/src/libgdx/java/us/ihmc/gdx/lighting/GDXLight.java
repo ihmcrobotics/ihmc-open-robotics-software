@@ -1,7 +1,10 @@
 package us.ihmc.gdx.lighting;
 
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
@@ -25,8 +28,10 @@ public abstract class GDXLight
    /**
     * init() should be called after the light is created. It initializes the shaders, depthmap, etc.
     */
-   public void init() {
-      if (modelBatch == null) {
+   public void init()
+   {
+      if (modelBatch == null)
+      {
          shaderProgram = GDXDepthMapShader.buildShaderProgram();
          modelBatch = new ModelBatch(new DefaultShaderProvider()
          {
@@ -39,7 +44,8 @@ public abstract class GDXLight
       }
    }
 
-   public boolean isInitialized() {
+   public boolean isInitialized()
+   {
       return modelBatch != null;
    }
 

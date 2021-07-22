@@ -1,9 +1,11 @@
 package us.ihmc.gdx.lighting;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Cubemap;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.glutils.FrameBufferCubemap;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
 
@@ -12,7 +14,8 @@ public class GDXPointLight extends GDXLight
    private AccessibleFrameBufferCubemap framebuffer;
    private Cubemap depthMap;
 
-   public GDXPointLight(Vector3 position) {
+   public GDXPointLight(Vector3 position)
+   {
       this.position = position;
    }
 
@@ -40,7 +43,6 @@ public class GDXPointLight extends GDXLight
          modelBatch.begin(camera);
          modelBatch.render(renderableProviders);
          modelBatch.end();
-
       }
 
       framebuffer.end();
