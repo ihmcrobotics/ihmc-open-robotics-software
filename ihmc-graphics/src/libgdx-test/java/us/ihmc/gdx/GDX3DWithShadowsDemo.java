@@ -33,10 +33,7 @@ import com.badlogic.gdx.utils.Array;
 import org.lwjgl.opengl.GL30;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.lighting.GDXDirectionalLight;
-import us.ihmc.gdx.lighting.GDXLight;
-import us.ihmc.gdx.lighting.GDXSceneShader;
-import us.ihmc.gdx.lighting.GDXShadowManager;
+import us.ihmc.gdx.lighting.*;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
@@ -74,7 +71,7 @@ public class GDX3DWithShadowsDemo {
       });
 
       manager = new GDXShadowManager(program);
-      GDXLight light = new GDXDirectionalLight(new Vector3(1, 1, 1), new Vector3(-1, -1, -1));
+      GDXLight light = new GDXPointLight(new Vector3(1, 1, 1));
       light.init(); //TODO change me?
       manager.addLight(light);
 
