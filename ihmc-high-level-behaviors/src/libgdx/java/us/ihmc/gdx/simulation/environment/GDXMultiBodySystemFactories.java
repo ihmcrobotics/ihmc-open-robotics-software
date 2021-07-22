@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -11,6 +12,7 @@ import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.JointBuilder;
 import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
 import us.ihmc.mecano.yoVariables.tools.YoMultiBodySystemFactories;
+import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
@@ -129,25 +131,30 @@ public class GDXMultiBodySystemFactories
    {
       GDXRigidBody gdxRigidBody = new GDXRigidBody(rigidBody);
       List<VisualDefinition> visualDefinitions = rigidBodyDefinition.getVisualDefinitions();
+      List<CollisionShapeDefinition> collisionShapeDefinitions = rigidBodyDefinition.getCollisionShapeDefinitions();
 
       if (graphicLoader != null)
       {
-         graphicLoader.execute(() -> loadRigidBodyGraphic(visualDefinitions, gdxRigidBody, resourceClassLoader));
+         graphicLoader.execute(() -> loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, gdxRigidBody, resourceClassLoader));
       }
       else
       {
-         loadRigidBodyGraphic(visualDefinitions, gdxRigidBody, resourceClassLoader);
+         loadRigidBodyGraphic(visualDefinitions, collisionShapeDefinitions, gdxRigidBody, resourceClassLoader);
       }
 
       return gdxRigidBody;
    }
 
-   private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions, GDXRigidBody gdxRigidBody, ClassLoader resourceClassLoader)
+   private static void loadRigidBodyGraphic(List<VisualDefinition> visualDefinitions,
+                                            List<CollisionShapeDefinition> collisionShapeDefinitions,
+                                            GDXRigidBody gdxRigidBody,
+                                            ClassLoader resourceClassLoader)
    {
-      ModelInstance graphicNode = GDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
+      DynamicGDXModel graphicNode = GDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
+      DynamicGDXModel collisionsNode = GDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
       ReferenceFrame graphicFrame = gdxRigidBody.isRootBody() ? gdxRigidBody.getBodyFixedFrame() : gdxRigidBody.getParentJoint().getFrameAfterJoint();
 
       if (graphicNode != null)
-         gdxRigidBody.setGraphics(new FrameGDXNode(graphicFrame, graphicNode));
+         gdxRigidBody.setGraphics(new FrameGDXNode(graphicFrame, graphicNode, collisionsNode));
    }
 }

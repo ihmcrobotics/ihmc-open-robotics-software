@@ -5,13 +5,16 @@ import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
+import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
@@ -24,14 +27,14 @@ public class GDXVisualTools
    private static final Color DEFAULT_COLOR = Color.BLUE;
    private static final Material DEFAULT_MATERIAL = new Material(ColorAttribute.createDiffuse(DEFAULT_COLOR));
 
-   public static ModelInstance collectNodes(List<VisualDefinition> visualDefinitions)
+   public static DynamicGDXModel collectNodes(List<VisualDefinition> visualDefinitions)
    {
       return collectNodes(visualDefinitions, null);
    }
 
-   public static ModelInstance collectNodes(List<VisualDefinition> visualDefinitions, ClassLoader resourceClassLoader)
+   public static DynamicGDXModel collectNodes(List<VisualDefinition> visualDefinitions, ClassLoader resourceClassLoader)
    {
-      List<ModelInstance> nodes = visualDefinitions.stream()
+      List<DynamicGDXModel> nodes = visualDefinitions.stream()
                                                    .map(definition -> toNode(definition, resourceClassLoader))
                                                    .filter(Objects::nonNull)
                                                    .collect(Collectors.toList());
@@ -42,29 +45,73 @@ public class GDXVisualTools
          return nodes.get(0);
       else
       {
+         DynamicGDXModel dynamicGDXModel = new DynamicGDXModel();
          Model model = new Model();
-         for (ModelInstance node : nodes)
+         for (DynamicGDXModel node : nodes)
          {
-            model.nodes.addAll(node.nodes);
+            node.buildIfNeeded();
+            model.nodes.addAll(node.getModel().nodes);
          }
-         return new ModelInstance(model);
+         dynamicGDXModel.setModel(model);
+         return dynamicGDXModel;
       }
    }
 
-   public static ModelInstance toNode(VisualDefinition visualDefinition, ClassLoader resourceClassLoader)
+   public static DynamicGDXModel toNode(VisualDefinition visualDefinition, ClassLoader resourceClassLoader)
    {
-      ModelInstance node = toShape3D(visualDefinition.getGeometryDefinition(), visualDefinition.getMaterialDefinition(), resourceClassLoader);
+      DynamicGDXModel node = toShape3D(visualDefinition.getGeometryDefinition(), visualDefinition.getMaterialDefinition(), resourceClassLoader);
 
       if (node != null && visualDefinition.getOriginPose() != null)
       {
-         GDXTools.toGDX(visualDefinition.getOriginPose(), node.transform);
+         node.getLocalTransform().set(visualDefinition.getOriginPose());
       }
 
       return node;
    }
 
-   public static ModelInstance toShape3D(GeometryDefinition geometryDefinition, MaterialDefinition materialDefinition, ClassLoader resourceClassLoader)
+   public static DynamicGDXModel collectCollisionNodes(List<CollisionShapeDefinition> collisionShapeDefinitions)
    {
+      List<DynamicGDXModel> nodes = collisionShapeDefinitions.stream()
+                                                             .map(definition -> toNode(definition))
+                                                             .filter(Objects::nonNull)
+                                                             .collect(Collectors.toList());
+
+      if (nodes.isEmpty())
+         return null;
+      else if (nodes.size() == 1)
+         return nodes.get(0);
+      else
+      {
+         DynamicGDXModel dynamicGDXModel = new DynamicGDXModel();
+         Model model = new Model();
+         for (DynamicGDXModel node : nodes)
+         {
+            node.buildIfNeeded();
+            model.nodes.addAll(node.getModel().nodes);
+         }
+         dynamicGDXModel.setModel(model);
+         return dynamicGDXModel;
+      }
+   }
+
+   public static DynamicGDXModel toNode(CollisionShapeDefinition collisionShapeDefinition)
+   {
+      ColorDefinition diffuseColor = ColorDefinitions.DarkRed();
+      diffuseColor.setAlpha(0.6);
+      MaterialDefinition materialDefinition = new MaterialDefinition(diffuseColor);
+      DynamicGDXModel node = toShape3D(collisionShapeDefinition.getGeometryDefinition(), materialDefinition, null);
+
+      if (node != null && collisionShapeDefinition.getOriginPose() != null)
+      {
+         node.getLocalTransform().set(collisionShapeDefinition.getOriginPose());
+      }
+
+      return node;
+   }
+
+   public static DynamicGDXModel toShape3D(GeometryDefinition geometryDefinition, MaterialDefinition materialDefinition, ClassLoader resourceClassLoader)
+   {
+      DynamicGDXModel gdxModel = new DynamicGDXModel(); // TODO: Should just pass DynamicGDXModel around?
       if (geometryDefinition instanceof ModelFileGeometryDefinition)
       {
          ModelFileGeometryDefinition modelFileGeometryDefinition = (ModelFileGeometryDefinition) geometryDefinition;
@@ -74,14 +121,15 @@ public class GDXVisualTools
          if (modifiedFileName == null)
             return null;
 
-         return new ModelInstance(GDXModelLoader.loadG3DModel(modifiedFileName));
+         gdxModel.setModel(GDXModelLoader.loadG3DModel(modifiedFileName));
       }
-
-      DynamicGDXModel gdxModel = new DynamicGDXModel(); // TODO: Should just pass DynamicGDXModel around?
-      gdxModel.setMaterial(toMaterial(materialDefinition));
-      Mesh mesh = GDXTriangleMesh3DDefinitionInterpreter.interpretDefinition(TriangleMesh3DFactories.TriangleMesh(geometryDefinition), false);
-      gdxModel.setMesh(mesh);
-      return gdxModel.getOrCreateModelInstance();
+      else
+      {
+         gdxModel.setMaterial(toMaterial(materialDefinition));
+         Mesh mesh = GDXTriangleMesh3DDefinitionInterpreter.interpretDefinition(TriangleMesh3DFactories.TriangleMesh(geometryDefinition), false);
+         gdxModel.setMesh(mesh);
+      }
+      return gdxModel;
    }
 
    public static Material toMaterial(MaterialDefinition materialDefinition)
@@ -90,7 +138,10 @@ public class GDXVisualTools
          return DEFAULT_MATERIAL;
 
       Color color = toColor(materialDefinition.getDiffuseColor());
-      return new Material(ColorAttribute.createDiffuse(color));
+      Material attributes = new Material(ColorAttribute.createDiffuse(color));
+      if (materialDefinition.getDiffuseColor().getAlpha() < 1.0)
+         attributes.set(new BlendingAttribute(true, (float) materialDefinition.getDiffuseColor().getAlpha()));
+      return attributes;
    }
 
    public static Color toColor(ColorDefinition colorDefinition)

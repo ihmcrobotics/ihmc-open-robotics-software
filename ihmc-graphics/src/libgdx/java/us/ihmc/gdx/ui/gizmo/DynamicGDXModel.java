@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import org.lwjgl.opengl.GL32;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 import java.util.function.Consumer;
@@ -15,7 +16,7 @@ import java.util.function.Supplier;
 
 public class DynamicGDXModel
 {
-   private final Model model;
+   private Model model;
    private final Node node;
    private MeshPart meshPart;
    private ModelInstance modelInstance;
@@ -23,6 +24,9 @@ public class DynamicGDXModel
    private Supplier<Mesh> buildMesh;
    private Mesh mesh;
    private boolean needsRebuild = true;
+   private boolean customModel = false;
+
+   private final RigidBodyTransform localTransform = new RigidBodyTransform();
 
    public DynamicGDXModel()
    {
@@ -30,6 +34,12 @@ public class DynamicGDXModel
       node = new Node();
       model.nodes.add(node);
       node.id = "node" + model.nodes.size;
+   }
+
+   public void setModel(Model model)
+   {
+      this.model = model;
+      customModel = true;
    }
 
    public void setMesh(Consumer<GDXMultiColorMeshBuilder> buildMesh)
@@ -70,9 +80,9 @@ public class DynamicGDXModel
       }
    }
 
-   private void buildIfNeeded()
+   public void buildIfNeeded()
    {
-      if (needsRebuild)
+      if (needsRebuild && !customModel)
       {
          needsRebuild = false;
          if (mesh != null && buildMesh != null)
@@ -83,8 +93,11 @@ public class DynamicGDXModel
 
          if (buildMesh != null)
             mesh = buildMesh.get();
-         meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
-         node.parts.add(new NodePart(meshPart, material));
+         if (mesh != null)
+         {
+            meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
+            node.parts.add(new NodePart(meshPart, material));
+         }
       }
    }
 
@@ -99,6 +112,11 @@ public class DynamicGDXModel
       return new ModelInstance(model);
    }
 
+   public Model getModel()
+   {
+      return model;
+   }
+
    public ModelInstance getOrCreateModelInstance()
    {
       if (needsRebuild || modelInstance == null)
@@ -106,5 +124,10 @@ public class DynamicGDXModel
          modelInstance = newModelInstance();
       }
       return modelInstance;
+   }
+
+   public RigidBodyTransform getLocalTransform()
+   {
+      return localTransform;
    }
 }
