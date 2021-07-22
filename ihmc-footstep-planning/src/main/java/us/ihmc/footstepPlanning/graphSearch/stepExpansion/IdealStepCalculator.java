@@ -43,7 +43,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
 
    private SideDependentList<DiscreteFootstep> goalSteps;
    private PlanarRegionsList planarRegionsList;
-   private double desiredHeading = 0.0;
+   private final YoDouble desiredRelativeHeading;
 
    private final SideDependentList<YoDouble> idealStepLengths = new SideDependentList<>();
    private final SideDependentList<YoDouble> idealStepWidths = new SideDependentList<>();
@@ -84,12 +84,12 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       idealStepYaw = new YoDouble("idealStepYaw", registry);
       yawMode = new YoEnum<>("idealStepYawMode", registry, IdealStepMode.class);
       stepMode = new YoEnum<>("idealStepPositionMode", registry, IdealStepMode.class);
+      desiredRelativeHeading = new YoDouble("desiredRelativeHeading", registry);
    }
 
-   public void initialize(SideDependentList<DiscreteFootstep> goalSteps, double desiredHeading)
+   public void initialize(SideDependentList<DiscreteFootstep> goalSteps)
    {
       this.goalSteps = goalSteps;
-      this.desiredHeading = desiredHeading;
 
       idealStepMap.clear();
       pathLength = bodyPathPlanHolder.computePathLength(0.0);
@@ -106,7 +106,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       double closestAngle = Double.MAX_VALUE;
       for (FootstepPlanHeading heading : FootstepPlanHeading.values())
       {
-         double deltaAngle = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(desiredHeading, heading.getYawOffset()));
+         double deltaAngle = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(desiredRelativeHeading.getValue(), heading.getYawOffset()));
          if (Math.abs(deltaAngle) < closestAngle)
          {
             closestAngle = deltaAngle;
@@ -121,7 +121,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
          if (heading == primaryDirection)
             continue;
 
-         double deltaAngle = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(desiredHeading, heading.getYawOffset()));
+         double deltaAngle = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(desiredRelativeHeading.getValue(), heading.getYawOffset()));
          if (Math.abs(deltaAngle) < secondClosestAngle)
          {
             secondClosestAngle = deltaAngle;
@@ -129,7 +129,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
          }
       }
 
-      double thetaFromPrimary = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(desiredHeading, primaryDirection.getYawOffset()));
+      double thetaFromPrimary = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(desiredRelativeHeading.getValue(), primaryDirection.getYawOffset()));
       double percentageSecondary = thetaFromPrimary / (0.5 * Math.PI);
       double percentagePrimary = 1.0 - percentageSecondary;
 
@@ -206,6 +206,10 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       int segmentIndex = bodyPathPlanHolder.getSegmentIndexFromAlpha(alphaMidFoot);
       bodyPathPlanHolder.getPointAlongPath(alphaMidFoot, projectionPose);
 
+      double desiredRobotPostureHeading = bodyPathPlanHolder.getBodyPathPlan().getWaypoint(segmentIndex).getOrientation().getYaw();
+      double desiredRobotMotionHeading = bodyPathPlanHolder.getSegmentYaw(segmentIndex);
+      desiredRelativeHeading.set(EuclidCoreTools.angleDifferenceMinusPiToPi(desiredRobotPostureHeading, desiredRobotMotionHeading));
+
       double distanceFromGoalSquared = midFootPoint.distanceSquared(goalMidFootPose.getPosition());
       double distanceFromPathSquared = midFootPoint.distanceXYSquared(projectionPose.getPosition());
       double finalTurnProximity = parameters.getFinalTurnProximity();
@@ -224,10 +228,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       else if (distanceFromPathSquared < MathTools.square(parameters.getDistanceFromPathTolerance()))
       {
          yawMode.set(IdealStepMode.ON_PATH);
-//         desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading);
-
-         // TODO temporary, don't merge into develop. Follows the body path orientations but doesn't give great results when waypoints are sparse.
-         desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(projectionPose.getYaw());
+         desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredRelativeHeading.getValue());
       }
       else
       {
@@ -237,7 +238,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
          double alphaLookAhead = MathTools.clamp(alphaMidFoot + numberOfCorrectiveStepsWhenOffPath * parameters.getIdealFootstepLength() / pathLength, 0.0, 1.0);
          bodyPathPlanHolder.getPointAlongPath(alphaLookAhead, projectionPose);
          desiredYaw = Math.atan2(projectionPose.getY() - midFootPoint.getY(), projectionPose.getX() - midFootPoint.getX());
-         desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(desiredYaw + desiredHeading);
+         desiredYaw = EuclidCoreTools.trimAngleMinusPiToPi(desiredYaw + desiredRelativeHeading.getValue());
       }
 
       // Clamp target yaw to what's achievable by step parameters
@@ -312,7 +313,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       correctiveDistanceX.set(toClosestPointOnPath.getX());
       correctiveDistanceY.set(toClosestPointOnPath.getY());
 
-      double pathYaw = bodyPathPlanHolder.getSegmentYaw(bodyPathPlanHolder.getSegmentIndexFromAlpha(alpha)) + desiredHeading;
+      double pathYaw = bodyPathPlanHolder.getSegmentYaw(bodyPathPlanHolder.getSegmentIndexFromAlpha(alpha)) + desiredRelativeHeading.getValue();
       double currentYaw = midFootPose.getYaw();
       correctiveYaw.set(MathTools.clamp(AngleTools.computeAngleDifferenceMinusPiToPi(pathYaw, currentYaw), maxYawAdjustmentTowardsPath));
    }

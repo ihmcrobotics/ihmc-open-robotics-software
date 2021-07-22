@@ -59,17 +59,18 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public boolean plan_body_path_;
    /**
-            * If true, will plan a body path. If false, will follow a straight-line path to the goal
-            */
-   public boolean plan_narrow_passage_;
-   /**
             * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
             */
    public boolean perform_a_star_search_ = true;
    /**
-            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+            * Requested body path waypoints in world-frame. If non-empty, planner will follow this path and will not plan a body path
+            * The robot will walk with the orientation of waypoint N between points N and N+1
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
+   /**
+            * If true, the planner will plan a narrow passage body path. If false, it will try to follow a straight line to the goal.
+            */
+   public boolean plan_narrow_passage_;
    /**
             * (In beta) acceptable xy distance from the given goal for the planner to terminate
             */
@@ -78,11 +79,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             * (In beta) acceptable yaw offset from the given goal for the planner to terminate
             */
    public double goal_yaw_proximity_ = -1.0;
-   /**
-            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
-            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-            */
-   public double requested_path_heading_;
    /**
             * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
             */
@@ -157,16 +153,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       plan_body_path_ = other.plan_body_path_;
 
-      plan_narrow_passage_ = other.plan_narrow_passage_;
-
       perform_a_star_search_ = other.perform_a_star_search_;
 
       body_path_waypoints_.set(other.body_path_waypoints_);
+      plan_narrow_passage_ = other.plan_narrow_passage_;
+
       goal_distance_proximity_ = other.goal_distance_proximity_;
 
       goal_yaw_proximity_ = other.goal_yaw_proximity_;
-
-      requested_path_heading_ = other.requested_path_heading_;
 
       timeout_ = other.timeout_;
 
@@ -305,27 +299,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    {
       plan_body_path_ = plan_body_path;
    }
-
-   /**
-            * If true, will plan a body path using narrow passage calculator. If false, will follow a straight-line path to the goal
-            */
-   public void setPlanNarrowPassage(boolean plan_narrow_passage)
-   {
-      plan_narrow_passage_ = plan_narrow_passage;
-   }
    /**
             * If true, will plan a body path. If false, will follow a straight-line path to the goal
             */
    public boolean getPlanBodyPath()
    {
       return plan_body_path_;
-   }
-   /**
-            * If true, will plan a body path using narrow passage calculator. If false, will follow a straight-line path to the goal
-            */
-   public boolean getPlanNarrowPassage()
-   {
-      return plan_narrow_passage_;
    }
 
    /**
@@ -345,11 +324,27 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+            * Requested body path waypoints in world-frame. If non-empty, planner will follow this path and will not plan a body path
+            * The robot will walk with the orientation of waypoint N between points N and N+1
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPathWaypoints()
    {
       return body_path_waypoints_;
+   }
+
+   /**
+            * If true, the planner will plan a narrow passage body path. If false, it will try to follow a straight line to the goal.
+            */
+   public void setPlanNarrowPassage(boolean plan_narrow_passage)
+   {
+      plan_narrow_passage_ = plan_narrow_passage;
+   }
+   /**
+            * If true, the planner will plan a narrow passage body path. If false, it will try to follow a straight line to the goal.
+            */
+   public boolean getPlanNarrowPassage()
+   {
+      return plan_narrow_passage_;
    }
 
    /**
@@ -380,23 +375,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public double getGoalYawProximity()
    {
       return goal_yaw_proximity_;
-   }
-
-   /**
-            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
-            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-            */
-   public void setRequestedPathHeading(double requested_path_heading)
-   {
-      requested_path_heading_ = requested_path_heading;
-   }
-   /**
-            * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
-            * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-            */
-   public double getRequestedPathHeading()
-   {
-      return requested_path_heading_;
    }
 
    /**
@@ -566,8 +544,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_body_path_, other.plan_body_path_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_narrow_passage_, other.plan_narrow_passage_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_a_star_search_, other.perform_a_star_search_, epsilon)) return false;
 
       if (this.body_path_waypoints_.size() != other.body_path_waypoints_.size()) { return false; }
@@ -577,11 +553,11 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
          {  if (!this.body_path_waypoints_.get(i).epsilonEquals(other.body_path_waypoints_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_narrow_passage_, other.plan_narrow_passage_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_distance_proximity_, other.goal_distance_proximity_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_yaw_proximity_, other.goal_yaw_proximity_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_path_heading_, other.requested_path_heading_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timeout_, other.timeout_, epsilon)) return false;
 
@@ -629,16 +605,14 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.plan_body_path_ != otherMyClass.plan_body_path_) return false;
 
-      if(this.plan_narrow_passage_ != otherMyClass.plan_narrow_passage_) return false;
-
       if(this.perform_a_star_search_ != otherMyClass.perform_a_star_search_) return false;
 
       if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
+      if(this.plan_narrow_passage_ != otherMyClass.plan_narrow_passage_) return false;
+
       if(this.goal_distance_proximity_ != otherMyClass.goal_distance_proximity_) return false;
 
       if(this.goal_yaw_proximity_ != otherMyClass.goal_yaw_proximity_) return false;
-
-      if(this.requested_path_heading_ != otherMyClass.requested_path_heading_) return false;
 
       if(this.timeout_ != otherMyClass.timeout_) return false;
 
@@ -687,18 +661,16 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.abort_if_body_path_planner_fails_);      builder.append(", ");
       builder.append("plan_body_path=");
       builder.append(this.plan_body_path_);      builder.append(", ");
-      builder.append("plan_narrow_passage=");
-      builder.append(this.plan_narrow_passage_);      builder.append(", ");
       builder.append("perform_a_star_search=");
       builder.append(this.perform_a_star_search_);      builder.append(", ");
       builder.append("body_path_waypoints=");
       builder.append(this.body_path_waypoints_);      builder.append(", ");
+      builder.append("plan_narrow_passage=");
+      builder.append(this.plan_narrow_passage_);      builder.append(", ");
       builder.append("goal_distance_proximity=");
       builder.append(this.goal_distance_proximity_);      builder.append(", ");
       builder.append("goal_yaw_proximity=");
       builder.append(this.goal_yaw_proximity_);      builder.append(", ");
-      builder.append("requested_path_heading=");
-      builder.append(this.requested_path_heading_);      builder.append(", ");
       builder.append("timeout=");
       builder.append(this.timeout_);      builder.append(", ");
       builder.append("max_iterations=");
