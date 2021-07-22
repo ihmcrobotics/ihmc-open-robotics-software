@@ -12,12 +12,12 @@ import com.badlogic.gdx.math.Vector3;
 
 public class GDXDirectionalLight extends GDXLight
 {
+   protected Vector3 direction;
    private FrameBuffer framebuffer;
    private Texture depthMap;
 
-   protected Vector3 direction;
-
-   public GDXDirectionalLight(Vector3 position, Vector3 direction) {
+   public GDXDirectionalLight(Vector3 position, Vector3 direction)
+   {
       this.position = position;
       this.direction = direction;
    }

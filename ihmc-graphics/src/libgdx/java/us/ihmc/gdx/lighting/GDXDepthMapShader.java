@@ -17,28 +17,6 @@ public class GDXDepthMapShader extends BaseShader
 {
    private Renderable renderable;
 
-   @Override
-   public void end()
-   {
-      super.end();
-   }
-
-   protected static ShaderProgram buildShaderProgram() {
-      ShaderProgram.pedantic = false;
-      final String directory = "us/ihmc/gdx/shadows";
-      final String prefix = "depthmap";
-
-      final ShaderProgram shaderProgram = new ShaderProgram(Gdx.files.classpath(directory + "/" + prefix + "_v.glsl"), Gdx.files.classpath(directory + "/" + prefix + "_f.glsl"));
-      if (!shaderProgram.isCompiled())
-      {
-         LogTools.fatal("Error with shader " + prefix + ": " + shaderProgram.getLog());
-         System.exit(1);
-      } else {
-         LogTools.info("Shader " + prefix + " compiled");
-      }
-      return shaderProgram;
-   }
-
    protected GDXDepthMapShader(final Renderable renderable, final ShaderProgram shaderProgram)
    {
       this.renderable = renderable;
@@ -46,7 +24,32 @@ public class GDXDepthMapShader extends BaseShader
       register(DefaultShader.Inputs.worldTrans, DefaultShader.Setters.worldTrans);
       register(DefaultShader.Inputs.projViewTrans, DefaultShader.Setters.projViewTrans);
       register(DefaultShader.Inputs.normalMatrix, DefaultShader.Setters.normalMatrix);
+   }
 
+   protected static ShaderProgram buildShaderProgram()
+   {
+      ShaderProgram.pedantic = false;
+      final String directory = "us/ihmc/gdx/shadows";
+      final String prefix = "depthmap";
+
+      final ShaderProgram shaderProgram = new ShaderProgram(Gdx.files.classpath(directory + "/" + prefix + "_v.glsl"),
+                                                            Gdx.files.classpath(directory + "/" + prefix + "_f.glsl"));
+      if (!shaderProgram.isCompiled())
+      {
+         LogTools.fatal("Error with shader " + prefix + ": " + shaderProgram.getLog());
+         System.exit(1);
+      }
+      else
+      {
+         LogTools.info("Shader " + prefix + " compiled");
+      }
+      return shaderProgram;
+   }
+
+   @Override
+   public void end()
+   {
+      super.end();
    }
 
    @Override
@@ -55,7 +58,6 @@ public class GDXDepthMapShader extends BaseShader
       super.begin(camera, context);
       context.setDepthTest(GL20.GL_LEQUAL);
       context.setCullFace(GL20.GL_BACK);
-
    }
 
    @Override

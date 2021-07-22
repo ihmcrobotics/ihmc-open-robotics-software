@@ -22,14 +22,16 @@ public class GDXShadowManager
 
    private FrameBuffer framebuffer;
 
-   public GDXShadowManager() {
+   public GDXShadowManager()
+   {
       this(GDXShadowMapShader.buildShaderProgram());
    }
 
    /**
     * @param shader The ShaderProgram used to create the shader used by the main ModelBatch
     */
-   public GDXShadowManager(ShaderProgram shader) {
+   public GDXShadowManager(ShaderProgram shader)
+   {
       final GDXShadowManager manager = this;
 
       this.shader = shader;
@@ -43,27 +45,44 @@ public class GDXShadowManager
       });
    }
 
-   public void addLight(GDXLight light) {
+   public static String getVertexShader()
+   {
+      return Gdx.files.classpath("us/ihmc/gdx/shadows/scene_v.glsl").readString();
+   }
+
+   public static String getFragmentShader()
+   {
+      return Gdx.files.classpath("us/ihmc/gdx/shadows/scene_f.glsl").readString();
+   }
+
+   public void addLight(GDXLight light)
+   {
       lights.add(light);
    }
 
    /**
     * Ensures that all lights are initialized
     */
-   public void update() {
-      for (GDXLight light : lights) {
+   public void update()
+   {
+      for (GDXLight light : lights)
+      {
          if (!light.isInitialized())
             light.init();
       }
    }
 
    /**
-    * Renders shadows to the ModelBatch and prepares the OpenGL environment for the rendering of the main ModelBatch, which should be rendered immediately after this call.
+    * Renders shadows to the ModelBatch and prepares the OpenGL environment for the rendering of the main ModelBatch, which should be rendered immediately after
+    * this call.
+    *
     * @param renderableProviders The models to be rendered
-    * @param program The {@link GDXSceneShader} belonging to the main batch
+    * @param program             The {@link GDXSceneShader} belonging to the main batch
     */
-   public <T extends RenderableProvider> void renderShadows( Camera camera, Iterable<T> renderableProviders, ShaderProgram program) {
-      for (GDXLight light : lights) {
+   public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders, ShaderProgram program)
+   {
+      for (GDXLight light : lights)
+      {
          light.render(renderableProviders);
       }
 
@@ -91,13 +110,5 @@ public class GDXShadowManager
       program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
       program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
       program.end();
-   }
-
-   public static String getVertexShader() {
-      return Gdx.files.classpath("us/ihmc/gdx/shadows/scene_v.glsl").readString();
-   }
-
-   public static String getFragmentShader() {
-      return Gdx.files.classpath("us/ihmc/gdx/shadows/scene_f.glsl").readString();
    }
 }
