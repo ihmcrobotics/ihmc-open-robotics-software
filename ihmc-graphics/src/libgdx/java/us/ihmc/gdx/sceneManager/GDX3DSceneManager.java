@@ -8,7 +8,9 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
+import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.BufferUtils;
@@ -17,6 +19,10 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.GDXInputMode;
+import us.ihmc.gdx.lighting.GDXDirectionalLight;
+import us.ihmc.gdx.lighting.GDXPointLight;
+import us.ihmc.gdx.lighting.GDXSceneShader;
+import us.ihmc.gdx.lighting.GDXShadowManager;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -31,12 +37,11 @@ public class GDX3DSceneManager
 {
    private InputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
-   private Environment environment;
    private ScreenViewport viewport;
+   private ShaderProgram mainShaderProgram;
    private ModelBatch modelBatch;
 
-   private DirectionalShadowLight shadowLight;
-   private ModelBatch shadowBatch;
+   private GDXShadowManager shadowManager;
 
    private int x = 0;
    private int y = 0;
@@ -80,32 +85,25 @@ public class GDX3DSceneManager
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
-      // Environment setup
-      environment = new Environment();
-      environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1.0f));
+      mainShaderProgram = new ShaderProgram(GDXShadowManager.getVertexShader(), GDXShadowManager.getFragmentShader());
+      modelBatch = new ModelBatch(new DefaultShaderProvider() {
+         @Override
+         protected Shader createShader(Renderable renderable)
+         {
+            return new GDXSceneShader(renderable, mainShaderProgram);
+         }
+      });
 
-      shadowLight = new DirectionalShadowLight(1024, 1024, 5.0f, 5.0f, 1.0f, 100.0f);
-      shadowLight.set(0.8f, 0.8f, 0.8f, -1.0f, -0.8f, -0.2f);
-      environment.add(shadowLight);
-      environment.shadowMap = shadowLight;
+      shadowManager = new GDXShadowManager();
 
-      PointLight light = new PointLight();
-      light.set(1, 1, 1, 0, 0, 20, 100);
-      environment.add(light);
+      shadowManager.addLight(new GDXPointLight(new Vector3(5, 5, 5)));
 
-      modelBatch = new ModelBatch();
-      shadowBatch = new ModelBatch(new DepthShaderProvider());
+      shadowManager.update();
    }
 
    public void renderShadowMap()
    {
-      shadowLight.begin(Vector3.Zero, camera3D.direction);
-      shadowBatch.begin(shadowLight.getCamera());
-
-      renderFromBatch(shadowBatch, GDXSceneLevel.REAL_ENVIRONMENT);
-
-      shadowBatch.end();
-      shadowLight.end();
+      shadowManager.renderShadows(camera3D, renderables, mainShaderProgram); //TODO only pass real objects to not render shadows for virtuals
    }
 
    private void preRender()
@@ -139,7 +137,7 @@ public class GDX3DSceneManager
       for (GDXRenderable renderable : renderables)
       {
          if (sceneLevel.ordinal() >= renderable.getSceneType().ordinal())
-            modelBatch.render(renderable.getRenderableProvider(), environment);
+            modelBatch.render(renderable.getRenderableProvider());
       }
    }
 
@@ -256,11 +254,6 @@ public class GDX3DSceneManager
       {
          LogTools.error(1, "libGDX is not being used for input!");
       }
-   }
-
-   public Environment getEnvironment()
-   {
-      return environment;
    }
 
    public void setAddFocusSphere(boolean addFocusSphere)
