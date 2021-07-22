@@ -53,7 +53,8 @@ public class GDXPointLight extends GDXLight
       shader.begin();
       final int textureNum = depthMap.getTextureObjectHandle();
       depthMap.bind(textureNum);
-      shader.setUniformi("u_depthMap", textureNum);
+      shader.setUniformf("u_type", 2);
+      shader.setUniformi("u_depthMapCube", textureNum);
       //sceneShaderProgram.setUniformMatrix("u_lightTrans", camera.combined);
       shader.setUniformf("u_cameraFar", camera.far);
       shader.setUniformf("u_lightPosition", position);
