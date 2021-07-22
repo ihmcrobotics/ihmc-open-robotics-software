@@ -18,21 +18,14 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
 import com.badlogic.gdx.graphics.g3d.utils.*;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.tests.utils.GdxTest;
 import com.badlogic.gdx.utils.Array;
 import org.lwjgl.opengl.GL30;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.lighting.*;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
@@ -45,6 +38,10 @@ public class GDX3DWithShadowsDemo {
    private ModelBatch modelBatch;
    private Array<ModelInstance> instances = new Array<>();
    private ModelInstance box;
+
+   private ShaderProgram program;
+
+   private GDXLight light;
 
    private GDXShadowManager manager;
 
@@ -61,7 +58,7 @@ public class GDX3DWithShadowsDemo {
       cam.update();
 
       //Model batch and shadow stuff
-      ShaderProgram program = new ShaderProgram(GDXShadowManager.getVertexShader(), GDXShadowManager.getFragmentShader());
+      program = new ShaderProgram(GDXShadowManager.getVertexShader(), GDXShadowManager.getFragmentShader());
       modelBatch = new ModelBatch(new DefaultShaderProvider() {
          @Override
          protected Shader createShader(Renderable renderable)
@@ -70,10 +67,11 @@ public class GDX3DWithShadowsDemo {
          }
       });
 
-      manager = new GDXShadowManager(program);
-      GDXLight light = new GDXPointLight(new Vector3(1, 1, 1));
-      light.init(); //TODO change me?
+      manager = new GDXShadowManager();
+      manager.addLight(new GDXDirectionalLight(new Vector3(1, 1, 1), new Vector3(-1, -1, -1)));
+      light = new GDXPointLight(new Vector3(1, 1, -1));
       manager.addLight(light);
+      manager.update();
 
       //Add model instances
       instances.add(box = GDXModelPrimitives.buildModelInstance(meshBuilder ->
@@ -97,7 +95,7 @@ public class GDX3DWithShadowsDemo {
 
       GDX3DSceneTools.glClearGray();
 
-      manager.render(instances);
+      manager.renderShadows(cam, instances, program);
 
       modelBatch.begin(cam);
       modelBatch.render(instances);
