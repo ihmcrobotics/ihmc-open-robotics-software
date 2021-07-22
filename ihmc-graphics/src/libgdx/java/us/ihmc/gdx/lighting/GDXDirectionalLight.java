@@ -66,8 +66,8 @@ public class GDXDirectionalLight extends GDXLight
       super.init();
 
       this.camera = new PerspectiveCamera(120f, DEPTHMAP_SIZE, DEPTHMAP_SIZE);
-      this.camera.near = 0.1f;
-      this.camera.far = 5f;
+      this.camera.near = CAMERA_NEAR;
+      this.camera.far = CAMERA_FAR;
       this.camera.position.set(position);
       this.camera.lookAt(direction);
 
