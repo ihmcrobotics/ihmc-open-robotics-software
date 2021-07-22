@@ -53,7 +53,8 @@ public class GDXDirectionalLight extends GDXLight
       shader.begin();
       final int textureNum = depthMap.getTextureObjectHandle();
       depthMap.bind(textureNum);
-      shader.setUniformi("u_depthMap", textureNum);
+      shader.setUniformf("u_type", 1);
+      shader.setUniformi("u_depthMapDir", textureNum);
       shader.setUniformMatrix("u_lightTrans", camera.combined);
       shader.setUniformf("u_cameraFar", camera.far);
       shader.setUniformf("u_lightPosition", camera.position);

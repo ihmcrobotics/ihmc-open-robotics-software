@@ -42,7 +42,7 @@ void main()
 	}
 	
 	// If not in shadow, add some light
-	if(lenDepthMap<lenToLight-0.005){
+	if(lenDepthMap<lenToLight-0.0025){
 	}else{
 		intensity=0.5*(1.0-lenToLight);
 	}

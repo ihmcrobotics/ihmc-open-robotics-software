@@ -39,6 +39,10 @@ public abstract class GDXLight
       }
    }
 
+   public boolean isInitialized() {
+      return modelBatch != null;
+   }
+
    public Camera getCamera()
    {
       return camera;
@@ -56,6 +60,6 @@ public abstract class GDXLight
 
    public void setPosition(Vector3 position)
    {
-      this.position = position;
+      //this.position = position; //changing the position of a light causes rendering problems
    }
 }
