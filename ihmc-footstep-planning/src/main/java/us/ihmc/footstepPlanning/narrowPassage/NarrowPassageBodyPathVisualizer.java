@@ -56,7 +56,8 @@ public class NarrowPassageBodyPathVisualizer
                                                                                                       scs,
                                                                                                       scs.getRootRegistry());
          narrowPassageBodyPathPlanner.setPlanarRegionsList(planarRegionsList);
-         narrowPassageBodyPathPlanner.computePlan(startPose, endPose);
+         narrowPassageBodyPathPlanner.setStartAndEndPoses(startPose, endPose);
+         narrowPassageBodyPathPlanner.computePlan();
       }
       else
       {

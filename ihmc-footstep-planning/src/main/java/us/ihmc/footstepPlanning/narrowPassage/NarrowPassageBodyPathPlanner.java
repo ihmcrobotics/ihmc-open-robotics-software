@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -37,12 +36,13 @@ public class NarrowPassageBodyPathPlanner
    private final YoGraphicsListRegistry graphicsListRegistry;
    private final YoBoolean collisionFound = new YoBoolean("collisionFound", registry);
    private final boolean visualize;
+   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
 
    private PlanarRegionsList planarRegionsList;
 
    private final YoFramePose3D startPose = new YoFramePose3D("startPose", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePose3D endPose = new YoFramePose3D("endPose", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePose3D[] waypoints = new YoFramePose3D[numberOfWaypoints];
+   private YoFramePose3D[] waypoints;
    private final List<BodyCollisionPoint> bodyCollisionPoints = new ArrayList<>();
 
    private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
@@ -72,18 +72,9 @@ public class NarrowPassageBodyPathPlanner
    {
       this.graphicsListRegistry = graphicsListRegistry;
       this.tickAndUpdatable = tickAndUpdatable;
+      this.footstepPlannerParameters = footstepPlannerParameters;
 
       visualize = graphicsListRegistry != null;
-      for (int i = 0; i < numberOfWaypoints; i++)
-      {
-         waypoints[i] = new YoFramePose3D("waypoint" + i, ReferenceFrame.getWorldFrame(), registry);
-         bodyCollisionPoints.add(new BodyCollisionPoint(i, footstepPlannerParameters, graphicsListRegistry, registry));
-         collisionGradients.add(new Vector3D());
-         convolvedGradients.add(new Vector3D());
-         yaws.add(new Vector3D());
-         convolvedYaws.add(new Vector3D());
-      }
-
       if (parentRegistry != null)
       {
          parentRegistry.addChild(registry);
@@ -119,11 +110,16 @@ public class NarrowPassageBodyPathPlanner
       this.planarRegionsList = planarRegionsList;
    }
 
-   public List<Pose3DReadOnly> computePlan(Pose3DReadOnly startPose, Pose3DReadOnly endPose)
+   public void setStartAndEndPoses(Pose3DReadOnly startPose, Pose3DReadOnly endPose)
    {
       this.startPose.set(startPose);
       this.endPose.set(endPose);
+      numberOfWaypoints = (int) (startPose.getPosition().distance(endPose.getPosition()) / 0.2);
+      waypoints = new YoFramePose3D[numberOfWaypoints];
+   }
 
+   public List<Pose3DReadOnly> computePlan()
+   {
       if (visualize)
       {
          setStartAndEndGraphics();
@@ -132,6 +128,7 @@ public class NarrowPassageBodyPathPlanner
       // initialize the waypoints with simple interpolation
       for (int i = 0; i < numberOfWaypoints; i++)
       {
+         waypoints[i] = new YoFramePose3D("waypoint" + i, ReferenceFrame.getWorldFrame(), registry);
          double alpha = (i + 1) / (double) (numberOfWaypoints + 1);
          waypoints[i].interpolate(startPose, endPose, alpha);
       }
@@ -168,13 +165,18 @@ public class NarrowPassageBodyPathPlanner
       Vector3D vectorToNextWaypoint = new Vector3D();
       for (int i = 0; i < numberOfWaypoints; i++)
       {
+         bodyCollisionPoints.add(new BodyCollisionPoint(i, footstepPlannerParameters, graphicsListRegistry, registry));
+         collisionGradients.add(new Vector3D());
+         convolvedGradients.add(new Vector3D());
+         yaws.add(new Vector3D());
+         convolvedYaws.add(new Vector3D());
+         convolutionWeights.add(exp(0.65, i));
          if (i < numberOfWaypoints - 1)
             vectorToNextWaypoint.set(waypoints[i + 1].getX() - waypoints[i].getX(),
                                      waypoints[i + 1].getY() - waypoints[i].getY(),
                                      waypoints[i + 1].getZ() - waypoints[i].getZ());
          bodyCollisionPoints.get(i).initializeWaypointAdjustmentFrame(vectorToNextWaypoint);
          bodyCollisionPoints.get(i).initialize(waypoints[i]);
-
          convolutionWeights.add(exp(0.65, i));
       }
       if (visualize)
@@ -196,7 +198,6 @@ public class NarrowPassageBodyPathPlanner
       for (int i = 0; i < maxPoseAdjustmentIterations; i++)
       {
          double maxCollisionDistance = 0.0;
-         LogTools.info("pose adjust: " + i);
          boolean intersectionFound = false;
          for (int j = 0; j < numberOfWaypoints; j++)
          {
@@ -240,7 +241,6 @@ public class NarrowPassageBodyPathPlanner
 
             bodyCollisionPoints.get(j).project(convolvedGradients.get(j));
             bodyCollisionPoints.get(j).shiftWaypoint(convolvedGradients.get(j));
-            LogTools.info("update: " + bodyCollisionPoints.get(j).getOptimizedWaypoint());
 
             if (visualize)
             {
@@ -270,8 +270,6 @@ public class NarrowPassageBodyPathPlanner
 
       for (int i = 0; i < maxOrientationAdjustmentIterations; i++)
       {
-         LogTools.info("orientation adjust: " + i);
-
          boolean intersectionFound = false;
 
          // Adjust waypoint orientations

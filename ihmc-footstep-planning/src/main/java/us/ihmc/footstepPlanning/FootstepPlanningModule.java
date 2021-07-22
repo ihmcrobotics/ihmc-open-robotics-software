@@ -231,7 +231,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       else if (request.getPlanNarrowPassage())
       {
          LogTools.info("Entering Narrow Passage planning");
-         List<Pose3DReadOnly> waypoints = bodyPathPlannerNarrowPassage.computePlan(startMidFootPose, goalMidFootPose);
+         bodyPathPlannerNarrowPassage.setStartAndEndPoses(startMidFootPose, goalMidFootPose);
+         List<Pose3DReadOnly> waypoints = bodyPathPlannerNarrowPassage.computePlan();
 //         if (waypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails())
 //         {
 //            reportBodyPathPlan();
