@@ -54,7 +54,7 @@ public class GDXSimulatedRobot
       {
          if (rigidBody.getGraphics() != null)
          {
-            rigidBody.getGraphics().getModelInstance().getRenderables(renderables, pool);
+            rigidBody.getGraphics().getRealRenderables(renderables, pool);
          }
       }
    }
