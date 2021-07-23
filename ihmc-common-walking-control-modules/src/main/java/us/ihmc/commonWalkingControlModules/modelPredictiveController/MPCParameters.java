@@ -23,7 +23,7 @@ public class MPCParameters
    private static final double defaultMinRhoValue = 0.0;//05;
 
    public static final double defaultInitialComWeight = 5e3;
-   public static final double defaultInitialComVelocityWeight = 153;
+   public static final double defaultInitialComVelocityWeight = 1e3;
    public static final double defaultFinalComWeight = 1e1;
    public static final double defaultFinalVRPWeight = 1e2;
    public static final double defaultVrpTrackingWeight = 1e2;
@@ -37,10 +37,10 @@ public class MPCParameters
    private static final double defaultInitialOrientationWeight = 1e3;
    private static final double defaultFinalOrientationWeight = 1e2;
 
-   public static final ConstraintType initialCoMPositionConstraintType = ConstraintType.EQUALITY;
-   public static final ConstraintType initialCoMVelocityConstraintType = ConstraintType.EQUALITY;
-   public static final ConstraintType finalCoMPositionConstraintType = ConstraintType.OBJECTIVE;
-   public static final ConstraintType finalCoMVelocityConstraintType = ConstraintType.EQUALITY;
+   public static final ConstraintType initialCoMPositionConstraintType = ConstraintType.OBJECTIVE;
+   public static final ConstraintType initialCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
+   public static final ConstraintType finalCoMPositionConstraintType = ConstraintType.EQUALITY;
+   public static final ConstraintType finalCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
    public static final ConstraintType finalDCMPositionConstraintType = ConstraintType.OBJECTIVE;
    public static final ConstraintType finalVRPPositionConstraintType = ConstraintType.OBJECTIVE;
 

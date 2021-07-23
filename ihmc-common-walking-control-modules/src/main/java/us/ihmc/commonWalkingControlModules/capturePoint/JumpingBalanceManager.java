@@ -550,7 +550,7 @@ public class JumpingBalanceManager
       copTrajectoryState.setInitialCoP(yoDesiredVRP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-//      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
+      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
 
       startTimeForSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
@@ -565,10 +565,12 @@ public class JumpingBalanceManager
 
    public void initializeCoMPlanForSupport(JumpingGoal jumpingGoal)
    {
+//      comTrajectoryPlanner.reset();
+
       copTrajectoryState.setInitialCoP(yoDesiredVRP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-//      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
+      comTrajectoryPlanner.setInitialBodyOrientationState(yoDesiredBodyOrientation, yoDesiredBodyAngularVelocity);
 
       startTimeForSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
