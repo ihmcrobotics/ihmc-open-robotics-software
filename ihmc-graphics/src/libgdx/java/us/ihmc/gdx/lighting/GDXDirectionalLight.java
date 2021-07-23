@@ -41,8 +41,7 @@ public class GDXDirectionalLight extends GDXLight
       modelBatch.begin(camera);
       modelBatch.render(renderableProviders);
       modelBatch.end();
-
-      //PerryUtilsDONOTCOMMIT.screenshot(framebuffer, "depth");
+      
       framebuffer.end();
       depthMap = framebuffer.getColorBufferTexture();
    }
