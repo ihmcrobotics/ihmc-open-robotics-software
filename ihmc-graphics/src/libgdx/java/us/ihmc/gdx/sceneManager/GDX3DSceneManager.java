@@ -101,9 +101,9 @@ public class GDX3DSceneManager
       shadowManager.update();
    }
 
-   public void renderShadowMap()
+   public void renderShadowMap(int x, int y)
    {
-      shadowManager.renderShadows(camera3D, renderables, mainShaderProgram); //TODO only pass real objects to not render shadows for virtuals
+      shadowManager.renderShadows(camera3D, renderables, x, y); //TODO only pass real objects to not render shadows for virtuals
    }
 
    private void preRender()
@@ -120,6 +120,7 @@ public class GDX3DSceneManager
          height = getCurrentWindowHeight();
 
       viewport.update(width, height);
+      shadowManager.apply(mainShaderProgram);
       modelBatch.begin(camera3D);
       Gdx.gl.glViewport(x, y, width, height);
       GDX3DSceneTools.glClearGray();
@@ -227,6 +228,8 @@ public class GDX3DSceneManager
       this.y = y;
       this.width = width;
       this.height = height;
+
+      this.shadowManager.setViewportBounds(x, y, width, height);
    }
 
    public int getCurrentWindowWidth()
