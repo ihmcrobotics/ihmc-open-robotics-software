@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.OrientationTrajectoryConstructor;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.customPolicies.CustomMPCPolicy;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
@@ -33,17 +34,13 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntUnaryOperator;
 
 public class SE3ModelPredictiveController extends EuclideanModelPredictiveController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double defaultOrientationAngleTrackingWeight = 1e-2;
-   private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
-
-   private static final double defaultInitialOrientationWeight = 1e6;
-   private static final double defaultFinalOrientationWeight = 1e-6;
 
    private static final boolean defaultIncludeIntermediateOrientationTracking = true;
 
@@ -83,14 +80,13 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    protected final YoVector3D currentBodyAngularVelocityError = new YoVector3D("currentBodyAngularVelocityError", registry);
 
    private final YoBoolean includeIntermediateOrientationTracking = new YoBoolean("includeIntermediateOrientationTracking", registry);
-   private final YoDouble orientationAngleTrackingWeight = new YoDouble("orientationAngleTrackingWeight", registry);
-   private final YoDouble orientationVelocityTrackingWeight = new YoDouble("orientationVelocityTrackingWeight", registry);
-   private final YoDouble initialOrientationWeight = new YoDouble("initialOrientationWeight", registry);
-   private final YoDouble finalOrientationWeight = new YoDouble("finalOrientationWeight", registry);
 
    private final IntUnaryOperator firstVariableIndex;
 
+   private final List<CustomMPCPolicy> customMPCPoliciesToProcess = new ArrayList<>();
+
    public SE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
+                                       MPCParameters mpcParameters,
                                        double gravityZ,
                                        double nominalCoMHeight,
                                        double mass,
@@ -99,6 +95,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    {
       this(new SE3MPCIndexHandler(numberOfBasisVectorsPerContactPoint),
            momentOfInertia,
+           mpcParameters,
            gravityZ,
            nominalCoMHeight,
            mass,
@@ -108,13 +105,14 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
    public SE3ModelPredictiveController(SE3MPCIndexHandler indexHandler,
                                        Matrix3DReadOnly momentOfInertia,
+                                       MPCParameters mpcParameters,
                                        double gravityZ,
                                        double nominalCoMHeight,
                                        double mass,
                                        double dt,
                                        YoRegistry parentRegistry)
    {
-      super(indexHandler, mass, gravityZ, nominalCoMHeight, parentRegistry);
+      super(indexHandler, mpcParameters, mass, gravityZ, nominalCoMHeight, parentRegistry);
 
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
@@ -124,14 +122,9 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
       firstVariableIndex = indexHandler::getOrientationStartIndex;
 
-      orientationAngleTrackingWeight.set(defaultOrientationAngleTrackingWeight);
-      orientationVelocityTrackingWeight.set(defaultOrientationVelocityTrackingWeight);
-      initialOrientationWeight.set(defaultInitialOrientationWeight);
-      finalOrientationWeight.set(defaultFinalOrientationWeight);
-
       orientationTrajectoryConstructor = new OrientationTrajectoryConstructor(indexHandler,
-                                                                              orientationAngleTrackingWeight,
-                                                                              orientationVelocityTrackingWeight,
+                                                                              mpcParameters.getOrientationAngleTrackingWeightProvider(),
+                                                                              mpcParameters.getOrientationVelocityTrackingWeightProvider(),
                                                                               omega,
                                                                               mass,
                                                                               gravityZ);
@@ -150,6 +143,11 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       includeIntermediateOrientationTracking.set(defaultIncludeIntermediateOrientationTracking);
 
       parentRegistry.addChild(registry);
+   }
+   
+   public void addCustomPolicyToProcess(CustomMPCPolicy policyToProcess)
+   {
+      customMPCPoliciesToProcess.add(policyToProcess);
    }
 
 
@@ -198,6 +196,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       super.computeObjectives(contactSequence);
 
       computeOrientationObjectives();
+
+      computeCustomMPCPolicyObjectives(contactSequence);
    }
 
    private final DMatrixRMaj initialError = new DMatrixRMaj(6, 1);
@@ -225,6 +225,16 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       mpcCommands.addCommand(computeFinalOrientationMinimizationCommand(commandProvider.getNextOrientationValueCommand()));
    }
 
+   private void computeCustomMPCPolicyObjectives(List<ContactPlaneProvider> contactSequence)
+   {
+      for (int i = 0; i < customMPCPoliciesToProcess.size(); i++)
+      {
+         mpcCommands.addCommand(customMPCPoliciesToProcess.get(i).computeMPCCommand(contactHandler, contactSequence, omega.getValue()));
+      }
+
+      customMPCPoliciesToProcess.clear();
+   }
+
    private void computeInitialError()
    {
       orientationTrajectoryHandler.computeReferenceValue(currentTimeInState.getDoubleValue());
@@ -245,7 +255,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       commandToPack.setSegmentNumber(0);
       commandToPack.setObjectiveValue(initialError);
       commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
-      commandToPack.setObjectiveWeight(initialOrientationWeight.getDoubleValue());
+      commandToPack.setObjectiveWeight(mpcParameters.getInitialOrientationWeight());
 
       return commandToPack;
    }
@@ -264,7 +274,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
       commandToPack.getObjectiveValue().zero();
       commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
-      commandToPack.setObjectiveWeight(finalOrientationWeight.getDoubleValue());
+      commandToPack.setObjectiveWeight(mpcParameters.getFinalOrientationWeight());
 
       return commandToPack;
    }
@@ -316,8 +326,6 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
          assembleActiveSet(firstVariableIndex);
          qpSolver.setPreviousSolution(previousSolution);
          qpSolver.setActiveInequalityIndices(activeInequalityConstraints);
-         qpSolver.setActiveLowerBoundIndices(activeUpperBoundConstraints);
-         qpSolver.setActiveUpperBoundIndices(activeLowerBoundConstraints);
       }
 
       if (!qpSolver.solve())

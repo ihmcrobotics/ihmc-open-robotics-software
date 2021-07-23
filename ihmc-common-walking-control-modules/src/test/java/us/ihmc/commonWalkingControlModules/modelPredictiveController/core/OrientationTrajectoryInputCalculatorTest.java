@@ -339,8 +339,8 @@ public class OrientationTrajectoryInputCalculatorTest
          qpSolver.addInput(regularInput, regularOffset);
          compactSolver.addInput(compactInput, compactOffset);
 
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_H, compactSolver.solverInput_H, 1e-5);
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_f, compactSolver.solverInput_f, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.costQuadraticMatrix, compactSolver.qpSolver.costQuadraticMatrix, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.quadraticCostQVector, compactSolver.qpSolver.quadraticCostQVector, 1e-5);
       }
 
    }
@@ -423,8 +423,8 @@ public class OrientationTrajectoryInputCalculatorTest
          qpSolver.addInput(regularInput, regularOffset);
          compactSolver.addInput(compactInput, compactOffset);
 
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_H, compactSolver.solverInput_H, 1e-5);
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_f, compactSolver.solverInput_f, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.costQuadraticMatrix, compactSolver.qpSolver.costQuadraticMatrix, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.quadraticCostQVector, compactSolver.qpSolver.quadraticCostQVector, 1e-5);
       }
 
    }
@@ -503,10 +503,11 @@ public class OrientationTrajectoryInputCalculatorTest
          qpSolver.addInput(regularInput, regularOffset);
          compactSolver.addInput(compactInput, compactOffset);
 
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_H, compactSolver.solverInput_H, 1e-5);
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_f, compactSolver.solverInput_f, 1e-5);
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_Aeq, compactSolver.solverInput_Aeq, 1e-5);
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_bin, compactSolver.solverInput_bin, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.costQuadraticMatrix, compactSolver.qpSolver.costQuadraticMatrix, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.quadraticCostQVector, compactSolver.qpSolver.quadraticCostQVector, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.linearEqualityConstraintsAMatrix, compactSolver.qpSolver.linearEqualityConstraintsAMatrix, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.linearEqualityConstraintsBVector, compactSolver.qpSolver.linearEqualityConstraintsBVector, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.linearInequalityConstraintsDVectorO, compactSolver.qpSolver.linearInequalityConstraintsDVectorO, 1e-5);
       }
 
    }
@@ -586,10 +587,11 @@ public class OrientationTrajectoryInputCalculatorTest
          qpSolver.addInput(regularInput, regularOffset);
          compactSolver.addInput(compactInput, compactOffset);
 
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_H, compactSolver.solverInput_H, 1e-5);
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_f, compactSolver.solverInput_f, 1e-5);
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_Aeq, compactSolver.solverInput_Aeq, 1e-5);
-         MatrixTestTools.assertMatrixEquals(qpSolver.solverInput_bin, compactSolver.solverInput_bin, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.costQuadraticMatrix, compactSolver.qpSolver.costQuadraticMatrix, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.quadraticCostQVector, compactSolver.qpSolver.quadraticCostQVector, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.linearEqualityConstraintsAMatrix, compactSolver.qpSolver.linearEqualityConstraintsAMatrix, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.linearEqualityConstraintsBVector, compactSolver.qpSolver.linearEqualityConstraintsBVector, 1e-5);
+         MatrixTestTools.assertMatrixEquals(qpSolver.qpSolver.linearInequalityConstraintsDVectorO, compactSolver.qpSolver.linearInequalityConstraintsDVectorO, 1e-5);
       }
 
    }
