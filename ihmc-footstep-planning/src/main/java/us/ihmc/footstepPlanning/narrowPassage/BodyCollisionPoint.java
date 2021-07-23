@@ -29,11 +29,10 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.awt.*;
 
-import static us.ihmc.footstepPlanning.narrowPassage.NarrowPassageBodyPathPlanner.scaleAdd;
-
 public class BodyCollisionPoint
 {
    private static final double collisionBoxHeight = 0.4;
+   private static double shiftAlpha = 1;
    private static final FramePose3D nanPose = new FramePose3D();
 
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
@@ -109,8 +108,8 @@ public class BodyCollisionPoint
    public void initializeBoxParameters()
    {
       // set default size
-      double boxSizeX = 0.4;   //footstepPlannerParameters.getBodyBoxDepth();
-      double boxSizeY = 0.9;  //footstepPlannerParameters.getBodyBoxWidth();
+      double boxSizeX = 0.46;   //footstepPlannerParameters.getBodyBoxDepth();
+      double boxSizeY = 1;  //footstepPlannerParameters.getBodyBoxWidth();
       double boxSizeZ = 1.5;   //footstepPlannerParameters.getBodyBoxHeight();
       collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
       boxCenterInSoleFrame.set(0.0, 0.0, boxSizeZ / 2 + 0.3);
@@ -142,12 +141,22 @@ public class BodyCollisionPoint
    {
       double yAlpha = adjustmentFrameY.dot(shiftDirection);
       shiftDirection.set(adjustmentFrameY);
-      shiftDirection.scale(yAlpha);
+      shiftDirection.scale(yAlpha * 0.5);
    }
 
-   public YoFramePose3D getStartingWaypoint()
+   public int project(Vector3DBasics shiftDirection, int previousShiftSign)
    {
-      return startingWaypoint;
+      double yAlpha = adjustmentFrameY.dot(shiftDirection);
+      shiftDirection.set(adjustmentFrameY);
+      if ((previousShiftSign > 0 && yAlpha < 0) || (previousShiftSign < 0 && yAlpha > 0))
+         shiftAlpha = shiftAlpha * 0.85;
+      shiftDirection.scale(yAlpha * shiftAlpha);
+      return yAlpha > 0 ? 1 : -1;
+   }
+
+   public void resetShiftAlpha()
+   {
+      this.shiftAlpha = 1;
    }
 
    public void initialize(FramePose3DReadOnly startingWaypoint)
@@ -179,16 +188,20 @@ public class BodyCollisionPoint
       updateCollisionBox();
    }
 
-   public void adjustOrientation(int rotationDirection, Vector3D collisionVector)
+   public double getYawShift(Vector3D collisionVector)
    {
       // Scale turning angle based on collision vector
-      double scale = collisionVector.length() * 200;
-      if (scale < 2)
-         scale = 2;
+      double yawShift = collisionVector.length() * 200;
+      if (yawShift < 1)
+         yawShift = 1;
+      return yawShift;
+   }
 
+   public void adjustOrientation(int rotationDirection, double yawShift)
+   {
       QuaternionReadOnly orientation = optimizedWaypoint.getOrientation();
       optimizedWaypoint.getOrientation()
-                       .setYawPitchRoll(orientation.getYaw() + Math.toRadians(rotationDirection * scale), orientation.getPitch(), orientation.getRoll());
+                       .setYawPitchRoll(orientation.getYaw() + Math.toRadians(rotationDirection * yawShift), orientation.getPitch(), orientation.getRoll());
       updateCollisionBox();
    }
 
@@ -229,7 +242,6 @@ public class BodyCollisionPoint
    private void updateCollisionBox()
    {
       waypointPoseFrame.setPoseAndUpdate(optimizedWaypoint);
-//      LogTools.info("waypointPoseFrame: " + waypointPoseFrame);
       boxCenterPose.setToZero(waypointPoseFrame);
       boxCenterPose.getPosition().set(boxCenterInSoleFrame);
       boxCenterPose.changeFrame(ReferenceFrame.getWorldFrame());
