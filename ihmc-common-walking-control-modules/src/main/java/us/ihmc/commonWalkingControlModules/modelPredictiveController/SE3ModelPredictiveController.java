@@ -71,7 +71,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
    protected final YoVector3D currentBodyAxisAngleError = new YoVector3D("currentBodyAxisAngleError", registry);
 
-   private final OrientationTrajectoryConstructor orientationTrajectoryConstructor;
+   final OrientationTrajectoryConstructor orientationTrajectoryConstructor;
    final OrientationMPCTrajectoryHandler orientationTrajectoryHandler;
    private SE3MPCTrajectoryViewer trajectoryViewer = null;
 
@@ -197,17 +197,6 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    @Override
    protected void computeObjectives(List<ContactPlaneProvider> contactSequence)
    {
-      super.computeObjectives(contactSequence);
-
-      computeOrientationObjectives();
-
-      computeCustomMPCPolicyObjectives(contactSequence);
-   }
-
-   private final DMatrixRMaj initialError = new DMatrixRMaj(6, 1);
-
-   private void computeOrientationObjectives()
-   {
       computeInitialError();
 
       orientationTrajectoryConstructor.compute(previewWindowCalculator.getPlanningWindow(),
@@ -216,17 +205,9 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                                                orientationTrajectoryHandler,
                                                contactHandler.getContactPlanes());
 
-      int numberOfSegments = indexHandler.getNumberOfSegments();
-      for (int i = 0; i < numberOfSegments; i++)
-      {
-         if (includeIntermediateOrientationTracking.getBooleanValue())
-            mpcCommands.addCommand(orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(i));
-         if (i < numberOfSegments - 1)
-            mpcCommands.addCommand(computeOrientationContinuityCommand(i, commandProvider.getNextOrientationContinuityCommand()));
-      }
+      super.computeObjectives(contactSequence);
 
-      mpcCommands.addCommand(computeInitialOrientationErrorCommand(commandProvider.getNextDirectOrientationValueCommand()));
-      mpcCommands.addCommand(computeFinalOrientationMinimizationCommand(commandProvider.getNextOrientationValueCommand()));
+      computeCustomMPCPolicyObjectives(contactSequence);
    }
 
    private void computeCustomMPCPolicyObjectives(List<ContactPlaneProvider> contactSequence)
@@ -238,6 +219,41 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
       customMPCPoliciesToProcess.clear();
    }
+
+   @Override
+   public void computeInitialPhaseObjectives()
+   {
+      super.computeInitialPhaseObjectives();
+
+      mpcCommands.addCommand(computeInitialOrientationErrorCommand(commandProvider.getNextDirectOrientationValueCommand()));
+   }
+
+   @Override
+   protected void computeTransitionObjectives(ContactPlaneProvider currentContact, ContactPlaneProvider nextContact, int currentSegmentNumber)
+   {
+      super.computeTransitionObjectives(currentContact, nextContact, currentSegmentNumber);
+
+      mpcCommands.addCommand(computeOrientationContinuityCommand(currentSegmentNumber, commandProvider.getNextOrientationContinuityCommand()));
+   }
+
+   @Override
+   protected void computeObjectivesForCurrentPhase(ContactPlaneProvider contactPlaneProvider, int segmentNumber)
+   {
+      super.computeObjectivesForCurrentPhase(contactPlaneProvider, segmentNumber);
+
+      if (includeIntermediateOrientationTracking.getBooleanValue())
+         mpcCommands.addCommand(orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(segmentNumber));
+   }
+
+   @Override
+   public void computeFinalPhaseObjectives(ContactPlaneProvider lastContactPhase, int segmentNumber)
+   {
+      super.computeFinalPhaseObjectives(lastContactPhase, segmentNumber);
+
+      mpcCommands.addCommand(computeFinalOrientationMinimizationCommand(commandProvider.getNextOrientationValueCommand()));
+   }
+
+   private final DMatrixRMaj initialError = new DMatrixRMaj(6, 1);
 
    private void computeInitialError()
    {

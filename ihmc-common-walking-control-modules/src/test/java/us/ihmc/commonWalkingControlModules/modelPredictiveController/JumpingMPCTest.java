@@ -1,21 +1,25 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
+import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.ContactStateMagnitudeToForceMatrixHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCTestHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -187,7 +191,194 @@ public class JumpingMPCTest
 
       NativeMatrix solutionCoefficients = mpc.qpSolver.getSolution();
 
+      DMatrixRMaj linearConstraintMatrix = new DMatrixRMaj(numberOfEqualityConstraints, indexHandler.getTotalProblemSize());
+      DMatrixRMaj linearConstraintVector = new DMatrixRMaj(numberOfEqualityConstraints, 1);
 
+      int row = 0;
+      if (MPCParameters.initialCoMPositionConstraintType == ConstraintType.EQUALITY)
+      {
+         DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+         List<MPCContactPlane> contactPlanes = mpc.contactHandler.getContactPlanesForSegment(0);
+         CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(0), 0.0, tempJacobian, 0, 1.0);
+         int rhoStart = indexHandler.getRhoCoefficientStartIndex(0);
+         for (int i = 0; i < contactPlanes.size(); i++)
+         {
+            ContactPlaneJacobianCalculator.computeLinearJacobian(0, 0.0, mpc.omega.getValue(), rhoStart, contactPlanes.get(i), tempJacobian);
+            rhoStart += contactPlanes.get(i).getCoefficientSize();
+         }
+
+         MatrixTools.setMatrixBlock(linearConstraintMatrix, row, 0, tempJacobian, 0, 0, 3, indexHandler.getTotalProblemSize(), 1.0);
+
+         row += 3;
+      }
+      if (MPCParameters.initialCoMVelocityConstraintType == ConstraintType.EQUALITY)
+      {
+         DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+
+         List<MPCContactPlane> contactPlanes = mpc.contactHandler.getContactPlanesForSegment(0);
+         CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(0), 0.0, tempJacobian, 1, 1.0);
+         int rhoStart = indexHandler.getRhoCoefficientStartIndex(0);
+         for (int i = 0; i < contactPlanes.size(); i++)
+         {
+            ContactPlaneJacobianCalculator.computeLinearJacobian(1, 0.0, mpc.omega.getValue(), rhoStart, contactPlanes.get(i), tempJacobian);
+            rhoStart += contactPlanes.get(i).getCoefficientSize();
+         }
+
+         MatrixTools.setMatrixBlock(linearConstraintMatrix, row, 0, tempJacobian, 0, 0, 3, indexHandler.getTotalProblemSize(), 1.0);
+
+         row += 3;
+      }
+
+
+      for (int transition = 0; transition < mpc.previewWindowCalculator.getPlanningWindow().size() - 1; transition++)
+      {
+         int currentSegmentNumber = transition;
+         int nextSegmentNumber = transition + 1;
+         List<MPCContactPlane> contactPlanesInCurrentSegment = mpc.contactHandler.getContactPlanesForSegment(currentSegmentNumber);
+         List<MPCContactPlane> contactPlanesInNextSegment = mpc.contactHandler.getContactPlanesForSegment(nextSegmentNumber);
+
+         double currentSegmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(currentSegmentNumber).getTimeInterval().getDuration();
+
+         // Position continuity constraint
+         {
+            DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(currentSegmentNumber),
+                                                                  currentSegmentDuration,
+                                                                  tempJacobian,
+                                                                  0,
+                                                                  1.0);
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(nextSegmentNumber), 0.0, tempJacobian, 0, -1.0);
+
+            int rhoStart = indexHandler.getRhoCoefficientStartIndex(currentSegmentNumber);
+            for (int i = 0; i < contactPlanesInCurrentSegment.size(); i++)
+            {
+               ContactPlaneJacobianCalculator.computeLinearJacobian(0, currentSegmentDuration, mpc.omega.getValue(), rhoStart, contactPlanesInCurrentSegment.get(i), tempJacobian);
+               rhoStart += contactPlanesInCurrentSegment.get(i).getCoefficientSize();
+            }
+
+            rhoStart = indexHandler.getRhoCoefficientStartIndex(nextSegmentNumber);
+            for (int i = 0; i < contactPlanesInNextSegment.size(); i++)
+            {
+               ContactPlaneJacobianCalculator.computeLinearJacobian(-1.0, 0, 0.0, mpc.omega.getValue(), rhoStart, contactPlanesInNextSegment.get(i), tempJacobian);
+               rhoStart += contactPlanesInNextSegment.get(i).getCoefficientSize();
+            }
+
+            linearConstraintVector.set(row + 2, 0, -0.5 * currentSegmentDuration * currentSegmentDuration * -9.81);
+
+            MatrixTools.setMatrixBlock(linearConstraintMatrix, row, 0, tempJacobian, 0, 0, 3, indexHandler.getTotalProblemSize(), 1.0);
+
+            row += 3;
+         }
+
+         // Velocity continuity constraint
+         {
+            DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(currentSegmentNumber),
+                                                                  currentSegmentDuration,
+                                                                  tempJacobian,
+                                                                  1,
+                                                                  1.0);
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(nextSegmentNumber), 0.0, tempJacobian, 1, -1.0);
+
+            int rhoStart = indexHandler.getRhoCoefficientStartIndex(currentSegmentNumber);
+            for (int i = 0; i < contactPlanesInCurrentSegment.size(); i++)
+            {
+               ContactPlaneJacobianCalculator.computeLinearJacobian(1, currentSegmentDuration, mpc.omega.getValue(), rhoStart, contactPlanesInCurrentSegment.get(i), tempJacobian);
+               rhoStart += contactPlanesInCurrentSegment.get(i).getCoefficientSize();
+            }
+
+            rhoStart = indexHandler.getRhoCoefficientStartIndex(nextSegmentNumber);
+            for (int i = 0; i < contactPlanesInNextSegment.size(); i++)
+            {
+               ContactPlaneJacobianCalculator.computeLinearJacobian(-1.0, 1, 0.0, mpc.omega.getValue(), rhoStart, contactPlanesInNextSegment.get(i), tempJacobian);
+               rhoStart += contactPlanesInNextSegment.get(i).getCoefficientSize();
+            }
+
+            MatrixTools.setMatrixBlock(linearConstraintMatrix, row, 0, tempJacobian, 0, 0, 3, indexHandler.getTotalProblemSize(), 1.0);
+
+            linearConstraintVector.set(row + 2, 0, -currentSegmentDuration * -9.81);
+
+            row += 3;
+         }
+
+         // VRP Continuity constraint
+         if (contactPlanesInCurrentSegment.size() > 0 && contactPlanesInNextSegment.size() > 0)
+         {
+            DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(currentSegmentNumber),
+                                                                  currentSegmentDuration,
+                                                                  tempJacobian,
+                                                                  0,
+                                                                  1.0);
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(currentSegmentNumber),
+                                                                  currentSegmentDuration,
+                                                                  tempJacobian,
+                                                                  2,
+                                                                  -1.0 / MathTools.square(mpc.omega.getValue()));
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(nextSegmentNumber), 0.0, tempJacobian, 0, -1.0);
+            CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(nextSegmentNumber), 0.0, tempJacobian, 2, 1.0 / MathTools.square(mpc.omega.getValue()));
+
+            int rhoStart = indexHandler.getRhoCoefficientStartIndex(currentSegmentNumber);
+            for (int i = 0; i < contactPlanesInCurrentSegment.size(); i++)
+            {
+               ContactPlaneJacobianCalculator.computeLinearJacobian(0, currentSegmentDuration, mpc.omega.getValue(), rhoStart, contactPlanesInCurrentSegment.get(i), tempJacobian);
+               ContactPlaneJacobianCalculator.computeLinearJacobian(-1.0 / MathTools.square(mpc.omega.getValue()), 2, currentSegmentDuration, mpc.omega.getValue(), rhoStart, contactPlanesInCurrentSegment.get(i), tempJacobian);
+               rhoStart += contactPlanesInCurrentSegment.get(i).getCoefficientSize();
+            }
+
+            rhoStart = indexHandler.getRhoCoefficientStartIndex(nextSegmentNumber);
+            for (int i = 0; i < contactPlanesInNextSegment.size(); i++)
+            {
+               ContactPlaneJacobianCalculator.computeLinearJacobian(-1.0, 0, 0.0, mpc.omega.getValue(), rhoStart, contactPlanesInNextSegment.get(i), tempJacobian);
+               ContactPlaneJacobianCalculator.computeLinearJacobian(1.0 / MathTools.square(mpc.omega.getValue()), 2, 0.0, mpc.omega.getValue(), rhoStart, contactPlanesInNextSegment.get(i), tempJacobian);
+               rhoStart += contactPlanesInNextSegment.get(i).getCoefficientSize();
+            }
+
+            MatrixTools.setMatrixBlock(linearConstraintMatrix, row, 0, tempJacobian, 0, 0, 3, indexHandler.getTotalProblemSize(), 1.0);
+
+            linearConstraintVector.set(row + 2, 0, -0.5 * currentSegmentDuration * currentSegmentDuration * -9.81 );
+
+            row += 3;
+         }
+
+         // Orientation Continuity constraint
+         {
+            DMatrixRMaj tempJacobian = new DMatrixRMaj(6, indexHandler.getTotalProblemSize());
+
+            OrientationTrajectoryCommand  trajectoryCommand = mpc.orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(currentSegmentNumber);
+            MatrixTools.setMatrixBlock(tempJacobian,
+                                       0,
+                                       indexHandler.getOrientationStartIndex(currentSegmentNumber),
+                                       trajectoryCommand.getAMatrix(indexHandler.getTicksInSegment(currentSegmentNumber)  - 1),
+                                       0,
+                                       0,
+                                       6,
+                                       6,
+                                       -1.0);
+            MatrixTools.setMatrixBlock(tempJacobian,
+                                       0,
+                                       indexHandler.getComCoefficientStartIndex(currentSegmentNumber),
+                                       trajectoryCommand.getBMatrix(indexHandler.getTicksInSegment(currentSegmentNumber) - 1),
+                                       0,
+                                       0,
+                                       6,
+                                       indexHandler.getRhoCoefficientsInSegment(currentSegmentNumber) + LinearMPCIndexHandler.comCoefficientsPerSegment,
+                                       -1.0);
+            MatrixTools.setMatrixBlock(tempJacobian, 0, indexHandler.getOrientationStartIndex(nextSegmentNumber), CommonOps_DDRM.identity(6), 0, 0, 6, 6, 1.0);
+
+            MatrixTools.setMatrixBlock(linearConstraintMatrix, row, 0, tempJacobian, 0, 0, 6, indexHandler.getTotalProblemSize(), 1.0);
+            MatrixTools.setMatrixBlock(linearConstraintVector, row, 0, trajectoryCommand.getCMatrix(indexHandler.getTicksInSegment(currentSegmentNumber) - 1), 0, 0, 6, 1, 1.0);
+
+            row += 6;
+         }
+      }
+
+
+      MatrixTestTools.assertMatrixEquals(linearConstraintMatrix, mpc.qpSolver.qpSolver.linearEqualityConstraintsAMatrix, 1e-5);
+      MatrixTestTools.assertMatrixEquals(linearConstraintVector, mpc.qpSolver.qpSolver.linearEqualityConstraintsBVector, 1e-5);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoMPosition, mpc.getDesiredCoMPosition(), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoMPosition, mpc.getDesiredVRPPosition(), epsilon);
