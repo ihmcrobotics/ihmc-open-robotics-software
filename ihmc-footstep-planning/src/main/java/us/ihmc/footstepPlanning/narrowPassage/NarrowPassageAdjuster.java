@@ -29,6 +29,13 @@ public class NarrowPassageAdjuster
    private static int numberOfWaypoints;
    private static int maxOrientationAdjustmentIterations = 20;
    private static int maxPoseAdjustmentIterations = 20;
+   private static int yawShiftLimit = 120;
+   private static int yawWiggleLimit = 25;
+   private static int maxTotalIterations = 7;
+   private static int currentIteration = 0;
+
+   private boolean rotationDirectionDetermined = false;
+   private int rotationDirection = 0;
 
    private static final double bodyDepth = 0.4;
    private static final double bodyWidth = 0.7;
@@ -48,11 +55,14 @@ public class NarrowPassageAdjuster
 
    private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
    private static final double collisionGradientScale = 0.5;
+   private final List<Double> totalYawsShifted = new ArrayList<>();
+   private final List<Integer> shiftSigns = new ArrayList<>();
    private final List<Vector3D> collisionGradients = new ArrayList<>();
    private final List<Vector3D> convolvedGradients = new ArrayList<>();
    private final List<Vector3D> yaws = new ArrayList<>();
    private final List<Vector3D> convolvedYaws = new ArrayList<>();
    private final TDoubleArrayList convolutionWeights = new TDoubleArrayList();
+   private final TDoubleArrayList convolutionYawWeights = new TDoubleArrayList();
 
    // for visualization only
    private TickAndUpdatable tickAndUpdatable;
@@ -113,16 +123,18 @@ public class NarrowPassageAdjuster
          bodyCollisionPoints.add(new BodyCollisionPoint(i, footstepPlannerParameters, graphicsListRegistry, registry));
          collisionGradients.add(new Vector3D());
          convolvedGradients.add(new Vector3D());
+         shiftSigns.add(0);
          yaws.add(new Vector3D());
          convolvedYaws.add(new Vector3D());
          convolutionWeights.add(exp(0.65, i));
+         convolutionYawWeights.add(exp(0.5, i));
          if (i < numberOfWaypoints - 1)
             vectorToNextWaypoint.set(waypoints[i + 1].getX() - waypoints[i].getX(),
                                      waypoints[i + 1].getY() - waypoints[i].getY(),
                                      waypoints[i + 1].getZ() - waypoints[i].getZ());
-
          bodyCollisionPoints.get(i).initializeWaypointAdjustmentFrame(vectorToNextWaypoint);
          bodyCollisionPoints.get(i).initialize(waypoints[i]);
+         totalYawsShifted.add(0.0);
       }
 
       if (visualize)
@@ -139,12 +151,14 @@ public class NarrowPassageAdjuster
 
    private void adjustBodyPointPositions()
    {
+      resetShiftAlphas();
       collisionFound.set(false);
       for (int i = 0; i < maxPoseAdjustmentIterations; i++)
       {
-         LogTools.info("Pose adjustment iteration: " + i);
-
+//         LogTools.info("Pose adjustment iteration: " + i);
          boolean intersectionFound = false;
+         double maxShiftDistance = 0.0;
+
          for (int j = 0; j < numberOfWaypoints; j++)
          {
             BodyCollisionPoint bodyCollisionPoint = bodyCollisionPoints.get(j);
@@ -157,9 +171,10 @@ public class NarrowPassageAdjuster
 
                EuclidShape3DCollisionResult collisionResult = bodyCollisionPoint.getCollisionResult();
                collisionGradients.get(j).sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
-               LogTools.info("collisionvector " + collisionGradients.get(j));
+//               LogTools.info("collision vector " + collisionGradients.get(j));
                collisionGradients.get(j).scale(collisionGradientScale);
-               bodyCollisionPoints.get(j).project(collisionGradients.get(j));
+               int shiftSign = bodyCollisionPoints.get(j).project(collisionGradients.get(j), shiftSigns.get(j));
+               shiftSigns.set(j, shiftSign);
             }
             else
             {
@@ -167,11 +182,12 @@ public class NarrowPassageAdjuster
                continue;
             }
 
-            //            if (bodyCollisionPoints.get(j).getCollisionResult().areShapesColliding())
-            //            {
-            //               double scale = bodyCollisionPoints.get(j).computeMaximumDisplacementScale(collisionGradients.get(j));
-            //               collisionGradients.get(j).scale(scale);
-            //            }
+//            if (bodyCollisionPoints.get(j).getCollisionResult().areShapesColliding())
+//            {
+//               double scale = bodyCollisionPoints.get(j).computeMaximumDisplacementScale(collisionGradients.get(j));
+//               collisionGradients.get(j).scale(scale);
+//            }
+            maxShiftDistance = Math.max(maxShiftDistance, collisionGradients.get(j).length());
          }
 
          for (int j = 0; j < numberOfWaypoints; j++)
@@ -195,7 +211,8 @@ public class NarrowPassageAdjuster
 
          if (visualize) tickAndUpdatable.tickAndUpdate();
 
-         if (!intersectionFound)
+         double shiftDistanceEpsilon = 0.003;
+         if (!intersectionFound || maxShiftDistance < shiftDistanceEpsilon)
          {
             break;
          }
@@ -204,14 +221,11 @@ public class NarrowPassageAdjuster
 
    private void adjustBodyPointOrientations()
    {
-      // Rotation direction determined by first collision vector
-      boolean rotationDirectionDetermined = false;
-      int rotationDirection = 0;
-
+      boolean collisionAfterOrientationAdjustment = false;
       for (int i = 0; i < maxOrientationAdjustmentIterations; i++)
       {
-         LogTools.info("Orientation adjustment iteration: " + i);
-         boolean intersectionFound = false;
+//         LogTools.info("Orientation adjustment iteration: " + i);
+         boolean collisionFound = false;
 
          // Adjust waypoint orientations
          for (int j = 0; j < numberOfWaypoints; j++)
@@ -224,15 +238,14 @@ public class NarrowPassageAdjuster
                EuclidShape3DCollisionResult collisionResult = bodyCollisionPoint.getCollisionResult();
                Vector3D collisionVector = new Vector3D();
                collisionVector.sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
+               // Rotation direction initially determined by first collision vector
                if (!rotationDirectionDetermined)
                {
                   rotationDirection = bodyCollisionPoint.getRotationDirection(collisionVector);
                   rotationDirectionDetermined = true;
                }
                yaws.set(j, collisionVector);
-               intersectionFound = true;
-
-               bodyCollisionPoints.get(j).adjustOrientation(rotationDirection, yaws.get(j));
+               collisionFound = true;
             }
             else
             {
@@ -249,11 +262,19 @@ public class NarrowPassageAdjuster
             for (int k = 0; k < numberOfWaypoints; k++)
             {
                int indexDifference = Math.abs(j - k);
-               double scale = convolutionWeights.get(indexDifference);
+               double scale = convolutionYawWeights.get(indexDifference);
                scaleAdd(convolvedYaws.get(j), scale, yaws.get(k));
             }
 
-            bodyCollisionPoints.get(j).adjustOrientation(rotationDirection, convolvedYaws.get(j));
+            double totalYawShifted = totalYawsShifted.get(j);
+            double yawShift = bodyCollisionPoints.get(j).getYawShift(convolvedYaws.get(j));
+            double limit = currentIteration < 1 ? yawShiftLimit : yawWiggleLimit;
+            if (Math.abs(totalYawShifted + (rotationDirection * yawShift)) < limit)
+            {
+               bodyCollisionPoints.get(j).adjustOrientation(rotationDirection, yawShift);
+               double previousTotalYawShifted = totalYawsShifted.get(j);
+               totalYawsShifted.set(j, previousTotalYawShifted + (rotationDirection * yawShift));
+            }
 
             if (visualize)
             {
@@ -263,10 +284,43 @@ public class NarrowPassageAdjuster
 
          if (visualize) tickAndUpdatable.tickAndUpdate();
 
-         if (!intersectionFound)
+         if (!collisionFound)
          {
             break;
          }
+         else
+         {
+            collisionAfterOrientationAdjustment = true;
+         }
+      }
+      currentIteration++;
+      if (collisionAfterOrientationAdjustment && currentIteration < maxTotalIterations)
+      {
+         reAdjustWaypoints();
+      }
+   }
+
+   private void reAdjustWaypoints()
+   {
+      rotationDirection = (rotationDirection < 0) ? 1 : -1;
+      resetYawsShifted();
+      adjustBodyPointPositions();
+      adjustBodyPointOrientations();
+   }
+
+   private void resetYawsShifted()
+   {
+      for (int i = 0; i < numberOfWaypoints; i++)
+      {
+         totalYawsShifted.set(i, 0.0);
+      }
+   }
+
+   private void resetShiftAlphas()
+   {
+      for (int i = 0; i < numberOfWaypoints; i++)
+      {
+         bodyCollisionPoints.get(i).resetShiftAlpha();
       }
    }
 
@@ -313,10 +367,12 @@ public class NarrowPassageAdjuster
 
       for (int i = 0; i < numOfWaypoints - 1; i++)
       {
-         if (i != 0) increasedWaypoints.add(waypoints.get(i));
-         int numOfExtraWaypoints = (int) (waypoints.get(i).getPosition().distance(waypoints.get(i + 1).getPosition()) / 0.3);
+         increasedWaypoints.add(waypoints.get(i));
+//         if (i != 0) increasedWaypoints.add(waypoints.get(i));
+         int numOfExtraWaypoints = (int) (waypoints.get(i).getPosition().distance(waypoints.get(i + 1).getPosition()) / 0.15);
 
          for (int j = 0; j < numOfExtraWaypoints; j++)
+
          {
             double alpha = (j + 1) / (double) (numOfExtraWaypoints + 1);
             FramePose3D interpolatedWaypoint = new FramePose3D();

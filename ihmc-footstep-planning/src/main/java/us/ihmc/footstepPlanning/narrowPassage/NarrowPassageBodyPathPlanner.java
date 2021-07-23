@@ -254,7 +254,6 @@ public class NarrowPassageBodyPathPlanner
          }
 
          double collisionDistanceEpsilon = 1e-4;
-         // TODO implement oscillation check
          if (!intersectionFound || maxCollisionDistance < collisionDistanceEpsilon)
          {
             break;
@@ -291,8 +290,6 @@ public class NarrowPassageBodyPathPlanner
                yaws.set(j, collisionVector);
                intersectionFound = true;
 
-               bodyCollisionPoints.get(j).adjustOrientation(rotationDirection, yaws.get(j));
-
             }
             else
             {
@@ -316,7 +313,8 @@ public class NarrowPassageBodyPathPlanner
                scaleAdd(convolvedYaws.get(j), scale, yaws.get(k));
             }
 
-            bodyCollisionPoints.get(j).adjustOrientation(rotationDirection, convolvedYaws.get(j));
+            double yawShift = bodyCollisionPoints.get(j).getYawShift(convolvedYaws.get(j));
+            bodyCollisionPoints.get(j).adjustOrientation(rotationDirection, yawShift);
 
             if (visualize)
             {
