@@ -116,16 +116,16 @@ public class MinRhoObjectiveTest
 
       CommonOps_DDRM.scale(-1.0, taskJacobianExpectedAlt);
       CommonOps_DDRM.scale(-1.0, taskObjectiveExpected);
-      EjmlUnitTests.assertEquals(taskJacobianExpectedAlt, solver.solverInput_Ain, 1e-5);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.solverInput_bin, 1e-5);
+      EjmlUnitTests.assertEquals(taskJacobianExpectedAlt, solver.qpSolver.linearInequalityConstraintsCMatrixO, 1e-5);
+      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpSolver.linearInequalityConstraintsDVectorO, 1e-5);
 
       DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpectedAlt.getNumCols(), taskJacobianExpectedAlt.getNumCols());
       DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpectedAlt.getNumCols(), 1);
 
       MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
 
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.qpSolver.costQuadraticMatrix, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.qpSolver.quadraticCostQVector, 1e-10);
    }
 
    @Test
@@ -203,8 +203,8 @@ public class MinRhoObjectiveTest
 
       CommonOps_DDRM.scale(-1.0, taskJacobianExpected);
       CommonOps_DDRM.scale(-1.0, taskObjectiveExpected);
-      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.solverInput_Ain, 1e-5);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.solverInput_bin, 1e-5);
+      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpSolver.linearInequalityConstraintsCMatrixO, 1e-5);
+      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpSolver.linearInequalityConstraintsDVectorO, 1e-5);
 
       double omega2 = omega * omega;
 
@@ -397,15 +397,15 @@ public class MinRhoObjectiveTest
 
       CommonOps_DDRM.scale(-1.0, taskJacobianExpected);
       CommonOps_DDRM.scale(-1.0, taskObjectiveExpected);
-      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.solverInput_Ain, 1e-5);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.solverInput_bin, 1e-5);
+      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpSolver.linearInequalityConstraintsCMatrixO, 1e-5);
+      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpSolver.linearInequalityConstraintsDVectorO, 1e-5);
 
       DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
       DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
 
       MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
 
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.qpSolver.costQuadraticMatrix, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.qpSolver.quadraticCostQVector, 1e-10);
    }
 }

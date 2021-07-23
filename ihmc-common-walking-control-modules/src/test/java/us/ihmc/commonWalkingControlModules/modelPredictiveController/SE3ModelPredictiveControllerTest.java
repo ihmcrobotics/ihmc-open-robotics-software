@@ -906,7 +906,7 @@ public class SE3ModelPredictiveControllerTest
 
       for (int i = 0; i < 22; i++)
       {
-         assertNotEquals(0.0, mpc.qpSolver.solverInput_H.get(i, i), epsilon);
+         assertNotEquals(0.0, mpc.qpSolver.qpSolver.costQuadraticMatrix.get(i, i), epsilon);
       }
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredCoMPosition(), epsilon);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);

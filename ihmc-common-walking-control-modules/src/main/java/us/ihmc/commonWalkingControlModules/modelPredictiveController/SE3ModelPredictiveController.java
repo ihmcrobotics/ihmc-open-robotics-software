@@ -326,8 +326,6 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
          assembleActiveSet(firstVariableIndex);
          qpSolver.setPreviousSolution(previousSolution);
          qpSolver.setActiveInequalityIndices(activeInequalityConstraints);
-         qpSolver.setActiveLowerBoundIndices(activeUpperBoundConstraints);
-         qpSolver.setActiveUpperBoundIndices(activeLowerBoundConstraints);
       }
 
       if (!qpSolver.solve())
