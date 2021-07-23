@@ -8,11 +8,12 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 
+import java.util.ArrayList;
+
 public class GDXSimulatedTerrainObject
 {
    private final TerrainObjectDefinition terrainObjectDefinition;
-   private DynamicGDXModel model;
-   private ModelInstance modelInstance;
+   private final ArrayList<ModelInstance> modelInstances = new ArrayList<>();
 
    public GDXSimulatedTerrainObject(TerrainObjectDefinition terrainObjectDefinition)
    {
@@ -21,13 +22,19 @@ public class GDXSimulatedTerrainObject
 
    public void create()
    {
-      model = GDXVisualTools.collectNodes(terrainObjectDefinition.getVisualDefinitions());
-      modelInstance = model.getOrCreateModelInstance();
-      GDXTools.toGDX(model.getLocalTransform(), modelInstance.transform);
+      for (DynamicGDXModel terrainModelPart : GDXVisualTools.collectNodes(terrainObjectDefinition.getVisualDefinitions()))
+      {
+         ModelInstance modelInstance = terrainModelPart.getOrCreateModelInstance();
+         modelInstances.add(modelInstance);
+         GDXTools.toGDX(terrainModelPart.getLocalTransform(), modelInstance.transform);
+      }
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      modelInstance.getRenderables(renderables, pool);
+      for (ModelInstance modelInstance : modelInstances)
+      {
+         modelInstance.getRenderables(renderables, pool);
+      }
    }
 }

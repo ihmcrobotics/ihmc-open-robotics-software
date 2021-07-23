@@ -8,52 +8,31 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.DynamicGDXModel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+
+import java.util.ArrayList;
 
 public class FrameGDXNode
 {
    private final ReferenceFrame referenceFrame;
-   private final DynamicGDXModel visualModel;
-   private final DynamicGDXModel collisionModel;
    private final ModelInstance coordinateFrame;
-   private final ReferenceFrame visualModelFrame;
-   private final ModelInstance visualModelInstance;
-   private ModelInstance collisionModelInstance;
-   private ReferenceFrame collisionModelFrame;
+   private final ArrayList<FrameGDXNodePart> parts = new ArrayList<>();
 
-   public FrameGDXNode(ReferenceFrame referenceFrame, DynamicGDXModel visualModel, DynamicGDXModel collisionModel)
+   public FrameGDXNode(ReferenceFrame referenceFrame)
    {
       this.referenceFrame = referenceFrame;
-      this.visualModel = visualModel;
-      this.collisionModel = collisionModel;
-
-      visualModelFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("visualModelFrame",
-                                                                                                referenceFrame,
-                                                                                                visualModel.getLocalTransform()); // TODO: Broken ?
-      if (collisionModel != null)
-      {
-         collisionModelFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("collisionModelFrame",
-                                                                                                      referenceFrame,
-                                                                                                      collisionModel.getLocalTransform());
-         collisionModelInstance = collisionModel.getOrCreateModelInstance();
-      }
-
-      visualModelInstance = visualModel.getOrCreateModelInstance();
-
       coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);
+   }
+
+   public void addModelPart(DynamicGDXModel model)
+   {
+      parts.add(new FrameGDXNodePart(referenceFrame, model));
    }
 
    public void updatePose()
    {
-      visualModelFrame.update();
-//      GDXTools.toGDX(visualModelFrame.getTransformToRoot(), visualModel.getOrCreateModelInstance().transform);
-//      GDXTools.toGDX(referenceFrame.getTransformToRoot(), visualModel.getOrCreateModelInstance().transform);
-      GDXTools.toGDX(referenceFrame.getTransformToRoot(), visualModelInstance.transform);
-
-      if (collisionModel != null)
+      for (FrameGDXNodePart part : parts)
       {
-         collisionModelFrame.update();
-         GDXTools.toGDX(collisionModelFrame.getTransformToRoot(), collisionModelInstance.transform);
+         part.update();
       }
 
       GDXTools.toGDX(referenceFrame.getTransformToRoot(), coordinateFrame.transform);
@@ -61,9 +40,10 @@ public class FrameGDXNode
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      visualModelInstance.getRenderables(renderables, pool);
-      if (collisionModel != null)
-         collisionModelInstance.getRenderables(renderables, pool);
+      for (FrameGDXNodePart part : parts)
+      {
+         part.getRenderables(renderables, pool);
+      }
 
       coordinateFrame.getRenderables(renderables, pool);
    }

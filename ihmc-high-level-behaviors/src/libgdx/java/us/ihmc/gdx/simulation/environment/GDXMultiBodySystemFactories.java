@@ -150,11 +150,21 @@ public class GDXMultiBodySystemFactories
                                             GDXRigidBody gdxRigidBody,
                                             ClassLoader resourceClassLoader)
    {
-      DynamicGDXModel graphicNode = GDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
-      DynamicGDXModel collisionsNode = GDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
       ReferenceFrame graphicFrame = gdxRigidBody.isRootBody() ? gdxRigidBody.getBodyFixedFrame() : gdxRigidBody.getParentJoint().getFrameAfterJoint();
-
-      if (graphicNode != null)
-         gdxRigidBody.setGraphics(new FrameGDXNode(graphicFrame, graphicNode, collisionsNode));
+      List<DynamicGDXModel> visualModels = GDXVisualTools.collectNodes(visualDefinitions, resourceClassLoader);
+      List<DynamicGDXModel> collisionModels = GDXVisualTools.collectCollisionNodes(collisionShapeDefinitions);
+      if (!visualModels.isEmpty() || !collisionModels.isEmpty())
+      {
+         FrameGDXNode node = new FrameGDXNode(graphicFrame);
+         for (DynamicGDXModel visualModel : visualModels)
+         {
+            node.addModelPart(visualModel);
+         }
+         for (DynamicGDXModel collisionModel : collisionModels)
+         {
+            node.addModelPart(collisionModel);
+         }
+         gdxRigidBody.setGraphics(node);
+      }
    }
 }

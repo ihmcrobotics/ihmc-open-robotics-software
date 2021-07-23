@@ -3,8 +3,6 @@ package us.ihmc.gdx.simulation.environment;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import us.ihmc.gdx.tools.GDXModelLoader;
@@ -27,34 +25,17 @@ public class GDXVisualTools
    private static final Color DEFAULT_COLOR = Color.BLUE;
    private static final Material DEFAULT_MATERIAL = new Material(ColorAttribute.createDiffuse(DEFAULT_COLOR));
 
-   public static DynamicGDXModel collectNodes(List<VisualDefinition> visualDefinitions)
+   public static List<DynamicGDXModel> collectNodes(List<VisualDefinition> visualDefinitions)
    {
       return collectNodes(visualDefinitions, null);
    }
 
-   public static DynamicGDXModel collectNodes(List<VisualDefinition> visualDefinitions, ClassLoader resourceClassLoader)
+   public static List<DynamicGDXModel> collectNodes(List<VisualDefinition> visualDefinitions, ClassLoader resourceClassLoader)
    {
-      List<DynamicGDXModel> nodes = visualDefinitions.stream()
-                                                   .map(definition -> toNode(definition, resourceClassLoader))
-                                                   .filter(Objects::nonNull)
-                                                   .collect(Collectors.toList());
-
-      if (nodes.isEmpty())
-         return null;
-      else if (nodes.size() == 1)
-         return nodes.get(0);
-      else
-      {
-         DynamicGDXModel dynamicGDXModel = new DynamicGDXModel();
-         Model model = new Model();
-         for (DynamicGDXModel node : nodes)
-         {
-            node.buildIfNeeded();
-            model.nodes.addAll(node.getModel().nodes);
-         }
-         dynamicGDXModel.setModel(model);
-         return dynamicGDXModel;
-      }
+      return visualDefinitions.stream()
+                              .map(definition -> toNode(definition, resourceClassLoader))
+                              .filter(Objects::nonNull)
+                              .collect(Collectors.toList());
    }
 
    public static DynamicGDXModel toNode(VisualDefinition visualDefinition, ClassLoader resourceClassLoader)
@@ -69,29 +50,12 @@ public class GDXVisualTools
       return node;
    }
 
-   public static DynamicGDXModel collectCollisionNodes(List<CollisionShapeDefinition> collisionShapeDefinitions)
+   public static List<DynamicGDXModel> collectCollisionNodes(List<CollisionShapeDefinition> collisionShapeDefinitions)
    {
-      List<DynamicGDXModel> nodes = collisionShapeDefinitions.stream()
-                                                             .map(definition -> toNode(definition))
-                                                             .filter(Objects::nonNull)
-                                                             .collect(Collectors.toList());
-
-      if (nodes.isEmpty())
-         return null;
-      else if (nodes.size() == 1)
-         return nodes.get(0);
-      else
-      {
-         DynamicGDXModel dynamicGDXModel = new DynamicGDXModel();
-         Model model = new Model();
-         for (DynamicGDXModel node : nodes)
-         {
-            node.buildIfNeeded();
-            model.nodes.addAll(node.getModel().nodes);
-         }
-         dynamicGDXModel.setModel(model);
-         return dynamicGDXModel;
-      }
+      return collisionShapeDefinitions.stream()
+                                      .map(GDXVisualTools::toNode)
+                                      .filter(Objects::nonNull)
+                                      .collect(Collectors.toList());
    }
 
    public static DynamicGDXModel toNode(CollisionShapeDefinition collisionShapeDefinition)
