@@ -17,12 +17,14 @@ public class FrameGDXNodePart
 
    private final DynamicGDXModel model;
    private final ModelInstance modelInstance;
+   private final String name;
    private final ReferenceFrame modelFrame;
 
-   public FrameGDXNodePart(ReferenceFrame referenceFrame, DynamicGDXModel model)
+   public FrameGDXNodePart(ReferenceFrame referenceFrame, DynamicGDXModel model, String name)
    {
       this.model = model;
       modelInstance = model.getOrCreateModelInstance();
+      this.name = name;
       modelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("modelFrame" + INDEX.getAndIncrement(),
                                                                                      referenceFrame,
                                                                                      model.getLocalTransform());

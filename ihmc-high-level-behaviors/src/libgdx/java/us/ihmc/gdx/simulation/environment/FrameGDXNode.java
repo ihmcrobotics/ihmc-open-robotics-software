@@ -23,9 +23,9 @@ public class FrameGDXNode
       coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);
    }
 
-   public void addModelPart(DynamicGDXModel model)
+   public void addModelPart(DynamicGDXModel model, String name)
    {
-      parts.add(new FrameGDXNodePart(referenceFrame, model));
+      parts.add(new FrameGDXNodePart(referenceFrame, model, name));
    }
 
    public void updatePose()
