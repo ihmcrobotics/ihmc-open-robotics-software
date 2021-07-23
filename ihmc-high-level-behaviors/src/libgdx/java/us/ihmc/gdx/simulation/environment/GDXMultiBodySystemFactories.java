@@ -156,13 +156,15 @@ public class GDXMultiBodySystemFactories
       if (!visualModels.isEmpty() || !collisionModels.isEmpty())
       {
          FrameGDXNode node = new FrameGDXNode(graphicFrame);
+         int i = 0;
          for (DynamicGDXModel visualModel : visualModels)
          {
-            node.addModelPart(visualModel);
+            node.addModelPart(visualModel, gdxRigidBody.getName() + "Visual" + i);
          }
+         i = 0;
          for (DynamicGDXModel collisionModel : collisionModels)
          {
-            node.addModelPart(collisionModel);
+            node.addModelPart(collisionModel, gdxRigidBody.getName() + "Collision" + i);
          }
          gdxRigidBody.setGraphics(node);
       }
