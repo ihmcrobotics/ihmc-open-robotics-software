@@ -374,7 +374,7 @@ public abstract class EuclideanModelPredictiveController
       computeFinalPhaseObjectives(contactSequence.get(numberOfPhases - 1), numberOfPhases - 1);
    }
 
-   private void computeInitialPhaseObjectives()
+   protected void computeInitialPhaseObjectives()
    {
       mpcCommands.addCommand(computeInitialCoMPositionObjective(commandProvider.getNextCoMPositionCommand()));
       if (mpcParameters.includeInitialCoMVelocityObjective())
@@ -383,7 +383,7 @@ public abstract class EuclideanModelPredictiveController
       }
    }
 
-   private void computeTransitionObjectives(ContactPlaneProvider currentContact, ContactPlaneProvider nextContact, int currentSegmentNumber)
+   protected void computeTransitionObjectives(ContactPlaneProvider currentContact, ContactPlaneProvider nextContact, int currentSegmentNumber)
    {
       double firstSegmentDuration = currentContact.getTimeInterval().getDuration();
 
@@ -394,37 +394,37 @@ public abstract class EuclideanModelPredictiveController
          mpcCommands.addCommand(computeContinuityObjective(commandProvider.getNextVRPPositionContinuityCommand(), currentSegmentNumber, firstSegmentDuration));
    }
 
-   private void computeObjectivesForCurrentPhase(ContactPlaneProvider contactPlaneProvider, int segmentNumber)
+   protected void computeObjectivesForCurrentPhase(ContactPlaneProvider contactPlaneProvider, int segmentNumber)
    {
       if (!contactPlaneProvider.getContactState().isLoadBearing())
          return;
 
-         double segmentDuration = contactPlaneProvider.getTimeInterval().getDuration();
+      double segmentDuration = contactPlaneProvider.getTimeInterval().getDuration();
 
-         mpcCommands.addCommand(computeVRPTrackingObjective(commandProvider.getNextVRPTrackingCommand(),
-                                                            startVRPPositions.get(segmentNumber),
-                                                            startVRPVelocities.get(segmentNumber),
-                                                            endVRPPositions.get(segmentNumber),
-                                                            endVRPVelocities.get(segmentNumber),
-                                                            segmentNumber,
-                                                            segmentDuration,
-                                                            null));
-         if (mpcParameters.includeForceMinimization())
-         {
-            for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
-               mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceTrackingCommand(), segmentNumber, segmentDuration, i));
-         }
-         if (mpcParameters.includeRhoMinimization())
-            mpcCommands.addCommand(computeRhoMinimizationObjective(commandProvider.getRhoMinimizationCommand(), segmentNumber, segmentDuration));
-         if (mpcParameters.includeRhoRateMinimization())
-            mpcCommands.addCommand(computeRhoRateMinimizationObjective(commandProvider.getRhoRateMinimizationCommand(), segmentNumber, segmentDuration));
-         if (mpcParameters.includeRhoMinInequality())
-            mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), segmentNumber, segmentDuration));
-         if (mpcParameters.includeRhoMaxInequality())
-            mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextNormalForceBoundCommand(), segmentNumber, segmentDuration));
+      mpcCommands.addCommand(computeVRPTrackingObjective(commandProvider.getNextVRPTrackingCommand(),
+                                                         startVRPPositions.get(segmentNumber),
+                                                         startVRPVelocities.get(segmentNumber),
+                                                         endVRPPositions.get(segmentNumber),
+                                                         endVRPVelocities.get(segmentNumber),
+                                                         segmentNumber,
+                                                         segmentDuration,
+                                                         null));
+      if (mpcParameters.includeForceMinimization())
+      {
+         for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+            mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceTrackingCommand(), segmentNumber, segmentDuration, i));
+      }
+      if (mpcParameters.includeRhoMinimization())
+         mpcCommands.addCommand(computeRhoMinimizationObjective(commandProvider.getRhoMinimizationCommand(), segmentNumber, segmentDuration));
+      if (mpcParameters.includeRhoRateMinimization())
+         mpcCommands.addCommand(computeRhoRateMinimizationObjective(commandProvider.getRhoRateMinimizationCommand(), segmentNumber, segmentDuration));
+      if (mpcParameters.includeRhoMinInequality())
+         mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), segmentNumber, segmentDuration));
+      if (mpcParameters.includeRhoMaxInequality())
+         mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextNormalForceBoundCommand(), segmentNumber, segmentDuration));
    }
 
-   private void computeFinalPhaseObjectives(ContactPlaneProvider lastContactPhase, int segmentNumber)
+   protected void computeFinalPhaseObjectives(ContactPlaneProvider lastContactPhase, int segmentNumber)
    {
       double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), sufficientlyLongTime);
       if (mpcParameters.includeFinalCoMPositionObjective())
