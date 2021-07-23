@@ -97,8 +97,8 @@ public class CoMPositionCommandTest
 
       MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
 
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.qpSolver.costQuadraticMatrix, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.qpSolver.quadraticCostQVector, 1e-10);
 
       achievedObjective.mult(new NativeMatrix(taskJacobianExpected), solution);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
@@ -186,8 +186,8 @@ public class CoMPositionCommandTest
 
       MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
 
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.qpSolver.costQuadraticMatrix, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.qpSolver.quadraticCostQVector, 1e-10);
 
 
       EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, MPCTestHelper.computeCoMPosition(timeOfConstraint, omega, gravityZ, solution, contactPlaneHelper), 1e-4);

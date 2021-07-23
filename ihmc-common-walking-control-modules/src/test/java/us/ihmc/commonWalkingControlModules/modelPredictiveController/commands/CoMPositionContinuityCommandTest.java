@@ -147,8 +147,8 @@ public class CoMPositionContinuityCommandTest
 
       MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
 
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.qpSolver.costQuadraticMatrix, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.qpSolver.quadraticCostQVector, 1e-10);
 
       FramePoint3D desiredValue = new FramePoint3D();
       EuclidCoreTestTools.assertTuple3DEquals(valueEndOf1, valueStartOf2, 1e-4);
@@ -276,7 +276,7 @@ public class CoMPositionContinuityCommandTest
       achievedObjective.mult(new NativeMatrix(taskJacobianExpected), solution);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
-      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.solverInput_Aeq, 1e-10);
+      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpSolver.linearEqualityConstraintsAMatrix, 1e-10);
 
       FramePoint3D desiredValue = new FramePoint3D();
       EuclidCoreTestTools.assertTuple3DEquals(valueEndOf1, valueStartOf2, 1e-4);
