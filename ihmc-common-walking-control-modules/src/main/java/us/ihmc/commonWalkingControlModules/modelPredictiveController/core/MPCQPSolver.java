@@ -808,7 +808,7 @@ public class MPCQPSolver
          enforcementCheck.mult(linearEqualityConstraintsAMatrix, xSolutionToPack);
          for (int i = 0; i < linearEqualityConstraintsBVector.getNumRows(); i++)
          {
-            if (!MathTools.epsilonEquals(enforcementCheck.get(i, 0), linearEqualityConstraintsBVector.get(i, 0), 1e-5))
+            if (!MathTools.epsilonEquals(enforcementCheck.get(i, 0), linearEqualityConstraintsBVector.get(i, 0), 1e-3))
                constraintError = true;
          }
          if (subspaceError)
