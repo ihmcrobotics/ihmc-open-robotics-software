@@ -1,5 +1,6 @@
 package us.ihmc.tools.io;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
 
@@ -8,18 +9,21 @@ import java.nio.file.Paths;
 
 public class HybridDirectoryTest
 {
+   @Disabled // This doesn't really work on Bamboo and isn't designed to
    @Test
    public void testConstructors()
    {
       Path dotIHMC = Paths.get(System.getProperty("user.home")).resolve(".ihmc");
       String openRobotics = "ihmc-open-robotics-software";
       String subsequentPathToResourceFolder = "ihmc-java-toolkit/src/test/resources";
-      HybridDirectory directory = new HybridDirectory(dotIHMC, openRobotics, subsequentPathToResourceFolder, "/");
+      HybridDirectory directory;
+      HybridFile file;
+      directory = new HybridDirectory(dotIHMC, openRobotics, subsequentPathToResourceFolder, "/");
       LogTools.info(directory.getWorkspaceDirectory());
       LogTools.info(directory.getExternalDirectory());
       LogTools.info(directory.getClassForLoading());
       LogTools.info(directory.getPathNecessaryForClasspathLoading());
-      HybridFile file = new HybridFile(directory, "testRootResource.txt");
+      file = new HybridFile(directory, "testRootResource.txt");
       LogTools.info(file.getWorkspaceFile());
       LogTools.info(file.getExternalFile());
       LogTools.info(file.getClasspathResource());

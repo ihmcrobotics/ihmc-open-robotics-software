@@ -7,11 +7,7 @@ import java.util.List;
 import java.util.function.DoubleConsumer;
 
 /**
- * This command is designed to minimize the force exerted over the course of the segment duration. The exact cost is the integral of the squared force magnitude.
- * This can be thought of as minimizing the absolute work done.
- *
- * Whereas many other MPC algorithms provide some regularization by minimizing the CoM acceleration, this minimizes the force, so as to account for the force
- * that must be exerted to counter gravity.
+ * FIXME this command is not yet used.
  */
 public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
 {

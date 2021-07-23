@@ -11,12 +11,8 @@ public class ActiveSetData
    private int segmentNumber = -1;
    private int numberOfVariablesInSegment = -1;
    private int numberOfInequalityConstraints = -1;
-   private int numberOfLowerBoundConstraints = -1;
-   private int numberOfUpperBoundConstraints = -1;
 
    private final TIntArrayList activeInequalityIndices = new TIntArrayList();
-   private final TIntArrayList activeLowerBoundIndices = new TIntArrayList();
-   private final TIntArrayList activeUpperBoundIndices = new TIntArrayList();
 
    private final DMatrixRMaj previousSolution = new DMatrixRMaj(1, 1);
 
@@ -28,8 +24,6 @@ public class ActiveSetData
       numberOfVariablesInSegment = -1;
 
       numberOfInequalityConstraints = 0;
-      numberOfLowerBoundConstraints = 0;
-      numberOfUpperBoundConstraints = 0;
 
       clearActiveSet();
    }
@@ -37,8 +31,6 @@ public class ActiveSetData
    public void resetConstraintCounter()
    {
       numberOfInequalityConstraints = 0;
-      numberOfLowerBoundConstraints = 0;
-      numberOfUpperBoundConstraints = 0;
    }
 
    public void clearActiveSet()
@@ -46,8 +38,6 @@ public class ActiveSetData
       CommonOps_DDRM.fill(previousSolution, Double.NaN);
 
       activeInequalityIndices.reset();
-      activeLowerBoundIndices.reset();
-      activeUpperBoundIndices.reset();
    }
 
    public void setSegmentNumber(int segmentNumber)
@@ -72,29 +62,9 @@ public class ActiveSetData
       numberOfInequalityConstraints += numberOfConstraints;
    }
 
-   public void addLowerBoundConstraints(int numberOfConstraints)
-   {
-      numberOfLowerBoundConstraints += numberOfConstraints;
-   }
-
-   public void addUpperBoundConstraints(int numberOfConstraints)
-   {
-      numberOfUpperBoundConstraints += numberOfConstraints;
-   }
-
    public void addActiveInequalityConstraint(int constraintIndex)
    {
       activeInequalityIndices.add(constraintIndex);
-   }
-
-   public void addActiveLowerBoundConstraint(int constraintIndex)
-   {
-      activeLowerBoundIndices.add(constraintIndex);
-   }
-
-   public void addActiveUpperBoundConstraint(int constraintIndex)
-   {
-      activeUpperBoundIndices.add(constraintIndex);
    }
 
    public int getNumberOfInequalityConstraints()
@@ -102,43 +72,13 @@ public class ActiveSetData
       return numberOfInequalityConstraints;
    }
 
-   public int getNumberOfLowerBoundConstraints()
-   {
-      return numberOfLowerBoundConstraints;
-   }
-
-   public int getNumberOfUpperBoundConstraints()
-   {
-      return numberOfUpperBoundConstraints;
-   }
-
    public int getNumberOfActiveInequalityConstraints()
    {
       return activeInequalityIndices.size();
    }
 
-   public int getNumberOfActiveLowerBoundConstraints()
-   {
-      return activeLowerBoundIndices.size();
-   }
-
-   public int getNumberOfActiveUpperBoundConstraints()
-   {
-      return activeUpperBoundIndices.size();
-   }
-
    public int getActiveInequalityIndex(int constraint)
    {
       return activeInequalityIndices.get(constraint);
-   }
-
-   public int getActiveLowerBoundIndex(int constraint)
-   {
-      return activeLowerBoundIndices.get(constraint);
-   }
-
-   public int getActiveUpperBoundIndex(int constraint)
-   {
-      return activeUpperBoundIndices.get(constraint);
    }
 }
