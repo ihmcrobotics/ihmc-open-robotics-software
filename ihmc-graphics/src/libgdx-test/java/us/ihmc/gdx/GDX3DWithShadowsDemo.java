@@ -128,7 +128,8 @@ public class GDX3DWithShadowsDemo
 
       GDX3DSceneTools.glClearGray();
 
-      manager.renderShadows(cam, instances, program);
+      manager.renderShadows(cam, instances);
+      manager.apply(program);
 
       modelBatch.begin(cam);
       modelBatch.render(instances);

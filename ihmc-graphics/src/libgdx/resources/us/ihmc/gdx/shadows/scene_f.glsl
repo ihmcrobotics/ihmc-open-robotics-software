@@ -24,6 +24,7 @@ void main()
 
     // Retrieve the shadow color from shadow map
     vec2 c= gl_FragCoord.xy;
+    c /= 2.0; //DYNAMICALLY PASS THIS VALUE!!!!!!!!!!!
     c.x/=u_screenWidth;
     c.y/=u_screenHeight;
     vec4 color=texture2D(u_shadows,c);

@@ -13,12 +13,19 @@ import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
+import us.ihmc.log.LogTools;
 
 public class GDXShadowManager
 {
    protected final Array<GDXLight> lights = new Array<>();
    private final ShaderProgram shader;
    private final ModelBatch batch;
+
+   private boolean useViewport = false;
+   private int x = 0;
+   private int y = 0;
+   private int width = 0;
+   private int height = 0;
 
    private FrameBuffer framebuffer;
 
@@ -79,19 +86,37 @@ public class GDXShadowManager
     * @param renderableProviders The models to be rendered
     * @param program             The {@link GDXSceneShader} belonging to the main batch
     */
-   public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders, ShaderProgram program)
+   public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders) {
+      renderShadows(camera, renderableProviders, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+   }
+
+   /**
+    * Renders shadows to the ModelBatch and prepares the OpenGL environment for the rendering of the main ModelBatch, which should be rendered immediately after
+    * this call.
+    *
+    * @param renderableProviders The models to be rendered
+    * @param program             The {@link GDXSceneShader} belonging to the main batch
+    */
+   public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders, int width, int height)
    {
       for (GDXLight light : lights)
       {
          light.render(renderableProviders);
       }
 
-      if (framebuffer == null)
+      if (framebuffer == null || width < framebuffer.getWidth() || height < framebuffer.getHeight()) //resizing bug caused by something??
       {
-         framebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+         if (framebuffer != null)
+            framebuffer.dispose();
+
+         LogTools.info("Allocating framebuffer of size: " + width + "x" + height);
+         framebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, true);
       }
 
       framebuffer.begin();
+
+      if (useViewport)
+         Gdx.gl.glViewport(this.x, this.y, this.width, this.height);
 
       Gdx.gl.glClearColor(0.4f, 0.4f, 0.4f, 0.4f);
       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -101,7 +126,9 @@ public class GDXShadowManager
       batch.end();
 
       framebuffer.end();
+   }
 
+   public void apply(ShaderProgram program) {
       program.begin();
       Texture shadows = framebuffer.getColorBufferTexture();
       final int textureNum = shadows.getTextureObjectHandle();
@@ -110,5 +137,13 @@ public class GDXShadowManager
       program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
       program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
       program.end();
+   }
+
+   public void setViewportBounds(int x, int y, int width, int height) {
+      this.useViewport = true;
+      this.x = x;
+      this.y = y;
+      this.width = width;
+      this.height = height;
    }
 }
