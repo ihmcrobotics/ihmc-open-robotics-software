@@ -16,7 +16,7 @@ import java.util.Arrays;
 
 /**
  * Module to estimate unknown external contact. This class estimates an array of joint torques based on the discrepancy between
- * the expected and actual system behavior. In the below paper, this module tau_ext, i.e. the "generalized external forces", which
+ * the expected and actual system behavior. This module estimates the tau_ext variable in the below paper, i.e. the "generalized external forces", which
  * can in turn be used to estimate taskspace forces in a number of different ways.
  *
  * Implementation based on Haddadin, et. al:
@@ -138,7 +138,7 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
       // update integral
       currentIntegrandValue.set(tau);
       CommonOps_DDRM.subtractEquals(currentIntegrandValue, gravityMatrix);
-      CommonOps_DDRM.multAddTransA(-1.0, coriolisMatrix, qd, currentIntegrandValue);
+      CommonOps_DDRM.multAddTransA(coriolisMatrix, qd, currentIntegrandValue);
       CommonOps_DDRM.addEquals(currentIntegrandValue, estimatedExternalTorque);
       CommonOps_DDRM.addEquals(currentIntegratedValue, dt, currentIntegrandValue);
 

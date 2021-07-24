@@ -23,8 +23,10 @@ public class ContactPointParticle
    private final JointBasics[] orderedJoints;
 
    private final FramePoint3D contactPointPosition = new FramePoint3D();
+   /* Surface normal pointing out of the mesh */
    private final FrameVector3D surfaceNormal = new FrameVector3D();
    private final FramePose3D surfacePose = new FramePose3D();
+   /* Reference frame with origin at the contact point and Z pointing out of the mesh */
    private final PoseReferenceFrame contactPointFrame;
 
    private GeometricJacobian contactPointJacobian;

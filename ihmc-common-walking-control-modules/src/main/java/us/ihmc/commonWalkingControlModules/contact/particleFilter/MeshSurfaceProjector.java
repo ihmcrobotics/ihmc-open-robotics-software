@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.physics.Collidable;
@@ -12,12 +13,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ContactPointProjector
+/**
+ * Tool for projecting points onto a {@link Collidable}
+ */
+public class MeshSurfaceProjector
 {
    private final RigidBodyBasics[] collidableRigidBodies;
    private final Map<RigidBodyBasics, List<Collidable>> collidableMap = new HashMap<>();
+   private final FramePoint3D tempPointToProject = new FramePoint3D();
 
-   public ContactPointProjector(List<Collidable> allCollidables)
+   public MeshSurfaceProjector(List<Collidable> allCollidables)
    {
       allCollidables.forEach(collidable -> collidableMap.computeIfAbsent(collidable.getRigidBody(), r -> new ArrayList<>()).add(collidable));
       collidableRigidBodies = collidableMap.keySet().toArray(new RigidBodyBasics[0]);
@@ -74,12 +79,12 @@ public class ContactPointProjector
       return collidingRigidBodies;
    }
 
-   public void projectToSpecificLink(FramePoint3DBasics pointToProject,
-                                     FramePoint3D contactPointPosition,
-                                     FrameVector3D surfaceNormal,
+   public void projectToSpecificLink(FramePoint3DReadOnly pointToProject,
+                                     FramePoint3D projectedPoint,
+                                     FrameVector3D surfaceNormalAtProjection,
                                      RigidBodyBasics rigidBody)
    {
-      projectPoint(pointToProject, contactPointPosition, surfaceNormal, rigidBody);
+      projectPoint(pointToProject, projectedPoint, surfaceNormalAtProjection, rigidBody);
    }
 
    public RigidBodyBasics projectToClosestLink(FramePoint3DBasics pointToProject, FramePoint3D contactPointPosition, FrameVector3D surfaceNormal)
@@ -91,9 +96,9 @@ public class ContactPointProjector
     * Projects the given point to the surface of the nearest collidable.
     * Assumes the point isn't inside a collidable, use {@link #isPointInsideAnyRigidBody} to check
     */
-   public RigidBodyBasics projectPoint(FramePoint3DBasics pointToProject,
-                                       FramePoint3D contactPointPosition,
-                                       FrameVector3D surfaceNormal,
+   public RigidBodyBasics projectPoint(FramePoint3DReadOnly pointToProject,
+                                       FramePoint3D projectedPoint,
+                                       FrameVector3D surfaceNormalAtProjection,
                                        RigidBodyBasics... rigidBodiesToCheck)
    {
       double minimumProjectionDistance = Double.MAX_VALUE;
@@ -107,11 +112,12 @@ public class ContactPointProjector
          for (int j = 0; j < collidablesToCheck.size(); j++)
          {
             FrameShape3DReadOnly collisionShape = collidablesToCheck.get(j).getShape();
-            pointToProject.changeFrame(collisionShape.getReferenceFrame());
-            collisionShape.evaluatePoint3DCollision(pointToProject, contactPointPosition, surfaceNormal);
+            tempPointToProject.setIncludingFrame(pointToProject);
+            tempPointToProject.changeFrame(collisionShape.getReferenceFrame());
+            collisionShape.evaluatePoint3DCollision(tempPointToProject, projectedPoint, surfaceNormalAtProjection);
 
-            pointToProject.changeFrame(contactPointPosition.getReferenceFrame());
-            double distance = contactPointPosition.distance(pointToProject);
+            tempPointToProject.changeFrame(projectedPoint.getReferenceFrame());
+            double distance = projectedPoint.distance(tempPointToProject);
             if (distance < minimumProjectionDistance)
             {
                minimumProjectionDistance = distance;
@@ -122,8 +128,9 @@ public class ContactPointProjector
       }
 
       FrameShape3DReadOnly shapeToProjectTo = collidableMap.get(minimumDistanceBody).get(minimumDistanceIndex).getShape();
-      pointToProject.changeFrame(shapeToProjectTo.getReferenceFrame());
-      shapeToProjectTo.evaluatePoint3DCollision(pointToProject, contactPointPosition, surfaceNormal);
+      tempPointToProject.setIncludingFrame(pointToProject);
+      tempPointToProject.changeFrame(shapeToProjectTo.getReferenceFrame());
+      shapeToProjectTo.evaluatePoint3DCollision(tempPointToProject, projectedPoint, surfaceNormalAtProjection);
 
       return minimumDistanceBody;
    }

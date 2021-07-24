@@ -60,7 +60,7 @@ public class FixedBaseRobotArmController implements RobotController
    public enum FeedbackControlType
    {
       SPATIAL, LINEAR_ANGULAR_SEPARATE
-   };
+   }
 
    private final YoEnum<WholeBodyControllerCoreMode> controllerCoreMode = new YoEnum<>("controllerCoreMode", registry,
                                                                                                        WholeBodyControllerCoreMode.class);

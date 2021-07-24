@@ -86,10 +86,10 @@ public class ContactPointEvaluator
     * @param jointspaceResidual gamma in the above paper (eq 12)
     * @param contactPointJacobian J_rt in the above paper (eq 12)
     * @param sigma modelled noise of the joint angles, i.e. relative expected joint torque std. dev (eq 10)
-    * @param zInContactFrame reference frame of the contact point, with z pointing into the mesh
+    * @param zOutContactFrame reference frame of the contact point, with z pointing out of the mesh
     * @return likelihood of the given contact point, QP in the above paper
     */
-   public double computeMaximumLikelihoodForce(DMatrixRMaj jointspaceResidual, DMatrixRMaj contactPointJacobian, DMatrixRMaj sigma, ReferenceFrame zInContactFrame)
+   public double computeMaximumLikelihoodForce(DMatrixRMaj jointspaceResidual, DMatrixRMaj contactPointJacobian, DMatrixRMaj sigma, ReferenceFrame zOutContactFrame)
    {
       if (polyhedraBasisVectors[0].containsNaN())
       {
@@ -99,7 +99,7 @@ public class ContactPointEvaluator
 
       for (int i = 0; i < polyhedraFrameBasisVectors.length; i++)
       {
-         polyhedraFrameBasisVectors[i].setIncludingFrame(zInContactFrame, polyhedraBasisVectors[i]);
+         polyhedraFrameBasisVectors[i].setIncludingFrame(zOutContactFrame, polyhedraBasisVectors[i]);
          polyhedraFrameBasisVectors[i].changeFrame(ReferenceFrame.getWorldFrame());
          polyhedraFrameBasisVectors[i].get(0, i, basisVectorMatrix);
       }

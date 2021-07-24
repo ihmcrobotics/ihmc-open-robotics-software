@@ -72,7 +72,6 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private final DynamicsMatrixCalculator dynamicsMatrixCalculator;
    private final DMatrixRMaj controllerDesiredQdd;
    private final DMatrixRMaj controllerDesiredTau;
-   private final DMatrixRMaj gravityMatrix;
    private final DMatrixRMaj cqd;
    private final DMatrixRMaj qd;
 
@@ -138,7 +137,6 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       this.controllerDesiredQdd = new DMatrixRMaj(degreesOfFreedom, 1);
       this.controllerDesiredTau = new DMatrixRMaj(degreesOfFreedom, 1);
 
-      this.gravityMatrix = new DMatrixRMaj(degreesOfFreedom, 1);
       this.coriolisAndGravityMatrix = new DMatrixRMaj(degreesOfFreedom, 1);
       this.cqd = new DMatrixRMaj(degreesOfFreedom, 1);
       this.qd = new DMatrixRMaj(degreesOfFreedom, 1);
@@ -154,6 +152,8 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          coriolisMatrix.set(dynamicsMatrixCalculator.getMassMatrixCalculator().getCoriolisMatrix());
 
          MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
+
+         // TODO update this
          MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
 
          CommonOps_DDRM.mult(coriolisMatrix, qd, cqd);

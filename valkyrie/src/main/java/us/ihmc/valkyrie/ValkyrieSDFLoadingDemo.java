@@ -67,14 +67,17 @@ public class ValkyrieSDFLoadingDemo
          inertiaVis.update();
       }
 
+      AppearanceDefinition collisionAppearance = YoAppearance.DarkGreen();
+      collisionAppearance.setTransparency(0.5);
+
       if (SHOW_KINEMATICS_COLLISIONS)
-         addKinematicsCollisionGraphics(fullRobotModel.getElevator(), valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel());
+         addKinematicsCollisionGraphics(fullRobotModel.getElevator(), valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel(), collisionAppearance);
 
       if (SHOW_SIM_COLLISIONS)
       {
          ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(robotModel.getJointMap());
          collisionModel.setCollidableHelper(new CollidableHelper(), "robot", "ground");
-         addKinematicsCollisionGraphics(fullRobotModel.getElevator(), valkyrieRobot, collisionModel);
+         addKinematicsCollisionGraphics(fullRobotModel.getElevator(), valkyrieRobot, collisionModel, collisionAppearance);
       }
 
       scs = new SimulationConstructionSet(valkyrieRobot);
@@ -129,7 +132,7 @@ public class ValkyrieSDFLoadingDemo
       }
    }
 
-   public static void addKinematicsCollisionGraphics(RigidBodyBasics rootBody, Robot robot, RobotCollisionModel collisionModel)
+   public static void addKinematicsCollisionGraphics(RigidBodyBasics rootBody, Robot robot, RobotCollisionModel collisionModel, AppearanceDefinition appearance)
    {
       List<Collidable> robotCollidables = collisionModel.getRobotCollidables(rootBody);
 
@@ -138,24 +141,22 @@ public class ValkyrieSDFLoadingDemo
          Link link = robot.getLink(collidable.getRigidBody().getName());
          if (link.getLinkGraphics() == null)
          {
-            link.setLinkGraphics(getGraphics(collidable));
+            link.setLinkGraphics(getGraphics(collidable, appearance));
          }
          else
          {
-            link.getLinkGraphics().combine(getGraphics(collidable));
+            link.getLinkGraphics().combine(getGraphics(collidable, appearance));
          }
       }
    }
 
-   private static Graphics3DObject getGraphics(Collidable collidable)
+   private static Graphics3DObject getGraphics(Collidable collidable, AppearanceDefinition appearance)
    {
       Shape3DReadOnly shape = collidable.getShape();
       RigidBodyTransform transformToParentJoint = collidable.getShape().getReferenceFrame()
                                                             .getTransformToDesiredFrame(collidable.getRigidBody().getParentJoint().getFrameAfterJoint());
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.transform(transformToParentJoint);
-      AppearanceDefinition appearance = YoAppearance.DarkGreen();
-      appearance.setTransparency(0.5);
 
       if (shape instanceof Sphere3DReadOnly)
       {

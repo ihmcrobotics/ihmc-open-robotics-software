@@ -36,7 +36,7 @@ import java.util.*;
  */
 public class ContactParticleFilter
 {
-   private static final int numberOfParticles = 30;
+   private static final int numberOfParticles = 50;
    private static final int estimationVariables = 3;
 
    private final String name = getClass().getSimpleName();
@@ -58,7 +58,7 @@ public class ContactParticleFilter
    private final YoDouble yoJointspaceResidualMagnitude = new YoDouble("jointspaceResidualMagnitude", registry);
 
    private final ContactPointEvaluator contactPointEvaluator = new ContactPointEvaluator();
-   private final ContactPointProjector contactPointProjector;
+   private final MeshSurfaceProjector contactPointProjector;
 
    // If non-empty will consider all rigid bodies
    private final Set<RigidBodyBasics> rigidBodiesToConsiderQueue = new HashSet<>();
@@ -122,7 +122,7 @@ public class ContactParticleFilter
       this.systemJacobian = new DMatrixRMaj(estimationVariables, dofs);
       this.jointNoiseVariance = CommonOps_DDRM.identity(dofs);
       this.jointNoiseVarianceInv = CommonOps_DDRM.identity(dofs);
-      this.contactPointProjector = new ContactPointProjector(collidables);
+      this.contactPointProjector = new MeshSurfaceProjector(collidables);
       this.averageProjectedParticle = new ContactPointParticle("averageParticle", joints);
 
       for (int i = 0; i < numberOfParticles; i++)
@@ -539,6 +539,14 @@ public class ContactParticleFilter
    public FramePoint3D getEstimatedContactPosition()
    {
       return averageProjectedParticle.getContactPointPosition();
+   }
+
+   /**
+    * Reference frame centered on the estimated contact point, with Z pointing out of the robot's mesh
+    */
+   public ReferenceFrame getEstimatedContactSurfaceFrame()
+   {
+      return averageProjectedParticle.getContactPointFrame();
    }
 
    public RigidBodyBasics getEstimatedContactingBody()
