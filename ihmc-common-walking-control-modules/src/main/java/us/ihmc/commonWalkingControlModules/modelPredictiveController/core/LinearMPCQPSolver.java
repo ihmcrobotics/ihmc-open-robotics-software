@@ -423,7 +423,7 @@ public class LinearMPCQPSolver
          constructedB.mult(qpSolver.linearEqualityConstraintsAMatrix, solverOutput);
          for (int i = 0; i < constructedB.getNumRows(); i++)
          {
-            if (!MathTools.epsilonEquals(constructedB.get(i, 0), qpSolver.linearEqualityConstraintsBVector.get(i, 0), 1e-5))
+            if (!MathTools.epsilonEquals(constructedB.get(i, 0), qpSolver.linearEqualityConstraintsBVector.get(i, 0), 1e-3))
                LogTools.info("The equality constraints weren't satisfied.");
          }
       }

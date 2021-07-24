@@ -32,13 +32,13 @@ public class MPCQPSolver
 {
    private static  final boolean debug = true;
 
-   private static final double violationFractionToAdd = 0.8;
-   private static final double violationFractionToRemove = 0.95;
+   private static final double violationFractionToAdd = 0.95;
+   private static final double violationFractionToRemove = 0.8;
    //private static final double violationFractionToAdd = 1.0;
    //private static final double violationFractionToRemove = 1.0;
-   private double convergenceThreshold = 1e-10;
+   private double convergenceThreshold = 1e-4;
    //private double convergenceThresholdForLagrangeMultipliers = 0.0;
-   private double convergenceThresholdForLagrangeMultipliers = 1e-10;
+   private double convergenceThresholdForLagrangeMultipliers = 1e-3;
    private int maxNumberOfIterations = 10;
    private boolean reportFailedConvergenceAsNaN = true;
    private boolean resetActiveSetOnSizeChange = true;
@@ -462,6 +462,8 @@ public class MPCQPSolver
 
    public int solve(DMatrix solutionToPack)
    {
+//      printActiveSetInfo("At beginning " );
+
       // TODO CHECK SIZE
       assertSizesCorrect();
       computeSymmetricHessian();
@@ -506,6 +508,7 @@ public class MPCQPSolver
          if (!activeSetWasModified)
          {
             solutionToPack.set(nativexSolutionMatrix);
+//            printActiveSetInfo("At end " );
 
             return numberOfIterations;
          }
@@ -524,7 +527,13 @@ public class MPCQPSolver
          solutionToPack.set(nativexSolutionMatrix);
       }
 
+      printActiveSetInfo("At end " );
       return numberOfIterations;
+   }
+
+   private void printActiveSetInfo(String prefix)
+   {
+      LogTools.info(prefix + " Active set size is " + activeInequalityIndices.size() + " out of " + getNumberOfInequalityConstraints() + " constraints.");
    }
 
    private boolean problemSizeChanged()

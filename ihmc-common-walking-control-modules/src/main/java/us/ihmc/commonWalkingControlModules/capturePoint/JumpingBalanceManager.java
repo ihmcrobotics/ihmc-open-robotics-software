@@ -72,8 +72,12 @@ public class JumpingBalanceManager
 
    private final YoFramePoint3D touchdownCoMPosition = new YoFramePoint3D("touchdownCoMPosition", worldFrame, registry);
    private final YoFrameVector3D touchdownCoMVelocity = new YoFrameVector3D("touchdownCoMVelocity", worldFrame, registry);
+   private final YoFrameYawPitchRoll touchdownBodyOrientation = new YoFrameYawPitchRoll("touchdownBodyOrientation", worldFrame, registry);
+   private final YoFrameVector3D touchdownBodyAngularVelocity = new YoFrameVector3D("touchdownBodyAngularVelocity", worldFrame, registry);
    private final YoFramePoint3D takeOffCoMPosition = new YoFramePoint3D("takeOffCoMPosition", worldFrame, registry);
    private final YoFrameVector3D takeOffCoMVelocity = new YoFrameVector3D("takeOffCoMVelocity", worldFrame, registry);
+   private final YoFrameYawPitchRoll takeOffBodyOrientation = new YoFrameYawPitchRoll("takeOffBodyOrientation", worldFrame, registry);
+   private final YoFrameVector3D takeOffBodyAngularVelocity = new YoFrameVector3D("takeOffBodyAngularVelocity", worldFrame, registry);
    private final YoFramePoint3D touchdownDCMPosition = new YoFramePoint3D("touchdownDCMPosition", worldFrame, registry);
    private final YoFramePoint3D updatedTouchdownCoMPosition = new YoFramePoint3D("updatedTouchdownCoMPosition", worldFrame, registry);
 
@@ -285,6 +289,8 @@ public class JumpingBalanceManager
 
       takeOffCoMPosition.setToNaN();
       takeOffCoMVelocity.setToNaN();
+      takeOffBodyOrientation.setToNaN();
+      takeOffBodyAngularVelocity.setToNaN();
       touchdownCoMPosition.setToNaN();
       touchdownCoMVelocity.setToNaN();;
       touchdownDCMPosition.setToNaN();
@@ -440,12 +446,16 @@ public class JumpingBalanceManager
          comTrajectoryPlanner.compute(jumpingGoal.getSupportDuration());
          takeOffCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
          takeOffCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
+         takeOffBodyOrientation.set(comTrajectoryPlanner.getDesiredBodyOrientationSolution());
+         takeOffBodyAngularVelocity.set(comTrajectoryPlanner.getDesiredBodyAngularVelocitySolution());
       }
 
       comTrajectoryPlanner.compute(Math.max(totalStateDuration.getDoubleValue(), timeInSupportSequence.getDoubleValue()));
       updatedTouchdownCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
       touchdownCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
       touchdownDCMPosition.set(comTrajectoryPlanner.getDesiredDCMPosition());
+      touchdownBodyOrientation.set(comTrajectoryPlanner.getDesiredBodyOrientationSolution());
+      touchdownBodyAngularVelocity.set(comTrajectoryPlanner.getDesiredBodyAngularVelocitySolution());
 
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
