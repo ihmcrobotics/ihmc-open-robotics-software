@@ -14,6 +14,10 @@ import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+/**
+ * TODO: This class needs to probably be several implementations of some interfaces.
+ * It's a mess right now.
+ */
 public class DynamicGDXModel
 {
    private Model model;

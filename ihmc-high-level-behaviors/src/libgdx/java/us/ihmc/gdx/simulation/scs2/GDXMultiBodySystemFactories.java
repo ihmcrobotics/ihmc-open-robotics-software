@@ -1,6 +1,5 @@
-package us.ihmc.gdx.simulation.environment;
+package us.ihmc.gdx.simulation.scs2;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;

@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation;
+package us.ihmc.gdx.simulation.scs2;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.commons.RandomNumbers;
@@ -8,7 +8,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.simulation.environment.*;
+import us.ihmc.gdx.simulation.BoxRobotDefinition;
+import us.ihmc.gdx.simulation.SlopeGroundDefinition;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
