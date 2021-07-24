@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation.environment;
+package us.ihmc.gdx.simulation.scs2;
 
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;

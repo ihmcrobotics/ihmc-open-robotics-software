@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation.environment;
+package us.ihmc.gdx.simulation.scs2;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
