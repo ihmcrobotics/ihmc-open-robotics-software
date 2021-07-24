@@ -106,10 +106,10 @@ public class OrientationMPCTrajectoryHandler
                                                FrameQuaternionReadOnly currentDesiredOrientation,
                                                FrameVector3DReadOnly currentDesiredAngularVelocity)
    {
-      previewWindowEndTime.set(currentTimeInState + previewWindowDuration);
       extractSolutionVectors(solutionCoefficients);
 
       clearTrajectory();
+      previewWindowEndTime.set(currentTimeInState + previewWindowDuration);
 
       desiredOrientationSolution.clear();
       desiredAngularVelocitySolution.clear();

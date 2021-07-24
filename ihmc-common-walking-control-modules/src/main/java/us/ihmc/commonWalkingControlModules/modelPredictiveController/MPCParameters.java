@@ -8,8 +8,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class MPCParameters
 {
    public static final boolean includeInitialCoMVelocityObjective = true;
-   public static final boolean includeFinalCoMPositionObjective = false;
-   public static final boolean includeFinalCoMVelocityObjective = true;
+   public static final boolean includeFinalCoMPositionObjective = true;
+   public static final boolean includeFinalCoMVelocityObjective = false;
    public static final boolean includeFinalDCMPositionObjective = true;
 
    public static final boolean includeRhoMinInequality = true;
@@ -22,8 +22,8 @@ public class MPCParameters
 
    private static final double defaultMinRhoValue = 0.0;//05;
 
-   public static final double defaultInitialComWeight = 5e3;
-   public static final double defaultInitialComVelocityWeight = 1e3;
+   public static final double defaultInitialComWeight = 5e2;
+   public static final double defaultInitialComVelocityWeight = 1e2;
    public static final double defaultFinalComWeight = 1e1;
    public static final double defaultFinalVRPWeight = 1e2;
    public static final double defaultVrpTrackingWeight = 1e2;
@@ -31,7 +31,7 @@ public class MPCParameters
    public static final double defaultRhoRateTrackingWeight = 1e-6;
    public static final double defaultForceTrackingWeight = 1e-4;
 
-   private static final double defaultOrientationAngleTrackingWeight = 1e-2;
+   private static final double defaultOrientationAngleTrackingWeight = 1e-4;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
    private static final double defaultInitialOrientationWeight = 1e3;

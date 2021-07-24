@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
@@ -30,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class JumpingMPCTest
 {
@@ -126,6 +128,11 @@ public class JumpingMPCTest
       List<OrientationContinuityCommand> orientationContinuityCommands = new ArrayList<>();
       List<VRPPositionCommand> vrpPositionCommands = new ArrayList<>();
       List<VRPTrackingCommand> vrpTrackingCommands = new ArrayList<>();
+      List<OrientationTrajectoryCommand> orientationTrackingCommands = new ArrayList<>();
+      List<ForceTrackingCommand> forceTrackingCommands = new ArrayList<>();
+      List<RhoBoundCommand> rhoBoundCommands = new ArrayList<>();
+      List<RhoTrackingCommand> rhoTrackingCommands = new ArrayList<>();
+      List<RhoRateTrackingCommand> rhoRateTrackingCommands = new ArrayList<>();
       for (int i = 0; i < mpc.mpcCommands.getNumberOfCommands(); i++)
       {
          MPCCommand<?> command = mpc.mpcCommands.getCommand(i);
@@ -143,13 +150,28 @@ public class JumpingMPCTest
             vrpContinuityCommands.add((VRPPositionContinuityCommand) command);
          else if (command instanceof OrientationContinuityCommand)
             orientationContinuityCommands.add((OrientationContinuityCommand) command);
+         else if (command instanceof VRPTrackingCommand)
+            vrpTrackingCommands.add((VRPTrackingCommand) command);
+         else if (command instanceof  OrientationTrajectoryCommand)
+            orientationTrackingCommands.add((OrientationTrajectoryCommand) command);
+         else if (command instanceof  ForceTrackingCommand)
+            forceTrackingCommands.add((ForceTrackingCommand) command);
+         else if (command instanceof  RhoBoundCommand)
+            rhoBoundCommands.add((RhoBoundCommand) command);
+         else if (command instanceof  RhoTrackingCommand)
+            rhoTrackingCommands.add((RhoTrackingCommand) command);
+         else if (command instanceof  RhoRateTrackingCommand)
+            rhoRateTrackingCommands.add((RhoRateTrackingCommand) command);
       }
 
       int expectedCoMPositionCommands = 1;
       int expectedCoMVelocityCommands = 1;
       int expectedDCMPositionCommands = 0;
       if (MPCParameters.includeFinalCoMPositionObjective)
+      {
+         LogTools.info("Adding final COM");
          expectedCoMPositionCommands++;
+      }
       if (MPCParameters.includeFinalCoMVelocityObjective)
          expectedCoMVelocityCommands++;
       if (MPCParameters.includeFinalDCMPositionObjective)
@@ -180,8 +202,57 @@ public class JumpingMPCTest
       }
       numberOfEqualityConstraints += 6 * orientationContinuityCommands.size();
 
+      assertEquals(mpc.previewWindowCalculator.getPlanningWindow().size(), orientationTrackingCommands.size());
+      if (MPCParameters.includeForceMinimization)
+         assertEquals(2 * (mpc.previewWindowCalculator.getPlanningWindow().size() - 1), forceTrackingCommands.size());
+      assertEquals(mpc.previewWindowCalculator.getPlanningWindow().size() - 1, rhoTrackingCommands.size());
+      assertEquals(mpc.previewWindowCalculator.getPlanningWindow().size() - 1, rhoRateTrackingCommands.size());
+      assertEquals(mpc.previewWindowCalculator.getPlanningWindow().size() - 1, rhoBoundCommands.size());
       assertEquals(numberOfEqualityConstraints, mpc.qpSolver.qpSolver.linearEqualityConstraintsBVector.getNumRows());
       assertEquals(numberOfEqualityConstraints, mpc.qpSolver.qpSolver.linearEqualityConstraintsAMatrix.getNumRows());
+
+      for (int i = 0; i < mpc.previewWindowCalculator.getPlanningWindow().size(); i++)
+      {
+         int segmentToMatch = i;
+
+         if (mpc.previewWindowCalculator.getPlanningWindow().get(i).getContactState().isLoadBearing())
+         {
+            assertTrue(rhoBoundCommands.stream().anyMatch(command -> command.getSegmentNumber() == segmentToMatch));
+            assertTrue(rhoTrackingCommands.stream().anyMatch(command -> command.getSegmentNumber() == segmentToMatch));
+            assertTrue(rhoRateTrackingCommands.stream().anyMatch(command -> command.getSegmentNumber() == segmentToMatch));
+
+            if (MPCParameters.includeForceMinimization)
+            {
+               int numberShouldMatch = mpc.previewWindowCalculator.getPlanningWindow().get(i).getNumberOfContactPlanes();
+               assertEquals(numberShouldMatch, forceTrackingCommands.stream().filter(command -> command.getSegmentNumber() == segmentToMatch).count());
+            }
+         }
+         assertTrue(orientationTrackingCommands.stream().anyMatch(command -> command.getSegmentNumber() == segmentToMatch));
+
+         if (i < mpc.previewWindowCalculator.getPlanningWindow().size() - 1)
+         {
+            assertTrue(comPositionContinuityCommands.stream().anyMatch(command -> command.getFirstSegmentNumber() == segmentToMatch));
+            assertTrue(comVelocityContinuityCommands.stream().anyMatch(command -> command.getFirstSegmentNumber() == segmentToMatch));
+            assertTrue(orientationContinuityCommands.stream().anyMatch(command -> command.getSegmentNumber() == segmentToMatch));
+         }
+      }
+
+      if (MPCParameters.includeFinalCoMPositionObjective)
+      {
+         CoMPositionCommand finalCoMPositionCommand = comPositionCommands.stream()
+                                                                         .filter(command -> command.getSegmentNumber() == mpc.previewWindowCalculator.getPlanningWindow().size() - 1)
+                                                                         .findFirst()
+                                                                         .get();
+         assertEquals(MPCParameters.finalCoMPositionConstraintType, finalCoMPositionCommand.getConstraintType());
+      }
+      if (MPCParameters.includeFinalDCMPositionObjective)
+      {
+         DCMPositionCommand finalCoMPositionCommand = dcmPositionCommands.stream()
+                                                                         .filter(command -> command.getSegmentNumber() == mpc.previewWindowCalculator.getPlanningWindow().size() - 1)
+                                                                         .findFirst()
+                                                                         .get();
+         assertEquals(MPCParameters.finalDCMPositionConstraintType, finalCoMPositionCommand.getConstraintType());
+      }
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       indexHandler.initialize(mpc.previewWindowCalculator.getPlanningWindow());
@@ -376,6 +447,104 @@ public class JumpingMPCTest
          }
       }
 
+      if (MPCParameters.includeFinalCoMPositionObjective && MPCParameters.finalCoMPositionConstraintType == ConstraintType.EQUALITY)
+      {
+         int segmentNumber = mpc.previewWindowCalculator.getPlanningWindow().size() - 1;
+         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getTimeInterval().getDuration();
+         DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+         List<MPCContactPlane> contactPlanes = mpc.contactHandler.getContactPlanesForSegment(segmentNumber);
+         CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(segmentNumber), segmentDuration, tempJacobian, 0, 1.0);
+         int rhoStart = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+         for (int i = 0; i < contactPlanes.size(); i++)
+         {
+            ContactPlaneJacobianCalculator.computeLinearJacobian(0, segmentDuration, mpc.omega.getValue(), rhoStart, contactPlanes.get(i), tempJacobian);
+            rhoStart += contactPlanes.get(i).getCoefficientSize();
+         }
+
+         MatrixTools.setMatrixBlock(linearConstraintMatrix, row, 0, tempJacobian, 0, 0, 3, indexHandler.getTotalProblemSize(), 1.0);
+
+         mpc.comPositionAtEndOfWindow.get(row, linearConstraintVector);
+         linearConstraintVector.add(row + 2, 0, 0.5 * 9.81 * segmentDuration * segmentDuration);
+
+         row += 3;
+      }
+      if (MPCParameters.includeFinalCoMVelocityObjective && MPCParameters.finalCoMVelocityConstraintType == ConstraintType.EQUALITY)
+      {
+         int segmentNumber = mpc.previewWindowCalculator.getPlanningWindow().size() - 1;
+         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getTimeInterval().getDuration();
+         DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+
+         List<MPCContactPlane> contactPlanes = mpc.contactHandler.getContactPlanesForSegment(segmentNumber);
+         CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(segmentNumber), segmentDuration, tempJacobian, 1, 1.0);
+         int rhoStart = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+         for (int i = 0; i < contactPlanes.size(); i++)
+         {
+            ContactPlaneJacobianCalculator.computeLinearJacobian(1, segmentDuration, mpc.omega.getValue(), rhoStart, contactPlanes.get(i), tempJacobian);
+            rhoStart += contactPlanes.get(i).getCoefficientSize();
+         }
+
+         MatrixTools.setMatrixBlock(linearConstraintMatrix, row, 0, tempJacobian, 0, 0, 3, indexHandler.getTotalProblemSize(), 1.0);
+
+         mpc.comVelocityAtEndOfWindow.get(row, linearConstraintVector);
+         linearConstraintVector.add(row + 2, 0, 9.81 * segmentDuration);
+
+         row += 3;
+      }
+      if (MPCParameters.includeFinalDCMPositionObjective && MPCParameters.finalDCMPositionConstraintType == ConstraintType.EQUALITY)
+      {
+         int segmentNumber = mpc.previewWindowCalculator.getPlanningWindow().size() - 1;
+         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getTimeInterval().getDuration();
+         DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+
+         List<MPCContactPlane> contactPlanes = mpc.contactHandler.getContactPlanesForSegment(segmentNumber);
+         CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(segmentNumber), segmentDuration, tempJacobian, 0, 1.0);
+         CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(segmentNumber), segmentDuration, tempJacobian, 1, 1.0 / mpc.omega.getValue());
+         int rhoStart = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+         for (int i = 0; i < contactPlanes.size(); i++)
+         {
+            ContactPlaneJacobianCalculator.computeLinearJacobian(0, segmentDuration, mpc.omega.getValue(), rhoStart, contactPlanes.get(i), tempJacobian);
+            ContactPlaneJacobianCalculator.computeLinearJacobian(1.0 / mpc.omega.getValue(), 1, segmentDuration, mpc.omega.getValue(), rhoStart, contactPlanes.get(i), tempJacobian);
+            rhoStart += contactPlanes.get(i).getCoefficientSize();
+         }
+
+         MatrixTools.setMatrixBlock(linearConstraintMatrix, row, 0, tempJacobian, 0, 0, 3, indexHandler.getTotalProblemSize(), 1.0);
+
+         FramePoint3D dcmAtEndOfState = new FramePoint3D();
+         dcmAtEndOfState.scaleAdd(1.0 / mpc.omega.getValue(), mpc.comVelocityAtEndOfWindow, mpc.comPositionAtEndOfWindow);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(dcmAtEndOfState, mpc.dcmAtEndOfWindow, 1e-5);
+
+         dcmAtEndOfState.get(row, linearConstraintVector);
+         linearConstraintVector.add(row + 2, 0, 0.5 * 9.81 * segmentDuration * segmentDuration + 9.81 / mpc.omega.getValue() * segmentDuration);
+
+         row += 3;
+      }
+      if (MPCParameters.finalVRPPositionConstraintType == ConstraintType.EQUALITY)
+      {
+         int segmentNumber = mpc.previewWindowCalculator.getPlanningWindow().size() - 1;
+         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getTimeInterval().getDuration();
+         DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
+
+         List<MPCContactPlane> contactPlanes = mpc.contactHandler.getContactPlanesForSegment(segmentNumber);
+         CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(segmentNumber), segmentDuration, tempJacobian, 0, 1.0);
+         CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(segmentNumber), segmentDuration, tempJacobian, 2, -1.0 / MathTools.square(mpc.omega.getValue()));
+         int rhoStart = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+         for (int i = 0; i < contactPlanes.size(); i++)
+         {
+            ContactPlaneJacobianCalculator.computeLinearJacobian(0, segmentDuration, mpc.omega.getValue(), rhoStart, contactPlanes.get(i), tempJacobian);
+            ContactPlaneJacobianCalculator.computeLinearJacobian(-1.0 / MathTools.square(mpc.omega.getValue()),
+                                                                 2,
+                                                                 segmentDuration,
+                                                                 mpc.omega.getValue(),
+                                                                 rhoStart,
+                                                                 contactPlanes.get(i),
+                                                                 tempJacobian);
+            rhoStart += contactPlanes.get(i).getCoefficientSize();
+         }
+
+         MatrixTools.setMatrixBlock(linearConstraintMatrix, row, 0, tempJacobian, 0, 0, 3, indexHandler.getTotalProblemSize(), 1.0);
+
+         row += 3;
+      }
 
       MatrixTestTools.assertMatrixEquals(linearConstraintMatrix, mpc.qpSolver.qpSolver.linearEqualityConstraintsAMatrix, 1e-5);
       MatrixTestTools.assertMatrixEquals(linearConstraintVector, mpc.qpSolver.qpSolver.linearEqualityConstraintsBVector, 1e-5);
