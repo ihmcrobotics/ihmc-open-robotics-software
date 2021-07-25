@@ -7,9 +7,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GDXInteractableFoot
@@ -21,6 +23,7 @@ public class GDXInteractableFoot
    private final ModelInstance footModelInstance;
    private boolean selected = false;
    private boolean hovered;
+   private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
 
    public GDXInteractableFoot(GDXRobotCollisionLink collisionLink, RobotSide side, ReferenceFrame syncedRobotFootFrame)
    {
@@ -37,6 +40,11 @@ public class GDXInteractableFoot
       GDXTools.setTransparency(footModelInstance, 0.5f);
    }
 
+   public void create(FocusBasedGDXCamera camera3D)
+   {
+      poseGizmo.create(camera3D);
+   }
+
    public void process3DViewInput(ImGui3DViewInput input)
    {
       hovered = !selected && collisionLink.getIntersects();
@@ -47,7 +55,13 @@ public class GDXInteractableFoot
          if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
          {
             selected = true;
+            poseGizmo.getTransform().set(syncedRobotFootFrame.getTransformToWorldFrame());
          }
+      }
+      if (selected)
+      {
+         poseGizmo.process3DViewInput(input);
+         GDXTools.toGDX(poseGizmo.getTransform(), footModelInstance.transform);
       }
    }
 
@@ -57,15 +71,14 @@ public class GDXInteractableFoot
       {
          footModelInstance.getRenderables(renderables, pool);
       }
+      if (selected)
+      {
+         poseGizmo.getRenderables(renderables, pool);
+      }
    }
 
    public void destroy()
    {
       footModel.dispose();
-   }
-
-   public GDXRobotCollisionLink getCollisionLink()
-   {
-      return collisionLink;
    }
 }

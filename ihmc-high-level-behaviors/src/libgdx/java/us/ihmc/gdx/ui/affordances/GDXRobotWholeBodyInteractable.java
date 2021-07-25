@@ -64,17 +64,18 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       {
          GDXRobotCollisionLink collisionLink = new GDXRobotCollisionLink(collidable, GDXTools.toGDX(red));
          environmentCollisionLinks.add(collisionLink);
-         if (collidable.getRigidBody().getName().equals("l_foot"))
+
+         for (RobotSide side : RobotSide.values)
          {
-            footInteractables.put(RobotSide.LEFT, new GDXInteractableFoot(collisionLink,
-                                                                          RobotSide.LEFT,
-                                                                          fullRobotModel.getFrameAfterLegJoint(RobotSide.LEFT, LegJointName.ANKLE_ROLL)));
-         }
-         else if (collidable.getRigidBody().getName().equals("r_foot"))
-         {
-            footInteractables.put(RobotSide.RIGHT, new GDXInteractableFoot(collisionLink,
-                                                                           RobotSide.RIGHT,
-                                                                           fullRobotModel.getFrameAfterLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_ROLL)));
+            if (collidable.getRigidBody().getName().equals(side.getSideNameFirstLowerCaseLetter() + "_foot"))
+            {
+               GDXInteractableFoot interactableFoot = new GDXInteractableFoot(collisionLink,
+                                                                              side,
+                                                                              fullRobotModel.getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL));
+               interactableFoot.create(baseUI.get3DSceneManager().getCamera3D());
+               footInteractables.put(side, interactableFoot);
+            }
+
          }
       }
    }
