@@ -92,14 +92,4 @@ public class GDXModelLoader
       String modifiedFileName = objFileName.replace(".obj", "") + ".g3dj";
       return modifiedFileName;
    }
-
-   public static Model loadG3DModel(String modelFileName)
-   {
-      return modelLoader.loadOrGetModel(modelFileName);
-   }
-
-   public static void destroy()
-   {
-      modelLoader.destroyInternal();
-   }
 }
