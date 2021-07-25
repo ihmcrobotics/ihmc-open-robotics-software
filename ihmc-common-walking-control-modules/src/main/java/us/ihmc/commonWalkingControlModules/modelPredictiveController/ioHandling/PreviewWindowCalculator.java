@@ -1,12 +1,13 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProviderTools;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
+import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -32,8 +33,10 @@ public class PreviewWindowCalculator
    private final YoInteger segmentsInPreviewWindow = new YoInteger("segmentsInPreviewWindow", registry);
    private final YoDouble previewWindowDuration = new YoDouble("previewWindowDuration", registry);
 
-   private final RecyclingArrayList<ContactPlaneProvider> previewWindowContacts = new RecyclingArrayList<>(ContactPlaneProvider::new);
+   private final RecyclingArrayList<PreviewWindowSegment> previewWindowContacts = new RecyclingArrayList<>(PreviewWindowSegment::new);
    private final RecyclingArrayList<ContactPlaneProvider> fullContactSet = new RecyclingArrayList<>(ContactPlaneProvider::new);
+
+   private final PreviewWindowSegment trimmedFinalSegment = new PreviewWindowSegment();
 
    private final ContactSegmentHelper contactSegmentHelper = new ContactSegmentHelper();
 
@@ -99,7 +102,7 @@ public class PreviewWindowCalculator
       {
          ContactPlaneProvider contact = fullContactSequence.get(i);
 
-         previewWindowContacts.add().set(contact);
+         previewWindowContacts.add().addContactPhaseInSegment(contact, contact.getTimeInterval().getStartTime(), contact.getTimeInterval().getEndTime());
          horizonDuration += contact.getTimeInterval().getDuration();
 
          if (contact.getContactState().isLoadBearing() && (horizonDuration >= maximumPreviewWindowDuration.getDoubleValue()
@@ -107,29 +110,45 @@ public class PreviewWindowCalculator
             break;
       }
 
-      contactSegmentHelper.cropInitialSegmentLength(previewWindowContacts.get(0), timeAtStartOfWindow);
+      double startAlpha = (timeAtStartOfWindow - fullContactSequence.get(activeSegment).getTimeInterval().getStartTime()) / fullContactSequence.get(activeSegment).getTimeInterval().getDuration();
+      contactSegmentHelper.cubicInterpolateStartOfSegment(previewWindowContacts.get(0).getContactPhase(0), startAlpha);
 
       double previewWindowLength = 0.0;
       double flightDuration = 0.0;
       for (int i = 0; i < previewWindowContacts.size() - 1; i++)
       {
-         double duration = previewWindowContacts.get(i).getTimeInterval().getDuration();
+         double duration = previewWindowContacts.get(i).getDuration();
          if (previewWindowContacts.get(i).getContactState().isLoadBearing())
             previewWindowLength += duration;
          else
             flightDuration += duration;
       }
 
-      ContactPlaneProvider trimmedFinalSegment = contactSegmentHelper.trimFinalSegmentLength(previewWindowContacts.getLast(), previewWindowLength, maximumPreviewWindowDuration.getDoubleValue());
-      previewWindowLength += previewWindowContacts.getLast().getTimeInterval().getDuration();
+      double finalSegmentDuration = maximumPreviewWindowDuration.getDoubleValue() - previewWindowLength;
+      PreviewWindowSegment lastSegment = previewWindowContacts.getLast();
+      ContactStateBasics<?> lastPhase = lastSegment.getContactPhase(lastSegment.getNumberOfContactPhasesInSegment() - 1);
+      double alpha = Math.min(finalSegmentDuration / lastPhase.getTimeInterval().getDuration(), 1.0);
+      trimmedFinalSegment.reset();
+      if (alpha < 1.0)
+      {
+         double startTime = lastPhase.getTimeInterval().getStartTime();
+         double oldEndTime = lastPhase.getTimeInterval().getEndTime();
+         double newEndTime = alpha * lastPhase.getTimeInterval().getDuration() + startTime;
+         trimmedFinalSegment.addContactPhaseInSegment(lastPhase, newEndTime, oldEndTime);
+         for (int i = 0; i < lastSegment.getNumberOfContacts(); i++)
+            trimmedFinalSegment.addContact(lastSegment.getContactPose(i), lastSegment.getContactsInBodyFrame(i));
+         contactSegmentHelper.cubicInterpolateStartOfSegment(trimmedFinalSegment.getContactPhase(0), alpha);
+         contactSegmentHelper.cubicInterpolateEndOfSegment(lastPhase, alpha);
+      }
+      previewWindowLength += lastSegment.getDuration();
 
       fullContactSet.clear();
       for (int i = 0; i < previewWindowContacts.size(); i++)
-         fullContactSet.add().set(previewWindowContacts.get(i));
+         setPlaneProviderFromPreviewWindowSegment(fullContactSet.add(), previewWindowContacts.get(i));
 
-      if (trimmedFinalSegment != null)
+      if (alpha < 1.0)
       {
-         fullContactSet.add().set(trimmedFinalSegment);
+         setPlaneProviderFromPreviewWindowSegment(fullContactSet.add(), trimmedFinalSegment);
          for (int i = previewWindowContacts.size() + activeSegment; i < fullContactSequence.size(); i++)
             fullContactSet.add().set(fullContactSequence.get(i));
       }
@@ -139,7 +158,7 @@ public class PreviewWindowCalculator
             fullContactSet.add().set(fullContactSequence.get(i));
       }
 
-      if (!ContactStateProviderTools.checkContactSequenceIsValid(previewWindowContacts))
+      if (!checkContactSequenceIsValid(previewWindowContacts))
          throw new IllegalArgumentException("The preview window is not valid.");
       if (!ContactStateProviderTools.checkContactSequenceIsValid(fullContactSet))
          throw new IllegalArgumentException("The full contact sequence is not valid.");
@@ -151,7 +170,7 @@ public class PreviewWindowCalculator
     * Gets the contact sequence that composes the preview window
     * @return contacts in the preview window
     */
-   public List<ContactPlaneProvider> getPlanningWindow()
+   public List<PreviewWindowSegment> getPlanningWindow()
    {
       return previewWindowContacts;
    }
@@ -174,5 +193,44 @@ public class PreviewWindowCalculator
    public boolean activeSegmentChanged()
    {
       return activeSegmentChanged.getBooleanValue();
+   }
+
+   public static boolean checkContactSequenceIsValid(List<PreviewWindowSegment> contactStateSequence)
+   {
+      if (!checkContactSequenceDoesNotEndInFlight(contactStateSequence))
+         return false;
+
+      return isTimeSequenceContinuous(contactStateSequence, 1e-2);
+   }
+
+   static boolean checkContactSequenceDoesNotEndInFlight(List<PreviewWindowSegment> contactStateSequence)
+   {
+      return contactStateSequence.get(contactStateSequence.size() - 1).getContactState().isLoadBearing();
+   }
+
+   public static boolean isTimeSequenceContinuous(List<PreviewWindowSegment> contactStateSequence, double epsilon)
+   {
+      for (int index = 0; index < contactStateSequence.size() - 1; index++)
+      {
+         if (!TimeIntervalTools.areTimeIntervalsConsecutive(contactStateSequence.get(index), contactStateSequence.get(index + 1), epsilon))
+            return false;
+      }
+
+      return true;
+   }
+
+   private static void setPlaneProviderFromPreviewWindowSegment(ContactPlaneProvider planeProviderToPack, PreviewWindowSegment segment)
+   {
+      planeProviderToPack.reset();
+      planeProviderToPack.getTimeInterval().set(segment);
+
+      planeProviderToPack.setStartECMPPosition(segment.getContactPhase(0).getECMPStartPosition());
+      planeProviderToPack.setStartECMPVelocity(segment.getContactPhase(0).getECMPStartVelocity());
+      int lastId = segment.getNumberOfContactPhasesInSegment() - 1;
+      planeProviderToPack.setEndECMPPosition(segment.getContactPhase(lastId).getECMPEndPosition());
+      planeProviderToPack.setEndECMPVelocity(segment.getContactPhase(lastId).getECMPEndVelocity());
+
+      for (int i = 0; i < segment.getNumberOfContacts(); i++)
+         planeProviderToPack.addContact(segment.getContactPose(i), segment.getContactsInBodyFrame(i));
    }
 }

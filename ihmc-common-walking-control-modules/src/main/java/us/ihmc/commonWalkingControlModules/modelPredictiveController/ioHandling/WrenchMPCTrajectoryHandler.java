@@ -36,7 +36,7 @@ public class WrenchMPCTrajectoryHandler
       return hasTrajectory;
    }
 
-   public void extractSolutionForPreviewWindow(List<ContactPlaneProvider> planningWindow,
+   public void extractSolutionForPreviewWindow(List<PreviewWindowSegment> planningWindow,
                                                List<? extends List<MPCContactPlane>> contactPlaneHelpers,
                                                double mass,
                                                double omega)
@@ -45,7 +45,7 @@ public class WrenchMPCTrajectoryHandler
 
       for (int i = 0; i < planningWindow.size(); i++)
       {
-         TimeIntervalReadOnly timeInterval = planningWindow.get(i).getTimeInterval();
+         TimeIntervalReadOnly timeInterval = planningWindow.get(i);
          wrenchTrajectory.appendSegment(timeInterval, mass, omega, contactPlaneHelpers.get(i));
       }
 

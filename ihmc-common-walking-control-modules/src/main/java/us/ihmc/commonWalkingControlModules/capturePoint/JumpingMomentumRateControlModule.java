@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.orientationControl.VariationalLQRController;
 import us.ihmc.euclid.referenceFrame.*;
@@ -59,7 +60,7 @@ public class JumpingMomentumRateControlModule
    private double timeInContactPhase;
 
    private List<? extends Polynomial3DReadOnly> vrpTrajectories;
-   private List<? extends ContactStateProvider> contactStateProviders;
+   private List<PreviewWindowSegment> contactStateProviders;
 
    private FrameVector3DReadOnly mpcLinearMomentumRateOfChange;
    private FrameVector3DReadOnly mpcAngularMomentumRateOfChange;

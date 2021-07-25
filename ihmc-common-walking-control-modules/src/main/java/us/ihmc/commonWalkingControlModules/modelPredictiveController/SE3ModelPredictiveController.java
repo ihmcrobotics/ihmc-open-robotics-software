@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPC
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.customPolicies.CustomMPCPolicy;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCTrajectoryViewer;
 import us.ihmc.commons.MathTools;
@@ -160,7 +161,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    @Override
    protected void initializeIndexHandler()
    {
-      List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
+      List<PreviewWindowSegment> planningWindow = previewWindowCalculator.getPlanningWindow();
       indexHandler.initialize(planningWindow);
    }
 
@@ -197,7 +198,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    }
 
    @Override
-   protected void computeObjectives(List<ContactPlaneProvider> contactSequence)
+   protected void computeObjectives(List<PreviewWindowSegment> contactSequence)
    {
       computeInitialError();
 
@@ -212,7 +213,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       computeCustomMPCPolicyObjectives(contactSequence);
    }
 
-   private void computeCustomMPCPolicyObjectives(List<ContactPlaneProvider> contactSequence)
+   private void computeCustomMPCPolicyObjectives(List<PreviewWindowSegment> contactSequence)
    {
       for (int i = 0; i < customMPCPoliciesToProcess.size(); i++)
       {
@@ -231,7 +232,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    }
 
    @Override
-   protected void computeTransitionObjectives(ContactPlaneProvider currentContact, ContactPlaneProvider nextContact, int currentSegmentNumber)
+   protected void computeTransitionObjectives(PreviewWindowSegment currentContact, PreviewWindowSegment nextContact, int currentSegmentNumber)
    {
       super.computeTransitionObjectives(currentContact, nextContact, currentSegmentNumber);
 
@@ -239,7 +240,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    }
 
    @Override
-   protected void computeObjectivesForCurrentPhase(ContactPlaneProvider contactPlaneProvider, int segmentNumber)
+   protected void computeObjectivesForCurrentPhase(PreviewWindowSegment contactPlaneProvider, int segmentNumber)
    {
       super.computeObjectivesForCurrentPhase(contactPlaneProvider, segmentNumber);
 
@@ -248,7 +249,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    }
 
    @Override
-   public void computeFinalPhaseObjectives(ContactPlaneProvider lastContactPhase, int segmentNumber)
+   public void computeFinalPhaseObjectives(PreviewWindowSegment lastContactPhase, int segmentNumber)
    {
       super.computeFinalPhaseObjectives(lastContactPhase, segmentNumber);
 
