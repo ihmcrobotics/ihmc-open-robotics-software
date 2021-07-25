@@ -39,14 +39,34 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private BoxRayIntersection boxRayIntersection;
    private ModelInstance coordinateFrame;
 
+   public GDXRobotCollisionLink(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
+   {
+      this(collidable.getShape(),
+           collidable.getShape().getReferenceFrame(),
+           collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
+           collidable.getRigidBody().getName(),
+           color);
+   }
+
    public GDXRobotCollisionLink(Collidable collidable, Color color)
    {
-      shape = collidable.getShape();
-      ReferenceFrame shapeFrame = collidable.getShape().getReferenceFrame();
-      MovingReferenceFrame frameAfterJoint = collidable.getRigidBody().getParentJoint().getFrameAfterJoint();
+      this(collidable.getShape(),
+           collidable.getShape().getReferenceFrame(),
+           collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
+           collidable.getRigidBody().getName(),
+           color);
+   }
+
+   public GDXRobotCollisionLink(Shape3DReadOnly shape,
+                                ReferenceFrame shapeFrame,
+                                MovingReferenceFrame frameAfterJoint,
+                                String rigidBodyName,
+                                Color color)
+   {
+      this.shape = shape;
       // TODO update every frame
       transformToJoint = new RigidBodyTransform(shapeFrame.getTransformToDesiredFrame(frameAfterJoint));
-      collisionMeshFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("collisionMeshFrame" + collidable.getRigidBody().getName(),
+      collisionMeshFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("collisionMeshFrame" + rigidBodyName,
                                                                                                   frameAfterJoint,
                                                                                                   transformToJoint);
 
@@ -94,7 +114,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
          {
             LogTools.warn("Shape not handled: {}", shape);
          }
-      }, collidable.getRigidBody().getName());
+      }, rigidBodyName);
       GDXTools.setTransparency(modelInstance, color.a);
 
       coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);

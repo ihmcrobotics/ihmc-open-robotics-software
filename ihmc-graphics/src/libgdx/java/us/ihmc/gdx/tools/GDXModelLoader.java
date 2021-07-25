@@ -78,4 +78,28 @@ public class GDXModelLoader
       }
       loadedModels.clear();
    }
+
+   /**
+    * TODO: Implement Collada, STL, etc model loaders
+    */
+   public static String modifyFileName(String modelFileName)
+   {
+      if (!modelFileName.endsWith(".obj"))
+         return null;
+
+      String[] splitSlash = modelFileName.split("/");
+      String objFileName = splitSlash[splitSlash.length - 1];
+      String modifiedFileName = objFileName.replace(".obj", "") + ".g3dj";
+      return modifiedFileName;
+   }
+
+   public static Model loadG3DModel(String modelFileName)
+   {
+      return modelLoader.loadOrGetModel(modelFileName);
+   }
+
+   public static void destroy()
+   {
+      modelLoader.destroyInternal();
+   }
 }
