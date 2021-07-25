@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -48,7 +49,7 @@ public class CustomCoMPositionPolicy implements CustomMPCPolicy
    }
 
    @Override
-   public MPCCommand<?> computeMPCCommand(MPCContactHandler contactHandler, List<? extends ContactStateProvider<?>> contactStateProviders, double omega)
+   public MPCCommand<?> computeMPCCommand(MPCContactHandler contactHandler, List<PreviewWindowSegment> contactStateProviders, double omega)
    {
       int segmentNumber = CustomPolicyTools.getSegmentNumber(timeOfPolicy, contactStateProviders);
       double timeInSegment = CustomPolicyTools.getTimeInSegment(segmentNumber, timeOfPolicy, contactStateProviders);

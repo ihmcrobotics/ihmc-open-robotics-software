@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Or
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -60,7 +61,7 @@ public class OrientationTrajectoryConstructor
       return trajectoryCommandsForSegments;
    }
 
-   public void compute(List<ContactPlaneProvider> previewWindowContactSequence,
+   public void compute(List<PreviewWindowSegment> previewWindowContactSequence,
                        Matrix3DReadOnly momentOfInertia,
                        LinearMPCTrajectoryHandler linearTrajectoryHandler,
                        OrientationMPCTrajectoryHandler orientationTrajectoryHandler,
@@ -70,7 +71,7 @@ public class OrientationTrajectoryConstructor
 
       trajectoryCommandsForSegments.clear();
 
-      double trajectoryStartTime = previewWindowContactSequence.get(0).getTimeInterval().getStartTime();
+      double trajectoryStartTime = previewWindowContactSequence.get(0).getStartTime();
 
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {

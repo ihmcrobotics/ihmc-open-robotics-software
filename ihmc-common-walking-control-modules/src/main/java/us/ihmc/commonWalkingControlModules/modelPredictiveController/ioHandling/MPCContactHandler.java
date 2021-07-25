@@ -55,7 +55,7 @@ public class MPCContactHandler
       contactDataList.clear();
    }
 
-   public void computeMatrixHelpers(List<ContactPlaneProvider> currentContactSequence, List<ContactPlaneProvider> previousContactSequence, double omega)
+   public void computeMatrixHelpers(List<PreviewWindowSegment> currentContactSequence, List<PreviewWindowSegment> previousContactSequence, double omega)
    {
       contactPlanes.clear();
       activeSetData.clear();
@@ -64,7 +64,7 @@ public class MPCContactHandler
 
       for (int sequenceId = 0; sequenceId < currentContactSequence.size(); sequenceId++)
       {
-         ContactPlaneProvider contact = currentContactSequence.get(sequenceId);
+         PreviewWindowSegment contact = currentContactSequence.get(sequenceId);
 
          int contactIdx = contactDataList.indexOf(contact);
          ContactData contactData;
@@ -80,7 +80,7 @@ public class MPCContactHandler
 
          List<MPCContactPlane> contactPlanes = contactData.getPlanes();
 
-         for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
+         for (int contactId = 0; contactId < contact.getNumberOfContacts(); contactId++)
          {
             MPCContactPlane contactPlane = contactPlanes.get(contactId);
             contactPlane.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
@@ -103,7 +103,7 @@ public class MPCContactHandler
          unusedContactDataList.add(contactDataList.getContactData(i));
    }
 
-   private ContactData createNewContactData(int sequenceId, ContactPlaneProvider contact)
+   private ContactData createNewContactData(int sequenceId, PreviewWindowSegment contact)
    {
       ContactData contactData = contactDataList.addContactData();
       contactData.clear();
@@ -113,13 +113,13 @@ public class MPCContactHandler
       activeSetData.setSegmentNumber(sequenceId);
       activeSetData.setNumberOfVariablesInSegment(indexHandler.getVariablesInSegment(sequenceId));
 
-      for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
+      for (int contactId = 0; contactId < contact.getNumberOfContacts(); contactId++)
          contactData.addContactPlane();
 
       return contactData;
    }
 
-   private void registerAsUsed(ContactPlaneProvider contact, ContactData contactData)
+   private void registerAsUsed(PreviewWindowSegment contact, ContactData contactData)
    {
       contactData.setContact(contact);
 
@@ -142,7 +142,7 @@ public class MPCContactHandler
       while (i < contactDataList.numberOfContacts())
       {
          ContactData contactData = contactDataList.getContactData(i);
-         if (contactData.getContact().getNumberOfContactPlanes() != contactData.getPlanes().size())
+         if (contactData.getContact().getNumberOfContacts() != contactData.getPlanes().size())
          {
             contactDataList.removeContact(i);
             continue;
@@ -182,14 +182,14 @@ public class MPCContactHandler
       private final RecyclingArrayList<MPCContactPlane> contactPlanes = new RecyclingArrayList<>(contactPlaneProvider);
       private final ActiveSetData activeSetData = new ActiveSetData();
 
-      private final ContactPlaneProvider contact = new ContactPlaneProvider();
+      private final PreviewWindowSegment contact = new PreviewWindowSegment();
 
-      public void setContact(ContactPlaneProvider contact)
+      public void setContact(PreviewWindowSegment contact)
       {
          this.contact.set(contact);
       }
 
-      public ContactPlaneProvider getContact()
+      public PreviewWindowSegment getContact()
       {
          return contact;
       }
@@ -219,7 +219,7 @@ public class MPCContactHandler
       @Override
       public String toString()
       {
-         return contact.getTimeInterval().toString();
+         return contact.toString();
       }
    }
 
@@ -247,7 +247,7 @@ public class MPCContactHandler
          return contactData.get(index);
       }
 
-      public boolean removeContact(ContactPlaneProvider contactPlaneProvider)
+      public boolean removeContact(PreviewWindowSegment contactPlaneProvider)
       {
          int index = indexOf(contactPlaneProvider);
          return removeContact(index);
@@ -265,22 +265,22 @@ public class MPCContactHandler
       private static final double timeEpsilon = 1e-2;
       private static final double positionEpsilon = 5e-3;
 
-      public boolean containsContact(ContactPlaneProvider contactPlaneProvider)
+      public boolean containsContact(PreviewWindowSegment contactPlaneProvider)
       {
          for (int i = 0; i < contactData.size(); i++)
          {
-            if (ContactPlaneProvider.epsilonEquals(contactData.get(i).getContact(), contactPlaneProvider, timeEpsilon, positionEpsilon))
+            if (PreviewWindowSegment.epsilonEquals(contactData.get(i).getContact(), contactPlaneProvider, timeEpsilon, positionEpsilon))
                return true;
          }
 
          return false;
       }
 
-      public int indexOf(ContactPlaneProvider contact)
+      public int indexOf(PreviewWindowSegment contact)
       {
          for (int i = 0; i < contactData.size(); i++)
          {
-            if (ContactPlaneProvider.epsilonEquals(contactData.get(i).getContact(), contact, timeEpsilon, positionEpsilon))
+            if (PreviewWindowSegment.epsilonEquals(contactData.get(i).getContact(), contact, timeEpsilon, positionEpsilon))
             {
                return i;
             }

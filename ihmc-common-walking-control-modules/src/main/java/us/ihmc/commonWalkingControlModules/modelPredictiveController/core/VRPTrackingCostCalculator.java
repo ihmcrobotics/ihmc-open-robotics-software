@@ -17,7 +17,6 @@ import java.util.List;
  * This class is used to compute the cost functions for tracking a desired VRP function.
  * This tracking function can be computed as a convex quadratic cost term.
  *
- * TODO improve this cost calculator to allow tracking cubic VRP trajectories, rather than just linear ones.
  * TODO review class to make it more efficient for column-wise operations, such as what happens in the sparse matrices
  */
 public class VRPTrackingCostCalculator
@@ -84,7 +83,7 @@ public class VRPTrackingCostCalculator
       double w2 = omega * omega;
       double w4 = w2 * w2;
 
-      double tEnd = objective.getSegmentDuration();
+      double tEnd = objective.getEndTime();
       double t2End = tEnd * tEnd;
       double t3End = tEnd * t2End;
       double t4End = tEnd * t3End;
@@ -98,23 +97,45 @@ public class VRPTrackingCostCalculator
       double gc0End = t4End / 8.0 - 0.5 * t2End / w2;
       double gc1End = t3End / 6.0 - tEnd / w2;
 
-      costHessianToPack.set(startCoMIdx, startCoMIdx, c0c0End);
-      costHessianToPack.set(startCoMIdx, startCoMIdx + 1, c0c1End);
-      costHessianToPack.set(startCoMIdx + 1, startCoMIdx, c0c1End);
-      costHessianToPack.set(startCoMIdx + 1, startCoMIdx + 1, tEnd);
+      double tStart = objective.getStartTime();
+      double t2Start = tStart * tStart;
+      double t3Start = tStart * t2Start;
+      double t4Start = tStart * t3Start;
+      double t5Start = tStart * t4Start;
+      double t6Start = tStart * t5Start;
+      double t7Start = tStart * t6Start;
 
-      costHessianToPack.set(startCoMIdx + 2, startCoMIdx + 2, c0c0End);
-      costHessianToPack.set(startCoMIdx + 2, startCoMIdx + 3, c0c1End);
-      costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 2, c0c1End);
-      costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 3, tEnd);
+      double c0c0Start = t3Start / 3.0;
+      double c0c1Start = 0.5 * t2Start;
 
-      costHessianToPack.set(startCoMIdx + 4, startCoMIdx + 4, c0c0End);
-      costHessianToPack.set(startCoMIdx + 4, startCoMIdx + 5, c0c1End);
-      costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 4, c0c1End);
-      costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 5, tEnd);
+      double gc0Start = t4Start / 8.0 - 0.5 * t2Start / w2;
+      double gc1Start = t3Start / 6.0 - tStart / w2;
 
-      costGradientToPack.set(startCoMIdx + 4, 0, gc0End * gravityZ);
-      costGradientToPack.set(startCoMIdx + 5, 0, gc1End * gravityZ);
+      double c0c0 = c0c0End - c0c0Start;
+      double c0c1 = c0c1End - c0c1Start;
+
+      double gc0 = gc0End - gc0Start;
+      double gc1 = gc1End - gc1Start;
+
+      double duration = tEnd - tStart;
+
+      costHessianToPack.set(startCoMIdx, startCoMIdx, c0c0);
+      costHessianToPack.set(startCoMIdx, startCoMIdx + 1, c0c1);
+      costHessianToPack.set(startCoMIdx + 1, startCoMIdx, c0c1);
+      costHessianToPack.set(startCoMIdx + 1, startCoMIdx + 1, duration);
+
+      costHessianToPack.set(startCoMIdx + 2, startCoMIdx + 2, c0c0);
+      costHessianToPack.set(startCoMIdx + 2, startCoMIdx + 3, c0c1);
+      costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 2, c0c1);
+      costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 3, duration);
+
+      costHessianToPack.set(startCoMIdx + 4, startCoMIdx + 4, c0c0);
+      costHessianToPack.set(startCoMIdx + 4, startCoMIdx + 5, c0c1);
+      costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 4, c0c1);
+      costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 5, duration);
+
+      costGradientToPack.set(startCoMIdx + 4, 0, gc0 * gravityZ);
+      costGradientToPack.set(startCoMIdx + 5, 0, gc1 * gravityZ);
 
       allBasisVectors.clear();
       for (int contactPlaneIdx = 0; contactPlaneIdx < objective.getNumberOfContacts(); contactPlaneIdx++)
@@ -139,6 +160,25 @@ public class VRPTrackingCostCalculator
       double a2c1End = t4End / 4.0 - 3.0 * t2End / w2;
       double a3c1End = t3End / 3.0 - 2.0 * tEnd / w2;
 
+      double a2a2Start = t7Start / 7.0 - 12.0 * t5Start / (5.0 * w2) + 12.0 / w4 * t3Start;
+      double a2a3Start = t6Start / 6.0 - 2.0 * t4Start / w2 + 6.0 / w4 * t2Start;
+      double a3a3Start = t5Start / 5.0 - 4.0 / 3.0 * t3Start / w2 + 4.0 / w4 * tStart;
+
+      double a2c0Start = t5Start / 5.0 - 2.0 * t3Start / w2;
+      double a3c0Start = t4Start / 4.0 - t2Start / w2;
+      double a2c1Start = t4Start / 4.0 - 3.0 * t2Start / w2;
+      double a3c1Start = t3Start / 3.0 - 2.0 * tStart / w2;
+
+      double a2a2 = a2a2End - a2a2Start;
+      double a2a3 = a2a3End - a2a3Start;
+      double a3a3 = a3a3End - a3a3Start;
+
+      double a2c0 = a2c0End - a2c0Start;
+      double a3c0 = a3c0End - a3c0Start;
+      double a2c1 = a2c1End - a2c1Start;
+      double a3c1 = a3c1End - a3c1Start;
+
+
       double a2DeltaEnd = t4End / 5.0 - 2.0 * t2End / w2;
       double a3DeltaEnd = t3End / 4.0 - tEnd / w2;
       double a2Start = a2c1End;
@@ -154,8 +194,8 @@ public class VRPTrackingCostCalculator
       for (int ordinal = 0; ordinal < 3; ordinal++)
       {
          int offset = 2 * ordinal + startCoMIdx;
-         double c0 = t2End / 3.0 * c2Desired.getElement(ordinal) + t2End / 2.0 * c3Desired.getElement(ordinal);
-         double c1 = tEnd / 2.0 * c2Desired.getElement(ordinal) + tEnd * c3Desired.getElement(ordinal);
+         double c0 = (t2End - t2Start) / 3.0 * c2Desired.getElement(ordinal) + (t2End - t2Start) / 2.0 * c3Desired.getElement(ordinal);
+         double c1 = (tEnd - tStart) / 2.0 * c2Desired.getElement(ordinal) + (tEnd - tStart) * c3Desired.getElement(ordinal);
 
          MatrixMissingTools.unsafe_add(costGradientToPack, offset, 0, -c0);
          MatrixMissingTools.unsafe_add(costGradientToPack, offset + 1, 0, -c1);
@@ -167,10 +207,10 @@ public class VRPTrackingCostCalculator
 
          FrameVector3DReadOnly basisVector = allBasisVectors.get(i);
 
-         MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxI, a2a2End);
-         MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxI + 1, a2a3End);
-         MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxI, a2a3End);
-         MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxI + 1, a3a3End);
+         MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxI, a2a2);
+         MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxI + 1, a2a3);
+         MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxI, a2a3);
+         MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxI + 1, a3a3);
 
          for (int j = i + 1; j < allBasisVectors.size(); j++)
          {
@@ -180,16 +220,16 @@ public class VRPTrackingCostCalculator
 
             int idxJ = 4 * j + startRhoIdx + 2;
 
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxJ, basisDot * a2a2End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxJ + 1, basisDot * a2a3End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxJ, basisDot * a2a3End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxJ + 1, basisDot * a3a3End);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxJ, basisDot * a2a2);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxJ + 1, basisDot * a2a3);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxJ, basisDot * a2a3);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxJ + 1, basisDot * a3a3);
 
             // we know it's symmetric, and this way we can avoid iterating as much
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ, idxI, basisDot * a2a2End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ + 1, idxI, basisDot * a2a3End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ, idxI + 1, basisDot * a2a3End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ + 1, idxI + 1, basisDot * a3a3End);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ, idxI, basisDot * a2a2);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ + 1, idxI, basisDot * a2a3);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ, idxI + 1, basisDot * a2a3);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ + 1, idxI + 1, basisDot * a3a3);
          }
 
 
@@ -197,22 +237,23 @@ public class VRPTrackingCostCalculator
          {
             int offset = startCoMIdx + 2 * ordinal;
             double value = basisVector.getElement(ordinal);
-            MatrixMissingTools.unsafe_add(costHessianToPack, offset, idxI, a2c0End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, offset, idxI + 1, a3c0End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, offset + 1, idxI, a2c1End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, offset + 1, idxI + 1, a3c1End * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, offset, idxI, a2c0 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, offset, idxI + 1, a3c0 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, offset + 1, idxI, a2c1 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, offset + 1, idxI + 1, a3c1 * value);
 
             // symmetric...
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, offset, a2c0End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, offset,  a3c0End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, offset + 1, a2c1End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, offset + 1, a3c1End * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, offset, a2c0 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, offset,  a3c0 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, offset + 1, a2c1 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, offset + 1, a3c1 * value);
          }
 
          double basisDotDelta = c2Desired.dot(basisVector);
          double basisDotStart = c3Desired.dot(basisVector);
          double basisDotG = basisVector.getZ() * gravityZ;
 
+         // FIXME
          MatrixMissingTools.unsafe_add(costGradientToPack, idxI, 0, -basisDotDelta * a2DeltaEnd - basisDotStart * a2Start + basisDotG * ga2End);
          MatrixMissingTools.unsafe_add(costGradientToPack, idxI + 1, 0, -basisDotDelta * a3DeltaEnd - basisDotStart * a3Start + basisDotG * ga3End);
       }
@@ -220,7 +261,6 @@ public class VRPTrackingCostCalculator
       return true;
    }
 
-   // TODO
    private boolean calculateCubicVRPTrackingObjectiveInternal(DMatrix costHessianToPack,
                                                                DMatrix costGradientToPack,
                                                                VRPTrackingCommand objective,
@@ -231,10 +271,11 @@ public class VRPTrackingCostCalculator
       double w2 = omega * omega;
       double w4 = w2 * w2;
 
-      double duration = objective.getSegmentDuration();
+      double duration = objective.getEndTime() - objective.getStartTime();
       double t2 = duration * duration;
       double t3 = duration * t2;
-      double tEnd = objective.getSegmentDuration();
+
+      double tEnd = objective.getEndTime();
       double t2End = tEnd * tEnd;
       double t3End = tEnd * t2End;
       double t4End = tEnd * t3End;
@@ -248,23 +289,43 @@ public class VRPTrackingCostCalculator
       double gc0End = t4End / 8.0 - 0.5 * t2End / w2;
       double gc1End = t3End / 6.0 - tEnd / w2;
 
-      costHessianToPack.set(startCoMIdx, startCoMIdx, c0c0End);
-      costHessianToPack.set(startCoMIdx, startCoMIdx + 1, c0c1End);
-      costHessianToPack.set(startCoMIdx + 1, startCoMIdx, c0c1End);
-      costHessianToPack.set(startCoMIdx + 1, startCoMIdx + 1, tEnd);
+      double tStart = objective.getStartTime();
+      double t2Start = tStart * tStart;
+      double t3Start = tStart * t2Start;
+      double t4Start = tStart * t3Start;
+      double t5Start = tStart * t4Start;
+      double t6Start = tStart * t5Start;
+      double t7Start = tStart * t6Start;
 
-      costHessianToPack.set(startCoMIdx + 2, startCoMIdx + 2, c0c0End);
-      costHessianToPack.set(startCoMIdx + 2, startCoMIdx + 3, c0c1End);
-      costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 2, c0c1End);
-      costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 3, tEnd);
+      double c0c0Start = t3Start / 3.0;
+      double c0c1Start = 0.5 * t2Start;
 
-      costHessianToPack.set(startCoMIdx + 4, startCoMIdx + 4, c0c0End);
-      costHessianToPack.set(startCoMIdx + 4, startCoMIdx + 5, c0c1End);
-      costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 4, c0c1End);
-      costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 5, tEnd);
+      double gc0Start = t4Start / 8.0 - 0.5 * t2Start / w2;
+      double gc1Start = t3Start / 6.0 - tStart / w2;
 
-      costGradientToPack.set(startCoMIdx + 4, 0, gc0End * gravityZ);
-      costGradientToPack.set(startCoMIdx + 5, 0, gc1End * gravityZ);
+      double c0c0 = c0c0End - c0c0Start;
+      double c0c1 = c0c1End - c0c1Start;
+
+      double gc0 = gc0End - gc1Start;
+      double gc1 = gc1End - gc1Start;
+
+      costHessianToPack.set(startCoMIdx, startCoMIdx, c0c0);
+      costHessianToPack.set(startCoMIdx, startCoMIdx + 1, c0c1);
+      costHessianToPack.set(startCoMIdx + 1, startCoMIdx, c0c1);
+      costHessianToPack.set(startCoMIdx + 1, startCoMIdx + 1, duration);
+
+      costHessianToPack.set(startCoMIdx + 2, startCoMIdx + 2, c0c0);
+      costHessianToPack.set(startCoMIdx + 2, startCoMIdx + 3, c0c1);
+      costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 2, c0c1);
+      costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 3, duration);
+
+      costHessianToPack.set(startCoMIdx + 4, startCoMIdx + 4, c0c0);
+      costHessianToPack.set(startCoMIdx + 4, startCoMIdx + 5, c0c1);
+      costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 4, c0c1);
+      costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 5, duration);
+
+      costGradientToPack.set(startCoMIdx + 4, 0, gc0 * gravityZ);
+      costGradientToPack.set(startCoMIdx + 5, 0, gc1 * gravityZ);
 
       allBasisVectors.clear();
       for (int contactPlaneIdx = 0; contactPlaneIdx < objective.getNumberOfContacts(); contactPlaneIdx++)
@@ -300,6 +361,36 @@ public class VRPTrackingCostCalculator
 
       double ga2End = t6End / 12.0 - t4End / w2 + 3.0 * t2End / w4;
       double ga3End = t5End / 10 - 2.0 * t3End / (3.0 * w2) + 2.0 / w4 * tEnd;
+
+      double a2a2Start = t7Start / 7.0 - 12.0 * t5Start / (5.0 * w2) + 12.0 / w4 * t3Start;
+      double a2a3Start = t6Start / 6.0 - 2.0 * t4Start / w2 + 6.0 / w4 * t2Start;
+      double a3a3Start = t5Start / 5.0 - 4.0 / 3.0 * t3Start / w2 + 4.0 / w4 * tStart;
+
+      double a2c0Start = t5Start / 5.0 - 2.0 * t3Start / w2;
+      double a3c0Start = t4Start / 4.0 - t2Start / w2;
+      double a2c1Start = t4Start / 4.0 - 3.0 * t2Start / w2;
+      double a3c1Start = t3Start / 3.0 - 2.0 * tStart / w2;
+
+      double a2c0DesiredStart = t7Start / 7.0 - 6.0 * t5Start / (5.0 * w2);
+      double a3c0DesiredStart = t6Start / 6.0 - t4Start / (2.0 * w2);
+      double a2c1DesiredStart = t6Start / 6.0 - 3.0 * t4Start / (2.0 * w2);
+      double a3c1DesiredStart = t5Start / 5.0 - 2.0 * t3Start / (3.0 * w2);
+      double a2c2DesiredStart = t5Start / 5.0 - 2.0 * t3Start / w2;
+      double a3c2DesiredStart = t4Start / 4.0 - t2Start / w2;
+      double a2c3DesiredStart = t4Start / 4.0 - 3.0 * t2Start / w2;
+      double a3c3DesiredStart = t3Start / 3.0 - 2.0 * tStart / w2;
+
+      double ga2Start = t6Start / 12.0 - t4Start / w2 + 3.0 * t2Start / w4;
+      double ga3Start = t5Start / 10 - 2.0 * t3Start / (3.0 * w2) + 2.0 / w4 * tStart;
+
+      double a2a2 = a2a2End - a2a2Start;
+      double a2a3 = a2a3End - a2a3Start;
+      double a3a3 = a3a3End - a3a3Start;
+
+      double a2c0 = a2c0End - a2c0Start;
+      double a3c0 = a3c0End - a3c0Start;
+      double a2c1 = a2c1End - a2c1Start;
+      double a3c1 = a3c1End - a3c1Start;
 
       vrpChange.sub(objective.getEndVRP(), objective.getStartVRP());
 
@@ -340,10 +431,10 @@ public class VRPTrackingCostCalculator
 
          FrameVector3DReadOnly basisVector = allBasisVectors.get(i);
 
-         MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxI, a2a2End);
-         MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxI + 1, a2a3End);
-         MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxI, a2a3End);
-         MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxI + 1, a3a3End);
+         MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxI, a2a2);
+         MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxI + 1, a2a3);
+         MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxI, a2a3);
+         MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxI + 1, a3a3);
 
          for (int j = i + 1; j < allBasisVectors.size(); j++)
          {
@@ -353,16 +444,16 @@ public class VRPTrackingCostCalculator
 
             int idxJ = 4 * j + startRhoIdx + 2;
 
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxJ, basisDot * a2a2End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxJ + 1, basisDot * a2a3End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxJ, basisDot * a2a3End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxJ + 1, basisDot * a3a3End);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxJ, basisDot * a2a2);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, idxJ + 1, basisDot * a2a3);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxJ, basisDot * a2a3);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, idxJ + 1, basisDot * a3a3);
 
             // we know it's symmetric, and this way we can avoid iterating as much
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ, idxI, basisDot * a2a2End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ + 1, idxI, basisDot * a2a3End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ, idxI + 1, basisDot * a2a3End);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ + 1, idxI + 1, basisDot * a3a3End);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ, idxI, basisDot * a2a2);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ + 1, idxI, basisDot * a2a3);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ, idxI + 1, basisDot * a2a3);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxJ + 1, idxI + 1, basisDot * a3a3);
          }
 
 
@@ -370,16 +461,16 @@ public class VRPTrackingCostCalculator
          {
             int offset = startCoMIdx + 2 * ordinal;
             double value = basisVector.getElement(ordinal);
-            MatrixMissingTools.unsafe_add(costHessianToPack, offset, idxI, a2c0End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, offset, idxI + 1, a3c0End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, offset + 1, idxI, a2c1End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, offset + 1, idxI + 1, a3c1End * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, offset, idxI, a2c0 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, offset, idxI + 1, a3c0 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, offset + 1, idxI, a2c1 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, offset + 1, idxI + 1, a3c1 * value);
 
             // symmetric...
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, offset, a2c0End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, offset,  a3c0End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, offset + 1, a2c1End * value);
-            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, offset + 1, a3c1End * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, offset, a2c0 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, offset,  a3c0 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI, offset + 1, a2c1 * value);
+            MatrixMissingTools.unsafe_add(costHessianToPack, idxI + 1, offset + 1, a3c1 * value);
          }
 
          double basisDotC0 = c0Desired.dot(basisVector);
@@ -388,6 +479,7 @@ public class VRPTrackingCostCalculator
          double basisDotC3 = c3Desired.dot(basisVector);
          double basisDotG = basisVector.getZ() * gravityZ;
 
+         // FIXME
          MatrixMissingTools.unsafe_add(costGradientToPack, idxI, 0, -basisDotC0 * a2c0DesiredEnd - basisDotC1 * a2c1DesiredEnd
                                                                     -basisDotC2 * a2c2DesiredEnd - basisDotC3 * a2c3DesiredEnd + basisDotG * ga2End);
          MatrixMissingTools.unsafe_add(costGradientToPack, idxI + 1, 0, -basisDotC0 * a3c0DesiredEnd - basisDotC1 * a3c1DesiredEnd
