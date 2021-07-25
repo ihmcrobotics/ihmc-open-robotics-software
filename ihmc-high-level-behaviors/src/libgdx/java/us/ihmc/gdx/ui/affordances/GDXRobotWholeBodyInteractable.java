@@ -13,8 +13,11 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,9 +31,11 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final ArrayList<GDXRobotCollisionLink> selfCollisionLinks = new ArrayList<>();
    private final ArrayList<GDXRobotCollisionLink> environmentCollisionLinks = new ArrayList<>();
 
-   private final ImGuiPanel panel = new ImGuiPanel(getClass().getSimpleName(), this::renderImGuiWidgets);
+   private final ImGuiPanel panel = new ImGuiPanel("Whole Body Interactable", this::renderImGuiWidgets);
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
+
+   private final SideDependentList<GDXInteractableFoot> footInteractables = new SideDependentList<>();
 
    public GDXRobotWholeBodyInteractable(RobotCollisionModel robotSelfCollisionModel,
                                         RobotCollisionModel robotEnvironmentCollisionModel,
@@ -59,6 +64,18 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       {
          GDXRobotCollisionLink collisionLink = new GDXRobotCollisionLink(collidable, GDXTools.toGDX(red));
          environmentCollisionLinks.add(collisionLink);
+         if (collidable.getRigidBody().getName().equals("l_foot"))
+         {
+            footInteractables.put(RobotSide.LEFT, new GDXInteractableFoot(collisionLink,
+                                                                          RobotSide.LEFT,
+                                                                          fullRobotModel.getFrameAfterLegJoint(RobotSide.LEFT, LegJointName.ANKLE_ROLL)));
+         }
+         else if (collidable.getRigidBody().getName().equals("r_foot"))
+         {
+            footInteractables.put(RobotSide.RIGHT, new GDXInteractableFoot(collisionLink,
+                                                                           RobotSide.RIGHT,
+                                                                           fullRobotModel.getFrameAfterLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_ROLL)));
+         }
       }
    }
 
@@ -85,12 +102,21 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       {
          collisionLink.process3DViewInput(input);
       }
+
+      for (GDXInteractableFoot footInteractable : footInteractables)
+      {
+         footInteractable.process3DViewInput(input);
+      }
    }
 
    private void renderImGuiWidgets()
    {
       ImGui.checkbox("Show self collision meshes", showSelfCollisionMeshes);
       ImGui.checkbox("Show environment collision meshes", showEnvironmentCollisionMeshes);
+      ImGui.text("TODO:");
+      ImGui.text("- Add transparency sliders");
+      ImGui.text("- Add context menus");
+      ImGui.text("- Add ghost robot");
    }
 
    @Override
@@ -109,6 +135,11 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          {
             collisionLink.getRenderables(renderables, pool);
          }
+      }
+
+      for (GDXInteractableFoot footInteractable : footInteractables)
+      {
+         footInteractable.getVirtualRenderables(renderables, pool);
       }
    }
 

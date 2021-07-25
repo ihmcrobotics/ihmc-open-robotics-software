@@ -38,6 +38,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private CapsuleRayIntersection capsuleIntersection;
    private BoxRayIntersection boxRayIntersection;
    private ModelInstance coordinateFrame;
+   private boolean intersects;
 
    public GDXRobotCollisionLink(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
    {
@@ -132,7 +133,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
       RigidBodyTransform transformToWorldFrame = collisionMeshFrame.getTransformToWorldFrame();
-      boolean intersects = false;
+      intersects = false;
       if (shape instanceof Sphere3DReadOnly)
       {
          Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
@@ -176,5 +177,10 @@ public class GDXRobotCollisionLink implements RenderableProvider
    {
       modelInstance.getRenderables(renderables, pool);
       coordinateFrame.getRenderables(renderables, pool);
+   }
+
+   public boolean getIntersects()
+   {
+      return intersects;
    }
 }
