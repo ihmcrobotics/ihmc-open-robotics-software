@@ -363,7 +363,7 @@ public class GDXImGuiBasedUI
       }
 
       sceneManager.setViewportBounds(0, 0, (int) renderSizeX, (int) renderSizeY);
-      sceneManager.renderShadowMap(frameBuffer.getWidth(),frameBuffer.getHeight());
+      sceneManager.renderShadowMap(Gdx.graphics.getWidth() * ANTI_ALIASING, Gdx.graphics.getHeight() * ANTI_ALIASING);
 
       frameBuffer.begin();
       sceneManager.render();
