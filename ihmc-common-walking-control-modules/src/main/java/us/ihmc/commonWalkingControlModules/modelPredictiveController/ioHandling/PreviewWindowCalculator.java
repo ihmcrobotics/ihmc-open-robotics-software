@@ -105,6 +105,8 @@ public class PreviewWindowCalculator
          PreviewWindowSegment segment = previewWindowContacts.add();
          segment.reset();
          segment.addContactPhaseInSegment(contact, contact.getTimeInterval().getStartTime(), contact.getTimeInterval().getEndTime());
+         for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
+            segment.addContact(contact.getContactPose(contactId), contact.getContactsInBodyFrame(contactId));
          horizonDuration += contact.getTimeInterval().getDuration();
 
          if (contact.getContactState().isLoadBearing() && (horizonDuration >= maximumPreviewWindowDuration.getDoubleValue()
@@ -114,6 +116,7 @@ public class PreviewWindowCalculator
 
       double startAlpha = (timeAtStartOfWindow - fullContactSequence.get(activeSegment).getTimeInterval().getStartTime()) / fullContactSequence.get(activeSegment).getTimeInterval().getDuration();
       contactSegmentHelper.cubicInterpolateStartOfSegment(previewWindowContacts.get(0).getContactPhase(0), startAlpha);
+      previewWindowContacts.get(0).setStartTime(timeAtStartOfWindow);
 
       double previewWindowLength = 0.0;
       double flightDuration = 0.0;
@@ -126,21 +129,23 @@ public class PreviewWindowCalculator
             flightDuration += duration;
       }
 
-      double finalSegmentDuration = maximumPreviewWindowDuration.getDoubleValue() - previewWindowLength;
+      double desiredFinalSegmentDuration = maximumPreviewWindowDuration.getDoubleValue() - previewWindowLength;
       PreviewWindowSegment lastSegment = previewWindowContacts.getLast();
       ContactStateBasics<?> lastPhase = lastSegment.getContactPhase(lastSegment.getNumberOfContactPhasesInSegment() - 1);
-      double alpha = Math.min(finalSegmentDuration / lastPhase.getTimeInterval().getDuration(), 1.0);
+      double lastPhaseDuration = Math.min(lastPhase.getTimeInterval().getDuration(), 10.0);
+      double alpha = Math.min(desiredFinalSegmentDuration / lastPhaseDuration, 1.0);
       trimmedFinalSegment.reset();
       if (alpha < 1.0)
       {
          double startTime = lastPhase.getTimeInterval().getStartTime();
          double oldEndTime = lastPhase.getTimeInterval().getEndTime();
-         double newEndTime = alpha * lastPhase.getTimeInterval().getDuration() + startTime;
+         double newEndTime = alpha * lastPhaseDuration + startTime;
          trimmedFinalSegment.addContactPhaseInSegment(lastPhase, newEndTime, oldEndTime);
          for (int i = 0; i < lastSegment.getNumberOfContactPlanes(); i++)
             trimmedFinalSegment.addContact(lastSegment.getContactPose(i), lastSegment.getContactsInBodyFrame(i));
          contactSegmentHelper.cubicInterpolateStartOfSegment(trimmedFinalSegment.getContactPhase(0), alpha);
          contactSegmentHelper.cubicInterpolateEndOfSegment(lastPhase, alpha);
+         lastSegment.setEndTime(newEndTime);
       }
       previewWindowLength += lastSegment.getDuration();
 
