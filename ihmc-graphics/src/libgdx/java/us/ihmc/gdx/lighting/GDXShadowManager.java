@@ -109,7 +109,7 @@ public class GDXShadowManager
          light.render(renderableProviders);
       }
 
-      if (framebuffer == null || width < framebuffer.getWidth() || height < framebuffer.getHeight()) //resizing bug caused by something??
+   if (framebuffer == null || width != framebuffer.getWidth() || height != framebuffer.getHeight())
       {
          if (framebuffer != null)
             framebuffer.dispose();
