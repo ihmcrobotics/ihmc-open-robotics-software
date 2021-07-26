@@ -12,7 +12,9 @@ precision mediump float;
 uniform sampler2D u_depthMapDir;
 uniform samplerCube u_depthMapCube;
 uniform float u_cameraFar;
-uniform vec3 u_lightPosition;
+uniform float u_lightPosition_x;
+uniform float u_lightPosition_y;
+uniform float u_lightPosition_z;
 uniform float u_type;
 
 
@@ -32,8 +34,11 @@ void main()
 	// Default is to not add any color
 	float intensity=0.0; 
 	// Vector light-current position
-	vec3 lightDirection=v_position.xyz-u_lightPosition;
-	float lenToLight=length(lightDirection)/u_cameraFar;
+    float lightDirection_x = v_position.x - u_lightPosition_x;
+    float lightDirection_y = v_position.y - u_lightPosition_y;
+    float lightDirection_z = v_position.z - u_lightPosition_z;
+
+	float lenToLight=sqrt((lightDirection_x * lightDirection_x) + (lightDirection_y * lightDirection_y) + (lightDirection_z * lightDirection_z))/u_cameraFar;
 	// By default assume shadow
 	float lenDepthMap=-1.0;
 	
@@ -46,7 +51,7 @@ void main()
 	}
 	// Point light, just get the depth given light vector
 	else if(u_type==2.0){
-		lenDepthMap = unpack(textureCube(u_depthMapCube, lightDirection));
+		lenDepthMap = unpack(textureCube(u_depthMapCube, vec3(lightDirection_x, lightDirection_y, lightDirection_z)));
 	}
 	
 	// If not in shadow, add some light

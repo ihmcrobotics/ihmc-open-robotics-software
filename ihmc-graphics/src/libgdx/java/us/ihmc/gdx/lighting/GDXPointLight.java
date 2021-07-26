@@ -29,7 +29,9 @@ public class GDXPointLight extends GDXLight
 
       shaderProgram.begin();
       shaderProgram.setUniformf("u_cameraFar", camera.far);
-      shaderProgram.setUniformf("u_lightPosition", position);
+      shaderProgram.setUniformf("u_lightPosition_x", position.x);
+      shaderProgram.setUniformf("u_lightPosition_y", position.y);
+      shaderProgram.setUniformf("u_lightPosition_z", position.z);
       shaderProgram.end();
 
       for (int s = 0; s <= 5; s++)
@@ -57,9 +59,11 @@ public class GDXPointLight extends GDXLight
       depthMap.bind(textureNum);
       shader.setUniformf("u_type", 2);
       shader.setUniformi("u_depthMapCube", textureNum);
-      //sceneShaderProgram.setUniformMatrix("u_lightTrans", camera.combined);
+      shader.setUniformMatrix("u_lightTrans", camera.combined);
       shader.setUniformf("u_cameraFar", camera.far);
-      shader.setUniformf("u_lightPosition", position);
+      shader.setUniformf("u_lightPosition_x", position.x);
+      shader.setUniformf("u_lightPosition_y", position.y);
+      shader.setUniformf("u_lightPosition_z", position.z);
 
       shader.end();
    }

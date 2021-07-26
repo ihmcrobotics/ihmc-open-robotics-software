@@ -12,7 +12,9 @@ precision mediump float;
 uniform float u_cameraFar;
 
 varying vec4 v_position;
-uniform vec3 u_lightPosition;
+uniform float u_lightPosition_x;
+uniform float u_lightPosition_y;
+uniform float u_lightPosition_z;
 
 vec4 pack(HIGH float depth) {
     const vec4 bitSh = vec4(256 * 256 * 256, 256 * 256, 256, 1.0);
@@ -25,7 +27,11 @@ vec4 pack(HIGH float depth) {
 void main()
 {
 	// Simple depth calculation, just the length of the vector light-current position
-    float depth = length(v_position.xyz-u_lightPosition)/u_cameraFar;
+    float lightDirection_x = v_position.x - u_lightPosition_x;
+    float lightDirection_y = v_position.y - u_lightPosition_y;
+    float lightDirection_z = v_position.z - u_lightPosition_z;
+
+    float depth = sqrt((lightDirection_x * lightDirection_x) + (lightDirection_y * lightDirection_y) + (lightDirection_z * lightDirection_z))/u_cameraFar;
 	gl_FragColor     = pack(depth);
 	
 }
