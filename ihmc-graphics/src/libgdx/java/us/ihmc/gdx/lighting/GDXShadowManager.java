@@ -109,7 +109,7 @@ public class GDXShadowManager
          light.render(renderableProviders);
       }
 
-   if (framebuffer == null || width != framebuffer.getWidth() || height != framebuffer.getHeight())
+      if ((framebuffer == null || width != framebuffer.getWidth() || height != framebuffer.getHeight()) && width > 0 && height > 0)
       {
          if (framebuffer != null)
             framebuffer.dispose();
