@@ -36,7 +36,9 @@ public class OrientationValueCommand implements MPCCommand<OrientationValueComma
 
    private final DMatrixRMaj objectiveValue = new DMatrixRMaj(6, 1);
 
+   private boolean useWeightScalar;
    private double objectiveWeight;
+   private final DMatrixRMaj weightMatrix = new DMatrixRMaj(6, 6);
 
    public void setCommandId(int commandId)
    {
@@ -59,6 +61,7 @@ public class OrientationValueCommand implements MPCCommand<OrientationValueComma
       getBMatrix().zero();
       getCMatrix().zero();
       getObjectiveValue().zero();
+      useWeightScalar = true;
    }
 
    public int getSegmentNumber()
@@ -131,6 +134,26 @@ public class OrientationValueCommand implements MPCCommand<OrientationValueComma
       return objectiveWeight;
    }
 
+   public void setUseWeightScalar(boolean useWeightScalar)
+   {
+      this.useWeightScalar = useWeightScalar;
+   }
+
+   public boolean useWeightScalar()
+   {
+      return useWeightScalar;
+   }
+
+   public void setWeightMatrix(DMatrixRMaj weightMatrix)
+   {
+      this.weightMatrix.set(weightMatrix);
+   }
+
+   public DMatrixRMaj getWeightMatrix()
+   {
+      return weightMatrix;
+   }
+
    public void set(OrientationValueCommand other)
    {
       setCommandId(other.getCommandId());
@@ -139,5 +162,7 @@ public class OrientationValueCommand implements MPCCommand<OrientationValueComma
       setBMatrix(other.getBMatrix());
       setCMatrix(other.getCMatrix());
       setObjectiveValue(other.getObjectiveValue());
+      setUseWeightScalar(other.useWeightScalar());
+      setWeightMatrix(other.getWeightMatrix());
    }
 }
