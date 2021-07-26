@@ -179,13 +179,13 @@ public class VRPTrackingCostCalculator
       double a3c1 = a3c1End - a3c1Start;
 
 
-      double a2DeltaEnd = t4End / 5.0 - 2.0 * t2End / w2;
-      double a3DeltaEnd = t3End / 4.0 - tEnd / w2;
-      double a2Start = a2c1End;
-      double a3Start = a3c1End;
+      double a2Delta = (t4End - t4Start) / 5.0 - 2.0 * (t2End - t2Start) / w2;
+      double a3Delta = (t3End - t3Start) / 4.0 - (tEnd - tStart) / w2;
+      double a2 = a2c1;
+      double a3 = a3c1;
 
-      double ga2End = t6End / 12.0 - t4End / w2 + 3.0 * t2End / w4;
-      double ga3End = t5End / 10 - 2.0 * t3End / (3.0 * w2) + 2.0 / w4 * tEnd;
+      double ga2 = (t6End - t6Start) / 12.0 - (t4End - t4Start) / w2 + 3.0 * (t2End - t2Start) / w4;
+      double ga3 = (t5End - t5Start) / 10 - 2.0 * (t3End - t3Start) / (3.0 * w2) + 2.0 / w4 * (tEnd - tStart);
 
       c3Desired.set(objective.getStartVRP());
       c2Desired.sub(objective.getEndVRP(), objective.getStartVRP());
@@ -253,9 +253,8 @@ public class VRPTrackingCostCalculator
          double basisDotStart = c3Desired.dot(basisVector);
          double basisDotG = basisVector.getZ() * gravityZ;
 
-         // FIXME
-         MatrixMissingTools.unsafe_add(costGradientToPack, idxI, 0, -basisDotDelta * a2DeltaEnd - basisDotStart * a2Start + basisDotG * ga2End);
-         MatrixMissingTools.unsafe_add(costGradientToPack, idxI + 1, 0, -basisDotDelta * a3DeltaEnd - basisDotStart * a3Start + basisDotG * ga3End);
+         MatrixMissingTools.unsafe_add(costGradientToPack, idxI, 0, -basisDotDelta * a2Delta - basisDotStart * a2 + basisDotG * ga2);
+         MatrixMissingTools.unsafe_add(costGradientToPack, idxI + 1, 0, -basisDotDelta * a3Delta - basisDotStart * a3 + basisDotG * ga3);
       }
 
       return true;
@@ -350,18 +349,6 @@ public class VRPTrackingCostCalculator
       double a2c1End = t4End / 4.0 - 3.0 * t2End / w2;
       double a3c1End = t3End / 3.0 - 2.0 * tEnd / w2;
 
-      double a2c0DesiredEnd = t7End / 7.0 - 6.0 * t5End / (5.0 * w2);
-      double a3c0DesiredEnd = t6End / 6.0 - t4End / (2.0 * w2);
-      double a2c1DesiredEnd = t6End / 6.0 - 3.0 * t4End / (2.0 * w2);
-      double a3c1DesiredEnd = t5End / 5.0 - 2.0 * t3End / (3.0 * w2);
-      double a2c2DesiredEnd = t5End / 5.0 - 2.0 * t3End / w2;
-      double a3c2DesiredEnd = t4End / 4.0 - t2End / w2;
-      double a2c3DesiredEnd = t4End / 4.0 - 3.0 * t2End / w2;
-      double a3c3DesiredEnd = t3End / 3.0 - 2.0 * tEnd / w2;
-
-      double ga2End = t6End / 12.0 - t4End / w2 + 3.0 * t2End / w4;
-      double ga3End = t5End / 10 - 2.0 * t3End / (3.0 * w2) + 2.0 / w4 * tEnd;
-
       double a2a2Start = t7Start / 7.0 - 12.0 * t5Start / (5.0 * w2) + 12.0 / w4 * t3Start;
       double a2a3Start = t6Start / 6.0 - 2.0 * t4Start / w2 + 6.0 / w4 * t2Start;
       double a3a3Start = t5Start / 5.0 - 4.0 / 3.0 * t3Start / w2 + 4.0 / w4 * tStart;
@@ -371,17 +358,17 @@ public class VRPTrackingCostCalculator
       double a2c1Start = t4Start / 4.0 - 3.0 * t2Start / w2;
       double a3c1Start = t3Start / 3.0 - 2.0 * tStart / w2;
 
-      double a2c0DesiredStart = t7Start / 7.0 - 6.0 * t5Start / (5.0 * w2);
-      double a3c0DesiredStart = t6Start / 6.0 - t4Start / (2.0 * w2);
-      double a2c1DesiredStart = t6Start / 6.0 - 3.0 * t4Start / (2.0 * w2);
-      double a3c1DesiredStart = t5Start / 5.0 - 2.0 * t3Start / (3.0 * w2);
-      double a2c2DesiredStart = t5Start / 5.0 - 2.0 * t3Start / w2;
-      double a3c2DesiredStart = t4Start / 4.0 - t2Start / w2;
-      double a2c3DesiredStart = t4Start / 4.0 - 3.0 * t2Start / w2;
-      double a3c3DesiredStart = t3Start / 3.0 - 2.0 * tStart / w2;
+      double a2c0Desired = (t7End - t7Start) / 7.0 - 6.0 * (t5End - t5Start) / (5.0 * w2);
+      double a3c0Desired = (t6End - t6Start) / 6.0 - (t4End - t4Start) / (2.0 * w2);
+      double a2c1Desired = (t6End - t6Start) / 6.0 - 3.0 * (t4End - t4Start) / (2.0 * w2);
+      double a3c1Desired = (t5End - t5Start) / 5.0 - 2.0 * (t3End - t3Start) / (3.0 * w2);
+      double a2c2Desired = (t5End - t5Start) / 5.0 - 2.0 * (t3End - t3Start) / w2;
+      double a3c2Desired = (t4End - t4Start) / 4.0 - (t2End - t2Start) / w2;
+      double a2c3Desired = (t4End - t4Start) / 4.0 - 3.0 * (t2End - t2Start) / w2;
+      double a3c3Desired = (t3End - t3Start) / 3.0 - 2.0 * (tEnd - tStart) / w2;
 
-      double ga2Start = t6Start / 12.0 - t4Start / w2 + 3.0 * t2Start / w4;
-      double ga3Start = t5Start / 10 - 2.0 * t3Start / (3.0 * w2) + 2.0 / w4 * tStart;
+      double ga2 = (t6End - t6Start) / 12.0 - (t4End - t4Start) / w2 + 3.0 * (t2End - t2Start) / w4;
+      double ga3 = (t5End - t5Start) / 10 - 2.0 * (t3End - t3Start) / (3.0 * w2) + 2.0 / w4 * (tEnd - tStart);
 
       double a2a2 = a2a2End - a2a2Start;
       double a2a3 = a2a3End - a2a3Start;
@@ -479,11 +466,9 @@ public class VRPTrackingCostCalculator
          double basisDotC3 = c3Desired.dot(basisVector);
          double basisDotG = basisVector.getZ() * gravityZ;
 
-         // FIXME
-         MatrixMissingTools.unsafe_add(costGradientToPack, idxI, 0, -basisDotC0 * a2c0DesiredEnd - basisDotC1 * a2c1DesiredEnd
-                                                                    -basisDotC2 * a2c2DesiredEnd - basisDotC3 * a2c3DesiredEnd + basisDotG * ga2End);
-         MatrixMissingTools.unsafe_add(costGradientToPack, idxI + 1, 0, -basisDotC0 * a3c0DesiredEnd - basisDotC1 * a3c1DesiredEnd
-                                                                        -basisDotC2 * a3c2DesiredEnd - basisDotC3 * a3c3DesiredEnd + basisDotG * ga3End);
+         MatrixMissingTools.unsafe_add(costGradientToPack, idxI, 0, -basisDotC0 * a2c0Desired - basisDotC1 * a2c1Desired - basisDotC2 * a2c2Desired - basisDotC3 * a2c3Desired + basisDotG * ga2);
+         MatrixMissingTools.unsafe_add(costGradientToPack, idxI + 1, 0, -basisDotC0 * a3c0Desired - basisDotC1 * a3c1Desired
+                                                                        -basisDotC2 * a3c2Desired - basisDotC3 * a3c3Desired + basisDotG * ga3);
       }
 
       return true;
