@@ -4,6 +4,7 @@ import org.ejml.data.DMatrix;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 
@@ -123,6 +124,25 @@ public class CoMTrajectoryPlannerTools
       start.addZ(nominalCoMHeight);
       end.set(contactStateProvider.getECMPEndPosition());
       end.addZ(nominalCoMHeight);
+   }
+
+   public static void computeVRPVelocites(List<? extends ContactStateProvider<?>> contactSequence,
+                                          RecyclingArrayList<FrameVector3D> startVRPVelocitiesToPack,
+                                          RecyclingArrayList<FrameVector3D> endVRPVelocitiesToPack)
+   {
+      startVRPVelocitiesToPack.clear();
+      endVRPVelocitiesToPack.clear();
+
+      for (int i = 0; i < contactSequence.size(); i++)
+      {
+         ContactStateProvider<?> contactStateProvider = contactSequence.get(i);
+
+         FrameVector3D start = startVRPVelocitiesToPack.add();
+         FrameVector3D end = endVRPVelocitiesToPack.add();
+
+         start.set(contactStateProvider.getECMPStartVelocity());
+         end.set(contactStateProvider.getECMPEndVelocity());
+      }
    }
 
    /**

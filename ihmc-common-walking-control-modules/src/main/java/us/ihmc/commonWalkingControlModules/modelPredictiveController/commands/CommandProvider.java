@@ -22,8 +22,9 @@ public class CommandProvider
    private final RecyclingArrayList<OrientationValueCommand> orientationValueCommandPool = new RecyclingArrayList<>(OrientationValueCommand::new);
    private final RecyclingArrayList<DirectOrientationValueCommand> directOrientationValueCommandPool = new RecyclingArrayList<>(DirectOrientationValueCommand::new);
    private final RecyclingArrayList<OrientationContinuityCommand> orientationContinuityCommandPool = new RecyclingArrayList<>(OrientationContinuityCommand::new);
-   private final RecyclingArrayList<ForceObjectiveCommand> forceMinimizationCommandPool = new RecyclingArrayList<>(ForceObjectiveCommand::new);
+   private final RecyclingArrayList<ForceTrackingCommand> forceTrackingCommandPool = new RecyclingArrayList<>(ForceTrackingCommand::new);
    private final RecyclingArrayList<RhoTrackingCommand> rhoTrackingCommandPool = new RecyclingArrayList<>(RhoTrackingCommand::new);
+   private final RecyclingArrayList<RhoRateTrackingCommand> rhoRateTrackingCommandPool = new RecyclingArrayList<>(RhoRateTrackingCommand::new);
 
    /**
           * Clears all the commands, resetting the provider. Must be called every iteration of the MPC
@@ -45,8 +46,9 @@ public class CommandProvider
       orientationValueCommandPool.clear();
       directOrientationValueCommandPool.clear();
       orientationContinuityCommandPool.clear();
-      forceMinimizationCommandPool.clear();
+      forceTrackingCommandPool.clear();
       rhoTrackingCommandPool.clear();
+      rhoRateTrackingCommandPool.clear();
    }
 
    public CoMPositionCommand getNextCoMPositionCommand()
@@ -124,13 +126,18 @@ public class CommandProvider
       return orientationContinuityCommandPool.add();
    }
 
-   public ForceObjectiveCommand getForceMinimizationCommand()
+   public ForceTrackingCommand getForceTrackingCommand()
    {
-      return forceMinimizationCommandPool.add();
+      return forceTrackingCommandPool.add();
    }
 
    public RhoTrackingCommand getRhoMinimizationCommand()
    {
       return rhoTrackingCommandPool.add();
+   }
+
+   public RhoRateTrackingCommand getRhoRateMinimizationCommand()
+   {
+      return rhoRateTrackingCommandPool.add();
    }
 }
