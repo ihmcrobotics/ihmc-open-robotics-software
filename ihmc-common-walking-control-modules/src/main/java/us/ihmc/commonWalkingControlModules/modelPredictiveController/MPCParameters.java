@@ -7,18 +7,18 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MPCParameters
 {
-   private static final boolean includeInitialCoMVelocityObjective = true;
-   private static final boolean includeFinalCoMPositionObjective = false;
-   private static final boolean includeFinalCoMVelocityObjective = true;
-   private static final boolean includeFinalDCMPositionObjective = true;
+   public static final boolean includeInitialCoMVelocityObjective = true;
+   public static final boolean includeFinalCoMPositionObjective = false;
+   public static final boolean includeFinalCoMVelocityObjective = true;
+   public static final boolean includeFinalDCMPositionObjective = true;
 
-   private static final boolean includeRhoMinInequality = true;
-   private static final boolean includeRhoMaxInequality = false;
-   private static final boolean includeForceMinimization = false;
-   private static final boolean includeRhoMinimization = true;
-   private static final boolean includeRhoRateMinimization = true;
+   public static final boolean includeRhoMinInequality = true;
+   public static final boolean includeRhoMaxInequality = false;
+   public static final boolean includeForceMinimization = false;
+   public static final boolean includeRhoMinimization = true;
+   public static final boolean includeRhoRateMinimization = true;
 
-   private static final boolean includeIntermediateOrientationTracking = true;
+   public static final boolean includeIntermediateOrientationTracking = true;
 
    private static final double defaultMinRhoValue = 0.0;//05;
 
