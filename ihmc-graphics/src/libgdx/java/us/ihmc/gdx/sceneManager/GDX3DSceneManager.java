@@ -5,11 +5,14 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -25,6 +28,9 @@ import us.ihmc.log.LogTools;
 
 import java.nio.IntBuffer;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * TODO: Pause and resume?
@@ -36,8 +42,10 @@ public class GDX3DSceneManager
    private ScreenViewport viewport;
    private ShaderProgram mainShaderProgram;
    private ModelBatch modelBatch;
+   private ModelBatch virtualBatch;
 
    private GDXShadowManager shadowManager;
+
 
    private int x = 0;
    private int y = 0;
@@ -46,6 +54,63 @@ public class GDX3DSceneManager
 
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private final HashSet<GDXRenderable> renderables = new HashSet<>();
+
+   private class GDXRenderableIterable implements Iterable<GDXRenderable>
+   {
+      private final HashSet<GDXRenderable> renderables;
+      private GDXSceneLevel level;
+
+      private class GDXRenderableIterator implements Iterator<GDXRenderable> {
+         private final HashSet<GDXRenderable> renderablesInternal;
+
+         private GDXRenderableIterator() {
+            renderablesInternal = new HashSet<>(renderables);
+         }
+
+         @Override
+         public boolean hasNext()
+         {
+            for (GDXRenderable renderable: renderablesInternal) {
+               if (renderable.getSceneType() == level) {
+                  return true;
+               }
+            }
+
+            return false;
+         }
+
+         @Override
+         public GDXRenderable next()
+         {
+            Iterator<GDXRenderable> it = renderablesInternal.iterator();
+            while (it.hasNext()) {
+               GDXRenderable renderable = it.next();
+               it.remove();
+
+               if (renderable.getSceneType() == level) {
+                  return renderable;
+               }
+            }
+
+            throw new NoSuchElementException();
+         }
+      }
+
+      protected GDXRenderableIterable(HashSet<GDXRenderable> renderables) {
+         this(renderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      }
+
+      protected GDXRenderableIterable(HashSet<GDXRenderable> renderables, GDXSceneLevel level) {
+         this.renderables = renderables;
+         this.level = level;
+      }
+
+      @Override
+      public Iterator<GDXRenderable> iterator()
+      {
+         return new GDXRenderableIterator();
+      }
+   }
 
    private boolean firstRenderStarted = false;
    private boolean addFocusSphere = true;
@@ -90,6 +155,8 @@ public class GDX3DSceneManager
          }
       });
 
+      virtualBatch = new ModelBatch();
+
       shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING);
 
       shadowManager.addLight(new GDXPointLight(new Vector3(5, 5, 5)));
@@ -99,7 +166,7 @@ public class GDX3DSceneManager
 
    public void renderShadowMap(int x, int y)
    {
-      shadowManager.renderShadows(camera3D, renderables, x, y); //TODO only pass real objects to not render shadows for virtuals
+      shadowManager.renderShadows(camera3D, new GDXRenderableIterable(renderables), x, y);
    }
 
    private void preRender()
@@ -134,13 +201,18 @@ public class GDX3DSceneManager
       for (GDXRenderable renderable : renderables)
       {
          if (sceneLevel.ordinal() >= renderable.getSceneType().ordinal())
-            modelBatch.render(renderable.getRenderableProvider());
+            modelBatch.render(renderable);
       }
    }
 
    private void postRender()
    {
       modelBatch.end(); // This is actually where all the rendering happens despite the method name
+
+      //Render virtual objects to the screen too
+      virtualBatch.begin(camera3D);
+      virtualBatch.render(new GDXRenderableIterable(renderables, GDXSceneLevel.VIRTUAL));
+      virtualBatch.end();
    }
 
    // Render public API
