@@ -67,13 +67,14 @@ public class ContactParticleFilter
    private final ContactPointParticle[] contactPointParticles = new ContactPointParticle[numberOfParticles];
    private final YoDouble[] contactPointProbabilities = new YoDouble[numberOfParticles];
    private final FramePoint3D[] sampledContactPositions = new FramePoint3D[numberOfParticles];
-   private final YoFramePoint3D[] contactPointPositions = new YoFramePoint3D[numberOfParticles];
-   private final YoFrameVector3D[] scaledSurfaceNormal = new YoFrameVector3D[numberOfParticles];
+   private final YoFramePoint3D[] yoContactPointPositions = new YoFramePoint3D[numberOfParticles];
+   private final YoFrameVector3D[] yoScaledSurfaceNormal = new YoFrameVector3D[numberOfParticles];
 
    private final ContactPointParticle averageProjectedParticle;
    private final YoFramePoint3D yoEstimatedContactPosition = new YoFramePoint3D("estimatedContactPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D yoEstimatedContactNormal = new YoFrameVector3D("estimatedContactNormal", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D estimatedExternalForce = new YoFrameVector3D("estimatedExternalForce", ReferenceFrame.getWorldFrame(), registry);
+   private final YoBoolean showParticles = new YoBoolean("showParticles", registry);
 
    // Resampling variables
    private final double[] histogramValues = new double[numberOfParticles];
@@ -128,8 +129,8 @@ public class ContactParticleFilter
       for (int i = 0; i < numberOfParticles; i++)
       {
          contactPointProbabilities[i] = new YoDouble("cpProb_" + i, registry);
-         contactPointPositions[i] = new YoFramePoint3D("cpPosition_" + i, ReferenceFrame.getWorldFrame(), registry);
-         scaledSurfaceNormal[i] = new YoFrameVector3D("cpNorm_" + i, ReferenceFrame.getWorldFrame(), registry);
+         yoContactPointPositions[i] = new YoFramePoint3D("cpPosition_" + i, ReferenceFrame.getWorldFrame(), registry);
+         yoScaledSurfaceNormal[i] = new YoFrameVector3D("cpNorm_" + i, ReferenceFrame.getWorldFrame(), registry);
          sampledContactPositions[i] = new FramePoint3D();
          contactPointParticles[i] = new ContactPointParticle("particle" + i, joints);
       }
@@ -154,7 +155,7 @@ public class ContactParticleFilter
 
          for (int i = 0; i < numberOfParticles; i++)
          {
-            YoGraphicPosition contactPointGraphic = new YoGraphicPosition("cpPositionViz_" + i, contactPointPositions[i], 0.005, YoAppearance.Blue());
+            YoGraphicPosition contactPointGraphic = new YoGraphicPosition("cpPositionViz_" + i, yoContactPointPositions[i], 0.005, YoAppearance.Blue());
             graphicsListRegistry.registerYoGraphic(name, contactPointGraphic);
          }
       }
@@ -170,6 +171,7 @@ public class ContactParticleFilter
       minIterations.set(500);
       maxIterations.set((int) (maxTime / dt));
       terminalParticleVelocity.set(1.0e-5);
+      showParticles.set(true);
 
       if (parentRegistry != null)
       {
@@ -333,16 +335,27 @@ public class ContactParticleFilter
          contactPointParticles[i].getContactPointPosition().changeFrame(ReferenceFrame.getWorldFrame());
          contactPointParticles[i].getSurfaceNormal().changeFrame(ReferenceFrame.getWorldFrame());
 
-         contactPointPositions[i].set(contactPointParticles[i].getContactPointPosition());
-         scaledSurfaceNormal[i].set(contactPointParticles[i].getSurfaceNormal());
-         scaledSurfaceNormal[i].scale(contactPointProbabilities[i].getDoubleValue());
+         if (showParticles.getValue())
+         {
+            yoContactPointPositions[i].set(contactPointParticles[i].getContactPointPosition());
+            yoScaledSurfaceNormal[i].set(contactPointParticles[i].getSurfaceNormal());
+            yoScaledSurfaceNormal[i].scale(contactPointProbabilities[i].getDoubleValue());
+         }
+         else
+         {
+            yoContactPointPositions[i].setToNaN();
+         }
+
+//         yoContactPointPositions[i].set(contactPointParticles[i].getContactPointPosition());
+//         yoScaledSurfaceNormal[i].set(contactPointParticles[i].getSurfaceNormal());
+//         yoScaledSurfaceNormal[i].scale(contactPointProbabilities[i].getDoubleValue());
       }
 
       FramePoint3D averageParticlePosition = averageProjectedParticle.getContactPointPosition();
       averageParticlePosition.setToZero(ReferenceFrame.getWorldFrame());
       for (int i = 0; i < numberOfParticles; i++)
       {
-         averageParticlePosition.add(contactPointPositions[i]);
+         averageParticlePosition.add(contactPointParticles[i].getContactPointPosition());
       }
       averageParticlePosition.scale(1.0 / numberOfParticles);
 
@@ -557,6 +570,18 @@ public class ContactParticleFilter
    public DMatrixRMaj getJointResiduals()
    {
       return externalTorqueEstimator.getEstimatedExternalTorque();
+   }
+
+   public void showParticles(boolean show)
+   {
+      this.showParticles.set(show);
+      if (!show)
+      {
+         for (int i = 0; i < yoContactPointPositions.length; i++)
+         {
+            yoContactPointPositions[i].setToNaN();
+         }
+      }
    }
 
    public YoRegistry getRegistry()
