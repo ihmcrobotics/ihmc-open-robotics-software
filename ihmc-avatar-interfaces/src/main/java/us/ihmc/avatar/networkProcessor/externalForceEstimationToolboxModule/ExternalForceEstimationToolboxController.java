@@ -145,19 +145,20 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       {
          dynamicsMatrixCalculator.reset();
          dynamicsMatrixCalculator.compute();
-         dynamicsMatrixCalculator.getBodyCoriolisMatrix(coriolisAndGravityMatrix);
+         dynamicsMatrixCalculator.getCoriolisMatrix(coriolisAndGravityMatrix);
+
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
 
          dynamicsMatrixCalculator.getMassMatrixCalculator().reset();
          massMatrix.set(dynamicsMatrixCalculator.getMassMatrixCalculator().getMassMatrix());
          coriolisMatrix.set(dynamicsMatrixCalculator.getMassMatrixCalculator().getCoriolisMatrix());
 
-         MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
-
-         // TODO update this
-         MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
-
          CommonOps_DDRM.mult(coriolisMatrix, qd, cqd);
          CommonOps_DDRM.subtract(coriolisAndGravityMatrix, cqd, gravityMatrix);
+
+         CommonOps_DDRM.mult(massMatrix, controllerDesiredQdd, tau);
+         CommonOps_DDRM.multAdd(coriolisMatrix, qd, tau);
+         CommonOps_DDRM.addEquals(tau, gravityMatrix);
       };
 
       RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
