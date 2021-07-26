@@ -16,6 +16,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
    private YoRegistry yoRegistry;
    private YoVariablesUpdatedListener listener;
    private YoVariableClient yoVariableClient;
+   private final MutableBoolean connecting = new MutableBoolean(false);
 
    public YoVariableClientHelper(String registryName)
    {
@@ -27,7 +28,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
       yoRegistry = new YoRegistry(registryName);
       listener = new YoVariableClientHelperUpdatedListener(yoRegistry);
       yoVariableClient = new YoVariableClient(listener);
-      MutableBoolean connecting = new MutableBoolean(true);
+      connecting.setValue(true);
       ThreadTools.startAThread(() ->
       {
          while (connecting.getValue())
@@ -42,7 +43,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
             catch (RuntimeException e)
             {
                LogTools.warn("Couldn't connect to {}:{}. {} Trying again...", hostname, port, e.getMessage());
-               ThreadTools.sleepSeconds(1.0);
+               connecting.setValue(false);
             }
          }
       }, "YoVariableClientHelperConnection");
@@ -51,6 +52,11 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
    public boolean isConnected()
    {
       return yoVariableClient != null && yoVariableClient.isConnected();
+   }
+
+   public boolean isConnecting()
+   {
+      return connecting.getValue();
    }
 
    public void disconnect()
