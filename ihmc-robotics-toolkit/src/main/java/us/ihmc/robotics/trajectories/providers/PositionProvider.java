@@ -1,8 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public interface PositionProvider
 {
-   public abstract void getPosition(FramePoint3D positionToPack);
+   Point3DReadOnly getPosition();
 }

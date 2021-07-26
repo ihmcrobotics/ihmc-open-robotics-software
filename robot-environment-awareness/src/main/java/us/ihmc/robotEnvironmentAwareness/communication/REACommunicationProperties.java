@@ -18,6 +18,8 @@ import geometry_msgs.msg.dds.QuaternionPubSubType;
 import geometry_msgs.msg.dds.Vector3PubSubType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.*;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.PacketDestination;
@@ -40,10 +42,6 @@ import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeNodeM
 import us.ihmc.robotEnvironmentAwareness.communication.packets.OcTreeKeyMessage;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.IntersectionEstimationParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 
 /**
  * Created by adrien on 11/18/16.
@@ -64,6 +62,7 @@ public class REACommunicationProperties
    static
    {
       privateNetClassList.registerPacketClass(Message.class);
+      privateNetClassList.registerPacketClass(Pose3D.class);
       privateNetClassList.registerPacketField(PacketDestination.class);
       privateNetClassList.registerPacketField(Boolean.class);
       privateNetClassList.registerPacketField(Double.class);
@@ -74,6 +73,7 @@ public class REACommunicationProperties
       privateNetClassList.registerPacketField(Point3D.class);
       privateNetClassList.registerPacketField(Point3D32.class);
       privateNetClassList.registerPacketField(Point2D.class);
+      privateNetClassList.registerPacketField(Pose3D.class);
       privateNetClassList.registerPacketField(Vector3D.class);
       privateNetClassList.registerPacketField(Vector3D32.class);
       privateNetClassList.registerPacketField(Quaternion.class);
@@ -96,6 +96,7 @@ public class REACommunicationProperties
       privateNetClassList.registerPacketField(NormalOcTreeNodeMessage[].class);
       privateNetClassList.registerPacketField(OcTreeKeyMessage.class);
       privateNetClassList.registerPacketField(OcTreeKeyMessage[].class);
+      privateNetClassList.registerPacketField(SurfaceNormalFilterParameters.class);
       privateNetClassList.registerPacketField(PlanarRegionSegmentationMessage.class);
       privateNetClassList.registerPacketField(PlanarRegionSegmentationMessage[].class);
       privateNetClassList.registerPacketField(PlanarRegionsListMessage.class);

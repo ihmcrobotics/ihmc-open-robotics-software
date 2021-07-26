@@ -67,7 +67,7 @@ public class KryoStreamSerializer
     */
    public int write(OutputStream outputStream, Object object) throws IOException
    {
-      output.clear();
+      output.reset();
       output.setPosition(4);
       kryo.writeClassAndObject(output, object);
       int length = output.position() - 4;

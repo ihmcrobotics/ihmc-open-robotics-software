@@ -27,8 +27,8 @@ import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
@@ -365,17 +365,21 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                             additionalContactTransforms.get(i));
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
+      CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
-      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-                                                                                                    feetContactSensorNames, wristForceSensorNames,
-                                                                                                    highLevelControllerParameters, walkingControllerParameters,
-                                                                                                    capturePointPlannerParameters);
+      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
+                                                                                                    feetForceSensorNames,
+                                                                                                    feetContactSensorNames,
+                                                                                                    wristForceSensorNames,
+                                                                                                    highLevelControllerParameters,
+                                                                                                    walkingControllerParameters,
+                                                                                                    copTrajectoryParameters,
+                                                                                                    robotModel.getSplitFractionCalculatorParameters());
 
       controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node);
 

@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -231,7 +231,7 @@ public class EuclideanTrajectoryHandler
          polynomial.setCubic(t0, t1, p0, v0, p1, v1);
          polynomial.compute(time);
 
-         position.setElement(i, polynomial.getPosition());
+         position.setElement(i, polynomial.getValue());
          velocity.setElement(i, polynomial.getVelocity());
          acceleration.setElement(i, polynomial.getAcceleration());
       }

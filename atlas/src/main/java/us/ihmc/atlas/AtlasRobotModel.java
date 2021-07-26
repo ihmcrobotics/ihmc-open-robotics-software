@@ -3,6 +3,7 @@ package us.ihmc.atlas;
 import java.io.InputStream;
 import java.util.List;
 
+import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.*;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
@@ -17,21 +18,23 @@ import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
+import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -51,7 +54,6 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -63,6 +65,7 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
@@ -72,6 +75,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
@@ -99,7 +103,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasJointMap jointMap;
    private final AtlasContactPointParameters contactPointParameters;
    private final AtlasSensorInformation sensorInformation;
-   private final ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
@@ -131,7 +134,10 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(atlasVersion, target, headless, null, createAdditionalContactPoints, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, boolean createAdditionalContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion,
+                          RobotTarget target,
+                          boolean headless,
+                          boolean createAdditionalContactPoints,
                           boolean useShapeCollision)
    {
       this(atlasVersion, target, headless, null, createAdditionalContactPoints, useShapeCollision);
@@ -142,14 +148,21 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(atlasVersion, target, headless, simulationContactPoints, false, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion,
+                          RobotTarget target,
+                          boolean headless,
+                          FootContactPoints<RobotSide> simulationContactPoints,
                           boolean createAdditionalContactPointsn)
    {
       this(atlasVersion, target, headless, simulationContactPoints, createAdditionalContactPointsn, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints,
-                          boolean createAdditionalContactPoints, boolean useShapeCollision)
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion,
+                          RobotTarget target,
+                          boolean headless,
+                          FootContactPoints<RobotSide> simulationContactPoints,
+                          boolean createAdditionalContactPoints,
+                          boolean useShapeCollision)
    {
       if (SCALE_ATLAS)
       {
@@ -187,8 +200,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
-
-      capturePointPlannerParameters = new AtlasSmoothCMPPlannerParameters(atlasPhysicalProperties, target);
 
       highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
@@ -243,6 +254,18 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
+   }
+
+   @Override
+   public CoPTrajectoryParameters getCoPTrajectoryParameters()
+   {
+      return new AtlasCoPTrajectoryParameters();
+   }
+
+   @Override
+   public SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
+   {
+      return new AtlasICPSplitFractionCalculatorParameters();
    }
 
    @Override
@@ -420,7 +443,25 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
+   public String getStepReachabilityResourceName()
+   {
+      return "ihmc-open-robotics-software/atlas/src/main/resources/us/ihmc/atlas/parameters/StepReachabilityMap.csv";
+   }
+
+   @Override
+   public StepReachabilityData getStepReachabilityData()
+   {
+      return StepReachabilityFileTools.loadFromFile(getStepReachabilityResourceName());
+   }
+
+   @Override
    public AtlasSensorSuiteManager getSensorSuiteManager()
+   {
+      return getSensorSuiteManager(null);
+   }
+
+   @Override
+   public AtlasSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node)
    {
       if (sensorSuiteManager == null)
       {
@@ -431,15 +472,10 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
                                                           sensorInformation,
                                                           getJointMap(),
                                                           getPhysicalProperties(),
-                                                          target);
+                                                          target,
+                                                          ros2Node);
       }
       return sensorSuiteManager;
-   }
-
-   @Override
-   public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
-   {
-      return capturePointPlannerParameters;
    }
 
    @Override
@@ -456,18 +492,13 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          case ROBOTIQ:
             return new SimulatedRobotiqHandsController(simulatedRobot,
                                                        this,
-                                                       realtimeROS2Node, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       realtimeROS2Node,
+                                                       ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
                                                        ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
 
          default:
             return null;
       }
-   }
-
-   @Override
-   public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
-   {
-      return new AtlasQuadTreeFootstepPlanningParameters();
    }
 
    @Override
@@ -855,7 +886,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
-      return new DefaultVisibilityGraphParameters();
+      return new AtlasVisibilityGraphParameters();
    }
 
    @Override
@@ -868,12 +899,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
    {
       return new AtlasSwingPlannerParameters(fileNameSuffix);
-   }
-
-   @Override
-   public SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
-   {
-      return new AtlasSplitFractionCalculatorParameters();
    }
 
    @Override
@@ -928,5 +953,17 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       AtlasSimulationCollisionModel collisionModel = new AtlasSimulationCollisionModel(jointMap, selectedVersion);
       collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
       return collisionModel;
+   }
+
+   @Override
+   public DiagnosticParameters getDiagnoticParameters()
+   {
+      return new AtlasDiagnosticParameters(getJointMap(), getSensorInformation(), target == RobotTarget.REAL_ROBOT);
+   }
+
+   @Override
+   public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
+   {
+      return new AtlasDirectRobotInterface(ros2Node, this);
    }
 }

@@ -38,6 +38,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
    private final AtomicDouble desiredHeading = new AtomicDouble();
+   private boolean squareUpEndSteps = true;
 
    private final FootstepListBehavior footstepListBehavior;
    private PlanPathToLocationBehavior planPathToLocationBehavior;
@@ -99,6 +100,11 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
       this.desiredHeading.set(desiredHeading);
    }
 
+   public void setSquareUpEndSteps(boolean squareUpEndSteps)
+   {
+      this.squareUpEndSteps = squareUpEndSteps;
+   }
+
    public void setPlanBodyPath(boolean planBodyPath)
    {
       this.planBodyPath = planBodyPath;
@@ -137,6 +143,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          protected void setBehaviorInput()
          {
             setupComplete = true;
+            publishTextToSpeech("WalkToLocationPlannedBehavior:waiting For Goal To Be Set");
+
 
          }
 
@@ -144,6 +152,11 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          public boolean isDone(double timeInState)
          {
             // TODO Auto-generated method stub
+            if(currentGoalPose.get() != null)
+            {
+               publishTextToSpeech("WalkToLocationPlannedBehavior:waitForGoalToBeSet is complete");
+
+            }
             return currentGoalPose.get() != null;
          }
       };
@@ -153,6 +166,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          @Override
          protected void setBehaviorInput()
          {
+            publishTextToSpeech("WalkToLocationPlannedBehavior:planFootSteps state");
+
             goalLocationChanged = false;
             RobotSide initialStanceSide = RobotSide.LEFT;
             FramePose3D leftFootPose = new FramePose3D(referenceFrames.getSoleFrame(RobotSide.LEFT));
@@ -165,7 +180,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
             }
 
            
-            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose, planBodyPath, assumeFlatGround, desiredHeading.get());
+            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose, planBodyPath, assumeFlatGround, desiredHeading.get(), squareUpEndSteps);
             planPathToLocationBehavior.setPlanningTimeout(20);
          }
 
@@ -176,6 +191,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          @Override
          protected void setBehaviorInput()
          {
+            publishTextToSpeech("WalkToLocationPlannedBehavior:sendPlanToController state");
 
             if (planPathToLocationBehavior.getFootStepList() != null)
             {
@@ -222,6 +238,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
       factory.addTransition(WalkToLocationStates.WAIT_FOR_GOAL, WalkToLocationStates.PLAN_PATH, t -> currentGoalPose.get() != null);
       factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.WALK_PATH, t -> isPlanPathComplete() && hasValidPlanPath());
+      factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.PLAN_FAILED, t -> isPlanPathComplete() && !hasValidPlanPath());
+
       factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.PLAN_PATH, t -> goalLocationChanged);
       factory.addTransition(WalkToLocationStates.WALK_PATH, WalkToLocationStates.PLAN_PATH, t -> goalLocationChanged);
 

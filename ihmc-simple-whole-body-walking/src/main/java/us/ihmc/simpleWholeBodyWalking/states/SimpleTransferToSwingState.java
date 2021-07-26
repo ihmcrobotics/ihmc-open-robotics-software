@@ -64,12 +64,10 @@ public class SimpleTransferToSwingState extends SimpleTransferState
       {
          Footstep footstep = footsteps[i];
          FootstepTiming timing = footstepTimings[i];
-         FootstepShiftFractions shiftFractions = footstepShiftFractions[i];
          walkingMessageHandler.peekFootstep(i, footstep);
          walkingMessageHandler.peekTiming(i, timing);
-         walkingMessageHandler.peekShiftFraction(i, shiftFractions);
 
-         balanceManager.addFootstepToPlan(footstep, timing, shiftFractions);
+         balanceManager.addFootstepToPlan(footstep, timing);
       }
 
       balanceManager.setICPPlanTransferToSide(transferToSide);

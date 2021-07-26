@@ -4,10 +4,13 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 
 public class SDFDescriptionJointLimitRemover implements SDFDescriptionMutator
 {
+   // Using MAX_VALUE or INFINITY can throw off the QP
+   private static final double MIN_MAX_LIMIT = 100.0;
+
    @Override
    public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
    {
-      jointHolder.setLimits(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+      jointHolder.setLimits(-MIN_MAX_LIMIT, MIN_MAX_LIMIT);
    }
 
    @Override

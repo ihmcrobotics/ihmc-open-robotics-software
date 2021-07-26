@@ -34,7 +34,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -155,11 +154,11 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       goalPose.getPosition().set(1.0, 0.0, -height);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
+      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose,
+                                                         footstepPlannerParameters);
       request.setRequestedPathHeading(Math.toRadians(30.0));
 
-      request.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
-      request.setPerformPositionBasedSplitFractionCalculation(true);
+      request.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
 
       runTest(request);
    }
@@ -192,8 +191,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
-      requestPacket.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
-      requestPacket.setPerformPositionBasedSplitFractionCalculation(true);
+      requestPacket.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
 
       runTest(requestPacket);
    }
@@ -313,10 +311,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          FramePose3D footPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(side));
          footPose.changeFrame(ReferenceFrame.getWorldFrame());
          request.getStartFootPoses().get(side).set(footPose);
-         request.getStartFootholds().get(side).set(defaultSolePolygon);
       }
-
-      footstepPlanningModule.getPositionBasedSplitFractionCalculator().computeSplitFractions(request, footstepPlan);
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                                     swingDuration,
@@ -440,8 +435,13 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       }
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(),
-                                                                                                                     -1.0,
-                                                                                                                     -1.0);
+                                                                                                                     0.4,
+                                                                                                                     0.8);
+      for (FootstepDataMessage footstepDataMessage : footstepDataListMessage.footstep_data_list_)
+      {
+         footstepDataMessage.setSwingDuration(0.8);
+         footstepDataMessage.setTransferDuration(0.4);
+      }
 
       drcSimulationTestHelper.publishToController(footstepDataListMessage);
 

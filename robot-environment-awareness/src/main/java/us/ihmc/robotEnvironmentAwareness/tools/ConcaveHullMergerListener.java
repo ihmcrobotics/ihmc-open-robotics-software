@@ -1,6 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.tools;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.LineSegment2D;

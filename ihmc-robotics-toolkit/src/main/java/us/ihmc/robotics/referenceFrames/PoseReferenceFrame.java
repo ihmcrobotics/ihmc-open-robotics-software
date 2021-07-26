@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -87,7 +88,7 @@ public class PoseReferenceFrame extends ReferenceFrame
       this.update();
    }
 
-   public void setPoseAndUpdate(RigidBodyTransform transformToParent)
+   public void setPoseAndUpdate(RigidBodyTransformReadOnly transformToParent)
    {
       originPose.set(transformToParent);
       this.update();

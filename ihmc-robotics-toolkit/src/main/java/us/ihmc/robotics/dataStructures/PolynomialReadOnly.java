@@ -4,5 +4,5 @@ public interface PolynomialReadOnly
 {
    public void compute(double x);
 
-   public double getPosition();
+   public double getValue();
 }

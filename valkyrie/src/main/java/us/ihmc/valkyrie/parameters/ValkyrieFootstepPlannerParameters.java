@@ -41,9 +41,8 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       setAStarHeuristicsWeight(5.0);
       setYawWeight(0.15);
       setForwardWeight(2.5);
-      setMaximum2dDistanceFromBoundingBoxToPenalize(0.05);
 
-      load();
+      loadUnsafe();
    }
 
    public static void main(String[] args)

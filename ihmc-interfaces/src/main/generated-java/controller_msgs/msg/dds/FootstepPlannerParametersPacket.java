@@ -101,6 +101,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double maximum_step_yaw_ = -11.1;
    /**
+            * If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
+            */
+   public boolean use_reachability_map_;
+   /**
+            * Solution quality threshold when using IK-based feasibility check, only used when use_reachability_map is true.
+            */
+   public double solution_quality_threshold_ = -11.1;
+   /**
             * Minimum step width the planner will consider for candidate steps.
             * 
             * Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
@@ -424,15 +432,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double a_star_heuristics_weight_ = -11.1;
    /**
-            * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
-            * Additional checks are done by interpolating between the start and end steps
+            * Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
             */
-   public long number_of_bounding_box_checks_ = 1;
-   /**
-            * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
-            * @see FootstepPlannerCostParameters#getBoundingBoxCost
-            */
-   public double maximum_2d_distance_from_bounding_box_to_penalize_ = -11.1;
+   public long intermediate_body_box_checks_ = 1;
    /**
             * If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
             * Otherwise, it will turn towards the body path
@@ -509,6 +511,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       maximum_step_reach_ = other.maximum_step_reach_;
 
       maximum_step_yaw_ = other.maximum_step_yaw_;
+
+      use_reachability_map_ = other.use_reachability_map_;
+
+      solution_quality_threshold_ = other.solution_quality_threshold_;
 
       minimum_step_width_ = other.minimum_step_width_;
 
@@ -606,9 +612,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
 
-      number_of_bounding_box_checks_ = other.number_of_bounding_box_checks_;
-
-      maximum_2d_distance_from_bounding_box_to_penalize_ = other.maximum_2d_distance_from_bounding_box_to_penalize_;
+      intermediate_body_box_checks_ = other.intermediate_body_box_checks_;
 
       distance_from_path_tolerance_ = other.distance_from_path_tolerance_;
 
@@ -836,6 +840,36 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMaximumStepYaw()
    {
       return maximum_step_yaw_;
+   }
+
+   /**
+            * If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
+            */
+   public void setUseReachabilityMap(boolean use_reachability_map)
+   {
+      use_reachability_map_ = use_reachability_map;
+   }
+   /**
+            * If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
+            */
+   public boolean getUseReachabilityMap()
+   {
+      return use_reachability_map_;
+   }
+
+   /**
+            * Solution quality threshold when using IK-based feasibility check, only used when use_reachability_map is true.
+            */
+   public void setSolutionQualityThreshold(double solution_quality_threshold)
+   {
+      solution_quality_threshold_ = solution_quality_threshold;
+   }
+   /**
+            * Solution quality threshold when using IK-based feasibility check, only used when use_reachability_map is true.
+            */
+   public double getSolutionQualityThreshold()
+   {
+      return solution_quality_threshold_;
    }
 
    /**
@@ -1821,37 +1855,18 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
-            * Additional checks are done by interpolating between the start and end steps
+            * Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
             */
-   public void setNumberOfBoundingBoxChecks(long number_of_bounding_box_checks)
+   public void setIntermediateBodyBoxChecks(long intermediate_body_box_checks)
    {
-      number_of_bounding_box_checks_ = number_of_bounding_box_checks;
+      intermediate_body_box_checks_ = intermediate_body_box_checks;
    }
    /**
-            * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
-            * Additional checks are done by interpolating between the start and end steps
+            * Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
             */
-   public long getNumberOfBoundingBoxChecks()
+   public long getIntermediateBodyBoxChecks()
    {
-      return number_of_bounding_box_checks_;
-   }
-
-   /**
-            * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
-            * @see FootstepPlannerCostParameters#getBoundingBoxCost
-            */
-   public void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum_2d_distance_from_bounding_box_to_penalize)
-   {
-      maximum_2d_distance_from_bounding_box_to_penalize_ = maximum_2d_distance_from_bounding_box_to_penalize;
-   }
-   /**
-            * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
-            * @see FootstepPlannerCostParameters#getBoundingBoxCost
-            */
-   public double getMaximum2dDistanceFromBoundingBoxToPenalize()
-   {
-      return maximum_2d_distance_from_bounding_box_to_penalize_;
+      return intermediate_body_box_checks_;
    }
 
    /**
@@ -2039,6 +2054,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_yaw_, other.maximum_step_yaw_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_reachability_map_, other.use_reachability_map_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_threshold_, other.solution_quality_threshold_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_width_, other.minimum_step_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_length_, other.minimum_step_length_, epsilon)) return false;
@@ -2135,9 +2154,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_bounding_box_checks_, other.number_of_bounding_box_checks_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_2d_distance_from_bounding_box_to_penalize_, other.maximum_2d_distance_from_bounding_box_to_penalize_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.intermediate_body_box_checks_, other.intermediate_body_box_checks_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_from_path_tolerance_, other.distance_from_path_tolerance_, epsilon)) return false;
 
@@ -2193,6 +2210,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.maximum_step_reach_ != otherMyClass.maximum_step_reach_) return false;
 
       if(this.maximum_step_yaw_ != otherMyClass.maximum_step_yaw_) return false;
+
+      if(this.use_reachability_map_ != otherMyClass.use_reachability_map_) return false;
+
+      if(this.solution_quality_threshold_ != otherMyClass.solution_quality_threshold_) return false;
 
       if(this.minimum_step_width_ != otherMyClass.minimum_step_width_) return false;
 
@@ -2290,9 +2311,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
 
-      if(this.number_of_bounding_box_checks_ != otherMyClass.number_of_bounding_box_checks_) return false;
-
-      if(this.maximum_2d_distance_from_bounding_box_to_penalize_ != otherMyClass.maximum_2d_distance_from_bounding_box_to_penalize_) return false;
+      if(this.intermediate_body_box_checks_ != otherMyClass.intermediate_body_box_checks_) return false;
 
       if(this.distance_from_path_tolerance_ != otherMyClass.distance_from_path_tolerance_) return false;
 
@@ -2346,6 +2365,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.maximum_step_reach_);      builder.append(", ");
       builder.append("maximum_step_yaw=");
       builder.append(this.maximum_step_yaw_);      builder.append(", ");
+      builder.append("use_reachability_map=");
+      builder.append(this.use_reachability_map_);      builder.append(", ");
+      builder.append("solution_quality_threshold=");
+      builder.append(this.solution_quality_threshold_);      builder.append(", ");
       builder.append("minimum_step_width=");
       builder.append(this.minimum_step_width_);      builder.append(", ");
       builder.append("minimum_step_length=");
@@ -2442,10 +2465,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.cost_per_step_);      builder.append(", ");
       builder.append("a_star_heuristics_weight=");
       builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
-      builder.append("number_of_bounding_box_checks=");
-      builder.append(this.number_of_bounding_box_checks_);      builder.append(", ");
-      builder.append("maximum_2d_distance_from_bounding_box_to_penalize=");
-      builder.append(this.maximum_2d_distance_from_bounding_box_to_penalize_);      builder.append(", ");
+      builder.append("intermediate_body_box_checks=");
+      builder.append(this.intermediate_body_box_checks_);      builder.append(", ");
       builder.append("distance_from_path_tolerance=");
       builder.append(this.distance_from_path_tolerance_);      builder.append(", ");
       builder.append("delta_yaw_from_reference_tolerance=");

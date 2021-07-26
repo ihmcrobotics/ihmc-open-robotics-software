@@ -21,7 +21,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
@@ -58,15 +64,16 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -147,7 +154,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       IHMCROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                          WholeBodyTrajectoryMessage.class,
                                                                                                          controllerInputTopic);
-      toolboxController.setOutputPublisher(outputPublisher::publish);
+      toolboxController.setTrajectoryMessagePublisher(outputPublisher::publish);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
@@ -621,6 +628,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
          graphics.addCapsule(capsule.getRadius(),
                              capsule.getLength() + 2.0 * capsule.getRadius(), // the 2nd term is removed internally.
                              appearance);
+      }
+      else if (shape instanceof FrameSTPBox3DReadOnly)
+      {
+         FrameSTPBox3DReadOnly box = (FrameSTPBox3DReadOnly) shape;
+         RigidBodyTransform transform = new RigidBodyTransform();
+         transform.getRotation().set(box.getOrientation());
+         transform.getTranslation().set(box.getPosition());
+         graphics.transform(transform);
+         graphics.addCube(box.getSizeX(), box.getSizeY(), box.getSizeZ(), appearance);
       }
       else
       {

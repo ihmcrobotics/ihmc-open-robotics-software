@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -514,19 +513,6 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public double getMinimumFootstepWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getMinimumFeedbackWeight()
-      {
-         return 0.0001;
-      }
-
-
-      @Override
       public double getMinimumTimeRemaining()
       {
          return 0.0001;
@@ -633,12 +619,6 @@ public class ICPOptimizationControllerTest
 
       @Override
       public MomentumOptimizationSettings getMomentumOptimizationSettings()
-      {
-         return null;
-      }
-
-      @Override
-      public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
       {
          return null;
       }

@@ -8,6 +8,9 @@ import us.ihmc.pubsub.TopicDataType;
 
 /**
        * This message is part of the IHMC footstep planning module.
+       * The parameters below are used in the class CollisionFreeSwingCalculator, which computes a trajectory with ~10 knot points.
+       * The naming below is used to describe a trapezoid curve, such that parameters have a low and high value, and are interpolated
+       * between them based on a low and high percentage through the trajectory.
        */
 public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersPacket> implements Settable<SwingPlannerParametersPacket>, EpsilonComparable<SwingPlannerParametersPacket>
 {
@@ -80,6 +83,31 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
             * If using the custom position swing planner, will add additional swing time if the trajectory is expanded
             */
    public double additional_swing_time_if_expanded_ = -1.0;
+   /**
+            * If true, the swing plan allows lateral relative to the nominal trajectory.
+            */
+   public boolean allow_lateral_motion_ = true;
+   /**
+            * If a footstep has less than this xy displacement during swing, no swing trajectory is planned
+            */
+   public double min_xy_translation_to_plan_swing_ = -1.0;
+   public double percentage_extra_size_x_low_ = -1.0;
+   public double percentage_extra_size_x_high_ = -1.0;
+   public double extra_size_x_low_ = -1.0;
+   public double extra_size_x_high_ = -1.0;
+   public double percentage_extra_size_y_low_ = -1.0;
+   public double percentage_extra_size_y_high_ = -1.0;
+   public double extra_size_y_low_ = -1.0;
+   public double extra_size_y_high_ = -1.0;
+   public double percentage_extra_size_z_low_ = -1.0;
+   public double percentage_extra_size_z_high_ = -1.0;
+   public double extra_size_z_low_ = -1.0;
+   public double extra_size_z_high_ = -1.0;
+   public double percentage_max_displacement_low_ = -1.0;
+   public double percentage_max_displacement_high_ = -1.0;
+   public double max_displacement_low_ = -1.0;
+   public double max_displacement_high_ = -1.0;
+   public double motion_correlation_alpha_ = -1.0;
 
    public SwingPlannerParametersPacket()
    {
@@ -126,6 +154,44 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       waypoint_proportion_shift_for_stub_avoidance_ = other.waypoint_proportion_shift_for_stub_avoidance_;
 
       additional_swing_time_if_expanded_ = other.additional_swing_time_if_expanded_;
+
+      allow_lateral_motion_ = other.allow_lateral_motion_;
+
+      min_xy_translation_to_plan_swing_ = other.min_xy_translation_to_plan_swing_;
+
+      percentage_extra_size_x_low_ = other.percentage_extra_size_x_low_;
+
+      percentage_extra_size_x_high_ = other.percentage_extra_size_x_high_;
+
+      extra_size_x_low_ = other.extra_size_x_low_;
+
+      extra_size_x_high_ = other.extra_size_x_high_;
+
+      percentage_extra_size_y_low_ = other.percentage_extra_size_y_low_;
+
+      percentage_extra_size_y_high_ = other.percentage_extra_size_y_high_;
+
+      extra_size_y_low_ = other.extra_size_y_low_;
+
+      extra_size_y_high_ = other.extra_size_y_high_;
+
+      percentage_extra_size_z_low_ = other.percentage_extra_size_z_low_;
+
+      percentage_extra_size_z_high_ = other.percentage_extra_size_z_high_;
+
+      extra_size_z_low_ = other.extra_size_z_low_;
+
+      extra_size_z_high_ = other.extra_size_z_high_;
+
+      percentage_max_displacement_low_ = other.percentage_max_displacement_low_;
+
+      percentage_max_displacement_high_ = other.percentage_max_displacement_high_;
+
+      max_displacement_low_ = other.max_displacement_low_;
+
+      max_displacement_high_ = other.max_displacement_high_;
+
+      motion_correlation_alpha_ = other.motion_correlation_alpha_;
 
    }
 
@@ -386,6 +452,189 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       return additional_swing_time_if_expanded_;
    }
 
+   /**
+            * If true, the swing plan allows lateral relative to the nominal trajectory.
+            */
+   public void setAllowLateralMotion(boolean allow_lateral_motion)
+   {
+      allow_lateral_motion_ = allow_lateral_motion;
+   }
+   /**
+            * If true, the swing plan allows lateral relative to the nominal trajectory.
+            */
+   public boolean getAllowLateralMotion()
+   {
+      return allow_lateral_motion_;
+   }
+
+   /**
+            * If a footstep has less than this xy displacement during swing, no swing trajectory is planned
+            */
+   public void setMinXyTranslationToPlanSwing(double min_xy_translation_to_plan_swing)
+   {
+      min_xy_translation_to_plan_swing_ = min_xy_translation_to_plan_swing;
+   }
+   /**
+            * If a footstep has less than this xy displacement during swing, no swing trajectory is planned
+            */
+   public double getMinXyTranslationToPlanSwing()
+   {
+      return min_xy_translation_to_plan_swing_;
+   }
+
+   public void setPercentageExtraSizeXLow(double percentage_extra_size_x_low)
+   {
+      percentage_extra_size_x_low_ = percentage_extra_size_x_low;
+   }
+   public double getPercentageExtraSizeXLow()
+   {
+      return percentage_extra_size_x_low_;
+   }
+
+   public void setPercentageExtraSizeXHigh(double percentage_extra_size_x_high)
+   {
+      percentage_extra_size_x_high_ = percentage_extra_size_x_high;
+   }
+   public double getPercentageExtraSizeXHigh()
+   {
+      return percentage_extra_size_x_high_;
+   }
+
+   public void setExtraSizeXLow(double extra_size_x_low)
+   {
+      extra_size_x_low_ = extra_size_x_low;
+   }
+   public double getExtraSizeXLow()
+   {
+      return extra_size_x_low_;
+   }
+
+   public void setExtraSizeXHigh(double extra_size_x_high)
+   {
+      extra_size_x_high_ = extra_size_x_high;
+   }
+   public double getExtraSizeXHigh()
+   {
+      return extra_size_x_high_;
+   }
+
+   public void setPercentageExtraSizeYLow(double percentage_extra_size_y_low)
+   {
+      percentage_extra_size_y_low_ = percentage_extra_size_y_low;
+   }
+   public double getPercentageExtraSizeYLow()
+   {
+      return percentage_extra_size_y_low_;
+   }
+
+   public void setPercentageExtraSizeYHigh(double percentage_extra_size_y_high)
+   {
+      percentage_extra_size_y_high_ = percentage_extra_size_y_high;
+   }
+   public double getPercentageExtraSizeYHigh()
+   {
+      return percentage_extra_size_y_high_;
+   }
+
+   public void setExtraSizeYLow(double extra_size_y_low)
+   {
+      extra_size_y_low_ = extra_size_y_low;
+   }
+   public double getExtraSizeYLow()
+   {
+      return extra_size_y_low_;
+   }
+
+   public void setExtraSizeYHigh(double extra_size_y_high)
+   {
+      extra_size_y_high_ = extra_size_y_high;
+   }
+   public double getExtraSizeYHigh()
+   {
+      return extra_size_y_high_;
+   }
+
+   public void setPercentageExtraSizeZLow(double percentage_extra_size_z_low)
+   {
+      percentage_extra_size_z_low_ = percentage_extra_size_z_low;
+   }
+   public double getPercentageExtraSizeZLow()
+   {
+      return percentage_extra_size_z_low_;
+   }
+
+   public void setPercentageExtraSizeZHigh(double percentage_extra_size_z_high)
+   {
+      percentage_extra_size_z_high_ = percentage_extra_size_z_high;
+   }
+   public double getPercentageExtraSizeZHigh()
+   {
+      return percentage_extra_size_z_high_;
+   }
+
+   public void setExtraSizeZLow(double extra_size_z_low)
+   {
+      extra_size_z_low_ = extra_size_z_low;
+   }
+   public double getExtraSizeZLow()
+   {
+      return extra_size_z_low_;
+   }
+
+   public void setExtraSizeZHigh(double extra_size_z_high)
+   {
+      extra_size_z_high_ = extra_size_z_high;
+   }
+   public double getExtraSizeZHigh()
+   {
+      return extra_size_z_high_;
+   }
+
+   public void setPercentageMaxDisplacementLow(double percentage_max_displacement_low)
+   {
+      percentage_max_displacement_low_ = percentage_max_displacement_low;
+   }
+   public double getPercentageMaxDisplacementLow()
+   {
+      return percentage_max_displacement_low_;
+   }
+
+   public void setPercentageMaxDisplacementHigh(double percentage_max_displacement_high)
+   {
+      percentage_max_displacement_high_ = percentage_max_displacement_high;
+   }
+   public double getPercentageMaxDisplacementHigh()
+   {
+      return percentage_max_displacement_high_;
+   }
+
+   public void setMaxDisplacementLow(double max_displacement_low)
+   {
+      max_displacement_low_ = max_displacement_low;
+   }
+   public double getMaxDisplacementLow()
+   {
+      return max_displacement_low_;
+   }
+
+   public void setMaxDisplacementHigh(double max_displacement_high)
+   {
+      max_displacement_high_ = max_displacement_high;
+   }
+   public double getMaxDisplacementHigh()
+   {
+      return max_displacement_high_;
+   }
+
+   public void setMotionCorrelationAlpha(double motion_correlation_alpha)
+   {
+      motion_correlation_alpha_ = motion_correlation_alpha;
+   }
+   public double getMotionCorrelationAlpha()
+   {
+      return motion_correlation_alpha_;
+   }
+
 
    public static Supplier<SwingPlannerParametersPacketPubSubType> getPubSubType()
    {
@@ -438,6 +687,44 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.additional_swing_time_if_expanded_, other.additional_swing_time_if_expanded_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.allow_lateral_motion_, other.allow_lateral_motion_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_xy_translation_to_plan_swing_, other.min_xy_translation_to_plan_swing_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_extra_size_x_low_, other.percentage_extra_size_x_low_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_extra_size_x_high_, other.percentage_extra_size_x_high_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.extra_size_x_low_, other.extra_size_x_low_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.extra_size_x_high_, other.extra_size_x_high_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_extra_size_y_low_, other.percentage_extra_size_y_low_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_extra_size_y_high_, other.percentage_extra_size_y_high_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.extra_size_y_low_, other.extra_size_y_low_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.extra_size_y_high_, other.extra_size_y_high_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_extra_size_z_low_, other.percentage_extra_size_z_low_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_extra_size_z_high_, other.percentage_extra_size_z_high_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.extra_size_z_low_, other.extra_size_z_low_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.extra_size_z_high_, other.extra_size_z_high_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_max_displacement_low_, other.percentage_max_displacement_low_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_max_displacement_high_, other.percentage_max_displacement_high_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_displacement_low_, other.max_displacement_low_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.max_displacement_high_, other.max_displacement_high_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.motion_correlation_alpha_, other.motion_correlation_alpha_, epsilon)) return false;
+
 
       return true;
    }
@@ -485,6 +772,44 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
       if(this.additional_swing_time_if_expanded_ != otherMyClass.additional_swing_time_if_expanded_) return false;
 
+      if(this.allow_lateral_motion_ != otherMyClass.allow_lateral_motion_) return false;
+
+      if(this.min_xy_translation_to_plan_swing_ != otherMyClass.min_xy_translation_to_plan_swing_) return false;
+
+      if(this.percentage_extra_size_x_low_ != otherMyClass.percentage_extra_size_x_low_) return false;
+
+      if(this.percentage_extra_size_x_high_ != otherMyClass.percentage_extra_size_x_high_) return false;
+
+      if(this.extra_size_x_low_ != otherMyClass.extra_size_x_low_) return false;
+
+      if(this.extra_size_x_high_ != otherMyClass.extra_size_x_high_) return false;
+
+      if(this.percentage_extra_size_y_low_ != otherMyClass.percentage_extra_size_y_low_) return false;
+
+      if(this.percentage_extra_size_y_high_ != otherMyClass.percentage_extra_size_y_high_) return false;
+
+      if(this.extra_size_y_low_ != otherMyClass.extra_size_y_low_) return false;
+
+      if(this.extra_size_y_high_ != otherMyClass.extra_size_y_high_) return false;
+
+      if(this.percentage_extra_size_z_low_ != otherMyClass.percentage_extra_size_z_low_) return false;
+
+      if(this.percentage_extra_size_z_high_ != otherMyClass.percentage_extra_size_z_high_) return false;
+
+      if(this.extra_size_z_low_ != otherMyClass.extra_size_z_low_) return false;
+
+      if(this.extra_size_z_high_ != otherMyClass.extra_size_z_high_) return false;
+
+      if(this.percentage_max_displacement_low_ != otherMyClass.percentage_max_displacement_low_) return false;
+
+      if(this.percentage_max_displacement_high_ != otherMyClass.percentage_max_displacement_high_) return false;
+
+      if(this.max_displacement_low_ != otherMyClass.max_displacement_low_) return false;
+
+      if(this.max_displacement_high_ != otherMyClass.max_displacement_high_) return false;
+
+      if(this.motion_correlation_alpha_ != otherMyClass.motion_correlation_alpha_) return false;
+
 
       return true;
    }
@@ -528,7 +853,45 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       builder.append("waypoint_proportion_shift_for_stub_avoidance=");
       builder.append(this.waypoint_proportion_shift_for_stub_avoidance_);      builder.append(", ");
       builder.append("additional_swing_time_if_expanded=");
-      builder.append(this.additional_swing_time_if_expanded_);
+      builder.append(this.additional_swing_time_if_expanded_);      builder.append(", ");
+      builder.append("allow_lateral_motion=");
+      builder.append(this.allow_lateral_motion_);      builder.append(", ");
+      builder.append("min_xy_translation_to_plan_swing=");
+      builder.append(this.min_xy_translation_to_plan_swing_);      builder.append(", ");
+      builder.append("percentage_extra_size_x_low=");
+      builder.append(this.percentage_extra_size_x_low_);      builder.append(", ");
+      builder.append("percentage_extra_size_x_high=");
+      builder.append(this.percentage_extra_size_x_high_);      builder.append(", ");
+      builder.append("extra_size_x_low=");
+      builder.append(this.extra_size_x_low_);      builder.append(", ");
+      builder.append("extra_size_x_high=");
+      builder.append(this.extra_size_x_high_);      builder.append(", ");
+      builder.append("percentage_extra_size_y_low=");
+      builder.append(this.percentage_extra_size_y_low_);      builder.append(", ");
+      builder.append("percentage_extra_size_y_high=");
+      builder.append(this.percentage_extra_size_y_high_);      builder.append(", ");
+      builder.append("extra_size_y_low=");
+      builder.append(this.extra_size_y_low_);      builder.append(", ");
+      builder.append("extra_size_y_high=");
+      builder.append(this.extra_size_y_high_);      builder.append(", ");
+      builder.append("percentage_extra_size_z_low=");
+      builder.append(this.percentage_extra_size_z_low_);      builder.append(", ");
+      builder.append("percentage_extra_size_z_high=");
+      builder.append(this.percentage_extra_size_z_high_);      builder.append(", ");
+      builder.append("extra_size_z_low=");
+      builder.append(this.extra_size_z_low_);      builder.append(", ");
+      builder.append("extra_size_z_high=");
+      builder.append(this.extra_size_z_high_);      builder.append(", ");
+      builder.append("percentage_max_displacement_low=");
+      builder.append(this.percentage_max_displacement_low_);      builder.append(", ");
+      builder.append("percentage_max_displacement_high=");
+      builder.append(this.percentage_max_displacement_high_);      builder.append(", ");
+      builder.append("max_displacement_low=");
+      builder.append(this.max_displacement_low_);      builder.append(", ");
+      builder.append("max_displacement_high=");
+      builder.append(this.max_displacement_high_);      builder.append(", ");
+      builder.append("motion_correlation_alpha=");
+      builder.append(this.motion_correlation_alpha_);
       builder.append("}");
       return builder.toString();
    }

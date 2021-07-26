@@ -25,8 +25,8 @@ float64 resolution
 # The number of points in this frame.
 int32 number_of_points
 # The compressed pointcloud.
-# See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+# See us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression for more info on the compression protocol.
 byte[<=2000000] point_cloud
 # The compressed colors.
-# See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+# See us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression for more info on the compression protocol.
 byte[<=700000] colors

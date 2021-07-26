@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
@@ -37,6 +38,7 @@ import us.ihmc.robotics.kinematics.fourbar.FourBarAngle;
 import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
 import us.ihmc.robotics.kinematics.fourbar.InvertedFourBarTest;
 import us.ihmc.robotics.kinematics.fourbar.InvertedFourBarTest.Viewer;
+import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunctionTools.FourBarToJointConverter;
 
 public class FourBarKinematicLoopFunctionTest
 {
@@ -207,6 +209,105 @@ public class FourBarKinematicLoopFunctionTest
       }
    }
 
+   @Test
+   public void testLimitConfigurationInvertedFourBar()
+   {
+      Random random = new Random(7834678);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         boolean clockwise = random.nextBoolean();
+         int masterJointIndex = random.nextInt(4);
+         boolean flipAxesRandomly = true;
+         boolean invertedFourBar = true;
+         FourBarKinematicLoopFunction fourBarKinematicLoop = nextFourBar(random, clockwise, masterJointIndex, flipAxesRandomly, invertedFourBar);
+         FourBar fourBar = fourBarKinematicLoop.getFourBar();
+
+         List<RevoluteJointBasics> joints = fourBarKinematicLoop.getLoopJoints();
+         FourBarToJointConverter[] converters = fourBarKinematicLoop.getConverters();
+         FourBarVertex[] vertices = {fourBar.getVertexA(), fourBar.getVertexB(), fourBar.getVertexC(), fourBar.getVertexD()};
+
+         for (int j = 0; j < 4; j++)
+         {
+            RevoluteJointBasics joint = joints.get(j);
+            FourBarToJointConverter converter = converters[j];
+            FourBarVertex vertex = vertices[j];
+            Supplier<String> messageSupplier = () -> "Failed for :" + joint.getName();
+
+            if (converter.getSign() > 0.0)
+            {
+               assertEquals(joint.getJointLimitLower(), converter.toJointAngle(vertex.getMinAngle()), messageSupplier);
+               assertEquals(joint.getJointLimitUpper(), converter.toJointAngle(vertex.getMaxAngle()), messageSupplier);
+            }
+            else
+            {
+               assertEquals(joint.getJointLimitLower(), converter.toJointAngle(vertex.getMaxAngle()), messageSupplier);
+               assertEquals(joint.getJointLimitUpper(), converter.toJointAngle(vertex.getMinAngle()), messageSupplier);
+            }
+         }
+
+         RevoluteJointBasics joint = fourBarKinematicLoop.getMasterJoint();
+         FourBarToJointConverter converter = converters[fourBarKinematicLoop.getMasterJointIndex()];
+         FourBarVertex vertex = fourBarKinematicLoop.getMasterVertex();
+         Supplier<String> messageSupplier = () -> "Failed for :" + joint.getName();
+         
+         if (converter.getSign() > 0.0)
+         {
+            assertEquals(joint.getJointLimitLower(), converter.toJointAngle(vertex.getMinAngle()), messageSupplier);
+            assertEquals(joint.getJointLimitUpper(), converter.toJointAngle(vertex.getMaxAngle()), messageSupplier);
+         }
+         else
+         {
+            assertEquals(joint.getJointLimitLower(), converter.toJointAngle(vertex.getMaxAngle()), messageSupplier);
+            assertEquals(joint.getJointLimitUpper(), converter.toJointAngle(vertex.getMinAngle()), messageSupplier);
+         }
+      }
+
+      { // Test with four bar example
+         FourBarKinematicLoopFunction fourBarKinematicLoop = createFourBarExample1(random, 0, false);
+         FourBar fourBar = fourBarKinematicLoop.getFourBar();
+
+         List<RevoluteJointBasics> joints = fourBarKinematicLoop.getLoopJoints();
+         FourBarToJointConverter[] converters = fourBarKinematicLoop.getConverters();
+         FourBarVertex[] vertices = {fourBar.getVertexA(), fourBar.getVertexB(), fourBar.getVertexC(), fourBar.getVertexD()};
+
+         for (int j = 0; j < 4; j++)
+         {
+            RevoluteJointBasics joint = joints.get(j);
+            FourBarToJointConverter converter = converters[j];
+            FourBarVertex vertex = vertices[j];
+            Supplier<String> messageSupplier = () -> "Failed for :" + joint.getName();
+
+            if (converter.getSign() > 0.0)
+            {
+               assertEquals(joint.getJointLimitLower(), converter.toJointAngle(vertex.getMinAngle()), messageSupplier);
+               assertEquals(joint.getJointLimitUpper(), converter.toJointAngle(vertex.getMaxAngle()), messageSupplier);
+            }
+            else
+            {
+               assertEquals(joint.getJointLimitLower(), converter.toJointAngle(vertex.getMaxAngle()), messageSupplier);
+               assertEquals(joint.getJointLimitUpper(), converter.toJointAngle(vertex.getMinAngle()), messageSupplier);
+            }
+         }
+
+         RevoluteJointBasics joint = fourBarKinematicLoop.getMasterJoint();
+         FourBarToJointConverter converter = converters[fourBarKinematicLoop.getMasterJointIndex()];
+         FourBarVertex vertex = fourBarKinematicLoop.getMasterVertex();
+         Supplier<String> messageSupplier = () -> "Failed for :" + joint.getName();
+
+         if (converter.getSign() > 0.0)
+         {
+            assertEquals(joint.getJointLimitLower(), converter.toJointAngle(vertex.getMinAngle()), messageSupplier);
+            assertEquals(joint.getJointLimitUpper(), converter.toJointAngle(vertex.getMaxAngle()), messageSupplier);
+         }
+         else
+         {
+            assertEquals(joint.getJointLimitLower(), converter.toJointAngle(vertex.getMaxAngle()), messageSupplier);
+            assertEquals(joint.getJointLimitUpper(), converter.toJointAngle(vertex.getMinAngle()), messageSupplier);
+         }
+      }
+   }
+
    private static void assertFourBarIsClosed(int iteration, FourBarKinematicLoopFunction fourBarKinematicLoop)
    {
       RevoluteJointBasics closingJoint = null;
@@ -316,6 +417,20 @@ public class FourBarKinematicLoopFunctionTest
       Point2D C = vertices.get(2);
       Point2D D = vertices.get(3);
 
+      return nextFourBar(random, A, B, C, D, masterJointIndex, flipAxesRandomly);
+   }
+
+   public FourBarKinematicLoopFunction createFourBarExample1(Random random, int masterJointIndex, boolean flipAxesRandomly)
+   {
+      Point2D A = new Point2D(0.227, 0.100);
+      Point2D B = new Point2D(0.227, -0.100);
+      Point2D C = new Point2D(0.427, 0.100);
+      Point2D D = new Point2D(0.427, -0.100);
+      return nextFourBar(random, A, B, C, D, masterJointIndex, flipAxesRandomly);
+   }
+
+   private FourBarKinematicLoopFunction nextFourBar(Random random, Point2D A, Point2D B, Point2D C, Point2D D, int masterJointIndex, boolean flipAxesRandomly)
+   {
       Vector2D AB = new Vector2D();
       Vector2D AC = new Vector2D();
       Vector2D AD = new Vector2D();

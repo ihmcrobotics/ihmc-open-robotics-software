@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.geometry.LineSegment3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;

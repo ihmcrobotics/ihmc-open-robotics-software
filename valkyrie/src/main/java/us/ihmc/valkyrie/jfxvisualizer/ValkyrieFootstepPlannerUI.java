@@ -51,7 +51,6 @@ public class ValkyrieFootstepPlannerUI extends Application
                                               model.getVisibilityGraphsParameters(),
                                               model.getFootstepPlannerParameters(),
                                               model.getSwingPlannerParameters(),
-                                              model.getSplitFractionCalculatorParameters(),
                                               model,
                                               previewModel,
                                               model.getJointMap(),

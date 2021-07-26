@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyCont
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPVariableSubstitution;
 import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
@@ -34,7 +34,7 @@ public class InverseKinematicsOptimizationControlModule
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final InverseKinematicsQPSolver qpSolver;
-   private final QPInput qpInput;
+   private final QPInputTypeA qpInput;
    private final QPVariableSubstitution qpVariableSubstitution;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
@@ -63,7 +63,7 @@ public class InverseKinematicsOptimizationControlModule
       inverseKinematicsSolution = new InverseKinematicsSolution(jointsToOptimizeFor);
 
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      qpInput = new QPInput(numberOfDoFs);
+      qpInput = new QPInputTypeA(numberOfDoFs);
       qpVariableSubstitution = new QPVariableSubstitution();
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();

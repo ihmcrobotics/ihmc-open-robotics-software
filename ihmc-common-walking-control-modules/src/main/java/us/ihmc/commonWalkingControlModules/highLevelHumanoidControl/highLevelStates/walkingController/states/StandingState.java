@@ -4,10 +4,11 @@ import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -22,6 +23,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class StandingState extends WalkingState
 {
+   private static final boolean holdDesiredHeightConstantWhenStanding = false;
+
    private final CommandInputManager commandInputManager;
    private final WalkingMessageHandler walkingMessageHandler;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -33,6 +36,7 @@ public class StandingState extends WalkingState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final LegConfigurationManager legConfigurationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
+   private final FeetManager feetManager;
 
    public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
                         HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
@@ -68,18 +72,22 @@ public class StandingState extends WalkingState
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
+      feetManager = managerFactory.getOrCreateFeetManager();
    }
 
    @Override
    public void doAction(double timeInState)
    {
-      comHeightManager.setSupportLeg(RobotSide.LEFT);
+      if (!holdDesiredHeightConstantWhenStanding)
+         comHeightManager.setSupportLeg(RobotSide.LEFT);
+      balanceManager.computeICPPlan();
    }
 
    @Override
    public void onEntry()
    {
       commandInputManager.clearAllCommands();
+      feetManager.reset();
 
       touchdownErrorCompensator.clear();
 
@@ -88,12 +96,19 @@ public class StandingState extends WalkingState
 
       balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
-      balanceManager.setICPPlanTransferFromSide(null);
       balanceManager.initializeICPPlanForStanding();
+      balanceManager.setHoldSplitFractions(false);
 
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
-            .createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.RIGHT);
-      comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, 0.0);
+      if (holdDesiredHeightConstantWhenStanding)
+      {
+         comHeightManager.initializeToNominalDesiredHeight();
+      }
+      else
+      {
+         TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(
+               RobotSide.RIGHT);
+         comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, 0.0);
+      }
 
       walkingMessageHandler.reportWalkingComplete();
 
@@ -113,6 +128,7 @@ public class StandingState extends WalkingState
    @Override
    public void onExit()
    {
+      feetManager.saveCurrentPositionsAsLastFootstepPositions();
       for (RobotSide robotSide : RobotSide.values)
       {
          if (handManagers.get(robotSide) != null)

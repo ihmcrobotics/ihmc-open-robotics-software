@@ -8,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -32,9 +31,9 @@ public class HeightOffsetHandler
 
    private final YoDouble offsetHeightAboveGroundPrevValue = new YoDouble("offsetHeightAboveGroundPrevValue", registry);
    private final YoDouble offsetHeightAboveGroundChangedTime = new YoDouble("offsetHeightAboveGroundChangedTime", registry);
-   private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryOutput = new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryOutput",
+   private final YoDouble offsetHeightAboveGroundTrajectoryOutput = new YoDouble("offsetHeightAboveGroundTrajectoryOutput",
                                                                                                                  registry);
-   private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryTimeProvider",
+   private final YoDouble offsetHeightAboveGroundTrajectoryTimeProvider = new YoDouble("offsetHeightAboveGroundTrajectoryTimeProvider",
                                                                                                                        registry);
    private final MultipleWaypointsTrajectoryGenerator offsetHeightTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator("pelvisHeightOffset",
                                                                                                                                  registry);
@@ -46,6 +45,7 @@ public class HeightOffsetHandler
    private final RecyclingArrayDeque<PelvisHeightTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisHeightTrajectoryCommand.class,
                                                                                                              PelvisHeightTrajectoryCommand::set);
 
+   private final FramePoint3D tempPoint = new FramePoint3D();
    private ReferenceFrame internalReferenceFrame;
 
    private final DoubleProvider yoTime;
@@ -292,12 +292,12 @@ public class HeightOffsetHandler
    private void appendTrajectoryPoint(FrameEuclideanTrajectoryPoint trajectoryPoint, double currentDesiredHeight)
    {
       double time = trajectoryPoint.getTime();
-      double z = fromAbsoluteToOffset(trajectoryPoint.getPositionZ(), currentDesiredHeight);
+      tempPoint.setIncludingFrame(trajectoryPoint.getPosition());
+      tempPoint.changeFrame(worldFrame);
+      double z = fromAbsoluteToOffset(tempPoint.getZ(), currentDesiredHeight);
       double zDot = trajectoryPoint.getLinearVelocityZ();
       offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
    }
-
-   private final FramePoint3D tempPoint = new FramePoint3D();
 
    private double fromAbsoluteToOffset(double zInWorld, double currentDesiredHeight)
    {

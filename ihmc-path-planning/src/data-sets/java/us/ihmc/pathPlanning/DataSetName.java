@@ -2,6 +2,8 @@ package us.ihmc.pathPlanning;
 
 public enum DataSetName
 {
+	_20210419_111333_GPUCinders1,
+	_20210223_155750_Door,
 	_20201013_151529_CurvedCinders,
 	_20200624_110132_FBDemoDebris_Large,
 	_20200624_105955_FBDemoDebris_Medium,

@@ -31,9 +31,9 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 public class BambooTools
 {
    private final static String[] possibleRootDirectoriesForBambooDataAndVideos = new String[] { "C:/videos/", "D:/BambooDataAndVideos/",
-         "../BambooDataAndVideos/", "~/bamboo-videos" };
+         "../BambooDataAndVideos/", "~/.ihmc/bamboo-logs" };
 
-   private final static String eraseableBambooDataAndVideosDirectoryLinux = "~/bamboo-videos";
+   private final static String eraseableBambooDataAndVideosDirectoryLinux = "~/.ihmc/bamboo-logs";
    private final static String eraseableBambooDataAndVideosDirectoryWindows = "C:/videos/";
 
    private static final String UPLOADED_VIDEOS_LOG = "uploaded-videos.log";
@@ -644,6 +644,8 @@ public class BambooTools
          return "Valkyrie";
       case ATLAS:
          return "Atlas";
+      case NADIA:
+         return "Nadia";
       case BONO:
          return "Bono";
       case SPOKED_RUNNER:
@@ -659,6 +661,6 @@ public class BambooTools
 
    public static enum SimpleRobotNameKeys
    {
-      M2V2, R2, VALKYRIE, ATLAS, BONO, SPOKED_RUNNER, V2EXOSKELETON,V3EXOSKELETON
+      M2V2, R2, VALKYRIE, ATLAS, NADIA, BONO, SPOKED_RUNNER, V2EXOSKELETON,V3EXOSKELETON
    }
 }

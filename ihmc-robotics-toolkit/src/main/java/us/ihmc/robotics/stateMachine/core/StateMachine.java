@@ -26,7 +26,6 @@ import us.ihmc.yoVariables.variable.YoEnum;
  * </p>
  * 
  * @author Sylvain
- *
  * @param <K> Type of {@link Enum} that lists the potential states.
  * @param <S> Type of {@link State} that is contained in the state machine.
  */
@@ -62,19 +61,20 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * {@link StateMachine}.
     * </p>
     * 
-    * @param initialStateKey the key for the initial state. The state machine will transition into the
-    *           initial state at the first call of {@link #doAction()} or when calling
-    *           {@link #resetToInitialState()}.
-    * @param states the map of the states composing this state machine associated with their keys.
-    * @param stateTransitions the map of the state transitions associated with the state keys.
+    * @param initialStateKey       the key for the initial state. The state machine will transition
+    *                              into the initial state at the first call of {@link #doAction()} or
+    *                              when calling {@link #resetToInitialState()}.
+    * @param states                the map of the states composing this state machine associated with
+    *                              their keys.
+    * @param stateTransitions      the map of the state transitions associated with the state keys.
     * @param stateChangedListeners the list of listeners to be called when the active state changes.
-    *           New listeners can be added later via
-    *           {@link #addStateChangedListener(StateChangedListener)}.
-    * @param clock the clock needed to provide the time spent in the active state.
-    * @param namePrefix the prefix used when creating the {@code YoVariable}s for tracking the active
-    *           and previous states.
-    * @param registry the registry to which the {@code YoVariable}s in this state machine will be added
-    *           to.
+    *                              New listeners can be added later via
+    *                              {@link #addStateChangedListener(StateChangedListener)}.
+    * @param clock                 the clock needed to provide the time spent in the active state.
+    * @param namePrefix            the prefix used when creating the {@code YoVariable}s for tracking
+    *                              the active and previous states.
+    * @param registry              the registry to which the {@code YoVariable}s in this state machine
+    *                              will be added to.
     */
    public StateMachine(K initialStateKey, Map<K, S> states, Map<K, StateTransition<K>> stateTransitions, List<StateChangedListener<K>> stateChangedListeners,
                        StateMachineClock clock, String namePrefix, YoRegistry registry)
@@ -202,7 +202,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * 
     * @return whether the active state is changing.
     * @throws RuntimeException if there is no state mapped to the key provided by the
-    *            {@link StateTransition} of the active state.
+    *                          {@link StateTransition} of the active state.
     */
    public boolean doTransitions()
    {
@@ -213,25 +213,47 @@ public class StateMachine<K extends Enum<K>, S extends State>
 
       StateTransition<K> stateTransition = stateTransitions.get(currentStateKey.getEnumValue());
 
-      
       if (stateTransition == null)
       {
          callPostTransitionCallbacks();
          return false;
       }
 
-      K nextStateKey = stateTransition.isTransitionRequested(clock.getTimeInCurrentState());
+      StateTransition<K>.TransitionRequest transitionRequest = stateTransition.isTransitionRequested(clock.getTimeInCurrentState());
 
-      if (nextStateKey == null)
+      if (transitionRequest == null)
       {
          callPostTransitionCallbacks();
          return false;
       }
 
-      performTransition(nextStateKey);
+      performTransition(transitionRequest);
 
       callPostTransitionCallbacks();
       return true;
+   }
+
+   /**
+    * Changes immediately the active state.
+    * <p>
+    * This method should be used cautiously and only for exceptional scenario, it is not the regular
+    * way of using a state machine.
+    * </p>
+    * <p>
+    * In order, this method calls {@link State#onExit()} on the state being exited, notifies the
+    * {@link StateChangedListener}s registered, and then calls {@link State#onEntry()} on the new
+    * active state.
+    * </p>
+    * 
+    * @param transitionRequest the info about the transition requested.
+    * @throws RuntimeException if there is no state mapped to {@code nextStateKey}.
+    */
+   void performTransition(StateTransition<K>.TransitionRequest transitionRequest)
+   {
+      K nextStateKey = transitionRequest.getDestinationKey();
+      boolean performOnExit = transitionRequest.isPerformOnExit();
+      boolean performOnEntry = transitionRequest.isPerformOnEntry();
+      performTransition(nextStateKey, performOnExit, performOnEntry);
    }
 
    /**
@@ -251,10 +273,32 @@ public class StateMachine<K extends Enum<K>, S extends State>
     */
    public void performTransition(K nextStateKey)
    {
+      performTransition(nextStateKey, true, true);
+   }
+
+   /**
+    * Changes immediately the active state.
+    * <p>
+    * This method should be used cautiously and only for exceptional scenario, it is not the regular
+    * way of using a state machine.
+    * </p>
+    * <p>
+    * In order, this method calls {@link State#onExit()} on the state being exited, notifies the
+    * {@link StateChangedListener}s registered, and then calls {@link State#onEntry()} on the new
+    * active state.
+    * </p>
+    * 
+    * @param nextStateKey   the key of the state to transition into.
+    * @param performOnExit  whether to perform {@link State#onExit()} or the state being exited.
+    * @param performOnEntry whether to perform {@link State#onEntry()} or the state being entered.
+    * @throws RuntimeException if there is no state mapped to {@code nextStateKey}.
+    */
+   public void performTransition(K nextStateKey, boolean performOnExit, boolean performOnEntry)
+   {
       if (currentStateKey.getEnumValue() != null)
       {
          S currentState = states.get(currentStateKey.getEnumValue());
-         if (currentState != null)
+         if (currentState != null && performOnExit)
             currentState.onExit(clock.getTimeInCurrentState());
       }
 
@@ -269,7 +313,8 @@ public class StateMachine<K extends Enum<K>, S extends State>
 
       clock.notifyStateChanged();
 
-      nextState.onEntry();
+      if (performOnEntry)
+         nextState.onEntry();
       currentStateKey.set(nextStateKey);
    }
 
@@ -336,7 +381,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * 
     * @return the current state.
     * @throws RuntimeException if calling this method before either {@link #resetToInitialState()} or
-    *            {@link #doAction()} was called at least once.
+    *                          {@link #doAction()} was called at least once.
     */
    public S getCurrentState()
    {

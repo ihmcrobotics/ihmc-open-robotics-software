@@ -15,7 +15,7 @@ public enum TrajectoryType
       case OBSTACLE_CLEARANCE:
          return "The controller will attempt to step on/off an obstacle.";
       case CUSTOM:
-         return "In this mode two trajectory position waypoints can be specified.";
+         return "In this mode trajectory position waypoints can be specified.";
       case WAYPOINTS:
          return "The swing trajectory is fully defined by the given waypoints.";
 

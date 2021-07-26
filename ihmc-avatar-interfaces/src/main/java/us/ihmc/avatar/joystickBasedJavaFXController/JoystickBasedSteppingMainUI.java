@@ -26,7 +26,7 @@ import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.javafx.JavaFXRobotVisualizer;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;

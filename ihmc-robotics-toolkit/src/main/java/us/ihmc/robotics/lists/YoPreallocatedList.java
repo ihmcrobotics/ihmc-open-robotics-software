@@ -38,6 +38,11 @@ public class YoPreallocatedList<T> implements List<T>
       position.set(-1);
    }
 
+   public YoInteger getYoPosition()
+   {
+      return position;
+   }
+
    /**
     * Returns the elements in this list as array
     *

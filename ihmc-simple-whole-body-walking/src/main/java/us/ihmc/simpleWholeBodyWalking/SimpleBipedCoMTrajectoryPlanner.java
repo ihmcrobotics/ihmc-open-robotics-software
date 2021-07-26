@@ -3,7 +3,6 @@ package us.ihmc.simpleWholeBodyWalking;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedContactSequenceTools;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedContactSequenceUpdater;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.BipedTimedStep;
@@ -20,7 +19,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -84,12 +84,12 @@ public class SimpleBipedCoMTrajectoryPlanner
                                           DoubleProvider omega0, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(soleZUpFrames, gravityZ, nominalCoMHeight, omega0, parentRegistry, yoGraphicsListRegistry,
-           null, null, null);
+           null, null);
    }
    
       public SimpleBipedCoMTrajectoryPlanner(SideDependentList<MovingReferenceFrame> soleZUpFrames, double gravityZ, double nominalCoMHeight,
                                              DoubleProvider omega0, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                             YoDouble yoTime, ICPPlannerParameters icpPlannerParameters, BipedSupportPolygons bipedSupportPolygons)
+                                             YoDouble yoTime, BipedSupportPolygons bipedSupportPolygons)
       {
       sequenceUpdater = new SimpleBipedContactSequenceUpdater(soleZUpFrames, registry, yoGraphicsListRegistry);
       comTrajectoryPlanner = new SimpleCoMTrajectoryPlanner(omega0);
@@ -98,8 +98,7 @@ public class SimpleBipedCoMTrajectoryPlanner
       if (yoGraphicsListRegistry != null && VISUALIZE)
          ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry));
 
-      if (icpPlannerParameters != null)
-         numberFootstepsToConsider.set(icpPlannerParameters.getNumberOfFootstepsToConsider());
+         numberFootstepsToConsider.set(3);
       parentRegistry.addChild(registry);
       
       defaultFinalTransferDuration.set(0.5);
@@ -273,9 +272,14 @@ public class SimpleBipedCoMTrajectoryPlanner
       return comTrajectoryPlanner.getDesiredVRPPosition();
    }
 
-   public List<Trajectory3D> getVRPTrajectories()
+   public List<? extends Polynomial3DReadOnly> getVRPTrajectories()
    {
       return ((SimpleCoMTrajectoryPlanner) comTrajectoryPlanner).getVRPTrajectories();
+   }
+
+   public List<? extends ContactStateProvider> getContactStateProviders()
+   {
+      return sequenceUpdater.getContactSequence();
    }
    
    public double getTimeInContactPhase()

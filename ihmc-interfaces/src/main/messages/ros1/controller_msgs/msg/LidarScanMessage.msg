@@ -21,6 +21,10 @@ float64 sensor_pose_confidence
 # Field default value 1.0
 float64 point_cloud_confidence
 
-float32[] scan
+# Number of points in the pointcloud
+int32 number_of_points
+
+# Compressed pointcloud data. See us.ihmc.communication.packets.LidarPointCloudCompression for method to compress and decompress
+int8[] scan
 
 

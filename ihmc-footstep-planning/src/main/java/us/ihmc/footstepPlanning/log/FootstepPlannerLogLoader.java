@@ -7,6 +7,7 @@ import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,6 +18,9 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
@@ -24,6 +28,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.Extrusion
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.variable.YoVariableType;
 
@@ -40,7 +45,6 @@ public class FootstepPlannerLogLoader
    private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
-   private final JSONSerializer<SplitFractionCalculatorParametersPacket> splitFractionParametersPacketSerializer  = new JSONSerializer<>(new SplitFractionCalculatorParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
    private FootstepPlannerLog log = null;
@@ -182,16 +186,6 @@ public class FootstepPlannerLogLoader
             jsonNode = objectMapper.readTree(swingParametersPacketInputStream);
             log.getSwingPlannerParametersPacket().set(swingParametersSerializer.deserialize(jsonNode.toString()));
             swingParametersPacketInputStream.close();
-         }
-
-         // load split fraction parameters packet
-         File splitFractionParametersFile = new File(logDirectory, FootstepPlannerLogger.splitFractionParametersFileName);
-         if (splitFractionParametersFile.exists())
-         {
-            InputStream splitFractionParametersInputStream = new FileInputStream(splitFractionParametersFile);
-            jsonNode = objectMapper.readTree(splitFractionParametersInputStream);
-            log.getSplitFractionParametersPacket().set(splitFractionParametersPacketSerializer.deserialize(jsonNode.toString()));
-            splitFractionParametersInputStream.close();
          }
 
          // load status packet
@@ -513,5 +507,37 @@ public class FootstepPlannerLogLoader
       }
       polygon.update();
       return polygon;
+   }
+
+   public static void main(String[] args)
+   {
+      FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
+      LoadResult loadResult = logLoader.load();
+      if (loadResult != LoadResult.LOADED)
+      {
+         return;
+      }
+
+      FootstepPlannerLog log = logLoader.getLog();
+      FootstepPlanningRequestPacket requestPacket = log.getRequestPacket();
+      Pose3D startPose = new Pose3D();
+      Pose3D goalPose = new Pose3D();
+      startPose.interpolate(requestPacket.getStartLeftFootPose(), requestPacket.getStartRightFootPose(), 0.5);
+      goalPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
+
+      String dataSetName = "20210419_111333_GPUCinders1";
+      PlanarRegionsListMessage planarRegionsMessage = requestPacket.getPlanarRegionsListMessage();
+      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
+
+      DataSet dataSet = new DataSet(dataSetName, planarRegionsList);
+
+      PlannerInput plannerInput = new PlannerInput();
+      plannerInput.setStartPosition(startPose.getPosition());
+      plannerInput.setStartYaw(startPose.getYaw());
+      plannerInput.setGoalPosition(goalPose.getPosition());
+      plannerInput.setGoalYaw(goalPose.getYaw());
+      dataSet.setPlannerInput(plannerInput);
+
+      DataSetIOTools.exportDataSet(dataSet);
    }
 }

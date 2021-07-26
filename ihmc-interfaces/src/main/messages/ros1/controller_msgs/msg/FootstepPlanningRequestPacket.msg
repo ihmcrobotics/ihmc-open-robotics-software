@@ -6,9 +6,11 @@ int8 ROBOT_SIDE_RIGHT=1
 
 int8 SWING_PLANNER_TYPE_NONE=0
 
-int8 SWING_PLANNER_TYPE_POSITION=1
+int8 SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION=1
 
-int8 SWING_PLANNER_TYPE_PROPORTION=2
+int8 SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION=2
+
+int8 SWING_PLANNER_TYPE_PROPORTION=3
 
 int32 NO_PLAN_ID=-1
 
@@ -20,12 +22,6 @@ geometry_msgs/Pose start_left_foot_pose
 
 # Starting right foot pose
 geometry_msgs/Pose start_right_foot_pose
-
-# Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
-geometry_msgs/Point[] initial_left_contact_points_2d
-
-# Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
-geometry_msgs/Point[] initial_right_contact_points_2d
 
 # Goal left foot pose
 geometry_msgs/Pose goal_left_foot_pose
@@ -83,7 +79,8 @@ float64 horizon_length
 # Planar regions to use, if you don't want to assume flat ground
 controller_msgs/PlanarRegionsListMessage planar_regions_list_message
 
-# Explicitly tell the planner to use flat ground
+# If true, steps are snapped assuming flat ground.
+# Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
 bool assume_flat_ground
 
 # Set this id to keep track of your request
@@ -96,12 +93,6 @@ float64 status_publish_period
 
 # Specifies swing planner to use. See the above enumeration
 int8 requested_swing_planner
-
-# Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
-bool perform_position_based_split_fraction_calculation
-
-# Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
-bool perform_area_based_split_fraction_calculation
 
 # Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
 # For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/

@@ -1,6 +1,8 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -10,13 +12,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class FramePlane3d implements ReferenceFrameHolder
 {
    private ReferenceFrame referenceFrame;
-   private Plane3D plane3d;
+   private final Plane3D plane3d;
 
    private final RigidBodyTransform temporaryTransformToDesiredFrame = new RigidBodyTransform();
    private final Vector3D temporaryVector = new Vector3D();
@@ -78,7 +82,7 @@ public class FramePlane3d implements ReferenceFrameHolder
       return returnVector;
    }
    
-   public Vector3DReadOnly getNormal()
+   public Vector3DBasics getNormal()
    {
       return plane3d.getNormal();
    }
@@ -107,7 +111,7 @@ public class FramePlane3d implements ReferenceFrameHolder
       return pointToReturn;
    }
    
-   public Point3DReadOnly getPoint()
+   public Point3DBasics getPoint()
    {
       return plane3d.getPoint();
    }
@@ -148,6 +152,16 @@ public class FramePlane3d implements ReferenceFrameHolder
       checkReferenceFrameMatch(pointToTest);
 
       return plane3d.isOnOrAbove(pointToTest);
+   }
+
+   public boolean isOnOrAbove(Point3DReadOnly pointToTest)
+   {
+      return plane3d.isOnOrAbove(pointToTest);
+   }
+
+   public boolean isOnOrAbove(Point3DReadOnly pointToTest, double epsilon)
+   {
+      return plane3d.isOnOrAbove(pointToTest, epsilon);
    }
 
    public boolean isOnOrBelow(FramePoint3D pointToTest)
@@ -264,6 +278,28 @@ public class FramePlane3d implements ReferenceFrameHolder
 	   Point3D intersectionToPack = new Point3D();
 	   plane3d.intersectionWith(intersectionToPack, line.getPoint(), line.getDirection());
 	   pointToPack.set(intersectionToPack);
+   }
+
+   public void getIntersectionWithLine(Point3D pointToPack, Line3DReadOnly line)
+   {
+      plane3d.intersectionWith(pointToPack, line.getPoint(), line.getDirection());
+   }
+
+   public void setToZero()
+   {
+      getPoint().setToZero();
+      getNormal().set(Axis3D.Z);
+   }
+
+   public void setToZero(ReferenceFrame referenceFrame)
+   {
+      setReferenceFrame(referenceFrame);
+      setToZero();
+   }
+
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
    }
 
    @Override

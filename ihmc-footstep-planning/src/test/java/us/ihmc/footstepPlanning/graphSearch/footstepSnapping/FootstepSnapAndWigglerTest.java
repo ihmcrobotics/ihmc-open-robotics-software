@@ -1,23 +1,40 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,6 +43,46 @@ import java.util.Random;
 
 public class FootstepSnapAndWigglerTest
 {
+   private static boolean visualize = true;
+
+   // For visualizable tests at the bottom
+   private static final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+   private SimulationConstructionSet scs;
+   private YoGraphicsListRegistry graphicsListRegistry;
+   private YoRegistry registry;
+   private FootstepSnapAndWiggler snapAndWiggler;
+   private final FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
+   private YoDouble achievedDeltaInside;
+
+   @BeforeEach
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+
+      if (visualize)
+      {
+         scs = new SimulationConstructionSet(new Robot("testRobot"));
+         achievedDeltaInside = new YoDouble("achievedDeltaInside", scs.getRootRegistry());
+         scs.setGroundVisible(false);
+         registry = new YoRegistry(getClass().getSimpleName());
+         graphicsListRegistry = new YoGraphicsListRegistry();
+         snapAndWiggler = new FootstepSnapAndWiggler(footPolygons, parameters, scs, graphicsListRegistry, registry);
+         graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
+
+         Graphics3DObject graphics3DObject = new Graphics3DObject();
+         Graphics3DObjectTools.addPlanarRegionsList(graphics3DObject, DataSetIOTools.loadDataSet(DataSetName._20210419_111333_GPUCinders1).getPlanarRegionsList(), YoAppearance.DarkGray());
+         scs.addStaticLinkGraphics(graphics3DObject);
+
+         scs.addYoGraphicsListRegistry(graphicsListRegistry);
+         scs.getRootRegistry().addChild(registry);
+         scs.startOnAThread();
+      }
+      else
+      {
+         snapAndWiggler = new FootstepSnapAndWiggler(footPolygons, parameters);
+      }
+   }
+
    @Test
    public void testQPNotSolvedIfFootSufficientlyInside()
    {
@@ -305,6 +362,8 @@ public class FootstepSnapAndWigglerTest
       stepPolygon.scale(0.5);
       stepPolygon.update();
 
+      FrameConvexPolygon2D p;
+
       PlanarRegion planarRegion = new PlanarRegion(new RigidBodyTransform(), concaveHullVertices, Arrays.asList(convexHull));
       double epsilon = 1e-6;
 
@@ -349,5 +408,60 @@ public class FootstepSnapAndWigglerTest
       distance = FootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
       expectedDistance = - dy / Math.sqrt(2.0);
       Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+   }
+
+   @Test
+   public void testSnappingToFlatGroundHeight()
+   {
+      double flatGroundHeight = 0.7;
+      snapAndWiggler.setFlatGroundHeight(flatGroundHeight);
+      snapAndWiggler.setPlanarRegions(null);
+
+      DiscreteFootstep footstep = new DiscreteFootstep(3, -2, 5, RobotSide.LEFT);
+      FootstepSnapData snapData = snapAndWiggler.snapFootstep(footstep);
+      RigidBodyTransform snappedStepTransform = snapData.getSnappedStepTransform(footstep);
+      double epsilon = 1e-7;
+      Assertions.assertEquals(snappedStepTransform.getTranslation().getZ(), flatGroundHeight, epsilon, "Flat ground snap height is not equal");
+   }
+
+   public void testStanceFootClearance()
+   {
+      DataSet dataset = DataSetIOTools.loadDataSet(DataSetName._20210419_111333_GPUCinders1);
+      PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
+
+      parameters.setEnableConcaveHullWiggler(true);
+      parameters.setWiggleInsideDeltaTarget(0.07);
+      parameters.setWiggleInsideDeltaMinimum(0.02);
+      parameters.setMaximumXYWiggleDistance(0.2);
+      parameters.setMinClearanceFromStance(0.03);
+
+      snapAndWiggler.initialize();
+
+      snapAndWiggler.setPlanarRegions(planarRegionsList);
+      DiscreteFootstep stanceStep = new DiscreteFootstep(105, 82, 3, RobotSide.LEFT);
+      DiscreteFootstep candidateStep = new DiscreteFootstep(109, 80, 2, RobotSide.RIGHT);
+
+      RigidBodyTransform stanceSnapTransform = new RigidBodyTransform(new Quaternion(-0.00521871,0.01066136,-0.00008137,0.99992954), new Vector3D(-0.00110121,0.00147726,0.88437723));
+      FootstepSnapData stanceSnapData = new FootstepSnapData(stanceSnapTransform);
+      stanceSnapData.setRegionIndex(2);
+      snapAndWiggler.addSnapData(stanceStep, stanceSnapData);
+
+      if (visualize)
+      {
+         FootstepSnapData snapWiggleData = snapAndWiggler.snapFootstep(candidateStep, stanceStep, true);
+         achievedDeltaInside.set(snapWiggleData.getAchievedInsideDelta());
+         scs.tickAndUpdate();
+
+         scs.cropBuffer();
+         ThreadTools.sleepForever();
+      }
+   }
+
+   public static void main(String[] args)
+   {
+      FootstepSnapAndWigglerTest footstepSnapAndWigglerTest = new FootstepSnapAndWigglerTest();
+      visualize = true;
+      footstepSnapAndWigglerTest.setup();
+      footstepSnapAndWigglerTest.testStanceFootClearance();
    }
 }

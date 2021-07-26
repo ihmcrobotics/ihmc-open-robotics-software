@@ -4,7 +4,7 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.SquaredUpDRCRobotInitialSetup;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class SquaredUpVRCQual3Platform extends SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
@@ -23,7 +23,7 @@ public class SquaredUpVRCQual3Platform extends SquaredUpDRCRobotInitialSetup imp
       this(0.0);
    }
 
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
    {
       super.initializeRobot(robot, jointMap);
 

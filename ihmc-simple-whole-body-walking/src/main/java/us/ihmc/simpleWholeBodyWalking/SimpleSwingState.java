@@ -42,7 +42,7 @@ import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
 import us.ihmc.robotics.math.trajectories.BlendedPositionTrajectoryGeneratorVisualizer;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -273,11 +273,12 @@ public class SimpleSwingState extends SimpleFootControlState
       double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
       double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
+      double customWaypointAngleThreshold = walkingControllerParameters.getSteppingParameters().getCustomWaypointAngleThreshold();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix, minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot,
-                                                               defaultSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
+                                                               defaultSwingHeightFromStanceFoot, customWaypointAngleThreshold, registry, yoGraphicsListRegistry);
 
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
@@ -472,7 +473,7 @@ public class SimpleSwingState extends SimpleFootControlState
          time = currentTimeWithSwingSpeedUp.getDoubleValue();
       }
 
-      PoseTrajectoryGenerator activeTrajectory;
+      FixedFramePoseTrajectoryGenerator activeTrajectory;
       if (time > swingDuration.getDoubleValue())
          activeTrajectory = touchdownTrajectory;
       else
@@ -482,7 +483,7 @@ public class SimpleSwingState extends SimpleFootControlState
       if (replanTrajectory.getBooleanValue())
       {
          activeTrajectory.compute(time); // compute to get the current unadjusted position
-         activeTrajectory.getPosition(unadjustedPosition);
+         unadjustedPosition.setIncludingFrame(activeTrajectory.getPosition());
          footstepWasAdjusted = true;
       }
 
@@ -714,8 +715,7 @@ public class SimpleSwingState extends SimpleFootControlState
          for (int i = 0; i < swingWaypoints.size(); i++)
          {
             blendedSwingTrajectory.compute(swingWaypoints.get(i).getTime());
-            blendedSwingTrajectory.getPosition(tempWaypoint);
-            swingWaypointsForViz.get(i).setMatchingFrame(tempWaypoint);
+            swingWaypointsForViz.get(i).setMatchingFrame(blendedSwingTrajectory.getPosition());
          }
       }
    }

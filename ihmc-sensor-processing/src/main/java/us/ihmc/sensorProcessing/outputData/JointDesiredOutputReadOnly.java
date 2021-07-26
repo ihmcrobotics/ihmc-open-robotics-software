@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.outputData;
 
 import controller_msgs.msg.dds.JointDesiredOutputMessage;
+import us.ihmc.commons.MathTools;
 
 /**
  * An interface for a data holder that is used to communicate desired joint behavior (setpoints and
@@ -192,8 +193,8 @@ public interface JointDesiredOutputReadOnly
    }
 
    /**
-    * Gets the maximum position error to consider in the acceleration integration of this joint. How this
-    * value is used is specific to the joint low level control.
+    * Gets the maximum position error to consider in the acceleration integration of this joint. How
+    * this value is used is specific to the joint low level control.
     *
     * @return the maximum position error for acceleration integration for the joint.
     */
@@ -210,8 +211,8 @@ public interface JointDesiredOutputReadOnly
    }
 
    /**
-    * Gets the maximum velocity error to consider in the acceleration integration of this joint. How this
-    * value is used is specific to the joint low level control.
+    * Gets the maximum velocity error to consider in the acceleration integration of this joint. How
+    * this value is used is specific to the joint low level control.
     *
     * @return the maximum velocity error for the joint.
     */
@@ -228,12 +229,38 @@ public interface JointDesiredOutputReadOnly
    }
 
    /**
-    * Gets the maximum position error to consider in the low level feedback control of this joint. How this
-    * value is used is specific to the joint low level control.
+    * Gets the maximum position error to consider in the low level feedback control of this joint. How
+    * this value is used is specific to the joint low level control.
     *
     * @return the maximum position error for the joint feedback control.
     */
    double getPositionFeedbackMaxError();
+
+   /**
+    * Convenience for clamping the desired position with {@link #getPositionFeedbackMaxError()} if it
+    * is available.
+    * 
+    * @param currentPosition the current joint position that is to be used in the feedback controller.
+    * @return the desired position clamped such that
+    *         {@code |error| = Math.abs(getDesiredPosition() - currentPosition) <= getPositionFeedbackMaxError()}.
+    */
+   default double getClampedDesiredPosition(double currentPosition)
+   {
+      if (!hasDesiredPosition() || !hasPositionFeedbackMaxError())
+         return getDesiredPosition();
+
+      double error = getDesiredPosition() - currentPosition;
+
+      if (Math.abs(error) > getPositionFeedbackMaxError())
+      {
+         double errorClamped = MathTools.clamp(error, getPositionFeedbackMaxError());
+         return currentPosition + errorClamped;
+      }
+      else
+      {
+         return getDesiredPosition();
+      }
+   }
 
    /**
     * Returns true if a maximum velocity error for feedback was set for this joint.
@@ -246,12 +273,38 @@ public interface JointDesiredOutputReadOnly
    }
 
    /**
-    * Gets the maximum velocity error to consider in the low level feedback control of this joint. How this
-    * value is used is specific to the joint low level control.
+    * Gets the maximum velocity error to consider in the low level feedback control of this joint. How
+    * this value is used is specific to the joint low level control.
     *
     * @return the maximum velocity error for the joint feedback control.
     */
    double getVelocityFeedbackMaxError();
+
+   /**
+    * Convenience for clamping the desired velocity with {@link #getVelocityFeedbackMaxError()} if it
+    * is available.
+    * 
+    * @param currentVelocity the current joint velocity that is to be used in the feedback controller.
+    * @return the desired velocity clamped such that
+    *         {@code |error| = Math.abs(getDesiredVelocity() - currentVelocity) <= getVelocityFeedbackMaxError()}.
+    */
+   default double getClampedDesiredVelocity(double currentVelocity)
+   {
+      if (!hasDesiredVelocity() || !hasVelocityFeedbackMaxError())
+         return getDesiredVelocity();
+
+      double error = getDesiredVelocity() - currentVelocity;
+
+      if (Math.abs(error) > getVelocityFeedbackMaxError())
+      {
+         double errorClamped = MathTools.clamp(error, getVelocityFeedbackMaxError());
+         return currentVelocity + errorClamped;
+      }
+      else
+      {
+         return getDesiredVelocity();
+      }
+   }
 
    /**
     * Copies the contents of this object to {@link JointDesiredOutputMessage}
@@ -309,6 +362,32 @@ public interface JointDesiredOutputReadOnly
       if (hasPositionIntegrationBreakFrequency())
          ret += "positionIntegrationBreakFrequency = " + getPositionIntegrationBreakFrequency() + "\n";
       return ret;
+   }
+
+   default String getShortRepresentativeString()
+   {
+      StringBuilder ret = new StringBuilder();
+      if (hasControlMode())
+         ret.append("mode= " + getControlMode());
+      if (hasDesiredTorque())
+      {
+         if (ret.length() > 0)
+            ret.append(", ");
+         ret.append("tau_d= " + getDesiredTorque());
+      }
+      if (hasDesiredPosition())
+      {
+         if (ret.length() > 0)
+            ret.append(", ");
+         ret.append("q_d= " + getDesiredPosition());
+      }
+      if (hasDesiredVelocity())
+      {
+         if (ret.length() > 0)
+            ret.append(", ");
+         ret.append("qd_d= " + getDesiredVelocity());
+      }
+      return ret.toString();
    }
 
    default boolean equals(JointDesiredOutputReadOnly other)

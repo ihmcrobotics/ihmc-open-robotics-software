@@ -10,7 +10,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -86,6 +85,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    {
       // TODO probably need to be tuned.
       return (target == RobotTarget.REAL_ROBOT ? 3.0 : 3.3) / Math.sqrt(jointMap.getModelScale()); // 3.3 seems more appropriate.
+   }
+
+   @Override
+   public double getMaxAllowedDistanceCMPSupport()
+   {
+      return target == RobotTarget.REAL_ROBOT ? 0.0 : 0.04;
    }
 
    @Override
@@ -578,7 +583,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getDefaultInitialTransferTime()
    {
-      return (target == RobotTarget.REAL_ROBOT) ? 2.0 : 1.0;
+      return 1.0;
    }
 
    @Override
@@ -627,12 +632,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public FeedbackControllerSettings getFeedbackControllerSettings()
    {
       return new ValkyrieFeedbackControllerSettings(jointMap, target);
-   }
-
-   @Override
-   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
-   {
-      return new ICPAngularMomentumModifierParameters();
    }
 
    @Override
@@ -736,7 +735,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public JointLimitParameters getJointLimitParametersForJointsWithRestictiveLimits()
+   public JointLimitParameters getJointLimitParametersForJointsWithRestrictiveLimits(String jointName)
    {
       JointLimitParameters parameters = new JointLimitParameters();
       parameters.setMaxAbsJointVelocity(1.5);

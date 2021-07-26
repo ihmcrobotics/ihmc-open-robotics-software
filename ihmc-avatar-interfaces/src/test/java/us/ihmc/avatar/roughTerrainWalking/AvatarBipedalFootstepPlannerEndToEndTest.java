@@ -31,7 +31,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -119,15 +119,15 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), PubSubImplementation.INTRAPROCESS);
 
       footstepPlanningRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
-                                                                            FootstepPlannerCommunicationProperties.inputTopic(getSimpleRobotName()));
+                                                                            FootstepPlannerAPI.inputTopic(getSimpleRobotName()));
       footstepPlannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlannerParametersPacket.class,
-                                                                              FootstepPlannerCommunicationProperties.inputTopic(getSimpleRobotName()));
+                                                                              FootstepPlannerAPI.inputTopic(getSimpleRobotName()));
 
       toolboxStatePublisher = ROS2Tools
-            .createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.inputTopic(getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, FootstepPlannerAPI.inputTopic(getSimpleRobotName()));
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                                    FootstepPlannerCommunicationProperties.outputTopic(getSimpleRobotName()),
+                                                    FootstepPlannerAPI.outputTopic(getSimpleRobotName()),
                                            s -> setOutputStatus(s.takeNextData()));
 
       FullHumanoidRobotModel fullHumanoidRobotModel = getRobotModel().createFullRobotModel();

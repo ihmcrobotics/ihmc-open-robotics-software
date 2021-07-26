@@ -5,6 +5,7 @@ import java.util.Collection;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -31,8 +32,12 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 
    private final YoFramePoint2D yoResolvedCoP;
 
-   public KinematicsBasedFootSwitch(String footName, SegmentDependentList<RobotSide, ? extends ContactablePlaneBody> bipedFeet, DoubleProvider switchZThreshold,
-                                    double totalRobotWeight, RobotSide side, YoRegistry parentRegistry)
+   public KinematicsBasedFootSwitch(String footName,
+                                    SegmentDependentList<RobotSide, ? extends ContactablePlaneBody> bipedFeet,
+                                    DoubleProvider switchZThreshold,
+                                    double totalRobotWeight,
+                                    RobotSide side,
+                                    YoRegistry parentRegistry)
    {
       registry = new YoRegistry(footName + getClass().getSimpleName());
       foot = bipedFeet.get(side);
@@ -50,8 +55,12 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       parentRegistry.addChild(registry);
    }
 
-   public KinematicsBasedFootSwitch(String footName, ContactablePlaneBody foot, Collection<? extends ContactablePlaneBody> otherFeet, DoubleProvider switchZThreshold,
-                                    double totalRobotWeight, YoRegistry parentRegistry)
+   public KinematicsBasedFootSwitch(String footName,
+                                    ContactablePlaneBody foot,
+                                    Collection<? extends ContactablePlaneBody> otherFeet,
+                                    DoubleProvider switchZThreshold,
+                                    double totalRobotWeight,
+                                    YoRegistry parentRegistry)
    {
       registry = new YoRegistry(footName + getClass().getSimpleName());
       this.foot = foot;
@@ -70,24 +79,30 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
 
    /**
     * Quadruped version, assumes flat ground
-    * @param footName name for yovariable registry and yovariable names
-    * @param quadrupedFeet all the feet
-    * @param switchZThreshold difference in z between the lowest foot and the foot inquestion before assuming foot is in contact
+    * 
+    * @param footName         name for yovariable registry and yovariable names
+    * @param quadrupedFeet    all the feet
+    * @param switchZThreshold difference in z between the lowest foot and the foot inquestion before
+    *                         assuming foot is in contact
     * @param totalRobotWeight
-    * @param quadrant the foot in question
+    * @param quadrant         the foot in question
     * @param parentRegistry
     */
-   public KinematicsBasedFootSwitch(String footName, QuadrantDependentList<? extends ContactablePlaneBody> quadrupedFeet, DoubleProvider switchZThreshold,
-                                    double totalRobotWeight, RobotQuadrant quadrant, YoRegistry parentRegistry)
+   public KinematicsBasedFootSwitch(String footName,
+                                    QuadrantDependentList<? extends ContactablePlaneBody> quadrupedFeet,
+                                    DoubleProvider switchZThreshold,
+                                    double totalRobotWeight,
+                                    RobotQuadrant quadrant,
+                                    YoRegistry parentRegistry)
    {
       registry = new YoRegistry(footName + getClass().getSimpleName());
       foot = quadrupedFeet.get(quadrant);
-      
+
       ContactablePlaneBody acrossBodyFrontFoot = quadrupedFeet.get(quadrant.getAcrossBodyFrontQuadrant());
       ContactablePlaneBody acrossBodyHindFoot = quadrupedFeet.get(quadrant.getAcrossBodyHindQuadrant());
       ContactablePlaneBody sameSideFoot = quadrupedFeet.get(quadrant.getSameSideQuadrant());
       otherFeet = new ContactablePlaneBody[] {acrossBodyFrontFoot, acrossBodyHindFoot, sameSideFoot};
-      
+
       this.totalRobotWeight = totalRobotWeight;
       hitGround = new YoBoolean(footName + "hitGround", registry);
       fixedOnGround = new YoBoolean(footName + "fixedOnGround", registry);
@@ -127,10 +142,10 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    private double getLowestFootZInWorld()
    {
       double lowestZ = Double.MAX_VALUE;
-      for(int i = 0; i < otherFeet.length; i++)
+      for (int i = 0; i < otherFeet.length; i++)
       {
          double z = getPointInWorld(otherFeet[i].getSoleFrame()).getZ();
-         if(z < lowestZ)
+         if (z < lowestZ)
          {
             lowestZ = z;
          }
@@ -156,12 +171,17 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
       yoResolvedCoP.setToZero();
    }
 
+   private final Vector3D footForce = new Vector3D();
+
    @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
-      footWrenchToPack.setToZero();
+      footWrenchToPack.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getSoleFrame());
       if (hasFootHitGround())
-         footWrenchToPack.setLinearPartZ(totalRobotWeight);
+      {
+         footForce.set(0.0, 0.0, totalRobotWeight);
+         footWrenchToPack.getLinearPart().setMatchingFrame(ReferenceFrame.getWorldFrame(), footForce);
+      }
    }
 
    @Override

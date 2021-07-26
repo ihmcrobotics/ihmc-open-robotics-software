@@ -40,14 +40,14 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private final PIDSE3GainsReadOnly gains;
 
-   public MoveViaWaypointsState(FootControlHelper footControlHelper, FrameVector3DReadOnly touchdownVelocity, FrameVector3DReadOnly touchdownAcceleration,
+   public MoveViaWaypointsState(FootControlHelper footControlHelper,
                                 PIDSE3GainsReadOnly gains, YoRegistry registry)
    {
       super(footControlHelper);
 
       this.gains = gains;
-      this.touchdownVelocity = touchdownVelocity;
-      this.touchdownAcceleration = touchdownAcceleration;
+      this.touchdownVelocity = footControlHelper.getSwingTrajectoryParameters().getDesiredTouchdownVelocity();
+      this.touchdownAcceleration = footControlHelper.getSwingTrajectoryParameters().getDesiredTouchdownAcceleration();
 
       RigidBodyBasics foot = controllerToolbox.getFullRobotModel().getFoot(robotSide);
       String namePrefix = foot.getName() + "MoveViaWaypoints";

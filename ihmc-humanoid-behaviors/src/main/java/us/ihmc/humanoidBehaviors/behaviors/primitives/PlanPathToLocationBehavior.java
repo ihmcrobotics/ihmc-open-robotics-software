@@ -54,6 +54,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private double desiredHeading;
    private FootstepDataListMessage footstepDataListMessage;
    private FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus;
+   private boolean squareUpEndSteps = true;
 
    protected final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footPlanStatusQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(2);
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
@@ -90,8 +91,9 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                          Pose3DReadOnly rightFootPose,
                          boolean planBodyPath,
                          boolean assumeFlatGround,
-                         double desiredHeading)
+                         double desiredHeading, boolean squareUpEndSteps)
    {
+      this.squareUpEndSteps = squareUpEndSteps;
       this.goalPose = goalPose;
       this.assumeFlatGround = assumeFlatGround;
       this.planBodyPath = planBodyPath;
@@ -166,6 +168,12 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             footstepPlan.addFootstep(RobotSide.LEFT, startLeftFootPose);
             footstepPlan.addFootstep(RobotSide.RIGHT, startLeftFootPose);
             request.setRequestedPathHeading(desiredHeading);
+            if(squareUpEndSteps)
+            {
+               request.getGoalLeftFootPose().set(goalLeftFootPose);
+               request.getGoalRightFootPose().set(goalRightFootPose);
+            }
+
 
             FootstepDataListMessage footstepDataGoalStepForVisualization = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                                                        0.0,
@@ -175,9 +183,13 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
             request.setTimeout(timeout);
             request.setAssumeFlatGround(assumeFlatGround);
-            if (planarRegions.get() != null)
+            if (planarRegions.get() != null && !assumeFlatGround)
             {
                request.getPlanarRegionsListMessage().set(planarRegions.get());
+            }
+            else if (assumeFlatGround)
+            {
+               publishTextToSpeech("PlanPathToLocationBehavior: Assuming flat ground, Requesting Plan without planar regions");
             }
             else
             {

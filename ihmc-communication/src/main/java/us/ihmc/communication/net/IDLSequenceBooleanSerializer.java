@@ -31,7 +31,8 @@ public class IDLSequenceBooleanSerializer extends Serializer<IDLSequence.Boolean
          output.writeBoolean(collection.getBoolean(i));
    }
 
-   public IDLSequence.Boolean read(Kryo kryo, Input input, Class<IDLSequence.Boolean> type)
+   @Override
+   public IDLSequence.Boolean read(Kryo kryo, Input input, Class<? extends IDLSequence.Boolean> type)
    {
       int length = input.readInt(true);
       IDLSequence.Boolean resultList = new IDLSequence.Boolean(length, TYPE_CODE);
@@ -45,7 +46,7 @@ public class IDLSequenceBooleanSerializer extends Serializer<IDLSequence.Boolean
    }
 
    /**
-    * Used by {@link #copy(Kryo, Collection)} to create the new object. This can be overridden to
+    * Used by {@link copy(Kryo, Collection)} to create the new object. This can be overridden to
     * customize object creation, eg to call a constructor with arguments. The default implementation
     * uses {@link Kryo#newInstance(Class)}.
     */

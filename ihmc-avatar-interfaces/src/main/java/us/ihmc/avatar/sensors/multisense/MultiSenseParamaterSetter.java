@@ -25,7 +25,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.processManagement.ProcessStreamGobbler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosServiceClient;
@@ -45,7 +45,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    private ParameterTree params;
    private IHMCROS2Publisher<MultisenseParameterPacket> publisher;
 
-   public MultiSenseParamaterSetter(RosMainNode rosMainNode, ROS2Node ros2Node)
+   public MultiSenseParamaterSetter(RosMainNode rosMainNode, ROS2NodeInterface ros2Node)
    {
       this.rosMainNode = rosMainNode;
       multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);

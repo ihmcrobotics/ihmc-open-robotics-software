@@ -15,15 +15,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.partNames.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehavior;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 public class AtlasHighLevelControllerParameters implements HighLevelControllerParameters
 {
@@ -285,55 +281,75 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
          integrationSettings.add(new GroupParameter<>("SpineAccelerationIntegration", settings, jointMap.getSpineJointNamesAsStrings()));
       }
 
-      { // Leg joints:
+      { // Leg joints (but knee):
+         List<String> legJoints = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL));
+         }
          JointAccelerationIntegrationParameters settings = new JointAccelerationIntegrationParameters();
          settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.985, 0.004));
          settings.setMaxVelocity(5.0);
-         integrationSettings.add(new GroupParameter<>("LegAccelerationIntegration", settings, jointMap.getLegJointNamesAsStrings()));
+         integrationSettings.add(new GroupParameter<>("LegAccelerationIntegration", settings, legJoints));
+      }
+
+      { // Knee joints:
+         List<String> kneeJoints = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            kneeJoints.add(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH));
+         JointAccelerationIntegrationParameters settings = new JointAccelerationIntegrationParameters();
+         settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.985, 0.004));
+         settings.setMaxVelocity(5.0);
+         settings.setZeroVelocityReset(true);
+         integrationSettings.add(new GroupParameter<>("KneeAccelerationIntegration", settings, kneeJoints));
       }
 
       return integrationSettings;
    }
 
-   private static void configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap, SpineJointName jointName,
-                                         JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static void configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap, SpineJointName jointName,
+                                        JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, names));
    }
 
-   private static void configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap, NeckJointName jointName,
-                                         JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static void configureBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap, NeckJointName jointName,
+                                        JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       List<String> names = Collections.singletonList(jointMap.getNeckJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, names));
    }
 
-   private static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
-                                                  LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                 LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       configureSymmetricBehavior(behaviors, jointMap, jointName, controlMode, stiffness, damping, Double.POSITIVE_INFINITY);
    }
 
-   private static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
-                                                  LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
-                                                  double maxVelocityError)
+   public static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                 LegJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping,
+                                                 double maxVelocityError)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       jointBehavior.setMaxVelocityError(maxVelocityError);
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
    }
 
-   private static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, DRCRobotJointMap jointMap,
-                                                  ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
+   public static void configureSymmetricBehavior(List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors, HumanoidJointNameMap jointMap,
+                                                 ArmJointName jointName, JointDesiredControlMode controlMode, double stiffness, double damping)
    {
       JointDesiredBehavior jointBehavior = new JointDesiredBehavior(controlMode, stiffness, damping);
       behaviors.add(new GroupParameter<>(jointName.toString(), jointBehavior, getLeftAndRightJointNames(jointMap, jointName)));
    }
 
-   private static List<String> getLeftAndRightJointNames(DRCRobotJointMap jointMap, LegJointName legJointName)
+   public static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, LegJointName legJointName)
    {
       List<String> jointNames = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
@@ -343,7 +359,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
       return jointNames;
    }
 
-   private static List<String> getLeftAndRightJointNames(DRCRobotJointMap jointMap, ArmJointName armJointName)
+   public static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, ArmJointName armJointName)
    {
       List<String> jointNames = new ArrayList<>();
       for (RobotSide side : RobotSide.values)

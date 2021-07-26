@@ -22,8 +22,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.RosNavMsgsOdometrySubscriber;
@@ -51,12 +51,12 @@ public class TrackingCameraBridge
 
    private final Consumer<StampedPosePacket> stampedPosePacketPublisher;
 
-   public TrackingCameraBridge(FullRobotModelFactory modelFactory, ROS2Node ros2Node)
+   public TrackingCameraBridge(FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node);
    }
 
-   public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, ROS2Node ros2Node)
+   public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, ROS2NodeInterface ros2Node)
    {
       this.fullRobotModel = fullRobotModel;
 

@@ -72,7 +72,15 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
    private final StereoVisionPointCloudDataExporter stereoVisionPointCloudDataExporter;
    private final ROS2Node ros2Node;
 
-   private SLAMBasedEnvironmentAwarenessUI(REAUIMessager uiMessager, Stage primaryStage, SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
+   public SLAMBasedEnvironmentAwarenessUI(REAUIMessager uiMessager, Stage primaryStage, SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
+   {
+      this(uiMessager, primaryStage, defaultContactPoints, true);
+   }
+
+   public SLAMBasedEnvironmentAwarenessUI(REAUIMessager uiMessager,
+                                           Stage primaryStage,
+                                           SideDependentList<List<Point2D>> defaultContactPoints,
+                                           boolean startMessager) throws Exception
    {
       this.primaryStage = primaryStage;
       FXMLLoader loader = new FXMLLoader();
@@ -88,7 +96,8 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
 
       // Client
       this.uiMessager = uiMessager;
-      uiMessager.startMessager();
+      if (startMessager)
+         uiMessager.startMessager();
 
       ihmcSLAMViewer = new SLAMMeshViewer(uiMessager);
       depthFrameViewer = new SensorFrameViewer<StereoVisionPointCloudMessage>(uiMessager,

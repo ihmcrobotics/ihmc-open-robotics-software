@@ -26,6 +26,12 @@ public class AtlasToeOffParameters extends ToeOffParameters
    }
 
    @Override
+   public boolean doToeOffWhenHittingTrailingKneeLowerLimit()
+   {
+      return true;
+   }
+
+   @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
       return true;
@@ -65,5 +71,11 @@ public class AtlasToeOffParameters extends ToeOffParameters
    public double getICPPercentOfStanceForDSToeOff()
    {
       return 0.03; // JCarff ToeOff
+   }
+
+   @Override
+   public double getKneeUpperLimitToTriggerToeOff()
+   {
+      return 2.0;
    }
 }

@@ -17,7 +17,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Sphere;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -25,9 +25,9 @@ public class StickRobotContactPointParameters extends RobotContactPointParameter
 {
    private final SideDependentList<ArrayList<Point2D>> footGroundContactPoints = new SideDependentList<>();
 
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
 
-   public StickRobotContactPointParameters(DRCRobotJointMap jointMap, FootContactPoints<RobotSide> footContactPoints)
+   public StickRobotContactPointParameters(HumanoidJointNameMap jointMap, FootContactPoints<RobotSide> footContactPoints)
    {
       super(jointMap, footWidth, footLength, soleToAnkleFrameTransforms);
       this.jointMap = jointMap;

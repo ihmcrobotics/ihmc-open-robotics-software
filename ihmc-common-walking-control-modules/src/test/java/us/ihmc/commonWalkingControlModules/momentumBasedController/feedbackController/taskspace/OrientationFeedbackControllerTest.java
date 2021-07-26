@@ -17,7 +17,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -73,8 +73,8 @@ public class OrientationFeedbackControllerTest
       spatialFeedbackControlCommand.getSpatialAccelerationCommand().setSelectionMatrixForAngularControl();
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
-      QPInput orientationMotionQPInput = new QPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
-      QPInput spatialMotionQPInput = new QPInput(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      QPInputTypeA orientationMotionQPInput = new QPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
+      QPInputTypeA spatialMotionQPInput = new QPInputTypeA(toolbox.getJointIndexHandler().getNumberOfDoFs());
 
       SpatialAccelerationCommand orientationControllerOutput = orientationFeedbackController.getInverseDynamicsOutput();
       SpatialAccelerationCommand spatialControllerOutput = spatialFeedbackController.getInverseDynamicsOutput();

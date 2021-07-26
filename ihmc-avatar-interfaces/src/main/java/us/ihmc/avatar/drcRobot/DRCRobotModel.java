@@ -7,33 +7,36 @@ import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -42,7 +45,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   public abstract DRCRobotJointMap getJointMap();
+   public abstract HumanoidJointNameMap getJointMap();
 
    public abstract DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw);
 
@@ -62,7 +65,12 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return new WallTimeBasedROSClockCalculator();
    }
 
-   public abstract DRCSensorSuiteManager getSensorSuiteManager();
+   public default DRCSensorSuiteManager getSensorSuiteManager()
+   {
+      return getSensorSuiteManager(null);
+   }
+
+   public abstract DRCSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node);
 
    public default SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
    {
@@ -76,11 +84,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    public abstract String getSimpleRobotName();
 
    public abstract CollisionBoxProvider getCollisionBoxProvider();
-
-   public default SliderBoardParameters getSliderBoardParameters()
-   {
-      return new SliderBoardParameters();
-   }
 
    /**
     * Override this method to create a custom output processor to be used with this robot.
@@ -147,17 +150,22 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
+   default String getStepReachabilityResourceName()
+   {
+      return null;
+   }
+
+   default StepReachabilityData getStepReachabilityData()
+   {
+      return null;
+   }
+
    default SwingPlannerParametersBasics getSwingPlannerParameters(String fileNameSuffix)
    {
       return null;
    }
 
    default SwingPlannerParametersBasics getSwingPlannerParameters()
-   {
-      return null;
-   }
-
-   default SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
    {
       return null;
    }
@@ -191,6 +199,22 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * @return the robot collision model used to create the robot's {@link Collidable}s.
     */
    default RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
+   {
+      return null;
+   }
+
+   /**
+    * Gets the parameters necessary to run an automated diagnostic on the robot.
+    * 
+    * @return the parameters required for running the diagnostic controller.
+    * @see AutomatedDiagnosticAnalysisController
+    */
+   default DiagnosticParameters getDiagnoticParameters()
+   {
+      return null;
+   }
+
+   default RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
    {
       return null;
    }

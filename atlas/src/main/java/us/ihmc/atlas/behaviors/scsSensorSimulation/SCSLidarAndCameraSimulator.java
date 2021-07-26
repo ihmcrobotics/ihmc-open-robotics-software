@@ -11,7 +11,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Input;
@@ -57,7 +57,7 @@ public class SCSLidarAndCameraSimulator
 {
    private final ROS2Node ros2Node;
    private final ROS2Input<RobotConfigurationData> robotConfigurationData;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D tempNeckFramePose = new FramePose3D();
    private final SimulationConstructionSet scs;
    private final FloatingJoint floatingHeadJoint;
@@ -71,11 +71,9 @@ public class SCSLidarAndCameraSimulator
    {
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "lidar_and_camera");
 
-      robotConfigurationData = new ROS2Input<>(ros2Node,
-                                               RobotConfigurationData.class,
-                                               ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withInput());
+      robotConfigurationData = new ROS2Input<>(ros2Node, ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
 
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
       Robot robot = new Robot("Robot");
 
@@ -114,10 +112,8 @@ public class SCSLidarAndCameraSimulator
 
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
-                                                                                 RobotConfigurationData.class,
-                                                                                 ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
-                                                                                                              .withOutput());
-      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
+                                                                                 ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
+      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, ROS2Tools.VIDEO);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
       scs.setupCamera(cameraConfiguration);
@@ -133,6 +129,8 @@ public class SCSLidarAndCameraSimulator
 
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
+      scs.skipLoadingDefaultConfiguration();
+      scs.setupGraph("t");
 
       scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(0.25));
       scs.startOnAThread();

@@ -15,10 +15,6 @@ import org.ros.node.service.ServiceResponseListener;
 import test_rosmaster.AddTwoInts;
 import test_rosmaster.AddTwoIntsRequest;
 import test_rosmaster.AddTwoIntsResponse;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.utilities.ros.service.AddTwoIntsClient;
-import us.ihmc.utilities.ros.service.AddTwoIntsServer;
 
 public class AddTwoIntsServiceTest extends IHMCRosTestWithRosCore
 {

@@ -4,9 +4,16 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.heightPlanning.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightPartialDerivativesDataBasics;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesCalculator;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesSmoother;
+import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightPartialDerivativesData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.YoCoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -14,7 +21,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -25,11 +34,14 @@ import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.robotics.controllers.PDControllerWithGainSetter;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -43,6 +55,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean controlPelvisHeightInsteadOfCoMHeight = new YoBoolean("controlPelvisHeightInsteadOfCoMHeight", registry);
+   private final YoBoolean controlHeightWithMomentum = new YoBoolean("controlHeightWithMomentum", registry);
 
    private final CoMHeightTimeDerivativesSmoother comHeightTimeDerivativesSmoother;
    private final YoDouble desiredCoMHeightFromTrajectory = new YoDouble("desiredCoMHeightFromTrajectory", registry);
@@ -60,49 +73,61 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final YoDouble desiredCoMHeightAccelerationAfterSmoothing = new YoDouble("desiredCoMHeightAccelerationAfterSmoothing", registry);
    private final YoDouble desiredCoMHeightJerkAfterSmoothing = new YoDouble("desiredCoMHeightJerkAfterSmoothing", registry);
 
-   private final YoDouble zDesired = new YoDouble("zDesired", registry);
-   private final YoDouble zdDesired = new YoDouble("zdDesired", registry);
-   private final YoDouble zddDesired = new YoDouble("zddDesired", registry);
-
-   private final PDControllerWithGainSetter centerOfMassHeightController;
+   private final DoubleProvider currentTime;
+   private final YoDouble transitionDurationToFall = new YoDouble("comHeightTransitionDurationToFall", registry);
+   private final YoDouble transitionToFallStartTime = new YoDouble("comHeightTransitionToFallStartTime", registry);
+   private final YoDouble fallActivationRatio = new YoDouble("comHeightFallActivationRatio", registry);
+   private final DoubleProvider fallAccelerationMagnitude = new DoubleParameter("comHeightFallAccelerationMagnitude", registry, 5.0);
 
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final MovingReferenceFrame pelvisFrame;
-   private final BetterLookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator;
-
-   private final double gravity;
+   private final LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator;
 
    private final FramePoint3D statusDesiredPosition = new FramePoint3D();
    private final FramePoint3D statusActualPosition = new FramePoint3D();
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisHeight");
+
+   private final PointFeedbackControlCommand pelvisHeightControlCommand = new PointFeedbackControlCommand();
+   private final CenterOfMassFeedbackControlCommand comHeightControlCommand = new CenterOfMassFeedbackControlCommand();
+
+   private Vector3DReadOnly pelvisTaskpaceFeedbackWeight;
 
    public CenterOfMassHeightControlState(HighLevelHumanoidControllerToolbox controllerToolbox,
                                          WalkingControllerParameters walkingControllerParameters,
                                          YoRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
-      centerOfMassJacobian = new CenterOfMassJacobian(controllerToolbox.getFullRobotModel().getElevator(), worldFrame);
+      centerOfMassJacobian = controllerToolbox.getCenterOfMassJacobian();
       pelvisFrame = referenceFrames.getPelvisFrame();
-
-      gravity = controllerToolbox.getGravityZ();
 
       centerOfMassTrajectoryGenerator = createTrajectoryGenerator(controllerToolbox, walkingControllerParameters, referenceFrames);
 
       // TODO: Fix low level stuff so that we are truly controlling pelvis height and not CoM height.
-      controlPelvisHeightInsteadOfCoMHeight.set(true);
+      controlPelvisHeightInsteadOfCoMHeight.set(walkingControllerParameters.controlPelvisHeightInsteadOfCoMHeight());
+      controlHeightWithMomentum.set(walkingControllerParameters.controlHeightWithMomentum());
 
       double controlDT = controllerToolbox.getControlDT();
       comHeightTimeDerivativesSmoother = new CoMHeightTimeDerivativesSmoother(controlDT, registry);
-      centerOfMassHeightController = new PDControllerWithGainSetter("CoMHeight", registry);
+
+      currentTime = controllerToolbox.getYoTime();
+
+      SelectionMatrix3D selectionMatrix = new SelectionMatrix3D(worldFrame, false, false, true);
+      pelvisHeightControlCommand.set(fullRobotModel.getElevator(), fullRobotModel.getPelvis());
+      FramePoint3D pelvisPoint = new FramePoint3D(pelvisFrame);
+      pelvisPoint.changeFrame(fullRobotModel.getPelvis().getBodyFixedFrame());
+      pelvisHeightControlCommand.setBodyFixedPointToControl(pelvisPoint);
+      pelvisHeightControlCommand.setSelectionMatrix(selectionMatrix);
+      comHeightControlCommand.setSelectionMatrix(selectionMatrix);
 
       parentRegistry.addChild(registry);
    }
 
-   public BetterLookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                                                WalkingControllerParameters walkingControllerParameters,
-                                                                                CommonHumanoidReferenceFrames referenceFrames)
+   public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                                          WalkingControllerParameters walkingControllerParameters,
+                                                                          CommonHumanoidReferenceFrames referenceFrames)
    {
       double ankleToGround = Double.NEGATIVE_INFINITY;
       for (RobotSide robotSide : RobotSide.values)
@@ -123,7 +148,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       double hipWidth = leftHipPitch.getY() - rightHipPitch.getY();
 
-
       double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle() + ankleToGround;
       double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle() + ankleToGround;
       double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle() + ankleToGround;
@@ -131,26 +155,26 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       double doubleSupportPercentageIn = 0.3;
 
-      return new BetterLookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
-                                                             nominalHeightAboveGround,
-                                                             maximumHeightAboveGround,
-                                                             defaultOffsetHeightAboveGround,
-                                                             doubleSupportPercentageIn,
-                                                             hipWidth,
-                                                             centerOfMassFrame,
-                                                             pelvisFrame,
-                                                             referenceFrames.getSoleZUpFrames(),
-                                                             controllerToolbox.getYoTime(),
-                                                             controllerToolbox.getYoGraphicsListRegistry(),
-                                                             registry);
+      return new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
+                                                       nominalHeightAboveGround,
+                                                       maximumHeightAboveGround,
+                                                       defaultOffsetHeightAboveGround,
+                                                       doubleSupportPercentageIn,
+                                                       hipWidth,
+                                                       centerOfMassFrame,
+                                                       pelvisFrame,
+                                                       referenceFrames.getSoleZUpFrames(),
+                                                       controllerToolbox.getYoTime(),
+                                                       controllerToolbox.getYoGraphicsListRegistry(),
+                                                       registry);
    }
-
 
    @Override
    public void initialize()
    {
       centerOfMassTrajectoryGenerator.reset();
       comHeightTimeDerivativesSmoother.reset();
+      transitionToFallStartTime.setToNaN();
    }
 
    @Override
@@ -158,11 +182,28 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    {
       centerOfMassTrajectoryGenerator.initializeDesiredHeightToCurrent();
       comHeightTimeDerivativesSmoother.reset();
+      transitionToFallStartTime.setToNaN();
    }
 
-   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
+   public void initializeToNominalDesiredHeight()
    {
+      centerOfMassTrajectoryGenerator.initializeToNominalHeight();
+   }
+
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
+   {
+      if (!transitionToFallStartTime.isNaN())
+         initialize();
       centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+   }
+
+   public void initializeTransitionToFall(double transitionDuration)
+   {
+      if (transitionToFallStartTime.isNaN())
+      {
+         transitionToFallStartTime.set(currentTime.getValue());
+         transitionDurationToFall.set(transitionDuration);
+      }
    }
 
    public void handlePelvisTrajectoryCommand(PelvisTrajectoryCommand command)
@@ -183,6 +224,11 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
          euclideanTrajectory.setSequenceId(command.getSequenceId());
          statusHelper.registerNewTrajectory(euclideanTrajectory);
       }
+   }
+
+   public void setWeights(Vector3DReadOnly weight)
+   {
+      this.pelvisTaskpaceFeedbackWeight = weight;
    }
 
    @Override
@@ -207,6 +253,10 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       centerOfMassTrajectoryGenerator.solve(comHeightPartialDerivativesToPack, isInDoubleSupport);
    }
 
+   private final FramePoint3D desiredPosition = new FramePoint3D();
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
+   private final FrameVector3D desiredAcceleration = new FrameVector3D();
+   private PDGainsReadOnly gains;
    // Temporary objects to reduce garbage collection.
    private final CoMHeightPartialDerivativesDataBasics comHeightPartialDerivatives = new YoCoMHeightPartialDerivativesData(registry);
    private final FramePoint3D comPosition = new FramePoint3D();
@@ -226,25 +276,24 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private boolean desiredCMPcontainedNaN = false;
 
    @Override
-   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
-                                                     FrameVector2DReadOnly desiredCoMVelocity,
-                                                     boolean isInDoubleSupport,
-                                                     double omega0,
-                                                     boolean isRecoveringFromPush,
-                                                     FeetManager feetManager)
+   public void computeCoMHeightCommand(FrameVector2DReadOnly desiredICPVelocity,
+                                       FrameVector2DReadOnly desiredCoMVelocity,
+                                       boolean isInDoubleSupport,
+                                       double omega0,
+                                       boolean isRecoveringFromPush,
+                                       FeetManager feetManager)
    {
       solve(comHeightPartialDerivatives, isInDoubleSupport);
       statusHelper.updateWithTimeInTrajectory(centerOfMassTrajectoryGenerator.getOffsetHeightTimeInTrajectory());
 
       comPosition.setToZero(centerOfMassFrame);
-      centerOfMassJacobian.reset();
       comVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
       comPosition.changeFrame(worldFrame);
       comVelocity.changeFrame(worldFrame);
 
       double zCurrent = comPosition.getZ();
-      double zdCurrent = comVelocity.getZ();
 
+      // FIXME should we be using the desired values instead of the current values?
       if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
       {
          pelvisPosition.setToZero(pelvisFrame);
@@ -252,7 +301,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
          zCurrent = pelvisPosition.getZ();
          pelvisFrame.getTwistOfFrame(currentPelvisTwist);
          currentPelvisTwist.changeFrame(worldFrame);
-         zdCurrent = comVelocity.getZ(); // Just use com velocity for now for damping...
       }
 
       // TODO: use current omega0 instead of previous
@@ -273,7 +321,8 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       desiredComAcceleration.scale(omega0); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
 
       CoMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing,
-                                                                         desiredCoMVelocity, desiredComAcceleration,
+                                                                         desiredCoMVelocity,
+                                                                         desiredComAcceleration,
                                                                          comHeightPartialDerivatives);
 
       comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
@@ -321,26 +370,47 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       double zdDesired = finalComHeightData.getComHeightVelocity();
       double zddFeedForward = finalComHeightData.getComHeightAcceleration();
 
-      double zddDesired = centerOfMassHeightController.compute(zCurrent, zDesired, zdCurrent, zdDesired) + zddFeedForward;
+      double gainScaleFactor = 1.0;
 
-      // In a recovering context, accelerating upwards is just gonna make the robot fall faster. We should even consider letting the robot fall a bit.
-      if (isRecoveringFromPush)
-         zddDesired = Math.min(0.0, zddDesired);
+      if (!transitionToFallStartTime.isNaN())
+      {
+         double ratio = (currentTime.getValue() - transitionToFallStartTime.getValue()) / transitionDurationToFall.getValue();
+         fallActivationRatio.set(MathTools.clamp(ratio, 0.0, 1.0));
+         zddFeedForward = EuclidCoreTools.interpolate(zddFeedForward, -fallAccelerationMagnitude.getValue(), fallActivationRatio.getValue());
+         gainScaleFactor = 1.0 - fallActivationRatio.getValue();
+      }
 
-      double epsilon = 1e-12;
-      zddDesired = MathTools.clamp(zddDesired, -gravity + epsilon, Double.POSITIVE_INFINITY);
+      desiredPosition.set(0.0, 0.0, zDesired);
+      desiredVelocity.set(0.0, 0.0, zdDesired);
+      desiredAcceleration.set(0.0, 0.0, zddFeedForward);
 
-      this.zDesired.set(zDesired);
-      this.zdDesired.set(zdDesired);
-      this.zddDesired.set(zddDesired);
-
-      return zddDesired;
+      updateGains(gainScaleFactor);
+      pelvisHeightControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
+      comHeightControlCommand.setInverseDynamics(desiredPosition, desiredVelocity, desiredAcceleration);
    }
 
    @Override
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
-      return null;
+      if (controlHeightWithMomentum.getValue() || !controlPelvisHeightInsteadOfCoMHeight.getValue())
+         return null;
+      else
+         return pelvisHeightControlCommand;
+   }
+
+   @Override
+   public FeedbackControlCommand<?> getHeightControlCommand()
+   {
+      if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
+         return pelvisHeightControlCommand;
+      else
+         return comHeightControlCommand;
+   }
+
+   @Override
+   public boolean getControlHeightWithMomentum()
+   {
+      return controlHeightWithMomentum.getValue();
    }
 
    @Override
@@ -350,8 +420,24 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
    public void setGains(PDGainsReadOnly gains, DoubleProvider maximumComVelocity)
    {
-      centerOfMassHeightController.setGains(gains);
+      this.gains = gains;
       comHeightTimeDerivativesSmoother.setGains(gains, maximumComVelocity);
+   }
+
+   private final DefaultPID3DGains gainsTemp = new DefaultPID3DGains();
+
+   public void updateGains(double gainScaleFactor)
+   {
+      gainsTemp.setProportionalGains(0.0, 0.0, gainScaleFactor * gains.getKp());
+      gainsTemp.setDerivativeGains(0.0, 0.0, gainScaleFactor * gains.getKd());
+      gainsTemp.setMaxFeedbackAndFeedbackRate(gains.getMaximumFeedback(), gains.getMaximumFeedbackRate());
+
+      comHeightControlCommand.setGains(gainsTemp);
+      pelvisHeightControlCommand.setGains(gainsTemp);
+      pelvisHeightControlCommand.getGains().setMaxFeedbackAndFeedbackRate(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      pelvisHeightControlCommand.getSpatialAccelerationCommand().getWeightMatrix().setWeightFrames(null, worldFrame);
+      pelvisHeightControlCommand.getSpatialAccelerationCommand().getWeightMatrix().setAngularWeights(0.0, 0.0, 0.0);
+      pelvisHeightControlCommand.getSpatialAccelerationCommand().getWeightMatrix().getLinearPart().set(pelvisTaskpaceFeedbackWeight);
    }
 
    @Override

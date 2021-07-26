@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace.CenterOfMassFeedbackController;
@@ -47,22 +48,27 @@ public class WholeBodyFeedbackController
 
    private final WholeBodyControlCoreToolbox coreToolbox;
    private final FeedbackControllerToolbox feedbackControllerToolbox;
+   private final FeedbackControllerFactory feedbackControllerFactory;
 
    private final ExecutionTimer feedbackControllerTimer = new ExecutionTimer("wholeBodyFeedbackControllerTimer", 1.0, registry);
    private final ExecutionTimer achievedComputationTimer = new ExecutionTimer("achievedComputationTimer", 1.0, registry);
 
-   public WholeBodyFeedbackController(WholeBodyControlCoreToolbox coreToolbox, FeedbackControllerTemplate feedbackControllerTemplate,
-                                      YoRegistry parentRegistry)
+   public WholeBodyFeedbackController(WholeBodyControlCoreToolbox coreToolbox, FeedbackControllerTemplate feedbackControllerTemplate, YoRegistry parentRegistry)
    {
       this.coreToolbox = coreToolbox;
       feedbackControllerToolbox = new FeedbackControllerToolbox(coreToolbox.getFeedbackControllerSettings(), registry);
 
-      if (feedbackControllerTemplate == null)
-         return;
-
-      registerControllers(feedbackControllerTemplate);
-
-      parentRegistry.addChild(registry);
+      if (feedbackControllerTemplate != null)
+      {
+         feedbackControllerFactory = feedbackControllerTemplate.getFeedbackControllerFactory();
+         feedbackControllerFactory.configure(coreToolbox, feedbackControllerToolbox, registry);
+         registerControllers(feedbackControllerTemplate);
+         parentRegistry.addChild(registry);
+      }
+      else
+      {
+         feedbackControllerFactory = null;
+      }
    }
 
    private void registerControllers(FeedbackControllerTemplate template)
@@ -83,7 +89,7 @@ public class WholeBodyFeedbackController
 
       for (int controllerIndex = 0; controllerIndex < numberOfControllers; controllerIndex++)
       {
-         SpatialFeedbackController controller = new SpatialFeedbackController(endEffector, controllerIndex, coreToolbox, feedbackControllerToolbox, registry);
+         SpatialFeedbackController controller = feedbackControllerFactory.buildSpatialFeedbackController(endEffector, controllerIndex);
          endEffectorControllers.add(controller);
          allControllers.add(controller);
       }
@@ -96,7 +102,7 @@ public class WholeBodyFeedbackController
 
       for (int controllerIndex = 0; controllerIndex < numberOfControllers; controllerIndex++)
       {
-         PointFeedbackController controller = new PointFeedbackController(endEffector, controllerIndex, coreToolbox, feedbackControllerToolbox, registry);
+         PointFeedbackController controller = feedbackControllerFactory.buildPointFeedbackController(endEffector, controllerIndex);
          endEffectorControllers.add(controller);
          allControllers.add(controller);
       }
@@ -109,11 +115,7 @@ public class WholeBodyFeedbackController
 
       for (int controllerIndex = 0; controllerIndex < numberOfControllers; controllerIndex++)
       {
-         OrientationFeedbackController controller = new OrientationFeedbackController(endEffector,
-                                                                                      controllerIndex,
-                                                                                      coreToolbox,
-                                                                                      feedbackControllerToolbox,
-                                                                                      registry);
+         OrientationFeedbackController controller = feedbackControllerFactory.buildOrientationFeedbackController(endEffector, controllerIndex);
          endEffectorControllers.add(controller);
          allControllers.add(controller);
       }
@@ -121,14 +123,14 @@ public class WholeBodyFeedbackController
 
    private void registerOneDoFJointControllers(OneDoFJointBasics joint)
    {
-      OneDoFJointFeedbackController controller = new OneDoFJointFeedbackController(joint, coreToolbox, feedbackControllerToolbox, registry);
+      OneDoFJointFeedbackController controller = feedbackControllerFactory.buildOneDoFJointFeedbackController(joint);
       oneDoFJointFeedbackControllerMap.put(joint, controller);
       allControllers.add(controller);
    }
 
    private void registerCenterOfMassController()
    {
-      centerOfMassFeedbackController = new CenterOfMassFeedbackController(coreToolbox, feedbackControllerToolbox, registry);
+      centerOfMassFeedbackController = feedbackControllerFactory.buildCenterOfMassFeedbackController();
       allControllers.add(centerOfMassFeedbackController);
    }
 

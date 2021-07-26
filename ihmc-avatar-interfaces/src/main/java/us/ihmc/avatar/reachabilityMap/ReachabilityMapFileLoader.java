@@ -5,6 +5,7 @@ import java.awt.Frame;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.stream.Stream;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -14,8 +15,10 @@ import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import cern.colt.Arrays;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -112,15 +115,16 @@ public class ReachabilityMapFileLoader
       while (currentCell != null)
       {
          jointNames.add(currentCell.getStringCellValue());
-         currentCell = currentRow.getCell(currentIndexValue++);
+         currentIndexValue++;
+         currentCell = currentRow.getCell(currentIndexValue);
       }
 
-      JointBasics[] joints = ScrewTools.findJointsWithNames(MultiBodySystemTools.collectSubtreeJoints(rootBody), jointNames.toArray(new String[0]));
+      JointBasics[] joints = Stream.of(MultiBodySystemTools.collectSubtreeJoints(rootBody)).filter(joint -> jointNames.contains(joint.getName())).toArray(JointBasics[]::new);
       OneDoFJointBasics[] oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
       if (oneDoFJoints.length != jointNames.size())
       {
-         throw new RuntimeException("Could not find all the joints");
+         throw new RuntimeException("Could not find all the joints, expected:\n " + jointNames + "\nwas:\n" + Arrays.toString(oneDoFJoints));
       }
    }
 

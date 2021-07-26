@@ -22,7 +22,7 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 /**
  * Collision model for Atlas used for simulating shape-to-shape collisions. It is used only with
@@ -36,7 +36,7 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
  */
 public class AtlasSimulationCollisionModel implements RobotCollisionModel
 {
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
 
    private CollidableHelper helper;
    private String[] otherCollisionMasks;
@@ -44,7 +44,7 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
 
    private AtlasRobotVersion atlasRobotVersion;
 
-   public AtlasSimulationCollisionModel(DRCRobotJointMap jointMap, AtlasRobotVersion atlasRobotVersion)
+   public AtlasSimulationCollisionModel(HumanoidJointNameMap jointMap, AtlasRobotVersion atlasRobotVersion)
    {
       this.jointMap = jointMap;
       this.atlasRobotVersion = atlasRobotVersion;

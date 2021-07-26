@@ -648,6 +648,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    protected boolean initializeInternal()
    {
+      threadTimer.clear();
       userFBCommands.clear();
       previousUserFBCommands.clear();
       isUserProvidingSupportPolygon.set(false);

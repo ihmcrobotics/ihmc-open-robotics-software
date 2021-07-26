@@ -38,11 +38,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.OneDoFTrajectoryPointCalculator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -1128,8 +1128,8 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       {
          String jointName = armJoints[i].getName();
          String subTrajectory = "SubTrajectory";
-         String subTrajectoryName = jointName + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
-         String variableName = jointName + subTrajectory + "CurrentValue";
+         String subTrajectoryName = jointName + MultipleWaypointsTrajectoryGenerator.class.getSimpleName();
+         String variableName = jointName + subTrajectory + "CurrentPosition";
          YoDouble q_d = (YoDouble) scs.findVariable(subTrajectoryName, variableName);
          controllerDesiredJointPositions[i] = q_d.getDoubleValue();
       }
@@ -1143,7 +1143,7 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
       {
          String jointName = armJoints[i].getName();
          String subTrajectory = "SubTrajectory";
-         String subTrajectoryName = jointName + subTrajectory + CubicPolynomialTrajectoryGenerator.class.getSimpleName();
+         String subTrajectoryName = jointName + MultipleWaypointsTrajectoryGenerator.class.getSimpleName();
          String variableName = jointName + subTrajectory + "CurrentVelocity";
          YoDouble qd_d = (YoDouble) scs.findVariable(subTrajectoryName, variableName);
          controllerDesiredJointVelocities[i] = qd_d.getDoubleValue();

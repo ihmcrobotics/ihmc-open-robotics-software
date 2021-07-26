@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,6 +12,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.geometry.shapes.FrameSTPBox3D;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
@@ -18,13 +20,13 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
 {
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
 
-   public ValkyrieKinematicsCollisionModel(DRCRobotJointMap jointMap)
+   public ValkyrieKinematicsCollisionModel(HumanoidJointNameMap jointMap)
    {
       this.jointMap = jointMap;
    }

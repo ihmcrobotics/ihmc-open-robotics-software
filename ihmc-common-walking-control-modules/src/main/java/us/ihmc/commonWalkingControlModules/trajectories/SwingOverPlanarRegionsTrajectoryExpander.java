@@ -14,7 +14,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -139,7 +138,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix,
                                                                 steppingParameters.getMinSwingHeightFromStanceFoot(),
                                                                 steppingParameters.getMaxSwingHeightFromStanceFoot(),
-                                                                steppingParameters.getDefaultSwingHeightFromStanceFoot(), this.registry,
+                                                                steppingParameters.getDefaultSwingHeightFromStanceFoot(),
+                                                                steppingParameters.getCustomWaypointAngleThreshold(),
+                                                                this.registry,
                                                                 graphicsListRegistry);
       minimumSwingHeight = steppingParameters.getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = steppingParameters.getMaxSwingHeightFromStanceFoot();
@@ -615,9 +616,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       for (double fraction = 0.0; fraction <= 1.0; fraction += stepAmount)
       {
          twoWaypointSwingGenerator.compute(fraction);
-         FramePoint3D frameTupleUnsafe = new FramePoint3D(trajectoryPosition);
-         twoWaypointSwingGenerator.getPosition(frameTupleUnsafe);
-         trajectoryPosition.set(frameTupleUnsafe);
+         trajectoryPosition.setMatchingFrame(twoWaypointSwingGenerator.getPosition());
          solePoseReferenceFrame.setPositionAndUpdate(trajectoryPosition);
          pointOnTrajectoryToPack.set(trajectoryPosition);
 
@@ -632,7 +631,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
          for (PlanarRegion planarRegion : planarRegions)
          {
-            Point3DReadOnly closestPointOnRegion = PlanarRegionTools.closestPointOnPlane(trajectoryPosition, planarRegion);
+            Point3DReadOnly closestPointOnRegion = PlanarRegionTools.closestPointOnPlanarRegion(trajectoryPosition, planarRegion);
             updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.NO_INTERSECTION, closestPointOnRegion);
 
             if (closestPointOnRegion == null)
@@ -797,14 +796,14 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       FramePoint3D position1 = new FramePoint3D();
 
       twoWaypointSwingGenerator.compute(0.0);
-      twoWaypointSwingGenerator.getPosition(position0);
+      position0.setIncludingFrame(twoWaypointSwingGenerator.getPosition());
       double distance = 0.0;
 
       for (int i = 0; i < numberOfTrajectorySegmentsToCalculateLength; i++)
       {
          double t = ((double) (i + 1)) / (numberOfTrajectorySegmentsToCalculateLength);
          twoWaypointSwingGenerator.compute(t);
-         twoWaypointSwingGenerator.getPosition(position1);
+         position1.setIncludingFrame(twoWaypointSwingGenerator.getPosition());
          distance += position0.distance(position1);
          position0.set(position1);
       }

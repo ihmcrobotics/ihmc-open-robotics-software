@@ -17,6 +17,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commons.thread.ThreadTools;
@@ -292,7 +293,7 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       }
 
       String currentIndexName = prefix + "CurrentWaypointIndex";
-      String swingStateNamespace = sidePrefix + FootControlModule.class.getSimpleName();
+      String swingStateNamespace = sidePrefix + "FootSwing" + SwingTrajectoryCalculator.class.getSimpleName();
       String typeName = sidePrefix + "FootSwing" + TrajectoryType.class.getSimpleName();
 
       @SuppressWarnings("unchecked")

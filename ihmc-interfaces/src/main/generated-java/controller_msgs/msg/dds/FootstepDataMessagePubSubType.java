@@ -57,20 +57,12 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (2 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 12; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 12; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -149,18 +141,6 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -185,11 +165,11 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       cdr.write_type_e(data.getCustomWaypointProportions());else
           throw new RuntimeException("custom_waypoint_proportions field exceeds the maximum length");
 
-      if(data.getCustomPositionWaypoints().size() <= 10)
+      if(data.getCustomPositionWaypoints().size() <= 12)
       cdr.write_type_e(data.getCustomPositionWaypoints());else
           throw new RuntimeException("custom_position_waypoints field exceeds the maximum length");
 
-      if(data.getSwingTrajectory().size() <= 10)
+      if(data.getSwingTrajectory().size() <= 12)
       cdr.write_type_e(data.getSwingTrajectory());else
           throw new RuntimeException("swing_trajectory field exceeds the maximum length");
 
@@ -200,14 +180,6 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       cdr.write_type_6(data.getTransferDuration());
 
       cdr.write_type_6(data.getExecutionDelayTime());
-
-      cdr.write_type_6(data.getSwingDurationShiftFraction());
-
-      cdr.write_type_6(data.getSwingSplitFraction());
-
-      cdr.write_type_6(data.getTransferSplitFraction());
-
-      cdr.write_type_6(data.getTransferWeightDistribution());
 
       cdr.write_type_6(data.getTouchdownDuration());
 
@@ -239,14 +211,6 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       	
       data.setExecutionDelayTime(cdr.read_type_6());
       	
-      data.setSwingDurationShiftFraction(cdr.read_type_6());
-      	
-      data.setSwingSplitFraction(cdr.read_type_6());
-      	
-      data.setTransferSplitFraction(cdr.read_type_6());
-      	
-      data.setTransferWeightDistribution(cdr.read_type_6());
-      	
       data.setTouchdownDuration(cdr.read_type_6());
       	
       data.setLiftoffDuration(cdr.read_type_6());
@@ -273,10 +237,6 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       ser.write_type_6("swing_duration", data.getSwingDuration());
       ser.write_type_6("transfer_duration", data.getTransferDuration());
       ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
-      ser.write_type_6("swing_duration_shift_fraction", data.getSwingDurationShiftFraction());
-      ser.write_type_6("swing_split_fraction", data.getSwingSplitFraction());
-      ser.write_type_6("transfer_split_fraction", data.getTransferSplitFraction());
-      ser.write_type_6("transfer_weight_distribution", data.getTransferWeightDistribution());
       ser.write_type_6("touchdown_duration", data.getTouchdownDuration());
       ser.write_type_6("liftoff_duration", data.getLiftoffDuration());
    }
@@ -300,10 +260,6 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       data.setSwingDuration(ser.read_type_6("swing_duration"));
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
       data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
-      data.setSwingDurationShiftFraction(ser.read_type_6("swing_duration_shift_fraction"));
-      data.setSwingSplitFraction(ser.read_type_6("swing_split_fraction"));
-      data.setTransferSplitFraction(ser.read_type_6("transfer_split_fraction"));
-      data.setTransferWeightDistribution(ser.read_type_6("transfer_weight_distribution"));
       data.setTouchdownDuration(ser.read_type_6("touchdown_duration"));
       data.setLiftoffDuration(ser.read_type_6("liftoff_duration"));
    }

@@ -9,7 +9,6 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
-import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
 import us.ihmc.simpleWholeBodyWalking.SimpleWalkingControllerStateFactory;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
@@ -68,7 +67,7 @@ public class SimpleAtlasFlatGroundWalkingTrack
                                     cheatWithGroundHeightAtForFootstep,
                                     model,
                                     walkingScriptParameters,
-                                    new SimpleWalkingControllerStateFactory(model.getCapturePointPlannerParameters()));
+                                    new SimpleWalkingControllerStateFactory());
    }
 
 }
