@@ -501,7 +501,7 @@ public class LinearMPCQPSolverTest
       VRPTrackingCommand startVRPCommand = new VRPTrackingCommand();
       startVRPCommand.setSegmentNumber(0);
       startVRPCommand.setOmega(omega);
-      startVRPCommand.setSegmentDuration(firstSegmentDuration);
+      startVRPCommand.setTimeInterval(0.0, firstSegmentDuration);
       startVRPCommand.setWeight(MPCParameters.defaultVrpTrackingWeight);
       startVRPCommand.setStartVRP(startPosition);
       startVRPCommand.setEndVRP(startPosition);
@@ -510,7 +510,7 @@ public class LinearMPCQPSolverTest
       VRPTrackingCommand endVRPCommand = new VRPTrackingCommand();
       endVRPCommand.setSegmentNumber(2);
       endVRPCommand.setOmega(omega);
-      endVRPCommand.setSegmentDuration(thirdSegmentDuration);
+      endVRPCommand.setTimeInterval(0.0, thirdSegmentDuration);
       endVRPCommand.setWeight(MPCParameters.defaultVrpTrackingWeight);
       endVRPCommand.setStartVRP(endPosition);
       endVRPCommand.setEndVRP(endPosition);
@@ -788,7 +788,7 @@ public class LinearMPCQPSolverTest
       VRPTrackingCommand startVRPCommand = new VRPTrackingCommand();
       startVRPCommand.setSegmentNumber(0);
       startVRPCommand.setOmega(omega);
-      startVRPCommand.setSegmentDuration(firstSegmentDuration);
+      startVRPCommand.setTimeInterval(0.0, firstSegmentDuration);
       startVRPCommand.setWeight(MPCParameters.defaultVrpTrackingWeight);
       startVRPCommand.setStartVRP(startPosition);
       startVRPCommand.setEndVRP(startPosition);
@@ -798,7 +798,7 @@ public class LinearMPCQPSolverTest
       VRPTrackingCommand endVRPCommand = new VRPTrackingCommand();
       endVRPCommand.setSegmentNumber(2);
       endVRPCommand.setOmega(omega);
-      endVRPCommand.setSegmentDuration(thirdSegmentDuration);
+      endVRPCommand.setTimeInterval(0.0, thirdSegmentDuration);
       endVRPCommand.setWeight(MPCParameters.defaultVrpTrackingWeight);
       endVRPCommand.setStartVRP(endPosition);
       endVRPCommand.setEndVRP(endPosition);

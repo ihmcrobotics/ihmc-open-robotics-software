@@ -8,8 +8,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.robotics.time.TimeIntervalBasics;
-import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 
 import java.util.ArrayList;
@@ -45,7 +43,7 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
          ContactStateBasics<?> contact = other.getContactPhase(i);
          addContactPhaseInSegment(contact, contact.getTimeInterval().getStartTime(), contact.getTimeInterval().getEndTime());
       }
-      for (int i = 0; i < other.getNumberOfContacts(); i++)
+      for (int i = 0; i < other.getNumberOfContactPlanes(); i++)
          addContact(other.getContactPose(i), other.getContactsInBodyFrame(i));
    }
 
@@ -58,6 +56,11 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
          addContact(other.getContactPose(i), other.getContactsInBodyFrame(i));
    }
 
+   public void setContactState(ContactState contactState)
+   {
+      this.contactState = contactState;
+   }
+
    public void addContactPhaseInSegment(ContactStateBasics<?> contactPhase, double startTime, double endTime)
    {
       if (contactState != null)
@@ -66,6 +69,7 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
       SettableContactStateProvider newContact = contactPhasesInSegment.add();
       newContact.set(contactPhase);
       newContact.getTimeInterval().setInterval(startTime, endTime);
+      contactState = contactPhase.getContactState();
       totalDuration += endTime - startTime;
    }
 
@@ -141,7 +145,7 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
       return contactPhasesInSegment.getLast().getTimeInterval().getEndTime();
    }
 
-   public int getNumberOfContacts()
+   public int getNumberOfContactPlanes()
    {
       return contactPointsInBodyFrame.size();
    }
@@ -180,10 +184,10 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
       if (segmentA.getContactState() == ContactState.FLIGHT)
          return true;
 
-      if (segmentA.getNumberOfContacts() != segmentB.getNumberOfContacts())
+      if (segmentA.getNumberOfContactPlanes() != segmentB.getNumberOfContactPlanes())
          return false;
 
-      for (int i = 0; i < segmentA.getNumberOfContacts(); i++)
+      for (int i = 0; i < segmentA.getNumberOfContactPlanes(); i++)
       {
          if (segmentA.getContactsInBodyFrame(i).getNumberOfVertices() != segmentB.getContactsInBodyFrame(i).getNumberOfVertices())
             return false;
