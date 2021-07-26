@@ -5,11 +5,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalShadowLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import com.badlogic.gdx.graphics.g3d.utils.DepthShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Vector3;
@@ -19,12 +15,12 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.GDXInputMode;
-import us.ihmc.gdx.lighting.GDXDirectionalLight;
 import us.ihmc.gdx.lighting.GDXPointLight;
 import us.ihmc.gdx.lighting.GDXSceneShader;
 import us.ihmc.gdx.lighting.GDXShadowManager;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.log.LogTools;
 
 import java.nio.IntBuffer;
@@ -94,7 +90,7 @@ public class GDX3DSceneManager
          }
       });
 
-      shadowManager = new GDXShadowManager();
+      shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING);
 
       shadowManager.addLight(new GDXPointLight(new Vector3(5, 5, 5)));
 

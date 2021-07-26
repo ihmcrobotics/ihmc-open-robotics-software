@@ -13,6 +13,7 @@ uniform sampler2D u_diffuseTexture;
 uniform sampler2D u_shadows;
 uniform float u_screenWidth;
 uniform float u_screenHeight;
+uniform float u_antiAliasing;
 
 varying vec2 v_texCoords0;
 varying float v_intensity;
@@ -24,7 +25,7 @@ void main()
 
     // Retrieve the shadow color from shadow map
     vec2 c= gl_FragCoord.xy;
-    c /= 2.0; //DYNAMICALLY PASS THIS VALUE!!!!!!!!!!!
+    c /= u_antiAliasing;
     c.x/=u_screenWidth;
     c.y/=u_screenHeight;
     vec4 color=texture2D(u_shadows,c);
