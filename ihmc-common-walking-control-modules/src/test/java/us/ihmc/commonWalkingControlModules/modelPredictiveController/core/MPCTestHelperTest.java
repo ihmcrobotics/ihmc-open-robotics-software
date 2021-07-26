@@ -55,7 +55,7 @@ public class MPCTestHelperTest
 
       contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      indexHandler.initialize(contactProviders);
+      indexHandler.initialize((i) -> contactPolygon.getNumberOfVertices(), 1);
 
       Random random = new Random(1738L);
       for (int iter = 0; iter < 1000; iter++)

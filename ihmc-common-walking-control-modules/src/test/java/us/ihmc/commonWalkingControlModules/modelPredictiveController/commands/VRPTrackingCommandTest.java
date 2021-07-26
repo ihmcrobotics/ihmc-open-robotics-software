@@ -57,7 +57,7 @@ public class VRPTrackingCommandTest
       VRPTrackingCommand command = new VRPTrackingCommand();
       command.setStartVRP(startVRP);
       command.setEndVRP(endVRP);
-      command.setSegmentDuration(duration);
+      command.setTimeInterval(0.0, duration);
       command.setSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(10.0);
@@ -173,7 +173,7 @@ public class VRPTrackingCommandTest
       command.setEndVRP(endVRP);
       command.setStartVRPVelocity(startVRPVelocity);
       command.setEndVRPVelocity(endVRPVelocity);
-      command.setSegmentDuration(duration);
+      command.setTimeInterval(0.0, duration);
       command.setSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(10.0);

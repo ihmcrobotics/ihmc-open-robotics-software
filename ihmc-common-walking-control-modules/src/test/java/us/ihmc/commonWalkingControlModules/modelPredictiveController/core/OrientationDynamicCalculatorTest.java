@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -57,7 +58,7 @@ public class OrientationDynamicCalculatorTest
 
       MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D contactPose = new FramePose3D();
@@ -70,7 +71,10 @@ public class OrientationDynamicCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
@@ -143,7 +147,7 @@ public class OrientationDynamicCalculatorTest
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D leftContactPose = new FramePose3D();
@@ -161,7 +165,10 @@ public class OrientationDynamicCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
@@ -241,7 +248,7 @@ public class OrientationDynamicCalculatorTest
 
       MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
@@ -256,7 +263,10 @@ public class OrientationDynamicCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
@@ -342,14 +352,17 @@ public class OrientationDynamicCalculatorTest
       double orientationPreviewWindowLength = 0.75;
       double tickDuration = 0.1;
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
@@ -423,7 +436,7 @@ public class OrientationDynamicCalculatorTest
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D leftContactPose = new FramePose3D();
@@ -441,7 +454,10 @@ public class OrientationDynamicCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
@@ -582,7 +598,7 @@ public class OrientationDynamicCalculatorTest
       FrameVector3D desiredCoMAcceleration = new FrameVector3D(desiredCoMPosition);
       desiredCoMAcceleration.setZ(gravityZ);
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2D contactPolygon = new ConvexPolygon2D();
       contactPolygon.addVertex(desiredCoMPosition);
       contactPolygon.addVertex(desiredCoMPosition);
@@ -600,7 +616,10 @@ public class OrientationDynamicCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
@@ -695,7 +714,7 @@ public class OrientationDynamicCalculatorTest
 
       MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
@@ -710,7 +729,10 @@ public class OrientationDynamicCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
@@ -799,7 +821,7 @@ public class OrientationDynamicCalculatorTest
 
       MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D contactPose = new FramePose3D();
@@ -812,7 +834,10 @@ public class OrientationDynamicCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
@@ -900,7 +925,7 @@ public class OrientationDynamicCalculatorTest
 
       MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D contactPose = new FramePose3D();
@@ -913,7 +938,10 @@ public class OrientationDynamicCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
@@ -1001,7 +1029,7 @@ public class OrientationDynamicCalculatorTest
 
       MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
@@ -1016,7 +1044,10 @@ public class OrientationDynamicCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
@@ -1094,7 +1125,7 @@ public class OrientationDynamicCalculatorTest
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
@@ -1114,7 +1145,10 @@ public class OrientationDynamicCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
+
+      contactProviders.add(segment);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);

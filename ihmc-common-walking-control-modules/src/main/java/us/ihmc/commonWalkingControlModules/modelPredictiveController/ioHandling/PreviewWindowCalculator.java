@@ -102,7 +102,9 @@ public class PreviewWindowCalculator
       {
          ContactPlaneProvider contact = fullContactSequence.get(i);
 
-         previewWindowContacts.add().addContactPhaseInSegment(contact, contact.getTimeInterval().getStartTime(), contact.getTimeInterval().getEndTime());
+         PreviewWindowSegment segment = previewWindowContacts.add();
+         segment.reset();
+         segment.addContactPhaseInSegment(contact, contact.getTimeInterval().getStartTime(), contact.getTimeInterval().getEndTime());
          horizonDuration += contact.getTimeInterval().getDuration();
 
          if (contact.getContactState().isLoadBearing() && (horizonDuration >= maximumPreviewWindowDuration.getDoubleValue()
@@ -135,7 +137,7 @@ public class PreviewWindowCalculator
          double oldEndTime = lastPhase.getTimeInterval().getEndTime();
          double newEndTime = alpha * lastPhase.getTimeInterval().getDuration() + startTime;
          trimmedFinalSegment.addContactPhaseInSegment(lastPhase, newEndTime, oldEndTime);
-         for (int i = 0; i < lastSegment.getNumberOfContacts(); i++)
+         for (int i = 0; i < lastSegment.getNumberOfContactPlanes(); i++)
             trimmedFinalSegment.addContact(lastSegment.getContactPose(i), lastSegment.getContactsInBodyFrame(i));
          contactSegmentHelper.cubicInterpolateStartOfSegment(trimmedFinalSegment.getContactPhase(0), alpha);
          contactSegmentHelper.cubicInterpolateEndOfSegment(lastPhase, alpha);
@@ -230,7 +232,7 @@ public class PreviewWindowCalculator
       planeProviderToPack.setEndECMPPosition(segment.getContactPhase(lastId).getECMPEndPosition());
       planeProviderToPack.setEndECMPVelocity(segment.getContactPhase(lastId).getECMPEndVelocity());
 
-      for (int i = 0; i < segment.getNumberOfContacts(); i++)
+      for (int i = 0; i < segment.getNumberOfContactPlanes(); i++)
          planeProviderToPack.addContact(segment.getContactPose(i), segment.getContactsInBodyFrame(i));
    }
 }

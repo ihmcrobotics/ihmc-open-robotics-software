@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -46,8 +47,12 @@ public class LQRJumpMomentumControllerTest
 
       List<SettableContactStateProvider> contactStates = new ArrayList<>();
       contactStates.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.addContactPhaseInSegment(contact, contact.getTimeInterval().getStartTime(), contact.getTimeInterval().getEndTime());
+      List<PreviewWindowSegment> contactSegments = new ArrayList<>();
+      contactSegments.add(segment);
 
-      controller.setVRPTrajectory(trajectories, contactStates);
+      controller.setVRPTrajectory(trajectories, contactSegments);
 
       DMatrixRMaj AExpected = new DMatrixRMaj(6, 6);
       AExpected.set(0, 3, 1.0);
@@ -228,14 +233,25 @@ public class LQRJumpMomentumControllerTest
       contact3.getTimeInterval().setInterval(startTime, startTime + contactDuration);
       contact3.setContactState(ContactState.IN_CONTACT);
 
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      PreviewWindowSegment segment2 = new PreviewWindowSegment();
+      PreviewWindowSegment segment3 = new PreviewWindowSegment();
+      segment1.addContactPhaseInSegment(contact1, contact1.getTimeInterval().getStartTime(), contact1.getTimeInterval().getEndTime());
+      segment2.addContactPhaseInSegment(contact2, contact2.getTimeInterval().getStartTime(), contact2.getTimeInterval().getEndTime());
+      segment3.addContactPhaseInSegment(contact3, contact3.getTimeInterval().getStartTime(), contact3.getTimeInterval().getEndTime());
+
       List<SettableContactStateProvider> contactStates = new ArrayList<>();
       contactStates.add(contact1);
       contactStates.add(contact2);
       contactStates.add(contact3);
+      List<PreviewWindowSegment> segments = new ArrayList<>();
+      segments.add(segment1);
+      segments.add(segment2);
+      segments.add(segment3);
 
       coMTrajectoryPlanner.solveForTrajectory(contactStates);
 
-      controller.setVRPTrajectory(coMTrajectoryPlanner.getVRPTrajectories(), contactStates);
+      controller.setVRPTrajectory(coMTrajectoryPlanner.getVRPTrajectories(), segments);
       controller.computeS1Segments();
       controller.computeS2Segments();
 

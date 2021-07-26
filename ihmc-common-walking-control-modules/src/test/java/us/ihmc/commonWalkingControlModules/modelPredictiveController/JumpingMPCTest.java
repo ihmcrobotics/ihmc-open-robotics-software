@@ -308,7 +308,7 @@ public class JumpingMPCTest
          List<MPCContactPlane> contactPlanesInCurrentSegment = mpc.contactHandler.getContactPlanesForSegment(currentSegmentNumber);
          List<MPCContactPlane> contactPlanesInNextSegment = mpc.contactHandler.getContactPlanesForSegment(nextSegmentNumber);
 
-         double currentSegmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(currentSegmentNumber).getTimeInterval().getDuration();
+         double currentSegmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(currentSegmentNumber).getDuration();
 
          // Position continuity constraint
          {
@@ -450,7 +450,7 @@ public class JumpingMPCTest
       if (MPCParameters.includeFinalCoMPositionObjective && MPCParameters.finalCoMPositionConstraintType == ConstraintType.EQUALITY)
       {
          int segmentNumber = mpc.previewWindowCalculator.getPlanningWindow().size() - 1;
-         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getTimeInterval().getDuration();
+         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getDuration();
          DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
          List<MPCContactPlane> contactPlanes = mpc.contactHandler.getContactPlanesForSegment(segmentNumber);
          CoMCoefficientJacobianCalculator.calculateCoMJacobian(indexHandler.getComCoefficientStartIndex(segmentNumber), segmentDuration, tempJacobian, 0, 1.0);
@@ -471,7 +471,7 @@ public class JumpingMPCTest
       if (MPCParameters.includeFinalCoMVelocityObjective && MPCParameters.finalCoMVelocityConstraintType == ConstraintType.EQUALITY)
       {
          int segmentNumber = mpc.previewWindowCalculator.getPlanningWindow().size() - 1;
-         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getTimeInterval().getDuration();
+         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getDuration();
          DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
 
          List<MPCContactPlane> contactPlanes = mpc.contactHandler.getContactPlanesForSegment(segmentNumber);
@@ -493,7 +493,7 @@ public class JumpingMPCTest
       if (MPCParameters.includeFinalDCMPositionObjective && MPCParameters.finalDCMPositionConstraintType == ConstraintType.EQUALITY)
       {
          int segmentNumber = mpc.previewWindowCalculator.getPlanningWindow().size() - 1;
-         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getTimeInterval().getDuration();
+         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getDuration();
          DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
 
          List<MPCContactPlane> contactPlanes = mpc.contactHandler.getContactPlanesForSegment(segmentNumber);
@@ -521,7 +521,7 @@ public class JumpingMPCTest
       if (MPCParameters.finalVRPPositionConstraintType == ConstraintType.EQUALITY)
       {
          int segmentNumber = mpc.previewWindowCalculator.getPlanningWindow().size() - 1;
-         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getTimeInterval().getDuration();
+         double segmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(segmentNumber).getDuration();
          DMatrixRMaj tempJacobian = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
 
          List<MPCContactPlane> contactPlanes = mpc.contactHandler.getContactPlanesForSegment(segmentNumber);
