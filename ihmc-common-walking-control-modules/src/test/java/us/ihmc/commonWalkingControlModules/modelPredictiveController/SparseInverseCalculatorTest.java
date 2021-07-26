@@ -120,7 +120,7 @@ public class SparseInverseCalculatorTest
 
       solver.addValueRegularization();
 
-      DMatrixRMaj hessian = new DMatrixRMaj(solver.solverInput_H);
+      DMatrixRMaj hessian = new DMatrixRMaj(solver.qpSolver.costQuadraticMatrix);
 
       // check that it's block diagonal
       for (int row = 0; row < indexHandler.getComCoefficientStartIndex(1); row++)
