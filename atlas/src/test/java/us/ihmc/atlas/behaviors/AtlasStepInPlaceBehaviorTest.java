@@ -4,10 +4,11 @@ import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.dynamicsSimulation.HumanoidDynamicsSimulation;
 import us.ihmc.avatar.factory.AvatarSimulation;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.StepInPlaceBehavior;
+import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.behaviors.BehaviorRegistry;
+import us.ihmc.behaviors.StepInPlaceBehavior;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -63,7 +64,7 @@ public class AtlasStepInPlaceBehaviorTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-      SimulationConstructionSet scs = AtlasDynamicsSimulation.createForAutomatedTest(robotModel, new FlatGroundEnvironment()).getSimulationConstructionSet();
+      SimulationConstructionSet scs = HumanoidDynamicsSimulation.createForAutomatedTest(robotModel, new FlatGroundEnvironment()).getSimulationConstructionSet();
       variables = new AtlasBehaviorTestYoVariables(scs);
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

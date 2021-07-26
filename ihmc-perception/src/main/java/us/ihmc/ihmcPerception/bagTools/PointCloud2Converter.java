@@ -6,6 +6,7 @@ import sensor_msgs.msg.dds.PointCloud2;
 import sensor_msgs.msg.dds.PointCloud2PubSubType;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Node;
@@ -107,7 +108,7 @@ public class PointCloud2Converter
 
             LidarScanMessage message = new LidarScanMessage();
             message.setSequenceId(counter.getAndIncrement());
-            message.getScan().add(points);
+            LidarPointCloudCompression.compressPointCloud(points.length, message, (pointIndex, coordinateIndex) -> points[3 * pointIndex + coordinateIndex]);
             messageList.add(message);
          }
 

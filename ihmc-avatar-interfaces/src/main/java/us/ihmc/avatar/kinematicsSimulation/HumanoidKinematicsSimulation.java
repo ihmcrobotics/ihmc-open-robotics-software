@@ -3,9 +3,9 @@ package us.ihmc.avatar.kinematicsSimulation;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -13,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreTo
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -37,6 +38,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -56,7 +58,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -75,14 +76,13 @@ import java.util.stream.Collectors;
 
 public class HumanoidKinematicsSimulation
 {
-   private static final double PLAYBACK_SPEED_MULTIPLIER = 10.0;
-   private static final double DT = UnitConversions.hertzToSeconds(70);
-   private static final double UPDATE_PERIOD = DT / PLAYBACK_SPEED_MULTIPLIER;
    private static final double GRAVITY_Z = 9.81;
+   private static final double LIDAR_SPINDLE_SPEED = 2.5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final HumanoidKinematicsSimulationParameters kinematicsSimulationParameters;
    private final PausablePeriodicThread controlThread;
    private final ROS2Node ros2Node;
+   private final RealtimeROS2Node realtimeROS2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -183,22 +183,18 @@ public class HumanoidKinematicsSimulation
                                                                  GRAVITY_Z,
                                                                  robotModel.getWalkingControllerParameters().getOmega0(),
                                                                  feet,
-                                                                 DT,
+                                                                 kinematicsSimulationParameters.getDt(),
                                                                  Collections.emptyList(),
                                                                  allContactableBodies,
                                                                  yoGraphicsListRegistry,
                                                                  jointsToIgnore);
       humanoidHighLevelControllerManagerRegistry.addChild(controllerToolbox.getYoVariableRegistry());
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(walkingControllerParameters.getDefaultTransferTime(),
                                                                               walkingControllerParameters.getDefaultSwingTime(),
                                                                               walkingControllerParameters.getDefaultInitialTransferTime(),
                                                                               walkingControllerParameters.getDefaultFinalTransferTime(),
-                                                                              capturePointPlannerParameters.getSwingDurationShiftFraction(),
-                                                                              capturePointPlannerParameters.getSwingSplitFraction(),
-                                                                              capturePointPlannerParameters.getTransferSplitFraction(),
-                                                                              capturePointPlannerParameters.getTransferSplitFraction(),
                                                                               controllerToolbox.getContactableFeet(),
                                                                               walkingOutputManager,
                                                                               yoTime,
@@ -218,7 +214,7 @@ public class HumanoidKinematicsSimulation
 
       managerFactory = new HighLevelControlManagerFactory(managerParentRegistry);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
-      managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
+      managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
 
       walkingController = new WalkingHighLevelHumanoidController(walkingInputManager,
@@ -229,15 +225,14 @@ public class HumanoidKinematicsSimulation
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
-      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(kinematicsSimulationParameters.getPubSubImplementation(),
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(kinematicsSimulationParameters.getPubSubImplementation(),
                                                                            ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
       ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
       ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
                                                                                                 walkingInputManager,
                                                                                                 outputTopic,
-                                                                                                walkingOutputManager,
-                                                                                                realtimeROS2Node);
+                                                                                                walkingOutputManager, realtimeROS2Node);
       controllerNetworkSubscriber.addMessageFilter(message ->
       {
          if (message instanceof FootstepDataListMessage)
@@ -255,7 +250,7 @@ public class HumanoidKinematicsSimulation
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
       realtimeROS2Node.spin();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(DT,
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters.getDt(),
                                                                                        GRAVITY_Z,
                                                                                        fullRobotModel.getRootJoint(),
                                                                                        controllerToolbox.getControlledJoints(),
@@ -277,7 +272,6 @@ public class HumanoidKinematicsSimulation
                                                                             controllerToolbox.getContactableFeet(),
                                                                             fullRobotModel.getElevator(),
                                                                             walkingControllerParameters,
-                                                                            controllerToolbox.getYoTime(),
                                                                             GRAVITY_Z,
                                                                             controllerToolbox.getControlDT(),
                                                                             walkingParentRegistry,
@@ -295,22 +289,13 @@ public class HumanoidKinematicsSimulation
       if (kinematicsSimulationParameters.getLogToFile())
       {
          Path incomingLogsDirectory;
-         if (kinematicsSimulationParameters.getIncomingLogsDirectory() == null)
-         {
-            incomingLogsDirectory = IntraprocessYoVariableLogger.DEFAULT_INCOMING_LOGS_DIRECTORY;
-         }
-         else
-         {
-            incomingLogsDirectory = kinematicsSimulationParameters.getIncomingLogsDirectory();
-         }
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          registry,
                                                                          fullRobotModel.getElevator(),
                                                                          yoGraphicsListRegistry,
                                                                          100000,
-                                                                         0.01,
-                                                                         incomingLogsDirectory);
+                                                                         0.01);
          intraprocessYoVariableLogger.start();
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())
@@ -326,7 +311,7 @@ public class HumanoidKinematicsSimulation
       initialize();
 
       monotonicTimer.start();
-      controlThread = new PausablePeriodicThread(getClass().getSimpleName(), UPDATE_PERIOD, 5, this::controllerTick);
+      controlThread = new PausablePeriodicThread(getClass().getSimpleName(), kinematicsSimulationParameters.getUpdatePeriod(), 5, this::controllerTick);
       controlThread.start();
    }
 
@@ -357,7 +342,7 @@ public class HumanoidKinematicsSimulation
 
    public void doControl()
    {
-      yoTime.add(DT);
+      yoTime.add(kinematicsSimulationParameters.getDt());
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
       controllerToolbox.update();
@@ -403,8 +388,16 @@ public class HumanoidKinematicsSimulation
          joint.setQdd(jointDesiredOutput.getDesiredAcceleration());
       }
 
-      integrator.setIntegrationDT(DT);
+      integrator.setIntegrationDT(kinematicsSimulationParameters.getDt());
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
+
+      // spin lidar
+      JointBasics hokuyoJoint = fullRobotModel.getLidarJoint("head_hokuyo_sensor");
+      if (hokuyoJoint instanceof RevoluteJoint)
+      {
+         RevoluteJoint revoluteHokuyoJoint = (RevoluteJoint) hokuyoJoint;
+         revoluteHokuyoJoint.setQ(revoluteHokuyoJoint.getQ() + LIDAR_SPINDLE_SPEED * kinematicsSimulationParameters.getUpdatePeriod());
+      }
 
       yoVariableServerTime += Conversions.millisecondsToSeconds(1);
       if (kinematicsSimulationParameters.getLogToFile())
@@ -471,8 +464,9 @@ public class HumanoidKinematicsSimulation
    public void destroy()
    {
       LogTools.info("Shutting down...");
-      controlThread.stop();
+      controlThread.destroy();
       ros2Node.destroy();
+      realtimeROS2Node.destroy();
       if (yoVariableServer != null)
          yoVariableServer.close();
    }

@@ -4,7 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.Set;
+
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -12,6 +17,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
@@ -22,6 +29,7 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorReaderFactory
@@ -46,10 +54,11 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    }
 
    @Override
-   public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
+   public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
                      JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoRegistry parentRegistry)
    {
       List<Joint> rootJoints = robot.getRootJoints();
+
       if (rootJoints.size() > 1)
       {
          throw new RuntimeException("Robot has more than 1 rootJoint");
@@ -59,26 +68,90 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       if (!(scsRootJoint instanceof FloatingJoint))
          throw new RuntimeException("Not FloatingJoint rootjoint found");
 
-      SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap = SCSToInverseDynamicsJointMap.createByName((FloatingJoint) scsRootJoint, rootJoint);
-      StateEstimatorSensorDefinitionsFromRobotFactory stateEstimatorSensorDefinitionsFromRobotFactory = new StateEstimatorSensorDefinitionsFromRobotFactory(scsToInverseDynamicsJointMap,
-                                                                                                                                                            imuMounts,
-                                                                                                                                                            groundContactPointBasedWrenchCalculators,
-                                                                                                                                                            imuDefinition,
-                                                                                                                                                            forceSensorDefinitions);
+      stateEstimatorSensorDefinitions = new StateEstimatorSensorDefinitions();
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootJoint.getPredecessor()).forEach(stateEstimatorSensorDefinitions::addJointSensorDefinition);
+      for (IMUDefinition imuDefinition : imuDefinitions)
+      {
+         stateEstimatorSensorDefinitions.addIMUSensorDefinition(imuDefinition);
+      }
+      for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
+      {
+         stateEstimatorSensorDefinitions.addForceSensorDefinition(forceSensorDefinition);
+      }
 
-      this.stateEstimatorSensorDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getStateEstimatorSensorDefinitions();
-      Map<IMUMount, IMUDefinition> imuDefinitions = stateEstimatorSensorDefinitionsFromRobotFactory.getIMUDefinitions();
-      Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensors = stateEstimatorSensorDefinitionsFromRobotFactory.getForceSensorDefinitions();
-      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(stateEstimatorSensorDefinitions, sensorProcessingConfiguration,
-                                                                               robot.getYoTime(), registry);
+      this.simulatedSensorHolderAndReader = new SimulatedSensorHolderAndReader(stateEstimatorSensorDefinitions,
+                                                                               sensorProcessingConfiguration,
+                                                                               robot.getYoTime(),
+                                                                               registry);
 
-      createAndAddOrientationSensors(imuDefinitions, registry);
-      createAndAddAngularVelocitySensors(imuDefinitions, registry);
-      createAndAddForceSensors(forceSensors, registry);
-      createAndAddLinearAccelerationSensors(imuDefinitions, registry);
-      createAndAddOneDoFPositionAndVelocitySensors(scsToInverseDynamicsJointMap);
+      SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootJoint.getPredecessor()).forEach(joint ->
+      {
+         final DoubleProvider position, velocity, tau;
+
+         if (joint instanceof InvertedFourBarJoint)
+         {
+            InvertedFourBarJoint fourBarJoint = (InvertedFourBarJoint) joint;
+            OneDegreeOfFreedomJoint scsJointA = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointA().getName());
+            OneDegreeOfFreedomJoint scsJointB = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointB().getName());
+            OneDegreeOfFreedomJoint scsJointC = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointC().getName());
+            OneDegreeOfFreedomJoint scsJointD = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointD().getName());
+
+            if (scsJointA != null && scsJointD != null)
+            {
+               position = () -> scsJointA.getQ() + scsJointD.getQ();
+               velocity = () -> scsJointA.getQD() + scsJointD.getQD();
+               tau = () ->
+               {
+                  // This is inaccurate as the Jacobian should be updated with the most recent position, but it shouldn't matter.
+                  DMatrixRMaj loopJacobian = fourBarJoint.getFourBarFunction().getLoopJacobian();
+                  return loopJacobian.get(0) * scsJointA.getTau() + loopJacobian.get(3) * scsJointD.getTau();
+               };
+            }
+            else
+            {
+               position = () -> scsJointB.getQ() + scsJointC.getQ();
+               velocity = () -> scsJointB.getQD() + scsJointC.getQD();
+               tau = () ->
+               {
+                  // This is inaccurate as the Jacobian should be updated with the most recent position, but it shouldn't matter.
+                  DMatrixRMaj loopJacobian = fourBarJoint.getFourBarFunction().getLoopJacobian();
+                  return loopJacobian.get(1) * scsJointB.getTau() + loopJacobian.get(2) * scsJointC.getTau();
+               };
+            }
+         }
+         else
+         {
+            OneDegreeOfFreedomJoint scsJoint = (OneDegreeOfFreedomJoint) robot.getJoint(joint.getName());
+            position = scsJoint.getQYoVariable();
+            velocity = scsJoint.getQDYoVariable();
+            tau = scsJoint.getTauYoVariable();
+         }
+
+         simulatedSensorHolderAndReader.addJointPositionSensorPort(joint, position);
+         simulatedSensorHolderAndReader.addJointVelocitySensorPort(joint, velocity);
+         simulatedSensorHolderAndReader.addJointTorqueSensorPort(joint, tau);
+      });
+
+      Map<IMUMount, IMUDefinition> imuSensorMap = Stream.of(imuDefinitions).collect(Collectors.toMap(def -> findIMUMount(def.getName()), Function.identity()));
+      Map<WrenchCalculatorInterface, ForceSensorDefinition> wrenchSensorMap = Stream.of(forceSensorDefinitions)
+                                                                                    .collect(Collectors.toMap(def -> findWrenchSensor(def.getSensorName()),
+                                                                                                              Function.identity()));
+      createAndAddOrientationSensors(imuSensorMap, registry);
+      createAndAddAngularVelocitySensors(imuSensorMap, registry);
+      createAndAddLinearAccelerationSensors(imuSensorMap, registry);
+      createAndAddForceSensors(wrenchSensorMap, registry);
 
       parentRegistry.addChild(registry);
+   }
+
+   private IMUMount findIMUMount(String sensorName)
+   {
+      return imuMounts.stream().filter(candidate -> candidate.getName().equals(sensorName)).findFirst().get();
+   }
+
+   private WrenchCalculatorInterface findWrenchSensor(String sensorName)
+   {
+      return groundContactPointBasedWrenchCalculators.stream().filter(candidate -> candidate.getName().equals(sensorName)).findFirst().get();
    }
 
    private void createAndAddForceSensors(Map<WrenchCalculatorInterface, ForceSensorDefinition> forceSensorDefinitions2, YoRegistry registry)
@@ -94,20 +167,6 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    public SimulatedSensorHolderAndReader getSensorReader()
    {
       return simulatedSensorHolderAndReader;
-   }
-
-   private void createAndAddOneDoFPositionAndVelocitySensors(SCSToInverseDynamicsJointMap scsToInverseDynamicsJointMap)
-   {
-      ArrayList<OneDegreeOfFreedomJoint> oneDegreeOfFreedomJoints = new ArrayList<OneDegreeOfFreedomJoint>(scsToInverseDynamicsJointMap.getSCSOneDegreeOfFreedomJoints());
-
-      for (OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint : oneDegreeOfFreedomJoints)
-      {
-         OneDoFJointBasics oneDoFJoint = scsToInverseDynamicsJointMap.getInverseDynamicsOneDoFJoint(oneDegreeOfFreedomJoint);
-
-         simulatedSensorHolderAndReader.addJointPositionSensorPort(oneDoFJoint, oneDegreeOfFreedomJoint.getQYoVariable());
-         simulatedSensorHolderAndReader.addJointVelocitySensorPort(oneDoFJoint, oneDegreeOfFreedomJoint.getQDYoVariable());
-         simulatedSensorHolderAndReader.addJointTorqueSensorPort(oneDoFJoint, oneDegreeOfFreedomJoint.getTauYoVariable());
-      }
    }
 
    private void createAndAddOrientationSensors(Map<IMUMount, IMUDefinition> imuDefinitions, YoRegistry registry)

@@ -7,9 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import Jama.Matrix;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 public class PolynomialMatrixTest
 {
@@ -26,26 +24,26 @@ public class PolynomialMatrixTest
 	@Test
    public void testComputeDeterminantOne()
    {
-      Polynomial zero = new Polynomial(new double[] {0.0});
-      Polynomial one = new Polynomial(new double[] {1.0});
-      Polynomial two = new Polynomial(new double[] {2.0});
+      ObsoletePolynomial zero = new ObsoletePolynomial(new double[] {0.0});
+      ObsoletePolynomial one = new ObsoletePolynomial(new double[] {1.0});
+      ObsoletePolynomial two = new ObsoletePolynomial(new double[] {2.0});
 
-      Polynomial[][] polynomials = new Polynomial[][]
+      ObsoletePolynomial[][] polynomials = new ObsoletePolynomial[][]
       {
          {one}
       };
       PolynomialMatrix m0 = new PolynomialMatrix(polynomials);
       assertTrue(m0.computeDeterminant().epsilonEquals(one, 1e-7));
 
-      polynomials = new Polynomial[][]
+      polynomials = new ObsoletePolynomial[][]
       {
          {one, one}, {zero, one}
       };
       m0 = new PolynomialMatrix(polynomials);
-      Polynomial determinant = m0.computeDeterminant();
+      ObsoletePolynomial determinant = m0.computeDeterminant();
       assertTrue(determinant.epsilonEquals(one, 1e-7));
 
-      polynomials = new Polynomial[][]
+      polynomials = new ObsoletePolynomial[][]
       {
          {one, two}, {two, two}
       };
@@ -59,19 +57,19 @@ public class PolynomialMatrixTest
    {
       // From J.Pratt MCSI Problem Set 5.
 
-      Polynomial s = new Polynomial(new double[] {1.0, 0.0});
-      Polynomial zero = new Polynomial(new double[] {0.0});
-      Polynomial one = new Polynomial(new double[] {1.0});
-      Polynomial negativeOne = one.times(-1.0);
+      ObsoletePolynomial s = new ObsoletePolynomial(new double[] {1.0, 0.0});
+      ObsoletePolynomial zero = new ObsoletePolynomial(new double[] {0.0});
+      ObsoletePolynomial one = new ObsoletePolynomial(new double[] {1.0});
+      ObsoletePolynomial negativeOne = one.times(-1.0);
 
-      Polynomial[][] polynomials = new Polynomial[][]
+      ObsoletePolynomial[][] polynomials = new ObsoletePolynomial[][]
       {
          {s, zero, negativeOne, zero}, {zero, s, zero, negativeOne}, {one, negativeOne, s, zero}, {negativeOne, one, zero, s}
       };
 
-      Polynomial expectedDeterminant = new Polynomial(new double[] {1.0, 0.0, 2.0, 0.0, 0.0});
+      ObsoletePolynomial expectedDeterminant = new ObsoletePolynomial(new double[] {1.0, 0.0, 2.0, 0.0, 0.0});
       PolynomialMatrix m0 = new PolynomialMatrix(polynomials);
-      Polynomial determinant = m0.computeDeterminant();
+      ObsoletePolynomial determinant = m0.computeDeterminant();
 
       assertTrue(determinant.epsilonEquals(expectedDeterminant, 1e-7));
    }
@@ -85,9 +83,9 @@ public class PolynomialMatrixTest
       });
 
       PolynomialMatrix sIMinusA = PolynomialMatrix.constructSIMinusA(matrixA);
-      Polynomial determinant = sIMinusA.computeDeterminant();
+      ObsoletePolynomial determinant = sIMinusA.computeDeterminant();
 
-      Polynomial expectedPolynomial = new Polynomial(new double[] {1.0, -1.0});
+      ObsoletePolynomial expectedPolynomial = new ObsoletePolynomial(new double[] {1.0, -1.0});
       assertTrue(expectedPolynomial.epsilonEquals(determinant, 1e-7));
 
       // From J.Pratt MCSI Problem Set 5.
@@ -100,7 +98,7 @@ public class PolynomialMatrixTest
       sIMinusA = PolynomialMatrix.constructSIMinusA(matrixA);
       determinant = sIMinusA.computeDeterminant();
 
-      expectedPolynomial = new Polynomial(new double[] {1.0, 0.0, 2.0, 0.0, 0.0});
+      expectedPolynomial = new ObsoletePolynomial(new double[] {1.0, 0.0, 2.0, 0.0, 0.0});
       assertTrue(expectedPolynomial.epsilonEquals(determinant, 1e-7));
    }
 
@@ -116,26 +114,26 @@ public class PolynomialMatrixTest
       Matrix matrixA = new Matrix(elementsA);
 
       PolynomialMatrix sIMinusA = PolynomialMatrix.constructSIMinusA(matrixA);
-      Polynomial determinant = sIMinusA.computeDeterminant();
+      ObsoletePolynomial determinant = sIMinusA.computeDeterminant();
 
-      Polynomial expectedPolynomial =
-         Polynomial.constructFromRealRoot(1.0).times(Polynomial.constructFromRealRoot(-2.0)).times(Polynomial.constructFromRealRoot(3.0));
+      ObsoletePolynomial expectedPolynomial =
+         ObsoletePolynomial.constructFromRealRoot(1.0).times(ObsoletePolynomial.constructFromRealRoot(-2.0)).times(ObsoletePolynomial.constructFromRealRoot(3.0));
       assertTrue(expectedPolynomial.epsilonEquals(determinant, 1e-7));
 
-      Polynomial[][] cofactors = sIMinusA.computeCofactors();
+      ObsoletePolynomial[][] cofactors = sIMinusA.computeCofactors();
 
 
-      assertTrue(cofactors[0][0].epsilonEquals(new Polynomial(1.0, 0.0, -4.0), 1e-7));
-      assertTrue(cofactors[0][1].epsilonEquals(new Polynomial(1.0, 2.0), 1e-7));
-      assertTrue(cofactors[0][2].epsilonEquals(new Polynomial(1.0, 2.0), 1e-7));
+      assertTrue(cofactors[0][0].epsilonEquals(new ObsoletePolynomial(1.0, 0.0, -4.0), 1e-7));
+      assertTrue(cofactors[0][1].epsilonEquals(new ObsoletePolynomial(1.0, 2.0), 1e-7));
+      assertTrue(cofactors[0][2].epsilonEquals(new ObsoletePolynomial(1.0, 2.0), 1e-7));
 
-      assertTrue(cofactors[1][0].epsilonEquals(new Polynomial(-2.0, 7.0), 1e-7));
-      assertTrue(cofactors[1][1].epsilonEquals(new Polynomial(1.0, -1.0, -5.0), 1e-7));
-      assertTrue(cofactors[1][2].epsilonEquals(new Polynomial(3.0, -8.0), 1e-7));
+      assertTrue(cofactors[1][0].epsilonEquals(new ObsoletePolynomial(-2.0, 7.0), 1e-7));
+      assertTrue(cofactors[1][1].epsilonEquals(new ObsoletePolynomial(1.0, -1.0, -5.0), 1e-7));
+      assertTrue(cofactors[1][2].epsilonEquals(new ObsoletePolynomial(3.0, -8.0), 1e-7));
 
-      assertTrue(cofactors[2][0].epsilonEquals(new Polynomial(3.0, -5.0), 1e-7));
-      assertTrue(cofactors[2][1].epsilonEquals(new Polynomial(1.0, 1.0), 1e-7));
-      assertTrue(cofactors[2][2].epsilonEquals(new Polynomial(1.0, -3.0, +4.0), 1e-7));
+      assertTrue(cofactors[2][0].epsilonEquals(new ObsoletePolynomial(3.0, -5.0), 1e-7));
+      assertTrue(cofactors[2][1].epsilonEquals(new ObsoletePolynomial(1.0, 1.0), 1e-7));
+      assertTrue(cofactors[2][2].epsilonEquals(new ObsoletePolynomial(1.0, -3.0, +4.0), 1e-7));
 
    }
 

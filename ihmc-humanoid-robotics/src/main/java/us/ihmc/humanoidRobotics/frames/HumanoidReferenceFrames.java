@@ -4,6 +4,8 @@ import java.util.EnumMap;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -21,6 +23,7 @@ import us.ihmc.robotics.screwTheory.MovingMidFrameZUpFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.containers.ContainerTools;
 
 public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
@@ -50,8 +53,17 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final MovingReferenceFrame midFeetUnderPelvisWalkDirectionFrame;
 
    private final ReferenceFrame centerOfMassFrame;
+   private final ReferenceFrame lidarSensorFrame;
+   private ReferenceFrame headCameraFrame;
+   private ReferenceFrame steppingCameraFrame;
+   private ReferenceFrame objectDetectionCameraFrame;
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
+   {
+      this(fullRobotModel, null);
+   }
+
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation)
    {
       this.fullRobotModel = fullRobotModel;
 
@@ -81,6 +93,31 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          {
             this.neckReferenceFrames.put(neckJointName, fullRobotModel.getNeckJoint(neckJointName).getFrameAfterJoint());
          }
+      }
+
+      if (!fullRobotModel.getLidarSensorNames().isEmpty()
+          && fullRobotModel.getLidarSensorNames().get(0) != null &&
+            !fullRobotModel.getLidarSensorNames().get(0).isEmpty())
+      {
+         String lidarSensorName = fullRobotModel.getLidarSensorNames().get(0);
+         ReferenceFrame lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarSensorName);
+         RigidBodyTransform lidarBaseToSensorTransform = fullRobotModel.getLidarBaseToSensorTransform(lidarSensorName);
+         if (lidarBaseFrame != null && lidarBaseToSensorTransform != null)
+         {
+            lidarSensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, lidarBaseToSensorTransform);
+         }
+         else
+         {
+            lidarSensorFrame = null;
+         }
+      }
+      else
+      {
+         lidarSensorFrame = null;
+      }
+      if (sensorInformation != null)
+      {
+         headCameraFrame = fullRobotModel.getCameraFrame(sensorInformation.getHeadCameraName());
       }
 
       if (robotJointNames.getSpineJointNames() != null)
@@ -158,6 +195,12 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       if (chest != null)
       {
          addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CHEST_FRAME, chest.getBodyFixedFrame());
+      }
+
+      if (sensorInformation != null)
+      {
+         steppingCameraFrame = sensorInformation.getSteppingCameraFrame(this);
+         objectDetectionCameraFrame = sensorInformation.getObjectDetectionCameraFrame(this);
       }
    }
 
@@ -316,6 +359,14 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       midFeetUnderPelvisWalkDirectionFrame.update();
 
       centerOfMassFrame.update();
+
+      if (lidarSensorFrame != null)
+         lidarSensorFrame.update();
+      if (steppingCameraFrame != null)
+      {
+         steppingCameraFrame.update();
+         objectDetectionCameraFrame.update();
+      }
    }
 
    @Override
@@ -364,5 +415,25 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
    {
       return nameBasedHashCodeToReferenceFrameMap;
+   }
+
+   public ReferenceFrame getLidarSensorFrame()
+   {
+      return lidarSensorFrame;
+   }
+
+   public ReferenceFrame getHeadCameraFrame()
+   {
+      return headCameraFrame;
+   }
+
+   public ReferenceFrame getSteppingCameraFrame()
+   {
+      return steppingCameraFrame;
+   }
+
+   public ReferenceFrame getObjectDetectionCameraFrame()
+   {
+      return objectDetectionCameraFrame;
    }
 }

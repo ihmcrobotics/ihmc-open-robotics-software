@@ -181,6 +181,19 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       rhoWeights.get(contactPoint).set(rhoWeight);
    }
 
+   public void setRhoWeights(double rhoWeight)
+   {
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         rhoWeights.get(contactPoints.get(i)).set(rhoWeight);
+      }
+   }
+
+   public void clearRhoWeights()
+   {
+      setRhoWeights(Double.NaN);
+   }
+
    @Override
    public List<YoContactPoint> getContactPoints()
    {

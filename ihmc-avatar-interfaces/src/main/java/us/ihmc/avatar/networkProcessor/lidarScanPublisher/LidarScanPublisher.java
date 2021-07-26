@@ -6,7 +6,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
@@ -17,7 +16,6 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.RangeScanPointF
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
@@ -33,9 +31,7 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.lidar.LidarScan;
 import us.ihmc.robotics.lidar.LidarScanParameters;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -63,7 +59,6 @@ public class LidarScanPublisher
    private RobotROSClockCalculator rosClockCalculator = null;
 
    private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
-   private final IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanRealtimePublisher;
 
    private int maximumNumberOfPoints = DEFAULT_MAX_NUMBER_OF_POINTS;
    private RangeScanPointFilter rangeFilter = null;
@@ -73,54 +68,28 @@ public class LidarScanPublisher
 
    private long publisherPeriodInMillisecond = 1L;
 
-   public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2Node ros2Node, ROS2Topic robotConfigurationDataTopicName)
+   public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node)
    {
-      this(modelFactory, defaultSensorFrameFactory(lidarName), ros2Node, robotConfigurationDataTopicName);
+      this(modelFactory, defaultSensorFrameFactory(lidarName), ros2Node);
    }
 
-   public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2Node ros2Node,
-                             ROS2Topic robotConfigurationDataTopicName)
+   public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node)
    {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), sensorFrameFactory, ros2Node, robotConfigurationDataTopicName);
+      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), sensorFrameFactory, ros2Node);
    }
-
-   public LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, ROS2Node ros2Node,
-                             ROS2Topic robotConfigurationDataTopicName)
-   {
-      this(robotName, fullRobotModel, sensorFrameFactory, ros2Node, null, robotConfigurationDataTopicName);
-   }
-
-   public LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, RealtimeROS2Node realtimeROS2Node,
-                             ROS2Topic robotConfigurationDataTopicName)
-   {
-      this(robotName, fullRobotModel, sensorFrameFactory, null, realtimeROS2Node, robotConfigurationDataTopicName);
-   }
-
-   private LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, ROS2Node ros2Node,
-                              RealtimeROS2Node realtimeROS2Node, ROS2Topic robotConfigurationDataTopicName)
+   public LidarScanPublisher(String robotName,
+                              FullRobotModel fullRobotModel,
+                              SensorFrameFactory sensorFrameFactory,
+                              ROS2NodeInterface ros2Node)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
       lidarSensorFrame = sensorFrameFactory.setupSensorFrame(fullRobotModel);
 
-      if (ros2Node != null)
-      {
-         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                       RobotConfigurationData.class,
-                                                       robotConfigurationDataTopicName,
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
-         lidarScanRealtimePublisher = null;
-      }
-      else
-      {
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                       RobotConfigurationData.class,
-                                                       robotConfigurationDataTopicName,
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         lidarScanPublisher = null;
-         lidarScanRealtimePublisher = ROS2Tools.createPublisher(realtimeROS2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
-      }
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           ROS2Tools.getRobotConfigurationDataTopic(robotName),
+                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
    }
 
    public void setMaximumNumberOfPoints(int maximumNumberOfPoints)
@@ -339,10 +308,7 @@ public class LidarScanPublisher
       message.getLidarPosition().set(sensorPose.getPosition());
       message.getLidarOrientation().set(sensorPose.getOrientation());
 
-      if (lidarScanPublisher != null)
-         lidarScanPublisher.publish(message);
-      else
-         lidarScanRealtimePublisher.publish(message);
+      lidarScanPublisher.publish(message);
 
       return message;
    }

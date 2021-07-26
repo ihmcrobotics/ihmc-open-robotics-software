@@ -16,7 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.SelectionCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -213,7 +213,7 @@ public class WrenchMatrixCalculator
    }
 
    // FIXME The formulation of the objective should be unified with PlaneContactStateToWrenchMatrixHelper.computeCopObjectiveJacobian(...)
-   public boolean getCenterOfPressureInput(QPInput inputToPack)
+   public boolean getCenterOfPressureInput(QPInputTypeA inputToPack)
    {
       int commands = centerOfPressureCommands.size();
       if (commands <= 0)
@@ -297,7 +297,7 @@ public class WrenchMatrixCalculator
    private final DMatrixRMaj tempTaskObjective = new DMatrixRMaj(Wrench.SIZE, 1);
    private final SelectionCalculator selectionCalculator = new SelectionCalculator();
 
-   public boolean getContactWrenchInput(QPInput inputToPack)
+   public boolean getContactWrenchInput(QPInputTypeA inputToPack)
    {
       int commands = contactWrenchCommands.size();
       if (commands <= 0)

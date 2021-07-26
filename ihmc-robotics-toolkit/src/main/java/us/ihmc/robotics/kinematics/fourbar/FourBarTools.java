@@ -7,84 +7,81 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 
 public class FourBarTools
 {
+   public static boolean isFourBarInverted(FourBar fourBar)
+   {
+      return fourBar.getEdgeAB().isCrossing() && fourBar.getEdgeCD().isCrossing() || fourBar.getEdgeDA().isCrossing() && fourBar.getEdgeBC().isCrossing();
+   }
+
+   public static boolean isFourBarInverted(FourBarVertex fourBarVertex)
+   {
+      FourBarVertex A = fourBarVertex;
+      FourBarEdge ABEdge = A.getNextEdge();
+      FourBarEdge BCEdge = ABEdge.getNext();
+      FourBarEdge CDEdge = BCEdge.getNext();
+      FourBarEdge DAEdge = CDEdge.getNext();
+
+      return ABEdge.isCrossing() && CDEdge.isCrossing() || DAEdge.isCrossing() && BCEdge.isCrossing();
+   }
+
+   public static void setToMinAngle(FourBarVertex vertex)
+   {
+      vertex.setToMin();
+
+      FourBarVertex nextVertex = vertex.getNextVertex();
+      if (vertex.isConvex() == nextVertex.isConvex())
+         nextVertex.setToMax();
+      else
+         nextVertex.setToMin();
+
+      FourBarVertex oppositeVertex = vertex.getOppositeVertex();
+      if (vertex.isConvex() == oppositeVertex.isConvex())
+         oppositeVertex.setToMin();
+      else
+         oppositeVertex.setToMax();
+
+      FourBarVertex previousVertex = vertex.getPreviousVertex();
+      if (vertex.isConvex() == previousVertex.isConvex())
+         previousVertex.setToMax();
+      else
+         previousVertex.setToMin();
+   }
+
+   public static void setToMaxAngle(FourBarVertex vertex)
+   {
+      vertex.setToMax();
+
+      FourBarVertex nextVertex = vertex.getNextVertex();
+      if (vertex.isConvex() == nextVertex.isConvex())
+         nextVertex.setToMin();
+      else
+         nextVertex.setToMax();
+
+      FourBarVertex oppositeVertex = vertex.getOppositeVertex();
+      if (vertex.isConvex() == oppositeVertex.isConvex())
+         oppositeVertex.setToMax();
+      else
+         oppositeVertex.setToMin();
+
+      FourBarVertex previousVertex = vertex.getPreviousVertex();
+      if (vertex.isConvex() == previousVertex.isConvex())
+         previousVertex.setToMin();
+      else
+         previousVertex.setToMax();
+   }
+
    public static Bound update(FourBarVertex vertex, double angle)
    {
-      FourBarVertex A = vertex;
-      FourBarVertex B = vertex.getNextVertex();
-      FourBarVertex C = vertex.getOppositeVertex();
-      FourBarVertex D = vertex.getPreviousVertex();
-
-      if (angle <= A.getMinAngle())
-      {
-         A.setToMin();
-         B.setToMax();
-         C.setToMin();
-         D.setToMax();
-         return Bound.MIN;
-      }
-      else if (angle >= A.getMaxAngle())
-      {
-         A.setToMax();
-         B.setToMin();
-         C.setToMax();
-         D.setToMin();
-         return Bound.MAX;
-      }
-
-      FourBarEdge ABEdge = A.getNextEdge();
-      FourBarEdge BCEdge = B.getNextEdge();
-      FourBarEdge CDEdge = C.getNextEdge();
-      FourBarEdge DAEdge = D.getNextEdge();
-      FourBarDiagonal ACDiag = A.getDiagonal();
-      FourBarDiagonal BDDiag = B.getDiagonal();
-
-      double AB = ABEdge.getLength();
-      double BC = BCEdge.getLength();
-      double CD = CDEdge.getLength();
-      double DA = DAEdge.getLength();
-
-      A.setAngle(angle);
-      double BD = EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(AB, DA, angle);
-      BDDiag.setLength(BD);
-      C.setAngle(angleWithCosineLaw(BC, CD, BD));
-      double angleDBC = angleWithCosineLaw(BC, BD, CD);
-      double angleABD = angleWithCosineLaw(AB, BD, DA);
-
-      if (ABEdge.isCrossing() || BCEdge.isCrossing())
-      { // Inverted four bar
-         /*
-          * @formatter:off
-          *  +A------B+    +D------A+    +C------D+    +B------C+
-          *    \    /        \    /        \    /        \    /  
-          *     \  /          \  /          \  /          \  /   
-          *      \/     or     \/     or     \/     or     \/    
-          *      /\            /\            /\            /\    
-          *     /  \          /  \          /  \          /  \   
-          *    /    \        /    \        /    \        /    \  
-          *  -C------D-    -B------C-    -A------B-    -D------A-
-          * @formatter:on
-          */
-         if (!C.isConvex())
-            C.setAngle(-C.getAngle());
-         B.setAngle(Math.abs(angleABD - angleDBC));
-         if (!B.isConvex())
-            B.setAngle(-B.getAngle());
-         D.setAngle(-A.getAngle() - B.getAngle() - C.getAngle());
-      }
-      else
-      { // Assume the four bar is convex.
-         B.setAngle(angleABD + angleDBC);
-         D.setAngle(2.0 * Math.PI - A.getAngle() - B.getAngle() - C.getAngle());
-      }
-
-      ACDiag.setLength(EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(AB, BC, B.getAngle()));
-
-      return null;
+      return update(vertex, angle, Double.NaN, Double.NaN);
    }
 
    public static Bound update(FourBarVertex vertex, double angle, double angleDot)
    {
-      Bound limit = update(vertex, angle);
+      return update(vertex, angle, angleDot, Double.NaN);
+   }
+
+   public static Bound update(FourBarVertex vertex, double angle, double angleDot, double angleDDot)
+   {
+      Bound limit = null;
 
       FourBarVertex A = vertex;
       FourBarVertex B = vertex.getNextVertex();
@@ -102,18 +99,124 @@ public class FourBarTools
       double BC = BCEdge.getLength();
       double CD = CDEdge.getLength();
       double DA = DAEdge.getLength();
-      double AC = ACDiag.getLength();
-      double BD = BDDiag.getLength();
+      double BD = Double.NaN;
+      double AC = Double.NaN;
+
+      // -------------------- Compute angles ----------------------- //
+
+      double cosDAB = Double.NaN;
+      double cosBCD = Double.NaN;
+      double cosDBC = Double.NaN;
+      double cosABD = Double.NaN;
+      double cosABC = Double.NaN;
+      double sinABDSquare = Double.NaN;
+      double sinABD = Double.NaN;
+      double sinDBCSquare = Double.NaN;
+      double sinDBC = Double.NaN;
+      double sinBCDSquare = Double.NaN;
+      double sinBCD = Double.NaN;
+
+      if (angle <= A.getMinAngle())
+      {
+         angle = A.getMinAngle();
+         setToMinAngle(A);
+         limit = Bound.MIN;
+      }
+      else if (angle >= A.getMaxAngle())
+      {
+         angle = A.getMaxAngle();
+         setToMaxAngle(A);
+         limit = Bound.MAX;
+      }
+      else
+      {
+         A.setAngle(angle);
+         cosDAB = EuclidCoreTools.cos(angle);
+         BD = Math.sqrt(AB * AB + DA * DA - 2.0 * AB * DA * cosDAB);
+         BDDiag.setLength(BD);
+         cosBCD = cosineAngleWithCosineLaw(BC, CD, BD);
+         sinBCDSquare = 1.0 - cosBCD * cosBCD;
+         sinBCD = Math.sqrt(sinBCDSquare);
+         C.setAngle(fastAcos(cosBCD, sinBCD));
+         cosDBC = cosineAngleWithCosineLaw(BC, BD, CD);
+         cosABD = cosineAngleWithCosineLaw(AB, BD, DA);
+         sinABDSquare = 1 - cosABD * cosABD;
+         sinABD = Math.sqrt(sinABDSquare);
+         sinDBCSquare = 1 - cosDBC * cosDBC;
+         sinDBC = Math.sqrt(sinDBCSquare);
+
+         if (ABEdge.isCrossing() || BCEdge.isCrossing())
+         { // Inverted four bar
+            /*
+             * @formatter:off
+             *  +A------B+    +D------A+    +C------D+    +B------C+
+             *    \    /        \    /        \    /        \    /
+             *     \  /          \  /          \  /          \  /
+             *      \/     or     \/     or     \/     or     \/
+             *      /\            /\            /\            /\
+             *     /  \          /  \          /  \          /  \
+             *    /    \        /    \        /    \        /    \
+             *  -C------D-    -B------C-    -A------B-    -D------A-
+             * @formatter:on
+             */
+            if (!C.isConvex())
+               C.setAngle(-C.getAngle());
+            cosABC = MathTools.clamp(cosABD * cosDBC + sinABD * sinDBC, 1.0);
+            B.setAngle(Math.abs(fastAcos(cosABC)));
+            if (!B.isConvex())
+               B.setAngle(-B.getAngle());
+            D.setAngle(-A.getAngle() - B.getAngle() - C.getAngle());
+         }
+         else
+         { // Assume the four bar is convex.
+            cosABC = MathTools.clamp(cosABD * cosDBC - sinABD * sinDBC, 1.0);
+            B.setAngle(Math.abs(fastAcos(cosABC)));
+            D.setAngle(2.0 * Math.PI - A.getAngle() - B.getAngle() - C.getAngle());
+         }
+
+         AC = Math.sqrt(AB * AB + BC * BC - 2.0 * AB * BC * cosABC);
+         ACDiag.setLength(AC);
+      }
+
+      // -------------------- Compute angle first derivative ----------------------- //
+      if (Double.isNaN(angleDot))
+         return limit;
+
+      if (limit != null)
+      {
+         cosABC = EuclidCoreTools.cos(B.getAngle());
+         cosDAB = EuclidCoreTools.cos(A.getAngle());
+         cosBCD = Math.cos(C.getAngle());
+         sinBCDSquare = 1.0 - cosBCD * cosBCD;
+         sinBCD = Math.sqrt(sinBCDSquare);
+         cosABD = cosineAngleWithCosineLaw(AB, BD, DA);
+         cosDBC = cosineAngleWithCosineLaw(BC, BD, CD);
+         sinABDSquare = 1 - cosABD * cosABD;
+         sinABD = Math.sqrt(sinABDSquare);
+         sinDBCSquare = 1 - cosDBC * cosDBC;
+         sinDBC = Math.sqrt(sinDBCSquare);
+
+         AC = Math.sqrt(AB * AB + BC * BC - 2.0 * AB * BC * cosABC);
+         BD = Math.sqrt(AB * AB + DA * DA - 2.0 * AB * DA * cosDAB);
+         ACDiag.setLength(AC);
+         BDDiag.setLength(BD);
+      }
+
+      double sinDAB = Math.sin(A.getAngle());
 
       A.setAngleDot(angleDot);
-      double BDDt = DA * AB * Math.sin(A.getAngle()) * angleDot / BD;
+      double BDDt = DA * AB * sinDAB * angleDot / BD;
       BDDiag.setLengthDot(BDDt);
-      C.setAngleDot(FourBarTools.angleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt));
-      double angleDtABD = FourBarTools.angleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
-      double angleDtDBC = FourBarTools.angleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
+      double cosBCDDot = cosineAngleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt);
+      C.setAngleDot(-cosBCDDot / sinBCD);
 
       if (!C.isConvex())
          C.setAngleDot(-C.getAngleDot());
+
+      double cosABDDot = cosineAngleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
+      double angleDtABD = -cosABDDot / sinABD;
+      double cosDBCDot = cosineAngleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
+      double angleDtDBC = -cosDBCDot / sinDBC;
 
       if (ABEdge.isCrossing())
          angleDtABD = -angleDtABD;
@@ -126,46 +229,27 @@ public class FourBarTools
 
       D.setAngleDot(-A.getAngleDot() - B.getAngleDot() - C.getAngleDot());
 
-      double ACDt = AB * BC * Math.sin(B.getAngle()) * B.getAngleDot() / AC;
+      double sinABC = Math.sin(B.getAngle());
+      double ACDt = AB * BC * sinABC * B.getAngleDot() / AC;
       ACDiag.setLengthDot(ACDt);
 
-      return limit;
-   }
-
-   public static Bound update(FourBarVertex vertex, double angle, double angleDot, double angleDDot)
-   {
-      Bound limit = update(vertex, angle, angleDot);
-
-      FourBarVertex A = vertex;
-      FourBarVertex B = vertex.getNextVertex();
-      FourBarVertex C = vertex.getOppositeVertex();
-      FourBarVertex D = vertex.getPreviousVertex();
-
-      FourBarEdge ABEdge = A.getNextEdge();
-      FourBarEdge BCEdge = B.getNextEdge();
-      FourBarEdge CDEdge = C.getNextEdge();
-      FourBarEdge DAEdge = D.getNextEdge();
-      FourBarDiagonal ACDiag = A.getDiagonal();
-      FourBarDiagonal BDDiag = B.getDiagonal();
-
-      double AB = ABEdge.getLength();
-      double BC = BCEdge.getLength();
-      double CD = CDEdge.getLength();
-      double DA = DAEdge.getLength();
-      double AC = ACDiag.getLength();
-      double BD = BDDiag.getLength();
-      double ACDt = ACDiag.getLengthDot();
-      double BDDt = BDDiag.getLengthDot();
+      // -------------------- Compute angle second derivative ----------------------- //
+      if (Double.isNaN(angleDDot))
+         return limit;
 
       A.setAngleDDot(angleDDot);
-      double BDDt2 = DA * AB / BD * (Math.cos(A.getAngle()) * angleDot * angleDot + Math.sin(A.getAngle()) * (angleDDot - BDDt * angleDot / BD));
+      double BDDt2 = DA * AB / BD * (cosDAB * angleDot * angleDot + sinDAB * (angleDDot - BDDt * angleDot / BD));
       BDDiag.setLengthDDot(BDDt2);
-      C.setAngleDDot(FourBarTools.angleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2));
+
+      double cosBCDDt2 = cosineAngleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2);
+      C.setAngleDDot(-(cosBCDDt2 * sinBCDSquare + cosBCDDot * cosBCDDot * cosBCD) / (sinBCDSquare * sinBCD));
       if (!C.isConvex())
          C.setAngleDDot(-C.getAngleDDot());
 
-      double angleDt2ABD = FourBarTools.angleDDotWithCosineLaw(AB, BD, BDDt, BDDt2, DA, 0.0, 0.0);
-      double angleDt2DBC = FourBarTools.angleDDotWithCosineLaw(BC, BD, BDDt, BDDt2, CD, 0.0, 0.0);
+      double cosABDDt2 = cosineAngleDDotWithCosineLaw(AB, BD, BDDt, BDDt2, DA, 0.0, 0.0);
+      double angleDt2ABD = -(cosABDDt2 * sinABDSquare + cosABDDot * cosABDDot * cosABD) / (sinABDSquare * sinABD);
+      double cosDBCDt2 = cosineAngleDDotWithCosineLaw(BC, BD, BDDt, BDDt2, CD, 0.0, 0.0);
+      double angleDt2DBC = -(cosDBCDt2 * sinDBCSquare + cosDBCDot * cosDBCDot * cosDBC) / (sinDBCSquare * sinDBC);
       if (ABEdge.isCrossing())
          angleDt2ABD = -angleDt2ABD;
       if (BCEdge.isCrossing())
@@ -176,8 +260,7 @@ public class FourBarTools
          B.setAngleDDot(-B.getAngleDDot());
       D.setAngleDDot(-A.getAngleDDot() - B.getAngleDDot() - C.getAngleDDot());
 
-      double ACDt2 = AB * BC / AC
-            * (Math.cos(B.getAngle()) * B.getAngleDot() * B.getAngleDot() + Math.sin(B.getAngle()) * (B.getAngleDDot() - ACDt * B.getAngleDot() / AC));
+      double ACDt2 = AB * BC / AC * (cosABC * B.getAngleDot() * B.getAngleDot() + sinABC * (B.getAngleDDot() - ACDt * B.getAngleDot() / AC));
       ACDiag.setLengthDDot(ACDt2);
 
       return limit;
@@ -229,7 +312,7 @@ public class FourBarTools
              *    C----D
              * @formatter:on
              */
-            lowerBound = FourBarTools.angleWithCosineLaw(AB, DA, BC - CD);
+            lowerBound = angleWithCosineLaw(AB, DA, BC - CD);
          }
 
          if (DA > CD && EuclidGeometryTools.isFormingTriangle(AB, DA - CD, BC))
@@ -246,7 +329,7 @@ public class FourBarTools
              *   C------D             D
              * @formatter:on
              */
-            upperBound = FourBarTools.angleWithCosineLaw(AB, DA - CD, BC);
+            upperBound = angleWithCosineLaw(AB, DA - CD, BC);
          }
          else
          {
@@ -254,14 +337,14 @@ public class FourBarTools
              * @formatter:off
              *    A----B           B
              *     \  /           /
-             *      \/           A 
-             *      /\    =>    / \ 
+             *      \/           A
+             *      /\    =>    / \
              *     /  \        /   \
              *    /    \      C-----D
              *   C------D
              * @formatter:on
              */
-            upperBound = Math.PI - FourBarTools.angleWithCosineLaw(BC - AB, DA, CD);
+            upperBound = Math.PI - angleWithCosineLaw(BC - AB, DA, CD);
          }
       }
       else if (ABEdge.isCrossing())
@@ -269,12 +352,12 @@ public class FourBarTools
          if (AB > DA && EuclidGeometryTools.isFormingTriangle(BC, CD, AB - DA))
             lowerBound = 0.0;
          else
-            lowerBound = FourBarTools.angleWithCosineLaw(DA, AB, CD - BC);
+            lowerBound = angleWithCosineLaw(DA, AB, CD - BC);
 
          if (AB > BC && EuclidGeometryTools.isFormingTriangle(DA, AB - BC, CD))
-            upperBound = FourBarTools.angleWithCosineLaw(DA, AB - BC, CD);
+            upperBound = angleWithCosineLaw(DA, AB - BC, CD);
          else
-            upperBound = Math.PI - FourBarTools.angleWithCosineLaw(AB, CD - DA, BC);
+            upperBound = Math.PI - angleWithCosineLaw(AB, CD - DA, BC);
       }
       else
       { // Assume the four-bar is convex.
@@ -306,7 +389,7 @@ public class FourBarTools
 
    /**
     * Calculates the angle at A for a triangle ABC defined by by its lengths.
-    * 
+    *
     * @param AB the length of the side joining the vertices A and B.
     * @param AC the length of the side joining the vertices A and C.
     * @param BC the length of the side joining the vertices B and C.
@@ -314,12 +397,12 @@ public class FourBarTools
     */
    public static double angleWithCosineLaw(double AB, double AC, double BC)
    {
-      return Math.acos(cosineAngleWithCosineLaw(AB, AC, BC));
+      return fastAcos(cosineAngleWithCosineLaw(AB, AC, BC));
    }
 
    /**
     * Calculates the cosine value of the angle at A for a triangle ABC defined by by its lengths.
-    * 
+    *
     * @param AB the length of the side joining the vertices A and B.
     * @param AC the length of the side joining the vertices A and C.
     * @param BC the length of the side joining the vertices B and C.
@@ -348,7 +431,7 @@ public class FourBarTools
     * The angle is changing due to the sides AC and BC changing. Their rate of change is to provided.
     * This method assumes that the side AB is constant.
     * </p>
-    * 
+    *
     * @param AB    the length of the side joining the vertices A and B.
     * @param AC    the length of the side joining the vertices A and C.
     * @param ACDot the derivative of the side AC.
@@ -359,8 +442,7 @@ public class FourBarTools
    public static double angleDotWithCosineLaw(double AB, double AC, double ACDot, double BC, double BCDot)
    {
       double cosAngle = cosineAngleWithCosineLaw(AB, AC, BC);
-      double cosAngleDot = cosineAngleDotWithCosineLaw(AB, AC, ACDot, BC, BCDot);
-      return -cosAngleDot / Math.sqrt(1 - cosAngle * cosAngle);
+      return -cosineAngleDotWithCosineLaw(AB, AC, ACDot, BC, BCDot) / Math.sqrt(1 - cosAngle * cosAngle);
    }
 
    /**
@@ -370,7 +452,7 @@ public class FourBarTools
     * The angle is changing due to the sides AC and BC changing. Their rate of change is to provided.
     * This method assumes that the side AB is constant.
     * </p>
-    * 
+    *
     * @param AB    the length of the side joining the vertices A and B.
     * @param AC    the length of the side joining the vertices A and C.
     * @param ACDot the derivative of the side AC.
@@ -396,7 +478,7 @@ public class FourBarTools
     * The angle is changing due to the sides AC and BC changing. Their rate of change is to provided.
     * This method assumes that the side AB is constant.
     * </p>
-    * 
+    *
     * @param AB     the length of the side joining the vertices A and B.
     * @param AC     the length of the side joining the vertices A and C.
     * @param ACDot  the derivative of the side AC.
@@ -428,7 +510,7 @@ public class FourBarTools
     * The angle is changing due to the sides AC and BC changing. Their rate of change is to provided.
     * This method assumes that the side AB is constant.
     * </p>
-    * 
+    *
     * @param AB     the length of the side joining the vertices A and B.
     * @param AC     the length of the side joining the vertices A and C.
     * @param ACDot  the derivative of the side AC.
@@ -456,5 +538,44 @@ public class FourBarTools
       cosAngleDDot /= ACCubed * AB;
 
       return cosAngleDDot;
+   }
+
+   /**
+    * Variation of {@link Math#acos(double)} function that relies on the following identity:
+    *
+    * <pre>
+    * acos(cosX) = 2 atan2(&Sqrt;(1 - cosX<sup>2</sup>), 1 + cosX)
+    * </pre>
+    *
+    * @param cosX the value whose arc cosine is to be returned. The value is clamped to be within [-1,
+    *             1].
+    * @return the arc cosine of the argument.
+    */
+   public static double fastAcos(double cosX)
+   {
+      if (cosX == -1.0)
+         return Math.PI;
+      else
+         return 2.0 * Math.atan2(Math.sqrt(1.0 - cosX * cosX), 1.0 + cosX);
+   }
+
+   /**
+    * Variation of {@link Math#acos(double)} function that relies on the following identity:
+    *
+    * <pre>
+    * acos(cosX) = 2 atan2(&Sqrt;(1 - cosX<sup>2</sup>), 1 + cosX) = 2 atan2(sinX, 1 + cosX)
+    * </pre>
+    *
+    * @param cosX the value whose arc cosine is to be returned. The value is clamped to be within [-1,
+    *             1].
+    * @param sinX the precomputed value of <tt>&Sqrt;(1 - cosX<sup>2</sup>)</tt>.
+    * @return the arc cosine of the argument.
+    */
+   public static double fastAcos(double cosX, double sinX)
+   {
+      if (cosX == -1.0)
+         return Math.PI;
+      else
+         return 2.0 * Math.atan2(sinX, 1.0 + cosX);
    }
 }

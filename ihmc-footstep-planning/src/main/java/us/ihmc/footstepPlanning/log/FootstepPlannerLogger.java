@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.log;
 
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
@@ -43,7 +44,22 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class FootstepPlannerLogger
 {
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
-   /** package-private */ static final String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   /** package-private */ static final String defaultLogsDirectory;
+   static
+   {
+      String incomingLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator;
+      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      {
+         incomingLogsDirectory = incomingLogsDirectory + "bamboo-logs" + File.separator
+                                                       + System.getenv("bamboo_planKey") + File.separator
+                                                       + System.getenv("bamboo_buildResultKey") + File.separator;
+      }
+      else
+      {
+         incomingLogsDirectory = incomingLogsDirectory + "logs" + File.separator;
+      }
+      defaultLogsDirectory = incomingLogsDirectory;
+   }
    /** package-private */ static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
    // File names
@@ -68,14 +84,12 @@ public class FootstepPlannerLogger
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
    private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
    private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
-   private final SplitFractionCalculatorParametersPacket splitFractionParametersPacket = new SplitFractionCalculatorParametersPacket();
    private final FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
 
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
    private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersPacketSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersPacketSerializer = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
    private final JSONSerializer<SwingPlannerParametersPacket> swingPlannerParametersPacketSerializer = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
-   private final JSONSerializer<SplitFractionCalculatorParametersPacket> splitFractionParametersPacketSerializer = new JSONSerializer<>(new SplitFractionCalculatorParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
    public FootstepPlannerLogger(FootstepPlanningModule planner)
@@ -170,12 +184,6 @@ public class FootstepPlannerLogger
          swingPlannerParametersPacket.set(planner.getSwingPlannerParameters().getAsPacket());
          byte[] serializedSwingParameters = swingPlannerParametersPacketSerializer.serializeToBytes(swingPlannerParametersPacket);
          writeToFile(swingParametersPacketFile, serializedSwingParameters);
-
-         // log split fraction parameters packet
-         String splitFractionParametersPacketFile = sessionDirectory + splitFractionParametersFileName;
-         splitFractionParametersPacket.set(planner.getSplitFractionParameters().getAsPacket());
-         byte[] serializedSplitFractionParameters = splitFractionParametersPacketSerializer.serializeToBytes(splitFractionParametersPacket);
-         writeToFile(splitFractionParametersPacketFile, serializedSplitFractionParameters);
 
          // log status packet
          String statusPacketFile = sessionDirectory + statusPacketFileName;

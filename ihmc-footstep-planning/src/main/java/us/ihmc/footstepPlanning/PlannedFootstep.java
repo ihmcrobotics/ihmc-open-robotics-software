@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -8,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -29,14 +31,10 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
    private double swingHeight = -1.0;
    private final TDoubleArrayList customWaypointProportions = new TDoubleArrayList();
    private final List<Point3D> customWaypointPositions = new ArrayList<>();
+   private final List<FrameSE3TrajectoryPoint> swingTrajectory = new ArrayList<>();
 
    private double swingDuration = -1.0;
    private double transferDuration = -1.0;
-
-   private double swingDurationShiftFraction = -1.0;
-   private double swingSplitFraction = -1.0;
-   private double transferSplitFraction = -1.0;
-   private double transferWeightDistribution = -1.0;
 
    public PlannedFootstep(RobotSide robotSide)
    {
@@ -84,12 +82,6 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
 
       this.swingDuration = other.swingDuration;
       this.transferDuration = other.transferDuration;
-
-      this.swingDurationShiftFraction = other.swingDurationShiftFraction;
-      this.swingSplitFraction = other.swingSplitFraction;
-      this.transferSplitFraction = other.transferSplitFraction;
-      this.transferWeightDistribution = other.transferWeightDistribution;
-
    }
 
    @Override
@@ -151,26 +143,6 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       return transferDuration;
    }
 
-   public double getSwingDurationShiftFraction()
-   {
-      return swingDurationShiftFraction;
-   }
-
-   public double getSwingSplitFraction()
-   {
-      return swingSplitFraction;
-   }
-
-   public double getTransferSplitFraction()
-   {
-      return transferSplitFraction;
-   }
-
-   public double getTransferWeightDistribution()
-   {
-      return transferWeightDistribution;
-   }
-
    public void setTrajectoryType(TrajectoryType trajectoryType)
    {
       this.trajectoryType = trajectoryType;
@@ -205,32 +177,17 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       this.transferDuration = transferDuration;
    }
 
-   public void setSwingDurationShiftFraction(double swingDurationShiftFraction)
-   {
-      this.swingDurationShiftFraction = swingDurationShiftFraction;
-   }
-
-   public void setSwingSplitFraction(double swingSplitFraction)
-   {
-      this.swingSplitFraction = swingSplitFraction;
-   }
-
-   public void setTransferSplitFraction(double transferSplitFraction)
-   {
-      this.transferSplitFraction = transferSplitFraction;
-   }
-
-   public void setTransferWeightDistribution(double transferWeightDistribution)
-   {
-      this.transferWeightDistribution = transferWeightDistribution;
-   }
-
    public void limitFootholdVertices()
    {
       if (!foothold.isEmpty() && foothold.getNumberOfVertices() != 4)
       {
          ConvexPolygonTools.limitVerticesConservative(foothold, 4);
       }
+   }
+
+   public List<FrameSE3TrajectoryPoint> getSwingTrajectory()
+   {
+      return swingTrajectory;
    }
 
    public FootstepDataMessage getAsMessage()
@@ -262,12 +219,18 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
          footstepDataMessage.getCustomPositionWaypoints().add().set(customWaypointPositions.get(i));
       }
 
+      for (int i = 0; i < swingTrajectory.size(); i++)
+      {
+         SE3TrajectoryPointMessage swingTrajectoryPointToSet = footstepDataMessage.getSwingTrajectory().add();
+         swingTrajectoryPointToSet.setTime(swingTrajectory.get(i).getTime());
+         swingTrajectoryPointToSet.getPosition().set(swingTrajectory.get(i).getPosition());
+         swingTrajectoryPointToSet.getOrientation().set(swingTrajectory.get(i).getOrientation());
+         swingTrajectoryPointToSet.getLinearVelocity().set(swingTrajectory.get(i).getLinearVelocity());
+         swingTrajectoryPointToSet.getAngularVelocity().set(swingTrajectory.get(i).getAngularVelocity());
+      }
+
       footstepDataMessage.setSwingDuration(swingDuration);
       footstepDataMessage.setTransferDuration(transferDuration);
-      footstepDataMessage.setSwingDurationShiftFraction(swingDurationShiftFraction);
-      footstepDataMessage.setSwingSplitFraction(swingSplitFraction);
-      footstepDataMessage.setTransferSplitFraction(transferSplitFraction);
-      footstepDataMessage.setTransferWeightDistribution(transferWeightDistribution);
 
       return footstepDataMessage;
    }
@@ -297,13 +260,20 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
          Point3D waypoint1 = footstepDataMessage.getCustomPositionWaypoints().get(1);
          plannedFootstep.setCustomWaypointPositions(waypoint0, waypoint1);
       }
+      for (int i = 0; i < footstepDataMessage.getSwingTrajectory().size(); i++)
+      {
+         SE3TrajectoryPointMessage trajectoryPoint = footstepDataMessage.getSwingTrajectory().get(i);
+         FrameSE3TrajectoryPoint trajectoryPointToSet = new FrameSE3TrajectoryPoint();
+         trajectoryPointToSet.set(trajectoryPoint.getTime(),
+                                  trajectoryPoint.getPosition(),
+                                  trajectoryPoint.getOrientation(),
+                                  trajectoryPoint.getLinearVelocity(),
+                                  trajectoryPoint.getAngularVelocity());
+         plannedFootstep.getSwingTrajectory().add(trajectoryPointToSet);
+      }
 
       plannedFootstep.setSwingDuration(footstepDataMessage.getSwingDuration());
       plannedFootstep.setTransferDuration(footstepDataMessage.getTransferDuration());
-      plannedFootstep.setSwingDurationShiftFraction(footstepDataMessage.getSwingDurationShiftFraction());
-      plannedFootstep.setSwingSplitFraction(footstepDataMessage.getSwingSplitFraction());
-      plannedFootstep.setTransferSplitFraction(footstepDataMessage.getTransferSplitFraction());
-      plannedFootstep.setTransferWeightDistribution(footstepDataMessage.getTransferWeightDistribution());
 
       return plannedFootstep;
    }

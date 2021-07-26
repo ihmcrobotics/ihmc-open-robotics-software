@@ -307,6 +307,16 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                                            referenceFrames,
                                                            wholeBodyControllerParameters,
                                                            atlasPrimitiveActions));
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_HEIGHT,
+                             new TestSetHeightBehavior(robotName,
+                                                           "testheight",
+                                                           yoTime,
+                                                           ros2Node,
+                                                           fullRobotModel,
+                                                           referenceFrames,
+                                                           wholeBodyControllerParameters,
+                                                           atlasPrimitiveActions));
+//
 //
 //      dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
 //                             new PickUpBallBehaviorStateMachine(robotName,
@@ -345,19 +355,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                                          wholeBodyControllerParameters,
                                                          atlasPrimitiveActions,
                                                          yoGraphicsListRegistry));
-      dispatcher.addBehavior(HumanoidBehaviorType.SIMPLE_WALK_THROUGH_DOOR,
-                             new SimplifiedWalkThroughDoorBehavior(robotName,
-                                                         "VRWalkDoor",
-                                                         ros2Node,
-                                                         yoTime,
-                                                         yoDoubleSupport,
-                                                         fullRobotModel,
-                                                         referenceFrames,
-                                                         wholeBodyControllerParameters,
-                                                         atlasPrimitiveActions,
-                                                         yoGraphicsListRegistry));
-//
-//
+      
 //      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR, new DoorTimingBehavior(robotName, yoTime, ros2Node, true));
 //      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_AUTOMATED_TIMING_BEHAVIOR,
 //                             new DoorTimingBehaviorAutomated(robotName,

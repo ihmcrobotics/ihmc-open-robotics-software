@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
@@ -144,7 +145,8 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
       if (handleCommandInternal(command) && orientationHelper.handleTrajectoryCommand(command))
       {
          usingWeightFromMessage.set(orientationHelper.isMessageWeightValid());
-         statusHelper.registerNewTrajectory(command);
+         if (command.getExecutionMode() != ExecutionMode.STREAM)
+            statusHelper.registerNewTrajectory(command);
          return true;
       }
 

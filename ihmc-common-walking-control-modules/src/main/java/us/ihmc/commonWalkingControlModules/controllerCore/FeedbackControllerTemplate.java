@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerFactory;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
@@ -37,6 +38,8 @@ public class FeedbackControllerTemplate
    private final Map<RigidBodyBasics, Integer> pointFeedbackControllerTemplate = new HashMap<>();
    private final Set<OneDoFJointBasics> oneDoFJointFeedbackControllerTemplate = new HashSet<>();
    private boolean enableCenterOfMassFeedbackController = false;
+
+   private FeedbackControllerFactory feedbackControllerFactory = new FeedbackControllerFactory();
 
    /**
     * Creates an empty template.
@@ -228,6 +231,17 @@ public class FeedbackControllerTemplate
       enableCenterOfMassFeedbackController = true;
    }
 
+   /**
+    * Sets the factory to use for creating the feedback controllers in
+    * {@link WholeBodyFeedbackController}.
+    * 
+    * @param feedbackControllerFactory the new factory.
+    */
+   public void setFeedbackControllerFactory(FeedbackControllerFactory feedbackControllerFactory)
+   {
+      this.feedbackControllerFactory = feedbackControllerFactory;
+   }
+
    public boolean isDynamicControllerConstructionAllowed()
    {
       return allowDynamicControllerConstruction;
@@ -256,5 +270,10 @@ public class FeedbackControllerTemplate
    public boolean isCenterOfMassFeedbackControllerEnabled()
    {
       return enableCenterOfMassFeedbackController;
+   }
+
+   public FeedbackControllerFactory getFeedbackControllerFactory()
+   {
+      return feedbackControllerFactory;
    }
 }

@@ -152,8 +152,9 @@ public class CoMTrajectoryPlannerVisualizer
 
       SettableContactStateProvider initialContactStateProvider = new SettableContactStateProvider();
       initialContactStateProvider.getTimeInterval().setInterval(0.0, 0.5);
-      initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
-      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setLinearECMPVelocity();
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
 
@@ -163,11 +164,13 @@ public class CoMTrajectoryPlannerVisualizer
       {
          SettableContactStateProvider contactStateProvider = new SettableContactStateProvider();
 
-         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -verticalOffset));
+         contactStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -verticalOffset));
          if (includeFlight)
-            contactStateProvider.setEndCopPosition(contactStateProvider.getCopStartPosition());
+            contactStateProvider.setEndECMPPosition(contactStateProvider.getECMPStartPosition());
          else
-            contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, 0.0, -verticalOffset));
+            contactStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, 0.0, -verticalOffset));
+         initialContactStateProvider.setLinearECMPVelocity();
+
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
 
@@ -190,9 +193,10 @@ public class CoMTrajectoryPlannerVisualizer
       }
 
       SettableContactStateProvider finalStateProvider = new SettableContactStateProvider();
-      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
-      finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
+      finalStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
+      finalStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
+      finalStateProvider.setLinearECMPVelocity();
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(finalStateProvider);

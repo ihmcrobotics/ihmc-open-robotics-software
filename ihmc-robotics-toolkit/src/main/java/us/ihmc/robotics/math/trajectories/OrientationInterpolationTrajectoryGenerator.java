@@ -2,10 +2,13 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
-import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFrameOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -13,11 +16,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class OrientationInterpolationTrajectoryGenerator implements OrientationTrajectoryGenerator
+public class OrientationInterpolationTrajectoryGenerator implements FixedFrameOrientationTrajectoryGenerator
 {
    private final YoRegistry registry;
    private final YoDouble currentTime;
    private final YoDouble trajectoryTime;
+   private final ReferenceFrame referenceFrame;
    private final YoPolynomial parameterPolynomial;
    private final YoFrameQuaternion initialOrientation;
    private final YoFrameQuaternion finalOrientation;
@@ -27,8 +31,8 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
    private final YoFrameVector3D desiredAngularAcceleration;
 
    private final DoubleProvider trajectoryTimeProvider;
-   private final OrientationProvider initialOrientationProvider;
-   private final OrientationProvider finalOrientationProvider;
+   private final FrameOrientationProvider initialOrientationProvider;
+   private final FrameOrientationProvider finalOrientationProvider;
 
    private final YoBoolean continuouslyUpdateFinalOrientation;
    
@@ -38,13 +42,14 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
    private final OrientationInterpolationCalculator orientationInterpolationCalculator = new OrientationInterpolationCalculator();
 
    public OrientationInterpolationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider trajectoryTimeProvider,
-                                                      OrientationProvider initialOrientationProvider, OrientationProvider finalOrientationProvider,
+                                                      FrameOrientationProvider initialOrientationProvider, FrameOrientationProvider finalOrientationProvider,
                                                       YoRegistry parentRegistry)
    {
       this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       this.currentTime = new YoDouble(namePrefix + "Time", registry);
       this.parameterPolynomial = new YoPolynomial(namePrefix + "ParameterPolynomial", 6, registry);
+      this.referenceFrame = referenceFrame;
       
       this.initialOrientation = new YoFrameQuaternion(namePrefix + "InitialOrientation", referenceFrame, registry);
       this.finalOrientation = new YoFrameQuaternion(namePrefix + "FinalOrientation", referenceFrame, registry);
@@ -87,17 +92,13 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
 
    private void updateInitialOrientation()
    {
-      initialOrientationProvider.getOrientation(tempInitialOrientation);      
-      tempInitialOrientation.changeFrame(initialOrientation.getReferenceFrame());
-      initialOrientation.set(tempInitialOrientation);
+      initialOrientation.setMatchingFrame(initialOrientationProvider.getOrientation());
       initialOrientation.checkIfUnitary();
    }
 
    private void updateFinalOrientation()
    {
-      finalOrientationProvider.getOrientation(tempFinalOrientation);
-      tempFinalOrientation.changeFrame(finalOrientation.getReferenceFrame());
-      finalOrientation.set(tempFinalOrientation);
+      finalOrientation.setMatchingFrame(finalOrientationProvider.getOrientation());
       finalOrientation.checkIfUnitary();
    }
 
@@ -110,7 +111,7 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       time = MathTools.clamp(time, 0.0, trajectoryTime.getDoubleValue());
       parameterPolynomial.compute(time);
       
-      double parameter = isDone() ? 1.0 : parameterPolynomial.getPosition();
+      double parameter = isDone() ? 1.0 : parameterPolynomial.getValue();
       desiredOrientation.interpolate(initialOrientation, finalOrientation, parameter);
       double parameterd = isDone() ? 0.0 : parameterPolynomial.getVelocity();
       orientationInterpolationCalculator.computeAngularVelocity(desiredAngularVelocity, initialOrientation, finalOrientation, parameterd);
@@ -123,25 +124,27 @@ public class OrientationInterpolationTrajectoryGenerator implements OrientationT
       return currentTime.getDoubleValue() >= trajectoryTime.getDoubleValue();
    }
 
-   public void getOrientation(FrameQuaternion orientationToPack)
+   @Override
+   public ReferenceFrame getReferenceFrame()
    {
-      orientationToPack.setIncludingFrame(desiredOrientation);
+      return referenceFrame;
    }
 
-   public void getAngularVelocity(FrameVector3D velocityToPack)
+   @Override
+   public FrameQuaternionReadOnly getOrientation()
    {
-      velocityToPack.setIncludingFrame(desiredAngularVelocity);
+      return desiredOrientation;
    }
 
-   public void getAngularAcceleration(FrameVector3D accelerationToPack)
+   @Override
+   public FrameVector3DReadOnly getAngularVelocity()
    {
-      accelerationToPack.setIncludingFrame(desiredAngularAcceleration);
+      return desiredAngularVelocity;
    }
 
-   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
+   @Override
+   public FrameVector3DReadOnly getAngularAcceleration()
    {
-      getOrientation(orientationToPack);
-      getAngularVelocity(angularVelocityToPack);
-      getAngularAcceleration(angularAccelerationToPack);
+      return desiredAngularAcceleration;
    }
 }

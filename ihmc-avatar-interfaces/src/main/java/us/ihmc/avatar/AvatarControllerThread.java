@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
+import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -21,11 +22,8 @@ import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
@@ -38,8 +36,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
-import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
-import us.ihmc.simulationConstructionSetTools.util.visualizers.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.simulationConstructionSetTools.util.visualizers.JointAxisVisualizer;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.wholeBodyController.CenterOfMassCalibrationTool;
@@ -60,7 +56,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
    private static final boolean SHOW_JOINTAXIS_ZALIGN_FRAMES = false;
 
    private static final boolean CREATE_COM_CALIBRATION_TOOL = false;
-   private static final boolean ALLOW_MODEL_CORRUPTION = true;
+   private static final boolean ALLOW_MODEL_CORRUPTION = false;
 
    private final YoRegistry registry = new YoRegistry("DRCControllerThread");
 
@@ -248,17 +244,6 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
 
       return modularRobotController;
-   }
-
-   public static FullInverseDynamicsStructure createInverseDynamicsStructure(FullRobotModel fullRobotModel)
-   {
-      RigidBodyBasics elevator = fullRobotModel.getElevator();
-      FloatingJointBasics rootInverseDynamicsJoint = fullRobotModel.getRootJoint();
-      RigidBodyBasics estimationLink = fullRobotModel.getRootBody();
-
-      FullInverseDynamicsStructure inverseDynamicsStructure = new FullInverseDynamicsStructure(elevator, estimationLink, rootInverseDynamicsJoint);
-
-      return inverseDynamicsStructure;
    }
 
    public void initialize()

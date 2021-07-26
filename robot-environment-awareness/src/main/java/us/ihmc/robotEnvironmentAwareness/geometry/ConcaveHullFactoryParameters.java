@@ -98,17 +98,22 @@ public class ConcaveHullFactoryParameters
             + ", triangulation tolerance: " + triangulationTolerance;
    }
 
-   public static ConcaveHullFactoryParameters parse(String parametersAsString)
+   public void setFromString(String parametersAsString)
    {
       parametersAsString = parametersAsString.replace(",", "");
       Scanner scanner = new Scanner(parametersAsString);
-      ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
-      parameters.setEdgeLengthThreshold(ScannerTools.readNextDouble(scanner, parameters.getEdgeLengthThreshold()));
-      parameters.setRemoveAllTrianglesWithTwoBorderEdges(ScannerTools.readNextBoolean(scanner, parameters.doRemoveAllTrianglesWithTwoBorderEdges()));
-      parameters.setAllowSplittingConcaveHull(ScannerTools.readNextBoolean(scanner, parameters.isSplittingConcaveHullAllowed()));
-      parameters.setMaxNumberOfIterations(ScannerTools.readNextInt(scanner, parameters.getMaxNumberOfIterations()));
-      parameters.setTriangulationTolerance(ScannerTools.readNextDouble(scanner, parameters.getTriangulationTolerance()));
+      setEdgeLengthThreshold(ScannerTools.readNextDouble(scanner, getEdgeLengthThreshold()));
+      setRemoveAllTrianglesWithTwoBorderEdges(ScannerTools.readNextBoolean(scanner, doRemoveAllTrianglesWithTwoBorderEdges()));
+      setAllowSplittingConcaveHull(ScannerTools.readNextBoolean(scanner, isSplittingConcaveHullAllowed()));
+      setMaxNumberOfIterations(ScannerTools.readNextInt(scanner, getMaxNumberOfIterations()));
+      setTriangulationTolerance(ScannerTools.readNextDouble(scanner, getTriangulationTolerance()));
       scanner.close();
+   }
+
+   public static ConcaveHullFactoryParameters parse(String parametersAsString)
+   {
+      ConcaveHullFactoryParameters parameters = new ConcaveHullFactoryParameters();
+      parameters.setFromString(parametersAsString);
       return parameters;
    }
 }

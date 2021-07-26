@@ -7,6 +7,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -75,6 +76,31 @@ public class JointIndexHandler
          }
       }
 
+      return true;
+   }
+   
+   public boolean compactBlockToFullBlock(JointReadOnly[] joints, DMatrixRMaj compactMatrix, NativeMatrix fullMatrix)
+   {
+      fullMatrix.zero();
+      
+      for (JointReadOnly joint : joints)
+      {
+         indicesIntoCompactBlock.reset();
+         ScrewTools.computeIndexForJoint(joints, indicesIntoCompactBlock, joint);
+         int[] indicesIntoFullBlock = columnsForJoints.get(joint);
+         
+         if (indicesIntoFullBlock == null) // don't do anything for joints that are not in the list
+            return false;
+         
+         for (int i = 0; i < indicesIntoCompactBlock.size(); i++)
+         {
+            int compactBlockIndex = indicesIntoCompactBlock.get(i);
+            int fullBlockIndex = indicesIntoFullBlock[i];
+           
+            fullMatrix.insert(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, 0, fullBlockIndex);
+         }
+      }
+      
       return true;
    }
 

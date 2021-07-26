@@ -3,6 +3,7 @@ package us.ihmc.avatar;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -39,6 +42,8 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -55,7 +60,7 @@ import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements MultiRobotTestInterface
 {
@@ -169,6 +174,22 @@ public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements Mul
 
       Random random = new Random(543543);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
+      drcSimulationTestHelper.getSimulationStarter().registerControllerStateTransition(new ControllerStateTransitionFactory<HighLevelControllerName>()
+      {
+         @Override
+         public HighLevelControllerName getStateToAttachEnum()
+         {
+            return HighLevelControllerName.WALKING;
+         }
+
+         @Override
+         public StateTransition<HighLevelControllerName> getOrCreateStateTransition(EnumMap<HighLevelControllerName, ? extends State> stateMap,
+                                                                                    HighLevelControllerFactoryHelper controllerFactoryHelper,
+                                                                                    YoRegistry parentRegistry)
+         {
+            return new StateTransition<>(HighLevelControllerName.DO_NOTHING_BEHAVIOR, t -> true);
+         }
+      });
       drcSimulationTestHelper.createSimulation("FwdDynamicAgainstSCS_Floating");
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
@@ -176,10 +197,6 @@ public abstract class AvatarEndToEndForwardDynamicsCalculatorTest implements Mul
       ForwardDynamicComparisonScript script = new ForwardDynamicComparisonScript(robot, robotModel);
       scs.addScript(script);
 
-      @SuppressWarnings("unchecked")
-      YoEnum<HighLevelControllerName> currentState = (YoEnum<HighLevelControllerName>) scs.findVariable("highLevelControllerNameCurrentState");
-      currentState.set(HighLevelControllerName.DO_NOTHING_BEHAVIOR);
-      currentState.addListener(v -> currentState.set(HighLevelControllerName.DO_NOTHING_BEHAVIOR));
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
       script.setPerformAssertions(true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));

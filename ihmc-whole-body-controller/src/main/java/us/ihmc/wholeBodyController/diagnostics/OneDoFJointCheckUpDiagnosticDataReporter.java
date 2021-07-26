@@ -12,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
 import us.ihmc.wholeBodyController.diagnostics.logging.JointForceTrackingDelayLogRecord;
 import us.ihmc.wholeBodyController.diagnostics.logging.ProcessedJointPositionDelayLogRecord;

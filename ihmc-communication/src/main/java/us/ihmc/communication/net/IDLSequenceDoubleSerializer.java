@@ -31,7 +31,7 @@ public class IDLSequenceDoubleSerializer extends Serializer<IDLSequence.Double>
          output.writeDouble(collection.get(i));
    }
 
-   public IDLSequence.Double read(Kryo kryo, Input input, Class<IDLSequence.Double> type)
+   public IDLSequence.Double read(Kryo kryo, Input input, Class<? extends IDLSequence.Double> type)
    {
       int length = input.readInt(true);
       IDLSequence.Double resultList = new IDLSequence.Double(length, TYPE_CODE);

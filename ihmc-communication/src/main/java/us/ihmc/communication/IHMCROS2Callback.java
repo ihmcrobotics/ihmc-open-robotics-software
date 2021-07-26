@@ -71,8 +71,10 @@ public class IHMCROS2Callback<T>
       }
       catch (NoSuchMethodException | SecurityException e)
       {
-         throw new RuntimeException(
-               "Something went wrong when looking up for the method " + messageType.getSimpleName() + "." + ROS2TopicNameTools.pubSubTypeGetterName + "().", e);
+         throw new RuntimeException("Something went wrong when looking up the method "
+                                    + messageType.getSimpleName() + "."
+                                    + ROS2TopicNameTools.pubSubTypeGetterName + "()."
+                                    + e.getMessage(), e);
       }
 
       TopicDataType<T> topicDataType;

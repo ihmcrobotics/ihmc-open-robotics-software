@@ -158,8 +158,11 @@ public class ProcessStreamGobbler extends Thread
    public synchronized void startShutdown()
    {
       shutdown = true;
-      currentTimer.cancel();
-      currentTimer.purge();
+      if (currentTimer != null)
+      {
+         currentTimer.cancel();
+         currentTimer.purge();
+      }
       synchronized (monitor)
       {
          monitor.notify();

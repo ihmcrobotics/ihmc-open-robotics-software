@@ -152,15 +152,12 @@ public class QuaternionCalculusTest
       for (double time = dt; time <= trajectoryTime - dt; time += dt)
       {
          traj.compute(time);
-         traj.getOrientation(orientation);
-         traj.getAngularVelocity(expectedAngularVelocity);
-         q.set(orientation);
+         expectedAngularVelocity.setIncludingFrame(traj.getAngularVelocity());
+         q.set(traj.getOrientation());
          traj.compute(time - dtForFD);
-         traj.getOrientation(orientation);
-         qPrevious.set(orientation);
+         qPrevious.set(traj.getOrientation());
          traj.compute(time + dtForFD);
-         traj.getOrientation(orientation);
-         qNext.set(orientation);
+         qNext.set(traj.getOrientation());
 
          quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dtForFD, qDot);
          quaternionCalculus.computeAngularVelocityInWorldFrame(q, qDot, actualAngularVelocity);
@@ -246,15 +243,12 @@ public class QuaternionCalculusTest
       for (double time = dt; time <= trajectoryTime - dt; time += dt)
       {
          traj.compute(time);
-         traj.getOrientation(orientation);
-         traj.getAngularAcceleration(expectedAngularAcceleration);
-         q.set(orientation);
+         expectedAngularAcceleration.setIncludingFrame(traj.getAngularAcceleration());
+         q.set(traj.getOrientation());
          traj.compute(time - dtForFD);
-         traj.getOrientation(orientation);
-         qPrevious.set(orientation);
+         qPrevious.set(traj.getOrientation());
          traj.compute(time + dtForFD);
-         traj.getOrientation(orientation);
-         qNext.set(orientation);
+         qNext.set(traj.getOrientation());
 
          quaternionCalculus.computeQDotByFiniteDifferenceCentral(qPrevious, qNext, dtForFD, qDot);
          quaternionCalculus.computeQDDotByFiniteDifferenceCentral(qPrevious, q, qNext, dtForFD, qDDot);

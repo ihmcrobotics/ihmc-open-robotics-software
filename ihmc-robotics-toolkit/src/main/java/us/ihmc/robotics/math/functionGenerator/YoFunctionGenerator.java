@@ -3,10 +3,12 @@ package us.ihmc.robotics.math.functionGenerator;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.YoSignalDerivative;
 import us.ihmc.robotics.math.YoSignalDerivative.DifferentiationMode;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -51,7 +53,7 @@ public class YoFunctionGenerator
    private final YoVariable[] createdVariables;
    private final YoSignalDerivative signalDerivative;
 
-   private final YoDouble time;
+   private final DoubleProvider time;
    private double sweepFrequencyLowHz = 0.001;
    private double previousResetTime, previousChirpFrequency;
    private boolean previousChirpUpAndDown;
@@ -73,12 +75,12 @@ public class YoFunctionGenerator
       this(name, null, registry, smoothParameters, -1.0);
    }
 
-   public YoFunctionGenerator(String name, YoDouble time, YoRegistry parentRegistry)
+   public YoFunctionGenerator(String name, DoubleProvider time, YoRegistry parentRegistry)
    {
       this(name, time, parentRegistry, false, -1.0);
    }
 
-   public YoFunctionGenerator(String name, YoDouble time, YoRegistry parentRegistry, boolean smoothParameters, double dT)
+   public YoFunctionGenerator(String name, DoubleProvider time, YoRegistry parentRegistry, boolean smoothParameters, double dT)
    {
       this.smoothParameters = smoothParameters;
 
@@ -99,7 +101,7 @@ public class YoFunctionGenerator
       frequency = new YoDouble(name + "Freq", registry);
       phase = new YoDouble(name + "Phase", registry);
 
-      alphaFilter = new YoDouble("alphaFilter", registry);
+      alphaFilter = new YoDouble(name + "SmoothingAlphaFilter", registry);
       if (!smoothParameters)
          alphaFilter.set(0.0);
       else
@@ -201,6 +203,11 @@ public class YoFunctionGenerator
    {
       return frequency.getDoubleValue();
    }
+   
+   public double getFrequencyFiltered()
+   {
+      return frequencyFiltered.getDoubleValue();
+   }
 
    public void setChirpFrequencyMaxHz(double frequencyHz)
    {
@@ -210,6 +217,11 @@ public class YoFunctionGenerator
    public double getChirpFrequencyMax()
    {
       return chirpFrequencyMax.getDoubleValue();
+   }
+   
+   public double getChirpFrequency()
+   {
+      return chirpFrequency.getDoubleValue();
    }
 
    public void setPhase(double phase)
@@ -280,7 +292,7 @@ public class YoFunctionGenerator
                "Function Generator wasn't created with a time YoVariable. Need to create with a time variable or call getValue(double time) instead");
       }
 
-      return getValue(time.getDoubleValue());
+      return getValue(time.getValue());
    }
 
    public double getValueDot()
@@ -520,25 +532,10 @@ public class YoFunctionGenerator
          if (angle < 0.0)
             angle = angle + TWO_PI;
 
-         if (angle < Math.PI / 2.0)
-         {
-            double percentUp = angle / (Math.PI / 2.0);
-            value.set(offsetFiltered.getDoubleValue() + amplitudeFiltered.getDoubleValue() * percentUp);
-         }
-         else if (angle < 3.0 * Math.PI / 2.0)
-         {
-            double percentDown = (angle - Math.PI / 2.0) / (Math.PI / 2.0);
-            value.set(offsetFiltered.getDoubleValue() + amplitudeFiltered.getDoubleValue() - amplitudeFiltered.getDoubleValue() * percentDown);
-         }
-         else if (angle < TWO_PI)
-         {
-            double percentUp = (angle - 3.0 * Math.PI / 2.0) / (Math.PI / 2.0);
-            value.set(offsetFiltered.getDoubleValue() - amplitudeFiltered.getDoubleValue() + amplitudeFiltered.getDoubleValue() * percentUp);
-         }
-         else
-         {
-            value.set(offsetFiltered.getDoubleValue());
-         }
+         double percentUp = angle / (2.0 * Math.PI);
+
+         double sawtoothValue = EuclidCoreTools.interpolate(-amplitudeFiltered.getValue(), amplitudeFiltered.getValue(), percentUp);
+         value.set(offsetFiltered.getDoubleValue() + sawtoothValue);
 
          break;
       }

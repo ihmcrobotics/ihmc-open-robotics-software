@@ -8,21 +8,20 @@ import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectio
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -30,6 +29,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -38,19 +38,16 @@ public class WalkingSingleSupportState extends SingleSupportState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private final int additionalFootstepsToConsider;
    private final Footstep nextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
-   private final FootstepShiftFractions footstepShiftFraction = new FootstepShiftFractions();
    private double swingTime;
 
-   private static final int additionalFootstepsToConsider = 2;
-   private final Footstep[] footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
-   private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
-   private final FootstepShiftFractions[] footstepShiftFractions = FootstepShiftFractions.createShiftFractions(additionalFootstepsToConsider);
+   private final Footstep[] footsteps;
+   private final FootstepTiming[] footstepTimings;
 
    private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
    private final FramePose3D desiredFootPoseInWorld = new FramePose3D(worldFrame);
-   private final FramePoint3D nextExitCMP = new FramePoint3D();
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -59,8 +56,6 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
    private final LegConfigurationManager legConfigurationManager;
-
-   private final FramePoint3D desiredCoM = new FramePoint3D();
 
    private final YoDouble fractionOfSwingToStraightenSwingLeg = new YoDouble("fractionOfSwingToStraightenSwingLeg", registry);
    private final YoDouble fractionOfSwingToCollapseStanceLeg = new YoDouble("fractionOfSwingToCollapseStanceLeg", registry);
@@ -71,16 +66,24 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final YoDouble icpErrorThresholdToSpeedUpSwing = new YoDouble("icpErrorThresholdToSpeedUpSwing", registry);
 
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
+   private final YoBoolean resubmitStepsInSwingEveryTick = new YoBoolean("resubmitStepsInSwingEveryTick", registry);
+
    private final BooleanProvider minimizeAngularMomentumRateZDuringSwing;
+
+   private final DoubleProvider timeOverrunToInitializeFreeFall;
 
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
-   public WalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
-                                    HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-                                    WalkingControllerParameters walkingControllerParameters, WalkingFailureDetectionControlModule failureDetectionControlModule,
+   public WalkingSingleSupportState(WalkingStateEnum stateEnum,
+                                    WalkingMessageHandler walkingMessageHandler,
+                                    TouchdownErrorCompensator touchdownErrorCompensator,
+                                    HighLevelHumanoidControllerToolbox controllerToolbox,
+                                    HighLevelControlManagerFactory managerFactory,
+                                    WalkingControllerParameters walkingControllerParameters,
+                                    WalkingFailureDetectionControlModule failureDetectionControlModule,
                                     YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, parentRegistry);
@@ -99,8 +102,20 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
-      minimizeAngularMomentumRateZDuringSwing = new BooleanParameter("minimizeAngularMomentumRateZDuringSwing", registry,
+      minimizeAngularMomentumRateZDuringSwing = new BooleanParameter("minimizeAngularMomentumRateZDuringSwing",
+                                                                     registry,
                                                                      walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
+
+      timeOverrunToInitializeFreeFall = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
+                                                                               getClass().getSimpleName(),
+                                                                               "swingTimeOverrunToInitializeFreeFall",
+                                                                               registry,
+                                                                               walkingControllerParameters.getSwingTimeOverrunToInitializeFreeFall());
+      resubmitStepsInSwingEveryTick.set(walkingControllerParameters.resubmitStepsInTransferEveryTick());
+
+      additionalFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
+      footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
+      footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
 
       setYoVariablesToNaN();
    }
@@ -115,6 +130,23 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public void doAction(double timeInState)
    {
+      if (resubmitStepsInSwingEveryTick.getBooleanValue())
+      {
+         balanceManager.clearICPPlan();
+         balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
+
+         int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
+         for (int i = 0; i < stepsToAdd; i++)
+         {
+            walkingMessageHandler.peekFootstep(i, footsteps[i]);
+            walkingMessageHandler.peekTiming(i, footstepTimings[i]);
+            balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
+         }
+      }
+
+      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
+      balanceManager.computeICPPlan();
+
       super.doAction(timeInState);
 
       boolean requestSwingSpeedUp = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
@@ -131,47 +163,15 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
-            balanceManager.updateCurrentICPPlan();
-
-            updateHeightManager();
-         }
-      }
-      else if (balanceManager.isPushRecoveryEnabled())
-      {
-         boolean footstepHasBeenAdjusted = balanceManager.checkAndUpdateFootstep(nextFootstep);
-         if (footstepHasBeenAdjusted)
-         {
-            requestSwingSpeedUp = true;
-            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-            failureDetectionControlModule.setNextFootstep(nextFootstep);
-            updateFootstepParameters();
-
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
-
-            walkingMessageHandler.reportWalkingAbortRequested();
-            walkingMessageHandler.clearFootsteps();
-
-            double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-            double swingDuration = footstepTiming.getSwingTime();
-            double transferDuration = footstepTiming.getTransferTime();
-
-            double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-            double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
-
-            balanceManager.clearICPPlan();
-            balanceManager.setFinalTransferTime(finalTransferTime);
-            balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-            balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
-            balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
-            balanceManager.setICPPlanSupportSide(supportSide);
-            balanceManager.initializeICPPlanForSingleSupport(swingDuration, transferDuration, finalTransferTime);
+            balanceManager.adjustFootstep(nextFootstep);
+            balanceManager.computeICPPlan();
 
             updateHeightManager();
          }
       }
       else
       {
-         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateFootstepFromICPOptimization(nextFootstep);
+         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
 
          if (footstepIsBeingAdjusted)
          {
@@ -182,8 +182,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
-            balanceManager.updateCurrentICPPlan();
-            //legConfigurationManager.prepareForLegBracing(swingSide);
+            balanceManager.adjustFootstep(nextFootstep);
+            balanceManager.computeICPPlan();
 
             updateHeightManager();
          }
@@ -204,10 +204,17 @@ public class WalkingSingleSupportState extends SingleSupportState
       {
          legConfigurationManager.straightenLegDuringSwing(swingSide);
       }
+
       if (timeInState > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime && !legConfigurationManager.isLegCollapsed(supportSide)
             && feetAreWellPositioned)
       {
          legConfigurationManager.collapseLegDuringSwing(swingSide.getOppositeSide());
+      }
+
+      if (timeInState > swingTime + timeOverrunToInitializeFreeFall.getValue())
+      {
+         // TODO Not sure if the transition duration should be fixed or a scale of the swing time. Need to be extracted. 
+         comHeightManager.initializeTransitionToFall(swingTime / 6.0);
       }
 
       walkingMessageHandler.clearFootTrajectory();
@@ -235,35 +242,33 @@ public class WalkingSingleSupportState extends SingleSupportState
       double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
-      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
-
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
          swingTime = defaultSwingTime;
          footstepTiming.setTimings(swingTime, defaultTransferTime);
          balanceManager.packFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime, nextFootstep);
          nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
+         nextFootstep.setIsAdjustable(true);
          walkingMessageHandler.reportWalkingAbortRequested();
          walkingMessageHandler.clearFootsteps();
       }
       else
       {
          swingTime = walkingMessageHandler.getNextSwingTime();
-         walkingMessageHandler.poll(nextFootstep, footstepTiming, footstepShiftFraction);
+         walkingMessageHandler.poll(nextFootstep, footstepTiming);
       }
 
-      /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
+      /**
+       * 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the
+       * contact points are up to date
+       */
       feetManager.setContactStateForSwing(swingSide);
 
       updateFootstepParameters();
 
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getValue());
-      balanceManager.setNextFootstep(nextFootstep);
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
-      balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
+      balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       boolean isLastStep = stepsToAdd == 0;
@@ -271,48 +276,31 @@ public class WalkingSingleSupportState extends SingleSupportState
       {
          walkingMessageHandler.peekFootstep(i, footsteps[i]);
          walkingMessageHandler.peekTiming(i, footstepTimings[i]);
-         walkingMessageHandler.peekShiftFraction(i, footstepShiftFractions[i]);
-         balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i], footstepShiftFractions[i]);
+         balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
 
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport(footstepTiming.getSwingTime(), footstepTiming.getTransferTime(), finalTransferTime);
+      balanceManager.initializeICPPlanForSingleSupport();
 
       updateHeightManager();
 
-      if (balanceManager.wasTimingAdjustedForReachability())
-      {
-         double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
-         double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
-         double nextTransferDuration = balanceManager.getNextTransferDurationAdjustedForReachability();
-
-         swingTime = currentSwingDuration;
-         footstepTiming.setTimings(currentSwingDuration, currentTransferDuration);
-
-         if (isLastStep)
-         {
-            balanceManager.setFinalTransferTime(nextTransferDuration);
-         }
-         else
-         {
-            double nextSwingTime = footstepTimings[0].getSwingTime();
-            footstepTimings[0].setTimings(nextSwingTime, nextTransferDuration);
-            walkingMessageHandler.adjustTiming(nextSwingTime, nextTransferDuration);
-         }
-      }
-
-      if (balanceManager.isRecoveringFromDoubleSupportFall())
-      {
-         balanceManager.updateCurrentICPPlan();
-         balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
-      }
-
-      feetManager.requestSwing(swingSide, nextFootstep, swingTime);
+      feetManager.requestSwing(swingSide,
+                               nextFootstep,
+                               swingTime,
+                               balanceManager.getFinalDesiredCoMVelocity(),
+                               balanceManager.getFinalDesiredCoMAcceleration());
 
       if (feetManager.adjustHeightIfNeeded(nextFootstep))
       {
          walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
          feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
+      }
+
+      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
+      if (balanceManager.isRecoveringFromDoubleSupportFall())
+      {
+         balanceManager.computeICPPlan();
+         balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
       }
 
       legConfigurationManager.startSwing(swingSide);
@@ -388,9 +376,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    private final FramePoint2D filteredDesiredCoP = new FramePoint2D(worldFrame);
-   private final FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
    private final FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
-   private final FramePoint2D desiredICP = new FramePoint2D(worldFrame);
    private final FramePoint2D currentICP = new FramePoint2D(worldFrame);
 
    public void switchToToeOffIfPossible(RobotSide supportSide)
@@ -400,26 +386,33 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       if (shouldComputeToeLineContact || shouldComputeToePointContact)
       {
-         balanceManager.getDesiredCMP(desiredCMP);
-         balanceManager.getDesiredICP(desiredICP);
-         balanceManager.getCapturePoint(currentICP);
-         balanceManager.getNextExitCMP(nextExitCMP);
+         currentICP.setIncludingFrame(balanceManager.getCapturePoint());
 
          controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), desiredCoP);
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
 
-         feetManager.updateToeOffStatusSingleSupport(nextFootstep, nextExitCMP, desiredCMP, desiredCoP, desiredICP, currentICP);
+         FramePoint3DReadOnly supportFootExitCMP = balanceManager.getFirstExitCMPForToeOff(false);
+
+         feetManager.updateToeOffStatusSingleSupport(nextFootstep,
+                                                     supportFootExitCMP,
+                                                     balanceManager.getDesiredCMP(),
+                                                     desiredCoP,
+                                                     balanceManager.getDesiredICP(),
+                                                     currentICP,
+                                                     balanceManager.getFinalDesiredICP());
 
          if (feetManager.okForPointToeOff() && shouldComputeToePointContact)
-            feetManager.requestPointToeOff(supportSide, nextExitCMP, filteredDesiredCoP);
+            feetManager.requestPointToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
          else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
-            feetManager.requestLineToeOff(supportSide, nextExitCMP, filteredDesiredCoP);
+            feetManager.requestLineToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
+
+//         updateHeightManager();
       }
    }
 
    /**
     * Request the swing trajectory to speed up using
-    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2D)}.
+    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2DReadOnly)}.
     * It is clamped w.r.t. to
     * {@link WalkingControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     *
@@ -458,31 +451,26 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private void updateHeightManager()
    {
-      balanceManager.getFinalDesiredCoMPosition(desiredCoM);
-
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep,
-                                                                                                                                                   swingSide);
-      transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep,
+                                                                                                                                                swingSide);
+      transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());
       double extraToeOffHeight = 0.0;
-      if (feetManager.canDoSingleSupportToeOff(nextFootstep, swingSide))
+      if (feetManager.canDoSingleSupportToeOff(nextFootstep.getFootstepPose().getPosition(), swingSide) && feetManager.getToeOffManager().isSteppingUp())
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
-
-      FixedFramePoint3DBasics stanceFootPosition = walkingMessageHandler.getFootstepAtCurrentLocation(swingSide.getOppositeSide()).getFootstepPose().getPosition();
-      FixedFramePoint3DBasics touchdownPosition = nextFootstep.getFootstepPose().getPosition();
-      double swingTime = footstepTiming.getSwingTime(); // TODO: Should be swing time remaining for step adjustments.
-      comHeightManager.step(stanceFootPosition, touchdownPosition, swingTime, swingSide, extraToeOffHeight);
    }
 
    @Override
    protected boolean hasMinimumTimePassed(double timeInState)
    {
-      double minimumSwingTime;
       if (balanceManager.isRecoveringFromDoubleSupportFall())
-         minimumSwingTime = 0.15;
+      {
+         double minimumSwingTime = 0.15;
+         return timeInState > minimumSwingTime;
+      }
       else
-         minimumSwingTime = swingTime * minimumSwingFraction.getDoubleValue();
-
-      return timeInState > minimumSwingTime;
+      {
+         return feetManager.getFractionThroughSwing(swingSide) > minimumSwingFraction.getDoubleValue();
+      }
    }
 }

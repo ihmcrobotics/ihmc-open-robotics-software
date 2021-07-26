@@ -6,15 +6,16 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.jfxvisualizer.AtlasFootstepPlannerUI;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.dynamicsSimulation.HumanoidDynamicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
+import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.behaviors.tools.perception.SimulatedREAModule;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -70,13 +71,13 @@ public class AtlasBehaviorUIDemo
       if (LAUNCH_PARAMETER_TUNER) ThreadTools.startAThread(this::parameterTuner, "ParameterTuner");
       if (LAUNCH_FOOTSTEP_PLANNER_UI) ThreadTools.startAThread(this::footstepPlannerUI, "FootstepPlannerUI");
 
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.DEFAULT_BEHAVIORS;
+      JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       LogTools.info("Creating behavior module");
       BehaviorModule.createInterprocess(behaviorRegistry, createRobotModel());
 
       LogTools.info("Creating behavior user interface");
-      BehaviorUI.createInterprocess(behaviorRegistry, createRobotModel(), "localhost");
+      JavaFXBehaviorUI.createInterprocess(behaviorRegistry, createRobotModel(), "localhost");
    }
 
    private void simulation()
@@ -92,9 +93,9 @@ public class AtlasBehaviorUIDemo
       else
       {
          LogTools.info("Creating dynamics simulation");
-         AtlasDynamicsSimulation.createForManualTest(createRobotModel(),
-                                                     new PlanarRegionsListDefinedEnvironment(ENVIRONMENT.get(), 0.02, false),
-                                                     recordFrequencySpeedup, 10).simulate();
+         HumanoidDynamicsSimulation.createForManualTest(createRobotModel(),
+                                                        new PlanarRegionsListDefinedEnvironment(ENVIRONMENT.get(), 0.02, false),
+                                                        recordFrequencySpeedup, 10).simulate();
       }
    }
 

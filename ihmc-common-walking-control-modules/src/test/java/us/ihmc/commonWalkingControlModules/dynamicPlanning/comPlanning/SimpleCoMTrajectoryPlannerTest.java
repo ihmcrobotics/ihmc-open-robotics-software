@@ -55,16 +55,19 @@ public class SimpleCoMTrajectoryPlannerTest
       double finalTime3 = 3.97;
 
       firstContact.getTimeInterval().setInterval(0.0, finalTime1);
-      firstContact.setStartCopPosition(vrpStart);
-      firstContact.setEndCopPosition(vrpMiddle);
+      firstContact.setStartECMPPosition(vrpStart, 0.0);
+      firstContact.setEndECMPPosition(vrpMiddle, 0.0);
+      firstContact.setLinearECMPVelocity();
 
       secondContact.getTimeInterval().setInterval(finalTime1, finalTime2);
-      secondContact.setStartCopPosition(vrpMiddle);
-      secondContact.setEndCopPosition(vrpMiddle2);
+      secondContact.setStartECMPPosition(vrpMiddle, 0.0);
+      secondContact.setEndECMPPosition(vrpMiddle2, 0.0);
+      secondContact.setLinearECMPVelocity();
 
       thirdContact.getTimeInterval().setInterval(finalTime2, finalTime3);
-      thirdContact.setStartCopPosition(vrpMiddle2);
-      thirdContact.setEndCopPosition(vrpEnd);
+      thirdContact.setStartECMPPosition(vrpMiddle2, 0.0);
+      thirdContact.setEndECMPPosition(vrpEnd, 0.0);
+      thirdContact.setLinearECMPVelocity();
 
       contactSequence.add(firstContact);
       contactSequence.add(secondContact);
@@ -294,16 +297,19 @@ public class SimpleCoMTrajectoryPlannerTest
       double finalTime3 = 3.97;
 
       firstContact.getTimeInterval().setInterval(0.0, finalTime1);
-      firstContact.setStartCopPosition(vrpStart);
-      firstContact.setEndCopPosition(vrpMiddle);
+      firstContact.setStartECMPPosition(vrpStart, 0.0);
+      firstContact.setEndECMPPosition(vrpMiddle, 0.0);
+      firstContact.setLinearECMPVelocity();
 
       secondContact.getTimeInterval().setInterval(finalTime1, finalTime2);
-      secondContact.setStartCopPosition(vrpMiddle);
-      secondContact.setEndCopPosition(vrpMiddle2);
+      secondContact.setStartECMPPosition(vrpMiddle, 0.0);
+      secondContact.setEndECMPPosition(vrpMiddle2, 0.0);
+      secondContact.setLinearECMPVelocity();
 
       thirdContact.getTimeInterval().setInterval(finalTime2, finalTime3);
-      thirdContact.setStartCopPosition(vrpMiddle2);
-      thirdContact.setEndCopPosition(vrpEnd);
+      thirdContact.setStartECMPPosition(vrpMiddle2, 0.0);
+      thirdContact.setEndECMPPosition(vrpEnd, 0.0);
+      thirdContact.setLinearECMPVelocity();
 
       contactSequence.add(firstContact);
       contactSequence.add(secondContact);

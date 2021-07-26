@@ -22,7 +22,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.WorkspaceLimiterControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
@@ -450,7 +450,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
       // Since the control frame is moved down below the foot this assert makes sure the singularity escape uses the desired ankle position, not the desired control point position.
       String namePrefix = fullRobotModel.getFoot(robotSide).getName();
-      String className = LegSingularityAndKneeCollapseAvoidanceControlModule.class.getSimpleName();
+      String className = WorkspaceLimiterControlModule.class.getSimpleName();
       YoBoolean singularityEscape = (YoBoolean) scs.findVariable(namePrefix + className, namePrefix + "IsSwingSingularityAvoidanceUsed");
       assertFalse("Singularity escape should not be active.", singularityEscape.getBooleanValue());
 

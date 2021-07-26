@@ -1,11 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.capturePoint.YoICPControlGains;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -18,6 +15,9 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BasicSphereController implements SphereControllerInterface
 {
@@ -35,7 +35,7 @@ public class BasicSphereController implements SphereControllerInterface
 
    private final CoMTrajectoryProvider dcmPlan;
 
-   private final List<ContactStateProvider> contactStateProviders = new ArrayList<>();
+   private final List<SettableContactStateProvider> contactStateProviders = new ArrayList<>();
 
    public BasicSphereController(SphereRobot sphereRobot, CoMTrajectoryProvider comTrajectoryProvider, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -77,19 +77,28 @@ public class BasicSphereController implements SphereControllerInterface
       sphereRobot.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
       perfectVRP.set(dcmPlan.getDesiredVRPPosition());
 
-      tempDesiredCMP.set(icpProportionalController.doProportionalControl(sphereRobot.getDCM(), dcmPlan.getDesiredDCMPosition(),
-                                                                         dcmPlan.getDesiredDCMVelocity(), sphereRobot.getOmega0()));
-      tempDesiredCMP.subZ(sphereRobot.getDesiredHeight());
-      desiredCMP.set(tempDesiredCMP);
+      if (contactStateProviders.get(segmentNumber).getContactState().isLoadBearing())
+      {
 
-      heightController.doControl();
+         tempDesiredCMP.set(icpProportionalController
+                                  .doProportionalControl(sphereRobot.getDCM(), dcmPlan.getDesiredDCMPosition(), dcmPlan.getDesiredDCMVelocity(), sphereRobot.getOmega0()));
+         tempDesiredCMP.subZ(sphereRobot.getDesiredHeight());
+         desiredCMP.set(tempDesiredCMP);
 
-      double fZ = heightController.getVerticalForce();
-      WrenchDistributorTools.computePseudoCMP3d(tempDesiredCMP, sphereRobot.getCenterOfMass(), new FramePoint2D(tempDesiredCMP), fZ,
-                                                sphereRobot.getTotalMass(), sphereRobot.getOmega0());
-      WrenchDistributorTools.computeForce(forces, sphereRobot.getCenterOfMass(), tempDesiredCMP, fZ);
+         heightController.doControl(dcmPlan.getDesiredCoMPosition().getZ(), dcmPlan.getDesiredCoMVelocity().getZ());
 
-      vrpForces.setMatchingFrame(forces);
+         double fZ = heightController.getVerticalForce();
+         WrenchDistributorTools
+               .computePseudoCMP3d(tempDesiredCMP, sphereRobot.getCenterOfMass(), new FramePoint2D(tempDesiredCMP), fZ, sphereRobot.getTotalMass(), sphereRobot.getOmega0());
+         WrenchDistributorTools.computeForce(forces, sphereRobot.getCenterOfMass(), tempDesiredCMP, fZ);
+
+         vrpForces.setMatchingFrame(forces);
+      }
+      else
+      {
+         vrpForces.setToZero();
+         forces.setToZero();
+      }
       externalForcePoint.setForce(forces);
 
       if (forces.containsNaN())
@@ -105,7 +114,7 @@ public class BasicSphereController implements SphereControllerInterface
    {
    }
 
-   public void solveForTrajectory(List<? extends ContactStateProvider> stateProviders)
+   public void solveForTrajectory(List<SettableContactStateProvider> stateProviders)
    {
       contactStateProviders.clear();
       contactStateProviders.addAll(stateProviders);

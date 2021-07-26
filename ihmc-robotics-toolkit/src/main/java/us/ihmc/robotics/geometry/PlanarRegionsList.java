@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
@@ -399,7 +400,7 @@ public class PlanarRegionsList
     *
     * @param rigidBodyTransform transform from current frame to desired frame
     */
-   public void applyTransform(RigidBodyTransform rigidBodyTransform)
+   public void applyTransform(RigidBodyTransformReadOnly rigidBodyTransform)
    {
       for (int i = 0; i < regions.size(); i++)
       {
@@ -457,5 +458,44 @@ public class PlanarRegionsList
             ids.add(id);
          }
       }
+   }
+
+   public boolean epsilonEquals(PlanarRegionsList other, double epsilon) {
+      if (this.regions.size() != other.regions.size())
+         return false;
+
+      outer:
+      for (PlanarRegion region : this.regions) {
+         if (other.regions.contains(region))
+            continue;
+
+         for (PlanarRegion regionOther : other.regions) {
+            if (region.getNormal().epsilonEquals(regionOther.getNormal(), epsilon) && region.getPoint().epsilonEquals(regionOther.getPoint(), epsilon)) {
+               for (int i = 0; i < region.getNumberOfConvexPolygons(); i++) {
+                  if (region.getConvexPolygon(i).epsilonEquals(regionOther.getConvexPolygon(i), epsilon))
+                     continue outer;
+               }
+            }
+         }
+
+         //Has not found equal planar region
+         return false;
+      }
+
+      //Has found equal planar region for every element in regions list
+      return true;
+   }
+
+   @Override
+   public boolean equals(Object o) {
+      if (this == o)
+         return true;
+
+      if (!(o instanceof PlanarRegionsList))
+         return false;
+
+      PlanarRegionsList other = (PlanarRegionsList) o;
+
+      return this.epsilonEquals(other, 1e-6); //Semi-arbitrary epsilon; smallest number I could get to consistently pass tests
    }
 }

@@ -21,22 +21,39 @@ import us.ihmc.tools.thread.CloseableAndDisposable;
 
 public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
 {
+   private final boolean manageROS2Node;
    private final RealtimeROS2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
    private final REAStateRequestMessage clearRequestMessage = new REAStateRequestMessage();
    private final REAStateRequestMessage pauseRequestMessage = new REAStateRequestMessage();
    private final REAStateRequestMessage resumeRequestMessage = new REAStateRequestMessage();
    private final REAStateRequestMessage clearAndResumeRequestMessage = new REAStateRequestMessage();
 
+   public HumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node)
+   {
+      this(robotModel, realtimeROS2Node, REACommunicationProperties.inputTopic);
+   }
+
    public HumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation)
    {
       this(robotModel, implementation, REACommunicationProperties.inputTopic);
    }
 
-   public HumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation, ROS2Topic inputTopic)
+   public HumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node, ROS2Topic<?> inputTopic)
+   {
+      this(robotModel, realtimeROS2Node, null, inputTopic);
+   }
+
+   public HumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation, ROS2Topic<?> inputTopic)
+   {
+      this(robotModel, null, implementation, inputTopic);
+   }
+
+   private HumanoidAvatarREAStateUpdater(DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node, PubSubImplementation implementation,
+                                         ROS2Topic<?> inputTopic)
    {
       String robotName = robotModel.getSimpleRobotName();
 
@@ -46,15 +63,23 @@ public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
       clearAndResumeRequestMessage.setRequestClear(true);
       clearAndResumeRequestMessage.setRequestResume(true);
 
-      ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "avatar_rea_state_updater");
+      manageROS2Node = realtimeROS2Node == null;
+      if (realtimeROS2Node == null)
+         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(implementation, "avatar_rea_state_updater");
+      ros2Node = realtimeROS2Node;
 
       reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    HighLevelStateChangeStatusMessage.class,
+                                                    ROS2Tools.getControllerOutputTopic(robotName),
                                                     this::handleHighLevelStateChangeMessage);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    WalkingStatusMessage.class,
+                                                    ROS2Tools.getControllerOutputTopic(robotName),
                                                     this::handleWalkingStatusMessage);
 
-      ros2Node.spin();
+      if (manageROS2Node)
+         ros2Node.spin();
    }
 
    private void handleHighLevelStateChangeMessage(Subscriber<HighLevelStateChangeStatusMessage> subscriber)
@@ -69,12 +94,12 @@ public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
 
       switch (HighLevelControllerName.fromByte(newMessage.getEndHighLevelControllerName()))
       {
-      case WALKING:
-         executorService.execute(() -> reaStateRequestPublisher.publish(clearAndResumeRequestMessage));
-         break;
-      default:
-         executorService.execute(() -> reaStateRequestPublisher.publish(pauseRequestMessage));
-         break;
+         case WALKING:
+            executorService.execute(() -> reaStateRequestPublisher.publish(clearAndResumeRequestMessage));
+            break;
+         default:
+            executorService.execute(() -> reaStateRequestPublisher.publish(pauseRequestMessage));
+            break;
       }
    }
 
@@ -87,25 +112,26 @@ public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
 
       switch (WalkingStatus.fromByte(newMessage.getWalkingStatus()))
       {
-      case STARTED:
-      case RESUMED:
-         executorService.execute(() -> reaStateRequestPublisher.publish(pauseRequestMessage));
-         break;
-      case COMPLETED:
-      case PAUSED:
-         executorService.execute(() -> reaStateRequestPublisher.publish(resumeRequestMessage));
-         break;
-      case ABORT_REQUESTED:
-      default:
-         // Do nothing?
-         break;
+         case STARTED:
+         case RESUMED:
+            executorService.execute(() -> reaStateRequestPublisher.publish(pauseRequestMessage));
+            break;
+         case COMPLETED:
+         case PAUSED:
+            executorService.execute(() -> reaStateRequestPublisher.publish(resumeRequestMessage));
+            break;
+         case ABORT_REQUESTED:
+         default:
+            // Do nothing?
+            break;
       }
    }
 
    private void shutdown()
    {
       executorService.shutdownNow();
-      ros2Node.destroy();
+      if (manageROS2Node)
+         ros2Node.destroy();
    }
 
    @Override

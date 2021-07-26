@@ -710,6 +710,8 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Wiggle inside delta minimums aren't equal.", parameters.getWiggleInsideDeltaMinimum(), packet.getWiggleInsideDeltaMinimum(), epsilon);
       assertEquals("Maximum step reaches aren't equal.", parameters.getMaximumStepReach(), parameters.getMaximumStepReach(), epsilon);
       assertEquals("Maximum step yaws aren't equal.", parameters.getMaximumStepYaw(), packet.getMaximumStepYaw(), epsilon);
+      assertEquals("Use reachability map isn't equal", parameters.getUseStepReachabilityMap(), packet.getUseReachabilityMap());
+      assertEquals("Solution quality threshold isn't equal", parameters.getSolutionQualityThreshold(), packet.getSolutionQualityThreshold(), epsilon);
       assertEquals("Minimum step widths aren't equal.", parameters.getMinimumStepWidth(), packet.getMinimumStepWidth(), epsilon);
       assertEquals("Minimum step lengths aren't equal.", parameters.getMinimumStepLength(), packet.getMinimumStepLength(), epsilon);
       assertEquals("Minimum step yaws aren't equal.", parameters.getMinimumStepYaw(), packet.getMinimumStepYaw(), epsilon);

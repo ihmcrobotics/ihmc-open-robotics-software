@@ -8,13 +8,13 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.19.3"
+      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.19.4"
    }
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.22.0"
-   id("us.ihmc.log-tools-plugin") version "0.5.0"
+   id("us.ihmc.ihmc-build")
+   id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
 ihmc {
@@ -30,7 +30,7 @@ ihmc {
 
 mainDependencies {
    api("us.ihmc:ihmc-pub-sub:0.15.0")
-   api("us.ihmc:ros2-common-interfaces:0.19.3")
+   api("us.ihmc:ros2-common-interfaces:0.19.4")
 }
 
 def generator = new us.ihmc.ros2.rosidl.ROS2InterfaceGenerator();

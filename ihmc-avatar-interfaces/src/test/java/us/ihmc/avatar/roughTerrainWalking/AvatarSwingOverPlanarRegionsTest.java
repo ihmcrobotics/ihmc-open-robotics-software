@@ -48,7 +48,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
 
       double swingTime = 0.6;
       double transferTime = 0.25;
-      double stepLength = 0.32;
+      double stepLength = 0.35;
       double stepWidth = 0.14;
       double maxSwingSpeed = 1.0;
       int steps = 10;
@@ -146,7 +146,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       drcSimulationTestHelper.publishToController(footsteps);
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 
-      Point3D rootJointPosition = new Point3D(2.97, 0.0, 0.83);
+      Point3D rootJointPosition = new Point3D(3.25, 0.0, 0.83);
       Vector3D epsilon = new Vector3D(0.05, 0.05, 0.10);
       Point3D min = new Point3D(rootJointPosition);
       Point3D max = new Point3D(rootJointPosition);

@@ -6,18 +6,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 public class PolynomialTest
 {
-   private Polynomial constant5Polynomial, twoXPlus3Polynomial, fourX4ThreeX3TwoX2OneX1Polynomial;
+   private ObsoletePolynomial constant5Polynomial, twoXPlus3Polynomial, fourX4ThreeX3TwoX2OneX1Polynomial;
 
    @BeforeEach
    public void setUp()
    {
-      constant5Polynomial = new Polynomial(new double[] {5.0});
-      twoXPlus3Polynomial = new Polynomial(new double[] {2.0, 3.0});
-      fourX4ThreeX3TwoX2OneX1Polynomial = new Polynomial(new double[] {4.0, 3.0, 2.0, 1.0, 0.0});
+      constant5Polynomial = new ObsoletePolynomial(new double[] {5.0});
+      twoXPlus3Polynomial = new ObsoletePolynomial(new double[] {2.0, 3.0});
+      fourX4ThreeX3TwoX2OneX1Polynomial = new ObsoletePolynomial(new double[] {4.0, 3.0, 2.0, 1.0, 0.0});
    }
 
    @AfterEach
@@ -33,7 +31,7 @@ public class PolynomialTest
    {
       double realRoot = 7.7;
 
-      Polynomial polynomial = Polynomial.constructFromRealRoot(realRoot);
+      ObsoletePolynomial polynomial = ObsoletePolynomial.constructFromRealRoot(realRoot);
 
       assertEquals(0.0, polynomial.evaluate(realRoot), 1e-7);
       assertEquals(-realRoot, polynomial.evaluate(0.0), 1e-7);
@@ -46,7 +44,7 @@ public class PolynomialTest
       double[] realRoots = new double[] {1.1, 2.7, 3.91};
       ComplexNumber[] complexRootPairs = new ComplexNumber[] {new ComplexNumber(10.2, 7.7), new ComplexNumber(7.9, 3.3)};
 
-      Polynomial polynomial = Polynomial.constructFromScaleFactorAndRoots(scaleFactor, realRoots, complexRootPairs);
+      ObsoletePolynomial polynomial = ObsoletePolynomial.constructFromScaleFactorAndRoots(scaleFactor, realRoots, complexRootPairs);
 
       for (Double realRoot : realRoots)
       {
@@ -70,7 +68,7 @@ public class PolynomialTest
    private void verifyComplexPair(double real, double imag)
    {
       ComplexNumber complexNumber = new ComplexNumber(real, imag);
-      Polynomial polynomial = Polynomial.constructFromComplexPairRoot(complexNumber);
+      ObsoletePolynomial polynomial = ObsoletePolynomial.constructFromComplexPairRoot(complexNumber);
 
       double x = 3.7;
 
@@ -97,7 +95,7 @@ public class PolynomialTest
 	@Test
    public void testSetQuintic()
    {
-	   Polynomial quintic = new Polynomial(new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0});
+	   ObsoletePolynomial quintic = new ObsoletePolynomial(new double[]{1.0, 1.0, 1.0, 1.0, 1.0, 1.0});
 	   quintic.setQuintic(0.0, 1.0,    1.0, 2.0, 3.0,     4.0, 5.0, 6.0);
 	  
 	   assertEquals(quintic.evaluate(0), 1.0, 1e-7);
@@ -122,7 +120,7 @@ public class PolynomialTest
 	@Test
    public void testSetCubic()
    {
-	   Polynomial quintic = new Polynomial(new double[]{1.0, 1.0, 1.0, 1.0});
+	   ObsoletePolynomial quintic = new ObsoletePolynomial(new double[]{1.0, 1.0, 1.0, 1.0});
 	   quintic.setCubic(-1.0, 1.0, 1.0, 2.0, 3.0, 4.0);
 
 	   assertEquals(quintic.evaluate(-1),           1.0, 1e-7);
@@ -248,10 +246,10 @@ public class PolynomialTest
 	@Test
    public void testTimes()
    {
-      Polynomial tenXPlus15Polynomial = constant5Polynomial.times(twoXPlus3Polynomial);
+      ObsoletePolynomial tenXPlus15Polynomial = constant5Polynomial.times(twoXPlus3Polynomial);
       verifyEpsilonEquals(new double[] {10.0, 15.0}, tenXPlus15Polynomial.getCoefficients(), 1e-7);
 
-      Polynomial multipliedPolynomial = twoXPlus3Polynomial.times(fourX4ThreeX3TwoX2OneX1Polynomial);
+      ObsoletePolynomial multipliedPolynomial = twoXPlus3Polynomial.times(fourX4ThreeX3TwoX2OneX1Polynomial);
       verifyEpsilonEquals(new double[]
       {
          8.0, 18.0, 13.0, 8.0, 3.0, 0.0
@@ -261,23 +259,23 @@ public class PolynomialTest
 	@Test
    public void testTimesScalar()
    {
-      Polynomial eighteenXPlus27Polynomial = twoXPlus3Polynomial.times(9.0);
+      ObsoletePolynomial eighteenXPlus27Polynomial = twoXPlus3Polynomial.times(9.0);
       verifyEpsilonEquals(new double[] {18.0, 27.0}, eighteenXPlus27Polynomial.getCoefficients(), 1e-7);
    }
 
 	@Test
    public void testPlus()
    {
-      Polynomial twoXPlus8Polynomial = constant5Polynomial.plus(twoXPlus3Polynomial);
+      ObsoletePolynomial twoXPlus8Polynomial = constant5Polynomial.plus(twoXPlus3Polynomial);
       verifyEpsilonEquals(new double[] {2.0, 8.0}, twoXPlus8Polynomial.getCoefficients(), 1e-7);
 
-      Polynomial plusPolynomial = twoXPlus3Polynomial.plus(fourX4ThreeX3TwoX2OneX1Polynomial);
+      ObsoletePolynomial plusPolynomial = twoXPlus3Polynomial.plus(fourX4ThreeX3TwoX2OneX1Polynomial);
       verifyEpsilonEquals(new double[] {4.0, 3.0, 2.0, 3.0, 3.0}, plusPolynomial.getCoefficients(), 1e-7);
 
-      Polynomial zero = new Polynomial(new double[] {0.0});
-      Polynomial zero2 = new Polynomial(new double[] {0.0});
+      ObsoletePolynomial zero = new ObsoletePolynomial(new double[] {0.0});
+      ObsoletePolynomial zero2 = new ObsoletePolynomial(new double[] {0.0});
 
-      Polynomial zero3 = zero.plus(zero2);
+      ObsoletePolynomial zero3 = zero.plus(zero2);
 
       assertTrue(zero3.epsilonEquals(zero, 1e-7));
    }
@@ -286,9 +284,9 @@ public class PolynomialTest
    public void testEpsilonEquals()
    {
       assertTrue(constant5Polynomial.epsilonEquals(constant5Polynomial, 1e-30));
-      assertTrue(twoXPlus3Polynomial.epsilonEquals(twoXPlus3Polynomial.plus(new Polynomial(new double[] {0.0})), 1e-30));
+      assertTrue(twoXPlus3Polynomial.epsilonEquals(twoXPlus3Polynomial.plus(new ObsoletePolynomial(new double[] {0.0})), 1e-30));
 
-      assertFalse(twoXPlus3Polynomial.epsilonEquals(twoXPlus3Polynomial.plus(new Polynomial(new double[] {1.0})), 1e-1));
+      assertFalse(twoXPlus3Polynomial.epsilonEquals(twoXPlus3Polynomial.plus(new ObsoletePolynomial(new double[] {1.0})), 1e-1));
    }
 
 	@Test
@@ -306,10 +304,10 @@ public class PolynomialTest
 	@Test
    public void testEqualsZero()
    {
-      Polynomial zeroPolynomial = new Polynomial(new double[] {0.0});
-      Polynomial zeroPolynomial2 = new Polynomial(new double[] {0.0, 0.0});
-      Polynomial nonZeroPolynomial = new Polynomial(new double[] {1.0, 0.1});
-      Polynomial nonZeroPolynomial2 = new Polynomial(new double[] {0.0, 0.1});
+      ObsoletePolynomial zeroPolynomial = new ObsoletePolynomial(new double[] {0.0});
+      ObsoletePolynomial zeroPolynomial2 = new ObsoletePolynomial(new double[] {0.0, 0.0});
+      ObsoletePolynomial nonZeroPolynomial = new ObsoletePolynomial(new double[] {1.0, 0.1});
+      ObsoletePolynomial nonZeroPolynomial2 = new ObsoletePolynomial(new double[] {0.0, 0.1});
 
       assertTrue(zeroPolynomial.equalsZero());
       assertTrue(zeroPolynomial2.equalsZero());

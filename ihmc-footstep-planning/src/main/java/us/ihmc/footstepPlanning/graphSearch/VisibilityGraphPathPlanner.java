@@ -3,11 +3,13 @@ package us.ihmc.footstepPlanning.graphSearch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
@@ -20,16 +22,17 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcesso
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.string.StringTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 
 public class VisibilityGraphPathPlanner
 {
-   private static final boolean debug = false;
-
    private final NavigableRegionsManager navigableRegionsManager;
    private final PathOrientationCalculator pathOrientationCalculator;
    private final YoEnum<BodyPathPlanningResult> yoResult;
@@ -42,6 +45,11 @@ public class VisibilityGraphPathPlanner
    private PlanarRegionsList planarRegionsList;
 
    private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
+
+   public VisibilityGraphPathPlanner(VisibilityGraphsParametersReadOnly visibilityGraphsParameters, BodyPathPostProcessor pathPostProcessor)
+   {
+      this("", visibilityGraphsParameters, pathPostProcessor, new YoRegistry(VisibilityGraphPathPlanner.class.getSimpleName()));
+   }
 
    public VisibilityGraphPathPlanner(VisibilityGraphsParametersReadOnly visibilityGraphsParameters,
                                      BodyPathPostProcessor pathPostProcessor,
@@ -62,6 +70,16 @@ public class VisibilityGraphPathPlanner
 
    public BodyPathPlanningResult planWaypoints()
    {
+      return planWaypoints(navigableRegionsManager::calculateBodyPath);
+   }
+
+   public BodyPathPlanningResult planWaypointsWithOcclusionHandling()
+   {
+      return planWaypoints(navigableRegionsManager::calculateBodyPathWithOcclusionHandling);
+   }
+
+   private BodyPathPlanningResult planWaypoints(BiFunction<Point3DReadOnly, Point3DReadOnly, List<Point3DReadOnly>> calculateBodyPath)
+   {
       waypoints.clear();
 
       if (planarRegionsList == null)
@@ -81,16 +99,13 @@ public class VisibilityGraphPathPlanner
 
          navigableRegionsManager.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
 
-         if (debug)
-         {
-            LogTools.info("Starting to plan using " + getClass().getSimpleName());
-            LogTools.info("Body start pose: " + startPosition);
-            LogTools.info("Body goal pose:  " + goalPosition);
-         }
+         LogTools.debug("Starting to plan using " + getClass().getSimpleName());
+         LogTools.debug("Body start pose: " + startPosition);
+         LogTools.debug("Body goal pose:  " + goalPosition);
 
          try
          {
-            List<Point3DReadOnly> path = navigableRegionsManager.calculateBodyPath(startPosition, goalPosition);
+            List<Point3DReadOnly> path = calculateBodyPath.apply(startPosition, goalPosition);
             List<? extends Pose3DReadOnly> posePath = pathOrientationCalculator.computePosesFromPath(path,
                                                                                                      navigableRegionsManager.getVisibilityMapSolution(),
                                                                                                      bodyStartPose.getOrientation(),
@@ -113,6 +128,11 @@ public class VisibilityGraphPathPlanner
       else
       {
          yoResult.set(BodyPathPlanningResult.FOUND_SOLUTION);
+         for (int i = 0, waypointsSize = waypoints.size(); i < waypointsSize; i++)
+         {
+            Pose3DReadOnly waypoint = waypoints.get(i);
+            LogTools.debug("Solution waypoint {}: {}", i, StringTools.zUpPoseString(waypoint));
+         }
       }
 
       return yoResult.getEnumValue();
@@ -122,6 +142,19 @@ public class VisibilityGraphPathPlanner
    {
       packGraph(visibilityGraphHolder);
       return visibilityGraphHolder;
+   }
+
+   public void setStanceFootPoses(HumanoidReferenceFrames humanoidReferenceFrames)
+   {
+      FramePose3D leftFootPoseTemp = new FramePose3D();
+      leftFootPoseTemp.setToZero(humanoidReferenceFrames.getSoleFrame(RobotSide.LEFT));
+      leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FramePose3D rightFootPoseTemp = new FramePose3D();
+      rightFootPoseTemp.setToZero(humanoidReferenceFrames.getSoleFrame(RobotSide.RIGHT));
+      rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+
+      setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
    }
 
    public void setStanceFootPoses(Pose3DReadOnly leftFootPose, Pose3DReadOnly rightFootPose)

@@ -1,31 +1,63 @@
 package us.ihmc.atlas.behaviors.coordinator;
 
-import javafx.application.Application;
-import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorAPI;
-import us.ihmc.humanoidBehaviors.ui.behaviors.coordinator.BuildingExplorationBehaviorUI;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.behaviors.demo.BuildingExplorationBehaviorOld;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.communication.CommunicationMode;
+import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
+import us.ihmc.log.LogTools;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
-public class AtlasBuildingExplorationBehaviorUI extends Application
+public class AtlasBuildingExplorationBehaviorUI
 {
-   @Override
-   public void start(Stage stage) throws Exception
+   public static void start()
    {
-      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
-      SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(BuildingExplorationBehaviorAPI.API);
+      start(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false),
+            CommunicationMode.INTERPROCESS,
+            CommunicationMode.INTRAPROCESS);
+   }
 
-      messager.startMessager();
-      BuildingExplorationBehaviorUI ui = new BuildingExplorationBehaviorUI(stage, messager, robotModel);
+   public static void start(DRCRobotModel robotModel, CommunicationMode ros2CommunicationMode, CommunicationMode behaviorMessagerCommunicationMode)
+   {
+      LogTools.info("Starting humanoid behavior manager");
+      ExceptionTools.handle(() ->
+      {
+         HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+         LogModelProvider logModelProvider = robotModel.getLogModelProvider();
+         new IHMCHumanoidBehaviorManager(robotModel.getSimpleRobotName(),
+                                         robotModel.getFootstepPlannerParameters(),
+                                         robotModel,
+                                         robotModel,
+                                         logModelProvider,
+                                         false,
+                                         sensorInformation);
+      }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
 
-      ui.show();
+      JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
+
+      LogTools.info("Starting behavior module");
+      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, ros2CommunicationMode, behaviorMessagerCommunicationMode);
+
+      LogTools.info("Starting behavior UI");
+      JavaFXBehaviorUI behaviorUI = JavaFXBehaviorUI.create(behaviorRegistry,
+                                                            robotModel,
+                                                            ros2CommunicationMode,
+                                                            behaviorMessagerCommunicationMode,
+                                                            "localhost",
+                                                            behaviorModule.getMessager());
+      behaviorUI.selectBehavior(BuildingExplorationBehaviorOld.DEFINITION);
    }
 
    public static void main(String[] args)
    {
-      launch(args);
+      AtlasBuildingExplorationBehaviorUI.start();
    }
 }

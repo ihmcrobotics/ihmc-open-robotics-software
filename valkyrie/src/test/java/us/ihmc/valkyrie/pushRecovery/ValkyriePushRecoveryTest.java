@@ -17,12 +17,6 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       return new ValkyrieRobotModel(RobotTarget.SCS);
    }
 
-   @Override
-   public double getForceScale()
-   {
-      return 0.5;
-   }
-
    @Tag("humanoid-push-recovery-slow")
    @Override
    @Test

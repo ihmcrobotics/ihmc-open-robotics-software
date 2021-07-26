@@ -3,6 +3,7 @@ package us.ihmc.robotics.trajectories.providers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 
@@ -16,25 +17,25 @@ public class CurrentRigidBodyStateProvider
       this.frameOfInterest = frameOfInterest;
    }
    
-   public void getPosition(FramePoint3D positionToPack)
+   public void getPosition(FixedFramePoint3DBasics positionToPack)
    {
-      positionToPack.setToZero(frameOfInterest);
+      positionToPack.setFromReferenceFrame(frameOfInterest);
    }
    
-   public void getLinearVelocity(FrameVector3D linearVelocityToPack)
+   public void getLinearVelocity(FixedFrameVector3DBasics linearVelocityToPack)
    {
       frameOfInterest.getTwistOfFrame(twist);
-      linearVelocityToPack.setIncludingFrame(twist.getLinearPart());
+      linearVelocityToPack.setMatchingFrame(twist.getLinearPart());
    }
    
-   public void getOrientation(FrameQuaternion orientationToPack)
+   public void getOrientation(FixedFrameQuaternionBasics orientationToPack)
    {
-      orientationToPack.setToZero(frameOfInterest);
+      orientationToPack.setFromReferenceFrame(frameOfInterest);
    }
    
-   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
+   public void getAngularVelocity(FixedFrameVector3DBasics angularVelocityToPack)
    {
       frameOfInterest.getTwistOfFrame(twist);
-      angularVelocityToPack.setIncludingFrame(twist.getAngularPart());
+      angularVelocityToPack.setMatchingFrame(twist.getAngularPart());
    }
 }

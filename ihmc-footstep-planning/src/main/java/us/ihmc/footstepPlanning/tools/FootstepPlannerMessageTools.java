@@ -61,6 +61,8 @@ public class FootstepPlannerMessageTools
       packet.setWiggleInsideDeltaMinimum(parameters.getWiggleInsideDeltaMinimum());
       packet.setMaximumStepReach(parameters.getMaximumStepReach());
       packet.setMaximumStepYaw(parameters.getMaximumStepYaw());
+      packet.setUseReachabilityMap(parameters.getUseStepReachabilityMap());
+      packet.setSolutionQualityThreshold(parameters.getSolutionQualityThreshold());
       packet.setMinimumStepWidth(parameters.getMinimumStepWidth());
       packet.setMinimumStepLength(parameters.getMinimumStepLength());
       packet.setMinimumStepYaw(parameters.getMinimumStepYaw());
@@ -114,8 +116,7 @@ public class FootstepPlannerMessageTools
       packet.setForwardWeight(parameters.getForwardWeight());
       packet.setLateralWeight(parameters.getLateralWeight());
       packet.setCostPerStep(parameters.getCostPerStep());
-      packet.setNumberOfBoundingBoxChecks(parameters.getNumberOfBoundingBoxChecks());
-      packet.setMaximum2dDistanceFromBoundingBoxToPenalize(parameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
+      packet.setIntermediateBodyBoxChecks(parameters.getIntermediateBodyBoxChecks());
       packet.setFootholdAreaWeight(parameters.getFootholdAreaWeight());
       packet.setDistanceFromPathTolerance(parameters.getDistanceFromPathTolerance());
       packet.setDeltaYawFromReferenceTolerance(parameters.getDeltaYawFromReferenceTolerance());

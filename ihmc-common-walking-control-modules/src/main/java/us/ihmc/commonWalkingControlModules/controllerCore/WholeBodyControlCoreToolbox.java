@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
@@ -487,6 +488,11 @@ public class WholeBodyControlCoreToolbox
    public CenterOfPressureDataHolder getDesiredCenterOfPressureDataHolder()
    {
       return getPlaneContactWrenchProcessor().getDesiredCenterOfPressureDataHolder();
+   }
+   
+   public DesiredExternalWrenchHolder getDesiredExternalWrenchHolder()
+   {
+      return getPlaneContactWrenchProcessor().getDesiredExternalWrenchHolder();
    }
 
    public WrenchVisualizer getWrenchVisualizer()

@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
 import us.ihmc.utilities.ros.RosMainNode;
@@ -27,7 +27,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
    private static final boolean DEBUG = false;
 
    public FisheyeCameraReceiver(FullHumanoidRobotModelFactory fullRobotModelFactory, final AvatarRobotCameraParameters cameraParameters,
-                                RobotConfigurationDataBuffer robotConfigurationDataBuffer, ROS2Node ros2Node,
+                                RobotConfigurationDataBuffer robotConfigurationDataBuffer, ROS2NodeInterface ros2Node,
                                 LongUnaryOperator robotMonotonicTimeCalculator, final RosMainNode rosMainNode)
    {
       super(fullRobotModelFactory, cameraParameters.getSensorNameInSdf(), robotConfigurationDataBuffer, new CompressedFisheyeHandler(ros2Node),
@@ -64,7 +64,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
    {
       private final IHMCROS2Publisher<FisheyePacket> publisher;
 
-      public CompressedFisheyeHandler(ROS2Node ros2Node)
+      public CompressedFisheyeHandler(ROS2NodeInterface ros2Node)
       {
          publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FisheyePacket.class, ROS2Tools.IHMC_ROOT);
       }

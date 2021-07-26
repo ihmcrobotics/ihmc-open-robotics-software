@@ -20,10 +20,10 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class StickRobotJointMap implements DRCRobotJointMap
+public class StickRobotJointMap implements HumanoidJointNameMap
 {
 
    private static final String chestName = "torso";

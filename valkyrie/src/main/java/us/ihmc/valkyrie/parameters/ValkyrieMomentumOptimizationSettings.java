@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSettings
 {
@@ -108,18 +108,18 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
       taskspaceLinearWeights.add(new GroupParameter<>("Foot", footLinearWeight, footNames));
    }
 
-   private static void configureSymmetricBehavior(List<GroupParameter<Double>> behaviors, DRCRobotJointMap jointMap, ArmJointName jointName, double weight)
+   private static void configureSymmetricBehavior(List<GroupParameter<Double>> behaviors, HumanoidJointNameMap jointMap, ArmJointName jointName, double weight)
    {
       behaviors.add(new GroupParameter<>(jointName.toString(), new Double(weight), jointMap.getLeftAndRightJointNames(jointName)));
    }
 
-   private static void configureBehavior(List<GroupParameter<Double>> behaviors, DRCRobotJointMap jointMap, SpineJointName jointName, double weight)
+   private static void configureBehavior(List<GroupParameter<Double>> behaviors, HumanoidJointNameMap jointMap, SpineJointName jointName, double weight)
    {
       List<String> names = Collections.singletonList(jointMap.getSpineJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), new Double(weight), names));
    }
 
-   private static void configureBehavior(List<GroupParameter<Double>> behaviors, DRCRobotJointMap jointMap, NeckJointName jointName, double weight)
+   private static void configureBehavior(List<GroupParameter<Double>> behaviors, HumanoidJointNameMap jointMap, NeckJointName jointName, double weight)
    {
       List<String> names = Collections.singletonList(jointMap.getNeckJointName(jointName));
       behaviors.add(new GroupParameter<>(jointName.toString(), new Double(weight), names));

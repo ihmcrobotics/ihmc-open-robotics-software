@@ -28,6 +28,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
    private final RecyclingArrayList<JointLimitEnforcementMethodCommand> jointLimitEnforcementMethodCommandBuffer = new RecyclingArrayList<>(JointLimitEnforcementMethodCommand.class);
    private final RecyclingArrayList<JointspaceAccelerationCommand> jointspaceAccelerationCommandBuffer = new RecyclingArrayList<>(JointspaceAccelerationCommand.class);
    private final RecyclingArrayList<MomentumRateCommand> momentumRateCommandBuffer = new RecyclingArrayList<>(MomentumRateCommand.class);
+   private final RecyclingArrayList<LinearMomentumRateCostCommand> linearMomentumRateCostCommandBuffer = new RecyclingArrayList<>(LinearMomentumRateCostCommand.class);
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandBuffer = new RecyclingArrayList<>(PlaneContactStateCommand.class);
    private final RecyclingArrayList<SpatialAccelerationCommand> spatialAccelerationCommandBuffer = new RecyclingArrayList<>(SpatialAccelerationCommand.class);
    private final RecyclingArrayList<JointLimitReductionCommand> jointLimitReductionCommandBuffer = new RecyclingArrayList<>(JointLimitReductionCommand.class);
@@ -54,6 +55,7 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
       jointLimitEnforcementMethodCommandBuffer.clear();
       jointspaceAccelerationCommandBuffer.clear();
       momentumRateCommandBuffer.clear();
+      linearMomentumRateCostCommandBuffer.clear();
       planeContactStateCommandBuffer.clear();
       spatialAccelerationCommandBuffer.clear();
       jointLimitReductionCommandBuffer.clear();
@@ -190,6 +192,18 @@ public class InverseDynamicsCommandBuffer extends InverseDynamicsCommandList
    public MomentumRateCommand addMomentumRateCommand()
    {
       MomentumRateCommand command = momentumRateCommandBuffer.add();
+      super.addCommand(command);
+      return command;
+   }
+
+   /**
+    * Gets an available {@link LinearMomentumRateCostCommand} and registers it to this list.
+    *
+    * @return the available command ready to be set.
+    */
+   public LinearMomentumRateCostCommand addLinearMomentumRateCostCommand()
+   {
+      LinearMomentumRateCostCommand command = linearMomentumRateCostCommandBuffer.add();
       super.addCommand(command);
       return command;
    }

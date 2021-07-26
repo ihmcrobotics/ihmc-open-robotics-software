@@ -5,9 +5,8 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSegment;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -97,7 +96,7 @@ public class ContactStateRhoRamping<T extends RobotSegment>
       polynomial.compute(timeInTrajectory.getDoubleValue());
 
       //rho initial is bigger than rho final
-      double rhoWeight = MathTools.clamp(polynomial.getPosition(), rhoFinal.getDoubleValue(), rhoInitial.getDoubleValue());
+      double rhoWeight = MathTools.clamp(polynomial.getValue(), rhoFinal.getDoubleValue(), rhoInitial.getDoubleValue());
       rhoCurrent.set(rhoWeight);
 
       for (int i = 0; i < contactPoints.size(); i++)

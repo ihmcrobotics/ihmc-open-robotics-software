@@ -16,7 +16,7 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 // As an intermediate step, low-hanging fruit would be just doing the foot polygons and replacing the foot geometry parameters (e.g. foot forward offset)
 // from the controller param classes with foot polygons
 
-/* package-private */ class ProxyAtlasWalkingControllerParameters extends WalkingControllerParameters
+public class ProxyAtlasWalkingControllerParameters extends WalkingControllerParameters
 {
    @Override
    public double getOmega0()
@@ -104,12 +104,6 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 
    @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
-   {
-      return null;
-   }
-
-   @Override
-   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
    {
       return null;
    }
@@ -409,7 +403,7 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
       }
    }
 
-   static ConvexPolygon2D getProxyAtlasFootPolygon()
+   public static ConvexPolygon2D getProxyAtlasFootPolygon()
    {
       SteppingParameters steppingParameters = new ProxyAtlasSteppingParameters();
 

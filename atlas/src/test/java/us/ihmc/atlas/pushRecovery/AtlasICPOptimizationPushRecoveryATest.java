@@ -5,13 +5,11 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasSteppingParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.AvatarICPOptimizationPushRecoveryATest;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 
@@ -20,38 +18,13 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    @Override
    protected DRCRobotModel getRobotModel()
    {
-      AtlasRobotModel atlasRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
+      return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new AtlasWalkingControllerParameters(RobotTarget.SCS, getJointMap(), getContactPointParameters())
+            return new AtlasWalkingControllerParameters(getTarget(), getJointMap(), getContactPointParameters())
             {
-               @Override
-               public ICPOptimizationParameters getICPOptimizationParameters()
-               {
-                  return new AtlasICPOptimizationParameters(false)
-                  {
-                     @Override
-                     public boolean useAngularMomentum()
-                     {
-                        return true;
-                     }
-
-                     @Override
-                     public boolean allowStepAdjustment()
-                     {
-                        return true;
-                     }
-
-                     @Override
-                     public boolean useSmartICPIntegrator()
-                     {
-                        return true;
-                     }
-                  };
-               }
-
                @Override
                public SteppingParameters getSteppingParameters()
                {
@@ -60,15 +33,19 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
                      @Override
                      public double getMaxStepLength()
                      {
-                        return 1.0;
+                        return 0.8;
+                     }
+
+                     @Override
+                     public double getMaxStepWidth()
+                     {
+                        return 0.7;
                      }
                   };
                }
             };
          }
       };
-
-      return atlasRobotModel;
    }
 
    @Override
@@ -100,7 +77,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    @Test
    public void testPushICPOptimizationBackwardPushInSwing() throws Exception
    {
-      percentWeight = 0.2;
+      percentWeight = 0.5;
       super.testPushICPOptimizationBackwardPushInSwing();
    }
 
@@ -109,7 +86,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    @Test
    public void testPushICPOptimizationForwardPushInSlowSwing() throws Exception
    {
-      percentWeight = 0.2;
+      percentWeight = 0.6;
       super.testPushICPOptimizationForwardPushInSlowSwing();
    }
 
@@ -118,7 +95,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    @Test
    public void testPushICPOptimizationForwardPushInSwing() throws Exception
    {
-      percentWeight = 0.29;
+      percentWeight = 0.7;
       super.testPushICPOptimizationForwardPushInSwing();
    }
 
@@ -127,7 +104,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    @Test
    public void testPushICPOptimizationInwardPushInSwing() throws Exception
    {
-      percentWeight = 0.17;
+      percentWeight = 0.22;
       super.testPushICPOptimizationInwardPushInSwing();
    }
 
@@ -145,7 +122,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    @Test
    public void testPushICPOptimizationOutwardPushInTransfer() throws Exception
    {
-      percentWeight = 0.12;
+      percentWeight = 0.25;
       super.testPushICPOptimizationOutwardPushInTransfer();
    }
 
@@ -154,7 +131,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    @Test
    public void testPushICPOptimizationOutwardPushOnEachStep() throws Exception
    {
-      percentWeight = 0.12;
+      percentWeight = 0.25;
       super.testPushICPOptimizationOutwardPushOnEachStep();
    }
 

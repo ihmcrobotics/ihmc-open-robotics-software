@@ -7,8 +7,6 @@ import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -19,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -334,7 +331,7 @@ public class VelocityConstrainedPoseTrajectoryGeneratorTest
       YoRegistry registry = new YoRegistry("youpiloup");
       VelocityConstrainedPoseTrajectoryGenerator trajToTest = new VelocityConstrainedPoseTrajectoryGenerator("blop", worldFrame, registry);
 
-      DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(10.0);
+      DoubleProvider trajectoryTimeProvider = () -> 10.0;
       FramePoint3D initialPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
       FramePoint3D finalPosition = EuclidFrameRandomTools.nextFramePoint3D(random, worldFrame, 100.0, 100.0, 100.0);
 

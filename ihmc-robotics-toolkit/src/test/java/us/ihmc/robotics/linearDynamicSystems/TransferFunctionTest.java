@@ -6,9 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 import us.ihmc.robotics.geometry.AngleTools;
 
 public class TransferFunctionTest
@@ -273,10 +271,10 @@ public class TransferFunctionTest
 	@Test
    public void testEqualsZero()
    {
-      Polynomial numerator = new Polynomial(new double[] {1.0, 2.0});
-      Polynomial zeroNumeratorOne = new Polynomial(new double[] {0.0});
-      Polynomial zeroNumeratorTwo = new Polynomial(new double[] {0.0, 0.0});
-      Polynomial denominator = new Polynomial(new double[] {1.0, 2.0});
+      ObsoletePolynomial numerator = new ObsoletePolynomial(new double[] {1.0, 2.0});
+      ObsoletePolynomial zeroNumeratorOne = new ObsoletePolynomial(new double[] {0.0});
+      ObsoletePolynomial zeroNumeratorTwo = new ObsoletePolynomial(new double[] {0.0, 0.0});
+      ObsoletePolynomial denominator = new ObsoletePolynomial(new double[] {1.0, 2.0});
 
       TransferFunction nonZeroTransferFunction = new TransferFunction(numerator, denominator);
       TransferFunction zeroTransferFunction = new TransferFunction(zeroNumeratorOne, denominator);

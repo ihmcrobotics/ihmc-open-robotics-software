@@ -27,8 +27,8 @@ public class AccelerationLimitedYoFrameVector3D extends YoFrameVector3D
 
    private final double dt;
 
-   private final FrameVector3D positionError = new FrameVector3D();
-   private final FrameVector3D acceleration = new FrameVector3D();
+   private final FrameVector3D positionError;
+   private final FrameVector3D acceleration;
 
    private static DoubleProvider createMaxRateYoDouble(String namePrefix, String nameSuffix, double initialValue, YoRegistry registry)
    {
@@ -66,6 +66,9 @@ public class AccelerationLimitedYoFrameVector3D extends YoFrameVector3D
                                               DoubleProvider maxAcceleration, double dt, FrameTuple3DReadOnly rawPosition, ReferenceFrame referenceFrame)
    {
       super(namePrefix, nameSuffix, referenceFrame, registry);
+
+      positionError = new FrameVector3D(referenceFrame);
+      acceleration = new FrameVector3D(referenceFrame);
 
       if (maxRate == null)
          maxRate = createMaxRateYoDouble(namePrefix, nameSuffix, Double.POSITIVE_INFINITY, registry);

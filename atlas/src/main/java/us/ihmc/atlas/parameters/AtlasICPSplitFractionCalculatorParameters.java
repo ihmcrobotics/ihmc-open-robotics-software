@@ -1,6 +1,6 @@
 package us.ihmc.atlas.parameters;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 
 public class AtlasICPSplitFractionCalculatorParameters implements SplitFractionCalculatorParametersReadOnly
 {
@@ -28,9 +28,21 @@ public class AtlasICPSplitFractionCalculatorParameters implements SplitFractionC
    }
 
    /** {@inheritDoc} */
+   public double getStepHeightForLargeStepUp()
+   {
+      return 0.5;
+   }
+
+   /** {@inheritDoc} */
    public double getLargestStepDownHeight()
    {
       return 0.15;
+   }
+
+   /** {@inheritDoc} */
+   public double getLargestStepUpHeight()
+   {
+      return 0.25;
    }
 
    /** {@inheritDoc} */
@@ -40,15 +52,33 @@ public class AtlasICPSplitFractionCalculatorParameters implements SplitFractionC
    }
 
    /** {@inheritDoc} */
+   public double getTransferSplitFractionForStepUpAtFullDepth()
+   {
+      return 0.6;
+   }
+
+   /** {@inheritDoc} */
    public double getTransferWeightDistributionAtFullDepth()
    {
-      return 0.75;
+      return 0.65;
+   }
+
+   /** {@inheritDoc} */
+   public double getTransferWeightDistributionForStepUpAtFullDepth()
+   {
+      return 0.25;
    }
 
    /** {@inheritDoc} */
    public double getTransferFinalWeightDistributionAtFullDepth()
    {
       return 0.8;
+   }
+
+   /** {@inheritDoc} */
+   public double getTransferFinalWeightDistributionForStepUpAtFullDepth()
+   {
+      return 0.35;
    }
 
    /** {@inheritDoc} */

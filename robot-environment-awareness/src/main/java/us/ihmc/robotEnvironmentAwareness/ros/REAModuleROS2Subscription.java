@@ -4,7 +4,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Subscription;
 
 public class REAModuleROS2Subscription<T>
@@ -15,12 +15,12 @@ public class REAModuleROS2Subscription<T>
 
    private ROS2Subscription<T> subscription = null;
 
-   public REAModuleROS2Subscription(ROS2Node ros2Node, Messager messager, REASourceType reaSourceType, Class<T> messageType, NewMessageListener<T> listener)
+   public REAModuleROS2Subscription(ROS2NodeInterface ros2Node, Messager messager, REASourceType reaSourceType, Class<T> messageType, NewMessageListener<T> listener)
    {
       this(ros2Node, messager, reaSourceType.getTopicName(), messageType, listener, reaSourceType.getEnableTopic());
    }
 
-   public REAModuleROS2Subscription(ROS2Node node, Messager messager, String name, Class<T> Type, NewMessageListener<T> listener, Topic<Boolean> enableTopic)
+   public REAModuleROS2Subscription(ROS2NodeInterface node, Messager messager, String name, Class<T> Type, NewMessageListener<T> listener, Topic<Boolean> enableTopic)
    {
       this.topicName = name;
       this.messageType = Type;
@@ -29,7 +29,7 @@ public class REAModuleROS2Subscription<T>
       messager.registerTopicListener(enableTopic, (enable) -> handle(node, enable));
    }
 
-   public void handle(ROS2Node ros2Node, boolean enable)
+   public void handle(ROS2NodeInterface ros2Node, boolean enable)
    {
       if (enable)
          create(ros2Node);
@@ -37,7 +37,7 @@ public class REAModuleROS2Subscription<T>
          remove();
    }
 
-   public void create(ROS2Node ros2Node)
+   public void create(ROS2NodeInterface ros2Node)
    {
       if (subscription == null)
          subscription = ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, listener);

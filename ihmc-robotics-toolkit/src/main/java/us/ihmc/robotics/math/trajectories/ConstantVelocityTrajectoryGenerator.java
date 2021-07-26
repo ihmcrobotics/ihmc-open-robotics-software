@@ -1,6 +1,8 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -50,7 +52,7 @@ public class ConstantVelocityTrajectoryGenerator implements DoubleTrajectoryGene
 
    public double getValue()
    {
-      return polynomial.getPosition();
+      return polynomial.getValue();
    }
 
    public double getVelocity()

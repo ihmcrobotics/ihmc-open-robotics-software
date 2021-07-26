@@ -1,13 +1,13 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.interpolators.OrientationInterpolationCalculator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -98,7 +98,7 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
 
       if (!isDone() && trajectoryTime.getValue() >= 1.0e-6)
       {
-         currentOrientation.interpolate(initialOrientation, finalOrientation, parameterPolynomial.getPosition());
+         currentOrientation.interpolate(initialOrientation, finalOrientation, parameterPolynomial.getValue());
          orientationInterpolationCalculator.computeAngularVelocity(currentAngularVelocity, initialOrientation, finalOrientation, alphaDot);
          orientationInterpolationCalculator.computeAngularAcceleration(currentAngularAcceleration, initialOrientation, finalOrientation, alphaDDot);
       }
@@ -117,30 +117,23 @@ public class SimpleOrientationTrajectoryGenerator extends OrientationTrajectoryG
    }
 
    @Override
-   public void getOrientation(FrameQuaternion orientationToPack)
+   public FrameQuaternionReadOnly getOrientation()
    {
-      orientationToPack.setIncludingFrame(currentOrientation);
+      return currentOrientation;
    }
 
    @Override
-   public void getAngularVelocity(FrameVector3D velocityToPack)
+   public FrameVector3DReadOnly getAngularVelocity()
    {
-      velocityToPack.setIncludingFrame(currentAngularVelocity);
+      return currentAngularVelocity;
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getAngularAcceleration()
    {
-      accelerationToPack.setIncludingFrame(currentAngularAcceleration);
+      return currentAngularAcceleration;
    }
 
-   @Override
-   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
-   {
-      getOrientation(orientationToPack);
-      getAngularVelocity(angularVelocityToPack);
-      getAngularAcceleration(angularAccelerationToPack);
-   }
 
    @Override
    public String toString()

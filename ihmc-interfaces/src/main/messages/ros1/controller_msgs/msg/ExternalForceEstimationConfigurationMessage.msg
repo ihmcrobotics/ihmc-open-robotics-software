@@ -23,4 +23,7 @@ int32[] rigid_body_hash_codes
 # List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
 geometry_msgs/Point[] contact_point_positions
 
+# (in beta) Estimates the location of the contact point at a single rigid body (the first provided). The root joint wrench is not estimated.
+bool estimate_contact_location
+
 

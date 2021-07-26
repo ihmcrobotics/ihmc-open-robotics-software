@@ -10,9 +10,13 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -107,10 +111,13 @@ public class PelvisICPBasedTranslationManager
     * over the network.
     */
    private final YoDouble streamTimestampOffset = new YoDouble("pelvisTranslationStreamTimestampOffset", registry);
+   private final YoDouble streamTimestampSource = new YoDouble("pelvisTranslationStreamTimestampSource", registry);
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisXY");
 
-   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin,
-                                           BipedSupportPolygons bipedSupportPolygons, YoRegistry parentRegistry)
+   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                           double pelvisTranslationICPSupportPolygonSafeMargin,
+                                           BipedSupportPolygons bipedSupportPolygons,
+                                           YoRegistry parentRegistry)
    {
       dt = controllerToolbox.getControlDT();
 
@@ -150,11 +157,12 @@ public class PelvisICPBasedTranslationManager
       numberOfQueuedCommands = new YoLong(namePrefix + "NumberOfQueuedCommands", registry);
 
       streamTimestampOffset.setToNaN();
+      streamTimestampSource.setToNaN();
 
       parentRegistry.addChild(registry);
    }
 
-   public void compute(RobotSide supportLeg, FramePoint2DReadOnly actualICP)
+   public void compute(RobotSide supportLeg)
    {
       tempPosition2d.setToZero(pelvisZUpFrame);
       tempPosition2d.changeFrame(worldFrame);
@@ -195,23 +203,30 @@ public class PelvisICPBasedTranslationManager
             statusHelper.updateWithTimeInTrajectory(deltaTime);
             positionTrajectoryGenerator.compute(deltaTime);
 
-            if (positionTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
+            if (positionTrajectoryGenerator.isDone())
             {
-               double firstTrajectoryPointTime = positionTrajectoryGenerator.getLastWaypointTime();
-               commandBeingProcessed.set(commandQueue.poll());
-               numberOfQueuedCommands.decrement();
-               initializeTrajectoryGenerator(commandBeingProcessed, firstTrajectoryPointTime);
-               positionTrajectoryGenerator.compute(deltaTime);
+               if (!commandQueue.isEmpty())
+               {
+                  double firstTrajectoryPointTime = positionTrajectoryGenerator.getLastWaypointTime();
+                  commandBeingProcessed.set(commandQueue.poll());
+                  numberOfQueuedCommands.decrement();
+                  initializeTrajectoryGenerator(commandBeingProcessed, firstTrajectoryPointTime);
+                  positionTrajectoryGenerator.compute(deltaTime);
 
-               if (positionTrajectoryGenerator.isDone())
+                  if (positionTrajectoryGenerator.isDone())
+                  {
+                     streamTimestampOffset.setToNaN();
+                     streamTimestampSource.setToNaN();
+                  }
+               }
+               else
+               {
                   streamTimestampOffset.setToNaN();
-            }
-            else
-            {
-               streamTimestampOffset.setToNaN();
+                  streamTimestampSource.setToNaN();
+               }
             }
          }
-         positionTrajectoryGenerator.getPosition(tempPosition);
+         tempPosition.setIncludingFrame(positionTrajectoryGenerator.getPosition());
          tempPosition.changeFrame(desiredPelvisPosition.getReferenceFrame());
          desiredPelvisPosition.set(tempPosition);
       }
@@ -249,6 +264,7 @@ public class PelvisICPBasedTranslationManager
       positionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);
       streamTimestampOffset.setToNaN();
+      streamTimestampSource.setToNaN();
       isRunning.set(true);
    }
 
@@ -271,6 +287,7 @@ public class PelvisICPBasedTranslationManager
          initialPelvisPositionTime.set(yoTime.getDoubleValue());
          initializeTrajectoryGenerator(command, 0.0);
          streamTimestampOffset.setToNaN();
+         streamTimestampSource.setToNaN();
          statusHelper.registerNewTrajectory(se3Trajectory);
          return;
       }
@@ -289,26 +306,35 @@ public class PelvisICPBasedTranslationManager
          }
 
          streamTimestampOffset.setToNaN();
+         streamTimestampSource.setToNaN();
 
          return;
       }
       else if (se3Trajectory.getExecutionMode() == ExecutionMode.STREAM)
       {
-         isReadyToHandleQueuedCommands.set(true);
-         clearCommandQueue(se3Trajectory.getCommandId());
-         initialPelvisPositionTime.set(yoTime.getDoubleValue());
-
          double timeOffset = 0.0;
 
+         // Need to do time checks before moving on.
          if (se3Trajectory.getTimestamp() <= 0)
          {
             streamTimestampOffset.setToNaN();
+            streamTimestampSource.setToNaN();
          }
          else
          {
             double senderTime = Conversions.nanosecondsToSeconds(se3Trajectory.getTimestamp());
+
+            if (!streamTimestampSource.isNaN() && senderTime < streamTimestampSource.getValue())
+            {
+               // Messages are out of order which is fine, we just don't want to handle the new message.
+               return;
+            }
+
+            streamTimestampSource.set(senderTime);
+
             timeOffset = yoTime.getValue() - senderTime;
-            if (streamTimestampOffset.isNaN())
+
+            if (Double.isNaN(streamTimestampOffset.getValue()))
             {
                streamTimestampOffset.set(timeOffset);
             }
@@ -325,6 +351,10 @@ public class PelvisICPBasedTranslationManager
                   streamTimestampOffset.set(Math.min(timeOffset, streamTimestampOffset.getValue()));
             }
          }
+
+         isReadyToHandleQueuedCommands.set(true);
+         clearCommandQueue(se3Trajectory.getCommandId());
+         initialPelvisPositionTime.set(yoTime.getDoubleValue());
 
          if (se3Trajectory.getNumberOfTrajectoryPoints() != 1)
          {
@@ -351,7 +381,7 @@ public class PelvisICPBasedTranslationManager
 
          positionTrajectoryGenerator.clear();
          positionTrajectoryGenerator.changeFrame(worldFrame);
-         positionTrajectoryGenerator.appendWaypoint(trajectoryPoint);
+         positionTrajectoryGenerator.appendWaypoint(trajectoryPointLocal);
          tempPosition.setIncludingFrame(trajectoryPointLocal.getLinearVelocity());
          tempPosition.scaleAdd(se3Trajectory.getStreamIntegrationDuration(), trajectoryPoint.getPosition());
          positionTrajectoryGenerator.appendWaypoint(se3Trajectory.getStreamIntegrationDuration() + trajectoryPointLocal.getTime(),
@@ -366,7 +396,8 @@ public class PelvisICPBasedTranslationManager
          positionTrajectoryGenerator.initialize();
          isTrajectoryStopped.set(false);
          isRunning.set(true);
-         statusHelper.registerNewTrajectory(se3Trajectory);
+         if (se3Trajectory.getExecutionMode() != ExecutionMode.STREAM)
+            statusHelper.registerNewTrajectory(se3Trajectory);
          return;
       }
       else
@@ -414,7 +445,7 @@ public class PelvisICPBasedTranslationManager
       if (se3Trajectory.getTrajectoryPoint(0).getTime() > 1.0e-5)
       {
          if (isRunning.getBooleanValue())
-            positionTrajectoryGenerator.getPosition(tempPosition);
+            tempPosition.setIncludingFrame(positionTrajectoryGenerator.getPosition());
          else
             tempPosition.setToZero(pelvisZUpFrame);
          tempPosition.changeFrame(worldFrame);
@@ -516,11 +547,11 @@ public class PelvisICPBasedTranslationManager
 
    private final FramePoint2D originalICPToModify = new FramePoint2D();
 
-   public void addICPOffset(FramePoint2D desiredICPToModify, FrameVector2D desiredICPVelocityToModify, FramePoint2D desiredCoPToModify)
+   public void addICPOffset(FramePoint2D desiredICPToModify, FramePoint2D desiredCoMToModify, FramePoint2D desiredCoPToModify)
    {
       desiredICPToModify.changeFrame(supportPolygon.getReferenceFrame());
-      desiredICPVelocityToModify.changeFrame(supportPolygon.getReferenceFrame());
       desiredCoPToModify.changeFrame(supportPolygon.getReferenceFrame());
+      desiredCoMToModify.changeFrame(supportPolygon.getReferenceFrame());
 
       originalICPToModify.setIncludingFrame(desiredICPToModify);
 
@@ -529,7 +560,7 @@ public class PelvisICPBasedTranslationManager
          desiredICPOffset.setToZero();
          icpOffsetForFreezing.setToZero();
          desiredICPToModify.changeFrame(worldFrame);
-         desiredICPVelocityToModify.changeFrame(worldFrame);
+         desiredCoMToModify.changeFrame(worldFrame);
          desiredCoPToModify.changeFrame(worldFrame);
          return;
       }
@@ -549,14 +580,17 @@ public class PelvisICPBasedTranslationManager
          desiredICPOffset.setMatchingFrame(icpOffsetForFreezing);
          desiredICPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
          desiredCoPToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
+         desiredCoMToModify.changeFrame(icpOffsetForFreezing.getReferenceFrame());
          desiredICPToModify.add(icpOffsetForFreezing);
          desiredCoPToModify.add(icpOffsetForFreezing);
+         desiredCoMToModify.add(icpOffsetForFreezing);
       }
 
       else
       {
          desiredICPToModify.add(tempICPOffset);
          desiredCoPToModify.add(tempICPOffset);
+         desiredCoMToModify.add(tempICPOffset);
 
          convexPolygonShrinker.scaleConvexPolygon(supportPolygon, supportPolygonSafeMargin.getDoubleValue(), safeSupportPolygonToConstrainICPOffset);
          safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPToModify);
@@ -567,7 +601,7 @@ public class PelvisICPBasedTranslationManager
       }
 
       desiredICPToModify.changeFrame(worldFrame);
-      desiredICPVelocityToModify.changeFrame(worldFrame);
+      desiredCoMToModify.changeFrame(worldFrame);
       desiredCoPToModify.changeFrame(worldFrame);
    }
 
@@ -586,6 +620,7 @@ public class PelvisICPBasedTranslationManager
 
       desiredICPOffset.setToZero();
       streamTimestampOffset.setToNaN();
+      streamTimestampSource.setToNaN();
    }
 
    public void enable()
@@ -602,6 +637,7 @@ public class PelvisICPBasedTranslationManager
    {
       isFrozen.set(true);
       streamTimestampOffset.setToNaN();
+      streamTimestampSource.setToNaN();
    }
 
    private void initialize()
@@ -615,6 +651,7 @@ public class PelvisICPBasedTranslationManager
       positionTrajectoryGenerator.initialize();
       isTrajectoryStopped.set(false);
       streamTimestampOffset.setToNaN();
+      streamTimestampSource.setToNaN();
    }
 
    public TaskspaceTrajectoryStatusMessage pollStatusToReport()

@@ -24,11 +24,20 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
             * Estimated root joint wrench, if requested. Will be set to NaN if root joint was not included in the solver
             */
    public geometry_msgs.msg.dds.Wrench estimated_root_joint_wrench_;
+   /**
+            * Estimated contacting rigid body hashcode, if configured with estimate_contact_location=true
+            */
+   public int rigid_body_hash_code_;
+   /**
+            * Estimated contact point in parent joint frame, if configured with estimate_contact_location=true
+            */
+   public us.ihmc.euclid.tuple3D.Point3D contact_point_;
 
    public ExternalForceEstimationOutputStatus()
    {
       estimated_external_forces_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D> (10, new geometry_msgs.msg.dds.Vector3PubSubType());
       estimated_root_joint_wrench_ = new geometry_msgs.msg.dds.Wrench();
+      contact_point_ = new us.ihmc.euclid.tuple3D.Point3D();
 
    }
 
@@ -44,6 +53,9 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
 
       estimated_external_forces_.set(other.estimated_external_forces_);
       geometry_msgs.msg.dds.WrenchPubSubType.staticCopy(other.estimated_root_joint_wrench_, estimated_root_joint_wrench_);
+      rigid_body_hash_code_ = other.rigid_body_hash_code_;
+
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.contact_point_, contact_point_);
    }
 
    /**
@@ -79,6 +91,30 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
       return estimated_root_joint_wrench_;
    }
 
+   /**
+            * Estimated contacting rigid body hashcode, if configured with estimate_contact_location=true
+            */
+   public void setRigidBodyHashCode(int rigid_body_hash_code)
+   {
+      rigid_body_hash_code_ = rigid_body_hash_code;
+   }
+   /**
+            * Estimated contacting rigid body hashcode, if configured with estimate_contact_location=true
+            */
+   public int getRigidBodyHashCode()
+   {
+      return rigid_body_hash_code_;
+   }
+
+
+   /**
+            * Estimated contact point in parent joint frame, if configured with estimate_contact_location=true
+            */
+   public us.ihmc.euclid.tuple3D.Point3D getContactPoint()
+   {
+      return contact_point_;
+   }
+
 
    public static Supplier<ExternalForceEstimationOutputStatusPubSubType> getPubSubType()
    {
@@ -107,6 +143,9 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
       }
 
       if (!this.estimated_root_joint_wrench_.epsilonEquals(other.estimated_root_joint_wrench_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.rigid_body_hash_code_, other.rigid_body_hash_code_, epsilon)) return false;
+
+      if (!this.contact_point_.epsilonEquals(other.contact_point_, epsilon)) return false;
 
       return true;
    }
@@ -124,6 +163,9 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
 
       if (!this.estimated_external_forces_.equals(otherMyClass.estimated_external_forces_)) return false;
       if (!this.estimated_root_joint_wrench_.equals(otherMyClass.estimated_root_joint_wrench_)) return false;
+      if(this.rigid_body_hash_code_ != otherMyClass.rigid_body_hash_code_) return false;
+
+      if (!this.contact_point_.equals(otherMyClass.contact_point_)) return false;
 
       return true;
    }
@@ -139,7 +181,11 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
       builder.append("estimated_external_forces=");
       builder.append(this.estimated_external_forces_);      builder.append(", ");
       builder.append("estimated_root_joint_wrench=");
-      builder.append(this.estimated_root_joint_wrench_);
+      builder.append(this.estimated_root_joint_wrench_);      builder.append(", ");
+      builder.append("rigid_body_hash_code=");
+      builder.append(this.rigid_body_hash_code_);      builder.append(", ");
+      builder.append("contact_point=");
+      builder.append(this.contact_point_);
       builder.append("}");
       return builder.toString();
    }

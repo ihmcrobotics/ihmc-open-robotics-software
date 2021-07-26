@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -276,12 +275,6 @@ public class CentroidProjectionToeOffCalculatorTest
 
          @Override
          public MomentumOptimizationSettings getMomentumOptimizationSettings()
-         {
-            return null;
-         }
-
-         @Override
-         public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
          {
             return null;
          }

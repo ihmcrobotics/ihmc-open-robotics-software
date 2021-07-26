@@ -3,7 +3,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
@@ -29,6 +31,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
@@ -56,15 +59,11 @@ public class ICPController
 
    private final BooleanProvider scaleFeedbackWeightWithGain;
 
-   private final YoBoolean isStationary = new YoBoolean(yoNamePrefix + "IsStationary", registry);
-   private final YoBoolean isInDoubleSupport = new YoBoolean(yoNamePrefix + "IsInDoubleSupport", registry);
-
-   private final YoEnum<RobotSide> supportSide = new YoEnum<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
-
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
-   private final YoFramePoint2D unconstrainedFeedbackCMP = new YoFramePoint2D(yoNamePrefix + "UnconstraintFeedbackCMP", worldFrame, registry);
+   private final YoFrameVector2D unconstrainedFeedback = new YoFrameVector2D(yoNamePrefix + "UnconstrainedFeedback", worldFrame, registry);
+   private final YoFramePoint2D unconstrainedFeedbackCMP = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCMP", worldFrame, registry);
    final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
    final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
 
@@ -87,6 +86,8 @@ public class ICPController
    private final DoubleProvider feedbackRateWeight;
    private final DoubleProvider copCMPFeedbackRateWeight;
    private final DoubleProvider dynamicsObjectiveWeight;
+
+   private final DoubleProvider feedbackDirectionWeight;
 
    private final AngularMomentumIntegrator integrator;
 
@@ -112,7 +113,8 @@ public class ICPController
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentICP = new FramePoint2D();
-   private final FrameVector2D currentICPVelocity = new FrameVector2D();
+   private final FramePoint2D currentCoMPosition = new FramePoint2D();
+   private final FrameVector2D currentCoMVelocity = new FrameVector2D();
 
    private final double controlDT;
    private final double controlDTSquare;
@@ -149,7 +151,6 @@ public class ICPController
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
 
-
       useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
       useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
 
@@ -170,6 +171,8 @@ public class ICPController
       dynamicsObjectiveWeight = new DoubleParameter(yoNamePrefix + "DynamicsObjectiveWeight", registry, icpOptimizationParameters.getDynamicsObjectiveWeight());
 
       cmpFeedbackWeight = new DoubleParameter(yoNamePrefix + "CMPFeedbackWeight", registry, icpOptimizationParameters.getAngularMomentumMinimizationWeight());
+
+      feedbackDirectionWeight = new DoubleParameter(yoNamePrefix + "FeedbackDirectionWeight", registry, icpOptimizationParameters.getFeedbackDirectionWeight());
 
       BooleanProvider useICPControlPolygons = new BooleanParameter(yoNamePrefix + "UseICPControlPolygons", registry, icpOptimizationParameters.getUseICPControlPolygons());
       boolean hasICPControlPolygons = icpControlPolygons != null;
@@ -225,27 +228,8 @@ public class ICPController
    }
 
    /** {@inheritDoc} */
-   public void initializeForStanding()
+   public void initialize()
    {
-      isStationary.set(true);
-      isInDoubleSupport.set(true);
-      integrator.reset();
-   }
-
-   /** {@inheritDoc} */
-   public void initializeForTransfer()
-   {
-      isInDoubleSupport.set(true);
-      isStationary.set(false);
-      integrator.reset();
-   }
-
-   /** {@inheritDoc} */
-   public void initializeForSingleSupport(RobotSide supportSide)
-   {
-      this.supportSide.set(supportSide);
-      isStationary.set(false);
-      isInDoubleSupport.set(false);
       integrator.reset();
    }
 
@@ -274,10 +258,11 @@ public class ICPController
                        FrameVector2DReadOnly desiredICPVelocity,
                        FramePoint2DReadOnly perfectCoP,
                        FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly currentICPVelocity)
+                       FramePoint2DReadOnly currentCoMPosition,
+                       double omega0)
    {
       desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentICPVelocity);
+      compute(desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentCoMPosition, omega0);
    }
 
    /** {@inheritDoc} */
@@ -286,7 +271,8 @@ public class ICPController
                        FramePoint2DReadOnly perfectCoP,
                        FrameVector2DReadOnly perfectCMPOffset,
                        FramePoint2DReadOnly currentICP,
-                       FrameVector2DReadOnly currentICPVelocity)
+                       FramePoint2DReadOnly currentCoMPosition,
+                       double omega0)
    {
       controllerTimer.startMeasurement();
 
@@ -294,7 +280,9 @@ public class ICPController
       this.desiredICPVelocity.setMatchingFrame(desiredICPVelocity);
       this.perfectCMPOffset.setMatchingFrame(perfectCMPOffset);
       this.currentICP.setMatchingFrame(currentICP);
-      this.currentICPVelocity.setMatchingFrame(currentICPVelocity);
+      this.currentCoMPosition.setMatchingFrame(currentCoMPosition);
+
+      CapturePointTools.computeCenterOfMassVelocity(currentCoMPosition, currentICP, omega0, currentCoMVelocity);
 
       this.perfectCoP.setMatchingFrame(perfectCoP);
       this.perfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
@@ -333,12 +321,16 @@ public class ICPController
                                         feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
                                         feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
-      fastStaticInverse(transformedGains, inverseTransformedGains);
+      computeUnconstrainedFeedbackCMPGain();
+
+      UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 
       solver.resetCoPFeedbackConditions();
+      solver.resetFeedbackDirection();
       solver.setFeedbackConditions(scaledCoPFeedbackWeight, transformedGains, dynamicsObjectiveWeight.getValue());
       solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getValue());
       solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
+      solver.setDesiredFeedbackDirection(unconstrainedFeedback, feedbackDirectionWeight.getValue());
 
       solver.setMaximumFeedbackMagnitude(transformedMagnitudeLimits);
       solver.setMaximumFeedbackRate(feedbackGains.getFeedbackPartMaxRate(), controlDT);
@@ -347,15 +339,6 @@ public class ICPController
 
       if (useCMPFeedback.getValue())
          solver.setCMPFeedbackConditions(cmpFeedbackWeight.getValue(), useAngularMomentum.getValue());
-   }
-
-   private static void fastStaticInverse(DMatrixRMaj matrixToInvert, DMatrixRMaj invertedMatrixToPack)
-   {
-      double determinate = CommonOps_DDRM.det(matrixToInvert);
-      invertedMatrixToPack.set(0, 0,  matrixToInvert.get(1, 1) / determinate);
-      invertedMatrixToPack.set(1, 1, matrixToInvert.get(0, 0) / determinate);
-      invertedMatrixToPack.set(0, 1, -matrixToInvert.get(0, 1) / determinate);
-      invertedMatrixToPack.set(1, 0, -matrixToInvert.get(1, 0) / determinate);
    }
 
    private boolean solveQP()
@@ -376,6 +359,14 @@ public class ICPController
       return converged;
    }
 
+   private void computeUnconstrainedFeedbackCMPGain()
+   {
+      unconstrainedFeedback.setX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
+      unconstrainedFeedback.setY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
+      unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
+      unconstrainedFeedbackCMP.add(unconstrainedFeedback);
+   }
+
    private void extractSolutionsFromSolver(boolean converged)
    {
       numberOfIterations.set(solver.getNumberOfIterations());
@@ -393,12 +384,7 @@ public class ICPController
          residualDynamicsErrorConservative.add(icpError);
       }
 
-      boolean checkIfStuck = !isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue();
-      integrator.update(checkIfStuck, desiredICPVelocity, currentICPVelocity, icpError);
-
-      unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
-      unconstrainedFeedbackCMP.addX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
-      unconstrainedFeedbackCMP.addY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
+      integrator.update(desiredICPVelocity, currentCoMVelocity, icpError);
 
       feedbackCoP.add(perfectCoP, feedbackCoPDelta);
       feedbackCMP.add(feedbackCoP, perfectCMPOffset);

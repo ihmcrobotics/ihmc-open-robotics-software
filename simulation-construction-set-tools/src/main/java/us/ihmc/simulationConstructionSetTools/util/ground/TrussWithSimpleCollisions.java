@@ -16,9 +16,9 @@ public class TrussWithSimpleCollisions extends RotatableBoxTerrainObject
 	}
 
 	public TrussWithSimpleCollisions(double[] newPoint, double trussLength,
-			double trussSide, double courseAngleDeg, AppearanceDefinition color)
+			double trussSide, double courseAngleDeg, double heightOffset, AppearanceDefinition color)
 	{
-		this(new Box3D(TransformTools.yawPitchDegreesTransform(new Vector3D(newPoint[0], newPoint[1], trussSide/2), courseAngleDeg, 0),
+		this(new Box3D(TransformTools.yawPitchDegreesTransform(new Vector3D(newPoint[0], newPoint[1], trussSide/2 + heightOffset), courseAngleDeg, 0),
 				trussSide, trussLength, trussSide), color);
 	}
 //	// TODO Auto-generated constructor stub
