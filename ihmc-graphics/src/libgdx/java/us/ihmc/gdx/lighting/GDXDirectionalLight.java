@@ -35,7 +35,9 @@ public class GDXDirectionalLight extends GDXLight
 
       shaderProgram.begin();
       shaderProgram.setUniformf("u_cameraFar", camera.far);
-      shaderProgram.setUniformf("u_lightPosition", camera.position);
+      shaderProgram.setUniformf("u_lightPosition_x", position.x);
+      shaderProgram.setUniformf("u_lightPosition_y", position.y);
+      shaderProgram.setUniformf("u_lightPosition_z", position.z);
       shaderProgram.end();
 
       modelBatch.begin(camera);
@@ -56,7 +58,9 @@ public class GDXDirectionalLight extends GDXLight
       shader.setUniformi("u_depthMapDir", textureNum);
       shader.setUniformMatrix("u_lightTrans", camera.combined);
       shader.setUniformf("u_cameraFar", camera.far);
-      shader.setUniformf("u_lightPosition", camera.position);
+      shader.setUniformf("u_lightPosition_x", position.x);
+      shader.setUniformf("u_lightPosition_y", position.y);
+      shader.setUniformf("u_lightPosition_z", position.z);
       shader.end();
    }
 
