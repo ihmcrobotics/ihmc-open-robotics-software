@@ -141,8 +141,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, registry);
       qpSolver.setMaxNumberOfIterations(10);
 
-      qpSolver.setFirstOrientationVariableRegularization(1e-10);
-      qpSolver.setSecondOrientationVariableRegularization(1e-10);
+      qpSolver.setFirstOrientationVariableRegularization(1e-6);
+      qpSolver.setSecondOrientationVariableRegularization(1e-6);
+      qpSolver.setFirstOrientationRateVariableRegularization(1e-3);
+      qpSolver.setSecondOrientationRateVariableRegularization(1e-3);
 
       includeIntermediateOrientationTracking.set(mpcParameters.includeIntermediateOrientationTracking());
 
@@ -280,6 +282,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       return commandToPack;
    }
 
+   private final DMatrixRMaj weightMatrix = new DMatrixRMaj(6, 6);
+
    private MPCCommand<?>  computeFinalOrientationMinimizationCommand(OrientationValueCommand commandToPack)
    {
       commandToPack.reset();
@@ -294,7 +298,13 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
       commandToPack.getObjectiveValue().zero();
       commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
-      commandToPack.setObjectiveWeight(mpcParameters.getFinalOrientationWeight());
+      for (int i = 0; i < 3; i++)
+      {
+         weightMatrix.set(i, i, mpcParameters.getFinalOrientationAngleWeight());
+         weightMatrix.set(i + 3, i + 3, mpcParameters.getFinalOrientationVelocityWeight());
+      }
+      commandToPack.setWeightMatrix(weightMatrix);
+      commandToPack.setUseWeightScalar(true);
 
       return commandToPack;
    }
