@@ -3,9 +3,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -27,6 +24,7 @@ public class PreviewWindowCalculator
    private final YoInteger activeSegment = new YoInteger("activeSegmentInWindow", registry);
    private final YoBoolean activeSegmentChanged = new YoBoolean("activeSegmentChanged", registry);
 
+   private final YoDouble nominalSegmentDuration = new YoDouble("nominalSegmentDuration", registry);
    private final YoDouble maximumPreviewWindowDuration = new YoDouble("maximumPreviewWindowDuration", registry);
    private final YoInteger maximumPreviewWindowSegments = new YoInteger("maximumPreviewWindowSegments", registry);
 
@@ -36,13 +34,12 @@ public class PreviewWindowCalculator
    private final RecyclingArrayList<PreviewWindowSegment> previewWindowContacts = new RecyclingArrayList<>(PreviewWindowSegment::new);
    private final RecyclingArrayList<ContactPlaneProvider> fullContactSet = new RecyclingArrayList<>(ContactPlaneProvider::new);
 
-   private final PreviewWindowSegment trimmedFinalSegment = new PreviewWindowSegment();
-
    private final ContactSegmentHelper contactSegmentHelper = new ContactSegmentHelper();
 
    public PreviewWindowCalculator(YoRegistry parentRegistry)
    {
       activeSegment.set(-1);
+      this.nominalSegmentDuration.set(0.1);
       this.maximumPreviewWindowDuration.set(0.75);
       this.maximumPreviewWindowSegments.set(3);
 
@@ -75,19 +72,8 @@ public class PreviewWindowCalculator
 
    private double computePlanningHorizon(List<ContactPlaneProvider> fullContactSequence, double timeAtStartOfWindow)
    {
-      int activeSegment = -1;
+      int activeSegment = findTheActiveSegmentInTheContactSequence(fullContactSequence, timeAtStartOfWindow);
       activeSegmentChanged.set(false);
-      for (int i = 0; i < fullContactSequence.size(); i++)
-      {
-         TimeIntervalReadOnly timeInterval = fullContactSequence.get(i).getTimeInterval();
-         boolean segmentIsValid = timeInterval.intervalContains(timeAtStartOfWindow);
-         boolean notAtEndOfSegment = i >= fullContactSequence.size() - 1 || timeAtStartOfWindow < timeInterval.getEndTime();
-         if (segmentIsValid && notAtEndOfSegment)
-         {
-            activeSegment = i;
-            break;
-         }
-      }
 
       if (this.activeSegment.getIntegerValue() != activeSegment)
       {
@@ -134,36 +120,16 @@ public class PreviewWindowCalculator
       ContactStateBasics<?> lastPhase = lastSegment.getContactPhase(lastSegment.getNumberOfContactPhasesInSegment() - 1);
       double lastPhaseDuration = Math.min(lastPhase.getTimeInterval().getDuration(), 10.0);
       double alpha = Math.min(desiredFinalSegmentDuration / lastPhaseDuration, 1.0);
-      trimmedFinalSegment.reset();
       if (alpha < 1.0)
       {
          double startTime = lastPhase.getTimeInterval().getStartTime();
-         double oldEndTime = lastPhase.getTimeInterval().getEndTime();
          double newEndTime = alpha * lastPhaseDuration + startTime;
-         trimmedFinalSegment.addContactPhaseInSegment(lastPhase, newEndTime, oldEndTime);
-         for (int i = 0; i < lastSegment.getNumberOfContactPlanes(); i++)
-            trimmedFinalSegment.addContact(lastSegment.getContactPose(i), lastSegment.getContactsInBodyFrame(i));
-         contactSegmentHelper.cubicInterpolateStartOfSegment(trimmedFinalSegment.getContactPhase(0), alpha);
          contactSegmentHelper.cubicInterpolateEndOfSegment(lastPhase, alpha);
          lastSegment.setEndTime(newEndTime);
       }
       previewWindowLength += lastSegment.getDuration();
 
-      fullContactSet.clear();
-      for (int i = 0; i < previewWindowContacts.size(); i++)
-         setPlaneProviderFromPreviewWindowSegment(fullContactSet.add(), previewWindowContacts.get(i));
-
-      if (alpha < 1.0)
-      {
-         setPlaneProviderFromPreviewWindowSegment(fullContactSet.add(), trimmedFinalSegment);
-         for (int i = previewWindowContacts.size() + activeSegment; i < fullContactSequence.size(); i++)
-            fullContactSet.add().set(fullContactSequence.get(i));
-      }
-      else
-      {
-         for (int i = previewWindowContacts.size() + activeSegment; i < fullContactSequence.size(); i++)
-            fullContactSet.add().set(fullContactSequence.get(i));
-      }
+      populateTheFullContactSet(fullContactSequence);
 
       if (!checkContactSequenceIsValid(previewWindowContacts))
          throw new IllegalArgumentException("The preview window is not valid.");
@@ -171,6 +137,52 @@ public class PreviewWindowCalculator
          throw new IllegalArgumentException("The full contact sequence is not valid.");
 
       return previewWindowLength + flightDuration;
+   }
+
+   private void populateTheFullContactSet(List<ContactPlaneProvider> fullContactSequence)
+   {
+      fullContactSet.clear();
+      for (int i = 0; i < previewWindowContacts.size(); i++)
+         setPlaneProviderFromPreviewWindowSegment(fullContactSet.add(), previewWindowContacts.get(i));
+
+      double previewWindowEndTime = previewWindowContacts.getLast().getEndTime();
+      if (previewWindowEndTime < fullContactSequence.get(fullContactSequence.size() - 1).getTimeInterval().getEndTime())
+      {
+         int activeSegmentIdx = findTheActiveSegmentInTheContactSequence(fullContactSequence, previewWindowEndTime);
+
+         ContactPlaneProvider activeSegment = fullContactSequence.get(activeSegmentIdx);
+         ContactPlaneProvider trimmedFinalSegment = fullContactSet.add();
+         trimmedFinalSegment.set(activeSegment);
+         trimmedFinalSegment.setStartTime(previewWindowEndTime);
+         double alpha = computeTheFractionThroughTheTimeInterval(previewWindowEndTime, activeSegment.getTimeInterval());
+         contactSegmentHelper.cubicInterpolateStartOfSegment(trimmedFinalSegment, alpha);
+
+         for (int i = activeSegmentIdx + 1; i < fullContactSequence.size(); i++)
+            fullContactSet.add().set(fullContactSequence.get(i));
+      }
+   }
+
+   private static int findTheActiveSegmentInTheContactSequence(List<ContactPlaneProvider> fullContactSequence, double time)
+   {
+      int activeSegment = -1;
+      for (int i = 0; i < fullContactSequence.size(); i++)
+      {
+         TimeIntervalReadOnly timeInterval = fullContactSequence.get(i).getTimeInterval();
+         boolean segmentIsValid = timeInterval.intervalContains(time);
+         boolean notAtEndOfSegment = i >= fullContactSequence.size() - 1 || time < timeInterval.getEndTime();
+         if (segmentIsValid && notAtEndOfSegment)
+         {
+            activeSegment = i;
+            break;
+         }
+      }
+
+      return activeSegment;
+   }
+
+   private static double computeTheFractionThroughTheTimeInterval(double time, TimeIntervalReadOnly timeInterval)
+   {
+      return (time - timeInterval.getStartTime()) / Math.min(timeInterval.getDuration(), 10.0);
    }
 
    /**
