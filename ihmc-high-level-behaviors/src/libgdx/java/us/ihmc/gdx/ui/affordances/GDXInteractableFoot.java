@@ -5,31 +5,39 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiMouseButton;
+import imgui.internal.ImGui;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 public class GDXInteractableFoot
 {
    private final GDXRobotCollisionLink collisionLink;
    private final RobotSide side;
    private final ReferenceFrame syncedRobotFootFrame;
+   private final ROS2ControllerHelper ros2Helper;
    private final Model footModel;
    private final ModelInstance footModelInstance;
    private boolean selected = false;
    private boolean hovered;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
+   private int spaceKey;
 
-   public GDXInteractableFoot(GDXRobotCollisionLink collisionLink, RobotSide side, ReferenceFrame syncedRobotFootFrame)
+   public GDXInteractableFoot(GDXRobotCollisionLink collisionLink, RobotSide side, ReferenceFrame syncedRobotFootFrame, ROS2ControllerHelper ros2Helper)
    {
       this.collisionLink = collisionLink;
       this.side = side;
       this.syncedRobotFootFrame = syncedRobotFootFrame;
+      this.ros2Helper = ros2Helper;
 
       String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
       String modelFileName = robotSidePrefix + "foot.g3dj";
@@ -43,6 +51,7 @@ public class GDXInteractableFoot
    public void create(FocusBasedGDXCamera camera3D)
    {
       poseGizmo.create(camera3D);
+      spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -62,6 +71,12 @@ public class GDXInteractableFoot
       {
          poseGizmo.process3DViewInput(input);
          GDXTools.toGDX(poseGizmo.getTransform(), footModelInstance.transform);
+
+         if (ImGui.isKeyReleased(spaceKey))
+         {
+            // TODO: Trajectory time in ImGui panel
+            ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side, 1.2, poseGizmo.getPose()));
+         }
       }
    }
 

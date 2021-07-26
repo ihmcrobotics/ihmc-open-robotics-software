@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
@@ -27,6 +28,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final RobotCollisionModel robotSelfCollisionModel;
    private final RobotCollisionModel robotEnvironmentCollisionModel;
    private final FullHumanoidRobotModel fullRobotModel;
+   private final ROS2ControllerHelper ros2Helper;
 
    private final ArrayList<GDXRobotCollisionLink> selfCollisionLinks = new ArrayList<>();
    private final ArrayList<GDXRobotCollisionLink> environmentCollisionLinks = new ArrayList<>();
@@ -39,11 +41,13 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
    public GDXRobotWholeBodyInteractable(RobotCollisionModel robotSelfCollisionModel,
                                         RobotCollisionModel robotEnvironmentCollisionModel,
-                                        FullHumanoidRobotModel fullRobotModel)
+                                        FullHumanoidRobotModel fullRobotModel,
+                                        ROS2ControllerHelper ros2Helper)
    {
       this.robotSelfCollisionModel = robotSelfCollisionModel;
       this.robotEnvironmentCollisionModel = robotEnvironmentCollisionModel;
       this.fullRobotModel = fullRobotModel;
+      this.ros2Helper = ros2Helper;
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -71,7 +75,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
             {
                GDXInteractableFoot interactableFoot = new GDXInteractableFoot(collisionLink,
                                                                               side,
-                                                                              fullRobotModel.getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL));
+                                                                              fullRobotModel.getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
+                                                                              ros2Helper);
                interactableFoot.create(baseUI.get3DSceneManager().getCamera3D());
                footInteractables.put(side, interactableFoot);
             }
