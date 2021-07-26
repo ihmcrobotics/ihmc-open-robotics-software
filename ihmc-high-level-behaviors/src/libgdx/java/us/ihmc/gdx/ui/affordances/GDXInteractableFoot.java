@@ -17,7 +17,6 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2NodeInterface;
 
 public class GDXInteractableFoot
 {
@@ -28,9 +27,12 @@ public class GDXInteractableFoot
    private final Model footModel;
    private final ModelInstance footModelInstance;
    private boolean selected = false;
-   private boolean hovered;
+   private boolean modified = false;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private int spaceKey;
+   private int deleteKey;
+   private int escapeKey;
+   private boolean mouseIntersects;
 
    public GDXInteractableFoot(GDXRobotCollisionLink collisionLink, RobotSide side, ReferenceFrame syncedRobotFootFrame, ROS2ControllerHelper ros2Helper)
    {
@@ -52,25 +54,54 @@ public class GDXInteractableFoot
    {
       poseGizmo.create(camera3D);
       spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
+      deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
+      escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      hovered = !selected && collisionLink.getIntersects();
-      if (hovered)
+      mouseIntersects = collisionLink.getIntersects();
+      boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+
+      if (!modified && mouseIntersects)
       {
          GDXTools.toGDX(syncedRobotFootFrame.getTransformToWorldFrame(), footModelInstance.transform);
 
-         if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
+         if (leftMouseReleasedWithoutDrag)
          {
             selected = true;
+            modified = true;
+            collisionLink.overrideTransform(true);
             poseGizmo.getTransform().set(syncedRobotFootFrame.getTransformToWorldFrame());
          }
       }
+
+      if (selected && !mouseIntersects && leftMouseReleasedWithoutDrag)
+      {
+         selected = false;
+      }
+      if (modified && mouseIntersects && leftMouseReleasedWithoutDrag)
+      {
+         selected = true;
+      }
+      if (modified && !selected && mouseIntersects)
+      {
+         GDXTools.setTransparency(footModelInstance, 0.7f);
+      }
+      else
+      {
+         GDXTools.setTransparency(footModelInstance, 0.5f);
+      }
+
+      if (modified)
+      {
+         collisionLink.overrideTransform(true).set(poseGizmo.getTransform());
+         GDXTools.toGDX(poseGizmo.getTransform(), footModelInstance.transform);
+      }
+
       if (selected)
       {
          poseGizmo.process3DViewInput(input);
-         GDXTools.toGDX(poseGizmo.getTransform(), footModelInstance.transform);
 
          if (ImGui.isKeyReleased(spaceKey))
          {
@@ -78,11 +109,23 @@ public class GDXInteractableFoot
             ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side, 1.2, poseGizmo.getPose()));
          }
       }
+
+      if (modified && selected && ImGui.isKeyReleased(deleteKey))
+      {
+         selected = false;
+         modified = false;
+         collisionLink.overrideTransform(false);
+      }
+
+      if (selected && ImGui.isKeyReleased(escapeKey))
+      {
+         selected = false;
+      }
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (selected || hovered)
+      if (modified || mouseIntersects)
       {
          footModelInstance.getRenderables(renderables, pool);
       }
