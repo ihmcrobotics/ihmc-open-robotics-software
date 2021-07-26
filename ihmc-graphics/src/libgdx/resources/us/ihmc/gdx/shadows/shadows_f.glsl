@@ -19,6 +19,14 @@ uniform float u_type;
 varying vec4 v_position;
 varying vec4 v_positionLightTrans;
 
+float unpack (vec4 color) {
+    const vec4 bitShifts = vec4(1.0 / (256.0 * 256.0 * 256.0),
+    1.0 / (256.0 * 256.0),
+    1.0 / 256.0,
+    1);
+    return dot(color , bitShifts);
+}
+
 void main()
 {
 	// Default is to not add any color
@@ -33,19 +41,18 @@ void main()
 	if(u_type==1.0){
 		vec3 depth = (v_positionLightTrans.xyz / v_positionLightTrans.w)*0.5+0.5;
 		if (v_positionLightTrans.z>=0.0 && (depth.x >= 0.0) && (depth.x <= 1.0) && (depth.y >= 0.0) && (depth.y <= 1.0) ) {
-			lenDepthMap = texture2D(u_depthMapDir, depth.xy).a;
+			lenDepthMap = unpack(texture2D(u_depthMapDir, depth.xy));
 		}
 	}
 	// Point light, just get the depth given light vector
 	else if(u_type==2.0){
-		lenDepthMap = textureCube(u_depthMapCube, lightDirection).a;
+		lenDepthMap = unpack(textureCube(u_depthMapCube, lightDirection));
 	}
 	
 	// If not in shadow, add some light
-	if(lenDepthMap<lenToLight-0.005){ //epsilon kinda
-	}else{
-		intensity=0.5*(1.0-lenToLight);
-	}
+	if(lenDepthMap>=lenToLight){
+        intensity=0.5*(1.0-lenToLight);
+    }
 	
 	gl_FragColor     = vec4(intensity);
 
