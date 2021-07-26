@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,11 +19,15 @@ public class SE3MPCIndexHandlerTest
    {
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D contactPose = new FramePose3D();
+
+      PreviewWindowSegment segment0 = new PreviewWindowSegment();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      PreviewWindowSegment segment2 = new PreviewWindowSegment();
 
       ContactPlaneProvider contact0 = new ContactPlaneProvider();
       ContactPlaneProvider contact1 = new ContactPlaneProvider();
@@ -38,9 +43,13 @@ public class SE3MPCIndexHandlerTest
       contact2.set(contact1);
       contact2.getTimeInterval().setInterval(1.5, 2.2);
 
-      contactProviders.add(contact0);
-      contactProviders.add(contact1);
-      contactProviders.add(contact2);
+      segment0.set(contact0);
+      segment1.set(contact1);
+      segment2.set(contact2);
+
+      contactProviders.add(segment0);
+      contactProviders.add(segment1);
+      contactProviders.add(segment2);
 
       indexHandler.initialize(contactProviders);
 

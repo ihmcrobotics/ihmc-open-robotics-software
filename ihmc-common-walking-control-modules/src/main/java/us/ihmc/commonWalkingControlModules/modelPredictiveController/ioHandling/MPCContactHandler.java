@@ -1,17 +1,13 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ActiveSetData;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -80,7 +76,7 @@ public class MPCContactHandler
 
          List<MPCContactPlane> contactPlanes = contactData.getPlanes();
 
-         for (int contactId = 0; contactId < contact.getNumberOfContacts(); contactId++)
+         for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          {
             MPCContactPlane contactPlane = contactPlanes.get(contactId);
             contactPlane.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
@@ -113,7 +109,7 @@ public class MPCContactHandler
       activeSetData.setSegmentNumber(sequenceId);
       activeSetData.setNumberOfVariablesInSegment(indexHandler.getVariablesInSegment(sequenceId));
 
-      for (int contactId = 0; contactId < contact.getNumberOfContacts(); contactId++)
+      for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          contactData.addContactPlane();
 
       return contactData;
@@ -142,7 +138,7 @@ public class MPCContactHandler
       while (i < contactDataList.numberOfContacts())
       {
          ContactData contactData = contactDataList.getContactData(i);
-         if (contactData.getContact().getNumberOfContacts() != contactData.getPlanes().size())
+         if (contactData.getContact().getNumberOfContactPlanes() != contactData.getPlanes().size())
          {
             contactDataList.removeContact(i);
             continue;
