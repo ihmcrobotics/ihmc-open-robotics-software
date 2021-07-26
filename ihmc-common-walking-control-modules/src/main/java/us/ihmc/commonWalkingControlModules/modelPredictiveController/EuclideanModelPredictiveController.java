@@ -45,6 +45,9 @@ public abstract class EuclideanModelPredictiveController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private static final boolean useSlackVariablesForRhoBounds = true;
+   private static final double firstSegmentSlackWeight = 1e7;
+
    protected static final int numberOfBasisVectorsPerContactPoint = 4;
    private final double maxContactForce;
 
@@ -104,8 +107,6 @@ public abstract class EuclideanModelPredictiveController
 
    protected final DMatrixRMaj previousSolution = new DMatrixRMaj(1, 1);
    protected final TIntArrayList activeInequalityConstraints = new TIntArrayList();
-   protected final TIntArrayList activeLowerBoundConstraints = new TIntArrayList();
-   protected final TIntArrayList activeUpperBoundConstraints = new TIntArrayList();
 
    private MPCCornerPointViewer cornerPointViewer = null;
    private LinearMPCTrajectoryViewer trajectoryViewer = null;
@@ -238,8 +239,6 @@ public abstract class EuclideanModelPredictiveController
    protected void assembleActiveSet(IntUnaryOperator startIndexGetter)
    {
       activeInequalityConstraints.reset();
-      activeLowerBoundConstraints.reset();
-      activeUpperBoundConstraints.reset();
       previousSolution.reshape(indexHandler.getTotalProblemSize(), 1);
 
       int inequalityStartIndex = 0;
@@ -264,34 +263,18 @@ public abstract class EuclideanModelPredictiveController
          {
             activeInequalityConstraints.add(activeSetData.getActiveInequalityIndex(i) + inequalityStartIndex);
          }
-         for (int i = 0; i < activeSetData.getNumberOfActiveLowerBoundConstraints(); i++)
-         {
-            activeLowerBoundConstraints.add(activeSetData.getActiveLowerBoundIndex(i) + lowerBoundStartIndex);
-         }
-         for (int i = 0; i < activeSetData.getNumberOfActiveUpperBoundConstraints(); i++)
-         {
-            activeUpperBoundConstraints.add(activeSetData.getActiveUpperBoundIndex(i) + upperBoundStartIndex);
-         }
 
          inequalityStartIndex += activeSetData.getNumberOfInequalityConstraints();
-         lowerBoundStartIndex += activeSetData.getNumberOfLowerBoundConstraints();
-         upperBoundStartIndex += activeSetData.getNumberOfUpperBoundConstraints();
       }
    }
 
    protected void extractNewActiveSetData(boolean foundSolution, LinearMPCQPSolver qpSolver, IntUnaryOperator startIndexGetter)
    {
       TIntList activeInequalityIndices = qpSolver.getActiveInequalityIndices();
-      TIntList activeLowerBoundIndices = qpSolver.getActiveLowerBoundIndices();
-      TIntList activeUpperBoundIndices = qpSolver.getActiveUpperBoundIndices();
 
       int inequalityStartIndex = 0;
-      int lowerBoundStartIndex = 0;
-      int upperBoundStartIndex = 0;
 
       int currentInequalityIndex = 0;
-      int currentLowerBoundIndex = 0;
-      int currentUpperBoundIndex = 0;
 
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
@@ -312,8 +295,6 @@ public abstract class EuclideanModelPredictiveController
          }
 
          int inequalityEndIndex = inequalityStartIndex + activeSetData.getNumberOfInequalityConstraints();
-         int lowerBoundEndIndex = lowerBoundStartIndex + activeSetData.getNumberOfLowerBoundConstraints();
-         int upperBoundEndIndex = upperBoundStartIndex + activeSetData.getNumberOfUpperBoundConstraints();
 
          while (currentInequalityIndex < activeInequalityIndices.size() && activeInequalityIndices.get(currentInequalityIndex) < inequalityEndIndex)
          {
@@ -321,21 +302,7 @@ public abstract class EuclideanModelPredictiveController
             currentInequalityIndex++;
          }
 
-         while (currentLowerBoundIndex < activeLowerBoundIndices.size() && activeLowerBoundIndices.get(currentLowerBoundIndex) < lowerBoundEndIndex)
-         {
-            activeSetData.addActiveLowerBoundConstraint(activeLowerBoundIndices.get(currentLowerBoundIndex) - lowerBoundStartIndex);
-            currentLowerBoundIndex++;
-         }
-
-         while (currentUpperBoundIndex < activeUpperBoundIndices.size() && activeUpperBoundIndices.get(currentUpperBoundIndex) < upperBoundEndIndex)
-         {
-            activeSetData.addActiveUpperBoundConstraint(activeUpperBoundIndices.get(currentUpperBoundIndex) - upperBoundStartIndex);
-            currentUpperBoundIndex++;
-         }
-
          inequalityStartIndex = inequalityEndIndex;
-         lowerBoundStartIndex = lowerBoundEndIndex;
-         upperBoundStartIndex = upperBoundEndIndex;
       }
    }
 
@@ -526,6 +493,8 @@ public abstract class EuclideanModelPredictiveController
          return null;
 
       valueObjective.clear();
+      if (useSlackVariablesForRhoBounds)
+         valueObjective.setSlackVariableWeight(firstSegmentSlackWeight / MathTools.pow(10.0, segmentNumber));
       valueObjective.setOmega(omega.getValue());
       valueObjective.setSegmentDuration(segmentDuration);
       valueObjective.setSegmentNumber(segmentNumber);
@@ -534,7 +503,7 @@ public abstract class EuclideanModelPredictiveController
       {
          MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
          valueObjective.addContactPlane(contactPlane, mpcParameters.getMinRhoValue());
-         contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(contactPlane.getRhoSize());
+         contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(4 * contactPlane.getRhoSize());
       }
 
       return valueObjective;
@@ -552,6 +521,7 @@ public abstract class EuclideanModelPredictiveController
       {
          MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
          valueObjective.addContactPlane(contactPlane, maxContactForce);
+         // FIXME This is wrong
          contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(contactPlane.getRhoSize());
       }
 
