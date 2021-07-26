@@ -5,7 +5,6 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
-import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiStyleVar;
@@ -42,6 +41,8 @@ import java.util.function.Consumer;
 
 public class GDXImGuiBasedUI
 {
+   public static final int ANTI_ALIASING = 2;
+
    private static boolean RECORD_VIDEO = Boolean.parseBoolean(System.getProperty("record.video"));
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
    private static final String VIEW_3D_WINDOW_NAME = "3D View";
@@ -334,13 +335,12 @@ public class GDXImGuiBasedUI
       ImGui.begin(VIEW_3D_WINDOW_NAME, flags);
       view3DPanelSizeHandler.handleSizeAfterBegin();
 
-      int antiAliasing = 2;
       float posX = ImGui.getWindowPosX();
       float posY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
       sizeX = ImGui.getWindowSizeX();
       sizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
-      float renderSizeX = sizeX * antiAliasing;
-      float renderSizeY = sizeY * antiAliasing;
+      float renderSizeX = sizeX * ANTI_ALIASING;
+      float renderSizeY = sizeY * ANTI_ALIASING;
 
       inputCalculator.compute();
       for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imGuiInputProcessors)
@@ -353,8 +353,8 @@ public class GDXImGuiBasedUI
          if (frameBuffer != null)
             frameBuffer.dispose();
 
-         int newWidth = frameBuffer == null ? Gdx.graphics.getWidth() * antiAliasing : frameBuffer.getWidth() * 2;
-         int newHeight = frameBuffer == null ? Gdx.graphics.getHeight() * antiAliasing : frameBuffer.getHeight() * 2;
+         int newWidth = frameBuffer == null ? Gdx.graphics.getWidth() * ANTI_ALIASING : frameBuffer.getWidth() * 2;
+         int newHeight = frameBuffer == null ? Gdx.graphics.getHeight() * ANTI_ALIASING : frameBuffer.getHeight() * 2;
          LogTools.info("Allocating framebuffer of size: {}x{}", newWidth, newHeight);
          GLFrameBuffer.FrameBufferBuilder frameBufferBuilder = new GLFrameBuffer.FrameBufferBuilder(newWidth, newHeight);
          frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);

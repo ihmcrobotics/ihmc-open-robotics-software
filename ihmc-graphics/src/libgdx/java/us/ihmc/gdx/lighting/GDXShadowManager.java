@@ -26,20 +26,27 @@ public class GDXShadowManager
    private int y = 0;
    private int width = 0;
    private int height = 0;
+   private float antiAliasing = 1;
 
    private FrameBuffer framebuffer;
 
-   public GDXShadowManager()
+   public GDXShadowManager() {
+      this(1.0f);
+   }
+
+   public GDXShadowManager(float antiAliasing)
    {
-      this(GDXShadowMapShader.buildShaderProgram());
+      this(antiAliasing, GDXShadowMapShader.buildShaderProgram());
    }
 
    /**
     * @param shader The ShaderProgram used to create the shader used by the main ModelBatch
     */
-   public GDXShadowManager(ShaderProgram shader)
+   public GDXShadowManager(float antiAliasing, ShaderProgram shader)
    {
       final GDXShadowManager manager = this;
+
+      this.antiAliasing = antiAliasing;
 
       this.shader = shader;
       this.batch = new ModelBatch(new DefaultShaderProvider()
@@ -84,7 +91,6 @@ public class GDXShadowManager
     * this call.
     *
     * @param renderableProviders The models to be rendered
-    * @param program             The {@link GDXSceneShader} belonging to the main batch
     */
    public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders) {
       renderShadows(camera, renderableProviders, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -95,7 +101,6 @@ public class GDXShadowManager
     * this call.
     *
     * @param renderableProviders The models to be rendered
-    * @param program             The {@link GDXSceneShader} belonging to the main batch
     */
    public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders, int width, int height)
    {
@@ -136,6 +141,7 @@ public class GDXShadowManager
       program.setUniformi("u_shadows", textureNum);
       program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
       program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
+      program.setUniformf("u_antiAliasing", this.antiAliasing);
       program.end();
    }
 
