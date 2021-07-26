@@ -1,29 +1,17 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import gnu.trove.list.TIntList;
-import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.BlockInverseCalculator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeC;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
-import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.lang.annotation.Native;
 
 /**
  * This is the wrapper class for the quadratic program solver. It receives all the MPC Commands, converting them to quadratic costs or linear constraints.
@@ -37,27 +25,15 @@ public class LinearMPCQPSolver
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final ExecutionTimer qpSolverTimer = new ExecutionTimer("mpcSolverTimer", 0.5, registry);
-   private final SimpleEfficientActiveSetQPSolver qpSolver;
+   public final MPCQPSolver qpSolver;
 
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
    private final YoBoolean foundSolution = new YoBoolean("foundSolution", registry);
-
-   // These are all public to help with testing. DO NOT USE THEM IN A PUBLIC FASHION
-   public final NativeMatrix solverInput_H;
-   public final NativeMatrix solverInput_f;
-
-   private final NativeMatrix tempA;
-   private final NativeMatrix tempB;
-   public final NativeMatrix solverInput_Aeq;
-   public final NativeMatrix solverInput_beq;
-   public final NativeMatrix solverInput_Ain;
-   public final NativeMatrix solverInput_bin;
 
    protected final NativeMatrix previousSolution;
 
    public final NativeQPInputTypeA qpInputTypeA = new NativeQPInputTypeA(0);
    public final NativeQPInputTypeC qpInputTypeC = new NativeQPInputTypeC(0);
-
 
    protected final NativeMatrix solverOutput;
 
@@ -110,7 +86,7 @@ public class LinearMPCQPSolver
       rhoRateCoefficientRegularization.set(1e-10);
       comRateCoefficientRegularization.set(1e-10);
 
-      qpSolver = new SimpleEfficientActiveSetQPSolver();
+      qpSolver = new MPCQPSolver();
       qpSolver.setConvergenceThreshold(5e-6);
       qpSolver.setConvergenceThresholdForLagrangeMultipliers(1e-4);
       if (inverseMatrixCalculator != null)
@@ -120,15 +96,6 @@ public class LinearMPCQPSolver
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
       int problemSize = 3 * (2 * 4 * LinearMPCIndexHandler.coefficientsPerRho + LinearMPCIndexHandler.comCoefficientsPerSegment);
-      solverInput_H = new NativeMatrix(problemSize, problemSize);
-      solverInput_f = new NativeMatrix(problemSize, 1);
-
-      tempA = new NativeMatrix(0, problemSize);
-      tempB = new NativeMatrix(0, 1);
-      solverInput_Aeq = new NativeMatrix(0, problemSize);
-      solverInput_beq = new NativeMatrix(0, 1);
-      solverInput_Ain = new NativeMatrix(0, problemSize);
-      solverInput_bin = new NativeMatrix(0, 1);
 
       previousSolution = new NativeMatrix(0, 0);
 
@@ -192,27 +159,11 @@ public class LinearMPCQPSolver
       qpInputTypeA.setNumberOfVariables(problemSize);
       qpInputTypeC.setNumberOfVariables(problemSize);
 
-      solverInput_H.reshape(problemSize, problemSize);
-      solverInput_f.reshape(problemSize, 1);
-
       solverOutput.reshape(problemSize, 1);
 
       resetRateRegularization();
 
-      solverInput_Aeq.zero();
-      solverInput_beq.zero();
-
-      solverInput_Ain.zero();
-      solverInput_bin.zero();
-
-      solverInput_Aeq.reshape(0, problemSize);
-      solverInput_beq.reshape(0, 1);
-
-      solverInput_Ain.reshape(0, problemSize);
-      solverInput_bin.reshape(0, 1);
-
-      solverInput_H.zero();
-      solverInput_f.zero();
+      qpSolver.initialize(problemSize);
    }
 
    public void resetRateRegularization()
@@ -233,12 +184,9 @@ public class LinearMPCQPSolver
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
          int start = indexHandler.getComCoefficientStartIndex(segmentId);
-         for (int i = 0; i < LinearMPCIndexHandler.comCoefficientsPerSegment; i++)
-            solverInput_H.add(start + i, start + i, comCoefficientRegularization.getDoubleValue());
-
+         qpSolver.addRegularization(start, LinearMPCIndexHandler.comCoefficientsPerSegment, comCoefficientRegularization.getValue());
          start = indexHandler.getRhoCoefficientStartIndex(segmentId);
-         for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
-            solverInput_H.add(start + i, start + i, rhoCoefficientRegularization.getDoubleValue());
+         qpSolver.addRegularization(start, indexHandler.getRhoCoefficientsInSegment(segmentId), rhoCoefficientRegularization.getValue());
       }
    }
 
@@ -250,24 +198,9 @@ public class LinearMPCQPSolver
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
          int start = indexHandler.getComCoefficientStartIndex(segmentId);
-         for (int i = 0; i < LinearMPCIndexHandler.comCoefficientsPerSegment; i++)
-         {
-            double previousValue = previousSolution.get(start + i, 0);
-            if (Double.isNaN(previousValue))
-               continue;
-            solverInput_H.add(start + i, start + i, comCoefficientFactor);
-            solverInput_f.add(start + i, 0, -previousValue * comCoefficientFactor);
-         }
-
+         qpSolver.addRateRegularization(start, LinearMPCIndexHandler.comCoefficientsPerSegment, comCoefficientFactor, previousSolution);
          start += LinearMPCIndexHandler.comCoefficientsPerSegment;
-         for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
-         {
-            double previousValue = previousSolution.get(start + i, 0);
-            if (Double.isNaN(previousValue))
-               continue;
-            solverInput_H.add(start + i, start + i, rhoCoefficientFactor);
-            solverInput_f.add(start + i, 0, -previousValue * rhoCoefficientFactor);
-         }
+         qpSolver.addRateRegularization(start, indexHandler.getRhoCoefficientsInSegment(segmentId), rhoCoefficientFactor, previousSolution);
       }
    }
 
@@ -317,6 +250,9 @@ public class LinearMPCQPSolver
          case RHO_TRACKING:
             submitRhoTrackingCommand((RhoTrackingCommand) command);
             break;
+         case RHO_RATE_TRACKING:
+            submitRhoRateTrackingCommand((RhoRateTrackingCommand) command);
+            break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
       }
@@ -354,7 +290,7 @@ public class LinearMPCQPSolver
    {
       int offset = inputCalculator.calculateRhoBoundCommandCompact(qpInputTypeA, command);
       if (offset != -1)
-         addInput(qpInputTypeA, offset);
+         addInput(qpInputTypeA, offset, command.getSlackVariableWeight());
    }
 
    public void submitNormalForceBoundCommand(NormalForceBoundCommand command)
@@ -392,6 +328,13 @@ public class LinearMPCQPSolver
          addInput(qpInputTypeC, offset);
    }
 
+   public void submitRhoRateTrackingCommand(RhoRateTrackingCommand command)
+   {
+      int offset = inputCalculator.calculateRhoRateTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
+         addInput(qpInputTypeC, offset);
+   }
+
    public void addInput(NativeQPInputTypeA input)
    {
       addInput(input, 0);
@@ -399,205 +342,31 @@ public class LinearMPCQPSolver
 
    public void addInput(NativeQPInputTypeA input, int offset)
    {
+      addInput(input, offset, Double.NaN);
+   }
+
+   public void addInput(NativeQPInputTypeA input, int offset, double slackVariableWeight)
+   {
       switch (input.getConstraintType())
       {
          case OBJECTIVE:
             if (input.useWeightScalar())
-               addObjective(input.taskJacobian, input.taskObjective, input.getWeightScalar(), offset);
+               qpSolver.addObjective(input.taskJacobian, input.taskObjective, input.getWeightScalar(), offset);
             else
-               addObjective(input.taskJacobian, input.taskObjective, input.getTaskWeightMatrix(), offset);
+               qpSolver.addObjective(input.taskJacobian, input.taskObjective, input.getTaskWeightMatrix(), offset);
             break;
          case EQUALITY:
-            addEqualityConstraint(input.taskJacobian, input.taskObjective, offset);
+            qpSolver.addEqualityConstraint(input.taskJacobian, input.taskObjective, problemSize, offset);
             break;
          case LEQ_INEQUALITY:
-            addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, offset);
+            qpSolver.addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, slackVariableWeight, problemSize, offset);
             break;
          case GEQ_INEQUALITY:
-            addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, offset);
+            qpSolver.addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective, slackVariableWeight, problemSize, offset);
             break;
          default:
             throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
       }
-   }
-
-   public void addObjective(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight)
-   {
-      addObjective(taskJacobian, taskObjective, taskWeight, 0);
-   }
-
-   public void addObjective(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight, int offset)
-   {
-      addObjective(taskJacobian, taskObjective, taskWeight, taskJacobian.getNumCols(), offset, solverInput_H, solverInput_f);
-   }
-
-   public static void addObjective(NativeMatrix taskJacobian,
-                                   NativeMatrix taskObjective,
-                                   double taskWeight,
-                                   int problemSize,
-                                   int offset,
-                                   NativeMatrix solverInput_H,
-                                   NativeMatrix solverInput_f)
-   {
-      if (taskJacobian.getNumCols() != problemSize)
-      {
-         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
-      }
-      int variables = taskJacobian.getNumCols();
-      if (variables > problemSize)
-      {
-         throw new RuntimeException("This task does not fit.");
-      }
-
-      // Compute: H += J^T W J
-      // TODO figure out an efficient inner product in eigen
-      solverInput_H.multAddBlockTransA(taskWeight, taskJacobian, taskJacobian, offset, offset);
-      if (debug && solverInput_H.containsNaN())
-         throw new RuntimeException("error");
-
-      // Compute: f += - J^T W Objective
-      solverInput_f.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, offset, 0);
-      if (debug && solverInput_f.containsNaN())
-         throw new RuntimeException("error");
-   }
-
-   public void addObjective(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix taskWeight, int offset)
-   {
-      addObjective(taskJacobian, taskObjective, taskWeight, taskJacobian.getNumCols(), offset, solverInput_H, solverInput_f);
-   }
-
-   private final NativeMatrix tempJtW = new NativeMatrix(0, 0);
-
-   private void addObjective(NativeMatrix taskJacobian,
-                             NativeMatrix taskObjective,
-                             NativeMatrix taskWeight,
-                             int problemSize,
-                             int offset,
-                             NativeMatrix solverInput_H,
-                             NativeMatrix solverInput_f)
-   {
-      int taskSize = taskJacobian.getNumRows();
-      if (taskJacobian.getNumCols() != problemSize)
-      {
-         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
-      }
-      int variables = taskJacobian.getNumCols();
-      if (variables > problemSize)
-      {
-         throw new RuntimeException("This task does not fit.");
-      }
-
-      tempJtW.reshape(variables, taskSize);
-
-      // J^T W
-      tempJtW.multTransA(taskJacobian, taskWeight);
-
-      // Compute: H += J^T W J
-      solverInput_H.multAddBlock(tempJtW, taskJacobian, offset, offset);
-      if (debug && solverInput_H.containsNaN())
-         throw new RuntimeException("error");
-
-      // Compute: f += - J^T W Objective
-      solverInput_f.multAddBlock(-1.0, tempJtW, taskObjective, offset, 0);
-      if (debug && solverInput_f.containsNaN())
-         throw new RuntimeException("error");
-   }
-
-   public void addEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective)
-   {
-      addEqualityConstraint(taskJacobian, taskObjective, 0);
-   }
-
-   public void addEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, int taskColOffset)
-   {
-      addEqualityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, taskColOffset);
-   }
-
-   public void addEqualityConstraint(NativeMatrix taskJacobian,
-                                            NativeMatrix taskObjective,
-                                            int problemSize,
-                                            int totalProblemSize,
-                                            int colOffset)
-   {
-      if (taskJacobian.getNumCols() != problemSize)
-      {
-         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
-      }
-
-      int variables = taskJacobian.getNumCols();
-      if (variables + colOffset > totalProblemSize)
-      {
-         throw new RuntimeException("This task does not fit.");
-      }
-
-      nativeMatrixGrower.appendRows(solverInput_Aeq, colOffset, taskJacobian);
-      nativeMatrixGrower.appendRows(solverInput_beq, taskObjective);
-
-      if (debug && solverInput_Aeq.containsNaN())
-         throw new RuntimeException("error");
-      if (debug && solverInput_beq.containsNaN())
-         throw new RuntimeException("error");
-   }
-
-
-
-   public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective)
-   {
-      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, 0);
-   }
-
-   public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, int colOffset)
-   {
-      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset);
-   }
-
-   public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian,
-                                                                 NativeMatrix taskObjective,
-                                                                 int problemSize,
-                                                                 int totalProblemSize,
-                                                                 int colOffset)
-   {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, problemSize, totalProblemSize, colOffset);
-   }
-
-   public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective)
-   {
-      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, 0);
-   }
-
-   public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, int colOffset)
-   {
-      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset);
-   }
-
-   public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian,
-                                                                  NativeMatrix taskObjective,
-                                                                  int problemSize,
-                                                                  int totalProblemSize,
-                                                                  int colOffset)
-   {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, problemSize, totalProblemSize, colOffset);
-   }
-
-   private void addInequalityConstraintInternal(NativeMatrix taskJacobian,
-                                                NativeMatrix taskObjective,
-                                                double sign,
-                                                int problemSize,
-                                                int totalProblemSize,
-                                                int colOffset)
-   {
-      int variables = taskJacobian.getNumCols();
-      if (taskJacobian.getNumCols() != problemSize)
-      {
-         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
-      }
-      if (variables > totalProblemSize)
-      {
-         throw new RuntimeException("This task does not fit.");
-      }
-
-      nativeMatrixGrower.appendRows(solverInput_Ain, colOffset, sign, taskJacobian);
-      nativeMatrixGrower.appendRows(solverInput_bin, sign, taskObjective);
    }
 
    public void addInput(NativeQPInputTypeC input)
@@ -610,26 +379,18 @@ public class LinearMPCQPSolver
       if (!input.useWeightScalar())
          throw new IllegalArgumentException("Not yet implemented.");
 
-      int size = input.directCostHessian.getNumCols();
-      solverInput_H.addBlock(input.directCostHessian, offset, offset, 0, 0, size, size, input.getWeightScalar());
-      if (debug && solverInput_H.containsNaN())
-         throw new RuntimeException("error");
-      solverInput_f.addBlock(input.directCostGradient, offset, 0, 0, 0, size, 1, input.getWeightScalar());
-      if (debug && solverInput_f.containsNaN())
-         throw new RuntimeException("Error");
+      qpSolver.addDirectObjective(input.directCostHessian, input.directCostGradient, input.getWeightScalar(), offset);
    }
 
    public boolean solve()
    {
       addCoefficientRegularization();
 
-      numberOfEqualityConstraints.set(solverInput_Aeq.getNumRows());
-      numberOfInequalityConstraints.set(solverInput_Ain.getNumRows());
-      numberOfConstraints.set(solverInput_Aeq.getNumRows() + solverInput_Ain.getNumRows());
+      numberOfEqualityConstraints.set(qpSolver.getNumberOfEqualityConstraints());//solverInput_Aeq.getNumRows());
+      numberOfInequalityConstraints.set(qpSolver.getNumberOfInequalityConstraints());
+      numberOfConstraints.set(numberOfEqualityConstraints.getIntegerValue() + numberOfInequalityConstraints.getIntegerValue());
 
       qpSolverTimer.startMeasurement();
-
-      qpSolver.clear();
 
       qpSolver.setUseWarmStart(useWarmStart);
       qpSolver.setMaxNumberOfIterations(maxNumberOfIterations);
@@ -637,11 +398,7 @@ public class LinearMPCQPSolver
          qpSolver.resetActiveSet();
 
       numberOfActiveVariables.set(problemSize);
-
-      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
-      qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
-      qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
-
+      
       numberOfIterations.set(qpSolver.solve(solverOutput));
 
       qpSolverTimer.stopMeasurement();
@@ -671,28 +428,8 @@ public class LinearMPCQPSolver
       qpSolver.setActiveInequalityIndices(activeInequalityIndices);
    }
 
-   public void setActiveLowerBoundIndices(TIntList activeLowerBoundIndices)
-   {
-      qpSolver.setActiveLowerBoundIndices(activeLowerBoundIndices);
-   }
-
-   public void setActiveUpperBoundIndices(TIntList activeUpperBoundIndices)
-   {
-      qpSolver.setActiveUpperBoundIndices(activeUpperBoundIndices);
-   }
-
    public TIntList getActiveInequalityIndices()
    {
       return qpSolver.getActiveInequalityIndices();
-   }
-
-   public TIntList getActiveLowerBoundIndices()
-   {
-      return qpSolver.getActiveLowerBoundIndices();
-   }
-
-   public TIntList getActiveUpperBoundIndices()
-   {
-      return qpSolver.getActiveUpperBoundIndices();
    }
 }
