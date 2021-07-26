@@ -21,7 +21,6 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
    private final List<ConvexPolygon2DReadOnly> contactPointsInBodyFrame = new ArrayList<>();
    private final List<FramePose3DReadOnly> contactPoses = new ArrayList<>();
 
-   private double totalDuration = 0.0;
    private int totalContactPoints = 0;
 
    public void reset()
@@ -31,7 +30,6 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
       contactPointsInBodyFrame.clear();
       contactPoses.clear();
       totalContactPoints = 0;
-      totalDuration = 0.0;
    }
 
    public void set(PreviewWindowSegment other)
@@ -54,6 +52,8 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
       addContactPhaseInSegment(other, other.getTimeInterval().getStartTime(), other.getTimeInterval().getEndTime());
       for (int i = 0; i < other.getNumberOfContactPlanes(); i++)
          addContact(other.getContactPose(i), other.getContactsInBodyFrame(i));
+      totalContactPoints = other.getTotalNumberOfPointsInContact();
+      contactState = other.getContactState();
    }
 
    public void setContactState(ContactState contactState)
@@ -63,22 +63,19 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
 
    public void addContactPhaseInSegment(ContactStateBasics<?> contactPhase, double startTime, double endTime)
    {
-      if (contactState != null)
+      if (contactState != null && contactPhasesInSegment.size() > 0)
          validateContactPhase(contactPhase);
 
       SettableContactStateProvider newContact = contactPhasesInSegment.add();
       newContact.set(contactPhase);
       newContact.getTimeInterval().setInterval(startTime, endTime);
       contactState = contactPhase.getContactState();
-      totalDuration += endTime - startTime;
    }
 
    public void removeContactPhaseFromSegment(int phaseId)
    {
       SettableContactStateProvider phase = contactPhasesInSegment.get(phaseId);
       contactPhasesInSegment.remove(phaseId);
-
-      totalDuration -= phase.getTimeInterval().getDuration();
    }
 
    private void validateContactPhase(ContactStateBasics<?> contactPhase)
@@ -125,14 +122,14 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
       return contactPhasesInSegment.get(phaseNumber).getTimeInterval();
    }
 
-   public double getDuration()
-   {
-      return totalDuration;
-   }
-
    public void setStartTime(double startTime)
    {
       contactPhasesInSegment.get(0).getTimeInterval().setStartTime(startTime);
+   }
+
+   public void setEndTime(double endTime)
+   {
+      contactPhasesInSegment.getLast().getTimeInterval().setEndTime(endTime);
    }
 
    public double getStartTime()
