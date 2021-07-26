@@ -16,11 +16,6 @@ public class GDXRenderable implements RenderableProvider
       this.sceneType = sceneType;
    }
 
-   public RenderableProvider getRenderableProvider()
-   {
-      return renderableProvider;
-   }
-
    public GDXSceneLevel getSceneType()
    {
       return sceneType;
