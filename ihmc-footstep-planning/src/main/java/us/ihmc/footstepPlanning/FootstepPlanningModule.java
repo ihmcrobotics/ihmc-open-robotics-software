@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
@@ -16,7 +15,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -27,9 +25,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.VariableDescriptor;
-import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageAdjuster;
 import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageBodyPathPlanner;
-import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageBodyPathVisualizer;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
@@ -37,9 +33,6 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.DataSet;
-import us.ihmc.pathPlanning.DataSetIOTools;
-import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
@@ -68,8 +61,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final VisibilityGraphPathPlanner bodyPathPlanner;
-   private final NarrowPassageBodyPathPlanner bodyPathPlannerNarrowPassage;
-   private final NarrowPassageAdjuster narrowPassageAdjuster;
+   private final NarrowPassageBodyPathPlanner narrowPassageBodyPathPlanner;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
 
    private final PlanThenSnapPlanner planThenSnapPlanner;
@@ -115,8 +107,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, registry);
-      this.bodyPathPlannerNarrowPassage = new NarrowPassageBodyPathPlanner(footstepPlannerParameters, registry);
-      this.narrowPassageAdjuster = new NarrowPassageAdjuster(footstepPlannerParameters, registry);
+      this.narrowPassageBodyPathPlanner = new NarrowPassageBodyPathPlanner(footstepPlannerParameters, registry);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
@@ -179,8 +170,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
       PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
-      bodyPathPlannerNarrowPassage.setPlanarRegionsList(planarRegionsList);
-      narrowPassageAdjuster.setPlanarRegionsList(planarRegionsList);
+      narrowPassageBodyPathPlanner.setPlanarRegionsList(planarRegionsList);
 
       // record time
       output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
@@ -193,6 +183,17 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
          BodyPathPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
          List<Pose3DReadOnly> waypoints = bodyPathPlanner.getWaypoints();
+
+         if (request.getPlanNarrowPassage())
+         {
+            LogTools.info("with Narrow Passage adjustment");
+
+            List<FramePose3D> waypointsList = bodyPathPlanner.getWaypointsAsFramePoseList();
+
+            narrowPassageBodyPathPlanner.setWaypoints(waypointsList);
+            waypoints = narrowPassageBodyPathPlanner.makeAdjustments();
+            bodyPathPlannerResult = narrowPassageBodyPathPlanner.getBodyPathPlanningResult();
+         }
 
          if (!bodyPathPlannerResult.validForExecution() || (waypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails()))
          {
@@ -208,16 +209,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             bodyPathPlanner.computeBestEffortPlan(horizonLength);
          }
 
-         if (request.getPlanNarrowPassage())
-         {
-            LogTools.info("with Narrow Passage adjustment");
-
-            List<FramePose3D> waypointsList = bodyPathPlanner.getWaypointsAsFramePoseList();
-
-            narrowPassageAdjuster.setWaypoints(waypointsList);
-            waypoints = narrowPassageAdjuster.makeAdjustments();
-         }
-
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);
          if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
@@ -230,20 +221,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
       else if (request.getPlanNarrowPassage())
       {
-         LogTools.info("Entering Narrow Passage planning");
-         bodyPathPlannerNarrowPassage.setStartAndEndPoses(startMidFootPose, goalMidFootPose);
-         List<Pose3DReadOnly> waypoints = bodyPathPlannerNarrowPassage.computePlan();
-//         if (waypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails())
-//         {
-//            reportBodyPathPlan();
-//            output.setBodyPathPlanningResult();
-//            statusCallbacks.forEach(callback -> callback.accept(output));
-//            isPlanning.set(false);
-//            return;
-//         }
+         LogTools.info("Entering straight path with narrow passage adjustment");
+         narrowPassageBodyPathPlanner.setWaypointsFromStartAndEndPoses(startMidFootPose, goalMidFootPose);
+         List<Pose3DReadOnly> waypoints = narrowPassageBodyPathPlanner.makeAdjustments();
 
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
-
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);
          if (MathTools.intervalContains(request.getHorizonLength(), 0.0, pathLength))
          {
@@ -251,7 +233,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
 
-         reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
+         reportBodyPathPlan(narrowPassageBodyPathPlanner.getBodyPathPlanningResult());
       }
       else
       {

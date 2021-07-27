@@ -31,42 +31,47 @@ import java.awt.*;
 
 public class BodyCollisionPoint
 {
-   private static final double collisionBoxHeight = 0.4;
    private static double shiftAlpha = 1;
    private static final FramePose3D nanPose = new FramePose3D();
 
-   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
-   private final YoFramePose3D startingWaypoint;
-   private final YoFramePose3D optimizedWaypoint;
-   private final YoDouble waypointDisplacement;
-   private final YoFramePoseUsingYawPitchRoll collisionBoxPose;
-   private final YoDouble maxDisplacement;
-   private final YoDouble maxDisplacementSquared;
+   private FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private YoFramePose3D startingWaypoint;
+   private YoFramePose3D optimizedWaypoint;
+   private YoDouble maxDisplacementSquared;
+   private YoFramePoseUsingYawPitchRoll collisionBoxPose;
 
-   private final PoseReferenceFrame waypointPoseFrame;
+   private PoseReferenceFrame waypointPoseFrame;
    private final Vector3D boxCenterInSoleFrame = new Vector3D();
    private final FramePose3D boxCenterPose = new FramePose3D();
    private final FrameBox3D collisionBox = new FrameBox3D();
    private final EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
 
-   private final PoseReferenceFrame waypointAdjustmentFrame;
-   private final YoFramePose3D waypointAdjustmentPose;
+   private PoseReferenceFrame waypointAdjustmentFrame;
+   private YoFramePose3D waypointAdjustmentPose;
+   private YoGraphicShape yoCollisionBoxGraphic;
+   private YoGraphicCoordinateSystem adjustmentGraphic;
 
-   private final YoGraphicShape yoCollisionBoxGraphic;
-   private final YoGraphicCoordinateSystem adjustmentGraphic;
+   public BodyCollisionPoint()
+   {
+      this(0, null, null, null);
+   }
 
    public BodyCollisionPoint(int index,
                              FootstepPlannerParametersReadOnly footstepPlannerParameters,
                              YoGraphicsListRegistry graphicsListRegistry,
                              YoRegistry registry)
    {
+      set(index, footstepPlannerParameters, graphicsListRegistry, registry);
+   }
+
+   public void set(int index, FootstepPlannerParametersReadOnly footstepPlannerParameters, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
+   {
       this.footstepPlannerParameters = footstepPlannerParameters;
       startingWaypoint = new YoFramePose3D("waypoint_init" + index, ReferenceFrame.getWorldFrame(), registry);
       optimizedWaypoint = new YoFramePose3D("waypoint_opt" + index, ReferenceFrame.getWorldFrame(), registry);
-      waypointDisplacement = new YoDouble("waypoint_disp_" + index, registry);
 
-      maxDisplacement = new YoDouble("maxDisplacement" + index, registry);
       maxDisplacementSquared = new YoDouble("maxDisplacementSq" + index, registry);
+      maxDisplacementSquared.set(0.01);
 
       waypointPoseFrame = new PoseReferenceFrame("waypointPoseFrame" + index, ReferenceFrame.getWorldFrame());
       collisionBoxPose = new YoFramePoseUsingYawPitchRoll("collisionBoxPose" + index, ReferenceFrame.getWorldFrame(), registry);
@@ -108,9 +113,14 @@ public class BodyCollisionPoint
    public void initializeBoxParameters()
    {
       // set default size
-      double boxSizeX = 0.46;   //footstepPlannerParameters.getBodyBoxDepth();
-      double boxSizeY = 1;  //footstepPlannerParameters.getBodyBoxWidth();
-      double boxSizeZ = 1.5;   //footstepPlannerParameters.getBodyBoxHeight();
+      double boxSizeX = 0.4;
+      double boxSizeY = 0.8;
+      double boxSizeZ = 1.5;
+
+//      double boxSizeX = footstepPlannerParameters.getBodyBoxDepth();
+//      double boxSizeY = footstepPlannerParameters.getBodyBoxWidth() + 0.2;
+//      double boxSizeZ = footstepPlannerParameters.getBodyBoxHeight();
+
       collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
       boxCenterInSoleFrame.set(0.0, 0.0, boxSizeZ / 2 + 0.3);
    }
@@ -172,26 +182,16 @@ public class BodyCollisionPoint
       return optimizedWaypoint;
    }
 
-   private final FramePose3D tempPose = new FramePose3D();
-   private final FrameVector3D tempVector = new FrameVector3D();
-
    public void shiftWaypoint(Vector3DReadOnly displacement)
    {
-      double scale = computeMaximumDisplacementScale(displacement);
-      //      if (scale < 1e-8)
-      //      {
-      //         return;
-      //      }
-
-      optimizedWaypoint.getPosition().set(tempPose.getPosition());
-      waypointDisplacement.set(startingWaypoint.getPosition().distance(optimizedWaypoint.getPosition()));
+      optimizedWaypoint.getPosition().add(displacement);
       updateCollisionBox();
    }
 
    public double getYawShift(Vector3D collisionVector)
    {
       // Scale turning angle based on collision vector
-      double yawShift = collisionVector.length() * 200;
+      double yawShift = collisionVector.length() * 250;
       if (yawShift < 1)
          yawShift = 1;
       return yawShift;
@@ -209,34 +209,6 @@ public class BodyCollisionPoint
    {
       double yAlpha = adjustmentFrameY.dot(collisionVector);
       return yAlpha < 0 ? 1 : -1;
-   }
-
-   public double computeMaximumDisplacementScale(Vector3DReadOnly displacement)
-   {
-      double adjustmentScale = 1.0;
-
-      // TODO Find a better place to set this
-      maxDisplacementSquared.set(0.01);
-
-      // try max of 5 times to scale down and check if valid to shift
-      int maxAttempts = 5;
-      for (int i = 0; i < maxAttempts; i++)
-      {
-         tempPose.set(optimizedWaypoint);
-         tempVector.set(displacement);
-         tempVector.scale(adjustmentScale);
-         tempPose.getPosition().add(tempVector);
-         boolean validShift = tempPose.getPosition().distanceSquared(startingWaypoint.getPosition()) < maxDisplacementSquared.getDoubleValue();
-         if (validShift)
-            break;
-         adjustmentScale *= 0.5;
-         if (i == maxAttempts - 1)
-         {
-            return 0.0;
-         }
-      }
-
-      return adjustmentScale;
    }
 
    private void updateCollisionBox()
