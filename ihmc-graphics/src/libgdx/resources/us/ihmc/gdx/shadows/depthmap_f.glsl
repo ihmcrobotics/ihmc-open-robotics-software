@@ -32,7 +32,7 @@ void main()
     float lightDirection_z = v_position.z - u_lightPosition_z;
 
     float depth = sqrt((lightDirection_x * lightDirection_x) + (lightDirection_y * lightDirection_y) + (lightDirection_z * lightDirection_z))/u_cameraFar;
-	gl_FragColor     = pack(depth);
+	gl_FragColor = pack(depth);
 	
 }
 
