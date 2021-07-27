@@ -100,7 +100,7 @@ public class GDX3DWithShadowsDemo
       });
 
       manager = new GDXShadowManager();
-      manager.addLight(new GDXDirectionalLight(new Vector3(20, 20, 20), new Vector3(-1, -1, -1)));
+      manager.addLight(new GDXDirectionalLight(new Vector3(4, 4.5f, 4), new Vector3(-1, -1, -1)));
       light = new GDXPointLight(new Vector3(6, 3, -6));
       manager.addLight(light);
       manager.update();

@@ -34,10 +34,11 @@ public class GDXPointLight extends GDXLight
       shaderProgram.setUniformf("u_lightPosition_z", position.z);
       shaderProgram.end();
 
+      framebuffer.begin();
+
       for (int s = 0; s <= 5; s++)
       {
          final Cubemap.CubemapSide side = Cubemap.CubemapSide.values()[s];
-         framebuffer.begin();
          framebuffer.bindSide(side, camera);
          Gdx.gl.glClearColor(0, 0, 0, 1);
          Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
@@ -59,7 +60,7 @@ public class GDXPointLight extends GDXLight
       depthMap.bind(textureNum);
       shader.setUniformf("u_type", 2);
       shader.setUniformi("u_depthMapCube", textureNum);
-      shader.setUniformMatrix("u_lightTrans", camera.combined);
+      //shader.setUniformMatrix("u_lightTrans", camera.combined);
       shader.setUniformf("u_cameraFar", camera.far);
       shader.setUniformf("u_lightPosition_x", position.x);
       shader.setUniformf("u_lightPosition_y", position.y);

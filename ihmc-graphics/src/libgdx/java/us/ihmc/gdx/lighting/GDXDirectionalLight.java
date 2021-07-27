@@ -29,9 +29,6 @@ public class GDXDirectionalLight extends GDXLight
       {
          framebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, DEPTHMAP_SIZE, DEPTHMAP_SIZE, true);
       }
-      framebuffer.begin();
-      Gdx.gl.glClearColor(0, 0, 0, 1);
-      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
       shaderProgram.begin();
       shaderProgram.setUniformf("u_cameraFar", camera.far);
@@ -39,6 +36,10 @@ public class GDXDirectionalLight extends GDXLight
       shaderProgram.setUniformf("u_lightPosition_y", position.y);
       shaderProgram.setUniformf("u_lightPosition_z", position.z);
       shaderProgram.end();
+
+      framebuffer.begin();
+      Gdx.gl.glClearColor(0, 0, 0, 1);
+      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
       modelBatch.begin(camera);
       modelBatch.render(renderableProviders);
@@ -69,7 +70,7 @@ public class GDXDirectionalLight extends GDXLight
    {
       super.init();
 
-      this.camera = new PerspectiveCamera(120f, DEPTHMAP_SIZE, DEPTHMAP_SIZE);
+      this.camera = new PerspectiveCamera(150f, DEPTHMAP_SIZE, DEPTHMAP_SIZE);
       this.camera.near = CAMERA_NEAR;
       this.camera.far = CAMERA_FAR;
       this.camera.position.set(position);
