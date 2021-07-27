@@ -39,7 +39,7 @@ void main()
 {
 	// Default is to not add any color
 	float intensity = 0.0;
-    
+
 	// Vector light-current position
     float lightDirection_x = v_position_x - u_lightPosition_x;
     float lightDirection_y = v_position_y - u_lightPosition_y;
@@ -50,7 +50,7 @@ void main()
 	float lenDepthMap = -1.0;
 	
 	// Directional light, check if in field of view and get the depth
-	if(u_type==1.0){
+	if (u_type==1.0){
         float depth_x = v_positionLightTrans_x / v_positionLightTrans_w * 0.5 + 0.5;
         float depth_y = v_positionLightTrans_y / v_positionLightTrans_w * 0.5 + 0.5;
         float depth_z = v_positionLightTrans_z / v_positionLightTrans_w * 0.5 + 0.5;

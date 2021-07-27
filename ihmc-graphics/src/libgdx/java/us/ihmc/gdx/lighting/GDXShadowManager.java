@@ -83,6 +83,8 @@ public class GDXShadowManager
       {
          if (!light.isInitialized())
             light.init();
+         else
+            light.update();
       }
    }
 
