@@ -138,8 +138,8 @@ public class PreviewWindowCalculator
       double alpha = Math.min(desiredFinalSegmentDuration / lastPhaseDuration, 1.0);
       if (alpha < 1.0)
       {
-         double startTime = lastPhase.getTimeInterval().getStartTime();
-         double newEndTime = alpha * lastPhaseDuration + startTime;
+         double lastStartTime = lastPhase.getTimeInterval().getStartTime();
+         double newEndTime = alpha * lastPhaseDuration + lastStartTime;
          contactSegmentHelper.cubicInterpolateEndOfSegment(lastPhase, alpha);
          lastSegment.setEndTime(newEndTime);
       }
