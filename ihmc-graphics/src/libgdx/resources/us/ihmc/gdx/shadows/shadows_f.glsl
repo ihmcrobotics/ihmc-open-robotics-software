@@ -38,15 +38,16 @@ float unpack (vec4 color) {
 void main()
 {
 	// Default is to not add any color
-	float intensity=0.0; 
+	float intensity = 0.0;
+    
 	// Vector light-current position
     float lightDirection_x = v_position_x - u_lightPosition_x;
     float lightDirection_y = v_position_y - u_lightPosition_y;
     float lightDirection_z = v_position_z - u_lightPosition_z;
 
-	float lenToLight=sqrt((lightDirection_x * lightDirection_x) + (lightDirection_y * lightDirection_y) + (lightDirection_z * lightDirection_z))/u_cameraFar;
+	float lenToLight = sqrt((lightDirection_x * lightDirection_x) + (lightDirection_y * lightDirection_y) + (lightDirection_z * lightDirection_z)) / u_cameraFar;
 	// By default assume shadow
-	float lenDepthMap=-1.0;
+	float lenDepthMap = -1.0;
 	
 	// Directional light, check if in field of view and get the depth
 	if(u_type==1.0){
@@ -54,21 +55,21 @@ void main()
         float depth_y = v_positionLightTrans_y / v_positionLightTrans_w * 0.5 + 0.5;
         float depth_z = v_positionLightTrans_z / v_positionLightTrans_w * 0.5 + 0.5;
 
-		if (v_positionLightTrans_z>=0.0 && (depth_x >= 0.0) && (depth_y <= 1.0) && (depth_y >= 0.0) && (depth_y <= 1.0) ) {
+		if (v_positionLightTrans_z >= 0.0 && (depth_x >= 0.0) && (depth_y <= 1.0) && (depth_y >= 0.0) && (depth_y <= 1.0) ) {
 			lenDepthMap = unpack(texture2D(u_depthMapDir, vec2(depth_x, depth_y)));
 		}
 	}
 	// Point light, just get the depth given light vector
-	else if(u_type==2.0){
+	else if (u_type == 2.0){
 		lenDepthMap = unpack(textureCube(u_depthMapCube, vec3(lightDirection_x, lightDirection_y, lightDirection_z)));
 	}
 	
 	// If not in shadow, add some light
-	if(lenDepthMap>=lenToLight){
-        intensity=0.5*(1.0-lenToLight);
+	if(lenDepthMap >= lenToLight){
+        intensity=0.5 * (1.0-lenToLight);
     }
 	
-	gl_FragColor     = vec4(intensity);
+	gl_FragColor = vec4(intensity);
 
 }
 
