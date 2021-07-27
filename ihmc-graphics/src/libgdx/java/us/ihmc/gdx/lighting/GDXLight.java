@@ -44,6 +44,8 @@ public abstract class GDXLight
       }
    }
 
+   public abstract void update();
+
    public boolean isInitialized()
    {
       return modelBatch != null;
@@ -66,6 +68,6 @@ public abstract class GDXLight
 
    public void setPosition(Vector3 position)
    {
-      //this.position = position; //changing the position of a light causes rendering problems
+      this.position = position; //changing the position of a light causes rendering problems
    }
 }

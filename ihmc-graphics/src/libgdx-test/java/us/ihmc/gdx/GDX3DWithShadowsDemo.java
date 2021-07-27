@@ -121,6 +121,8 @@ public class GDX3DWithShadowsDemo
    public void render()
    {
       box.transform.setToTranslation((float) Math.sin(System.currentTimeMillis() / 500d) * 2, 0, (float) Math.cos(System.currentTimeMillis() / 500d) * 2);
+      light.getPosition().set((float) Math.sin(System.currentTimeMillis() / 1000d) * 6, 3, (float) Math.cos(System.currentTimeMillis() / 1000d) * 6);
+      light.update();
 
       camController.update();
 

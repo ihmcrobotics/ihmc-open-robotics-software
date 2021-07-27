@@ -70,15 +70,20 @@ public class GDXPointLight extends GDXLight
    }
 
    @Override
-   public void init()
+   public void update()
    {
-      super.init();
-
-      this.camera = new PerspectiveCamera(90f, DEPTHMAP_SIZE, DEPTHMAP_SIZE);
       this.camera.near = CAMERA_NEAR;
       this.camera.far = CAMERA_FAR;
       this.camera.position.set(position);
 
       this.camera.update();
+   }
+
+   @Override
+   public void init()
+   {
+      super.init();
+      this.camera = new PerspectiveCamera(90f, DEPTHMAP_SIZE, DEPTHMAP_SIZE);
+      this.update();
    }
 }

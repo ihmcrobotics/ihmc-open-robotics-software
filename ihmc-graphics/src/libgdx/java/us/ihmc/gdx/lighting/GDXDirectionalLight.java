@@ -69,8 +69,13 @@ public class GDXDirectionalLight extends GDXLight
    public void init()
    {
       super.init();
-
       this.camera = new PerspectiveCamera(150f, DEPTHMAP_SIZE, DEPTHMAP_SIZE);
+      this.update();
+   }
+
+   @Override
+   public void update()
+   {
       this.camera.near = CAMERA_NEAR;
       this.camera.far = CAMERA_FAR;
       this.camera.position.set(position);
