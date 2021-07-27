@@ -18,8 +18,14 @@ uniform float u_lightPosition_z;
 uniform float u_type;
 
 
-varying vec4 v_position;
-varying vec4 v_positionLightTrans;
+varying float v_positionLightTrans_x;
+varying float v_positionLightTrans_y;
+varying float v_positionLightTrans_z;
+varying float v_positionLightTrans_w;
+varying float v_position_x;
+varying float v_position_y;
+varying float v_position_z;
+varying float v_position_w;
 
 float unpack (vec4 color) {
     const vec4 bitShifts = vec4(1.0 / (256.0 * 256.0 * 256.0),
@@ -34,9 +40,9 @@ void main()
 	// Default is to not add any color
 	float intensity=0.0; 
 	// Vector light-current position
-    float lightDirection_x = v_position.x - u_lightPosition_x;
-    float lightDirection_y = v_position.y - u_lightPosition_y;
-    float lightDirection_z = v_position.z - u_lightPosition_z;
+    float lightDirection_x = v_position_x - u_lightPosition_x;
+    float lightDirection_y = v_position_y - u_lightPosition_y;
+    float lightDirection_z = v_position_z - u_lightPosition_z;
 
 	float lenToLight=sqrt((lightDirection_x * lightDirection_x) + (lightDirection_y * lightDirection_y) + (lightDirection_z * lightDirection_z))/u_cameraFar;
 	// By default assume shadow
@@ -44,11 +50,11 @@ void main()
 	
 	// Directional light, check if in field of view and get the depth
 	if(u_type==1.0){
-        float depth_x = v_positionLightTrans.x / v_positionLightTrans.w * 0.5 + 0.5;
-        float depth_y = v_positionLightTrans.y / v_positionLightTrans.w * 0.5 + 0.5;
-        float depth_z = v_positionLightTrans.z / v_positionLightTrans.w * 0.5 + 0.5;
+        float depth_x = v_positionLightTrans_x / v_positionLightTrans_w * 0.5 + 0.5;
+        float depth_y = v_positionLightTrans_y / v_positionLightTrans_w * 0.5 + 0.5;
+        float depth_z = v_positionLightTrans_z / v_positionLightTrans_w * 0.5 + 0.5;
 
-		if (v_positionLightTrans.z>=0.0 && (depth_x >= 0.0) && (depth_y <= 1.0) && (depth_y >= 0.0) && (depth_y <= 1.0) ) {
+		if (v_positionLightTrans_z>=0.0 && (depth_x >= 0.0) && (depth_y <= 1.0) && (depth_y >= 0.0) && (depth_y <= 1.0) ) {
 			lenDepthMap = unpack(texture2D(u_depthMapDir, vec2(depth_x, depth_y)));
 		}
 	}
