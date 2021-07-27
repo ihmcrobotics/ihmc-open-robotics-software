@@ -33,7 +33,6 @@ public class GDXTransformTuner
    public void create(FocusBasedGDXCamera camera3D)
    {
       poseGizmo.create(camera3D);
-      poseGizmo.getTransform().set(transformToTune);
    }
 
    // happens before renderImGuiWidgets
@@ -41,6 +40,7 @@ public class GDXTransformTuner
    {
       if (showGizmo.get())
       {
+         poseGizmo.getTransform().set(transformToTune);
          poseGizmo.process3DViewInput(input);
          transformToTune.set(poseGizmo.getTransform());
       }
@@ -70,7 +70,6 @@ public class GDXTransformTuner
       ImGui.inputDouble(labels.get("roll"), roll, 0.01);
       transformToTune.getTranslation().set(x.get(), y.get(), z.get());
       transformToTune.getRotation().setYawPitchRoll(yaw.get(), pitch.get(), roll.get());
-      poseGizmo.getTransform().set(transformToTune);
 
       if (ImGui.button(labels.get("Print transform")))
       {
