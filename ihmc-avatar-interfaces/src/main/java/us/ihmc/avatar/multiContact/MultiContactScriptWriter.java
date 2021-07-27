@@ -18,7 +18,7 @@ public class MultiContactScriptWriter
 {
    private File scriptFile = null;
    private final List<KinematicsToolboxSnapshotDescription> messagesToWrite = new ArrayList<>();
-   private double[] gridData = null;
+   private JsonNode auxiliaryData = null;
 
    public MultiContactScriptWriter()
    {
@@ -71,9 +71,9 @@ public class MultiContactScriptWriter
       messagesToWrite.add(description);
    }
 
-   public void addGridData(double[] gridData)
+   public void addAuxiliaryData(JsonNode auxiliaryData)
    {
-      this.gridData = gridData;
+      this.auxiliaryData = auxiliaryData;
    }
 
    public boolean isEmpty()
@@ -94,17 +94,6 @@ public class MultiContactScriptWriter
       return true;
    }
 
-   public JsonNode gridDataToJSON(ObjectMapper objectMapper)
-   {
-      ObjectNode root = objectMapper.createObjectNode();
-      ObjectNode configurationJSON = root.putObject("Reachability Grid Data");
-
-      configurationJSON.put("spacingXYZ", gridData[0]);
-      configurationJSON.put("gridSizeYaw", gridData[1]);
-      configurationJSON.put("yawDivisions", gridData[2]);
-      return root;
-   }
-
    public boolean writeScript()
    {
       PrintStream printStream = null;
@@ -114,17 +103,22 @@ public class MultiContactScriptWriter
          printStream = new PrintStream(scriptFile);
          JsonFactory jsonFactory = new JsonFactory();
          ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
-         ArrayNode arrayNode = objectMapper.createArrayNode();
+         ArrayNode script = objectMapper.createArrayNode();
 
+         ObjectNode auxiliaryDataNode = null;
+         if (auxiliaryData != null)
+         {
+            auxiliaryDataNode = objectMapper.createObjectNode();
+            auxiliaryDataNode.set("Auxiliary Data", auxiliaryData);
+         }
+
+         ArrayNode arrayNode = objectMapper.createArrayNode();
          for (KinematicsToolboxSnapshotDescription message : messagesToWrite)
             arrayNode.add(message.toJSON(objectMapper));
 
-         if (gridData != null)
-         {
-            arrayNode.add(gridDataToJSON(objectMapper));
-         }
-
-         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, arrayNode);
+         script.add(auxiliaryDataNode);
+         script.add(arrayNode);
+         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, script);
          printStream.close();
          scriptFile = null;
          return true;
