@@ -89,6 +89,23 @@ public class PreviewWindowCalculatorTest
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(firstContact.getECMPEndPosition(), previewWindow.get(1).getContactPhase(0).getECMPEndPosition(), 1e-4);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(secondContact.getECMPStartPosition(), previewWindow.get(2).getContactPhase(0).getECMPStartPosition(), 1e-4);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(secondContact.getECMPEndPosition(), previewWindow.get(2).getContactPhase(0).getECMPEndPosition(), 1e-4);
+
+      previewWindowCalculator.compute(contacts, 0.25 * segmentDuration);
+
+      assertEquals(2.75 * segmentDuration, previewWindowCalculator.getPreviewWindowDuration(), 1e-5);
+      assertEquals(3, previewWindowCalculator.getPlanningWindow().size());
+
+      previewWindow = previewWindowCalculator.getPlanningWindow();
+
+      for (int i = 0; i < 3; i++)
+         assertEquals(1, previewWindow.get(i).getNumberOfContactPhasesInSegment());
+
+      assertEquals(0.25 * segmentDuration, previewWindow.get(0).getStartTime(), 1e-5);
+      assertEquals((0.25 + 0.375) * segmentDuration, previewWindow.get(0).getEndTime(), 1e-5);
+      assertEquals((0.25 + 0.375) * segmentDuration, previewWindow.get(1).getStartTime(), 1e-5);
+      assertEquals(2.0 * segmentDuration, previewWindow.get(1).getEndTime(), 1e-5);
+      assertEquals(2.0 * segmentDuration, previewWindow.get(2).getStartTime(), 1e-5);
+      assertEquals(3.0 * segmentDuration, previewWindow.get(2).getEndTime(), 1e-5);
    }
 
    @Test
@@ -378,5 +395,97 @@ public class PreviewWindowCalculatorTest
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(firstContact.getECMPEndPosition(), previewWindow.get(1).getContactPhase(0).getECMPEndPosition(), 1e-4);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(thirdContact.getECMPStartPosition(), previewWindow.get(3).getContactPhase(0).getECMPStartPosition(), 1e-4);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(thirdContact.getECMPEndPosition(), previewWindow.get(3).getContactPhase(0).getECMPEndPosition(), 1e-4);
+   }
+
+   @Test
+   public void computeTwoContactsInOnePhase()
+   {
+      YoRegistry testRegistry = new YoRegistry("test");
+      PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+
+      double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
+
+      FramePoint3D startCoP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.1, 0.25, 0.3);
+      FramePoint3D middleCoP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, 0.3, 0.32);
+      FramePoint3D endCoP = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.05, -0.1, -0.32);
+
+      FramePose3D firstPose = new FramePose3D();
+      firstPose.getPosition().set(startCoP);
+
+      FrameConvexPolygon2D contactPolygon = new FrameConvexPolygon2D();
+      contactPolygon.addVertex(0.1, -0.05);
+      contactPolygon.addVertex(0.1, 0.05);
+      contactPolygon.addVertex(-0.1, 0.05);
+      contactPolygon.addVertex(-0.1, -0.05);
+      contactPolygon.update();
+
+      FramePose3D secondPose = new FramePose3D();
+      secondPose.getPosition().set(endCoP);
+
+      ContactPlaneProvider firstContact = new ContactPlaneProvider();
+      firstContact.getTimeInterval().setInterval(0.0, 2.0 * segmentDuration);
+      firstContact.setStartECMPPosition(startCoP);
+      firstContact.setEndECMPPosition(middleCoP);
+      firstContact.setLinearECMPVelocity();
+      firstContact.addContact(firstPose, contactPolygon);
+      firstContact.addContact(secondPose, contactPolygon);
+
+      ContactPlaneProvider secondContact = new ContactPlaneProvider();
+      secondContact.getTimeInterval().setInterval(2.0 * segmentDuration, 3.0 * segmentDuration);
+      secondContact.setStartECMPPosition(middleCoP);
+      secondContact.setEndECMPPosition(endCoP);
+      secondContact.setLinearECMPVelocity();
+      secondContact.addContact(firstPose, contactPolygon);
+      secondContact.addContact(secondPose, contactPolygon);
+
+      List<ContactPlaneProvider> contacts = new ArrayList<>();
+      contacts.add(firstContact);
+      contacts.add(secondContact);
+
+      previewWindowCalculator.compute(contacts, 0.0);
+
+      assertEquals(3.0 * segmentDuration, previewWindowCalculator.getPreviewWindowDuration(), 1e-5);
+      assertEquals(3, previewWindowCalculator.getPlanningWindow().size());
+
+      List<PreviewWindowSegment> previewWindow = previewWindowCalculator.getPlanningWindow();
+
+      for (int i = 0; i < 3; i++)
+         assertEquals(1, previewWindow.get(i).getNumberOfContactPhasesInSegment());
+
+      assertEquals(0.0, previewWindow.get(0).getStartTime(), 1e-5);
+      assertEquals(segmentDuration, previewWindow.get(0).getEndTime(), 1e-5);
+      assertEquals(segmentDuration, previewWindow.get(1).getStartTime(), 1e-5);
+      assertEquals(2.0 * segmentDuration, previewWindow.get(1).getEndTime(), 1e-5);
+      assertEquals(2.0 * segmentDuration, previewWindow.get(2).getStartTime(), 1e-5);
+      assertEquals(3.0 * segmentDuration, previewWindow.get(2).getEndTime(), 1e-5);
+
+      FramePoint3D superMiddle = new FramePoint3D();
+      superMiddle.interpolate(startCoP, middleCoP, 0.5);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(firstContact.getECMPStartPosition(), previewWindow.get(0).getContactPhase(0).getECMPStartPosition(), 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(superMiddle, previewWindow.get(0).getContactPhase(0).getECMPEndPosition(), 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(superMiddle, previewWindow.get(1).getContactPhase(0).getECMPStartPosition(), 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(firstContact.getECMPEndPosition(), previewWindow.get(1).getContactPhase(0).getECMPEndPosition(), 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(secondContact.getECMPStartPosition(), previewWindow.get(2).getContactPhase(0).getECMPStartPosition(), 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(secondContact.getECMPEndPosition(), previewWindow.get(2).getContactPhase(0).getECMPEndPosition(), 1e-4);
+
+      previewWindowCalculator.compute(contacts, 0.25 * segmentDuration);
+
+      assertEquals(2.75 * segmentDuration, previewWindowCalculator.getPreviewWindowDuration(), 1e-5);
+      assertEquals(3, previewWindowCalculator.getPlanningWindow().size());
+
+      previewWindow = previewWindowCalculator.getPlanningWindow();
+
+      assertEquals(1, previewWindow.get(0).getNumberOfContactPhasesInSegment());
+      assertEquals(2, previewWindow.get(1).getNumberOfContactPhasesInSegment());
+      assertEquals(1, previewWindow.get(2).getNumberOfContactPhasesInSegment());
+
+      double expectedStart = 0.25 * segmentDuration;
+      double expectedDuration = 2.75 / 3.0 * segmentDuration;
+      assertEquals(expectedStart, previewWindow.get(0).getStartTime(), 1e-5);
+      assertEquals(expectedStart + expectedDuration, previewWindow.get(0).getEndTime(), 1e-5);
+      assertEquals(expectedStart + expectedDuration, previewWindow.get(1).getStartTime(), 1e-5);
+      assertEquals(expectedStart + 2.0 * expectedDuration, previewWindow.get(1).getEndTime(), 1e-5);
+      assertEquals(expectedStart + 2.0 * expectedDuration, previewWindow.get(2).getStartTime(), 1e-5);
+      assertEquals(expectedStart + 3.0 * expectedDuration, previewWindow.get(2).getEndTime(), 1e-5);
    }
 }
