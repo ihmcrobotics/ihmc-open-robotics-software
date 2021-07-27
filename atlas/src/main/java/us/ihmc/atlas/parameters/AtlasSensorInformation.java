@@ -200,6 +200,24 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformChestToD435DepthCamera.appendTranslation(chestToSensor);
    }
 
+   private static final RigidBodyTransform transformChestToOuster = new RigidBodyTransform();
+   static
+   {
+      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.4);
+      transformChestToOuster.appendTranslation(chestToSensor);
+      double pitch = Math.toRadians(90.0 - 24.0);
+      transformChestToOuster.appendOrientation(new YawPitchRoll(0.01, pitch, -0.045));
+   }
+
+   private static final RigidBodyTransform transformChestToZED2 = new RigidBodyTransform();
+   static
+   {
+      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.4);
+      transformChestToZED2.appendTranslation(chestToSensor);
+      double pitch = Math.toRadians(90.0 - 24.0);
+      transformChestToZED2.appendOrientation(new YawPitchRoll(0.01, pitch, -0.045));
+   }
+
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
    {
       this.target = target;
@@ -458,5 +476,17 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public String getHeadCameraName()
    {
       return "stereo_camera_left";
+   }
+
+   @Override
+   public RigidBodyTransform getHeadZED2CameraTransform()
+   {
+      return transformChestToZED2;
+   }
+
+   @Override
+   public RigidBodyTransform getOusterLidarTransform()
+   {
+      return transformChestToOuster;
    }
 }
