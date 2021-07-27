@@ -159,7 +159,7 @@ public class GDX3DSceneManager
 
       shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING);
 
-      shadowManager.addLight(new GDXPointLight(new Vector3(5, 5, 5)));
+      shadowManager.addLight(new GDXPointLight(new Vector3(2, 2, 2))); //TODO adding a second light caused an access violation, not sure why, works in theory
 
       shadowManager.update();
    }

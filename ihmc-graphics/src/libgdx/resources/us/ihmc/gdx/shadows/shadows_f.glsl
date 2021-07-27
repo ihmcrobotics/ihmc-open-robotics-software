@@ -44,9 +44,12 @@ void main()
 	
 	// Directional light, check if in field of view and get the depth
 	if(u_type==1.0){
-		vec3 depth = (v_positionLightTrans.xyz / v_positionLightTrans.w)*0.5+0.5;
-		if (v_positionLightTrans.z>=0.0 && (depth.x >= 0.0) && (depth.x <= 1.0) && (depth.y >= 0.0) && (depth.y <= 1.0) ) {
-			lenDepthMap = unpack(texture2D(u_depthMapDir, depth.xy));
+        float depth_x = v_positionLightTrans.x / v_positionLightTrans.w * 0.5 + 0.5;
+        float depth_y = v_positionLightTrans.y / v_positionLightTrans.w * 0.5 + 0.5;
+        float depth_z = v_positionLightTrans.z / v_positionLightTrans.w * 0.5 + 0.5;
+
+		if (v_positionLightTrans.z>=0.0 && (depth_x >= 0.0) && (depth_y <= 1.0) && (depth_y >= 0.0) && (depth_y <= 1.0) ) {
+			lenDepthMap = unpack(texture2D(u_depthMapDir, vec2(depth_x, depth_y)));
 		}
 	}
 	// Point light, just get the depth given light vector
