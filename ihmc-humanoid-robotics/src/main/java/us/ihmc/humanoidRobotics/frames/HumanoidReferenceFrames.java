@@ -370,6 +370,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          steppingCameraFrame.update();
          objectDetectionCameraFrame.update();
+         headZED2CameraFrame.update();
+         ousterLidarFrame.update();
       }
    }
 
