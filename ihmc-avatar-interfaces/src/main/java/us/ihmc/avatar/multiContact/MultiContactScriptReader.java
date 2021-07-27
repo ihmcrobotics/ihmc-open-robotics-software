@@ -11,7 +11,6 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import sun.rmi.runtime.Log;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.log.LogTools;
 
@@ -19,8 +18,7 @@ public class MultiContactScriptReader
 {
    private int currentMessageIndex = 0;
    private final List<KinematicsToolboxSnapshotDescription> loadedMessages = new ArrayList<>();
-   private boolean isReachabilityData = false;
-   private double[] gridData;
+   private JsonNode auxiliaryData;
 
    public MultiContactScriptReader()
    {
@@ -71,28 +69,19 @@ public class MultiContactScriptReader
          JsonNode jsonNode = objectMapper.readTree(inputStream);
 
          List<KinematicsToolboxSnapshotDescription> messages = new ArrayList<>();
-         int numberOfSnapshots = jsonNode.size();
-         if (isReachabilityData) numberOfSnapshots--;
+
+         this.auxiliaryData = jsonNode.get(0);
+         JsonNode script = jsonNode.get(1);
+         int numberOfSnapshots = script.size();
          for (int i = 0; i < numberOfSnapshots; i++)
          {
-            JsonNode child = jsonNode.get(i);
+            JsonNode child = script.get(i);
             messages.add(KinematicsToolboxSnapshotDescription.fromJSON(child));
          }
 
          loadedMessages.clear();
          loadedMessages.addAll(messages);
          currentMessageIndex = -1;
-
-         if (isReachabilityData)
-         {
-            JsonNode gridDataJsonNode = jsonNode.get(numberOfSnapshots);
-            gridDataJsonNode = gridDataJsonNode.get("Reachability Grid Data");
-            double[] gridData = new double[3];
-            gridData[0] = gridDataJsonNode.get("spacingXYZ").asDouble();
-            gridData[1] = gridDataJsonNode.get("gridSizeYaw").asDouble();
-            gridData[2] = gridDataJsonNode.get("yawDivisions").asDouble();
-            this.gridData = gridData;
-         }
 
          return true;
       }
@@ -113,16 +102,15 @@ public class MultiContactScriptReader
       return currentMessageIndex;
    }
 
+   public JsonNode getAuxiliaryData()
+   {
+      return auxiliaryData;
+   }
+
    public boolean hasNext()
    {
       return currentMessageIndex < loadedMessages.size() - 1;
    }
-
-   public void setIsReachabilityData()
-   {
-      isReachabilityData = true;
-   }
-
 
    public KinematicsToolboxSnapshotDescription rewind()
    {
@@ -165,11 +153,6 @@ public class MultiContactScriptReader
    public List<KinematicsToolboxSnapshotDescription> getAllItems()
    {
       return loadedMessages;
-   }
-
-   public double[] getReachabilityGridData()
-   {
-      return gridData;
    }
 
    public void applyTransform(Transform transform)

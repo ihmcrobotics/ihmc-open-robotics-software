@@ -1,6 +1,9 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
-import org.apache.commons.io.FilenameUtils;
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
 import us.ihmc.avatar.multiContact.MultiContactScriptReader;
@@ -20,7 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 public class StepReachabilityFileTools
 {
@@ -58,32 +60,16 @@ public class StepReachabilityFileTools
       }
    }
 
-   public static List<KinematicsToolboxSnapshotDescription> loadKinematicsSnapshots(DRCRobotModel robotModel)
-   {
-      MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      scriptReader.setIsReachabilityData();
-
-      Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-      Path filePath = Paths.get(rootPath.toString(), robotModel.getStepReachabilityResourceName());
-      scriptReader.loadScript(filePath.toFile());
-      return scriptReader.getAllItems();
-   }
-
-   public static double[] loadGridData(DRCRobotModel robotModel)
-   {
-      MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      scriptReader.setIsReachabilityData();
-
-      Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-      Path filePath = Paths.get(rootPath.toString(), robotModel.getStepReachabilityResourceName());
-      scriptReader.loadScript(filePath.toFile());
-      return scriptReader.getReachabilityGridData();
-   }
-
    public static StepReachabilityData loadStepReachability(DRCRobotModel robotModel)
    {
-      List<KinematicsToolboxSnapshotDescription> kinematicsSnapshots = loadKinematicsSnapshots(robotModel);
-      double[] gridData = loadGridData(robotModel);
+      MultiContactScriptReader scriptReader = new MultiContactScriptReader();
+
+      Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      Path filePath = Paths.get(rootPath.toString(), robotModel.getStepReachabilityResourceName());
+      scriptReader.loadScript(filePath.toFile());
+
+      List<KinematicsToolboxSnapshotDescription> kinematicsSnapshots = scriptReader.getAllItems();
+      double[] gridData = loadGridDataFromJson(scriptReader.getAuxiliaryData());
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       StepReachabilityData reachabilityData = new StepReachabilityData();
 
@@ -117,5 +103,29 @@ public class StepReachabilityFileTools
          reachabilityData.getLegReachabilityMap().put(latticePoint, solutionQuality);
       }
       return reachabilityData;
+   }
+
+   public static double[] loadGridDataFromJson(JsonNode jsonNode)
+   {
+      JsonNode auxDataNode = jsonNode.get("Auxiliary Data");
+      JsonNode gridDataNode = auxDataNode.get("Reachability Grid Data");
+      double[] gridData = new double[3];
+      gridData[0] = gridDataNode.get("spacingXYZ").asDouble();
+      gridData[1] = gridDataNode.get("gridSizeYaw").asDouble();
+      gridData[2] = gridDataNode.get("yawDivisions").asDouble();
+      return gridData;
+   }
+
+   public static JsonNode gridDataToJson(double[] gridData)
+   {
+      JsonFactory jsonFactory = new JsonFactory();
+      ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+      ObjectNode root = objectMapper.createObjectNode();
+      ObjectNode configurationJSON = root.putObject("Reachability Grid Data");
+
+      configurationJSON.put("spacingXYZ", gridData[0]);
+      configurationJSON.put("gridSizeYaw", gridData[1]);
+      configurationJSON.put("yawDivisions", gridData[2]);
+      return root;
    }
 }

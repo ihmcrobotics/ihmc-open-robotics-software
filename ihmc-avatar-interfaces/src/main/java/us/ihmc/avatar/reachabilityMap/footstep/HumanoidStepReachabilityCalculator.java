@@ -1,8 +1,9 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import controller_msgs.msg.dds.*;
+import sun.rmi.runtime.Log;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.multiContact.*;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxOptimizationSettings;
@@ -21,8 +22,8 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -47,7 +48,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
-import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -56,9 +56,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -73,7 +71,6 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -97,7 +94,6 @@ import java.util.stream.Collectors;
 
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.*;
 
-
 /**
  * Pattern matched off of HumanoidKinematicsToolboxControllerTest. Check there for reference if needed.
  */
@@ -106,10 +102,10 @@ public abstract class HumanoidStepReachabilityCalculator
 
    private enum Mode
    {
-      HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_VISUALIZATION
+      HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_VISUALIZATION, TEST_WRITE_SCRIPT, TEST_LOAD_SCRIPT
    }
 
-   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
+   private static final Mode mode = Mode.TEST_LOAD_SCRIPT;
 
    private static final double COM_WEIGHT = 1.0;
    private static final double RIGID_BODY_FEET_WEIGHT = 40.0;
@@ -121,6 +117,7 @@ public abstract class HumanoidStepReachabilityCalculator
    private static final YoAppearanceRGBColor ghostAppearance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
+
    static
    {
       simulationTestingParameters.setDataBufferSize(1 << 16);
@@ -206,7 +203,7 @@ public abstract class HumanoidStepReachabilityCalculator
          blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
       }
 
-      switch(mode)
+      switch (mode)
       {
          case HAND_POSE:
             testHandPose();
@@ -256,14 +253,47 @@ public abstract class HumanoidStepReachabilityCalculator
             gridData[0] = spacingXYZ;
             gridData[1] = maximumOffsetYaw - minimumOffsetYaw;
             gridData[2] = yawDivisions;
-            scriptWriter.addGridData(gridData);
-
+            JsonNode gridDataNode = StepReachabilityFileTools.gridDataToJson(gridData);
+            scriptWriter.addAuxiliaryData(gridDataNode);
             scriptWriter.writeScript();
             break;
 
-            case TEST_VISUALIZATION:
+         case TEST_VISUALIZATION:
             StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
             new StepReachabilityVisualizer(stepReachabilityData);
+            break;
+
+         case TEST_WRITE_SCRIPT:
+            scriptWriter = new MultiContactScriptWriter();
+            Path path = Paths.get(WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software").toString(),
+                                  "/valkyrie/src/main/resources/us/ihmc/valkyrie/parameters/TestScript.json");
+            File testFile = path.toFile();
+            scriptWriter.startNewScript(testFile, true);
+
+            double[] reachabilityGridData = new double[3];
+            reachabilityGridData[0] = spacingXYZ;
+            reachabilityGridData[1] = maximumOffsetYaw - minimumOffsetYaw;
+            reachabilityGridData[2] = yawDivisions;
+
+            JsonNode testGridDataNode = StepReachabilityFileTools.gridDataToJson(reachabilityGridData);
+            scriptWriter.addAuxiliaryData(testGridDataNode);
+            KinematicsToolboxSnapshotDescription snapshot = testSingleStep(new StepReachabilityLatticePoint(0, 1, 0, 0), new FramePose3D(), true);
+            scriptWriter.recordConfiguration(snapshot);
+            scriptWriter.writeScript();
+            break;
+
+         case TEST_LOAD_SCRIPT:
+            MultiContactScriptReader scriptReader = new MultiContactScriptReader();
+            path = Paths.get(WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software").toString(),
+                             "/valkyrie/src/main/resources/us/ihmc/valkyrie/parameters/TestScript.json");
+            scriptReader.loadScript(path.toFile());
+
+            List<KinematicsToolboxSnapshotDescription> kinematicsSnapshots = scriptReader.getAllItems();
+            double[] testGridData = StepReachabilityFileTools.loadGridDataFromJson(scriptReader.getAuxiliaryData());
+            LogTools.info("Number of kinematic snapshots: " + kinematicsSnapshots.size());
+            LogTools.info("spacingXYZ: " + testGridData[0]);
+            LogTools.info("gridSizeYaw: " + testGridData[1]);
+            LogTools.info("yawDivisions: " + testGridData[2]);
             break;
 
          default:
@@ -312,7 +342,8 @@ public abstract class HumanoidStepReachabilityCalculator
          }
 
          { // Setup CoM message
-            KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(randomizedFullRobotModel));
+            KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(
+                  randomizedFullRobotModel));
             SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
             selectionMatrix.selectZAxis(false);
             message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
@@ -399,9 +430,9 @@ public abstract class HumanoidStepReachabilityCalculator
          sixDoFMotionControlAnchorDescriptions.add(sixDoFMessageToDescription(targetFullRobotModel.getFoot(robotSide), footObjective));
 
          // OneDoFJoint objective for each knee joint TODO Find a way to prevent straight legs
-//         OneDoFJoint kneeJoint = (OneDoFJoint) targetFullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
-//         KinematicsToolboxOneDoFJointMessage jointMessage = newOneDoFJointMessage(kneeJoint, JOINT_WEIGHT, 1.04);
-//         commandInputManager.submitMessage(jointMessage);
+         //         OneDoFJoint kneeJoint = (OneDoFJoint) targetFullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+         //         KinematicsToolboxOneDoFJointMessage jointMessage = newOneDoFJointMessage(kneeJoint, JOINT_WEIGHT, 1.04);
+         //         commandInputManager.submitMessage(jointMessage);
       }
 
       FramePose3D centerFeet = interpolateFeet(leftFoot, rightFoot);
@@ -438,7 +469,7 @@ public abstract class HumanoidStepReachabilityCalculator
       configurationMessage.setEnableCollisionAvoidance(true);
       commandInputManager.submitMessage(configurationMessage);
 
-//      snapGhostToFullRobotModel(targetFullRobotModel);
+      //      snapGhostToFullRobotModel(targetFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
 
       runKinematicsToolboxController();
@@ -494,7 +525,7 @@ public abstract class HumanoidStepReachabilityCalculator
    private static final double maximumOffsetY = 0.7;
    private static final double minimumOffsetZ = 0.0;
    private static final double maximumOffsetZ = 0.4;
-   private static final double minimumOffsetYaw = - Math.toRadians(70.0);
+   private static final double minimumOffsetYaw = -Math.toRadians(70.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
    private static final double spacingXYZ = 0.3; // 0.05
@@ -533,12 +564,15 @@ public abstract class HumanoidStepReachabilityCalculator
    {
       List<StepReachabilityLatticePoint> leftFootYawSweepList = new ArrayList<>();
 
-      int minimumYawIndex = - Math.floorMod((int) (Math.round((minimumOffsetYaw) / yawSpacing)), yawDivisions);
+      int minimumYawIndex = -Math.floorMod((int) (Math.round((minimumOffsetYaw) / yawSpacing)), yawDivisions);
       int maximumYawIndex = Math.floorMod((int) (Math.round((maximumOffsetYaw) / yawSpacing)), yawDivisions);
 
       for (int yawIndex = minimumYawIndex; yawIndex <= maximumYawIndex; yawIndex++)
       {
-         StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(leftFootPose.getXIndex(), leftFootPose.getYIndex(), leftFootPose.getZIndex(), yawIndex);
+         StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(leftFootPose.getXIndex(),
+                                                                                      leftFootPose.getYIndex(),
+                                                                                      leftFootPose.getZIndex(),
+                                                                                      yawIndex);
          leftFootYawSweepList.add(latticePoint);
       }
 
@@ -579,7 +613,6 @@ public abstract class HumanoidStepReachabilityCalculator
          recursivelyModifyGraphics(child, ghostAppearance);
       }
    }
-
 
    private RobotController createToolboxUpdater()
    {
@@ -652,7 +685,11 @@ public abstract class HumanoidStepReachabilityCalculator
    {
       return createFullRobotModelAtInitialConfiguration(robotModel, groundHeight, new Point2D(), offsetYaw);
    }
-   public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(DRCRobotModel robotModel, double groundHeight, Tuple2DReadOnly offset, double offsetYaw)
+
+   public static FullHumanoidRobotModel createFullRobotModelAtInitialConfiguration(DRCRobotModel robotModel,
+                                                                                   double groundHeight,
+                                                                                   Tuple2DReadOnly offset,
+                                                                                   double offsetYaw)
    {
       FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
@@ -714,7 +751,9 @@ public abstract class HumanoidStepReachabilityCalculator
       randomizeArmJointPositions(random, robotSide, robotModelToModify, 1.0);
    }
 
-   public static void randomizeArmJointPositions(Random random, RobotSide robotSide, FullHumanoidRobotModel robotModelToModify,
+   public static void randomizeArmJointPositions(Random random,
+                                                 RobotSide robotSide,
+                                                 FullHumanoidRobotModel robotModelToModify,
                                                  double percentOfMotionRangeAllowed)
    {
       RigidBodyBasics chest = robotModelToModify.getChest();
@@ -794,15 +833,18 @@ public abstract class HumanoidStepReachabilityCalculator
       return robotConfigurationData;
    }
 
-   public static CapturabilityBasedStatus createCapturabilityBasedStatus(FullHumanoidRobotModel currentRobotModel, DRCRobotModel drcRobotModel,
-                                                                         boolean isLeftFootInSupport, boolean isRightFootInSupport)
+   public static CapturabilityBasedStatus createCapturabilityBasedStatus(FullHumanoidRobotModel currentRobotModel,
+                                                                         DRCRobotModel drcRobotModel,
+                                                                         boolean isLeftFootInSupport,
+                                                                         boolean isRightFootInSupport)
    {
       return createCapturabilityBasedStatus(currentRobotModel, drcRobotModel.getContactPointParameters(), isLeftFootInSupport, isRightFootInSupport);
    }
 
    public static CapturabilityBasedStatus createCapturabilityBasedStatus(FullHumanoidRobotModel currentRobotModel,
                                                                          RobotContactPointParameters<RobotSide> contactPointParameters,
-                                                                         boolean isLeftFootInSupport, boolean isRightFootInSupport)
+                                                                         boolean isLeftFootInSupport,
+                                                                         boolean isRightFootInSupport)
    {
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
@@ -811,10 +853,16 @@ public abstract class HumanoidStepReachabilityCalculator
       IDLSequence.Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
       IDLSequence.Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
       if (isLeftFootInSupport)
-         contactableFeet.get(RobotSide.LEFT).getContactPointsCopy().stream().peek(cp -> cp.changeFrame(worldFrame))
+         contactableFeet.get(RobotSide.LEFT)
+                        .getContactPointsCopy()
+                        .stream()
+                        .peek(cp -> cp.changeFrame(worldFrame))
                         .forEach(cp -> leftFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));
       if (isRightFootInSupport)
-         contactableFeet.get(RobotSide.RIGHT).getContactPointsCopy().stream().peek(cp -> cp.changeFrame(worldFrame))
+         contactableFeet.get(RobotSide.RIGHT)
+                        .getContactPointsCopy()
+                        .stream()
+                        .peek(cp -> cp.changeFrame(worldFrame))
                         .forEach(cp -> rightFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));
       return capturabilityBasedStatus;
    }
@@ -822,7 +870,8 @@ public abstract class HumanoidStepReachabilityCalculator
    private static Graphics3DObject getGraphics(Collidable collidable)
    {
       Shape3DReadOnly shape = collidable.getShape();
-      RigidBodyTransform transformToParentJoint = collidable.getShape().getReferenceFrame()
+      RigidBodyTransform transformToParentJoint = collidable.getShape()
+                                                            .getReferenceFrame()
                                                             .getTransformToDesiredFrame(collidable.getRigidBody().getParentJoint().getFrameAfterJoint());
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.transform(transformToParentJoint);
@@ -842,8 +891,7 @@ public abstract class HumanoidStepReachabilityCalculator
          EuclidGeometryTools.orientation3DFromZUpToVector3D(capsule.getAxis(), transform.getRotation());
          transform.getTranslation().set(capsule.getPosition());
          graphics.transform(transform);
-         graphics.addCapsule(capsule.getRadius(),
-                             capsule.getLength() + 2.0 * capsule.getRadius(), // the 2nd term is removed internally.
+         graphics.addCapsule(capsule.getRadius(), capsule.getLength() + 2.0 * capsule.getRadius(), // the 2nd term is removed internally.
                              appearance);
       }
       else if (shape instanceof Box3DReadOnly)
@@ -878,5 +926,4 @@ public abstract class HumanoidStepReachabilityCalculator
             linkGraphics.combine(getGraphics(collidable));
       }
    }
-
 }
