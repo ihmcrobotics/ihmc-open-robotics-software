@@ -22,7 +22,8 @@ public class ImGuiUniqueLabelMap
       AtomicInteger classIndex = CLASS_TO_INDEX.get(simpleName);
       if (classIndex == null)
       {
-         CLASS_TO_INDEX.put(simpleName, new AtomicInteger());
+         classIndex = new AtomicInteger();
+         CLASS_TO_INDEX.put(simpleName, classIndex);
       }
       index = classIndex.getAndIncrement();
    }

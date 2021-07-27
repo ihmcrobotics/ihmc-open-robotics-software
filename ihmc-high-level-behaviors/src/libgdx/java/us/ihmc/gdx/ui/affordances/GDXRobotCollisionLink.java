@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -123,8 +125,10 @@ public class GDXRobotCollisionLink implements RenderableProvider
    public void update()
    {
       collisionMeshFrame.update();
-      GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), modelInstance.transform);
-      GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), coordinateFrame.transform);
+      ExceptionTools.handle(() -> GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), modelInstance.transform),
+                            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      ExceptionTools.handle(() -> GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), coordinateFrame.transform),
+                            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    // Happens after update
