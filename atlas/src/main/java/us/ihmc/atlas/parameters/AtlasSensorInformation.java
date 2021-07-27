@@ -193,15 +193,19 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 //      transformChestToL515DepthCamera.appendOrientation(new YawPitchRoll(0.01, pitch, -0.045));
 
       transformChestToL515DepthCamera.setIdentity();
-      transformChestToL515DepthCamera.getTranslation().set(0.215000, 0.002000, 0.140000);
-      transformChestToL515DepthCamera.getRotation().setYawPitchRoll(0.020000, 1.051917, 0.095000);
+      transformChestToL515DepthCamera.getTranslation().set(0.275000, 0.052000, 0.140000);
+      transformChestToL515DepthCamera.getRotation().setYawPitchRoll(0.010000, 1.151900, 0.045000);
    }
 
    private static final RigidBodyTransform transformChestToD435DepthCamera = new RigidBodyTransform();
    static
    {
-      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.4);
-      transformChestToD435DepthCamera.appendTranslation(chestToSensor);
+//      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.4);
+//      transformChestToD435DepthCamera.appendTranslation(chestToSensor);
+
+      transformChestToD435DepthCamera.setIdentity();
+      transformChestToD435DepthCamera.getTranslation().set(0.300000, 0.020000, 0.580000);
+      transformChestToD435DepthCamera.getRotation().setYawPitchRoll(0.0, 0.0, 0.0);
    }
 
    private static final RigidBodyTransform transformChestToOuster = new RigidBodyTransform();
@@ -220,8 +224,8 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
 //      transformChestToOuster.normalizeRotationPart();
 
       transformChestToOuster.setIdentity();
-      transformChestToOuster.getTranslation().set(0.036000, -0.188000, 0.749000);
-      transformChestToOuster.getRotation().setYawPitchRoll(0.250000, 0.270000, -0.020000);
+      transformChestToOuster.getTranslation().set(0.265000, -0.0200, 0.720000);
+      transformChestToOuster.getRotation().setYawPitchRoll(0.00000, 0.349100, 0.000000);
    }
 
    private static final RigidBodyTransform transformChestToZED2 = new RigidBodyTransform();
