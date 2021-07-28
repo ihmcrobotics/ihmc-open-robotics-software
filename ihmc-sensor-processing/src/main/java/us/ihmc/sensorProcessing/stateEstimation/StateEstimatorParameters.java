@@ -115,6 +115,59 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    /** The smaller the value, the more it trusts the IMU **/
    public abstract double getPelvisLinearVelocityFusingFrequency();
 
+   /**
+    * The new fusing filter continuously estimates the bias from the accelerometer when integrating
+    * into pelvis linear velocity and then position.
+    */
+   public boolean usePelvisLinearStateNewFusingFilter()
+   {
+      return false;
+   }
+
+   /**
+    * Parameter for the new pelvis linear state fusing filter.
+    * 
+    * @return proportional gain to correct the integrated linear velocity using the information from
+    *         the kinematics. A lower value means less correction, thus trusting more the IMU.
+    */
+   public double getPelvisPositionNewFusingFilterKp()
+   {
+      return 0.1;
+   }
+
+   /**
+    * Parameter for the new pelvis linear state fusing filter.
+    * 
+    * @return integral gain used to estimate the linear velocity bias. A lower value means a slower
+    *         update of the bias.
+    */
+   public double getPelvisPositionNewFusingFilterKi()
+   {
+      return 1.0e-3;
+   }
+
+   /**
+    * Parameter for the new pelvis linear state fusing filter.
+    * 
+    * @return proportional gain to correct the integrated linear acceleration using the information
+    *         from the kinematics. A lower value means less correction, thus trusting more the IMU.
+    */
+   public double getPelvisLinearVelocityNewFusingFilterKp()
+   {
+      return 0.1;
+   }
+
+   /**
+    * Parameter for the new pelvis linear state fusing filter.
+    * 
+    * @return integral gain used to estimate the linear acceleration bias. A lower value means a slower
+    *         update of the bias.
+    */
+   public double getPelvisLinearVelocityNewFusingFilterKi()
+   {
+      return 1.0e-3;
+   }
+
    /** The smaller the value, the more it trusts the IMU **/
    public abstract double getCenterOfMassVelocityFusingFrequency();
 

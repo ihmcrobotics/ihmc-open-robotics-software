@@ -71,8 +71,21 @@ public class JointControlBlender
       if (ENABLE_TAU_SCALE)
          blendingFactor *= tauScale.getDoubleValue();
 
+      if (blendingFactor == 0.0)
+      {
+         outputDataToPack.set(outputData0);
+         return;
+      }
+
+      if (blendingFactor == 1.0)
+      {
+         outputDataToPack.set(outputData1);
+         return;
+      }
+
       outputDataToPack.clear();
       outputDataToPack.setControlMode(outputData0.getControlMode());
+      outputDataToPack.setLoadMode(outputData0.getLoadMode());
 
       double currentJointAngle = oneDoFJoint.getQ();
       double currentJointVelocity = oneDoFJoint.getQd();

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredLoadMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -11,6 +12,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 public class YoJointDesiredOutput implements JointDesiredOutputBasics
 {
    private final YoEnum<JointDesiredControlMode> controlMode;
+   private final YoEnum<JointDesiredLoadMode> loadMode;
 
    private final YoDouble desiredTorque;
    private final YoDouble desiredPosition;
@@ -36,6 +38,7 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
       namePrefix += "LowLevel";
 
       controlMode = new YoEnum<>(namePrefix + "ControlMode" + suffixString, registry, JointDesiredControlMode.class, true);
+      loadMode = new YoEnum<>(namePrefix + "LoadMode" + suffixString, registry, JointDesiredLoadMode.class, true);
       desiredTorque = new YoDouble(namePrefix + "DesiredTorque" + suffixString, registry);
       desiredPosition = new YoDouble(namePrefix + "DesiredPosition" + suffixString, registry);
       desiredVelocity = new YoDouble(namePrefix + "DesiredVelocity" + suffixString, registry);
@@ -62,6 +65,7 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    public void clear()
    {
       controlMode.set(null);
+      loadMode.set(null);
       desiredTorque.set(Double.NaN);
       desiredPosition.set(Double.NaN);
       desiredVelocity.set(Double.NaN);
@@ -83,6 +87,12 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    public void setControlMode(JointDesiredControlMode controlMode)
    {
       this.controlMode.set(controlMode);
+   }
+
+   @Override
+   public void setLoadMode(JointDesiredLoadMode loadMode)
+   {
+      this.loadMode.set(loadMode);
    }
 
    @Override
@@ -119,6 +129,12 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    public JointDesiredControlMode getControlMode()
    {
       return controlMode.getEnumValue();
+   }
+
+   @Override
+   public JointDesiredLoadMode getLoadMode()
+   {
+      return loadMode.getValue();
    }
 
    @Override
