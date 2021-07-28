@@ -210,7 +210,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       robotDescription = createRobotDescription();
    }
 
-   private RobotDescription createRobotDescription()
+   public RobotDescription createRobotDescription()
+   {
+      return createRobotDescription(0.0);
+   }
+
+   public RobotDescription createRobotDescription(double transparency)
    {
       boolean useCollisionMeshes = false;
 
@@ -226,7 +231,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
       else
       {
-         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters, useCollisionMeshes);
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel,
+                                                                          jointMap,
+                                                                          contactPointParameters,
+                                                                          useCollisionMeshes,
+                                                                          transparency);
       }
 
       return robotDescription;
