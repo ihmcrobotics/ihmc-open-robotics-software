@@ -188,7 +188,8 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      door.getCollisionModelInstance().getRenderables(renderables, pool);
+      if (!distanceToDoor.get().isNaN())
+         door.getCollisionModelInstance().getRenderables(renderables, pool);
    }
 
    @Override
