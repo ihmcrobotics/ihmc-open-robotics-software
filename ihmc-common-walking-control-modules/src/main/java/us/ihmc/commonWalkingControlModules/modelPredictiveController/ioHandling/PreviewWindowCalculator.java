@@ -1,7 +1,10 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.robotics.time.TimeIntervalTools;
@@ -10,6 +13,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +39,10 @@ public class PreviewWindowCalculator
 
    private final RecyclingArrayList<PreviewWindowSegment> previewWindowContacts = new RecyclingArrayList<>(PreviewWindowSegment::new);
    private final RecyclingArrayList<ContactPlaneProvider> fullContactSet = new RecyclingArrayList<>(ContactPlaneProvider::new);
+
+   private final TDoubleArrayList contactGroupDurations = new TDoubleArrayList();
+   private final TIntArrayList numberOfSegmentsInContactGroups = new TIntArrayList();
+   private final RecyclingArrayList<TIntArrayList> contactPhasesInGroups = new RecyclingArrayList<>(TIntArrayList::new);
 
    private final ContactSegmentHelper contactSegmentHelper = new ContactSegmentHelper();
    private final List<ContactPlaneProvider> phasesInInterval = new ArrayList<>();
@@ -76,7 +84,7 @@ public class PreviewWindowCalculator
 
    private double computePlanningHorizon(List<ContactPlaneProvider> fullContactSequence, double timeAtStartOfWindow)
    {
-      int activeSegment = findTheActiveSegmentInTheContactSequence(fullContactSequence, timeAtStartOfWindow);
+      int activeSegment = findTheActiveSegmentInTheContactSequence(fullContactSequence, timeAtStartOfWindow, true, false);
       activeSegmentChanged.set(false);
 
       if (this.activeSegment.getIntegerValue() != activeSegment)
@@ -87,38 +95,41 @@ public class PreviewWindowCalculator
 
       previewWindowContacts.clear();
 
-      double timeUntilTakeOff = computeTimeUntilTakeOff(fullContactSequence, timeAtStartOfWindow);
-
-      int segmentsInWindow = (int) Math.floor(Math.min(timeUntilTakeOff, maximumPreviewWindowDuration.getDoubleValue()) / nominalSegmentDuration.getDoubleValue());
-      segmentsInWindow = Math.max(segmentsInWindow, minimumPreviewWindowSegments.getIntegerValue());
-      double nominalSegmentDuration = timeUntilTakeOff / segmentsInWindow;
-
-      double startTime = timeAtStartOfWindow;
-      for (int segmentIndex = activeSegment; segmentIndex < segmentsInWindow; segmentIndex++)
+      computeContactGroups(fullContactSequence, timeAtStartOfWindow, timeAtStartOfWindow + maximumPreviewWindowDuration.getDoubleValue(), activeSegment);
+      double segmentStartTime = timeAtStartOfWindow;
+      for (int contactGroupIdx = 0; contactGroupIdx < numberOfSegmentsInContactGroups.size(); contactGroupIdx++)
       {
-         PreviewWindowSegment segment = previewWindowContacts.add();
-         segment.reset();
+         double durationOfSegmentsInGroup = contactGroupDurations.get(contactGroupIdx) / numberOfSegmentsInContactGroups.get(contactGroupIdx);
+         TIntArrayList phasesInGroup = contactPhasesInGroups.get(contactGroupIdx);
+         int startIdx = phasesInGroup.get(0);
+         int endIndx = phasesInGroup.get(phasesInGroup.size() - 1);
 
-         double endTime = startTime + nominalSegmentDuration;
-         getPhasesSpanningInterval(startTime, endTime, fullContactSequence, phasesInInterval);
-         for (int phaseIndex = 0; phaseIndex < phasesInInterval.size(); phaseIndex++)
+         for (int segmentIdx = 0; segmentIdx < numberOfSegmentsInContactGroups.get(contactGroupIdx); segmentIdx++)
          {
-            ContactPlaneProvider contact = phasesInInterval.get(phaseIndex);
-            segment.addContactPhaseInSegment(contact, contact.getTimeInterval().getStartTime(), contact.getTimeInterval().getEndTime());
+            PreviewWindowSegment segment = previewWindowContacts.add();
+            segment.reset();
+
+            double segmentEndTime = segmentStartTime + durationOfSegmentsInGroup;
+            startIdx = getPhasesSpanningInterval(segmentStartTime, segmentEndTime, startIdx, endIndx, fullContactSequence, phasesInInterval);
+            for (int phaseIdx = 0; phaseIdx < phasesInInterval.size(); phaseIdx++)
+            {
+               ContactPlaneProvider contact = phasesInInterval.get(phaseIdx);
+               double phaseStart = Math.max(segmentStartTime, contact.getTimeInterval().getStartTime());
+               double phaseEnd = Math.min(segmentEndTime, contact.getTimeInterval().getEndTime());
+               segment.addContactPhaseInSegment(contact, phaseStart, phaseEnd);
+            }
+
+            double alphaThroughStart = computeTheFractionThroughTheTimeInterval(segmentStartTime, phasesInInterval.get(0).getTimeInterval());
+            double alphaThroughEnd = computeTheFractionThroughTheTimeInterval(segmentEndTime, phasesInInterval.get(phasesInInterval.size() - 1).getTimeInterval());
+            contactSegmentHelper.cubicInterpolateStartOfSegment(segment.getContactPhase(0), alphaThroughStart);
+            contactSegmentHelper.cubicInterpolateEndOfSegment(segment.getContactPhase(phasesInInterval.size() - 1), alphaThroughEnd);
+
+            for (int contactId = 0; contactId < phasesInInterval.get(0).getNumberOfContactPlanes(); contactId++)
+               segment.addContact(phasesInInterval.get(0).getContactPose(contactId), phasesInInterval.get(0).getContactsInBodyFrame(contactId));
+
+            segmentStartTime = segmentEndTime;
          }
-
-         double alphaThroughStart = computeTheFractionThroughTheTimeInterval(startTime, phasesInInterval.get(0).getTimeInterval());
-         double alphaThroughEnd = computeTheFractionThroughTheTimeInterval(endTime, phasesInInterval.get(phasesInInterval.size() - 1).getTimeInterval());
-         contactSegmentHelper.cubicInterpolateStartOfSegment(segment.getContactPhase(0), alphaThroughStart);
-         contactSegmentHelper.cubicInterpolateEndOfSegment(segment.getContactPhase(phasesInInterval.size() - 1), alphaThroughEnd);
-
-         for (int contactId = 0; contactId < phasesInInterval.get(0).getNumberOfContactPlanes(); contactId++)
-            segment.addContact(phasesInInterval.get(0).getContactPose(contactId), phasesInInterval.get(0).getContactsInBodyFrame(contactId));
       }
-
-      double startAlpha = (timeAtStartOfWindow - fullContactSequence.get(activeSegment).getTimeInterval().getStartTime()) / fullContactSequence.get(activeSegment).getTimeInterval().getDuration();
-      contactSegmentHelper.cubicInterpolateStartOfSegment(previewWindowContacts.get(0).getContactPhase(0), startAlpha);
-      previewWindowContacts.get(0).setStartTime(timeAtStartOfWindow);
 
       double previewWindowLength = 0.0;
       double flightDuration = 0.0;
@@ -147,7 +158,7 @@ public class PreviewWindowCalculator
 
       populateTheFullContactSet(fullContactSequence);
 
-      if (!checkContactSequenceIsValid(previewWindowContacts))
+      if (!checkContactSequenceIsValid(previewWindowContacts, false))
          throw new IllegalArgumentException("The preview window is not valid.");
       if (!ContactStateProviderTools.checkContactSequenceIsValid(fullContactSet))
          throw new IllegalArgumentException("The full contact sequence is not valid.");
@@ -155,18 +166,74 @@ public class PreviewWindowCalculator
       return previewWindowLength + flightDuration;
    }
 
-   private static double computeTimeUntilTakeOff(List<ContactPlaneProvider> fullContactSequence, double currentTime)
+   private void computeContactGroups(List<ContactPlaneProvider> fullContactSequence, double currentTime, double endTime, int activeSegment)
    {
-      double totalWindow = fullContactSequence.get(0).getTimeInterval().getStartTime() - currentTime;
-      for (int i = 0; i < fullContactSequence.size(); i++)
-      {
-         if (i > 0 && fullContactSequence.get(i).getContactState().isLoadBearing())
-            return totalWindow;
+      contactPhasesInGroups.clear();
+      numberOfSegmentsInContactGroups.reset();
+      contactGroupDurations.reset();
 
-         totalWindow += fullContactSequence.get(i).getTimeInterval().getDuration();
+      TIntArrayList contactPhasesInGroup = contactPhasesInGroups.add();
+      contactPhasesInGroup.reset();
+      contactPhasesInGroup.add(activeSegment);
+
+      double groupDuration = fullContactSequence.get(activeSegment).getTimeInterval().getDuration() - (currentTime - fullContactSequence.get(activeSegment).getTimeInterval().getStartTime());
+      int segmentIdx = activeSegment + 1;
+      for (; segmentIdx < fullContactSequence.size(); segmentIdx++)
+      {
+         ContactPlaneProvider previousContact = fullContactSequence.get(segmentIdx - 1);
+         ContactPlaneProvider currentContact = fullContactSequence.get(segmentIdx);
+
+         if (doContactPhasesBelongToTheSameGroup(previousContact, currentContact))
+         {
+            groupDuration += currentContact.getTimeInterval().getDuration();
+         }
+         else
+         {
+            contactPhasesInGroup = contactPhasesInGroups.add();
+            contactPhasesInGroup.reset();
+
+            contactGroupDurations.add(groupDuration);
+            numberOfSegmentsInContactGroups.add(computeNumberOfSegmentsInGroup(previousContact.getContactState(), groupDuration));
+
+            groupDuration = currentContact.getTimeInterval().getDuration();
+         }
+         contactPhasesInGroup.add(segmentIdx);
+
+         if (currentContact.getTimeInterval().getEndTime() > endTime + timeEpsilon)
+         {
+            segmentIdx++;
+            break;
+         }
       }
 
-      return totalWindow;
+      contactGroupDurations.add(groupDuration);
+      numberOfSegmentsInContactGroups.add(computeNumberOfSegmentsInGroup(fullContactSequence.get(segmentIdx - 1).getContactState(), groupDuration));
+//      contactPhasesInGroup.add(fullContactSequence.size() - 1);
+   }
+
+   private int computeNumberOfSegmentsInGroup(ContactState contactState, double groupDuration)
+   {
+      if (contactState == ContactState.FLIGHT)
+         return 1;
+
+      return (int) Math.round(groupDuration / nominalSegmentDuration.getDoubleValue());
+   }
+
+   private static boolean doContactPhasesBelongToTheSameGroup(ContactPlaneProvider phaseA, ContactPlaneProvider phaseB)
+   {
+      if (phaseA.getContactState() != phaseB.getContactState())
+         return false;
+
+      if (phaseA.getNumberOfContactPlanes() != phaseB.getNumberOfContactPlanes())
+         return false;
+
+      for (int i = 0; i < phaseA.getNumberOfContactPlanes(); i++)
+      {
+         if (!phaseA.getContactPose(i).epsilonEquals(phaseB.getContactPose(i), 1e-3))
+            return false;
+      }
+
+      return true;
    }
 
    private void populateTheFullContactSet(List<ContactPlaneProvider> fullContactSequence)
@@ -178,7 +245,7 @@ public class PreviewWindowCalculator
       double previewWindowEndTime = previewWindowContacts.getLast().getEndTime();
       if (previewWindowEndTime < fullContactSequence.get(fullContactSequence.size() - 1).getTimeInterval().getEndTime())
       {
-         int activeSegmentIdx = findTheActiveSegmentInTheContactSequence(fullContactSequence, previewWindowEndTime);
+         int activeSegmentIdx = findTheActiveSegmentInTheContactSequence(fullContactSequence, previewWindowEndTime, true, false);
 
          ContactPlaneProvider activeSegment = fullContactSequence.get(activeSegmentIdx);
          ContactPlaneProvider trimmedFinalSegment = fullContactSet.add();
@@ -192,30 +259,53 @@ public class PreviewWindowCalculator
       }
    }
 
-   private static void getPhasesSpanningInterval(double starTime, double endTime, List<ContactPlaneProvider> fullContactSequenece, List<ContactPlaneProvider> segmentsToPack)
+   private static int getPhasesSpanningInterval(double startTime, double endTime, int startOfInterval, int endOfInterval,
+                                                 List<ContactPlaneProvider> fullContactSequenece, List<ContactPlaneProvider> segmentsToPack)
    {
       segmentsToPack.clear();
-      int startSegment = findTheActiveSegmentInTheContactSequence(fullContactSequenece, starTime);
-      int endSegment = findTheActiveSegmentInTheContactSequence(fullContactSequenece, endTime, startSegment);
+      int startSegment = findTheActiveSegmentInTheContactSequence(fullContactSequenece, startTime, startOfInterval, endOfInterval, true, false);
+      int endSegment = findTheActiveSegmentInTheContactSequence(fullContactSequenece, endTime, startSegment, endOfInterval, false, true);
 
       for (int i = startSegment; i <= endSegment; i++)
          segmentsToPack.add(fullContactSequenece.get(i));
+
+      return endSegment;
    }
 
-   private static int findTheActiveSegmentInTheContactSequence(List<ContactPlaneProvider> fullContactSequence, double time)
+   private static int findTheActiveSegmentInTheContactSequence(List<ContactPlaneProvider> fullContactSequence,
+                                                               double time,
+                                                               boolean beginningInclusive,
+                                                               boolean endInclusive)
    {
-      return findTheActiveSegmentInTheContactSequence(fullContactSequence, time, 0);
+      return findTheActiveSegmentInTheContactSequence(fullContactSequence, time, 0, beginningInclusive, endInclusive);
    }
 
-   private static int findTheActiveSegmentInTheContactSequence(List<ContactPlaneProvider> fullContactSequence, double time, int startSegment)
+   private static final double timeEpsilon = 1e-6;
+
+   private static int findTheActiveSegmentInTheContactSequence(List<ContactPlaneProvider> fullContactSequence,
+                                                               double time,
+                                                               int startSegment,
+                                                               boolean beginningInclusive,
+                                                               boolean endInclusive)
+   {
+      return findTheActiveSegmentInTheContactSequence(fullContactSequence, time, startSegment, fullContactSequence.size() - 1, beginningInclusive, endInclusive);
+   }
+
+   private static int findTheActiveSegmentInTheContactSequence(List<ContactPlaneProvider> fullContactSequence,
+                                                               double time,
+                                                               int startSegment,
+                                                               int endSegment,
+                                                               boolean beginningInclusive,
+                                                               boolean endInclusive)
    {
       int activeSegment = -1;
-      for (int i = 0; i < fullContactSequence.size(); i++)
+      int max = endSegment + 1;
+      for (int i = startSegment; i < max; i++)
       {
          TimeIntervalReadOnly timeInterval = fullContactSequence.get(i).getTimeInterval();
-         boolean segmentIsValid = timeInterval.intervalContains(time);
-         boolean notAtEndOfSegment = i >= fullContactSequence.size() - 1 || time < timeInterval.getEndTime();
-         if (segmentIsValid && notAtEndOfSegment)
+         boolean segmentIsValid = timeInterval.epsilonContains(time, timeEpsilon);
+         boolean notAtEndOfSegment = i >= fullContactSequence.size() - 1 || (time + timeEpsilon < timeInterval.getEndTime() || endInclusive);
+         if (segmentIsValid && notAtEndOfSegment && (beginningInclusive || time > timeInterval.getStartTime() - timeEpsilon))
          {
             activeSegment = i;
             break;
@@ -261,7 +351,12 @@ public class PreviewWindowCalculator
 
    public static boolean checkContactSequenceIsValid(List<PreviewWindowSegment> contactStateSequence)
    {
-      if (!checkContactSequenceDoesNotEndInFlight(contactStateSequence))
+      return checkContactSequenceIsValid(contactStateSequence, true);
+   }
+
+   public static boolean checkContactSequenceIsValid(List<PreviewWindowSegment> contactStateSequence, boolean checkForFlight)
+   {
+      if (checkForFlight && !checkContactSequenceDoesNotEndInFlight(contactStateSequence))
          return false;
 
       return isTimeSequenceContinuous(contactStateSequence, 1e-2);
