@@ -59,13 +59,10 @@ public class GDXImGuiBasedUI
    private HybridDirectory perspectiveDirectory;
    private HybridFile libGDXSettingsFile;
    private final Stopwatch runTime = new Stopwatch().start();
-   private String statusText = "";
+   private String statusText = ""; // TODO: Add status at bottom of window
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private ImGui3DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui3DViewInput>> imGuiInputProcessors = new ArrayList<>();
-   private boolean dragging = false;
-   private float dragBucketX;
-   private float dragBucketY;
    private GLFrameBuffer frameBuffer;
    private float sizeX;
    private float sizeY;
