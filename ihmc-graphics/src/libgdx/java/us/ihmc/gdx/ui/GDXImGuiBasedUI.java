@@ -112,12 +112,12 @@ public class GDXImGuiBasedUI
 
    public void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
    {
-      AtomicReference<Double> windowWidth = new AtomicReference<>((double) 800);
-      AtomicReference<Double> windowHeight = new AtomicReference<>((double) 600);
+      AtomicReference<Integer> windowWidth = new AtomicReference<>(800);
+      AtomicReference<Integer> windowHeight = new AtomicReference<>(600);
       JSONFileTools.loadUserWithClasspathDefaultFallback(libGDXSettingsFile, jsonNode ->
       {
-         windowWidth.set(jsonNode.get("windowWidth").asDouble());
-         windowHeight.set(jsonNode.get("windowHeight").asDouble());
+         windowWidth.set(jsonNode.get("windowWidth").asInt());
+         windowHeight.set(jsonNode.get("windowHeight").asInt());
       });
 
       LogTools.info("Launching GDX application");
@@ -220,6 +220,14 @@ public class GDXImGuiBasedUI
                currentPerspective = perspective;
                applyPerspectiveDirectory();
                imGuiWindowAndDockSystem.loadConfiguration(perspectiveDefaultMode.get());
+               Path libGDXFile = perspectiveDefaultMode.get() ? libGDXSettingsFile.getWorkspaceFile() : libGDXSettingsFile.getExternalFile();
+               JSONFileTools.load(libGDXFile, jsonNode ->
+               {
+                  int width = jsonNode.get("windowWidth").asInt();
+                  int height = jsonNode.get("windowHeight").asInt();
+                  Gdx.graphics.setWindowedMode(width, height);
+               });
+
             }
             if (currentPerspective.equals(perspective))
             {
