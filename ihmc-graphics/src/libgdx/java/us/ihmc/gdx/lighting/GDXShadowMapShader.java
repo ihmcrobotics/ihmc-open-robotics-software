@@ -100,7 +100,7 @@ public class GDXShadowMapShader extends BaseShader
          {
             context.setDepthTest(GL20.GL_LEQUAL);
             context.setBlending(false, GL20.GL_ONE, GL20.GL_ONE); //Deactivate blending on first pass
-            super.render(renderable, combinedAttributes);
+            super.render(renderable, combinedAttributes); //TODO something goes wrong here w/ glDrawElements, only with multiple lights and with the EnvironmentBuilderUI - model issue?
             firstCall = false;
          }
          else
