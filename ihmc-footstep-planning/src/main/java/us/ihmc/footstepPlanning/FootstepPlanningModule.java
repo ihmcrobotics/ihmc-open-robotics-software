@@ -25,7 +25,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.VariableDescriptor;
-import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageBodyPathPlanner;
+import us.ihmc.footstepPlanning.narrowPassage.NarrowPassageBodyPathOptimizer;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
@@ -61,7 +61,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final VisibilityGraphPathPlanner bodyPathPlanner;
-   private final NarrowPassageBodyPathPlanner narrowPassageBodyPathPlanner;
+   private final NarrowPassageBodyPathOptimizer narrowPassageBodyPathOptimizer;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
 
    private final PlanThenSnapPlanner planThenSnapPlanner;
@@ -107,7 +107,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, registry);
-      this.narrowPassageBodyPathPlanner = new NarrowPassageBodyPathPlanner(footstepPlannerParameters, registry);
+      this.narrowPassageBodyPathOptimizer = new NarrowPassageBodyPathOptimizer(footstepPlannerParameters, registry);
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
                                                            footPolygons,
@@ -170,7 +170,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
       PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
-      narrowPassageBodyPathPlanner.setPlanarRegionsList(planarRegionsList);
+      narrowPassageBodyPathOptimizer.setPlanarRegionsList(planarRegionsList);
 
       // record time
       output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
@@ -184,15 +184,15 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          BodyPathPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
          List<Pose3DReadOnly> waypoints = bodyPathPlanner.getWaypoints();
 
-         if (request.getPlanNarrowPassage())
+         if (visibilityGraphParameters.getOptimizeForNarrowPassage())
          {
             LogTools.info("with Narrow Passage adjustment");
 
             List<FramePose3D> waypointsList = bodyPathPlanner.getWaypointsAsFramePoseList();
 
-            narrowPassageBodyPathPlanner.setWaypoints(waypointsList);
-            waypoints = narrowPassageBodyPathPlanner.makeAdjustments();
-            bodyPathPlannerResult = narrowPassageBodyPathPlanner.getBodyPathPlanningResult();
+            narrowPassageBodyPathOptimizer.setWaypoints(waypointsList);
+            waypoints = narrowPassageBodyPathOptimizer.runNarrowPassageOptimizer();
+            bodyPathPlannerResult = narrowPassageBodyPathOptimizer.getBodyPathPlanningResult();
          }
 
          if (!bodyPathPlannerResult.validForExecution() || (waypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails()))
@@ -219,11 +219,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
          reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
-      else if (request.getPlanNarrowPassage())
+      else if (visibilityGraphParameters.getOptimizeForNarrowPassage())
       {
          LogTools.info("Entering straight path with narrow passage adjustment");
-         narrowPassageBodyPathPlanner.setWaypointsFromStartAndEndPoses(startMidFootPose, goalMidFootPose);
-         List<Pose3DReadOnly> waypoints = narrowPassageBodyPathPlanner.makeAdjustments();
+         narrowPassageBodyPathOptimizer.setWaypointsFromStartAndEndPoses(startMidFootPose, goalMidFootPose);
+         List<Pose3DReadOnly> waypoints = narrowPassageBodyPathOptimizer.runNarrowPassageOptimizer();
 
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);
@@ -233,7 +233,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
 
-         reportBodyPathPlan(narrowPassageBodyPathPlanner.getBodyPathPlanningResult());
+         reportBodyPathPlan(narrowPassageBodyPathOptimizer.getBodyPathPlanningResult());
       }
       else
       {

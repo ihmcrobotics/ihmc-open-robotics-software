@@ -65,8 +65,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -136,9 +134,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getBodyPathWaypoints().get(i0), current_alignment);}
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -199,8 +194,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_e(data.getBodyPathWaypoints());else
           throw new RuntimeException("body_path_waypoints field exceeds the maximum length");
 
-      cdr.write_type_7(data.getPlanNarrowPassage());
-
       cdr.write_type_6(data.getGoalDistanceProximity());
 
       cdr.write_type_6(data.getGoalYawProximity());
@@ -245,8 +238,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setPerformAStarSearch(cdr.read_type_7());
       	
       cdr.read_type_e(data.getBodyPathWaypoints());	
-      data.setPlanNarrowPassage(cdr.read_type_7());
-      	
       data.setGoalDistanceProximity(cdr.read_type_6());
       	
       data.setGoalYawProximity(cdr.read_type_6());
@@ -290,7 +281,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_7("plan_body_path", data.getPlanBodyPath());
       ser.write_type_7("perform_a_star_search", data.getPerformAStarSearch());
       ser.write_type_e("body_path_waypoints", data.getBodyPathWaypoints());
-      ser.write_type_7("plan_narrow_passage", data.getPlanNarrowPassage());
       ser.write_type_6("goal_distance_proximity", data.getGoalDistanceProximity());
       ser.write_type_6("goal_yaw_proximity", data.getGoalYawProximity());
       ser.write_type_6("timeout", data.getTimeout());
@@ -324,7 +314,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setPlanBodyPath(ser.read_type_7("plan_body_path"));
       data.setPerformAStarSearch(ser.read_type_7("perform_a_star_search"));
       ser.read_type_e("body_path_waypoints", data.getBodyPathWaypoints());
-      data.setPlanNarrowPassage(ser.read_type_7("plan_narrow_passage"));
       data.setGoalDistanceProximity(ser.read_type_6("goal_distance_proximity"));
       data.setGoalYawProximity(ser.read_type_6("goal_yaw_proximity"));
       data.setTimeout(ser.read_type_6("timeout"));

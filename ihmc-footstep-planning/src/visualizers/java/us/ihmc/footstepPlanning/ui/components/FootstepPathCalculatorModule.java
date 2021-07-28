@@ -149,7 +149,6 @@ public class FootstepPathCalculatorModule
          request.setStartFootPoses(leftFootStartPose.get(), rightFootStartPose.get());
          request.setGoalFootPoses(leftFootGoalPose.get(), rightFootGoalPose.get());
          request.setPlanBodyPath(planBodyPath.get());
-         request.setPlanNarrowPassage(planNarrowPassage.get());
          request.setPerformAStarSearch(performAStarSearch.get());
          request.setSnapGoalSteps(snapGoalSteps.get());
          request.setAbortIfGoalStepSnappingFails(abortIfGoalStepSnapFails.get());

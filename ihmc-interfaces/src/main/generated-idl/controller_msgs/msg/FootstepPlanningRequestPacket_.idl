@@ -90,10 +90,6 @@ module controller_msgs
          */
         sequence<geometry_msgs::msg::dds::Pose, 50> body_path_waypoints;
         /**
-         * If true, the planner will plan a narrow passage body path. If false, it will try to follow a straight line to the goal.
-         */
-        boolean plan_narrow_passage;
-        /**
          * (In beta) acceptable xy distance from the given goal for the planner to terminate
          */
         @defaultValue(value=-1.0)

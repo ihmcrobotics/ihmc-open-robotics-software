@@ -68,10 +68,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
    /**
-            * If true, the planner will plan a narrow passage body path. If false, it will try to follow a straight line to the goal.
-            */
-   public boolean plan_narrow_passage_;
-   /**
             * (In beta) acceptable xy distance from the given goal for the planner to terminate
             */
    public double goal_distance_proximity_ = -1.0;
@@ -156,8 +152,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       perform_a_star_search_ = other.perform_a_star_search_;
 
       body_path_waypoints_.set(other.body_path_waypoints_);
-      plan_narrow_passage_ = other.plan_narrow_passage_;
-
       goal_distance_proximity_ = other.goal_distance_proximity_;
 
       goal_yaw_proximity_ = other.goal_yaw_proximity_;
@@ -330,21 +324,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPathWaypoints()
    {
       return body_path_waypoints_;
-   }
-
-   /**
-            * If true, the planner will plan a narrow passage body path. If false, it will try to follow a straight line to the goal.
-            */
-   public void setPlanNarrowPassage(boolean plan_narrow_passage)
-   {
-      plan_narrow_passage_ = plan_narrow_passage;
-   }
-   /**
-            * If true, the planner will plan a narrow passage body path. If false, it will try to follow a straight line to the goal.
-            */
-   public boolean getPlanNarrowPassage()
-   {
-      return plan_narrow_passage_;
    }
 
    /**
@@ -553,8 +532,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
          {  if (!this.body_path_waypoints_.get(i).epsilonEquals(other.body_path_waypoints_.get(i), epsilon)) return false; }
       }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_narrow_passage_, other.plan_narrow_passage_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_distance_proximity_, other.goal_distance_proximity_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_yaw_proximity_, other.goal_yaw_proximity_, epsilon)) return false;
@@ -608,8 +585,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.perform_a_star_search_ != otherMyClass.perform_a_star_search_) return false;
 
       if (!this.body_path_waypoints_.equals(otherMyClass.body_path_waypoints_)) return false;
-      if(this.plan_narrow_passage_ != otherMyClass.plan_narrow_passage_) return false;
-
       if(this.goal_distance_proximity_ != otherMyClass.goal_distance_proximity_) return false;
 
       if(this.goal_yaw_proximity_ != otherMyClass.goal_yaw_proximity_) return false;
@@ -665,8 +640,6 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.perform_a_star_search_);      builder.append(", ");
       builder.append("body_path_waypoints=");
       builder.append(this.body_path_waypoints_);      builder.append(", ");
-      builder.append("plan_narrow_passage=");
-      builder.append(this.plan_narrow_passage_);      builder.append(", ");
       builder.append("goal_distance_proximity=");
       builder.append(this.goal_distance_proximity_);      builder.append(", ");
       builder.append("goal_yaw_proximity=");

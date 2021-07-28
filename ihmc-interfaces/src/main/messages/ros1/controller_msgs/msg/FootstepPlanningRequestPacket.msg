@@ -54,9 +54,6 @@ bool perform_a_star_search
 # The robot will walk with the orientation of waypoint N between points N and N+1
 geometry_msgs/Pose[] body_path_waypoints
 
-# If true, the planner will plan a narrow passage body path. If false, it will try to follow a straight line to the goal.
-bool plan_narrow_passage
-
 # (In beta) acceptable xy distance from the given goal for the planner to terminate
 # Field default value -1.0
 float64 goal_distance_proximity

@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.narrowPassage;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
@@ -23,19 +24,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class NarrowPassageBodyPathPlanner
+public class NarrowPassageBodyPathOptimizer
 {
-   BodyPathPlanningResult bodyPathPlanningResult;
+   private BodyPathPlanningResult bodyPathPlanningResult;
 
-   private static int numberOfWaypoints;
-   private static int maxNumberOfWaypoints = 80;
-   private static int maxOrientationAdjustmentIterations = 20;
-   private static int maxPoseAdjustmentIterations = 20;
-   private static int yawShiftLimit = 120;
-   private static int yawWiggleLimit = 25;
-   private static int maxTotalIterations = 7;
-   private static int currentIteration = 0;
-   private static double distancePerCollisionPoint = 0.15;
+   private int numberOfWaypoints;
+   private int currentIteration = 0;
+
+   private final static int maxNumberOfWaypoints = 80;
+   private final static int maxOrientationAdjustmentIterations = 20;
+   private final static int maxPoseAdjustmentIterations = 20;
+   private final static int yawShiftLimit = 120;
+   private final static int yawWiggleLimit = 25;
+   private final static int maxTotalIterations = 7;
+   private final static double distancePerCollisionPoint = 0.15;
 
    private boolean rotationDirectionDetermined = false;
    private int rotationDirection = 0;
@@ -46,8 +48,8 @@ public class NarrowPassageBodyPathPlanner
 
    private PlanarRegionsList planarRegionsList;
 
-   private FramePose3D startPose = new FramePose3D();
-   private FramePose3D endPose = new FramePose3D();
+   private final FramePose3D startPose = new FramePose3D();
+   private final FramePose3D endPose = new FramePose3D();
    private FramePose3D[] waypoints;
    private final RecyclingArrayList<BodyCollisionPoint> bodyCollisionPoints;
 
@@ -66,26 +68,22 @@ public class NarrowPassageBodyPathPlanner
    private TickAndUpdatable tickAndUpdatable;
    private final BagOfBalls waypointPointGraphic;
 
-   public NarrowPassageBodyPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters, YoRegistry parentRegistry)
+   public NarrowPassageBodyPathOptimizer(FootstepPlannerParametersReadOnly footstepPlannerParameters, YoRegistry parentRegistry)
    {
       this(footstepPlannerParameters, null, null, parentRegistry);
    }
 
-   public NarrowPassageBodyPathPlanner(FootstepPlannerParametersReadOnly footstepPlannerParameters,
-                                       TickAndUpdatable tickAndUpdatable,
-                                       YoGraphicsListRegistry graphicsListRegistry,
-                                       YoRegistry parentRegistry)
+   public NarrowPassageBodyPathOptimizer(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                         TickAndUpdatable tickAndUpdatable,
+                                         YoGraphicsListRegistry graphicsListRegistry,
+                                         YoRegistry parentRegistry)
    {
       this.tickAndUpdatable = tickAndUpdatable;
-      this.bodyCollisionPoints = new RecyclingArrayList<>(maxNumberOfWaypoints, BodyCollisionPoint.class);
-      this.bodyCollisionPoints.clear();
-
-      for (int i = 0; i < maxNumberOfWaypoints; i++)
-      {
-         BodyCollisionPoint bodyCollisionPoint = bodyCollisionPoints.add();
-         bodyCollisionPoint.set(i, footstepPlannerParameters, graphicsListRegistry, registry);
-      }
-
+      this.bodyCollisionPoints = new RecyclingArrayList<>(maxNumberOfWaypoints,
+                                                          SupplierBuilder.indexedSupplier(index -> new BodyCollisionPoint(index,
+                                                                                                                          footstepPlannerParameters,
+                                                                                                                          graphicsListRegistry,
+                                                                                                                          registry)));
       visualize = graphicsListRegistry != null;
       if (parentRegistry != null)
       {
@@ -103,12 +101,12 @@ public class NarrowPassageBodyPathPlanner
       this.planarRegionsList = planarRegionsList;
    }
 
-   public List<Pose3DReadOnly> makeAdjustments()
+   public List<Pose3DReadOnly> runNarrowPassageOptimizer()
    {
       initializeBodyPoints();
       while (currentIteration < maxTotalIterations)
       {
-         adjustWaypoints();
+         computePositionAndYawAdjustments();
          if (!collisionFound.getValue())
             break;
       }
@@ -297,7 +295,7 @@ public class NarrowPassageBodyPathPlanner
       }
    }
 
-   private void adjustWaypoints()
+   private void computePositionAndYawAdjustments()
    {
       if (currentIteration > 0)
          rotationDirection = (rotationDirection < 0) ? 1 : -1;
@@ -321,10 +319,7 @@ public class NarrowPassageBodyPathPlanner
 
    private void resetShiftAlphas()
    {
-      for (int i = 0; i < numberOfWaypoints; i++)
-      {
-         bodyCollisionPoints.get(i).resetShiftAlpha();
-      }
+      BodyCollisionPoint.resetShiftAlpha();
    }
 
    private void recomputeWaypoints()
@@ -372,11 +367,13 @@ public class NarrowPassageBodyPathPlanner
          LogTools.error("Not enough space in recycling array for waypoints, increase maxNumberOfWaypoints.");
       }
 
+      bodyCollisionPoints.clear();
       for (int i = 0; i < numberOfWaypoints; i++)
       {
          waypoints[i] = new FramePose3D();
          double alpha = (i + 1) / (double) (numberOfWaypoints + 1);
          waypoints[i].interpolate(this.startPose, this.endPose, alpha);
+         bodyCollisionPoints.add();
       }
 
       resetAdjuster();
@@ -415,6 +412,12 @@ public class NarrowPassageBodyPathPlanner
       }
       this.waypoints = waypointsArray;
       this.numberOfWaypoints = this.waypoints.length;
+
+      bodyCollisionPoints.clear();
+      for (int i = 0; i < numberOfWaypoints; i++)
+      {
+         bodyCollisionPoints.add();
+      }
 
       resetAdjuster();
       updateWaypointPointGraphics();
