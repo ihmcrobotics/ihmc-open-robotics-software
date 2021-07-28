@@ -1,19 +1,16 @@
 package us.ihmc.gdx.sceneManager;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -31,88 +28,25 @@ import java.nio.IntBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * TODO: Pause and resume?
  */
 public class GDX3DSceneManager
 {
+   private final HashSet<ModelInstance> modelInstances = new HashSet<>();
+   private final HashSet<GDXRenderable> renderables = new HashSet<>();
    private InputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
    private ScreenViewport viewport;
    private ShaderProgram mainShaderProgram;
    private ModelBatch modelBatch;
    private ModelBatch virtualBatch;
-
    private GDXShadowManager shadowManager;
-
-
    private int x = 0;
    private int y = 0;
    private int width = -1;
    private int height = -1;
-
-   private final HashSet<ModelInstance> modelInstances = new HashSet<>();
-   private final HashSet<GDXRenderable> renderables = new HashSet<>();
-
-   private class GDXRenderableIterable implements Iterable<GDXRenderable>
-   {
-      private final HashSet<GDXRenderable> renderables;
-      private GDXSceneLevel level;
-
-      private class GDXRenderableIterator implements Iterator<GDXRenderable> {
-         private final HashSet<GDXRenderable> renderablesInternal;
-
-         private GDXRenderableIterator() {
-            renderablesInternal = new HashSet<>(renderables);
-         }
-
-         @Override
-         public boolean hasNext()
-         {
-            for (GDXRenderable renderable: renderablesInternal) {
-               if (renderable.getSceneType() == level) {
-                  return true;
-               }
-            }
-
-            return false;
-         }
-
-         @Override
-         public GDXRenderable next()
-         {
-            Iterator<GDXRenderable> it = renderablesInternal.iterator();
-            while (it.hasNext()) {
-               GDXRenderable renderable = it.next();
-               it.remove();
-
-               if (renderable.getSceneType() == level) {
-                  return renderable;
-               }
-            }
-
-            throw new NoSuchElementException();
-         }
-      }
-
-      protected GDXRenderableIterable(HashSet<GDXRenderable> renderables) {
-         this(renderables, GDXSceneLevel.REAL_ENVIRONMENT);
-      }
-
-      protected GDXRenderableIterable(HashSet<GDXRenderable> renderables, GDXSceneLevel level) {
-         this.renderables = renderables;
-         this.level = level;
-      }
-
-      @Override
-      public Iterator<GDXRenderable> iterator()
-      {
-         return new GDXRenderableIterator();
-      }
-   }
-
    private boolean firstRenderStarted = false;
    private boolean addFocusSphere = true;
 
@@ -148,7 +82,8 @@ public class GDX3DSceneManager
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
       mainShaderProgram = new ShaderProgram(GDXShadowManager.getVertexShader(), GDXShadowManager.getFragmentShader());
-      modelBatch = new ModelBatch(new DefaultShaderProvider() {
+      modelBatch = new ModelBatch(new DefaultShaderProvider()
+      {
          @Override
          protected Shader createShader(Renderable renderable)
          {
@@ -163,9 +98,9 @@ public class GDX3DSceneManager
       shadowManager.addLight(new GDXPointLight(new Vector3(5, 10, 5))); //TODO adding a second light caused an access violation exactly once, not sure why, usually works
       shadowManager.addLight(new GDXPointLight(new Vector3(0, 10, 5)));
       shadowManager.addLight(new GDXPointLight(new Vector3(-5, 10, 5)));
-//      shadowManager.addLight(new GDXPointLight(new Vector3(5, 10, -5)));
-//      shadowManager.addLight(new GDXPointLight(new Vector3(0, 10, -5)));
-//      shadowManager.addLight(new GDXPointLight(new Vector3(-5, 10, -5)));
+      //      shadowManager.addLight(new GDXPointLight(new Vector3(5, 10, -5)));
+      //      shadowManager.addLight(new GDXPointLight(new Vector3(0, 10, -5)));
+      //      shadowManager.addLight(new GDXPointLight(new Vector3(-5, 10, -5)));
 
       shadowManager.update();
    }
@@ -241,10 +176,10 @@ public class GDX3DSceneManager
       postRender();
    }
 
-   public void renderFromBatch(ModelBatch batch, GDXSceneLevel sceneLevel) {
+   public void renderFromBatch(ModelBatch batch, GDXSceneLevel sceneLevel)
+   {
       renderInternal(batch, sceneLevel);
    }
-   // End render public API
 
    public void dispose()
    {
@@ -256,6 +191,7 @@ public class GDX3DSceneManager
       ExceptionTools.handle(() -> camera3D.dispose(), DefaultExceptionHandler.PRINT_MESSAGE);
       modelBatch.dispose();
    }
+   // End render public API
 
    public boolean closeRequested()
    {
@@ -336,5 +272,70 @@ public class GDX3DSceneManager
    public void setAddFocusSphere(boolean addFocusSphere)
    {
       this.addFocusSphere = addFocusSphere;
+   }
+
+   private class GDXRenderableIterable implements Iterable<GDXRenderable>
+   {
+      private final HashSet<GDXRenderable> renderables;
+      private final GDXSceneLevel level;
+
+      protected GDXRenderableIterable(HashSet<GDXRenderable> renderables)
+      {
+         this(renderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      }
+
+      protected GDXRenderableIterable(HashSet<GDXRenderable> renderables, GDXSceneLevel level)
+      {
+         this.renderables = renderables;
+         this.level = level;
+      }
+
+      @Override
+      public Iterator<GDXRenderable> iterator()
+      {
+         return new GDXRenderableIterator();
+      }
+
+      private class GDXRenderableIterator implements Iterator<GDXRenderable>
+      {
+         private final HashSet<GDXRenderable> renderablesInternal;
+
+         private GDXRenderableIterator()
+         {
+            renderablesInternal = new HashSet<>(renderables);
+         }
+
+         @Override
+         public boolean hasNext()
+         {
+            for (GDXRenderable renderable : renderablesInternal)
+            {
+               if (renderable.getSceneType() == level)
+               {
+                  return true;
+               }
+            }
+
+            return false;
+         }
+
+         @Override
+         public GDXRenderable next()
+         {
+            Iterator<GDXRenderable> it = renderablesInternal.iterator();
+            while (it.hasNext())
+            {
+               GDXRenderable renderable = it.next();
+               it.remove();
+
+               if (renderable.getSceneType() == level)
+               {
+                  return renderable;
+               }
+            }
+
+            throw new NoSuchElementException();
+         }
+      }
    }
 }
