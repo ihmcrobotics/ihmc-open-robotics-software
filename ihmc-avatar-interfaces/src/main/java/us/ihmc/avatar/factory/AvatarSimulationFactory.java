@@ -111,6 +111,7 @@ public class AvatarSimulationFactory
    private ActualCMPComputer actualCMPComputer;
    private FullHumanoidRobotModel masterFullRobotModel;
    private HumanoidRobotContextData masterContext;
+   private ExperimentalSimulation experimentalSimulation;
 
    private DRCRobotModelShapeCollisionSettings shapeCollisionSettings;
 
@@ -175,7 +176,7 @@ public class AvatarSimulationFactory
 
       if (scsInitialSetup.get().getUseExperimentalPhysicsEngine())
       {
-         ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(allSimulatedRobotList.toArray(new Robot[0]),
+         experimentalSimulation = new ExperimentalSimulation(allSimulatedRobotList.toArray(new Robot[0]),
                                                                                     simulationConstructionSetParameters.getDataBufferSize());
          experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -Math.abs(gravity.get())));
 
@@ -485,6 +486,11 @@ public class AvatarSimulationFactory
                                                                                controllerThread.getDesiredJointDataHolder());
       if (lowLevelController != null)
          humanoidFloatingRootJointRobot.setController(lowLevelController);
+   }
+
+   public ExperimentalSimulation getExperimentalSimulation()
+   {
+      return experimentalSimulation;
    }
 
    private void setupPassiveJoints()
