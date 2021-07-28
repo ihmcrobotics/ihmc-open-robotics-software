@@ -119,7 +119,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                }
             }
 
-            if (sdfVisual.getTransparency() != null)
+            if (sdfVisual.getTransparency() != null && Double.parseDouble(sdfVisual.getTransparency()) > 0.0)
             {
                // An appearance must exist in order to set a transparency value, whether a material was defined above or not.
                if (appearance == null)
