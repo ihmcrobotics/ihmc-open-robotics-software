@@ -2,7 +2,6 @@ package us.ihmc.avatar.reachabilityMap.footstep;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import controller_msgs.msg.dds.*;
-import sun.rmi.runtime.Log;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.multiContact.*;
@@ -22,7 +21,6 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -528,7 +526,7 @@ public abstract class HumanoidStepReachabilityCalculator
    private static final double minimumOffsetYaw = -Math.toRadians(70.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
-   private static final double spacingXYZ = 0.3; // 0.05
+   private static final double spacingXYZ = 0.2; // 0.05
    private static final int yawDivisions = 2;   // 10
    private static final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
 
