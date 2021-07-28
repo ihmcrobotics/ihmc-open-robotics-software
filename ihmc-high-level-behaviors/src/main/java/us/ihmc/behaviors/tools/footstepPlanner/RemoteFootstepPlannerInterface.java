@@ -177,10 +177,8 @@ public class RemoteFootstepPlannerInterface
       FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
 
       boolean planBodyPath = false;
-      boolean planNarrowPassage = false;
       boolean performAStarSearch = true;
       packet.setPlanBodyPath(planBodyPath);
-      packet.setPlanNarrowPassage(planNarrowPassage);
       packet.setPerformAStarSearch(performAStarSearch);
 
       packet.setRequestedInitialStanceSide(initialStanceSide.toByte());

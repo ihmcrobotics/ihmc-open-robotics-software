@@ -313,7 +313,6 @@ public class RemoteUIMessageConverter
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, packet.getPerformAStarSearch());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, packet.getPlanBodyPath());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanNarrowPassage, packet.getPlanNarrowPassage());
       messager.submitMessage(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.fromByte(packet.getRequestedSwingPlanner()));
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
@@ -519,7 +518,6 @@ public class RemoteUIMessageConverter
          packet.setTimeout(plannerTimeoutReference.get());
 
       packet.setPlanBodyPath(planBodyPath.get());
-      packet.setPlanNarrowPassage(planNarrowPassage.get());
       packet.setPerformAStarSearch(performAStarSearch.get());
       packet.setRequestedSwingPlanner(requestedSwingPlanner.get().toByte());
 

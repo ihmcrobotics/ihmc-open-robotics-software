@@ -46,13 +46,13 @@ public class NarrowPassageBodyPathVisualizer
       endPose.getOrientation().setToYawOrientation(dataSet.getPlannerInput().getGoalYaw());
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      NarrowPassageBodyPathPlanner narrowPassageBodyPathPlanner = new NarrowPassageBodyPathPlanner(footstepPlannerParameters,
-                                                                                                   scs,
-                                                                                                   graphicsListRegistry,
-                                                                                                   scs.getRootRegistry());
+      NarrowPassageBodyPathOptimizer narrowPassageBodyPathOptimizer = new NarrowPassageBodyPathOptimizer(footstepPlannerParameters,
+                                                                                                         scs,
+                                                                                                         graphicsListRegistry,
+                                                                                                         scs.getRootRegistry());
       if (!useVisibilityMap)
       {
-         narrowPassageBodyPathPlanner.setWaypointsFromStartAndEndPoses(startPose, endPose);
+         narrowPassageBodyPathOptimizer.setWaypointsFromStartAndEndPoses(startPose, endPose);
       }
       else
       {
@@ -67,15 +67,17 @@ public class NarrowPassageBodyPathVisualizer
          List<FramePose3D> waypointsList = bodyPathPlanner.getWaypointsAsFramePoseList();
 
          // Adjust the path for narrow passages
-         narrowPassageBodyPathPlanner.setWaypoints(waypointsList);
+         narrowPassageBodyPathOptimizer.setWaypoints(waypointsList);
       }
 
-      narrowPassageBodyPathPlanner.setPlanarRegionsList(planarRegionsList);
-      narrowPassageBodyPathPlanner.makeAdjustments();
+      narrowPassageBodyPathOptimizer.setPlanarRegionsList(planarRegionsList);
+      narrowPassageBodyPathOptimizer.runNarrowPassageOptimizer();
 
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.startOnAThread();
       scs.setGroundVisible(false);
+      scs.cropBuffer();
+
       ThreadTools.sleepForever();
    }
 
@@ -89,6 +91,6 @@ public class NarrowPassageBodyPathVisualizer
       DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_JSC_60cm;
 //      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_IHMC_55cm;
 
-      new NarrowPassageBodyPathVisualizer(dataSetName, true);
+      new NarrowPassageBodyPathVisualizer(dataSetName, false);
    }
 }

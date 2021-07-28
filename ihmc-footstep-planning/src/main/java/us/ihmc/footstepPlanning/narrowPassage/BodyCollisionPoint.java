@@ -34,37 +34,27 @@ public class BodyCollisionPoint
    private static double shiftAlpha = 1;
    private static final FramePose3D nanPose = new FramePose3D();
 
-   private FootstepPlannerParametersReadOnly footstepPlannerParameters;
-   private YoFramePose3D startingWaypoint;
-   private YoFramePose3D optimizedWaypoint;
-   private YoDouble maxDisplacementSquared;
-   private YoFramePoseUsingYawPitchRoll collisionBoxPose;
+   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private final YoFramePose3D startingWaypoint;
+   private final YoFramePose3D optimizedWaypoint;
+   private final YoDouble maxDisplacementSquared;
+   private final YoFramePoseUsingYawPitchRoll collisionBoxPose;
 
-   private PoseReferenceFrame waypointPoseFrame;
+   private final PoseReferenceFrame waypointPoseFrame;
    private final Vector3D boxCenterInSoleFrame = new Vector3D();
    private final FramePose3D boxCenterPose = new FramePose3D();
    private final FrameBox3D collisionBox = new FrameBox3D();
    private final EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
 
-   private PoseReferenceFrame waypointAdjustmentFrame;
-   private YoFramePose3D waypointAdjustmentPose;
-   private YoGraphicShape yoCollisionBoxGraphic;
-   private YoGraphicCoordinateSystem adjustmentGraphic;
-
-   public BodyCollisionPoint()
-   {
-      this(0, null, null, null);
-   }
+   private final PoseReferenceFrame waypointAdjustmentFrame;
+   private final YoFramePose3D waypointAdjustmentPose;
+   private final YoGraphicShape yoCollisionBoxGraphic;
+   private final YoGraphicCoordinateSystem adjustmentGraphic;
 
    public BodyCollisionPoint(int index,
                              FootstepPlannerParametersReadOnly footstepPlannerParameters,
                              YoGraphicsListRegistry graphicsListRegistry,
                              YoRegistry registry)
-   {
-      set(index, footstepPlannerParameters, graphicsListRegistry, registry);
-   }
-
-   public void set(int index, FootstepPlannerParametersReadOnly footstepPlannerParameters, YoGraphicsListRegistry graphicsListRegistry, YoRegistry registry)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       startingWaypoint = new YoFramePose3D("waypoint_init" + index, ReferenceFrame.getWorldFrame(), registry);
@@ -112,17 +102,12 @@ public class BodyCollisionPoint
 
    public void initializeBoxParameters()
    {
-      // set default size
-      double boxSizeX = 0.4;
-      double boxSizeY = 0.8;
-      double boxSizeZ = 1.5;
-
-//      double boxSizeX = footstepPlannerParameters.getBodyBoxDepth();
-//      double boxSizeY = footstepPlannerParameters.getBodyBoxWidth() + 0.2;
-//      double boxSizeZ = footstepPlannerParameters.getBodyBoxHeight();
+      double boxSizeX = footstepPlannerParameters.getBodyBoxDepth();
+      double boxSizeY = footstepPlannerParameters.getBodyBoxWidth();
+      double boxSizeZ = footstepPlannerParameters.getBodyBoxHeight();
 
       collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
-      boxCenterInSoleFrame.set(0.0, 0.0, boxSizeZ / 2 + 0.3);
+      boxCenterInSoleFrame.set(footstepPlannerParameters.getBodyBoxBaseX(), 0.0, boxSizeZ / 2.0 + footstepPlannerParameters.getBodyBoxBaseZ());
    }
 
    private final Vector3D adjustmentFrameX = new Vector3D();
@@ -164,9 +149,9 @@ public class BodyCollisionPoint
       return yAlpha > 0 ? 1 : -1;
    }
 
-   public void resetShiftAlpha()
+   public static void resetShiftAlpha()
    {
-      this.shiftAlpha = 1;
+      shiftAlpha = 1;
    }
 
    public void initialize(FramePose3DReadOnly startingWaypoint)
