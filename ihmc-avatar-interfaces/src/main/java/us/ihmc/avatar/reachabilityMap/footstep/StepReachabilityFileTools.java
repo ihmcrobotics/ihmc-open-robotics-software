@@ -60,14 +60,29 @@ public class StepReachabilityFileTools
       }
    }
 
-   public static StepReachabilityData loadStepReachability(DRCRobotModel robotModel)
+   private static MultiContactScriptReader setupScriptReader(DRCRobotModel robotModel)
    {
       MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-
       Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
       Path filePath = Paths.get(rootPath.toString(), robotModel.getStepReachabilityResourceName());
       scriptReader.loadScript(filePath.toFile());
+      return scriptReader;
+   }
 
+   public static List<KinematicsToolboxSnapshotDescription> loadKinematicsSnapshots(DRCRobotModel robotModel)
+   {
+      MultiContactScriptReader scriptReader = setupScriptReader(robotModel);
+      return scriptReader.getAllItems();
+   }
+
+   public static StepReachabilityData loadStepReachability(DRCRobotModel robotModel)
+   {
+      MultiContactScriptReader scriptReader = setupScriptReader(robotModel);
+      return loadStepReachability(scriptReader, robotModel);
+   }
+
+   public static StepReachabilityData loadStepReachability(MultiContactScriptReader scriptReader, DRCRobotModel robotModel)
+   {
       List<KinematicsToolboxSnapshotDescription> kinematicsSnapshots = scriptReader.getAllItems();
       double[] gridData = loadGridDataFromJson(scriptReader.getAuxiliaryData());
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -127,5 +142,61 @@ public class StepReachabilityFileTools
       configurationJSON.put("gridSizeYaw", gridData[1]);
       configurationJSON.put("yawDivisions", gridData[2]);
       return root;
+   }
+
+   public static boolean isReachabilityFile(File file)
+   {
+      if (file == null || !file.exists() || !file.isFile())
+      {
+         return false;
+      }
+
+      try
+      {
+         return loadReachabilityScript(new FileInputStream(file));
+      }
+      catch (FileNotFoundException e)
+      {
+         return false;
+      }
+   }
+
+   public static boolean loadReachabilityScript(InputStream inputStream)
+   {
+      if (inputStream == null)
+      {
+         return false;
+      }
+
+      try
+      {
+         ObjectMapper objectMapper = new ObjectMapper();
+         JsonNode jsonNode = objectMapper.readTree(inputStream);
+
+         JsonNode auxiliaryData = null;
+         try
+         {
+            KinematicsToolboxSnapshotDescription.fromJSON(jsonNode.get(0));
+         }
+         catch (RuntimeException e)
+         {
+            auxiliaryData = jsonNode.get(1);
+         }
+
+         if (auxiliaryData != null)
+         {
+            JsonNode auxDataNode = auxiliaryData.get("Auxiliary Data");
+            if (!auxDataNode.isNull());
+            {
+               JsonNode gridDataNode = auxDataNode.get("Reachability Grid Data");
+               if (!gridDataNode.isNull()) return true;
+            }
+         }
+      }
+      catch (IOException e)
+      {
+         return false;
+      }
+      return false;
    }
 }

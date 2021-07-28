@@ -70,8 +70,18 @@ public class MultiContactScriptReader
 
          List<KinematicsToolboxSnapshotDescription> messages = new ArrayList<>();
 
-         this.auxiliaryData = jsonNode.get(0);
-         JsonNode script = jsonNode.get(1);
+         JsonNode script = null;
+         try
+         {
+            KinematicsToolboxSnapshotDescription.fromJSON(jsonNode.get(0));
+         }
+         catch (RuntimeException e)
+         {
+            script = jsonNode.get(0);
+            this.auxiliaryData = jsonNode.get(1);
+         }
+
+         if (script == null) script = jsonNode;
          int numberOfSnapshots = script.size();
          for (int i = 0; i < numberOfSnapshots; i++)
          {

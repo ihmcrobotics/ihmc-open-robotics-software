@@ -116,8 +116,8 @@ public class MultiContactScriptWriter
          for (KinematicsToolboxSnapshotDescription message : messagesToWrite)
             arrayNode.add(message.toJSON(objectMapper));
 
-         script.add(auxiliaryDataNode);
          script.add(arrayNode);
+         script.add(auxiliaryDataNode);
          objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, script);
          printStream.close();
          scriptFile = null;

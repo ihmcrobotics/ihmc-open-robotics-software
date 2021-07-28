@@ -21,12 +21,12 @@ public class ValkyrieStepReachabilityCalculator extends HumanoidStepReachability
     * So if jointA normally can be between 0 rad and 1 rad and has a reduction
     * of 0.2, it now can only go 0.1 rad to 0.9 rad
     */
-   private static final double kneePitchLimitReduction = 0.3;
-   private static final double anklePitchLimitReduction = 0.3;
-   private static final double ankleRollLimitReduction = 0.3;
-   private static final double hipPitchLimitReduction = 0.3;
-   private static final double hipRollLimitReduction = 0.3;
-   private static final double hipYawLimitReduction = 0.3;
+   private static final double kneePitchLimitReduction = 0.2;
+   private static final double anklePitchLimitReduction = 0.2;
+   private static final double ankleRollLimitReduction = 0.2;
+   private static final double hipPitchLimitReduction = 0.2;
+   private static final double hipRollLimitReduction = 0.2;
+   private static final double hipYawLimitReduction = 0.2;
 
    public ValkyrieStepReachabilityCalculator() throws Exception
    {
