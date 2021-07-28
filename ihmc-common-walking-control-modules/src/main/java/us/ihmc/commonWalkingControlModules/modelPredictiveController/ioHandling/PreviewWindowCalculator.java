@@ -180,8 +180,10 @@ public class PreviewWindowCalculator
       contactPhasesInGroup.reset();
       contactPhasesInGroup.add(activeSegment);
 
-      double timeRemaining = endTime - currentTime - fullContactSequence.get(activeSegment).getTimeInterval().getDuration();
+      double maxDuration = endTime - currentTime;
       double groupDuration = fullContactSequence.get(activeSegment).getTimeInterval().getDuration() - (currentTime - fullContactSequence.get(activeSegment).getTimeInterval().getStartTime());
+      groupDuration = Math.min(groupDuration, maxDuration);
+      double timeRemaining = maxDuration - groupDuration;
       int segmentIdx = activeSegment + 1;
       for (; segmentIdx < fullContactSequence.size(); segmentIdx++)
       {
