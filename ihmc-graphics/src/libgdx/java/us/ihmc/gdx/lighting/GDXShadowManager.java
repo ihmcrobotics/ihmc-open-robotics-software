@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import us.ihmc.log.LogTools;
 
 public class GDXShadowManager
@@ -27,6 +28,16 @@ public class GDXShadowManager
    private int width = 0;
    private int height = 0;
    private float antiAliasing = 1;
+
+   private final Array<Renderable> renderableArray = new Array<>();
+   private final Pool<Renderable> renderablePool = new Pool<Renderable>()
+   {
+      @Override
+      protected Renderable newObject()
+      {
+         return new Renderable();
+      }
+   };
 
    private FrameBuffer framebuffer;
 
@@ -128,9 +139,18 @@ public class GDXShadowManager
       Gdx.gl.glClearColor(0.4f, 0.4f, 0.4f, 0.4f);
       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-      batch.begin(camera);
-      batch.render(renderableProviders);
-      batch.end();
+      renderablePool.freeAll(renderableArray);
+      renderableArray.clear();
+
+      for (RenderableProvider renderableProvider : renderableProviders) {
+         renderableProvider.getRenderables(renderableArray, renderablePool);
+      }
+
+      for (Renderable renderable : renderableArray) {
+         batch.begin(camera);
+         batch.render(renderable);
+         batch.end();
+      }
 
       framebuffer.end();
    }
