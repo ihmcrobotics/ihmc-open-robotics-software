@@ -36,7 +36,7 @@ import java.util.*;
  */
 public class ContactParticleFilter
 {
-   private static final int numberOfParticles = 50;
+   private static final int numberOfParticles = 150;
    private static final int estimationVariables = 3;
 
    private final String name = getClass().getSimpleName();

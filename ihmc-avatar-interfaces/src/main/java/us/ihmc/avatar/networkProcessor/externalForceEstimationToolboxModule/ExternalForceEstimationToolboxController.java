@@ -81,8 +81,8 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
    private final CommandInputManager commandInputManager;
    private final ExternalForceEstimationOutputStatus outputStatus = new ExternalForceEstimationOutputStatus();
 
-   private PredefinedContactExternalForceSolver predefinedContactForceSolver;
-   private ContactParticleFilter contactParticleFilter;
+   private final PredefinedContactExternalForceSolver predefinedContactForceSolver;
+   private final ContactParticleFilter contactParticleFilter;
 
    // Particle filter parameters
    private final YoBoolean enableJointNoiseModel = new YoBoolean("enableJointNoiseModel", registry);

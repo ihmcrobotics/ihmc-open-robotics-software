@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
@@ -25,6 +26,7 @@ public class DiscreteTimeExternalTorqueEstimator implements ExternalTorqueEstima
 
    private final YoDouble discreteTimeGain = new YoDouble("discreteTimeFilterGain", registry);
    private final YoDouble beta = new YoDouble("discreteTimeMomentumGain", registry);
+   private final YoDouble estimatedExternalTorqueMagnitude = new YoDouble("estimatedExternalTorqueMagnitude", registry);
 
    private final JointBasics[] joints;
    private final int dofs;
@@ -139,10 +141,14 @@ public class DiscreteTimeExternalTorqueEstimator implements ExternalTorqueEstima
       CommonOps_DDRM.scale(beta.getValue(), estimatedExternalTorque);
       CommonOps_DDRM.subtractEquals(estimatedExternalTorque, runningFilteredValue);
 
+      double estimatedExternalTorqueMagnitude = 0.0;
       for (int i = 0; i < dofs; i++)
       {
          yoObservedExternalJointTorque[i].set(estimatedExternalTorque.get(i, 0));
+         estimatedExternalTorqueMagnitude += MathTools.square(yoObservedExternalJointTorque[i].getDoubleValue());
       }
+
+      this.estimatedExternalTorqueMagnitude.set(Math.sqrt(estimatedExternalTorqueMagnitude));
    }
 
    @Override
@@ -168,5 +174,11 @@ public class DiscreteTimeExternalTorqueEstimator implements ExternalTorqueEstima
    public YoRegistry getYoRegistry()
    {
       return registry;
+   }
+
+   @Override
+   public double getEstimatedExternalTorqueMagnitude()
+   {
+      return estimatedExternalTorqueMagnitude.getDoubleValue();
    }
 }

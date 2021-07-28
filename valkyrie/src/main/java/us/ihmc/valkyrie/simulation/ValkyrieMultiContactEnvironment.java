@@ -19,7 +19,7 @@ public enum ValkyrieMultiContactEnvironment
    TILTED_HANDHOLDS;
 
    //////// DEFAULTS ////////
-   public static ValkyrieMultiContactEnvironment defaultEnvironment = FLAT_GROUND;
+   public static ValkyrieMultiContactEnvironment defaultEnvironment = FLAT_IN_FRONT;
    public static PlanarRegionsList createPlanarRegions()
    {
       return defaultEnvironment.getPlanarRegionsList();

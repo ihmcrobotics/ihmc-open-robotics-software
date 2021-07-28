@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.contact.particleFilter;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -30,6 +31,7 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
    private final YoRegistry registry = new YoRegistry(name);
    private final YoBoolean requestInitialize = new YoBoolean("requestInitialize", registry);
 
+   private final YoDouble estimatedExternalTorqueMagnitude = new YoDouble("estimatedExternalTorqueMagnitude", registry);
    private final YoDouble estimationGain = new YoDouble("estimationGain", registry);
    private final double dt;
 
@@ -148,10 +150,14 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
       CommonOps_DDRM.subtractEquals(estimatedExternalTorque, currentIntegratedValue);
       CommonOps_DDRM.scale(estimationGain.getDoubleValue(), estimatedExternalTorque);
 
+      double estimatedExternalTorqueMagnitude = 0.0;
       for (int i = 0; i < dofs; i++)
       {
          yoObservedExternalJointTorque[i].set(estimatedExternalTorque.get(i, 0));
+         estimatedExternalTorqueMagnitude += MathTools.square(yoObservedExternalJointTorque[i].getDoubleValue());
       }
+
+      this.estimatedExternalTorqueMagnitude.set(Math.sqrt(estimatedExternalTorqueMagnitude));
    }
 
    @Override
@@ -176,5 +182,11 @@ public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
    public void setEstimatorGain(double estimatorGain)
    {
       this.estimationGain.set(estimatorGain);
+   }
+
+   @Override
+   public double getEstimatedExternalTorqueMagnitude()
+   {
+      return estimatedExternalTorqueMagnitude.getDoubleValue();
    }
 }

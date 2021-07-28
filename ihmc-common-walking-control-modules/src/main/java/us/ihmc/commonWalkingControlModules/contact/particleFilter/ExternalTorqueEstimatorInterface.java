@@ -10,4 +10,6 @@ public interface ExternalTorqueEstimatorInterface extends RobotController
    void requestInitialize();
 
    void setEstimatorGain(double estimatorGain);
+
+   double getEstimatedExternalTorqueMagnitude();
 }
