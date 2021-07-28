@@ -53,6 +53,11 @@ public interface JointDesiredOutputReadOnly
       return getControlMode() != null;
    }
 
+   default boolean hasLoadMode()
+   {
+      return getLoadMode() != null;
+   }
+
    /**
     * <p>
     * The whole body controller can use this to provide information about desired joint behavior.
@@ -61,6 +66,12 @@ public interface JointDesiredOutputReadOnly
     * control laws, the tracked value (e.g. position, torque), or determine the actuator control mode.
     */
    JointDesiredControlMode getControlMode();
+
+   /**
+    * Specifies whether the joint associated to this output is used to support the robot weight. It can
+    * be used to do some gain scheduling.
+    */
+   JointDesiredLoadMode getLoadMode();
 
    /**
     * Returns true if a desired stiffness was set for this joint.
@@ -345,6 +356,8 @@ public interface JointDesiredOutputReadOnly
       String ret = "Joint Desired Output:\n";
       if (hasControlMode())
          ret += "controlMode = " + getControlMode() + "\n";
+      if (hasLoadMode())
+         ret += "loadMode = " + getLoadMode() + "\n";
       if (hasDesiredTorque())
          ret += "desiredTorque = " + getDesiredTorque() + "\n";
       if (hasDesiredPosition())
@@ -369,6 +382,12 @@ public interface JointDesiredOutputReadOnly
       StringBuilder ret = new StringBuilder();
       if (hasControlMode())
          ret.append("mode= " + getControlMode());
+      if (hasLoadMode())
+      {
+         if (ret.length() > 0)
+            ret.append(", ");
+         ret.append("load= " + getLoadMode());
+      }
       if (hasDesiredTorque())
       {
          if (ret.length() > 0)
@@ -403,6 +422,8 @@ public interface JointDesiredOutputReadOnly
       else
       {
          if (getControlMode() != other.getControlMode())
+            return false;
+         if (getLoadMode() != other.getLoadMode())
             return false;
          if (Double.compare(getDesiredTorque(), other.getDesiredTorque()) != 0)
             return false;

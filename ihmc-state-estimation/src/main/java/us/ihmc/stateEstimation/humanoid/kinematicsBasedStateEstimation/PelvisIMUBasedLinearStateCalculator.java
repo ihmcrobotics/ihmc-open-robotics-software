@@ -5,6 +5,7 @@ import java.util.List;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.spatial.Twist;
@@ -152,6 +153,11 @@ public class PelvisIMUBasedLinearStateCalculator
       yoLinearAccelerationMeasurement.set(linearAccelerationMeasurement);
    }
 
+   public ReferenceFrame getIMUMeasurementFrame()
+   {
+      return measurementFrame;
+   }
+
    private final FrameVector3D correctionVelocityForMeasurementFrameOffset = new FrameVector3D();
 
    public void updateIMUAndRootJointLinearVelocity(FrameVector3D rootJointVelocityToPack)
@@ -173,6 +179,11 @@ public class PelvisIMUBasedLinearStateCalculator
       imuLinearVelocityIMUOnly.scale(alphaLeakIMUOnly.getDoubleValue());
       rootJointLinearVelocityIMUOnly.set(imuLinearVelocityIMUOnly);
       rootJointLinearVelocityIMUOnly.sub(correctionVelocityForMeasurementFrameOffset);
+   }
+
+   public FrameVector3DReadOnly getLinearAccelerationMeasurement()
+   {
+      return yoLinearAccelerationMeasurement;
    }
 
    public void correctIMULinearVelocity(FrameVector3D rootJointVelocity)
