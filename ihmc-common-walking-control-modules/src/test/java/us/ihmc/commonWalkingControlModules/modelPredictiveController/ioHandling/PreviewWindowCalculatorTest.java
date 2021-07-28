@@ -4,12 +4,14 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -100,9 +102,11 @@ public class PreviewWindowCalculatorTest
       for (int i = 0; i < 3; i++)
          assertEquals(1, previewWindow.get(i).getNumberOfContactPhasesInSegment());
 
-      assertEquals(0.25 * segmentDuration, previewWindow.get(0).getStartTime(), 1e-5);
-      assertEquals((0.25 + 0.375) * segmentDuration, previewWindow.get(0).getEndTime(), 1e-5);
-      assertEquals((0.25 + 0.375) * segmentDuration, previewWindow.get(1).getStartTime(), 1e-5);
+      double firstGroupStart = 0.25 * segmentDuration;
+      double firstGroupDuration = 2.0 * segmentDuration - firstGroupStart;
+      assertEquals(firstGroupStart, previewWindow.get(0).getStartTime(), 1e-5);
+      assertEquals(firstGroupStart + 0.5 * firstGroupDuration, previewWindow.get(0).getEndTime(), 1e-5);
+      assertEquals(firstGroupStart + 0.5 * firstGroupDuration, previewWindow.get(1).getStartTime(), 1e-5);
       assertEquals(2.0 * segmentDuration, previewWindow.get(1).getEndTime(), 1e-5);
       assertEquals(2.0 * segmentDuration, previewWindow.get(2).getStartTime(), 1e-5);
       assertEquals(3.0 * segmentDuration, previewWindow.get(2).getEndTime(), 1e-5);
@@ -163,8 +167,8 @@ public class PreviewWindowCalculatorTest
          assertEquals(1, previewWindow.get(i).getNumberOfContactPhasesInSegment());
 
       assertEquals(0.0, previewWindow.get(0).getStartTime(), 1e-5);
-      assertEquals(segmentDuration, 0.9 * previewWindow.get(0).getEndTime(), 1e-5);
-      assertEquals(segmentDuration, 0.9 * previewWindow.get(1).getStartTime(), 1e-5);
+      assertEquals(0.9 *segmentDuration, previewWindow.get(0).getEndTime(), 1e-5);
+      assertEquals(0.9 * segmentDuration, previewWindow.get(1).getStartTime(), 1e-5);
       assertEquals(1.8 * segmentDuration, previewWindow.get(1).getEndTime(), 1e-5);
       assertEquals(1.8 * segmentDuration, previewWindow.get(2).getStartTime(), 1e-5);
       assertEquals(3.0 * segmentDuration, previewWindow.get(2).getEndTime(), 1e-5);
@@ -234,8 +238,8 @@ public class PreviewWindowCalculatorTest
          assertEquals(1, previewWindow.get(i).getNumberOfContactPhasesInSegment());
 
       assertEquals(0.0, previewWindow.get(0).getStartTime(), 1e-5);
-      assertEquals(segmentDuration, 1.1 * previewWindow.get(0).getEndTime(), 1e-5);
-      assertEquals(segmentDuration, 1.1 * previewWindow.get(1).getStartTime(), 1e-5);
+      assertEquals(1.1 * segmentDuration, previewWindow.get(0).getEndTime(), 1e-5);
+      assertEquals(1.1 * segmentDuration, previewWindow.get(1).getStartTime(), 1e-5);
       assertEquals(2.2 * segmentDuration, previewWindow.get(1).getEndTime(), 1e-5);
       assertEquals(2.2 * segmentDuration, previewWindow.get(2).getStartTime(), 1e-5);
       assertEquals(3.1 * segmentDuration, previewWindow.get(2).getEndTime(), 1e-5);
@@ -301,8 +305,8 @@ public class PreviewWindowCalculatorTest
          assertEquals(1, previewWindow.get(i).getNumberOfContactPhasesInSegment());
 
       assertEquals(0.0, previewWindow.get(0).getStartTime(), 1e-5);
-      assertEquals(segmentDuration, 1.1 * previewWindow.get(0).getEndTime(), 1e-5);
-      assertEquals(segmentDuration, 1.1 * previewWindow.get(1).getStartTime(), 1e-5);
+      assertEquals(1.1 * segmentDuration, previewWindow.get(0).getEndTime(), 1e-5);
+      assertEquals(1.1 * segmentDuration, previewWindow.get(1).getStartTime(), 1e-5);
       assertEquals(2.2 * segmentDuration, previewWindow.get(1).getEndTime(), 1e-5);
       assertEquals(2.2 * segmentDuration, previewWindow.get(2).getStartTime(), 1e-5);
       assertEquals(2.45 * segmentDuration, previewWindow.get(2).getEndTime(), 1e-5);
@@ -368,7 +372,7 @@ public class PreviewWindowCalculatorTest
 
       previewWindowCalculator.compute(contacts, 0.0);
 
-      assertEquals(3.1 * segmentDuration, previewWindowCalculator.getPreviewWindowDuration(), 1e-5);
+      assertEquals(3.2 * segmentDuration, previewWindowCalculator.getPreviewWindowDuration(), 1e-5);
       assertEquals(4, previewWindowCalculator.getPlanningWindow().size());
 
       List<PreviewWindowSegment> previewWindow = previewWindowCalculator.getPlanningWindow();
@@ -377,8 +381,8 @@ public class PreviewWindowCalculatorTest
          assertEquals(1, previewWindow.get(i).getNumberOfContactPhasesInSegment());
 
       assertEquals(0.0, previewWindow.get(0).getStartTime(), 1e-5);
-      assertEquals(segmentDuration, 1.1 * previewWindow.get(0).getEndTime(), 1e-5);
-      assertEquals(segmentDuration, 1.1 * previewWindow.get(1).getStartTime(), 1e-5);
+      assertEquals(1.1 * segmentDuration, previewWindow.get(0).getEndTime(), 1e-5);
+      assertEquals(1.1 * segmentDuration, previewWindow.get(1).getStartTime(), 1e-5);
       assertEquals(2.2 * segmentDuration, previewWindow.get(1).getEndTime(), 1e-5);
       assertEquals(2.2 * segmentDuration, previewWindow.get(2).getStartTime(), 1e-5);
       assertEquals(2.45 * segmentDuration, previewWindow.get(2).getEndTime(), 1e-5);
@@ -488,4 +492,5 @@ public class PreviewWindowCalculatorTest
       assertEquals(expectedStart + 2.0 * expectedDuration, previewWindow.get(2).getStartTime(), 1e-5);
       assertEquals(expectedStart + 3.0 * expectedDuration, previewWindow.get(2).getEndTime(), 1e-5);
    }
+
 }
