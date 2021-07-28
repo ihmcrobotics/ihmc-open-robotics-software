@@ -147,6 +147,7 @@ public class PreviewWindowCalculator
       ContactStateBasics<?> lastPhase = lastSegment.getContactPhase(lastSegment.getNumberOfContactPhasesInSegment() - 1);
       double lastPhaseDuration = Math.min(lastPhase.getTimeInterval().getDuration(), 10.0);
       double alpha = Math.min(desiredFinalSegmentDuration / lastPhaseDuration, 1.0);
+      /*
       if (alpha < 1.0)
       {
          double lastStartTime = lastPhase.getTimeInterval().getStartTime();
@@ -154,12 +155,15 @@ public class PreviewWindowCalculator
          contactSegmentHelper.cubicInterpolateEndOfSegment(lastPhase, alpha);
          lastSegment.setEndTime(newEndTime);
       }
-      previewWindowLength += lastSegment.getDuration();
 
-      populateTheFullContactSet(fullContactSequence);
+       */
+      previewWindowLength += lastSegment.getDuration();
 
       if (!checkContactSequenceIsValid(previewWindowContacts, false))
          throw new IllegalArgumentException("The preview window is not valid.");
+
+      populateTheFullContactSet(fullContactSequence);
+
       if (!ContactStateProviderTools.checkContactSequenceIsValid(fullContactSet))
          throw new IllegalArgumentException("The full contact sequence is not valid.");
 
@@ -176,6 +180,7 @@ public class PreviewWindowCalculator
       contactPhasesInGroup.reset();
       contactPhasesInGroup.add(activeSegment);
 
+      double timeRemaining = endTime - currentTime - fullContactSequence.get(activeSegment).getTimeInterval().getDuration();
       double groupDuration = fullContactSequence.get(activeSegment).getTimeInterval().getDuration() - (currentTime - fullContactSequence.get(activeSegment).getTimeInterval().getStartTime());
       int segmentIdx = activeSegment + 1;
       for (; segmentIdx < fullContactSequence.size(); segmentIdx++)
@@ -183,9 +188,11 @@ public class PreviewWindowCalculator
          ContactPlaneProvider previousContact = fullContactSequence.get(segmentIdx - 1);
          ContactPlaneProvider currentContact = fullContactSequence.get(segmentIdx);
 
+         double currentDuration = currentContact.getTimeInterval().getDuration();
+
          if (doContactPhasesBelongToTheSameGroup(previousContact, currentContact))
          {
-            groupDuration += currentContact.getTimeInterval().getDuration();
+            groupDuration += currentDuration;
          }
          else
          {
@@ -195,14 +202,23 @@ public class PreviewWindowCalculator
             contactGroupDurations.add(groupDuration);
             numberOfSegmentsInContactGroups.add(computeNumberOfSegmentsInGroup(previousContact.getContactState(), groupDuration));
 
-            groupDuration = currentContact.getTimeInterval().getDuration();
+            groupDuration = currentDuration;
          }
          contactPhasesInGroup.add(segmentIdx);
 
-         if (currentContact.getTimeInterval().getEndTime() > endTime + timeEpsilon)
+         if (timeRemaining - currentDuration < 0.0)
          {
+            if (currentContact.getContactState().isLoadBearing())
+               groupDuration = timeRemaining;
+            else
+               groupDuration = currentDuration;
+
             segmentIdx++;
             break;
+         }
+         else if (currentContact.getContactState().isLoadBearing())
+         {
+            timeRemaining -= currentDuration;
          }
       }
 
