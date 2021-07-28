@@ -21,14 +21,6 @@ public class GDXShadowManager
    protected final Array<GDXLight> lights = new Array<>();
    private final ShaderProgram shader;
    private final ModelBatch batch;
-
-   private boolean useViewport = false;
-   private int x = 0;
-   private int y = 0;
-   private int width = 0;
-   private int height = 0;
-   private float antiAliasing = 1;
-
    private final Array<Renderable> renderableArray = new Array<>();
    private final Pool<Renderable> renderablePool = new Pool<Renderable>()
    {
@@ -38,10 +30,16 @@ public class GDXShadowManager
          return new Renderable();
       }
    };
-
+   private boolean useViewport = false;
+   private int x = 0;
+   private int y = 0;
+   private int width = 0;
+   private int height = 0;
+   private float antiAliasing = 1;
    private FrameBuffer framebuffer;
 
-   public GDXShadowManager() {
+   public GDXShadowManager()
+   {
       this(1.0f);
    }
 
@@ -105,7 +103,8 @@ public class GDXShadowManager
     *
     * @param renderableProviders The models to be rendered
     */
-   public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders) {
+   public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders)
+   {
       renderShadows(camera, renderableProviders, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
    }
 
@@ -142,11 +141,14 @@ public class GDXShadowManager
       renderablePool.freeAll(renderableArray);
       renderableArray.clear();
 
-      for (RenderableProvider renderableProvider : renderableProviders) {
+      for (RenderableProvider renderableProvider : renderableProviders)
+      {
          renderableProvider.getRenderables(renderableArray, renderablePool);
       }
 
-      for (Renderable renderable : renderableArray) {
+      //We must individually render every renderable here or everything breaks and things are bad. It's annoying, but there is no performance hit, so it's okay.
+      for (Renderable renderable : renderableArray)
+      {
          batch.begin(camera);
          batch.render(renderable);
          batch.end();
@@ -155,7 +157,8 @@ public class GDXShadowManager
       framebuffer.end();
    }
 
-   public void apply(ShaderProgram program) {
+   public void apply(ShaderProgram program)
+   {
       program.begin();
       Texture shadows = framebuffer.getColorBufferTexture();
       final int textureNum = shadows.getTextureObjectHandle();
@@ -167,7 +170,8 @@ public class GDXShadowManager
       program.end();
    }
 
-   public void setViewportBounds(int x, int y, int width, int height) {
+   public void setViewportBounds(int x, int y, int width, int height)
+   {
       this.useViewport = true;
       this.x = x;
       this.y = y;

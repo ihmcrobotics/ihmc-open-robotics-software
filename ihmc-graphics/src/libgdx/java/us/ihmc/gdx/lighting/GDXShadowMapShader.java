@@ -20,8 +20,8 @@ import us.ihmc.log.LogTools;
  */
 public class GDXShadowMapShader extends BaseShader
 {
-   private Renderable renderable;
    private final GDXShadowManager manager;
+   private Renderable renderable;
 
    protected GDXShadowMapShader(final Renderable renderable, final ShaderProgram shader, final GDXShadowManager manager)
    {
@@ -100,7 +100,8 @@ public class GDXShadowMapShader extends BaseShader
          {
             context.setDepthTest(GL20.GL_LEQUAL);
             context.setBlending(false, GL20.GL_ONE, GL20.GL_ONE); //Deactivate blending on first pass
-            super.render(renderable, combinedAttributes); //TODO something goes wrong here w/ glDrawElements, only with multiple lights and with the EnvironmentBuilderUI - model issue?
+            super.render(renderable,
+                         combinedAttributes); //TODO something goes wrong here w/ glDrawElements, only with multiple lights and with the EnvironmentBuilderUI - model issue?
             firstCall = false;
          }
          else
