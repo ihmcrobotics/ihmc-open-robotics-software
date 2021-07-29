@@ -43,7 +43,7 @@ public abstract class AvatarMeshProjectionVisualizer
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       List<Pair<RigidBodyBasics, FramePoint3D>> queryPoints = createListOfPointsToProject(fullRobotModel);
 
-      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
+      RobotCollisionModel collisionModel = getCollisionModel();
       List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getRootBody());
       MeshSurfaceProjector meshSurfaceProjector = new MeshSurfaceProjector(robotCollidables);
 
@@ -121,6 +121,7 @@ public abstract class AvatarMeshProjectionVisualizer
 
    protected abstract List<Pair<RigidBodyBasics, FramePoint3D>> createListOfPointsToProject(FullHumanoidRobotModel fullRobotModel);
 
+   protected abstract RobotCollisionModel getCollisionModel();
 
    public static void addKinematicsCollisionGraphics(RigidBodyBasics rootBody, Robot robot, RobotCollisionModel collisionModel, AppearanceDefinition appearance)
    {

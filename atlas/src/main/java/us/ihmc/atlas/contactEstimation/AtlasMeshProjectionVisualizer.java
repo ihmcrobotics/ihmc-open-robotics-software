@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,14 +35,27 @@ public class AtlasMeshProjectionVisualizer extends AvatarMeshProjectionVisualize
       queryPoints.add(Pair.of(leftKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.08, 0.28, -0.63)));
       queryPoints.add(Pair.of(leftKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.15, 0.1, -0.66)));
 
-//      RigidBodyBasics rightKneePitchLink = fullRobotModel.getOneDoFJointByName("r_leg_kny").getSuccessor();
-//      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.25, -0.2, -0.7)));
-//      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.1, -0.4, -0.75)));
-//      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.1, -0.4, -0.8)));
-//      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.25, -0.3, -0.85)));
-//      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.25, -0.1, -1.1)));
+      RigidBodyBasics rightKneePitchLink = fullRobotModel.getOneDoFJointByName("r_leg_kny").getSuccessor();
+      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, -0.1, -0.7)));
+      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, 0.0, -0.55)));
+      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, -0.15, -0.58)));
+      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.08, -0.25, -0.6)));
+      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.08, -0.28, -0.63)));
+      queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.15, -0.1, -0.66)));
+
+      RigidBodyBasics pelvisLink = fullRobotModel.getOneDoFJointByName("l_leg_hpz").getPredecessor();
+      queryPoints.add(Pair.of(pelvisLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, 0.0, 0.0)));
+      queryPoints.add(Pair.of(pelvisLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, 0.1, 0.0)));
+      queryPoints.add(Pair.of(pelvisLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.1, 0.2, 0.0)));
+      queryPoints.add(Pair.of(pelvisLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.3, 0.0)));
 
       return queryPoints;
+   }
+
+   @Override
+   protected RobotCollisionModel getCollisionModel()
+   {
+      return new AtlasMultiContactCollisionModel(getRobotModel().getJointMap());
    }
 
    public static void main(String[] args)

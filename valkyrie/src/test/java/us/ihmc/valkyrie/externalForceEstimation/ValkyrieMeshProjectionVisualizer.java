@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
@@ -20,6 +21,12 @@ public class ValkyrieMeshProjectionVisualizer extends AvatarMeshProjectionVisual
    protected DRCRobotModel getRobotModel()
    {
       return new ValkyrieRobotModel(RobotTarget.SCS);
+   }
+
+   @Override
+   protected RobotCollisionModel getCollisionModel()
+   {
+      return getRobotModel().getHumanoidRobotKinematicsCollisionModel();
    }
 
    @Override

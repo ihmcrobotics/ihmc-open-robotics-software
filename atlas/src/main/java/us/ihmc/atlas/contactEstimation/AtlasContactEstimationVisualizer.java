@@ -62,12 +62,14 @@ public class AtlasContactEstimationVisualizer implements SCSVisualizerStateListe
       //      RigidBodyBasics endEffector = fullRobotModel.getRootBody();
 
       // ----- 1DOF Joints ----- //
-      jointName = "l_leg_kny";
+//      jointName = "l_leg_kny";
+//      RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(jointName).getSuccessor();
 
-      RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(jointName).getSuccessor();
+      jointName = "l_leg_hpz";
+      RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(jointName).getPredecessor();
 
       endEffectorHashCode = endEffector.hashCode();
-      externalForcePointOffset.set(0.080, -0.040, -0.248 );
+      externalForcePointOffset.set(0.0, 0.0, 0.0);
 
       // ----- Client -----//
       YoVariableClient client = new YoVariableClient(scsVisualizer);
@@ -127,16 +129,17 @@ public class AtlasContactEstimationVisualizer implements SCSVisualizerStateListe
       wakeupButton.addActionListener(e ->
                                      {
                                         ExternalForceEstimationConfigurationMessage configurationMessage = new ExternalForceEstimationConfigurationMessage();
-                                        configurationMessage.setEstimatorGain(0.5);
+                                        configurationMessage.setEstimatorGain(0.7);
                                         configurationMessage.getRigidBodyHashCodes().add(endEffectorHashCode);
                                         configurationMessage.getContactPointPositions().add().set(externalForcePointOffset);
+                                        configurationMessage.setCalculateRootJointWrench(false);
                                         configurationMessagePublisher.publish(configurationMessage);
 
                                         ThreadTools.sleep(1);
 
                                         ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
                                         toolboxStateMessage.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);
-                                        toolboxStateMessage.setRequestLogging(true);
+                                        toolboxStateMessage.setRequestLogging(false);
                                         toolboxStatePublisher.publish(toolboxStateMessage);
                                      });
       scs.addButton(wakeupButton);
