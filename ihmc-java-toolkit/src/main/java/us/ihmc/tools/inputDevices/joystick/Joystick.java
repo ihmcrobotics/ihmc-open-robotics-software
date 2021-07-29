@@ -1,6 +1,8 @@
 package us.ihmc.tools.inputDevices.joystick;
 
 import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.concurrent.ThreadFactory;
@@ -9,23 +11,60 @@ import javax.swing.JFrame;
 
 import org.apache.commons.lang3.SystemUtils;
 
+import com.google.common.base.Supplier;
+
 import net.java.games.input.Component;
 import net.java.games.input.Component.Identifier;
 import net.java.games.input.Controller;
 import net.java.games.input.ControllerEnvironment;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.inputDevices.joystick.exceptions.JoystickNotFoundException;
 
 /**
- * <p>WARNING: On Windows, the process running this thread needs to have a Window in focus for the OS 
- *    to reveal events. Call setStandalone() to open a focus window if you're on Windows and don't have
- *    any other GUIs running.</p>
+ * <p>
+ * WARNING: On Windows, the process running this thread needs to have a Window in focus for the OS
+ * to reveal events. Call setStandalone() to open a focus window if you're on Windows and don't have
+ * any other GUIs running.
+ * </p>
  */
 public class Joystick
 {
-   private static final ThreadFactory namedThreadFactory = ThreadTools.getNamedThreadFactory(Joystick.class.getSimpleName());
-   
+   private static final ThreadFactory namedThreadFactory = ThreadTools.createNamedThreadFactory(Joystick.class.getSimpleName());
+
+   private static ControllerEnvironment controllerEnvironment = null;
+   private static final Supplier<ControllerEnvironment> controllerEnvironmentFactory = createControllerEnvironmentFactory();
+
+   private static Supplier<ControllerEnvironment> createControllerEnvironmentFactory()
+   {
+      Constructor<?> constructor;
+      try
+      {
+         constructor = Class.forName("net.java.games.input.DefaultControllerEnvironment").getDeclaredConstructors()[0];
+      }
+      catch (SecurityException | ClassNotFoundException e1)
+      {
+         e1.printStackTrace();
+         throw new RuntimeException(e1);
+      }
+
+      constructor.setAccessible(true);
+
+      return () ->
+      {
+         try
+         {
+            return (ControllerEnvironment) constructor.newInstance();
+         }
+         catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+         {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+         }
+      };
+
+   }
+
    private final ArrayList<JoystickStatusListener> statusListeners = new ArrayList<JoystickStatusListener>();
    private final HashSet<Identifier> identifiers = new HashSet<Identifier>();
    protected final Controller joystickController;
@@ -47,24 +86,48 @@ public class Joystick
       {
          throw joystickNotFoundException;
       }
-      
-      if (ControllerEnvironment.getDefaultEnvironment().getControllers().length > 1)
+
+      if (getControllers().length > 1)
       {
-         PrintTools.warn("More than one joystick found!");
+         LogTools.warn("More than one joystick found!");
          printListOfConnectedJoysticks();
       }
-   
-      PrintTools.info("Using joystick: " + joystickController.getName());
-      
+
+      LogTools.info("Using joystick: " + joystickController.getName());
+
       model = JoystickModel.getModelFromName(joystickController.getName());
-      
+
       initializeIdentifiers();
-      
+
       joystickUpdater = new JoystickUpdater(joystickController, model, statusListeners);
 
       startThread();
    }
-   
+
+   public static void rescanControllers()
+   {
+      destroyControllerEnvironment();
+   }
+
+   private static void destroyControllerEnvironment()
+   {
+      Thread.getAllStackTraces().keySet().stream().filter(thread -> thread.getClass().getPackage().getName().equals("net.java.games.input"))
+            .forEach(jinputThread ->
+            {
+               jinputThread.interrupt();
+            });
+
+      if (controllerEnvironment != null)
+         controllerEnvironment = null;
+   }
+
+   private static Controller[] getControllers()
+   {
+      if (controllerEnvironment == null)
+         controllerEnvironment = controllerEnvironmentFactory.get();
+      return controllerEnvironment.getControllers();
+   }
+
    /**
     * Connects to the nth joystick of model type found on the system.
     * 
@@ -81,33 +144,33 @@ public class Joystick
       {
          throw joystickNotFoundException;
       }
-      
-      PrintTools.info("Using joystick: " + joystickController.getName());
-      
+
+      LogTools.info("Using joystick: " + joystickController.getName());
+
       model = JoystickModel.getModelFromName(joystickController.getName());
-      
+
       initializeIdentifiers();
-      
+
       joystickUpdater = new JoystickUpdater(joystickController, model, statusListeners);
 
       startThread();
    }
-   
+
    /**
     * Connects to the provided controller. For use with VirtualJoystickController.
     * 
     * @param controller to use
     */
    protected Joystick(Controller joystickController) throws IOException
-   {      
+   {
       this.joystickController = joystickController;
-      
-      PrintTools.info("Using joystick: " + joystickController.getName());
-      
+
+      LogTools.info("Using joystick: " + joystickController.getName());
+
       model = JoystickModel.getModelFromName(joystickController.getName());
-      
+
       initializeIdentifiers();
-      
+
       joystickUpdater = new JoystickUpdater(joystickController, model, statusListeners);
 
       startThread();
@@ -126,10 +189,10 @@ public class Joystick
       Thread updaterThread = namedThreadFactory.newThread(joystickUpdater);
       updaterThread.start();
    }
-   
+
    public void shutdown()
    {
-      PrintTools.warn("Joystick (" + joystickController.getName() + ") poll thread shutting down");
+      LogTools.warn("Joystick (" + joystickController.getName() + ") poll thread shutting down");
       joystickUpdater.stopThread();
    }
 
@@ -137,12 +200,12 @@ public class Joystick
    {
       joystickUpdater.addListener(joystickEventListener);
    }
-   
+
    public void addJoystickStatusListener(JoystickStatusListener joystickStatusListener)
    {
       statusListeners.add(joystickStatusListener);
    }
-   
+
    public void clearEventListeners()
    {
       joystickUpdater.clearListeners();
@@ -160,12 +223,12 @@ public class Joystick
    {
       return identifiers.contains(identifier);
    }
-   
+
    public void setPollInterval(int pollIntervalMillis)
    {
       joystickUpdater.setPollIntervalMillis(pollIntervalMillis);
    }
-   
+
    /**
     * For Windows users, jinput requires a window to be in focus.
     */
@@ -179,7 +242,7 @@ public class Joystick
          frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       }
    }
-   
+
    public void setCustomizationFilter(JoystickCustomizationFilter componentFilter)
    {
       joystickUpdater.setCustomizationFilter(componentFilter);
@@ -192,8 +255,8 @@ public class Joystick
 
    private static Controller getFirstJoystickFoundOnSystem() throws JoystickNotFoundException
    {
-      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
-   
+      Controller[] controllers = getControllers();
+
       for (Controller controller : controllers)
       {
          if (isValidControllerType(controller))
@@ -201,27 +264,27 @@ public class Joystick
             return controller;
          }
       }
-      
+
       throw new JoystickNotFoundException("No joysticks found on system!");
    }
-   
+
    public void printListOfConnectedJoysticks()
    {
-      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
-      
+      Controller[] controllers = getControllers();
+
       for (Controller controller : controllers)
       {
          if (isValidControllerType(controller))
          {
-            PrintTools.info(this, "Found: " + controller.getName());
+            LogTools.info("Found: " + controller.getName());
          }
       }
    }
-   
+
    public static boolean isJoystickComboFoundOnSystem(JoystickModel model1, JoystickModel model2)
    {
-      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
-      
+      Controller[] controllers = getControllers();
+
       int occurancesOfModel1 = 0;
       int occurancesOfModel2 = 0;
       for (Controller controller : controllers)
@@ -238,7 +301,7 @@ public class Joystick
             }
          }
       }
-      
+
       if (model1 == model2)
       {
          return occurancesOfModel1 >= 2;
@@ -248,11 +311,11 @@ public class Joystick
          return occurancesOfModel1 >= 1 && occurancesOfModel2 >= 1;
       }
    }
-   
+
    private static Controller getJoystickOfModelOnSystem(JoystickModel model, int nthToPick) throws JoystickNotFoundException
    {
-      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
-   
+      Controller[] controllers = getControllers();
+
       int i = 0;
       for (Controller controller : controllers)
       {
@@ -268,7 +331,7 @@ public class Joystick
             }
          }
       }
-      
+
       throw new JoystickNotFoundException("Can't find index " + nthToPick + " of model: " + model);
    }
 
@@ -284,12 +347,12 @@ public class Joystick
          return false;
       }
    }
-   
+
    private static boolean isValidControllerType(Controller controller)
    {
       return controller.getType() == Controller.Type.STICK || controller.getType() == Controller.Type.GAMEPAD;
    }
-   
+
    public static void main(String[] args)
    {
       try

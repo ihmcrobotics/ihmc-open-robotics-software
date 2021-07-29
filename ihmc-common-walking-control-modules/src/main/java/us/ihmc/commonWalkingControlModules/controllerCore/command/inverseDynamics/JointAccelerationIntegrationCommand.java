@@ -28,7 +28,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
  * </p>
  *
  * @author Sylvain Bertrand
- *
  */
 public class JointAccelerationIntegrationCommand
       implements InverseDynamicsCommand<JointAccelerationIntegrationCommand>, VirtualModelControlCommand<JointAccelerationIntegrationCommand>
@@ -66,12 +65,13 @@ public class JointAccelerationIntegrationCommand
     * the desired position of.
     * <p>
     * Optional: Specific integration parameters can be provided via
-    * {@link #setBreakFrequencies(int, double, double)} and {@link #setJointMaxima(int, double, double)}.
-    * If not provided, the calculator will use a default set.
+    * {@link #setBreakFrequencies(int, double, double)} and
+    * {@link #setJointMaxima(int, double, double)}. If not provided, the calculator will use a default
+    * set.
     * </p>
     *
-    * @param joint the joint for which the desired acceleration is to be integrated to desired
-    *           velocity and desired acceleration.
+    * @param joint the joint for which the desired acceleration is to be integrated to desired velocity
+    *              and desired acceleration.
     */
    public void addJointToComputeDesiredPositionFor(OneDoFJointBasics joint)
    {
@@ -83,7 +83,7 @@ public class JointAccelerationIntegrationCommand
     * Sets the acceleration integration parameters for the {@code jointIndex}<sup>th</sup> of this
     * command to {@code jointParameters}.
     *
-    * @param jointIndex the index of the joint to provide parameters for.
+    * @param jointIndex      the index of the joint to provide parameters for.
     * @param jointParameters the set of parameters to use for the joint. Not modified.
     */
    public void setJointParameters(int jointIndex, JointAccelerationIntegrationParametersReadOnly jointParameters)
@@ -92,15 +92,15 @@ public class JointAccelerationIntegrationCommand
    }
 
    /**
-    * Provides to the {@link JointAccelerationIntegrationCalculator} specific parameter values for
-    * the {@code jointIndex}<sup>th</sup> of this command.
+    * Provides to the {@link JointAccelerationIntegrationCalculator} specific parameter values for the
+    * {@code jointIndex}<sup>th</sup> of this command.
     * <p>
     * For the usage of these parameters see<br>
     * {@link JointAccelerationIntegrationParametersReadOnly#getPositionBreakFrequency()}<br>
     * {@link JointAccelerationIntegrationParametersReadOnly#getVelocityBreakFrequency()}
     * </p>
     *
-    * @param jointIndex the index of the joint to provide parameters for.
+    * @param jointIndex             the index of the joint to provide parameters for.
     * @param positionBreakFrequency the break frequency used to compute the desired position.
     * @param velocityBreakFrequency the break frequency used to compute the desired velocity.
     */
@@ -110,36 +110,21 @@ public class JointAccelerationIntegrationCommand
    }
 
    /**
-    * Provides to the {@link JointAccelerationIntegrationCalculator} specific parameter values for
-    * the {@code jointIndex}<sup>th</sup> of this command.
-    * <p>
-    * These two parameters are safety parameters that are relevant to the tuning process for a
-    * joint. The default values used by the calculator should be adequate in most situation.
-    * </p>
-    * <p>
-    * The maximum velocity parameter is used to saturate the value of the desired velocity computed.
-    * If not specified otherwise, {@code maxVelocity} =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_VELOCITY}. It can be increased once
-    * the acceleration integration is proven to be working properly on a specific robot to allow the
-    * joint to reach higher velocities.
-    * </p>
-    * <p>
-    * The maximum position error parameter is used to limit the gap between the desired position
-    * computed and the actual joint position. This is a critical parameter and should be only
-    * changed once heavy testing has been performed on the robot knowing that the effects of this
-    * parameter may show up only under specific circumstances. If not specified otherwise
-    * {@code maxPositionError} =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_POSITION_ERROR}.
-    * </p>
+    * Provides to the {@link JointAccelerationIntegrationCalculator} specific parameter values for the
+    * {@code jointIndex}<sup>th</sup> of this command.
     *
-    * @param jointIndex the index of the joint to provide parameters for.
+    * @param jointIndex       the index of the joint to provide parameters for.
     * @param maxPositionError limits the gap between the desired joint position and the actual joint
-    *           position.
-    * @param maxVelocity limits the maximum value of the desired joint velocity.
+    *                         position.
+    * @param maxVelocityError limits the gap between the desired joint velocity and the reference joint
+    *                         velocity.
+    * @see JointAccelerationIntegrationParametersReadOnly#getMaxPositionError()
+    * @see JointAccelerationIntegrationParametersReadOnly#getMaxVelocityError()
+    * @see JointAccelerationIntegrationParametersReadOnly#getVelocityReferenceAlpha()
     */
-   public void setJointMaxima(int jointIndex, double maxPositionError, double maxVelocity)
+   public void setJointMaxima(int jointIndex, double maxPositionError, double maxVelocityError)
    {
-      jointParameters.get(jointIndex).setMaxima(maxPositionError, maxVelocity);
+      jointParameters.get(jointIndex).setMaxima(maxPositionError, maxVelocityError);
    }
 
    /**

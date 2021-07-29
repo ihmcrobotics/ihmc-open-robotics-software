@@ -406,7 +406,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          parameters.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9998, 0.004));
          parameters.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.84, 0.004));
          parameters.setMaxPositionError(0.2);
-         parameters.setMaxVelocity(2.0);
+         parameters.setMaxVelocityError(2.0);
          List<String> jointNames = new ArrayList<>();
          for (RobotSide robotSide : RobotSide.values)
             jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
@@ -419,7 +419,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          parameters.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9995, 0.004));
          parameters.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.83, 0.004));
          parameters.setMaxPositionError(0.2);
-         parameters.setMaxVelocity(2.0);
+         parameters.setMaxVelocityError(2.0);
          List<String> jointNames = new ArrayList<>();
          for (RobotSide robotSide : RobotSide.values)
             jointNames.add(jointMap.getArmJointName(robotSide, armJointName));
@@ -432,7 +432,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
          parameters.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9996, 0.004));
          parameters.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.004));
          parameters.setMaxPositionError(0.2);
-         parameters.setMaxVelocity(2.0);
+         parameters.setMaxVelocityError(2.0);
          List<String> jointNames = Collections.singletonList(jointMap.getNeckJointName(neckJointName));
          ret.add(new GroupParameter<>(neckJointName.getCamelCaseName(), parameters, jointNames));
       }

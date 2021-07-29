@@ -2,17 +2,12 @@ package us.ihmc.gdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.JSONFileTools;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.function.Consumer;
+import java.util.*;
 
 public class ImGuiPanelManager
 {
-   private final ArrayList<ImGuiPanel> panels = new ArrayList<>();
+   private final TreeSet<ImGuiPanel> panels = new TreeSet<>(Comparator.comparing(ImGuiPanel::getPanelName));
 
    public void addPanel(ImGuiPanel panel)
    {

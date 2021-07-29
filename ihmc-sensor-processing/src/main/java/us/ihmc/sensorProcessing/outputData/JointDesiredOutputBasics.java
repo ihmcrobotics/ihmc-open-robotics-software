@@ -7,6 +7,7 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
    default void set(JointDesiredOutputReadOnly other)
    {
       setControlMode(other.getControlMode());
+      setLoadMode(other.getLoadMode());
       setDesiredTorque(other.getDesiredTorque());
       setDesiredPosition(other.getDesiredPosition());
       setDesiredVelocity(other.getDesiredVelocity());
@@ -32,6 +33,8 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
    {
       if (!hasControlMode())
          setControlMode(other.getControlMode());
+      if (!hasLoadMode())
+         setLoadMode(other.getLoadMode());
       if (!hasDesiredTorque())
          setDesiredTorque(other.getDesiredTorque());
       if (!hasDesiredPosition())
@@ -65,6 +68,8 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
    }
 
    void setControlMode(JointDesiredControlMode controlMode);
+
+   void setLoadMode(JointDesiredLoadMode loadMode);
 
    void setDesiredTorque(double tau);
 
