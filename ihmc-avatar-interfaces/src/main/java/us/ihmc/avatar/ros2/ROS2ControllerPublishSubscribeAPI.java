@@ -1,12 +1,13 @@
 package us.ihmc.avatar.ros2;
 
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public interface ROS2ControllerPublishSubscribeAPI
+public interface ROS2ControllerPublishSubscribeAPI extends ROS2PublishSubscribeAPI
 {
    public void publishToController(Object message);
 
@@ -17,4 +18,6 @@ public interface ROS2ControllerPublishSubscribeAPI
    public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback);
 
    public Notification subscribeToWalkingCompletedViaNotification();
+
+   public String getRobotName();
 }

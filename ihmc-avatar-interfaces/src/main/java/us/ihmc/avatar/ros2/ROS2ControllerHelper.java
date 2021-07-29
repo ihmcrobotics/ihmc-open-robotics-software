@@ -5,14 +5,13 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class ROS2ControllerHelper extends ROS2Helper implements ROS2PublishSubscribeAPI, ROS2ControllerPublishSubscribeAPI
+public class ROS2ControllerHelper extends ROS2Helper implements ROS2ControllerPublishSubscribeAPI
 {
    protected final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
    private final DRCRobotModel robotModel;
@@ -59,5 +58,11 @@ public class ROS2ControllerHelper extends ROS2Helper implements ROS2PublishSubsc
          }
       });
       return notification;
+   }
+
+   @Override
+   public String getRobotName()
+   {
+      return robotModel.getSimpleRobotName();
    }
 }
