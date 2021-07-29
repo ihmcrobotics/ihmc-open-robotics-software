@@ -41,4 +41,14 @@ public class FullRobotModelUtils
          throw new RuntimeException(String.format("Joint names do not match. expected: %s actual: %s", expectedJointNameHash, actualJointNameHash));
       }
    }
+
+   public static void copy(FullHumanoidRobotModel from, FullHumanoidRobotModel to)
+   {
+      to.getRootJoint().setJointConfiguration(from.getRootJoint());
+      for (int i = 0; i < to.getOneDoFJoints().length; i++)
+      {
+         to.getOneDoFJoints()[i].setJointConfiguration(from.getOneDoFJoints()[i]);
+      }
+      to.updateFrames();
+   }
 }
