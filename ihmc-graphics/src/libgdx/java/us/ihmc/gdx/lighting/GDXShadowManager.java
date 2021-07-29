@@ -17,9 +17,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.log.LogTools;
 
+import java.util.HashSet;
+
 public class GDXShadowManager
 {
-   protected final Array<GDXLight> lights = new Array<>();
+   protected final HashSet<GDXLight> lights = new HashSet<>();
    private final ShaderProgram shader;
    private final ModelBatch batch;
    private final Array<Renderable> renderableArray = new Array<>();
@@ -98,6 +100,10 @@ public class GDXShadowManager
    public void addLight(GDXLight light)
    {
       lights.add(light);
+   }
+
+   public void removeLight(GDXLight light) {
+      lights.remove(light);
    }
 
    /**

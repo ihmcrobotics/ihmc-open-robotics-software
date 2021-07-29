@@ -10,14 +10,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.lighting.GDXPointLight;
 import us.ihmc.gdx.lighting.GDXShadowManager;
-import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GDXPointLightObject extends GDXEnvironmentObject
+public class GDXPointLightObject extends GDXLightObject
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
 
@@ -56,6 +55,11 @@ public class GDXPointLightObject extends GDXEnvironmentObject
       Tuple3DReadOnly tuple = this.getObjectTransform().getTranslation();
       light.setPosition(new Vector3(tuple.getX32(), tuple.getY32(), tuple.getZ32()));
       light.update();
+   }
+
+   @Override
+   public void delete() {
+      manager.removeLight(light);
    }
 
    @Override
