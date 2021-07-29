@@ -14,6 +14,7 @@ uniform sampler2D u_shadows;
 uniform float u_screenWidth;
 uniform float u_screenHeight;
 uniform float u_antiAliasing;
+uniform float u_ambientLight;
 
 varying vec2 v_texCoords0;
 varying float v_intensity;
@@ -32,7 +33,7 @@ void main()
     vec4 color = texture2D(u_shadows, c);
 
     // Apply shadow
-    finalColor.rgb *= (0.4 + 0.6 * color.a);
+    finalColor.rgb *= (u_ambientLight + 0.6 * color.a);
 
     gl_FragColor = finalColor;
 }
