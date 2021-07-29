@@ -9,18 +9,18 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
-public class ValkyrieExternalForceEstimationModule extends ExternalForceEstimationToolboxModule
+public class ValkyrieContactEstimationModule extends ExternalForceEstimationToolboxModule
 {
    public static final ValkyrieRobotVersion version = ValkyrieRosControlController.VERSION; // ValkyrieRobotVersion.ARM_MASS_SIM; //
 
-   public ValkyrieExternalForceEstimationModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node ros2Node)
+   public ValkyrieContactEstimationModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node ros2Node)
    {
-      super(robotModel, startYoVariableServer, ros2Node);
+      super(robotModel, robotModel.getHumanoidRobotKinematicsCollisionModel(), startYoVariableServer, ros2Node);
    }
 
-   public ValkyrieExternalForceEstimationModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
+   public ValkyrieContactEstimationModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
-      super(robotModel, startYoVariableServer, pubSubImplementation);
+      super(robotModel, robotModel.getHumanoidRobotKinematicsCollisionModel(), startYoVariableServer, pubSubImplementation);
    }
    
    public static void main(String[] args)
@@ -29,6 +29,6 @@ public class ValkyrieExternalForceEstimationModule extends ExternalForceEstimati
 
       boolean startYoVariableServer = false;
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
-      new ExternalForceEstimationToolboxModule(robotModel, startYoVariableServer, pubSubImplementation);
+      new ExternalForceEstimationToolboxModule(robotModel, robotModel.getHumanoidRobotKinematicsCollisionModel(), startYoVariableServer, pubSubImplementation);
    }
 }

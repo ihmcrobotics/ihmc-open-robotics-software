@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -24,18 +25,18 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
 
    private final ExternalForceEstimationToolboxController forceEstimationToolboxController;
 
-   public ExternalForceEstimationToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node ros2Node)
+   public ExternalForceEstimationToolboxModule(DRCRobotModel robotModel, RobotCollisionModel collisionModel, boolean startYoVariableServer, RealtimeROS2Node ros2Node)
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_MILLIS, ros2Node);
-      this.forceEstimationToolboxController = new ExternalForceEstimationToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, UPDATE_PERIOD_MILLIS, registry);
+      this.forceEstimationToolboxController = new ExternalForceEstimationToolboxController(robotModel, fullRobotModel, collisionModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, UPDATE_PERIOD_MILLIS, registry);
       timeWithoutInputsBeforeGoingToSleep.set(defaultTimeWithoutInputsBeforeSleep);
       startYoVariableServer();
    }
 
-   public ExternalForceEstimationToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
+   public ExternalForceEstimationToolboxModule(DRCRobotModel robotModel, RobotCollisionModel collisionModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_MILLIS, pubSubImplementation);
-      this.forceEstimationToolboxController = new ExternalForceEstimationToolboxController(robotModel, fullRobotModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, UPDATE_PERIOD_MILLIS, registry);
+      this.forceEstimationToolboxController = new ExternalForceEstimationToolboxController(robotModel, fullRobotModel, collisionModel, commandInputManager, statusOutputManager, yoGraphicsListRegistry, UPDATE_PERIOD_MILLIS, registry);
       timeWithoutInputsBeforeGoingToSleep.set(defaultTimeWithoutInputsBeforeSleep);
       startYoVariableServer();
    }

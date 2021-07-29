@@ -185,6 +185,7 @@ public class ValkyrieExternalForceEstimationTest
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(ExternalForceEstimationToolboxModule.getSupportedStatuses());
       toolboxController = new ExternalForceEstimationToolboxController(robotModel,
                                                                        robotModel.createFullRobotModel(),
+                                                                       robotModel.getHumanoidRobotKinematicsCollisionModel(),
                                                                        commandInputManager,
                                                                        statusOutputManager,
                                                                        null,

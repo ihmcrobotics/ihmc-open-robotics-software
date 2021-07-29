@@ -53,7 +53,7 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       scsVisualizer.setShowOverheadView(true);
 
       // ----- Toolbox Output Display -----//
-      ValkyrieRobotVersion version = ValkyrieExternalForceEstimationModule.version;
+      ValkyrieRobotVersion version = ValkyrieContactEstimationModule.version;
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, version);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 

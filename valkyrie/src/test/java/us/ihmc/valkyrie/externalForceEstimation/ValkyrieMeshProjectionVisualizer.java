@@ -1,48 +1,30 @@
 package us.ihmc.valkyrie.externalForceEstimation;
 
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.avatar.contactEstimation.AvatarMeshProjectionVisualizer;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.contact.particleFilter.ContactPointParticle;
-import us.ihmc.commonWalkingControlModules.contact.particleFilter.MeshSurfaceProjector;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.valkyrie.ValkyrieSDFLoadingDemo.addKinematicsCollisionGraphics;
-
-public class ValkyrieContactPointProjectorTest
+public class ValkyrieMeshProjectionVisualizer extends AvatarMeshProjectionVisualizer
 {
-   public ValkyrieContactPointProjectorTest()
+   @Override
+   protected DRCRobotModel getRobotModel()
    {
-      boolean projectToSpecificLink = true;
-      boolean printProjectedLocation = true;
+      return new ValkyrieRobotModel(RobotTarget.SCS);
+   }
 
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
-      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
-
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getRootBody());
-      MeshSurfaceProjector meshSurfaceProjector = new MeshSurfaceProjector(robotCollidables);
-
+   @Override
+   protected List<Pair<RigidBodyBasics, FramePoint3D>> createListOfPointsToProject(FullHumanoidRobotModel fullRobotModel)
+   {
       List<Pair<RigidBodyBasics, FramePoint3D>> queryPoints = new ArrayList<>();
 
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -104,80 +86,11 @@ public class ValkyrieContactPointProjectorTest
       queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.25, -0.3, -0.85)));
       queryPoints.add(Pair.of(rightKneePitchLink, new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.25, -0.1, -1.1)));
 
-      Graphics3DObject graphics3DObject = new Graphics3DObject();
-
-      for (Pair<RigidBodyBasics, FramePoint3D> query : queryPoints)
-      {
-         RigidBodyBasics rigidBody = query.getLeft();
-         FramePoint3D queryPoint = query.getRight();
-
-         JointBasics[] orderedJoints = HighLevelHumanoidControllerToolbox.computeJointsToOptimizeFor(fullRobotModel);
-         ContactPointParticle contactPointParticle = new ContactPointParticle("", orderedJoints);
-         contactPointParticle.setRigidBody(rigidBody);
-
-         if (projectToSpecificLink)
-         {
-            meshSurfaceProjector.projectToSpecificLink(queryPoint, contactPointParticle.getContactPointPosition(), contactPointParticle.getSurfaceNormal(), rigidBody);
-
-            if (printProjectedLocation)
-            {
-               FramePoint3D position = contactPointParticle.getContactPointPosition();
-               position.changeFrame(rigidBody.getParentJoint().getFrameAfterJoint());
-               System.out.println(rigidBody.getParentJoint().getName() + "\t" + EuclidCoreIOTools.getTuple3DString(position));
-            }
-         }
-         else
-         {
-            RigidBodyBasics closestLink = meshSurfaceProjector.projectToClosestLink(queryPoint,
-                                                                                     contactPointParticle.getContactPointPosition(),
-                                                                                     contactPointParticle.getSurfaceNormal());
-            contactPointParticle.setRigidBody(closestLink);
-
-            if (printProjectedLocation)
-            {
-               FramePoint3D position = contactPointParticle.getContactPointPosition();
-               position.changeFrame(closestLink.getParentJoint().getFrameAfterJoint());
-               System.out.println(closestLink.getParentJoint().getName() + "\t" + EuclidCoreIOTools.getTuple3DString(position));
-            }
-         }
-
-         contactPointParticle.update();
-
-         graphics3DObject.identity();
-
-         queryPoint.changeFrame(ReferenceFrame.getWorldFrame());
-         graphics3DObject.translate(queryPoint);
-         graphics3DObject.addSphere(0.012);
-
-         graphics3DObject.identity();
-         graphics3DObject.translate(contactPointParticle.getContactPointPosition());
-         graphics3DObject.addSphere(0.012);
-
-         graphics3DObject.identity();
-
-         RigidBodyTransform transformToWorldFrame = contactPointParticle.getContactPointFrame().getTransformToWorldFrame();
-
-         graphics3DObject.transform(transformToWorldFrame);
-         graphics3DObject.addCoordinateSystem(0.1);
-      }
-
-      FloatingRootJointRobot valkyrieRobot = robotModel.createHumanoidFloatingRootJointRobot(true);
-      valkyrieRobot.setPositionInWorld(new Vector3D());
-
-      AppearanceDefinition collisionAppearance = YoAppearance.DarkGreen();
-      collisionAppearance.setTransparency(0.5);
-      addKinematicsCollisionGraphics(fullRobotModel.getElevator(), valkyrieRobot, robotModel.getHumanoidRobotKinematicsCollisionModel(), collisionAppearance);
-
-      SimulationConstructionSet scs = new SimulationConstructionSet(valkyrieRobot);
-      scs.addStaticLinkGraphics(graphics3DObject);
-      scs.setGroundVisible(false);
-      scs.startOnAThread();
-
-      ThreadTools.sleepForever();
+      return queryPoints;
    }
 
    public static void main(String[] args)
    {
-      new ValkyrieContactPointProjectorTest();
+      new ValkyrieMeshProjectionVisualizer();
    }
 }

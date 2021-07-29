@@ -91,6 +91,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
 
    public ExternalForceEstimationToolboxController(DRCRobotModel robotModel,
                                                    FullHumanoidRobotModel fullRobotModel,
+                                                   RobotCollisionModel collisionModel,
                                                    CommandInputManager commandInputManager,
                                                    StatusMessageOutputManager statusOutputManager,
                                                    YoGraphicsListRegistry graphicsListRegistry,
@@ -161,7 +162,6 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
          CommonOps_DDRM.addEquals(tau, gravityMatrix);
       };
 
-      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
       List<Collidable> collidables = collisionModel.getRobotCollidables(fullRobotModel.getRootBody());
 
       predefinedContactForceSolver = new PredefinedContactExternalForceSolver(joints, updateDT, dynamicMatrixUpdater, graphicsListRegistry, registry);

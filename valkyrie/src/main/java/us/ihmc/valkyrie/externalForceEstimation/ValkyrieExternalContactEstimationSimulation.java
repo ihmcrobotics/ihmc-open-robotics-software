@@ -12,15 +12,15 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.valkyrie.ValkyrieKinematicsCollisionModel;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 public class ValkyrieExternalContactEstimationSimulation extends AvatarExternalContactEstimationSimulation
 {
-   private static final double simDT = 2e-4; // normally 6.6e-4. (controlDT=4e-3)
-
 //       static String jointName = "torsoRoll";          static Point3D offset = new Point3D(0.156, 0.093, 0.197);
 //       static String jointName = "pelvis";             static Point3D offset =new Point3D(0.131, 0.000, -0.044);
 //       static String jointName = "torsoRoll";          static Point3D offset = new Point3D(0.113, -0.050, 0.090);
@@ -63,7 +63,7 @@ public class ValkyrieExternalContactEstimationSimulation extends AvatarExternalC
 
    public ValkyrieExternalContactEstimationSimulation()
    {
-      super(jointName, offset, simDT, true);
+      super(jointName, offset);
    }
 
    /**
@@ -103,6 +103,12 @@ public class ValkyrieExternalContactEstimationSimulation extends AvatarExternalC
    {
       ValkyrieRobotVersion version = ValkyrieRobotVersion.FINGERLESS;
       return new ValkyrieRobotModel(RobotTarget.SCS, version);
+   }
+
+   @Override
+   protected RobotCollisionModel getCollisionModel()
+   {
+      return getRobotModel().getHumanoidRobotKinematicsCollisionModel();
    }
 
    public static void main(String[] args)

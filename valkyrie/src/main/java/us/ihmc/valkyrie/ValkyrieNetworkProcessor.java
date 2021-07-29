@@ -14,7 +14,7 @@ import us.ihmc.communication.producers.VideoControlSettings;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.externalForceEstimation.ValkyrieExternalForceEstimationModule;
+import us.ihmc.valkyrie.externalForceEstimation.ValkyrieContactEstimationModule;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
@@ -134,7 +134,7 @@ public class ValkyrieNetworkProcessor
 
       if (parameters.get(ValkyrieNetworkProcessorParameters.start_force_estimation))
       {
-         new ValkyrieExternalForceEstimationModule(robotModel, false, networkProcessor.getOrCreateROS2Node());
+         new ValkyrieContactEstimationModule(robotModel, false, networkProcessor.getOrCreateROS2Node());
       }
 
       if (parameters.get(ValkyrieNetworkProcessorParameters.start_footstep_planning))
