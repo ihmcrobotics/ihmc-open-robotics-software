@@ -35,7 +35,5 @@ void main()
     finalColor.rgb *= (0.4 + 0.6 * color.a);
 
     gl_FragColor = finalColor;
-
-
 }
 

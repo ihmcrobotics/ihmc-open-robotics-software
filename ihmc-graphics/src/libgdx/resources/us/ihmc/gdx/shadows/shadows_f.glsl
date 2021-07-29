@@ -50,7 +50,7 @@ void main()
 	float lenDepthMap = -1.0;
 	
 	// Directional light, check if in field of view and get the depth
-	if (u_type==1.0){
+	if (u_type == 1.0){
         float depth_x = v_positionLightTrans_x / v_positionLightTrans_w * 0.5 + 0.5;
         float depth_y = v_positionLightTrans_y / v_positionLightTrans_w * 0.5 + 0.5;
         float depth_z = v_positionLightTrans_z / v_positionLightTrans_w * 0.5 + 0.5;
@@ -65,11 +65,10 @@ void main()
 	}
 	
 	// If not in shadow, add some light
-	if(lenDepthMap >= lenToLight){
-        intensity=0.5 * (1.0-lenToLight);
+	if (lenDepthMap > lenToLight * 1.0035) { //we increase lenToLight very slightly here to counter inaccuracies that come with distance. These numbers are very precise, so a slight change causes a very large effect
+        intensity = 0.5 * (1.0 - lenToLight);
     }
 	
 	gl_FragColor = vec4(intensity);
-
 }
 

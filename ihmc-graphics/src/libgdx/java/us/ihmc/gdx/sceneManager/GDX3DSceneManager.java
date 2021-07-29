@@ -95,10 +95,10 @@ public class GDX3DSceneManager
 
       shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING);
 
-      shadowManager.addLight(new GDXPointLight(new Vector3(5, 10, 5))); //TODO adding a second light caused an access violation exactly once, not sure why, usually works
-      shadowManager.addLight(new GDXPointLight(new Vector3(0, 10, 5)));
-      shadowManager.addLight(new GDXPointLight(new Vector3(-5, 10, 5)));
-      //      shadowManager.addLight(new GDXPointLight(new Vector3(5, 10, -5)));
+      shadowManager.addLight(new GDXPointLight(new Vector3(5, 10, 5)));
+//      shadowManager.addLight(new GDXPointLight(new Vector3(0, 10, 5)));
+//      shadowManager.addLight(new GDXPointLight(new Vector3(-5, 10, 5)));
+//      shadowManager.addLight(new GDXPointLight(new Vector3(5, 10, -5)));
       //      shadowManager.addLight(new GDXPointLight(new Vector3(0, 10, -5)));
       //      shadowManager.addLight(new GDXPointLight(new Vector3(-5, 10, -5)));
 
