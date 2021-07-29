@@ -251,7 +251,6 @@ public class VRPTrackingCostCalculator
       double w2 = omega * omega;
       double w4 = w2 * w2;
 
-      double duration = objective.getEndTime() - objective.getStartTime();
 
       double tEnd = objective.getEndTime();
       double t2End = tEnd * tEnd;
@@ -269,26 +268,34 @@ public class VRPTrackingCostCalculator
       double t6Start = tStart * t5Start;
       double t7Start = tStart * t6Start;
 
-      double c0c0 = (t3End - t3Start) / 3.0;
-      double c0c1 = 0.5 * (t2End - t2Start);
+      double t7Change = t7End - t7Start;
+      double t6Change = t6End - t6Start;
+      double t5Change = t5End - t5Start;
+      double t4Change = t4End - t4Start;
+      double t3Change = t3End - t3Start;
+      double t2Change = t2End - t2Start;
+      double tChange = tEnd - tStart;
 
-      double gc0 = (t4End- t4Start) / 8.0 - 0.5 * (t2End - t2Start) / w2;
-      double gc1 = (t3End - t3Start) / 6.0 - (tEnd - tStart) / w2;
+      double c0c0 = t3Change / 3.0;
+      double c0c1 = 0.5 * t2Change;
+
+      double gc0 = t4Change / 8.0 - 0.5 * t2Change / w2;
+      double gc1 = t3Change / 6.0 - tChange / w2;
 
       costHessianToPack.set(startCoMIdx, startCoMIdx, c0c0);
       costHessianToPack.set(startCoMIdx, startCoMIdx + 1, c0c1);
       costHessianToPack.set(startCoMIdx + 1, startCoMIdx, c0c1);
-      costHessianToPack.set(startCoMIdx + 1, startCoMIdx + 1, duration);
+      costHessianToPack.set(startCoMIdx + 1, startCoMIdx + 1, tChange);
 
       costHessianToPack.set(startCoMIdx + 2, startCoMIdx + 2, c0c0);
       costHessianToPack.set(startCoMIdx + 2, startCoMIdx + 3, c0c1);
       costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 2, c0c1);
-      costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 3, duration);
+      costHessianToPack.set(startCoMIdx + 3, startCoMIdx + 3, tChange);
 
       costHessianToPack.set(startCoMIdx + 4, startCoMIdx + 4, c0c0);
       costHessianToPack.set(startCoMIdx + 4, startCoMIdx + 5, c0c1);
       costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 4, c0c1);
-      costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 5, duration);
+      costHessianToPack.set(startCoMIdx + 5, startCoMIdx + 5, tChange);
 
       costGradientToPack.set(startCoMIdx + 4, 0, gc0 * gravityZ);
       costGradientToPack.set(startCoMIdx + 5, 0, gc1 * gravityZ);
@@ -307,72 +314,71 @@ public class VRPTrackingCostCalculator
          }
       }
 
-      double a3a3End = t5End / 5.0 - 4.0 / 3.0 * t3End / w2 + 4.0 / w4 * tEnd;
-
       double a2c0End = t5End / 5.0 - 2.0 * t3End / w2;
       double a3c0End = t4End / 4.0 - t2End / w2;
       double a2c1End = t4End / 4.0 - 3.0 * t2End / w2;
       double a3c1End = t3End / 3.0 - 2.0 * tEnd / w2;
-
-      double a3a3Start = t5Start / 5.0 - 4.0 / 3.0 * t3Start / w2 + 4.0 / w4 * tStart;
 
       double a2c0Start = t5Start / 5.0 - 2.0 * t3Start / w2;
       double a3c0Start = t4Start / 4.0 - t2Start / w2;
       double a2c1Start = t4Start / 4.0 - 3.0 * t2Start / w2;
       double a3c1Start = t3Start / 3.0 - 2.0 * tStart / w2;
 
-      double a2c0Desired = (t7End - t7Start) / 7.0 - 6.0 * (t5End - t5Start) / (5.0 * w2);
-      double a3c0Desired = (t6End - t6Start) / 6.0 - (t4End - t4Start) / (2.0 * w2);
-      double a2c1Desired = (t6End - t6Start) / 6.0 - 3.0 * (t4End - t4Start) / (2.0 * w2);
-      double a3c1Desired = (t5End - t5Start) / 5.0 - 2.0 * (t3End - t3Start) / (3.0 * w2);
-      double a2c2Desired = (t5End - t5Start) / 5.0 - 2.0 * (t3End - t3Start) / w2;
-      double a3c2Desired = (t4End - t4Start) / 4.0 - (t2End - t2Start) / w2;
-      double a2c3Desired = (t4End - t4Start) / 4.0 - 3.0 * (t2End - t2Start) / w2;
-      double a3c3Desired = (t3End - t3Start) / 3.0 - 2.0 * (tEnd - tStart) / w2;
+      double a2c0Desired = t7Change / 7.0 - 6.0 * t5Change / (5.0 * w2);
+      double a3c0Desired = t6Change / 6.0 - t4Change / (2.0 * w2);
+      double a2c1Desired = t6Change / 6.0 - 3.0 * (t4End - t4Start) / (2.0 * w2);
+      double a3c1Desired = t5Change / 5.0 - 2.0 * (t3End - t3Start) / (3.0 * w2);
+      double a2c2Desired = t5Change / 5.0 - 2.0 * (t3End - t3Start) / w2;
+      double a3c2Desired = t4Change / 4.0 - (t2End - t2Start) / w2;
+      double a2c3Desired = t4Change / 4.0 - 3.0 * (t2End - t2Start) / w2;
+      double a3c3Desired = t3Change / 3.0 - 2.0 * (tEnd - tStart) / w2;
 
       double ga2 = (t6End - t6Start) / 12.0 - (t4End - t4Start) / w2 + 3.0 * (t2End - t2Start) / w4;
       double ga3 = (t5End - t5Start) / 10.0 - 2.0 * (t3End - t3Start) / (3.0 * w2) + 2.0 / w4 * (tEnd - tStart);
 
       double a2a2 = (t7End - t7Start) / 7.0 - 12.0 * (t5End - t5Start) / (5.0 * w2) + 12.0 / w4 * (t3End - t3Start);
       double a2a3 = (t6End - t6Start) / 6.0 - 2.0 * (t4End - t4Start) / w2 + 6.0 / w4 * (t2End- t2Start);
-      double a3a3 = a3a3End - a3a3Start;
+      double a3a3 = (t5End - t5Start) / 5.0 - 4.0 / 3.0 * (t3End - t3Start) / w2 + 4.0 / w4 * (tEnd - tStart);
 
       double a2c0 = a2c0End - a2c0Start;
       double a3c0 = a3c0End - a3c0Start;
       double a2c1 = a2c1End - a2c1Start;
       double a3c1 = a3c1End - a3c1Start;
 
+      // compute the cubic function in terms of the time relative to the start of the segment
       vrpChange.sub(objective.getEndVRP(), objective.getStartVRP());
 
-      double d2 = duration * duration;
-      double d3 = duration * d2;
+      double d2 = tChange * tChange;
+      double d3 = tChange * d2;
       a0Desired.add(objective.getEndVRPVelocity(), objective.getStartVRPVelocity());
       a0Desired.scale(1.0 / d2);
       a0Desired.scaleAdd(-2.0 / d3, vrpChange, a0Desired);
 
       a1Desired.add(objective.getEndVRPVelocity(), objective.getStartVRPVelocity());
       a1Desired.add(objective.getStartVRPVelocity());
-      a1Desired.scale(-1.0 / duration);
+      a1Desired.scale(-1.0 / tChange);
       a1Desired.scaleAdd(3.0 / d2, vrpChange, a1Desired);
 
       a2Desired.set(objective.getStartVRPVelocity());
+
       a3Desired.set(objective.getStartVRP());
 
       // convert to global time.
       c0Desired.set(a0Desired);
 
-      c1Desired.set(a0Desired);
-      c1Desired.scaleAdd(-3.0 * tStart, a1Desired);
+      c1Desired.setAndScale(-3.0 * tStart, a0Desired);
+      c1Desired.add(a1Desired);
 
-      c2Desired.set(a0Desired);
-      c2Desired.scaleAdd(3.0 * t2Start, a2Desired);
+      c2Desired.setAndScale(3.0 * t2Start, a0Desired);
       c2Desired.scaleAdd(-2.0 * tStart, a1Desired, c2Desired);
+      c2Desired.add(a2Desired);
 
-      c3Desired.set(a0Desired);
-      c3Desired.scaleAdd(-t3Start, a3Desired);
-      c3Desired.scaleAdd(tStart, a1Desired, c3Desired);
+      c3Desired.setAndScale(-t3Start, a0Desired);
+      c3Desired.scaleAdd(t2Start, a1Desired, c3Desired);
+      c3Desired.scaleAdd(-tStart, a2Desired, c3Desired);
+      c3Desired.add(a3Desired);
 
-      desiredValuePosition.setAndScale((t5End - t5Start )/ 5.0, c0Desired);
+      desiredValuePosition.setAndScale((t5End - t5Start) / 5.0, c0Desired);
       desiredValuePosition.scaleAdd((t4End - t4Start) / 4.0, c1Desired, desiredValuePosition);
       desiredValuePosition.scaleAdd((t3End- t3Start) / 3.0, c2Desired, desiredValuePosition);
       desiredValuePosition.scaleAdd((t2End - t2Start) / 2.0, c3Desired, desiredValuePosition);
