@@ -81,7 +81,7 @@ public class ContactSegmentHelper
 
    public void cubicInterpolateStartOfSegment(ContactStateBasics<?> contact, double alpha)
    {
-      double originalDuration = contact.getTimeInterval().getDuration();
+      double originalDuration = Math.min(contact.getTimeInterval().getDuration(), 10.0);
       cubicInterpolatePosition(modifiedCoPLocation, contact.getECMPStartPosition(), contact.getECMPStartVelocity(),
                                contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha, originalDuration);
       cubicInterpolateVelocity(modifiedCoPVelocity, contact.getECMPStartPosition(), contact.getECMPStartVelocity(),
@@ -92,13 +92,35 @@ public class ContactSegmentHelper
 
    public void cubicInterpolateEndOfSegment(ContactStateBasics<?> contact, double alpha)
    {
-      double originalDuration = contact.getTimeInterval().getDuration();
+      double originalDuration = Math.min(contact.getTimeInterval().getDuration(), 10.0);
       cubicInterpolatePosition(modifiedCoPLocation, contact.getECMPStartPosition(), contact.getECMPStartVelocity(),
                                contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha, originalDuration);
       cubicInterpolateVelocity(modifiedCoPVelocity, contact.getECMPStartPosition(), contact.getECMPStartVelocity(),
                                contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha, originalDuration);
       contact.setEndECMPPosition(modifiedCoPLocation);
       contact.setEndECMPVelocity(modifiedCoPVelocity);
+   }
+
+   public static void cubicInterpolatePosition(FramePoint3DBasics positionToPack, ContactStateBasics<?> contact, double alpha)
+   {
+      cubicInterpolatePosition(positionToPack,
+                               contact.getECMPStartPosition(),
+                               contact.getECMPStartVelocity(),
+                               contact.getECMPEndPosition(),
+                               contact.getECMPEndVelocity(),
+                               alpha,
+                               Math.min(contact.getTimeInterval().getDuration(), 10.0));
+   }
+
+   public static void cubicInterpolateVelocity(FrameVector3DBasics velocityToPack, ContactStateBasics<?> contact, double alpha)
+   {
+      cubicInterpolateVelocity(velocityToPack,
+                               contact.getECMPStartPosition(),
+                               contact.getECMPStartVelocity(),
+                               contact.getECMPEndPosition(),
+                               contact.getECMPEndVelocity(),
+                               alpha,
+                               Math.min(contact.getTimeInterval().getDuration(), 10.0));
    }
 
    private static void cubicInterpolatePosition(FramePoint3DBasics positionToPack,

@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.robotics.time.TimeIntervalTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -82,6 +84,11 @@ public class PreviewWindowCalculator
       return previewWindowDuration.getDoubleValue();
    }
 
+   private final FramePoint3D modifiedStartPosition = new FramePoint3D();
+   private final FramePoint3D modifiedEndPosition = new FramePoint3D();
+   private final FrameVector3D modifiedStartVelocity = new FrameVector3D();
+   private final FrameVector3D modifiedEndVelocity = new FrameVector3D();
+
    private double computePlanningHorizon(List<ContactPlaneProvider> fullContactSequence, double timeAtStartOfWindow)
    {
       int activeSegment = findTheActiveSegmentInTheContactSequence(fullContactSequence, timeAtStartOfWindow, true, false);
@@ -117,14 +124,26 @@ public class PreviewWindowCalculator
                segment.addContactPhaseInSegment(contact);
             }
 
+            ContactStateBasics<?> startPhase = segment.getContactPhase(0);
+            ContactStateBasics<?> endPhase = segment.getContactPhase(phasesInInterval.size() - 1);
+
             double alphaThroughStart = computeTheFractionThroughTheTimeInterval(segmentStartTime, phasesInInterval.get(0).getTimeInterval());
             double alphaThroughEnd = computeTheFractionThroughTheTimeInterval(segmentEndTime, phasesInInterval.get(phasesInInterval.size() - 1).getTimeInterval());
-            double phaseStart = Math.max(segmentStartTime, segment.getContactPhase(0).getTimeInterval().getStartTime());
-            double phaseEnd = Math.min(segmentEndTime, segment.getContactPhase(phasesInInterval.size() - 1).getTimeInterval().getEndTime());
-            contactSegmentHelper.cubicInterpolateStartOfSegment(segment.getContactPhase(0), alphaThroughStart);
-            contactSegmentHelper.cubicInterpolateEndOfSegment(segment.getContactPhase(phasesInInterval.size() - 1), alphaThroughEnd);
-            segment.getContactPhase(0).getTimeInterval().setStartTime(phaseStart);
-            segment.getContactPhase(phasesInInterval.size() - 1).getTimeInterval().setEndTime(phaseEnd);
+            double phaseStart = Math.max(segmentStartTime, startPhase.getTimeInterval().getStartTime());
+            double phaseEnd = Math.min(segmentEndTime, endPhase.getTimeInterval().getEndTime());
+
+            ContactSegmentHelper.cubicInterpolatePosition(modifiedStartPosition, startPhase, alphaThroughStart);
+            ContactSegmentHelper.cubicInterpolateVelocity(modifiedStartVelocity, startPhase, alphaThroughStart);
+            ContactSegmentHelper.cubicInterpolatePosition(modifiedEndPosition, endPhase, alphaThroughEnd);
+            ContactSegmentHelper.cubicInterpolateVelocity(modifiedEndVelocity, endPhase, alphaThroughEnd);
+
+            startPhase.setStartECMPPosition(modifiedStartPosition);
+            startPhase.setStartECMPVelocity(modifiedStartVelocity);
+            endPhase.setEndECMPPosition(modifiedEndPosition);
+            endPhase.setEndECMPVelocity(modifiedEndVelocity);
+
+            startPhase.getTimeInterval().setStartTime(phaseStart);
+            endPhase.getTimeInterval().setEndTime(phaseEnd);
 
             for (int contactId = 0; contactId < phasesInInterval.get(0).getNumberOfContactPlanes(); contactId++)
                segment.addContact(phasesInInterval.get(0).getContactPose(contactId), phasesInInterval.get(0).getContactsInBodyFrame(contactId));
