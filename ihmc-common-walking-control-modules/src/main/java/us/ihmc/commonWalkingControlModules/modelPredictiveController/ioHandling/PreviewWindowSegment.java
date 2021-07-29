@@ -61,6 +61,11 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
       this.contactState = contactState;
    }
 
+   public void addContactPhaseInSegment(ContactStateBasics<?> contactPhase)
+   {
+      addContactPhaseInSegment(contactPhase, contactPhase.getTimeInterval().getStartTime(), contactPhase.getTimeInterval().getEndTime());
+   }
+
    public void addContactPhaseInSegment(ContactStateBasics<?> contactPhase, double startTime, double endTime)
    {
       if (contactState != null && contactPhasesInSegment.size() > 0)
