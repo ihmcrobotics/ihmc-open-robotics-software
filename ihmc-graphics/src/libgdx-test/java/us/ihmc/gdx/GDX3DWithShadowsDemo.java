@@ -100,7 +100,7 @@ public class GDX3DWithShadowsDemo
       });
 
       manager = new GDXShadowManager();
-      manager.addLight(new GDXDirectionalLight(new Vector3(4, 4.5f, 4), new Vector3(-1, -1, -1)));
+      manager.addLight(new GDXDirectionalLight(new Vector3(10, 10f, 10), new Vector3(-1, -1, -1)));
       light = new GDXPointLight(new Vector3(6, 3, -6));
       manager.addLight(light);
       manager.update();
@@ -121,7 +121,7 @@ public class GDX3DWithShadowsDemo
    public void render()
    {
       box.transform.setToTranslation((float) Math.sin(System.currentTimeMillis() / 500d) * 2, 0, (float) Math.cos(System.currentTimeMillis() / 500d) * 2);
-      light.getPosition().set((float) Math.sin(System.currentTimeMillis() / 1000d) * 6, 3, (float) Math.cos(System.currentTimeMillis() / 1000d) * 6);
+      light.getPosition().set((float) Math.sin(System.currentTimeMillis() / 1000d) * 10, 10, (float) Math.cos(System.currentTimeMillis() / 1000d) * 10);
       light.update();
 
       camController.update();
