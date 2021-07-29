@@ -192,10 +192,12 @@ public class GDXEnvironment extends ImGuiPanel
             objectToPlace = new GDXPointLightObject(baseUI.get3DSceneManager().getShadowManager());
          if (ImGui.button("Place Directional Light"))
             objectToPlace = new GDXDirectionalLightObject(baseUI.get3DSceneManager().getShadowManager());
+
+         ImGui.separator();
       }
       if (objectToPlace != null)
       {
-         if (objectToPlace instanceof GDXDirectionalLightObject || objectToPlace instanceof GDXPointLightObject)
+         if (objectToPlace instanceof GDXLightObject)
             lightObjects.add(objectToPlace);
 
          objects.add(objectToPlace);
@@ -207,6 +209,11 @@ public class GDXEnvironment extends ImGuiPanel
       if (selectedObject != null && ImGui.button("Delete selected"))
       {
          objects.remove(selectedObject);
+         lightObjects.remove(selectedObject);
+
+         if (selectedObject instanceof GDXLightObject)
+            ((GDXLightObject) selectedObject).delete();
+
          selectedObject = null;
          intersectedObject = null;
       }
@@ -354,7 +361,7 @@ public class GDXEnvironment extends ImGuiPanel
    {
       for (GDXEnvironmentObject object : objects)
       {
-         if (!(object instanceof GDXPointLightObject || object instanceof GDXDirectionalLightObject))
+         if (!(object instanceof GDXLightObject))
             object.getRealisticModelInstance().getRenderables(renderables, pool);
       }
    }

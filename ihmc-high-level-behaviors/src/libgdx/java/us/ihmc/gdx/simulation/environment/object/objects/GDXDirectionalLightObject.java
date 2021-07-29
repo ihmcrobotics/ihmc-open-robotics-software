@@ -11,14 +11,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.lighting.GDXDirectionalLight;
 import us.ihmc.gdx.lighting.GDXShadowManager;
-import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GDXDirectionalLightObject  extends GDXEnvironmentObject
+public class GDXDirectionalLightObject extends GDXLightObject
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
 
@@ -61,6 +60,11 @@ public class GDXDirectionalLightObject  extends GDXEnvironmentObject
       light.setPosition(new Vector3(position.getX32(), position.getY32(), position.getZ32()));
       light.setDirection(new Vector3(rotation.getX32(), rotation.getY32(), rotation.getZ32()));
       light.update();
+   }
+
+   @Override
+   public void delete() {
+      manager.removeLight(light);
    }
 
    @Override
