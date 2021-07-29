@@ -28,30 +28,34 @@ public class NarrowPassageBodyPathOptimizer
 {
    private BodyPathPlanningResult bodyPathPlanningResult;
 
-   private int numberOfWaypoints;
-   private int currentIteration = 0;
-
-   private final static int maxNumberOfWaypoints = 80;
+   private final static int maxTotalIterations = 7;
    private final static int maxOrientationAdjustmentIterations = 20;
    private final static int maxPoseAdjustmentIterations = 20;
-   private final static int yawShiftLimit = 120;
-   private final static int yawWiggleLimit = 25;
-   private final static int maxTotalIterations = 7;
+   private int currentIteration = 0;
+
+   // Rotation limit in first iteration of orientation adjustment avoids turning full circle
+   private final static double yawShiftLimit = Math.toRadians(120);
+   // Should be close to solution after first iteration,
+   // following iterations of orientation adjustment are more restricted
+   private final static double yawWiggleLimit = Math.toRadians(25);
+
+   // Number of body collision points allocated in recycling array list
+   private final static int maxNumberOfWaypoints = 80;
+   private final RecyclingArrayList<BodyCollisionPoint> bodyCollisionPoints;
    private final static double distancePerCollisionPoint = 0.15;
+   private FramePose3D[] waypoints;
+   private int numberOfWaypoints;
 
-   private boolean rotationDirectionDetermined = false;
-   private int rotationDirection = 0;
-
+   private PlanarRegionsList planarRegionsList;
+   private final FramePose3D startPose = new FramePose3D();
+   private final FramePose3D endPose = new FramePose3D();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoBoolean collisionFound = new YoBoolean("collisionFound", registry);
    private final boolean visualize;
 
-   private PlanarRegionsList planarRegionsList;
-
-   private final FramePose3D startPose = new FramePose3D();
-   private final FramePose3D endPose = new FramePose3D();
-   private FramePose3D[] waypoints;
-   private final RecyclingArrayList<BodyCollisionPoint> bodyCollisionPoints;
+   // Rotation adjustment direction for all body collision points is determined by first collision
+   private boolean rotationDirectionDetermined = false;
+   private int rotationDirection = 0;
 
    private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
    private static final double collisionGradientScale = 0.5;
@@ -64,7 +68,7 @@ public class NarrowPassageBodyPathOptimizer
    private final TDoubleArrayList convolutionWeights = new TDoubleArrayList();
    private final TDoubleArrayList convolutionYawWeights = new TDoubleArrayList();
 
-   // for visualization only
+   // For visualization only
    private TickAndUpdatable tickAndUpdatable;
    private final BagOfBalls waypointPointGraphic;
 
