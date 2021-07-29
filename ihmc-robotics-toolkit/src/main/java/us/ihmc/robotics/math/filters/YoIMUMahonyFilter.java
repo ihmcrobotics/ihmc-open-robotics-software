@@ -319,6 +319,15 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       hasBeenInitialized.set(false);
    }
 
+   private boolean hasDesiredInitialHeading = false;
+   private final Vector3D desiredInitialHeading = new Vector3D();
+
+   public void setDesiredInitialHeading(Vector3DReadOnly desiredInitialHeading)
+   {
+      this.desiredInitialHeading.set(desiredInitialHeading);
+      hasDesiredInitialHeading = true;
+   }
+
    public void initialize(Orientation3DReadOnly initialOrientation)
    {
       estimatedOrientation.set(initialOrientation);
@@ -328,6 +337,11 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
    private void initialize(Vector3DReadOnly acceleration, Vector3DReadOnly magneticVector)
    {
+      if (magneticVector == null && hasDesiredInitialHeading)
+      {
+         magneticVector = desiredInitialHeading;
+      }
+
       boolean success = computeRotationMatrixFromXZAxes(magneticVector, acceleration, estimatedOrientation);
 
       if (!success)
@@ -384,7 +398,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
          double normalPartMagnitude = TupleTools.dot(aRef, integralTerm);
 
-         if (Double.isFinite(normalPartMagnitude) && Math.abs(normalPartMagnitude) >= MIN_MAGNITUDE)
+         if (Double.isFinite(normalPartMagnitude) && normalPartMagnitude != 0.0)
          {
             normalPart.setAndScale(normalPartMagnitude, aRef);
             tangentialPart.sub(integralTerm, normalPart);
@@ -399,7 +413,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
          // If we don't have a magnetic vector, the error around the gravity vector cannot be estimated. So we slowly decay it.
          double normalPartMagnitude = TupleTools.dot(aRef, integralTerm);
 
-         if (Double.isFinite(normalPartMagnitude) && Math.abs(normalPartMagnitude) >= MIN_MAGNITUDE)
+         if (Double.isFinite(normalPartMagnitude) && normalPartMagnitude != 0.0)
          {
             normalPart.setAndScale(normalPartMagnitude, aRef);
             tangentialPart.sub(integralTerm, normalPart);

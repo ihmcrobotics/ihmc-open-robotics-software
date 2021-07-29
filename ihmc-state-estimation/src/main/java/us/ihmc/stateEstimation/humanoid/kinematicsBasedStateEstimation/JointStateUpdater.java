@@ -128,15 +128,16 @@ public class JointStateUpdater
          for (int j = 0; j < imuBasedJointStateEstimators.size(); j++)
          {
             IMUBasedJointStateEstimator estimator = imuBasedJointStateEstimators.get(j);
+            OneDoFJointStateReadOnly state = estimator.getJointEstimatedState(oneDoFJoint);
 
-            if (!estimator.containsJoint(oneDoFJoint))
+            if (state == null)
                continue;
 
-            double estimatedJointPosition = estimator.getEstimatedJointPosition(oneDoFJoint);
+            double estimatedJointPosition = state.getPosition();
             if (!Double.isNaN(estimatedJointPosition))
                positionSensorData = estimatedJointPosition;
 
-            double estimatedJointVelocity = estimator.getEstimatedJointVelocity(oneDoFJoint);
+            double estimatedJointVelocity = state.getVelocity();
             if (!Double.isNaN(estimatedJointVelocity))
                velocitySensorData = estimatedJointVelocity;
 
