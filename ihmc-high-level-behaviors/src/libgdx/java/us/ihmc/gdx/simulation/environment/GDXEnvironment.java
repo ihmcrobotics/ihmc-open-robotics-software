@@ -43,6 +43,7 @@ public class GDXEnvironment extends ImGuiPanel
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironment.class, "Environment");
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
+   private final ArrayList<GDXEnvironmentObject> lightObjects = new ArrayList<>();
    private GDXEnvironmentObject selectedObject;
    private GDXEnvironmentObject intersectedObject;
    private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo();
@@ -56,20 +57,22 @@ public class GDXEnvironment extends ImGuiPanel
    private final Quaternion tempOrientation = new Quaternion();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Point3D tempIntersection = new Point3D();
+   private final GDXImGuiBasedUI baseUI;
    private GDXDoorSimulator doorSimulator;
 
-   public GDXEnvironment()
+   public GDXEnvironment(GDXImGuiBasedUI baseUI)
    {
-      this(null, null);
+      this(baseUI, null, null);
    }
 
-   public GDXEnvironment(ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
+   public GDXEnvironment(GDXImGuiBasedUI baseUI, ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
    {
       super(WINDOW_NAME);
       if (syncedRobot != null)
          doorSimulator = new GDXDoorSimulator(syncedRobot, helper);
       setRenderMethod(this::renderImGuiWidgets);
       addChild(poseGizmoTunerPanel);
+      this.baseUI = baseUI;
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -182,10 +185,21 @@ public class GDXEnvironment extends ImGuiPanel
          }
 //         if (ImGui.button("Place Door Frame"))
 //            objectToPlace = new GDXDoorFrameObject();
+
+         ImGui.separator();
+
+         if (ImGui.button("Place Point Light"))
+            objectToPlace = new GDXPointLightObject(baseUI.get3DSceneManager().getShadowManager());
+         if (ImGui.button("Place Directional Light"))
+            objectToPlace = new GDXDirectionalLightObject(baseUI.get3DSceneManager().getShadowManager());
       }
       if (objectToPlace != null)
       {
+         if (objectToPlace instanceof GDXDirectionalLightObject || objectToPlace instanceof GDXPointLightObject)
+            lightObjects.add(objectToPlace);
+
          objects.add(objectToPlace);
+
          selectedObject = objectToPlace;
          placing = true;
       }
@@ -340,12 +354,17 @@ public class GDXEnvironment extends ImGuiPanel
    {
       for (GDXEnvironmentObject object : objects)
       {
-         object.getRealisticModelInstance().getRenderables(renderables, pool);
+         if (!(object instanceof GDXPointLightObject || object instanceof GDXDirectionalLightObject))
+            object.getRealisticModelInstance().getRenderables(renderables, pool);
       }
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      for (GDXEnvironmentObject object : lightObjects) {
+         object.getRealisticModelInstance().getRenderables(renderables, pool);
+      }
+
       if (selectedObject != null)
       {
          selectedObject.getCollisionModelInstance().getRenderables(renderables, pool);

@@ -11,13 +11,13 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/libgdx/resources",
                                                               "Environment Builder");
-   private final GDXEnvironment environment = new GDXEnvironment();
+   private final GDXEnvironment environment = new GDXEnvironment(baseUI);
+   private GDXLightingPanel lightingPanel;
    private final ImGui3DViewInputDebugger inputDebugger = new ImGui3DViewInputDebugger();
 
    public GDXEnvironmentBuilderUI()
    {
       baseUI.getImGuiPanelManager().addPanel(environment.getWindowName(), environment::renderImGuiWidgets);
-      baseUI.getImGuiPanelManager().addPanel(GDX3DSceneTools.TUNING_WINDOW_NAME, GDX3DSceneTools::renderTuningSliders);
       baseUI.launchGDXApplication(this);
    }
 
@@ -29,12 +29,17 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
       inputDebugger.create(baseUI);
       baseUI.getImGuiPanelManager().addPanel(inputDebugger.getWindowName(), inputDebugger::render);
 
+      lightingPanel = new GDXLightingPanel(baseUI.get3DSceneManager());
+      baseUI.getImGuiPanelManager().addPanel(lightingPanel.getWindowName(), lightingPanel::renderImGuiWidgets);
+
       environment.create(baseUI);
    }
 
    @Override
    public void render()
    {
+      lightingPanel.update();
+
       baseUI.pollVREvents();
 
       baseUI.renderBeforeOnScreenUI();
