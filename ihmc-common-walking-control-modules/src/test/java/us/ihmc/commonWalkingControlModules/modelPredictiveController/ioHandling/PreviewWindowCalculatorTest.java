@@ -20,11 +20,24 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class PreviewWindowCalculatorTest
 {
+   private static void setupTest(YoRegistry registry)
+   {
+      setupTest(registry, 0.15, 0.75);
+   }
+
+   private static void setupTest(YoRegistry registry, double nominalDuration, double totalDuration)
+   {
+      ((YoDouble) registry.findVariable("nominalSegmentDuration")).set(nominalDuration);
+      ((YoDouble) registry.findVariable("maximumPreviewWindowDuration")).set(totalDuration);
+   }
+
    @Test
    public void computeSimpleIdealContact()
    {
       YoRegistry testRegistry = new YoRegistry("test");
       PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+
+      setupTest(testRegistry);
 
       double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
 
@@ -121,6 +134,7 @@ public class PreviewWindowCalculatorTest
    {
       YoRegistry testRegistry = new YoRegistry("test");
       PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+      setupTest(testRegistry);
 
       double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
 
@@ -192,6 +206,7 @@ public class PreviewWindowCalculatorTest
    {
       YoRegistry testRegistry = new YoRegistry("test");
       PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+      setupTest(testRegistry);
 
       double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
 
@@ -263,6 +278,7 @@ public class PreviewWindowCalculatorTest
    {
       YoRegistry testRegistry = new YoRegistry("test");
       PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+      setupTest(testRegistry);
 
       double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
 
@@ -330,6 +346,7 @@ public class PreviewWindowCalculatorTest
    {
       YoRegistry testRegistry = new YoRegistry("test");
       PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+      setupTest(testRegistry);
 
       double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
 
@@ -410,6 +427,7 @@ public class PreviewWindowCalculatorTest
    {
       YoRegistry testRegistry = new YoRegistry("test");
       PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+      setupTest(testRegistry);
 
       double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
 
@@ -502,6 +520,7 @@ public class PreviewWindowCalculatorTest
    {
       YoRegistry testRegistry = new YoRegistry("test");
       PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+      setupTest(testRegistry);
 
       double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
       double maximumPreviewWindowDuration = ((YoDouble) testRegistry.findVariable("maximumPreviewWindowDuration")).getDoubleValue();
@@ -613,6 +632,7 @@ public class PreviewWindowCalculatorTest
    {
       YoRegistry testRegistry = new YoRegistry("test");
       PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+      setupTest(testRegistry);
 
       double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
       double maximumPreviewWindowDuration = ((YoDouble) testRegistry.findVariable("maximumPreviewWindowDuration")).getDoubleValue();
@@ -721,6 +741,7 @@ public class PreviewWindowCalculatorTest
    {
       YoRegistry testRegistry = new YoRegistry("test");
       PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+      setupTest(testRegistry);
 
       double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
       double maximumPreviewWindowDuration = ((YoDouble) testRegistry.findVariable("maximumPreviewWindowDuration")).getDoubleValue();
@@ -774,5 +795,102 @@ public class PreviewWindowCalculatorTest
 
          startTime += segmentDuration;
       }
+   }
+
+   @Test
+   public void testStandingBug()
+   {
+      YoRegistry testRegistry = new YoRegistry("test");
+      PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+
+      setupTest(testRegistry, 0.25, 0.5);
+
+      double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
+      double maximumPreviewWindowDuration = ((YoDouble) testRegistry.findVariable("maximumPreviewWindowDuration")).getDoubleValue();
+
+      FramePoint3D startCoP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.1, 0.25, 0.3);
+
+      FramePose3D firstPose = new FramePose3D();
+      firstPose.getPosition().set(startCoP);
+
+      double startTime = 00.0;
+
+      FrameConvexPolygon2D contactPolygon = new FrameConvexPolygon2D();
+      contactPolygon.addVertex(0.1, -0.05);
+      contactPolygon.addVertex(0.1, 0.05);
+      contactPolygon.addVertex(-0.1, 0.05);
+      contactPolygon.addVertex(-0.1, -0.05);
+      contactPolygon.update();
+
+      ContactPlaneProvider firstContactFirstTick = new ContactPlaneProvider();
+      firstContactFirstTick.getTimeInterval().setInterval(0.0, 0.125);
+      firstContactFirstTick.setStartECMPPosition(startCoP);
+      firstContactFirstTick.setEndECMPPosition(startCoP);
+      firstContactFirstTick.setLinearECMPVelocity();
+      firstContactFirstTick.addContact(firstPose, contactPolygon);
+
+
+      ContactPlaneProvider secondContact = new ContactPlaneProvider();
+      secondContact.getTimeInterval().setInterval(0.125, 0.25);
+      secondContact.setStartECMPPosition(startCoP);
+      secondContact.setEndECMPPosition(startCoP);
+      secondContact.setLinearECMPVelocity();
+      secondContact.addContact(firstPose, contactPolygon);
+
+      ContactPlaneProvider thirdContactFirstTick = new ContactPlaneProvider();
+      thirdContactFirstTick.getTimeInterval().setInterval(0.25, Double.POSITIVE_INFINITY);
+      thirdContactFirstTick.setStartECMPPosition(startCoP);
+      thirdContactFirstTick.setEndECMPPosition(startCoP);
+      thirdContactFirstTick.setLinearECMPVelocity();
+      thirdContactFirstTick.addContact(firstPose, contactPolygon);
+
+
+      List<ContactPlaneProvider> contacts = new ArrayList<>();
+      contacts.add(firstContactFirstTick);
+      contacts.add(secondContact);
+      contacts.add(thirdContactFirstTick);
+
+      previewWindowCalculator.compute(contacts, 0.0);
+
+      assertEquals(maximumPreviewWindowDuration, previewWindowCalculator.getPreviewWindowDuration(), 1e-5);
+      assertEquals((int) Math.round(maximumPreviewWindowDuration / segmentDuration), previewWindowCalculator.getPlanningWindow().size());
+
+      List<PreviewWindowSegment> previewWindow = previewWindowCalculator.getPlanningWindow();
+
+      FrameVector3DBasics zeroVector = new FrameVector3D();
+
+      for (int i = 0; i < (int) Math.round(maximumPreviewWindowDuration / segmentDuration); i++)
+      {
+         assertEquals(1, previewWindow.get(i).getNumberOfContactPhasesInSegment());
+
+         assertEquals(startTime, previewWindow.get(i).getStartTime(), 1e-5);
+         assertEquals(startTime + segmentDuration, previewWindow.get(i).getEndTime(), 1e-5);
+
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoP, previewWindow.get(i).getContactPhase(0).getECMPEndPosition(), 1e-4);
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(startCoP, previewWindow.get(i).getContactPhase(0).getECMPStartPosition(), 1e-4);
+
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zeroVector, previewWindow.get(i).getContactPhase(0).getECMPStartVelocity(), 1e-4);
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(zeroVector, previewWindow.get(i).getContactPhase(0).getECMPEndVelocity(), 1e-4);
+
+         startTime += segmentDuration;
+      }
+
+      previewWindowCalculator.compute(contacts, 0.004);
+
+      assertEquals(2, previewWindowCalculator.getPlanningWindow().size());
+      assertEquals(maximumPreviewWindowDuration, previewWindowCalculator.getPreviewWindowDuration(), 1e-4);
+
+      assertEquals(2, previewWindowCalculator.getPlanningWindow().get(0).getNumberOfContactPhasesInSegment());
+      assertEquals(0.004, previewWindowCalculator.getPlanningWindow().get(0).getContactPhase(0).getTimeInterval().getStartTime(), 1e-4);
+      assertEquals(0.25, previewWindowCalculator.getPlanningWindow().get(0).getContactPhase(0).getTimeInterval().getEndTime(), 1e-4);
+      assertEquals(0.25, previewWindowCalculator.getPlanningWindow().get(0).getContactPhase(1).getTimeInterval().getStartTime(), 1e-4);
+      assertEquals(0.254, previewWindowCalculator.getPlanningWindow().get(0).getContactPhase(1).getTimeInterval().getEndTime(), 1e-4);
+      assertEquals(0.254, previewWindowCalculator.getPlanningWindow().get(1).getContactPhase(0).getTimeInterval().getStartTime(), 1e-4);
+      assertEquals(0.504, previewWindowCalculator.getPlanningWindow().get(1).getContactPhase(0).getTimeInterval().getEndTime(), 1e-4);
+
+      assertEquals(0.004, previewWindowCalculator.getPlanningWindow().get(0).getStartTime(), 1e-4);
+      assertEquals(0.254, previewWindowCalculator.getPlanningWindow().get(0).getEndTime(), 1e-4);
+      assertEquals(0.254, previewWindowCalculator.getPlanningWindow().get(1).getStartTime(), 1e-4);
+      assertEquals(0.504, previewWindowCalculator.getPlanningWindow().get(1).getEndTime(), 1e-4);
    }
 }
