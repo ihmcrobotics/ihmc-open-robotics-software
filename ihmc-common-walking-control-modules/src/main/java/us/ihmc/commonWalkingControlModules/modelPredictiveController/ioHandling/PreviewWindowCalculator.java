@@ -52,8 +52,8 @@ public class PreviewWindowCalculator
    public PreviewWindowCalculator(YoRegistry parentRegistry)
    {
       activeSegment.set(-1);
-      this.nominalSegmentDuration.set(0.15);
-      this.maximumPreviewWindowDuration.set(0.75);
+      this.nominalSegmentDuration.set(0.25);
+      this.maximumPreviewWindowDuration.set(0.50);
       this.maximumPreviewWindowSegments.set(5);
       this.minimumPreviewWindowSegments.set(2);
 
@@ -163,21 +163,7 @@ public class PreviewWindowCalculator
             flightDuration += duration;
       }
 
-      double desiredFinalSegmentDuration = maximumPreviewWindowDuration.getDoubleValue() - previewWindowLength;
       PreviewWindowSegment lastSegment = previewWindowContacts.getLast();
-      ContactStateBasics<?> lastPhase = lastSegment.getContactPhase(lastSegment.getNumberOfContactPhasesInSegment() - 1);
-      double lastPhaseDuration = Math.min(lastPhase.getTimeInterval().getDuration(), 10.0);
-      double alpha = Math.min(desiredFinalSegmentDuration / lastPhaseDuration, 1.0);
-      /*
-      if (alpha < 1.0)
-      {
-         double lastStartTime = lastPhase.getTimeInterval().getStartTime();
-         double newEndTime = alpha * lastPhaseDuration + lastStartTime;
-         contactSegmentHelper.cubicInterpolateEndOfSegment(lastPhase, alpha);
-         lastSegment.setEndTime(newEndTime);
-      }
-
-       */
       previewWindowLength += lastSegment.getDuration();
 
       if (!checkContactSequenceIsValid(previewWindowContacts, false))
@@ -211,7 +197,7 @@ public class PreviewWindowCalculator
          ContactPlaneProvider previousContact = fullContactSequence.get(segmentIdx - 1);
          ContactPlaneProvider currentContact = fullContactSequence.get(segmentIdx);
 
-         double currentDuration = currentContact.getTimeInterval().getDuration();
+         double currentDuration = Math.min(currentContact.getTimeInterval().getDuration(), 10.0);
 
          if (doContactPhasesBelongToTheSameGroup(previousContact, currentContact))
          {
@@ -232,7 +218,7 @@ public class PreviewWindowCalculator
          if (timeRemaining - currentDuration < 0.0)
          {
             if (currentContact.getContactState().isLoadBearing())
-               groupDuration = timeRemaining;
+               groupDuration += timeRemaining - currentDuration;
             else
                groupDuration = currentDuration;
 
