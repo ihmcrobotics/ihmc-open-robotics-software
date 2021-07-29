@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.log.LogTools;
@@ -66,6 +67,11 @@ public class GDXShadowManager
             return new GDXShadowMapShader(renderable, shader, manager);
          }
       });
+
+      //Add three lights offscreen so that things render properly. I do not know why this is necessary, and am not proud of it.
+      addLight(new GDXPointLight(new Vector3(0, 0, -500)));
+      addLight(new GDXPointLight(new Vector3(1, 0, -500)));
+      addLight(new GDXPointLight(new Vector3(2, 0, -500)));
    }
 
    public static String getVertexShader()
