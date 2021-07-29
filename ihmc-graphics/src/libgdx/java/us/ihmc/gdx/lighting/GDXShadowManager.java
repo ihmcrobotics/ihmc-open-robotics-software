@@ -31,12 +31,13 @@ public class GDXShadowManager
          return new Renderable();
       }
    };
+   private final float antiAliasing;
    private boolean useViewport = false;
    private int x = 0;
    private int y = 0;
    private int width = 0;
    private int height = 0;
-   private float antiAliasing = 1;
+   private float ambientLight = 0.4f;
    private FrameBuffer framebuffer;
 
    public GDXShadowManager()
@@ -82,6 +83,16 @@ public class GDXShadowManager
    public static String getFragmentShader()
    {
       return Gdx.files.classpath("us/ihmc/gdx/shadows/scene_f.glsl").readString();
+   }
+
+   public float getAmbientLight()
+   {
+      return ambientLight;
+   }
+
+   public void setAmbientLight(float ambientLight)
+   {
+      this.ambientLight = ambientLight;
    }
 
    public void addLight(GDXLight light)
@@ -173,6 +184,7 @@ public class GDXShadowManager
       program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
       program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
       program.setUniformf("u_antiAliasing", this.antiAliasing);
+      program.setUniformf("u_ambientLight", this.ambientLight);
       program.end();
    }
 
