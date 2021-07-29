@@ -6,15 +6,16 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.log.LogTools;
 
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Map;
+import java.util.TreeSet;
 
 public class ImGuiPanel extends ImGuiPanelSizeHandler
 {
    private final String panelName;
    private Runnable render;
    private final ImBoolean isShowing;
-   private final ArrayList<ImGuiPanel> children = new ArrayList<>();
+   private final TreeSet<ImGuiPanel> children = new TreeSet<>(Comparator.comparing(ImGuiPanel::getPanelName));
 
    private int lastDockID = -1;
 
@@ -37,13 +38,17 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
 
    /* package-private */ void renderMenuItem()
    {
+      renderMenuItem("");
+   }
+   /* package-private */ void renderMenuItem(String indent)
+   {
       if (isTogglable())
       {
-         ImGui.menuItem(panelName, "", isShowing);
+         ImGui.menuItem(indent + panelName, "", isShowing);
 
          for (ImGuiPanel child : children)
          {
-            child.renderMenuItem();
+            child.renderMenuItem(indent + "\t");
          }
       }
    }

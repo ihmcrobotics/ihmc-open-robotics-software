@@ -3,12 +3,13 @@
  */
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import gnu.trove.impl.Constants;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import java.util.HashMap;
+import java.util.Map;
+
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.BacklashProcessingYoVariable;
+import us.ihmc.robotics.math.filters.ButterworthFilteredYoVariable;
+import us.ihmc.robotics.math.filters.ButterworthFusedYoVariable;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -17,7 +18,6 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -32,18 +32,27 @@ public class IMUBasedJointStateEstimator
    private final YoRegistry registry;
    private final BooleanProvider enableOutput;
    private final IMUBasedJointVelocityEstimator velocityEstimator;
-   private final DoubleProvider velocityBreakFrequency;
-   private final DoubleProvider positionBreakFrequency;
    private final GeometricJacobian jacobian;
    private final SensorOutputMapReadOnly sensorMap;
 
+   private final DoubleParameter velocityBreakFrequency;
+   private final DoubleParameter positionBreakFrequency;
+
+   private boolean velocityAlphaDirty = true;
+   private double velocityAlpha = 0.0;
+   private boolean positionAlphaDirty = true;
+   private double positionAlpha = 0.0;
+
    private final OneDoFJointBasics[] joints;
-   private final TObjectIntHashMap<OneDoFJointBasics> jointToIndexMap = new TObjectIntHashMap<>(3, Constants.DEFAULT_LOAD_FACTOR, -1);
-   private final BacklashProcessingYoVariable[] jointVelocities;
-   private final YoDouble[] jointPositions;
+   private final ButterworthFusedYoVariable[] jointVelocities;
+   private final ButterworthFusedYoVariable[] jointPositions;
    private final YoDouble[] jointPositionsFromIMUOnly;
 
    private final double estimatorDT;
+
+   private final YoDouble imuOnlyPositionLeak;
+
+   private final Map<OneDoFJointBasics, OneDoFJointStateReadOnly> jointOutputStates = new HashMap<>();
 
    public IMUBasedJointStateEstimator(double estimatorDT,
                                       IMUSensorReadOnly parentIMU,
@@ -64,22 +73,35 @@ public class IMUBasedJointStateEstimator
       joints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       this.velocityEstimator = new IMUBasedJointVelocityEstimator(jacobian, parentIMU, childIMU, registry);
 
-      velocityBreakFrequency = new DoubleParameter(name + "AlphaFuseVelocity", registry, parameters.getBreakFrequencyForVelocityEstimation());
-      positionBreakFrequency = new DoubleParameter(name + "AlphaFusePosition", registry, parameters.getBreakFrequencyForPositionEstimation());
+      velocityBreakFrequency = new DoubleParameter(name + "FuseVelocityBreakFreq", registry, parameters.getBreakFrequencyForVelocityEstimation());
+      positionBreakFrequency = new DoubleParameter(name + "FusePositionBreakFreq", registry, parameters.getBreakFrequencyForPositionEstimation());
+      velocityBreakFrequency.addListener(p -> velocityAlphaDirty = true);
+      positionBreakFrequency.addListener(p -> positionAlphaDirty = true);
 
-      DoubleProvider slopTime = new DoubleParameter(name + "SlopTime", registry, parameters.getVelocityEstimationBacklashSlopTime());
-
-      jointVelocities = new BacklashProcessingYoVariable[joints.length];
+      jointVelocities = new ButterworthFusedYoVariable[joints.length];
       jointPositionsFromIMUOnly = new YoDouble[joints.length];
-      jointPositions = new YoDouble[joints.length];
+      jointPositions = new ButterworthFusedYoVariable[joints.length];
+
+      imuOnlyPositionLeak = new YoDouble(name + "IMUOnlyPositionLeak", registry);
+      imuOnlyPositionLeak.set(1.0e-4);
 
       for (int i = 0; i < joints.length; i++)
       {
          OneDoFJointBasics joint = joints[i];
-         jointToIndexMap.put(joint, i);
-         jointVelocities[i] = new BacklashProcessingYoVariable("qd_" + joint.getName() + "_FusedWithIMU", "", estimatorDT, slopTime, registry);
-         jointPositionsFromIMUOnly[i] = new YoDouble("q_" + joint.getName() + "_IMUBased", registry);
-         jointPositions[i] = new YoDouble("q_" + joint.getName() + "_FusedWithIMU", registry);
+         String jointName = joint.getName();
+         jointPositionsFromIMUOnly[i] = new YoDouble("q_" + jointName + "_IMUBased", registry);
+         ButterworthFusedYoVariable jointVelocity = new ButterworthFusedYoVariable("qd_" + jointName + "_FusedWithIMU", registry, () -> velocityAlpha);
+         ButterworthFusedYoVariable jointPosition = new ButterworthFusedYoVariable("q_" + jointName + "_FusedWithIMU", registry, () -> positionAlpha);
+         jointVelocities[i] = jointVelocity;
+         jointPositions[i] = jointPosition;
+
+         jointOutputStates.put(joint,
+                               OneDoFJointStateReadOnly.createFromSuppliers(jointName,
+                                                                            () -> jointPosition.getValue(),
+                                                                            () -> jointVelocity.getValue(),
+                                                                            () -> Double.NaN,
+                                                                            () -> Double.NaN,
+                                                                            () -> true));
       }
 
       parentRegistry.addChild(registry);
@@ -87,10 +109,9 @@ public class IMUBasedJointStateEstimator
 
    public void compute()
    {
-      velocityEstimator.compute();
+      updateAlphas();
 
-      double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityBreakFrequency.getValue(), estimatorDT);
-      double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(positionBreakFrequency.getValue(), estimatorDT);
+      velocityEstimator.compute();
 
       for (int i = 0; i < joints.length; i++)
       {
@@ -99,47 +120,35 @@ public class IMUBasedJointStateEstimator
 
          double qd_sensorMap = jointSensorOutput.getVelocity();
          double qd_IMU = velocityEstimator.getEstimatedJointVelocity(i);
-         double qd_fused = (1.0 - alphaVelocity) * qd_sensorMap + alphaVelocity * qd_IMU;
-
-         jointVelocities[i].update(qd_fused);
-
          double q_sensorMap = jointSensorOutput.getPosition();
-         double q_IMU = jointPositions[i].getDoubleValue() + estimatorDT * qd_IMU; // is qd_IMU or qd_fused better here?
-         double q_fused = (1.0 - alphaPosition) * q_sensorMap + alphaPosition * q_IMU;
 
-         jointPositionsFromIMUOnly[i].set(q_IMU);
-         jointPositions[i].set(q_fused);
+         jointVelocities[i].update(qd_sensorMap, qd_IMU);
+         jointPositionsFromIMUOnly[i].mul(1.0 - imuOnlyPositionLeak.getValue());
+         jointPositionsFromIMUOnly[i].add(jointVelocities[i].getValue() * estimatorDT);
+         jointPositions[i].update(q_sensorMap, jointPositionsFromIMUOnly[i].getValue());
       }
    }
 
-   public boolean containsJoint(OneDoFJointBasics joint)
+   private void updateAlphas()
    {
-      return jointToIndexMap.containsKey(joint);
+      if (velocityAlphaDirty)
+      {
+         velocityAlphaDirty = false;
+         velocityAlpha = ButterworthFilteredYoVariable.computeAlphaGivenBreakFrequency(velocityBreakFrequency.getValue(), estimatorDT);
+      }
+
+      if (positionAlphaDirty)
+      {
+         positionAlphaDirty = false;
+         positionAlpha = ButterworthFilteredYoVariable.computeAlphaGivenBreakFrequency(positionBreakFrequency.getValue(), estimatorDT);
+      }
    }
 
-   public double getEstimatedJointVelocity(OneDoFJointBasics joint)
+   public OneDoFJointStateReadOnly getJointEstimatedState(OneDoFJointBasics joint)
    {
-      if (!enableOutput.getValue())
-         return Double.NaN;
-
-      int jointIndex = jointToIndexMap.get(joint);
-
-      if (jointIndex == -1)
-         return Double.NaN;
-
-      return jointVelocities[jointIndex].getDoubleValue();
-   }
-
-   public double getEstimatedJointPosition(OneDoFJointBasics joint)
-   {
-      if (!enableOutput.getValue())
-         return Double.NaN;
-
-      int jointIndex = jointToIndexMap.get(joint);
-
-      if (jointIndex == -1)
-         return Double.NaN;
-
-      return jointPositions[jointIndex].getDoubleValue();
+      if (enableOutput.getValue())
+         return jointOutputStates.get(joint);
+      else
+         return null;
    }
 }
