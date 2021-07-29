@@ -8,6 +8,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -176,6 +177,18 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
          pointA.setMatchingFrame(collisionResult.getPointOnARootFrame());
       if (pointB != null)
          pointB.setMatchingFrame(collisionResult.getPointOnBRootFrame());
+   }
+
+   @Override
+   public FramePoint3DReadOnly getPointA()
+   {
+      return pointA;
+   }
+
+   @Override
+   public FramePoint3DReadOnly getPointB()
+   {
+      return pointB;
    }
 
    private final FrameVector3D mutableFrameVector = new FrameVector3D();

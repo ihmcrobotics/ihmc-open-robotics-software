@@ -164,7 +164,7 @@ public class StandPrepControllerState extends HighLevelControllerState
    }
 
    @Override
-   public JointDesiredOutputListReadOnly getOutputForLowLevelController()
+   public LowLevelOneDoFJointDesiredDataHolder getOutputForLowLevelController()
    {
       return lowLevelOneDoFJointDesiredDataHolder;
    }

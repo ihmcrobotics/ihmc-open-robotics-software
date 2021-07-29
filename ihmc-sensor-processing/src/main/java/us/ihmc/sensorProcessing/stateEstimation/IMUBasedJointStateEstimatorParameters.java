@@ -7,7 +7,6 @@ public class IMUBasedJointStateEstimatorParameters
    private final String parentIMUName, childIMUName;
    private final double breakFrequencyForVelocityEstimation;
    private final double breakFrequencyForPositionEstimation;
-   private double velocityEstimationBacklashSlopTime = 0.0;
 
    public IMUBasedJointStateEstimatorParameters(String estimatorName,
                                                 boolean enableOutput,
@@ -22,11 +21,6 @@ public class IMUBasedJointStateEstimatorParameters
       this.childIMUName = childIMUName;
       this.breakFrequencyForVelocityEstimation = breakFrequencyForVelocityEstimation;
       this.breakFrequencyForPositionEstimation = breakFrequencyForPositionEstimation;
-   }
-
-   public void setVelocityEstimationBacklashSlopTime(double velocityEstimationBacklashSlopTime)
-   {
-      this.velocityEstimationBacklashSlopTime = velocityEstimationBacklashSlopTime;
    }
 
    public String getEstimatorName()
@@ -57,10 +51,5 @@ public class IMUBasedJointStateEstimatorParameters
    public double getBreakFrequencyForPositionEstimation()
    {
       return breakFrequencyForPositionEstimation;
-   }
-
-   public double getVelocityEstimationBacklashSlopTime()
-   {
-      return velocityEstimationBacklashSlopTime;
    }
 }

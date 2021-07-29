@@ -29,6 +29,7 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.JavaFXRobotVisualizer;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -128,6 +129,11 @@ public class JoystickBasedSteppingMainUI
       primaryStage.setOnCloseRequest(event -> stop());
 
       start();
+   }
+   
+   public FullHumanoidRobotModel getFullRobotModel()
+   {
+      return robotVisualizer.getFullRobotModel();
    }
 
    private void setupSceneLighting(View3DFactory view3dFactory)
