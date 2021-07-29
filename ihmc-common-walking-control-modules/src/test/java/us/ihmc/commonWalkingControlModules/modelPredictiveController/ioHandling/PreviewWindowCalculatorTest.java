@@ -599,11 +599,13 @@ public class PreviewWindowCalculatorTest
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(thirdContact.getECMPEndPosition(), previewWindow.get(2).getContactPhase(0).getECMPEndPosition(), 1e-4);
 
       FramePoint3D middleOfEndPosition = new FramePoint3D();
-      middleOfEndPosition.interpolate(middleCoP, endCoP, (middleOfEnd - 4.5 * segmentDuration) / (absoluteEndTime - endTime));
+      middleOfEndPosition.interpolate(middleCoP, endCoP, (middleOfEnd - 4.5 * segmentDuration) / (endTime - 4.5 * segmentDuration));
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(fourthContact.getECMPStartPosition(), previewWindow.get(3).getContactPhase(0).getECMPStartPosition(), 1e-4);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(middleOfEndPosition, previewWindow.get(3).getContactPhase(0).getECMPEndPosition(), 1e-4);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(middleOfEndPosition, previewWindow.get(4).getContactPhase(0).getECMPStartPosition(), 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(fourthContact.getECMPEndPosition(), previewWindow.get(4).getContactPhase(0).getECMPEndPosition(), 1e-4);
+
+      middleOfEndPosition.interpolate(middleCoP, endCoP, (absoluteEndTime - 4.5 * segmentDuration) / (endTime - 4.5 * segmentDuration));
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(middleOfEndPosition, previewWindow.get(4).getContactPhase(0).getECMPEndPosition(), 1e-4);
    }
 
    @Test
@@ -665,38 +667,53 @@ public class PreviewWindowCalculatorTest
          assertEquals(1, previewWindow.get(i).getNumberOfContactPhasesInSegment());
 
       double absoluteEndTime = startTime + maximumPreviewWindowDuration;
-      double lastGroupDuration = absoluteEndTime - 4.5 * segmentDuration;
-      double middleOfEnd = 0.5 * lastGroupDuration + 4.5 * segmentDuration;
+      double lastGroupDuration = absoluteEndTime - 1.9 * segmentDuration;
+      double lastSegmentDurations = lastGroupDuration / Math.round(lastGroupDuration / segmentDuration);
+
 
       assertEquals(1.25 * segmentDuration, previewWindow.get(0).getStartTime(), 1e-5);
       assertEquals(1.9 * segmentDuration, previewWindow.get(0).getEndTime(), 1e-5);
       assertEquals(1.9 * segmentDuration, previewWindow.get(1).getStartTime(), 1e-5);
-      assertEquals(2.9 * segmentDuration, previewWindow.get(1).getEndTime(), 1e-5);
-      assertEquals(2.9 * segmentDuration, previewWindow.get(2).getStartTime(), 1e-5);
-      assertEquals(3.9 * segmentDuration, previewWindow.get(2).getEndTime(), 1e-5);
-      assertEquals(3.9 * segmentDuration, previewWindow.get(3).getStartTime(), 1e-5);
-      assertEquals(4.9 * segmentDuration, previewWindow.get(3).getEndTime(), 1e-5);
-      assertEquals(4.9 * segmentDuration, previewWindow.get(4).getStartTime(), 1e-5);
-      assertEquals(5.9 * segmentDuration, previewWindow.get(4).getEndTime(), 1e-5);
+      assertEquals(1.9 * segmentDuration + lastSegmentDurations, previewWindow.get(1).getEndTime(), 1e-5);
+      assertEquals(1.9 * segmentDuration + lastSegmentDurations, previewWindow.get(2).getStartTime(), 1e-5);
+      assertEquals(1.9 * segmentDuration + 2.0 * lastSegmentDurations, previewWindow.get(2).getEndTime(), 1e-5);
+      assertEquals(1.9 * segmentDuration + 2.0 * lastSegmentDurations, previewWindow.get(3).getStartTime(), 1e-5);
+      assertEquals(1.9 * segmentDuration + 3.0 * lastSegmentDurations, previewWindow.get(3).getEndTime(), 1e-5);
+      assertEquals(1.9 * segmentDuration + 3.0 * lastSegmentDurations, previewWindow.get(4).getStartTime(), 1e-5);
+      assertEquals(1.9 * segmentDuration + 4.0 * lastSegmentDurations, previewWindow.get(4).getEndTime(), 1e-5);
 
       FramePoint3D copAtStartOfWindow = new FramePoint3D();
       copAtStartOfWindow.interpolate(startCoP, middleCoP, startTime / firstContact.getTimeInterval().getDuration());
-      FramePoint3D superMiddle = new FramePoint3D();
-      superMiddle.interpolate(startCoP, middleCoP, 0.5);
+
 
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(copAtStartOfWindow, previewWindow.get(0).getContactPhase(0).getECMPStartPosition(), 1e-4);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(middleCoP, previewWindow.get(0).getContactPhase(0).getECMPEndPosition(), 1e-4);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(middleCoP, previewWindow.get(1).getContactPhase(0).getECMPStartPosition(), 1e-4);
-      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(secondContact.getECMPEndPosition(), previewWindow.get(1).getContactPhase(0).getECMPEndPosition(), 1e-4);
-//      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(thirdContact.getECMPStartPosition(), previewWindow.get(2).getContactPhase(0).getECMPStartPosition(), 1e-4);
-//      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(thirdContact.getECMPEndPosition(), previewWindow.get(2).getContactPhase(0).getECMPEndPosition(), 1e-4);
 
-      FramePoint3D middleOfEndPosition = new FramePoint3D();
-      middleOfEndPosition.interpolate(middleCoP, endCoP, (middleOfEnd - 4.5 * segmentDuration) / (absoluteEndTime - endTime));
-//      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(fourthContact.getECMPStartPosition(), previewWindow.get(3).getContactPhase(0).getECMPStartPosition(), 1e-4);
-//      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(middleOfEndPosition, previewWindow.get(3).getContactPhase(0).getECMPEndPosition(), 1e-4);
-//      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(middleOfEndPosition, previewWindow.get(4).getContactPhase(0).getECMPStartPosition(), 1e-4);
-//      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(fourthContact.getECMPEndPosition(), previewWindow.get(4).getContactPhase(0).getECMPEndPosition(), 1e-4);
+      FramePoint3D superMiddle = new FramePoint3D();
+      double alpha = lastSegmentDurations / 10.0;
+      superMiddle.interpolate(middleCoP, endCoP, alpha);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(superMiddle, previewWindow.get(1).getContactPhase(0).getECMPEndPosition(), 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(superMiddle, previewWindow.get(2).getContactPhase(0).getECMPStartPosition(), 1e-4);
+
+      alpha *= 2.0;
+      superMiddle.interpolate(middleCoP, endCoP, alpha);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(superMiddle, previewWindow.get(2).getContactPhase(0).getECMPEndPosition(), 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(superMiddle, previewWindow.get(3).getContactPhase(0).getECMPStartPosition(), 1e-4);
+
+      alpha *= 3.0 / 2.0;
+      superMiddle.interpolate(middleCoP, endCoP, alpha);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(superMiddle, previewWindow.get(3).getContactPhase(0).getECMPEndPosition(), 1e-4);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(superMiddle, previewWindow.get(4).getContactPhase(0).getECMPStartPosition(), 1e-4);
+
+      alpha = 4.0 * lastSegmentDurations / 10.0;
+      superMiddle.interpolate(middleCoP, endCoP, alpha);
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(superMiddle, previewWindow.get(4).getContactPhase(0).getECMPEndPosition(), 1e-4);
+
    }
 
    @Test
