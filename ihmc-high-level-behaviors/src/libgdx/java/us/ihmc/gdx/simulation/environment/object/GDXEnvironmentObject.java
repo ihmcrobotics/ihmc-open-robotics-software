@@ -173,7 +173,7 @@ public class GDXEnvironmentObject
       updateRenderablesPoses();
    }
 
-   private void updateRenderablesPoses()
+   protected void updateRenderablesPoses()
    {
       placementFrame.update();
 

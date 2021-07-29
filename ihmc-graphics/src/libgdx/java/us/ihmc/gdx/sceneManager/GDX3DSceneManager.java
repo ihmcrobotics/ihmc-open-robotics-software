@@ -94,14 +94,6 @@ public class GDX3DSceneManager
       virtualBatch = new ModelBatch();
 
       shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING);
-
-      shadowManager.addLight(new GDXPointLight(new Vector3(5, 10, 5)));
-//      shadowManager.addLight(new GDXPointLight(new Vector3(0, 10, 5)));
-//      shadowManager.addLight(new GDXPointLight(new Vector3(-5, 10, 5)));
-//      shadowManager.addLight(new GDXPointLight(new Vector3(5, 10, -5)));
-      //      shadowManager.addLight(new GDXPointLight(new Vector3(0, 10, -5)));
-      //      shadowManager.addLight(new GDXPointLight(new Vector3(-5, 10, -5)));
-
       shadowManager.update();
    }
 
@@ -250,6 +242,10 @@ public class GDX3DSceneManager
    public int getCurrentWindowHeight()
    {
       return Gdx.graphics.getHeight();
+   }
+
+   public GDXShadowManager getShadowManager() {
+      return shadowManager;
    }
 
    public FocusBasedGDXCamera getCamera3D()
