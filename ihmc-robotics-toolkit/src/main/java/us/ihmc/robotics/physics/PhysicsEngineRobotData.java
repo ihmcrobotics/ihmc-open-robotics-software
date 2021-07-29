@@ -197,6 +197,16 @@ public class PhysicsEngineRobotData implements CollidableHolder
       return environmentContactConstraintCalculatorPool.nextAvailable();
    }
 
+   public YoSingleContactImpulseCalculatorPool getEnvironmentContactConstraintCalculatorPool()
+   {
+      return environmentContactConstraintCalculatorPool;
+   }
+
+   public YoSingleContactImpulseCalculatorPool getSelfContactConstraintCalculatorPool()
+   {
+      return selfContactConstraintCalculatorPool;
+   }
+
    public SingleContactImpulseCalculator getOrCreateSelfContactConstraintCalculator()
    {
       return selfContactConstraintCalculatorPool.nextAvailable();

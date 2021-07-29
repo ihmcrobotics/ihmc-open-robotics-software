@@ -439,4 +439,9 @@ public class WrenchBasedFootSwitch implements HeelSwitch, ToeSwitch
    {
       throw new RuntimeException("This is not a different implementation by default.");
    }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
 }

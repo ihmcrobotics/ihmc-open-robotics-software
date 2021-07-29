@@ -75,10 +75,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVelocityIntegratorResetMode;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -128,6 +128,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.ImuData;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredLoadMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.LowLevelState;
@@ -440,8 +441,9 @@ public class CrossRobotCommandRandomTools
       next.setPositionBreakFrequency(random.nextDouble());
       next.setVelocityBreakFrequency(random.nextDouble());
       next.setMaxPositionError(random.nextDouble());
-      next.setMaxVelocity(random.nextDouble());
-      next.setZeroVelocityReset(RandomNumbers.nextBoolean(random, 0.5));
+      next.setMaxVelocityError(random.nextDouble());
+      next.setVelocityReferenceAlpha(random.nextDouble());
+      next.setVelocityResetMode(nextElementIn(random, JointVelocityIntegratorResetMode.values));
       return next;
    }
 
@@ -576,6 +578,8 @@ public class CrossRobotCommandRandomTools
          next.setPositionFeedbackMaxError(random.nextDouble());
       if (random.nextBoolean())
          next.setVelocityFeedbackMaxError(random.nextDouble());
+      if (random.nextBoolean())
+         next.setLoadMode(nextElementIn(random, JointDesiredLoadMode.values));
       return next;
    }
 

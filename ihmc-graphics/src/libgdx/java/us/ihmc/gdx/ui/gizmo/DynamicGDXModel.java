@@ -8,20 +8,29 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import org.lwjgl.opengl.GL32;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+/**
+ * TODO: This class needs to probably be several implementations of some interfaces.
+ * It's a mess right now.
+ */
 public class DynamicGDXModel
 {
-   private final Model model;
+   private Model model;
    private final Node node;
    private MeshPart meshPart;
    private ModelInstance modelInstance;
    private Material material;
-   private Consumer<GDXMultiColorMeshBuilder> buildMesh;
+   private Supplier<Mesh> buildMesh;
    private Mesh mesh;
    private boolean needsRebuild = true;
+   private boolean customModel = false;
+
+   private final RigidBodyTransform localTransform = new RigidBodyTransform();
 
    public DynamicGDXModel()
    {
@@ -31,9 +40,33 @@ public class DynamicGDXModel
       node.id = "node" + model.nodes.size;
    }
 
+   public void setModel(Model model)
+   {
+      this.model = model;
+      customModel = true;
+   }
+
    public void setMesh(Consumer<GDXMultiColorMeshBuilder> buildMesh)
    {
+      this.buildMesh = () ->
+      {
+         GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
+         buildMesh.accept(meshBuilder);
+         return meshBuilder.generateMesh();
+      };
+      needsRebuild = true;
+   }
+
+   public void setMesh(Supplier<Mesh> buildMesh)
+   {
       this.buildMesh = buildMesh;
+      needsRebuild = true;
+   }
+
+   public void setMesh(Mesh mesh)
+   {
+      this.mesh = mesh;
+      this.buildMesh = null;
       needsRebuild = true;
    }
 
@@ -51,22 +84,24 @@ public class DynamicGDXModel
       }
    }
 
-   private void buildIfNeeded()
+   public void buildIfNeeded()
    {
-      if (needsRebuild)
+      if (needsRebuild && !customModel)
       {
          needsRebuild = false;
-         if (mesh != null)
+         if (mesh != null && buildMesh != null)
          {
             node.parts.removeIndex(0);
             dispose();
          }
 
-         GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
-         buildMesh.accept(meshBuilder);
-         mesh = meshBuilder.generateMesh();
-         meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
-         node.parts.add(new NodePart(meshPart, material));
+         if (buildMesh != null)
+            mesh = buildMesh.get();
+         if (mesh != null)
+         {
+            meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
+            node.parts.add(new NodePart(meshPart, material));
+         }
       }
    }
 
@@ -81,6 +116,11 @@ public class DynamicGDXModel
       return new ModelInstance(model);
    }
 
+   public Model getModel()
+   {
+      return model;
+   }
+
    public ModelInstance getOrCreateModelInstance()
    {
       if (needsRebuild || modelInstance == null)
@@ -88,5 +128,10 @@ public class DynamicGDXModel
          modelInstance = newModelInstance();
       }
       return modelInstance;
+   }
+
+   public RigidBodyTransform getLocalTransform()
+   {
+      return localTransform;
    }
 }
