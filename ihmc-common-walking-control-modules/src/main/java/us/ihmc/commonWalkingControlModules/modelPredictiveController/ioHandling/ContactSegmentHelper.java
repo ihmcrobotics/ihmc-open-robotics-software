@@ -112,8 +112,8 @@ public class ContactSegmentHelper
       double a2 = alpha * alpha;
       double a3 = alpha * a2;
 
-      positionToPack.setAndScale((a3 - a2) / originalDuration, endVelocity);
-      positionToPack.scaleAdd((a3 - 2.0 * a2 + alpha) / originalDuration, startVelocity, positionToPack);
+      positionToPack.setAndScale((a3 - a2) * originalDuration, endVelocity);
+      positionToPack.scaleAdd((a3 - 2.0 * a2 + alpha) * originalDuration, startVelocity, positionToPack);
       positionToPack.scaleAdd(3.0 * a2 - 2.0 * a3, endPosition, positionToPack);
       positionToPack.scaleAdd(2.0 * a3 - 3.0 * a2 + 1, startPosition, positionToPack);
    }
@@ -129,7 +129,7 @@ public class ContactSegmentHelper
       double a2 = alpha * alpha;
 
       velocityToPack.sub(startPosition, endPosition);
-      velocityToPack.scale(6.0 * (a2 - alpha));
+      velocityToPack.scale(6.0 / originalDuration * (a2 - alpha));
       velocityToPack.scaleAdd(3.0 * a2 - 2.0 * alpha, endVelocity, velocityToPack);
       velocityToPack.scaleAdd(3.0 * a2 - 4.0 * alpha + 1.0, startVelocity, velocityToPack);
    }
