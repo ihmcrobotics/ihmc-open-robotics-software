@@ -15,8 +15,8 @@ public class MPCParameters
    public static final boolean includeRhoMinInequality = true;
    public static final boolean includeRhoMaxInequality = false;
    public static final boolean includeForceMinimization = false;
-   public static final boolean includeRhoMinimization = true;
-   public static final boolean includeRhoRateMinimization = true;
+   public static final boolean includeRhoMinimization = false;
+   public static final boolean includeRhoRateMinimization = false;
 
    public static final boolean includeIntermediateOrientationTracking = true;
 
@@ -26,7 +26,7 @@ public class MPCParameters
    public static final double defaultInitialComVelocityWeight = 1e2;
    public static final double defaultFinalComWeight = 1e1;
    public static final double defaultFinalVRPWeight = 1e2;
-   public static final double defaultVrpTrackingWeight = 1e2;
+   public static final double defaultVrpTrackingWeight = 1e3;
    public static final double defaultRhoTrackingWeight = 1e-3;
    public static final double defaultRhoRateTrackingWeight = 1e-6;
    public static final double defaultForceTrackingWeight = 1e-4;
