@@ -222,7 +222,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       twistRootBodyRelativeToWorld.setIncludingFrame(rootJoint.getJointTwist());
       twistRootBodyRelativeToWorld.getAngularPart().set(angularVelocityRootJointFrameRelativeToWorld);
       rootJoint.setJointTwist(twistRootBodyRelativeToWorld);
-      rootJoint.updateFramesRecursively();
+      rootJoint.updateFrame();
 
       yoRootJointAngularVelocity.setMatchingFrame(angularVelocityMeasurementLinkRelativeToWorld);
       yoRootJointAngularVelocityMeasFrame.setMatchingFrame(angularVelocityMeasurementLinkRelativeToWorld);

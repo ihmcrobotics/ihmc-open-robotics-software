@@ -50,7 +50,6 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    private String messagerConnectedHost = "";
    private final MessagerHelper messagerHelper;
    private volatile boolean yoClientDisconnecting = false;
-   private volatile boolean yoClientConnecting = false;
    private final YoVariableClientHelper yoVariableClientHelper;
    private final GDXBehaviorUIInterface highestLevelUI;
    private final ImGuiBehaviorModuleDisabledNodeUI disabledNodeUI;
@@ -212,13 +211,9 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
             disconnectMessager();
          }
       }
-      if (yoClientConnecting)
+      if (yoVariableClientHelper.isConnecting())
       {
          ImGui.text("YoVariable client connecting...");
-         if (yoVariableClientHelper.isConnected())
-         {
-            yoClientConnecting = false;
-         }
       }
       else if (yoClientDisconnecting)
       {
@@ -256,7 +251,6 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    public void connectYoVariableClient()
    {
       yoVariableClientHelper.start(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
-      yoClientConnecting = true;
    }
 
    public void disconnectMessager()
