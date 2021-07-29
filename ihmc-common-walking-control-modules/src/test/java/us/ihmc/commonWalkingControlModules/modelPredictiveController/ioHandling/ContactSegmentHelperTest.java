@@ -1,9 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import org.junit.jupiter.api.Test;
-import org.ojalgo.random.RandomNumber;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -12,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameVertex3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
@@ -21,8 +18,9 @@ import java.util.Random;
 
 public class ContactSegmentHelperTest
 {
-   private static final int iters = 10000;
-   private static final double epsilon = 1e-6;
+   private static final int iters = 1000;
+   private static final double positionEpsilon = 5e-5;
+   private static final double velocityEpsilon = 5e-3;
 
    @Test
    public void testRandomCubicTrajectory()
@@ -32,7 +30,6 @@ public class ContactSegmentHelperTest
       for (int i = 0; i < iters; i++)
       {
          Polynomial3D trajectory = new Polynomial3D(4);
-         Polynomial3D trajectory2 = new Polynomial3D(4);
 
          FramePoint3D startPoint = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FramePoint3D endPoint = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
@@ -62,29 +59,22 @@ public class ContactSegmentHelperTest
          double alphaFromEnd = (timeFromEnd - startTime) / duration;
 
          trajectory.setCubic(startTime, endTime, startPoint, startVelocity, endPoint, endVelocity);
-         trajectory2.setCubic(0.0, duration, startPoint, startVelocity, endPoint, endVelocity);
+
+         segmentToInterpolateFromStart.getTimeInterval().setInterval(startTime, endTime);
+         segmentToInterpolateFromEnd.getTimeInterval().setInterval(startTime, endTime);
 
          helper.cubicInterpolateStartOfSegment(segmentToInterpolateFromStart, alphaFromStart);
          helper.cubicInterpolateEndOfSegment(segmentToInterpolateFromEnd, alphaFromEnd);
 
          trajectory.compute(timeFromStart);
-         trajectory2.compute(timeFromStart - startTime);
 
-         FramePoint3D alt = new FramePoint3D();
-
-         interpolatePosition(alt, startPoint, startVelocity, endPoint, endVelocity, alphaFromStart);
-
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(trajectory.getPosition(), trajectory2.getPosition(), epsilon);
-         EuclidCoreTestTools.assertVector3DGeometricallyEquals(trajectory.getVelocity(), trajectory2.getVelocity(), epsilon);
-
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(alt, segmentToInterpolateFromStart.getECMPStartPosition(), epsilon);
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(trajectory.getPosition(), segmentToInterpolateFromStart.getECMPStartPosition(), epsilon);
-         EuclidCoreTestTools.assertVector3DGeometricallyEquals(trajectory.getVelocity(), segmentToInterpolateFromStart.getECMPStartVelocity(), epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(trajectory.getPosition(), segmentToInterpolateFromStart.getECMPStartPosition(), positionEpsilon);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(trajectory.getVelocity(), segmentToInterpolateFromStart.getECMPStartVelocity(), velocityEpsilon);
 
          trajectory.compute(timeFromEnd);
 
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(trajectory.getPosition(), segmentToInterpolateFromEnd.getECMPEndPosition(), epsilon);
-         EuclidCoreTestTools.assertVector3DGeometricallyEquals(trajectory.getVelocity(), segmentToInterpolateFromEnd.getECMPEndVelocity(), epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(trajectory.getPosition(), segmentToInterpolateFromEnd.getECMPEndPosition(), positionEpsilon);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(trajectory.getVelocity(), segmentToInterpolateFromEnd.getECMPEndVelocity(), velocityEpsilon);
       }
    }
 
@@ -104,11 +94,9 @@ public class ContactSegmentHelperTest
 
          segmentToInterpolateFromStart.setStartECMPPosition(startPoint);
          segmentToInterpolateFromStart.setEndECMPPosition(endPoint);
-         segmentToInterpolateFromStart.setLinearECMPVelocity();
 
          segmentToInterpolateFromEnd.setStartECMPPosition(startPoint);
          segmentToInterpolateFromEnd.setEndECMPPosition(endPoint);
-         segmentToInterpolateFromEnd.setLinearECMPVelocity();
 
          double startTime = RandomNumbers.nextDouble(random, 10.0);
          double duration = RandomNumbers.nextDouble(random, 0.0, 10.0);
@@ -118,6 +106,11 @@ public class ContactSegmentHelperTest
 
          double alphaFromStart = (timeFromStart - startTime) / duration;
          double alphaFromEnd = (timeFromEnd - startTime) / duration;
+
+         segmentToInterpolateFromStart.getTimeInterval().setInterval(startTime, endTime);
+         segmentToInterpolateFromStart.setLinearECMPVelocity();
+         segmentToInterpolateFromEnd.getTimeInterval().setInterval(startTime, endTime);
+         segmentToInterpolateFromEnd.setLinearECMPVelocity();
 
 
          FrameVector3DBasics velocity = new FrameVector3D();
@@ -133,33 +126,11 @@ public class ContactSegmentHelperTest
          helper.cubicInterpolateStartOfSegment(segmentToInterpolateFromStart, alphaFromStart);
          helper.cubicInterpolateEndOfSegment(segmentToInterpolateFromEnd, alphaFromEnd);
 
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(positionFromStart, segmentToInterpolateFromStart.getECMPStartPosition(), epsilon);
-         EuclidCoreTestTools.assertVector3DGeometricallyEquals(velocity, segmentToInterpolateFromStart.getECMPStartVelocity(), epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(positionFromStart, segmentToInterpolateFromStart.getECMPStartPosition(), positionEpsilon);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(velocity, segmentToInterpolateFromStart.getECMPStartVelocity(), velocityEpsilon);
 
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(positionFromEnd, segmentToInterpolateFromEnd.getECMPEndPosition(), epsilon);
-         EuclidCoreTestTools.assertVector3DGeometricallyEquals(velocity, segmentToInterpolateFromEnd.getECMPEndVelocity(), epsilon);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(positionFromEnd, segmentToInterpolateFromEnd.getECMPEndPosition(), positionEpsilon);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(velocity, segmentToInterpolateFromEnd.getECMPEndVelocity(), velocityEpsilon);
       }
-   }
-
-   private static void interpolatePosition(FramePoint3DBasics framePointToPack, FramePoint3DReadOnly startPosition,
-                                           FrameVector3DReadOnly startVelocity, FramePoint3DReadOnly endPosition,
-                                           FrameVector3DReadOnly endVelocity, double alpha)
-   {
-      FramePoint3D c2 = new FramePoint3D();
-      c2.sub(endPosition, startPosition);
-      c2.scale(3.0);
-      c2.scaleAdd(-2.0, startVelocity, c2);
-      c2.sub(endVelocity);
-
-      FramePoint3D c3 = new FramePoint3D();
-      c3.sub(startPosition, endPosition);
-      c3.scale(2.0);
-      c3.add(startVelocity);
-      c3.add(endVelocity);
-
-      framePointToPack.set(startPosition);
-      framePointToPack.scaleAdd(alpha, startVelocity, framePointToPack);
-      framePointToPack.scaleAdd(alpha * alpha, c2, framePointToPack);
-      framePointToPack.scaleAdd(alpha * alpha * alpha, c3, framePointToPack);
    }
 }
