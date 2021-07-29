@@ -114,15 +114,17 @@ public class PreviewWindowCalculator
             for (int phaseIdx = 0; phaseIdx < phasesInInterval.size(); phaseIdx++)
             {
                ContactPlaneProvider contact = phasesInInterval.get(phaseIdx);
-               double phaseStart = Math.max(segmentStartTime, contact.getTimeInterval().getStartTime());
-               double phaseEnd = Math.min(segmentEndTime, contact.getTimeInterval().getEndTime());
-               segment.addContactPhaseInSegment(contact, phaseStart, phaseEnd);
+               segment.addContactPhaseInSegment(contact);
             }
 
             double alphaThroughStart = computeTheFractionThroughTheTimeInterval(segmentStartTime, phasesInInterval.get(0).getTimeInterval());
             double alphaThroughEnd = computeTheFractionThroughTheTimeInterval(segmentEndTime, phasesInInterval.get(phasesInInterval.size() - 1).getTimeInterval());
+            double phaseStart = Math.max(segmentStartTime, segment.getContactPhase(0).getTimeInterval().getStartTime());
+            double phaseEnd = Math.min(segmentEndTime, segment.getContactPhase(phasesInInterval.size() - 1).getTimeInterval().getEndTime());
             contactSegmentHelper.cubicInterpolateStartOfSegment(segment.getContactPhase(0), alphaThroughStart);
             contactSegmentHelper.cubicInterpolateEndOfSegment(segment.getContactPhase(phasesInInterval.size() - 1), alphaThroughEnd);
+            segment.getContactPhase(0).getTimeInterval().setStartTime(phaseStart);
+            segment.getContactPhase(phasesInInterval.size() - 1).getTimeInterval().setEndTime(phaseEnd);
 
             for (int contactId = 0; contactId < phasesInInterval.get(0).getNumberOfContactPlanes(); contactId++)
                segment.addContact(phasesInInterval.get(0).getContactPose(contactId), phasesInInterval.get(0).getContactsInBodyFrame(contactId));

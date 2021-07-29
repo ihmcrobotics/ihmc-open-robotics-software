@@ -81,19 +81,22 @@ public class ContactSegmentHelper
 
    public void cubicInterpolateStartOfSegment(ContactStateBasics<?> contact, double alpha)
    {
+      double originalDuration = contact.getTimeInterval().getDuration();
       cubicInterpolatePosition(modifiedCoPLocation, contact.getECMPStartPosition(), contact.getECMPStartVelocity(),
-                               contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha);
+                               contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha, originalDuration);
       cubicInterpolateVelocity(modifiedCoPVelocity, contact.getECMPStartPosition(), contact.getECMPStartVelocity(),
-                               contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha);
+                               contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha, originalDuration);
       contact.setStartECMPPosition(modifiedCoPLocation);
       contact.setStartECMPVelocity(modifiedCoPVelocity);
    }
+
    public void cubicInterpolateEndOfSegment(ContactStateBasics<?> contact, double alpha)
    {
+      double originalDuration = contact.getTimeInterval().getDuration();
       cubicInterpolatePosition(modifiedCoPLocation, contact.getECMPStartPosition(), contact.getECMPStartVelocity(),
-                               contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha);
+                               contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha, originalDuration);
       cubicInterpolateVelocity(modifiedCoPVelocity, contact.getECMPStartPosition(), contact.getECMPStartVelocity(),
-                               contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha);
+                               contact.getECMPEndPosition(), contact.getECMPEndVelocity(), alpha, originalDuration);
       contact.setEndECMPPosition(modifiedCoPLocation);
       contact.setEndECMPVelocity(modifiedCoPVelocity);
    }
@@ -103,13 +106,14 @@ public class ContactSegmentHelper
                                                 FrameVector3DReadOnly startVelocity,
                                                 FramePoint3DReadOnly endPosition,
                                                 FrameVector3DReadOnly endVelocity,
-                                                double alpha)
+                                                double alpha,
+                                                double originalDuration)
    {
       double a2 = alpha * alpha;
       double a3 = alpha * a2;
 
-      positionToPack.setAndScale(a3 - a2, endVelocity);
-      positionToPack.scaleAdd(a3 - 2.0 * a2 + alpha, startVelocity, positionToPack);
+      positionToPack.setAndScale((a3 - a2) / originalDuration, endVelocity);
+      positionToPack.scaleAdd((a3 - 2.0 * a2 + alpha) / originalDuration, startVelocity, positionToPack);
       positionToPack.scaleAdd(3.0 * a2 - 2.0 * a3, endPosition, positionToPack);
       positionToPack.scaleAdd(2.0 * a3 - 3.0 * a2 + 1, startPosition, positionToPack);
    }
@@ -119,7 +123,8 @@ public class ContactSegmentHelper
                                                 FrameVector3DReadOnly startVelocity,
                                                 FramePoint3DReadOnly endPosition,
                                                 FrameVector3DReadOnly endVelocity,
-                                                double alpha)
+                                                double alpha,
+                                                double originalDuration)
    {
       double a2 = alpha * alpha;
 
