@@ -4,98 +4,179 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
+import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.BodyPathPlanningResult;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.footstepPlanning.ui.components.FootstepPathCalculatorModule;
-import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
-import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
-import us.ihmc.robotics.Assert;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+import java.util.ArrayList;
+
+import static us.ihmc.robotics.Assert.*;
 
 public class NarrowPassageBodyPathOptimizerTest
 {
-   private static final double timeout = 240.0;
-
-   private Messager messager = null;
-   private FootstepPathCalculatorModule module = null;
+   private final double idealStanceWidth = new DefaultFootstepPlannerParameters().getIdealFootstepWidth();
+   private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
+   private FootstepPlanningModule module;
+   private FootstepPlannerParametersBasics footstepPlanningParameters;
+   private PlanarRegionsList planarRegionsList;
 
    @BeforeEach
    public void setup()
    {
-      messager = new SharedMemoryMessager(FootstepPlannerMessagerAPI.API);
-      module = new FootstepPathCalculatorModule(messager);
-      module.start();
+      FootstepPlanningModule defaultFootstepPlanningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      VisibilityGraphsParametersBasics visibilityGraphParameters = defaultFootstepPlanningModule.getVisibilityGraphParameters();
+      visibilityGraphParameters.setOptimizeForNarrowPassage(true);
+      footstepPlanningParameters = defaultFootstepPlanningModule.getFootstepPlannerParameters();
 
-      try
-      {
-         messager.startMessager();
-      }
-      catch (Exception e)
-      {
-         throw new RuntimeException("Failed to start messager.");
-      }
-
-
+      module = new FootstepPlanningModule(getClass().getSimpleName(),
+                                          visibilityGraphParameters,
+                                          footstepPlanningParameters,
+                                          defaultFootstepPlanningModule.getSwingPlannerParameters(),
+                                          null,
+                                          PlannerTools.createDefaultFootPolygons(),
+                                          null);
    }
 
    @AfterEach
    public void tearDown() throws Exception
    {
-      module.stop();
-      messager.closeMessager();
       module = null;
-      messager = null;
+   }
+
+   @Test
+   public void testJerseyBarriers78cm()
+   {
+      DataSet dataset = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_Jersey_Barriers_JSC_78cm);
+      ArrayList<Pose3D> waypoints = runFootstepPlanningModuleTest(dataset);
+      doCollisionChecks(waypoints);
+   }
+
+   @Test
+   public void testJerseyBarriers65cm()
+   {
+      DataSet dataset = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_Jersey_Barriers_IHMC_65cm);
+      ArrayList<Pose3D> waypoints = runFootstepPlanningModuleTest(dataset);
+      doCollisionChecks(waypoints);
    }
 
    @Test
    public void testJerseyBarriers60cm()
    {
       DataSet dataset = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_Jersey_Barriers_JSC_60cm);
-      packPlanningRequest(dataset, messager);
-      FootstepPlanningModule planningModule = module.getPlanningModule();
-      int numberOfWaypoints = planningModule.getBodyPathPlan().getNumberOfWaypoints();
-      LogTools.info("numberOfWaypoints: " + numberOfWaypoints);
-      assert(numberOfWaypoints > 2);
+      ArrayList<Pose3D> waypoints = runFootstepPlanningModuleTest(dataset);
+      doCollisionChecks(waypoints);
    }
 
-   private void packPlanningRequest(DataSet dataset, Messager messager)
+   @Test
+   public void testJerseyBarriers55cm()
+   {
+      DataSet dataset = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_Jersey_Barriers_IHMC_55cm);
+      ArrayList<Pose3D> waypoints = runFootstepPlanningModuleTest(dataset);
+      doCollisionChecks(waypoints);
+   }
+
+   @Test
+   public void testCorridor1Wall()
+   {
+      DataSet dataset = DataSetIOTools.loadDataSet(DataSetName._20191007_200400_Corridor1Wall);
+      ArrayList<Pose3D> waypoints = runFootstepPlanningModuleTest(dataset);
+      doCollisionChecks(waypoints);
+   }
+
+   // Test that the body-path result from running the request through the planning module is a FOUND_SOLUTION
+   private ArrayList<Pose3D> runFootstepPlanningModuleTest(DataSet dataset)
    {
       PlannerInput plannerInput = dataset.getPlannerInput();
-      double startYaw = plannerInput.getStartYaw();
-      double goalYaw = plannerInput.getGoalYaw();
+      planarRegionsList = dataset.getPlanarRegionsList();
       SideDependentList<Pose3D> startSteps = PlannerTools.createSquaredUpFootsteps(plannerInput.getStartPosition(),
-                                                                                   startYaw,
-                                                                                   module.getPlanningModule()
-                                                                                         .getFootstepPlannerParameters()
-                                                                                         .getIdealFootstepWidth());
-      SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(plannerInput.getGoalPosition(),
-                                                                                  goalYaw,
-                                                                                  module.getPlanningModule()
-                                                                                        .getFootstepPlannerParameters()
-                                                                                        .getIdealFootstepWidth());
+                                                                                   plannerInput.getStartYaw(),
+                                                                                   idealStanceWidth);
+      SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(plannerInput.getGoalPosition(), plannerInput.getGoalYaw(), idealStanceWidth);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, startSteps.get(RobotSide.LEFT));
-      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, startSteps.get(RobotSide.RIGHT));
-      messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, goalSteps.get(RobotSide.LEFT));
-      messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, goalSteps.get(RobotSide.RIGHT));
+      FootstepPlannerRequest request = new FootstepPlannerRequest();
+      request.setStartFootPoses(startSteps.get(RobotSide.LEFT), startSteps.get(RobotSide.RIGHT));
+      request.setGoalFootPoses(goalSteps.get(RobotSide.LEFT), goalSteps.get(RobotSide.RIGHT));
+      request.setPerformAStarSearch(false);
+      request.setPlanBodyPath(true);
+      request.setPlanarRegionsList(planarRegionsList);
+      FootstepPlannerOutput plannerOutput = module.handleRequest(request);
+      assertEquals(plannerOutput.getBodyPathPlanningResult(), BodyPathPlanningResult.FOUND_SOLUTION);
+      return plannerOutput.getBodyPath();
+   }
 
-      messager.submitMessage(PlanBodyPath, true);
-      messager.submitMessage(PlanNarrowPassage, true);
+   // Perform collision check between bounding box at body-path waypoints and planar region environment
+   private void doCollisionChecks(ArrayList<Pose3D> waypoints)
+   {
+      waypoints.remove(0);
+      waypoints.remove(waypoints.size() - 1);
+      for (int i = 0; i < waypoints.size(); i++)
+      {
+         assertFalse(doCollisionCheck(waypoints.get(i)));
+      }
+   }
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, dataset.getPlanarRegionsList());
+   private boolean doCollisionCheck(Pose3DReadOnly waypoint)
+   {
+      FrameBox3D collisionBox = new FrameBox3D();
+      double boxSizeX = footstepPlanningParameters.getBodyBoxDepth();
+      double boxSizeY = footstepPlanningParameters.getBodyBoxWidth();
+      double boxSizeZ = footstepPlanningParameters.getBodyBoxHeight();
+      collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
+      Vector3D boxCenterInSoleFrame = new Vector3D();
+      boxCenterInSoleFrame.set(footstepPlanningParameters.getBodyBoxBaseX(), 0.0, boxSizeZ / 2.0 + footstepPlanningParameters.getBodyBoxBaseZ());
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, 300);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, Double.MAX_VALUE);
-      messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
+      PoseReferenceFrame waypointPoseFrame = new PoseReferenceFrame("waypointPoseFrame", ReferenceFrame.getWorldFrame());
+      waypointPoseFrame.setPoseAndUpdate(waypoint);
+
+      FramePose3D boxCenterPose = new FramePose3D(waypointPoseFrame);
+      boxCenterPose.getPosition().set(boxCenterInSoleFrame);
+      boxCenterPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      collisionBox.getPose().set(boxCenterPose);
+      collisionBox.getOrientation().set(waypoint.getOrientation());
+
+      EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
+      collisionResult.setToZero();
+      collisionResult.setSignedDistance(Double.POSITIVE_INFINITY);
+
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
+
+         if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(collisionBox.getBoundingBox()))
+         {
+            EuclidShape3DCollisionResult result = new EuclidShape3DCollisionResult();
+            collisionDetector.evaluateCollision(collisionBox, planarRegion, result);
+
+            if (result.getSignedDistance() < collisionResult.getSignedDistance())
+            {
+               collisionResult.set(result);
+            }
+         }
+         if (collisionResult.areShapesColliding())
+            return true;
+      }
+      return false;
    }
 }
