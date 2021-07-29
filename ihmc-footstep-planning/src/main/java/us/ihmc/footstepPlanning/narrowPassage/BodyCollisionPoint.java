@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.narrowPassage;
 
-import sun.rmi.runtime.Log;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -18,26 +17,24 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.awt.*;
 
 public class BodyCollisionPoint
 {
+   // Scale applied to position shift, used to converge on center of oscillation
    private static double shiftAlpha = 1;
-   private static final FramePose3D nanPose = new FramePose3D();
+//   private static final FramePose3D nanPose = new FramePose3D();
 
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final YoFramePose3D startingWaypoint;
    private final YoFramePose3D optimizedWaypoint;
-   private final YoDouble maxDisplacementSquared;
    private final YoFramePoseUsingYawPitchRoll collisionBoxPose;
 
    private final PoseReferenceFrame waypointPoseFrame;
@@ -59,9 +56,6 @@ public class BodyCollisionPoint
       this.footstepPlannerParameters = footstepPlannerParameters;
       startingWaypoint = new YoFramePose3D("waypoint_init" + index, ReferenceFrame.getWorldFrame(), registry);
       optimizedWaypoint = new YoFramePose3D("waypoint_opt" + index, ReferenceFrame.getWorldFrame(), registry);
-
-      maxDisplacementSquared = new YoDouble("maxDisplacementSq" + index, registry);
-      maxDisplacementSquared.set(0.01);
 
       waypointPoseFrame = new PoseReferenceFrame("waypointPoseFrame" + index, ReferenceFrame.getWorldFrame());
       collisionBoxPose = new YoFramePoseUsingYawPitchRoll("collisionBoxPose" + index, ReferenceFrame.getWorldFrame(), registry);
@@ -97,6 +91,7 @@ public class BodyCollisionPoint
                                                                            0.01,
                                                                            YoAppearance.Black());
          graphicsListRegistry.registerYoGraphic(waypointListName, waypointPositionGraphic);
+         updateGraphics(false);
       }
    }
 
@@ -176,9 +171,9 @@ public class BodyCollisionPoint
    public double getYawShift(Vector3D collisionVector)
    {
       // Scale turning angle based on collision vector
-      double yawShift = collisionVector.length() * 250;
-      if (yawShift < 1)
-         yawShift = 1;
+      double yawShift = Math.toRadians(collisionVector.length() * 250);
+      if (yawShift < Math.toRadians(1))
+         yawShift = Math.toRadians(1);
       return yawShift;
    }
 
@@ -186,7 +181,7 @@ public class BodyCollisionPoint
    {
       QuaternionReadOnly orientation = optimizedWaypoint.getOrientation();
       optimizedWaypoint.getOrientation()
-                       .setYawPitchRoll(orientation.getYaw() + Math.toRadians(rotationDirection * yawShift), orientation.getPitch(), orientation.getRoll());
+                       .setYawPitchRoll(orientation.getYaw() + rotationDirection * yawShift, orientation.getPitch(), orientation.getRoll());
       updateCollisionBox();
    }
 
@@ -251,7 +246,7 @@ public class BodyCollisionPoint
    public void hide()
    {
       updateGraphics(false);
-      adjustmentGraphic.setPose(nanPose);
+      adjustmentGraphic.setPose(new FramePose3D());
       optimizedWaypoint.setToNaN();
    }
 }
