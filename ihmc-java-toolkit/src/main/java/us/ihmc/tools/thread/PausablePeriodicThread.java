@@ -66,4 +66,9 @@ public class PausablePeriodicThread
          stop();
       }
    }
+
+   public boolean isRunning()
+   {
+      return scheduled != null && !scheduled.isDone() && !scheduled.isCancelled();
+   }
 }
