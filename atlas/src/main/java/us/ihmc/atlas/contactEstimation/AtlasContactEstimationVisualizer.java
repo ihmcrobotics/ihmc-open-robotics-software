@@ -1,13 +1,10 @@
-package us.ihmc.valkyrie.externalForceEstimation;
-
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.swing.JButton;
+package us.ihmc.atlas.contactEstimation;
 
 import controller_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import controller_msgs.msg.dds.ExternalForceEstimationOutputStatus;
 import controller_msgs.msg.dds.ToolboxStateMessage;
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalForceEstimationToolboxModule;
@@ -20,7 +17,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
@@ -31,21 +28,23 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.KinematicPoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerStateListener
+import javax.swing.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+public class AtlasContactEstimationVisualizer implements SCSVisualizerStateListener
 {
-   private final RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_visualizer");
+   private final RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "atlas_contact_estimation_visualizer");
    private final ROS2Topic inputTopic;
    private final ROS2Topic outputTopic;
    private final int endEffectorHashCode;
    private final Vector3D externalForcePointOffset = new Vector3D();
    private String jointName;
 
-   public ValkyrieExternalForceEstimationVisualizer()
+   public AtlasContactEstimationVisualizer()
    {
       SCSVisualizer scsVisualizer = new SCSVisualizer(16384);
       scsVisualizer.setVariableUpdateRate(8);
@@ -53,8 +52,7 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       scsVisualizer.setShowOverheadView(true);
 
       // ----- Toolbox Output Display -----//
-      ValkyrieRobotVersion version = ValkyrieContactEstimationModule.version;
-      DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, version);
+      DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       inputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotModel.getSimpleRobotName());
@@ -64,16 +62,12 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       //      RigidBodyBasics endEffector = fullRobotModel.getRootBody();
 
       // ----- 1DOF Joints ----- //
-      //      endEffectorName = "torsoRoll"; // Chest
-      //      endEffectorName = "rightShoulderRoll"; // Shoulder
-      jointName = "rightElbowPitch"; // Elbow
-      //      endEffectorName = "rightForearmYaw"; // Forearm
-      //      endEffectorName = "rightWristRoll"; // Wrist roll
-      //      endEffectorName = "rightWristPitch"; // Wrist pitch
+      jointName = "l_leg_kny";
+
       RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(jointName).getSuccessor();
 
       endEffectorHashCode = endEffector.hashCode();
-      externalForcePointOffset.set(0.0, -0.35, -0.03);
+      externalForcePointOffset.set(0.080, -0.040, -0.248 );
 
       // ----- Client -----//
       YoVariableClient client = new YoVariableClient(scsVisualizer);
@@ -104,7 +98,7 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ExternalForceEstimationOutputStatus.class,
                                                     outputTopic,
-                                           s -> toolboxOutputStatus.set(s.takeNextData()));
+                                                    s -> toolboxOutputStatus.set(s.takeNextData()));
 
       AtomicBoolean reset = new AtomicBoolean();
       Vector3D tareOffset = new Vector3D();
@@ -165,6 +159,6 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
 
    public static void main(String[] args)
    {
-      new ValkyrieExternalForceEstimationVisualizer();
+      new AtlasContactEstimationVisualizer();
    }
 }

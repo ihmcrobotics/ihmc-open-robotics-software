@@ -20,7 +20,7 @@ import java.util.List;
 
 public class ExternalForceEstimationToolboxModule extends ToolboxModule
 {
-   public static final int UPDATE_PERIOD_MILLIS = 60;
+   public static final int UPDATE_PERIOD_MILLIS = 8;
    private static final double defaultTimeWithoutInputsBeforeSleep = 60.0;
 
    private final ExternalForceEstimationToolboxController forceEstimationToolboxController;

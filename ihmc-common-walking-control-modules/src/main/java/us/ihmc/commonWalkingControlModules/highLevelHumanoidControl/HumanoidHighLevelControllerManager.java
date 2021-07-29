@@ -72,7 +72,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private final ExecutionTimer highLevelControllerTimer = new ExecutionTimer("activeHighLevelControllerTimer", 1.0, registry);
 
    private final RobotDesiredConfigurationData robotDesiredConfigurationData = new RobotDesiredConfigurationData();
-   private final IntegerParameter jointDesiredOutputBroadcastFrequency = new IntegerParameter("jointDesiredOutputBroadcastFrequency", registry, 10);
+   private final IntegerParameter jointDesiredOutputBroadcastFrequency = new IntegerParameter("jointDesiredOutputBroadcastFrequency", registry, 2);
 
    public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
                                              HighLevelControllerName initialControllerState, HighLevelControllerParameters highLevelControllerParameters,
