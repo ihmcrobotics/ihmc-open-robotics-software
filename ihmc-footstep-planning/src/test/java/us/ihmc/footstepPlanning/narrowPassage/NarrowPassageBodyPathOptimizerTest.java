@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.narrowPassage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import sun.rmi.runtime.Log;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
@@ -19,7 +18,6 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -140,7 +138,6 @@ public class NarrowPassageBodyPathOptimizerTest
       {
          waypoints.add((Pose3D) module.getBodyPathPlan().getWaypoint(i));
       }
-      waypoints.forEach(wp -> LogTools.info(wp.getOrientation()));
 
       return waypoints;
    }
@@ -153,7 +150,6 @@ public class NarrowPassageBodyPathOptimizerTest
       for (int i = 0; i < waypoints.size(); i++)
       {
          boolean check = doCollisionCheck(waypoints.get(i));
-         LogTools.info("waypoint " + i + ": " + check);
          assertFalse(check);
       }
    }

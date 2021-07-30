@@ -30,7 +30,6 @@ public class BodyCollisionPoint
 {
    // Scale applied to position shift, used to converge on center of oscillation
    private static double shiftAlpha = 1;
-//   private static final FramePose3D nanPose = new FramePose3D();
 
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final YoFramePose3D startingWaypoint;
@@ -121,7 +120,7 @@ public class BodyCollisionPoint
       waypointAdjustmentPose.getPosition().set(startingWaypoint.getPosition());
 
       double yaw = Math.atan2(adjustmentFrameX.getY(), adjustmentFrameX.getX());
-      double pitch = -Math.asin(adjustmentFrameX.getZ());
+      double pitch = 0.0;
       double roll = 0.0;
       waypointAdjustmentPose.getOrientation().setYawPitchRoll(yaw, pitch, roll);
       waypointAdjustmentFrame.setPoseAndUpdate(waypointAdjustmentPose);
@@ -180,8 +179,7 @@ public class BodyCollisionPoint
    public void adjustOrientation(int rotationDirection, double yawShift)
    {
       QuaternionReadOnly orientation = optimizedWaypoint.getOrientation();
-      optimizedWaypoint.getOrientation()
-                       .setYawPitchRoll(orientation.getYaw() + rotationDirection * yawShift, orientation.getPitch(), orientation.getRoll());
+      optimizedWaypoint.getOrientation().setYawPitchRoll(orientation.getYaw() + rotationDirection * yawShift, orientation.getPitch(), orientation.getRoll());
       updateCollisionBox();
    }
 
