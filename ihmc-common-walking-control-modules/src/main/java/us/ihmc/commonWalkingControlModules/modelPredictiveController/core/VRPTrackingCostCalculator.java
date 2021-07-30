@@ -60,18 +60,30 @@ public class VRPTrackingCostCalculator
       int startCoMIdx = indexHandler.getComCoefficientStartIndex(segmentNumber, 0);
       int startRhoIdx = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
 
-      if (hasValidVelocityBounds(objective))
-         return calculateCubicVRPTrackingObjectiveInternal(costHessianToPack, costGradientToPack, objective, startCoMIdx, startRhoIdx);
-      else
-         return calculateLinearVRPTrackingObjectiveInternal(costHessianToPack, costGradientToPack, objective, startCoMIdx, startRhoIdx);
+      if (!hasValidVelocityBounds(objective))
+      {
+         velocity.sub(objective.getEndVRP(), objective.getStartVRP());
+         velocity.scale(1.0 / (objective.getEndTime() - objective.getStartTime()));
+         objective.setStartVRPVelocity(velocity);
+         objective.setEndVRPVelocity(velocity);
+      }
+
+      return calculateCubicVRPTrackingObjectiveInternal(costHessianToPack, costGradientToPack, objective, startCoMIdx, startRhoIdx);
    }
+
+   private final FrameVector3D velocity = new FrameVector3D();
 
    public boolean calculateCompactVRPTrackingObjective(DMatrix costHessianToPack, DMatrix costGradientToPack, VRPTrackingCommand objective)
    {
-      if (hasValidVelocityBounds(objective))
-         return calculateCubicVRPTrackingObjectiveInternal(costHessianToPack, costGradientToPack, objective, 0, LinearMPCIndexHandler.comCoefficientsPerSegment);
-      else
-         return calculateLinearVRPTrackingObjectiveInternal(costHessianToPack, costGradientToPack, objective, 0, LinearMPCIndexHandler.comCoefficientsPerSegment);
+      if (!hasValidVelocityBounds(objective))
+      {
+         velocity.sub(objective.getEndVRP(), objective.getStartVRP());
+         velocity.scale(1.0 / (objective.getEndTime() - objective.getStartTime()));
+         objective.setStartVRPVelocity(velocity);
+         objective.setEndVRPVelocity(velocity);
+      }
+
+      return calculateCubicVRPTrackingObjectiveInternal(costHessianToPack, costGradientToPack, objective, 0, LinearMPCIndexHandler.comCoefficientsPerSegment);
    }
 
    private static boolean hasValidVelocityBounds(VRPTrackingCommand objective)
@@ -314,36 +326,26 @@ public class VRPTrackingCostCalculator
          }
       }
 
-      double a2c0End = t5End / 5.0 - 2.0 * t3End / w2;
-      double a3c0End = t4End / 4.0 - t2End / w2;
-      double a2c1End = t4End / 4.0 - 3.0 * t2End / w2;
-      double a3c1End = t3End / 3.0 - 2.0 * tEnd / w2;
-
-      double a2c0Start = t5Start / 5.0 - 2.0 * t3Start / w2;
-      double a3c0Start = t4Start / 4.0 - t2Start / w2;
-      double a2c1Start = t4Start / 4.0 - 3.0 * t2Start / w2;
-      double a3c1Start = t3Start / 3.0 - 2.0 * tStart / w2;
-
       double a2c0Desired = t7Change / 7.0 - 6.0 * t5Change / (5.0 * w2);
       double a3c0Desired = t6Change / 6.0 - t4Change / (2.0 * w2);
-      double a2c1Desired = t6Change / 6.0 - 3.0 * (t4End - t4Start) / (2.0 * w2);
-      double a3c1Desired = t5Change / 5.0 - 2.0 * (t3End - t3Start) / (3.0 * w2);
-      double a2c2Desired = t5Change / 5.0 - 2.0 * (t3End - t3Start) / w2;
-      double a3c2Desired = t4Change / 4.0 - (t2End - t2Start) / w2;
-      double a2c3Desired = t4Change / 4.0 - 3.0 * (t2End - t2Start) / w2;
-      double a3c3Desired = t3Change / 3.0 - 2.0 * (tEnd - tStart) / w2;
+      double a2c1Desired = t6Change / 6.0 - 3.0 * t4Change / (2.0 * w2);
+      double a3c1Desired = t5Change / 5.0 - 2.0 * t3Change / (3.0 * w2);
+      double a2c2Desired = t5Change / 5.0 - 2.0 * t3Change / w2;
+      double a3c2Desired = t4Change / 4.0 - t2Change / w2;
+      double a2c3Desired = t4Change / 4.0 - 3.0 * t2Change / w2;
+      double a3c3Desired = t3Change / 3.0 - 2.0 * tChange / w2;
 
-      double ga2 = (t6End - t6Start) / 12.0 - (t4End - t4Start) / w2 + 3.0 * (t2End - t2Start) / w4;
-      double ga3 = (t5End - t5Start) / 10.0 - 2.0 * (t3End - t3Start) / (3.0 * w2) + 2.0 / w4 * (tEnd - tStart);
+      double ga2 = t6Change / 12.0 - t4Change / w2 + 3.0 * t2Change / w4;
+      double ga3 = t5Change / 10.0 - 2.0 * t3Change / (3.0 * w2) + 2.0 / w4 * tChange;
 
-      double a2a2 = (t7End - t7Start) / 7.0 - 12.0 * (t5End - t5Start) / (5.0 * w2) + 12.0 / w4 * (t3End - t3Start);
-      double a2a3 = (t6End - t6Start) / 6.0 - 2.0 * (t4End - t4Start) / w2 + 6.0 / w4 * (t2End- t2Start);
-      double a3a3 = (t5End - t5Start) / 5.0 - 4.0 / 3.0 * (t3End - t3Start) / w2 + 4.0 / w4 * (tEnd - tStart);
+      double a2a2 = t7Change / 7.0 - 12.0 * t5Change / (5.0 * w2) + 12.0 / w4 * t3Change;
+      double a2a3 = t6Change / 6.0 - 2.0 * t4Change / w2 + 6.0 / w4 * t2Change;
+      double a3a3 = t5Change / 5.0 - 4.0 / 3.0 * t3Change / w2 + 4.0 / w4 * tChange;
 
-      double a2c0 = a2c0End - a2c0Start;
-      double a3c0 = a3c0End - a3c0Start;
-      double a2c1 = a2c1End - a2c1Start;
-      double a3c1 = a3c1End - a3c1Start;
+      double a2c0 = t5Change / 5.0 - 2.0 * t3Change / w2;
+      double a3c0 = t4Change / 4.0 - t2Change / w2;
+      double a2c1 = t4Change / 4.0 - 3.0 * t2Change / w2;
+      double a3c1 = t3Change / 3.0 - 2.0 * tChange / w2;
 
       // compute the cubic function in terms of the time relative to the start of the segment
       vrpChange.sub(objective.getEndVRP(), objective.getStartVRP());
@@ -378,15 +380,15 @@ public class VRPTrackingCostCalculator
       c3Desired.scaleAdd(-tStart, a2Desired, c3Desired);
       c3Desired.add(a3Desired);
 
-      desiredValuePosition.setAndScale((t5End - t5Start) / 5.0, c0Desired);
-      desiredValuePosition.scaleAdd((t4End - t4Start) / 4.0, c1Desired, desiredValuePosition);
-      desiredValuePosition.scaleAdd((t3End- t3Start) / 3.0, c2Desired, desiredValuePosition);
-      desiredValuePosition.scaleAdd((t2End - t2Start) / 2.0, c3Desired, desiredValuePosition);
+      desiredValuePosition.setAndScale(t5Change / 5.0, c0Desired);
+      desiredValuePosition.scaleAdd(t4Change / 4.0, c1Desired, desiredValuePosition);
+      desiredValuePosition.scaleAdd(t3Change / 3.0, c2Desired, desiredValuePosition);
+      desiredValuePosition.scaleAdd(t2Change / 2.0, c3Desired, desiredValuePosition);
 
-      desiredValueVelocity.setAndScale((t4End - t4Start) / 4.0, c0Desired);
-      desiredValueVelocity.scaleAdd((t3End - t3Start) / 3.0, c1Desired, desiredValueVelocity);
-      desiredValueVelocity.scaleAdd((t2End - t2Start) / 2.0, c2Desired, desiredValueVelocity);
-      desiredValueVelocity.scaleAdd((tEnd - tStart), c3Desired, desiredValueVelocity);
+      desiredValueVelocity.setAndScale(t4Change / 4.0, c0Desired);
+      desiredValueVelocity.scaleAdd(t3Change / 3.0, c1Desired, desiredValueVelocity);
+      desiredValueVelocity.scaleAdd(t2Change / 2.0, c2Desired, desiredValueVelocity);
+      desiredValueVelocity.scaleAdd(tChange, c3Desired, desiredValueVelocity);
 
       // TODO review to see if the set vs add methods are correct
       for (int ordinal = 0; ordinal < 3; ordinal++)
@@ -451,9 +453,9 @@ public class VRPTrackingCostCalculator
          double basisDotC3 = c3Desired.dot(basisVector);
          double basisDotG = basisVector.getZ() * gravityZ;
 
-         MatrixMissingTools.unsafe_add(costGradientToPack, idxI, 0, -basisDotC0 * a2c0Desired - basisDotC1 * a2c1Desired - basisDotC2 * a2c2Desired - basisDotC3 * a2c3Desired + basisDotG * ga2);
-         MatrixMissingTools.unsafe_add(costGradientToPack, idxI + 1, 0, -basisDotC0 * a3c0Desired - basisDotC1 * a3c1Desired
-                                                                        -basisDotC2 * a3c2Desired - basisDotC3 * a3c3Desired + basisDotG * ga3);
+         MatrixMissingTools.unsafe_add(costGradientToPack, idxI, 0, basisDotG * ga2 - basisDotC0 * a2c0Desired - basisDotC1 * a2c1Desired - basisDotC2 * a2c2Desired - basisDotC3 * a2c3Desired);
+         MatrixMissingTools.unsafe_add(costGradientToPack, idxI + 1, 0, basisDotG * ga3 - basisDotC0 * a3c0Desired - basisDotC1 * a3c1Desired
+                                                                        -basisDotC2 * a3c2Desired - basisDotC3 * a3c3Desired);
       }
 
       return true;
