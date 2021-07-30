@@ -9,7 +9,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -41,7 +40,6 @@ public class NarrowPassageBodyPathVisualizer
 
       Pose3D startPose = new Pose3D();
       Pose3D endPose = new Pose3D();
-
       startPose.getPosition().set(dataSet.getPlannerInput().getStartPosition());
       startPose.getOrientation().setToYawOrientation(dataSet.getPlannerInput().getStartYaw());
       endPose.getPosition().set(dataSet.getPlannerInput().getGoalPosition());
@@ -66,9 +64,6 @@ public class NarrowPassageBodyPathVisualizer
          bodyPathPlanner.setStart(startPose);
          bodyPathPlanner.setGoal(endPose);
 
-//         LogTools.info(startPose);
-//         LogTools.info(endPose);
-
          bodyPathPlanner.planWaypoints();
          List<FramePose3D> waypointsList = bodyPathPlanner.getWaypointsAsFramePoseList();
 
@@ -77,11 +72,7 @@ public class NarrowPassageBodyPathVisualizer
       }
 
       narrowPassageBodyPathOptimizer.setPlanarRegionsList(planarRegionsList);
-      List<Pose3DReadOnly> waypoints = narrowPassageBodyPathOptimizer.runNarrowPassageOptimizer();
-      for (int i = 0; i < waypoints.size(); i++)
-      {
-         LogTools.info(waypoints.get(i).getOrientation());
-      }
+      narrowPassageBodyPathOptimizer.runNarrowPassageOptimizer();
 
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.startOnAThread();

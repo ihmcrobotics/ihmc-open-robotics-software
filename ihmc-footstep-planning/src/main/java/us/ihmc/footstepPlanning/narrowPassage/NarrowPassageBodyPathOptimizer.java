@@ -461,13 +461,11 @@ public class NarrowPassageBodyPathOptimizer
    {
       double value = 1.0;
       int i = 0;
-
       while (i < exponent)
       {
          value *= base;
          i++;
       }
-
       return value;
    }
 }
