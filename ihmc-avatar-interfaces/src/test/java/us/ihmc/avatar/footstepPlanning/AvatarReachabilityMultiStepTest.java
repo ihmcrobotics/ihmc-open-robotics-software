@@ -52,12 +52,12 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private static final int numberOfStancesToCheck = 1;
-   private static final int numberOfStepsToTake = 5;
+   private static final int numberOfStepsToTake = 4;
    private static final double solutionQualityThreshold = 2.2;
    private static final double initialStanceTime = 0.5;
-   private static final double swingDuration = 2;
+   private static final double swingDuration = 3;
    private static final double stepTime = numberOfStepsToTake * swingDuration * 1.5;
-   private static final Random random = new Random(250);
+   private static final Random random = new Random(650);
 
    private DRCRobotModel robotModel;
    private List<KinematicsToolboxSnapshotDescription> feasibleSolutions;
@@ -211,11 +211,8 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
          stanceFootFrame.setTransformAndUpdate(new RigidBodyTransform(new Quaternion(previousYaw, 0, 0), previousPose));
 
-         TransformReferenceFrame loadedFootFrame = new TransformReferenceFrame("loadedFootFrame", stanceFootFrame);
-         loadedFootFrame.setTransformAndUpdate(new RigidBodyTransform(loadedOrientation, loadedPose));
-
          // Adjust candidate foot position if right step
-         if (robotSide == RobotSide.LEFT)
+         if (robotSide == RobotSide.RIGHT)
          {
             double stepY = loadedPose.getY();
             loadedPose.setY(-stepY);
@@ -225,6 +222,12 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
             double stepRoll = loadedOrientation.getRoll();
             loadedOrientation.setYawPitchRoll(-stepYaw, stepPitch, stepRoll);
          }
+
+         TransformReferenceFrame loadedFootFrame = new TransformReferenceFrame("loadedFootFrame", stanceFootFrame);
+         loadedFootFrame.setTransformAndUpdate(new RigidBodyTransform(loadedOrientation, loadedPose));
+
+         LogTools.info(loadedPose);
+         LogTools.info(loadedOrientation.getYaw());
 
          // Get desired step in stance frame
          FramePose3D footPose = new FramePose3D();
@@ -247,6 +250,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          // Add to footstep command list
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, step, orientation);
          footstepData.setSwingDuration(swingDuration);
+         footstepData.setSwingHeight(1);
          footstepDataListMessage.getFootstepDataList().add().set(footstepData);
 
          previousPose.setX(step.getX());
@@ -278,7 +282,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    private int getNextStep(List<KinematicsToolboxSnapshotDescription> feasibleSolutions, RobotSide robotSide, Mode mode)
    {
       int stepIndex = -1;
-      int maxNumOfIterations = 1000;
+      int maxNumOfIterations = 5000;
       int count = 0;
       while (count < maxNumOfIterations)
       {
@@ -297,11 +301,15 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
                   return randIndex;
                break;
             case FLAT_LEFT:
-               if (desiredPosition.getY() > 0 && desiredPosition.getZ() == 0)
+               if (robotSide == RobotSide.LEFT && desiredPosition.getY() > 0 && desiredPosition.getZ() == 0)
+                  return randIndex;
+               if (robotSide == RobotSide.RIGHT && desiredPosition.getY() < 0 && desiredPosition.getZ() == 0)
                   return randIndex;
                break;
             case FLAT_RIGHT:
-               if (desiredPosition.getY() < 0 && desiredPosition.getZ() == 0)
+               if (robotSide == RobotSide.LEFT && desiredPosition.getY() < 0 && desiredPosition.getZ() == 0)
+                  return randIndex;
+               if (robotSide == RobotSide.RIGHT && desiredPosition.getY() > 0 && desiredPosition.getZ() == 0)
                   return randIndex;
                break;
             case FLAT_RANDOM:
@@ -334,7 +342,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
 
    public void endDRCSimulationTest()
    {
-      drcSimulationTestHelper.getBlockingSimulationRunner().destroySimulation();
+//      drcSimulationTestHelper.getBlockingSimulationRunner().destroySimulation();
       drcSimulationTestHelper.getAvatarSimulation().dispose();
       drcSimulationTestHelper.getSimulationStarter().close();
       drcSimulationTestHelper.getROS2Node().destroy();
