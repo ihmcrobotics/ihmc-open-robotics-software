@@ -43,7 +43,7 @@ public class GDXEnvironment extends ImGuiPanel
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironment.class, "Environment");
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
-   private final ArrayList<GDXEnvironmentObject> lightObjects = new ArrayList<>();
+   private final ArrayList<GDXLightObject> lightObjects = new ArrayList<>();
    private GDXEnvironmentObject selectedObject;
    private GDXEnvironmentObject intersectedObject;
    private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo();
@@ -198,7 +198,7 @@ public class GDXEnvironment extends ImGuiPanel
       if (objectToPlace != null)
       {
          if (objectToPlace instanceof GDXLightObject)
-            lightObjects.add(objectToPlace);
+            lightObjects.add((GDXLightObject) objectToPlace);
 
          objects.add(objectToPlace);
 
@@ -291,6 +291,10 @@ public class GDXEnvironment extends ImGuiPanel
    {
       selectedEnvironmentFile = environmentFile;
       objects.clear();
+
+      lightObjects.forEach(GDXLightObject::delete);
+      lightObjects.clear();
+
       selectedObject = null;
       intersectedObject = null;
       if (doorSimulator != null)
@@ -317,6 +321,9 @@ public class GDXEnvironment extends ImGuiPanel
                tempTransform.set(tempOrientation, tempTranslation);
                object.set(tempTransform);
                objects.add(object);
+
+               if (object instanceof GDXLightObject)
+                  lightObjects.add((GDXLightObject) object);
 
                if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
                {
