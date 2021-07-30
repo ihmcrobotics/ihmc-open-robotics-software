@@ -167,7 +167,6 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             goalRightFootPose.appendTranslation(0.0, -0.5 * footstepPlannerParameters.getIdealFootstepWidth(), 0.0);
             footstepPlan.addFootstep(RobotSide.LEFT, startLeftFootPose);
             footstepPlan.addFootstep(RobotSide.RIGHT, startLeftFootPose);
-            request.setRequestedPathHeading(desiredHeading);
             if(squareUpEndSteps)
             {
                request.getGoalLeftFootPose().set(goalLeftFootPose);
