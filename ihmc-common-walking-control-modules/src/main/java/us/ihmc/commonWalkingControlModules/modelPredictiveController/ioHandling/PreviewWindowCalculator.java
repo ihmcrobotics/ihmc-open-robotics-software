@@ -233,7 +233,6 @@ public class PreviewWindowCalculator
 
       contactGroupDurations.add(groupDuration);
       numberOfSegmentsInContactGroups.add(computeNumberOfSegmentsInGroup(fullContactSequence.get(segmentIdx - 1).getContactState(), groupDuration));
-//      contactPhasesInGroup.add(fullContactSequence.size() - 1);
    }
 
    private int computeNumberOfSegmentsInGroup(ContactState contactState, double groupDuration)
@@ -241,7 +240,7 @@ public class PreviewWindowCalculator
       if (contactState == ContactState.FLIGHT)
          return 1;
 
-      return (int) Math.round(groupDuration / nominalSegmentDuration.getDoubleValue());
+      return Math.max((int) Math.round(groupDuration / nominalSegmentDuration.getDoubleValue()), 1);
    }
 
    private static boolean doContactPhasesBelongToTheSameGroup(ContactPlaneProvider phaseA, ContactPlaneProvider phaseB)
