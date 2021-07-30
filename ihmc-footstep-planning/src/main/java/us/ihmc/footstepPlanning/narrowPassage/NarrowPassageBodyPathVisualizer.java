@@ -2,12 +2,14 @@ package us.ihmc.footstepPlanning.narrowPassage;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -63,6 +65,10 @@ public class NarrowPassageBodyPathVisualizer
          bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
          bodyPathPlanner.setStart(startPose);
          bodyPathPlanner.setGoal(endPose);
+
+//         LogTools.info(startPose);
+//         LogTools.info(endPose);
+
          bodyPathPlanner.planWaypoints();
          List<FramePose3D> waypointsList = bodyPathPlanner.getWaypointsAsFramePoseList();
 
@@ -71,7 +77,11 @@ public class NarrowPassageBodyPathVisualizer
       }
 
       narrowPassageBodyPathOptimizer.setPlanarRegionsList(planarRegionsList);
-      narrowPassageBodyPathOptimizer.runNarrowPassageOptimizer();
+      List<Pose3DReadOnly> waypoints = narrowPassageBodyPathOptimizer.runNarrowPassageOptimizer();
+      for (int i = 0; i < waypoints.size(); i++)
+      {
+         LogTools.info(waypoints.get(i).getOrientation());
+      }
 
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.startOnAThread();
@@ -87,10 +97,10 @@ public class NarrowPassageBodyPathVisualizer
 //      DataSetName dataSetName = DataSetName._20191008_153543_TrickCorridor;
 //      DataSetName dataSetName = DataSetName._20210223_155750_Door;
 //      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_JSC_78cm;
-//      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_IHMC_65cm;
-      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_JSC_60cm;
+      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_IHMC_65cm;
+//      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_JSC_60cm;
 //      DataSetName dataSetName = DataSetName._20190220_172417_Jersey_Barriers_IHMC_55cm;
 
-      new NarrowPassageBodyPathVisualizer(dataSetName, false);
+      new NarrowPassageBodyPathVisualizer(dataSetName, true);
    }
 }
