@@ -6,8 +6,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class JumpingCoPTrajectoryParameters extends YoSaveableModuleState
 {
-   private static final double defaultFractionSupportForShift = 0.5;
-
+   private static final double defaultFractionSupportForShift = 0.1;
 
    private final DoubleParameter fractionSupportForShift;
 
