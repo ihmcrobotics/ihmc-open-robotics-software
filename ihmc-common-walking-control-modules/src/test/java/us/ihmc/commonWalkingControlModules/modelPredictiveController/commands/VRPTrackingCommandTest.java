@@ -308,6 +308,8 @@ public class VRPTrackingCommandTest
       NativeMatrix solutionPosition = new NativeMatrix(3, 1);
       NativeMatrix jacobian = new NativeMatrix(3, indexHandler.getTotalProblemSize());
 
+      Polynomial3D trajectory = new Polynomial3D(4);
+
       for (double time = startTime; time <= endTime; time += 0.001)
       {
          assembledValue.setX(time * solution.get(0, 0) + solution.get(1, 0));
@@ -348,10 +350,10 @@ public class VRPTrackingCommandTest
          }
          assembledValue.scaleAdd(0.5 * time * time - 1.0 / omega2, gravityVector, assembledValue);
 
-         double alpha = (time - startTime) / (endTime - startTime);
-         expectedValue.interpolate(startVRP, endVRP, alpha);
+         trajectory.setLinear(startTime, endTime, startVRP, endVRP);
+         trajectory.compute(time);
 
-         EuclidCoreTestTools.assertTuple3DEquals(expectedValue, assembledValue, 1e-2);
+         EuclidCoreTestTools.assertTuple3DEquals(trajectory.getPosition(), assembledValue, 1e-2);
       }
    }
 
@@ -392,15 +394,15 @@ public class VRPTrackingCommandTest
 
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 1);
 
-      double start = 0.3;
-      double end = 0.7;
+      double startTime = 0.3;
+      double endTime = 0.7;
 
       VRPTrackingCommand command = new VRPTrackingCommand();
       command.setStartVRP(startVRP);
       command.setEndVRP(endVRP);
       command.setStartVRPVelocity(startVRPVelocity);
       command.setEndVRPVelocity(endVRPVelocity);
-      command.setTimeInterval(start, end);
+      command.setTimeInterval(startTime, endTime);
       command.setSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(10.0);
@@ -424,7 +426,7 @@ public class VRPTrackingCommandTest
       NativeMatrix solutionPosition = new NativeMatrix(3, 1);
       NativeMatrix jacobian = new NativeMatrix(3, indexHandler.getTotalProblemSize());
 
-      for (double time = start; time <= end; time += 0.001)
+      for (double time = startTime; time <= endTime; time += 0.001)
       {
          assembledValue.setX(time * solution.get(0, 0) + solution.get(1, 0));
          assembledValue.setY(time * solution.get(2, 0) + solution.get(3, 0));
@@ -443,7 +445,7 @@ public class VRPTrackingCommandTest
          solutionPosition.mult(jacobian, solution);
 
          Polynomial3D trajectory = new Polynomial3D(4);
-         trajectory.setCubic(start, end, startVRP, startVRPVelocity, endVRP, endVRPVelocity);
+         trajectory.setCubic(startTime, endTime, startVRP, startVRPVelocity, endVRP, endVRPVelocity);
 
          for (int pointIdx = 0; pointIdx < contactPlaneHelper.getNumberOfContactPoints(); pointIdx++)
          {
