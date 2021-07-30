@@ -15,8 +15,8 @@ public class MPCParameters
    public static final boolean includeRhoMinInequality = true;
    public static final boolean includeRhoMaxInequality = false;
    public static final boolean includeForceMinimization = false;
-   public static final boolean includeRhoMinimization = false;
-   public static final boolean includeRhoRateMinimization = false;
+   public static final boolean includeRhoMinimization = true;
+   public static final boolean includeRhoRateMinimization = true;
 
    public static final boolean includeIntermediateOrientationTracking = true;
 
@@ -35,8 +35,8 @@ public class MPCParameters
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
    private static final double defaultInitialOrientationWeight = 1e3;
-   private static final double defaultFinalOrientationAngleWeight = 1e3;
    private static final double defaultFinalOrientationVelocityWeight = 1e2;
+   private static final double defaultFinalOrientationAngleWeight = 1e3;
 
    public static final ConstraintType initialCoMPositionConstraintType = ConstraintType.OBJECTIVE;
    public static final ConstraintType initialCoMVelocityConstraintType = ConstraintType.OBJECTIVE;

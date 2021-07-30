@@ -290,10 +290,6 @@ public abstract class EuclideanModelPredictiveController
    {
       TIntList activeInequalityIndices = qpSolver.getActiveInequalityIndices();
 
-      int inequalityStartIndex = 0;
-
-      int currentInequalityIndex = 0;
-
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
          ActiveSetData activeSetData = contactHandler.getActiveSetData(segmentId);
@@ -311,17 +307,29 @@ public abstract class EuclideanModelPredictiveController
                                        1,
                                        1.0);
          }
-
-         int inequalityEndIndex = inequalityStartIndex + activeSetData.getNumberOfInequalityConstraints();
-
-         while (currentInequalityIndex < activeInequalityIndices.size() && activeInequalityIndices.get(currentInequalityIndex) < inequalityEndIndex)
-         {
-            activeSetData.addActiveInequalityConstraint(activeInequalityIndices.get(currentInequalityIndex) - inequalityStartIndex);
-            currentInequalityIndex++;
-         }
-
-         inequalityStartIndex = inequalityEndIndex;
       }
+
+      for (int i = 0; i < activeInequalityIndices.size(); i++)
+      {
+         assignActiveConstraintIndexToCorrectSegment(contactHandler, activeInequalityIndices.get(i));
+      }
+   }
+
+   private int assignActiveConstraintIndexToCorrectSegment(MPCContactHandler contactHandler, int activeConstraintIndex)
+   {
+      for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
+      {
+         ActiveSetData activeSetData = contactHandler.getActiveSetData(segmentId);
+         if (activeConstraintIndex < activeSetData.getNumberOfInequalityConstraints())
+         {
+            activeSetData.addActiveInequalityConstraint(activeConstraintIndex);
+            return segmentId;
+         }
+         else
+            activeConstraintIndex -= activeSetData.getNumberOfActiveInequalityConstraints();
+      }
+
+      return -1;
    }
 
    protected abstract void initializeIndexHandler();

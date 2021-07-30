@@ -65,6 +65,9 @@ public class LinearMPCTrajectoryHandler
       this.gravityZ = Math.abs(gravityZ);
 
       positionInitializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
+      positionInitializationCalculator.setComContinuityCalculator(new CoMContinuousContinuityCalculator(gravityZ, nominalCoMHeight, registry));
+      positionInitializationCalculator.setMaintainInitialCoMVelocityContinuity(true);
+
       comTrajectory = new MultipleCoMSegmentTrajectoryGenerator("desiredCoMTrajectory", registry);
    }
 
