@@ -423,6 +423,85 @@ public class PreviewWindowCalculatorTest
    }
 
    @Test
+   public void computeTwoContactOneFlightThenOneContact()
+   {
+      YoRegistry testRegistry = new YoRegistry("test");
+      PreviewWindowCalculator previewWindowCalculator = new PreviewWindowCalculator(testRegistry);
+      setupTest(testRegistry, 0.25, 0.5);
+
+      double segmentDuration = ((YoDouble) testRegistry.findVariable("nominalSegmentDuration")).getDoubleValue();
+
+      FramePoint3D startCoP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.1, 0.25, 0.3);
+      FramePoint3D middleCoP = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, 0.3, 0.32);
+      FramePoint3D endCoP = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.05, -0.1, -0.32);
+
+      FramePose3D firstPose = new FramePose3D();
+      firstPose.getPosition().set(startCoP);
+
+      FrameConvexPolygon2D contactPolygon = new FrameConvexPolygon2D();
+      contactPolygon.addVertex(0.1, -0.05);
+      contactPolygon.addVertex(0.1, 0.05);
+      contactPolygon.addVertex(-0.1, 0.05);
+      contactPolygon.addVertex(-0.1, -0.05);
+      contactPolygon.update();
+
+      FramePose3D secondPose = new FramePose3D();
+      secondPose.getPosition().set(endCoP);
+
+      ContactPlaneProvider firstContact = new ContactPlaneProvider();
+      firstContact.getTimeInterval().setInterval(0.0, 0.125);
+      firstContact.setStartECMPPosition(startCoP);
+      firstContact.setEndECMPPosition(middleCoP);
+      firstContact.setLinearECMPVelocity();
+      firstContact.addContact(firstPose, contactPolygon);
+
+      ContactPlaneProvider secondContact = new ContactPlaneProvider();
+      secondContact.getTimeInterval().setInterval(0.125, 0.25);
+      secondContact.setStartECMPPosition(middleCoP);
+      secondContact.setEndECMPPosition(middleCoP);
+      secondContact.setLinearECMPVelocity();
+      secondContact.addContact(firstPose, contactPolygon);
+
+      ContactPlaneProvider thirdContact = new ContactPlaneProvider();
+      thirdContact.getTimeInterval().setInterval(0.25, 0.5);
+      thirdContact.setContactState(ContactState.FLIGHT);
+
+      ContactPlaneProvider fourthContact = new ContactPlaneProvider();
+      fourthContact.getTimeInterval().setInterval(0.5, 0.75);
+      fourthContact.setStartECMPPosition(endCoP);
+      fourthContact.setEndECMPPosition(endCoP);
+      fourthContact.setLinearECMPVelocity();
+      fourthContact.addContact(firstPose, contactPolygon);
+      fourthContact.addContact(secondPose, contactPolygon);
+
+      List<ContactPlaneProvider> contacts = new ArrayList<>();
+      contacts.add(firstContact);
+      contacts.add(secondContact);
+      contacts.add(thirdContact);
+      contacts.add(fourthContact);
+
+      double startTime = 0.128;
+      previewWindowCalculator.compute(contacts, 0.128);
+
+      assertEquals(0.75 - startTime, previewWindowCalculator.getPreviewWindowDuration(), 1e-5);
+      assertEquals(3, previewWindowCalculator.getPlanningWindow().size());
+
+      List<PreviewWindowSegment> previewWindow = previewWindowCalculator.getPlanningWindow();
+
+      for (int i = 0; i < 3; i++)
+         assertEquals(1, previewWindow.get(i).getNumberOfContactPhasesInSegment());
+
+      assertEquals(startTime, previewWindow.get(0).getStartTime(), 1e-5);
+      assertEquals(0.25, previewWindow.get(0).getEndTime(), 1e-5);
+      assertEquals(0.25, previewWindow.get(1).getStartTime(), 1e-5);
+      assertEquals(0.5, previewWindow.get(1).getEndTime(), 1e-5);
+      assertEquals(0.5, previewWindow.get(2).getStartTime(), 1e-5);
+      assertEquals(0.75, previewWindow.get(2).getEndTime(), 1e-5);
+
+      assertEquals(ContactState.FLIGHT, previewWindow.get(1).getContactState());
+   }
+
+   @Test
    public void computeTwoContactsInOnePhase()
    {
       YoRegistry testRegistry = new YoRegistry("test");
