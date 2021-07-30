@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.narrowPassage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import sun.rmi.runtime.Log;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
@@ -18,6 +19,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -104,6 +106,14 @@ public class NarrowPassageBodyPathOptimizerTest
       doCollisionChecks(waypoints);
    }
 
+   @Test
+   public void testDoor()
+   {
+      DataSet dataset = DataSetIOTools.loadDataSet(DataSetName._20210223_155750_Door);
+      ArrayList<Pose3D> waypoints = runFootstepPlanningModuleTest(dataset);
+      doCollisionChecks(waypoints);
+   }
+
    // Test that the body-path result from running the request through the planning module is a FOUND_SOLUTION
    private ArrayList<Pose3D> runFootstepPlanningModuleTest(DataSet dataset)
    {
@@ -119,10 +129,20 @@ public class NarrowPassageBodyPathOptimizerTest
       request.setGoalFootPoses(goalSteps.get(RobotSide.LEFT), goalSteps.get(RobotSide.RIGHT));
       request.setPerformAStarSearch(false);
       request.setPlanBodyPath(true);
+      request.setSnapGoalSteps(false);
+      request.setAssumeFlatGround(false);
       request.setPlanarRegionsList(planarRegionsList);
+
       FootstepPlannerOutput plannerOutput = module.handleRequest(request);
-      assertEquals(plannerOutput.getBodyPathPlanningResult(), BodyPathPlanningResult.FOUND_SOLUTION);
-      return plannerOutput.getBodyPath();
+      assertEquals(BodyPathPlanningResult.FOUND_SOLUTION, plannerOutput.getBodyPathPlanningResult());
+      ArrayList<Pose3D> waypoints = new ArrayList<>();
+      for (int i = 1; i < module.getBodyPathPlan().getNumberOfWaypoints() - 1; i++)
+      {
+         waypoints.add((Pose3D) module.getBodyPathPlan().getWaypoint(i));
+      }
+      waypoints.forEach(wp -> LogTools.info(wp.getOrientation()));
+
+      return waypoints;
    }
 
    // Perform collision check between bounding box at body-path waypoints and planar region environment
@@ -132,7 +152,9 @@ public class NarrowPassageBodyPathOptimizerTest
       waypoints.remove(waypoints.size() - 1);
       for (int i = 0; i < waypoints.size(); i++)
       {
-         assertFalse(doCollisionCheck(waypoints.get(i)));
+         boolean check = doCollisionCheck(waypoints.get(i));
+         LogTools.info("waypoint " + i + ": " + check);
+         assertFalse(check);
       }
    }
 
