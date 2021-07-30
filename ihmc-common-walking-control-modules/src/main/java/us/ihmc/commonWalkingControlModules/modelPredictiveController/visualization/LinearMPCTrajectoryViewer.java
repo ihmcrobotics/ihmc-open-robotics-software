@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class LinearMPCTrajectoryViewer
 {
    private static final int numberOfVectors = 100;
-   private static final double dt = 0.01;
+   private static final double dt = 0.1;
    private static final double ballSize = 0.005;
 
    private final BagOfVectors comTrajectoryVectors;

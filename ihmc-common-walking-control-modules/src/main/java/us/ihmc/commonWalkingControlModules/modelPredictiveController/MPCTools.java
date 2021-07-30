@@ -97,6 +97,8 @@ public class MPCTools
       PreviewWindowSegment contactStateProvider = contactSequence.get(contactSequence.size() - 1);
       RecyclingArrayList<FramePoint3D> starts = startVRPPositionsToPack.add();
       RecyclingArrayList<FramePoint3D> ends = endVRPPositionsToPack.add();
+      starts.clear();
+      ends.clear();
 
       for (int phaseId = 0; phaseId < contactStateProvider.getNumberOfContactPhasesInSegment(); phaseId++)
       {
