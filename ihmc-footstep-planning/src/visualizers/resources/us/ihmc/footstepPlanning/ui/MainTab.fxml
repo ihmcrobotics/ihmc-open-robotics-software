@@ -20,7 +20,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<SplitPane dividerPositions="0.35, 0.85" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
+<SplitPane dividerPositions="0.35, 0.75" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
     <items>
         <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0">
             <children>
