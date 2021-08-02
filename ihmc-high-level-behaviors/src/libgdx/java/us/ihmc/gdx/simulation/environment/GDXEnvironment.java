@@ -10,8 +10,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.Axis3D;
@@ -21,13 +22,14 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.gdx.imgui.ImGui3DViewInput;
+import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.simulation.GDXDoorSimulator;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.GDXPose3DWidget;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspacePathTools;
@@ -36,14 +38,14 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.*;
 
-public class GDXEnvironment implements RenderableProvider
+public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironment.class, "Environment");
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
    private GDXEnvironmentObject selectedObject;
    private GDXEnvironmentObject intersectedObject;
-   private ImBoolean show3DWidgetTuner = new ImBoolean(false);
-   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget(getClass().getSimpleName());
+   private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo();
+   private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
    private boolean placing = false;
    private boolean loadedFilesOnce = false;
    private Path selectedEnvironmentFile = null;
@@ -53,12 +55,27 @@ public class GDXEnvironment implements RenderableProvider
    private final Quaternion tempOrientation = new Quaternion();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Point3D tempIntersection = new Point3D();
+   private GDXDoorSimulator doorSimulator;
+
+   public GDXEnvironment()
+   {
+      this(null, null);
+   }
+
+   public GDXEnvironment(ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
+   {
+      super(WINDOW_NAME);
+      if (syncedRobot != null)
+         doorSimulator = new GDXDoorSimulator(syncedRobot, helper);
+      setRenderMethod(this::renderImGuiWidgets);
+      addChild(poseGizmoTunerPanel);
+   }
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      baseUI.getSceneManager().addRenderableProvider(this);
+      baseUI.get3DSceneManager().addRenderableProvider(this);
 
-      pose3DWidget.create();
+      pose3DGizmo.create(baseUI.get3DSceneManager().getCamera3D());
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
@@ -74,7 +91,7 @@ public class GDXEnvironment implements RenderableProvider
                                                                                         pickRay.getPoint(),
                                                                                         pickRay.getDirection());
             selectedObject.set(pickPoint);
-            GDXTools.toEuclid(selectedObject.getRealisticModelInstance().transform, pose3DWidget.getTransform());
+            pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
 
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -83,8 +100,8 @@ public class GDXEnvironment implements RenderableProvider
          }
          else
          {
-            pose3DWidget.process3DViewInput(viewInput);
-            selectedObject.set(pose3DWidget.getTransform());
+            pose3DGizmo.process3DViewInput(viewInput);
+            selectedObject.set(pose3DGizmo.getTransform());
 
             intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -94,7 +111,7 @@ public class GDXEnvironment implements RenderableProvider
                   selectedObject = intersectedObject;
                   if (selectedObject != null)
                   {
-                     GDXTools.toEuclid(selectedObject.getRealisticModelInstance().transform, pose3DWidget.getTransform());
+                     pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
                   }
                }
             }
@@ -109,7 +126,7 @@ public class GDXEnvironment implements RenderableProvider
             if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                selectedObject = intersectedObject;
-               GDXTools.toEuclid(selectedObject.getRealisticModelInstance().transform, pose3DWidget.getTransform());
+               pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
             }
          }
       }
@@ -133,30 +150,36 @@ public class GDXEnvironment implements RenderableProvider
       return closestObject;
    }
 
-   public void render()
+   public void renderImGuiWidgets()
    {
-      ImGui.begin(WINDOW_NAME);
-
       ImGui.text("Selected: " + selectedObject);
       ImGui.text("Intersecting: " + intersectedObject);
 
       GDXEnvironmentObject objectToPlace = null;
       if (!placing)
       {
-         if (ImGui.button("Place Small Cinder Block Roughed"))
-            objectToPlace = new GDXSmallCinderBlockRoughed();
+//         if (ImGui.button("Place Small Cinder Block Roughed"))
+//            objectToPlace = new GDXSmallCinderBlockRoughed();
          if (ImGui.button("Place Medium Cinder Block Roughed"))
             objectToPlace = new GDXMediumCinderBlockRoughed();
-         if (ImGui.button("Place Medium Cinder Block Roughed"))
-            objectToPlace = new GDXLargeCinderBlockRoughed();
+//         if (ImGui.button("Place Large Cinder Block Roughed"))
+//            objectToPlace = new GDXLargeCinderBlockRoughed();
          if (ImGui.button("Place Lab Floor"))
             objectToPlace = new GDXLabFloorObject();
          if (ImGui.button("Place Pallet"))
             objectToPlace = new GDXPalletObject();
-         if (ImGui.button("Place Door Only"))
-            objectToPlace = new GDXDoorOnlyObject();
+         if (ImGui.button("Place Stairs"))
+            objectToPlace = new GDXStairsObject();
          if (ImGui.button("Place Door Frame"))
             objectToPlace = new GDXDoorFrameObject();
+         if (ImGui.button("Place Push Door Only"))
+         {
+            objectToPlace = new GDXPushHandleRightDoorObject();
+            if (doorSimulator != null)
+               doorSimulator.setDoor((GDXPushHandleRightDoorObject) objectToPlace);
+         }
+//         if (ImGui.button("Place Door Frame"))
+//            objectToPlace = new GDXDoorFrameObject();
       }
       if (objectToPlace != null)
       {
@@ -220,7 +243,7 @@ public class GDXEnvironment implements RenderableProvider
             {
                ObjectNode objectNode = objectsArrayNode.addObject();
                objectNode.put("type", object.getClass().getSimpleName());
-               GDXTools.toEuclid(object.getRealisticModelInstance().transform, tempTransform);
+               tempTransform.set(object.getObjectTransform());
                tempTranslation.set(tempTransform.getTranslation());
                tempOrientation.set(tempTransform.getRotation());
                objectNode.put("x", tempTranslation.getX());
@@ -235,11 +258,10 @@ public class GDXEnvironment implements RenderableProvider
          reindexScripts();
       }
 
-      ImGui.checkbox("Show 3D Widget Tuner", show3DWidgetTuner);
-      if (show3DWidgetTuner.get())
-         pose3DWidget.renderImGuiTuner();
+      ImGui.checkbox("Show 3D Widget Tuner", poseGizmoTunerPanel.getIsShowing());
 
-      ImGui.end();
+      if (doorSimulator != null)
+         doorSimulator.renderImGuiWidgets();
    }
 
    private void loadEnvironment(Path environmentFile)
@@ -248,6 +270,8 @@ public class GDXEnvironment implements RenderableProvider
       objects.clear();
       selectedObject = null;
       intersectedObject = null;
+      if (doorSimulator != null)
+         doorSimulator.setDoor(null);
 
       if (loadedFilesOnce)
       {
@@ -270,6 +294,11 @@ public class GDXEnvironment implements RenderableProvider
                tempTransform.set(tempOrientation, tempTranslation);
                object.set(tempTransform);
                objects.add(object);
+
+               if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
+               {
+                  doorSimulator.setDoor((GDXPushHandleRightDoorObject) object);
+               }
             }
          });
       }
@@ -316,7 +345,7 @@ public class GDXEnvironment implements RenderableProvider
       if (selectedObject != null)
       {
          selectedObject.getCollisionModelInstance().getRenderables(renderables, pool);
-         pose3DWidget.getRenderables(renderables, pool);
+         pose3DGizmo.getRenderables(renderables, pool);
       }
       if (intersectedObject != null && intersectedObject != selectedObject)
       {
@@ -324,8 +353,19 @@ public class GDXEnvironment implements RenderableProvider
       }
    }
 
+   public void destroy()
+   {
+      if (doorSimulator != null)
+         doorSimulator.destroy();
+   }
+
    public String getWindowName()
    {
       return WINDOW_NAME;
+   }
+
+   public GDXDoorSimulator getDoorSimulator()
+   {
+      return doorSimulator;
    }
 }

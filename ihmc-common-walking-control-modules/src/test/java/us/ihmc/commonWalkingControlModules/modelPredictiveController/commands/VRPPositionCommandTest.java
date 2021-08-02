@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -69,9 +70,9 @@ public class VRPPositionCommandTest
       FramePoint3D solvedPositionAtConstraint = new FramePoint3D();
       FramePoint3D solvedObjectivePositionTuple = new FramePoint3D();
       DMatrixRMaj rhoValueVector = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
-      DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
+      NativeMatrix solvedObjectivePosition = new NativeMatrix(3, 1);
 
-      DMatrixRMaj solution = solver.getSolution();
+      NativeMatrix solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
       solvedPositionAtConstraint.addX((timeOfConstraint) * solution.get(0, 0));
       solvedPositionAtConstraint.addX(solution.get(1, 0));
@@ -86,16 +87,16 @@ public class VRPPositionCommandTest
       CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution, rhoValueVector);
       CommonOps_DDRM.multAdd(-1.0 / omega2, helper.getAccelerationJacobianMatrix(), rhoSolution, rhoValueVector);
 
-      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
+      solvedObjectivePosition.mult(solver.qpInputTypeA.taskJacobian, solution);
       solvedObjectivePositionTuple.set(solvedObjectivePosition);
       solvedObjectivePositionTuple.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint - 1.0 / omega2, gravityVector, solvedObjectivePositionTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
-      DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
+      NativeMatrix achievedObjective = new NativeMatrix(3, 1);
       objectivePosition.get(taskObjectiveExpected);
       taskObjectiveExpected.add(2, 0, (-0.5 * timeOfConstraint * timeOfConstraint + 1.0 / omega2) * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = MPCTestHelper.getVRPPositionJacobian(timeOfConstraint, omega, rhoHelper);
+      NativeMatrix taskJacobianExpected = MPCTestHelper.getVRPPositionJacobian(timeOfConstraint, omega, rhoHelper);
 
       for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
       {
@@ -113,19 +114,19 @@ public class VRPPositionCommandTest
       EjmlUnitTests.assertEquals(MPCTestHelper.getVRPPositionJacobian(timeOfConstraint, omega, contactPlaneHelper), solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
-      CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
+      achievedObjective.mult(new NativeMatrix(taskJacobianExpected), solution);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
-      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
-      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
+      NativeMatrix solverInput_H_Expected = new NativeMatrix(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
+      NativeMatrix solverInput_f_Expected = new NativeMatrix(taskJacobianExpected.getNumCols(), 1);
 
-      CommonOps_DDRM.multInner(taskJacobianExpected, solverInput_H_Expected);
-      CommonOps_DDRM.multTransA(-1.0, taskJacobianExpected, taskObjectiveExpected, solverInput_f_Expected);
+      solverInput_H_Expected.multTransA(taskJacobianExpected, taskJacobianExpected);
+      solverInput_f_Expected.multTransA(-1.0, taskJacobianExpected, new NativeMatrix(taskObjectiveExpected));
 
       MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
 
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.qpSolver.costQuadraticMatrix, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.qpSolver.quadraticCostQVector, 1e-10);
 
 
       EuclidCoreTestTools.assertTuple3DEquals(objectivePosition, solvedObjectivePositionTuple, 1e-4);

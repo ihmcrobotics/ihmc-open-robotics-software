@@ -75,7 +75,7 @@ public class AvatarRobotCameraParameters implements AvatarRobotSensorParameters
    @Override
    public boolean useRosForTransformFromPoseToSensor()
    {
-      return (rosBaseFrameName != null && rosBaseFrameName != "") && (rosEndFrameName != null && rosEndFrameName != "");
+      return false; //(rosBaseFrameName != null && rosBaseFrameName != "") && (rosEndFrameName != null && rosEndFrameName != "");
    }
 
    @Override

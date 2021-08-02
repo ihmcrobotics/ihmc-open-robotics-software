@@ -11,7 +11,7 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.MathTools;
@@ -64,8 +64,8 @@ public class DirectRobotUI
    @FXML private Slider neckSlider;
 
    private RobotLowLevelMessenger robotLowLevelMessenger;
-   private RemoteSyncedRobotModel syncedRobotForHeightSlider;
-   private RemoteSyncedRobotModel syncedRobotForChestSlider;
+   private ROS2SyncedRobotModel syncedRobotForHeightSlider;
+   private ROS2SyncedRobotModel syncedRobotForChestSlider;
    private IHMCROS2Publisher<GoHomeMessage> goHomePublisher;
    private IHMCROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher;
    private IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
@@ -88,8 +88,8 @@ public class DirectRobotUI
    {
       String robotName = robotModel.getSimpleRobotName();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      syncedRobotForHeightSlider = new RemoteSyncedRobotModel(robotModel, ros2Node);
-      syncedRobotForChestSlider = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobotForHeightSlider = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      syncedRobotForChestSlider = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
       robotLowLevelMessenger = robotModel.newRobotLowLevelMessenger(ros2Node);
 
@@ -208,7 +208,7 @@ public class DirectRobotUI
                                                            ROS2TopicNameTools.newMessageInstance(GoHomeCommand.class).getMessageClass(),
                                                            ROS2Tools.getControllerInputTopic(robotName));
 
-      supportRegionsParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+      supportRegionsParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                              BipedalSupportPlanarRegionParametersMessage.class,
                                                                              BipedalSupportPlanarRegionPublisher.getTopic(robotName));
 

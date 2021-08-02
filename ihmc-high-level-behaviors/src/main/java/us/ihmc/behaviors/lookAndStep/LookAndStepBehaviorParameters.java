@@ -31,6 +31,8 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
    public static final IntegerStoredPropertyKey minimumNumberOfPlannedSteps = keys.addIntegerKey("Minimum number of planned steps");
    public static final DoubleStoredPropertyKey robotConfigurationDataExpiration = keys.addDoubleKey("Robot configuration data expiration");
    public static final IntegerStoredPropertyKey acceptableIncompleteFootsteps = keys.addIntegerKey("Acceptable incomplete footsteps");
+   public static final DoubleStoredPropertyKey horizonFromDebrisToStop = keys.addDoubleKey("Horizon from debris to stop");
+   public static final BooleanStoredPropertyKey stopForImpassibilities = keys.addBooleanKey("Stop for impassibilities");
 
    public LookAndStepBehaviorParameters()
    {

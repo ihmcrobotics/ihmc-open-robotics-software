@@ -34,6 +34,12 @@ import static us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator.scaleA
 public class SwingKnotPoint
 {
    private static final double collisionBoxHeight = 0.4;
+   private static final FramePose3D nanPose = new FramePose3D();
+
+   static
+   {
+      nanPose.setToNaN();
+   }
 
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -164,8 +170,17 @@ public class SwingKnotPoint
    // projects onto the YZ plane of the adjustment frame
    public void project(Vector3DBasics shiftDirection)
    {
-      double xAlpha = adjustmentFrameX.dot(shiftDirection);
-      scaleAdd(shiftDirection, -xAlpha, adjustmentFrameX);
+      if (swingPlannerParameters.getAllowLateralMotion())
+      {
+         double xAlpha = adjustmentFrameX.dot(shiftDirection);
+         scaleAdd(shiftDirection, -xAlpha, adjustmentFrameX);
+      }
+      else
+      {
+         double zAlpha = adjustmentFrameZ.dot(shiftDirection);
+         shiftDirection.set(adjustmentFrameZ);
+         shiftDirection.scale(zAlpha);
+      }
    }
 
    public YoFramePose3D getStartingWaypoint()
@@ -300,6 +315,12 @@ public class SwingKnotPoint
          yoCollisionBoxGraphic.setPose(boxCenterPose);
       else
          yoCollisionBoxGraphic.setPoseToNaN();
+   }
+
+   public void hide()
+   {
+      adjustmentGraphic.setPose(nanPose);
+      optimizedWaypoint.setToNaN();
    }
 }
 

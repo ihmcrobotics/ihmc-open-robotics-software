@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.filters;
 import static us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoVariable.createKiYoDouble;
 import static us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoVariable.createKpYoDouble;
 
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -19,19 +20,32 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
    private final DoubleProvider kp, ki;
    private final FrameTuple3DReadOnly rawPosition;
    private final FrameTuple3DReadOnly rawRate;
-   private final YoFrameVector3D error, biasEstimate;
+   private final YoFrameVector3D error;
    private final YoFrameVector3D estimatedRate;
+   private final YoFrameVector3D estimatedRateBias;
    private final YoBoolean hasBeenCalled;
 
    public IntegratorBiasCompensatorYoFrameVector3D(String name,
                                                    YoRegistry registry,
                                                    double kp,
                                                    double ki,
-                                                   FrameTuple3DReadOnly rawPositionVariable,
-                                                   FrameTuple3DReadOnly rawRateVariable,
+                                                   FrameTuple3DReadOnly rawPosition,
+                                                   FrameTuple3DReadOnly rawRate,
                                                    double dt)
    {
-      this(name, registry, createKpYoDouble(name, kp, registry), createKiYoDouble(name, ki, registry), rawPositionVariable, rawRateVariable, dt);
+      this(name, registry, kp, ki, rawPosition, rawRate, rawPosition.getReferenceFrame(), dt);
+   }
+
+   public IntegratorBiasCompensatorYoFrameVector3D(String name,
+                                                   YoRegistry registry,
+                                                   double kp,
+                                                   double ki,
+                                                   FrameTuple3DReadOnly rawPosition,
+                                                   FrameTuple3DReadOnly rawRate,
+                                                   ReferenceFrame biasEstimationFrame,
+                                                   double dt)
+   {
+      this(name, registry, createKpYoDouble(name, kp, registry), createKiYoDouble(name, ki, registry), rawPosition, rawRate, biasEstimationFrame, dt);
    }
 
    public IntegratorBiasCompensatorYoFrameVector3D(String name,
@@ -41,42 +55,66 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
                                                    ReferenceFrame referenceFrame,
                                                    double dt)
    {
-      this(name, registry, kp, ki, null, null, referenceFrame, dt);
+      this(name, registry, kp, ki, referenceFrame, referenceFrame, dt);
    }
 
    public IntegratorBiasCompensatorYoFrameVector3D(String name,
                                                    YoRegistry registry,
                                                    DoubleProvider kp,
                                                    DoubleProvider ki,
-                                                   FrameTuple3DReadOnly rawPositionVariable,
-                                                   FrameTuple3DReadOnly rawRateVariable,
+                                                   ReferenceFrame referenceFrame,
+                                                   ReferenceFrame biasEstimationFrame,
                                                    double dt)
    {
-      this(name, registry, kp, ki, rawPositionVariable, rawRateVariable, rawPositionVariable.getReferenceFrame(), dt);
+      this(name, registry, kp, ki, null, null, referenceFrame, biasEstimationFrame, dt);
+   }
+
+   public IntegratorBiasCompensatorYoFrameVector3D(String name,
+                                                   YoRegistry registry,
+                                                   DoubleProvider kp,
+                                                   DoubleProvider ki,
+                                                   FrameTuple3DReadOnly rawPosition,
+                                                   FrameTuple3DReadOnly rawRate,
+                                                   double dt)
+   {
+      this(name, registry, kp, ki, rawPosition, rawRate, rawPosition.getReferenceFrame(), dt);
+   }
+
+   public IntegratorBiasCompensatorYoFrameVector3D(String name,
+                                                   YoRegistry registry,
+                                                   DoubleProvider kp,
+                                                   DoubleProvider ki,
+                                                   FrameTuple3DReadOnly rawPosition,
+                                                   FrameTuple3DReadOnly rawRate,
+                                                   ReferenceFrame biasEstimationFrame,
+                                                   double dt)
+   {
+      this(name, registry, kp, ki, rawPosition, rawRate, rawPosition.getReferenceFrame(), biasEstimationFrame, dt);
    }
 
    private IntegratorBiasCompensatorYoFrameVector3D(String name,
                                                     YoRegistry registry,
                                                     DoubleProvider kp,
                                                     DoubleProvider ki,
-                                                    FrameTuple3DReadOnly rawPositionVariable,
-                                                    FrameTuple3DReadOnly rawRateVariable,
+                                                    FrameTuple3DReadOnly rawPosition,
+                                                    FrameTuple3DReadOnly rawRate,
                                                     ReferenceFrame referenceFrame,
+                                                    ReferenceFrame biasEstimationFrame,
                                                     double dt)
    {
       super(name, referenceFrame, registry);
 
-      if (rawPositionVariable != null && rawRateVariable != null)
-         rawPositionVariable.checkReferenceFrameMatch(rawRateVariable);
+      if (rawPosition != null && rawRate != null)
+         rawPosition.checkReferenceFrameMatch(rawRate);
 
       this.kp = kp;
       this.ki = ki;
       this.dt = dt;
-      this.rawPosition = rawPositionVariable;
-      this.rawRate = rawRateVariable;
+      this.rawPosition = rawPosition;
+      this.rawRate = rawRate;
       this.error = new YoFrameVector3D(name + "PositionError", referenceFrame, registry);
-      this.biasEstimate = new YoFrameVector3D(name + "BiasEstimate", referenceFrame, registry);
       this.estimatedRate = new YoFrameVector3D(name + "EstimatedRate", referenceFrame, registry);
+      this.estimatedRateBias = new YoFrameVector3D(name + "EstimatedRateBias", biasEstimationFrame, registry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", registry);
       reset();
    }
@@ -97,6 +135,11 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
       return estimatedRate;
    }
 
+   public YoFrameVector3D getBiasEstimation()
+   {
+      return estimatedRateBias;
+   }
+
    @Override
    public void update()
    {
@@ -105,6 +148,7 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
 
    private final Vector3D xd_filt = new Vector3D();
    private final Vector3D x_pred = new Vector3D();
+   private final FrameVector3D intermediateBias = new FrameVector3D();
 
    public void update(FrameTuple3DReadOnly rawPosition, FrameTuple3DReadOnly rawRate)
    {
@@ -120,20 +164,21 @@ public class IntegratorBiasCompensatorYoFrameVector3D extends YoFrameVector3D im
          set(rawPosition);
          estimatedRate.set(rawRate);
          error.setToZero();
-         biasEstimate.setToZero();
+         estimatedRateBias.setToZero();
          return;
       }
 
-      double kp = this.kp.getValue();
-      double ki = this.ki.getValue();
-      Tuple3DReadOnly x_meas = rawPosition;
-      Tuple3DReadOnly xd_meas = rawRate;
+      intermediateBias.setIncludingFrame(estimatedRateBias);
+      intermediateBias.changeFrame(getReferenceFrame());
+
       Vector3DBasics x_filt = this;
-      xd_filt.add(xd_meas, biasEstimate);
+      xd_filt.add(rawRate, intermediateBias); // = xd_filt_new
+      xd_filt.interpolate(estimatedRate, 0.5); // = 0.5 * (xd_filt_new + xd_filt_old)
       x_pred.scaleAdd(dt, xd_filt, x_filt);
-      error.sub(x_meas, x_pred);
-      x_filt.scaleAdd(kp, error, x_pred);
-      biasEstimate.scaleAdd(ki, error, biasEstimate);
-      estimatedRate.add(xd_meas, biasEstimate);
+      error.sub(rawPosition, x_pred);
+      x_filt.scaleAdd(kp.getValue(), error, x_pred);
+      intermediateBias.scaleAdd(ki.getValue(), error, intermediateBias);
+      estimatedRate.add(rawRate, intermediateBias);
+      estimatedRateBias.setMatchingFrame(intermediateBias);
    }
 }

@@ -611,6 +611,16 @@ public class FeetManager
       return footControlModules.get(robotSide).requestSwingSpeedUp(speedUpFactor);
    }
 
+   /**
+    * Computes and returns the swing fraction through the active swing, including the speed up factor.
+    *
+    * @return the estimated swing time remaining.
+    */
+   public double getFractionThroughSwing(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getFractionThroughSwing();
+   }
+
    public InverseDynamicsCommand<?> getInverseDynamicsCommand(RobotSide robotSide)
    {
       return footControlModules.get(robotSide).getInverseDynamicsCommand();

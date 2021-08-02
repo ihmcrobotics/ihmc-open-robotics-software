@@ -5,16 +5,24 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.gdx.GDXGraphics3DNode;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
+import us.ihmc.tools.thread.Activator;
 
-public class GDXRobotModelGraphic implements RenderableProvider
+public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements RenderableProvider
 {
    private GDXGraphics3DNode robotRootNode;
    private GraphicsRobot graphicsRobot;
+   private Activator robotLoadedActivator = new Activator();
+
+   public GDXRobotModelGraphic(String title)
+   {
+      super(title);
+   }
 
    public void loadRobotModelAndGraphics(RobotDescription robotDescription, RigidBodyBasics rootBody)
    {
@@ -26,6 +34,7 @@ public class GDXRobotModelGraphic implements RenderableProvider
       //      robotRootNode.setMouseTransparent(true);
       addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode);
       robotRootNode.update();
+      robotLoadedActivator.activate();
    }
 
    private void addNodesRecursively(Graphics3DNode graphics3DNode, GDXGraphics3DNode parentNode)
@@ -36,14 +45,39 @@ public class GDXRobotModelGraphic implements RenderableProvider
    }
 
    @Override
+   public void update()
+   {
+      super.update();
+      if (robotLoadedActivator.poll())
+      {
+         graphicsRobot.update();
+         robotRootNode.update();
+      }
+   }
+
+   @Override
+   public void renderImGuiWidgets()
+   {
+      super.renderImGuiWidgets();
+   }
+
+   @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      robotRootNode.getRenderables(renderables, pool);
+      if (robotLoadedActivator.poll())
+      {
+         robotRootNode.getRenderables(renderables, pool);
+      }
    }
 
    public void destroy()
    {
       robotRootNode.destroy();
+   }
+
+   public boolean isRobotLoaded()
+   {
+      return robotLoadedActivator.poll();
    }
 
    public GDXGraphics3DNode getRobotRootNode()

@@ -31,6 +31,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -136,7 +137,7 @@ public class JumpingControllerToolbox
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       standingHeight.set(1.05);
-      squattingHeight.set(0.6);
+      squattingHeight.set(0.7);
 
       finalTransferTime = new YoDouble("finalTransferTime", registry);
       finalTransferTime.set(0.25);
@@ -456,7 +457,7 @@ public class JumpingControllerToolbox
          yoPlaneContactState.clear();
    }
 
-   public ReferenceFrame getCenterOfMassFrame()
+   public MovingReferenceFrame getCenterOfMassFrame()
    {
       return centerOfMassFrame;
    }

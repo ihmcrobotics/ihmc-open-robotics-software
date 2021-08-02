@@ -27,7 +27,6 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
 import us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoFrameVector3D;
@@ -60,7 +59,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class PelvisLinearStateUpdater
 {
-   private static final boolean USE_KALMAN_STYLE_FUSING_FILTER = true;
    private static final boolean ESTIMATE_COM_STATE = false;
 
    private static final double minForceZInPercentThresholdToFilterFoot = 0.0;
@@ -94,16 +92,14 @@ public class PelvisLinearStateUpdater
    private final DoubleProvider grfAgainstIMUAndKinematicsForVelocityBreakFrequency;
    private final DoubleProvider imuAgainstKinematicsForPositionBreakFrequency;
 
-   private final YoDouble linearVelocityKp = new YoDouble("bloppyLinearVelocityKP", registry);
-   private final YoDouble linearVelocityKi = new YoDouble("bloppyLinearVelocityKI", registry);
+   private final BooleanProvider useNewFusingFilter;
+
+   private final DoubleProvider linearVelocityFusingKp, linearVelocityFusingKi;
    private final IntegratorBiasCompensatorYoFrameVector3D mainIMULinearVelocityEstimate;
    private final YoFrameVector3D pelvisNewLinearVelocityEstimate;
 
-   private final YoDouble positionKp = new YoDouble("bloppyPositionKP", registry);
-   private final YoDouble positionKi = new YoDouble("bloppyPositionKI", registry);
+   private final DoubleProvider positionFusingKp, positionFusingKi;
    private final IntegratorBiasCompensatorYoFrameVector3D pelvisPositionEstimate;
-
-   private final FilteredVelocityYoFrameVector pelvisLinearVelocityFD;
 
    private final BooleanProvider useGroundReactionForcesToComputeCenterOfMassVelocity;
    private final YoInteger numberOfEndEffectorsTrusted = new YoInteger("numberOfEndEffectorsTrusted", registry);
@@ -262,33 +258,33 @@ public class PelvisLinearStateUpdater
 
       slippageCompensatorMode.set(SlippageCompensatorMode.LOAD_THRESHOLD);
 
-      //      requestStopEstimationOfPelvisLinearState.set(true);
+      useNewFusingFilter = new BooleanParameter("usePelvisLinearStateNewFusingFilter",
+                                                registry,
+                                                stateEstimatorParameters.usePelvisLinearStateNewFusingFilter());
 
-      linearVelocityKp.set(0.0075); // Tested with 0.001 and looked fine at first glance.
-      linearVelocityKi.set(1.0e-4);
-      positionKp.set(0.01);
-      positionKi.set(1.0e-4);
-      mainIMULinearVelocityEstimate = new IntegratorBiasCompensatorYoFrameVector3D("bloppyMainIMULinearVelocityEstimate",
+      linearVelocityFusingKp = new DoubleParameter("pelvisLinearStateLinearVelocityFusingKp",
+                                                   registry,
+                                                   stateEstimatorParameters.getPelvisLinearVelocityNewFusingFilterKp());
+      linearVelocityFusingKi = new DoubleParameter("pelvisLinearStateLinearVelocityFusingKi",
+                                                   registry,
+                                                   stateEstimatorParameters.getPelvisLinearVelocityNewFusingFilterKi());
+      positionFusingKp = new DoubleParameter("pelvisLinearStatePositionFusingKp", registry, stateEstimatorParameters.getPelvisPositionNewFusingFilterKp());
+      positionFusingKi = new DoubleParameter("pelvisLinearStatePositionFusingKi", registry, stateEstimatorParameters.getPelvisPositionNewFusingFilterKi());
+      mainIMULinearVelocityEstimate = new IntegratorBiasCompensatorYoFrameVector3D("newMainIMULinearVelocityEstimate",
                                                                                    registry,
-                                                                                   linearVelocityKp,
-                                                                                   linearVelocityKi,
+                                                                                   linearVelocityFusingKp,
+                                                                                   linearVelocityFusingKi,
                                                                                    imuBasedLinearStateCalculator.getIMUMeasurementFrame(),
                                                                                    estimatorDT);
-      pelvisNewLinearVelocityEstimate = new YoFrameVector3D("bloppyEstimatedRootJointLinearVelocity", worldFrame, registry);
+      pelvisNewLinearVelocityEstimate = new YoFrameVector3D("newEstimatedRootJointLinearVelocity", worldFrame, registry);
 
-      pelvisPositionEstimate = new IntegratorBiasCompensatorYoFrameVector3D("bloppyPelvisPositionEstimate",
+      pelvisPositionEstimate = new IntegratorBiasCompensatorYoFrameVector3D("newPelvisPositionEstimate",
                                                                             registry,
-                                                                            positionKp,
-                                                                            positionKi,
+                                                                            positionFusingKp,
+                                                                            positionFusingKi,
                                                                             worldFrame,
+                                                                            rootJointFrame, // Keep the bias in the local frame instead of world.
                                                                             estimatorDT);
-
-      pelvisLinearVelocityFD = new FilteredVelocityYoFrameVector("bloppyPelvisLinearVelocityFD",
-                                                                 "",
-                                                                 new YoDouble("bloppyAlphaPelvisVelocityFD", registry),
-                                                                 estimatorDT,
-                                                                 registry,
-                                                                 pelvisPositionEstimate);
 
       if (VISUALIZE)
       {
@@ -458,7 +454,6 @@ public class PelvisLinearStateUpdater
          if (imuBasedLinearStateCalculator.isEstimationEnabled())
          {
             computeLinearStateFromMergingMeasurements();
-            kinematicsBasedLinearStateCalculator.correctTrustedLegJointStates(listOfTrustedFeet, yoRootJointPosition, yoRootJointVelocity);
          }
          else
          {
@@ -695,7 +690,7 @@ public class PelvisLinearStateUpdater
    {
       imuBasedLinearStateCalculator.updateIMUAndRootJointLinearVelocity(pelvisVelocityIMUPart);
 
-      if (!USE_KALMAN_STYLE_FUSING_FILTER)
+      if (!useNewFusingFilter.getValue())
       {
          // TODO Check out AlphaFusedYoVariable to that
          pelvisVelocityKinPart.setIncludingFrame(kinematicsBasedLinearStateCalculator.getPelvisVelocity());
@@ -718,7 +713,7 @@ public class PelvisLinearStateUpdater
       tempTwist.changeFrame(rootJointFrame);
       pelvisNewLinearVelocityEstimate.setMatchingFrame(tempTwist.getLinearPart());
 
-      if (USE_KALMAN_STYLE_FUSING_FILTER)
+      if (useNewFusingFilter.getValue())
       {
          rootJointVelocity.set(pelvisNewLinearVelocityEstimate);
          yoRootJointVelocity.set(pelvisNewLinearVelocityEstimate);
@@ -729,7 +724,7 @@ public class PelvisLinearStateUpdater
 
    private void computePositionFromMergingMeasurements()
    {
-      if (!USE_KALMAN_STYLE_FUSING_FILTER)
+      if (!useNewFusingFilter.getValue())
       {
          rootJointPosition.set(yoRootJointPosition);
          imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
@@ -745,9 +740,8 @@ public class PelvisLinearStateUpdater
       }
 
       pelvisPositionEstimate.update(kinematicsBasedLinearStateCalculator.getPelvisPosition(), pelvisNewLinearVelocityEstimate);
-      pelvisLinearVelocityFD.update();
 
-      if (USE_KALMAN_STYLE_FUSING_FILTER)
+      if (useNewFusingFilter.getValue())
       {
          rootJointPosition.set(pelvisPositionEstimate);
          yoRootJointPosition.set(pelvisPositionEstimate);

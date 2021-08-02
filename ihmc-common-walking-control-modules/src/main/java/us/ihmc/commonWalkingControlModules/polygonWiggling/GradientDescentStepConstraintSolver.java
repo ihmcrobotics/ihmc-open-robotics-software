@@ -19,7 +19,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
@@ -30,7 +29,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class GradientDescentStepConstraintSolver
 {
-   private static final boolean verbose = true;
+   private static final boolean verbose = false;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -52,7 +51,7 @@ public class GradientDescentStepConstraintSolver
    private final YoFrameVector3D gradient = new YoFrameVector3D("gradient", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D footPlacementGradient = new YoFrameVector3D("footPlacementGradient", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D legCollisionGradient = new YoFrameVector3D("legCollisionGradient", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFrameVector3D accumulatedTransform = new YoFrameVector3D("accumulatedTransformient", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D accumulatedTransform = new YoFrameVector3D("accumulatedTransform", ReferenceFrame.getWorldFrame(), registry);
    private final YoEnum<Constraint> activeConstraint = new YoEnum<>("activeConstraint", "Active constraint", registry, Constraint.class, true);
 
    private final RecyclingArrayList<Point2D> transformedVertices = new RecyclingArrayList<>(5, Point2D::new);

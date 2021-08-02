@@ -13,6 +13,8 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.Linear
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCTestHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeC;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -97,8 +99,8 @@ public class SparseInverseCalculatorTest
       dcmEndPositionCommand.addContactPlaneHelper(contactPlaneHelper);
 
       LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, 1e-3, gravityZ, new YoRegistry("registry"));
-      QPInputTypeA inputA = new QPInputTypeA(indexHandler.getTotalProblemSize());
-      QPInputTypeC inputC = new QPInputTypeC(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA inputA = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeC inputC = new NativeQPInputTypeC(indexHandler.getTotalProblemSize());
 
       solver.initialize();
       inputCalculator.calculateValueObjective(inputA, comStartPositionCommand);
@@ -118,7 +120,7 @@ public class SparseInverseCalculatorTest
 
       solver.addValueRegularization();
 
-      DMatrixRMaj hessian = new DMatrixRMaj(solver.solverInput_H);
+      DMatrixRMaj hessian = new DMatrixRMaj(solver.qpSolver.costQuadraticMatrix);
 
       // check that it's block diagonal
       for (int row = 0; row < indexHandler.getComCoefficientStartIndex(1); row++)

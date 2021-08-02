@@ -287,9 +287,9 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       cameraParameters[BLACKFLY_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT, right_fisheye_camera_name, fisheye_right_camera_topic,
                                                                                    fisheye_pose_source, fisheye_right_camera_info, BLACKFLY_RIGHT_CAMERA_ID);
 
-      setupROSLocationService = target == RobotTarget.REAL_ROBOT || (target == RobotTarget.SCS && SEND_ROBOT_DATA_TO_ROS);
-      setupROSParameterSetters = target == RobotTarget.REAL_ROBOT;
-      isMultisenseHead = target == RobotTarget.REAL_ROBOT;
+      setupROSLocationService = false; //target == RobotTarget.REAL_ROBOT || (target == RobotTarget.SCS && SEND_ROBOT_DATA_TO_ROS);
+      setupROSParameterSetters = false; //target == RobotTarget.REAL_ROBOT;
+      isMultisenseHead = false; //target == RobotTarget.REAL_ROBOT;
 
       setupStaticTransformsForRos();
    }
@@ -452,5 +452,11 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public RigidBodyTransform getObjectDetectionCameraTransform()
    {
       return transformChestToD435DepthCamera;
+   }
+
+   @Override
+   public String getHeadCameraName()
+   {
+      return "stereo_camera_left";
    }
 }

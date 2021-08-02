@@ -8,7 +8,6 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import imgui.internal.ImGui;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.gdx.imgui.ImGuiDerivativePlot;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
@@ -79,12 +78,12 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
    }
 
    @Override
-   public void renderGraphics()
+   public void update()
    {
-      super.renderGraphics();
+      super.update();
       if (isActive())
       {
-         planarRegionsGraphic.render();
+         planarRegionsGraphic.update();
       }
    }
 

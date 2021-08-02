@@ -71,8 +71,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -145,9 +143,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -203,8 +198,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_6(data.getGoalYawProximity());
 
-      cdr.write_type_6(data.getRequestedPathHeading());
-
       cdr.write_type_6(data.getTimeout());
 
       cdr.write_type_2(data.getMaxIterations());
@@ -249,8 +242,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       	
       data.setGoalYawProximity(cdr.read_type_6());
       	
-      data.setRequestedPathHeading(cdr.read_type_6());
-      	
       data.setTimeout(cdr.read_type_6());
       	
       data.setMaxIterations(cdr.read_type_2());
@@ -292,7 +283,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_e("body_path_waypoints", data.getBodyPathWaypoints());
       ser.write_type_6("goal_distance_proximity", data.getGoalDistanceProximity());
       ser.write_type_6("goal_yaw_proximity", data.getGoalYawProximity());
-      ser.write_type_6("requested_path_heading", data.getRequestedPathHeading());
       ser.write_type_6("timeout", data.getTimeout());
       ser.write_type_2("max_iterations", data.getMaxIterations());
       ser.write_type_6("horizon_length", data.getHorizonLength());
@@ -326,7 +316,6 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.read_type_e("body_path_waypoints", data.getBodyPathWaypoints());
       data.setGoalDistanceProximity(ser.read_type_6("goal_distance_proximity"));
       data.setGoalYawProximity(ser.read_type_6("goal_yaw_proximity"));
-      data.setRequestedPathHeading(ser.read_type_6("requested_path_heading"));
       data.setTimeout(ser.read_type_6("timeout"));
       data.setMaxIterations(ser.read_type_2("max_iterations"));
       data.setHorizonLength(ser.read_type_6("horizon_length"));

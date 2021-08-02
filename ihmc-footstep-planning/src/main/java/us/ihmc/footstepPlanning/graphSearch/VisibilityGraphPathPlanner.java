@@ -162,6 +162,11 @@ public class VisibilityGraphPathPlanner
       bodyStartPose.interpolate(leftFootPose, rightFootPose, 0.5);
    }
 
+   public void setStart(Pose3DReadOnly startPose)
+   {
+      bodyStartPose.set(startPose);
+   }
+
    public void setGoal(Pose3DReadOnly goalPose)
    {
       bodyGoalPose.set(goalPose);
@@ -186,6 +191,17 @@ public class VisibilityGraphPathPlanner
    public List<Pose3DReadOnly> getWaypoints()
    {
       return waypoints;
+   }
+
+   public List<FramePose3D> getWaypointsAsFramePoseList()
+   {
+      List<FramePose3D> waypointFrames = new ArrayList<>();
+      for (int i = 0; i < waypoints.size(); i++)
+      {
+         FramePose3D waypointFrame = new FramePose3D(ReferenceFrame.getWorldFrame(), waypoints.get(i).getPosition(), waypoints.get(i).getOrientation());
+         waypointFrames.add(waypointFrame);
+      }
+      return waypointFrames;
    }
 
    public void packGraph(VisibilityGraphHolder visibilityGraphHolder)

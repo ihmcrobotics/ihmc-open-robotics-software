@@ -1,10 +1,14 @@
 package us.ihmc.behaviors.tools;
 
+import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
@@ -13,6 +17,7 @@ import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -38,6 +43,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -110,7 +116,7 @@ public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2Control
       return bodyPathPlanner;
    }
 
-   public RemoteSyncedRobotModel newSyncedRobot()
+   public ROS2SyncedRobotModel newSyncedRobot()
    {
       return getOrCreateRobotInterface().newSyncedRobot();
    }
@@ -144,7 +150,7 @@ public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2Control
                                      createFootPolygons());
    }
 
-   public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<PlanarRegionsList> callback)
+   public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<Pair<Long, PlanarRegionsList>> callback)
    {
       return MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros2Helper.getROS2NodeInterface(), robotModel, topic, callback);
    }
@@ -179,6 +185,28 @@ public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2Control
    {
       ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(ros2Helper.getROS2NodeInterface(), topic.getType(), topic);
       return () -> PlanarRegionMessageConverter.convertToPlanarRegionsList(input.getLatest());
+   }
+
+   public void subscribeToDoorLocationViaCallback(Consumer<DoorLocationPacket> callback)
+   {
+      subscribeViaCallback(ObjectDetectorToolboxModule.getOutputTopic(getRobotModel().getSimpleRobotName()).withTypeName(DoorLocationPacket.class), callback);
+   }
+
+   @Override
+   public <T> void subscribeViaCallback(Function<String, ROS2Topic<T>> topicFunction, Consumer<T> callback)
+   {
+      ros2Helper.subscribeViaCallback(topicFunction, callback);
+   }
+
+   public void subscribeToRobotConfigurationDataViaCallback(Consumer<RobotConfigurationData> callback)
+   {
+      subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(getRobotModel().getSimpleRobotName()), callback);
+   }
+
+   @Override
+   public <T> void publish(Function<String, ROS2Topic<T>> topicFunction, T message)
+   {
+      ros2Helper.publish(topicFunction, message);
    }
 
    @Override

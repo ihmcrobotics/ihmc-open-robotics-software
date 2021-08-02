@@ -7,12 +7,15 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVelocityIntegratorResetMode;
 import us.ihmc.commons.MathTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class JointAccelerationIntegrationCalculator
 {
@@ -21,6 +24,7 @@ public class JointAccelerationIntegrationCalculator
    public static final double DEFAULT_MAX_POSITION_ERROR = 0.2;
    public static final double DEFAULT_MAX_VELOCITY_ERROR = 2.0;
    public static final double DEFAULT_VELOCITY_REFERENCE_ALPHA = 0.0;
+   public static final JointVelocityIntegratorResetMode DEFAULT_VELOCITY_RESET_MODE = JointVelocityIntegratorResetMode.CURRENT_VELOCITY;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -30,12 +34,16 @@ public class JointAccelerationIntegrationCalculator
    private final TDoubleArrayList jointSpecificMaxPositionError = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificMaxVelocityError = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificVelocityReferenceAlpha = new TDoubleArrayList();
+   private final List<JointVelocityIntegratorResetMode> jointSpecificVelocityResetMode = new ArrayList<>();
 
    private final YoDouble defaultPositionBreakFrequency = new YoDouble("defaultPositionBreakFrequencyIntegration", registry);
    private final YoDouble defaultVelocityBreakFrequency = new YoDouble("defaultVelocityBreakFrequencyIntegration", registry);
-   private final YoDouble defaultIntegrationMaxVelocity = new YoDouble("defaultIntegrationMaxVelocity", registry);
+   private final YoDouble defaultIntegrationMaxVelocityError = new YoDouble("defaultIntegrationMaxVelocityError", registry);
    private final YoDouble defaultIntegrationMaxPositionError = new YoDouble("defaultIntegrationMaxPositionError", registry);
    private final YoDouble defaultVelocityReferenceAlpha = new YoDouble("defaultVelocityReferenceAlpha", registry);
+   private final YoEnum<JointVelocityIntegratorResetMode> defaultVelocityResetMode = new YoEnum<>("defaultVelocityResetMode",
+                                                                                                  registry,
+                                                                                                  JointVelocityIntegratorResetMode.class);
 
    private final double controlDT;
 
@@ -45,8 +53,9 @@ public class JointAccelerationIntegrationCalculator
       defaultPositionBreakFrequency.set(DEFAULT_POSITION_BREAK_FREQUENCY);
       defaultVelocityBreakFrequency.set(DEFAULT_VELOCITY_BREAK_FREQUENCY);
       defaultIntegrationMaxPositionError.set(DEFAULT_MAX_POSITION_ERROR);
-      defaultIntegrationMaxVelocity.set(DEFAULT_MAX_VELOCITY_ERROR);
+      defaultIntegrationMaxVelocityError.set(DEFAULT_MAX_VELOCITY_ERROR);
       defaultVelocityReferenceAlpha.set(DEFAULT_VELOCITY_REFERENCE_ALPHA);
+      defaultVelocityResetMode.set(DEFAULT_VELOCITY_RESET_MODE);
 
       parentRegistry.addChild(registry);
    }
@@ -62,22 +71,31 @@ public class JointAccelerationIntegrationCalculator
          double newPositionBreakFrequency = jointParameters.getPositionBreakFrequency();
          if (Double.isNaN(newPositionBreakFrequency) || newPositionBreakFrequency < 0.0)
             newPositionBreakFrequency = defaultPositionBreakFrequency.getDoubleValue();
+         newPositionBreakFrequency = Math.max(0.0, newPositionBreakFrequency);
 
          double newVelocityBreakFrequency = jointParameters.getVelocityBreakFrequency();
          if (Double.isNaN(newVelocityBreakFrequency) || newVelocityBreakFrequency < 0.0)
             newVelocityBreakFrequency = defaultVelocityBreakFrequency.getDoubleValue();
+         newVelocityBreakFrequency = Math.max(0.0, newVelocityBreakFrequency);
 
          double newMaxPositionError = jointParameters.getMaxPositionError();
          if (Double.isNaN(newMaxPositionError) || newMaxPositionError < 0.0)
             newMaxPositionError = defaultIntegrationMaxPositionError.getDoubleValue();
+         newMaxPositionError = Math.max(0.0, newMaxPositionError);
 
          double newMaxVelocityError = jointParameters.getMaxVelocityError();
          if (Double.isNaN(newMaxVelocityError) || newMaxVelocityError < 0.0)
-            newMaxVelocityError = defaultIntegrationMaxVelocity.getDoubleValue();
+            newMaxVelocityError = defaultIntegrationMaxVelocityError.getDoubleValue();
+         newMaxVelocityError = Math.max(0.0, newMaxVelocityError);
 
          double newVelocityReferenceAlpha = jointParameters.getVelocityReferenceAlpha();
          if (Double.isNaN(newVelocityReferenceAlpha) || newVelocityReferenceAlpha < 0.0)
             newVelocityReferenceAlpha = defaultVelocityReferenceAlpha.getDoubleValue();
+         newVelocityReferenceAlpha = MathTools.clamp(newVelocityReferenceAlpha, 0.0, 1.0);
+
+         JointVelocityIntegratorResetMode newVelocityResetMode = jointParameters.getVelocityResetMode();
+         if (newVelocityResetMode == null)
+            newVelocityResetMode = defaultVelocityResetMode.getValue();
 
          if (localJointIndex < 0)
          {
@@ -87,6 +105,7 @@ public class JointAccelerationIntegrationCalculator
             jointSpecificMaxPositionError.add(newMaxPositionError);
             jointSpecificMaxVelocityError.add(newMaxVelocityError);
             jointSpecificVelocityReferenceAlpha.add(newVelocityReferenceAlpha);
+            jointSpecificVelocityResetMode.add(newVelocityResetMode);
          }
          else
          {
@@ -95,6 +114,7 @@ public class JointAccelerationIntegrationCalculator
             jointSpecificMaxPositionError.set(localJointIndex, newMaxPositionError);
             jointSpecificMaxVelocityError.set(localJointIndex, newMaxVelocityError);
             jointSpecificVelocityReferenceAlpha.set(localJointIndex, newVelocityReferenceAlpha);
+            jointSpecificVelocityResetMode.set(localJointIndex, newVelocityResetMode);
          }
       }
    }
@@ -120,7 +140,25 @@ public class JointAccelerationIntegrationCalculator
 
          boolean resetIntegrators = lowLevelJointData.pollResetIntegratorsRequest();
          if (!lowLevelJointData.hasDesiredVelocity() || resetIntegrators)
-            lowLevelJointData.setDesiredVelocity(velocityReference);
+         {
+            JointVelocityIntegratorResetMode velocityResetMode = jointSpecificVelocityResetMode.get(jointIndex);
+            switch (velocityResetMode)
+            {
+               case CURRENT_VELOCITY:
+                  lowLevelJointData.setDesiredVelocity(joint.getQd());
+                  break;
+               case ZERO_VELOCITY:
+                  lowLevelJointData.setDesiredVelocity(0.0);
+                  break;
+               case REFERENCE_VELOCITY:
+                  lowLevelJointData.setDesiredVelocity(velocityReference);
+                  break;
+               default:
+                  LogTools.warn("Unexpected velocity reset mode: {}, resetting velocity to current for joint {}.", velocityResetMode, joint.getName());
+                  lowLevelJointData.setDesiredVelocity(joint.getQd());
+                  break;
+            }
+         }
          if (!lowLevelJointData.hasDesiredPosition() || resetIntegrators)
             lowLevelJointData.setDesiredPosition(positionReference);
 

@@ -96,7 +96,7 @@ public class MultiContactScriptReader
    {
       return currentMessageIndex;
    }
-   
+
    public boolean hasNext()
    {
       return currentMessageIndex < loadedMessages.size() - 1;

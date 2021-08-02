@@ -1,9 +1,12 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCParameters;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +16,6 @@ import java.util.function.DoubleConsumer;
  * Tracking command a nominal VRP trajectory. Specifies a nominal VRP trajectory for the motion function to try and achieve for the segment
  * {@link #getSegmentNumber()} over a duration {@link #getSegmentDuration()}. This motion function always takes the form of a linear function that goes from
  * {@link #getStartVRP()} to {@link #getEndVRP()}.
- *
- * TODO: this tracking function should be improved to allow cubic VRP trajectories, not just linear ones.
  *
  * This tracking command can be formulated into a closed-form quadratic cost for the optimizer, and always represents an
  * {@link us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType#OBJECTIVE}
@@ -43,16 +44,32 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    /**
     *  weight to scale the cost of the VRP tracking objective.
     */
-   private double weight = CoMTrajectoryModelPredictiveController.defaultVrpTrackingWeight;
+   private double weight = MPCParameters.defaultVrpTrackingWeight;
 
    /**
     * Desired VRP value at the beginning of the segment.
     */
    private final FramePoint3D startVRP = new FramePoint3D();
+
    /**
     * Desired VRP value at the end of the segment.
     */
    private final FramePoint3D endVRP = new FramePoint3D();
+
+   /**
+    * Desired VRP velocity value at the beginning of the segment.
+    */
+   private final FrameVector3D startVRPVelocity = new FrameVector3D();
+
+   /**
+    * Desired VRP velocity value at the end of the segment.
+    */
+   private final FrameVector3D endVRPVelocity = new FrameVector3D();
+
+   {
+      startVRPVelocity.setToNaN();
+      endVRPVelocity.setToNaN();
+   }
 
    /**
     * Consumer for the computed cost to go on the output of the MPC function.
@@ -70,6 +87,8 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
       segmentNumber = -1;
       startVRP.setToNaN();
       endVRP.setToNaN();
+      startVRPVelocity.setToNaN();
+      endVRPVelocity.setToNaN();
    }
 
    /**
@@ -88,6 +107,16 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
       this.endVRP.set(endVRP);
    }
 
+   public void setStartVRPVelocity(FrameVector3DReadOnly startVRPVelocity)
+   {
+      this.startVRPVelocity.set(startVRPVelocity);
+   }
+
+   public void setEndVRPVelocity(FrameVector3DReadOnly endVRPVelocity)
+   {
+      this.endVRPVelocity.set(endVRPVelocity);
+   }
+
    public FramePoint3DReadOnly getStartVRP()
    {
       return startVRP;
@@ -96,6 +125,16 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    public FramePoint3DReadOnly getEndVRP()
    {
       return endVRP;
+   }
+
+   public FrameVector3DReadOnly getStartVRPVelocity()
+   {
+      return startVRPVelocity;
+   }
+
+   public FrameVector3DReadOnly getEndVRPVelocity()
+   {
+      return endVRPVelocity;
    }
 
    /**

@@ -58,7 +58,7 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
       currentTrajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       currentWaypointIndex = new YoInteger(namePrefix + "CurrentWaypointIndex", registry);
 
-      subTrajectory = new YoPolynomial(namePrefix + "SubTrajectory", 5, registry);
+      subTrajectory = new YoPolynomial(namePrefix + "SubTrajectory", 6, registry);
 
       waypoints = new ArrayList<>(maximumNumberOfWaypoints);
 

@@ -17,7 +17,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class ValkyriePlanarRegionsSimulation
 {
-   private static final DataSetName DATA_SET_TO_USE = DataSetName._20200226_120200_FlatGround_StartMidRegion;
+   private static final DataSetName DATA_SET_TO_USE = DataSetName._20190219_182005_CompareStepBeforeGap;
    private static final boolean GENERATE_GROUND_PLANE = false;
    private static final boolean ADD_EXTRA_CONTACT_POINTS = true;
 

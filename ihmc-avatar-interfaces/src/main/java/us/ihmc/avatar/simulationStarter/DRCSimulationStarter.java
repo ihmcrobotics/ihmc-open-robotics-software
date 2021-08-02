@@ -595,9 +595,12 @@ public class DRCSimulationStarter implements SimulationStarterInterface
                                                               framesPerSecond);
          }
 
-         for (AvatarRobotLidarParameters lidarParams : sensorInformation.getLidarParameters())
+         if (sensorInformation.getLidarParameters() != null)
          {
-            DRCLidar.setupDRCRobotLidar(robot, graphics3dAdapter, scsSensorOutputPacketCommunicator, jointMap, lidarParams, timeStampProvider, true);
+            for (AvatarRobotLidarParameters lidarParams : sensorInformation.getLidarParameters())
+            {
+               DRCLidar.setupDRCRobotLidar(robot, graphics3dAdapter, scsSensorOutputPacketCommunicator, jointMap, lidarParams, timeStampProvider, true);
+            }
          }
       }
 

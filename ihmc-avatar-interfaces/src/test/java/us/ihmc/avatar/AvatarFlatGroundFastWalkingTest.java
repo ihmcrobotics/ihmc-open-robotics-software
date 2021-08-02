@@ -14,7 +14,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -87,12 +87,10 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       footsteps.setOffsetFootstepsHeightWithExecutionError(true);
       drcSimulationTestHelper.publishToController(footsteps);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1
-            * computeWalkingDuration(footsteps, getRobotModel().getWalkingControllerParameters())));
+            * EndToEndTestTools.computeWalkingDuration(footsteps, getRobotModel().getWalkingControllerParameters())));
    }
 
-   private void setupSim(DRCRobotModel robotModel,
-                         boolean useVelocityAndHeadingScript,
-                         boolean cheatWithGroundHeightAtForFootstep,
+   private void setupSim(DRCRobotModel robotModel, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
                          HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -124,7 +122,7 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       stateVars.add(rootJoint.getQuaternionQy().getFullNameString());
       stateVars.add(rootJoint.getQuaternionQz().getFullNameString());
       stateVars.add(rootJoint.getQuaternionQs().getFullNameString());
-      
+
       for (OneDegreeOfFreedomJoint joint : joints)
       {
          stateVars.add(joint.getQYoVariable().getFullNameString());
@@ -134,7 +132,7 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       scs.setupVarGroup("RobotState", stateVars.toArray(new String[0]));
    }
 
-   private static DoubleUnaryOperator trapezoidFunction(double bottomValue, double plateauValue, double startPlateau, double endPlateau)
+   public static DoubleUnaryOperator trapezoidFunction(double bottomValue, double plateauValue, double startPlateau, double endPlateau)
    {
       return percent ->
       {
@@ -147,14 +145,8 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       };
    }
 
-   private static FootstepDataListMessage forwardSteps(RobotSide initialStepSide,
-                                                       int numberOfSteps,
-                                                       DoubleUnaryOperator stepLengthFunction,
-                                                       double stepWidth,
-                                                       double swingTime,
-                                                       double transferTime,
-                                                       Pose3DReadOnly startPose,
-                                                       boolean squareUp)
+   public static FootstepDataListMessage forwardSteps(RobotSide initialStepSide, int numberOfSteps, DoubleUnaryOperator stepLengthFunction, double stepWidth,
+                                                       double swingTime, double transferTime, Pose3DReadOnly startPose, boolean squareUp)
    {
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage footstep = message.getFootstepDataList().add();
@@ -192,40 +184,5 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       }
 
       return message;
-   }
-
-   private static double computeWalkingDuration(FootstepDataListMessage footsteps, WalkingControllerParameters walkingControllerParameters)
-   {
-      double defaultSwingDuration = getDuration(footsteps.getDefaultSwingDuration(), walkingControllerParameters.getDefaultSwingTime());
-      double defaultTransferDuration = getDuration(footsteps.getDefaultTransferDuration(), walkingControllerParameters.getDefaultTransferTime());
-      double defaultInitialTransferDuration = walkingControllerParameters.getDefaultInitialTransferTime();
-      double defaultFinalTransferDuration = walkingControllerParameters.getDefaultFinalTransferTime();
-
-      double walkingDuration = 0.0;
-
-      for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
-      {
-         if (i == 0)
-            walkingDuration += computeStepDuration(footsteps.getFootstepDataList().get(i), defaultSwingDuration, defaultInitialTransferDuration);
-         else
-            walkingDuration += computeStepDuration(footsteps.getFootstepDataList().get(i), defaultSwingDuration, defaultTransferDuration);
-      }
-
-      walkingDuration += getDuration(footsteps.getFinalTransferDuration(), defaultFinalTransferDuration);
-
-      return walkingDuration;
-   }
-
-   private static double computeStepDuration(FootstepDataMessage footstep, double defaultSwingDuration, double defaultTransferDuration)
-   {
-      return getDuration(footstep.getSwingDuration(), defaultSwingDuration) + getDuration(footstep.getTransferDuration(), defaultTransferDuration);
-   }
-
-   private static double getDuration(double duration, double defaultDuration)
-   {
-      if (duration <= 0.0 || !Double.isFinite(duration))
-         return defaultDuration;
-      else
-         return duration;
    }
 }

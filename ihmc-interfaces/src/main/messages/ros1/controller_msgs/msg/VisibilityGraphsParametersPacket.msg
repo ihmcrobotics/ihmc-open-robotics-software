@@ -94,4 +94,6 @@ float64 weight_for_non_preferred_edge
 
 bool return_best_effort_solution
 
+bool optimize_for_narrow_passage
+
 
