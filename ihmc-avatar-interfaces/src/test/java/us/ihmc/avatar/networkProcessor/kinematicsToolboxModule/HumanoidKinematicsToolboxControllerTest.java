@@ -135,7 +135,6 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
       FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel();
       commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
 
@@ -147,6 +146,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
                                                                   updateDT,
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, toolboxController.getDesiredReferenceFrames()));
       toolboxController.setInitialRobotConfiguration(robotModel);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
