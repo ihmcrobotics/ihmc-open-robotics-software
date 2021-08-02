@@ -156,18 +156,26 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private boolean hasMultiContactBalanceStatus = false;
    private final MultiContactBalanceStatus multiContactBalanceStatusInternal = new MultiContactBalanceStatus();
 
-   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                              FullHumanoidRobotModel desiredFullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                              double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
+                                              StatusMessageOutputManager statusOutputManager,
+                                              FullHumanoidRobotModel desiredFullRobotModel,
+                                              FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                              double updateDT,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoRegistry parentRegistry)
    {
       this(commandInputManager, statusOutputManager, desiredFullRobotModel, createListOfControllableRigidBodies(desiredFullRobotModel), fullRobotModelFactory,
            updateDT, yoGraphicsListRegistry, parentRegistry);
    }
 
-   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                              FullHumanoidRobotModel desiredFullRobotModel, Collection<? extends RigidBodyBasics> controllableRigidBodyies,
-                                              FullHumanoidRobotModelFactory fullRobotModelFactory, double updateDT,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
+                                              StatusMessageOutputManager statusOutputManager,
+                                              FullHumanoidRobotModel desiredFullRobotModel,
+                                              Collection<? extends RigidBodyBasics> controllableRigidBodyies,
+                                              FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                              double updateDT,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoRegistry parentRegistry)
    {
       super(commandInputManager, statusOutputManager, desiredFullRobotModel.getRootJoint(), getAllJointsExcludingHands(desiredFullRobotModel),
             controllableRigidBodyies, updateDT, yoGraphicsListRegistry, parentRegistry);
@@ -657,6 +665,21 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public FullHumanoidRobotModel getDesiredFullRobotModel()
    {
       return desiredFullRobotModel;
+   }
+
+   public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
+   {
+      return desiredReferenceFrames;
+   }
+
+   public FullHumanoidRobotModel getCurrentFullRobotModel()
+   {
+      return currentFullRobotModel;
+   }
+
+   public CommonHumanoidReferenceFrames getCurrentReferenceFrames()
+   {
+      return currentReferenceFrames;
    }
 
    private static class ContactingRigidBody

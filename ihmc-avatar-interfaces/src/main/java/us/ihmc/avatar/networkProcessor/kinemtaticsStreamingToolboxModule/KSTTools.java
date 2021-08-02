@@ -133,7 +133,7 @@ public class KSTTools
                                                              toolboxControllerPeriod,
                                                              yoGraphicsListRegistry,
                                                              registry);
-      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
+      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, ikController.getDesiredReferenceFrames()));
 
       ikController.setPreserveUserCommandHistory(false);
       ikController.minimizeAngularMomentum(true);
