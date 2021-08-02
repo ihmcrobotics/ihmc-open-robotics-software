@@ -31,7 +31,7 @@ public class GDX3DImGuiPanelsDemo
                }
             };
 
-            sceneManager.addRenderableProvider(GDXImGuiWindowManager.getInstance());
+            sceneManager.addRenderableProvider(GDXImGuiVirtualWindowManager.getInstance());
          }
 
          @Override
@@ -40,7 +40,7 @@ public class GDX3DImGuiPanelsDemo
             GDX3DSceneTools.glClearGray();
             sceneManager.setViewportBoundsToWindow();
 
-            GDXImGuiWindowManager.getInstance().update();
+            GDXImGuiVirtualWindowManager.getInstance().update();
 
             sceneManager.render();
          }

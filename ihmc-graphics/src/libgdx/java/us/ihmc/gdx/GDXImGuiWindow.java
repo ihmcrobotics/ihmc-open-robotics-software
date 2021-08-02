@@ -6,7 +6,7 @@ public abstract class GDXImGuiWindow
 
    public GDXImGuiWindow(String name) {
       this.name = name;
-      GDXImGuiWindowManager.getInstance().addPanel(this);
+      GDXImGuiVirtualWindowManager.getInstance().addPanel(this);
    }
 
    public abstract void renderImGuiWidgets();
