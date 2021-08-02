@@ -39,6 +39,11 @@ public class YoSingleContactImpulseCalculatorPool
       return pool.add();
    }
 
+   public RecyclingArrayList<YoSingleContactImpulseCalculator> getImpulseCalculatorPool()
+   {
+      return pool;
+   }
+
    public void clear()
    {
       for (int i = 0; i < pool.size(); i++)

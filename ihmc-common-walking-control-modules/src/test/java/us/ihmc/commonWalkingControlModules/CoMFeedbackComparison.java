@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajec
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -94,7 +95,7 @@ public class CoMFeedbackComparison
 
          icpController = new ICPProportionalController(icpGains, controlDt, registry);
          lqrController = new LQRMomentumController(basicTrajectoryPlanner.getOmega(), registry);
-         mpcController = new CoMTrajectoryModelPredictiveController(1.0, gravity, nominalHeight, controlDt, registry);
+         mpcController = new CoMTrajectoryModelPredictiveController(new MPCParameters(registry), 1.0, gravity, nominalHeight, controlDt, registry);
 
          restartTime.addListener(v ->
                                  {

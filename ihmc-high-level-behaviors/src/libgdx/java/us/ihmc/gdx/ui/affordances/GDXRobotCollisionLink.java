@@ -30,7 +30,6 @@ public class GDXRobotCollisionLink implements RenderableProvider
 {
    private final ModelInstance modelInstance;
    private final RigidBodyTransform transformToJoint;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ReferenceFrame collisionMeshFrame;
    private final FramePose3D boxPose = new FramePose3D();
    private final Shape3DReadOnly shape;
@@ -38,17 +37,48 @@ public class GDXRobotCollisionLink implements RenderableProvider
    private CapsuleRayIntersection capsuleIntersection;
    private BoxRayIntersection boxRayIntersection;
    private ModelInstance coordinateFrame;
+   private boolean intersects;
+   private boolean useOverrideTransform = false;
+   private final RigidBodyTransform overrideTransform = new RigidBodyTransform();
+   private final ReferenceFrame overrideFrame;
+   private final ReferenceFrame overrideMeshFrame;
+
+   public GDXRobotCollisionLink(us.ihmc.scs2.simulation.collision.Collidable collidable, Color color)
+   {
+      this(collidable.getShape(),
+           collidable.getShape().getReferenceFrame(),
+           collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
+           collidable.getRigidBody().getName(),
+           color);
+   }
 
    public GDXRobotCollisionLink(Collidable collidable, Color color)
    {
-      shape = collidable.getShape();
-      ReferenceFrame shapeFrame = collidable.getShape().getReferenceFrame();
-      MovingReferenceFrame frameAfterJoint = collidable.getRigidBody().getParentJoint().getFrameAfterJoint();
+      this(collidable.getShape(),
+           collidable.getShape().getReferenceFrame(),
+           collidable.getRigidBody().getParentJoint().getFrameAfterJoint(),
+           collidable.getRigidBody().getName(),
+           color);
+   }
+
+   public GDXRobotCollisionLink(Shape3DReadOnly shape,
+                                ReferenceFrame shapeFrame,
+                                MovingReferenceFrame frameAfterJoint,
+                                String rigidBodyName,
+                                Color color)
+   {
+      this.shape = shape;
       // TODO update every frame
       transformToJoint = new RigidBodyTransform(shapeFrame.getTransformToDesiredFrame(frameAfterJoint));
-      collisionMeshFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("collisionMeshFrame" + collidable.getRigidBody().getName(),
+      collisionMeshFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("collisionMeshFrame" + rigidBodyName,
                                                                                                   frameAfterJoint,
                                                                                                   transformToJoint);
+      overrideFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("overrideFrame" + rigidBodyName,
+                                                                                             ReferenceFrame.getWorldFrame(),
+                                                                                             overrideTransform);
+      overrideMeshFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("overrideMeshFrame" + rigidBodyName,
+                                                                                                 overrideFrame,
+                                                                                                 transformToJoint);
 
       modelInstance = GDXModelPrimitives.buildModelInstance(meshBuilder ->
       {
@@ -94,7 +124,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
          {
             LogTools.warn("Shape not handled: {}", shape);
          }
-      }, collidable.getRigidBody().getName());
+      }, rigidBodyName);
       GDXTools.setTransparency(modelInstance, color.a);
 
       coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.15);
@@ -102,17 +132,28 @@ public class GDXRobotCollisionLink implements RenderableProvider
 
    public void update()
    {
-      collisionMeshFrame.update();
-      GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), modelInstance.transform);
-      GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), coordinateFrame.transform);
+      if (useOverrideTransform)
+      {
+         overrideFrame.update();
+         overrideMeshFrame.update();
+         GDXTools.toGDX(overrideMeshFrame.getTransformToWorldFrame(), modelInstance.transform);
+         GDXTools.toGDX(overrideMeshFrame.getTransformToWorldFrame(), coordinateFrame.transform);
+      }
+      else
+      {
+         collisionMeshFrame.update();
+         GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), modelInstance.transform);
+         GDXTools.toGDX(collisionMeshFrame.getTransformToWorldFrame(), coordinateFrame.transform);
+      }
    }
 
    // Happens after update
    public void process3DViewInput(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
-      RigidBodyTransform transformToWorldFrame = collisionMeshFrame.getTransformToWorldFrame();
-      boolean intersects = false;
+      ReferenceFrame frameToUse = useOverrideTransform ? overrideMeshFrame : collisionMeshFrame;
+      RigidBodyTransform transformToWorldFrame = frameToUse.getTransformToWorldFrame();
+      intersects = false;
       if (shape instanceof Sphere3DReadOnly)
       {
          Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
@@ -133,7 +174,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
       else if (shape instanceof Box3DReadOnly)
       {
          Box3DReadOnly box = (Box3DReadOnly) shape;
-         boxPose.setToZero(collisionMeshFrame);
+         boxPose.setToZero(frameToUse);
          boxPose.changeFrame(ReferenceFrame.getWorldFrame());
          double sizeX = box.getSizeX();
          double sizeY = box.getSizeY();
@@ -156,5 +197,16 @@ public class GDXRobotCollisionLink implements RenderableProvider
    {
       modelInstance.getRenderables(renderables, pool);
       coordinateFrame.getRenderables(renderables, pool);
+   }
+
+   public RigidBodyTransform overrideTransform(boolean useOverrideTransform)
+   {
+      this.useOverrideTransform = useOverrideTransform;
+      return overrideTransform;
+   }
+
+   public boolean getIntersects()
+   {
+      return intersects;
    }
 }
