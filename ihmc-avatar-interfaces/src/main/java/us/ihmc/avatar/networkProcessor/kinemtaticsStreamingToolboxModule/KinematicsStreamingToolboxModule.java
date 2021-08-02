@@ -53,7 +53,6 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
          controller.setInitialRobotConfigurationNamedMap(initialConfiguration);
       controller.setTrajectoryMessagePublisher(trajectoryMessagePublisher::publish);
       controller.setStreamingMessagePublisher(streamingMessagePublisher::publish);
-      commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
       if (yoVariableServer != null)
       {

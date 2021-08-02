@@ -2,7 +2,9 @@ package us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI;
 
 import controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class KinematicsStreamingToolboxConfigurationCommand
       implements Command<KinematicsStreamingToolboxConfigurationCommand, KinematicsStreamingToolboxConfigurationMessage>
@@ -20,6 +22,11 @@ public class KinematicsStreamingToolboxConfigurationCommand
    private boolean enableRightHandTaskspace = true;
    private boolean enableChestTaskspace = true;
    private boolean enablePelvisTaskspace = true;
+
+   private ReferenceFrame leftHandTrajectoryFrame = ReferenceFrame.getWorldFrame();
+   private ReferenceFrame rightHandTrajectoryFrame = ReferenceFrame.getWorldFrame();
+   private ReferenceFrame chestTrajectoryFrame = ReferenceFrame.getWorldFrame();
+   private ReferenceFrame pelvisTrajectoryFrame = ReferenceFrame.getWorldFrame();
 
    public KinematicsStreamingToolboxConfigurationCommand()
    {
@@ -40,6 +47,11 @@ public class KinematicsStreamingToolboxConfigurationCommand
       enableRightHandTaskspace = true;
       enableChestTaskspace = true;
       enablePelvisTaskspace = true;
+
+      leftHandTrajectoryFrame = ReferenceFrame.getWorldFrame();
+      rightHandTrajectoryFrame = ReferenceFrame.getWorldFrame();
+      chestTrajectoryFrame = ReferenceFrame.getWorldFrame();
+      pelvisTrajectoryFrame = ReferenceFrame.getWorldFrame();
    }
 
    @Override
@@ -57,11 +69,23 @@ public class KinematicsStreamingToolboxConfigurationCommand
       enableRightHandTaskspace = other.enableRightHandTaskspace;
       enableChestTaskspace = other.enableChestTaskspace;
       enablePelvisTaskspace = other.enablePelvisTaskspace;
+
+      leftHandTrajectoryFrame = other.leftHandTrajectoryFrame;
+      rightHandTrajectoryFrame = other.rightHandTrajectoryFrame;
+      chestTrajectoryFrame = other.chestTrajectoryFrame;
+      pelvisTrajectoryFrame = other.pelvisTrajectoryFrame;
    }
 
    @Override
    public void setFromMessage(KinematicsStreamingToolboxConfigurationMessage message)
    {
+      set(message, null);
+   }
+
+   public void set(KinematicsStreamingToolboxConfigurationMessage message, ReferenceFrameHashCodeResolver referenceFrameResolver)
+   {
+      clear();
+
       sequenceId = message.getSequenceId();
 
       lockPelvis = message.getLockPelvis();
@@ -75,6 +99,14 @@ public class KinematicsStreamingToolboxConfigurationCommand
       enableRightHandTaskspace = message.getEnableRightHandTaskspace();
       enableChestTaskspace = message.getEnableChestTaskspace();
       enablePelvisTaskspace = message.getEnablePelvisTaskspace();
+
+      if (referenceFrameResolver != null)
+      {
+         leftHandTrajectoryFrame = referenceFrameResolver.getReferenceFrame(message.getLeftHandTrajectoryFrameId());
+         rightHandTrajectoryFrame = referenceFrameResolver.getReferenceFrame(message.getRightHandTrajectoryFrameId());
+         chestTrajectoryFrame = referenceFrameResolver.getReferenceFrame(message.getChestTrajectoryFrameId());
+         pelvisTrajectoryFrame = referenceFrameResolver.getReferenceFrame(message.getPelvisTrajectoryFrameId());
+      }
    }
 
    @Override
@@ -136,6 +168,31 @@ public class KinematicsStreamingToolboxConfigurationCommand
    public boolean isPelvisTaskspaceEnabled()
    {
       return enablePelvisTaskspace;
+   }
+
+   public ReferenceFrame getHandTrajectoryFrame(RobotSide robotSide)
+   {
+      return robotSide == RobotSide.LEFT ? leftHandTrajectoryFrame : rightHandTrajectoryFrame;
+   }
+   
+   public ReferenceFrame getLeftHandTrajectoryFrame()
+   {
+      return leftHandTrajectoryFrame;
+   }
+
+   public ReferenceFrame getRightHandTrajectoryFrame()
+   {
+      return rightHandTrajectoryFrame;
+   }
+
+   public ReferenceFrame getChestTrajectoryFrame()
+   {
+      return chestTrajectoryFrame;
+   }
+
+   public ReferenceFrame getPelvisTrajectoryFrame()
+   {
+      return pelvisTrajectoryFrame;
    }
 
    @Override
