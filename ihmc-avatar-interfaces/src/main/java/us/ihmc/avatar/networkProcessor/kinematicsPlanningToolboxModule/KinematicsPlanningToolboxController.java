@@ -130,7 +130,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       isDone = new YoBoolean("isDone", parentRegistry);
 
-      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
       double updateDT = 1.0e-3;
       ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager,
                                                              statusOutputManager,
@@ -139,6 +138,7 @@ public class KinematicsPlanningToolboxController extends ToolboxController
                                                              updateDT,
                                                              yoGraphicsListRegistry,
                                                              parentRegistry);
+      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, ikController.getDesiredReferenceFrames()));
       initialRobotConfiguration = MessageTools.createKinematicsToolboxOutputStatus(ikController.getDesiredOneDoFJoint());
 
       indexOfCurrentKeyFrame = new YoInteger("indexOfCurrentKeyFrame", parentRegistry);

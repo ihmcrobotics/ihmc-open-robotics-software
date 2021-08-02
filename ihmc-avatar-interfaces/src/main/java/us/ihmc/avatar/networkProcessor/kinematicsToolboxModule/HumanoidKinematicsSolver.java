@@ -59,7 +59,7 @@ public class HumanoidKinematicsSolver
                                                            yoGraphicsListRegistry,
                                                            registry);
 
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, controller.getDesiredReferenceFrames()));
 
       maximumNumberOfIterations.set(DEFAULT_MAX_NUMBER_OF_ITERATIONS);
       solutionQualityThreshold.set(DEFAULT_QUALITY_THRESHOLD);
