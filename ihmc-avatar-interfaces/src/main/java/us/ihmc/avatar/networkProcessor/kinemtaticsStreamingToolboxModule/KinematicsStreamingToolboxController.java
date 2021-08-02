@@ -60,9 +60,13 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
-   public KinematicsStreamingToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                               FullHumanoidRobotModel desiredFullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                               double walkingControllerPeriod, double toolboxControllerPeriod, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public KinematicsStreamingToolboxController(CommandInputManager commandInputManager,
+                                               StatusMessageOutputManager statusOutputManager,
+                                               FullHumanoidRobotModel desiredFullRobotModel,
+                                               FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                               double walkingControllerPeriod,
+                                               double toolboxControllerPeriod,
+                                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                                YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);

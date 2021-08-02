@@ -154,7 +154,6 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       toolboxRegistry = new YoRegistry("toolboxMain");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel));
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
       new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
