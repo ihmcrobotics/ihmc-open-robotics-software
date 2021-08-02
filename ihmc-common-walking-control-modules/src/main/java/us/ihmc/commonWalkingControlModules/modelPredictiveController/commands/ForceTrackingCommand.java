@@ -1,17 +1,16 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.DoubleConsumer;
 
 /**
- * This command is designed to minimize the force exerted over the course of the segment duration. The exact cost is the integral of the squared force magnitude.
- * This can be thought of as minimizing the absolute work done.
- *
- * Whereas many other MPC algorithms provide some regularization by minimizing the CoM acceleration, this minimizes the force, so as to account for the force
- * that must be exerted to counter gravity.
+ * This command is designed to minimize the difference between a contact acceleration exerted over the course of the segment duration and some desired value.
+ * The exact cost is the integral of the squared difference between the contact acceleration and a desired value.
  */
 public class ForceTrackingCommand implements MPCCommand<ForceTrackingCommand>
 {
@@ -36,7 +35,7 @@ public class ForceTrackingCommand implements MPCCommand<ForceTrackingCommand>
 
    private double duration;
 
-   private double objectiveValue;
+   private final FrameVector3D objectiveValue = new FrameVector3D();
 
    /**
     * @return command type for the MPC core.
@@ -53,7 +52,7 @@ public class ForceTrackingCommand implements MPCCommand<ForceTrackingCommand>
    {
       segmentNumber = -1;
       duration = Double.NaN;
-      objectiveValue = Double.NaN;
+      objectiveValue.setToNaN();
       contactPlaneHelpers.clear();
    }
 
@@ -94,9 +93,9 @@ public class ForceTrackingCommand implements MPCCommand<ForceTrackingCommand>
       this.duration = segmentDuration;
    }
 
-   public void setObjectiveValue(double objectiveValue)
+   public void setObjectiveValue(FrameVector3DReadOnly objectiveValue)
    {
-      this.objectiveValue = objectiveValue;
+      this.objectiveValue.set(objectiveValue);
    }
 
    public int getSegmentNumber()
@@ -124,7 +123,7 @@ public class ForceTrackingCommand implements MPCCommand<ForceTrackingCommand>
       return contactPlaneHelpers.get(i);
    }
 
-   public double getObjectiveValue()
+   public FrameVector3DReadOnly getObjectiveValue()
    {
       return objectiveValue;
    }

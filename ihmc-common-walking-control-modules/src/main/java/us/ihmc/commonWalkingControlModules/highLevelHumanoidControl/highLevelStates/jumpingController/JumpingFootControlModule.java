@@ -96,14 +96,8 @@ public class JumpingFootControlModule
 
       setupContactStatesMap();
 
-      Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownVelocity());
-      FrameParameterVector3D touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity",
-                                                                            ReferenceFrame.getWorldFrame(),
-                                                                            defaultTouchdownVelocity,
-                                                                            registry);
-
       supportState = new JumpingSupportFootState(footControlHelper, registry);
-      swingState = new JumpingSwingFootState(footControlHelper, touchdownVelocity, controllerToolbox.getGravityZ(), swingFootControlGains, registry);
+      swingState = new JumpingSwingFootState(footControlHelper, controllerToolbox.getGravityZ(), swingFootControlGains, registry);
 
       stateMachine = setupStateMachine(namePrefix);
 

@@ -85,6 +85,7 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double weight_for_non_preferred_edge;
         boolean return_best_effort_solution;
+        boolean optimize_for_narrow_passage;
       };
     };
   };

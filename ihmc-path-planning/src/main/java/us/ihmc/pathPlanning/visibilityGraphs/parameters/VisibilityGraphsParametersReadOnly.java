@@ -209,6 +209,15 @@ public interface VisibilityGraphsParametersReadOnly extends StoredPropertySetRea
    }
 
    /**
+    * If true, runs narrow passage body path optimizer.
+    * This will shift the waypoint positions and override the orientations of the body path plan using a simple bounding box approximation of the robot body.
+    */
+   default boolean getOptimizeForNarrowPassage()
+   {
+      return get(optimizeForNarrowPassage);
+   }
+
+   /**
     * The constant extrusion distance to use when extruding the hull of a navigable region.
     *
     * @return
