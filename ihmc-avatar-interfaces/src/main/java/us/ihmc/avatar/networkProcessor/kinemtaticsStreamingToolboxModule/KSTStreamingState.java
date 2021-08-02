@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -109,6 +110,15 @@ public class KSTStreamingState implements State
 
    private final YoDouble inputDecayFactor;
    private final YoInteger numberOfDecayingInputs = new YoInteger("numberOfDecayingInputs", registry);
+
+   /**
+    * Storing when each rigid-body has started being controlled by the user. That allows to identify
+    * newly controlled rigid-body for which the weight matrix will be slowly ramped up to smoothly
+    * activate the corresponding objective.
+    */
+   private final Map<RigidBodyBasics, YoDouble> rigidBodyControlStartTimeMap = new HashMap<>();
+   private final YoDouble[] rigidBodyControlStartTimeArray;
+
    /**
     * Buffer of commands used to slowly decay objectives for end-effector that have been discontinued.
     * The decay is done by reducing the objective's weight continuously over time.
@@ -272,10 +282,14 @@ public class KSTStreamingState implements State
          filteredExtrapolatedInputOrientationMap.put(rigidBody, filteredExtrapolatedInputOrientation);
          rawInputSpatialVelocityMap.put(rigidBody, rawInputSpatialVelocity);
          decayingInputSpatialVelocityMap.put(rigidBody, decayingInputSpatialVelocity);
+
+         YoDouble rigidBodyControlStartTime = new YoDouble(rigidBody.getName() + "ControlStartTime", registry);
+         rigidBodyControlStartTimeMap.put(rigidBody, rigidBodyControlStartTime);
       }
 
       rawInputSpatialVelocityArray = new YoFixedFrameSpatialVector[controllableRigidBodies.size()];
       decayingInputSpatialVelocityArray = new YoFixedFrameSpatialVector[controllableRigidBodies.size()];
+      rigidBodyControlStartTimeArray = new YoDouble[controllableRigidBodies.size()];
 
       int index = 0;
 
@@ -283,6 +297,7 @@ public class KSTStreamingState implements State
       {
          rawInputSpatialVelocityArray[index] = rawInputSpatialVelocityMap.get(rigidBody);
          decayingInputSpatialVelocityArray[index] = decayingInputSpatialVelocityMap.get(rigidBody);
+         rigidBodyControlStartTimeArray[index] = rigidBodyControlStartTimeMap.get(rigidBody);
          index++;
       }
    }
@@ -451,6 +466,10 @@ public class KSTStreamingState implements State
          filteredExtrapolatedInputOrientation.setToNaN();
          filteredExtrapolatedInputOrientation.reset();
       }
+
+      for (YoDouble rigidBodyControlStartTime : rigidBodyControlStartTimeArray)
+         rigidBodyControlStartTime.setToNaN();
+
       resetEstimatedInputVelocities();
 
       System.gc();
@@ -467,6 +486,7 @@ public class KSTStreamingState implements State
 
    private final KinematicsStreamingToolboxInputCommand rawInputs = new KinematicsStreamingToolboxInputCommand();
    private final KinematicsStreamingToolboxInputCommand filteredInputs = new KinematicsStreamingToolboxInputCommand();
+   private final List<RigidBodyBasics> uncontrolledRigidBodies = new ArrayList<>();
 
    @Override
    public void doAction(double timeInState)
@@ -495,9 +515,41 @@ public class KSTStreamingState implements State
 
       if (latestInput != null)
       {
+         // Reset the list to keep track of the bodies that are not controlled
+         uncontrolledRigidBodies.clear();
+         List<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
+
+         for (int i = 0; i < controllableRigidBodies.size(); i++)
+         {
+            uncontrolledRigidBodies.add(controllableRigidBodies.get(i));
+         }
+
          for (int i = 0; i < latestInput.getNumberOfInputs(); i++)
-         { // Sets the user weights only if provided.
-            setDefaultWeightIfNeeded(latestInput.getInput(i).getSelectionMatrix(), latestInput.getInput(i).getWeightMatrix());
+         {
+            KinematicsToolboxRigidBodyCommand rigidBodyInput = latestInput.getInput(i);
+            // Sets the user weights only if provided.
+            setDefaultWeightIfNeeded(rigidBodyInput.getSelectionMatrix(), rigidBodyInput.getWeightMatrix());
+
+            // Update time for which each rigid body started being controlled.
+            YoDouble startTime = rigidBodyControlStartTimeMap.get(rigidBodyInput.getEndEffector());
+            if (startTime.isNaN())
+               startTime.set(timeInState);
+
+            double controlDuration = timeInState - startTime.getValue();
+
+            if (controlDuration < streamingBlendingDuration.getValue())
+            {
+               double blendingFactor = MathTools.clamp(controlDuration / streamingBlendingDuration.getValue(), 0.0, 1.0);
+               rigidBodyInput.getWeightMatrix().scale(blendingFactor);
+            }
+
+            // Update the list of bodies that are not controlled this tick
+            uncontrolledRigidBodies.remove(rigidBodyInput.getEndEffector());
+         }
+
+         for (int i = 0; i < uncontrolledRigidBodies.size(); i++)
+         {
+            rigidBodyControlStartTimeMap.get(uncontrolledRigidBodies.get(i)).setToNaN();
          }
 
          if (!latestInput.getStreamToController() && latestInput.getNumberOfInputs() == 0 && tools.hasPreviousInput())
@@ -873,12 +925,12 @@ public class KSTStreamingState implements State
       numberOfDecayingInputs.set(decayingInputs.size());
    }
 
-   private double findMaximumWeightValue(WeightMatrix6D weightMatrix)
+   private static double findMaximumWeightValue(WeightMatrix6D weightMatrix)
    {
       return Math.max(findMaximumWeightValue(weightMatrix.getAngularPart()), findMaximumWeightValue(weightMatrix.getLinearPart()));
    }
 
-   private double findMaximumWeightValue(WeightMatrix3D weightMatrix)
+   private static double findMaximumWeightValue(WeightMatrix3D weightMatrix)
    {
       return EuclidCoreTools.max(weightMatrix.getX(), weightMatrix.getY(), weightMatrix.getZ());
    }
@@ -889,7 +941,7 @@ public class KSTStreamingState implements State
       setDefaultWeightIfNeeded(selectionMatrix.getAngularPart(), weightMatrix.getAngularPart(), defaultAngularWeight.getValue());
    }
 
-   private void setDefaultWeightIfNeeded(SelectionMatrix3D selectionMatrix, WeightMatrix3D weightMatrix, double defaultWeight)
+   private static void setDefaultWeightIfNeeded(SelectionMatrix3D selectionMatrix, WeightMatrix3D weightMatrix, double defaultWeight)
    {
       if (selectionMatrix.isXSelected())
       {
