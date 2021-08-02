@@ -144,6 +144,11 @@ public class KinematicsToolboxOutputConverter
 
    public void computeHandTrajectoryMessage(RobotSide robotSide)
    {
+      computeHandTrajectoryMessage(robotSide, worldFrame);
+   }
+
+   public void computeHandTrajectoryMessage(RobotSide robotSide, ReferenceFrame trajectoryFrame)
+   {
       checkIfDataHasBeenSet();
 
       // TODO Add the option to define the control frame in the API instead of hardcoding it here.
@@ -155,7 +160,8 @@ public class KinematicsToolboxOutputConverter
       handTrajectoryMessage.setRobotSide(robotSide.toByte());
       SE3TrajectoryMessage se3TrajectoryMessage = handTrajectoryMessage.getSe3Trajectory();
       packCustomControlFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handControlFrame, se3TrajectoryMessage);
-      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
+      se3TrajectoryMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
 
       Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3TrajectoryMessage.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
@@ -230,6 +236,10 @@ public class KinematicsToolboxOutputConverter
 
    public void computePelvisTrajectoryMessage()
    {
+      computePelvisTrajectoryMessage(worldFrame);
+   }
+   public void computePelvisTrajectoryMessage(ReferenceFrame trajectoryFrame)
+   {
       checkIfDataHasBeenSet();
 
       MovingReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
@@ -239,7 +249,8 @@ public class KinematicsToolboxOutputConverter
 
       PelvisTrajectoryMessage pelvisTrajectoryMessage = output.getPelvisTrajectoryMessage();
       SE3TrajectoryMessage se3Trajectory = pelvisTrajectoryMessage.getSe3Trajectory();
-      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
+      se3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
 
       Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3Trajectory.getTaskspaceTrajectoryPoints();
       taskspaceTrajectoryPoints.clear();
@@ -275,7 +286,9 @@ public class KinematicsToolboxOutputConverter
       return robotSide == RobotSide.LEFT ? left : right;
    }
 
-   private static void angularVelocity(MovingReferenceFrame movingFrame, ReferenceFrame outputFrame, boolean enableVelocity,
+   private static void angularVelocity(MovingReferenceFrame movingFrame,
+                                       ReferenceFrame outputFrame,
+                                       boolean enableVelocity,
                                        FrameVector3DBasics angularVelocityToPack)
    {
       if (!enableVelocity)
@@ -289,7 +302,9 @@ public class KinematicsToolboxOutputConverter
       }
    }
 
-   private static void spatialVelocity(MovingReferenceFrame movingFrame, ReferenceFrame outputFrame, boolean enableVelocity,
+   private static void spatialVelocity(MovingReferenceFrame movingFrame,
+                                       ReferenceFrame outputFrame,
+                                       boolean enableVelocity,
                                        SpatialVectorBasics spatialVelocityToPack)
    {
       if (!enableVelocity)
@@ -323,7 +338,9 @@ public class KinematicsToolboxOutputConverter
       controlFrame.transformFromThisToDesiredFrame(endEffectorFrame, controlFramePose);
    }
 
-   public static void packSO3TrajectoryPointMessage(double time, Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity,
+   public static void packSO3TrajectoryPointMessage(double time,
+                                                    Orientation3DReadOnly orientation,
+                                                    Vector3DReadOnly angularVelocity,
                                                     SO3TrajectoryPointMessage messageToPack)
    {
       messageToPack.setTime(time);
@@ -331,7 +348,9 @@ public class KinematicsToolboxOutputConverter
       messageToPack.getAngularVelocity().set(angularVelocity);
    }
 
-   public static void packSE3TrajectoryPointMessage(double time, Pose3DReadOnly pose, SpatialVectorReadOnly spatialVelocity,
+   public static void packSE3TrajectoryPointMessage(double time,
+                                                    Pose3DReadOnly pose,
+                                                    SpatialVectorReadOnly spatialVelocity,
                                                     SE3TrajectoryPointMessage messageToPack)
    {
       messageToPack.setTime(time);
