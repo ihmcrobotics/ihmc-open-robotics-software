@@ -3,6 +3,8 @@ package us.ihmc.gdx.tools;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -10,8 +12,8 @@ import org.apache.logging.log4j.Level;
 import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -278,6 +280,12 @@ public class GDXTools
       gdxAffine.setTranslation(euclidPoint.getX32(), euclidPoint.getY32(), euclidPoint.getZ32());
    }
 
+   public static void toGDX(Pose3DReadOnly euclidPose, RigidBodyTransform tempTransform, Matrix4 gdxAffine)
+   {
+      euclidPose.get(tempTransform);
+      toGDX(tempTransform, gdxAffine);
+   }
+
    public static void toGDX(javafx.scene.paint.Color javaFXColor, Color gdxColor)
    {
       gdxColor.set((float) javaFXColor.getRed(), (float) javaFXColor.getGreen(), (float) javaFXColor.getBlue(), (float) javaFXColor.getOpacity());
@@ -297,11 +305,26 @@ public class GDXTools
       return javafx.scene.paint.Color.color(gdxColor.r, gdxColor.g, gdxColor.b, gdxColor.a);
    }
 
+   /**
+    * @param hue 0.0 to 360.0
+    * @param saturation 0.0 to 1.0
+    * @param value 0.0 to 1.0
+    */
+   public static Color hueSaturationValue(double hue, double saturation, double value)
+   {
+      return new Color().fromHsv((float) hue, (float) saturation, (float) value);
+   }
+
    public static Color toGDX(AppearanceDefinition appearanceDefinition)
    {
       Color gdxColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
       toGDX(appearanceDefinition, gdxColor);
       return gdxColor;
+   }
+
+   public static Color toGDX(double red, double green, double blue, double alpha)
+   {
+      return new Color((float) red, (float) green, (float) blue, (float) alpha);
    }
 
    public static void toGDX(AppearanceDefinition appearanceDefinition, Color gdxColor)
@@ -310,5 +333,10 @@ public class GDXTools
       gdxColor.g = appearanceDefinition.getColor().getY();
       gdxColor.b = appearanceDefinition.getColor().getZ();
       gdxColor.a = 1.0f - (float) appearanceDefinition.getTransparency();
+   }
+
+   public static void setTransparency(ModelInstance modelInstance, float transparency)
+   {
+      modelInstance.materials.get(0).set(new BlendingAttribute(true, transparency));
    }
 }

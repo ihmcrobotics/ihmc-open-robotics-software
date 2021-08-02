@@ -5,6 +5,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -17,7 +19,7 @@ import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
@@ -33,7 +35,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
-public class FancyPosesBehavior implements BehaviorInterface
+public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Fancy Poses", FancyPosesBehavior::new, API.create());
 
@@ -56,7 +58,7 @@ public class FancyPosesBehavior implements BehaviorInterface
    private final double trajectoryTime = 3.0;
    private final PausablePeriodicThread mainThread;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
 
    public FancyPosesBehavior(BehaviorHelper helper)
    {
@@ -81,6 +83,12 @@ public class FancyPosesBehavior implements BehaviorInterface
       helper.subscribeViaCallback(API.Abort, this::doOnAbort);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), 1.0, this::doBehavior);
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    @Override

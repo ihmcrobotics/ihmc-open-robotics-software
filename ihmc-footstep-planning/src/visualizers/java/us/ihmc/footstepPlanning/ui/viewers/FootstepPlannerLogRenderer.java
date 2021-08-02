@@ -88,6 +88,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, loggedSnappedCandidateStepGraphic.getMeshView()::setVisible);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, loggedWiggledCandidateStepGraphic.getMeshView()::setVisible);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowBodyBox, loggedBodyBoxGraphic.getMeshView()::setVisible);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, loggedIealStepGraphic.getMeshView()::setVisible);
 
       root.setVisible(false);
    }

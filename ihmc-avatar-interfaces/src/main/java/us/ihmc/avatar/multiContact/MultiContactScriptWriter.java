@@ -62,7 +62,7 @@ public class MultiContactScriptWriter
    {
       messagesToWrite.clear();
    }
-   
+
    public void recordConfiguration(KinematicsToolboxSnapshotDescription description)
    {
       messagesToWrite.add(description);

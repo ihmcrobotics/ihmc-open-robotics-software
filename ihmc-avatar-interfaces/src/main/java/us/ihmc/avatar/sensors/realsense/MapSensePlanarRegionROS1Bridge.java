@@ -3,7 +3,7 @@ package us.ihmc.avatar.sensors.realsense;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedBufferedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedBufferedRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -22,12 +22,12 @@ public class MapSensePlanarRegionROS1Bridge
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
    private final ResettableExceptionHandlingExecutorService executorService;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> publisher;
-   private final RemoteSyncedBufferedRobotModel syncedRobot;
+   private final ROS2SyncedBufferedRobotModel syncedRobot;
    private final Timer throttleTimer = new Timer();
 
    public MapSensePlanarRegionROS1Bridge(DRCRobotModel robotModel, RosMainNode ros1Node, ROS2NodeInterface ros2Node)
    {
-      syncedRobot = new RemoteSyncedBufferedRobotModel(robotModel, ros2Node);
+      syncedRobot = new ROS2SyncedBufferedRobotModel(robotModel, ros2Node);
 
       MapsenseTools.createROS1Callback(ros1Node, this::acceptMessage);
 

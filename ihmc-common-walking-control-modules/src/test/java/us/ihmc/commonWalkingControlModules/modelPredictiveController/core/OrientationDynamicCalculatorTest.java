@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.ArrayList;
@@ -92,7 +93,7 @@ public class OrientationDynamicCalculatorTest
          contactPlane.computeContactForce(omega, time);
 
          DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
-         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, new NativeMatrix(trajectoryCoefficients), contactPlane);
          comPosition.get(comPositionVector);
 
          int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
@@ -184,7 +185,7 @@ public class OrientationDynamicCalculatorTest
          rightContactPlane.computeContactForce(omega, time);
 
          DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
-         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, leftContactPlane, rightContactPlane);
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, new NativeMatrix(trajectoryCoefficients), leftContactPlane, rightContactPlane);
          comPosition.get(comPositionVector);
 
          int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
@@ -278,7 +279,7 @@ public class OrientationDynamicCalculatorTest
          contactPlane.computeContactForce(omega, time);
 
          DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
-         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, new NativeMatrix(trajectoryCoefficients), contactPlane);
          comPosition.get(comPositionVector);
 
          int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
@@ -309,7 +310,7 @@ public class OrientationDynamicCalculatorTest
 
 
          DMatrixRMaj expectedA = new DMatrixRMaj(6, 6);
-         DMatrixRMaj expectedB = new DMatrixRMaj(6, numberOfTrajectoryCoefficients);
+         NativeMatrix expectedB = new NativeMatrix(6, numberOfTrajectoryCoefficients);
          DMatrixRMaj expectedC = new DMatrixRMaj(6, 1);
 
          DMatrixRMaj skewDesiredAngular = new DMatrixRMaj(3, 3);
@@ -322,7 +323,7 @@ public class OrientationDynamicCalculatorTest
          CommonOps_DDRM.insert(inputCalculator.getB4(), expectedA, 3, 3);
 
 
-         MatrixTools.multAddBlock(inputCalculator.getB1(), MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlane), expectedB, 3, 0);
+         expectedB.multAddBlock(new NativeMatrix(inputCalculator.getB1()), MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlane), 3, 0);
          MatrixTools.addMatrixBlock(expectedB, 3, 6, inputCalculator.getB2(), 0, 0, 3, rhoCoefficients, 1.0 );
 
          MatrixTools.setMatrixBlock(expectedC, 3, 0, inputCalculator.getB0(), 0, 0, 3, 1, 1.0);
@@ -366,7 +367,7 @@ public class OrientationDynamicCalculatorTest
          DMatrixRMaj trajectoryCoefficients = new DMatrixRMaj(numberOfTrajectoryCoefficients, 1);
          trajectoryCoefficients.setData(RandomNumbers.nextDoubleArray(random, numberOfTrajectoryCoefficients, 10.0));
 
-         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients);
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, new NativeMatrix(trajectoryCoefficients));
 
          int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
 
@@ -465,7 +466,7 @@ public class OrientationDynamicCalculatorTest
          rightContactPlane.computeContactForce(omega, time);
 
          DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
-         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, leftContactPlane, rightContactPlane);
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, new NativeMatrix(trajectoryCoefficients), leftContactPlane, rightContactPlane);
          comPosition.get(comPositionVector);
 
          int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
@@ -618,7 +619,7 @@ public class OrientationDynamicCalculatorTest
          contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0) - SE3MPCIndexHandler.variablesPerOrientationTick);
          contactPlane.computeContactForce(omega, time);
 
-         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, new NativeMatrix(trajectoryCoefficients), contactPlane);
 
          int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
 
@@ -663,13 +664,13 @@ public class OrientationDynamicCalculatorTest
          CommonOps_DDRM.mult(inputCalculator.getContinuousBMatrix(), trajectoryCoefficients, rateFromContact);
          CommonOps_DDRM.addEquals(rateFromContact, inputCalculator.getContinuousCMatrix());
 
-         DMatrixRMaj scaledGravity = new DMatrixRMaj(3, 1);
+         NativeMatrix scaledGravity = new NativeMatrix(3, 1);
          scaledGravity.set(2, 0, 0.5 * time * time * gravityZ);
 
-         DMatrixRMaj expectedBMatrix = new DMatrixRMaj(6, numberOfTrajectoryCoefficients);
-         DMatrixRMaj expectedCMatrix = new DMatrixRMaj(6, 1);
-         MatrixTools.multAddBlock(inputCalculator.getB1(), MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlane), expectedBMatrix, 3, 0);
-         MatrixTools.multAddBlock(inputCalculator.getB1(), scaledGravity, expectedCMatrix, 3, 0);
+         NativeMatrix expectedBMatrix = new NativeMatrix(6, numberOfTrajectoryCoefficients);
+         NativeMatrix expectedCMatrix = new NativeMatrix(6, 1);
+         expectedBMatrix.multAddBlock(new NativeMatrix(inputCalculator.getB1()), MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlane), 3, 0);
+         expectedCMatrix.multAddBlock(new NativeMatrix(inputCalculator.getB1()), scaledGravity, 3, 0);
 
          MatrixTools.setMatrixBlock(velocityErrorRateFromContact, 0, 0, rateFromContact, 3, 0, 3, 1, 1.0);
 
@@ -731,7 +732,7 @@ public class OrientationDynamicCalculatorTest
          contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0) - SE3MPCIndexHandler.variablesPerOrientationTick);
          contactPlane.computeContactForce(omega, time);
 
-         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, new NativeMatrix(trajectoryCoefficients), contactPlane);
          DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
          comPosition.get(comPositionVector);
 
@@ -936,7 +937,7 @@ public class OrientationDynamicCalculatorTest
          contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0) - SE3MPCIndexHandler.variablesPerOrientationTick);
          contactPlane.computeContactForce(omega, time);
 
-         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, new NativeMatrix(trajectoryCoefficients), contactPlane);
          DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
          comPosition.get(comPositionVector);
 
@@ -1037,7 +1038,7 @@ public class OrientationDynamicCalculatorTest
          contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0) - SE3MPCIndexHandler.variablesPerOrientationTick);
          contactPlane.computeContactForce(omega, time);
 
-         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, new NativeMatrix(trajectoryCoefficients), contactPlane);
          DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
          comPosition.get(comPositionVector);
 
@@ -1137,7 +1138,7 @@ public class OrientationDynamicCalculatorTest
          leftContactPlane.computeContactForce(omega, time);
          rightContactPlane.computeContactForce(omega, time);
 
-         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, leftContactPlane, rightContactPlane);
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, new NativeMatrix(trajectoryCoefficients), leftContactPlane, rightContactPlane);
          DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
          comPosition.get(comPositionVector);
 

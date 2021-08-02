@@ -141,8 +141,10 @@ public class FootstepPlannerMessagerAPI
 
    public static final Topic<Boolean> AssumeFlatGround = topic("AssumeFlatGround");
    public static final Topic<Boolean> PlanBodyPath = topic("PlanBodyPath");
+   public static final Topic<Boolean> PlanNarrowPassage = topic("PlanNarrowPassage");
    public static final Topic<Boolean> PerformAStarSearch = topic("PerformAStarSearch");
    public static final Topic<SwingPlannerType> RequestedSwingPlannerType = topic("RequestedSwingPlannerType");
+   public static final Topic<Boolean> PlanSingleStep = topic("PlanSingleStep");
 
    // Robot control
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");

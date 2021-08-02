@@ -9,7 +9,9 @@ import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
+import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiPlot;
+import us.ihmc.gdx.ui.ImGuiGDXPlanarRegionLoggingPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
@@ -27,6 +29,7 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
    private final String topic;
 
    private long receivedCount = 0;
+   private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImGuiPlot receivedPlot = new ImGuiPlot("Received", 1000, 230, 20);
    private final ImGuiPlot delayPlot = new ImGuiPlot("Delay", 1000, 230, 20);
 
@@ -34,6 +37,7 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
    private DelayFixedPlanarRegionsSubscription delayFixedPlanarRegionsSubscription;
    private ResettableExceptionHandlingExecutorService executorService;
    private AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber;
+   private final ImGuiGDXPlanarRegionLoggingPanel loggingPanel = new ImGuiGDXPlanarRegionLoggingPanel();
 
    public GDXROS1PlanarRegionsVisualizer(String title, ROS2NodeInterface ros2Node, String topic)
    {
@@ -56,7 +60,8 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
       delayFixedPlanarRegionsSubscription = MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros2Node, robotModel, topic, planarRegionsList ->
       {
          ++receivedCount;
-         planarRegionsGraphic.generateMeshes(planarRegionsList);
+         planarRegionsGraphic.generateMeshes(planarRegionsList.getRight());
+         loggingPanel.update(planarRegionsList.getLeft(), planarRegionsList.getRight());
       });
       delayFixedPlanarRegionsSubscription.setEnabled(isActive());
 
@@ -71,6 +76,7 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
          {
             PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
             planarRegionsGraphic.generateMeshes(planarRegionsList);
+            loggingPanel.update(System.nanoTime(), planarRegionsList);
          });
       }
    }
@@ -112,12 +118,19 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
    }
 
    @Override
-   public void renderGraphics()
+   public void create()
    {
-      super.renderGraphics();
+      super.create();
+      loggingPanel.create();
+   }
+
+   @Override
+   public void update()
+   {
+      super.update();
       if (isActive())
       {
-         planarRegionsGraphic.render();
+         planarRegionsGraphic.update();
       }
    }
 
@@ -133,6 +146,7 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
          ImGui.text("Delay:");
          delayPlot.render((float) delayFixedPlanarRegionsSubscription.getDelay());
       }
+      ImGui.checkbox(labels.get("Show logging panel"), loggingPanel.getIsShowing());
    }
 
    @Override
@@ -141,6 +155,10 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
       if (isActive())
       {
          planarRegionsGraphic.getRenderables(renderables, pool);
+         if (loggingPanel.getIsShowing().get())
+         {
+            loggingPanel.getRenderables(renderables, pool);
+         }
       }
    }
 
@@ -155,5 +173,10 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
          executorService.destroy();
       }
       planarRegionsGraphic.destroy();
+   }
+
+   public ImGuiGDXPlanarRegionLoggingPanel getLoggingPanel()
+   {
+      return loggingPanel;
    }
 }

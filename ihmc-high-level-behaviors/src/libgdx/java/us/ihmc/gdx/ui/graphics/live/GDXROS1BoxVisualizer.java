@@ -85,9 +85,9 @@ public class GDXROS1BoxVisualizer extends ImGuiGDXROS1Visualizer implements Rend
    }
 
    @Override
-   public void renderGraphics()
+   public void update()
    {
-      super.renderGraphics();
+      super.update();
       if (toRender != null)
       {
          toRender.run();
@@ -153,7 +153,7 @@ public class GDXROS1BoxVisualizer extends ImGuiGDXROS1Visualizer implements Rend
          Mesh mesh = meshBuilder.generateMesh();
          MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
          Material material = new Material();
-         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+         Texture paletteTexture = GDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(color));
          modelBuilder.part(meshPart, material);

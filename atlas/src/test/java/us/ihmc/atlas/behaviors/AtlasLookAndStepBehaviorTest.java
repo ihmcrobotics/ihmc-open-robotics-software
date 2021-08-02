@@ -35,7 +35,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepRemoteVisualizer;
 import us.ihmc.behaviors.simulation.EnvironmentInitialSetup;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -278,7 +278,7 @@ public class AtlasLookAndStepBehaviorTest
          reachedGoalOrFallen.set();
       });
 
-      RemoteSyncedRobotModel syncedRobot = robot.newSyncedRobot();
+      ROS2SyncedRobotModel syncedRobot = robot.newSyncedRobot();
       monitorThread = new PausablePeriodicThread(
             "RobotStatusThread",
             0.5,
@@ -315,7 +315,7 @@ public class AtlasLookAndStepBehaviorTest
    }
 
    private void monitorThread(AtomicReference<String> currentState,
-                              RemoteSyncedRobotModel syncedRobot,
+                              ROS2SyncedRobotModel syncedRobot,
                               List<TestWaypoint> waypoints)
    {
       syncedRobot.update();

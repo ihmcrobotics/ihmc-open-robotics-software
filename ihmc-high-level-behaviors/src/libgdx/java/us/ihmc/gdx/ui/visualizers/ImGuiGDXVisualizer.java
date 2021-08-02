@@ -6,11 +6,12 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 
 public abstract class ImGuiGDXVisualizer implements RenderableProvider
 {
-   private final ImBoolean active = new ImBoolean(false);
+   private ImBoolean active = new ImBoolean(false);
    private final String title;
    private boolean activeChanged = false;
    private boolean createdYet = false;
@@ -23,6 +24,10 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
    public void create()
    {
       createdYet = true;
+      if (getPanel() != null)
+      {
+         active = getPanel().getIsShowing();
+      }
    }
 
    public void renderImGuiWidgets()
@@ -30,7 +35,7 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
       activeChanged = ImGui.checkbox(title, active);
    }
 
-   public void renderGraphics()
+   public void update()
    {
       if (!createdYet)
       {
@@ -57,6 +62,11 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
 
+   }
+
+   public ImGuiPanel getPanel()
+   {
+      return null;
    }
 
    public void destroy()

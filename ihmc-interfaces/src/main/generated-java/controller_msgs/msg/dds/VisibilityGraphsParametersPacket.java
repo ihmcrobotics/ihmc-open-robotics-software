@@ -56,6 +56,7 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public double weight_for_inter_region_edge_ = -11.1;
    public double weight_for_non_preferred_edge_ = -11.1;
    public boolean return_best_effort_solution_;
+   public boolean optimize_for_narrow_passage_;
 
    public VisibilityGraphsParametersPacket()
    {
@@ -128,6 +129,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       weight_for_non_preferred_edge_ = other.weight_for_non_preferred_edge_;
 
       return_best_effort_solution_ = other.return_best_effort_solution_;
+
+      optimize_for_narrow_passage_ = other.optimize_for_narrow_passage_;
 
    }
 
@@ -429,6 +432,15 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       return return_best_effort_solution_;
    }
 
+   public void setOptimizeForNarrowPassage(boolean optimize_for_narrow_passage)
+   {
+      optimize_for_narrow_passage_ = optimize_for_narrow_passage;
+   }
+   public boolean getOptimizeForNarrowPassage()
+   {
+      return optimize_for_narrow_passage_;
+   }
+
 
    public static Supplier<VisibilityGraphsParametersPacketPubSubType> getPubSubType()
    {
@@ -507,6 +519,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_solution_, other.return_best_effort_solution_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.optimize_for_narrow_passage_, other.optimize_for_narrow_passage_, epsilon)) return false;
+
 
       return true;
    }
@@ -580,6 +594,8 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
       if(this.return_best_effort_solution_ != otherMyClass.return_best_effort_solution_) return false;
 
+      if(this.optimize_for_narrow_passage_ != otherMyClass.optimize_for_narrow_passage_) return false;
+
 
       return true;
    }
@@ -649,7 +665,9 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
       builder.append("weight_for_non_preferred_edge=");
       builder.append(this.weight_for_non_preferred_edge_);      builder.append(", ");
       builder.append("return_best_effort_solution=");
-      builder.append(this.return_best_effort_solution_);
+      builder.append(this.return_best_effort_solution_);      builder.append(", ");
+      builder.append("optimize_for_narrow_passage=");
+      builder.append(this.optimize_for_narrow_passage_);
       builder.append("}");
       return builder.toString();
    }

@@ -232,6 +232,11 @@ public class CenterOfMassHeightManager
       centerOfMassHeightControlState.initializeToNominalDesiredHeight();
    }
 
+   public void initializeTransitionToFall(double transitionDuration)
+   {
+      centerOfMassHeightControlState.initializeTransitionToFall(transitionDuration);
+   }
+
    public FeedbackControlCommand<?> getFeedbackControlCommand()
    {
       return stateMachine.getCurrentState().getFeedbackControlCommand();

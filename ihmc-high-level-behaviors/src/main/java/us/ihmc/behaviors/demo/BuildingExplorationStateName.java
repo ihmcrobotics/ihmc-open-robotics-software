@@ -13,4 +13,6 @@ public enum BuildingExplorationStateName
 
    /** Robot is going either up or down stairs */
    TRAVERSE_STAIRS;
+
+   public static final BuildingExplorationStateName[] values = values();
 }

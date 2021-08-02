@@ -18,18 +18,36 @@ public enum ValkyrieMultiContactEnvironment
    FLAT_HAND_HOLDS,
    TILTED_HANDHOLDS;
 
-   public static ValkyrieMultiContactEnvironment environment = FLAT_HAND_HOLDS;
-
+   //////// DEFAULTS ////////
+   public static ValkyrieMultiContactEnvironment defaultEnvironment = FLAT_GROUND;
    public static PlanarRegionsList createPlanarRegions()
    {
-      return environment.createPlanarRegionsInternal();
+      return defaultEnvironment.getPlanarRegionsList();
    }
 
-   private PlanarRegionsList createPlanarRegionsInternal()
+
+   //////// ALL ENVIRONMENTS ////////
+   private static final PlanarRegionsList[] planarRegionsLists = new PlanarRegionsList[values().length];
+
+   static
+   {
+      for (int i = 0; i < values().length; i++)
+      {
+         ValkyrieMultiContactEnvironment environment = values()[i];
+         planarRegionsLists[i] = createPlanarRegionsListForEnvironment(environment);
+      }
+   }
+
+   public PlanarRegionsList getPlanarRegionsList()
+   {
+      return planarRegionsLists[ordinal()];
+   }
+
+   private static PlanarRegionsList createPlanarRegionsListForEnvironment(ValkyrieMultiContactEnvironment environment)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
-      switch (this)
+      switch (environment)
       {
          case GROUND_AND_WALLS:
          {
@@ -175,5 +193,4 @@ public enum ValkyrieMultiContactEnvironment
          }
       }
    }
-
 }

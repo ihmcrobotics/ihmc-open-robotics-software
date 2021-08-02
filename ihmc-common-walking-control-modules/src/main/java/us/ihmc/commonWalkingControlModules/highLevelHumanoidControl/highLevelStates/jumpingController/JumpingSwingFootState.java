@@ -12,7 +12,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -57,8 +59,6 @@ public class JumpingSwingFootState implements JumpingFootControlState
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
    private final MultipleWaypointsPoseTrajectoryGenerator swingTrajectory;
 
-   private final FrameVector3DReadOnly touchdownVelocity;
-
    private final FramePoint3D initialPosition = new FramePoint3D();
    private final FrameVector3D initialLinearVelocity = new FrameVector3D();
    private final FrameQuaternion initialOrientation = new FrameQuaternion();
@@ -75,16 +75,18 @@ public class JumpingSwingFootState implements JumpingFootControlState
    private final YoDouble swingHeight;
    private final YoDouble currentTime;
 
-   private final ReferenceFrame centerOfMassFrame;
+   private final MovingReferenceFrame centerOfMassFrame;
    private final MovingReferenceFrame soleFrame;
 
    private final PoseReferenceFrame desiredSoleFrame = new PoseReferenceFrame("desiredSoleFrame", worldFrame);
    private final PoseReferenceFrame desiredControlFrame = new PoseReferenceFrame("desiredControlFrame", desiredSoleFrame);
+   private final YoGraphicReferenceFrame desiredFrameGraphic;
+   private final YoGraphicReferenceFrame controlFrameGraphic;
+
    private final FramePose3D desiredPose = new FramePose3D();
    private final Twist desiredTwist = new Twist();
+   private final Twist relativeTwist = new Twist();
    private final SpatialAcceleration desiredSpatialAcceleration = new SpatialAcceleration();
-
-   private final RigidBodyTransform transformFromToeToAnkle = new RigidBodyTransform();
 
    private final FramePose3D footstepPose = new FramePose3D();
 
@@ -93,8 +95,16 @@ public class JumpingSwingFootState implements JumpingFootControlState
    // for unit testing and debugging:
    private final YoFramePoint3D yoDesiredSolePosition;
    private final YoFrameVector3D yoDesiredSoleLinearVelocity;
+   private final YoFrameVector3D yoDesiredSoleLinearAcceleration;
+
    private final YoFramePoint3D yoDesiredSolePositionInCoMFrame;
    private final YoFrameVector3D yoDesiredSoleLinearVelocityInCoMFrame;
+   private final YoFrameVector3D yoDesiredSoleLinearAccelerationInCoMFrame;
+
+   private final YoFrameQuaternion yoDesiredSoleOrientationInCoMFrame;
+   private final YoFrameVector3D yoDesiredSoleAngularVelocityInCoMFrame;
+   private final YoFrameVector3D yoDesiredSoleAngularAccelerationInCoMFrame;
+
    private final YoFrameQuaternion yoDesiredSoleOrientation;
    private final YoFrameVector3D yoDesiredSoleAngularVelocity;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
@@ -106,7 +116,6 @@ public class JumpingSwingFootState implements JumpingFootControlState
    private final double gravityZ;
 
    public JumpingSwingFootState(JumpingFootControlHelper footControlHelper,
-                                FrameVector3DReadOnly touchdownVelocity,
                                 double gravityZ,
                                 PIDSE3GainsReadOnly gains,
                                 YoRegistry registry)
@@ -135,8 +144,6 @@ public class JumpingSwingFootState implements JumpingFootControlState
       FramePose3D controlFramePose = new FramePose3D(controlFrame);
       controlFramePose.changeFrame(contactableFoot.getRigidBody().getBodyFixedFrame());
       changeControlFrame(controlFramePose);
-
-      this.touchdownVelocity = new FrameVector3D(centerOfMassFrame);//touchdownVelocity;
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
       SwingTrajectoryParameters swingTrajectoryParameters = walkingControllerParameters.getSwingTrajectoryParameters();
@@ -182,16 +189,32 @@ public class JumpingSwingFootState implements JumpingFootControlState
       footstepPose.setToNaN();
 
       yoDesiredSolePosition = new YoFramePoint3D(namePrefix + "DesiredSolePositionInWorld", worldFrame, registry);
-      yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleLinearVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInWorld", worldFrame, registry);
+      yoDesiredSoleLinearAcceleration = new YoFrameVector3D(namePrefix + "DesiredSoleLinearAccelerationInWorld", worldFrame, registry);
       yoDesiredSolePositionInCoMFrame = new YoFramePoint3D(namePrefix + "DesiredSolePositionInCoMFrame", centerOfMassFrame, registry);
       yoDesiredSoleLinearVelocityInCoMFrame = new YoFrameVector3D(namePrefix + "DesiredSoleLinearVelocityInCoMFrame", centerOfMassFrame, registry);
+      yoDesiredSoleLinearAccelerationInCoMFrame = new YoFrameVector3D(namePrefix + "DesiredSoleLinearAccelerationInCoMFrame", centerOfMassFrame, registry);
+      yoDesiredSoleOrientation = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInWorld", worldFrame, registry);
       yoDesiredSoleAngularVelocity = new YoFrameVector3D(namePrefix + "DesiredSoleAngularVelocityInWorld", worldFrame, registry);
+      yoDesiredSoleOrientationInCoMFrame = new YoFrameQuaternion(namePrefix + "DesiredSoleOrientationInCoMFrame", centerOfMassFrame, registry);
+      yoDesiredSoleAngularVelocityInCoMFrame = new YoFrameVector3D(namePrefix + "DesiredSoleAngularVelocityInCoMFrame", centerOfMassFrame, registry);
+      yoDesiredSoleAngularAccelerationInCoMFrame = new YoFrameVector3D(namePrefix + "DesiredSoleAngularAccelerationInCoMFrame", centerOfMassFrame, registry);
 
       if (yoGraphicsListRegistry != null)
       {
          YoGraphicPosition desiredPosition = new YoGraphicPosition(namePrefix + "DesiredPosition", yoDesiredSolePosition, 0.015, YoAppearance.Green());
          yoGraphicsListRegistry.registerYoGraphic("Swing Foot", desiredPosition);
+
+         desiredFrameGraphic = new YoGraphicReferenceFrame(namePrefix, desiredSoleFrame, registry, false, 0.1, YoAppearance.Gray());
+         controlFrameGraphic = new YoGraphicReferenceFrame(namePrefix, desiredControlFrame, registry, false, 0.1, YoAppearance.Gray());
+
+         yoGraphicsListRegistry.registerYoGraphic("Swing Foot", desiredFrameGraphic);
+         yoGraphicsListRegistry.registerYoGraphic("Swing Foot", controlFrameGraphic);
+      }
+      else
+      {
+         desiredFrameGraphic = null;
+         controlFrameGraphic = null;
       }
    }
 
@@ -228,6 +251,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
       yoDesiredSolePosition.setToNaN();
       yoDesiredSoleOrientation.setToNaN();
       yoDesiredSoleLinearVelocity.setToNaN();
+      yoDesiredSoleLinearAcceleration.setToNaN();
       yoDesiredSoleAngularVelocity.setToNaN();
    }
 
@@ -261,22 +285,32 @@ public class JumpingSwingFootState implements JumpingFootControlState
       swingTrajectory.compute(time);
       swingTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       swingTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+
       if (timeInState > swingDuration.getDoubleValue())
       {
          desiredLinearVelocity.setToZero(centerOfMassFrame);
-         desiredLinearAcceleration.setToZero(worldFrame);
-         desiredLinearAcceleration.setZ(-controllerToolbox.getGravityZ());
+         desiredLinearAcceleration.setToZero(centerOfMassFrame);
 
-         desiredAngularVelocity.setToZero(worldFrame);
-         desiredAngularAcceleration.setToZero(worldFrame);
+         desiredAngularVelocity.setToZero(centerOfMassFrame);
+         desiredAngularAcceleration.setToZero(centerOfMassFrame);
       }
+
+      yoDesiredSolePositionInCoMFrame.set(desiredPosition);
+      yoDesiredSoleLinearVelocityInCoMFrame.set(desiredLinearVelocity);
+      yoDesiredSoleLinearAccelerationInCoMFrame.set(desiredLinearAcceleration);
+
+      yoDesiredSoleOrientationInCoMFrame.set(desiredOrientation);
+      yoDesiredSoleAngularVelocityInCoMFrame.set(desiredAngularVelocity);
+      yoDesiredSoleAngularAccelerationInCoMFrame.set(desiredAngularAcceleration);
 
       yoDesiredSolePosition.setMatchingFrame(desiredPosition);
       yoDesiredSoleOrientation.setMatchingFrame(desiredOrientation);
+
+      transformDesiredVelocitiesAndAccelerationsToFrame(worldFrame);
       yoDesiredSoleLinearVelocity.setMatchingFrame(desiredLinearVelocity);
+      yoDesiredSoleLinearAcceleration.setMatchingFrame(desiredLinearAcceleration);
+
       yoDesiredSoleAngularVelocity.setMatchingFrame(desiredAngularVelocity);
-      yoDesiredSolePositionInCoMFrame.setMatchingFrame(desiredPosition);
-      yoDesiredSoleLinearVelocityInCoMFrame.setMatchingFrame(desiredLinearVelocity);
 
       transformDesiredsFromCoMFrameToControlFrame();
    }
@@ -298,7 +332,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
       finalPosition.setIncludingFrame(footstepPose.getPosition());
       finalOrientation.setIncludingFrame(footstepPose.getOrientation());
 
-      finalLinearVelocity.setIncludingFrame(centerOfMassFrame, touchdownVelocity);
+      finalLinearVelocity.setToZero(centerOfMassFrame);
       finalAngularVelocity.setToZero(worldFrame);
       finalAngularVelocity.changeFrame(centerOfMassFrame);
 
@@ -342,31 +376,46 @@ public class JumpingSwingFootState implements JumpingFootControlState
       desiredOrientation.changeFrame(worldFrame);
       desiredSoleFrame.setPoseAndUpdate(desiredPosition, desiredOrientation);
 
+      desiredControlFrame.update();
+
+      if (desiredFrameGraphic != null)
+         desiredFrameGraphic.update();
+      if (controlFrameGraphic != null)
+         controlFrameGraphic.update();
+
       // change pose
       desiredPose.setToZero(desiredControlFrame);
       desiredPose.changeFrame(worldFrame);
       desiredPosition.setIncludingFrame(desiredPose.getPosition());
       desiredOrientation.setIncludingFrame(desiredPose.getOrientation());
 
+      transformDesiredVelocitiesAndAccelerationsToFrame(desiredControlFrame);
+   }
+
+   private void transformDesiredVelocitiesAndAccelerationsToFrame(ReferenceFrame desiredFrame)
+   {
       // change twist
-      desiredLinearVelocity.changeFrame(centerOfMassFrame);
-      desiredAngularVelocity.changeFrame(centerOfMassFrame);
-      desiredTwist.setIncludingFrame(centerOfMassFrame, worldFrame, centerOfMassFrame, desiredAngularVelocity, desiredLinearVelocity);
-      desiredTwist.changeFrame(desiredControlFrame);
+      desiredTwist.setIncludingFrame(centerOfMassFrame, worldFrame, centerOfMassFrame, yoDesiredSoleAngularVelocityInCoMFrame, yoDesiredSoleLinearVelocityInCoMFrame);
+      desiredTwist.changeFrame(desiredFrame);
+
+      centerOfMassFrame.getTwistRelativeToOther(worldFrame, relativeTwist);
+      relativeTwist.changeFrame(worldFrame);
+
       desiredLinearVelocity.setIncludingFrame(desiredTwist.getLinearPart());
       desiredAngularVelocity.setIncludingFrame(desiredTwist.getAngularPart());
       desiredLinearVelocity.changeFrame(worldFrame);
       desiredAngularVelocity.changeFrame(worldFrame);
+      desiredLinearVelocity.add(relativeTwist.getLinearPart());
+      desiredAngularVelocity.add(relativeTwist.getAngularPart());
 
       // change spatial acceleration
-      desiredLinearAcceleration.changeFrame(centerOfMassFrame);
-      desiredAngularAcceleration.changeFrame(centerOfMassFrame);
-      desiredSpatialAcceleration.setIncludingFrame(centerOfMassFrame, worldFrame, centerOfMassFrame, desiredAngularAcceleration, desiredLinearAcceleration);
-      desiredSpatialAcceleration.changeFrame(desiredControlFrame);
+      desiredSpatialAcceleration.setIncludingFrame(centerOfMassFrame, worldFrame, centerOfMassFrame, yoDesiredSoleAngularAccelerationInCoMFrame, yoDesiredSoleLinearAccelerationInCoMFrame);
+      desiredSpatialAcceleration.changeFrame(desiredFrame);
       desiredLinearAcceleration.setIncludingFrame(desiredSpatialAcceleration.getLinearPart());
       desiredAngularAcceleration.setIncludingFrame(desiredSpatialAcceleration.getAngularPart());
       desiredLinearAcceleration.changeFrame(worldFrame);
       desiredAngularAcceleration.changeFrame(worldFrame);
+      desiredLinearAcceleration.addZ(-gravityZ);
    }
 
    private void changeControlFrame(FramePose3DReadOnly controlFramePoseInEndEffector)

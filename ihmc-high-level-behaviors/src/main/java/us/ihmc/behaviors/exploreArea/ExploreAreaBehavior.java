@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.exploreArea;
 
+import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.behaviors.BehaviorDefinition;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -81,10 +81,10 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       mainThread.setRunning(enabled);
    }
 
-   class StopNode implements BehaviorTreeNode // TODO: Is there a more general reusable robot stop node?
+   class StopNode extends BehaviorTreeNode // TODO: Is there a more general reusable robot stop node?
    {
       @Override
-      public BehaviorTreeNodeStatus tick()
+      public BehaviorTreeNodeStatus tickInternal()
       {
          if (explore.get())
          {
@@ -129,7 +129,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          addChild(new AlwaysSuccessfulAction(lookAround::reset));
       }
 
-      class LookAndStepNode extends ParallelNodeBasics // TODO: Use look and step node directly somehow.
+      class LookAndStepNode extends AsynchronousActionNode // TODO: Use look and step node directly somehow.
       {
          private final Supplier<List<Pose3DReadOnly>> bestBodyPathSupplier;
          private final Supplier<ArrayList<Pose3D>> exploredGoalPosesSoFarSupplier;
@@ -145,10 +145,10 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          }
 
          @Override
-         public void doAction()
+         public BehaviorTreeNodeStatus doActionInternal()
          {
             if (noWhereToExploreSupplier.get())
-               return;
+               return SUCCESS; // return failure?
 
             helper.publish(CurrentState, LookAndStep);
 
@@ -164,6 +164,13 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             helper.publish(LookAndStepBehaviorAPI.BodyPathInput, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
             lookAndStepReachedGoal.poll();
             lookAndStepReachedGoal.blockingPoll();
+            return SUCCESS;
+         }
+
+         @Override
+         public void resetInternal()
+         {
+
          }
       }
    }

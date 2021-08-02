@@ -5,9 +5,13 @@ import map_sense.RawGPUPlanarRegion;
 import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanPointFilter;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanRegionFilter;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
@@ -173,5 +177,22 @@ public class GPUPlanarRegionUpdater
       }else{
          return PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
       }
+   }
+
+   /*
+   * Checks to see if the origin of the planar region falls inside the collision mesh of the robot. Removes the region if so.
+   * */
+   public PlanarRegionsList filterCollidingPlanarRegions(PlanarRegionsList regions, ScanRegionFilter filter)
+   {
+      int i = 0;
+      while (i < regions.getNumberOfPlanarRegions())
+      {
+         if (!filter.test(i, regions.getPlanarRegion(i)))
+            regions.pollPlanarRegion(i);
+         else
+            i++;
+      }
+
+      return regions;
    }
 }

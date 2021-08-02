@@ -1,24 +1,27 @@
 package us.ihmc.gdx.imgui;
 
+import us.ihmc.tools.io.HybridDirectory;
+
 import java.nio.file.Paths;
 
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
 public class ImGuiGlfwWindow
 {
-   private final String windowTitle;
    private final GlfwWindowForImGui glfwWindowForImGui;
-   private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem(getClass(),
-                                                                                               "ihmc-open-robotics-software",
-                                                                                               "ihmc-graphics/src/libgdx/resources",
-                                                                                               Paths.get(System.getProperty("user.home"),
-                                                                                                         ".ihmc/" + "GLFWDemo"
-                                                                                                         + "ImGuiSettings.ini").toAbsolutePath().normalize());
-   private final ImGuiDockingSetup dockingSetup = new ImGuiDockingSetup();
+   private final Class<? extends ImGuiGlfwWindow> classForLoading = getClass();
+   private final String directoryNameToAssumePresent = "ihmc-open-robotics-software";
+   private final String subsequentPathToResourceFolder = "ihmc-graphics/src/libgdx/resources";
+   private final HybridDirectory configurationDirectory = new HybridDirectory(Paths.get(System.getProperty("user.home"), ".ihmc"),
+                                                                              directoryNameToAssumePresent,
+                                                                              subsequentPathToResourceFolder,
+                                                                              classForLoading,
+                                                                              "GLFWDemo");
+   private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem();
 
    public ImGuiGlfwWindow(String windowTitle, int windowWidth, int windowHeight)
    {
-      this.windowTitle = windowTitle;
+      imGuiDockSystem.setDirectory(configurationDirectory);
       glfwWindowForImGui = new GlfwWindowForImGui(windowTitle, windowWidth, windowHeight);
    }
 
@@ -48,11 +51,6 @@ public class ImGuiGlfwWindow
 
          render.run();
 
-         if (imGuiDockSystem.isFirstRenderCall())
-         {
-            dockingSetup.build(imGuiDockSystem.getCentralDockspaceId());
-         }
-
          imGuiDockSystem.afterWindowManagement();
       }
 
@@ -63,9 +61,9 @@ public class ImGuiGlfwWindow
       glfwWindowForImGui.dispose();
    }
 
-   public ImGuiDockingSetup getDockingSetup()
+   public ImGuiPanelManager getPanelManager()
    {
-      return dockingSetup;
+      return imGuiDockSystem.getPanelManager();
    }
 
    public GDXImGuiWindowAndDockSystem getImGuiDockSystem()

@@ -37,7 +37,7 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
    private boolean drawBoundingBox = false;
    private boolean drawNormal;
 
-   private volatile Runnable toRender = null;
+   private volatile Runnable buildMeshAndCreateModelInstance = null;
 
    private ModelInstance modelInstance;
    private Model lastModel;
@@ -49,12 +49,12 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
       generateMeshes(PlanarRegionsList.flatGround(20.0));
    }
 
-   public void render()
+   public void update()
    {
-      if (toRender != null)
+      if (buildMeshAndCreateModelInstance != null)
       {
-         toRender.run();
-         toRender = null;
+         buildMeshAndCreateModelInstance.run();
+         buildMeshAndCreateModelInstance = null;
       }
    }
 
@@ -72,11 +72,11 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
          meshBuilders.add(meshBuilder);
          singleRegionMeshBuilder(planarRegion, meshBuilder); // should do in parallel somehow?
       }
-      toRender = () ->
+      buildMeshAndCreateModelInstance = () ->
       {
          modelBuilder.begin();
          Material material = new Material();
-         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+         Texture paletteTexture = GDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
 

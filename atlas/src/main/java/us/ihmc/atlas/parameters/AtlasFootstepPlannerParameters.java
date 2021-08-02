@@ -27,7 +27,7 @@ public class AtlasFootstepPlannerParameters extends StoredPropertySet implements
    public AtlasFootstepPlannerParameters(String projectName, String pathToResources, String fileNameSuffix)
    {
       super(FootstepPlannerParameterKeys.keys, AtlasFootstepPlannerParameters.class, projectName, pathToResources, fileNameSuffix);
-      load();
+      loadUnsafe();
    }
 
    /** Use this to update and fix the INI file */

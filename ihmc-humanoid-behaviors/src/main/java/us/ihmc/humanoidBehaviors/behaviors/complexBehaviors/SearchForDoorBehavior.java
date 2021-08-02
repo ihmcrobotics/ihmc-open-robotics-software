@@ -174,7 +174,7 @@ public class SearchForDoorBehavior extends StateMachineBehavior<SearchForDoorBeh
          {
             Quaternion rot = new Quaternion();
             rot.setEuler(0, Math.toRadians(-10), Math.toRadians(-10));
-            ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(6, rot, referenceFrames.getPelvisZUpFrame());
+            ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(3, rot, referenceFrames.getPelvisZUpFrame());
             atlasPrimitiveActions.chestTrajectoryBehavior.setInput(chestOrientationPacket);
          }
 
@@ -199,7 +199,7 @@ public class SearchForDoorBehavior extends StateMachineBehavior<SearchForDoorBeh
          {
             Quaternion rot = new Quaternion();
             rot.setEuler(0, Math.toRadians(10), Math.toRadians(-10));
-            ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(6, rot, referenceFrames.getPelvisZUpFrame());
+            ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(3, rot, referenceFrames.getPelvisZUpFrame());
             atlasPrimitiveActions.chestTrajectoryBehavior.setInput(chestOrientationPacket);
          }
       };
@@ -212,7 +212,7 @@ public class SearchForDoorBehavior extends StateMachineBehavior<SearchForDoorBeh
          {
             Quaternion rot = new Quaternion();
             rot.setEuler(0, Math.toRadians(10), Math.toRadians(10));
-            ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(6, rot, referenceFrames.getPelvisZUpFrame());
+            ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(3, rot, referenceFrames.getPelvisZUpFrame());
             atlasPrimitiveActions.chestTrajectoryBehavior.setInput(chestOrientationPacket);
          }
 
@@ -226,7 +226,7 @@ public class SearchForDoorBehavior extends StateMachineBehavior<SearchForDoorBeh
          {
             Quaternion rot = new Quaternion();
             rot.setEuler(0, Math.toRadians(-10), Math.toRadians(10));
-            ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(6, rot, referenceFrames.getPelvisZUpFrame());
+            ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(3, rot, referenceFrames.getPelvisZUpFrame());
             atlasPrimitiveActions.chestTrajectoryBehavior.setInput(chestOrientationPacket);
          }
 

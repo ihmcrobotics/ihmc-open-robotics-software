@@ -36,7 +36,7 @@ public class GDXVRDepthSensorDemo
          public void create()
          {
             sceneManager.create();
-            vrManager.create();
+            vrManager.create(sceneManager.getCamera3D());
 
             sceneManager.addCoordinateFrame(1.0);
             DepthSensorDemoObjectsModel depthSensorDemoObjectsModel = new DepthSensorDemoObjectsModel();

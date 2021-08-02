@@ -1,78 +1,86 @@
 package us.ihmc.gdx.ui.graphics.live;
 
-import javafx.scene.transform.Translate;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.gdx.FocusBasedGDXCamera;
-import us.ihmc.gdx.ui.graphics.GDXRobotGraphic;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.gdx.imgui.ImGuiPlot;
+import us.ihmc.gdx.ui.graphics.GDXRobotModelGraphic;
 
-public class GDXROS2RobotVisualizer extends GDXRobotGraphic
+public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
 {
-   private final RemoteSyncedRobotModel syncedRobot;
-   private final ExceptionHandlingThreadScheduler scheduler;
+//   private boolean trackRobot = false;
+//   private FocusBasedGDXCamera cameraForOptionalTracking;
+//   private Translate robotTranslate;
+//   private Translate savedCameraTranslate;
+//   private boolean hasPrepended = false;
+   private final DRCRobotModel robotModel;
+   private final ROS2SyncedRobotModel syncedRobot;
+   private final ImGuiPlot receivedPlot = new ImGuiPlot("RobotConfigurationData", 1000, 230, 20);
+   private volatile long receivedPackets = 0;
 
-   private boolean trackRobot = false;
-   private FocusBasedGDXCamera cameraForOptionalTracking;
-   private Translate robotTranslate;
-   private Translate savedCameraTranslate;
-   private boolean hasPrepended = false;
-
-   public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+   public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
-      super(robotModel, robotModel.createFullRobotModel());
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node, fullRobotModel);
-      scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, 1, true);
+      super(robotModel.getSimpleRobotName() + " Robot Visualizer (ROS 2)");
+      this.robotModel = robotModel;
+      this.syncedRobot = syncedRobot;
+      syncedRobot.addRobotConfigurationDataReceivedCallback(() -> ++receivedPackets);
    }
 
-   public void setTrackRobot(FocusBasedGDXCamera camera, boolean trackRobot)
+   @Override
+   public void create()
    {
-      this.trackRobot = trackRobot;
-      cameraForOptionalTracking = camera;
-      if (!hasPrepended)
-      {
-         hasPrepended = true;
-         robotTranslate = new Translate();
-//         cameraForOptionalTracking.prependTransform(robotTranslate);
-      }
-      else if (trackRobot)
-      {
-//         cameraForOptionalTracking.getTranslate().setX(savedCameraTranslate.getX());
-//         cameraForOptionalTracking.getTranslate().setY(savedCameraTranslate.getY());
-//         cameraForOptionalTracking.getTranslate().setZ(savedCameraTranslate.getZ());
-      }
-      else // !trackRobot
-      {
-//         savedCameraTranslate = cameraForOptionalTracking.getTranslate().clone();
-      }
+      super.create();
+      loadRobotModelAndGraphics(robotModel.getRobotDescription(), syncedRobot.getFullRobotModel().getElevator());
    }
 
-   public void update()
+   //   public void setTrackRobot(FocusBasedGDXCamera camera, boolean trackRobot)
+//   {
+//      this.trackRobot = trackRobot;
+//      cameraForOptionalTracking = camera;
+//      if (!hasPrepended)
+//      {
+//         hasPrepended = true;
+////         robotTranslate = new Translate();
+////         cameraForOptionalTracking.prependTransform(robotTranslate);
+//      }
+//      else if (trackRobot)
+//      {
+////         cameraForOptionalTracking.getTranslate().setX(savedCameraTranslate.getX());
+////         cameraForOptionalTracking.getTranslate().setY(savedCameraTranslate.getY());
+////         cameraForOptionalTracking.getTranslate().setZ(savedCameraTranslate.getZ());
+//      }
+//      else // !trackRobot
+//      {
+////         savedCameraTranslate = cameraForOptionalTracking.getTranslate().clone();
+//      }
+//   }
+
+   @Override
+   public void renderImGuiWidgets()
    {
-      if (robotLoadedActivator.poll())
-      {
-         syncedRobot.update();
-
-         super.update();
-
-         if (trackRobot)
-         {
-            FramePose3DReadOnly walkingFrame = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
-
-            robotTranslate.setX(walkingFrame.getPosition().getX());
-            robotTranslate.setY(walkingFrame.getPosition().getY());
-            robotTranslate.setZ(walkingFrame.getPosition().getZ());
-         }
-      }
+      super.renderImGuiWidgets();
+      receivedPlot.render(receivedPackets);
    }
+
+   @Override
+//   public void update()
+//   {
+//      if (isRobotLoaded())
+//      {
+//         super.update();
+//
+////         if (trackRobot)
+////         {
+////            FramePose3DReadOnly walkingFrame = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
+////
+////            robotTranslate.setX(walkingFrame.getPosition().getX());
+////            robotTranslate.setY(walkingFrame.getPosition().getY());
+////            robotTranslate.setZ(walkingFrame.getPosition().getZ());
+////         }
+//      }
+//   }
 
    public void destroy()
    {
-      scheduler.shutdownNow();
       super.destroy();
    }
 }

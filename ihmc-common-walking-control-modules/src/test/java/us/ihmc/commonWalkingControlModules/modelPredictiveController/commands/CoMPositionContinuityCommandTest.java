@@ -14,9 +14,13 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.lang.annotation.Native;
 
 public class CoMPositionContinuityCommandTest
 {
@@ -74,25 +78,25 @@ public class CoMPositionContinuityCommandTest
 
       solver.solve();
 
-      DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
+      NativeMatrix solvedObjectivePosition = new NativeMatrix(3, 1);
       FramePoint3D solvedObjectivePositionTuple = new FramePoint3D();
 
       FramePoint3D valueEndOf1 = new FramePoint3D();
       FramePoint3D valueStartOf2 = new FramePoint3D();
 
-      DMatrixRMaj solution = solver.getSolution();
+      NativeMatrix solution = solver.getSolution();
 
-      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
+      solvedObjectivePosition.mult(solver.qpInputTypeA.taskJacobian, solution);
       solvedObjectivePositionTuple.set(solvedObjectivePosition);
       solvedObjectivePositionTuple.scaleAdd(0.5 * duration1 * duration1, gravityVector, solvedObjectivePositionTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
-      DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
+      NativeMatrix achievedObjective = new NativeMatrix(3, 1);
       taskObjectiveExpected.add(2, 0, -0.5 * duration1 * duration1 * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
-      MatrixMissingTools.addMatrixBlock(taskJacobianExpected, 0, indexHandler.getComCoefficientStartIndex(0), MPCTestHelper.getCoMPositionJacobian(duration1, omega, contactPlaneHelper1));
-      MatrixMissingTools.addMatrixBlock(taskJacobianExpected, 0, indexHandler.getComCoefficientStartIndex(1), MPCTestHelper.getCoMPositionJacobian(0.0, omega, contactPlaneHelper2), -1.0);
+      NativeMatrix taskJacobianExpected = new NativeMatrix(3, indexHandler.getTotalProblemSize());
+      taskJacobianExpected.addBlock(MPCTestHelper.getCoMPositionJacobian(duration1, omega, contactPlaneHelper1), 0, indexHandler.getComCoefficientStartIndex(0), 0, 0, 3, indexHandler.getVariablesInSegment(0));
+      taskJacobianExpected.addBlock(MPCTestHelper.getCoMPositionJacobian(0.0, omega, contactPlaneHelper2), 0, indexHandler.getComCoefficientStartIndex(1), 0, 0, 3, indexHandler.getVariablesInSegment(1), -1.0);
 
       valueEndOf1.setX(duration1 * solution.get(0, 0) + solution.get(1, 0));
       valueEndOf1.setY(duration1 * solution.get(2, 0) + solution.get(3, 0));
@@ -128,22 +132,23 @@ public class CoMPositionContinuityCommandTest
       }
       valueStartOf2.scaleAdd(0.5 * 0.0 * 0.0, gravityVector, valueStartOf2);
 
+
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
-      CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
+      achievedObjective.mult(new NativeMatrix(taskJacobianExpected), solution);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
-      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
-      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
+      NativeMatrix solverInput_H_Expected = new NativeMatrix(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
+      NativeMatrix solverInput_f_Expected = new NativeMatrix(taskJacobianExpected.getNumCols(), 1);
 
-      CommonOps_DDRM.multInner(taskJacobianExpected, solverInput_H_Expected);
-      CommonOps_DDRM.multTransA(-1.0, taskJacobianExpected, taskObjectiveExpected, solverInput_f_Expected);
+      solverInput_H_Expected.multTransA(taskJacobianExpected, taskJacobianExpected);
+      solverInput_f_Expected.multTransA(-1.0, taskJacobianExpected, new NativeMatrix(taskObjectiveExpected));
 
       MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
 
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.qpSolver.costQuadraticMatrix, 1e-10);
+      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.qpSolver.quadraticCostQVector, 1e-10);
 
       FramePoint3D desiredValue = new FramePoint3D();
       EuclidCoreTestTools.assertTuple3DEquals(valueEndOf1, valueStartOf2, 1e-4);
@@ -205,20 +210,20 @@ public class CoMPositionContinuityCommandTest
 
       solver.solve();
 
-      DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
+      NativeMatrix solvedObjectivePosition = new NativeMatrix(3, 1);
       FramePoint3D solvedObjectivePositionTuple = new FramePoint3D();
 
       FramePoint3D valueEndOf1 = new FramePoint3D();
       FramePoint3D valueStartOf2 = new FramePoint3D();
 
-      DMatrixRMaj solution = solver.getSolution();
+      NativeMatrix solution = solver.getSolution();
 
-      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
+      solvedObjectivePosition.mult(solver.qpInputTypeA.taskJacobian, solution);
       solvedObjectivePositionTuple.set(solvedObjectivePosition);
       solvedObjectivePositionTuple.scaleAdd(0.5 * duration1 * duration1, gravityVector, solvedObjectivePositionTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
-      DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
+      NativeMatrix achievedObjective = new NativeMatrix(3, 1);
       taskObjectiveExpected.add(2, 0, -0.5 * duration1 * duration1 * -Math.abs(gravityZ));
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
@@ -239,6 +244,7 @@ public class CoMPositionContinuityCommandTest
       valueStartOf2.setY(0.0 * solution.get(startOf2 + 2, 0) + solution.get(startOf2 + 3, 0));
       valueStartOf2.setZ(0.0 * solution.get(startOf2 + 4, 0) + solution.get(startOf2 + 5, 0));
 
+      LogTools.info("made it here.");
       for (int rhoIdx  = 0; rhoIdx < rhoHelper1.getRhoSize(); rhoIdx++)
       {
          int startIdx = indexHandler.getRhoCoefficientStartIndex(0) + 4 * rhoIdx;
@@ -267,11 +273,10 @@ public class CoMPositionContinuityCommandTest
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
-      CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
+      achievedObjective.mult(new NativeMatrix(taskJacobianExpected), solution);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
-      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.solverInput_Aeq, 1e-10);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.solverOutput_beq, 1e-10);
+      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpSolver.linearEqualityConstraintsAMatrix, 1e-10);
 
       FramePoint3D desiredValue = new FramePoint3D();
       EuclidCoreTestTools.assertTuple3DEquals(valueEndOf1, valueStartOf2, 1e-4);

@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
@@ -25,7 +25,7 @@ public class GDXPalletObject extends GDXEnvironmentObject
       double sizeX = 0.3;
       double sizeY = 0.3;
       double sizeZ = 0.01;
-      Vector3D collisionShapeOffset = new Vector3D();
+      RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
       Sphere3D boundingSphere = new Sphere3D(0.7);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
@@ -35,7 +35,8 @@ public class GDXPalletObject extends GDXEnvironmentObject
          meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
       }, "collisionModel" + INDEX.getAndIncrement());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
-      create(realisticModel, collisionShapeOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
+      RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
+      create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
    }
 
    @Override
