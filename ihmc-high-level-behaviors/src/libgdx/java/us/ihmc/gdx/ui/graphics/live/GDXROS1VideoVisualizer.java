@@ -117,7 +117,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             int width = bufferedImage.getWidth();
             int height = bufferedImage.getHeight();
 
-            ensureTextureReady(image.getWidth(), image.getHeight());
+            ensureTextureReady(width, height);
 
             if (is8BitRGB)
             {
@@ -126,7 +126,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
                {
                   for (int x = 0; x < width; x++)
                   {
-                     int rgbaColor = data[zeroedIndex] << 24 | data[zeroedIndex + 1] << 16 | data[zeroedIndex + 2] << 8 | 255;
+//                     int rgbaColor = data[zeroedIndex] << 24 | data[zeroedIndex + 1] << 16 | data[zeroedIndex + 2] << 8 | 255;
                      int color = bufferedImage.getRGB(x, y);
                      zeroedIndex += 3;
                      pixmap.drawPixel(x, y, (color << 8) | 255);
@@ -157,41 +157,50 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
 
             boolean is16BitDepth = image.getEncoding().equals("16UC1");
             boolean is8BitRGB = image.getEncoding().equals("rgb8");
-            if (is16BitDepth || is8BitRGB)
+            if (is8BitRGB)
             {
                ChannelBuffer data = image.getData();
-               byte[] array = data.array();
-               int dataIndex = data.arrayOffset();
                int zeroedIndex = 0;
                for (int y = 0; y < image.getHeight(); y++)
                {
                   for (int x = 0; x < image.getWidth(); x++)
                   {
-                     if (is16BitDepth)
-                     {
-                        int bigByte = array[dataIndex];
-                        dataIndex++;
-                        int smallByte = array[dataIndex];
-                        dataIndex++;
+                     int r = Byte.toUnsignedInt(data.getByte(zeroedIndex + 0));
+                     int g = Byte.toUnsignedInt(data.getByte(zeroedIndex + 1));
+                     int b = Byte.toUnsignedInt(data.getByte(zeroedIndex + 2));
+                     int a = 255;
+                     zeroedIndex += 3;
+                     int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
+                     pixmap.drawPixel(x, y, rgb8888);
+                  }
+               }
+               texture.draw(pixmap, 0, 0);
+            }
+            else if (is16BitDepth)
+            {
+               ChannelBuffer data = image.getData();
+               byte[] array = data.array();
+               int dataIndex = data.arrayOffset();
+               for (int y = 0; y < image.getHeight(); y++)
+               {
+                  for (int x = 0; x < image.getWidth(); x++)
+                  {
+                     int bigByte = array[dataIndex];
+                     dataIndex++;
+                     int smallByte = array[dataIndex];
+                     dataIndex++;
 
-                        float value = (float) (bigByte & 0xFF | smallByte << 8);
+                     float value = (float) (bigByte & 0xFF | smallByte << 8);
 
-                        if (highestValueSeen < 0 || value > highestValueSeen)
-                           highestValueSeen = value;
-                        if (lowestValueSeen < 0 || value < lowestValueSeen)
-                           lowestValueSeen = value;
+                     if (highestValueSeen < 0 || value > highestValueSeen)
+                        highestValueSeen = value;
+                     if (lowestValueSeen < 0 || value < lowestValueSeen)
+                        lowestValueSeen = value;
 
-                        float colorRange = highestValueSeen - lowestValueSeen;
-                        float grayscale = (value - lowestValueSeen) / colorRange;
+                     float colorRange = highestValueSeen - lowestValueSeen;
+                     float grayscale = (value - lowestValueSeen) / colorRange;
 
-                        pixmap.drawPixel(x, y, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
-                     }
-                     else
-                     {
-                        int unsignedMedium = data.getUnsignedMedium(zeroedIndex);
-                        zeroedIndex += 3;
-                        pixmap.drawPixel(x, y, (unsignedMedium << 8) | 255);
-                     }
+                     pixmap.drawPixel(x, y, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
                   }
                }
                texture.draw(pixmap, 0, 0);
