@@ -20,9 +20,6 @@ public class CustomPolicyTools
 
    static double getTimeInSegment(int segmentNumber, double time, List<? extends TimeIntervalReadOnly> contactStateProviders)
    {
-      for (int i = 0; i < segmentNumber; i++)
-         time -= contactStateProviders.get(i).getDuration();
-
-      return time;
+      return time - contactStateProviders.get(segmentNumber).getStartTime();
    }
 }
