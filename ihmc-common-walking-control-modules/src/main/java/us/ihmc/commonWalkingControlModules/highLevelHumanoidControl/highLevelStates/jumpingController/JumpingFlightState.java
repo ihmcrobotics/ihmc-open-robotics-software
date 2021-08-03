@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -23,6 +24,8 @@ public class JumpingFlightState extends JumpingState
    private final JumpingParameters jumpingParameters;
    private final JumpingGoalHandler jumpingGoalHandler;
 
+   private final RigidBodyTransform takeOffTransform = new RigidBodyTransform();
+   private final ReferenceFrame takeOffFrame;
    private final JumpingGoalFootholdCalculator jumpingGoalFootholdCalculator = new JumpingGoalFootholdCalculator();
 
    private final JumpingGoal jumpingGoal = new JumpingGoal();
@@ -43,6 +46,15 @@ public class JumpingFlightState extends JumpingState
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+
+      takeOffFrame = new ReferenceFrame("takeOffFrame", ReferenceFrame.getWorldFrame())
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.set(takeOffTransform);
+         }
+      };
    }
 
    @Override
@@ -70,6 +82,8 @@ public class JumpingFlightState extends JumpingState
    @Override
    public void onEntry()
    {
+      takeOffTransform.set(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame());
+
       jumpingGoalHandler.pollNextJumpingGoal(jumpingGoal);
       balanceManager.setMinimizeAngularMomentumRate(false);
 
@@ -118,26 +132,23 @@ public class JumpingFlightState extends JumpingState
       touchdownCoMPose.getPosition().set(balanceManager.getTouchdownCoMPosition());
       touchdownCoMFrame.setPoseAndUpdate(touchdownCoMPose);
 
-      correctTouchdownFootPose(jumpingGoal);
+      double omega = Math.sqrt(controllerToolbox.getGravityZ() / touchdownCoMPose.getPosition().getZ());
 
-      jumpingGoalFootholdCalculator.computeGoalPose(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame(), jumpingGoal.getGoalLength(), width, jumpingGoal.getGoalHeight(),
-                                                    jumpingGoal.getGoalRotation());
+      comVelocity.setIncludingFrame(controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity());
+      comVelocity.changeFrame(touchdownCoMFrame);
+      goalPoint.setToZero(touchdownCoMFrame);
+      goalPoint.setX(comVelocity.getX() / omega);
+
+      goalPoint.changeFrame(takeOffFrame);
+
+//      jumpingGoal.setGoalLength(goalPoint.getX());
+
+      jumpingGoalFootholdCalculator.computeGoalPose(takeOffFrame, jumpingGoal.getGoalLength(), width, jumpingGoal.getGoalHeight(), jumpingGoal.getGoalRotation());
    }
 
    private final FramePoint3D goalPoint = new FramePoint3D();
    private final FrameVector3D comVelocity = new FrameVector3D();
 
-   private void correctTouchdownFootPose(JumpingGoal footPose)
-   {
-      comVelocity.setIncludingFrame(controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity());
-      comVelocity.changeFrame(touchdownCoMFrame);
-      goalPoint.setToZero(touchdownCoMFrame);
-      goalPoint.setX(comVelocity.getX() / controllerToolbox.getOmega0());
-
-      goalPoint.changeFrame(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame());
-
-      footPose.setGoalLength(goalPoint.getX());
-   }
 
    @Override
    public void onExit()
@@ -146,6 +157,7 @@ public class JumpingFlightState extends JumpingState
    }
 
    private static final double minFractionThroughSwingForContact = 0.8;
+
    @Override
    public boolean isDone(double timeInState)
    {
