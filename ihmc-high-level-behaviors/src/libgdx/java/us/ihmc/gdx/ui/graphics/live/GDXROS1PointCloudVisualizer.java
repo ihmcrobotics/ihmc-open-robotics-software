@@ -123,14 +123,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
 
                if (frame != null)
                {
-                  try
-                  {
-                     frame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
-                  }
-                  catch (NotARotationMatrixException notARotationMatrixException)
-                  {
-                     notARotationMatrixException.printStackTrace();
-                  }
+                  frame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
                   if (transformAfterFrame != null)
                      transformToWorld.multiply(transformAfterFrame);
                   pointCloudData.applyTransform(transformToWorld);

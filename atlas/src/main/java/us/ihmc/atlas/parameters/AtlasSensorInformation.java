@@ -187,11 +187,6 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    static
    {
       // TODO: Move this stuff to a file so it can be tuned and saved
-//      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.14);
-//      transformChestToL515DepthCamera.appendTranslation(chestToSensor);
-//      double pitch = Math.toRadians(90.0 - 24.0);
-//      transformChestToL515DepthCamera.appendOrientation(new YawPitchRoll(0.01, pitch, -0.045));
-
       transformChestToL515DepthCamera.setIdentity();
       transformChestToL515DepthCamera.getTranslation().set(0.275000, 0.052000, 0.140000);
       transformChestToL515DepthCamera.getRotation().setYawPitchRoll(0.010000, 1.151900, 0.045000);
@@ -200,9 +195,6 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    private static final RigidBodyTransform transformChestToD435DepthCamera = new RigidBodyTransform();
    static
    {
-//      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.4);
-//      transformChestToD435DepthCamera.appendTranslation(chestToSensor);
-
       transformChestToD435DepthCamera.setIdentity();
       transformChestToD435DepthCamera.getTranslation().set(0.300000, 0.020000, 0.580000);
       transformChestToD435DepthCamera.getRotation().setYawPitchRoll(0.0, 0.0, 0.0);
@@ -211,18 +203,6 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    private static final RigidBodyTransform transformChestToOuster = new RigidBodyTransform();
    static
    {
-//      Point3D chestToSensor = new Point3D(0.466343, 0.002315, 0.819452);
-//      transformChestToOuster.appendTranslation(chestToSensor);
-//      double pitch = Math.toRadians(90.0 - 24.0);
-//      transformChestToOuster.appendOrientation(new YawPitchRoll(0.036390, -1.160795, -1.457304));
-//
-//      transformChestToOuster.set(
-//            0.434, -0.862,  0.260,  0.466,
-//            0.134, -0.224, -0.965,  0.002,
-//            0.891,  0.454,  0.018,  0.819
-//      );
-//      transformChestToOuster.normalizeRotationPart();
-
       transformChestToOuster.setIdentity();
       transformChestToOuster.getTranslation().set(0.265000, -0.0200, 0.720000);
       transformChestToOuster.getRotation().setYawPitchRoll(0.00000, 0.349100, 0.000000);
