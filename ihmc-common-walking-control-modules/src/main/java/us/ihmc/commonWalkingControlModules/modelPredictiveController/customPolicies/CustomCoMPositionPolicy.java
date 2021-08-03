@@ -52,11 +52,12 @@ public class CustomCoMPositionPolicy implements CustomMPCPolicy
    public MPCCommand<?> computeMPCCommand(MPCContactHandler contactHandler, List<PreviewWindowSegment> contactStateProviders, double omega)
    {
       int segmentNumber = CustomPolicyTools.getSegmentNumber(timeOfPolicy, contactStateProviders);
-      double timeInSegment = CustomPolicyTools.getTimeInSegment(segmentNumber, timeOfPolicy, contactStateProviders);
-      timeInSegment = Math.min(timeInSegment, CoMTrajectoryPlannerTools.sufficientlyLongTime);
 
       if (segmentNumber < 0)
          return null;
+
+      double timeInSegment = CustomPolicyTools.getTimeInSegment(segmentNumber, timeOfPolicy, contactStateProviders);
+      timeInSegment = Math.min(timeInSegment, CoMTrajectoryPlannerTools.sufficientlyLongTime);
 
       mpcCommand.clear();
       mpcCommand.setSegmentNumber(segmentNumber);
@@ -64,7 +65,7 @@ public class CustomCoMPositionPolicy implements CustomMPCPolicy
       mpcCommand.setObjective(desiredCoMPosition);
       mpcCommand.setWeight(weight);
       mpcCommand.setOmega(omega);
-      mpcCommand.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+      mpcCommand.setConstraintType(ConstraintType.OBJECTIVE);
       mpcCommand.getSelectionMatrix().set(selectionMatrix);
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
          mpcCommand.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
