@@ -25,9 +25,10 @@ public class MPCParameters
    public static final double defaultInitialComWeight = 5e2;
    public static final double defaultInitialComVelocityWeight = 1e2;
    public static final double defaultFinalComWeight = 1e1;
-   public static final double defaultFinalVRPWeight = 1e2;
-   public static final double defaultVrpTrackingWeight = 1e3;
-   public static final double defaultRhoTrackingWeight = 1e-3;
+   public static final double defaultFinalVRPWeight = 1e-1;
+   public static final double defaultFinalDCMWeight = 1e2;
+   public static final double defaultVrpTrackingWeight = 1e2;
+   public static final double defaultRhoTrackingWeight = 1e-5;
    public static final double defaultRhoRateTrackingWeight = 1e-6;
    public static final double defaultForceTrackingWeight = 1e-4;
 
@@ -52,6 +53,7 @@ public class MPCParameters
    private final YoDouble initialComVelocityWeight = new YoDouble("initialComVelocityWeight", registry);
    private final YoDouble finalComWeight = new YoDouble("finalComWeight", registry);
    private final YoDouble finalVRPWeight = new YoDouble("finalVRPWeight", registry);
+   private final YoDouble finalDCMWeight = new YoDouble("finalDCMWeight", registry);
    private final YoDouble vrpTrackingWeight = new YoDouble("vrpTrackingWeight", registry);
    private final YoDouble rhoTrackingWeight = new YoDouble("rhoTrackingWeight", registry);
    private final YoDouble rhoRateTrackingWeight = new YoDouble("rhoRateTrackingWeight", registry);
@@ -70,6 +72,7 @@ public class MPCParameters
       initialComVelocityWeight.set(defaultInitialComVelocityWeight);
       finalComWeight.set(defaultFinalComWeight);
       finalVRPWeight.set(defaultFinalVRPWeight);
+      finalDCMWeight.set(defaultFinalDCMWeight);
       vrpTrackingWeight.set(defaultVrpTrackingWeight);
       rhoTrackingWeight.set(defaultRhoTrackingWeight);
       rhoRateTrackingWeight.set(defaultRhoRateTrackingWeight);
@@ -187,6 +190,11 @@ public class MPCParameters
    public double getFinalVRPWeight()
    {
       return finalVRPWeight.getDoubleValue();
+   }
+
+   public double getFinalDCMWeight()
+   {
+      return finalDCMWeight.getDoubleValue();
    }
 
    public double getVRPTrackingWeight()

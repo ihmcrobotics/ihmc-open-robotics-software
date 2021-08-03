@@ -206,7 +206,7 @@ public class LinearMPCTrajectoryHandler
             currentSegment.compute(currentSegment.getTimeInterval().getDuration() - epsilon);
             nextSegment.compute(epsilon);
 
-            if (!currentSegment.getPosition().epsilonEquals(nextSegment.getPosition(), 1e-4) && i < planningWindow.size() - 1 || (MPCParameters.includeFinalCoMPositionObjective && MPCParameters.finalCoMPositionConstraintType == ConstraintType.EQUALITY))
+            if (!currentSegment.getPosition().epsilonEquals(nextSegment.getPosition(), 1e-4) && (i < planningWindow.size() - 1 || (MPCParameters.includeFinalCoMPositionObjective && MPCParameters.finalCoMPositionConstraintType == ConstraintType.EQUALITY)))
                LogTools.error("C0 Discontinuous CoM trajectory. Position jumps from " + currentSegment.getPosition() + " to " + nextSegment.getPosition() + " at junction " + i);
             if (!currentSegment.getVelocity().epsilonEquals(nextSegment.getVelocity(), 1e-4) && i < planningWindow.size() - 1)
                LogTools.error("C1 Discontinuous CoM trajectory. Velocity jumps from " + currentSegment.getVelocity() + " to " + nextSegment.getVelocity() + " at junction " + i);
