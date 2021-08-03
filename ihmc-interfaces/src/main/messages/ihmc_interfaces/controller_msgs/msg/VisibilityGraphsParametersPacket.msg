@@ -70,3 +70,5 @@ float64 weight_for_inter_region_edge -11.1
 float64 weight_for_non_preferred_edge -11.1
 
 bool return_best_effort_solution false
+
+bool optimize_for_narrow_passage false

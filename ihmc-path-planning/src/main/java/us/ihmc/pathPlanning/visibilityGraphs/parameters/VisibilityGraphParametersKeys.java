@@ -33,6 +33,7 @@ public class VisibilityGraphParametersKeys
    public static final BooleanStoredPropertyKey computeOrientationsToAvoidObstacles        = keys.addBooleanKey("Compute orientations to avoid obstacles", false);
    public static final BooleanStoredPropertyKey returnBestEffortSolution                   = keys.addBooleanKey("Return best effort solution", true);
    public static final BooleanStoredPropertyKey includePreferredExtrusions                 = keys.addBooleanKey("Include preferred extrusions", true);
+   public static final BooleanStoredPropertyKey optimizeForNarrowPassage                   = keys.addBooleanKey("Optimize for narrow passage", false);
 
    public static final DoubleStoredPropertyKey heuristicWeight                             = keys.addDoubleKey("Heuristic weight", 1.25);
    public static final DoubleStoredPropertyKey distanceWeight                              = keys.addDoubleKey("Distance weight", 1.0);
