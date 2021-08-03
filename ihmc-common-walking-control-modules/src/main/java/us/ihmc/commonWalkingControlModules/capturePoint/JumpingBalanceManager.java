@@ -108,7 +108,7 @@ public class JumpingBalanceManager
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
    private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
 
-   private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, true);
+   private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, false);
    private final BooleanProvider useAngularMomentumOffsetInStanding = new BooleanParameter("useAngularMomentumOffsetInStanding", registry, true);
    private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
 
@@ -131,7 +131,7 @@ public class JumpingBalanceManager
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      desiredWeightForStateChangeHeights.set(1e-2);
+      desiredWeightForStateChangeHeights.set(1e1);
 
       yoTime = controllerToolbox.getYoTime();
       this.controllerToolbox = controllerToolbox;
@@ -423,7 +423,7 @@ public class JumpingBalanceManager
       tempPoint.setToZero(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame());
       tempPoint.changeFrame(worldFrame);
 
-      takeoffPolicy.getDesiredComPosition().setZ(tempPoint.getZ() + controllerToolbox.getStandingHeight());
+      takeoffPolicy.getDesiredComPosition().setZ(tempPoint.getZ() + controllerToolbox.getJumpingHeight());
       touchdownPolicy.getDesiredComPosition().setZ(jumpingGoal.getGoalHeight() + controllerToolbox.getStandingHeight());
 
       takeoffPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
@@ -432,7 +432,7 @@ public class JumpingBalanceManager
       takeoffPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration());
       touchdownPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 
-      comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
+//      comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
 //      comTrajectoryPlanner.addCustomPolicyToProcess(touchdownPolicy);
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);

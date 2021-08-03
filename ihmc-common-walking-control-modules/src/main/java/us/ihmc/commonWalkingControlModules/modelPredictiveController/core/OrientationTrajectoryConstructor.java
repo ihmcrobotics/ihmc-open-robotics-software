@@ -96,7 +96,7 @@ public class OrientationTrajectoryConstructor
             referenceBodyAngularVelocityInBodyFrame.set(orientationTrajectoryHandler.getReferenceBodyVelocity());
             referenceOrientation.transform(referenceBodyAngularVelocityInBodyFrame);
 
-            if (false)//orientationTrajectoryHandler.hasInternalAngularMomentum())
+            if (orientationTrajectoryHandler.hasInternalAngularMomentum())
             {
                desiredInternalAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
                if (contactPlaneHelpers.get(segmentNumber).size() > 0)
