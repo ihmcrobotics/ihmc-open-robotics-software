@@ -48,8 +48,17 @@ public class JumpingFlightState extends JumpingState
    @Override
    public void doAction(double timeInState)
    {
+      updateJumpingGoalPoseFromTouchdownPosition();
+
       for (RobotSide robotSide : RobotSide.values)
+      {
+         footGoalPose.setIncludingFrame(jumpingGoalFootholdCalculator.getFootGoalPose(robotSide));
+         footGoalPose.changeFrame(touchdownCoMFrame);
+
+         feetManager.adjustSwingTrajectory(robotSide, footGoalPose);
+
          balanceManager.setSwingFootTrajectory(robotSide, feetManager.getSwingTrajectory(robotSide));
+      }
 
       balanceManager.computeCoMPlanForJumping(jumpingGoal);
    }
@@ -69,27 +78,12 @@ public class JumpingFlightState extends JumpingState
          controllerToolbox.setFootContactStateFree(robotSide);
       controllerToolbox.updateBipedSupportPolygons();
 
-      FramePoint3DReadOnly takeOffCoMPosition = controllerToolbox.getCenterOfMassJacobian().getCenterOfMass();
-      FrameVector3DReadOnly takeOffCoMVelocity = controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity();
       // FIXME need to re-target the orientation
+      updateJumpingGoalPoseFromTouchdownPosition();
 //      touchdownCoMPose.getOrientation().set(goalPose.getOrientation());
-      touchdownCoMPose.getPosition().scaleAdd(jumpingGoal.getFlightDuration(), takeOffCoMVelocity, takeOffCoMPosition);
-      touchdownCoMPose.getPosition().subZ(0.5 * controllerToolbox.getGravityZ() * MathTools.square(jumpingGoal.getFlightDuration()));
-      touchdownCoMFrame.setPoseAndUpdate(touchdownCoMPose);
-
-      correctTouchdownFootPose(jumpingGoal);
 
       // TODO trigger the swing in the feet manager
-      balanceManager.initializeCoMPlanForFlight(jumpingGoal);
-
-      double width;
-      if (!Double.isNaN(jumpingGoal.getGoalFootWidth()))
-         width = jumpingGoal.getGoalFootWidth();
-      else
-         width = jumpingParameters.getDefaultFootWidth();
-
-      jumpingGoalFootholdCalculator.computeGoalPose(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame(), jumpingGoal.getGoalLength(), width, jumpingGoal.getGoalHeight(),
-                                                    jumpingGoal.getGoalRotation());
+      balanceManager.initializeCoMPlanForFlight(jumpingGoal.getSupportDuration(), jumpingGoal.getFlightDuration());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -111,6 +105,23 @@ public class JumpingFlightState extends JumpingState
 //         pelvisOrientationManager.initializeStanding();
 
 //      failureDetectionControlModule.setNextFootstep(null);
+   }
+
+   private void updateJumpingGoalPoseFromTouchdownPosition()
+   {
+      double width;
+      if (!Double.isNaN(jumpingGoal.getGoalFootWidth()))
+         width = jumpingGoal.getGoalFootWidth();
+      else
+         width = jumpingParameters.getDefaultFootWidth();
+
+      touchdownCoMPose.getPosition().set(balanceManager.getTouchdownCoMPosition());
+      touchdownCoMFrame.setPoseAndUpdate(touchdownCoMPose);
+
+      correctTouchdownFootPose(jumpingGoal);
+
+      jumpingGoalFootholdCalculator.computeGoalPose(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame(), jumpingGoal.getGoalLength(), width, jumpingGoal.getGoalHeight(),
+                                                    jumpingGoal.getGoalRotation());
    }
 
    private final FramePoint3D goalPoint = new FramePoint3D();

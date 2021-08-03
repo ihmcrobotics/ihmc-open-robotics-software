@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController;
 
+import org.apache.commons.math3.util.Precision;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -24,8 +25,10 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -35,6 +38,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -57,6 +61,8 @@ public class JumpingSwingFootState implements JumpingFootControlState
    private final JumpingControllerToolbox controllerToolbox;
 
    private final YoDouble currentTime;
+   private final YoBoolean replanTrajectory;
+   private final YoBoolean footstepWasAdjusted;
 
    private final MovingReferenceFrame centerOfMassFrame;
 
@@ -71,6 +77,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
    private final SpatialAcceleration desiredSpatialAcceleration = new SpatialAcceleration();
 
    private final JumpingSwingTrajectoryCalculator swingTrajectoryCalculator;
+   private final MultipleWaypointsBlendedPoseTrajectoryGenerator blendedSwingTrajectory;
 
    // for unit testing and debugging:
    private final YoFramePoint3D yoDesiredSolePosition;
@@ -93,6 +100,8 @@ public class JumpingSwingFootState implements JumpingFootControlState
    private final PoseReferenceFrame controlFrame;
    private final PIDSE3GainsReadOnly gains;
 
+   private final FramePose3D adjustedFootstepPose = new FramePose3D();
+
    private final double gravityZ;
 
    public JumpingSwingFootState(JumpingFootControlHelper footControlHelper,
@@ -105,16 +114,17 @@ public class JumpingSwingFootState implements JumpingFootControlState
       controllerToolbox = footControlHelper.getJumpingControllerToolbox();
       centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
 
-      swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
-
       robotSide = footControlHelper.getRobotSide();
+      String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "FootSwing";
+      swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix, swingTrajectoryCalculator.getSwingTrajectory(), centerOfMassFrame, registry);
+
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getJumpingControllerToolbox().getFullRobotModel();
 
       this.gravityZ = gravityZ;
       this.gains = gains;
 
       RigidBodyBasics foot = contactableFoot.getRigidBody();
-      String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "FootSwing";
 
       spatialFeedbackControlCommand.set(fullRobotModel.getElevator(), foot);
       spatialFeedbackControlCommand.setPrimaryBase(fullRobotModel.getPelvis());
@@ -134,6 +144,9 @@ public class JumpingSwingFootState implements JumpingFootControlState
       desiredControlFrame.setPoseAndUpdate(soleToControlFrameTransform);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
+
+      replanTrajectory = new YoBoolean(namePrefix + "ReplanTrajectory", registry);
+      footstepWasAdjusted = new YoBoolean(namePrefix + "FootstepWasAdjusted", registry);
 
       currentTime = new YoDouble(namePrefix + "CurrentTime", registry);
 
@@ -225,11 +238,16 @@ public class JumpingSwingFootState implements JumpingFootControlState
       {
          fillAndInitializeTrajectories(false);
       }
+      else if (replanTrajectory.getBooleanValue())
+      {
+         fillAndInitializeBlendedTrajectories();
+      }
 
-      MultipleWaypointsPoseTrajectoryGenerator swingTrajectory = swingTrajectoryCalculator.getSwingTrajectory();
-      swingTrajectory.compute(time);
-      swingTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      swingTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      replanTrajectory.set(false);
+
+      blendedSwingTrajectory.compute(time);
+      blendedSwingTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      blendedSwingTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       if (timeInState > swingTrajectoryCalculator.getSwingDuration())
       {
@@ -263,11 +281,31 @@ public class JumpingSwingFootState implements JumpingFootControlState
    public void setFootstep(FramePose3DReadOnly footstepPoseRelativeToTouchdownCoM, double swingHeight, double swingTime)
    {
       swingTrajectoryCalculator.setFootstep(footstepPoseRelativeToTouchdownCoM, swingHeight, swingTime);
+
+      adjustedFootstepPose.setIncludingFrame(centerOfMassFrame, footstepPoseRelativeToTouchdownCoM);
+   }
+
+   public void setAdjustedFootstepAndTime(FramePose3DReadOnly adjustedFootstep)
+   {
+      replanTrajectory.set(true);
+      footstepWasAdjusted.set(true);
+
+      adjustedFootstepPose.setIncludingFrame(centerOfMassFrame, adjustedFootstep);
    }
 
    private void fillAndInitializeTrajectories(boolean initializeOptimizer)
    {
       swingTrajectoryCalculator.initializeTrajectoryWaypoints(initializeOptimizer);
+   }
+
+   private void fillAndInitializeBlendedTrajectories()
+   {
+      double swingDuration = swingTrajectoryCalculator.getSwingDuration();
+      blendedSwingTrajectory.clear();
+         // If there is a swing waypoint at the end of swing we want to preserve its transform to the footstep pose to not blend out
+         // any touchdown trajectory when doing step adjustment.
+      blendedSwingTrajectory.blendFinalConstraint(adjustedFootstepPose, swingDuration, swingDuration);
+      blendedSwingTrajectory.initialize();
    }
 
    private void transformDesiredsFromCoMFrameToControlFrame()
