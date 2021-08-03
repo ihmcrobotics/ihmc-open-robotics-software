@@ -18,6 +18,7 @@ import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGuiContext;
 import org.lwjgl.opengl.GL30;
+import org.lwjgl.system.MemoryUtil;
 import us.ihmc.gdx.imgui.ImGuiTools;
 
 import java.util.ArrayList;
@@ -50,9 +51,13 @@ public class GDXImGuiVirtualWindowManager implements RenderableProvider
    private ImGuiContext savedImGuiContext = null;
 
    private void backupAndSwitchContext() {
+      savedGLFWContext = glfwGetCurrentContext();
+      glfwMakeContextCurrent(virtualWindowContext);
+
       savedImGuiContext = ImGui.getCurrentContext();
       if (virtualImGuiContext == null) {
          virtualImGuiContext = ImGui.createContext();
+         ImGui.setCurrentContext(virtualImGuiContext);
 
          final ImGuiIO io = ImGui.getIO();
 
@@ -75,12 +80,16 @@ public class GDXImGuiVirtualWindowManager implements RenderableProvider
             style.setColor(ImGuiCol.WindowBg, imgui.ImGui.getColorU32(ImGuiCol.WindowBg, 1));
          }
 
-         io.setDisplaySize(3000, 2000);
-      }
-      ImGui.setCurrentContext(virtualImGuiContext);
+         int[] fbWidth = new int[1];
+         int[] fbHeight = new int[1];
+         glfwGetFramebufferSize(virtualWindowContext, fbWidth, fbHeight);
 
-      savedGLFWContext = glfwGetCurrentContext();
-      glfwMakeContextCurrent(virtualWindowContext);
+         io.setDisplaySize(fbWidth[0], fbHeight[0]);
+      }
+      else
+      {
+         ImGui.setCurrentContext(virtualImGuiContext);
+      }
    }
 
    private void restoreSavedContext() {
@@ -91,21 +100,19 @@ public class GDXImGuiVirtualWindowManager implements RenderableProvider
    }
 
    private GDXImGuiVirtualWindowManager() {
-      if (!glfwInit())
-      {
-         throw new IllegalStateException("Unable to initialize GLFW");
-      }
-
       this.savedGLFWContext = glfwGetCurrentContext();
 
       glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-      this.virtualWindowContext = glfwCreateWindow(3000, 2000, "", 0, 0); //0 is NULL?
-
-      restoreSavedContext();
+      this.virtualWindowContext = glfwCreateWindow(3000, 2000, "", MemoryUtil.NULL, MemoryUtil.NULL);
    }
 
    public void create() {
       backupAndSwitchContext(); //This is also where the ImGuiContext is created
+
+      if (!glfwInit()) //Probably already initialized by this point, which immediately returns true
+      {
+         throw new IllegalStateException("Unable to initialize GLFW");
+      }
 
       imGuiGlfw.init(virtualWindowContext, true);
       imGuiGl3.init();
@@ -117,6 +124,7 @@ public class GDXImGuiVirtualWindowManager implements RenderableProvider
       backupAndSwitchContext();
 
       ImGui.newFrame();
+      ImGui.pushFont(font);
 
       for (GDXImGuiWindow panel : panels) {
          if (ImGui.begin(panel.getName())) {
@@ -125,6 +133,7 @@ public class GDXImGuiVirtualWindowManager implements RenderableProvider
          }
       }
 
+      ImGui.popFont();
       ImGui.render();
       imGuiGl3.renderDrawData(ImGui.getDrawData());
 
