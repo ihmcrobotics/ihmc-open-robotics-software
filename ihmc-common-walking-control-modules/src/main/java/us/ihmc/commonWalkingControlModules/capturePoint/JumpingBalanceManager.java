@@ -108,7 +108,7 @@ public class JumpingBalanceManager
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
    private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
 
-   private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, false);
+   private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, true);
    private final BooleanProvider useAngularMomentumOffsetInStanding = new BooleanParameter("useAngularMomentumOffsetInStanding", registry, true);
    private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
 
@@ -432,7 +432,7 @@ public class JumpingBalanceManager
       takeoffPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration());
       touchdownPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 
-//      comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
+      comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
 //      comTrajectoryPlanner.addCustomPolicyToProcess(touchdownPolicy);
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
@@ -501,7 +501,7 @@ public class JumpingBalanceManager
 
    public FramePoint3DReadOnly getTouchdownCoMPosition()
    {
-      return touchdownCoMPosition;
+      return updatedTouchdownCoMPosition;
    }
 
    public void initialize()
@@ -598,10 +598,10 @@ public class JumpingBalanceManager
       comPlannerDone.set(false);
    }
 
-   public void initializeCoMPlanForFlight(JumpingGoal jumpingGoal)
+   public void initializeCoMPlanForFlight(double supportDuration, double flightDuration)
    {
-      currentStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
-      totalStateDuration.set(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
+      currentStateDuration.set(supportDuration + flightDuration);
+      totalStateDuration.set(supportDuration + flightDuration);
 
       copTrajectoryState.setTimeAtStartOfState(timeInSupportSequence.getDoubleValue());
 
@@ -613,6 +613,7 @@ public class JumpingBalanceManager
 
       comPlannerDone.set(false);
    }
+
 
    public void setMinimizeAngularMomentumRate(boolean minimizeAngularMomentumRate)
    {

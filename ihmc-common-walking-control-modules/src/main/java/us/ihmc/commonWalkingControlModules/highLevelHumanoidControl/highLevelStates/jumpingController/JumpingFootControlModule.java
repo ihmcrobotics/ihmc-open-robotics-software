@@ -227,6 +227,11 @@ public class JumpingFootControlModule
          swingTrajectoryCalculator.initializeTrajectoryWaypoints(false);
    }
 
+   public void setAdjustedFootstepAndTime(FramePose3DReadOnly adjustedFootstep)
+   {
+      swingState.setAdjustedFootstepAndTime(adjustedFootstep);
+   }
+
    public void setFootstep(FramePose3DReadOnly footstepPoseRelativeToTouchdownCoM, double swingHeight, double swingTime)
    {
       swingState.setFootstep(footstepPoseRelativeToTouchdownCoM, swingHeight, swingTime);

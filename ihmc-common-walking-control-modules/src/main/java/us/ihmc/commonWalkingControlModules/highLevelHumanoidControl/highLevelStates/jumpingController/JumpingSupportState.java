@@ -52,9 +52,14 @@ public class JumpingSupportState extends JumpingState
    @Override
    public void doAction(double timeInState)
    {
+      updateJumpingGoalPoseFromTouchdownPosition();
+
       for (RobotSide swingSide : RobotSide.values)
       {
-         feetManager.updateSwingTrajectoryPreview(swingSide);
+         footGoalPose.setIncludingFrame(jumpingGoalFootholdCalculator.getFootGoalPose(swingSide));
+         footGoalPose.changeFrame(touchdownCoMFrame);
+
+         feetManager.updateSwingTrajectoryPreview(swingSide, footGoalPose);
          balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       }
 
@@ -73,17 +78,7 @@ public class JumpingSupportState extends JumpingState
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
 
-      double width;
-      if (!Double.isNaN(jumpingGoal.getGoalFootWidth()))
-         width = jumpingGoal.getGoalFootWidth();
-      else
-         width = jumpingParameters.getDefaultFootWidth();
-
-      touchdownCoMPose.getPosition().set(balanceManager.getTouchdownCoMPosition());
-      touchdownCoMFrame.setPoseAndUpdate(touchdownCoMPose);
-
-      jumpingGoalFootholdCalculator.computeGoalPose(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame(), jumpingGoal.getGoalLength(), width, jumpingGoal.getGoalHeight(),
-                                                    jumpingGoal.getGoalRotation());
+      updateJumpingGoalPoseFromTouchdownPosition();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -124,4 +119,20 @@ public class JumpingSupportState extends JumpingState
 
       return minKneeAngle <= jumpingParameters.getMinKneeAngleForTakeOff();
    }
+
+   private void updateJumpingGoalPoseFromTouchdownPosition()
+   {
+      double width;
+      if (!Double.isNaN(jumpingGoal.getGoalFootWidth()))
+         width = jumpingGoal.getGoalFootWidth();
+      else
+         width = jumpingParameters.getDefaultFootWidth();
+
+      touchdownCoMPose.getPosition().set(balanceManager.getTouchdownCoMPosition());
+      touchdownCoMFrame.setPoseAndUpdate(touchdownCoMPose);
+
+      jumpingGoalFootholdCalculator.computeGoalPose(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame(), jumpingGoal.getGoalLength(), width, jumpingGoal.getGoalHeight(),
+                                                    jumpingGoal.getGoalRotation());
+   }
+
 }
