@@ -9,7 +9,7 @@ public class JumpingParameters
    private static final double defaultFlightDurationValue = 0.2;
    private static final double defaultFootWidthValue = 0.2;
 
-   private static final double swingHeight = 0.02;
+   private static final double swingHeight = 0.1;
 
    private static final double defaultMinKneeAngleForTakeOff = Math.toRadians(30.0);
 
