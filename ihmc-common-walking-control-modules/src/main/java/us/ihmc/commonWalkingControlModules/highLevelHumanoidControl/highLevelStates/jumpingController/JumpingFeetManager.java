@@ -109,9 +109,15 @@ public class JumpingFeetManager
       footControlModules.get(upcomingSwingSide).initializeSwingTrajectoryPreview(footstepPoseRelativeToTouchdownCoM, swingHeight, swingTime);
    }
 
-   public void updateSwingTrajectoryPreview(RobotSide upcomingSwingSide)
+   public void updateSwingTrajectoryPreview(RobotSide upcomingSwingSide, FramePose3DReadOnly adjustedFootstep)
    {
+      footControlModules.get(upcomingSwingSide).setAdjustedFootstepAndTime(adjustedFootstep);
       footControlModules.get(upcomingSwingSide).updateSwingTrajectoryPreview();
+   }
+
+   public void adjustSwingTrajectory(RobotSide swingSide, FramePose3DReadOnly adjustedFootstep)
+   {
+      footControlModules.get(swingSide).setAdjustedFootstepAndTime(adjustedFootstep);
    }
 
    public void requestSwing(RobotSide upcomingSwingSide,
