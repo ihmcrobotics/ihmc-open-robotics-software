@@ -53,7 +53,7 @@ public class PreviewWindowCalculator
    {
       activeSegment.set(-1);
       this.nominalSegmentDuration.set(0.125);
-      this.maximumPreviewWindowDuration.set(0.50);
+      this.maximumPreviewWindowDuration.set(0.75);
       this.maximumPreviewWindowSegments.set(5);
       this.minimumPreviewWindowSegments.set(2);
 
