@@ -156,7 +156,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose,
                                                          footstepPlannerParameters);
-      request.setRequestedPathHeading(Math.toRadians(30.0));
+//      request.setRequestedPathHeading(Math.toRadians(30.0));
 
       request.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
 
