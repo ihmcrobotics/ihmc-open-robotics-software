@@ -9,6 +9,7 @@ import gnu.trove.set.hash.TLongHashSet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.sensorProcessing.outputData.ImuData;
 import us.ihmc.sensorProcessing.outputData.LowLevelState;
 
@@ -33,7 +34,7 @@ public class SensorDataContext implements Settable<SensorDataContext>
    {
    }
 
-   public SensorDataContext(FullHumanoidRobotModel fullRobotModel)
+   public SensorDataContext(FullRobotModel fullRobotModel)
    {
       Arrays.asList(fullRobotModel.getOneDoFJoints()).forEach(joint -> registerJoint(joint.getName()));
       Arrays.asList(fullRobotModel.getIMUDefinitions()).forEach(imu -> registerImu(imu.getName()));
