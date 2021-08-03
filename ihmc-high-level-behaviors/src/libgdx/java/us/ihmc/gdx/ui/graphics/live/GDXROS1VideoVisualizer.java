@@ -6,22 +6,30 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import imgui.internal.ImGui;
 import org.jboss.netty.buffer.ChannelBuffer;
+import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.utilities.ros.RosNodeInterface;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
+
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 
 public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
 {
+   private final boolean isCompressed;
    private AbstractRosTopicSubscriber<Image> subscriber;
+   private AbstractRosTopicSubscriber<CompressedImage> compressedSubscriber;
    private final String topic;
    private Pixmap pixmap;
    private Texture texture;
    private final ImGuiVideoPanel videoPanel;
    private volatile Image image;
+   private volatile CompressedImage compressedImage;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
 
@@ -32,28 +40,52 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       super(title);
       this.topic = topic;
+      isCompressed = topic.endsWith("compressed");
       videoPanel = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic), false);
    }
 
    @Override
    public void subscribe(RosNodeInterface ros1Node)
    {
-      subscriber = new AbstractRosTopicSubscriber<Image>(sensor_msgs.Image._TYPE)
+      if (isCompressed)
       {
-         @Override
-         public void onNewMessage(Image image)
+         compressedSubscriber = new AbstractRosTopicSubscriber<CompressedImage>(sensor_msgs.CompressedImage._TYPE)
          {
-            GDXROS1VideoVisualizer.this.image = image;
-            ++receivedCount;
-         }
-      };
-      ros1Node.attachSubscriber(topic, subscriber);
+            @Override
+            public void onNewMessage(CompressedImage image)
+            {
+               GDXROS1VideoVisualizer.this.compressedImage = image;
+               ++receivedCount;
+            }
+         };
+         ros1Node.attachSubscriber(topic, subscriber);
+      }
+      else
+      {
+         subscriber = new AbstractRosTopicSubscriber<Image>(sensor_msgs.Image._TYPE)
+         {
+            @Override
+            public void onNewMessage(Image image)
+            {
+               GDXROS1VideoVisualizer.this.image = image;
+               ++receivedCount;
+            }
+         };
+         ros1Node.attachSubscriber(topic, subscriber);
+      }
    }
 
    @Override
    public void unsubscribe(RosNodeInterface ros1Node)
    {
-      ros1Node.removeSubscriber(subscriber);
+      if (isCompressed)
+      {
+         ros1Node.removeSubscriber(compressedSubscriber);
+      }
+      else
+      {
+         ros1Node.removeSubscriber(subscriber);
+      }
    }
 
    @Override
@@ -70,23 +102,58 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
       super.update();
       if (isActive())
       {
-         Image image = this.image; // store the latest one here
+         // store the latest ones here
+         Image image = this.image;
+         CompressedImage compressedImage = this.compressedImage;
 
-         if (image != null)
+         if (isCompressed && compressedImage != null)
          {
-            if (texture == null || texture.getWidth() < image.getWidth() || texture.getHeight() < image.getHeight())
+            boolean is16BitDepth = compressedImage.getFormat().contains("16UC1"); // TODO: Support depth image
+            boolean is8BitRGB = compressedImage.getFormat().contains("rgb8");
+            boolean isBGR8 = compressedImage.getFormat().contains("bgr8");
+
+            BufferedImage bufferedImage = RosTools.bufferedImageFromRosMessageJpeg(compressedImage);
+            byte[] data = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
+            int width = bufferedImage.getWidth();
+            int height = bufferedImage.getHeight();
+
+            ensureTextureReady(image.getWidth(), image.getHeight());
+
+            if (is8BitRGB)
             {
-               if (texture != null)
+               int zeroedIndex = 0;
+               for (int y = 0; y < height; y++)
                {
-                  texture.dispose();
-                  pixmap.dispose();
+                  for (int x = 0; x < width; x++)
+                  {
+                     int rgbaColor = data[zeroedIndex] << 24 | data[zeroedIndex + 1] << 16 | data[zeroedIndex + 2] << 8 | 255;
+                     int color = bufferedImage.getRGB(x, y);
+                     zeroedIndex += 3;
+                     pixmap.drawPixel(x, y, (color << 8) | 255);
+                  }
                }
-
-               pixmap = new Pixmap(image.getWidth(), image.getHeight(), Pixmap.Format.RGBA8888);
-               texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
-
-               videoPanel.setTexture(texture);
             }
+            else if (isBGR8)
+            {
+               for (int y = 0; y < height; y++)
+               {
+                  for (int x = 0; x < width; x++)
+                  {
+                     int i = (y * width + x) * 3;
+                     int b = Byte.toUnsignedInt(data[i + 0]);
+                     int g = Byte.toUnsignedInt(data[i + 1]);
+                     int r = Byte.toUnsignedInt(data[i + 2]);
+                     int a = 255;
+                     int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
+                     pixmap.drawPixel(x, y, rgb8888);
+                  }
+               }
+            }
+            texture.draw(pixmap, 0, 0);
+         }
+         else if (image != null)
+         {
+            ensureTextureReady(image.getWidth(), image.getHeight());
 
             boolean is16BitDepth = image.getEncoding().equals("16UC1");
             boolean is8BitRGB = image.getEncoding().equals("rgb8");
@@ -130,6 +197,23 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
                texture.draw(pixmap, 0, 0);
             }
          }
+      }
+   }
+
+   private void ensureTextureReady(int width, int height)
+   {
+      if (texture == null || texture.getWidth() < width || texture.getHeight() < height)
+      {
+         if (texture != null)
+         {
+            texture.dispose();
+            pixmap.dispose();
+         }
+
+         pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
+         texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
+
+         videoPanel.setTexture(texture);
       }
    }
 
