@@ -58,7 +58,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
                ++receivedCount;
             }
          };
-         ros1Node.attachSubscriber(topic, subscriber);
+         ros1Node.attachSubscriber(topic, compressedSubscriber);
       }
       else
       {
