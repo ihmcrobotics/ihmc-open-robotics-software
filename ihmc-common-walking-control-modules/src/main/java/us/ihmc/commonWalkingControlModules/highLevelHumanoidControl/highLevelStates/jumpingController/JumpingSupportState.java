@@ -89,7 +89,7 @@ public class JumpingSupportState extends JumpingState
          balanceManager.setSwingFootTrajectory(robotSide, feetManager.getSwingTrajectory(robotSide));
       }
 
-      balanceManager.setDesiredCoMHeight(controllerToolbox.getStandingHeight());
+      balanceManager.setDesiredCoMHeight(controllerToolbox.getJumpingHeight());
       balanceManager.initializeCoMPlanForSupport(jumpingGoal);
       balanceManager.setMinimizeAngularMomentumRate(true);
 
