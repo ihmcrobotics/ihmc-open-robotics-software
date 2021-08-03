@@ -47,7 +47,7 @@ public class RosTools
    public static final String D435_DEPTH = "/camera/depth/image_rect_raw";
    public static final String D435_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
    public static final String L515_VIDEO = "/chest_l515/color/image_raw";
-   public static final String L515_COMPRESSED_VIDEO = "/camera/color/image_raw/compressed";
+   public static final String L515_COMPRESSED_VIDEO = "/chest_l515/color/image_raw/compressed";
    public static final String L515_DEPTH = "/chest_l515/depth/image_rect_raw";
    public static final String L515_POINT_CLOUD = "/chest_l515/depth/color/points";
    public static final String OUSTER_POINT_CLOUD = "/os_cloud_node/points";
@@ -58,6 +58,8 @@ public class RosTools
    public static final String MAPSENSE_DEPTH_CAMERA_INFO = L515_DEPTH_CAMERA_INFO;
    public static final String MAPSENSE_REGIONS = "/map/regions/test";
    public static final String MAPSENSE_CONFIGURATION = "/map/config";
+   // See https://www.stereolabs.com/docs/ros/zed-node/
+   public static final String ZED2_LEFT_EYE_VIDEO_COMPRESSED = "/zed/zed_node/left/image_rect_color/compressed";
 
    public static RosMainNode createRosNode(String uri, String name)
    {

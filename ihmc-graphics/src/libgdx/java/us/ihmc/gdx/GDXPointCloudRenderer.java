@@ -95,7 +95,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    public void updateMesh()
    {
-      updateMesh(0.0f);
+      updateMesh(1.0f);
    }
 
    public void updateMesh(float alpha)

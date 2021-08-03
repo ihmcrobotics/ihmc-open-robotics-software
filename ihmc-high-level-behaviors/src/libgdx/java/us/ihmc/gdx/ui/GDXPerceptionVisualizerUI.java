@@ -63,7 +63,7 @@ public class GDXPerceptionVisualizerUI
         globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Head Ouster", RosTools.OUSTER_POINT_CLOUD));
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Color Video", RosTools.L515_VIDEO));
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Depth Video", RosTools.L515_DEPTH));
-        globalVisualizersUI.addVisualizer(new GDXROS1CompressedVideoVisualizer("L515 Compressed Video", RosTools.L515_COMPRESSED_VIDEO));
+        globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Compressed Video", RosTools.L515_COMPRESSED_VIDEO));
         globalVisualizersUI.addVisualizer(new GDXROS2PointCloudVisualizer("MultiSense lidar scan", ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN));
         globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Lidar REA planar regions", ros2Node, ROS2Tools.LIDAR_REA_REGIONS));
         globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("SLAM Poses", RosTools.SLAM_POSE));
