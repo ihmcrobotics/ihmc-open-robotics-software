@@ -27,6 +27,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -245,9 +246,10 @@ public class JumpingSwingFootState implements JumpingFootControlState
 
       replanTrajectory.set(false);
 
-      blendedSwingTrajectory.compute(time);
-      blendedSwingTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
-      blendedSwingTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
+      FixedFramePoseTrajectoryGenerator swingTrajectory = swingTrajectoryCalculator.getSwingTrajectory();
+      swingTrajectory.compute(time);
+      swingTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
+      swingTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
 
       if (timeInState > swingTrajectoryCalculator.getSwingDuration())
       {
@@ -285,7 +287,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
       adjustedFootstepPose.setIncludingFrame(centerOfMassFrame, footstepPoseRelativeToTouchdownCoM);
    }
 
-   public void setAdjustedFootstepAndTime(FramePose3DReadOnly adjustedFootstep)
+   public void setAdjustedFootstep(FramePose3DReadOnly adjustedFootstep)
    {
       replanTrajectory.set(true);
       footstepWasAdjusted.set(true);
@@ -296,6 +298,8 @@ public class JumpingSwingFootState implements JumpingFootControlState
    private void fillAndInitializeTrajectories(boolean initializeOptimizer)
    {
       swingTrajectoryCalculator.initializeTrajectoryWaypoints(initializeOptimizer);
+
+      fillAndInitializeBlendedTrajectories();
    }
 
    private void fillAndInitializeBlendedTrajectories()
