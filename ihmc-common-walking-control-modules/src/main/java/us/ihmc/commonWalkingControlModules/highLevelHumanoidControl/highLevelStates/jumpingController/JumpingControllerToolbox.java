@@ -73,6 +73,7 @@ public class JumpingControllerToolbox
    private final YoRegistry registry = new YoRegistry(name);
 
    private final YoDouble standingHeight = new YoDouble("StandingHeight", registry);
+   private final YoDouble jumpingHeight = new YoDouble("JumpingHeight", registry);
    private final YoDouble squattingHeight = new YoDouble("SquattingHeight", registry);
 
    private final MovingCenterOfMassReferenceFrame centerOfMassFrame;
@@ -136,6 +137,7 @@ public class JumpingControllerToolbox
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
+      jumpingHeight.set(0.8);
       standingHeight.set(1.05);
       squattingHeight.set(0.7);
 
@@ -365,6 +367,11 @@ public class JumpingControllerToolbox
    public double getStandingHeight()
    {
       return standingHeight.getDoubleValue();
+   }
+
+   public double getJumpingHeight()
+   {
+      return jumpingHeight.getDoubleValue();
    }
 
    public double getSquattingHeight()
