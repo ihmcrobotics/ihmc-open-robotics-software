@@ -75,12 +75,6 @@ public class FootstepPlannerRequest
    private double goalYawProximity;
 
    /**
-    * Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
-    * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-    */
-   private double desiredHeading;
-
-   /**
     * Planner timeout in seconds. If {@link #maximumIterations} is set also, the planner terminates whenever either is reached
     */
    private double timeout;
@@ -139,7 +133,6 @@ public class FootstepPlannerRequest
       performAStarSearch = true;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
-      desiredHeading = 0.0;
       timeout = 5.0;
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
@@ -245,11 +238,6 @@ public class FootstepPlannerRequest
       this.goalYawProximity = goalYawProximity;
    }
 
-   public void setDesiredHeading(double desiredHeading)
-   {
-      this.desiredHeading = desiredHeading;
-   }
-
    public void setTimeout(double timeout)
    {
       this.timeout = timeout;
@@ -340,11 +328,6 @@ public class FootstepPlannerRequest
       return goalYawProximity;
    }
 
-   public double getDesiredHeading()
-   {
-      return desiredHeading;
-   }
-
    public double getTimeout()
    {
       return timeout;
@@ -414,7 +397,6 @@ public class FootstepPlannerRequest
       SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(requestPacket.getRequestedSwingPlanner());
       if (swingPlannerType != null)
          setSwingPlannerType(swingPlannerType);
-      setDesiredHeading(requestPacket.getRequestedPathHeading());
 
       for (int i = 0; i < requestPacket.getBodyPathWaypoints().size(); i++)
       {
@@ -441,7 +423,6 @@ public class FootstepPlannerRequest
       requestPacket.setPerformAStarSearch(getPerformAStarSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
-      requestPacket.setRequestedPathHeading(getDesiredHeading());
       requestPacket.setTimeout(getTimeout());
       requestPacket.setMaxIterations(getMaximumIterations());
       requestPacket.setHorizonLength(getHorizonLength());
@@ -481,7 +462,6 @@ public class FootstepPlannerRequest
       this.performAStarSearch = other.performAStarSearch;
       this.goalDistanceProximity = other.goalDistanceProximity;
       this.goalYawProximity = other.goalYawProximity;
-      this.desiredHeading = other.desiredHeading;
       this.timeout = other.timeout;
       this.maximumIterations = other.maximumIterations;
       this.horizonLength = other.horizonLength;

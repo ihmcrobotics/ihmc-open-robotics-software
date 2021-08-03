@@ -157,6 +157,11 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(weightForNonPreferredEdge, weight);
    }
 
+   default void setOptimizeForNarrowPassage(boolean performOptimization)
+   {
+      set(optimizeForNarrowPassage, performOptimization);
+   }
+
    default void set(VisibilityGraphsParametersPacket packet)
    {
       double noValue = VisibilityGraphsParametersPacket.DEFAULT_NO_VALUE;
@@ -215,6 +220,7 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       setIntroduceMidpointsInPostProcessing(packet.getIntroduceMidpointsInPostProcessing());
       setComputeOrientationsToAvoidObstacles(packet.getComputeOrientationsToAvoidObstacles());
       setIncludePreferredExtrusions(packet.getIncludePreferredExtrusions());
+      setOptimizeForNarrowPassage(packet.getOptimizeForNarrowPassage());
    }
 
 }
