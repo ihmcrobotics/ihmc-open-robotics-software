@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
@@ -157,18 +159,8 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                PointCloudData pointCloudData = new PointCloudData(message, MAX_POINTS, hasColors);
 
                if (imageSubscriber != null) {
-                  PointCloudData pointCloudDataForColors = new PointCloudData(message, MAX_POINTS, hasColors);
-
                   Image image = this.image;
                   CameraInfo info = this.cameraInfo;
-
-                  //Applies the following transform:
-                  //     [fx'  0  cx' Tx]
-                  // P = [ 0  fy' cy' Ty]
-                  //     [ 0   0   1   0]
-                  //This transforms a 3D point to a 2D pixel coordinate
-                  //https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/CameraInfo.html#:~:text=%23%C2%A0Projection/camera%C2%A0matrix,a%C2%A0stereo%C2%A0pair%2E
-                  pointCloudDataForColors.applyTransform(new RigidBodyTransform(info.getP()));
 
                   ChannelBuffer data = image.getData();
                   int zeroedIndex = 0;
@@ -190,8 +182,26 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
 
                   BufferBasedColorProvider provider = new BufferBasedColorProvider();
 
-                  for (Point3D point3D : pointCloudDataForColors.getPointCloud()) {
-                     Point2D point = new Point2D(point3D.getX(), point3D.getY());
+                  //Applies the following transform:
+                  //     [fx'  0  cx' Tx]
+                  // P = [ 0  fy' cy' Ty]
+                  //     [ 0   0   1   0]
+                  //This transforms a 3D point to a 2D pixel coordinate
+                  //https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/CameraInfo.html#:~:text=%23%C2%A0Projection/camera%C2%A0matrix,a%C2%A0stereo%C2%A0pair%2E
+                  DMatrixRMaj projectionMatrix = new DMatrixRMaj(3, 4);
+                  projectionMatrix.setData(info.getP());
+
+                  for (Point3D point3D : pointCloudData.getPointCloud()) {
+                     DMatrixRMaj pointIn = new DMatrixRMaj(4, 1);
+                     pointIn.set(0, 0, point3D.getX());
+                     pointIn.set(1, 0, point3D.getY());
+                     pointIn.set(2, 0, point3D.getZ());
+                     pointIn.set(3, 0, 1);
+
+                     DMatrixRMaj pointOut = new DMatrixRMaj(0);
+                     CommonOps_DDRM.mult(projectionMatrix, pointIn, pointOut);
+
+                     Point2D point = new Point2D(pointOut.get(0, 0), pointOut.get(1, 0));
                      provider.add(new Color(pixmap.getPixel((int) point.getX(), (int) point.getY())));
                   }
 
