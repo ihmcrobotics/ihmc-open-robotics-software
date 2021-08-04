@@ -29,6 +29,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
@@ -99,7 +100,7 @@ public class WholeBodyVirtualModelControlSolver
       rootJoint = toolbox.getRootJoint();
       optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, registry);
 
-      if (rootJoint.subtreeStream().filter(JointReadOnly::isLoopClosure).findFirst().isPresent())
+      if (SubtreeStreams.fromChildren(toolbox.getRootBody()).filter(JointReadOnly::isLoopClosure).findFirst().isPresent())
          throw new UnsupportedOperationException("The virtual model control does not support kinematic loops yet.");
 
       jointIndexHandler = toolbox.getJointIndexHandler();
