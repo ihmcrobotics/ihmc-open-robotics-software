@@ -11,7 +11,6 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
                                                               "ihmc-high-level-behaviors/src/libgdx/resources",
                                                               "Environment Builder");
    private final GDXEnvironment environment = new GDXEnvironment(baseUI);
-   private GDXLightingPanel lightingPanel;
    private final ImGui3DViewInputDebugger inputDebugger = new ImGui3DViewInputDebugger();
 
    public GDXEnvironmentBuilderUI()
@@ -28,21 +27,14 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
       inputDebugger.create(baseUI);
       baseUI.getImGuiPanelManager().addPanel(inputDebugger.getWindowName(), inputDebugger::render);
 
-      lightingPanel = new GDXLightingPanel(baseUI.get3DSceneManager());
-      baseUI.getImGuiPanelManager().addPanel(lightingPanel.getWindowName(), lightingPanel::renderImGuiWidgets);
-
       environment.create(baseUI);
    }
 
    @Override
    public void render()
    {
-      lightingPanel.update();
-
       baseUI.pollVREvents();
-
       baseUI.renderBeforeOnScreenUI();
-
       baseUI.renderEnd();
    }
 
