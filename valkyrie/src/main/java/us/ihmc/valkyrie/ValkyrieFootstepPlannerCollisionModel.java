@@ -50,6 +50,7 @@ public class ValkyrieFootstepPlannerCollisionModel implements RobotCollisionMode
       List<Collidable> allCollidables = new ArrayList<>();
       allCollidables.addAll(setupArmCollisions(multiBodySystem, helper));
       allCollidables.addAll(setupNeckCollisions(multiBodySystem, helper));
+      allCollidables.addAll(setupInterLegCollisions(multiBodySystem, helper));
       return allCollidables;
    }
 
@@ -162,9 +163,6 @@ public class ValkyrieFootstepPlannerCollisionModel implements RobotCollisionMode
          lowerLegShape.getAxis().set(new Vector3D(0.08, 0.0, 1.0));
          collidables.add(new Collidable(lowerLeg, collisionMask, collisionGroup, lowerLegShape));
       }
-
-      collidables.addAll(setupInterLegCollisions(multiBodySystem, helper));
-
       return collidables;
    }
 
@@ -198,7 +196,6 @@ public class ValkyrieFootstepPlannerCollisionModel implements RobotCollisionMode
          chinShape.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(head, collisionMask, collisionGroup, chinShape));
       }
-
       return collidables;
    }
 
@@ -240,7 +237,6 @@ public class ValkyrieFootstepPlannerCollisionModel implements RobotCollisionMode
          footShape.getPosition().set(0.044, 0.0, -0.042);
          collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
       }
-
       return collidables;
    }
 }
