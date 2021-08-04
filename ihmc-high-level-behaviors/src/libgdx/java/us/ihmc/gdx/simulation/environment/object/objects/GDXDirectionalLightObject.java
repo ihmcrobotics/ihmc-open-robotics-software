@@ -10,7 +10,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.lighting.GDXDirectionalLight;
-import us.ihmc.gdx.lighting.GDXShadowManager;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -21,15 +20,11 @@ public class GDXDirectionalLightObject extends GDXLightObject
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
 
-   private final GDXShadowManager manager;
    private final GDXDirectionalLight light;
 
-   public GDXDirectionalLightObject(GDXShadowManager manager)
+   public GDXDirectionalLightObject()
    {
-      this.manager = manager;
       this.light = new GDXDirectionalLight(Vector3.Zero, Vector3.Zero);
-      manager.addLight(light);
-      manager.update();
 
       Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addBox(0.2f, 0.2f, 0.05f, Color.YELLOW), "directionalModel");
       RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
@@ -63,13 +58,14 @@ public class GDXDirectionalLightObject extends GDXLightObject
    }
 
    @Override
-   public void delete() {
-      manager.removeLight(light);
+   public GDXDirectionalLightObject duplicate()
+   {
+      return new GDXDirectionalLightObject();
    }
 
    @Override
-   public GDXDirectionalLightObject duplicate()
+   public GDXDirectionalLight getLight()
    {
-      return new GDXDirectionalLightObject(manager);
+      return light;
    }
 }

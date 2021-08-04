@@ -232,6 +232,14 @@ public class GDXEnvironmentObject
       {
          return new GDXDoorFrameObject();
       }
+      else if (objectClassName.equals(GDXPointLightObject.class.getSimpleName()))
+      {
+         return new GDXPointLightObject();
+      }
+      else if (objectClassName.equals(GDXDirectionalLightObject.class.getSimpleName()))
+      {
+         return new GDXDirectionalLightObject();
+      }
       else
       {
          throw new RuntimeException("There is no object of that name!");

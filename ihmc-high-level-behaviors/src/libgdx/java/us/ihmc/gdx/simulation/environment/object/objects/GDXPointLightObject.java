@@ -9,7 +9,6 @@ import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.lighting.GDXPointLight;
-import us.ihmc.gdx.lighting.GDXShadowManager;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -20,15 +19,11 @@ public class GDXPointLightObject extends GDXLightObject
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
 
-   private final GDXShadowManager manager;
    private final GDXPointLight light;
 
-   public GDXPointLightObject(GDXShadowManager manager)
+   public GDXPointLightObject()
    {
-      this.manager = manager;
       this.light = new GDXPointLight(Vector3.Zero);
-      manager.addLight(light);
-      manager.update();
 
       Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addSphere(0.1f, Color.YELLOW), "pointModel");
 
@@ -58,13 +53,14 @@ public class GDXPointLightObject extends GDXLightObject
    }
 
    @Override
-   public void delete() {
-      manager.removeLight(light);
+   public GDXPointLightObject duplicate()
+   {
+      return new GDXPointLightObject();
    }
 
    @Override
-   public GDXPointLightObject duplicate()
+   public GDXPointLight getLight()
    {
-      return new GDXPointLightObject(manager);
+      return light;
    }
 }
