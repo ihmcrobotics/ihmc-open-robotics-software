@@ -74,7 +74,8 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
    private volatile boolean imageHasChanged = false;
    private volatile Pixmap pixmap = null;
 
-   private GDXPointCloudRenderer.ColorProvider colorProvider = null;
+   private GDXPointCloudRenderer.ColorProvider colorProviderA = null;
+   private GDXPointCloudRenderer.ColorProvider colorProviderB = null;
 
    private boolean flipToZUp = false;
 
@@ -166,30 +167,42 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                PointCloudData pointCloudData = new PointCloudData(message, MAX_POINTS, hasColors);
 
                if (this.imageHasChanged) {
-                  if (this.pixmap != null)
-                     this.pixmap.dispose();
+                  this.imageHasChanged = false;
 
                   Image image = this.image;
+
+                  if (this.pixmap == null)
+                  {
+                     this.pixmap = new Pixmap(image.getWidth(), image.getHeight(), Pixmap.Format.RGBA8888);
+                  }
+                  else if (this.pixmap.getWidth() < image.getWidth() || this.pixmap.getHeight() < image.getHeight())
+                  {
+                     synchronized (pixmap)
+                     {
+                        this.pixmap.dispose();
+                        this.pixmap = new Pixmap(image.getWidth(), image.getHeight(), Pixmap.Format.RGBA8888);
+                     }
+                  }
 
                   ChannelBuffer data = image.getData();
                   int zeroedIndex = 0;
 
-                  this.pixmap = new Pixmap(image.getWidth(), image.getHeight(), Pixmap.Format.RGBA8888);
-                  for (int y = 0; y < image.getHeight(); y++)
+                  synchronized (pixmap)
                   {
-                     for (int x = 0; x < image.getWidth(); x++)
+                     for (int y = 0; y < image.getHeight(); y++)
                      {
-                        int r = Byte.toUnsignedInt(data.getByte(zeroedIndex + 0));
-                        int g = Byte.toUnsignedInt(data.getByte(zeroedIndex + 1));
-                        int b = Byte.toUnsignedInt(data.getByte(zeroedIndex + 2));
-                        int a = 255;
-                        zeroedIndex += 3;
-                        int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
-                        pixmap.drawPixel(x, y, rgb8888);
+                        for (int x = 0; x < image.getWidth(); x++)
+                        {
+                           int r = Byte.toUnsignedInt(data.getByte(zeroedIndex + 0));
+                           int g = Byte.toUnsignedInt(data.getByte(zeroedIndex + 1));
+                           int b = Byte.toUnsignedInt(data.getByte(zeroedIndex + 2));
+                           int a = 255;
+                           zeroedIndex += 3;
+                           int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
+                           pixmap.drawPixel(x, y, rgb8888);
+                        }
                      }
                   }
-
-                  this.imageHasChanged = false;
                }
 
                if (imageSubscriber != null) {
@@ -206,25 +219,34 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                   DMatrixRMaj projectionMatrix = new DMatrixRMaj(3, 4);
                   projectionMatrix.setData(info.getP());
 
-                  for (Point3D point3D : pointCloudData.getPointCloud()) {
-                     if (point3D == null)
-                        continue;
-                     
-                     DMatrixRMaj pointIn = new DMatrixRMaj(4, 1);
-                     pointIn.set(0, 0, point3D.getX());
-                     pointIn.set(1, 0, point3D.getY());
-                     pointIn.set(2, 0, point3D.getZ());
-                     pointIn.set(3, 0, 1);
+                  synchronized (pixmap)
+                  {
+                     for (Point3D point3D : pointCloudData.getPointCloud())
+                     {
+                        if (point3D == null)
+                        {
+                           provider.add(null);
+                           continue;
+                        }
 
-                     DMatrixRMaj pointOut = new DMatrixRMaj(0);
-                     CommonOps_DDRM.mult(projectionMatrix, pointIn, pointOut);
+                        DMatrixRMaj pointIn = new DMatrixRMaj(4, 1);
+                        pointIn.set(0, 0, point3D.getX());
+                        pointIn.set(1, 0, point3D.getY());
+                        pointIn.set(2, 0, point3D.getZ());
+                        pointIn.set(3, 0, 1);
 
-                     Point2D point = new Point2D(pointOut.get(0, 0), pointOut.get(1, 0));
-                     provider.add(new Color(pixmap.getPixel((int) point.getX(), (int) point.getY())));
+                        DMatrixRMaj pointOut = new DMatrixRMaj(0);
+                        CommonOps_DDRM.mult(projectionMatrix, pointIn, pointOut);
+
+                        Point2D point = new Point2D(pointOut.get(0, 0), pointOut.get(1, 0));
+                        provider.add(new Color(pixmap.getPixel((int) point.getX(), (int) point.getY())));
+                     }
                   }
 
-                  this.colorProvider = provider;
-                  pixmap.dispose();
+                  if (packingA)
+                     this.colorProviderA = provider;
+                  else
+                     this.colorProviderB = provider;
                }
 
                if (flipToZUp)
@@ -290,12 +312,12 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
             }
          }
 
-         if (colorProvider != null) {
-            pointCloudRenderer.setPointsToRender(pointsToRender, colorProvider);
+         if (colorProviderA != null && colorProviderB != null) {
+            pointCloudRenderer.setPointsToRender(pointsToRender, packingA ? colorProviderB : colorProviderA);
          }
          else
          {
-            pointCloudRenderer.setPointsToRender(pointsToRender, color);
+            pointCloudRenderer.setPointsToRender(pointsToRender, color == null ? Color.BLACK : color);
          }
 
          if (!pointsToRender.isEmpty())

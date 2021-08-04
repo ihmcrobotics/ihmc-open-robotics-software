@@ -18,7 +18,8 @@ public class BufferBasedColorProvider implements ColorProvider
       if (colors.size() <= indexR)
          return 0;
 
-      return colors.get(indexR++).r;
+      Color color = colors.get(indexR++);
+      return colors == null ? 0 : color.r;
    }
 
    @Override
@@ -27,7 +28,8 @@ public class BufferBasedColorProvider implements ColorProvider
       if (colors.size() <= indexG)
          return 0;
 
-      return colors.get(indexG++).g;
+      Color color = colors.get(indexG++);
+      return colors == null ? 0 : color.g;
    }
 
    @Override
@@ -36,7 +38,8 @@ public class BufferBasedColorProvider implements ColorProvider
       if (colors.size() <= indexB)
          return 0;
 
-      return colors.get(indexB++).b;
+      Color color = colors.get(indexB++);
+      return colors == null ? 0 : color.b;
    }
 
    public void resetIndex() {

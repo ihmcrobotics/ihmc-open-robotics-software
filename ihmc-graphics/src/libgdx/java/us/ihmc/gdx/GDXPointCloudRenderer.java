@@ -126,6 +126,9 @@ public class GDXPointCloudRenderer implements RenderableProvider
          renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * vertexSize);
          renderable.meshPart.update();
       }
+
+      if (colorProvider != null && colorProvider instanceof BufferBasedColorProvider)
+         ((BufferBasedColorProvider) colorProvider).resetIndex();
    }
 
    @Override
