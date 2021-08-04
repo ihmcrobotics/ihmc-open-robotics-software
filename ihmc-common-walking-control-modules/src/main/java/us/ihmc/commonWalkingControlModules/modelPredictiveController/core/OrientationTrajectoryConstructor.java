@@ -20,7 +20,7 @@ import java.util.List;
 
 public class OrientationTrajectoryConstructor
 {
-   private static final boolean debug = true;
+   private static final boolean debug = false;
 
    private final OrientationDynamicsCalculator dynamicsCalculator;
 
@@ -88,8 +88,8 @@ public class OrientationTrajectoryConstructor
 
          for (int tick = 0; tick < ticksInSegment; tick++)
          {
-            linearTrajectoryHandler.compute(trajectoryStartTime);
-            orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(trajectoryStartTime);
+            linearTrajectoryHandler.compute(timeInSegment + trajectoryStartTime);
+            orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(timeInSegment + trajectoryStartTime);
 
             FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation();
             // angular velocity in body frame

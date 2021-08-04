@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.OrientationTrajectoryConstructor;
@@ -41,8 +42,6 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
  */
 public class OrientationMPCTrajectoryHandler
 {
-   private static final boolean debug = true;
-
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final OrientationTrajectoryCalculator referenceOrientationCalculator;
 
@@ -183,17 +182,12 @@ public class OrientationMPCTrajectoryHandler
             CommonOps_DDRM.multAdd(command.getAMatrix(tick), errorAtStartOfState, valueAtTick);
             CommonOps_DDRM.multAdd(command.getBMatrix(tick), segmentCoefficients, valueAtTick);
 
-            if (debug && indexHandler.getRhoCoefficientsInSegment(segment) == 0)
+            if (SE3ModelPredictiveController.debugOrientation && indexHandler.getRhoCoefficientsInSegment(segment) == 0)
             {
                if (MatrixTools.isEmptyMatrix(command.getBMatrix(tick)))
                   throw new RuntimeException("B should be zero.");
                if (MatrixTools.isEmptyMatrix(command.getCMatrix(tick)))
                   throw new RuntimeException("C should be zero.");
-               for (int row = 3; row < 6; row++)
-               {
-                  if (!MathTools.epsilonEquals(valueAtTick.get(row, 0), errorAtStartOfState.get(row, 0), 1e-5))
-                     throw new RuntimeException("Error shouldn't change.");
-               }
             }
 
             AxisAngleBasics axisAngleErrorSolution = axisAngleErrorSolutions.add();
@@ -327,7 +321,7 @@ public class OrientationMPCTrajectoryHandler
 
    public boolean hasInternalAngularMomentum()
    {
-      return internalAngularMomentumTrajectory.isEmpty();
+      return !internalAngularMomentumTrajectory.isEmpty();
    }
 
    public FramePoint3DReadOnly getDesiredInternalAngularMomentum()

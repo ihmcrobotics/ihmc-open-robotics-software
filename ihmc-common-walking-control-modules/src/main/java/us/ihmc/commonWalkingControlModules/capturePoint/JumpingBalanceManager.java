@@ -108,7 +108,7 @@ public class JumpingBalanceManager
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
    private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
 
-   private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, false);
+   private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, true);
    private final BooleanProvider useAngularMomentumOffsetInStanding = new BooleanParameter("useAngularMomentumOffsetInStanding", registry, true);
    private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
 
@@ -131,7 +131,7 @@ public class JumpingBalanceManager
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      desiredWeightForStateChangeHeights.set(1e1);
+      desiredWeightForStateChangeHeights.set(5e2);
 
       yoTime = controllerToolbox.getYoTime();
       this.controllerToolbox = controllerToolbox;
@@ -316,7 +316,8 @@ public class JumpingBalanceManager
 //      comTrajectoryPlanner.setCurrentState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
 
-      comTrajectoryPlanner.solveForTrajectory(copTrajectoryForStanding.getContactStateProviders());
+         comTrajectoryPlanner.solveForTrajectory(copTrajectoryForStanding.getContactStateProviders());
+
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
@@ -423,8 +424,10 @@ public class JumpingBalanceManager
       tempPoint.setToZero(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame());
       tempPoint.changeFrame(worldFrame);
 
+      double touchdownHeight = Double.isNaN(jumpingGoal.getGoalHeight()) ? 0.0 : jumpingGoal.getGoalHeight();
+      touchdownHeight += controllerToolbox.getJumpingHeight();
       takeoffPolicy.getDesiredComPosition().setZ(tempPoint.getZ() + controllerToolbox.getJumpingHeight());
-      touchdownPolicy.getDesiredComPosition().setZ(jumpingGoal.getGoalHeight() + controllerToolbox.getStandingHeight());
+      touchdownPolicy.getDesiredComPosition().setZ(touchdownHeight);
 
       takeoffPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
       touchdownPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
@@ -432,10 +435,14 @@ public class JumpingBalanceManager
       takeoffPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration());
       touchdownPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 
-//      comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
-//      comTrajectoryPlanner.addCustomPolicyToProcess(touchdownPolicy);
+      if (!copTrajectoryState.getIsInFlight())
+      {
+         comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
+         comTrajectoryPlanner.addCustomPolicyToProcess(touchdownPolicy);
 
-      comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
+         comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
+      }
+
 
       if (copTrajectoryState.getIsInFlight())
       {
@@ -530,7 +537,7 @@ public class JumpingBalanceManager
 
    public void setSwingFootTrajectory(RobotSide swingSide, MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
-//      angularMomentumHandler.setSwingFootTrajectory(swingSide, swingTrajectory);
+      angularMomentumHandler.setSwingFootTrajectory(swingSide, swingTrajectory);
    }
 
    public void clearSwingFootTrajectory()
@@ -578,8 +585,6 @@ public class JumpingBalanceManager
 
    public void initializeCoMPlanForSupport(JumpingGoal jumpingGoal)
    {
-//      comTrajectoryPlanner.reset();
-
       copTrajectoryState.setInitialCoP(yoDesiredVRP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass(),
