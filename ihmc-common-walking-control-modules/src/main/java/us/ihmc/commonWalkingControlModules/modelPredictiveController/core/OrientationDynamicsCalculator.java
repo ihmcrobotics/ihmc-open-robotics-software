@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commons.MathTools;
@@ -22,8 +23,6 @@ import java.util.List;
 
 public class OrientationDynamicsCalculator
 {
-   private static final boolean debug = true;
-
    private final DMatrixRMaj gravityVector = new DMatrixRMaj(3, 1);
 
    private final FrameVector3D desiredNetAngularMomentumRate = new FrameVector3D();
@@ -233,10 +232,11 @@ public class OrientationDynamicsCalculator
       desiredContactForce.set(desiredCoMAcceleration);
       desiredContactForce.addZ(-gravityVector.get(2, 0));
       desiredContactForce.scale(mass);
-      if (debug && contactPlanes.size() == 0)
+      if (SE3ModelPredictiveController.debugOrientation && contactPlanes.size() == 0)
       {
-         if (desiredContactForce.length() > 1e-4)
-            throw new RuntimeException("Should have zero desired force. Force is actually "+ desiredContactForce);
+         desiredContactForce.setToZero();
+//         if (desiredContactForce.length() > 1e-4)
+//            throw new RuntimeException("Should have zero desired force. Force is actually "+ desiredContactForce);
       }
 
 
@@ -291,10 +291,8 @@ public class OrientationDynamicsCalculator
       crossSub(skewAngularMomentum, desiredBodyAngularVelocityInBodyFrame, inertiaMatrixInBody);
       CommonOps_DDRM.mult(inverseInertia, skewAngularMomentum, b4);
 
-      if (debug && contactPlanes.size() < 1)
+      if (SE3ModelPredictiveController.debugOrientation && contactPlanes.size() < 1)
       {
-         if (desiredBodyAngularMomentumRate.length() > 1e-4)
-            throw new RuntimeException("This should be zero.");
          if (desiredContactForce.length() > 1e-4)
             throw new RuntimeException("Should have zero desired force.");
          if (desiredNetAngularMomentumRate.length() > 1e-4)

@@ -44,6 +44,7 @@ import java.util.function.IntUnaryOperator;
 
 public class SE3ModelPredictiveController extends EuclideanModelPredictiveController
 {
+   public static final boolean debugOrientation = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final double gravityZ;

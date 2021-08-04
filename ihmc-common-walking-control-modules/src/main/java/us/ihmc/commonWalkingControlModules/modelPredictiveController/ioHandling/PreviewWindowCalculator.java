@@ -200,11 +200,13 @@ public class PreviewWindowCalculator
             groupDuration += fullContactSequence.get(phasesInGroup.get(phaseIdx)).getTimeInterval().getDuration();
          }
 
-         groupDuration = Math.min(groupDuration, timeRemaining);
+         if (fullContactSequence.get(phasesInGroup.get(0)).getContactState().isLoadBearing())
+         {
+            groupDuration = Math.min(groupDuration, timeRemaining);
+            timeRemaining -= groupDuration;
+         }
          contactGroupDurations.add(groupDuration);
          numberOfSegmentsInContactGroups.add(computeNumberOfSegmentsInGroup(fullContactSequence.get(groupIdx).getContactState(), groupDuration));
-
-         timeRemaining -= groupDuration;
       }
    }
 
@@ -238,13 +240,16 @@ public class PreviewWindowCalculator
 
          double currentDuration = Math.min(currentContact.getTimeInterval().getDuration(), 10.0);
 
-         if (timeRemaining - currentDuration < 0.0)
+         if (currentContact.getContactState().isLoadBearing())
          {
-            break;
-         }
-         else if (currentContact.getContactState().isLoadBearing())
-         {
-            timeRemaining -= currentDuration;
+            if (timeRemaining - currentDuration < 0.0)
+            {
+               break;
+            }
+            else
+            {
+               timeRemaining -= currentDuration;
+            }
          }
 
          segmentIdx++;
