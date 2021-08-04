@@ -212,10 +212,6 @@ public class GDXEnvironment extends ImGuiPanel
             shadowManager.addLight(directionalLight.getLight());
             shadowManager.update();
          }
-         if (ImGui.button("Add Default Light Setup"))
-         {
-
-         }
 
          ImGui.separator();
       }
