@@ -1,7 +1,6 @@
 package us.ihmc.gdx.simulation.environment;
 
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGui3DViewInputDebugger;
 
