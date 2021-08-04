@@ -70,6 +70,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
 
    private volatile Image image;
    private volatile CameraInfo cameraInfo;
+   private volatile boolean imageHasChanged = false;
 
    private GDXPointCloudRenderer.ColorProvider colorProvider = null;
 
@@ -121,6 +122,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
             public void onNewMessage(Image image)
             {
                GDXROS1PointCloudVisualizer.this.image = image;
+               GDXROS1PointCloudVisualizer.this.imageHasChanged = true;
             }
          };
          ros1Node.attachSubscriber(rosVideoTopic, imageSubscriber);
@@ -144,6 +146,9 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
       if (imageSubscriber != null) {
          ros1Node.removeSubscriber(imageSubscriber);
          imageSubscriber = null;
+
+         ros1Node.removeSubscriber(cameraInfoSubscriber);
+         cameraInfoSubscriber = null;
       }
    }
 
@@ -158,7 +163,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                boolean hasColors = false;
                PointCloudData pointCloudData = new PointCloudData(message, MAX_POINTS, hasColors);
 
-               if (imageSubscriber != null) {
+               if (imageSubscriber != null && this.imageHasChanged) {
                   Image image = this.image;
                   CameraInfo info = this.cameraInfo;
 
@@ -209,6 +214,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                   }
 
                   this.colorProvider = provider;
+                  pixmap.dispose();
                }
 
                if (flipToZUp)
