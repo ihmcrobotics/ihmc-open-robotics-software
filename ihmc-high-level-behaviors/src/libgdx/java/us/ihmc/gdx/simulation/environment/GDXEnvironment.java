@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.lighting.GDXShadowManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXDoorSimulator;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
@@ -59,6 +60,7 @@ public class GDXEnvironment extends ImGuiPanel
    private final Point3D tempIntersection = new Point3D();
    private final GDXImGuiBasedUI baseUI;
    private GDXDoorSimulator doorSimulator;
+   private GDXShadowManager shadowManager;
 
    public GDXEnvironment(GDXImGuiBasedUI baseUI)
    {
@@ -77,6 +79,8 @@ public class GDXEnvironment extends ImGuiPanel
 
    public void create(GDXImGuiBasedUI baseUI)
    {
+      shadowManager = baseUI.get3DSceneManager().getShadowManager();
+
       baseUI.get3DSceneManager().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
       baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
@@ -189,9 +193,19 @@ public class GDXEnvironment extends ImGuiPanel
          ImGui.separator();
 
          if (ImGui.button("Place Point Light"))
-            objectToPlace = new GDXPointLightObject(baseUI.get3DSceneManager().getShadowManager());
+         {
+            GDXPointLightObject pointLight = new GDXPointLightObject();
+            objectToPlace = pointLight;
+            shadowManager.addLight(pointLight.getLight());
+            shadowManager.update();
+         }
          if (ImGui.button("Place Directional Light"))
-            objectToPlace = new GDXDirectionalLightObject(baseUI.get3DSceneManager().getShadowManager());
+         {
+            GDXDirectionalLightObject directionalLight = new GDXDirectionalLightObject();
+            objectToPlace = directionalLight;
+            shadowManager.addLight(directionalLight.getLight());
+            shadowManager.update();
+         }
 
          ImGui.separator();
       }
@@ -212,7 +226,10 @@ public class GDXEnvironment extends ImGuiPanel
          lightObjects.remove(selectedObject);
 
          if (selectedObject instanceof GDXLightObject)
-            ((GDXLightObject) selectedObject).delete();
+         {
+            GDXLightObject lightObject = (GDXLightObject) selectedObject;
+            shadowManager.removeLight(lightObject.getLight());
+         }
 
          selectedObject = null;
          intersectedObject = null;
@@ -292,7 +309,7 @@ public class GDXEnvironment extends ImGuiPanel
       selectedEnvironmentFile = environmentFile;
       objects.clear();
 
-      lightObjects.forEach(GDXLightObject::delete);
+      lightObjects.forEach(lightObject -> shadowManager.removeLight(lightObject.getLight()));
       lightObjects.clear();
 
       selectedObject = null;
@@ -311,6 +328,14 @@ public class GDXEnvironment extends ImGuiPanel
             {
                JsonNode objectNode = it.next();
                GDXEnvironmentObject object = GDXEnvironmentObject.loadByName(objectNode.get("type").asText());
+               if (object instanceof GDXLightObject)
+               {
+                  GDXLightObject lightObject = (GDXLightObject) object;
+                  shadowManager.addLight(lightObject.getLight());
+                  shadowManager.update();
+                  lightObjects.add(lightObject);
+               }
+
                tempTranslation.setX(objectNode.get("x").asDouble());
                tempTranslation.setY(objectNode.get("y").asDouble());
                tempTranslation.setZ(objectNode.get("z").asDouble());
@@ -321,9 +346,6 @@ public class GDXEnvironment extends ImGuiPanel
                tempTransform.set(tempOrientation, tempTranslation);
                object.set(tempTransform);
                objects.add(object);
-
-               if (object instanceof GDXLightObject)
-                  lightObjects.add((GDXLightObject) object);
 
                if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
                {
