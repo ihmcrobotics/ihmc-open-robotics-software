@@ -33,7 +33,7 @@ public class StepReachabilityVisualizer
       REACHABILITY_GRADIENT, REACHABILITY_MAP, HEURISTIC_REJECTION_REASON, CHECKER_COMPARISON
    }
 
-   Mode mode = Mode.CHECKER_COMPARISON;
+   private static final Mode mode = Mode.CHECKER_COMPARISON;
 
    private final double reachabilityThreshold = 2.2;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -51,7 +51,7 @@ public class StepReachabilityVisualizer
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(true, 16000);
       SimulationConstructionSet scs = new SimulationConstructionSet(parameters);
       Graphics3DObject coordinate = new Graphics3DObject();
-      coordinate.addCoordinateSystem(0.3);
+      coordinate.addCoordinateSystem(0.5);
       scs.addStaticLinkGraphics(coordinate);
       scs.setGroundVisible(false);
       scs.setCameraFix(0.0, 0.0, 1.0);
@@ -63,8 +63,10 @@ public class StepReachabilityVisualizer
          // Represent foot position as an arrow
          Graphics3DObject validStep = new Graphics3DObject();
          validStep.translate(latticePoint.getXIndex(), latticePoint.getYIndex(), latticePoint.getZIndex());
-         validStep.rotate(Math.toRadians(90), new Vector3D(0,1,0));
-         validStep.rotate(Math.toRadians(latticePoint.getYawIndex() * 10), new Vector3D(1,0,0));
+         validStep.rotate(Math.toRadians(90), new Vector3D(0,1.0,0));
+         validStep.rotate(latticePoint.getYawIndex() * stepReachabilityData.getGridSizeYaw() / stepReachabilityData.getYawDivisions(), new Vector3D(1.0,0,0));
+
+         BipedalFootstepPlannerNodeRejectionReason rejectionReason = checkStepHeuristicValidity(latticePoint);
 
          switch (mode)
          {
@@ -75,7 +77,7 @@ public class StepReachabilityVisualizer
                if (reachabilityValue > 40)
                   reachabilityValue = 40;
                AppearanceDefinition appearance = YoAppearance.RGBColor(reachabilityValue / 40, (40 - reachabilityValue) / 40, 0);
-               validStep.addArrow(0.5, appearance, appearance);
+               validStep.addArrow(0.4, appearance, appearance);
                scs.addStaticLinkGraphics(validStep);
                break;
             }
@@ -88,92 +90,117 @@ public class StepReachabilityVisualizer
                   appearance = YoAppearance.Green();
                else
                   appearance = YoAppearance.Red();
-               validStep.addArrow(0.5, appearance, appearance);
+               validStep.addArrow(0.4, appearance, appearance);
                scs.addStaticLinkGraphics(validStep);
                break;
             }
             case HEURISTIC_REJECTION_REASON:
             {
                AppearanceDefinition appearance;
-               if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH)
+               if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH)
                   appearance = YoAppearance.Pink();
-               else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR)
+               else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR)
                   appearance = YoAppearance.Blue();
-               else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH)
+               else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH)
                   appearance = YoAppearance.Red();
-               else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE)
+               else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE)
                   appearance = YoAppearance.Purple();
-               else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW)
+               else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW)
                   appearance = YoAppearance.YellowGreen();
-               else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH)
+               else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH)
                   appearance = YoAppearance.HotPink();
                else
                {
                   appearance = YoAppearance.White();
-                  LogTools.info(checkStepHeuristicValidity(latticePoint));
+                  LogTools.info(rejectionReason);
                }
-               validStep.addArrow(0.5, appearance, appearance);
+               validStep.addArrow(0.4, appearance, appearance);
                scs.addStaticLinkGraphics(validStep);
                break;
             }
             case CHECKER_COMPARISON:
             {
-               AppearanceDefinition appearance;
+               AppearanceDefinition appearance = null;
+               boolean addArrow = false;
+
                if (stepReachabilityData.getLegReachabilityMap().get(latticePoint) < reachabilityThreshold)
                {
-                  if (checkStepHeuristicValidity(latticePoint) == null)
+                  addArrow = true;
+                  // Both reachability map and heuristic accept
+                  if (rejectionReason == null)
+                  {
                      appearance = YoAppearance.Green();
-                  else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH)
+                  }
+
+                  // Reachability map accepts and heuristic doesn't
+                  else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH)
+                  {
                      appearance = YoAppearance.Pink();
-                  else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR)
+                  }
+                  else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR)
+                  {
                      appearance = YoAppearance.Blue();
-                  else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH)
+                  }
+                  else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH)
+                  {
                      appearance = YoAppearance.Red();
-                  else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE)
+                  }
+                  else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE)
+                  {
                      appearance = YoAppearance.Purple();
-                  else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW)
+                  }
+                  else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW)
+                  {
                      appearance = YoAppearance.YellowGreen();
-                  else if (checkStepHeuristicValidity(latticePoint) == BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH)
+                  }
+                  else if (rejectionReason == BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH)
+                  {
                      appearance = YoAppearance.White();
+                  }
                   else
                   {
                      appearance = YoAppearance.HotPink();
-                     LogTools.info(checkStepHeuristicValidity(latticePoint));
+                     LogTools.info(rejectionReason);
                   }
                }
-               else
+               // Heuristic accepts and reachability map doesn't
+               else if (rejectionReason == null)
                {
-                  if (checkStepHeuristicValidity(latticePoint) == null)
-                  {
-                     appearance = YoAppearance.Orange();
-                  }
-                  else
-                  {
-                     appearance = YoAppearance.Green();
-                  }
+                  addArrow = true;
+                  appearance = YoAppearance.Black();
                }
-               validStep.addArrow(0.5, appearance, appearance);
-               scs.addStaticLinkGraphics(validStep);
+               // If both reject don't render an arrow
+
+               if (addArrow)
+               {
+                  validStep.addArrow(0.4, appearance, appearance);
+                  scs.addStaticLinkGraphics(validStep);
+               }
+
                break;
             }
+         }
       }
    }
-}
 
    private BipedalFootstepPlannerNodeRejectionReason checkStepHeuristicValidity(StepReachabilityLatticePoint latticePoint)
    {
-      DiscreteFootstep candidateStep = new DiscreteFootstep(latticePoint.getXIndex() * stepReachabilityData.getXyzSpacing(),
-                                                            latticePoint.getYIndex() * stepReachabilityData.getXyzSpacing(),
-                                                            latticePoint.getYawIndex() * (stepReachabilityData.getGridSizeYaw() / stepReachabilityData.getYawDivisions()),
-                                                            RobotSide.LEFT);
+      double stepX = latticePoint.getXIndex() * stepReachabilityData.getXyzSpacing();
+      double stepY = latticePoint.getYIndex() * stepReachabilityData.getXyzSpacing();
+      double stepZ = latticePoint.getZIndex() * stepReachabilityData.getXyzSpacing();
+      double stepYaw = latticePoint.getYawIndex() * (stepReachabilityData.getGridSizeYaw() / stepReachabilityData.getYawDivisions());
+
+      DiscreteFootstep candidateStep = new DiscreteFootstep(stepX, stepY, stepYaw, RobotSide.LEFT);
       DiscreteFootstep stanceStep = new DiscreteFootstep(0, 0, 0, RobotSide.RIGHT);
 
-      Point3D loadedPose = new Point3D(candidateStep.getX(), candidateStep.getY(), latticePoint.getZIndex());
-
       FootstepSnapData candidateSnapData = new FootstepSnapData();
-      Pose3D snappedPose = new Pose3D(loadedPose, new Quaternion(candidateStep.getYaw(), 0, 0));
-      RigidBodyTransform snapTransform = FootstepSnappingTools.computeSnapTransform(candidateStep, snappedPose);
-      candidateSnapData.getSnapTransform().set(snapTransform);
+      Pose3D snappedCandidateStep = new Pose3D();
+      snappedCandidateStep.getPosition().set(stepX, stepY, stepZ);
+      snappedCandidateStep.getOrientation().setToYawOrientation(stepYaw);
+      candidateSnapData.getSnapTransform().set(FootstepSnappingTools.computeSnapTransform(candidateStep, snappedCandidateStep));
+
+      FootstepSnapData stanceSnapData = new FootstepSnapData();
+      stanceSnapData.getSnapTransform().set(new RigidBodyTransform());
 
       snapper.addSnapData(candidateStep, candidateSnapData);
 

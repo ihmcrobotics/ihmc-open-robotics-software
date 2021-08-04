@@ -103,7 +103,7 @@ public abstract class HumanoidStepReachabilityCalculator
       HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_VISUALIZATION, TEST_WRITE_SCRIPT, TEST_LOAD_SCRIPT
    }
 
-   private static final Mode mode = Mode.TEST_LOAD_SCRIPT;
+   private static final Mode mode = Mode.TEST_VISUALIZATION;
 
    private static final double COM_WEIGHT = 1.0;
    private static final double RIGID_BODY_FEET_WEIGHT = 40.0;
