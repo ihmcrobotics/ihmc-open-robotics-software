@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImFloat;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -61,6 +62,7 @@ public class GDXEnvironment extends ImGuiPanel
    private final GDXImGuiBasedUI baseUI;
    private GDXDoorSimulator doorSimulator;
    private GDXShadowManager shadowManager;
+   private final ImFloat ambientLight = new ImFloat(0.4f);
 
    public GDXEnvironment(GDXImGuiBasedUI baseUI)
    {
@@ -192,6 +194,10 @@ public class GDXEnvironment extends ImGuiPanel
 
          ImGui.separator();
 
+         if (ImGui.sliderFloat("Ambient light", ambientLight.getData(), 0.0f, 1.0f))
+         {
+            shadowManager.setAmbientLight(ambientLight.get());
+         }
          if (ImGui.button("Place Point Light"))
          {
             GDXPointLightObject pointLight = new GDXPointLightObject();
@@ -205,6 +211,10 @@ public class GDXEnvironment extends ImGuiPanel
             objectToPlace = directionalLight;
             shadowManager.addLight(directionalLight.getLight());
             shadowManager.update();
+         }
+         if (ImGui.button("Add Default Light Setup"))
+         {
+
          }
 
          ImGui.separator();
@@ -278,6 +288,7 @@ public class GDXEnvironment extends ImGuiPanel
                                        "environments/" + fileNameToSave,
          rootNode ->
          {
+            rootNode.put("ambientLight", ambientLight.get());
             ArrayNode objectsArrayNode = rootNode.putArray("objects");
             for (GDXEnvironmentObject object : this.objects)
             {
@@ -324,6 +335,13 @@ public class GDXEnvironment extends ImGuiPanel
                                          "environments/" + environmentFile.getFileName().toString(),
          node ->
          {
+            JsonNode ambientLightNode = node.get("ambientLight");
+            if (ambientLightNode != null)
+            {
+               float ambientValue = (float) ambientLightNode.asDouble();
+               ambientLight.set(ambientValue);
+               shadowManager.setAmbientLight(ambientLight.get());
+            }
             for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
             {
                JsonNode objectNode = it.next();
