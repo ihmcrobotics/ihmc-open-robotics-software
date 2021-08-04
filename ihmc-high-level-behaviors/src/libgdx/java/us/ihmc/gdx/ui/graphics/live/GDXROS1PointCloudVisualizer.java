@@ -192,6 +192,9 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                   projectionMatrix.setData(info.getP());
 
                   for (Point3D point3D : pointCloudData.getPointCloud()) {
+                     if (point3D == null)
+                        continue;
+                     
                      DMatrixRMaj pointIn = new DMatrixRMaj(4, 1);
                      pointIn.set(0, 0, point3D.getX());
                      pointIn.set(1, 0, point3D.getY());
