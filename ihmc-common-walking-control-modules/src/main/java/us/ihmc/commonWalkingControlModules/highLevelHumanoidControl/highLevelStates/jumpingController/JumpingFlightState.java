@@ -12,6 +12,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JumpingFlightState extends JumpingState
 {
@@ -29,6 +30,9 @@ public class JumpingFlightState extends JumpingState
    private final JumpingGoalFootholdCalculator jumpingGoalFootholdCalculator = new JumpingGoalFootholdCalculator();
 
    private final JumpingGoal jumpingGoal = new JumpingGoal();
+
+   private final YoDouble originalGoalLength = new YoDouble("originalGoalLength", registry);
+   private final YoDouble adjustedGoalLength = new YoDouble("adjustedGoalLength", registry);
 
    public JumpingFlightState(JumpingGoalHandler jumpingGoalHandler,
                              JumpingControllerToolbox controllerToolbox,
@@ -87,6 +91,8 @@ public class JumpingFlightState extends JumpingState
       jumpingGoalHandler.pollNextJumpingGoal(jumpingGoal);
       balanceManager.setMinimizeAngularMomentumRate(false);
 
+      originalGoalLength.set(jumpingGoal.getGoalLength());
+
       // need to always update biped support polygons after a change to the contact states
       for (RobotSide robotSide : RobotSide.values)
          controllerToolbox.setFootContactStateFree(robotSide);
@@ -141,9 +147,11 @@ public class JumpingFlightState extends JumpingState
 
       goalPoint.changeFrame(takeOffFrame);
 
-//      jumpingGoal.setGoalLength(goalPoint.getX());
+      adjustedGoalLength.set(goalPoint.getX());
 
-      jumpingGoalFootholdCalculator.computeGoalPose(takeOffFrame, jumpingGoal.getGoalLength(), width, jumpingGoal.getGoalHeight(), jumpingGoal.getGoalRotation());
+      jumpingGoal.setGoalLength(adjustedGoalLength.getDoubleValue());
+
+      jumpingGoalFootholdCalculator.computeGoalPose(takeOffFrame, adjustedGoalLength.getDoubleValue(), width, jumpingGoal.getGoalHeight(), jumpingGoal.getGoalRotation());
    }
 
    private final FramePoint3D goalPoint = new FramePoint3D();

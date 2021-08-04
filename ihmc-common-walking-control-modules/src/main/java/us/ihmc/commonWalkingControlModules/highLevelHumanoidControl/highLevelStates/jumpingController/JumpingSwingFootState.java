@@ -246,7 +246,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
 
       replanTrajectory.set(false);
 
-      FixedFramePoseTrajectoryGenerator swingTrajectory = swingTrajectoryCalculator.getSwingTrajectory();
+      FixedFramePoseTrajectoryGenerator swingTrajectory = blendedSwingTrajectory;//swingTrajectoryCalculator.getSwingTrajectory();
       swingTrajectory.compute(time);
       swingTrajectory.getLinearData(desiredPosition, desiredLinearVelocity, desiredLinearAcceleration);
       swingTrajectory.getAngularData(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration);
