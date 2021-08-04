@@ -97,6 +97,11 @@ public class GDX3DSceneManager
       shadowManager.update();
    }
 
+   public void renderShadowMap()
+   {
+      renderShadowMap(width, height);
+   }
+
    public void renderShadowMap(int x, int y)
    {
       shadowManager.renderShadows(camera3D, new GDXRenderableIterable(renderables), x, y);
@@ -244,7 +249,8 @@ public class GDX3DSceneManager
       return Gdx.graphics.getHeight();
    }
 
-   public GDXShadowManager getShadowManager() {
+   public GDXShadowManager getShadowManager()
+   {
       return shadowManager;
    }
 

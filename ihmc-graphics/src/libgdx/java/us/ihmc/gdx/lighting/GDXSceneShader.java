@@ -2,13 +2,19 @@ package us.ihmc.gdx.lighting;
 
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import us.ihmc.log.LogTools;
 
 public class GDXSceneShader extends BaseShader
 {
@@ -57,7 +63,18 @@ public class GDXSceneShader extends BaseShader
    @Override
    public void render(final Renderable renderable)
    {
-      context.setBlending(renderable.material.has(BlendingAttribute.Type), GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+      Material material = renderable.material;
+      context.setBlending(material.has(BlendingAttribute.Type), GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+      if (!material.has(TextureAttribute.Diffuse))
+      {
+         Pixmap map = new Pixmap(100, 100, Pixmap.Format.RGBA8888);
+         map.setColor(((ColorAttribute) material.get(ColorAttribute.Diffuse)).color);
+         map.drawRectangle(0, 0, 100, 100);
+
+         material.set(TextureAttribute.createDiffuse(new Texture(map)));
+
+         map.dispose();
+      }
       super.render(renderable);
    }
 }
