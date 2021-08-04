@@ -131,7 +131,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                GDXROS1PointCloudVisualizer.this.cameraInfo = info;
             }
          };
-         ros1Node.attachSubscriber(rosVideoTopic, imageSubscriber);
+         ros1Node.attachSubscriber(rosCameraInfoTopic, cameraInfoSubscriber);
       }
    }
 
