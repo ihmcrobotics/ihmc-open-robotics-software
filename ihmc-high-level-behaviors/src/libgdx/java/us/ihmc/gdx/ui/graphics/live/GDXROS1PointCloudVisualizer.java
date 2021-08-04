@@ -70,7 +70,9 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
 
    private volatile Image image;
    private volatile CameraInfo cameraInfo;
+
    private volatile boolean imageHasChanged = false;
+   private volatile Pixmap pixmap = null;
 
    private GDXPointCloudRenderer.ColorProvider colorProvider = null;
 
@@ -163,14 +165,16 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                boolean hasColors = false;
                PointCloudData pointCloudData = new PointCloudData(message, MAX_POINTS, hasColors);
 
-               if (imageSubscriber != null && this.imageHasChanged) {
+               if (this.imageHasChanged) {
+                  if (this.pixmap != null)
+                     this.pixmap.dispose();
+
                   Image image = this.image;
-                  CameraInfo info = this.cameraInfo;
 
                   ChannelBuffer data = image.getData();
                   int zeroedIndex = 0;
 
-                  Pixmap pixmap = new Pixmap(image.getWidth(), image.getHeight(), Pixmap.Format.RGBA8888);
+                  this.pixmap = new Pixmap(image.getWidth(), image.getHeight(), Pixmap.Format.RGBA8888);
                   for (int y = 0; y < image.getHeight(); y++)
                   {
                      for (int x = 0; x < image.getWidth(); x++)
@@ -184,6 +188,12 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                         pixmap.drawPixel(x, y, rgb8888);
                      }
                   }
+
+                  this.imageHasChanged = false;
+               }
+
+               if (imageSubscriber != null) {
+                  CameraInfo info = this.cameraInfo;
 
                   BufferBasedColorProvider provider = new BufferBasedColorProvider();
 
