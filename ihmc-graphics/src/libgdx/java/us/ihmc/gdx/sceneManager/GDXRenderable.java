@@ -24,7 +24,6 @@ public class GDXRenderable implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (renderableProvider != null)
-         renderableProvider.getRenderables(renderables, pool);
+      renderableProvider.getRenderables(renderables, pool);
    }
 }
