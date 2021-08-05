@@ -58,6 +58,7 @@ public class GDX3DSceneManager
    private int height = -1;
    private boolean firstRenderStarted = false;
    private boolean addFocusSphere = true;
+   private float pointLightIntensity = 1.0f; //THIS VALUE SHOULD BE MOVED SOMEWHERE ELSE
 
    private static int getFramebufferID()
    {
@@ -119,18 +120,20 @@ public class GDX3DSceneManager
       shadowManager.renderShadows(camera3D, new GDXRenderableIterable(renderables), x, y);
    }
 
-   private float pointLightIntensity = 1.0f; //THIS VALUE SHOULD BE MOVED SOMEWHERE ELSE
-
    /**
     * Updates LIGHTS for the environment - ambient light is handled separately
     */
-   private void updateEnvironment() {
+   private void updateEnvironment()
+   {
       shadowsDisabledEnvironment.clear();
-      for (GDXLight light : shadowManager.getLights()) {
-         if (light instanceof GDXPointLight) {
+      for (GDXLight light : shadowManager.getLights())
+      {
+         if (light instanceof GDXPointLight)
+         {
             shadowsDisabledEnvironment.add(new PointLight().set(Color.WHITE, light.getPosition(), pointLightIntensity));
          }
-         else if (light instanceof GDXDirectionalLight) {
+         else if (light instanceof GDXDirectionalLight)
+         {
             shadowsDisabledEnvironment.add(new DirectionalLight().set(Color.WHITE, ((GDXDirectionalLight) light).getDirection()));
          }
       }
@@ -220,7 +223,9 @@ public class GDX3DSceneManager
       if (shadowsEnabled)
       {
          currentRenderingBatch = shadowObjectsModelBatch;
-      } else {
+      }
+      else
+      {
          currentRenderingBatch = primaryModelBatch;
       }
 
