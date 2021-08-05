@@ -102,11 +102,13 @@ public class GDXShadowManager
       lights.add(light);
    }
 
-   public void removeLight(GDXLight light) {
+   public void removeLight(GDXLight light)
+   {
       lights.remove(light);
    }
 
-   public HashSet<GDXLight> getLights() {
+   public HashSet<GDXLight> getLights()
+   {
       return lights;
    }
 
