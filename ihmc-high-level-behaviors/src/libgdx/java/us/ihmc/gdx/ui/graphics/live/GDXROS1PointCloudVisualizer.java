@@ -211,16 +211,18 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                   BufferBasedColorProvider provider = new BufferBasedColorProvider();
 
                   //Applies the following transform:
-                  //     [fx'  0  cx' Tx]
-                  // P = [ 0  fy' cy' Ty]
-                  //     [ 0   0   1   0]
+                  //     [fx  0 cx]
+                  // K = [ 0 fy cy]
+                  //     [ 0  0  1]
                   //This transforms a 3D point to a 2D pixel coordinate
-                  //https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/CameraInfo.html#:~:text=%23%C2%A0Projection/camera%C2%A0matrix,a%C2%A0stereo%C2%A0pair%2E
-                  DMatrixRMaj projectionMatrix = new DMatrixRMaj(3, 4);
-                  projectionMatrix.setData(info.getP());
+                  //https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/CameraInfo.html#:~:text=Intrinsic%C2%A0camera%C2%A0matrix%C2%A0for%C2%A0the%C2%A0raw%C2%A0(distorted)%C2%A0images
+                  DMatrixRMaj projectionMatrix = new DMatrixRMaj(3, 3);
+                  projectionMatrix.setData(info.getK());
 
                   synchronized (pixmap)
                   {
+                     Color outOfBounds = (System.currentTimeMillis() / 1000) % 2 == 0 ? Color.BLACK : Color.RED;
+
                      for (Point3D point3D : pointCloudData.getPointCloud())
                      {
                         if (point3D == null)
@@ -239,7 +241,11 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                         CommonOps_DDRM.mult(projectionMatrix, pointIn, pointOut);
 
                         Point2D point = new Point2D(pointOut.get(0, 0), pointOut.get(1, 0));
-                        provider.add(new Color(pixmap.getPixel((int) point.getX(), (int) point.getY())));
+
+                        if (point.getX() > pixmap.getWidth() || point.getY() > pixmap.getHeight() || point.getX() < 0 || point.getY() < 0)
+                           provider.add(outOfBounds); //Show out-of-bounds points as flashing red and black
+                        else
+                           provider.add(new Color(pixmap.getPixel((int) point.getX(), (int) point.getY())));
                      }
                   }
 
