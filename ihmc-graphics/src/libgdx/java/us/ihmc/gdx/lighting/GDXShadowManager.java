@@ -106,6 +106,10 @@ public class GDXShadowManager
       lights.remove(light);
    }
 
+   public HashSet<GDXLight> getLights() {
+      return lights;
+   }
+
    /**
     * Ensures that all lights are initialized
     */
