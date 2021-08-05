@@ -15,14 +15,18 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.tools.thread.Throttler;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class AtlasOusterROS1ToREABridge
 {
+   private static final double REA_OUTPUT_FREQUENCY = UnitConversions.hertzToSeconds(10.0);
+
    public AtlasOusterROS1ToREABridge()
    {
       RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "ouster_to_rea");
@@ -31,6 +35,7 @@ public class AtlasOusterROS1ToREABridge
       CommunicationHelper ros2Helper = new CommunicationHelper(robotModel, ros2Node);
       ROS2SyncedRobotModel syncedRobot = ros2Helper.newSyncedRobot();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      Throttler throttler = new Throttler();
 
       ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("OusterToREABridge", true);
 
@@ -39,22 +44,25 @@ public class AtlasOusterROS1ToREABridge
          @Override
          public void onNewMessage(PointCloud2 pointCloud2)
          {
-            executor.submit(() ->
+            if (throttler.run(REA_OUTPUT_FREQUENCY))
             {
-               syncedRobot.update();
-               if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(3.0))
+               executor.submit(() ->
                {
-                  PointCloudData pointCloudData = new PointCloudData(pointCloud2, 1600000, false);
-                  FramePose3DReadOnly ousterPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getOusterLidarFrame);
-                  ousterPose.get(transformToWorld);
-                  pointCloudData.applyTransform(transformToWorld);
-                  LidarScanMessage lidarScanMessage = pointCloudData.toLidarScanMessage();
-                  lidarScanMessage.getLidarPosition().set(ousterPose.getPosition());
-                  lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation());
-                  lidarScanMessage.setSensorPoseConfidence(1.0);
-                  ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
-               }
-            });
+                  syncedRobot.update();
+//                  if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(3.0))
+                  {
+                     PointCloudData pointCloudData = new PointCloudData(pointCloud2, 1600000, false);
+                     FramePose3DReadOnly ousterPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getOusterLidarFrame);
+                     ousterPose.get(transformToWorld);
+                     pointCloudData.applyTransform(transformToWorld);
+                     LidarScanMessage lidarScanMessage = pointCloudData.toLidarScanMessage();
+                     lidarScanMessage.getLidarPosition().set(ousterPose.getPosition());
+                     lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation());
+                     lidarScanMessage.setSensorPoseConfidence(1.0);
+                     ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
+                  }
+               });
+            }
          }
       };
       ros1Node.attachSubscriber(RosTools.OUSTER_POINT_CLOUD, ousterSubscriber);
