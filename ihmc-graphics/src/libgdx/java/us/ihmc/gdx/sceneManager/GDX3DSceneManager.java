@@ -6,6 +6,7 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
@@ -46,6 +47,7 @@ public class GDX3DSceneManager
    private ModelBatch currentRenderingBatch;
 
    private boolean shadowsEnabled = false;
+   private Environment shadowsDisabledEnvironment;
 
    private int x = 0;
    private int y = 0;
@@ -97,6 +99,9 @@ public class GDX3DSceneManager
 
       primaryModelBatch = new ModelBatch();
 
+      shadowsDisabledEnvironment = new Environment();
+      shadowsDisabledEnvironment.set(ColorAttribute.createAmbientLight(0.4f, 0.4f, 0.4f, 1.0f));
+
       shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING);
       shadowManager.update();
    }
@@ -134,6 +139,12 @@ public class GDX3DSceneManager
          currentRenderingBatch = shadowObjectsModelBatch;
       } else {
          currentRenderingBatch = primaryModelBatch;
+
+         if (shadowManager != null)
+         {
+            float intensity = shadowManager.getAmbientLight();
+            shadowsDisabledEnvironment.set(ColorAttribute.createAmbientLight(intensity, intensity, intensity, 1.0f));
+         }
       }
 
       currentRenderingBatch.begin(camera3D);
@@ -154,7 +165,12 @@ public class GDX3DSceneManager
       for (GDXRenderable renderable : renderables)
       {
          if (sceneLevel.ordinal() >= renderable.getSceneType().ordinal())
-            modelBatch.render(renderable);
+         {
+            if (shadowsEnabled)
+               modelBatch.render(renderable);
+            else
+               modelBatch.render(renderable, shadowsDisabledEnvironment);
+         }
       }
    }
 
