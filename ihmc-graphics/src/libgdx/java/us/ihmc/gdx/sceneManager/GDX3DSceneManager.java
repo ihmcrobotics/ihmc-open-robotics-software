@@ -131,13 +131,13 @@ public class GDX3DSceneManager
 
       viewport.update(width, height);
 
-      shadowsEnabled = (System.currentTimeMillis() / 1000) % 2 == 0;
-
       if (shadowsEnabled)
       {
          shadowManager.apply(shadowSceneShaderProgram);
          currentRenderingBatch = shadowObjectsModelBatch;
-      } else {
+      }
+      else
+      {
          currentRenderingBatch = primaryModelBatch;
 
          if (shadowManager != null)
@@ -314,6 +314,11 @@ public class GDX3DSceneManager
    public void setAddFocusSphere(boolean addFocusSphere)
    {
       this.addFocusSphere = addFocusSphere;
+   }
+
+   public void setShadowsEnabled(boolean shadowsEnabled)
+   {
+      this.shadowsEnabled = shadowsEnabled;
    }
 
    private class GDXRenderableIterable implements Iterable<GDXRenderable>
