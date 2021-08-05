@@ -148,7 +148,10 @@ public class GDX3DSceneManager
       }
 
       if (shadowsHashCode != shadowManager.getLights().hashCode())
+      {
+         shadowsHashCode = shadowManager.getLights().hashCode();
          updateEnvironment();
+      }
 
       if (width < 0)
          width = getCurrentWindowWidth();
