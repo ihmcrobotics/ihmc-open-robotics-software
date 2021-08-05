@@ -37,10 +37,16 @@ public class GDX3DSceneManager
    private InputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
    private ScreenViewport viewport;
-   private ShaderProgram mainShaderProgram;
-   private ModelBatch modelBatch;
-   private ModelBatch virtualBatch;
+   private ShaderProgram shadowSceneShaderProgram;
+
+   private ModelBatch shadowObjectsModelBatch;
+   private ModelBatch primaryModelBatch;
+
    private GDXShadowManager shadowManager;
+   private ModelBatch currentRenderingBatch;
+
+   private boolean shadowsEnabled = false;
+
    private int x = 0;
    private int y = 0;
    private int width = -1;
@@ -79,17 +85,17 @@ public class GDX3DSceneManager
       viewport = new ScreenViewport(camera3D);
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
-      mainShaderProgram = new ShaderProgram(GDXShadowManager.getVertexShader(), GDXShadowManager.getFragmentShader());
-      modelBatch = new ModelBatch(new DefaultShaderProvider()
+      shadowSceneShaderProgram = new ShaderProgram(GDXShadowManager.getVertexShader(), GDXShadowManager.getFragmentShader());
+      shadowObjectsModelBatch = new ModelBatch(new DefaultShaderProvider()
       {
          @Override
          protected Shader createShader(Renderable renderable)
          {
-            return new GDXSceneShader(renderable, mainShaderProgram);
+            return new GDXSceneShader(renderable, shadowSceneShaderProgram);
          }
       });
 
-      virtualBatch = new ModelBatch();
+      primaryModelBatch = new ModelBatch();
 
       shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING);
       shadowManager.update();
@@ -119,8 +125,19 @@ public class GDX3DSceneManager
          height = getCurrentWindowHeight();
 
       viewport.update(width, height);
-      shadowManager.apply(mainShaderProgram);
-      modelBatch.begin(camera3D);
+
+      shadowsEnabled = (System.currentTimeMillis() / 1000) % 2 == 0;
+
+      if (shadowsEnabled)
+      {
+         shadowManager.apply(shadowSceneShaderProgram);
+         currentRenderingBatch = shadowObjectsModelBatch;
+      } else {
+         currentRenderingBatch = primaryModelBatch;
+      }
+
+      currentRenderingBatch.begin(camera3D);
+
       Gdx.gl.glViewport(x, y, width, height);
       GDX3DSceneTools.glClearGray();
    }
@@ -143,19 +160,27 @@ public class GDX3DSceneManager
 
    private void postRender()
    {
-      modelBatch.end(); // This is actually where all the rendering happens despite the method name
+      currentRenderingBatch.end(); // This is actually where all the rendering happens despite the method name
+      currentRenderingBatch = null;
 
-      //Render virtual objects to the screen too
-      virtualBatch.begin(camera3D);
-      virtualBatch.render(new GDXRenderableIterable(renderables, GDXSceneLevel.VIRTUAL));
-      virtualBatch.end();
+      //Render all virtual objects using the primary model batch
+      primaryModelBatch.begin(camera3D);
+      primaryModelBatch.render(new GDXRenderableIterable(renderables, GDXSceneLevel.VIRTUAL));
+      primaryModelBatch.end();
    }
 
    // Render public API
    public void renderToCamera(Camera camera)
    {
-      modelBatch.begin(camera);
-      renderInternal(modelBatch);
+      if (shadowsEnabled)
+      {
+         currentRenderingBatch = shadowObjectsModelBatch;
+      } else {
+         currentRenderingBatch = primaryModelBatch;
+      }
+
+      currentRenderingBatch.begin(camera);
+      renderInternal(currentRenderingBatch);
       postRender();
    }
 
@@ -167,7 +192,7 @@ public class GDX3DSceneManager
    public void render(GDXSceneLevel sceneLevel)
    {
       preRender();
-      renderInternal(modelBatch, sceneLevel);
+      renderInternal(currentRenderingBatch, sceneLevel);
       postRender();
    }
 
@@ -184,7 +209,8 @@ public class GDX3DSceneManager
       }
 
       ExceptionTools.handle(() -> camera3D.dispose(), DefaultExceptionHandler.PRINT_MESSAGE);
-      modelBatch.dispose();
+      shadowObjectsModelBatch.dispose();
+      primaryModelBatch.dispose();
    }
    // End render public API
 
