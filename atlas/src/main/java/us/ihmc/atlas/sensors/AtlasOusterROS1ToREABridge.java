@@ -2,10 +2,17 @@ package us.ihmc.atlas.sensors;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import sensor_msgs.PointCloud2;
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -20,7 +27,10 @@ public class AtlasOusterROS1ToREABridge
    {
       RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "ouster_to_rea");
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_to_rea");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT);
+      CommunicationHelper ros2Helper = new CommunicationHelper(robotModel, ros2Node);
+      ROS2SyncedRobotModel syncedRobot = ros2Helper.newSyncedRobot();
+      RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
       ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("OusterToREABridge", true);
 
@@ -31,9 +41,19 @@ public class AtlasOusterROS1ToREABridge
          {
             executor.submit(() ->
             {
-               PointCloudData pointCloudData = new PointCloudData(pointCloud2, 1600000, false);
-               LidarScanMessage lidarScanMessage = pointCloudData.toLidarScanMessage();
-               ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
+               syncedRobot.update();
+               if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(3.0))
+               {
+                  PointCloudData pointCloudData = new PointCloudData(pointCloud2, 1600000, false);
+                  FramePose3DReadOnly ousterPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getOusterLidarFrame);
+                  ousterPose.get(transformToWorld);
+                  pointCloudData.applyTransform(transformToWorld);
+                  LidarScanMessage lidarScanMessage = pointCloudData.toLidarScanMessage();
+                  lidarScanMessage.getLidarPosition().set(ousterPose.getPosition());
+                  lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation());
+                  lidarScanMessage.setSensorPoseConfidence(1.0);
+                  ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
+               }
             });
          }
       };
@@ -45,8 +65,6 @@ public class AtlasOusterROS1ToREABridge
          executor.destroy();
          ros1Node.shutdown();
       }, "IHMC-OusterROS1ToREABridgeShutdown"));
-
-//      ThreadTools.join();
    }
 
    public static void main(String[] args)
