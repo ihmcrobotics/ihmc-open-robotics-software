@@ -71,6 +71,7 @@ public class GDXImGuiBasedUI
    private float sizeY;
    private final ImInt foregroundFPS = new ImInt(240);
    private final ImBoolean vsync = new ImBoolean(false);
+   private final ImBoolean shadows = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
    private boolean needToReindexPerspectives = true;
    private final ImString perspectiveNameToSave = new ImString("", 100);
@@ -300,6 +301,10 @@ public class GDXImGuiBasedUI
          if (ImGui.checkbox("Vsync", vsync))
          {
             Gdx.graphics.setVSync(vsync.get());
+         }
+         if (ImGui.checkbox("Shadows", shadows))
+         {
+            sceneManager.setShadowsEnabled(shadows.get());
          }
          if (ImGui.inputInt("libGDX log level", libGDXLogLevel, 1))
          {
