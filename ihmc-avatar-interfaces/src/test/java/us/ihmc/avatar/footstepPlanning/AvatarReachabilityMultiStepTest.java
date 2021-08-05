@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -101,6 +102,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    protected abstract HumanoidRobotMutableInitialSetup createInitialSetup(HumanoidJointNameMap jointNameMap);
 
    @Test
+   @Disabled
    public void testFlatForwards() throws Exception
    {
       for (int i = 0; i < numberOfStancesToCheck; i++)
@@ -111,6 +113,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    }
 
    @Test
+   @Disabled
    public void testFlatBackwards() throws Exception
    {
       for (int i = 0; i < numberOfStancesToCheck; i++)
@@ -121,6 +124,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    }
 
    @Test
+   @Disabled
    public void testFlatLeft() throws Exception
    {
       for (int i = 0; i < numberOfStancesToCheck; i++)
@@ -131,6 +135,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    }
 
    @Test
+   @Disabled
    public void testFlatRight() throws Exception
    {
       for (int i = 0; i < numberOfStancesToCheck; i++)
@@ -141,6 +146,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    }
 
    @Test
+   @Disabled
    public void testFlatRandom() throws Exception
    {
       for (int i = 0; i < numberOfStancesToCheck; i++)
@@ -151,6 +157,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    }
 
    @Test
+   @Disabled
    public void testStairsForwards() throws Exception
    {
       for (int i = 0; i < numberOfStancesToCheck; i++)
@@ -161,6 +168,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    }
 
    @Test
+   @Disabled
    public void testStairsBackwards() throws Exception
    {
       for (int i = 0; i < numberOfStancesToCheck; i++)
@@ -170,7 +178,6 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
       }
    }
 
-   // TODO Complete test and move on to next one
    private void testSteps(DRCRobotModel robotModel, List<KinematicsToolboxSnapshotDescription> feasibleSolutions, Mode mode)
          throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
@@ -342,7 +349,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
 
    public void endDRCSimulationTest()
    {
-//      drcSimulationTestHelper.getBlockingSimulationRunner().destroySimulation();
+      drcSimulationTestHelper.getBlockingSimulationRunner().destroySimulation();
       drcSimulationTestHelper.getAvatarSimulation().dispose();
       drcSimulationTestHelper.getSimulationStarter().close();
       drcSimulationTestHelper.getROS2Node().destroy();
