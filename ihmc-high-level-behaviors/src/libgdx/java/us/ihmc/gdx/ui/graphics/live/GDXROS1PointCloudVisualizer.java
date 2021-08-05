@@ -218,38 +218,9 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                   //https://docs.ros.org/en/noetic/api/sensor_msgs/html/msg/CameraInfo.html#:~:text=%23%C2%A0Projection/camera%C2%A0matrix,a%C2%A0stereo%C2%A0pair%2E
                   DMatrixRMaj projectionMatrix = new DMatrixRMaj(3, 4);
                   projectionMatrix.setData(info.getP());
-                  //projectionMatrix.set(0, 2, 320);
 
                   synchronized (pixmap)
                   {
-                     Point2D min = new Point2D(Integer.MAX_VALUE, Integer.MAX_VALUE);
-                     Point2D max = new Point2D(Integer.MIN_VALUE, Integer.MIN_VALUE);
-                     for (Point3D point3D : pointCloudData.getPointCloud()) {
-                        if (point3D == null)
-                           continue;
-
-                        DMatrixRMaj pointIn = new DMatrixRMaj(4, 1);
-                        pointIn.set(0, 0, point3D.getX());
-                        pointIn.set(1, 0, point3D.getY());
-                        pointIn.set(2, 0, point3D.getZ());
-                        pointIn.set(3, 0, 1);
-
-                        DMatrixRMaj pointOut = new DMatrixRMaj(0);
-                        CommonOps_DDRM.mult(projectionMatrix, pointIn, pointOut);
-
-                        Point2D point = new Point2D(pointOut.get(0, 0), pointOut.get(1, 0));
-
-                        if (point.getX() < min.getX())
-                           min.setX(point.getX());
-                        if (point.getY() < min.getY())
-                           min.setY(point.getY());
-
-                        if (point.getX() > max.getX())
-                           max.setX(point.getX());
-                        if (point.getY() > max.getY())
-                           max.setY(point.getY());
-                     }
-
                      for (Point3D point3D : pointCloudData.getPointCloud())
                      {
                         if (point3D == null)
@@ -268,10 +239,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                         CommonOps_DDRM.mult(projectionMatrix, pointIn, pointOut);
 
                         Point2D point = new Point2D(pointOut.get(0, 0), pointOut.get(1, 0));
-                        if (point.getX() > pixmap.getWidth() || point.getY() > pixmap.getHeight() || point.getX() < 0 || point.getY() < 0)
-                           provider.add((System.currentTimeMillis() / 1000) % 2 == 0 ? Color.BLACK : Color.RED);
-                        else
-                           provider.add(new Color(pixmap.getPixel((int) point.getX(), (int) point.getY())));
+                        provider.add(new Color(pixmap.getPixel((int) point.getX(), (int) point.getY())));
                      }
                   }
 
