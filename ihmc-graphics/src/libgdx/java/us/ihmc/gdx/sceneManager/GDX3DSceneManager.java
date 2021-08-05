@@ -4,9 +4,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
@@ -16,8 +19,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.GDXInputMode;
-import us.ihmc.gdx.lighting.GDXSceneShader;
-import us.ihmc.gdx.lighting.GDXShadowManager;
+import us.ihmc.gdx.lighting.*;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -48,6 +50,7 @@ public class GDX3DSceneManager
 
    private boolean shadowsEnabled = false;
    private Environment shadowsDisabledEnvironment;
+   private int shadowsHashCode = 0;
 
    private int x = 0;
    private int y = 0;
@@ -116,13 +119,36 @@ public class GDX3DSceneManager
       shadowManager.renderShadows(camera3D, new GDXRenderableIterable(renderables), x, y);
    }
 
+   private float pointLightIntensity = 1.0f; //THIS VALUE SHOULD BE MOVED SOMEWHERE ELSE
+
+   /**
+    * Updates LIGHTS for the environment - ambient light is handled separately
+    */
+   private void updateEnvironment() {
+      shadowsDisabledEnvironment.clear();
+      for (GDXLight light : shadowManager.getLights()) {
+         if (light instanceof GDXPointLight) {
+            shadowsDisabledEnvironment.add(new PointLight().set(Color.WHITE, light.getPosition(), pointLightIntensity));
+         }
+         else if (light instanceof GDXDirectionalLight) {
+            shadowsDisabledEnvironment.add(new DirectionalLight().set(Color.WHITE, ((GDXDirectionalLight) light).getDirection()));
+         }
+      }
+   }
+
    private void preRender()
    {
       if (!firstRenderStarted)
       {
          firstRenderStarted = true;
          LogTools.info("Starting first render.");
+
+         shadowsHashCode = shadowManager.getLights().hashCode();
+         updateEnvironment();
       }
+
+      if (shadowsHashCode != shadowManager.getLights().hashCode())
+         updateEnvironment();
 
       if (width < 0)
          width = getCurrentWindowWidth();
