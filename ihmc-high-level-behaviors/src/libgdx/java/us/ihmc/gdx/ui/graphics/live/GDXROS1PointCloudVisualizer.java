@@ -178,7 +178,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
          pointCloudRenderer.setPointsToRender(pointsToRender, color);
          if (!pointsToRender.isEmpty())
          {
-            pointCloudRenderer.updateMesh(alpha);
+            pointCloudRenderer.updateMesh();
          }
       }
    }
