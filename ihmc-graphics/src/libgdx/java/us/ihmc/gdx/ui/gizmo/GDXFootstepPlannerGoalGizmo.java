@@ -78,6 +78,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private final Plane3D dragPlane = new Plane3D();
    private final Point3D dragPoint = new Point3D();
    private final Vector3D dragVector = new Vector3D();
+   private boolean hollowCylinderIntersects;
 
    public GDXFootstepPlannerGoalGizmo()
    {
@@ -209,6 +210,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
    {
+      hollowCylinderIntersects = false;
       closestCollisionSelection = -1;
       double closestCollisionDistance = Double.POSITIVE_INFINITY;
 
@@ -216,6 +218,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       double distance = hollowCylinderIntersection.intersect(pickRay);
       if (!Double.isNaN(distance) && distance < closestCollisionDistance)
       {
+         hollowCylinderIntersects = true;
          closestCollisionDistance = distance;
          closestCollisionSelection = 0;
          closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
@@ -345,5 +348,10 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    public RigidBodyTransform getTransform()
    {
       return transform;
+   }
+
+   public boolean getHollowCylinderIntersects()
+   {
+      return hollowCylinderIntersects;
    }
 }

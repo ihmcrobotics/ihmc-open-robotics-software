@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -27,7 +28,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 {
    private final RobotCollisionModel robotSelfCollisionModel;
    private final RobotCollisionModel robotEnvironmentCollisionModel;
-   private final FullHumanoidRobotModel fullRobotModel;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2Helper;
 
    private final ArrayList<GDXRobotCollisionLink> selfCollisionLinks = new ArrayList<>();
@@ -38,22 +39,23 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
 
    private final SideDependentList<GDXInteractableFoot> footInteractables = new SideDependentList<>();
+   private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
 
    public GDXRobotWholeBodyInteractable(RobotCollisionModel robotSelfCollisionModel,
                                         RobotCollisionModel robotEnvironmentCollisionModel,
-                                        FullHumanoidRobotModel fullRobotModel,
+                                        ROS2SyncedRobotModel syncedRobot,
                                         ROS2ControllerHelper ros2Helper)
    {
       this.robotSelfCollisionModel = robotSelfCollisionModel;
       this.robotEnvironmentCollisionModel = robotEnvironmentCollisionModel;
-      this.fullRobotModel = fullRobotModel;
+      this.syncedRobot = syncedRobot;
       this.ros2Helper = ros2Helper;
    }
 
    public void create(GDXImGuiBasedUI baseUI)
    {
       List<Collidable> robotCollidables;
-      robotCollidables = robotSelfCollisionModel.getRobotCollidables(fullRobotModel.getElevator());
+      robotCollidables = robotSelfCollisionModel.getRobotCollidables(syncedRobot.getFullRobotModel().getElevator());
       AppearanceDefinition green = YoAppearance.DarkGreen();
       green.setTransparency(0.4);
       for (Collidable collidable : robotCollidables)
@@ -61,7 +63,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          GDXRobotCollisionLink collisionLink = new GDXRobotCollisionLink(collidable, GDXTools.toGDX(green));
          selfCollisionLinks.add(collisionLink);
       }
-      robotCollidables = robotEnvironmentCollisionModel.getRobotCollidables(fullRobotModel.getElevator());
+      robotCollidables = robotEnvironmentCollisionModel.getRobotCollidables(syncedRobot.getFullRobotModel().getElevator());
       AppearanceDefinition red = YoAppearance.DarkRed();
       red.setTransparency(0.4);
       for (Collidable collidable : robotCollidables)
@@ -75,7 +77,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
             {
                GDXInteractableFoot interactableFoot = new GDXInteractableFoot(collisionLink,
                                                                               side,
-                                                                              fullRobotModel.getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
+                                                                              syncedRobot.getFullRobotModel()
+                                                                                         .getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
                                                                               ros2Helper);
                interactableFoot.create(baseUI.get3DSceneManager().getCamera3D());
                footInteractables.put(side, interactableFoot);
@@ -83,6 +86,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
          }
       }
+
+      walkPathControlRing.create(baseUI, syncedRobot);
    }
 
    public void update()
@@ -95,6 +100,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       {
          collisionLink.update();
       }
+
+      walkPathControlRing.update();
    }
 
    // This happens after update.
@@ -147,6 +154,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       {
          footInteractable.getVirtualRenderables(renderables, pool);
       }
+
+      walkPathControlRing.getVirtualRenderables(renderables, pool);
    }
 
    public ImGuiPanel getPanel()
