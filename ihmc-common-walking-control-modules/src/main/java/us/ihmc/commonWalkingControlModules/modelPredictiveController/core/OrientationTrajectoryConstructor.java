@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
@@ -20,8 +21,6 @@ import java.util.List;
 
 public class OrientationTrajectoryConstructor
 {
-   private static final boolean debug = false;
-
    private final OrientationDynamicsCalculator dynamicsCalculator;
 
    private final RecyclingArrayList<OrientationTrajectoryCommand> trajectoryCommandsForSegments = new RecyclingArrayList<>(OrientationTrajectoryCommand::new);
@@ -34,6 +33,8 @@ public class OrientationTrajectoryConstructor
    private final SE3MPCIndexHandler indexHandler;
    private final DoubleProvider orientationAngleTrackingWeight;
    private final DoubleProvider orientationVelocityTrackingWeight;
+
+   private final FrameVector3D desiredAcceleration = new FrameVector3D();
 
    private final DoubleProvider omega;
    private final double gravityZ;
@@ -88,8 +89,8 @@ public class OrientationTrajectoryConstructor
 
          for (int tick = 0; tick < ticksInSegment; tick++)
          {
-            linearTrajectoryHandler.compute(timeInSegment + trajectoryStartTime);
-            orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(timeInSegment + trajectoryStartTime);
+            linearTrajectoryHandler.compute(trajectoryStartTime);
+            orientationTrajectoryHandler.compute(trajectoryStartTime);
 
             FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation();
             // angular velocity in body frame
@@ -99,9 +100,9 @@ public class OrientationTrajectoryConstructor
             if (orientationTrajectoryHandler.hasInternalAngularMomentum())
             {
                desiredInternalAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
-               if (contactPlaneHelpers.get(segmentNumber).size() > 0)
-                  desiredNetAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
-               else
+//               if (contactPlaneHelpers.get(segmentNumber).size() > 0)
+//                  desiredNetAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+//               else
                   desiredNetAngularMomentumRate.setToZero();
             }
             else
@@ -110,14 +111,14 @@ public class OrientationTrajectoryConstructor
                desiredInternalAngularMomentumRate.setToZero();
             }
 
-            FrameVector3D acceleration = new FrameVector3D(linearTrajectoryHandler.getDesiredCoMAcceleration());
-            if (debug && contactPlaneHelpers.get(segmentNumber).size() == 0)
+            desiredAcceleration.set(linearTrajectoryHandler.getDesiredCoMAcceleration());
+            if (SE3ModelPredictiveController.debugOrientation && contactPlaneHelpers.get(segmentNumber).size() == 0)
             {
-               acceleration.set(gravityVector);
+               desiredAcceleration.set(gravityVector);
             }
 
             dynamicsCalculator.compute(linearTrajectoryHandler.getDesiredCoMPosition(),
-                                       acceleration,
+                                       desiredAcceleration,
                                        referenceOrientation,
                                        referenceBodyAngularVelocityInBodyFrame,
                                        desiredNetAngularMomentumRate,
@@ -149,7 +150,7 @@ public class OrientationTrajectoryConstructor
                nextA.set(dynamicsCalculator.getDiscreteAMatrix());
             }
 
-            if (debug && contactPlaneHelpers.get(segmentNumber).size() == 0)
+            if (SE3ModelPredictiveController.debugOrientation && contactPlaneHelpers.get(segmentNumber).size() == 0)
             {
                if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB0()), 0.0, 1e-3))
                   throw new RuntimeException("Poopy. B0 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB0()));
@@ -157,8 +158,8 @@ public class OrientationTrajectoryConstructor
                   throw new RuntimeException("Poopy. B1 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB1()));
                if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB2()), 0.0, 1e-3))
                   throw new RuntimeException("Poopy. B2 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB2()));
-               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB3()), 0.0, 1e-3))
-                  throw new RuntimeException("Poopy. B3 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB3()));
+//               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB3()), 0.0, 1e-3))
+//                  throw new RuntimeException("Poopy. B3 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB3()));
                if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB4()), 0.0, 1e-3))
                   throw new RuntimeException("Poopy. B4 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB4()));
 
