@@ -235,8 +235,8 @@ public class OrientationDynamicsCalculator
       if (SE3ModelPredictiveController.debugOrientation && contactPlanes.size() == 0)
       {
          desiredContactForce.setToZero();
-//         if (desiredContactForce.length() > 1e-4)
-//            throw new RuntimeException("Should have zero desired force. Force is actually "+ desiredContactForce);
+         if (desiredContactForce.length() > 1e-4)
+            throw new RuntimeException("Should have zero desired force. Force is actually "+ desiredContactForce);
       }
 
 
