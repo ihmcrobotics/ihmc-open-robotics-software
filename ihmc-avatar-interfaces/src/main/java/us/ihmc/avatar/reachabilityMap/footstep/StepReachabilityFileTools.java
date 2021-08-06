@@ -85,6 +85,9 @@ public class StepReachabilityFileTools
    {
       List<KinematicsToolboxSnapshotDescription> kinematicsSnapshots = scriptReader.getAllItems();
       double[] gridData = loadGridDataFromJson(scriptReader.getAuxiliaryData());
+      if (gridData == null)
+         return null;
+
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       StepReachabilityData reachabilityData = new StepReachabilityData();
 
@@ -122,6 +125,9 @@ public class StepReachabilityFileTools
 
    public static double[] loadGridDataFromJson(JsonNode jsonNode)
    {
+      if (jsonNode == null)
+         return null;
+
       JsonNode auxDataNode = jsonNode.get("Auxiliary Data");
       JsonNode gridDataNode = auxDataNode.get("Reachability Grid Data");
       double[] gridData = new double[3];
