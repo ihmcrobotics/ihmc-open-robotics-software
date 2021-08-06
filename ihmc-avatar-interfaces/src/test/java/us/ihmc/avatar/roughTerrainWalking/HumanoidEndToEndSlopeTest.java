@@ -39,6 +39,7 @@ import us.ihmc.tools.MemoryTools;
 
 public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterface
 {
+   private static final boolean EXPORT_TORQUE_SPEED_DATA = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -64,8 +65,16 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void testSlope(TestInfo testInfo, boolean up, boolean useSideSteps, double swingDuration, double transferDuration, double maxStepLength,
-                         double heightOffset, double torsoPitch, boolean useExperimentalPhysicsEngine, boolean disableToeOff)
+   public void testSlope(TestInfo testInfo,
+                         boolean up,
+                         boolean useSideSteps,
+                         double swingDuration,
+                         double transferDuration,
+                         double maxStepLength,
+                         double heightOffset,
+                         double torsoPitch,
+                         boolean useExperimentalPhysicsEngine,
+                         boolean disableToeOff)
          throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -137,6 +146,11 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       scs.setInPoint();
 
       publishFootstepsAndSimulate(robotModel, footsteps);
+
+      if (EXPORT_TORQUE_SPEED_DATA)
+      {
+         EndToEndTestTools.exportTorqueSpeedCurves(scs, EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null), testInfo.getTestMethod().get().getName());
+      }
    }
 
    private void publishHeightOffset(double heightOffset) throws Exception
@@ -218,8 +232,13 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1 * walkingDuration));
    }
 
-   private static FootstepDataListMessage createSlopeFootsteps(double xSlopeStart, double xSlopeEnd, double zSlopeStart, double slopeAngle, double footLength,
-                                                               double stanceWidth, double maxStepLength)
+   private static FootstepDataListMessage createSlopeFootsteps(double xSlopeStart,
+                                                               double xSlopeEnd,
+                                                               double zSlopeStart,
+                                                               double slopeAngle,
+                                                               double footLength,
+                                                               double stanceWidth,
+                                                               double maxStepLength)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double margin = 0.035;
@@ -270,8 +289,14 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       return footsteps;
    }
 
-   private static FootstepDataListMessage createSlopeSideFootsteps(double xSlopeStart, double xSlopeEnd, double zSlopeStart, double slopeAngle,
-                                                                   double footWidth, double stanceWidth, double minStanceWidth, double maxStepLength)
+   private static FootstepDataListMessage createSlopeSideFootsteps(double xSlopeStart,
+                                                                   double xSlopeEnd,
+                                                                   double zSlopeStart,
+                                                                   double slopeAngle,
+                                                                   double footWidth,
+                                                                   double stanceWidth,
+                                                                   double minStanceWidth,
+                                                                   double maxStepLength)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       double margin = 0.035;
