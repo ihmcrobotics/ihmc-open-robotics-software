@@ -1,13 +1,28 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
+import us.ihmc.avatar.multiContact.MultiContactScriptReader;
+import us.ihmc.avatar.multiContact.SixDoFMotionControlAnchorDescription;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 public class StepReachabilityFileTools
 {
@@ -45,46 +60,143 @@ public class StepReachabilityFileTools
       }
    }
 
-   public static StepReachabilityData loadFromFile(String filename)
+   private static MultiContactScriptReader setupScriptReader(DRCRobotModel robotModel)
    {
+      MultiContactScriptReader scriptReader = new MultiContactScriptReader();
+      Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      Path filePath = Paths.get(rootPath.toString(), robotModel.getStepReachabilityResourceName());
+      scriptReader.loadScript(filePath.toFile());
+      return scriptReader;
+   }
+
+   public static List<KinematicsToolboxSnapshotDescription> loadKinematicsSnapshots(DRCRobotModel robotModel)
+   {
+      MultiContactScriptReader scriptReader = setupScriptReader(robotModel);
+      return scriptReader.getAllItems();
+   }
+
+   public static StepReachabilityData loadStepReachability(DRCRobotModel robotModel)
+   {
+      MultiContactScriptReader scriptReader = setupScriptReader(robotModel);
+      return loadStepReachability(scriptReader, robotModel);
+   }
+
+   public static StepReachabilityData loadStepReachability(MultiContactScriptReader scriptReader, DRCRobotModel robotModel)
+   {
+      List<KinematicsToolboxSnapshotDescription> kinematicsSnapshots = scriptReader.getAllItems();
+      double[] gridData = loadGridDataFromJson(scriptReader.getAuxiliaryData());
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       StepReachabilityData reachabilityData = new StepReachabilityData();
+
+      double spacingXYZ = gridData[0];
+      double gridSizeYaw = gridData[1];
+      int yawDivisions = (int) gridData[2];
+
+      reachabilityData.setGridData(spacingXYZ, gridSizeYaw, yawDivisions);
+
+      for (int i = 0; i < kinematicsSnapshots.size(); i++)
+      {
+         KinematicsToolboxSnapshotDescription snapshot = kinematicsSnapshots.get(i);
+
+         // Exports left foot at 0 index then right foot at 1 index
+         SixDoFMotionControlAnchorDescription leftFoot = snapshot.getSixDoFAnchors().get(0);
+         SixDoFMotionControlAnchorDescription rightFoot = snapshot.getSixDoFAnchors().get(1);
+         assert(leftFoot.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.LEFT).getName()));
+         assert(rightFoot.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.RIGHT).getName()));
+
+         // Right foot is at origin. Back out lattice point of left foot
+         Point3D leftFootDesiredPosition = leftFoot.getInputMessage().getDesiredPositionInWorld();
+         Quaternion leftFootDesiredOrientation = leftFoot.getInputMessage().getDesiredOrientationInWorld();
+         StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(leftFootDesiredPosition.getX(),
+                                                                                      leftFootDesiredPosition.getY(),
+                                                                                      leftFootDesiredPosition.getZ(),
+                                                                                      leftFootDesiredOrientation.getYaw(),
+                                                                                      spacingXYZ,
+                                                                                      yawDivisions,
+                                                                                      gridSizeYaw/yawDivisions);
+         double solutionQuality = snapshot.getIkSolution().getSolutionQuality();
+         reachabilityData.getLegReachabilityMap().put(latticePoint, solutionQuality);
+      }
+      return reachabilityData;
+   }
+
+   public static double[] loadGridDataFromJson(JsonNode jsonNode)
+   {
+      JsonNode auxDataNode = jsonNode.get("Auxiliary Data");
+      JsonNode gridDataNode = auxDataNode.get("Reachability Grid Data");
+      double[] gridData = new double[3];
+      gridData[0] = gridDataNode.get("spacingXYZ").asDouble();
+      gridData[1] = gridDataNode.get("gridSizeYaw").asDouble();
+      gridData[2] = gridDataNode.get("yawDivisions").asDouble();
+      return gridData;
+   }
+
+   public static JsonNode gridDataToJson(double[] gridData)
+   {
+      JsonFactory jsonFactory = new JsonFactory();
+      ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
+      ObjectNode root = objectMapper.createObjectNode();
+      ObjectNode configurationJSON = root.putObject("Reachability Grid Data");
+
+      configurationJSON.put("spacingXYZ", gridData[0]);
+      configurationJSON.put("gridSizeYaw", gridData[1]);
+      configurationJSON.put("yawDivisions", gridData[2]);
+      return root;
+   }
+
+   public static boolean isReachabilityFile(File file)
+   {
+      if (file == null || !file.exists() || !file.isFile())
+      {
+         return false;
+      }
 
       try
       {
-         Scanner scanner = new Scanner(new File(filename));
-
-         // Read grid spacing
-         String gridData = scanner.nextLine();
-         String[] gridDataStrings = gridData.split(",");
-         double spacingXY = Double.parseDouble(gridDataStrings[0]);
-         int yawDivisions = Integer.parseInt(gridDataStrings[1]);
-         double yawSpacing = Double.parseDouble(gridDataStrings[2]);
-         reachabilityData.setGridData(spacingXY, yawSpacing, yawDivisions);
-
-         while(scanner.hasNextLine())
-         {
-            String line = scanner.nextLine();
-
-            // Parse to get frame position, orientation and feasibility boolean
-            String[] data = line.split(",");
-            int xIndex = Integer.parseInt(data[0]);
-            int yIndex = Integer.parseInt(data[1]);
-            int zIndex = Integer.parseInt(data[2]);
-            int yawIndex = Integer.parseInt(data[3]);
-            double reachabilityValue = Double.parseDouble(data[4]);
-            StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, zIndex, yawIndex);
-
-            reachabilityData.getLegReachabilityMap().put(latticePoint, reachabilityValue);
-         }
-         scanner.close();
-         LogTools.info("Done loading from file");
-         return reachabilityData;
+         return loadReachabilityScript(new FileInputStream(file));
       }
       catch (FileNotFoundException e)
       {
-         e.printStackTrace();
+         return false;
       }
-      return null;
    }
 
+   public static boolean loadReachabilityScript(InputStream inputStream)
+   {
+      if (inputStream == null)
+      {
+         return false;
+      }
+
+      try
+      {
+         ObjectMapper objectMapper = new ObjectMapper();
+         JsonNode jsonNode = objectMapper.readTree(inputStream);
+
+         JsonNode auxiliaryData = null;
+         try
+         {
+            KinematicsToolboxSnapshotDescription.fromJSON(jsonNode.get(0));
+         }
+         catch (RuntimeException e)
+         {
+            auxiliaryData = jsonNode.get(1);
+         }
+
+         if (auxiliaryData != null)
+         {
+            JsonNode auxDataNode = auxiliaryData.get("Auxiliary Data");
+            if (!auxDataNode.isNull());
+            {
+               JsonNode gridDataNode = auxDataNode.get("Reachability Grid Data");
+               if (!gridDataNode.isNull()) return true;
+            }
+         }
+      }
+      catch (IOException e)
+      {
+         return false;
+      }
+      return false;
+   }
 }
