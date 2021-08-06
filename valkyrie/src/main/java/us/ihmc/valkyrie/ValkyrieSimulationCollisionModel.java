@@ -19,7 +19,6 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
@@ -221,6 +220,143 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
          }
       }
 
+      collidables.addAll(setupLegCollisions(multiBodySystem, helper));
+
       return collidables;
    }
+
+   private List<Collidable> setupLegCollisions(MultiBodySystemBasics multiBodySystem, CollidableHelper helper)
+   {
+      List<Collidable> collidables = new ArrayList<>();
+      double modelScale = jointMap.getModelScale();
+
+      String leftFootName = "LeftFoot";
+      String rightFootName = "RightFoot";
+
+      // Collision between feet
+      { // Left foot
+         long collisionMask = helper.getCollisionMask(leftFootName);
+         long collisionGroup = helper.createCollisionGroup(rightFootName);
+
+         JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_ROLL), multiBodySystem);
+         MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
+
+         // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
+         FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, 0.275, 0.16, 0.095);
+         footShape.getSize().scale(modelScale);
+         footShape.setMargins(1.0e-5, 4.0e-4);
+         footShape.getPosition().set(0.044, 0.0, -0.042);
+         footShape.getPosition().scale(modelScale);
+         collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
+      }
+
+      { // Right foot
+         long collisionMask = helper.getCollisionMask(rightFootName);
+         long collisionGroup = helper.createCollisionGroup(leftFootName);
+
+         JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_ROLL), multiBodySystem);
+         MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
+
+         // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
+         FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, 0.275, 0.16, 0.095);
+         footShape.getSize().scale(modelScale);
+         footShape.setMargins(1.0e-5, 4.0e-4);
+         footShape.getPosition().set(0.044, 0.0, -0.042);
+         footShape.getPosition().scale(modelScale);
+         collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
+      }
+
+      // Collision between thighs
+      String leftThighName = "LeftThigh";
+      String rightThighName = "RightThigh";
+
+      { // Left thigh
+         long collisionMask = helper.getCollisionMask(leftThighName);
+         long collisionGroup = helper.createCollisionGroup(rightThighName);
+
+         RobotSide robotSide = RobotSide.LEFT;
+         RigidBodyBasics thigh = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem)
+                                                    .getPredecessor();
+         MovingReferenceFrame thighFrame = thigh.getParentJoint().getFrameAfterJoint();
+         FrameCapsule3D thighUpperShape = new FrameCapsule3D(thighFrame, 0.2 * modelScale, 0.1 * modelScale);
+         thighUpperShape.getPosition().set(0.0195, robotSide.negateIfRightSide(0.086), -0.093);
+         thighUpperShape.getPosition().scale(modelScale);
+         thighUpperShape.getAxis().set(new Vector3D(-0.15, robotSide.negateIfRightSide(-0.05), 1.0));
+         collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighUpperShape));
+
+         FrameCapsule3D thighFrontShape = new FrameCapsule3D(thighFrame, 0.15 * modelScale, 0.095 * modelScale);
+         thighFrontShape.getPosition().set(0.0424, robotSide.negateIfRightSide(0.081), -0.258);
+         thighFrontShape.getPosition().scale(modelScale);
+         thighFrontShape.getAxis().set(new Vector3D(0.1, 0.0, 1.0));
+         collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighFrontShape));
+
+         FrameCapsule3D thighLowerShape = new FrameCapsule3D(thighFrame, 0.25 * modelScale, 0.09 * modelScale);
+         thighLowerShape.getPosition().set(0.017, robotSide.negateIfRightSide(0.091), -0.288);
+         thighLowerShape.getPosition().scale(modelScale);
+         thighLowerShape.getAxis().set(new Vector3D(0.1, robotSide.negateIfRightSide(0.05), 1.0));
+         collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighLowerShape));
+      }
+
+      { // Right thigh
+         long collisionMask = helper.getCollisionMask(rightThighName);
+         long collisionGroup = helper.createCollisionGroup(leftThighName);
+
+         RobotSide robotSide = RobotSide.RIGHT;
+         RigidBodyBasics thigh = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem)
+                                                    .getPredecessor();
+         MovingReferenceFrame thighFrame = thigh.getParentJoint().getFrameAfterJoint();
+         FrameCapsule3D thighUpperShape = new FrameCapsule3D(thighFrame, 0.2 * modelScale, 0.1 * modelScale);
+         thighUpperShape.getPosition().set(0.0195, robotSide.negateIfRightSide(0.086), -0.093);
+         thighUpperShape.getPosition().scale(modelScale);
+         thighUpperShape.getAxis().set(new Vector3D(-0.15, robotSide.negateIfRightSide(-0.05), 1.0));
+         collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighUpperShape));
+
+         FrameCapsule3D thighFrontShape = new FrameCapsule3D(thighFrame, 0.15 * modelScale, 0.095 * modelScale);
+         thighFrontShape.getPosition().set(0.0424, robotSide.negateIfRightSide(0.081), -0.258);
+         thighFrontShape.getPosition().scale(modelScale);
+         thighFrontShape.getAxis().set(new Vector3D(0.1, 0.0, 1.0));
+         collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighFrontShape));
+
+         FrameCapsule3D thighLowerShape = new FrameCapsule3D(thighFrame, 0.25 * modelScale, 0.09 * modelScale);
+         thighLowerShape.getPosition().set(0.017, robotSide.negateIfRightSide(0.091), -0.288);
+         thighLowerShape.getPosition().scale(modelScale);
+         thighLowerShape.getAxis().set(new Vector3D(0.1, robotSide.negateIfRightSide(0.05), 1.0));
+         collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighLowerShape));
+      }
+
+      // Collision between shins
+      String leftShinName = "LeftShin";
+      String rightShinName = "RightShin";
+
+      { // Left Shin
+         long collisionMask = helper.getCollisionMask(leftShinName);
+         long collisionGroup = helper.createCollisionGroup(rightShinName);
+         RobotSide robotSide = RobotSide.LEFT;
+
+         RigidBodyBasics shin = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem).getSuccessor();
+         MovingReferenceFrame shinFrame = shin.getParentJoint().getFrameAfterJoint();
+         FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.3 * modelScale, 0.08 * modelScale);
+         shinShape.getPosition().set(0.008, 0.0, -0.189);
+         shinShape.getPosition().scale(modelScale);
+         shinShape.getAxis().set(new Vector3D(0.1, 0.0, 1.0));
+         collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape));
+      }
+
+      { // Right Shin
+         long collisionMask = helper.getCollisionMask(rightThighName);
+         long collisionGroup = helper.createCollisionGroup(leftThighName);
+         RobotSide robotSide = RobotSide.RIGHT;
+
+         RigidBodyBasics shin = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem).getSuccessor();
+         MovingReferenceFrame shinFrame = shin.getParentJoint().getFrameAfterJoint();
+         FrameCapsule3D shinShape = new FrameCapsule3D(shinFrame, 0.3 * modelScale, 0.08 * modelScale);
+         shinShape.getPosition().set(0.008, 0.0, -0.189);
+         shinShape.getPosition().scale(modelScale);
+         shinShape.getAxis().set(new Vector3D(0.1, 0.0, 1.0));
+         collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape));
+      }
+
+      return collidables;
+   }
+
 }
