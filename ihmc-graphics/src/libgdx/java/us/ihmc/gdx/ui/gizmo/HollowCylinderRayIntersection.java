@@ -27,6 +27,7 @@ public class HollowCylinderRayIntersection
       cylinder.getPosition().addZ(zOffset);
       cylinder.applyTransform(transform);
 
+      cylinderAxis.getPoint().setToZero();
       cylinderAxis.getDirection().set(Axis3D.Z);
       cylinderAxis.applyTransform(transform);
 
