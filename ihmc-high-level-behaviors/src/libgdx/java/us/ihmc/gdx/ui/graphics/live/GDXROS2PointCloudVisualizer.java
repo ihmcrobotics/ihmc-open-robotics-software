@@ -22,6 +22,8 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements RenderableProvider
 {
+   private static final int MAX_POINTS = 200000;
+
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
    private final ResettableExceptionHandlingExecutorService threadQueue;
@@ -92,7 +94,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    public void create()
    {
       super.create();
-      pointCloudRenderer.create(50000);
+      pointCloudRenderer.create(MAX_POINTS);
    }
 
    @Override
