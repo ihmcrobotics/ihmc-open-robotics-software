@@ -7,15 +7,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.nio.FileTools;
 
 public class MultiContactScriptWriter
 {
    private File scriptFile = null;
    private final List<KinematicsToolboxSnapshotDescription> messagesToWrite = new ArrayList<>();
+   private JsonNode auxiliaryData = null;
 
    public MultiContactScriptWriter()
    {
@@ -68,9 +71,19 @@ public class MultiContactScriptWriter
       messagesToWrite.add(description);
    }
 
+   public void addAuxiliaryData(JsonNode auxiliaryData)
+   {
+      this.auxiliaryData = auxiliaryData;
+   }
+
    public boolean isEmpty()
    {
       return messagesToWrite.isEmpty();
+   }
+
+   public KinematicsToolboxSnapshotDescription getMostRecentMessage()
+   {
+      return messagesToWrite.get(messagesToWrite.size()-1);
    }
 
    public boolean removeLast()
@@ -90,12 +103,22 @@ public class MultiContactScriptWriter
          printStream = new PrintStream(scriptFile);
          JsonFactory jsonFactory = new JsonFactory();
          ObjectMapper objectMapper = new ObjectMapper(jsonFactory);
-         ArrayNode arrayNode = objectMapper.createArrayNode();
+         ArrayNode script = objectMapper.createArrayNode();
 
+         ObjectNode auxiliaryDataNode = null;
+         if (auxiliaryData != null)
+         {
+            auxiliaryDataNode = objectMapper.createObjectNode();
+            auxiliaryDataNode.set("Auxiliary Data", auxiliaryData);
+         }
+
+         ArrayNode arrayNode = objectMapper.createArrayNode();
          for (KinematicsToolboxSnapshotDescription message : messagesToWrite)
             arrayNode.add(message.toJSON(objectMapper));
 
-         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, arrayNode);
+         script.add(arrayNode);
+         script.add(auxiliaryDataNode);
+         objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, script);
          printStream.close();
          scriptFile = null;
          return true;
