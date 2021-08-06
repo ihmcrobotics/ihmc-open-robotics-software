@@ -60,6 +60,7 @@ public class RosTools
    public static final String MAPSENSE_CONFIGURATION = "/map/config";
    // See https://www.stereolabs.com/docs/ros/zed-node/
    public static final String ZED2_LEFT_EYE_VIDEO_COMPRESSED = "/zed/zed_node/left/image_rect_color/compressed";
+   public static final String ZED2_POINT_CLOUD = "/zed/zed_node/point_cloud/cloud_registered";
 
    public static RosMainNode createRosNode(String uri, String name)
    {
