@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Or
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.OrientationTrajectoryConstructor;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
@@ -16,23 +15,15 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
-import us.ihmc.robotics.math.trajectories.core.FramePolynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.interfaces.FramePolynomial3DBasics;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.awt.*;
 import java.util.List;
-
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 /**
  * This class is meant to handle the trajectory from the MPC module. It includes the trajectory for the full planning window, which is overwritten with the
@@ -49,6 +40,7 @@ public class OrientationMPCTrajectoryHandler
 
    private final RecyclingArrayList<FrameOrientation3DBasics> discretizedReferenceOrientation = new RecyclingArrayList<>(FrameQuaternion::new);
    private final RecyclingArrayList<FrameVector3DBasics> discretizedReferenceAngularVelocity = new RecyclingArrayList<>(FrameVector3D::new);
+   private final RecyclingArrayList<FrameVector3DBasics> discretizedInternalAngularMomentumRate = new RecyclingArrayList<>(FrameVector3D::new);
 
    private final RecyclingArrayList<FrameQuaternionBasics> desiredOrientationSolution = new RecyclingArrayList<>(FrameQuaternion::new);
    private final RecyclingArrayList<FrameVector3DBasics> desiredAngularVelocitySolution = new RecyclingArrayList<>(FrameVector3D::new);
@@ -216,6 +208,7 @@ public class OrientationMPCTrajectoryHandler
    {
       discretizedReferenceOrientation.clear();
       discretizedReferenceAngularVelocity.clear();
+      discretizedInternalAngularMomentumRate.clear();
 
       for (int segment = 0; segment < indexHandler.getNumberOfSegments(); segment++)
       {
@@ -229,6 +222,12 @@ public class OrientationMPCTrajectoryHandler
 
             discretizedReferenceOrientation.add().set(referenceOrientationCalculator.getDesiredOrientation());
             discretizedReferenceAngularVelocity.add().set(referenceOrientationCalculator.getDesiredAngularVelocity());
+
+            if (hasInternalAngularMomentum())
+            {
+               internalAngularMomentumTrajectory.compute(currentTimeInState);
+               discretizedInternalAngularMomentumRate.add().set(internalAngularMomentumTrajectory.getVelocity());
+            }
          }
       }
    }
@@ -294,6 +293,16 @@ public class OrientationMPCTrajectoryHandler
       internalAngularMomentumTrajectory.initialize();
    }
 
+   public FrameOrientation3DReadOnly getReferenceBodyOrientation(int index)
+   {
+      return discretizedReferenceOrientation.get(index);
+   }
+
+   public FrameVector3DReadOnly getReferenceBodyVelocity(int index)
+   {
+      return discretizedReferenceAngularVelocity.get(index);
+   }
+
    public FrameOrientation3DReadOnly getReferenceBodyOrientation()
    {
       return referenceOrientationCalculator.getDesiredOrientation();
@@ -332,5 +341,10 @@ public class OrientationMPCTrajectoryHandler
    public FrameVector3DReadOnly getDesiredInternalAngularMomentumRate()
    {
       return internalAngularMomentumTrajectory.getVelocity();
+   }
+
+   public FrameVector3DReadOnly getDesiredInternalAngularMomentumRate(int index)
+   {
+      return discretizedReferenceAngularVelocity.get(index);
    }
 }
