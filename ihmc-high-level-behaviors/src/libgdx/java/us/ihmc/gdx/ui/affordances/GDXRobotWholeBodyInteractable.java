@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.gdx.imgui.ImGuiPanel;
@@ -14,7 +15,6 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -28,6 +28,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 {
    private final RobotCollisionModel robotSelfCollisionModel;
    private final RobotCollisionModel robotEnvironmentCollisionModel;
+   private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2Helper;
 
@@ -43,11 +44,13 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
    public GDXRobotWholeBodyInteractable(RobotCollisionModel robotSelfCollisionModel,
                                         RobotCollisionModel robotEnvironmentCollisionModel,
+                                        DRCRobotModel robotModel,
                                         ROS2SyncedRobotModel syncedRobot,
                                         ROS2ControllerHelper ros2Helper)
    {
       this.robotSelfCollisionModel = robotSelfCollisionModel;
       this.robotEnvironmentCollisionModel = robotEnvironmentCollisionModel;
+      this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.ros2Helper = ros2Helper;
    }
@@ -83,11 +86,10 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                interactableFoot.create(baseUI.get3DSceneManager().getCamera3D());
                footInteractables.put(side, interactableFoot);
             }
-
          }
       }
 
-      walkPathControlRing.create(baseUI, syncedRobot);
+      walkPathControlRing.create(baseUI, robotModel, syncedRobot, ros2Helper);
    }
 
    public void update()
