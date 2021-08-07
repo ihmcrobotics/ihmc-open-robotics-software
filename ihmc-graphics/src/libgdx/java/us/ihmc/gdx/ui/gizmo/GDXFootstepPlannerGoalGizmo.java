@@ -79,6 +79,8 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private final Point3D dragPoint = new Point3D();
    private final Vector3D dragVector = new Vector3D();
    private boolean hollowCylinderIntersects;
+   private boolean showArrows = true;
+   private boolean highlightingEnabled = true;
 
    public GDXFootstepPlannerGoalGizmo()
    {
@@ -223,58 +225,60 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
          closestCollisionSelection = 0;
          closestCollision.set(hollowCylinderIntersection.getClosestIntersection());
       }
-
-      positiveXArrowIntersection.setup(arrowWidth.get(),
-                                       arrowHeight.get(),
-                                       discThickness.get(),
-                                       new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, 0.0),
-                                       new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                       transform);
-      distance = positiveXArrowIntersection.intersect(pickRay, 100);
-      if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+      if (showArrows)
       {
-         closestCollisionDistance = distance;
-         closestCollisionSelection = 1;
-         closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
-      }
-      positiveYArrowIntersection.setup(arrowWidth.get(),
-                                       arrowHeight.get(),
-                                       discThickness.get(),
-                                       new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), 0.0),
-                                       new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
-                                       transform);
-      distance = positiveYArrowIntersection.intersect(pickRay, 100);
-      if (!Double.isNaN(distance) && distance < closestCollisionDistance)
-      {
-         closestCollisionDistance = distance;
-         closestCollisionSelection = 2;
-         closestCollision.set(positiveYArrowIntersection.getClosestIntersection());
-      }
-      negativeXArrowIntersection.setup(arrowWidth.get(),
-                                       arrowHeight.get(),
-                                       discThickness.get(),
-                                       new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, 0.0),
-                                       new YawPitchRoll(QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                       transform);
-      distance = negativeXArrowIntersection.intersect(pickRay, 100);
-      if (!Double.isNaN(distance) && distance < closestCollisionDistance)
-      {
-         closestCollisionDistance = distance;
-         closestCollisionSelection = 3;
-         closestCollision.set(negativeXArrowIntersection.getClosestIntersection());
-      }
-      negativeYArrowIntersection.setup(arrowWidth.get(),
-                                       arrowHeight.get(),
-                                       discThickness.get(),
-                                       new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), 0.0),
-                                       new YawPitchRoll(0.0, 0.0, QUARTER_TURN),
-                                       transform);
-      distance = negativeYArrowIntersection.intersect(pickRay, 100);
-      if (!Double.isNaN(distance) && distance < closestCollisionDistance)
-      {
-         closestCollisionDistance = distance;
-         closestCollisionSelection = 4;
-         closestCollision.set(negativeYArrowIntersection.getClosestIntersection());
+         positiveXArrowIntersection.setup(arrowWidth.get(),
+                                          arrowHeight.get(),
+                                          discThickness.get(),
+                                          new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, 0.0),
+                                          new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
+                                          transform);
+         distance = positiveXArrowIntersection.intersect(pickRay, 100);
+         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+         {
+            closestCollisionDistance = distance;
+            closestCollisionSelection = 1;
+            closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
+         }
+         positiveYArrowIntersection.setup(arrowWidth.get(),
+                                          arrowHeight.get(),
+                                          discThickness.get(),
+                                          new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), 0.0),
+                                          new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
+                                          transform);
+         distance = positiveYArrowIntersection.intersect(pickRay, 100);
+         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+         {
+            closestCollisionDistance = distance;
+            closestCollisionSelection = 2;
+            closestCollision.set(positiveYArrowIntersection.getClosestIntersection());
+         }
+         negativeXArrowIntersection.setup(arrowWidth.get(),
+                                          arrowHeight.get(),
+                                          discThickness.get(),
+                                          new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, 0.0),
+                                          new YawPitchRoll(QUARTER_TURN, 0.0, -QUARTER_TURN),
+                                          transform);
+         distance = negativeXArrowIntersection.intersect(pickRay, 100);
+         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+         {
+            closestCollisionDistance = distance;
+            closestCollisionSelection = 3;
+            closestCollision.set(negativeXArrowIntersection.getClosestIntersection());
+         }
+         negativeYArrowIntersection.setup(arrowWidth.get(),
+                                          arrowHeight.get(),
+                                          discThickness.get(),
+                                          new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), 0.0),
+                                          new YawPitchRoll(0.0, 0.0, QUARTER_TURN),
+                                          transform);
+         distance = negativeYArrowIntersection.intersect(pickRay, 100);
+         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+         {
+            closestCollisionDistance = distance;
+            closestCollisionSelection = 4;
+            closestCollision.set(negativeYArrowIntersection.getClosestIntersection());
+         }
       }
 
       updateMaterialHighlighting();
@@ -282,11 +286,11 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 
    private void updateMaterialHighlighting()
    {
-      discModel.setMaterial(closestCollisionSelection == 0 ? highlightedDiscMaterial : normalDiscMaterial);
-      positiveXArrowModel.setMaterial(closestCollisionSelection == 1 ? highlightedArrowMaterial : normalArrowMaterial);
-      positiveYArrowModel.setMaterial(closestCollisionSelection == 2 ? highlightedArrowMaterial : normalArrowMaterial);
-      negativeXArrowModel.setMaterial(closestCollisionSelection == 3 ? highlightedArrowMaterial : normalArrowMaterial);
-      negativeYArrowModel.setMaterial(closestCollisionSelection == 4 ? highlightedArrowMaterial : normalArrowMaterial);
+      discModel.setMaterial(highlightingEnabled && closestCollisionSelection == 0 ? highlightedDiscMaterial : normalDiscMaterial);
+      positiveXArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 1 ? highlightedArrowMaterial : normalArrowMaterial);
+      positiveYArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 2 ? highlightedArrowMaterial : normalArrowMaterial);
+      negativeXArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 3 ? highlightedArrowMaterial : normalArrowMaterial);
+      negativeYArrowModel.setMaterial(highlightingEnabled && closestCollisionSelection == 4 ? highlightedArrowMaterial : normalArrowMaterial);
    }
 
    public ImGuiPanel createTunerPanel(String name)
@@ -333,10 +337,13 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       discModel.getOrCreateModelInstance().getRenderables(renderables, pool);
-      positiveXArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
-      positiveYArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
-      negativeXArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
-      negativeYArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
+      if (showArrows)
+      {
+         positiveXArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
+         positiveYArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
+         negativeXArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
+         negativeYArrowModel.getOrCreateModelInstance().getRenderables(renderables, pool);
+      }
    }
 
    public Pose3DReadOnly getPose()
@@ -353,5 +360,15 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    public boolean getHollowCylinderIntersects()
    {
       return hollowCylinderIntersects;
+   }
+
+   public void setShowArrows(boolean showArrows)
+   {
+      this.showArrows = showArrows;
+   }
+
+   public void setHighlightingEnabled(boolean highlightingEnabled)
+   {
+      this.highlightingEnabled = highlightingEnabled;
    }
 }
