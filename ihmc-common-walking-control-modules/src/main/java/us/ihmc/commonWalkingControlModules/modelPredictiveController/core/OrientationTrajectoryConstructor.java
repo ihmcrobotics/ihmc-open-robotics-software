@@ -74,6 +74,8 @@ public class OrientationTrajectoryConstructor
 
       double trajectoryStartTime = previewWindowContactSequence.get(0).getStartTime();
 
+      int globalTick = 0;
+
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {
          OrientationTrajectoryCommand command = trajectoryCommandsForSegments.add();
@@ -90,19 +92,18 @@ public class OrientationTrajectoryConstructor
          for (int tick = 0; tick < ticksInSegment; tick++)
          {
             linearTrajectoryHandler.compute(trajectoryStartTime);
-            orientationTrajectoryHandler.compute(trajectoryStartTime);
 
-            FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation();
+            FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation(globalTick);
             // angular velocity in body frame
-            referenceBodyAngularVelocityInBodyFrame.set(orientationTrajectoryHandler.getReferenceBodyVelocity());
+            referenceBodyAngularVelocityInBodyFrame.set(orientationTrajectoryHandler.getReferenceBodyVelocity(globalTick));
             referenceOrientation.transform(referenceBodyAngularVelocityInBodyFrame);
 
             if (orientationTrajectoryHandler.hasInternalAngularMomentum())
             {
-               desiredInternalAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
-//               if (contactPlaneHelpers.get(segmentNumber).size() > 0)
-//                  desiredNetAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
-//               else
+               desiredInternalAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate(globalTick));
+               if (contactPlaneHelpers.get(segmentNumber).size() > 0)
+                  desiredNetAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate(globalTick));
+               else
                   desiredNetAngularMomentumRate.setToZero();
             }
             else
@@ -174,6 +175,7 @@ public class OrientationTrajectoryConstructor
                   throw new RuntimeException("Poopy. Discrete C should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getDiscreteCMatrix()));
             }
 
+            globalTick++;
             trajectoryStartTime += tickDuration;
             timeInSegment += tickDuration;
          }
