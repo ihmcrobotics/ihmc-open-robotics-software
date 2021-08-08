@@ -72,7 +72,7 @@ public class OrientationTrajectoryConstructor
 
       trajectoryCommandsForSegments.clear();
 
-      double trajectoryStartTime = previewWindowContactSequence.get(0).getStartTime();
+      double globalTime = previewWindowContactSequence.get(0).getStartTime();
 
       int globalTick = 0;
 
@@ -91,7 +91,7 @@ public class OrientationTrajectoryConstructor
 
          for (int tick = 0; tick < ticksInSegment; tick++)
          {
-            linearTrajectoryHandler.compute(trajectoryStartTime);
+            linearTrajectoryHandler.compute(globalTime);
 
             FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation(globalTick);
             // angular velocity in body frame
@@ -176,7 +176,7 @@ public class OrientationTrajectoryConstructor
             }
 
             globalTick++;
-            trajectoryStartTime += tickDuration;
+            globalTime += tickDuration;
             timeInSegment += tickDuration;
          }
       }

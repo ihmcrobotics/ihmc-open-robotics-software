@@ -34,6 +34,11 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
       orientationDt.set(intermediateDt);
    }
 
+   public void setOrientationDt(double orientationDt)
+   {
+      this.orientationDt.set(orientationDt);
+   }
+
    /**
     * Computes all the index values from the contact sequence directly.
     */
@@ -70,6 +75,10 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
 
          totalProblemSize += variablesPerOrientationTick;
       }
+
+      orientationStartIndices.add(totalProblemSize);
+      totalNumberOfOrientationTicks += variablesPerOrientationTick;
+      totalProblemSize += variablesPerOrientationTick;
    }
 
    public YoRegistry getRegistry()
