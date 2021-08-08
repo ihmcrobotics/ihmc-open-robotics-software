@@ -168,7 +168,7 @@ public class GDXWalkPathControlRing
             queueFootstepPlan();
          }
       }
-      if (selected && mouseIntersectsRing && input.isDragging(ImGuiMouseButton.Right))
+      if (selected && footstepPlannerGoalGizmo.isBeingDragged())
       {
          queueFootstepPlan();
       }

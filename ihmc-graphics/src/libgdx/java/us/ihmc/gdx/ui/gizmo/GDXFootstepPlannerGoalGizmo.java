@@ -13,13 +13,12 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiPanel;
@@ -71,13 +70,11 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    /** The main, source, true, base transform that this thing represents. */
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private boolean dragging = false;
    private FocusBasedGDXCamera camera3D;
    private final Point3D cameraPosition = new Point3D();
    private double lastDistanceToCamera = -1.0;
-   private final Plane3D dragPlane = new Plane3D();
-   private final Point3D dragPoint = new Point3D();
-   private final Vector3D dragVector = new Vector3D();
+   private final Plane3DMouseDragAlgorithm planeDragAlgorithm = new Plane3DMouseDragAlgorithm();
+   private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
    private boolean hollowCylinderIntersects;
    private boolean positiveXArrowIntersects;
    private boolean positiveYArrowIntersects;
@@ -85,6 +82,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private boolean negativeYArrowIntersects;
    private boolean showArrows = true;
    private boolean highlightingEnabled = true;
+   private boolean isBeingDragged;
 
    public GDXFootstepPlannerGoalGizmo()
    {
@@ -158,36 +156,42 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    {
       updateFromSourceTransform();
 
-      boolean rightMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Right);
+      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
+      boolean middleMouseDragging = input.isDragging(ImGuiMouseButton.Middle);
+      boolean middleMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Middle);
       boolean isWindowHovered = ImGui.isWindowHovered();
+      isBeingDragged = false;
 
-      if (!rightMouseDown)
-      {
-         dragging = false;
-      }
-      if (isWindowHovered && !dragging)
+      if (isWindowHovered && !rightMouseDragging && !middleMouseDragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
 
-         if (rightMouseDown)
+         if (middleMouseDown && closestCollisionSelection > -1)
          {
-            dragging = true;
+            clockFaceDragAlgorithm.reset();
          }
       }
-      if (dragging)
+      if (rightMouseDragging || middleMouseDragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
          if (closestCollisionSelection == 0)
          {
-            dragPlane.set(closestCollision, Axis3D.Z);
-
-            dragPlane.intersectionWith(pickRay, dragPoint);
-            dragVector.sub(dragPoint, closestCollision);
-
-            transform.getTranslation().add(dragVector);
-            closestCollision.add(dragVector);
+            isBeingDragged = true;
+            if (rightMouseDragging)
+            {
+               Vector3DReadOnly planarMotion = planeDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z);
+               transform.getTranslation().add(planarMotion);
+               closestCollision.add(planarMotion);
+            }
+            else // middleMouseDragging
+            {
+               if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, Axis3D.Z, transform))
+               {
+                  clockFaceDragAlgorithm.getMotion().transform(transform.getRotation());
+               }
+            }
          }
       }
 
@@ -412,5 +416,10 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    public void setHighlightingEnabled(boolean highlightingEnabled)
    {
       this.highlightingEnabled = highlightingEnabled;
+   }
+
+   public boolean isBeingDragged()
+   {
+      return isBeingDragged;
    }
 }
