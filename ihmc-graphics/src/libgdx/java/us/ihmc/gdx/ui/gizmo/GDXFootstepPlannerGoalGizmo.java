@@ -79,6 +79,10 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private final Point3D dragPoint = new Point3D();
    private final Vector3D dragVector = new Vector3D();
    private boolean hollowCylinderIntersects;
+   private boolean positiveXArrowIntersects;
+   private boolean positiveYArrowIntersects;
+   private boolean negativeXArrowIntersects;
+   private boolean negativeYArrowIntersects;
    private boolean showArrows = true;
    private boolean highlightingEnabled = true;
 
@@ -213,6 +217,10 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
    {
       hollowCylinderIntersects = false;
+      positiveXArrowIntersects = false;
+      positiveYArrowIntersects = false;
+      negativeXArrowIntersects = false;
+      negativeYArrowIntersects = false;
       closestCollisionSelection = -1;
       double closestCollisionDistance = Double.POSITIVE_INFINITY;
 
@@ -236,6 +244,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
          distance = positiveXArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
+            positiveXArrowIntersects = true;
             closestCollisionDistance = distance;
             closestCollisionSelection = 1;
             closestCollision.set(positiveXArrowIntersection.getClosestIntersection());
@@ -249,6 +258,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
          distance = positiveYArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
+            positiveYArrowIntersects = true;
             closestCollisionDistance = distance;
             closestCollisionSelection = 2;
             closestCollision.set(positiveYArrowIntersection.getClosestIntersection());
@@ -262,6 +272,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
          distance = negativeXArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
+            negativeXArrowIntersects = true;
             closestCollisionDistance = distance;
             closestCollisionSelection = 3;
             closestCollision.set(negativeXArrowIntersection.getClosestIntersection());
@@ -275,6 +286,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
          distance = negativeYArrowIntersection.intersect(pickRay, 100);
          if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
+            negativeYArrowIntersects = true;
             closestCollisionDistance = distance;
             closestCollisionSelection = 4;
             closestCollision.set(negativeYArrowIntersection.getClosestIntersection());
@@ -357,9 +369,39 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       return transform;
    }
 
+   public boolean getIntersectsAny()
+   {
+      return hollowCylinderIntersects || positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects;
+   }
+
+   public boolean getIntersectsAnyArrow()
+   {
+      return positiveXArrowIntersects || positiveYArrowIntersects || negativeXArrowIntersects || negativeYArrowIntersects;
+   }
+
    public boolean getHollowCylinderIntersects()
    {
       return hollowCylinderIntersects;
+   }
+
+   public boolean getPositiveXArrowIntersects()
+   {
+      return positiveXArrowIntersects;
+   }
+
+   public boolean getPositiveYArrowIntersects()
+   {
+      return positiveYArrowIntersects;
+   }
+
+   public boolean getNegativeXArrowIntersects()
+   {
+      return negativeXArrowIntersects;
+   }
+
+   public boolean getNegativeYArrowIntersects()
+   {
+      return negativeYArrowIntersects;
    }
 
    public void setShowArrows(boolean showArrows)

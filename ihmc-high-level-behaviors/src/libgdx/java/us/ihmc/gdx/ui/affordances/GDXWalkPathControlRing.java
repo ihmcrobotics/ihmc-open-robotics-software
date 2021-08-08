@@ -12,6 +12,8 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -41,7 +43,7 @@ public class GDXWalkPathControlRing
    private final GDXFootstepPlannerGoalGizmo footstepPlannerGoalGizmo = new GDXFootstepPlannerGoalGizmo();
    private boolean selected = false;
    private boolean modified = false;
-   private boolean mouseIntersects;
+   private boolean mouseIntersectsRing;
    private ROS2SyncedRobotModel syncedRobot;
    private ROS2ControllerHelper ros2Helper;
    private MovingReferenceFrame midFeetZUpFrame;
@@ -56,12 +58,16 @@ public class GDXWalkPathControlRing
    private final FramePose3D leftGoalFootPose = new FramePose3D();
    private final FramePose3D rightGoalFootPose = new FramePose3D();
    private ReferenceFrame goalFrame;
+   private final FramePose3D goalPose = new FramePose3D();
+   private final FramePose3D midFeetZUpPose = new FramePose3D();
+   private final FramePose3D startPose = new FramePose3D();
    private SideDependentList<MovingReferenceFrame> footFrames;
    private final AtomicInteger footstepPlannerId = new AtomicInteger(0);
    private FootstepPlanningModule footstepPlanner;
    private GDXFootstepPlanGraphic foostepPlanGraphic;
    private double halfIdealFootstepWidth;
    private volatile FootstepPlan footstepPlan;
+   private final AxisAngle walkFacingDirection = new AxisAngle();
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2Helper)
    {
@@ -116,18 +122,19 @@ public class GDXWalkPathControlRing
       boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
 
       footstepPlannerGoalGizmo.process3DViewInput(input);
-      mouseIntersects = footstepPlannerGoalGizmo.getHollowCylinderIntersects();
+      mouseIntersectsRing = footstepPlannerGoalGizmo.getHollowCylinderIntersects();
 
-      if (!modified && mouseIntersects && leftMouseReleasedWithoutDrag)
+      if (!modified && mouseIntersectsRing && leftMouseReleasedWithoutDrag)
       {
          selected = true;
          modified = true;
+         walkFacingDirection.set(Axis3D.Z, 0.0);
       }
-      if (selected && !mouseIntersects && leftMouseReleasedWithoutDrag)
+      if (selected && !footstepPlannerGoalGizmo.getIntersectsAny() && leftMouseReleasedWithoutDrag)
       {
          selected = false;
       }
-      if (modified && mouseIntersects && leftMouseReleasedWithoutDrag)
+      if (modified && mouseIntersectsRing && leftMouseReleasedWithoutDrag)
       {
          selected = true;
       }
@@ -136,12 +143,34 @@ public class GDXWalkPathControlRing
       {
          updateStuff();
       }
-      if (selected && mouseIntersects && input.isDragging(ImGuiMouseButton.Right))
+      if (selected && leftMouseReleasedWithoutDrag)
       {
-         footstepPlanningThread.clearQueueAndExecute(() -> planFoosteps(new Pose3D(leftStanceFootPose),
-                                                                        new Pose3D(rightStanceFootPose),
-                                                                        new Pose3D(leftGoalFootPose),
-                                                                        new Pose3D(rightGoalFootPose)));
+         if (footstepPlannerGoalGizmo.getPositiveXArrowIntersects())
+         {
+            walkFacingDirection.set(Axis3D.Z, 0.0);
+         }
+         else if (footstepPlannerGoalGizmo.getPositiveYArrowIntersects())
+         {
+            walkFacingDirection.set(Axis3D.Z, Math.PI / 2.0);
+         }
+         else if (footstepPlannerGoalGizmo.getNegativeXArrowIntersects())
+         {
+            walkFacingDirection.set(Axis3D.Z, Math.PI);
+         }
+         else if (footstepPlannerGoalGizmo.getNegativeYArrowIntersects())
+         {
+            walkFacingDirection.set(Axis3D.Z, -Math.PI / 2.0);
+         }
+         if (footstepPlannerGoalGizmo.getIntersectsAnyArrow())
+         {
+            footstepPlannerGoalGizmo.getTransform().appendOrientation(walkFacingDirection);
+            updateStuff();
+            queueFootstepPlan();
+         }
+      }
+      if (selected && mouseIntersectsRing && input.isDragging(ImGuiMouseButton.Right))
+      {
+         queueFootstepPlan();
       }
       if (selected && ImGui.isKeyReleased(input.getSpaceKey()))
       {
@@ -171,19 +200,37 @@ public class GDXWalkPathControlRing
       footstepPlannerGoalGizmo.setHighlightingEnabled(modified);
    }
 
+   private void queueFootstepPlan()
+   {
+      footstepPlanningThread.clearQueueAndExecute(() -> planFoosteps(new Pose3D(leftStanceFootPose),
+                                                                     new Pose3D(rightStanceFootPose),
+                                                                     new Pose3D(leftGoalFootPose),
+                                                                     new Pose3D(rightGoalFootPose)));
+   }
+
    private void updateStuff()
    {
       goalFrame.update();
-      leftGoalFootPose.setToZero(goalFrame);
+      goalPose.setToZero(goalFrame);
+//      goalPose.appendRotation(walkFacingDirection);
+
+      leftGoalFootPose.setIncludingFrame(goalPose);
       leftGoalFootPose.getPosition().addY(halfIdealFootstepWidth);
       leftGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      rightGoalFootPose.setToZero(goalFrame);
+      rightGoalFootPose.setIncludingFrame(goalPose);
       rightGoalFootPose.getPosition().subY(halfIdealFootstepWidth);
       rightGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       leftStanceFootPose.setToZero(footFrames.get(RobotSide.LEFT));
       leftStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightStanceFootPose.setToZero(footFrames.get(RobotSide.RIGHT));
       rightStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      goalPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      midFeetZUpPose.setToZero(midFeetZUpFrame);
+      midFeetZUpPose.changeFrame(ReferenceFrame.getWorldFrame());
+      startPose.setToZero(midFeetZUpFrame);
+      startPose.changeFrame(ReferenceFrame.getWorldFrame());
+      startPose.getOrientation().set(goalPose.getOrientation());
 
       leftGoalFootstepGraphic.setPose(leftGoalFootPose);
       rightGoalFootstepGraphic.setPose(rightGoalFootPose);
@@ -197,6 +244,9 @@ public class GDXWalkPathControlRing
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
+//      footstepPlannerRequest.getBodyPathWaypoints().add(midFeetZUpPose);
+//      footstepPlannerRequest.getBodyPathWaypoints().add(startPose);
+//      footstepPlannerRequest.getBodyPathWaypoints().add(goalPose);
       footstepPlannerRequest.setStartFootPoses(leftStanceFootPose, rightStanceFootPose);
       footstepPlannerRequest.setGoalFootPoses(leftGoalFootPose, rightGoalFootPose);
       footstepPlannerRequest.setAssumeFlatGround(true);
@@ -219,7 +269,7 @@ public class GDXWalkPathControlRing
          rightGoalFootstepGraphic.getRenderables(renderables, pool);
          foostepPlanGraphic.getRenderables(renderables, pool);
       }
-      if (modified || mouseIntersects)
+      if (modified || mouseIntersectsRing)
       {
          footstepPlannerGoalGizmo.getRenderables(renderables, pool);
       }
