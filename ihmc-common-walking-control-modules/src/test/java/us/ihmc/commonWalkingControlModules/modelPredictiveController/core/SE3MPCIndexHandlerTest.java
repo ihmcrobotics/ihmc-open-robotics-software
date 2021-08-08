@@ -87,4 +87,61 @@ public class SE3MPCIndexHandlerTest
       assertEquals(2.2, timeAtEndOfThirdSegment, 1e-6);
    }
 
+   @Test
+   public void testIndicesManually()
+   {
+      SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
+      indexHandler.setOrientationDt(0.25);
+
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+
+      FramePose3D contactPose = new FramePose3D();
+
+      PreviewWindowSegment segment0 = new PreviewWindowSegment();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+
+      ContactPlaneProvider contact0 = new ContactPlaneProvider();
+      ContactPlaneProvider contact1 = new ContactPlaneProvider();
+      contact0.getTimeInterval().setInterval(0.0, 1.0);
+      contact0.addContact(contactPose, contactPolygon);
+      contact0.setStartECMPPosition(new FramePoint3D());
+      contact0.setEndECMPPosition(new FramePoint3D());
+
+      contact1.set(contact0);
+      contact1.getTimeInterval().setInterval(1.0, 1.5);
+
+      segment0.set(contact0);
+      segment1.set(contact1);
+
+      contactProviders.add(segment0);
+      contactProviders.add(segment1);
+
+      indexHandler.initialize(contactProviders);
+
+      int comCoefficients = contactPolygon.getNumberOfVertices() * LinearMPCIndexHandler.coefficientsPerRho * 4;
+      int totalSize = 2 * (LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + SE3MPCIndexHandler.variablesPerOrientationTick);
+
+
+
+      assertEquals(totalSize, indexHandler.getTotalProblemSize());
+      assertEquals(4, indexHandler.getTicksInSegment(0));
+      assertEquals(2, indexHandler.getTicksInSegment(1));
+      assertEquals(0.25, indexHandler.getTickDuration(0), 1e-5);
+      assertEquals(0.25, indexHandler.getTickDuration(1), 1e-5);
+
+
+      double timeAtStartOfSecondSegment = 0.0;
+      for (int tick = 0; tick < indexHandler.getTicksInSegment(0); tick++)
+         timeAtStartOfSecondSegment += indexHandler.getTickDuration(0);
+
+      assertEquals(1.0, timeAtStartOfSecondSegment, 1e-6);
+
+      double timeAtStartOfThirdSegment = timeAtStartOfSecondSegment;
+      for (int tick = 0; tick < indexHandler.getTicksInSegment(1); tick++)
+         timeAtStartOfThirdSegment += indexHandler.getTickDuration(1);
+
+      assertEquals(1.5, timeAtStartOfThirdSegment, 1e-6);
+   }
 }
