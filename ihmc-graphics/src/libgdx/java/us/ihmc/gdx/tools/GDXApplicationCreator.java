@@ -6,6 +6,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.vr.GDXVRManager;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 public class GDXApplicationCreator
 {
    public static void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter, Class<?> clazz)
@@ -55,6 +57,7 @@ public class GDXApplicationCreator
    {
       ThreadTools.startAThread(() ->
       {
+         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE); //This doesn't work unless you're running OpenGL 4.3 or later
          new Lwjgl3Application(applicationAdapter, applicationConfiguration);
       }, title);
    }
