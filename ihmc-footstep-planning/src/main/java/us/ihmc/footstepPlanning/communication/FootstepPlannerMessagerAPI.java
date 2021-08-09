@@ -158,8 +158,8 @@ public class FootstepPlannerMessagerAPI
 
    // Footstep planner output
    public static final Topic<Boolean> SendPlan = topic("SendPlan");
-   public static final Topic<FootstepDataListMessage> FootstepPlanResponse = topic("FootstepPlanResponse");
-   public static final Topic<FootstepDataListMessage> FootstepPlanToRobot = topic("FootstepPlanToRobot");
+   public static final Topic<FootstepDataListMessage> FootstepPlanResponse = topic("FootstepPlanResponse"); // Planner >> UI
+   public static final Topic<FootstepDataListMessage> FootstepPlanToRobot = topic("FootstepPlanToRobot"); // UI >> Robot (if operator adjusts path or overrides swing times, etc.)
    public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
    public static final Topic<Quaternion> LowLevelGoalOrientation = topic("LowLevelGoalOrientation");
    public static final Topic<PlannerOccupancyMap> OccupancyMap = topic("OccupancyMap");
