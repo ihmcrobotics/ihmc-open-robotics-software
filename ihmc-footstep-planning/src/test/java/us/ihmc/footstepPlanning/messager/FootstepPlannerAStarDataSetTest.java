@@ -3,9 +3,14 @@ package us.ihmc.footstepPlanning.messager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
+import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.pathPlanning.PlannerInput;
 
-public class MessagerAStarDataSetTest extends FootstepPlannerDataSetTest
+import java.util.Arrays;
+import java.util.function.Predicate;
+
+public class FootstepPlannerAStarDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
    protected boolean getPlanBodyPath()
@@ -23,6 +28,18 @@ public class MessagerAStarDataSetTest extends FootstepPlannerDataSetTest
    protected String getTestNamePrefix()
    {
       return "a_star";
+   }
+
+   @Override
+   protected Predicate<PlannerInput> getTestableFilter()
+   {
+      return plannerInput -> plannerInput.getStepPlannerIsTestable() && plannerInput.containsIterationLimitFlag(getTestNamePrefix().toLowerCase());
+   }
+
+   @Override
+   protected Predicate<PlannerInput> getInDevelopmentFilter()
+   {
+      return plannerInput -> plannerInput.getStepPlannerIsInDevelopment() && plannerInput.containsIterationLimitFlag(getTestNamePrefix().toLowerCase());
    }
 
    @Override
@@ -49,10 +66,8 @@ public class MessagerAStarDataSetTest extends FootstepPlannerDataSetTest
 //      20190219_182005_Wall
 //      20171215_211034_DoorwayNoCeiling
 
-      MessagerAStarDataSetTest test = new MessagerAStarDataSetTest();
-      test.VISUALIZE = true;
-      test.setup();
-      test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171215_211034_DoorwayNoCeiling);
-      test.tearDown();
+      FootstepPlannerAStarDataSetTest test = new FootstepPlannerAStarDataSetTest();
+      DataSetName dataSetName = DataSetName._20171215_211034_DoorwayNoCeiling;
+      test.testDataSets(Arrays.asList(DataSetIOTools.loadDataSet(dataSetName)));
    }
 }
