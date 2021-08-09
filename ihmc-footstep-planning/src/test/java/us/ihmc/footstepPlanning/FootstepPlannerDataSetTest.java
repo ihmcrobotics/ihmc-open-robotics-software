@@ -1,8 +1,11 @@
 package us.ihmc.footstepPlanning;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.DataSet;
@@ -20,10 +23,12 @@ import java.util.function.Predicate;
 public abstract class FootstepPlannerDataSetTest
 {
    private static final double timeout = 240.0;
-   protected static boolean DEBUG = true;
-   protected static boolean VERBOSE = true;
+   private static final boolean DEBUG = true;
+   private static final boolean VERBOSE = true;
+   private static boolean GENERATE_LOG_FOR_FAILING_TESTS = true;
 
    private final FootstepPlanningModule planningModule = new FootstepPlanningModule("testModule");
+   private final FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
 
    protected abstract boolean getPlanBodyPath();
 
@@ -34,6 +39,12 @@ public abstract class FootstepPlannerDataSetTest
    protected abstract Predicate<PlannerInput> getTestableFilter();
 
    protected abstract Predicate<PlannerInput> getInDevelopmentFilter();
+
+   @BeforeEach
+   public void setup()
+   {
+      GENERATE_LOG_FOR_FAILING_TESTS &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
 
    @Test
    public void testDataSets()
@@ -76,6 +87,11 @@ public abstract class FootstepPlannerDataSetTest
          {
             numberOfFailingTests++;
             failingDatasets.add(dataset.getName());
+
+            if (GENERATE_LOG_FOR_FAILING_TESTS)
+            {
+               logger.logSession();
+            }
          }
 
          if (DEBUG || VERBOSE)
