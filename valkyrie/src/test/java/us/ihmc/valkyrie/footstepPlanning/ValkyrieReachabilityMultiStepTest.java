@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.footstepPlanning;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -12,6 +13,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 public class ValkyrieReachabilityMultiStepTest extends AvatarReachabilityMultiStepTest
 {
    @Test
+   @Disabled
    @Override
    public void testFlatForwards() throws Exception
    {
@@ -19,6 +21,7 @@ public class ValkyrieReachabilityMultiStepTest extends AvatarReachabilityMultiSt
    }
 
    @Test
+   @Disabled
    @Override
    public void testFlatBackwards() throws Exception
    {
@@ -26,6 +29,7 @@ public class ValkyrieReachabilityMultiStepTest extends AvatarReachabilityMultiSt
    }
 
    @Test
+   @Disabled
    @Override
    public void testFlatLeft() throws Exception
    {
@@ -33,6 +37,7 @@ public class ValkyrieReachabilityMultiStepTest extends AvatarReachabilityMultiSt
    }
 
    @Test
+   @Disabled
    @Override
    public void testFlatRight() throws Exception
    {
@@ -40,6 +45,7 @@ public class ValkyrieReachabilityMultiStepTest extends AvatarReachabilityMultiSt
    }
 
    @Test
+   @Disabled
    @Override
    public void testFlatRandom() throws Exception
    {
@@ -47,6 +53,7 @@ public class ValkyrieReachabilityMultiStepTest extends AvatarReachabilityMultiSt
    }
 
    @Test
+   @Disabled
    @Override
    public void testStairsForwards() throws Exception
    {
@@ -54,6 +61,7 @@ public class ValkyrieReachabilityMultiStepTest extends AvatarReachabilityMultiSt
    }
 
    @Test
+   @Disabled
    @Override
    public void testStairsBackwards() throws Exception
    {
