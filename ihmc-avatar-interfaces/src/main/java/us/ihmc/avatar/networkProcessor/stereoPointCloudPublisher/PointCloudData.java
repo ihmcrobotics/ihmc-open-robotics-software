@@ -10,7 +10,6 @@ import sensor_msgs.PointCloud2;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanPointFilter;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
@@ -20,7 +19,7 @@ public class PointCloudData
 {
    private final long timestamp;
    private final int numberOfPoints;
-   private final Point3D[] pointCloud;
+   private Point3D[] pointCloud;
    private final List<Point3D> filteredPointCloud = new ArrayList<>();
    private final int[] colors;
 
@@ -41,7 +40,6 @@ public class PointCloudData
          colors = null;
       }
    }
-
    public PointCloudData(PointCloud2 rosPointCloud2, int maxSize, boolean hasColors)
    {
       timestamp = rosPointCloud2.getHeader().getStamp().totalNsecs();
@@ -132,9 +130,22 @@ public class PointCloudData
 
    public LidarScanMessage toLidarScanMessage(ScanPointFilter filter)
    {
+      return toLidarScanMessage(filter, null);
+   }
+
+   public LidarScanMessage toLidarScanMessage(ScanPointFilter filter, Point3D[] extraPoints)
+   {
       LidarScanMessage message = new LidarScanMessage();
       message.setRobotTimestamp(timestamp);
       message.setSensorPoseConfidence(1.0);
+
+      if (extraPoints != null)
+      {
+         Point3D[] newPointCloud = new Point3D[pointCloud.length + extraPoints.length];
+         System.arraycopy(pointCloud, 0, newPointCloud, 0, pointCloud.length);
+         System.arraycopy(extraPoints, 0, newPointCloud, pointCloud.length, extraPoints.length);
+         pointCloud = newPointCloud;
+      }
 
       if (filter == null)
       {
