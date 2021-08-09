@@ -712,6 +712,11 @@ public class BalanceManager
       return maxNumberOfStepsToConsider;
    }
 
+   public int getNumberOfStepsBeingConsidered()
+   {
+      return footsteps.size();
+   }
+
    public FramePoint2DReadOnly getDesiredCMP()
    {
       return desiredCMP;

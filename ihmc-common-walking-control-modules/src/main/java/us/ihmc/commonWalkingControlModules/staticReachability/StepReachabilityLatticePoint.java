@@ -10,7 +10,7 @@ public class StepReachabilityLatticePoint
 
    public StepReachabilityLatticePoint(double x, double y, double z, double yaw, double xyzSpacing, int yawDivisions, double yawSpacing)
    {
-      this((int) Math.round(x / xyzSpacing), (int) Math.round(y / xyzSpacing), (int) Math.round(z / xyzSpacing), Math.floorMod((int) (Math.round((yaw) / yawSpacing)), yawDivisions));
+      this((int) Math.round(x / xyzSpacing), (int) Math.round(y / xyzSpacing), (int) Math.round(z / xyzSpacing), (int) ((Math.round((yaw) / yawSpacing)) % yawDivisions));
    }
 
    public StepReachabilityLatticePoint(int xIndex, int yIndex, int zIndex, int yawIndex)
@@ -40,6 +40,16 @@ public class StepReachabilityLatticePoint
    public int getYawIndex()
    {
       return yawIndex;
+   }
+
+   public double indexDistanceFrom(StepReachabilityLatticePoint step)
+   {
+      double sum = 0;
+      sum += Math.abs(step.getXIndex() - xIndex);
+      sum += Math.abs(step.getYIndex() - yIndex);
+      sum += Math.abs(step.getZIndex() - zIndex);
+      sum += Math.abs(step.getYawIndex() - yawIndex);
+      return sum/4;
    }
 
    private static int computeHashCode(StepReachabilityLatticePoint cell)
