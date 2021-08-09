@@ -231,11 +231,10 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                            continue;
                         }
 
-                        DMatrixRMaj pointIn = new DMatrixRMaj(4, 1);
+                        DMatrixRMaj pointIn = new DMatrixRMaj(3, 1);
                         pointIn.set(0, 0, point3D.getX());
                         pointIn.set(1, 0, point3D.getY());
                         pointIn.set(2, 0, point3D.getZ());
-                        pointIn.set(3, 0, 1);
 
                         DMatrixRMaj pointOut = new DMatrixRMaj(0);
                         CommonOps_DDRM.mult(projectionMatrix, pointIn, pointOut);
