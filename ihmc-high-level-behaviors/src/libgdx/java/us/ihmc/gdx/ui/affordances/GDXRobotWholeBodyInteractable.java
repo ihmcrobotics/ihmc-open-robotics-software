@@ -40,6 +40,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
 
    private final SideDependentList<GDXInteractableFoot> footInteractables = new SideDependentList<>();
+   private GDXInteractablePelvis pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
 
    public GDXRobotWholeBodyInteractable(RobotCollisionModel robotSelfCollisionModel,
@@ -74,6 +75,11 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          GDXRobotCollisionLink collisionLink = new GDXRobotCollisionLink(collidable, GDXTools.toGDX(red));
          environmentCollisionLinks.add(collisionLink);
 
+         if (collidable.getRigidBody().getName().equals("pelvis"))
+         {
+            pelvisInteractable = new GDXInteractablePelvis(collisionLink, syncedRobot.getReferenceFrames().getPelvisFrame(), ros2Helper);
+            pelvisInteractable.create(baseUI.get3DSceneManager().getCamera3D());
+         }
          for (RobotSide side : RobotSide.values)
          {
             if (collidable.getRigidBody().getName().equals(side.getSideNameFirstLowerCaseLetter() + "_foot"))
@@ -118,6 +124,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          collisionLink.process3DViewInput(input);
       }
 
+      pelvisInteractable.process3DViewInput(input);
       for (GDXInteractableFoot footInteractable : footInteractables)
       {
          footInteractable.process3DViewInput(input);
@@ -152,6 +159,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
       }
 
+      pelvisInteractable.getVirtualRenderables(renderables, pool);
       for (GDXInteractableFoot footInteractable : footInteractables)
       {
          footInteractable.getVirtualRenderables(renderables, pool);
