@@ -127,7 +127,7 @@ public class GDXPose3DGizmo implements RenderableProvider
             clockFaceDragAlgorithm.reset();
          }
       }
-      if (rightMouseDragging)
+      if (rightMouseDragging && closestCollisionSelection != null)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
