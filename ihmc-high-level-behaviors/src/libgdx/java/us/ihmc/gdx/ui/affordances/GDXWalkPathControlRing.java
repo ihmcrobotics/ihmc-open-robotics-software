@@ -67,6 +67,7 @@ public class GDXWalkPathControlRing
    private GDXFootstepPlanGraphic foostepPlanGraphic;
    private double halfIdealFootstepWidth;
    private volatile FootstepPlan footstepPlan;
+   private volatile FootstepPlan footstepPlanToGenerateMeshes;
    private final AxisAngle walkFacingDirection = new AxisAngle();
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2Helper)
@@ -113,6 +114,11 @@ public class GDXWalkPathControlRing
          footstepPlannerGoalGizmo.getTransform().set(midFeetZUpFrame.getTransformToWorldFrame());
       }
 
+      if (footstepPlanToGenerateMeshes != null)
+      {
+         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes, "plan"));
+         footstepPlanToGenerateMeshes = null;
+      }
       foostepPlanGraphic.update();
    }
 
@@ -191,7 +197,7 @@ public class GDXWalkPathControlRing
       {
          selected = false;
          modified = false;
-         foostepPlanGraphic.clearAsync();
+         foostepPlanGraphic.clear();
       }
       if (selected && ImGui.isKeyReleased(input.getEscapeKey()))
       {
@@ -254,11 +260,7 @@ public class GDXWalkPathControlRing
       footstepPlannerRequest.setAssumeFlatGround(true);
       footstepPlannerRequest.setRequestId(footstepPlannerId.getAndIncrement());
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
-      if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() > 0)
-      {
-         foostepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "plan"));
-      }
-      footstepPlan = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
+      footstepPlan = footstepPlanToGenerateMeshes = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
