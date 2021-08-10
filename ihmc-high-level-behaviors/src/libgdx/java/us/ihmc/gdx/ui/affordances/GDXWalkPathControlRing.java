@@ -129,6 +129,8 @@ public class GDXWalkPathControlRing
          selected = true;
          modified = true;
          walkFacingDirection.set(Axis3D.Z, 0.0);
+         updateStuff();
+         queueFootstepPlan();
       }
       if (selected && !footstepPlannerGoalGizmo.getIntersectsAny() && leftMouseReleasedWithoutDrag)
       {
