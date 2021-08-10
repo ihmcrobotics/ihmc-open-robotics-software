@@ -38,6 +38,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final ImGuiPanel panel = new ImGuiPanel("Whole Body Interactable", this::renderImGuiWidgets);
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
+   private final ImBoolean interactablesEnabled = new ImBoolean(false);
 
    private final SideDependentList<GDXInteractableFoot> footInteractables = new SideDependentList<>();
    private GDXInteractablePelvis pelvisInteractable;
@@ -109,7 +110,10 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          collisionLink.update();
       }
 
-      walkPathControlRing.update();
+      if (interactablesEnabled.get())
+      {
+         walkPathControlRing.update();
+      }
    }
 
    // This happens after update.
@@ -124,15 +128,19 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          collisionLink.process3DViewInput(input);
       }
 
-      pelvisInteractable.process3DViewInput(input);
-      for (GDXInteractableFoot footInteractable : footInteractables)
+      if (interactablesEnabled.get())
       {
-         footInteractable.process3DViewInput(input);
+         pelvisInteractable.process3DViewInput(input);
+         for (GDXInteractableFoot footInteractable : footInteractables)
+         {
+            footInteractable.process3DViewInput(input);
+         }
       }
    }
 
    private void renderImGuiWidgets()
    {
+      ImGui.checkbox("Interactables enabled", interactablesEnabled);
       ImGui.checkbox("Show self collision meshes", showSelfCollisionMeshes);
       ImGui.checkbox("Show environment collision meshes", showEnvironmentCollisionMeshes);
       ImGui.text("TODO:");
@@ -159,13 +167,16 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
       }
 
-      pelvisInteractable.getVirtualRenderables(renderables, pool);
-      for (GDXInteractableFoot footInteractable : footInteractables)
+      if (interactablesEnabled.get())
       {
-         footInteractable.getVirtualRenderables(renderables, pool);
-      }
+         pelvisInteractable.getVirtualRenderables(renderables, pool);
+         for (GDXInteractableFoot footInteractable : footInteractables)
+         {
+            footInteractable.getVirtualRenderables(renderables, pool);
+         }
 
-      walkPathControlRing.getVirtualRenderables(renderables, pool);
+         walkPathControlRing.getVirtualRenderables(renderables, pool);
+      }
    }
 
    public ImGuiPanel getPanel()
