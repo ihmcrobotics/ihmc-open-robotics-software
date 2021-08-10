@@ -17,7 +17,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class FootstepPlannerDataSetTest
