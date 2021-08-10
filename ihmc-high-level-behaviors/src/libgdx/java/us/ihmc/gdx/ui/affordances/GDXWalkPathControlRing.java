@@ -232,6 +232,9 @@ public class GDXWalkPathControlRing
       leftStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightStanceFootPose.setToZero(footFrames.get(RobotSide.RIGHT));
       rightStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      double lowestStanceZ = Math.min(leftStanceFootPose.getZ(), rightStanceFootPose.getZ());
+      leftStanceFootPose.setZ(lowestStanceZ);
+      rightStanceFootPose.setZ(lowestStanceZ);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       midFeetZUpPose.setToZero(midFeetZUpFrame);
