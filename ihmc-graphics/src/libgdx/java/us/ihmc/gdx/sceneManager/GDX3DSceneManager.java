@@ -125,6 +125,7 @@ public class GDX3DSceneManager
     */
    private void updateEnvironment()
    {
+      shadowsHashCode = shadowManager.getLights().hashCode();
       shadowsDisabledEnvironment.clear();
       for (GDXLight light : shadowManager.getLights())
       {
@@ -146,13 +147,11 @@ public class GDX3DSceneManager
          firstRenderStarted = true;
          LogTools.info("Starting first render.");
 
-         shadowsHashCode = shadowManager.getLights().hashCode();
          updateEnvironment();
       }
 
       if (shadowsHashCode != shadowManager.getLights().hashCode())
       {
-         shadowsHashCode = shadowManager.getLights().hashCode();
          updateEnvironment();
       }
 
