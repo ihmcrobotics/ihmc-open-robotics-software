@@ -10,28 +10,27 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import org.lwjgl.opengl.GL30;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.lighting.*;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 
+import java.util.ArrayList;
+
 public class GDX3DWithShadowsDemo
 {
    private PerspectiveCamera cam;
    private CameraInputController camController;
-
    private ModelBatch modelBatch;
    private final Array<ModelInstance> instances = new Array<>();
    private ModelInstance box;
-
    private ShaderProgram program;
-
    private GDXLight light;
-
+   private final ArrayList<GDXLight> lights = new ArrayList<>();
    private GDXShadowManager manager;
 
    public static void main(String[] args)
@@ -83,11 +82,10 @@ public class GDX3DWithShadowsDemo
          }
       });
 
-      manager = new GDXShadowManager();
-      manager.addLight(new GDXDirectionalLight(new Vector3(10, 10f, 10), new Vector3(-1, -1, -1)));
-      light = new GDXPointLight(new Vector3(6, 3, -6));
-      manager.addLight(light);
-      manager.update();
+      manager = new GDXShadowManager(() -> lights, () -> 0.4f);
+      light = new GDXPointLight(6.0, 3.0, -6.0);
+      lights.add(light);
+      lights.add(new GDXDirectionalLight(new Point3D(10.0, 10.0, 10.0), new Vector3D(-1.0, -1.0, -1.0)));
 
       //Add model instances
       instances.add(box = GDXModelPrimitives.buildModelInstance(meshBuilder ->
@@ -114,7 +112,7 @@ public class GDX3DWithShadowsDemo
 
       GDX3DSceneTools.glClearGray();
 
-      manager.renderShadows(cam, instances);
+      manager.renderShadows(lights, cam, instances);
       manager.apply(program);
 
       modelBatch.begin(cam);

@@ -14,6 +14,8 @@ import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import us.ihmc.log.LogTools;
 
+import java.util.function.Supplier;
+
 /**
  * Shader used to render multiple shadows on the main scene.
  * This shader will render the scene multiple times, adding shadows for one light at a time
@@ -22,12 +24,17 @@ public class GDXShadowMapShader extends BaseShader
 {
    private final GDXShadowManager manager;
    private Renderable renderable;
+   private final Supplier<Iterable<GDXLight>> lightSupplier;
 
-   protected GDXShadowMapShader(final Renderable renderable, final ShaderProgram shader, final GDXShadowManager manager)
+   protected GDXShadowMapShader(Renderable renderable,
+                                ShaderProgram shader,
+                                GDXShadowManager manager,
+                                Supplier<Iterable<GDXLight>> lightSupplier)
    {
       this.renderable = renderable;
       this.program = shader;
       this.manager = manager;
+      this.lightSupplier = lightSupplier;
       register(Inputs.worldTrans, Setters.worldTrans);
       register(Inputs.projViewTrans, Setters.projViewTrans);
       register(Inputs.normalMatrix, Setters.normalMatrix);
@@ -93,7 +100,7 @@ public class GDXShadowMapShader extends BaseShader
    public void render(final Renderable renderable, final Attributes combinedAttributes)
    {
       boolean firstCall = true;
-      for (final GDXLight light : manager.lights)
+      for (final GDXLight light : lightSupplier.get())
       {
          light.apply(program);
          if (firstCall)

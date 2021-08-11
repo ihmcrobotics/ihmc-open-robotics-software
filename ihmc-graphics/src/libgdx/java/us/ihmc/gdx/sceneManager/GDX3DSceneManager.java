@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
@@ -12,11 +11,10 @@ import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.lighting.*;
@@ -25,10 +23,7 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.log.LogTools;
 
-import java.nio.IntBuffer;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 /**
  * TODO: Pause and resume?
@@ -50,7 +45,7 @@ public class GDX3DSceneManager
 
    private boolean shadowsEnabled = false;
    private Environment shadowsDisabledEnvironment;
-   private int shadowsHashCode = 0;
+   private int lightsHashCode = 0;
 
    private int x = 0;
    private int y = 0;
@@ -58,16 +53,11 @@ public class GDX3DSceneManager
    private int height = -1;
    private boolean firstRenderStarted = false;
    private boolean addFocusSphere = true;
-   private float pointLightIntensity = 1.0f; //THIS VALUE SHOULD BE MOVED SOMEWHERE ELSE
    private final PointLightsAttribute shadowsDisabledPointLights = new PointLightsAttribute();
    private final DirectionalLightsAttribute shadowsDisabledDirectionalLights = new DirectionalLightsAttribute();
+   private float ambientLight = 0.4f;
 
-   private static int getFramebufferID()
-   {
-      IntBuffer buffer = BufferUtils.newIntBuffer(1);
-      Gdx.gl.glGetIntegerv(GL30.GL_DRAW_FRAMEBUFFER_BINDING, buffer);
-      return buffer.get();
-   }
+   protected final HashSet<GDXLight> lights = new HashSet<>();
 
    public void create()
    {
@@ -108,8 +98,7 @@ public class GDX3DSceneManager
       shadowsDisabledEnvironment = new Environment();
       shadowsDisabledEnvironment.set(ColorAttribute.createAmbientLight(0.4f, 0.4f, 0.4f, 1.0f));
 
-      shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING);
-      shadowManager.update();
+      shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING, () -> lights, () -> ambientLight);
    }
 
    public void renderShadowMap()
@@ -119,7 +108,7 @@ public class GDX3DSceneManager
 
    public void renderShadowMap(int x, int y)
    {
-      shadowManager.renderShadows(camera3D, new GDXRenderableIterable(renderables), x, y);
+      shadowManager.renderShadows(lights, camera3D, new GDXRenderableIterable(renderables), x, y);
    }
 
    /**
@@ -127,22 +116,24 @@ public class GDX3DSceneManager
     */
    private void updateEnvironment()
    {
-      shadowsHashCode = shadowManager.getLights().hashCode();
+      lightsHashCode = lights.hashCode();
       if (!shadowsEnabled)
       {
          shadowsDisabledEnvironment.clear();
          shadowsDisabledPointLights.lights.clear();
          shadowsDisabledDirectionalLights.lights.clear();
-         for (GDXLight light : shadowManager.getLights())
+         for (GDXLight light : lights)
          {
             if (light instanceof GDXPointLight)
             {
-               shadowsDisabledPointLights.lights.add(GDX3DSceneTools.createPointLight(light.getPosition().x, light.getPosition().y, light.getPosition().z));
+               shadowsDisabledPointLights.lights.add(GDX3DSceneTools.createPointLight(light.getPosition().getX32(),
+                                                                                      light.getPosition().getY32(),
+                                                                                      light.getPosition().getZ32()));
             }
             else if (light instanceof GDXDirectionalLight)
             {
-               Vector3 direction = ((GDXDirectionalLight) light).getDirection();
-               shadowsDisabledDirectionalLights.lights.add(GDX3DSceneTools.createDirectionalLight(direction.x, direction.y, direction.z));
+               Vector3D direction = ((GDXDirectionalLight) light).getDirection();
+               shadowsDisabledDirectionalLights.lights.add(GDX3DSceneTools.createDirectionalLight(direction.getX32(), direction.getY32(), direction.getZ32()));
             }
          }
          shadowsDisabledEnvironment.set(shadowsDisabledPointLights);
@@ -160,7 +151,7 @@ public class GDX3DSceneManager
          updateEnvironment();
       }
 
-      if (shadowsHashCode != shadowManager.getLights().hashCode())
+      if (lightsHashCode != lights.hashCode())
       {
          updateEnvironment();
       }
@@ -183,8 +174,7 @@ public class GDX3DSceneManager
 
          if (shadowManager != null)
          {
-            float intensity = shadowManager.getAmbientLight();
-            shadowsDisabledEnvironment.set(ColorAttribute.createAmbientLight(intensity, intensity, intensity, 1.0f));
+            shadowsDisabledEnvironment.set(ColorAttribute.createAmbientLight(ambientLight, ambientLight, ambientLight, 1.0f));
          }
       }
 
@@ -364,68 +354,28 @@ public class GDX3DSceneManager
       this.shadowsEnabled = shadowsEnabled;
    }
 
-   private class GDXRenderableIterable implements Iterable<GDXRenderable>
+   public void addLight(GDXLight light)
    {
-      private final HashSet<GDXRenderable> renderables;
-      private final GDXSceneLevel level;
+      lights.add(light);
+   }
 
-      protected GDXRenderableIterable(HashSet<GDXRenderable> renderables)
-      {
-         this(renderables, GDXSceneLevel.REAL_ENVIRONMENT);
-      }
+   public void removeLight(GDXLight light)
+   {
+      lights.remove(light);
+   }
 
-      protected GDXRenderableIterable(HashSet<GDXRenderable> renderables, GDXSceneLevel level)
-      {
-         this.renderables = renderables;
-         this.level = level;
-      }
+   public HashSet<GDXLight> getLights()
+   {
+      return lights;
+   }
 
-      @Override
-      public Iterator<GDXRenderable> iterator()
-      {
-         return new GDXRenderableIterator();
-      }
+   public float getAmbientLight()
+   {
+      return ambientLight;
+   }
 
-      private class GDXRenderableIterator implements Iterator<GDXRenderable>
-      {
-         private final HashSet<GDXRenderable> renderablesInternal;
-
-         private GDXRenderableIterator()
-         {
-            renderablesInternal = new HashSet<>(renderables);
-         }
-
-         @Override
-         public boolean hasNext()
-         {
-            for (GDXRenderable renderable : renderablesInternal)
-            {
-               if (renderable.getSceneType() == level)
-               {
-                  return true;
-               }
-            }
-
-            return false;
-         }
-
-         @Override
-         public GDXRenderable next()
-         {
-            Iterator<GDXRenderable> it = renderablesInternal.iterator();
-            while (it.hasNext())
-            {
-               GDXRenderable renderable = it.next();
-               it.remove();
-
-               if (renderable.getSceneType() == level)
-               {
-                  return renderable;
-               }
-            }
-
-            throw new NoSuchElementException();
-         }
-      }
+   public void setAmbientLight(float ambientLight)
+   {
+      this.ambientLight = ambientLight;
    }
 }

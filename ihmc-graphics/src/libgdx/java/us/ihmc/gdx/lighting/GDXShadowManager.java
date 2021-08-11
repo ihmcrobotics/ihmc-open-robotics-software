@@ -12,16 +12,15 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.log.LogTools;
 
 import java.util.HashSet;
+import java.util.function.Supplier;
 
 public class GDXShadowManager
 {
-   protected final HashSet<GDXLight> lights = new HashSet<>();
    private final ShaderProgram shader;
    private final ModelBatch batch;
    private final Array<Renderable> renderableArray = new Array<>();
@@ -34,29 +33,33 @@ public class GDXShadowManager
       }
    };
    private final float antiAliasing;
+   private final Supplier<Float> ambientLightSupplier;
    private boolean useViewport = false;
    private int x = 0;
    private int y = 0;
    private int width = 0;
    private int height = 0;
-   private float ambientLight = 0.4f;
    private FrameBuffer framebuffer;
+   protected final HashSet<GDXLight> additionalOffscreenLights = new HashSet<>();
 
-   public GDXShadowManager()
+   public GDXShadowManager(Supplier<Iterable<GDXLight>> lightSupplier, Supplier<Float> ambientLightSupplier)
    {
-      this(1.0f);
+      this(1.0f, lightSupplier, ambientLightSupplier);
    }
 
-   public GDXShadowManager(float antiAliasing)
+   public GDXShadowManager(float antiAliasing, Supplier<Iterable<GDXLight>> lightSupplier, Supplier<Float> ambientLightSupplier)
    {
-      this(antiAliasing, GDXShadowMapShader.buildShaderProgram());
+      this(antiAliasing, GDXShadowMapShader.buildShaderProgram(), lightSupplier, ambientLightSupplier);
    }
 
    /**
     * @param shader The ShaderProgram used to create the shader used by the main ModelBatch
     */
-   public GDXShadowManager(float antiAliasing, ShaderProgram shader)
+   public GDXShadowManager(float antiAliasing, ShaderProgram shader,
+                           Supplier<Iterable<GDXLight>> lightSupplier,
+                           Supplier<Float> ambientLightSupplier)
    {
+      this.ambientLightSupplier = ambientLightSupplier;
       final GDXShadowManager manager = this;
 
       this.antiAliasing = antiAliasing;
@@ -67,14 +70,14 @@ public class GDXShadowManager
          @Override
          protected Shader createShader(final Renderable renderable)
          {
-            return new GDXShadowMapShader(renderable, shader, manager);
+            return new GDXShadowMapShader(renderable, shader, manager, lightSupplier);
          }
       });
 
       //Add three lights offscreen so that things render properly. I do not know why this is necessary, and am not proud of it.
-      addLight(new GDXPointLight(new Vector3(0, 0, -500)));
-      addLight(new GDXPointLight(new Vector3(1, 0, -500)));
-      addLight(new GDXPointLight(new Vector3(2, 0, -500)));
+      additionalOffscreenLights.add(new GDXPointLight(0.0, 0.0, -500.0));
+      additionalOffscreenLights.add(new GDXPointLight(1.0, 0.0, -500.0));
+      additionalOffscreenLights.add(new GDXPointLight(2.0, 0.0, -500.0));
    }
 
    public static String getVertexShader()
@@ -87,64 +90,29 @@ public class GDXShadowManager
       return Gdx.files.classpath("us/ihmc/gdx/shadows/scene_f.glsl").readString();
    }
 
-   public float getAmbientLight()
+   /**
+    * Renders shadows to the ModelBatch and prepares the OpenGL environment for the rendering of the main ModelBatch, which should be rendered immediately after
+    * this call.
+    *
+    * @param renderableProviders The models to be rendered
+    */
+   public <T extends RenderableProvider> void renderShadows(Iterable<GDXLight> lights, Camera camera, Iterable<T> renderableProviders)
    {
-      return ambientLight;
-   }
-
-   public void setAmbientLight(float ambientLight)
-   {
-      this.ambientLight = ambientLight;
-   }
-
-   public void addLight(GDXLight light)
-   {
-      lights.add(light);
-   }
-
-   public void removeLight(GDXLight light)
-   {
-      lights.remove(light);
-   }
-
-   public HashSet<GDXLight> getLights()
-   {
-      return lights;
+      renderShadows(lights, camera, renderableProviders, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
    }
 
    /**
-    * Ensures that all lights are initialized
+    * Renders shadows to the ModelBatch and prepares the OpenGL environment for the rendering of the main ModelBatch, which should be rendered immediately after
+    * this call.
+    *
+    * @param renderableProviders The models to be rendered
     */
-   public void update()
+   public <T extends RenderableProvider> void renderShadows(Iterable<GDXLight> lights, Camera camera, Iterable<T> renderableProviders, int width, int height)
    {
-      for (GDXLight light : lights)
+      for (GDXLight additionalOffscreenLight : additionalOffscreenLights)
       {
-         if (!light.isInitialized())
-            light.init();
-         else
-            light.update();
+         additionalOffscreenLight.render(renderableProviders);
       }
-   }
-
-   /**
-    * Renders shadows to the ModelBatch and prepares the OpenGL environment for the rendering of the main ModelBatch, which should be rendered immediately after
-    * this call.
-    *
-    * @param renderableProviders The models to be rendered
-    */
-   public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders)
-   {
-      renderShadows(camera, renderableProviders, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-   }
-
-   /**
-    * Renders shadows to the ModelBatch and prepares the OpenGL environment for the rendering of the main ModelBatch, which should be rendered immediately after
-    * this call.
-    *
-    * @param renderableProviders The models to be rendered
-    */
-   public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders, int width, int height)
-   {
       for (GDXLight light : lights)
       {
          light.render(renderableProviders);
@@ -190,19 +158,19 @@ public class GDXShadowManager
    {
       program.begin();
       Texture shadows = framebuffer.getColorBufferTexture();
-      final int textureNum = shadows.getTextureObjectHandle();
+      int textureNum = shadows.getTextureObjectHandle();
       shadows.bind(textureNum);
       program.setUniformi("u_shadows", textureNum);
       program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
       program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
-      program.setUniformf("u_antiAliasing", this.antiAliasing);
-      program.setUniformf("u_ambientLight", this.ambientLight);
+      program.setUniformf("u_antiAliasing", antiAliasing);
+      program.setUniformf("u_ambientLight", ambientLightSupplier.get());
       program.end();
    }
 
    public void setViewportBounds(int x, int y, int width, int height)
    {
-      this.useViewport = true;
+      useViewport = true;
       this.x = x;
       this.y = y;
       this.width = width;
