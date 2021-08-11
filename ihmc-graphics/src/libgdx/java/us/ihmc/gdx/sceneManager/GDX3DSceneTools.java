@@ -18,15 +18,15 @@ public class GDX3DSceneTools
    public static final float CLEAR_COLOR = 0.5019608f;
    public static final String TUNING_WINDOW_NAME = "Lighting";
 
-   private static ImBoolean ambientEnabled = new ImBoolean(true);
-   private static ImFloat ambientColor = new ImFloat(1.0f);
-   private static ImBoolean pointEnabled = new ImBoolean(true);
-   private static ImFloat pointColor = new ImFloat(1.0f);
-   private static ImFloat pointDistance = new ImFloat(10.0f);
-   private static ImFloat pointIntensity = new ImFloat(43.280f);
-   private static ImBoolean directionEnabled = new ImBoolean(false);
-   private static ImFloat directionColor = new ImFloat(0.025f);
-   private static ImFloat directionDistance = new ImFloat(20.0f);
+   private static final ImBoolean ambientEnabled = new ImBoolean(true);
+   private static final ImFloat ambientColor = new ImFloat(1.0f);
+   private static final ImBoolean pointEnabled = new ImBoolean(true);
+   private static final ImFloat pointColor = new ImFloat(1.0f);
+   private static final ImFloat pointDistance = new ImFloat(10.0f);
+   private static final ImFloat pointIntensity = new ImFloat(43.280f);
+   private static final ImBoolean directionEnabled = new ImBoolean(false);
+   private static final ImFloat directionColor = new ImFloat(0.025f);
+   private static final ImFloat directionDistance = new ImFloat(20.0f);
 
    public static void glClearGray()
    {
@@ -77,6 +77,19 @@ public class GDX3DSceneTools
       //      directionalLights.lights.add(newShadowLight().set(pointColor, pointColor, pointColor, -pointDistance, pointDistance, -pointDistance));
       //      environment.set(directionalLights);
       return environment;
+   }
+
+   public static PointLight createPointLight(float x, float y, float z)
+   {
+      float pointColor = GDX3DSceneTools.pointColor.get();
+      float pointIntensity = GDX3DSceneTools.pointIntensity.get();
+      return new PointLight().set(pointColor, pointColor, pointColor, x, y, z, pointIntensity);
+   }
+
+   public static DirectionalLight createDirectionalLight(float x, float y, float z)
+   {
+      float directionColor = GDX3DSceneTools.directionColor.get();
+      return new DirectionalLight().set(directionColor, directionColor, directionColor, x, y, z);
    }
 
    private static DirectionalShadowLight newShadowLight()

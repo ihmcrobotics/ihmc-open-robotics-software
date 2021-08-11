@@ -4,15 +4,15 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.environment.PointLight;
+import com.badlogic.gdx.graphics.g3d.attributes.DirectionalLightsAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.PointLightsAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -59,6 +59,8 @@ public class GDX3DSceneManager
    private boolean firstRenderStarted = false;
    private boolean addFocusSphere = true;
    private float pointLightIntensity = 1.0f; //THIS VALUE SHOULD BE MOVED SOMEWHERE ELSE
+   private final PointLightsAttribute shadowsDisabledPointLights = new PointLightsAttribute();
+   private final DirectionalLightsAttribute shadowsDisabledDirectionalLights = new DirectionalLightsAttribute();
 
    private static int getFramebufferID()
    {
@@ -126,17 +128,25 @@ public class GDX3DSceneManager
    private void updateEnvironment()
    {
       shadowsHashCode = shadowManager.getLights().hashCode();
-      shadowsDisabledEnvironment.clear();
-      for (GDXLight light : shadowManager.getLights())
+      if (!shadowsEnabled)
       {
-         if (light instanceof GDXPointLight)
+         shadowsDisabledEnvironment.clear();
+         shadowsDisabledPointLights.lights.clear();
+         shadowsDisabledDirectionalLights.lights.clear();
+         for (GDXLight light : shadowManager.getLights())
          {
-            shadowsDisabledEnvironment.add(new PointLight().set(Color.WHITE, light.getPosition(), pointLightIntensity));
+            if (light instanceof GDXPointLight)
+            {
+               shadowsDisabledPointLights.lights.add(GDX3DSceneTools.createPointLight(light.getPosition().x, light.getPosition().y, light.getPosition().z));
+            }
+            else if (light instanceof GDXDirectionalLight)
+            {
+               Vector3 direction = ((GDXDirectionalLight) light).getDirection();
+               shadowsDisabledDirectionalLights.lights.add(GDX3DSceneTools.createDirectionalLight(direction.x, direction.y, direction.z));
+            }
          }
-         else if (light instanceof GDXDirectionalLight)
-         {
-            shadowsDisabledEnvironment.add(new DirectionalLight().set(Color.WHITE, ((GDXDirectionalLight) light).getDirection()));
-         }
+         shadowsDisabledEnvironment.set(shadowsDisabledPointLights);
+         shadowsDisabledEnvironment.set(shadowsDisabledDirectionalLights);
       }
    }
 
