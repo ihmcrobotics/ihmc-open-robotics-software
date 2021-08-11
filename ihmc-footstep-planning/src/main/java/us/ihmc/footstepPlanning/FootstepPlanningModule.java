@@ -12,7 +12,9 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTr
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
@@ -177,17 +179,15 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       if (request.getPlanBodyPath() && !flatGroundMode)
       {
-         LogTools.info("Entering body path planning");
          bodyPathPlanner.setStanceFootPoses(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT));
          bodyPathPlanner.setGoal(goalMidFootPose);
 
          BodyPathPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
          List<Pose3DReadOnly> waypoints = bodyPathPlanner.getWaypoints();
+         setNominalOrientations(waypoints);
 
          if (visibilityGraphParameters.getOptimizeForNarrowPassage())
          {
-            LogTools.info("with Narrow Passage adjustment");
-
             List<FramePose3D> waypointsList = bodyPathPlanner.getWaypointsAsFramePoseList();
 
             narrowPassageBodyPathOptimizer.setWaypoints(waypointsList);
@@ -221,7 +221,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
       else if (visibilityGraphParameters.getOptimizeForNarrowPassage())
       {
-         LogTools.info("Entering straight path with narrow passage adjustment");
          narrowPassageBodyPathOptimizer.setWaypointsFromStartAndEndPoses(startMidFootPose, goalMidFootPose);
          List<Pose3DReadOnly> waypoints = narrowPassageBodyPathOptimizer.runNarrowPassageOptimizer();
 
@@ -237,11 +236,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
       else
       {
-         LogTools.info("Entering straight path");
          List<Pose3DReadOnly> waypoints = new ArrayList<>();
          waypoints.add(startMidFootPose);
          waypoints.addAll(request.getBodyPathWaypoints());
          waypoints.add(goalMidFootPose);
+         setNominalOrientations(waypoints);
 
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
          reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
@@ -284,6 +283,16 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
 
       isPlanning.set(false);
+   }
+
+   private static void setNominalOrientations(List<Pose3DReadOnly> waypoints)
+   {
+      for (int i = 0; i < waypoints.size() - 1; i++)
+      {
+         double dx = waypoints.get(i + 1).getX() - waypoints.get(i).getX();
+         double dy = waypoints.get(i + 1).getY() - waypoints.get(i).getY();
+         ((Pose3DBasics) waypoints.get(i)).getOrientation().setToYawOrientation(Math.atan2(dy, dx));
+      }
    }
 
    /**
