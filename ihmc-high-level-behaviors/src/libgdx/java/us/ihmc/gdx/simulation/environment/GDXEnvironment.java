@@ -1,7 +1,6 @@
 package us.ihmc.gdx.simulation.environment;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,7 +25,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.lighting.GDXShadowManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXDoorSimulator;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
@@ -61,7 +59,6 @@ public class GDXEnvironment extends ImGuiPanel
    private final Point3D tempIntersection = new Point3D();
    private final GDXImGuiBasedUI baseUI;
    private GDXDoorSimulator doorSimulator;
-   private GDXShadowManager shadowManager;
    private final ImFloat ambientLight = new ImFloat(0.4f);
 
    public GDXEnvironment(GDXImGuiBasedUI baseUI)
@@ -81,8 +78,6 @@ public class GDXEnvironment extends ImGuiPanel
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      shadowManager = baseUI.get3DSceneManager().getShadowManager();
-
       baseUI.get3DSceneManager().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
       baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
@@ -196,21 +191,19 @@ public class GDXEnvironment extends ImGuiPanel
 
          if (ImGui.sliderFloat("Ambient light", ambientLight.getData(), 0.0f, 1.0f))
          {
-            shadowManager.setAmbientLight(ambientLight.get());
+            baseUI.get3DSceneManager().setAmbientLight(ambientLight.get());
          }
          if (ImGui.button("Place Point Light"))
          {
             GDXPointLightObject pointLight = new GDXPointLightObject();
             objectToPlace = pointLight;
-            shadowManager.addLight(pointLight.getLight());
-            shadowManager.update();
+            baseUI.get3DSceneManager().addLight(pointLight.getLight());
          }
          if (ImGui.button("Place Directional Light"))
          {
             GDXDirectionalLightObject directionalLight = new GDXDirectionalLightObject();
             objectToPlace = directionalLight;
-            shadowManager.addLight(directionalLight.getLight());
-            shadowManager.update();
+            baseUI.get3DSceneManager().addLight(directionalLight.getLight());
          }
 
          ImGui.separator();
@@ -234,7 +227,7 @@ public class GDXEnvironment extends ImGuiPanel
          if (selectedObject instanceof GDXLightObject)
          {
             GDXLightObject lightObject = (GDXLightObject) selectedObject;
-            shadowManager.removeLight(lightObject.getLight());
+            baseUI.get3DSceneManager().removeLight(lightObject.getLight());
          }
 
          selectedObject = null;
@@ -316,7 +309,7 @@ public class GDXEnvironment extends ImGuiPanel
       selectedEnvironmentFile = environmentFile;
       objects.clear();
 
-      lightObjects.forEach(lightObject -> shadowManager.removeLight(lightObject.getLight()));
+      lightObjects.forEach(lightObject -> baseUI.get3DSceneManager().removeLight(lightObject.getLight()));
       lightObjects.clear();
 
       selectedObject = null;
@@ -336,7 +329,7 @@ public class GDXEnvironment extends ImGuiPanel
             {
                float ambientValue = (float) ambientLightNode.asDouble();
                ambientLight.set(ambientValue);
-               shadowManager.setAmbientLight(ambientLight.get());
+               baseUI.get3DSceneManager().setAmbientLight(ambientLight.get());
             }
             for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
             {
@@ -345,8 +338,7 @@ public class GDXEnvironment extends ImGuiPanel
                if (object instanceof GDXLightObject)
                {
                   GDXLightObject lightObject = (GDXLightObject) object;
-                  shadowManager.addLight(lightObject.getLight());
-                  shadowManager.update();
+                  baseUI.get3DSceneManager().addLight(lightObject.getLight());
                   lightObjects.add(lightObject);
                }
 
