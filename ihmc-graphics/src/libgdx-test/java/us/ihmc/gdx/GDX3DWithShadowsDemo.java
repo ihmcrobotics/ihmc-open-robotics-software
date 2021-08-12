@@ -69,13 +69,13 @@ public class GDX3DWithShadowsDemo
 
             //Add model instances
             instances.add(box = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                      {
-                                                                         meshBuilder.addBox(2, 2, 2, new Point3D(0, 1.5, 0), Color.RED);
-                                                                      }, "box"));
+            {
+               meshBuilder.addBox(2, 2, 2, new Point3D(0, 1.5, 0), Color.RED);
+            }, "box"));
             instances.add(GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                {
-                                                                   meshBuilder.addBox(10, 1, 10, new Point3D(), Color.YELLOW);
-                                                                }, "box"));
+            {
+               meshBuilder.addBox(10, 1, 10, new Point3D(), Color.YELLOW);
+            }, "box"));
 
             Gdx.input.setInputProcessor(cameraController = new CameraInputController(camera));
          }

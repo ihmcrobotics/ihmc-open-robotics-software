@@ -18,7 +18,6 @@ public class GDXPointLight
    public static final float CAMERA_NEAR = 0.1f;
    public static final float CAMERA_FAR = 100f;
 
-   protected ShaderProgram shaderProgram = null;
    protected ModelBatch modelBatch;
 
    private final Camera camera;
@@ -57,6 +56,7 @@ public class GDXPointLight
          framebuffer = new AccessibleFrameBufferCubemap(Pixmap.Format.RGBA8888, DEPTHMAP_SIZE, DEPTHMAP_SIZE, true);
       }
 
+      ShaderProgram shaderProgram = GDXDepthMapShader.getOrLoadShaderProgram();
       shaderProgram.begin();
       shaderProgram.setUniformf("u_cameraFar", camera.far);
       shaderProgram.setUniformf("u_lightPosition_x", position.getX32());
@@ -66,9 +66,9 @@ public class GDXPointLight
 
       framebuffer.begin();
 
-      for (int s = 0; s <= 5; s++)
+      for (int sideIndex = 0; sideIndex < 6; sideIndex++)
       {
-         final Cubemap.CubemapSide side = Cubemap.CubemapSide.values()[s];
+         final Cubemap.CubemapSide side = Cubemap.CubemapSide.values()[sideIndex];
          framebuffer.bindSide(side, camera);
          Gdx.gl.glClearColor(0, 0, 0, 1);
          Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
