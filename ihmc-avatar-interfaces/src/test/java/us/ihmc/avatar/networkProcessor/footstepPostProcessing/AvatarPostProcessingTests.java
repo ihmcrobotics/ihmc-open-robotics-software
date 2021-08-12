@@ -425,6 +425,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getFootstepPlannerParameters().setMinimumFootholdPercent(0.99);
       footstepPlanningModule.getFootstepPlannerParameters().setMaximumStepZ(0.32);
+      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffBottoms(-1.0);
+      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffTops(-1.0);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
 
       System.out.println("output. " + plannerOutput.getFootstepPlanningResult());
