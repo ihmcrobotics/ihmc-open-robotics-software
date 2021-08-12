@@ -32,7 +32,7 @@ import java.util.HashSet;
 public class GDX3DSceneManager
 {
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
-   private final HashMap<GDXSceneLevel, ArrayList<GDXRenderable>> renderables = new HashMap<>();
+   private final HashMap<GDXSceneLevel, ArrayList<RenderableProvider>> renderables = new HashMap<>();
    private InputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
    private ScreenViewport viewport;
@@ -80,7 +80,6 @@ public class GDX3DSceneManager
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
       shadowsDisabledModelBatch = new ModelBatch();
-
       shadowsDisabledEnvironment = new Environment();
       shadowsDisabledEnvironment.set(ColorAttribute.createAmbientLight(ambientLight, ambientLight, ambientLight, 1.0f));
       shadowsDisabledEnvironment.set(shadowsDisabledPointLights);
@@ -96,7 +95,10 @@ public class GDX3DSceneManager
 
    public void renderShadowMap(int x, int y)
    {
-      shadowManager.renderShadows(camera3D, renderables.get(GDXSceneLevel.REAL_ENVIRONMENT), x, y);
+      if (shadowsEnabled)
+      {
+         shadowManager.renderShadows(camera3D, renderables.get(GDXSceneLevel.REAL_ENVIRONMENT), x, y);
+      }
    }
 
    public void render()
@@ -176,9 +178,9 @@ public class GDX3DSceneManager
       }
    }
 
-   private void renderInternal(ModelBatch modelBatch, Iterable<GDXRenderable> renderables)
+   private void renderInternal(ModelBatch modelBatch, Iterable<RenderableProvider> renderables)
    {
-      for (GDXRenderable renderable : renderables)
+      for (RenderableProvider renderable : renderables)
       {
          if (shadowsEnabled)
             modelBatch.render(renderable);
@@ -248,7 +250,7 @@ public class GDX3DSceneManager
 
    public void addRenderableProvider(RenderableProvider renderableProvider, GDXSceneLevel sceneLevel)
    {
-      renderables.get(sceneLevel).add(new GDXRenderable(renderableProvider, sceneLevel));
+      renderables.get(sceneLevel).add(renderableProvider);
    }
 
    public void setViewportBoundsToWindow()
@@ -266,7 +268,7 @@ public class GDX3DSceneManager
       this.width = width;
       this.height = height;
 
-      this.shadowManager.setViewportBounds(x, y, width, height);
+      shadowManager.setViewportBounds(x, y, width, height);
    }
 
    public int getCurrentWindowWidth()
@@ -277,11 +279,6 @@ public class GDX3DSceneManager
    public int getCurrentWindowHeight()
    {
       return Gdx.graphics.getHeight();
-   }
-
-   public GDXShadowManager getShadowManager()
-   {
-      return shadowManager;
    }
 
    public FocusBasedGDXCamera getCamera3D()
