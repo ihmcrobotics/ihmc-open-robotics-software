@@ -47,6 +47,8 @@ public class GDXPointLight
       camera.far = CAMERA_FAR;
       GDXTools.toGDX(position, camera.position);
       camera.update();
+      if (attribute != null)
+         GDXTools.toGDX(position, attribute.position);
    }
 
    public <T extends RenderableProvider> void render(Iterable<T> renderableProviders)

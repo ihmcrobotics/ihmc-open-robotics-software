@@ -47,9 +47,11 @@ public class GDXDirectionalLight
    {
       camera.near = CAMERA_NEAR;
       camera.far = CAMERA_FAR;
-      GDXTools.toGDX(getPosition(), camera.position);
+      GDXTools.toGDX(position, camera.position);
       camera.lookAt(direction.getX32(), direction.getY32(), direction.getZ32());
       camera.update();
+      if (attribute != null)
+         GDXTools.toGDX(direction, attribute.direction);
    }
 
    public <T extends RenderableProvider> void render(Iterable<T> renderableProviders)
