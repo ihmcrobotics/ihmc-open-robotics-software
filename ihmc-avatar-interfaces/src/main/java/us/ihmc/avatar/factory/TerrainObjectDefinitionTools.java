@@ -4,10 +4,7 @@ import java.util.List;
 
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
-import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
@@ -32,12 +29,11 @@ public class TerrainObjectDefinitionTools
 
       for (Collidable collidable : collidables)
       {
-         CollisionShapeDefinition collisionShapeDefinition = RobotDefinitionTools.toCollisionShapeDefinition(collidable);
-         output.addCollisionShapeDefinition(collisionShapeDefinition);
-         output.addVisualDefinition(new VisualDefinition(collisionShapeDefinition.getOriginPose(),
-                                                         collisionShapeDefinition.getGeometryDefinition(),
-                                                         new MaterialDefinition(ColorDefinitions.Maroon())));
+         output.addCollisionShapeDefinition(RobotDefinitionTools.toCollisionShapeDefinition(collidable));
       }
+
+      List<VisualDefinition> visualDefinitions = RobotDefinitionTools.toVisualDefinitions(environment.getTerrainObject3D().getLinkGraphics());
+      visualDefinitions.forEach(output::addVisualDefinition);
 
       return output;
    }
