@@ -312,8 +312,11 @@ public class GDX3DSceneManager
    {
       shadowsDisabledPointLights.lights.clear();
       shadowsDisabledDirectionalLights.lights.clear();
-      shadowManager.getPointLights().clear();
-      shadowManager.getDirectionalLights().clear();
+      if (shadowManager != null)
+      {
+         shadowManager.getPointLights().clear();
+         shadowManager.getDirectionalLights().clear();
+      }
    }
 
    public void addPointLight(GDXPointLight pointLight)
