@@ -7,13 +7,14 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.lighting.GDXPointLight;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GDXPointLightObject extends GDXLightObject
+public class GDXPointLightObject extends GDXEnvironmentObject
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
    private final GDXPointLight light;
@@ -54,7 +55,6 @@ public class GDXPointLightObject extends GDXLightObject
       return new GDXPointLightObject();
    }
 
-   @Override
    public GDXPointLight getLight()
    {
       return light;

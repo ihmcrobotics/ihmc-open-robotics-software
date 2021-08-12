@@ -9,13 +9,14 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.lighting.GDXDirectionalLight;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GDXDirectionalLightObject extends GDXLightObject
+public class GDXDirectionalLightObject extends GDXEnvironmentObject
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
 
@@ -62,7 +63,6 @@ public class GDXDirectionalLightObject extends GDXLightObject
       return new GDXDirectionalLightObject();
    }
 
-   @Override
    public GDXDirectionalLight getLight()
    {
       return light;

@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.Shader;
+import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
@@ -27,6 +28,7 @@ public class GDXDirectionalLight
    private final Vector3D direction = new Vector3D();
    private FrameBuffer framebuffer;
    private Texture depthMap;
+   private DirectionalLight attribute;
 
    public GDXDirectionalLight()
    {
@@ -105,5 +107,15 @@ public class GDXDirectionalLight
    public Camera getCamera()
    {
       return camera;
+   }
+
+   public void setAttribute(DirectionalLight attribute)
+   {
+      this.attribute = attribute;
+   }
+
+   public DirectionalLight getAttribute()
+   {
+      return attribute;
    }
 }

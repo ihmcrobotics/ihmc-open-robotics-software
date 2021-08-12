@@ -13,7 +13,6 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import org.lwjgl.opengl.GL30;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.lighting.*;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
@@ -23,14 +22,15 @@ import java.util.ArrayList;
 
 public class GDX3DWithShadowsDemo
 {
-   private PerspectiveCamera cam;
+   private PerspectiveCamera camera;
    private CameraInputController camController;
    private ModelBatch modelBatch;
    private final Array<ModelInstance> instances = new Array<>();
    private ModelInstance box;
    private ShaderProgram program;
-   private GDXLight light;
-   private final ArrayList<GDXLight> lights = new ArrayList<>();
+   private GDXPointLight light;
+   private final ArrayList<GDXPointLight> pointLights = new ArrayList<>();
+   private final ArrayList<GDXDirectionalLight> directionalLights = new ArrayList<>();
    private GDXShadowManager manager;
 
    public static void main(String[] args)
@@ -64,12 +64,12 @@ public class GDX3DWithShadowsDemo
       Gdx.gl.glEnable(GL30.GL_BLEND);
 
       //Camera initialization
-      cam = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-      cam.position.set(0f, 7f, 10f);
-      cam.lookAt(0, 0, 0);
-      cam.near = 1f;
-      cam.far = 50f;
-      cam.update();
+      camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+      camera.position.set(0f, 7f, 10f);
+      camera.lookAt(0, 0, 0);
+      camera.near = 1f;
+      camera.far = 50f;
+      camera.update();
 
       //Model batch and shadow stuff
       program = new ShaderProgram(GDXShadowManager.getVertexShader(), GDXShadowManager.getFragmentShader());
@@ -82,13 +82,14 @@ public class GDX3DWithShadowsDemo
          }
       });
 
-      manager = new GDXShadowManager(1.0f, () -> lights, () -> 0.4f);
-      light = new GDXPointLight(6.0, 3.0, -6.0);
-      lights.add(light);
+      manager = new GDXShadowManager(1.0f, 0.4f);
+      light = new GDXPointLight();
+      light.getPosition().set(6.0, 3.0, -6.0);
+      pointLights.add(light);
       GDXDirectionalLight directionalLight = new GDXDirectionalLight();
       directionalLight.getPosition().set(10.0, 10.0, 10.0);
       directionalLight.getDirection().set(-1.0, -1.0, -1.0);
-      lights.add(directionalLight));
+      directionalLights.add(directionalLight);
 
       //Add model instances
       instances.add(box = GDXModelPrimitives.buildModelInstance(meshBuilder ->
@@ -100,7 +101,7 @@ public class GDX3DWithShadowsDemo
                                                              meshBuilder.addBox(10, 1, 10, new Point3D(), Color.YELLOW);
                                                           }, "box"));
 
-      Gdx.input.setInputProcessor(camController = new CameraInputController(cam));
+      Gdx.input.setInputProcessor(camController = new CameraInputController(camera));
    }
 
    public void render()
@@ -115,10 +116,10 @@ public class GDX3DWithShadowsDemo
 
       GDX3DSceneTools.glClearGray();
 
-      manager.renderShadows(lights, cam, instances);
+      manager.renderShadows(camera, instances);
       manager.apply(program);
 
-      modelBatch.begin(cam);
+      modelBatch.begin(camera);
       modelBatch.render(instances);
       modelBatch.end();
    }
