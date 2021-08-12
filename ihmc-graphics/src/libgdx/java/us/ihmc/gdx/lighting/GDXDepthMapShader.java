@@ -15,6 +15,7 @@ import us.ihmc.log.LogTools;
 
 public class GDXDepthMapShader extends BaseShader
 {
+   private static ShaderProgram shaderProgram = null;
    private Renderable renderable;
 
    protected GDXDepthMapShader(Renderable renderable)
@@ -23,30 +24,33 @@ public class GDXDepthMapShader extends BaseShader
       register(DefaultShader.Inputs.worldTrans, DefaultShader.Setters.worldTrans);
       register(DefaultShader.Inputs.projViewTrans, DefaultShader.Setters.projViewTrans);
       register(DefaultShader.Inputs.normalMatrix, DefaultShader.Setters.normalMatrix);
+   }
 
-      ShaderProgram.pedantic = false;
-      String directory = "us/ihmc/gdx/shadows";
-      String prefix = "depthmap";
-
-      program = new ShaderProgram(Gdx.files.classpath(directory + "/" + prefix + "_v.glsl"),
-                                        Gdx.files.classpath(directory + "/" + prefix + "_f.glsl"));
-      if (!program.isCompiled())
+   public static ShaderProgram getOrLoadShaderProgram()
+   {
+      if (shaderProgram == null)
       {
-         LogTools.fatal("Error with shader " + prefix + ": " + program.getLog());
-         System.exit(1);
+         ShaderProgram.pedantic = false;
+         String directory = "us/ihmc/gdx/shadows";
+         String prefix = "depthmap";
+         shaderProgram = new ShaderProgram(Gdx.files.classpath(directory + "/" + prefix + "_v.glsl"), Gdx.files.classpath(directory + "/" + prefix + "_f.glsl"));
+         if (!shaderProgram.isCompiled())
+         {
+            LogTools.fatal("Error with shader " + prefix + ": " + shaderProgram.getLog());
+            System.exit(1);
+         }
+         else
+         {
+            LogTools.info("Shader " + prefix + " compiled");
+         }
       }
-      else
-      {
-         LogTools.info("Shader " + prefix + " compiled");
-      }
+      return shaderProgram;
    }
 
    @Override
    public void init()
    {
-      final ShaderProgram program = this.program;
-      this.program = null;
-      super.init(program, renderable);
+      super.init(getOrLoadShaderProgram(), renderable);
       renderable = null;
    }
 

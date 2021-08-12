@@ -20,7 +20,6 @@ public class GDXDirectionalLight
    public static final float CAMERA_NEAR = 0.1f;
    public static final float CAMERA_FAR = 100f;
 
-   protected ShaderProgram shaderProgram = null;
    protected ModelBatch modelBatch;
 
    private final Camera camera;
@@ -60,6 +59,7 @@ public class GDXDirectionalLight
          framebuffer = new FrameBuffer(Pixmap.Format.RGBA8888, DEPTHMAP_SIZE, DEPTHMAP_SIZE, true);
       }
 
+      ShaderProgram shaderProgram = GDXDepthMapShader.getOrLoadShaderProgram();
       shaderProgram.begin();
       shaderProgram.setUniformf("u_cameraFar", camera.far);
       shaderProgram.setUniformf("u_lightPosition_x", getPosition().getX32());
