@@ -22,6 +22,8 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.log.LogTools;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
@@ -30,7 +32,7 @@ import java.util.HashSet;
 public class GDX3DSceneManager
 {
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
-   private final HashSet<GDXRenderable> renderables = new HashSet<>();
+   private final HashMap<GDXSceneLevel, ArrayList<GDXRenderable>> renderables = new HashMap<>();
    private InputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
    private ScreenViewport viewport;
@@ -69,6 +71,9 @@ public class GDX3DSceneManager
          inputMultiplexer.addProcessor(camera3D.setInputForLibGDX());
       }
 
+      renderables.put(GDXSceneLevel.REAL_ENVIRONMENT, new ArrayList<>());
+      renderables.put(GDXSceneLevel.VIRTUAL, new ArrayList<>());
+
       if (addFocusSphere)
          addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
       viewport = new ScreenViewport(camera3D);
@@ -91,7 +96,43 @@ public class GDX3DSceneManager
 
    public void renderShadowMap(int x, int y)
    {
-      shadowManager.renderShadows(camera3D, new GDXRenderableIterable(renderables), x, y);
+      shadowManager.renderShadows(camera3D, renderables.get(GDXSceneLevel.REAL_ENVIRONMENT), x, y);
+   }
+
+   public void render()
+   {
+      preRender();
+      if (shadowsEnabled)
+      {
+         renderInternal(shadowManager.getShadowSceneBatch(), GDXSceneLevel.REAL_ENVIRONMENT);
+      }
+      else
+      {
+         renderInternal(shadowsDisabledModelBatch, GDXSceneLevel.VIRTUAL);
+      }
+      postRender(GDXSceneLevel.VIRTUAL);
+   }
+
+   // For simulated sensors
+   public void renderExternalBatch(ModelBatch batch, GDXSceneLevel sceneLevel)
+   {
+      renderInternal(batch, sceneLevel);
+   }
+
+   // For VR
+   public void renderToCamera(Camera camera)
+   {
+      if (shadowsEnabled)
+      {
+         shadowManager.preRender(camera);
+         renderInternal(shadowManager.getShadowSceneBatch(), GDXSceneLevel.REAL_ENVIRONMENT);
+      }
+      else
+      {
+         shadowsDisabledModelBatch.begin(camera);
+         renderInternal(shadowsDisabledModelBatch, GDXSceneLevel.VIRTUAL);
+      }
+      postRender(GDXSceneLevel.VIRTUAL);
    }
 
    private void preRender()
@@ -122,78 +163,48 @@ public class GDX3DSceneManager
       GDX3DSceneTools.glClearGray();
    }
 
-   private void renderInternal(ModelBatch modelBatch)
-   {
-      renderInternal(modelBatch, GDXSceneLevel.VIRTUAL);
-   }
-
    private void renderInternal(ModelBatch modelBatch, GDXSceneLevel sceneLevel)
    {
       // All rendering except modelBatch.begin() and end()
 
-      for (GDXRenderable renderable : renderables)
+      int level = sceneLevel.ordinal();
+      while (level >= 0)
       {
-         if (sceneLevel.ordinal() >= renderable.getSceneType().ordinal())
-         {
-            if (shadowsEnabled)
-               modelBatch.render(renderable);
-            else
-               modelBatch.render(renderable, shadowsDisabledEnvironment);
-         }
+         GDXSceneLevel levelToRender = GDXSceneLevel.values()[level];
+         renderInternal(modelBatch, renderables.get(levelToRender));
+         --level;
       }
    }
 
-   private void postRender()
+   private void renderInternal(ModelBatch modelBatch, Iterable<GDXRenderable> renderables)
+   {
+      for (GDXRenderable renderable : renderables)
+      {
+         if (shadowsEnabled)
+            modelBatch.render(renderable);
+         else
+            modelBatch.render(renderable, shadowsDisabledEnvironment);
+      }
+   }
+
+   private void postRender(GDXSceneLevel sceneLevel)
    {
       if (shadowsEnabled)
       {
          shadowManager.postRender();
       }
-
-      // Render all virtual objects using the primary model batch
-      shadowsDisabledModelBatch.begin(camera3D);
-      shadowsDisabledModelBatch.render(new GDXRenderableIterable(renderables, GDXSceneLevel.VIRTUAL));
-      shadowsDisabledModelBatch.end();
-   }
-
-   // Render public API
-   public void renderToCamera(Camera camera)
-   {
-      if (shadowsEnabled)
-      {
-         shadowManager.getBatch().begin(camera);
-         renderInternal(shadowManager.getBatch());
-      }
       else
       {
-         shadowsDisabledModelBatch.begin(camera);
-         renderInternal(shadowsDisabledModelBatch);
+         shadowsDisabledModelBatch.end();
       }
-      postRender();
-   }
 
-   public void render()
-   {
-      render(GDXSceneLevel.VIRTUAL);
-   }
-
-   public void render(GDXSceneLevel sceneLevel)
-   {
-      preRender();
-      if (shadowsEnabled)
+      if (shadowsEnabled && sceneLevel == GDXSceneLevel.VIRTUAL)
       {
-         renderInternal(shadowManager.getBatch(), sceneLevel);
+         // Render all virtual objects using the primary model batch
+         shadowsDisabledModelBatch.begin(camera3D);
+         shadowsDisabledModelBatch.render(renderables.get(GDXSceneLevel.VIRTUAL));
+         shadowsDisabledModelBatch.end();
       }
-      else
-      {
-         renderInternal(shadowsDisabledModelBatch, sceneLevel);
-      }
-      postRender();
-   }
-
-   public void renderFromBatch(ModelBatch batch, GDXSceneLevel sceneLevel)
-   {
-      renderInternal(batch, sceneLevel);
    }
 
    public void dispose()
@@ -237,7 +248,7 @@ public class GDX3DSceneManager
 
    public void addRenderableProvider(RenderableProvider renderableProvider, GDXSceneLevel sceneLevel)
    {
-      renderables.add(new GDXRenderable(renderableProvider, sceneLevel));
+      renderables.get(sceneLevel).add(new GDXRenderable(renderableProvider, sceneLevel));
    }
 
    public void setViewportBoundsToWindow()

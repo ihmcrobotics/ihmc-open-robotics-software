@@ -15,12 +15,12 @@ import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 
-public class GDXSceneShader extends BaseShader
+public class GDXShadowSceneShader extends BaseShader
 {
    private Renderable renderable;
    private ShaderProgram program;
 
-   public GDXSceneShader(Renderable renderable, ShaderProgram shaderProgram)
+   public GDXShadowSceneShader(Renderable renderable, ShaderProgram shaderProgram)
    {
       this.renderable = renderable;
       this.program = shaderProgram;
