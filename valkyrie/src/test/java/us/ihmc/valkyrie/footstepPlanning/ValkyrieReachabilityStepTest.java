@@ -13,7 +13,6 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 public class ValkyrieReachabilityStepTest extends AvatarReachabilityStepTest
 {
    @Test
-   @Disabled
    @Override
    public void testSingleStep() throws Exception
    {

@@ -445,7 +445,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public String getStepReachabilityResourceName()
    {
-      return "ihmc-open-robotics-software/atlas/src/main/resources/us/ihmc/atlas/parameters/StepReachabilityMap.json";
+      return "us/ihmc/atlas/parameters/StepReachabilityMap.json";
    }
 
    @Override

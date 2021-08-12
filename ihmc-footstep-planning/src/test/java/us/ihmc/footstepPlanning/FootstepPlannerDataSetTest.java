@@ -21,7 +21,6 @@ import java.util.function.Predicate;
 
 public abstract class FootstepPlannerDataSetTest
 {
-   private static final double timeout = 240.0;
    private static final boolean DEBUG = true;
    private static final boolean VERBOSE = true;
    private static boolean GENERATE_LOG_FOR_FAILING_TESTS = true;

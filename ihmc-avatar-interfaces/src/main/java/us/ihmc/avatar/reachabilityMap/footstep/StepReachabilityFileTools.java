@@ -63,9 +63,11 @@ public class StepReachabilityFileTools
    private static MultiContactScriptReader setupScriptReader(DRCRobotModel robotModel)
    {
       MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-      Path filePath = Paths.get(rootPath.toString(), robotModel.getStepReachabilityResourceName());
-      scriptReader.loadScript(filePath.toFile());
+
+      Class<StepReachabilityFileTools> loadingClass = StepReachabilityFileTools.class;
+      InputStream inputStream = loadingClass.getClassLoader().getResourceAsStream(robotModel.getStepReachabilityResourceName());
+      scriptReader.loadScript(inputStream);
+
       return scriptReader;
    }
 

@@ -103,7 +103,7 @@ public abstract class HumanoidStepReachabilityCalculator
       HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_VISUALIZATION, TEST_WRITE_SCRIPT, TEST_LOAD_SCRIPT
    }
 
-   private static final Mode mode = Mode.TEST_VISUALIZATION;
+   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
 
    private static final double COM_WEIGHT = 1.0;
    private static final double RIGID_BODY_FEET_WEIGHT = 40.0;
@@ -218,9 +218,8 @@ public abstract class HumanoidStepReachabilityCalculator
             FramePose3D rightFootPose = new FramePose3D();
             MultiContactScriptWriter scriptWriter = new MultiContactScriptWriter();
 
-            Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
-            Path filePath = Paths.get(rootPath.toString(), robotModel.getStepReachabilityResourceName());
-            File reachabilityFile = filePath.toFile();
+            String filePath = getResourcesDirectory().replace('/', File.separatorChar) + File.separator + robotModel.getStepReachabilityResourceName().replace('/', File.separatorChar);
+            File reachabilityFile = new File(filePath);
             scriptWriter.startNewScript(reachabilityFile, true);
 
             // Loop through XYZs, free yaw
@@ -302,6 +301,8 @@ public abstract class HumanoidStepReachabilityCalculator
    }
 
    protected abstract DRCRobotModel getRobotModel();
+
+   protected abstract String getResourcesDirectory();
 
    protected void imposeJointLimitRestrictions(DRCRobotModel robotModel)
    {
@@ -517,12 +518,12 @@ public abstract class HumanoidStepReachabilityCalculator
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
    }
 
-   private static final double minimumOffsetX = -0.6;
-   private static final double maximumOffsetX = 0.6;
-   private static final double minimumOffsetY = -0.4;
-   private static final double maximumOffsetY = 0.7;
+   private static final double minimumOffsetX = 0.0;
+   private static final double maximumOffsetX = 0.3;
+   private static final double minimumOffsetY = 0.0;
+   private static final double maximumOffsetY = 0.3;
    private static final double minimumOffsetZ = 0.0;
-   private static final double maximumOffsetZ = 0.4;
+   private static final double maximumOffsetZ = 0.3;
    private static final double minimumOffsetYaw = -Math.toRadians(70.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
