@@ -2,9 +2,15 @@ package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.JsonReader;
+import us.ihmc.log.LogTools;
 
 import java.util.HashMap;
 
@@ -18,6 +24,16 @@ public class GDXModelLoader
    {
    }
 
+   public static Model loadG3DModel(String modelFileName)
+   {
+      return modelLoader.loadOrGetModel(modelFileName);
+   }
+
+   public static void destroy()
+   {
+      modelLoader.destroyInternal();
+   }
+
    private Model loadOrGetModel(String modelFileName)
    {
       Model model = loadedModels.get(modelFileName);
@@ -26,10 +42,25 @@ public class GDXModelLoader
          FileHandle fileHandle = Gdx.files.internal(modelFileName);
          try
          {
+            Model loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
+            for (Material material : loadedModel.materials)
+            {
+               if (!material.has(TextureAttribute.Diffuse))
+               {
+                  LogTools.warn("Material \"" + material.id + "\" in model \"" + modelFileName + "\" does not contain TextureAttribute Diffuse. Creating...");
 
-         Model loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
-         loadedModels.put(modelFileName, loadedModel);
-         return loadedModel;
+                  Pixmap map = new Pixmap(100, 100, Pixmap.Format.RGBA8888);
+                  map.setColor(((ColorAttribute) material.get(ColorAttribute.Diffuse)).color);
+                  map.drawRectangle(0, 0, 100, 100);
+
+                  material.set(TextureAttribute.createDiffuse(new Texture(map)));
+
+                  map.dispose();
+               }
+            }
+
+            loadedModels.put(modelFileName, loadedModel);
+            return loadedModel;
          }
          catch (NullPointerException e)
          {
@@ -60,15 +91,5 @@ public class GDXModelLoader
       String objFileName = splitSlash[splitSlash.length - 1];
       String modifiedFileName = objFileName.replace(".obj", "") + ".g3dj";
       return modifiedFileName;
-   }
-
-   public static Model loadG3DModel(String modelFileName)
-   {
-      return modelLoader.loadOrGetModel(modelFileName);
-   }
-
-   public static void destroy()
-   {
-      modelLoader.destroyInternal();
    }
 }
