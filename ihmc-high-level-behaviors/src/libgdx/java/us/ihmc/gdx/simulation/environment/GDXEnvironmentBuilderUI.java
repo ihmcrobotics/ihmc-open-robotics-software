@@ -10,7 +10,7 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/libgdx/resources",
                                                               "Environment Builder");
-   private final GDXEnvironment environment = new GDXEnvironment(baseUI);
+   private final GDXEnvironment environment = new GDXEnvironment(baseUI.get3DSceneManager());
    private final ImGui3DViewInputDebugger inputDebugger = new ImGui3DViewInputDebugger();
 
    public GDXEnvironmentBuilderUI()
