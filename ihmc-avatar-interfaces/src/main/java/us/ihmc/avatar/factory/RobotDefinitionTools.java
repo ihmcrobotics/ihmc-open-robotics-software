@@ -88,6 +88,7 @@ import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition.SubMeshDefin
 import us.ihmc.scs2.definition.geometry.Point3DDefinition;
 import us.ihmc.scs2.definition.geometry.Polygon3DDefinition;
 import us.ihmc.scs2.definition.geometry.PyramidBox3DDefinition;
+import us.ihmc.scs2.definition.geometry.Ramp3DDefinition;
 import us.ihmc.scs2.definition.geometry.STPBox3DDefinition;
 import us.ihmc.scs2.definition.geometry.STPCapsule3DDefinition;
 import us.ihmc.scs2.definition.geometry.STPConvexPolytope3DDefinition;
@@ -96,7 +97,6 @@ import us.ihmc.scs2.definition.geometry.STPRamp3DDefinition;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
 import us.ihmc.scs2.definition.geometry.TriangleMesh3DDefinition;
 import us.ihmc.scs2.definition.geometry.TruncatedCone3DDefinition;
-import us.ihmc.scs2.definition.geometry.Ramp3DDefinition;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
 import us.ihmc.scs2.definition.robot.GroundContactPointDefinition;
 import us.ihmc.scs2.definition.robot.IMUSensorDefinition;
@@ -309,6 +309,8 @@ public class RobotDefinitionTools
       RigidBodyTransform pose = new RigidBodyTransform();
       GeometryDefinition geometry = null;
       CollisionShapeDefinition output = new CollisionShapeDefinition();
+      output.setCollisionMask(source.getCollisionMask());
+      output.setCollisionGroup(source.getCollisionGroup());
       output.setOriginPose(pose);
 
       FrameShape3DReadOnly shape = source.getShape();
