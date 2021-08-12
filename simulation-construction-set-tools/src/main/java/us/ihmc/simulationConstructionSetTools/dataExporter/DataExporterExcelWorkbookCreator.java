@@ -357,7 +357,7 @@ public class DataExporterExcelWorkbookCreator
          for (Axis3D axis : Axis3D.values())
          {
             addHeaderEntry(configDataSheet, column, "Joint offset " + axis.toString().toLowerCase());
-            addNumberToSheet(configDataSheet, column++, row, Axis3D.get(offset, axis));
+            addNumberToSheet(configDataSheet, column++, row, axis.extract(offset));
          }
 
          // Mass
@@ -372,7 +372,7 @@ public class DataExporterExcelWorkbookCreator
          for (Axis3D axis : Axis3D.values())
          {
             addHeaderEntry(configDataSheet, column, "CoM offset " + axis.toString().toLowerCase());
-            addNumberToSheet(configDataSheet, column++, row, Axis3D.get(offset, axis));
+            addNumberToSheet(configDataSheet, column++, row, axis.extract(comOffset));
          }
 
          // Mass moment of inertia
