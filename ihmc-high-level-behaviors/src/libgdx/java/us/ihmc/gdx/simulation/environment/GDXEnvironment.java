@@ -342,18 +342,6 @@ public class GDXEnvironment extends ImGuiPanel
             {
                JsonNode objectNode = it.next();
                GDXEnvironmentObject object = GDXEnvironmentObject.loadByName(objectNode.get("type").asText());
-               if (object instanceof GDXPointLightObject)
-               {
-                  GDXPointLightObject pointLightObject = (GDXPointLightObject) object;
-                  baseUI.get3DSceneManager().addPointLight(pointLightObject.getLight());
-                  lightObjects.add(pointLightObject);
-               }
-               else if (object instanceof GDXDirectionalLightObject)
-               {
-                  GDXDirectionalLightObject directionalLightObject = (GDXDirectionalLightObject) object;
-                  baseUI.get3DSceneManager().addDirectionalLight(directionalLightObject.getLight());
-                  lightObjects.add(directionalLightObject);
-               }
 
                tempTranslation.setX(objectNode.get("x").asDouble());
                tempTranslation.setY(objectNode.get("y").asDouble());
@@ -366,7 +354,19 @@ public class GDXEnvironment extends ImGuiPanel
                object.set(tempTransform);
                objects.add(object);
 
-               if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
+               if (object instanceof GDXPointLightObject)
+               {
+                  GDXPointLightObject pointLightObject = (GDXPointLightObject) object;
+                  baseUI.get3DSceneManager().addPointLight(pointLightObject.getLight());
+                  lightObjects.add(pointLightObject);
+               }
+               else if (object instanceof GDXDirectionalLightObject)
+               {
+                  GDXDirectionalLightObject directionalLightObject = (GDXDirectionalLightObject) object;
+                  baseUI.get3DSceneManager().addDirectionalLight(directionalLightObject.getLight());
+                  lightObjects.add(directionalLightObject);
+               }
+               else if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
                {
                   doorSimulator.setDoor((GDXPushHandleRightDoorObject) object);
                }
