@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.footstepPlanning;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -12,6 +13,7 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 public class ValkyrieReachabilityStepTest extends AvatarReachabilityStepTest
 {
    @Test
+   @Disabled
    @Override
    public void testSingleStep() throws Exception
    {
