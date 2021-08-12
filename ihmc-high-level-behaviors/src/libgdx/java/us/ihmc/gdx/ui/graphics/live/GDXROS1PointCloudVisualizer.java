@@ -123,7 +123,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
          {
             try
             {
-               boolean hasColors = false;
+               boolean hasColors = true;
                PointCloudData pointCloudData = new PointCloudData(message, MAX_POINTS, hasColors);
 
                GDXPointCloudRenderer.ColorProvider provider;
