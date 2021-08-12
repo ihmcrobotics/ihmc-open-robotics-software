@@ -318,6 +318,7 @@ public class RobotDefinitionTools
          FrameSTPBox3DReadOnly stpBox3D = (FrameSTPBox3DReadOnly) shape;
          STPBox3DDefinition stpGeometry = new STPBox3DDefinition(stpBox3D.getSize());
          stpGeometry.setMargins(stpBox3D.getMinimumMargin(), stpBox3D.getMaximumMargin());
+         pose.set(shape.getPose());
          geometry = stpGeometry;
       }
       else if (shape instanceof FrameBox3DReadOnly)
