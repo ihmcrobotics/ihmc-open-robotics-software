@@ -43,6 +43,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.sessionVisualizer.jfx.yoGraphic.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
@@ -91,10 +92,14 @@ public class SCS2AvatarSimulationFactory
    private FullHumanoidRobotModel masterFullRobotModel;
    private HumanoidRobotContextData masterContext;
 
+   private final CollidableHelper collidableHelper = new CollidableHelper();
+   private final String robotCollisionName = "robot";
+   private final String terrainCollisionName = "terrain";
+
    private void createRobot()
    {
       robotDefinition = RobotDefinitionTools.toRobotDefinition(robotModel.get().getRobotDescription());
-      RobotCollisionModel collisionModel = robotModel.get().getSimulationRobotCollisionModel(new CollidableHelper(), "robot", "terrain");
+      RobotCollisionModel collisionModel = robotModel.get().getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
       if (collisionModel != null)
          RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.get().createFullRobotModel().getElevator()),
                                                              robotDefinition);
@@ -189,6 +194,7 @@ public class SCS2AvatarSimulationFactory
                                                     realtimeROS2Node.get(),
                                                     gravity.get(),
                                                     robotModel.get().getEstimatorDT());
+      simulationSession.addYoGraphicDefinitions(SCS1GraphicConversionTools.toYoGraphicDefinitions(controllerThread.getYoGraphicsListRegistry()));
    }
 
    private void createMasterContext()
@@ -390,7 +396,10 @@ public class SCS2AvatarSimulationFactory
 
    public void setCommonAvatarEnvrionmentInterface(CommonAvatarEnvironmentInterface environment)
    {
-      setTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment));
+      setTerrainObjectDefinition(TerrainObjectDefinitionTools.toTerrainObjectDefinition(environment,
+                                                                                        collidableHelper,
+                                                                                        terrainCollisionName,
+                                                                                        robotCollisionName));
    }
 
    public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
