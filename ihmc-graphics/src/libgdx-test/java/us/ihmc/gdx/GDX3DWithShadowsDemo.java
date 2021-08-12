@@ -82,10 +82,13 @@ public class GDX3DWithShadowsDemo
          }
       });
 
-      manager = new GDXShadowManager(() -> lights, () -> 0.4f);
+      manager = new GDXShadowManager(1.0f, () -> lights, () -> 0.4f);
       light = new GDXPointLight(6.0, 3.0, -6.0);
       lights.add(light);
-      lights.add(new GDXDirectionalLight(new Point3D(10.0, 10.0, 10.0), new Vector3D(-1.0, -1.0, -1.0)));
+      GDXDirectionalLight directionalLight = new GDXDirectionalLight();
+      directionalLight.getPosition().set(10.0, 10.0, 10.0);
+      directionalLight.getDirection().set(-1.0, -1.0, -1.0);
+      lights.add(directionalLight));
 
       //Add model instances
       instances.add(box = GDXModelPrimitives.buildModelInstance(meshBuilder ->

@@ -1,38 +1,57 @@
 package us.ihmc.gdx.lighting;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.Shader;
+import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.tools.GDXTools;
 
-public class GDXDirectionalLight extends GDXLight
+public class GDXDirectionalLight
 {
+   public static final int DEPTHMAP_SIZE = 4096;
+   public static final float CAMERA_NEAR = 0.1f;
+   public static final float CAMERA_FAR = 100f;
+
+   protected ShaderProgram shaderProgram = null;
+   protected ModelBatch modelBatch;
+
+   private final Camera camera;
+   private final Point3D position = new Point3D();
    private final Vector3D direction = new Vector3D();
    private FrameBuffer framebuffer;
    private Texture depthMap;
 
    public GDXDirectionalLight()
    {
-      super(150.0);
+      camera = new PerspectiveCamera(150.0f, DEPTHMAP_SIZE, DEPTHMAP_SIZE);
+      modelBatch = new ModelBatch(new DefaultShaderProvider()
+      {
+         @Override
+         protected Shader createShader(final Renderable renderable)
+         {
+            return new GDXDepthMapShader(renderable);
+         }
+      });
       update();
    }
 
-   public GDXDirectionalLight(Point3D position, Vector3D direction)
+   public void update()
    {
-      super(150.0);
-      getPosition().set(position);
-      this.direction.set(direction);
-      update();
+      camera.near = CAMERA_NEAR;
+      camera.far = CAMERA_FAR;
+      GDXTools.toGDX(getPosition(), camera.position);
+      camera.lookAt(direction.getX32(), direction.getY32(), direction.getZ32());
+      camera.update();
    }
 
-   @Override
-   protected <T extends RenderableProvider> void render(Iterable<T> renderableProviders)
+   public <T extends RenderableProvider> void render(Iterable<T> renderableProviders)
    {
       if (framebuffer == null)
       {
@@ -40,7 +59,7 @@ public class GDXDirectionalLight extends GDXLight
       }
 
       shaderProgram.begin();
-      shaderProgram.setUniformf("u_cameraFar", getCamera().far);
+      shaderProgram.setUniformf("u_cameraFar", camera.far);
       shaderProgram.setUniformf("u_lightPosition_x", getPosition().getX32());
       shaderProgram.setUniformf("u_lightPosition_y", getPosition().getY32());
       shaderProgram.setUniformf("u_lightPosition_z", getPosition().getZ32());
@@ -50,7 +69,7 @@ public class GDXDirectionalLight extends GDXLight
       Gdx.gl.glClearColor(0, 0, 0, 1);
       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-      modelBatch.begin(getCamera());
+      modelBatch.begin(camera);
       modelBatch.render(renderableProviders);
       modelBatch.end();
 
@@ -58,34 +77,33 @@ public class GDXDirectionalLight extends GDXLight
       depthMap = framebuffer.getColorBufferTexture();
    }
 
-   @Override
-   protected void apply(ShaderProgram shader)
+   public void apply(ShaderProgram shader)
    {
       shader.begin();
       final int textureNum = depthMap.getTextureObjectHandle();
       depthMap.bind(textureNum);
       shader.setUniformf("u_type", 1);
       shader.setUniformi("u_depthMapDir", textureNum);
-      shader.setUniformMatrix("u_lightTrans", getCamera().combined);
-      shader.setUniformf("u_cameraFar", getCamera().far);
+      shader.setUniformMatrix("u_lightTrans", camera.combined);
+      shader.setUniformf("u_cameraFar", camera.far);
       shader.setUniformf("u_lightPosition_x", getPosition().getX32());
       shader.setUniformf("u_lightPosition_y", getPosition().getY32());
       shader.setUniformf("u_lightPosition_z", getPosition().getZ32());
       shader.end();
    }
 
-   @Override
-   public void update()
+   public Point3D getPosition()
    {
-      getCamera().near = CAMERA_NEAR;
-      getCamera().far = CAMERA_FAR;
-      GDXTools.toGDX(getPosition(), getCamera().position);
-      getCamera().lookAt(direction.getX32(), direction.getY32(), direction.getZ32());
-      getCamera().update();
+      return position;
    }
 
    public Vector3D getDirection()
    {
       return direction;
+   }
+
+   public Camera getCamera()
+   {
+      return camera;
    }
 }

@@ -14,9 +14,10 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.log.LogTools;
 
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 public class GDXShadowManager
@@ -34,33 +35,33 @@ public class GDXShadowManager
    };
    private final float antiAliasing;
    private final Supplier<Float> ambientLightSupplier;
+   private final GDX3DSceneManager sceneManager;
    private boolean useViewport = false;
    private int x = 0;
    private int y = 0;
    private int width = 0;
    private int height = 0;
    private FrameBuffer framebuffer;
-   protected final HashSet<GDXLight> additionalOffscreenLights = new HashSet<>();
+   private final ArrayList<GDXPointLight> additionalOffscreenLights = new ArrayList<>();
+   private final ArrayList<GDXPointLight> pointLights = new ArrayList<>();
+   private final ArrayList<GDXDirectionalLight> directionalLights = new ArrayList<>();
 
-   public GDXShadowManager(Supplier<Iterable<GDXLight>> lightSupplier, Supplier<Float> ambientLightSupplier)
+   public GDXShadowManager(GDX3DSceneManager sceneManager)
    {
-      this(1.0f, lightSupplier, ambientLightSupplier);
+      this(1.0f, sceneManager);
    }
 
-   public GDXShadowManager(float antiAliasing, Supplier<Iterable<GDXLight>> lightSupplier, Supplier<Float> ambientLightSupplier)
+   public GDXShadowManager(float antiAliasing, GDX3DSceneManager sceneManager)
    {
-      this(antiAliasing, GDXShadowMapShader.buildShaderProgram(), lightSupplier, ambientLightSupplier);
+      this(antiAliasing, GDXShadowMapShader.buildShaderProgram());
    }
 
    /**
     * @param shader The ShaderProgram used to create the shader used by the main ModelBatch
     */
-   public GDXShadowManager(float antiAliasing, ShaderProgram shader,
-                           Supplier<Iterable<GDXLight>> lightSupplier,
-                           Supplier<Float> ambientLightSupplier)
+   public GDXShadowManager(float antiAliasing, ShaderProgram shader, GDX3DSceneManager sceneManager)
    {
-      this.ambientLightSupplier = ambientLightSupplier;
-      final GDXShadowManager manager = this;
+      this.sceneManager = sceneManager;
 
       this.antiAliasing = antiAliasing;
 
@@ -70,7 +71,7 @@ public class GDXShadowManager
          @Override
          protected Shader createShader(final Renderable renderable)
          {
-            return new GDXShadowMapShader(renderable, shader, manager, lightSupplier);
+            return new GDXShadowMapShader(renderable, shader, this, sceneManager);
          }
       });
 
@@ -96,9 +97,9 @@ public class GDXShadowManager
     *
     * @param renderableProviders The models to be rendered
     */
-   public <T extends RenderableProvider> void renderShadows(Iterable<GDXLight> lights, Camera camera, Iterable<T> renderableProviders)
+   public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders)
    {
-      renderShadows(lights, camera, renderableProviders, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+      renderShadows(camera, renderableProviders, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
    }
 
    /**
@@ -107,15 +108,19 @@ public class GDXShadowManager
     *
     * @param renderableProviders The models to be rendered
     */
-   public <T extends RenderableProvider> void renderShadows(Iterable<GDXLight> lights, Camera camera, Iterable<T> renderableProviders, int width, int height)
+   public <T extends RenderableProvider> void renderShadows(Camera camera, Iterable<T> renderableProviders, int width, int height)
    {
-      for (GDXLight additionalOffscreenLight : additionalOffscreenLights)
+      for (GDXPointLight additionalOffscreenLight : additionalOffscreenLights)
       {
          additionalOffscreenLight.render(renderableProviders);
       }
-      for (GDXLight light : lights)
+      for (GDXPointLight pointLight : pointLights)
       {
-         light.render(renderableProviders);
+         pointLight.render(renderableProviders);
+      }
+      for (GDXDirectionalLight directionalLight : directionalLights)
+      {
+         directionalLight.render(renderableProviders);
       }
 
       if ((framebuffer == null || width != framebuffer.getWidth() || height != framebuffer.getHeight()) && width > 0 && height > 0)
@@ -175,5 +180,15 @@ public class GDXShadowManager
       this.y = y;
       this.width = width;
       this.height = height;
+   }
+
+   public ArrayList<GDXPointLight> getPointLights()
+   {
+      return pointLights;
+   }
+
+   public ArrayList<GDXDirectionalLight> getDirectionalLights()
+   {
+      return directionalLights;
    }
 }
