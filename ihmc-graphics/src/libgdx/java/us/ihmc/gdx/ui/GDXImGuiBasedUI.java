@@ -1,9 +1,13 @@
 package us.ihmc.gdx.ui;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
+import com.badlogic.gdx.graphics.glutils.GLVersion;
+import com.badlogic.gdx.utils.BufferUtils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiStyleVar;
@@ -12,6 +16,7 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import org.lwjgl.opengl.GL30;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
@@ -31,6 +36,7 @@ import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 
+import java.nio.IntBuffer;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,8 +44,12 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
+import static org.lwjgl.glfw.GLFW.*;
+
 public class GDXImGuiBasedUI
 {
+   public static final int ANTI_ALIASING = 2;
+
    private static boolean RECORD_VIDEO = Boolean.parseBoolean(System.getProperty("record.video"));
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
    private static final String VIEW_3D_WINDOW_NAME = "3D View";
@@ -68,12 +78,14 @@ public class GDXImGuiBasedUI
    private float sizeY;
    private final ImInt foregroundFPS = new ImInt(240);
    private final ImBoolean vsync = new ImBoolean(false);
+   private final ImBoolean shadows = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
    private boolean needToReindexPerspectives = true;
    private final ImString perspectiveNameToSave = new ImString("", 100);
    private final ImBoolean perspectiveDefaultMode = new ImBoolean(false);
    private final ArrayList<String> perspectives = new ArrayList<>();
    private String currentPerspective = "Main";
+   private Texture currentGDXTexture = null;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -127,6 +139,25 @@ public class GDXImGuiBasedUI
    public void create()
    {
       LogTools.info("create()");
+
+      GLVersion version = new GLVersion(Application.ApplicationType.Desktop, glfwGetVersionString(), null, null);
+      if (version.isVersionEqualToOrHigher(4, 3))
+      {
+         IntBuffer buffer = BufferUtils.newIntBuffer(1);
+         Gdx.gl.glGetIntegerv(GL30.GL_CONTEXT_FLAGS, buffer);
+         int flags = buffer.get();
+
+         //GL_CONTEXT_FLAG_DEBUG_BIT - ensure debug context
+         if ((flags & 0b10) == 0)
+         {
+            throw new IllegalStateException("OpenGL did not create debug context!");
+         }
+      }
+      else
+      {
+         LogTools.warn("You are running a version of OpenGL which does not support debug contexts: " + glfwGetVersionString());
+         LogTools.warn("Error messages may not be complete, and some may not be registered at all.");
+      }
 
       sceneManager.create(GDXInputMode.ImGui);
       inputCalculator = new ImGui3DViewInput(sceneManager.getCamera3D(), this::getViewportSizeX, this::getViewportSizeY);
@@ -297,6 +328,10 @@ public class GDXImGuiBasedUI
          {
             Gdx.graphics.setVSync(vsync.get());
          }
+         if (ImGui.checkbox("Shadows", shadows))
+         {
+            sceneManager.setShadowsEnabled(shadows.get());
+         }
          if (ImGui.inputInt("libGDX log level", libGDXLogLevel, 1))
          {
             Gdx.app.setLogLevel(libGDXLogLevel.get());
@@ -336,13 +371,12 @@ public class GDXImGuiBasedUI
       ImGui.begin(VIEW_3D_WINDOW_NAME, flags);
       view3DPanelSizeHandler.handleSizeAfterBegin();
 
-      int antiAliasing = 2;
       float posX = ImGui.getWindowPosX();
       float posY = ImGui.getWindowPosY() + ImGuiTools.TAB_BAR_HEIGHT;
       sizeX = ImGui.getWindowSizeX();
       sizeY = ImGui.getWindowSizeY() - ImGuiTools.TAB_BAR_HEIGHT;
-      float renderSizeX = sizeX * antiAliasing;
-      float renderSizeY = sizeY * antiAliasing;
+      float renderSizeX = sizeX * ANTI_ALIASING;
+      float renderSizeY = sizeY * ANTI_ALIASING;
 
       inputCalculator.compute();
       for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imGuiInputProcessors)
@@ -355,8 +389,8 @@ public class GDXImGuiBasedUI
          if (frameBuffer != null)
             frameBuffer.dispose();
 
-         int newWidth = frameBuffer == null ? Gdx.graphics.getWidth() * antiAliasing : frameBuffer.getWidth() * 2;
-         int newHeight = frameBuffer == null ? Gdx.graphics.getHeight() * antiAliasing : frameBuffer.getHeight() * 2;
+         int newWidth = frameBuffer == null ? Gdx.graphics.getWidth() * ANTI_ALIASING : frameBuffer.getWidth() * 2;
+         int newHeight = frameBuffer == null ? Gdx.graphics.getHeight() * ANTI_ALIASING : frameBuffer.getHeight() * 2;
          LogTools.info("Allocating framebuffer of size: {}x{}", newWidth, newHeight);
          GLFrameBuffer.FrameBufferBuilder frameBufferBuilder = new GLFrameBuffer.FrameBufferBuilder(newWidth, newHeight);
          frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
@@ -364,14 +398,18 @@ public class GDXImGuiBasedUI
          frameBuffer = frameBufferBuilder.build();
       }
 
-      frameBuffer.begin();
       sceneManager.setViewportBounds(0, 0, (int) renderSizeX, (int) renderSizeY);
+      sceneManager.renderShadowMap(Gdx.graphics.getWidth() * ANTI_ALIASING, Gdx.graphics.getHeight() * ANTI_ALIASING);
+
+      frameBuffer.begin();
       sceneManager.render();
       frameBuffer.end();
 
-      float percentOfFramebufferUsedX = renderSizeX / frameBuffer.getWidth();
-      float percentOfFramebufferUsedY = renderSizeY / frameBuffer.getHeight();
-      int textureId = frameBuffer.getColorBufferTexture().getTextureObjectHandle();
+      int frameBufferWidth = frameBuffer.getWidth();
+      int frameBufferHeight = frameBuffer.getHeight();
+      float percentOfFramebufferUsedX = renderSizeX / frameBufferWidth;
+      float percentOfFramebufferUsedY = renderSizeY / frameBufferHeight;
+      int textureID = frameBuffer.getColorBufferTexture().getTextureObjectHandle();
       float pMinX = posX;
       float pMinY = posY;
       float pMaxX = posX + sizeX;
@@ -380,7 +418,7 @@ public class GDXImGuiBasedUI
       float uvMinY = percentOfFramebufferUsedY; // flip Y
       float uvMaxX = percentOfFramebufferUsedX;
       float uvMaxY = 0.0f;
-      ImGui.getWindowDrawList().addImage(textureId, pMinX, pMinY, pMaxX, pMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
+      ImGui.getWindowDrawList().addImage(textureID, pMinX, pMinY, pMaxX, pMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
 
       ImGui.end();
       ImGui.popStyleVar();
