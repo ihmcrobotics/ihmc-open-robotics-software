@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.Shader;
+import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -25,6 +26,7 @@ public class GDXPointLight
 
    private AccessibleFrameBufferCubemap framebuffer;
    private Cubemap depthMap;
+   private PointLight attribute;
 
    public GDXPointLight()
    {
@@ -104,5 +106,15 @@ public class GDXPointLight
    public Camera getCamera()
    {
       return camera;
+   }
+
+   public void setAttribute(PointLight attribute)
+   {
+      this.attribute = attribute;
+   }
+
+   public PointLight getAttribute()
+   {
+      return attribute;
    }
 }
