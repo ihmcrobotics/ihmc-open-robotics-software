@@ -25,6 +25,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXDoorSimulator;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
@@ -57,31 +58,31 @@ public class GDXEnvironment extends ImGuiPanel
    private final Quaternion tempOrientation = new Quaternion();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Point3D tempIntersection = new Point3D();
-   private final GDXImGuiBasedUI baseUI;
    private GDXDoorSimulator doorSimulator;
    private final ImFloat ambientLight = new ImFloat(0.4f);
+   private final GDX3DSceneManager sceneManager;
 
-   public GDXEnvironment(GDXImGuiBasedUI baseUI)
+   public GDXEnvironment(GDX3DSceneManager sceneManager)
    {
-      this(baseUI, null, null);
+      this(sceneManager, null, null);
    }
 
-   public GDXEnvironment(GDXImGuiBasedUI baseUI, ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
+   public GDXEnvironment(GDX3DSceneManager sceneManager, ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
    {
       super(WINDOW_NAME);
+      this.sceneManager = sceneManager;
       if (syncedRobot != null)
          doorSimulator = new GDXDoorSimulator(syncedRobot, helper);
       setRenderMethod(this::renderImGuiWidgets);
       addChild(poseGizmoTunerPanel);
-      this.baseUI = baseUI;
    }
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      baseUI.get3DSceneManager().addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-      baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+      sceneManager.addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      sceneManager.addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
-      pose3DGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+      pose3DGizmo.create(sceneManager.getCamera3D());
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
@@ -191,19 +192,19 @@ public class GDXEnvironment extends ImGuiPanel
 
          if (ImGui.sliderFloat("Ambient light", ambientLight.getData(), 0.0f, 1.0f))
          {
-            baseUI.get3DSceneManager().setAmbientLight(ambientLight.get());
+            sceneManager.setAmbientLight(ambientLight.get());
          }
          if (ImGui.button("Place Point Light"))
          {
             GDXPointLightObject pointLight = new GDXPointLightObject();
             objectToPlace = pointLight;
-            baseUI.get3DSceneManager().addPointLight(pointLight.getLight());
+            sceneManager.addPointLight(pointLight.getLight());
          }
          if (ImGui.button("Place Directional Light"))
          {
             GDXDirectionalLightObject directionalLight = new GDXDirectionalLightObject();
             objectToPlace = directionalLight;
-            baseUI.get3DSceneManager().addDirectionalLight(directionalLight.getLight());
+            sceneManager.addDirectionalLight(directionalLight.getLight());
          }
 
          ImGui.separator();
@@ -229,12 +230,12 @@ public class GDXEnvironment extends ImGuiPanel
          if (selectedObject instanceof GDXPointLightObject)
          {
             GDXPointLightObject lightObject = (GDXPointLightObject) selectedObject;
-            baseUI.get3DSceneManager().removePointLight(lightObject.getLight());
+            sceneManager.removePointLight(lightObject.getLight());
          }
          else if (selectedObject instanceof GDXDirectionalLightObject)
          {
             GDXDirectionalLightObject lightObject = (GDXDirectionalLightObject) selectedObject;
-            baseUI.get3DSceneManager().removeDirectionalLight(lightObject.getLight());
+            sceneManager.removeDirectionalLight(lightObject.getLight());
          }
 
          selectedObject = null;
@@ -316,7 +317,7 @@ public class GDXEnvironment extends ImGuiPanel
       selectedEnvironmentFile = environmentFile;
       objects.clear();
 
-      baseUI.get3DSceneManager().clearLights();
+      sceneManager.clearLights();
       lightObjects.clear();
 
       selectedObject = null;
@@ -336,7 +337,7 @@ public class GDXEnvironment extends ImGuiPanel
             {
                float ambientValue = (float) ambientLightNode.asDouble();
                ambientLight.set(ambientValue);
-               baseUI.get3DSceneManager().setAmbientLight(ambientLight.get());
+               sceneManager.setAmbientLight(ambientLight.get());
             }
             for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
             {
@@ -357,13 +358,13 @@ public class GDXEnvironment extends ImGuiPanel
                if (object instanceof GDXPointLightObject)
                {
                   GDXPointLightObject pointLightObject = (GDXPointLightObject) object;
-                  baseUI.get3DSceneManager().addPointLight(pointLightObject.getLight());
+                  sceneManager.addPointLight(pointLightObject.getLight());
                   lightObjects.add(pointLightObject);
                }
                else if (object instanceof GDXDirectionalLightObject)
                {
                   GDXDirectionalLightObject directionalLightObject = (GDXDirectionalLightObject) object;
-                  baseUI.get3DSceneManager().addDirectionalLight(directionalLightObject.getLight());
+                  sceneManager.addDirectionalLight(directionalLightObject.getLight());
                   lightObjects.add(directionalLightObject);
                }
                else if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
