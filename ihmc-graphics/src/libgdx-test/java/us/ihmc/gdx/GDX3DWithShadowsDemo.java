@@ -3,14 +3,8 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
-import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.utils.Array;
 import org.lwjgl.opengl.GL30;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.lighting.*;
@@ -18,14 +12,14 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 
+import java.util.ArrayList;
+
 public class GDX3DWithShadowsDemo
 {
    private PerspectiveCamera camera;
    private CameraInputController cameraController;
-   private ModelBatch modelBatch;
-   private final Array<ModelInstance> instances = new Array<>();
+   private final ArrayList<ModelInstance> instances = new ArrayList<>();
    private ModelInstance box;
-   private ShaderProgram program;
    private GDXPointLight light;
    private GDXShadowManager manager;
 
@@ -46,17 +40,6 @@ public class GDX3DWithShadowsDemo
             camera.near = 1f;
             camera.far = 50f;
             camera.update();
-
-            //Model batch and shadow stuff
-            program = new ShaderProgram(GDXShadowManager.getVertexShader(), GDXShadowManager.getFragmentShader());
-            modelBatch = new ModelBatch(new DefaultShaderProvider()
-            {
-               @Override
-               protected Shader createShader(Renderable renderable)
-               {
-                  return new GDXSceneShader(renderable, program);
-               }
-            });
 
             manager = new GDXShadowManager(1.0f, 0.4f);
             light = new GDXPointLight();
@@ -94,17 +77,15 @@ public class GDX3DWithShadowsDemo
             GDX3DSceneTools.glClearGray();
 
             manager.renderShadows(camera, instances);
-            manager.apply(program);
-
-            modelBatch.begin(camera);
-            modelBatch.render(instances);
-            modelBatch.end();
+            manager.preRender(camera);
+            manager.render(instances);
+            manager.postRender();
          }
 
          @Override
          public void dispose()
          {
-            modelBatch.dispose();
+            manager.dispose();
          }
       }, GDX3DWithShadowsDemo.class);
    }

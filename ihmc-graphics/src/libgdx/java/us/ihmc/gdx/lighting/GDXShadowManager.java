@@ -12,24 +12,12 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
 public class GDXShadowManager
 {
-   private final ModelBatch batch;
-   private final Array<Renderable> renderableArray = new Array<>();
-   private final Pool<Renderable> renderablePool = new Pool<Renderable>()
-   {
-      @Override
-      protected Renderable newObject()
-      {
-         return new Renderable();
-      }
-   };
    private final float antiAliasing;
    private boolean useViewport = false;
    private int x = 0;
@@ -41,7 +29,8 @@ public class GDXShadowManager
    private final ArrayList<GDXPointLight> pointLights = new ArrayList<>();
    private final ArrayList<GDXDirectionalLight> directionalLights = new ArrayList<>();
    private final ShaderProgram shadowSceneShaderProgram;
-   private final ModelBatch shadowObjectsModelBatch;
+   private final ModelBatch shadowMapBatch;
+   private final ModelBatch shadowSceneBatch;
    private float ambientLight;
 
    public GDXShadowManager(float antiAliasing, float ambientLight)
@@ -49,17 +38,19 @@ public class GDXShadowManager
       this.antiAliasing = antiAliasing;
       this.ambientLight = ambientLight;
 
-      shadowSceneShaderProgram = new ShaderProgram(getVertexShader(), getFragmentShader());
-      shadowObjectsModelBatch = new ModelBatch(new DefaultShaderProvider()
+      String vertexShader = Gdx.files.classpath("us/ihmc/gdx/shadows/scene_v.glsl").readString();
+      String fragmentShader = Gdx.files.classpath("us/ihmc/gdx/shadows/scene_f.glsl").readString();
+      shadowSceneShaderProgram = new ShaderProgram(vertexShader, fragmentShader);
+      shadowSceneBatch = new ModelBatch(new DefaultShaderProvider()
       {
          @Override
          protected Shader createShader(Renderable renderable)
          {
-            return new GDXSceneShader(renderable, shadowSceneShaderProgram);
+            return new GDXShadowSceneShader(renderable, shadowSceneShaderProgram);
          }
       });
 
-      batch = new ModelBatch(new DefaultShaderProvider()
+      shadowMapBatch = new ModelBatch(new DefaultShaderProvider()
       {
          @Override
          protected Shader createShader(final Renderable renderable)
@@ -78,36 +69,6 @@ public class GDXShadowManager
       GDXPointLight lightThree = new GDXPointLight();
       lightThree.getPosition().set(2.0, 0.0, -500.0);
       additionalOffscreenLights.add(lightThree);
-   }
-
-   public static String getVertexShader()
-   {
-      return Gdx.files.classpath("us/ihmc/gdx/shadows/scene_v.glsl").readString();
-   }
-
-   public static String getFragmentShader()
-   {
-      return Gdx.files.classpath("us/ihmc/gdx/shadows/scene_f.glsl").readString();
-   }
-
-   public void preRender(Camera camera)
-   {
-      apply(shadowSceneShaderProgram);
-      shadowObjectsModelBatch.begin(camera);
-   }
-
-   public void apply(ShaderProgram program)
-   {
-      program.begin();
-      Texture shadows = framebuffer.getColorBufferTexture();
-      int textureNum = shadows.getTextureObjectHandle();
-      shadows.bind(textureNum);
-      program.setUniformi("u_shadows", textureNum);
-      program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
-      program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
-      program.setUniformf("u_antiAliasing", antiAliasing);
-      program.setUniformf("u_ambientLight", ambientLight);
-      program.end();
    }
 
    /**
@@ -159,34 +120,46 @@ public class GDXShadowManager
       Gdx.gl.glClearColor(0.4f, 0.4f, 0.4f, 0.4f);
       Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
-      renderablePool.freeAll(renderableArray);
-      renderableArray.clear();
-
-      for (RenderableProvider renderableProvider : renderableProviders)
-      {
-         renderableProvider.getRenderables(renderableArray, renderablePool);
-      }
-
       // We must individually render every renderable here or everything breaks and things are bad.
       // It's annoying, but there is no performance hit, so it's okay.
-      for (Renderable renderable : renderableArray)
+      for (RenderableProvider renderable : renderableProviders)
       {
-         batch.begin(camera);
-         batch.render(renderable);
-         batch.end();
+         shadowMapBatch.begin(camera);
+         shadowMapBatch.render(renderable);
+         shadowMapBatch.end();
       }
 
       framebuffer.end();
    }
 
-   public void renderToCamera(Camera camera)
+   public void apply(ShaderProgram program)
    {
+      program.begin();
+      Texture shadows = framebuffer.getColorBufferTexture();
+      int textureNum = shadows.getTextureObjectHandle();
+      shadows.bind(textureNum);
+      program.setUniformi("u_shadows", textureNum);
+      program.setUniformf("u_screenWidth", Gdx.graphics.getWidth());
+      program.setUniformf("u_screenHeight", Gdx.graphics.getHeight());
+      program.setUniformf("u_antiAliasing", antiAliasing);
+      program.setUniformf("u_ambientLight", ambientLight);
+      program.end();
+   }
 
+   public void preRender(Camera camera)
+   {
+      apply(shadowSceneShaderProgram);
+      shadowSceneBatch.begin(camera);
+   }
+
+   public void render(Iterable<? extends RenderableProvider> renderables)
+   {
+      shadowSceneBatch.render(renderables);
    }
 
    public void postRender()
    {
-      batch.end();
+      shadowSceneBatch.end();
    }
 
    public void setViewportBounds(int x, int y, int width, int height)
@@ -200,7 +173,7 @@ public class GDXShadowManager
 
    public void dispose()
    {
-      shadowObjectsModelBatch.dispose();
+      shadowSceneBatch.dispose();
    }
 
    public ArrayList<GDXPointLight> getPointLights()
@@ -213,13 +186,13 @@ public class GDXShadowManager
       return directionalLights;
    }
 
-   public ModelBatch getBatch()
-   {
-      return batch;
-   }
-
    public void setAmbientLight(float ambientLight)
    {
       this.ambientLight = ambientLight;
+   }
+
+   public ModelBatch getShadowSceneBatch()
+   {
+      return shadowSceneBatch;
    }
 }
