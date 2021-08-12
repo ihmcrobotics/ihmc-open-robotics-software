@@ -53,7 +53,6 @@ public class RosTools
    public static final String L515_DEPTH_TO_COLOR = "/chest_l515/extrinsics/depth_to_color";
    public static final String L515_ALIGNED_IMAGE = "/chest_l515/aligned_depth_to_color/image_raw";
    public static final String L515_ALIGNED_CAMERA_INFO = "/chest_l515/aligned_depth_to_color/camera_info";
-   public static final String L515_DEPTH_TO_COLOR = "/chest_l515/extrinsics/depth_to_color";
    public static final String OUSTER_POINT_CLOUD = "/os_cloud_node/points";
    public static final String SLAM_POSE = "/mapsense/slam/pose";
    public static final String L515_COLOR_CAMERA_INFO = "/chest_l515/color/camera_info";
