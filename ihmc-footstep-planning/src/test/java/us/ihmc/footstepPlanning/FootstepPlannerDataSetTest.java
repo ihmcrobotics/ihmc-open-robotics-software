@@ -153,7 +153,7 @@ public abstract class FootstepPlannerDataSetTest
       request.setPerformAStarSearch(getPerformAStarSearch());
       request.setPlanarRegionsList(dataset.getPlanarRegionsList());
       request.setMaximumIterations(300);
-      request.setTimeout(timeout);
+      request.setTimeout(Double.MAX_VALUE);
       request.setHorizonLength(Double.MAX_VALUE);
       return request;
    }

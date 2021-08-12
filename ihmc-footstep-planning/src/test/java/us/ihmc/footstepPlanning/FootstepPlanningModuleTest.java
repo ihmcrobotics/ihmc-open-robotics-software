@@ -101,7 +101,8 @@ public class FootstepPlanningModuleTest
       request.setPlanBodyPath(false);
       request.setGoalDistanceProximity(0.65);
       request.setGoalYawProximity(0.4);
-      request.setTimeout(2.0);
+      request.setTimeout(Double.MAX_VALUE);
+      request.setMaximumIterations(50);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
@@ -153,7 +154,8 @@ public class FootstepPlanningModuleTest
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setPlanarRegionsList(planarRegionsListGenerator.getPlanarRegionsList());
       request.setPlanBodyPath(false);
-      request.setTimeout(2.0);
+      request.setTimeout(Double.MAX_VALUE);
+      request.setMaximumIterations(30);
 
       // test snap goal steps
       request.setSnapGoalSteps(true);
