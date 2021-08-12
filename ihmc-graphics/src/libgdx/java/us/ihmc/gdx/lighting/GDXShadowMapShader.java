@@ -14,7 +14,7 @@ import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import us.ihmc.log.LogTools;
 
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 /**
  * Shader used to render multiple shadows on the main scene.
@@ -22,57 +22,33 @@ import java.util.function.Supplier;
  */
 public class GDXShadowMapShader extends BaseShader
 {
-   private final GDXShadowManager manager;
    private Renderable renderable;
-   private final Supplier<Iterable<GDXLight>> lightSupplier;
+   private final GDXShadowManager shadowManager;
 
-   protected GDXShadowMapShader(Renderable renderable,
-                                ShaderProgram shader,
-                                GDXShadowManager manager,
-                                Supplier<Iterable<GDXLight>> lightSupplier)
+   protected GDXShadowMapShader(Renderable renderable, GDXShadowManager shadowManager)
    {
       this.renderable = renderable;
-      this.program = shader;
-      this.manager = manager;
-      this.lightSupplier = lightSupplier;
+      this.shadowManager = shadowManager;
+
       register(Inputs.worldTrans, Setters.worldTrans);
       register(Inputs.projViewTrans, Setters.projViewTrans);
       register(Inputs.normalMatrix, Setters.normalMatrix);
-   }
 
-   protected static ShaderProgram buildShaderProgram()
-   {
       ShaderProgram.pedantic = false;
       final String directory = "us/ihmc/gdx/shadows";
       final String prefix = "shadows";
 
-      final ShaderProgram shaderProgram = new ShaderProgram(Gdx.files.classpath(directory + "/" + prefix + "_v.glsl"),
+      program = new ShaderProgram(Gdx.files.classpath(directory + "/" + prefix + "_v.glsl"),
                                                             Gdx.files.classpath(directory + "/" + prefix + "_f.glsl"));
-      if (!shaderProgram.isCompiled())
+      if (!program.isCompiled())
       {
-         LogTools.fatal("Error with shader " + prefix + ": " + shaderProgram.getLog());
+         LogTools.fatal("Error with shader " + prefix + ": " + program.getLog());
          System.exit(1);
       }
       else
       {
          LogTools.info("Shader " + prefix + " compiled");
       }
-      return shaderProgram;
-   }
-
-   @Override
-   public void begin(final Camera camera, final RenderContext context)
-   {
-      super.begin(camera, context);
-      context.setDepthTest(GL20.GL_LEQUAL);
-      context.setCullFace(GL20.GL_BACK);
-   }
-
-   @Override
-   public void render(final Renderable renderable)
-   {
-      context.setBlending(renderable.material.has(BlendingAttribute.Type), GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-      super.render(renderable);
    }
 
    @Override
@@ -80,14 +56,8 @@ public class GDXShadowMapShader extends BaseShader
    {
       final ShaderProgram program = this.program;
       this.program = null;
-      init(program, renderable);
+      super.init(program, renderable);
       renderable = null;
-   }
-
-   @Override
-   public int compareTo(final Shader other)
-   {
-      return 0;
    }
 
    @Override
@@ -97,25 +67,42 @@ public class GDXShadowMapShader extends BaseShader
    }
 
    @Override
+   public int compareTo(final Shader other)
+   {
+      if (other == null) return -1;
+      if (other == this) return 0;
+      return 0;
+   }
+
+   @Override
+   public void begin(Camera camera, RenderContext context)
+   {
+      super.begin(camera, context);
+      context.setDepthTest(GL20.GL_LEQUAL);
+      context.setCullFace(GL20.GL_BACK);
+   }
+
+   @Override
    public void render(final Renderable renderable, final Attributes combinedAttributes)
    {
-      boolean firstCall = true;
-      for (final GDXLight light : lightSupplier.get())
+      if (!combinedAttributes.has(BlendingAttribute.Type))
+         context.setBlending(false, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+
+      context.setDepthTest(GL20.GL_LEQUAL);
+      context.setBlending(false, GL20.GL_ONE, GL20.GL_ONE); // Deactivate blending on first pass
+      super.render(renderable, combinedAttributes);
+      for (GDXPointLight light : shadowManager.getPointLights())
       {
-         light.apply(program);
-         if (firstCall)
-         {
-            context.setDepthTest(GL20.GL_LEQUAL);
-            context.setBlending(false, GL20.GL_ONE, GL20.GL_ONE); //Deactivate blending on first pass
-            super.render(renderable, combinedAttributes);
-            firstCall = false;
-         }
-         else
-         {
-            context.setDepthTest(GL20.GL_EQUAL);
-            context.setBlending(true, GL20.GL_ONE, GL20.GL_ONE); //Activate additive blending
-            renderable.meshPart.render(program);
-         }
+         context.setDepthTest(GL20.GL_LEQUAL);
+         context.setBlending(true, GL20.GL_ONE, GL20.GL_ONE); // Activate additive blending
+         renderLight(renderable, combinedAttributes, light::apply);
       }
+   }
+
+   private void renderLight(Renderable renderable, Attributes combinedAttributes, Consumer<ShaderProgram> light)
+   {
+      light.accept(program);
+      context.setBlending(true, GL20.GL_ONE, GL20.GL_ONE); // Activate additive blending
+      renderable.meshPart.render(program);
    }
 }

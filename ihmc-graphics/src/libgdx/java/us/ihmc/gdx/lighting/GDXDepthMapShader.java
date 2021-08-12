@@ -17,54 +17,28 @@ public class GDXDepthMapShader extends BaseShader
 {
    private Renderable renderable;
 
-   protected GDXDepthMapShader(final Renderable renderable, final ShaderProgram shaderProgram)
+   protected GDXDepthMapShader(Renderable renderable)
    {
       this.renderable = renderable;
-      this.program = shaderProgram;
       register(DefaultShader.Inputs.worldTrans, DefaultShader.Setters.worldTrans);
       register(DefaultShader.Inputs.projViewTrans, DefaultShader.Setters.projViewTrans);
       register(DefaultShader.Inputs.normalMatrix, DefaultShader.Setters.normalMatrix);
-   }
 
-   protected static ShaderProgram buildShaderProgram()
-   {
       ShaderProgram.pedantic = false;
-      final String directory = "us/ihmc/gdx/shadows";
-      final String prefix = "depthmap";
+      String directory = "us/ihmc/gdx/shadows";
+      String prefix = "depthmap";
 
-      final ShaderProgram shaderProgram = new ShaderProgram(Gdx.files.classpath(directory + "/" + prefix + "_v.glsl"),
-                                                            Gdx.files.classpath(directory + "/" + prefix + "_f.glsl"));
-      if (!shaderProgram.isCompiled())
+      program = new ShaderProgram(Gdx.files.classpath(directory + "/" + prefix + "_v.glsl"),
+                                        Gdx.files.classpath(directory + "/" + prefix + "_f.glsl"));
+      if (!program.isCompiled())
       {
-         LogTools.fatal("Error with shader " + prefix + ": " + shaderProgram.getLog());
+         LogTools.fatal("Error with shader " + prefix + ": " + program.getLog());
          System.exit(1);
       }
       else
       {
          LogTools.info("Shader " + prefix + " compiled");
       }
-      return shaderProgram;
-   }
-
-   @Override
-   public void end()
-   {
-      super.end();
-   }
-
-   @Override
-   public void begin(final Camera camera, final RenderContext context)
-   {
-      super.begin(camera, context);
-      context.setDepthTest(GL20.GL_LEQUAL);
-      context.setCullFace(GL20.GL_BACK);
-   }
-
-   @Override
-   public void render(final Renderable renderable)
-   {
-      context.setBlending(renderable.material.has(BlendingAttribute.Type), GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-      super.render(renderable);
    }
 
    @Override
@@ -72,14 +46,8 @@ public class GDXDepthMapShader extends BaseShader
    {
       final ShaderProgram program = this.program;
       this.program = null;
-      init(program, renderable);
+      super.init(program, renderable);
       renderable = null;
-   }
-
-   @Override
-   public int compareTo(final Shader other)
-   {
-      return 0;
    }
 
    @Override
@@ -89,8 +57,24 @@ public class GDXDepthMapShader extends BaseShader
    }
 
    @Override
+   public int compareTo(final Shader other)
+   {
+      return 0;
+   }
+
+   @Override
+   public void begin(Camera camera, RenderContext context)
+   {
+      super.begin(camera, context);
+      context.setDepthTest(GL20.GL_LEQUAL);
+      context.setCullFace(GL20.GL_BACK);
+   }
+
+   @Override
    public void render(final Renderable renderable, final Attributes combinedAttributes)
    {
+      if (!combinedAttributes.has(BlendingAttribute.Type))
+         context.setBlending(false, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
       super.render(renderable, combinedAttributes);
    }
 }
