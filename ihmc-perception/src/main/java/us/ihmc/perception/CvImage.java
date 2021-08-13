@@ -27,13 +27,13 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package cv_bridge;
+package us.ihmc.perception;
 
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.opencv_core;
-import org.bytedeco.javacpp.opencv_core.Mat;
-import org.bytedeco.javacpp.opencv_imgcodecs;
-import org.bytedeco.javacpp.opencv_imgproc;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.*;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferOutputStream;
 import org.ros.internal.message.MessageBuffers;
@@ -45,7 +45,6 @@ import java.util.Vector;
 
 import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
-import sensor_msgs.ImageEncodings;
 import std_msgs.Header;
 
 /**
@@ -84,12 +83,12 @@ public class CvImage
 
         ros_image.setWidth(image.cols());
         ros_image.setHeight(image.rows());
-        ros_image.setStep(image.arrayStep());
+        ros_image.setStep((int) image.arrayStep());
         //// TODO: Handle the indian if needed;
         //// ros_image.setIsBigendian();
 
         ChannelBufferOutputStream stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
-        byte[] imageInBytes = new byte[image.arraySize()];
+        byte[] imageInBytes = new byte[(int) image.arraySize()];
         ((ByteBuffer)image.createBuffer()).get(imageInBytes);
         stream.write(imageInBytes);
 

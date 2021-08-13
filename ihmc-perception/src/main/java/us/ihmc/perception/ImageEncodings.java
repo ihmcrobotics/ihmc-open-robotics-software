@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package sensor_msgs;
+package us.ihmc.perception;
 
 /**
  *

@@ -26,7 +26,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package cv_bridge;
+package us.ihmc.perception;
 
 import java.util.HashMap;
 import java.util.Map;
