@@ -113,38 +113,46 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
 
          if (isCompressed && compressedImage != null)
          {
-            try
-            {
-               CvImage cvImage = CvImage.toCvCopy(compressedImage, ImageEncodings.RGBA8);
-               Buffer buffer = cvImage.image.createBuffer();
-               ensureTextureReady(cvImage.image.cols(), cvImage.image.rows());
-               pixmap.setPixels((ByteBuffer) buffer);
-            }
-            catch (Exception e)
-            {
-               e.printStackTrace();
-            }
-
+            decompressAndDecodeUsingOpenCV(compressedImage);
 //            decompressAndDecodeTheOldWay(compressedImage);
             texture.draw(pixmap, 0, 0);
          }
          else if (image != null)
          {
             ensureTextureReady(image.getWidth(), image.getHeight());
-            try
-            {
-               CvImage cvImage = CvImage.toCvCopy(image, ImageEncodings.RGBA8);
-               Buffer buffer = cvImage.image.createBuffer();
-               pixmap.setPixels((ByteBuffer) buffer);
-            }
-            catch (Exception e)
-            {
-               e.printStackTrace();
-            }
-
-//            decodeTheOldWay(image);
+            decodeUsingOpenCV(image);
+            //            decodeTheOldWay(image);
             texture.draw(pixmap, 0, 0);
          }
+      }
+   }
+
+   private void decodeUsingOpenCV(Image image)
+   {
+      try
+      {
+         CvImage cvImage = CvImage.toCvCopy(image, ImageEncodings.RGBA8);
+         Buffer buffer = cvImage.image.createBuffer();
+         pixmap.setPixels((ByteBuffer) buffer);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   private void decompressAndDecodeUsingOpenCV(CompressedImage compressedImage)
+   {
+      try
+      {
+         CvImage cvImage = CvImage.toCvCopy(compressedImage, ImageEncodings.RGBA8);
+         Buffer buffer = cvImage.image.createBuffer();
+         ensureTextureReady(cvImage.image.cols(), cvImage.image.rows());
+         pixmap.setPixels((ByteBuffer) buffer);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
       }
    }
 
@@ -210,6 +218,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
       byte[] data = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
       int width = bufferedImage.getWidth();
       int height = bufferedImage.getHeight();
+      ensureTextureReady(width, height);
 
       if (is8BitRGB)
       {
