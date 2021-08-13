@@ -92,7 +92,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
       // Do this here in case a test fails. That way the memory will be recycled.
       if (drcSimulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
+         /* destroy simulation is already called below */
          drcSimulationTestHelper = null;
       }
 
