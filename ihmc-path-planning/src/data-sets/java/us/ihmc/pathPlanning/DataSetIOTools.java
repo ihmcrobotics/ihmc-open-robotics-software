@@ -46,7 +46,7 @@ public class DataSetIOTools
 
    public static List<DataSet> loadDataSets()
    {
-      return loadDataSets(dataSet -> true);
+      return loadDataSets(null);
    }
 
    public static List<DataSet> loadDataSets(Predicate<DataSet> dataSetFilter)
@@ -60,7 +60,11 @@ public class DataSetIOTools
          dataSets.add(dataSet);
       }
 
-      dataSets.removeIf(dataSetFilter.negate());
+      if (dataSetFilter != null)
+      {
+         dataSets.removeIf(dataSetFilter.negate());
+      }
+
       return dataSets;
    }
 

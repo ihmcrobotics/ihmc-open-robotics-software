@@ -1,4 +1,5 @@
 {
+  "ambientLight" : 0.914,
   "objects" : [ {
     "type" : "GDXPushHandleRightDoorObject",
     "x" : 1.7137600116067575,
@@ -26,5 +27,41 @@
     "qy" : 1.3409993117142457E-30,
     "qz" : 4.3398613205355526E-17,
     "qs" : 0.7054565803420766
+  }, {
+    "type" : "GDXPointLightObject",
+    "x" : 10.0,
+    "y" : 10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  }, {
+    "type" : "GDXPointLightObject",
+    "x" : -10.0,
+    "y" : 10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  }, {
+    "type" : "GDXPointLightObject",
+    "x" : -10.0,
+    "y" : -10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  }, {
+    "type" : "GDXPointLightObject",
+    "x" : 10.0,
+    "y" : -10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
   } ]
 }
