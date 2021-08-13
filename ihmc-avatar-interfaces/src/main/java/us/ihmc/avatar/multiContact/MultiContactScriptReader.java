@@ -18,6 +18,7 @@ public class MultiContactScriptReader
 {
    private int currentMessageIndex = 0;
    private final List<KinematicsToolboxSnapshotDescription> loadedMessages = new ArrayList<>();
+   private JsonNode auxiliaryData;
 
    public MultiContactScriptReader()
    {
@@ -69,15 +70,29 @@ public class MultiContactScriptReader
 
          List<KinematicsToolboxSnapshotDescription> messages = new ArrayList<>();
 
-         for (int i = 0; i < jsonNode.size(); i++)
+         JsonNode script = null;
+         try
          {
-            JsonNode child = jsonNode.get(i);
+            KinematicsToolboxSnapshotDescription.fromJSON(jsonNode.get(0));
+         }
+         catch (RuntimeException e)
+         {
+            script = jsonNode.get(0);
+            this.auxiliaryData = jsonNode.get(1);
+         }
+
+         if (script == null) script = jsonNode;
+         int numberOfSnapshots = script.size();
+         for (int i = 0; i < numberOfSnapshots; i++)
+         {
+            JsonNode child = script.get(i);
             messages.add(KinematicsToolboxSnapshotDescription.fromJSON(child));
          }
 
          loadedMessages.clear();
          loadedMessages.addAll(messages);
          currentMessageIndex = -1;
+
          return true;
       }
       catch (IOException e)
@@ -95,6 +110,11 @@ public class MultiContactScriptReader
    public int getCurrentMessageIndex()
    {
       return currentMessageIndex;
+   }
+
+   public JsonNode getAuxiliaryData()
+   {
+      return auxiliaryData;
    }
 
    public boolean hasNext()

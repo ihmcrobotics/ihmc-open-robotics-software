@@ -83,5 +83,6 @@ public class PawStepPlannerMessageTools
       packet.setWeightForInterRegionEdge(parameters.getWeightForInterRegionEdge());
       packet.setWeightForNonPreferredEdge(parameters.getWeightForNonPreferredEdge());
       packet.setIncludePreferredExtrusions(parameters.includePreferredExtrusions());
+      packet.setOptimizeForNarrowPassage(parameters.getOptimizeForNarrowPassage());
    }
 }
