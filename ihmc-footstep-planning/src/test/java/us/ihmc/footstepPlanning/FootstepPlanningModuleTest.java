@@ -6,9 +6,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -128,7 +130,7 @@ public class FootstepPlanningModuleTest
       request.setGoalDistanceProximity(0.3);
       request.setGoalYawProximity(0.25 * Math.PI);
       request.setTimeout(Double.MAX_VALUE);
-      request.setMaximumIterations(200);
+      request.setMaximumIterations(2000);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
       Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
