@@ -27,12 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-package cv_bridge;
-
-
-
-import org.bytedeco.javacpp.opencv_core;
-import org.bytedeco.javacpp.opencv_imgproc;
+package us.ihmc.perception;
 
 import java.util.AbstractMap;
 import java.util.Arrays;
@@ -40,7 +35,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import sensor_msgs.ImageEncodings;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
 
 //from http://stackoverflow.com/questions/1195206/is-there-a-java-equivalent-or-methodology-for-the-typedef-keyword-in-c
 @SuppressWarnings("WeakerAccess")
