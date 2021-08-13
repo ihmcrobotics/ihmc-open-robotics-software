@@ -51,6 +51,7 @@ public class GDX3DSceneManager
    private boolean firstRenderStarted = false;
    private boolean addFocusSphere = true;
    private float ambientLight = 0.4f;
+   private Runnable onCreate;
 
    public void create()
    {
@@ -86,6 +87,9 @@ public class GDX3DSceneManager
       shadowsDisabledEnvironment.set(shadowsDisabledDirectionalLights);
 
       shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING, ambientLight);
+
+      if (onCreate != null)
+         onCreate.run();
    }
 
    public void renderShadowMap()
@@ -312,11 +316,30 @@ public class GDX3DSceneManager
    {
       shadowsDisabledPointLights.lights.clear();
       shadowsDisabledDirectionalLights.lights.clear();
-      if (shadowManager != null)
-      {
-         shadowManager.getPointLights().clear();
-         shadowManager.getDirectionalLights().clear();
-      }
+      shadowManager.getPointLights().clear();
+      shadowManager.getDirectionalLights().clear();
+   }
+
+   public void setOnCreate(Runnable onCreate)
+   {
+      this.onCreate = onCreate;
+   }
+
+   public void addDefaultLighting()
+   {
+      setAmbientLight(0.914f);
+      GDXPointLight pointLight = new GDXPointLight();
+      pointLight.getPosition().set(10.0, 10.0, 10.0);
+      addPointLight(pointLight);
+      pointLight = new GDXPointLight();
+      pointLight.getPosition().set(10.0, -10.0, 10.0);
+      addPointLight(pointLight);
+      pointLight = new GDXPointLight();
+      pointLight.getPosition().set(-10.0, 10.0, 10.0);
+      addPointLight(pointLight);
+      pointLight = new GDXPointLight();
+      pointLight.getPosition().set(-10.0, -10.0, 10.0);
+      addPointLight(pointLight);
    }
 
    public void addPointLight(GDXPointLight pointLight)
