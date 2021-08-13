@@ -13,8 +13,6 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 
-import java.util.Random;
-
 public class GDXPointCloudRenderer implements RenderableProvider
 {
    private static final int SIZE_AND_ROTATION_USAGE = 1 << 9;
@@ -144,24 +142,22 @@ public class GDXPointCloudRenderer implements RenderableProvider
    {
       setPointsToRender(pointsToRender, new ColorProvider()
       {
-         private final Random random = new Random(0);
-
          @Override
          public float getNextR()
          {
-            return random.nextFloat();
+            return Color.WHITE.r;
          }
 
          @Override
          public float getNextG()
          {
-            return random.nextFloat();
+            return Color.WHITE.g;
          }
 
          @Override
          public float getNextB()
          {
-            return random.nextFloat();
+            return Color.WHITE.b;
          }
       });
    }
