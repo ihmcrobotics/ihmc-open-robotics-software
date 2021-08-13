@@ -50,196 +50,194 @@ import std_msgs.Header;
 /**
  * @author Tal Regev
  */
-@SuppressWarnings({"WeakerAccess"})
 public class CvImage
 {
-    static protected final String TAG = "cv_bridge::CvImage";
-    public Header header;
-    public Mat image = new Mat();
-    public String encoding = "";
+   static protected final String TAG = "cv_bridge::CvImage";
+   public Header header;
+   public Mat image = new Mat();
+   public String encoding = "";
 
-    protected CvImage(){}
+   protected CvImage()
+   {
+   }
 
-    public CvImage(final Header header, final String encoding)
-    {
-        this.header = header;
-        this.encoding = encoding.toUpperCase();
-        this.image = new Mat();
-    }
+   public CvImage(final Header header, final String encoding)
+   {
+      this.header = header;
+      this.encoding = encoding.toUpperCase();
+      this.image = new Mat();
+   }
 
-    @SuppressWarnings("unused")
-    public CvImage(final Header header, final String encoding,
-                   final Mat image)
-    {
-        this.header = header;
-        this.encoding = encoding.toUpperCase();
-        this.image = image;
-    }
+   public CvImage(final Header header, final String encoding, final Mat image)
+   {
+      this.header = header;
+      this.encoding = encoding.toUpperCase();
+      this.image = image;
+   }
 
-    @SuppressWarnings("unused")
-    public final Image toImageMsg(final Image ros_image) throws IOException {
-        ros_image.setHeader(header);
-        ros_image.setEncoding(encoding.toLowerCase());
+   public final Image toImageMsg(final Image ros_image) throws IOException
+   {
+      ros_image.setHeader(header);
+      ros_image.setEncoding(encoding.toLowerCase());
 
-        ros_image.setWidth(image.cols());
-        ros_image.setHeight(image.rows());
-        ros_image.setStep((int) image.arrayStep());
-        //// TODO: Handle the indian if needed;
-        //// ros_image.setIsBigendian();
+      ros_image.setWidth(image.cols());
+      ros_image.setHeight(image.rows());
+      ros_image.setStep((int) image.arrayStep());
+      //// TODO: Handle the indian if needed;
+      //// ros_image.setIsBigendian();
 
-        ChannelBufferOutputStream stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
-        byte[] imageInBytes = new byte[(int) image.arraySize()];
-        ((ByteBuffer)image.createBuffer()).get(imageInBytes);
-        stream.write(imageInBytes);
+      ChannelBufferOutputStream stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
+      byte[] imageInBytes = new byte[(int) image.arraySize()];
+      ((ByteBuffer) image.createBuffer()).get(imageInBytes);
+      stream.write(imageInBytes);
 
-        //noinspection UnusedAssignment
-        imageInBytes = null;
+      //noinspection UnusedAssignment
+      imageInBytes = null;
 
-        ros_image.setData(stream.buffer());
-        return ros_image;
-    }
+      ros_image.setData(stream.buffer());
+      return ros_image;
+   }
 
-    //TODO add a compression parameter.
-    public final CompressedImage toCompressedImageMsg(final CompressedImage ros_image, Format dst_format) throws Exception {
-        ros_image.setHeader(header);
-        Mat image;
-        if(!encoding.equals(ImageEncodings.BGR8))
-        {
-            CvImage temp = CvImage.cvtColor(this, ImageEncodings.BGR8);
-            image      = temp.image;
-        }
-        else
-        {
-            image = this.image;
-        }
+   //TODO add a compression parameter.
+   public final CompressedImage toCompressedImageMsg(final CompressedImage ros_image, Format dst_format) throws Exception
+   {
+      ros_image.setHeader(header);
+      Mat image;
+      if (!encoding.equals(ImageEncodings.BGR8))
+      {
+         CvImage temp = CvImage.cvtColor(this, ImageEncodings.BGR8);
+         image = temp.image;
+      }
+      else
+      {
+         image = this.image;
+      }
 
-        //from https://github.com/bytedeco/javacpp-presets/issues/29#issuecomment-6408082977
-        BytePointer buf = new BytePointer();
+      //from https://github.com/bytedeco/javacpp-presets/issues/29#issuecomment-6408082977
+      BytePointer buf = new BytePointer();
 
-        //from http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
+      //from http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
 
-        ros_image.setFormat(Format.valueOf(dst_format));
-        opencv_imgcodecs.imencode(Format.getExtension(dst_format), image, buf);
+      ros_image.setFormat(Format.valueOf(dst_format));
+      opencv_imgcodecs.imencode(Format.getExtension(dst_format), image, buf);
 
+      ChannelBufferOutputStream stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
+      //from https://github.com/bytedeco/javacpp-presets/issues/29#issuecomment-6408082977
+      byte[] outputBuffer = new byte[(int) buf.capacity()];
+      buf.get(outputBuffer);
+      stream.write(outputBuffer);
 
-        ChannelBufferOutputStream stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
-        //from https://github.com/bytedeco/javacpp-presets/issues/29#issuecomment-6408082977
-        byte[] outputBuffer = new byte[(int)buf.capacity()];
-        buf.get(outputBuffer);
-        stream.write(outputBuffer);
+      ros_image.setData(stream.buffer());
+      return ros_image;
+   }
 
-        ros_image.setData(stream.buffer());
-        return ros_image;
-    }
+   static public CvImage toCvCopy(final Image source) throws Exception
+   {
+      return CvImage.toCvCopyImpl(matFromImage(source), source.getHeader(), source.getEncoding(), "");
+   }
 
-    @SuppressWarnings("unused")
-    static public CvImage toCvCopy(final Image source) throws Exception {
-        return CvImage.toCvCopyImpl(matFromImage(source), source.getHeader(), source.getEncoding(), "");
-    }
+   static public CvImage toCvCopy(final Image source, final String dst_encoding) throws Exception
+   {
+      return CvImage.toCvCopyImpl(matFromImage(source), source.getHeader(), source.getEncoding(), dst_encoding);
+   }
 
-    @SuppressWarnings("unused")
-    static public CvImage toCvCopy(final Image source, final String dst_encoding) throws Exception {
-        return CvImage.toCvCopyImpl(matFromImage(source), source.getHeader(), source.getEncoding(), dst_encoding);
-    }
+   static public CvImage toCvCopy(final CompressedImage source) throws Exception
+   {
+      return CvImage.toCvCopyImpl(matFromImage(source), source.getHeader(), ImageEncodings.BGR8, "");
+   }
 
-    @SuppressWarnings("unused")
-    static public CvImage toCvCopy(final CompressedImage source) throws Exception {
-        return CvImage.toCvCopyImpl(matFromImage(source), source.getHeader(), ImageEncodings.BGR8, "");
-    }
+   static public CvImage toCvCopy(final CompressedImage source, final String dst_encoding) throws Exception
+   {
+      return CvImage.toCvCopyImpl(matFromImage(source), source.getHeader(), ImageEncodings.BGR8, dst_encoding);
+   }
 
-    static public CvImage toCvCopy(final CompressedImage source,final String dst_encoding) throws Exception {
-        return CvImage.toCvCopyImpl(matFromImage(source), source.getHeader(), ImageEncodings.BGR8, dst_encoding);
-    }
+   static public CvImage cvtColor(final CvImage source, String encoding) throws Exception
+   {
+      return toCvCopyImpl(source.image, source.header, source.encoding, encoding);
+   }
 
-    @SuppressWarnings("unused")
-    static public CvImage cvtColor(final CvImage source, String encoding) throws Exception {
-        return toCvCopyImpl(source.image, source.header, source.encoding, encoding);
-    }
+   static protected CvImage toCvCopyImpl(final Mat source, final Header src_header, final String src_encoding, final String dst_encoding) throws Exception
+   {
+      /// @todo Handle endianness - e.g. 16-bit dc1394 camera images are big-endian
+      /// Languages such as Java manage this for you so that Java code can run on any platform and programmers do not have to manage byte ordering.
+      /// from http://www.yolinux.com/TUTORIALS/Endian-Byte-Order.html
+      /// need to check if it true in our case with this cameras.
 
-    static protected CvImage toCvCopyImpl(final Mat source,
-                            final Header src_header,
-                            final String src_encoding,
-                            final String dst_encoding) throws Exception
-    {
-        /// @todo Handle endianness - e.g. 16-bit dc1394 camera images are big-endian
-        /// Languages such as Java manage this for you so that Java code can run on any platform and programmers do not have to manage byte ordering.
-        /// from http://www.yolinux.com/TUTORIALS/Endian-Byte-Order.html
-        /// need to check if it true in our case with this cameras.
+      // Copy metadata
+      CvImage cvImage = new CvImage();
+      cvImage.header = src_header;
 
-        // Copy metadata
-        CvImage cvImage = new CvImage();
-        cvImage.header = src_header;
+      // Copy to new buffer if same encoding requested
+      if (dst_encoding.isEmpty() || dst_encoding.equals(src_encoding))
+      {
+         cvImage.encoding = src_encoding;
+         source.copyTo(cvImage.image);
+      }
+      else
+      {
+         // Convert the source data to the desired encoding
+         final Vector<Integer> conversion_codes = ImEncoding.getConversionCode(src_encoding, dst_encoding);
+         Mat image1 = source;
+         Mat image2 = new Mat();
 
-        // Copy to new buffer if same encoding requested
-        if (dst_encoding.isEmpty() || dst_encoding.equals(src_encoding))
-        {
-            cvImage.encoding = src_encoding;
-            source.copyTo(cvImage.image);
-        }
-        else
-        {
-            // Convert the source data to the desired encoding
-            final Vector<Integer> conversion_codes = ImEncoding.getConversionCode(src_encoding, dst_encoding);
-            Mat image1 = source;
-            Mat image2 = new Mat();
-
-
-            for(int i=0; i < conversion_codes.size(); ++i)
+         for (int i = 0; i < conversion_codes.size(); ++i)
+         {
+            int conversion_code = conversion_codes.get(i);
+            if (conversion_code == ImEncoding.SAME_FORMAT)
             {
-                int conversion_code = conversion_codes.get(i);
-                if (conversion_code == ImEncoding.SAME_FORMAT) {
-                    //convert from Same number of channels, but different bit depth
+               //convert from Same number of channels, but different bit depth
 
-                    //double alpha = 1.0;
-                    int src_depth = ImageEncodings.bitDepth(src_encoding);
-                    int dst_depth = ImageEncodings.bitDepth(dst_encoding);
-                    // Do scaling between CV_8U [0,255] and CV_16U [0,65535] images.
-                    //from http://www.rubydoc.info/github/ruby-opencv/ruby-opencv/OpenCV/CvMat
-                    //from http://docs.opencv.org/modules/core/doc/basic_structures.html
-                    //TODO: check which value default for beta is ok.
-                    int beta = 0;
-                    int image2_type = opencv_core.CV_MAKETYPE(opencv_core.CV_MAT_DEPTH(ImEncoding.getCvType(dst_encoding)), image1.channels());
-                    if (src_depth == 8 && dst_depth == 16)
-                        image1.convertTo(image2, image2_type, 65535. / 255.,beta);
-                    else if (src_depth == 16 && dst_depth == 8)
-                        image1.convertTo(image2, image2_type, 255. / 65535.,beta);
-                    else
-                        image1.convertTo(image2, image2_type);
-                }
-                else
-                {
-                    // Perform color conversion
-                    opencv_imgproc.cvtColor(image1, image2, conversion_codes.get(0));
-                }
-                image1 = image2;
+               //double alpha = 1.0;
+               int src_depth = ImageEncodings.bitDepth(src_encoding);
+               int dst_depth = ImageEncodings.bitDepth(dst_encoding);
+               // Do scaling between CV_8U [0,255] and CV_16U [0,65535] images.
+               //from http://www.rubydoc.info/github/ruby-opencv/ruby-opencv/OpenCV/CvMat
+               //from http://docs.opencv.org/modules/core/doc/basic_structures.html
+               //TODO: check which value default for beta is ok.
+               int beta = 0;
+               int image2_type = opencv_core.CV_MAKETYPE(opencv_core.CV_MAT_DEPTH(ImEncoding.getCvType(dst_encoding)), image1.channels());
+               if (src_depth == 8 && dst_depth == 16)
+                  image1.convertTo(image2, image2_type, 65535. / 255., beta);
+               else if (src_depth == 16 && dst_depth == 8)
+                  image1.convertTo(image2, image2_type, 255. / 65535., beta);
+               else
+                  image1.convertTo(image2, image2_type);
             }
-            cvImage.image = image2;
-            cvImage.encoding = dst_encoding;
-        }
-        return cvImage;
-    }
+            else
+            {
+               // Perform color conversion
+               opencv_imgproc.cvtColor(image1, image2, conversion_codes.get(0));
+            }
+            image1 = image2;
+         }
+         cvImage.image = image2;
+         cvImage.encoding = dst_encoding;
+      }
+      return cvImage;
+   }
 
-    static protected Mat matFromImage(final Image source) throws Exception {
-        byte[] imageInBytes = source.getData().array();
-        imageInBytes = Arrays.copyOfRange(imageInBytes,source.getData().arrayOffset(),imageInBytes.length);
-        String encoding = source.getEncoding().toUpperCase();
-        Mat cvImage = new Mat(source.getHeight(),source.getWidth(), ImEncoding.getCvType(encoding));
+   static protected Mat matFromImage(final Image source) throws Exception
+   {
+      byte[] imageInBytes = source.getData().array();
+      imageInBytes = Arrays.copyOfRange(imageInBytes, source.getData().arrayOffset(), imageInBytes.length);
+      String encoding = source.getEncoding().toUpperCase();
+      Mat cvImage = new Mat(source.getHeight(), source.getWidth(), ImEncoding.getCvType(encoding));
 
-        BytePointer bytePointer = new BytePointer(imageInBytes);
-        cvImage = cvImage.data(bytePointer);
-        return cvImage;
-    }
+      BytePointer bytePointer = new BytePointer(imageInBytes);
+      cvImage = cvImage.data(bytePointer);
+      return cvImage;
+   }
 
-    static protected Mat matFromImage(final CompressedImage source) throws Exception
-    {
-        ChannelBuffer data = source.getData();
-        byte[] imageInBytes = data.array();
-        imageInBytes = Arrays.copyOfRange(imageInBytes, source.getData().arrayOffset(), imageInBytes.length);
-        //from http://stackoverflow.com/questions/23202130/android-convert-byte-array-from-camera-api-to-color-mat-object-opencv
-        Mat cvImage = new Mat(1, imageInBytes.length, opencv_core.CV_8UC1);
-        BytePointer bytePointer = new BytePointer(imageInBytes);
-        cvImage = cvImage.data(bytePointer);
+   static protected Mat matFromImage(final CompressedImage source) throws Exception
+   {
+      ChannelBuffer data = source.getData();
+      byte[] imageInBytes = data.array();
+      imageInBytes = Arrays.copyOfRange(imageInBytes, source.getData().arrayOffset(), imageInBytes.length);
+      //from http://stackoverflow.com/questions/23202130/android-convert-byte-array-from-camera-api-to-color-mat-object-opencv
+      Mat cvImage = new Mat(1, imageInBytes.length, opencv_core.CV_8UC1);
+      BytePointer bytePointer = new BytePointer(imageInBytes);
+      cvImage = cvImage.data(bytePointer);
 
-        return opencv_imgcodecs.imdecode(cvImage, opencv_imgcodecs.IMREAD_ANYCOLOR);
-    }
+      return opencv_imgcodecs.imdecode(cvImage, opencv_imgcodecs.IMREAD_ANYCOLOR);
+   }
 }
