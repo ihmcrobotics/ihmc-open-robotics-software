@@ -122,9 +122,8 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
          threadQueue.clearQueueAndExecute(() ->
          {
             try
-            {
-               boolean hasColors = true;
-               PointCloudData pointCloudData = new PointCloudData(message, MAX_POINTS, hasColors);
+            { //TODO this assumes that if you're using camera color, the PointCloudData has color, and (more importantly) that if you're not, it doesn't. Fix
+               PointCloudData pointCloudData = new PointCloudData(message, MAX_POINTS, useCameraColor);
 
                GDXPointCloudRenderer.ColorProvider provider;
 
