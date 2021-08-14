@@ -4,7 +4,6 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.flag.*;
-import imgui.flag.ImGuiDragDropFlags;
 import imgui.internal.ImGui;
 import us.ihmc.gdx.ui.tools.ImPlotTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -19,19 +18,19 @@ public class GDXYoGraphRunnable implements Runnable
    private boolean shouldGraphExist = true;
    private boolean requestAddVariable = false;
 
-   private final ImPlotContext context;
+   private final ImPlotContext imPlotContext;
    private final AtomicInteger currentIndex;
    private final ArrayList<YoVariable> variables = new ArrayList<>();
-   private final ArrayList<Double[]> values = new ArrayList<>();
+   private final ArrayList<Double[]> variableValueBuffers = new ArrayList<>();
    private final YoRegistry registry;
    private final int bufferSize;
 
    private final int plotID;
    private static int currentPlotIndex = 0;
 
-   public GDXYoGraphRunnable(ImPlotContext ctx, YoRegistry registry, int bufferSize)
+   public GDXYoGraphRunnable(ImPlotContext imPlotContext, YoRegistry registry, int bufferSize)
    {
-      this.context = ctx;
+      this.imPlotContext = imPlotContext;
       this.registry = registry;
       this.bufferSize = bufferSize;
 
@@ -39,11 +38,11 @@ public class GDXYoGraphRunnable implements Runnable
       currentIndex = new AtomicInteger(0);
    }
 
-   public GDXYoGraphRunnable(ImPlotContext ctx, YoVariable variable, Double[] values, YoRegistry registry, int bufferSize)
+   public GDXYoGraphRunnable(ImPlotContext imPlotContext, YoVariable variable, Double[] variableValueBuffer, YoRegistry registry, int bufferSize)
    {
-      this.context = ctx;
+      this.imPlotContext = imPlotContext;
       this.variables.add(variable);
-      this.values.add(values);
+      this.variableValueBuffers.add(variableValueBuffer);
       this.registry = registry;
       this.bufferSize = bufferSize;
 
@@ -69,7 +68,7 @@ public class GDXYoGraphRunnable implements Runnable
    public void addVariable(YoVariable variable)
    {
       variables.add(variable);
-      values.add(new Double[bufferSize]);
+      variableValueBuffers.add(new Double[bufferSize]);
       requestAddVariable = false;
    }
 
@@ -79,7 +78,7 @@ public class GDXYoGraphRunnable implements Runnable
       if (!shouldGraphExist)
          return;
 
-      ImPlot.setCurrentContext(context);
+      ImPlot.setCurrentContext(imPlotContext);
 
       int currentValueIndex = currentIndex.getAndIncrement();
       float graphWidth = ImGui.getColumnWidth();
@@ -97,18 +96,19 @@ public class GDXYoGraphRunnable implements Runnable
       {
          ImPlot.setLegendLocation(ImPlotLocation.SouthWest, ImPlotOrientation.Horizontal, true);
 
-         Iterator<YoVariable> iteratorVariable = variables.iterator();
-         Iterator<Double[]> itVal = values.iterator();
+         Iterator<YoVariable> variableIterator = variables.iterator();
+         Iterator<Double[]> variableValueBufferIterator = variableValueBuffers.iterator();
          boolean showingLegendPopup = false;
-         while (iteratorVariable.hasNext())
+         while (variableIterator.hasNext())
          {
-            YoVariable variable = iteratorVariable.next();
-            Double[] varValues = itVal.next();
-            varValues[currentValueIndex] = variable.getValueAsDouble();
-            Double[] data = ImPlotTools.removeNullElements(varValues);
+            YoVariable variable = variableIterator.next();
+            Double[] variableValueBuffer = variableValueBufferIterator.next();
+            variableValueBuffer[currentValueIndex] = variable.getValueAsDouble();
+            Double[] variableValueBufferWithoutNulls = ImPlotTools.removeNullElements(variableValueBuffer);
 
-            ImPlot.plotLine(variable.getName(), ImPlotTools.createIndex(data), data);
-            if (ImPlot.beginLegendPopup(variable.getName()))
+            String labelID = variable.getName() + " " + variable.getValueAsDouble() + "###" + variable.getName();
+            ImPlot.plotLine(labelID, ImPlotTools.createIndex(variableValueBufferWithoutNulls), variableValueBufferWithoutNulls);
+            if (ImPlot.beginLegendPopup(labelID))
             {
                showingLegendPopup = true;
                ImGui.text(variable.getFullNameString());
@@ -119,8 +119,8 @@ public class GDXYoGraphRunnable implements Runnable
                }
                if (ImGui.button("Stop tracking variable##" + variable.getName()))
                {
-                  iteratorVariable.remove();
-                  itVal.remove();
+                  variableIterator.remove();
+                  variableValueBufferIterator.remove();
                }
                ImPlot.endLegendPopup();
             }
@@ -147,7 +147,7 @@ public class GDXYoGraphRunnable implements Runnable
             if (payload != null && registry.hasVariable(payload) && !variables.contains(registry.findVariable(payload)))
             {
                variables.add(registry.findVariable(payload));
-               values.add(new Double[bufferSize]);
+               variableValueBuffers.add(new Double[bufferSize]);
             }
          }
          ImPlot.endPlot();
