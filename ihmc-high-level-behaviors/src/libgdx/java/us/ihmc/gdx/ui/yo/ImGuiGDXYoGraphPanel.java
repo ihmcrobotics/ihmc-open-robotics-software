@@ -4,9 +4,6 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.ImPlotStyle;
-import imgui.extension.implot.flag.*;
-import imgui.flag.ImGuiDragDropFlags;
-import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -16,7 +13,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.ui.tools.ImPlotTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
@@ -26,7 +22,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImGuiGDXYoGraphPanel
 {
@@ -40,9 +35,9 @@ public class ImGuiGDXYoGraphPanel
    private YoRegistry registry;
    private YoVariableClient yoVariableClient;
 
-   private final ImInt graphGroupSelectedIndex = new ImInt(0);
-   private String[] graphGroupNames = new String[0];
-   private HashMap<String, GDXYoGraphGroup> graphGroups = new HashMap<>();
+   private final ImInt serverSelectedIndex = new ImInt(0);
+   private String[] serverGraphGroupNames = new String[0];
+   private final HashMap<String, GDXYoGraphGroup> serverGraphGroups = new HashMap<>();
 
    private ImPlotContext context = null;
 
@@ -71,6 +66,14 @@ public class ImGuiGDXYoGraphPanel
 
    public void startYoVariableClient(String graphGroupName)
    {
+      for (int i = 0; i < serverGraphGroupNames.length; i++)
+      {
+         if (serverGraphGroupNames[i].equals(graphGroupName))
+         {
+            serverSelectedIndex.set(i);
+         }
+      }
+
       connecting = true;
       handshakeComplete = false;
       this.registry = new YoRegistry(getClass().getSimpleName());
@@ -115,7 +118,7 @@ public class ImGuiGDXYoGraphPanel
       ImPlotStyle style = ImPlot.getStyle();
       style.setPlotPadding(new ImVec2(0, 0));
 
-      GDXYoGraphGroup graphGroup = graphGroups.get(graphGroupName);
+      GDXYoGraphGroup graphGroup = serverGraphGroups.get(graphGroupName);
       for (String variableName : graphGroup.getVariableNames())
       {
          MissingThreadTools.startAsDaemon("AddGraph", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
@@ -204,7 +207,7 @@ public class ImGuiGDXYoGraphPanel
    {
       ImGui.text("Controller host: " + controllerHost);
 
-      ImGui.combo(ImGuiTools.uniqueIDOnly(this, "Profile"), graphGroupSelectedIndex, graphGroupNames, graphGroupNames.length);
+      ImGui.combo(ImGuiTools.uniqueIDOnly(this, "Profile"), serverSelectedIndex, serverGraphGroupNames, serverGraphGroupNames.length);
       ImGui.sameLine();
       if (connecting)
       {
@@ -218,7 +221,7 @@ public class ImGuiGDXYoGraphPanel
       {
          if (ImGui.button(ImGuiTools.uniqueLabel(this, "Connect")))
          {
-            startYoVariableClient(graphGroupNames[graphGroupSelectedIndex.get()]);
+            startYoVariableClient(serverGraphGroupNames[serverSelectedIndex.get()]);
          }
       }
       else
@@ -252,17 +255,17 @@ public class ImGuiGDXYoGraphPanel
       }
    }
 
-   public void graphVariable(String groupName, String yoVariableName)
+   public void graphVariable(String serverName, String yoVariableName)
    {
-      GDXYoGraphGroup graphGroup = graphGroups.get(groupName);
+      GDXYoGraphGroup graphGroup = serverGraphGroups.get(serverName);
       if (graphGroup == null)
       {
          graphGroup = new GDXYoGraphGroup();
-         graphGroups.put(groupName, graphGroup);
+         serverGraphGroups.put(serverName, graphGroup);
       }
 
       graphGroup.addVariable(yoVariableName);
-      graphGroupNames = graphGroups.keySet().toArray(new String[0]);
+      serverGraphGroupNames = serverGraphGroups.keySet().toArray(new String[0]);
    }
 
    public void destroy()
