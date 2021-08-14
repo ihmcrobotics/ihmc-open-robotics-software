@@ -17,7 +17,7 @@ public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements Renderab
 {
    private GDXGraphics3DNode robotRootNode;
    private GraphicsRobot graphicsRobot;
-   private Activator robotLoadedActivator = new Activator();
+   private final Activator robotLoadedActivator = new Activator();
 
    public GDXRobotModelGraphic(String title)
    {
