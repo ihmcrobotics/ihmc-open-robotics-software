@@ -20,22 +20,22 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.*;
 
-public class ImGuiGDXYoGraphPanel
+public class ImPlotYoGraphPanel
 {
    private final String title;
    private final String controllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
    private final int bufferSize;
-   private final HashMap<String, ArrayList<GDXYoGraphRunnable>> graphs = new HashMap<>();
+   private final HashMap<String, ArrayList<ImPlotYoGraph>> graphs = new HashMap<>();
    private final YoVariableClientHelper yoClientHelper = new YoVariableClientHelper(getClass().getSimpleName());
    private final ImInt serverSelectedIndex = new ImInt(0);
    private String[] serverGraphGroupNames = new String[0];
-   private final HashMap<String, GDXYoGraphGroup> serverGraphGroups = new HashMap<>();
+   private final HashMap<String, TreeSet<String>> serverGraphGroups = new HashMap<>();
    private ImPlotContext context = null;
    private final ImBoolean showAllVariables = new ImBoolean(false);
    private final ImString searchBar = new ImString();
-   private GDXYoGraphRunnable graphRequesting = null;
+   private ImPlotYoGraph graphRequesting = null;
 
-   public ImGuiGDXYoGraphPanel(String title, int bufferSize)
+   public ImPlotYoGraphPanel(String title, int bufferSize)
    {
       this.title = title;
       this.bufferSize = bufferSize;
@@ -157,10 +157,10 @@ public class ImGuiGDXYoGraphPanel
 
       synchronized (graphs)
       {
-         Iterator<GDXYoGraphRunnable> graphsIterator = graphs.get(serverGraphGroupNames[serverSelectedIndex.get()]).iterator();
+         Iterator<ImPlotYoGraph> graphsIterator = graphs.get(serverGraphGroupNames[serverSelectedIndex.get()]).iterator();
          while (graphsIterator.hasNext())
          {
-            GDXYoGraphRunnable graph = graphsIterator.next();
+            ImPlotYoGraph graph = graphsIterator.next();
             graph.render(context);
             if (!graph.shouldGraphExist())
                graphsIterator.remove();
@@ -174,20 +174,15 @@ public class ImGuiGDXYoGraphPanel
 
       if (ImGui.button("Add new graph"))
       {
-         graphs.get(serverGraphGroupNames[serverSelectedIndex.get()]).add(new GDXYoGraphRunnable(yoClientHelper, bufferSize));
+         graphs.get(serverGraphGroupNames[serverSelectedIndex.get()]).add(new ImPlotYoGraph(yoClientHelper, bufferSize));
       }
    }
 
    public void graphVariable(String serverName, String yoVariableName)
    {
-      GDXYoGraphGroup graphGroup = serverGraphGroups.get(serverName);
-      if (graphGroup == null)
-      {
-         graphGroup = new GDXYoGraphGroup();
-         serverGraphGroups.put(serverName, graphGroup);
-      }
+      TreeSet<String> graphGroup = serverGraphGroups.computeIfAbsent(serverName, k -> new TreeSet<>());
 
-      graphGroup.addVariable(yoVariableName);
+      graphGroup.add(yoVariableName);
       serverGraphGroupNames = serverGraphGroups.keySet().toArray(new String[0]);
 
       YoDoubleClientHelper yoDoubleHelper = yoClientHelper.subscribeToYoDouble(yoVariableName);
@@ -195,8 +190,8 @@ public class ImGuiGDXYoGraphPanel
       Double[] values = new Double[bufferSize];
       synchronized (graphs)
       {
-         ArrayList<GDXYoGraphRunnable> graphsForServer = graphs.computeIfAbsent(serverName, key -> new ArrayList<>());
-         graphsForServer.add(new GDXYoGraphRunnable(yoDoubleHelper, yoClientHelper, values, bufferSize));
+         ArrayList<ImPlotYoGraph> graphsForServer = graphs.computeIfAbsent(serverName, key -> new ArrayList<>());
+         graphsForServer.add(new ImPlotYoGraph(yoDoubleHelper, yoClientHelper, values, bufferSize));
       }
    }
 

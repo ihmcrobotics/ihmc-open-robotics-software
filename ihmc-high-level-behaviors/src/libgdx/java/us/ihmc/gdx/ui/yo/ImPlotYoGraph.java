@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GDXYoGraphRunnable
+public class ImPlotYoGraph
 {
    private boolean shouldGraphExist = true;
    private boolean requestAddVariable = false;
@@ -27,7 +27,7 @@ public class GDXYoGraphRunnable
    private final int plotID;
    private static int currentPlotIndex = 0;
 
-   public GDXYoGraphRunnable(YoVariableClientHelper helper, int bufferSize)
+   public ImPlotYoGraph(YoVariableClientHelper helper, int bufferSize)
    {
       this.helper = helper;
       this.bufferSize = bufferSize;
@@ -36,7 +36,7 @@ public class GDXYoGraphRunnable
       currentIndex = new AtomicInteger(0);
    }
 
-   public GDXYoGraphRunnable(YoDoubleClientHelper variable, YoVariableClientHelper helper, Double[] variableValueBuffer, int bufferSize)
+   public ImPlotYoGraph(YoDoubleClientHelper variable, YoVariableClientHelper helper, Double[] variableValueBuffer, int bufferSize)
    {
       this.helper = helper;
       this.variables.add(variable);
