@@ -4,6 +4,7 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.ImPlotStyle;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
@@ -183,8 +184,16 @@ public class ImPlotYoGraphPanel
       for (ImGuiModifiableYoDouble modifiableYoDouble : modifiableVariables.get(serverGraphGroupNames[serverSelectedIndex.get()]))
       {
          modifiableYoDouble.update();
-         ImGui.pushItemWidth(100.0f);
-         if (ImGui.inputDouble(labels.get(modifiableYoDouble.getYoDoubleHelper().getName()), modifiableYoDouble.getImDouble(), 0.1))
+         ImGui.pushItemWidth(110.0f);
+         double step = 0.1;
+         double stepFast = 0.0;
+         String format = "%.4f";
+         if (ImGui.inputDouble(labels.get(modifiableYoDouble.getYoDoubleHelper().getName()),
+                               modifiableYoDouble.getImDouble(),
+                               step,
+                               stepFast,
+                               format,
+                               ImGuiInputTextFlags.EnterReturnsTrue))
          {
             modifiableYoDouble.set();
          }
