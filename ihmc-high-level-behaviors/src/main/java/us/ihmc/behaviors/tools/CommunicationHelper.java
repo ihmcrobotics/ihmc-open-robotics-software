@@ -51,7 +51,7 @@ import java.util.function.Supplier;
  * and subscribing where the user doesn't necessarily care which
  * protocol is being used.
  */
-public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2ControllerPublishSubscribeAPI
+public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 {
    protected final DRCRobotModel robotModel;
    protected final ROS2ControllerHelper ros2Helper;
@@ -291,5 +291,11 @@ public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2Control
       }
 
       return footPolygons;
+   }
+
+   @Override
+   public String getRobotName()
+   {
+      return robotModel.getSimpleRobotName();
    }
 }

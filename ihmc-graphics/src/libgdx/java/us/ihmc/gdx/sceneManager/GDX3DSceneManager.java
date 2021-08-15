@@ -88,6 +88,7 @@ public class GDX3DSceneManager
 
       shadowManager = new GDXShadowManager(GDXImGuiBasedUI.ANTI_ALIASING, ambientLight);
 
+      addDefaultLighting();
       if (onCreate != null)
          onCreate.run();
    }

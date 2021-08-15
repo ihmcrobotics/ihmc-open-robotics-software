@@ -15,35 +15,30 @@ import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
-public class GDXInteractableFoot
+public class GDXInteractablePelvis
 {
    private final GDXRobotCollisionLink collisionLink;
-   private final RobotSide side;
-   private final ReferenceFrame syncedRobotFootFrame;
+   private final ReferenceFrame syncedRobotPelvisFrame;
    private final ROS2ControllerHelper ros2Helper;
-   private final Model footModel;
-   private final ModelInstance footModelInstance;
+   private final Model pelvisModel;
+   private final ModelInstance pelvisModelInstance;
    private boolean selected = false;
    private boolean modified = false;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private boolean mouseIntersects;
 
-   public GDXInteractableFoot(GDXRobotCollisionLink collisionLink, RobotSide side, ReferenceFrame syncedRobotFootFrame, ROS2ControllerHelper ros2Helper)
+   public GDXInteractablePelvis(GDXRobotCollisionLink collisionLink, ReferenceFrame syncedRobotPelvisFrame, ROS2ControllerHelper ros2Helper)
    {
       this.collisionLink = collisionLink;
-      this.side = side;
-      this.syncedRobotFootFrame = syncedRobotFootFrame;
+      this.syncedRobotPelvisFrame = syncedRobotPelvisFrame;
       this.ros2Helper = ros2Helper;
 
-      String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
-      String modelFileName = robotSidePrefix + "foot.g3dj";
-      footModel = GDXModelLoader.loadG3DModel(modelFileName);
-      footModelInstance = new ModelInstance(footModel);
-      footModelInstance.transform.scale(1.01f, 1.01f, 1.01f);
+      pelvisModel = GDXModelLoader.loadG3DModel("pelvis.g3dj");
+      pelvisModelInstance = new ModelInstance(pelvisModel);
+      pelvisModelInstance.transform.scale(1.01f, 1.01f, 1.01f);
 
-      GDXTools.setTransparency(footModelInstance, 0.5f);
+      GDXTools.setTransparency(pelvisModelInstance, 0.5f);
    }
 
    public void create(FocusBasedGDXCamera camera3D)
@@ -58,14 +53,14 @@ public class GDXInteractableFoot
 
       if (!modified && mouseIntersects)
       {
-         GDXTools.toGDX(syncedRobotFootFrame.getTransformToWorldFrame(), footModelInstance.transform);
+         GDXTools.toGDX(syncedRobotPelvisFrame.getTransformToWorldFrame(), pelvisModelInstance.transform);
 
          if (leftMouseReleasedWithoutDrag)
          {
             selected = true;
             modified = true;
             collisionLink.overrideTransform(true);
-            poseGizmo.getTransform().set(syncedRobotFootFrame.getTransformToWorldFrame());
+            poseGizmo.getTransform().set(syncedRobotPelvisFrame.getTransformToWorldFrame());
          }
       }
 
@@ -79,17 +74,17 @@ public class GDXInteractableFoot
       }
       if (modified && !selected && mouseIntersects)
       {
-         GDXTools.setTransparency(footModelInstance, 0.7f);
+         GDXTools.setTransparency(pelvisModelInstance, 0.7f);
       }
       else
       {
-         GDXTools.setTransparency(footModelInstance, 0.5f);
+         GDXTools.setTransparency(pelvisModelInstance, 0.5f);
       }
 
       if (modified)
       {
          collisionLink.overrideTransform(true).set(poseGizmo.getTransform());
-         GDXTools.toGDX(poseGizmo.getTransform(), footModelInstance.transform);
+         GDXTools.toGDX(poseGizmo.getTransform(), pelvisModelInstance.transform);
       }
 
       if (selected)
@@ -99,7 +94,7 @@ public class GDXInteractableFoot
          if (ImGui.isKeyReleased(input.getSpaceKey()))
          {
             // TODO: Trajectory time in ImGui panel
-            ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side, 1.2, poseGizmo.getPose()));
+            ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(1.2, poseGizmo.getPose()));
          }
       }
 
@@ -120,7 +115,7 @@ public class GDXInteractableFoot
    {
       if (modified || mouseIntersects)
       {
-         footModelInstance.getRenderables(renderables, pool);
+         pelvisModelInstance.getRenderables(renderables, pool);
       }
       if (selected)
       {
@@ -130,6 +125,6 @@ public class GDXInteractableFoot
 
    public void destroy()
    {
-      footModel.dispose();
+      pelvisModel.dispose();
    }
 }
