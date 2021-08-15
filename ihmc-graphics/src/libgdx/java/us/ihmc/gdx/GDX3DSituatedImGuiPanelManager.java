@@ -1,14 +1,7 @@
 package us.ihmc.gdx;
 
-import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.*;
@@ -17,7 +10,6 @@ import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGuiContext;
-import org.lwjgl.opengl.GL30;
 import org.lwjgl.system.MemoryUtil;
 import us.ihmc.gdx.imgui.ImGuiTools;
 
@@ -25,18 +17,19 @@ import java.util.ArrayList;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class GDXImGuiVirtualWindowManager implements RenderableProvider
+public class GDX3DSituatedImGuiPanelManager implements RenderableProvider
 {
-   private static GDXImGuiVirtualWindowManager instance = null;
+   private static GDX3DSituatedImGuiPanelManager instance = null;
 
-   public static GDXImGuiVirtualWindowManager getInstance() {
+   public static GDX3DSituatedImGuiPanelManager getInstance()
+   {
       if (instance == null)
-         instance = new GDXImGuiVirtualWindowManager();
+         instance = new GDX3DSituatedImGuiPanelManager();
 
       return instance;
    }
 
-   private final ArrayList<GDXImGuiWindow> panels = new ArrayList<>();
+   private final ArrayList<GDX3DSituatedImGuiPanel> panels = new ArrayList<>();
    private ImFont font = null;
 
    private final ModelBuilder BUILDER = new ModelBuilder();
@@ -50,12 +43,14 @@ public class GDXImGuiVirtualWindowManager implements RenderableProvider
    private long savedGLFWContext = 0;
    private ImGuiContext savedImGuiContext = null;
 
-   private void backupAndSwitchContext() {
+   private void backupAndSwitchContext()
+   {
       savedGLFWContext = glfwGetCurrentContext();
       glfwMakeContextCurrent(virtualWindowContext);
 
       savedImGuiContext = ImGui.getCurrentContext();
-      if (virtualImGuiContext == null) {
+      if (virtualImGuiContext == null)
+      {
          virtualImGuiContext = ImGui.createContext();
          ImGui.setCurrentContext(virtualImGuiContext);
 
@@ -92,21 +87,24 @@ public class GDXImGuiVirtualWindowManager implements RenderableProvider
       }
    }
 
-   private void restoreSavedContext() {
+   private void restoreSavedContext()
+   {
       glfwMakeContextCurrent(savedGLFWContext);
 
       if (savedImGuiContext != null && savedImGuiContext.ptr != 0)
          ImGui.setCurrentContext(savedImGuiContext);
    }
 
-   private GDXImGuiVirtualWindowManager() {
+   private GDX3DSituatedImGuiPanelManager()
+   {
       this.savedGLFWContext = glfwGetCurrentContext();
 
       glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
       this.virtualWindowContext = glfwCreateWindow(3000, 2000, "", MemoryUtil.NULL, MemoryUtil.NULL);
    }
 
-   public void create() {
+   public void create()
+   {
       backupAndSwitchContext(); //This is also where the ImGuiContext is created
 
       if (!glfwInit()) //Probably already initialized by this point, which immediately returns true
@@ -120,14 +118,17 @@ public class GDXImGuiVirtualWindowManager implements RenderableProvider
       restoreSavedContext();
    }
 
-   public void update() {
+   public void update()
+   {
       backupAndSwitchContext();
 
       ImGui.newFrame();
       ImGui.pushFont(font);
 
-      for (GDXImGuiWindow panel : panels) {
-         if (ImGui.begin(panel.getName())) {
+      for (GDX3DSituatedImGuiPanel panel : panels)
+      {
+         if (ImGui.begin(panel.getName()))
+         {
             panel.renderImGuiWidgets();
             ImGui.end();
          }
@@ -140,7 +141,8 @@ public class GDXImGuiVirtualWindowManager implements RenderableProvider
       restoreSavedContext();
    }
 
-   public void addPanel(GDXImGuiWindow panel) {
+   public void addPanel(GDX3DSituatedImGuiPanel panel)
+   {
       panels.add(panel);
    }
 
@@ -151,8 +153,9 @@ public class GDXImGuiVirtualWindowManager implements RenderableProvider
          modelInstance.getRenderables(renderables, pool);
    }
 
-   public void dispose() {
-      for (GDXImGuiWindow panel : panels)
+   public void dispose()
+   {
+      for (GDX3DSituatedImGuiPanel panel : panels)
          panel.dispose();
 
       imGuiGl3.dispose();

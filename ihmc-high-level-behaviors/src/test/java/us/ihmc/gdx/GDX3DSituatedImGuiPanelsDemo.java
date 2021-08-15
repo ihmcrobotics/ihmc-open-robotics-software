@@ -6,9 +6,9 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 
-public class GDX3DImGuiPanelsDemo
+public class GDX3DSituatedImGuiPanelsDemo
 {
-   public GDX3DImGuiPanelsDemo()
+   public GDX3DSituatedImGuiPanelsDemo()
    {
       GDX3DSceneManager sceneManager = new GDX3DSceneManager();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
@@ -21,7 +21,7 @@ public class GDX3DImGuiPanelsDemo
             sceneManager.addCoordinateFrame(0.3);
             sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
 
-            new GDXImGuiWindow("Test Window")
+            new GDX3DSituatedImGuiPanel("Test Window")
             {
                @Override
                public void renderImGuiWidgets()
@@ -31,7 +31,7 @@ public class GDX3DImGuiPanelsDemo
                }
             };
 
-            sceneManager.addRenderableProvider(GDXImGuiVirtualWindowManager.getInstance());
+            sceneManager.addRenderableProvider(GDX3DSituatedImGuiPanelManager.getInstance());
          }
 
          @Override
@@ -40,7 +40,7 @@ public class GDX3DImGuiPanelsDemo
             GDX3DSceneTools.glClearGray();
             sceneManager.setViewportBoundsToWindow();
 
-            GDXImGuiVirtualWindowManager.getInstance().update();
+            GDX3DSituatedImGuiPanelManager.getInstance().update();
 
             sceneManager.render();
          }
@@ -49,6 +49,6 @@ public class GDX3DImGuiPanelsDemo
 
    public static void main(String[] args)
    {
-      new GDX3DImGuiPanelsDemo();
+      new GDX3DSituatedImGuiPanelsDemo();
    }
 }
