@@ -36,7 +36,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    private final ImGuiGDXTraverseStairsBehaviorUI traverseStairsUI;
    private final Point2D nodePosition = new Point2D(341.0, 5.0);
    private final ImGuiGDXDoorBehaviorUI doorUI;
-   private ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private volatile BuildingExplorationBehaviorMode mode = BuildingExplorationBehaviorMode.TELEOP;
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private String lastTickedThing = "NONE";

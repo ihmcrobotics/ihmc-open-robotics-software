@@ -88,9 +88,19 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
       }
    }
 
+   public void clearAsync()
+   {
+      generateMeshesAsync(new ArrayList<>());
+   }
+
    public void generateMeshesAsync(ArrayList<MinimalFootstep> footsteps)
    {
       executorService.clearQueueAndExecute(() -> generateMeshes(footsteps));
+   }
+
+   public void clear()
+   {
+      generateMeshes(new ArrayList<>());
    }
 
    public void generateMeshes(ArrayList<MinimalFootstep> footsteps)

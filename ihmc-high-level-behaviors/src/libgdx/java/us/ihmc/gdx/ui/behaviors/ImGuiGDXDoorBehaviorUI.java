@@ -57,6 +57,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    private final ImGuiMovingPlot detectedDoorPlot = new ImGuiMovingPlot("Detected door", 1000, 250, 15);
    private final ImBoolean reviewDoorPose = new ImBoolean(true);
    private GDXPushHandleRightDoorObject door;
+   private final ImBoolean showDetectedDoorGraphic = new ImBoolean(true);
 
    public ImGuiGDXDoorBehaviorUI(BehaviorHelper helper)
    {
@@ -172,6 +173,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
          helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
          helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
       }
+      ImGui.checkbox("Show detected door", showDetectedDoorGraphic);
    }
 
    @Override
@@ -188,7 +190,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (!distanceToDoor.get().isNaN())
+      if (showDetectedDoorGraphic.get() && !distanceToDoor.get().isNaN())
          door.getCollisionModelInstance().getRenderables(renderables, pool);
    }
 

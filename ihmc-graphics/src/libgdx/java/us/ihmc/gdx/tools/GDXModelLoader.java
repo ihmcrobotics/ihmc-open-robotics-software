@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.SerializationException;
 import us.ihmc.log.LogTools;
 
 import java.util.HashMap;
@@ -62,7 +63,7 @@ public class GDXModelLoader
             loadedModels.put(modelFileName, loadedModel);
             return loadedModel;
          }
-         catch (NullPointerException e)
+         catch (SerializationException | NullPointerException e)
          {
             return null;
          }
@@ -84,12 +85,16 @@ public class GDXModelLoader
     */
    public static String modifyFileName(String modelFileName)
    {
-      if (!modelFileName.endsWith(".obj"))
+      String lowerCase = modelFileName.toLowerCase();
+      if (!lowerCase.endsWith(".obj") && !lowerCase.endsWith(".stl"))
+      {
+         LogTools.warn("Model file \"{}\" is not an OBJ or STL. Skipping...", modelFileName);
          return null;
+      }
 
       String[] splitSlash = modelFileName.split("/");
       String objFileName = splitSlash[splitSlash.length - 1];
-      String modifiedFileName = objFileName.replace(".obj", "") + ".g3dj";
+      String modifiedFileName = objFileName.replace(".obj", "").replace(".STL", "") + ".g3dj";
       return modifiedFileName;
    }
 }
