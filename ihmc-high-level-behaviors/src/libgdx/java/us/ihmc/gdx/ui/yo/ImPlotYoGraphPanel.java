@@ -13,6 +13,7 @@ import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -30,10 +31,12 @@ public class ImPlotYoGraphPanel
    private final ImInt serverSelectedIndex = new ImInt(0);
    private String[] serverGraphGroupNames = new String[0];
    private final HashMap<String, TreeSet<String>> serverGraphGroups = new HashMap<>();
+   private final HashMap<String, ArrayList<ImGuiModifiableYoDouble>> modifiableVariables = new HashMap<>();
    private ImPlotContext context = null;
    private final ImBoolean showAllVariables = new ImBoolean(false);
    private final ImString searchBar = new ImString();
    private ImPlotYoGraph graphRequesting = null;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    public ImPlotYoGraphPanel(String title, int bufferSize)
    {
@@ -176,6 +179,19 @@ public class ImPlotYoGraphPanel
       {
          graphs.get(serverGraphGroupNames[serverSelectedIndex.get()]).add(new ImPlotYoGraph(yoClientHelper, bufferSize));
       }
+
+      for (ImGuiModifiableYoDouble modifiableYoDouble : modifiableVariables.get(serverGraphGroupNames[serverSelectedIndex.get()]))
+      {
+         modifiableYoDouble.update();
+         ImGui.pushItemWidth(100.0f);
+         if (ImGui.inputDouble(labels.get(modifiableYoDouble.getYoDoubleHelper().getName()), modifiableYoDouble.getImDouble(), 0.1))
+         {
+            modifiableYoDouble.set();
+         }
+         ImGui.popItemWidth();
+         ImGui.sameLine();
+         ImGui.text("Server: " + modifiableYoDouble.getYoDoubleHelper().get());
+      }
    }
 
    public void graphVariable(String serverName, String yoVariableName)
@@ -195,9 +211,11 @@ public class ImPlotYoGraphPanel
       }
    }
 
-   public void modifyVariable()
+   public void modifyVariable(String serverName, String yoVariableName)
    {
-
+      ArrayList<ImGuiModifiableYoDouble> modifiableVariablesForServer = modifiableVariables.computeIfAbsent(serverName, key -> new ArrayList<>());
+      YoDoubleClientHelper yoDoubleHelper = yoClientHelper.subscribeToYoDouble(yoVariableName);
+      modifiableVariablesForServer.add(new ImGuiModifiableYoDouble(yoDoubleHelper));
    }
 
    public void destroy()
