@@ -1,19 +1,24 @@
 package us.ihmc.gdx;
 
-public abstract class GDXImGuiWindow
+public abstract class GDX3DSituatedImGuiPanel
 {
    private final String name;
 
-   public GDXImGuiWindow(String name) {
+   public GDX3DSituatedImGuiPanel(String name)
+   {
       this.name = name;
-      GDXImGuiVirtualWindowManager.getInstance().addPanel(this);
+      GDX3DSituatedImGuiPanelManager.getInstance().addPanel(this);
    }
 
    public abstract void renderImGuiWidgets();
 
-   public void dispose() {}
+   public void dispose()
+   {
 
-   public final String getName() {
+   }
+
+   public final String getName()
+   {
       return name;
    }
 
