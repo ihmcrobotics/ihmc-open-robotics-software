@@ -174,7 +174,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
          public String getName()
          {
             YoVariable variable = tryToGetVariable(variableName);
-            return variable == null ? "" : variable.getName();
+            return variable == null ? variableName.substring(variableName.lastIndexOf(".")) : variable.getName();
          }
 
          @Override
