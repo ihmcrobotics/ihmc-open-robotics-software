@@ -173,7 +173,7 @@ public class GDXEnvironmentObject
       updateRenderablesPoses();
    }
 
-   private void updateRenderablesPoses()
+   protected void updateRenderablesPoses()
    {
       placementFrame.update();
 
@@ -231,6 +231,14 @@ public class GDXEnvironmentObject
       else if (objectClassName.equals(GDXDoorFrameObject.class.getSimpleName()))
       {
          return new GDXDoorFrameObject();
+      }
+      else if (objectClassName.equals(GDXPointLightObject.class.getSimpleName()))
+      {
+         return new GDXPointLightObject();
+      }
+      else if (objectClassName.equals(GDXDirectionalLightObject.class.getSimpleName()))
+      {
+         return new GDXDirectionalLightObject();
       }
       else
       {
