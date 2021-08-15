@@ -1,5 +1,6 @@
 package us.ihmc.gdx.ui.graphics.live;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
@@ -8,6 +9,7 @@ import imgui.internal.ImGui;
 import sensor_msgs.PointCloud2;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -44,12 +46,14 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
 
    private final ResettableExceptionHandlingExecutorService threadQueue;
 
-   private GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
+   private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
    private final RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
 
    private AbstractRosTopicSubscriber<PointCloud2> subscriber;
    private long receivedCount = 0;
+   private Color color = Color.WHITE;
 
+   private boolean flipToZUp = false;
 
    public GDXROS1PointCloudVisualizer(String title, String ros1PointCloudTopic)
    {
@@ -108,7 +112,8 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
                boolean hasColors = false;
                PointCloudData pointCloudData = new PointCloudData(message, MAX_POINTS, hasColors);
 
-               pointCloudData.flipToZUp();
+               if (flipToZUp)
+                  pointCloudData.flipToZUp();
 
                // Should be tuned somewhere else
 //               baseToSensorTransform.setToZero();
@@ -170,10 +175,10 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
             }
          }
 
-         pointCloudRenderer.setPointsToRender(pointsToRender);
+         pointCloudRenderer.setPointsToRender(pointsToRender, color);
          if (!pointsToRender.isEmpty())
          {
-            pointCloudRenderer.updateMesh(alpha);
+            pointCloudRenderer.updateMesh();
          }
       }
    }
@@ -200,5 +205,15 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
    {
       if (isActive())
          pointCloudRenderer.getRenderables(renderables, pool);
+   }
+
+   public void setFlipToZUp(boolean flipToZUp)
+   {
+      this.flipToZUp = flipToZUp;
+   }
+
+   public void setColor(Color color)
+   {
+      this.color = color;
    }
 }

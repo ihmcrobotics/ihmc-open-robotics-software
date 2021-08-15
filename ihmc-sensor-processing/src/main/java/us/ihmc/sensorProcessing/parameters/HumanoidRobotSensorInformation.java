@@ -41,6 +41,40 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
                                                                                     getObjectDetectionCameraTransform());
    }
 
+   public default RigidBodyTransform getHeadZED2CameraTransform()
+   {
+      return new RigidBodyTransform();
+   }
+
+   public default ReferenceFrame getHeadZED2CameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getChestFrame();
+   }
+
+   public default ReferenceFrame getHeadZED2CameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("headZED2Camera",
+                                                                                    getHeadZED2CameraParentFrame(referenceFrames),
+                                                                                    getHeadZED2CameraTransform());
+   }
+
+   public default RigidBodyTransform getOusterLidarTransform()
+   {
+      return new RigidBodyTransform();
+   }
+
+   public default ReferenceFrame getOusterLidarParentFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getChestFrame();
+   }
+
+   public default ReferenceFrame getOusterLidarFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("ousterLidar",
+                                                                                    getOusterLidarParentFrame(referenceFrames),
+                                                                                    getOusterLidarTransform());
+   }
+
    public default String getHeadCameraName()
    {
       return null;
