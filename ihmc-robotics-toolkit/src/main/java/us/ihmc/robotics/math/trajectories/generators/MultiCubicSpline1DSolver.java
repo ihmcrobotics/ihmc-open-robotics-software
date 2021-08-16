@@ -101,6 +101,9 @@ public class MultiCubicSpline1DSolver
 
    private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(0);
 
+   private final DMatrixRMaj solutionTranspose = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(1, 1);
+
    public MultiCubicSpline1DSolver()
    {
       this(true);
@@ -277,8 +280,6 @@ public class MultiCubicSpline1DSolver
          //      NativeCommonOps.multQuad(solutionToPack, H, b);
 
          // b = x^T H x
-         DMatrixRMaj solutionTranspose = new DMatrixRMaj(1, 1);
-         DMatrixRMaj tempMatrix = new DMatrixRMaj(1, 1);
          solutionTranspose.reshape(solutionToPack.getNumCols(), solutionToPack.getNumRows());
          CommonOps_DDRM.transpose(solutionToPack, solutionTranspose);
          CommonOps_DDRM.mult(solutionTranspose, H, tempMatrix);
