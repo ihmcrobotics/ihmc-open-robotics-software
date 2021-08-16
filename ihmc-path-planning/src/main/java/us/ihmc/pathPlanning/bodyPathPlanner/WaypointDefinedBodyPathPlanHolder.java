@@ -110,7 +110,9 @@ public class WaypointDefinedBodyPathPlanHolder implements BodyPathPlanHolder
          if (distance < closestPointDistance)
          {
             double distanceToSegmentStart = tempClosestPoint.distanceXY(segmentStart);
-            double alphaInSegment = distanceToSegmentStart / segmentLengths[i];
+
+            double epsilon = 1e-7;
+            double alphaInSegment = distanceToSegmentStart / (segmentLengths[i] + epsilon);
 
             boolean firstSegment = i == 0;
             double alphaSegmentStart = firstSegment ? 0.0 : maxAlphas[i - 1];
