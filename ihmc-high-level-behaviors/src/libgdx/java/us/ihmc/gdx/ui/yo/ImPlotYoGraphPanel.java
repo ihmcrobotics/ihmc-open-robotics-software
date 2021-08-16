@@ -181,25 +181,28 @@ public class ImPlotYoGraphPanel
          graphs.get(serverGraphGroupNames[serverSelectedIndex.get()]).add(new ImPlotYoGraph(yoClientHelper, bufferSize));
       }
 
-      for (ImGuiModifiableYoDouble modifiableYoDouble : modifiableVariables.get(serverGraphGroupNames[serverSelectedIndex.get()]))
+      if (modifiableVariables.containsKey(serverGraphGroupNames[serverSelectedIndex.get()]))
       {
-         modifiableYoDouble.update();
-         ImGui.pushItemWidth(110.0f);
-         double step = 0.1;
-         double stepFast = 0.0;
-         String format = "%.4f";
-         if (ImGui.inputDouble(labels.get(modifiableYoDouble.getYoDoubleHelper().getName()),
-                               modifiableYoDouble.getImDouble(),
-                               step,
-                               stepFast,
-                               format,
-                               ImGuiInputTextFlags.EnterReturnsTrue))
+         for (ImGuiModifiableYoDouble modifiableYoDouble : modifiableVariables.get(serverGraphGroupNames[serverSelectedIndex.get()]))
          {
-            modifiableYoDouble.set();
+            modifiableYoDouble.update();
+            ImGui.pushItemWidth(110.0f);
+            double step = 0.1;
+            double stepFast = 0.0;
+            String format = "%.4f";
+            if (ImGui.inputDouble(labels.get(modifiableYoDouble.getYoDoubleHelper().getName()),
+                                  modifiableYoDouble.getImDouble(),
+                                  step,
+                                  stepFast,
+                                  format,
+                                  ImGuiInputTextFlags.EnterReturnsTrue))
+            {
+               modifiableYoDouble.set();
+            }
+            ImGui.popItemWidth();
+            ImGui.sameLine();
+            ImGui.text("Server: " + modifiableYoDouble.getYoDoubleHelper().get());
          }
-         ImGui.popItemWidth();
-         ImGui.sameLine();
-         ImGui.text("Server: " + modifiableYoDouble.getYoDoubleHelper().get());
       }
    }
 
