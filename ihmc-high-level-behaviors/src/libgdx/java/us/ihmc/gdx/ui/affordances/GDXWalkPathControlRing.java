@@ -252,12 +252,11 @@ public class GDXWalkPathControlRing
                              Pose3DReadOnly leftGoalFootPose,
                              Pose3DReadOnly rightGoalFootPose)
    {
-
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
-//      footstepPlannerRequest.getBodyPathWaypoints().add(midFeetZUpPose);
-//      footstepPlannerRequest.getBodyPathWaypoints().add(startPose);
-//      footstepPlannerRequest.getBodyPathWaypoints().add(goalPose);
+      footstepPlannerRequest.getBodyPathWaypoints().add(midFeetZUpPose);
+      footstepPlannerRequest.getBodyPathWaypoints().add(startPose);
+      footstepPlannerRequest.getBodyPathWaypoints().add(goalPose);
       footstepPlannerRequest.setStartFootPoses(leftStanceFootPose, rightStanceFootPose);
       footstepPlannerRequest.setGoalFootPoses(leftGoalFootPose, rightGoalFootPose);
       footstepPlannerRequest.setAssumeFlatGround(true);
