@@ -125,7 +125,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
    {
-      if (isPlanning.get())
+      if (isPlanning.getAndSet(true))
       {
          LogTools.info("Received planning request packet but planner is currently running");
          return null;
@@ -141,7 +141,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       try
       {
          handleRequestInternal(request);
-         return output;
       }
       catch (Exception exception)
       {
@@ -152,9 +151,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          output.setFootstepPlanningResult(FootstepPlanningResult.EXCEPTION);
          output.setException(exception);
          statusCallbacks.forEach(callback -> callback.accept(output));
-         isPlanning.set(false);
-         return output;
       }
+
+      isPlanning.set(false);
+      return output;
    }
 
    private void handleRequestInternal(FootstepPlannerRequest request) throws Exception
@@ -162,7 +162,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.request.set(request);
       requestCallbacks.forEach(callback -> callback.accept(request));
       output.setRequestId(request.getRequestId());
-      isPlanning.set(true);
       bodyPathPlanHolder.getPlan().clear();
 
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
@@ -200,7 +199,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             reportBodyPathPlan(bodyPathPlannerResult);
             output.setBodyPathPlanningResult(bodyPathPlannerResult);
             statusCallbacks.forEach(callback -> callback.accept(output));
-            isPlanning.set(false);
             return;
          }
          else if (waypoints.size() < 2 && !request.getAbortIfBodyPathPlannerFails())
@@ -281,8 +279,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                                     request.getSwingPlannerType());
          statusCallbacks.forEach(callback -> callback.accept(output));
       }
-
-      isPlanning.set(false);
    }
 
    private static void setNominalOrientations(List<Pose3DReadOnly> waypoints)
