@@ -93,9 +93,7 @@ public class OrientationMPCTrajectoryHandler
 
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
                                                double currentTimeInState,
-                                               double previewWindowDuration,
-                                               FrameQuaternionReadOnly currentDesiredOrientation,
-                                               FrameVector3DReadOnly currentDesiredAngularVelocity)
+                                               double previewWindowDuration)
    {
       extractSolutionVectors(solutionCoefficients);
 
@@ -105,37 +103,30 @@ public class OrientationMPCTrajectoryHandler
       desiredOrientationSolution.clear();
       desiredAngularVelocitySolution.clear();
 
-      bodyOrientationTrajectory.appendWaypoint(currentTimeInState, currentDesiredOrientation, currentDesiredAngularVelocity);
-
       int globalTick = 0;
+      double tickDuration = 0.0;
       for (int segment = 0; segment < indexHandler.getNumberOfSegments(); segment++)
       {
          OrientationTrajectoryCommand command = trajectoryConstructor.getOrientationTrajectoryCommands().get(segment);
-         double tickDuration = indexHandler.getTickDuration(segment);
+         tickDuration = indexHandler.getTickDuration(segment);
 
          int end = globalTick + command.getNumberOfTicksInSegment();
          for (;globalTick < end; globalTick++)
          {
+            extractSolutionTick(globalTick, currentTimeInState);
+
             currentTimeInState += tickDuration;
-
-            FrameQuaternionBasics orientation = desiredOrientationSolution.add();
-            orientation.set(discretizedReferenceOrientation.get(globalTick));
-
-            FrameVector3DBasics angularVelocity = desiredAngularVelocitySolution.add();
-            angularVelocity.set(angularVelocityInBodyErrorSolutions.get(globalTick));
-
-            orientation.inverseTransform(angularVelocity);
-
-            angularVelocity.add(discretizedReferenceAngularVelocity.get(globalTick));
-
-            orientation.append(axisAngleErrorSolutions.get(globalTick));
-
-            bodyOrientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
          }
       }
 
+      // handle the final tick, which is also optimized
+      extractSolutionTick(globalTick, currentTimeInState);
+
       overwriteTrajectoryOutsidePreviewWindow();
    }
+
+
+
 
    private final DMatrixRMaj errorAtStartOfState = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj valueAtTick = new DMatrixRMaj(6, 1);
@@ -189,6 +180,32 @@ public class OrientationMPCTrajectoryHandler
             angularVelocityErrorSolution.set(3, valueAtTick);
          }
       }
+
+      // handle the last tick
+      MatrixTools.setMatrixBlock(errorAtStartOfState, 0, 0, solutionCoefficients, indexHandler.getOrientationStartIndex(indexHandler.getNumberOfSegments()), 0, 6, 1, 1.0);
+
+      AxisAngleBasics axisAngleErrorSolution = axisAngleErrorSolutions.add();
+      FrameVector3DBasics angularVelocityErrorSolution = angularVelocityInBodyErrorSolutions.add();
+
+      axisAngleErrorSolution.setRotationVector(errorAtStartOfState.get(0, 0), errorAtStartOfState.get(1, 0), errorAtStartOfState.get(2, 0));
+      angularVelocityErrorSolution.set(3, errorAtStartOfState);
+   }
+
+   private void extractSolutionTick(int globalTick, double currentTimeInState)
+   {
+      FrameQuaternionBasics orientation = desiredOrientationSolution.add();
+      orientation.set(discretizedReferenceOrientation.get(globalTick));
+
+      FrameVector3DBasics angularVelocity = desiredAngularVelocitySolution.add();
+      angularVelocity.set(angularVelocityInBodyErrorSolutions.get(globalTick));
+
+      orientation.inverseTransform(angularVelocity);
+
+      angularVelocity.add(discretizedReferenceAngularVelocity.get(globalTick));
+
+      orientation.append(axisAngleErrorSolutions.get(globalTick));
+
+      bodyOrientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
    }
 
    public void setInitialBodyOrientationState(FrameOrientation3DReadOnly bodyOrientation, FrameVector3DReadOnly bodyAngularVelocity)
@@ -216,21 +233,29 @@ public class OrientationMPCTrajectoryHandler
 
          for (int i = 0; i < indexHandler.getTicksInSegment(segment); i++)
          {
+            computeReferenceTick(currentTimeInState);
+
             currentTimeInState += tickDuration;
-
-            referenceOrientationCalculator.compute(currentTimeInState);
-
-            discretizedReferenceOrientation.add().set(referenceOrientationCalculator.getDesiredOrientation());
-            discretizedReferenceAngularVelocity.add().set(referenceOrientationCalculator.getDesiredAngularVelocity());
-
-            if (hasInternalAngularMomentum())
-            {
-               internalAngularMomentumTrajectory.compute(currentTimeInState);
-               discretizedInternalAngularMomentumRate.add().set(internalAngularMomentumTrajectory.getVelocity());
-            }
          }
       }
+
+      computeReferenceTick(currentTimeInState);
    }
+
+   private void computeReferenceTick(double currentTimeInState)
+   {
+      referenceOrientationCalculator.compute(currentTimeInState);
+
+      discretizedReferenceOrientation.add().set(referenceOrientationCalculator.getDesiredOrientation());
+      discretizedReferenceAngularVelocity.add().set(referenceOrientationCalculator.getDesiredAngularVelocity());
+
+      if (hasInternalAngularMomentum())
+      {
+         internalAngularMomentumTrajectory.compute(currentTimeInState);
+         discretizedInternalAngularMomentumRate.add().set(internalAngularMomentumTrajectory.getVelocity());
+      }
+   }
+
 
    private void removeInfoOutsidePreviewWindow()
    {
