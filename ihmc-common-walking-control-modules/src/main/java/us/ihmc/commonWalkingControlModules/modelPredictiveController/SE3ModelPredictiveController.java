@@ -193,9 +193,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
       orientationTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients,
                                                                    currentTimeInState.getDoubleValue(),
-                                                                   previewWindowCalculator.getPreviewWindowDuration(),
-                                                                   currentBodyOrientation,
-                                                                   currentBodyAngularVelocity);
+                                                                   previewWindowCalculator.getPreviewWindowDuration());
    }
 
    @Override
@@ -254,7 +252,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    {
       super.computeFinalPhaseObjectives(lastContactPhase, segmentNumber);
 
-      mpcCommands.addCommand(computeFinalOrientationMinimizationCommand(commandProvider.getNextOrientationValueCommand()));
+      mpcCommands.addCommand(computeOrientationContinuityCommand(segmentNumber, commandProvider.getNextOrientationContinuityCommand()));
+      mpcCommands.addCommand(computeFinalOrientationMinimizationCommand(commandProvider.getNextDirectOrientationValueCommand()));
    }
 
    private final DMatrixRMaj initialError = new DMatrixRMaj(6, 1);
@@ -286,17 +285,11 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
    private final DMatrixRMaj weightMatrix = new DMatrixRMaj(6, 6);
 
-   private MPCCommand<?>  computeFinalOrientationMinimizationCommand(OrientationValueCommand commandToPack)
+   private MPCCommand<?>  computeFinalOrientationMinimizationCommand(DirectOrientationValueCommand commandToPack)
    {
       commandToPack.reset();
 
-      int segmentNumber = indexHandler.getNumberOfSegments() - 1;
-      commandToPack.setSegmentNumber(segmentNumber);
-
-      OrientationTrajectoryCommand trajectoryCommand = orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(segmentNumber);
-      commandToPack.setAMatrix(trajectoryCommand.getLastAMatrix());
-      commandToPack.setBMatrix(trajectoryCommand.getLastBMatrix());
-      commandToPack.setCMatrix(trajectoryCommand.getLastCMatrix());
+      commandToPack.setSegmentNumber(indexHandler.getNumberOfSegments());
 
       commandToPack.getObjectiveValue().zero();
       commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
