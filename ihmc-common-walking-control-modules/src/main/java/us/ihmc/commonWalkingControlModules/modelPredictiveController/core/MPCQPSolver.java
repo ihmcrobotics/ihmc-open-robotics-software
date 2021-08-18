@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class MPCQPSolver
 {
-   private static  final boolean debug = true;
+   private static  final boolean debug = false;
 
    private static final double violationFractionToAdd = 0.95;
    private static final double violationFractionToRemove = 0.8;

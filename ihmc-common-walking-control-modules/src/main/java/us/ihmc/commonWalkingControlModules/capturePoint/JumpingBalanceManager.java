@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlan
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCParameters;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.customPolicies.CustomCoMPositionPolicy;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.customPolicies.CustomDCMPositionPolicy;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -116,7 +117,8 @@ public class JumpingBalanceManager
    private final SE3ModelPredictiveController comTrajectoryPlanner;
 
    private final CustomCoMPositionPolicy takeoffPolicy = new CustomCoMPositionPolicy();
-   private final CustomCoMPositionPolicy touchdownPolicy = new CustomCoMPositionPolicy();
+   private final CustomCoMPositionPolicy touchdownHeightPolicy = new CustomCoMPositionPolicy();
+   private final CustomDCMPositionPolicy touchdownXPolicy = new CustomDCMPositionPolicy();
 
    private final JumpingParameters jumpingParameters;
 
@@ -182,8 +184,10 @@ public class JumpingBalanceManager
 
       takeoffPolicy.getSelectionMatrix().clearSelection();
       takeoffPolicy.getSelectionMatrix().selectZAxis(true);
-      touchdownPolicy.getSelectionMatrix().clearSelection();
-      touchdownPolicy.getSelectionMatrix().selectZAxis(true);
+      touchdownHeightPolicy.getSelectionMatrix().clearSelection();
+      touchdownHeightPolicy.getSelectionMatrix().selectZAxis(true);
+      touchdownXPolicy.getSelectionMatrix().clearSelection();
+      touchdownXPolicy.getSelectionMatrix().selectXAxis(true);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -313,7 +317,8 @@ public class JumpingBalanceManager
                                                        chestPose.getOrientation(),
                                                        chestFrame.getTwistOfFrame().getAngularPart(),
                                                        timeInSupportSequence.getDoubleValue());
-//      comTrajectoryPlanner.setCurrentState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
+      comTrajectoryPlanner.setCurrentCoMAcceleration(yoDesiredCoMAcceleration);
+      //      comTrajectoryPlanner.setCurrentState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
 
          comTrajectoryPlanner.solveForTrajectory(copTrajectoryForStanding.getContactStateProviders());
@@ -393,6 +398,7 @@ public class JumpingBalanceManager
                                            chestPose.getOrientation(),
                                            chestFrame.getTwistOfFrame().getAngularPart(),
                                            timeInSupportSequence.getDoubleValue());
+      comTrajectoryPlanner.setCurrentCoMAcceleration(yoDesiredCoMAcceleration);
 //      comTrajectoryPlanner.setCurrentBodyOrientationState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
       List<ContactPlaneProvider> contactStateProviders = copTrajectoryForJumping.getContactStateProviders();
@@ -427,18 +433,23 @@ public class JumpingBalanceManager
       double touchdownHeight = Double.isNaN(jumpingGoal.getGoalHeight()) ? 0.0 : jumpingGoal.getGoalHeight();
       touchdownHeight += controllerToolbox.getJumpingHeight();
       takeoffPolicy.getDesiredComPosition().setZ(tempPoint.getZ() + controllerToolbox.getJumpingHeight());
-      touchdownPolicy.getDesiredComPosition().setZ(touchdownHeight);
+
+      touchdownHeightPolicy.getDesiredComPosition().setZ(touchdownHeight);
+      touchdownXPolicy.getDesiredComPosition().setX(jumpingGoal.getGoalLength());
 
       takeoffPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
-      touchdownPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
+      touchdownHeightPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
+      touchdownXPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
 
       takeoffPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration());
-      touchdownPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
+      touchdownHeightPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
+      touchdownXPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 
       if (!copTrajectoryState.getIsInFlight())
       {
          comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
-         comTrajectoryPlanner.addCustomPolicyToProcess(touchdownPolicy);
+         comTrajectoryPlanner.addCustomPolicyToProcess(touchdownHeightPolicy);
+         comTrajectoryPlanner.addCustomPolicyToProcess(touchdownXPolicy);
 
          comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
       }

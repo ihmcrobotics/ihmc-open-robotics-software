@@ -4,7 +4,6 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -15,7 +14,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +29,7 @@ public class PreviewWindowCalculator
    private final YoInteger activeSegment = new YoInteger("activeSegmentInWindow", registry);
    private final YoBoolean activeSegmentChanged = new YoBoolean("activeSegmentChanged", registry);
 
+   private final YoDouble nominalInitialSegmentDuration = new YoDouble("nominalInitialSegmentDuration", registry);
    private final YoDouble nominalSegmentDuration = new YoDouble("nominalSegmentDuration", registry);
    private final YoDouble maximumPreviewWindowDuration = new YoDouble("maximumPreviewWindowDuration", registry);
    private final YoInteger maximumPreviewWindowSegments = new YoInteger("maximumPreviewWindowSegments", registry);
@@ -52,7 +51,8 @@ public class PreviewWindowCalculator
    public PreviewWindowCalculator(YoRegistry parentRegistry)
    {
       activeSegment.set(-1);
-      this.nominalSegmentDuration.set(0.125);
+      this.nominalInitialSegmentDuration.set(0.125);
+      this.nominalSegmentDuration.set(0.25);
       this.maximumPreviewWindowDuration.set(0.75);
       this.maximumPreviewWindowSegments.set(5);
       this.minimumPreviewWindowSegments.set(2);
@@ -88,6 +88,7 @@ public class PreviewWindowCalculator
    private final FramePoint3D modifiedEndPosition = new FramePoint3D();
    private final FrameVector3D modifiedStartVelocity = new FrameVector3D();
    private final FrameVector3D modifiedEndVelocity = new FrameVector3D();
+   private final TDoubleArrayList segmentDurations = new TDoubleArrayList();
 
    private double computePlanningHorizon(List<ContactPlaneProvider> fullContactSequence, double timeAtStartOfWindow)
    {
@@ -107,17 +108,32 @@ public class PreviewWindowCalculator
       double segmentStartTime = timeAtStartOfWindow;
       for (int contactGroupIdx = 0; contactGroupIdx < numberOfSegmentsInContactGroups.size(); contactGroupIdx++)
       {
-         double durationOfSegmentsInGroup = contactGroupDurations.get(contactGroupIdx) / numberOfSegmentsInContactGroups.get(contactGroupIdx);
+         int segmentsInGroup = numberOfSegmentsInContactGroups.get(contactGroupIdx);
+
+         segmentDurations.reset();
+         if (segmentsInGroup > 2)
+         {
+            segmentDurations.add(nominalInitialSegmentDuration.getDoubleValue());
+            segmentDurations.add(nominalInitialSegmentDuration.getDoubleValue());
+            segmentDurations.add(contactGroupDurations.get(contactGroupIdx) - 2.0 * nominalInitialSegmentDuration.getDoubleValue());
+         }
+         else
+         {
+            double durationOfSegmentsInGroup = contactGroupDurations.get(contactGroupIdx) / segmentsInGroup;
+            segmentDurations.add(durationOfSegmentsInGroup);
+            segmentDurations.add(durationOfSegmentsInGroup);
+         }
+
          TIntArrayList phasesInGroup = contactPhasesInGroups.get(contactGroupIdx);
          int startIdx = phasesInGroup.get(0);
          int endIndx = phasesInGroup.get(phasesInGroup.size() - 1);
 
-         for (int segmentIdx = 0; segmentIdx < numberOfSegmentsInContactGroups.get(contactGroupIdx); segmentIdx++)
+         for (int segmentIdx = 0; segmentIdx < segmentsInGroup; segmentIdx++)
          {
             PreviewWindowSegment segment = previewWindowContacts.add();
             segment.reset();
 
-            double segmentEndTime = segmentStartTime + durationOfSegmentsInGroup;
+            double segmentEndTime = segmentStartTime + segmentDurations.get(segmentIdx);
             startIdx = getPhasesSpanningInterval(segmentStartTime, segmentEndTime, startIdx, endIndx, fullContactSequence, phasesInInterval);
             for (int phaseIdx = 0; phaseIdx < phasesInInterval.size(); phaseIdx++)
             {
@@ -187,6 +203,7 @@ public class PreviewWindowCalculator
 
       double relativeStartTime = currentTime - fullContactSequence.get(activeSegment).getTimeInterval().getStartTime();
       double timeRemaining = endTime - currentTime;
+      int totalNumberOfSegments = 0;
       for (int groupIdx = 0; groupIdx < contactPhasesInGroups.size(); groupIdx++)
       {
          TIntArrayList phasesInGroup = contactPhasesInGroups.get(groupIdx);
@@ -206,7 +223,11 @@ public class PreviewWindowCalculator
             timeRemaining -= groupDuration;
          }
          contactGroupDurations.add(groupDuration);
-         numberOfSegmentsInContactGroups.add(computeNumberOfSegmentsInGroup(fullContactSequence.get(groupIdx).getContactState(), groupDuration));
+         double segmentDuration = totalNumberOfSegments > 1 ? nominalSegmentDuration.getDoubleValue() : nominalInitialSegmentDuration.getDoubleValue();
+         int numberOfSegments = computeNumberOfSegmentsInGroup(fullContactSequence.get(groupIdx).getContactState(), groupDuration, segmentDuration);
+         numberOfSegments = Math.min(numberOfSegments, 3);
+         totalNumberOfSegments += numberOfSegments;
+         numberOfSegmentsInContactGroups.add(numberOfSegments);
       }
    }
 
@@ -257,12 +278,12 @@ public class PreviewWindowCalculator
 
    }
 
-   private int computeNumberOfSegmentsInGroup(ContactState contactState, double groupDuration)
+   private int computeNumberOfSegmentsInGroup(ContactState contactState, double groupDuration, double segmentDuration)
    {
       if (contactState == ContactState.FLIGHT)
          return 1;
 
-      return Math.max((int) Math.round(groupDuration / nominalSegmentDuration.getDoubleValue()), 1);
+      return Math.max((int) Math.round(groupDuration / nominalInitialSegmentDuration.getDoubleValue()), 1);
    }
 
    private static boolean doContactPhasesBelongToTheSameGroup(ContactPlaneProvider phaseA, ContactPlaneProvider phaseB)

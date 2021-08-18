@@ -84,6 +84,7 @@ public abstract class EuclideanModelPredictiveController
 
    protected final YoFramePoint3D currentCoMPosition = new YoFramePoint3D("currentCoMPosition", worldFrame, registry);
    protected final YoFrameVector3D currentCoMVelocity = new YoFrameVector3D("currentCoMVelocity", worldFrame, registry);
+   protected final YoFrameVector3D currentCoMAcceleration = new YoFrameVector3D("currentCoMAcceleration", worldFrame, registry);
 
    protected final YoDouble currentTimeInState = new YoDouble("currentTimeInState", registry);
    protected final YoFramePoint3D comPositionAtEndOfWindow = new YoFramePoint3D("comPositionAtEndOfWindow", worldFrame, registry);
@@ -391,6 +392,9 @@ public abstract class EuclideanModelPredictiveController
       {
          mpcCommands.addCommand(computeInitialCoMVelocityObjective(commandProvider.getNextCoMVelocityCommand()));
       }
+      if (mpcParameters.includeInitialCoMAccelerationObjective())
+         mpcCommands.addCommand(computeInitialCoMAccelerationObjective(commandProvider.getNextCoMAccelerationCommand()));
+
    }
 
    protected void computeTransitionObjectives(PreviewWindowSegment currentContact, PreviewWindowSegment nextContact, int currentSegmentNumber)
@@ -498,6 +502,21 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMVelocity);
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(0); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(0, i));
+
+      return objectiveToPack;
+   }
+
+   private MPCCommand<?> computeInitialCoMAccelerationObjective(CoMAccelerationCommand objectiveToPack)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      objectiveToPack.setWeight(mpcParameters.getInitialComAccelerationWeight());
+      objectiveToPack.setSegmentNumber(0);
+      objectiveToPack.setTimeOfObjective(0.0);
+      objectiveToPack.setObjective(currentCoMAcceleration);
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(0); i++)
          objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(0, i));
 
@@ -787,6 +806,11 @@ public abstract class EuclideanModelPredictiveController
       this.currentCoMPosition.setMatchingFrame(centerOfMassPosition);
       this.currentCoMVelocity.setMatchingFrame(centerOfMassVelocity);
       this.currentTimeInState.set(timeInState);
+   }
+
+   public void setCurrentCoMAcceleration(FrameVector3DReadOnly centerOfMassAcceleration)
+   {
+      this.currentCoMAcceleration.set(centerOfMassAcceleration);
    }
 
    /**
