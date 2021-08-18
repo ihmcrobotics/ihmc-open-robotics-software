@@ -29,7 +29,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -45,6 +44,10 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.yoGraphic.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
+import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
+import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
+import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -59,11 +62,10 @@ import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
+import us.ihmc.wholeBodyController.RobotContactPointParameters.GroundContactModelParameters;
 
 public class SCS2AvatarSimulationFactory
 {
-   private static final ReferenceFrame inertialFrame = SimulationSession.DEFAULT_INERTIAL_FRAME;
-
    private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
    private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
    private final RequiredFactoryField<TerrainObjectDefinition> terrainObjectDefinition = new RequiredFactoryField<>("terrainObjectDefinition");
@@ -76,6 +78,8 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
    private final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile");
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
+
+   private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine");
 
    // TO CONSTRUCT
    private RobotDefinition robotDefinition;
@@ -106,7 +110,6 @@ public class SCS2AvatarSimulationFactory
       HumanoidFloatingRootJointRobot tempRobotForInitialState = robotModel.get().createHumanoidFloatingRootJointRobot(false);
       robotInitialSetup.get().initializeRobot(tempRobotForInitialState, robotModel.get().getJointMap());
       RobotDefinitionTools.addInitialStateToRobotDefinition(tempRobotForInitialState, robotDefinition);
-      robot = new Robot(robotDefinition, inertialFrame);
    }
 
    private void setupYoVariableServer()
@@ -125,10 +128,32 @@ public class SCS2AvatarSimulationFactory
       SimulationConstructionSetParameters simulationConstructionSetParameters = guiInitialSetup.get().getSimulationConstructionSetParameters();
       simulationConstructionSetParameters.setDataBufferSize(scsInitialSetup.get().getSimulationDataBufferSize());
 
-      simulationSession = new SimulationSession();
+      PhysicsEngineFactory physicsEngineFactory;
+
+      if (useImpulseBasePhysicsEngine.hasValue() && useImpulseBasePhysicsEngine.get())
+      {
+         physicsEngineFactory = (inertialFrame, rootRegistry) -> new ImpulseBasedPhysicsEngine(inertialFrame, rootRegistry);
+      }
+      else
+      {
+         physicsEngineFactory = (inertialFrame, rootRegistry) ->
+         {
+            ContactPointBasedPhysicsEngine physicsEngine = new ContactPointBasedPhysicsEngine(inertialFrame, rootRegistry);
+            GroundContactModelParameters contactModelParameters = robotModel.get().getContactPointParameters()
+                                                                            .getContactModelParameters(robotModel.get().getSimulateDT());
+            ContactPointBasedContactParameters parameters = ContactPointBasedContactParameters.defaultParameters();
+            parameters.setKz(contactModelParameters.getZStiffness());
+            parameters.setBz(contactModelParameters.getZDamping());
+            parameters.setKxy(contactModelParameters.getXYStiffness());
+            parameters.setBxy(contactModelParameters.getXYDamping());
+            return physicsEngine;
+         };
+      }
+
+      simulationSession = new SimulationSession(physicsEngineFactory);
       simulationSession.submitBufferSizeRequest(scsInitialSetup.get().getSimulationDataBufferSize());
       simulationSession.addTerrainObject(terrainObjectDefinition.get());
-      simulationSession.addRobot(robot);
+      robot = simulationSession.addRobot(robotDefinition);
       simulationSession.setSessionTickToTimeIncrement(Conversions.secondsToNanoseconds(robotModel.get().getSimulateDT()));
    }
 
@@ -349,9 +374,9 @@ public class SCS2AvatarSimulationFactory
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       createRobot();
+      setupSimulationConstructionSet();
       createMasterContext();
       setupYoVariableServer();
-      setupSimulationConstructionSet();
       setupSensorReaderFactory();
       setupSimulationOutputWriter();
       setupStateEstimationThread();
