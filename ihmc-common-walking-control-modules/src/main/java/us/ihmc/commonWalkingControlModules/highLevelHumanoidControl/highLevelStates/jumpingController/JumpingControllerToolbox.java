@@ -137,7 +137,7 @@ public class JumpingControllerToolbox
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
-      jumpingHeight.set(0.8);
+      jumpingHeight.set(0.95);
       standingHeight.set(1.05);
       squattingHeight.set(0.7);
 
