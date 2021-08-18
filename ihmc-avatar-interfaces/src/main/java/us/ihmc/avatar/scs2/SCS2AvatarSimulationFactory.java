@@ -1,5 +1,8 @@
 package us.ihmc.avatar.scs2;
 
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.DO_NOTHING_BEHAVIOR;
+import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName.WALKING;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,17 +22,22 @@ import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.factory.TerrainObjectDefinitionTools;
-import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
+import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
@@ -38,6 +46,8 @@ import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -51,17 +61,17 @@ import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEng
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
-import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters.GroundContactModelParameters;
 
 public class SCS2AvatarSimulationFactory
@@ -69,17 +79,22 @@ public class SCS2AvatarSimulationFactory
    private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
    private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
    private final RequiredFactoryField<TerrainObjectDefinition> terrainObjectDefinition = new RequiredFactoryField<>("terrainObjectDefinition");
-   private final RequiredFactoryField<DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new RequiredFactoryField<>("robotInitialSetup");
-   private final RequiredFactoryField<DRCSCSInitialSetup> scsInitialSetup = new RequiredFactoryField<>("scsInitialSetup");
-   private final RequiredFactoryField<DRCGuiInitialSetup> guiInitialSetup = new RequiredFactoryField<>("guiInitialSetup");
    private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
 
-   private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity");
-   private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer");
-   private final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile");
+   private final OptionalFactoryField<DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
+   private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
+   private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
+   private final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
+   private final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
+   private final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
+   private final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
+   private final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
+   private final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
+   private final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
+   private final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
 
-   private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine");
+   private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
 
    // TO CONSTRUCT
    private RobotDefinition robotDefinition;
@@ -87,20 +102,53 @@ public class SCS2AvatarSimulationFactory
    private YoVariableServer yoVariableServer;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private SimulationSession simulationSession;
-   private SensorReaderFactory sensorReaderFactory;
    private JointDesiredOutputWriter simulationOutputWriter;
    private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
    private DisposableRobotController robotController;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
-   private FullHumanoidRobotModel masterFullRobotModel;
-   private HumanoidRobotContextData masterContext;
 
    private final CollidableHelper collidableHelper = new CollidableHelper();
    private final String robotCollisionName = "robot";
    private final String terrainCollisionName = "terrain";
 
-   private void createRobot()
+   public SCS2AvatarSimulation createAvatarSimulation()
+   {
+      simulationDataRecordTickPeriod.setDefaultValue((int) Math.max(1.0, robotModel.get().getControllerDT() / robotModel.get().getSimulateDT()));
+
+      FactoryTools.checkAllFactoryFieldsAreSet(this);
+
+      setupSimulationConstructionSet();
+      setupYoVariableServer();
+      setupSimulationOutputWriter();
+      setupStateEstimationThread();
+      setupControllerThread();
+      setupMultiThreadedRobotController();
+      initializeStateEstimatorToActual();
+      setupSimulatedRobotTimeProvider();
+
+      SCS2AvatarSimulation avatarSimulation = new SCS2AvatarSimulation();
+      avatarSimulation.setRobotModel(robotModel.get());
+      avatarSimulation.setSimulationSession(simulationSession);
+      avatarSimulation.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
+      avatarSimulation.setYoVariableServer(yoVariableServer);
+      avatarSimulation.setIntraprocessYoVariableLogger(intraprocessYoVariableLogger);
+      avatarSimulation.setControllerThread(controllerThread);
+      avatarSimulation.setStateEstimationThread(estimatorThread);
+      avatarSimulation.setRobotController(robotController);
+      avatarSimulation.setRobotDefinition(robotDefinition);
+      avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);
+      avatarSimulation.setFullHumanoidRobotModel(controllerThread.getFullRobotModel());
+      avatarSimulation.setShowGUI(showGUI.get());
+      avatarSimulation.setAutomaticallyStartSimulation(automaticallyStartSimulation.get());
+      avatarSimulation.setRealTimeROS2Node(realtimeROS2Node.get());
+
+      FactoryTools.disposeFactory(this);
+
+      return avatarSimulation;
+   }
+
+   private void setupSimulationConstructionSet()
    {
       robotDefinition = RobotDefinitionTools.toRobotDefinition(robotModel.get().getRobotDescription());
       RobotCollisionModel collisionModel = robotModel.get().getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
@@ -110,23 +158,6 @@ public class SCS2AvatarSimulationFactory
       HumanoidFloatingRootJointRobot tempRobotForInitialState = robotModel.get().createHumanoidFloatingRootJointRobot(false);
       robotInitialSetup.get().initializeRobot(tempRobotForInitialState, robotModel.get().getJointMap());
       RobotDefinitionTools.addInitialStateToRobotDefinition(tempRobotForInitialState, robotDefinition);
-   }
-
-   private void setupYoVariableServer()
-   {
-      if (createYoVariableServer.get())
-      {
-         yoVariableServer = new YoVariableServer(getClass(),
-                                                 robotModel.get().getLogModelProvider(),
-                                                 robotModel.get().getLogSettings(),
-                                                 robotModel.get().getEstimatorDT());
-      }
-   }
-
-   private void setupSimulationConstructionSet()
-   {
-      SimulationConstructionSetParameters simulationConstructionSetParameters = guiInitialSetup.get().getSimulationConstructionSetParameters();
-      simulationConstructionSetParameters.setDataBufferSize(scsInitialSetup.get().getSimulationDataBufferSize());
 
       PhysicsEngineFactory physicsEngineFactory;
 
@@ -151,20 +182,22 @@ public class SCS2AvatarSimulationFactory
       }
 
       simulationSession = new SimulationSession(physicsEngineFactory);
-      simulationSession.submitBufferSizeRequest(scsInitialSetup.get().getSimulationDataBufferSize());
+      simulationSession.submitBufferSizeRequest(simulationDataBufferSize.get());
+      simulationSession.submitBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       simulationSession.addTerrainObject(terrainObjectDefinition.get());
       robot = simulationSession.addRobot(robotDefinition);
       simulationSession.setSessionTickToTimeIncrement(Conversions.secondsToNanoseconds(robotModel.get().getSimulateDT()));
    }
 
-   private void setupSensorReaderFactory()
+   private void setupYoVariableServer()
    {
-      StateEstimatorParameters stateEstimatorParameters = robotModel.get().getStateEstimatorParameters();
-      SimControllerInput controllerInput = robot.getControllerManager().getControllerInput();
-      if (scsInitialSetup.get().usePerfectSensors())
-         sensorReaderFactory = SCS2SensorReaderFactory.newPerfectSensorReaderFactory(controllerInput);
-      else
-         sensorReaderFactory = SCS2SensorReaderFactory.newSensorReaderFactory(controllerInput, stateEstimatorParameters);
+      if (createYoVariableServer.get())
+      {
+         yoVariableServer = new YoVariableServer(getClass(),
+                                                 robotModel.get().getLogModelProvider(),
+                                                 robotModel.get().getLogSettings(),
+                                                 robotModel.get().getEstimatorDT());
+      }
    }
 
    private void setupSimulationOutputWriter()
@@ -175,6 +208,14 @@ public class SCS2AvatarSimulationFactory
    private void setupStateEstimationThread()
    {
       String robotName = robotModel.get().getSimpleRobotName();
+
+      StateEstimatorParameters stateEstimatorParameters = robotModel.get().getStateEstimatorParameters();
+      SimControllerInput controllerInput = robot.getControllerManager().getControllerInput();
+      SCS2SensorReaderFactory sensorReaderFactory;
+      if (usePerfectSensors.get())
+         sensorReaderFactory = SCS2SensorReaderFactory.newPerfectSensorReaderFactory(controllerInput);
+      else
+         sensorReaderFactory = SCS2SensorReaderFactory.newSensorReaderFactory(controllerInput, stateEstimatorParameters);
 
       ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotName);
@@ -222,17 +263,14 @@ public class SCS2AvatarSimulationFactory
       simulationSession.addYoGraphicDefinitions(SCS1GraphicConversionTools.toYoGraphicDefinitions(controllerThread.getYoGraphicsListRegistry()));
    }
 
-   private void createMasterContext()
-   {
-      // Create intermediate data buffer for threading.
-      masterFullRobotModel = robotModel.get().createFullRobotModel();
-      robotInitialSetup.get().initializeFullRobotModel(masterFullRobotModel);
-      masterContext = new HumanoidRobotContextData(masterFullRobotModel);
-   }
-
    private void setupMultiThreadedRobotController()
    {
       DRCRobotModel robotModel = this.robotModel.get();
+
+      // Create intermediate data buffer for threading.
+      FullHumanoidRobotModel masterFullRobotModel = robotModel.createFullRobotModel();
+      robotInitialSetup.get().initializeFullRobotModel(masterFullRobotModel);
+      HumanoidRobotContextData masterContext = new HumanoidRobotContextData(masterFullRobotModel);
 
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getSimulateDT());
@@ -271,7 +309,7 @@ public class SCS2AvatarSimulationFactory
 
       // Create the controller that will run the tasks.
       String controllerName = "DRCSimulation";
-      if (!scsInitialSetup.get().getRunMultiThreaded())
+      if (!runMultiThreaded.get())
       {
          LogTools.warn("Running simulation in single threaded mode");
          robotController = new SingleThreadedRobotController<>(controllerName, tasks, masterContext);
@@ -311,11 +349,13 @@ public class SCS2AvatarSimulationFactory
       }
       robotController.getYoRegistry().addChild(estimatorThread.getYoRegistry());
       robotController.getYoRegistry().addChild(controllerThread.getYoVariableRegistry());
+      robot.getRegistry().addChild(robotController.getYoRegistry());
+      robot.getControllerManager().addController(() -> robotController.doControl());
    }
 
    private void initializeStateEstimatorToActual()
    {
-      if (scsInitialSetup.get().getInitializeEstimatorToActual())
+      if (initializeEstimatorToActual.get())
       {
          LogTools.info("Initializing estimator to actual");
 
@@ -354,59 +394,75 @@ public class SCS2AvatarSimulationFactory
       estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
    }
 
-   private void setupThreadedRobotController()
-   {
-      robot.getRegistry().addChild(robotController.getYoRegistry());
-      robot.getControllerManager().addController(() -> robotController.doControl());
-   }
-
    private void setupSimulatedRobotTimeProvider()
    {
       simulatedRobotTimeProvider = new SimulatedDRCRobotTimeProvider(robotModel.get().getSimulateDT());
       robot.getControllerManager().addController(() -> simulatedRobotTimeProvider.doControl());
    }
 
-   public SCS2AvatarSimulation createAvatarSimulation()
-   {
-      gravity.setDefaultValue(-9.81);
-      createYoVariableServer.setDefaultValue(false);
-
-      FactoryTools.checkAllFactoryFieldsAreSet(this);
-
-      createRobot();
-      setupSimulationConstructionSet();
-      createMasterContext();
-      setupYoVariableServer();
-      setupSensorReaderFactory();
-      setupSimulationOutputWriter();
-      setupStateEstimationThread();
-      setupControllerThread();
-      setupMultiThreadedRobotController();
-      initializeStateEstimatorToActual();
-      setupThreadedRobotController();
-      setupSimulatedRobotTimeProvider();
-
-      SCS2AvatarSimulation avatarSimulation = new SCS2AvatarSimulation();
-      avatarSimulation.setRobotModel(robotModel.get());
-      avatarSimulation.setSimulationSession(simulationSession);
-      avatarSimulation.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
-      avatarSimulation.setYoVariableServer(yoVariableServer);
-      avatarSimulation.setIntraprocessYoVariableLogger(intraprocessYoVariableLogger);
-      avatarSimulation.setControllerThread(controllerThread);
-      avatarSimulation.setStateEstimationThread(estimatorThread);
-      avatarSimulation.setRobotController(robotController);
-      avatarSimulation.setRobotDefinition(robotDefinition);
-      avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);
-      avatarSimulation.setFullHumanoidRobotModel(controllerThread.getFullRobotModel());
-
-      FactoryTools.disposeFactory(this);
-
-      return avatarSimulation;
-   }
-
    public void setRobotModel(DRCRobotModel robotModel)
    {
       this.robotModel.set(robotModel);
+      robotInitialSetup.setDefaultValue(robotModel.getDefaultRobotInitialSetup(0, 0));
+   }
+
+   public HighLevelHumanoidControllerFactory setDefaultHighLevelHumanoidControllerFactory()
+   {
+      DRCRobotModel robotModel = this.robotModel.get();
+      HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
+      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
+      SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
+      SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
+      SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
+
+      RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
+      ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
+      ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
+      ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
+
+      ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
+      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
+      for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
+                                                            additionalContactNames.get(i),
+                                                            additionalContactTransforms.get(i));
+
+      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
+                                                                                                    feetForceSensorNames,
+                                                                                                    feetContactSensorNames,
+                                                                                                    wristForceSensorNames,
+                                                                                                    highLevelControllerParameters,
+                                                                                                    walkingControllerParameters,
+                                                                                                    copTrajectoryParameters);
+      HighLevelControllerName fallbackControllerState = highLevelControllerParameters.getFallbackControllerState();
+      controllerFactory.useDefaultDoNothingControlState();
+      controllerFactory.useDefaultWalkingControlState();
+
+      controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);
+      controllerFactory.addRequestableTransition(WALKING, DO_NOTHING_BEHAVIOR);
+
+      controllerFactory.addControllerFailureTransition(DO_NOTHING_BEHAVIOR, fallbackControllerState);
+      controllerFactory.addControllerFailureTransition(WALKING, fallbackControllerState);
+
+      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
+
+      controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node.get());
+
+      setHighLevelHumanoidControllerFactory(controllerFactory);
+      return controllerFactory;
+   }
+
+   public HighLevelHumanoidControllerFactory setDefaultHighLevelHumanoidControllerFactory(boolean useVelocityAndHeadingScript,
+                                                                                          HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
+   {
+      HighLevelHumanoidControllerFactory controllerFactory = setDefaultHighLevelHumanoidControllerFactory();
+      controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
+      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript);
+      return controllerFactory;
    }
 
    public void setHighLevelHumanoidControllerFactory(HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory)
@@ -432,14 +488,46 @@ public class SCS2AvatarSimulationFactory
       this.robotInitialSetup.set(robotInitialSetup);
    }
 
-   public void setSCSInitialSetup(DRCSCSInitialSetup scsInitialSetup)
+   public void setStartingLocationOffset(OffsetAndYawRobotInitialSetup startingLocationOffset)
    {
-      this.scsInitialSetup.set(scsInitialSetup);
+      robotInitialSetup.get().setInitialYaw(startingLocationOffset.getYaw());
+      robotInitialSetup.get().setInitialGroundHeight(startingLocationOffset.getGroundHeight());
+      robotInitialSetup.get().setOffset(startingLocationOffset.getAdditionalOffset());
    }
 
-   public void setGuiInitialSetup(DRCGuiInitialSetup guiInitialSetup)
+   public void setSimulationDataBufferSize(int simulationDataBufferSize)
    {
-      this.guiInitialSetup.set(guiInitialSetup);
+      this.simulationDataBufferSize.set(simulationDataBufferSize);
+   }
+
+   public void setSimulationDataRecordTimePeriod(double simulationDataRecordTimePeriod)
+   {
+      this.simulationDataRecordTickPeriod.set((int) Math.max(1.0, simulationDataRecordTimePeriod / robotModel.get().getSimulateDT()));
+   }
+
+   public void setSimulationDataRecordTickPeriod(int simulationDataRecordTickPeriod)
+   {
+      this.simulationDataRecordTickPeriod.set(simulationDataRecordTickPeriod);
+   }
+
+   public void setUsePerfectSensors(boolean usePerfectSensors)
+   {
+      this.usePerfectSensors.set(usePerfectSensors);
+   }
+
+   public void setRunMultiThreaded(boolean runMultiThreaded)
+   {
+      this.runMultiThreaded.set(runMultiThreaded);
+   }
+
+   public void setInitializeEstimatorToActual(boolean initializeEstimatorToActual)
+   {
+      this.initializeEstimatorToActual.set(initializeEstimatorToActual);
+   }
+
+   public void setShowGUI(boolean showGUI)
+   {
+      this.showGUI.set(showGUI);
    }
 
    public void setRealtimeROS2Node(RealtimeROS2Node realtimeROS2Node)
@@ -460,6 +548,11 @@ public class SCS2AvatarSimulationFactory
    public void setGravity(double gravity)
    {
       this.gravity.set(gravity);
+   }
+
+   public void setAutomaticallyStartSimulation(boolean automaticallyStartSimulation)
+   {
+      this.automaticallyStartSimulation.set(automaticallyStartSimulation);
    }
 
    public void setExternalPelvisCorrectorSubscriber(PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
