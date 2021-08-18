@@ -10,7 +10,9 @@ import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -28,6 +30,9 @@ public class SCS2AvatarSimulation
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
    private DRCRobotModel robotModel;
+   private boolean showGUI;
+   private boolean automaticallyStartSimulation;
+   private RealtimeROS2Node realtimeROS2Node;
 
    public void start()
    {
@@ -40,7 +45,12 @@ public class SCS2AvatarSimulation
          yoVariableServer.start();
       }
 
-      SessionVisualizer.startSessionVisualizer(simulationSession);
+      if (showGUI)
+         SessionVisualizer.startSessionVisualizer(simulationSession);
+      if (automaticallyStartSimulation)
+         simulationSession.setSessionMode(SessionMode.RUNNING);
+      if (realtimeROS2Node != null)
+         realtimeROS2Node.spin();
    }
 
    public void simulate()
@@ -151,5 +161,20 @@ public class SCS2AvatarSimulation
    public void setRobotModel(DRCRobotModel robotModel)
    {
       this.robotModel = robotModel;
+   }
+
+   public void setShowGUI(boolean showGUI)
+   {
+      this.showGUI = showGUI;
+   }
+
+   public void setAutomaticallyStartSimulation(boolean automaticallyStartSimulation)
+   {
+      this.automaticallyStartSimulation = automaticallyStartSimulation;
+   }
+
+   public void setRealTimeROS2Node(RealtimeROS2Node realtimeROS2Node)
+   {
+      this.realtimeROS2Node = realtimeROS2Node;
    }
 }
