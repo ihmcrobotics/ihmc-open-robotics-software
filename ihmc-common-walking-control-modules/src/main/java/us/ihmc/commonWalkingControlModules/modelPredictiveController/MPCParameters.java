@@ -8,6 +8,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class MPCParameters
 {
    public static final boolean includeInitialCoMVelocityObjective = true;
+   public static final boolean includeInitialCoMAccelerationObjective = true;
    public static final boolean includeFinalCoMPositionObjective = true;
    public static final boolean includeFinalCoMVelocityObjective = false;
    public static final boolean includeFinalDCMPositionObjective = true;
@@ -24,6 +25,7 @@ public class MPCParameters
 
    public static final double defaultInitialComWeight = 5e2;
    public static final double defaultInitialComVelocityWeight = 1e2;
+   public static final double defaultInitialComAccelerationWeight = 5e-3;
    public static final double defaultFinalComWeight = 1e1;
    public static final double defaultFinalVRPWeight = 1e-1;
    public static final double defaultFinalDCMWeight = 1e2;
@@ -51,6 +53,7 @@ public class MPCParameters
    private final YoDouble minRhoValue = new YoDouble("minRhoValue", registry);
    private final YoDouble initialComWeight = new YoDouble("initialComWeight", registry);
    private final YoDouble initialComVelocityWeight = new YoDouble("initialComVelocityWeight", registry);
+   private final YoDouble initialComAccelerationWeight = new YoDouble("initialComAccelerationWeight", registry);
    private final YoDouble finalComWeight = new YoDouble("finalComWeight", registry);
    private final YoDouble finalVRPWeight = new YoDouble("finalVRPWeight", registry);
    private final YoDouble finalDCMWeight = new YoDouble("finalDCMWeight", registry);
@@ -70,6 +73,7 @@ public class MPCParameters
       minRhoValue.set(defaultMinRhoValue);
       initialComWeight.set(defaultInitialComWeight);
       initialComVelocityWeight.set(defaultInitialComVelocityWeight);
+      initialComAccelerationWeight.set(defaultInitialComAccelerationWeight);
       finalComWeight.set(defaultFinalComWeight);
       finalVRPWeight.set(defaultFinalVRPWeight);
       finalDCMWeight.set(defaultFinalDCMWeight);
@@ -91,6 +95,12 @@ public class MPCParameters
    {
       return includeInitialCoMVelocityObjective;
    }
+
+   public boolean includeInitialCoMAccelerationObjective()
+   {
+      return includeInitialCoMAccelerationObjective;
+   }
+
 
    public boolean includeFinalCoMPositionObjective()
    {
@@ -180,6 +190,11 @@ public class MPCParameters
    public double getInitialComVelocityWeight()
    {
       return initialComVelocityWeight.getValue();
+   }
+
+   public double getInitialComAccelerationWeight()
+   {
+      return initialComAccelerationWeight.getValue();
    }
 
    public double getFinalComWeight()
