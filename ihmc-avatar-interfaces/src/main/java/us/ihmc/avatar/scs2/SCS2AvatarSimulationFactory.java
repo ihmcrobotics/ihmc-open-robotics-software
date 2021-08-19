@@ -5,6 +5,8 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.StampedPosePacket;
 import gnu.trove.map.TObjectDoubleMap;
@@ -12,6 +14,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
+import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -20,6 +23,9 @@ import us.ihmc.avatar.factory.BarrierScheduledRobotController;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
+import us.ihmc.avatar.factory.SimulatedHandControlTask;
+import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
+import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.factory.TerrainObjectDefinitionTools;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
@@ -41,6 +47,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -150,14 +157,18 @@ public class SCS2AvatarSimulationFactory
 
    private void setupSimulationConstructionSet()
    {
-      robotDefinition = RobotDefinitionTools.toRobotDefinition(robotModel.get().getRobotDescription());
-      RobotCollisionModel collisionModel = robotModel.get().getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
+      DRCRobotModel robotModel = this.robotModel.get();
+
+      robotDefinition = RobotDefinitionTools.toRobotDefinition(robotModel.getRobotDescription());
+      RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
       if (collisionModel != null)
-         RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.get().createFullRobotModel().getElevator()),
+         RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                              robotDefinition);
-      HumanoidFloatingRootJointRobot tempRobotForInitialState = robotModel.get().createHumanoidFloatingRootJointRobot(false);
-      robotInitialSetup.get().initializeRobot(tempRobotForInitialState, robotModel.get().getJointMap());
+      HumanoidFloatingRootJointRobot tempRobotForInitialState = robotModel.createHumanoidFloatingRootJointRobot(false);
+      robotInitialSetup.get().initializeRobot(tempRobotForInitialState, robotModel.getJointMap());
       RobotDefinitionTools.addInitialStateToRobotDefinition(tempRobotForInitialState, robotDefinition);
+      Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
+      lastSimulatedJoints.forEach(lastSimulatedJoint -> robotDefinition.addSubtreeJointsToIgnore(lastSimulatedJoint));
 
       PhysicsEngineFactory physicsEngineFactory;
 
@@ -170,8 +181,7 @@ public class SCS2AvatarSimulationFactory
          physicsEngineFactory = (inertialFrame, rootRegistry) ->
          {
             ContactPointBasedPhysicsEngine physicsEngine = new ContactPointBasedPhysicsEngine(inertialFrame, rootRegistry);
-            GroundContactModelParameters contactModelParameters = robotModel.get().getContactPointParameters()
-                                                                            .getContactModelParameters(robotModel.get().getSimulateDT());
+            GroundContactModelParameters contactModelParameters = robotModel.getContactPointParameters().getContactModelParameters(robotModel.getSimulateDT());
             ContactPointBasedContactParameters parameters = ContactPointBasedContactParameters.defaultParameters();
             parameters.setKz(contactModelParameters.getZStiffness());
             parameters.setBz(contactModelParameters.getZDamping());
@@ -186,7 +196,7 @@ public class SCS2AvatarSimulationFactory
       simulationSession.submitBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       simulationSession.addTerrainObject(terrainObjectDefinition.get());
       robot = simulationSession.addRobot(robotDefinition);
-      simulationSession.setSessionTickToTimeIncrement(Conversions.secondsToNanoseconds(robotModel.get().getSimulateDT()));
+      simulationSession.setSessionTickToTimeIncrement(Conversions.secondsToNanoseconds(robotModel.getSimulateDT()));
    }
 
    private void setupYoVariableServer()
@@ -275,8 +285,21 @@ public class SCS2AvatarSimulationFactory
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT());
+      int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / robotModel.getSimulateDT());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
+
+      AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
+      SimulatedHandControlTask handControlTask = null;
+
+      if (handControlThread != null)
+      {
+         List<String> fingerJointNames = handControlThread.getControlledOneDoFJoints().stream().map(JointReadOnly::getName).collect(Collectors.toList());
+         SimulatedHandSensorReader handSensorReader = new SCS2SimulatedHandSensorReader(robot.getControllerManager().getControllerInput(), fingerJointNames);
+         SimulatedHandOutputWriter handOutputWriter = new SCS2SimulatedHandOutputWriter(robot.getControllerManager().getControllerInput(),
+                                                                                        robot.getControllerManager().getControllerOutput());
+         handControlTask = new SimulatedHandControlTask(handSensorReader, handControlThread, handOutputWriter, handControlDivisor, robotModel.getSimulateDT());
+      }
 
       // Previously done in estimator thread write
       if (simulationOutputWriter != null)
@@ -306,6 +329,8 @@ public class SCS2AvatarSimulationFactory
       List<HumanoidRobotControlTask> tasks = new ArrayList<HumanoidRobotControlTask>();
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
+      if (handControlTask != null)
+         tasks.add(handControlTask);
 
       // Create the controller that will run the tasks.
       String controllerName = "DRCSimulation";
@@ -349,6 +374,8 @@ public class SCS2AvatarSimulationFactory
       }
       robotController.getYoRegistry().addChild(estimatorThread.getYoRegistry());
       robotController.getYoRegistry().addChild(controllerThread.getYoVariableRegistry());
+      if (handControlThread != null)
+         robotController.getYoRegistry().addChild(handControlThread.getYoVariableRegistry());
       robot.getRegistry().addChild(robotController.getYoRegistry());
       robot.getControllerManager().addController(() -> robotController.doControl());
    }
