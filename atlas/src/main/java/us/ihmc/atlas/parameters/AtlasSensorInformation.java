@@ -205,7 +205,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    {
       transformChestToOuster.setIdentity();
       transformChestToOuster.getTranslation().set(0.265000, -0.0200, 0.720000);
-      transformChestToOuster.getRotation().setYawPitchRoll(0.00000, 0.349100, 0.000000);
+      transformChestToOuster.getRotation().setYawPitchRoll(0.00000, 0.52400, 0.000000);
    }
 
    private static final RigidBodyTransform transformChestToZED2 = new RigidBodyTransform();
