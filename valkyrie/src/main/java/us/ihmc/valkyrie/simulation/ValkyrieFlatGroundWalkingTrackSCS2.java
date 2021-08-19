@@ -23,7 +23,7 @@ public class ValkyrieFlatGroundWalkingTrackSCS2
 
    public ValkyrieFlatGroundWalkingTrackSCS2()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.DEFAULT);
       FlatGroundEnvironment environment = new FlatGroundEnvironment();
 
       int recordFrequency = (int) Math.max(1.0, Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
