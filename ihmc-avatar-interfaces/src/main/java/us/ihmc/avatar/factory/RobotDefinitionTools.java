@@ -256,6 +256,8 @@ public class RobotDefinitionTools
       destination.setEffortLimits(source.getEffortLimit());
       destination.setStiction(source.getStiction());
       destination.setDamping(source.getDamping());
+      double[] limitStopParameters = source.getLimitStopParameters();
+      destination.setGainsSoftLimitStop(limitStopParameters[2], limitStopParameters[3]);
    }
 
    public static SensorDefinition toSensorDefinition(SensorDescription source)
