@@ -215,7 +215,8 @@ public class HumanoidKinematicsSimulation
             kinematicsSimulationParameters.getInitialRobotYaw(),
             kinematicsSimulationParameters.getInitialRobotX(),
             kinematicsSimulationParameters.getInitialRobotY());
-      KinematicsToolboxHelper.setRobotStateFromRawData(robotInitialSetup.getInitialPelvisPose(), robotInitialSetup.getInitialJointAngles(),
+      KinematicsToolboxHelper.setRobotStateFromRawData(robotInitialSetup.getInitialPelvisPose(),
+                                                       robotInitialSetup.getInitialJointAngles(),
                                                        fullRobotModel.getRootJoint(),
                                                        FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel));
 
@@ -292,6 +293,8 @@ public class HumanoidKinematicsSimulation
       {
          throw new RuntimeException("Need to load a default height.");
       }
+
+//      robotModel.createSimulatedHandController()
 
       if (kinematicsSimulationParameters.getLogToFile())
       {
