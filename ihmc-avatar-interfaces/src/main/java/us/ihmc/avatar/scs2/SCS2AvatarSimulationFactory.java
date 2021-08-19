@@ -57,6 +57,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.controller.ControllerInput;
+import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.yoGraphic.SCS1GraphicConversionTools;
@@ -68,6 +70,7 @@ import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEng
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
+import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -131,6 +134,7 @@ public class SCS2AvatarSimulationFactory
       setupStateEstimationThread();
       setupControllerThread();
       setupMultiThreadedRobotController();
+      setupLidarController();
       initializeStateEstimatorToActual();
       setupSimulatedRobotTimeProvider();
 
@@ -378,6 +382,22 @@ public class SCS2AvatarSimulationFactory
          robotController.getYoRegistry().addChild(handControlThread.getYoVariableRegistry());
       robot.getRegistry().addChild(robotController.getYoRegistry());
       robot.getControllerManager().addController(() -> robotController.doControl());
+   }
+
+   private void setupLidarController()
+   {
+      AvatarRobotLidarParameters lidarParameters = robotModel.get().getSensorInformation().getLidarParameters(0);
+      if (lidarParameters != null && lidarParameters.getLidarSpindleJointName() != null)
+      {
+         ControllerInput controllerInput = robot.getControllerManager().getControllerInput();
+         ControllerOutput controllerOutput = robot.getControllerManager().getControllerOutput();
+         robot.getControllerManager()
+              .addController(new SCS2PIDLidarTorqueController(controllerInput,
+                                                              controllerOutput,
+                                                              lidarParameters.getLidarSpindleJointName(),
+                                                              lidarParameters.getLidarSpindleVelocity(),
+                                                              robotModel.get().getSimulateDT()));
+      }
    }
 
    private void initializeStateEstimatorToActual()
