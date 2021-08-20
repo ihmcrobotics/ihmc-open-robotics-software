@@ -90,42 +90,50 @@ public class ImageEncodings
    // with an 8-bit depth
    public static final String YUV422 = "yuv422";
 
-   public static boolean isColor(final String encoding)
+   public static boolean isColor(String encoding)
    {
-      String lEncoding = encoding.toLowerCase();
-      return    lEncoding.equals(RGB8)
-             || lEncoding.equals(BGR8)
-             || lEncoding.equals(RGBA8)
-             || lEncoding.equals(BGRA8)
-             || lEncoding.equals(RGB16)
-             || lEncoding.equals(BGR16)
-             || lEncoding.equals(RGBA16)
-             || lEncoding.equals(BGRA16);
+      encoding = encoding.toLowerCase();
+      return     encoding.equals(RGB8)
+              || encoding.equals(BGR8)
+              || encoding.equals(RGBA8)
+              || encoding.equals(BGRA8)
+              || encoding.equals(RGB16)
+              || encoding.equals(BGR16)
+              || encoding.equals(RGBA16)
+              || encoding.equals(BGRA16);
    }
 
-   public static boolean isMono(final String encoding)
+   public static boolean isMono(String encoding)
    {
-      String lEncoding = encoding.toLowerCase();
-      return lEncoding.equals(MONO8) || lEncoding.equals(MONO16);
+      encoding = encoding.toLowerCase();
+      return encoding.equals(MONO8) || encoding.equals(MONO16);
    }
 
-   public static boolean isBayer(final String encoding)
+   public static boolean isBayer(String encoding)
    {
-      String lEncoding = encoding.toLowerCase();
-      return lEncoding.equals(BAYER_RGGB8) || lEncoding.equals(BAYER_BGGR8) || lEncoding.equals(BAYER_GBRG8) || lEncoding.equals(BAYER_GRBG8)
-             || lEncoding.equals(BAYER_RGGB16) || lEncoding.equals(BAYER_BGGR16) || lEncoding.equals(BAYER_GBRG16) || lEncoding.equals(BAYER_GRBG16);
+      encoding = encoding.toLowerCase();
+      return encoding.equals(BAYER_RGGB8)
+          || encoding.equals(BAYER_BGGR8)
+          || encoding.equals(BAYER_GBRG8)
+          || encoding.equals(BAYER_GRBG8)
+          || encoding.equals(BAYER_RGGB16)
+          || encoding.equals(BAYER_BGGR16)
+          || encoding.equals(BAYER_GBRG16)
+          || encoding.equals(BAYER_GRBG16);
    }
 
-   public static boolean hasAlpha(final String encoding)
+   public static boolean hasAlpha(String encoding)
    {
-      String lEncoding = encoding.toLowerCase();
-      return lEncoding.equals(RGBA8) || lEncoding.equals(BGRA8) || lEncoding.equals(RGBA16) || lEncoding.equals(BGRA16);
+      encoding = encoding.toLowerCase();
+      return encoding.equals(RGBA8)
+          || encoding.equals(BGRA8)
+          || encoding.equals(RGBA16)
+          || encoding.equals(BGRA16);
    }
 
-   public static int numChannels(final String enc) throws Exception
+   public static int numChannels(String encoding)
    {
-
-      String encoding = enc.toLowerCase();
+      encoding = encoding.toLowerCase();
       // First do the common-case encodings
       if (encoding.equals(MONO8) || encoding.equals(MONO16))
          return 1;
@@ -133,8 +141,14 @@ public class ImageEncodings
          return 3;
       if (encoding.equals(BGRA8) || encoding.equals(RGBA8) || encoding.equals(BGRA16) || encoding.equals(RGBA16))
          return 4;
-      if (encoding.equals(BAYER_RGGB8) || encoding.equals(BAYER_BGGR8) || encoding.equals(BAYER_GBRG8) || encoding.equals(BAYER_GRBG8) || encoding.equals(
-            BAYER_RGGB16) || encoding.equals(BAYER_BGGR16) || encoding.equals(BAYER_GBRG16) || encoding.equals(BAYER_GRBG16))
+      if (encoding.equals(BAYER_RGGB8)
+       || encoding.equals(BAYER_BGGR8)
+       || encoding.equals(BAYER_GBRG8)
+       || encoding.equals(BAYER_GRBG8)
+       || encoding.equals(BAYER_RGGB16)
+       || encoding.equals(BAYER_BGGR16)
+       || encoding.equals(BAYER_GBRG16)
+       || encoding.equals(BAYER_GRBG16))
          return 1;
 
       if (encoding.equals(YUV422))
@@ -142,37 +156,70 @@ public class ImageEncodings
 
       encoding = encoding.toUpperCase();
 
-      if (encoding.equals(TYPE_8UC1) || encoding.equals(TYPE_8SC1) || encoding.equals(TYPE_16UC1) || encoding.equals(TYPE_16SC1) || encoding.equals(TYPE_32SC1)
-          || encoding.equals(TYPE_32FC1) || encoding.equals(TYPE_64FC1))
+      if (encoding.equals(TYPE_8UC1)
+       || encoding.equals(TYPE_8SC1)
+       || encoding.equals(TYPE_16UC1)
+       || encoding.equals(TYPE_16SC1)
+       || encoding.equals(TYPE_32SC1)
+       || encoding.equals(TYPE_32FC1)
+       || encoding.equals(TYPE_64FC1))
          return 1;
 
-      if (encoding.equals(TYPE_8UC2) || encoding.equals(TYPE_8SC2) || encoding.equals(TYPE_16UC2) || encoding.equals(TYPE_16SC2) || encoding.equals(TYPE_32SC2)
-          || encoding.equals(TYPE_32FC2) || encoding.equals(TYPE_64FC2))
+      if (encoding.equals(TYPE_8UC2)
+       || encoding.equals(TYPE_8SC2)
+       || encoding.equals(TYPE_16UC2)
+       || encoding.equals(TYPE_16SC2)
+       || encoding.equals(TYPE_32SC2)
+       || encoding.equals(TYPE_32FC2)
+       || encoding.equals(TYPE_64FC2))
          return 2;
 
-      if (encoding.equals(TYPE_8UC3) || encoding.equals(TYPE_8SC3) || encoding.equals(TYPE_16UC3) || encoding.equals(TYPE_16SC3) || encoding.equals(TYPE_32SC3)
-          || encoding.equals(TYPE_32FC3) || encoding.equals(TYPE_64FC3))
+      if (encoding.equals(TYPE_8UC3)
+       || encoding.equals(TYPE_8SC3)
+       || encoding.equals(TYPE_16UC3)
+       || encoding.equals(TYPE_16SC3)
+       || encoding.equals(TYPE_32SC3)
+       || encoding.equals(TYPE_32FC3)
+       || encoding.equals(TYPE_64FC3))
          return 3;
 
-      if (encoding.equals(TYPE_8UC4) || encoding.equals(TYPE_8SC4) || encoding.equals(TYPE_16UC4) || encoding.equals(TYPE_16SC4) || encoding.equals(TYPE_32SC4)
-          || encoding.equals(TYPE_32FC4) || encoding.equals(TYPE_64FC4))
+      if (encoding.equals(TYPE_8UC4)
+       || encoding.equals(TYPE_8SC4)
+       || encoding.equals(TYPE_16UC4)
+       || encoding.equals(TYPE_16SC4)
+       || encoding.equals(TYPE_32SC4)
+       || encoding.equals(TYPE_32FC4)
+       || encoding.equals(TYPE_64FC4))
          return 4;
 
-      throw new Exception("Unknown encoding " + encoding);
+      throw new RuntimeException("Unknown encoding " + encoding);
    }
 
-   public static int bitDepth(final String enc) throws Exception
+   public static int bitDepth(String encoding)
    {
-
-      String encoding = enc.toLowerCase();
+      encoding = encoding.toLowerCase();
       if (encoding.equals(MONO16))
          return 16;
-      if (encoding.equals(MONO8) || encoding.equals(BGR8) || encoding.equals(RGB8) || encoding.equals(BGRA8) || encoding.equals(RGBA8) || encoding.equals(
-            BAYER_RGGB8) || encoding.equals(BAYER_BGGR8) || encoding.equals(BAYER_GBRG8) || encoding.equals(BAYER_GRBG8))
+      if (encoding.equals(MONO8)
+          || encoding.equals(BGR8)
+          || encoding.equals(RGB8)
+          || encoding.equals(BGRA8)
+          || encoding.equals(RGBA8)
+          || encoding.equals(BAYER_RGGB8)
+          || encoding.equals(BAYER_BGGR8)
+          || encoding.equals(BAYER_GBRG8)
+          || encoding.equals(BAYER_GRBG8))
          return 8;
 
-      if (encoding.equals(MONO16) || encoding.equals(BGR16) || encoding.equals(RGB16) || encoding.equals(BGRA16) || encoding.equals(RGBA16) || encoding.equals(
-            BAYER_RGGB16) || encoding.equals(BAYER_BGGR16) || encoding.equals(BAYER_GBRG16) || encoding.equals(BAYER_GRBG16))
+      if (encoding.equals(MONO16)
+          || encoding.equals(BGR16)
+          || encoding.equals(RGB16)
+          || encoding.equals(BGRA16)
+          || encoding.equals(RGBA16)
+          || encoding.equals(BAYER_RGGB16)
+          || encoding.equals(BAYER_BGGR16)
+          || encoding.equals(BAYER_GBRG16)
+          || encoding.equals(BAYER_GRBG16))
          return 16;
 
       if (encoding.equals(YUV422))
@@ -201,6 +248,6 @@ public class ImageEncodings
       if (encoding.equals(TYPE_64FC1) || encoding.equals(TYPE_64FC2) || encoding.equals(TYPE_64FC3) || encoding.equals(TYPE_64FC4))
          return 64;
 
-      throw new Exception("Unknown encoding " + encoding);
+      throw new RuntimeException("Unknown encoding " + encoding);
    }
 }
