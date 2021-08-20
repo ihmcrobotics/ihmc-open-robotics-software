@@ -23,7 +23,7 @@ public class CustomDCMPositionPolicy implements CustomMPCPolicy
 
    private final DCMPositionCommand mpcCommand = new DCMPositionCommand();
 
-   public FramePoint3DBasics getDesiredComPosition()
+   public FramePoint3DBasics getDesiredDCMPosition()
    {
       return desiredDCMPosition;
    }
