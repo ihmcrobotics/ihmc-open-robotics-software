@@ -30,6 +30,7 @@ public class ExceptionHandlingThreadScheduler
    private long crashCount = 0;
    private Runnable runnable;
    private ScheduledFuture<?> scheduledFuture;
+   private volatile boolean isRunningTask = false;
 
    /**
     * Normal operation. Just print a good error message and shutdown.
@@ -99,6 +100,7 @@ public class ExceptionHandlingThreadScheduler
 
    private void printingRunnableWrapper()
    {
+      isRunningTask = true;
       try
       {
          runnable.run();
@@ -114,6 +116,10 @@ public class ExceptionHandlingThreadScheduler
             throw t;
          }
       }
+      finally
+      {
+         isRunningTask = false;
+      }
    }
 
    public void shutdown()
@@ -124,5 +130,10 @@ public class ExceptionHandlingThreadScheduler
    public void shutdownNow()
    {
       executorService.shutdownNow();
+   }
+
+   public boolean isRunningTask()
+   {
+      return isRunningTask;
    }
 }

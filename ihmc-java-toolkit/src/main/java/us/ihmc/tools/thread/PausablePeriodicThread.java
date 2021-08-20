@@ -66,4 +66,23 @@ public class PausablePeriodicThread
          stop();
       }
    }
+
+   public boolean isRunning()
+   {
+      if (scheduled == null)
+      {
+         return false; // never was running
+      }
+      else if (scheduler.isRunningTask())
+      {
+         return true; // it's in the middle of computing
+      }
+      else
+      {
+         // if it's not done, then we're still going; nobody called stop yet
+         // if it is done, then someone called stop and it's finished it's running task because
+         // we got past the above condition
+         return !scheduled.isDone();
+      }
+   }
 }
