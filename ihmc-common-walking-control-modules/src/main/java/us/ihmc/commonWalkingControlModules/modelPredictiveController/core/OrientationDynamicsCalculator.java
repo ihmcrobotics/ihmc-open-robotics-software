@@ -58,7 +58,7 @@ public class OrientationDynamicsCalculator
    private final DMatrixRMaj B = new DMatrixRMaj(6, 0);
    private final DMatrixRMaj C = new DMatrixRMaj(6, 1);
 
-   private DiscretizationCalculator discretizationCalculator = new EfficientFirstOrderHoldDiscretizationCalculator();
+   private DiscretizationCalculator discretizationCalculator = new DiscreteDiscretizationCalculator();
 
    private final DMatrixRMaj Ad = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj Bd = new DMatrixRMaj(6, 0);
