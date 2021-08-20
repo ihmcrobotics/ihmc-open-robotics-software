@@ -606,4 +606,9 @@ public class SCS2AvatarSimulationFactory
    {
       this.externalPelvisCorrectorSubscriber.set(externalPelvisCorrectorSubscriber);
    }
+
+   public void setUseImpulseBasedPhysicsEngine(boolean useImpulseBasePhysicsEngine)
+   {
+      this.useImpulseBasePhysicsEngine.set(useImpulseBasePhysicsEngine);
+   }
 }
