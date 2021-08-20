@@ -20,7 +20,6 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
@@ -160,6 +159,8 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       boolean is16BitDepth = image.getEncoding().equals("16UC1");
       boolean is8BitRGB = image.getEncoding().equals("rgb8");
+      boolean isBGR8 = image.getEncoding().equals("bgr8");
+
       if (is8BitRGB)
       {
          ChannelBuffer data = image.getData();
@@ -177,7 +178,24 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
                pixmap.drawPixel(x, y, rgb8888);
             }
          }
-         texture.draw(pixmap, 0, 0);
+      }
+      else if (isBGR8)
+      {
+         ChannelBuffer data = image.getData();
+         int zeroedIndex = 0;
+         for (int y = 0; y < image.getHeight(); y++)
+         {
+            for (int x = 0; x < image.getWidth(); x++)
+            {
+               int b = Byte.toUnsignedInt(data.getByte(zeroedIndex + 0));
+               int g = Byte.toUnsignedInt(data.getByte(zeroedIndex + 1));
+               int r = Byte.toUnsignedInt(data.getByte(zeroedIndex + 2));
+               int a = 255;
+               zeroedIndex += 3;
+               int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
+               pixmap.drawPixel(x, y, rgb8888);
+            }
+         }
       }
       else if (is16BitDepth)
       {
@@ -207,6 +225,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             }
          }
       }
+      texture.draw(pixmap, 0, 0);
    }
 
    private void decompressAndDecodeTheOldWay(CompressedImage compressedImage)
@@ -246,8 +265,8 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
                int r = Byte.toUnsignedInt(data[i + 2]);
                int a = 255;
                int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
-               pixmap.drawPixel(x, y, rgb8888);
             }
+            texture.draw(pixmap, 0, 0);
          }
       }
    }

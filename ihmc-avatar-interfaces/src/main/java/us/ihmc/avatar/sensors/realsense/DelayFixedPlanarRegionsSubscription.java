@@ -145,18 +145,18 @@ public class DelayFixedPlanarRegionsSubscription
             timestamp -= Conversions.secondsToNanoseconds(seconds);
 
 
-            if (!rosClockCalculator.offsetIsDetermined())
-            {
-               delay = Double.NaN;
-               return;
-            }
-
-            long controllerTime = rosClockCalculator.computeRobotMonotonicTime(timestamp);
-            if (controllerTime == -1L)
-            {
-               delay = Double.NaN;
-               return;
-            }
+//            if (!rosClockCalculator.offsetIsDetermined())
+//            {
+//               delay = Double.NaN;
+//               return;
+//            }
+//
+//            long controllerTime = rosClockCalculator.computeRobotMonotonicTime(timestamp);
+//            if (controllerTime == -1L)
+//            {
+//               delay = Double.NaN;
+//               return;
+//            }
 
             long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
             if (newestTimestamp == -1L)
@@ -164,6 +164,8 @@ public class DelayFixedPlanarRegionsSubscription
                delay = Double.NaN;
                return;
             }
+
+            long controllerTime = newestTimestamp - Conversions.millisecondsToNanoseconds(250);
 
             boolean waitIfNecessary = false; // dangerous if true! need a timeout
             long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null);
