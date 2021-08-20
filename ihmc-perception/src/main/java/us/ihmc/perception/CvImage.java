@@ -75,16 +75,16 @@ public class CvImage
       this.image = image;
    }
 
-   public final Image toImageMsg(final Image ros_image) throws IOException
+   public final Image toImageMessage(final Image rosImage) throws IOException
    {
-      ros_image.setHeader(header);
-      ros_image.setEncoding(encoding.toLowerCase());
+      rosImage.setHeader(header);
+      rosImage.setEncoding(encoding.toLowerCase());
 
-      ros_image.setWidth(image.cols());
-      ros_image.setHeight(image.rows());
-      ros_image.setStep((int) image.arrayStep());
+      rosImage.setWidth(image.cols());
+      rosImage.setHeight(image.rows());
+      rosImage.setStep((int) image.arrayStep());
       //// TODO: Handle the indian if needed;
-      //// ros_image.setIsBigendian();
+      //// rosImage.setIsBigendian();
 
       ChannelBufferOutputStream stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
       byte[] imageInBytes = new byte[(int) image.arraySize()];
@@ -94,14 +94,14 @@ public class CvImage
       //noinspection UnusedAssignment
       imageInBytes = null;
 
-      ros_image.setData(stream.buffer());
-      return ros_image;
+      rosImage.setData(stream.buffer());
+      return rosImage;
    }
 
    //TODO add a compression parameter.
-   public final CompressedImage toCompressedImageMsg(final CompressedImage ros_image, Format dst_format) throws Exception
+   public final CompressedImage toCompressedImageMessage(final CompressedImage rosImage, Format destinationFormat) throws Exception
    {
-      ros_image.setHeader(header);
+      rosImage.setHeader(header);
       Mat image;
       if (!encoding.equals(ImageEncodings.BGR8))
       {
@@ -114,21 +114,21 @@ public class CvImage
       }
 
       //from https://github.com/bytedeco/javacpp-presets/issues/29#issuecomment-6408082977
-      BytePointer buf = new BytePointer();
+      BytePointer buffer = new BytePointer();
 
       //from http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
 
-      ros_image.setFormat(Format.valueOf(dst_format));
-      opencv_imgcodecs.imencode(Format.getExtension(dst_format), image, buf);
+      rosImage.setFormat(Format.valueOf(destinationFormat));
+      opencv_imgcodecs.imencode(Format.getExtension(destinationFormat), image, buffer);
 
       ChannelBufferOutputStream stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
       //from https://github.com/bytedeco/javacpp-presets/issues/29#issuecomment-6408082977
-      byte[] outputBuffer = new byte[(int) buf.capacity()];
-      buf.get(outputBuffer);
+      byte[] outputBuffer = new byte[(int) buffer.capacity()];
+      buffer.get(outputBuffer);
       stream.write(outputBuffer);
 
-      ros_image.setData(stream.buffer());
-      return ros_image;
+      rosImage.setData(stream.buffer());
+      return rosImage;
    }
 
    static public CvImage toCvCopy(final Image source) throws Exception
@@ -156,7 +156,7 @@ public class CvImage
       return toCvCopyImpl(source.image, source.header, source.encoding, encoding);
    }
 
-   static protected CvImage toCvCopyImpl(final Mat source, final Header src_header, final String src_encoding, final String dst_encoding) throws Exception
+   static protected CvImage toCvCopyImpl(final Mat source, final Header sourceHeader, final String sourceEncoding, final String destinationEncoding) throws Exception
    {
       /// @todo Handle endianness - e.g. 16-bit dc1394 camera images are big-endian
       /// Languages such as Java manage this for you so that Java code can run on any platform and programmers do not have to manage byte ordering.
@@ -165,53 +165,53 @@ public class CvImage
 
       // Copy metadata
       CvImage cvImage = new CvImage();
-      cvImage.header = src_header;
+      cvImage.header = sourceHeader;
 
       // Copy to new buffer if same encoding requested
-      if (dst_encoding.isEmpty() || dst_encoding.equals(src_encoding))
+      if (destinationEncoding.isEmpty() || destinationEncoding.equals(sourceEncoding))
       {
-         cvImage.encoding = src_encoding;
+         cvImage.encoding = sourceEncoding;
          source.copyTo(cvImage.image);
       }
       else
       {
          // Convert the source data to the desired encoding
-         final Vector<Integer> conversion_codes = ImEncoding.getConversionCode(src_encoding, dst_encoding);
+         final Vector<Integer> conversionCodes = ImEncoding.getConversionCode(sourceEncoding, destinationEncoding);
          Mat image1 = source;
          Mat image2 = new Mat();
 
-         for (int i = 0; i < conversion_codes.size(); ++i)
+         for (int i = 0; i < conversionCodes.size(); ++i)
          {
-            int conversion_code = conversion_codes.get(i);
-            if (conversion_code == ImEncoding.SAME_FORMAT)
+            int conversionCode = conversionCodes.get(i);
+            if (conversionCode == ImEncoding.SAME_FORMAT)
             {
                //convert from Same number of channels, but different bit depth
 
                //double alpha = 1.0;
-               int src_depth = ImageEncodings.bitDepth(src_encoding);
-               int dst_depth = ImageEncodings.bitDepth(dst_encoding);
+               int sourceDepth = ImageEncodings.bitDepth(sourceEncoding);
+               int destinationDepth = ImageEncodings.bitDepth(destinationEncoding);
                // Do scaling between CV_8U [0,255] and CV_16U [0,65535] images.
                //from http://www.rubydoc.info/github/ruby-opencv/ruby-opencv/OpenCV/CvMat
                //from http://docs.opencv.org/modules/core/doc/basic_structures.html
                //TODO: check which value default for beta is ok.
                int beta = 0;
-               int image2_type = opencv_core.CV_MAKETYPE(opencv_core.CV_MAT_DEPTH(ImEncoding.getCvType(dst_encoding)), image1.channels());
-               if (src_depth == 8 && dst_depth == 16)
-                  image1.convertTo(image2, image2_type, 65535. / 255., beta);
-               else if (src_depth == 16 && dst_depth == 8)
-                  image1.convertTo(image2, image2_type, 255. / 65535., beta);
+               int image2Type = opencv_core.CV_MAKETYPE(opencv_core.CV_MAT_DEPTH(ImEncoding.getCvType(destinationEncoding)), image1.channels());
+               if (sourceDepth == 8 && destinationDepth == 16)
+                  image1.convertTo(image2, image2Type, 65535. / 255., beta);
+               else if (sourceDepth == 16 && destinationDepth == 8)
+                  image1.convertTo(image2, image2Type, 255. / 65535., beta);
                else
-                  image1.convertTo(image2, image2_type);
+                  image1.convertTo(image2, image2Type);
             }
             else
             {
                // Perform color conversion
-               opencv_imgproc.cvtColor(image1, image2, conversion_codes.get(0));
+               opencv_imgproc.cvtColor(image1, image2, conversionCodes.get(0));
             }
             image1 = image2;
          }
          cvImage.image = image2;
-         cvImage.encoding = dst_encoding;
+         cvImage.encoding = destinationEncoding;
       }
       return cvImage;
    }
