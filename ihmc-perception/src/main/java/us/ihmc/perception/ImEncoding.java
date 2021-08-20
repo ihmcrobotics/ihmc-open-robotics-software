@@ -12,9 +12,9 @@ public class ImEncoding
 {
    protected static final int SAME_FORMAT = -1;
 
-   static int getCvType(final String enc) throws Exception
+   public static int getCvType(String encoding)
    {
-      String encoding = enc.toLowerCase();
+      encoding = encoding.toLowerCase();
       if (encoding.equals(ImageEncodings.BGR8))
          return opencv_core.CV_8UC3;
       if (encoding.equals(ImageEncodings.MONO8))
@@ -118,7 +118,7 @@ public class ImEncoding
       if (encoding.equals(ImageEncodings.TYPE_64FC4))
          return opencv_core.CV_64FC4;
 
-      throw new Exception("Unrecognized image encoding [" + encoding + "]");
+      throw new RuntimeException("Unrecognized image encoding [" + encoding + "]");
    }
 
    protected static int safeLongToInt(long l)
