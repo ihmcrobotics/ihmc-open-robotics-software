@@ -1,5 +1,6 @@
 package us.ihmc.avatar.scs2;
 
+import javafx.application.Platform;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,6 +14,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.session.SessionMode;
+import us.ihmc.scs2.session.SessionState;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -45,6 +47,8 @@ public class SCS2AvatarSimulation
          yoVariableServer.start();
       }
 
+      simulationSession.setSessionState(SessionState.ACTIVE);
+
       if (showGUI)
          SessionVisualizer.startSessionVisualizer(simulationSession);
       if (automaticallyStartSimulation)
@@ -53,21 +57,34 @@ public class SCS2AvatarSimulation
          realtimeROS2Node.spin();
    }
 
-   public void simulate()
-   {
-   }
-
-   public void dispose()
-   {
-      robotController.dispose();
-      robotController = null;
-   }
-
    public void destroy()
    {
-      dispose();
+      if (robotController != null)
+      {
+         robotController.dispose();
+         robotController = null;
+      }
+
       if (yoVariableServer != null)
+      {
          yoVariableServer.close();
+         yoVariableServer = null;
+      }
+
+      if (realtimeROS2Node != null)
+      {
+         realtimeROS2Node.destroy();
+         realtimeROS2Node = null;
+      }
+
+      if (simulationSession != null)
+      {
+         if (showGUI)
+            Platform.exit();
+         else
+            simulationSession.shutdownSession();
+         simulationSession = null;
+      }
    }
 
    public FullHumanoidRobotModel getControllerFullRobotModel()
