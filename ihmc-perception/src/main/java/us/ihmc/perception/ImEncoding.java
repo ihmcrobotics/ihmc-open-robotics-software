@@ -217,7 +217,7 @@ public class ImEncoding
       return Encoding.INVALID;
    }
 
-   public static Vector<Integer> getConversionCode(String sourceEncodingString, String destinationEncodingString) throws Exception
+   public static Vector<Integer> getConversionCode(String sourceEncodingString, String destinationEncodingString)
    {
       Encoding sourceEncoding = getEncoding(sourceEncodingString);
       Encoding destinationEncoding = getEncoding(destinationEncodingString);
@@ -239,9 +239,9 @@ public class ImEncoding
       if (!isSourceColorFormat)
       {
          if (isDestinationColorFormat)
-            throw new Exception("[" + sourceEncodingString + "] is not a color format. but [" + destinationEncodingString + "] is. The conversion does not make sense");
+            throw new RuntimeException("[" + sourceEncodingString + "] is not a color format. but [" + destinationEncodingString + "] is. The conversion does not make sense");
          if (!isNumberOfChannelsTheSame)
-            throw new Exception("[" + sourceEncodingString + "] and [" + destinationEncodingString + "] do not have the same number of channel");
+            throw new RuntimeException("[" + sourceEncodingString + "] and [" + destinationEncodingString + "] do not have the same number of channel");
          return new Vector<>(1, SAME_FORMAT);
       }
 
@@ -250,7 +250,7 @@ public class ImEncoding
       if (!isDestinationColorFormat)
       {
          if (!isNumberOfChannelsTheSame)
-            throw new Exception("[" + sourceEncodingString + "] is a color format but [" + destinationEncodingString + "] "
+            throw new RuntimeException("[" + sourceEncodingString + "] is a color format but [" + destinationEncodingString + "] "
                                 + "is not so they must have the same OpenCV type, CV_8UC3, CV16UC1 ....");
          return new Vector<>(1, SAME_FORMAT);
       }
@@ -262,7 +262,7 @@ public class ImEncoding
       Vector<Integer> codesVector = conversionCodes.get(key);
 
       if (codesVector == null)
-         throw new Exception("Unsupported conversion from [" + sourceEncodingString + "] to [" + destinationEncodingString + "]");
+         throw new RuntimeException("Unsupported conversion from [" + sourceEncodingString + "] to [" + destinationEncodingString + "]");
 
       // And deal with depth differences if the colors are different
       if (ImageEncodings.bitDepth(sourceEncodingString) != ImageEncodings.bitDepth(destinationEncodingString) && (getEncoding(sourceEncodingString) != getEncoding(destinationEncodingString)))
