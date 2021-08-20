@@ -1,6 +1,5 @@
 package us.ihmc.avatar.scs2;
 
-import javafx.application.Platform;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -16,6 +15,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.session.SessionState;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
+import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
@@ -36,6 +36,10 @@ public class SCS2AvatarSimulation
    private boolean automaticallyStartSimulation;
    private RealtimeROS2Node realtimeROS2Node;
 
+   private SessionVisualizerControls sessionVisualizerControls;
+
+   private boolean hasBeenDestroyed = false;
+
    public void start()
    {
       if (intraprocessYoVariableLogger != null)
@@ -50,7 +54,7 @@ public class SCS2AvatarSimulation
       simulationSession.setSessionState(SessionState.ACTIVE);
 
       if (showGUI)
-         SessionVisualizer.startSessionVisualizer(simulationSession);
+         sessionVisualizerControls = SessionVisualizer.startSessionVisualizer(simulationSession);
       if (automaticallyStartSimulation)
          simulationSession.setSessionMode(SessionMode.RUNNING);
       if (realtimeROS2Node != null)
@@ -59,6 +63,11 @@ public class SCS2AvatarSimulation
 
    public void destroy()
    {
+      if (hasBeenDestroyed)
+         return;
+
+      hasBeenDestroyed = true;
+
       if (robotController != null)
       {
          robotController.dispose();
@@ -80,11 +89,20 @@ public class SCS2AvatarSimulation
       if (simulationSession != null)
       {
          if (showGUI)
-            Platform.exit();
-         else
-            simulationSession.shutdownSession();
+            sessionVisualizerControls.shutdownNow();
+         simulationSession.shutdownSession();
          simulationSession = null;
       }
+   }
+
+   public SimulationSession getSimulationSession()
+   {
+      return simulationSession;
+   }
+
+   public SessionVisualizerControls getSessionVisualizerControls()
+   {
+      return sessionVisualizerControls;
    }
 
    public FullHumanoidRobotModel getControllerFullRobotModel()
@@ -103,11 +121,6 @@ public class SCS2AvatarSimulation
    public FullRobotModelCorruptor getFullRobotModelCorruptor()
    {
       return controllerThread.getFullRobotModelCorruptor();
-   }
-
-   public SimulationSession getSimulationSession()
-   {
-      return simulationSession;
    }
 
    public HighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
