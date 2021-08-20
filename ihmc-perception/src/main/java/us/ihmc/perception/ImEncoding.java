@@ -3,10 +3,7 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 public class ImEncoding
 {
@@ -132,162 +129,145 @@ public class ImEncoding
 
    protected static Map<Pair<Encoding, Encoding>, Vector<Integer>> getConversionCodes()
    {
-      Map<Pair<Encoding, Encoding>, Vector<Integer>> res = new HashMap<Pair<Encoding, Encoding>, Vector<Integer>>();
+      Map<Pair<Encoding, Encoding>, Vector<Integer>> conversionCodeMap = new HashMap<>();
 
       for (int i = 0; i <= 5; ++i)
       {
-         res.put(new Pair<Encoding, Encoding>(Encoding.valueOf(i), Encoding.valueOf(i)), new Vector<Integer>(Arrays.asList(new Integer[] {SAME_FORMAT})));
+         conversionCodeMap.put(new Pair<>(Encoding.valueOf(i), Encoding.valueOf(i)), new Vector<>(Collections.singletonList(SAME_FORMAT)));
       }
 
-      res.put(new Pair<Encoding, Encoding>(Encoding.GRAY, Encoding.RGB), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_GRAY2RGB})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.GRAY, Encoding.BGR), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_GRAY2BGR})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.GRAY, Encoding.RGBA), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_GRAY2RGBA})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.GRAY, Encoding.BGRA), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_GRAY2BGRA})));
+      conversionCodeMap.put(new Pair<>(Encoding.GRAY, Encoding.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2RGB)));
+      conversionCodeMap.put(new Pair<>(Encoding.GRAY, Encoding.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2BGR)));
+      conversionCodeMap.put(new Pair<>(Encoding.GRAY, Encoding.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2RGBA)));
+      conversionCodeMap.put(new Pair<>(Encoding.GRAY, Encoding.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2BGRA)));
 
-      res.put(new Pair<Encoding, Encoding>(Encoding.RGB, Encoding.GRAY), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_RGB2GRAY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.RGB, Encoding.BGR), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_RGB2BGR})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.RGB, Encoding.RGBA), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_RGB2RGBA})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.RGB, Encoding.BGRA), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_RGB2BGRA})));
+      conversionCodeMap.put(new Pair<>(Encoding.RGB, Encoding.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2GRAY)));
+      conversionCodeMap.put(new Pair<>(Encoding.RGB, Encoding.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2BGR)));
+      conversionCodeMap.put(new Pair<>(Encoding.RGB, Encoding.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2RGBA)));
+      conversionCodeMap.put(new Pair<>(Encoding.RGB, Encoding.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2BGRA)));
 
-      res.put(new Pair<Encoding, Encoding>(Encoding.BGR, Encoding.GRAY), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BGR2GRAY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BGR, Encoding.RGB), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BGR2RGB})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BGR, Encoding.RGBA), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BGR2RGBA})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BGR, Encoding.BGRA), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BGR2BGRA})));
+      conversionCodeMap.put(new Pair<>(Encoding.BGR, Encoding.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2GRAY)));
+      conversionCodeMap.put(new Pair<>(Encoding.BGR, Encoding.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2RGB)));
+      conversionCodeMap.put(new Pair<>(Encoding.BGR, Encoding.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2RGBA)));
+      conversionCodeMap.put(new Pair<>(Encoding.BGR, Encoding.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2BGRA)));
 
-      res.put(new Pair<Encoding, Encoding>(Encoding.RGBA, Encoding.GRAY), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_RGBA2GRAY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.RGBA, Encoding.RGB), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_RGBA2RGB})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.RGBA, Encoding.BGR), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_RGBA2BGR})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.RGBA, Encoding.BGRA), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_RGBA2BGRA})));
+      conversionCodeMap.put(new Pair<>(Encoding.RGBA, Encoding.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2GRAY)));
+      conversionCodeMap.put(new Pair<>(Encoding.RGBA, Encoding.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2RGB)));
+      conversionCodeMap.put(new Pair<>(Encoding.RGBA, Encoding.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2BGR)));
+      conversionCodeMap.put(new Pair<>(Encoding.RGBA, Encoding.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2BGRA)));
 
-      res.put(new Pair<Encoding, Encoding>(Encoding.BGRA, Encoding.GRAY), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BGRA2GRAY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BGRA, Encoding.RGB), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BGRA2RGB})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BGRA, Encoding.BGR), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BGRA2BGR})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BGRA, Encoding.RGBA), new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BGRA2RGBA})));
+      conversionCodeMap.put(new Pair<>(Encoding.BGRA, Encoding.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2GRAY)));
+      conversionCodeMap.put(new Pair<>(Encoding.BGRA, Encoding.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2RGB)));
+      conversionCodeMap.put(new Pair<>(Encoding.BGRA, Encoding.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2BGR)));
+      conversionCodeMap.put(new Pair<>(Encoding.BGRA, Encoding.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2RGBA)));
 
-      res.put(new Pair<Encoding, Encoding>(Encoding.YUV422, Encoding.GRAY),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_YUV2GRAY_UYVY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.YUV422, Encoding.RGB),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_YUV2RGB_UYVY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.YUV422, Encoding.BGR),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_YUV2BGR_UYVY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.YUV422, Encoding.RGBA),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_YUV2RGBA_UYVY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.YUV422, Encoding.BGRA),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_YUV2BGRA_UYVY})));
+      conversionCodeMap.put(new Pair<>(Encoding.YUV422, Encoding.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2GRAY_UYVY)));
+      conversionCodeMap.put(new Pair<>(Encoding.YUV422, Encoding.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2RGB_UYVY)));
+      conversionCodeMap.put(new Pair<>(Encoding.YUV422, Encoding.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2BGR_UYVY)));
+      conversionCodeMap.put(new Pair<>(Encoding.YUV422, Encoding.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2RGBA_UYVY)));
+      conversionCodeMap.put(new Pair<>(Encoding.YUV422, Encoding.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2BGRA_UYVY)));
 
       // Deal with Bayer
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_RGGB, Encoding.GRAY),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerBG2GRAY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_RGGB, Encoding.RGB),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerBG2RGB})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_RGGB, Encoding.BGR),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerBG2BGR})));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_RGGB, Encoding.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerBG2GRAY)));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_RGGB, Encoding.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerBG2RGB)));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_RGGB, Encoding.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerBG2BGR)));
 
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_BGGR, Encoding.GRAY),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerRG2GRAY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_BGGR, Encoding.RGB),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerRG2RGB})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_BGGR, Encoding.BGR),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerRG2BGR})));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_BGGR, Encoding.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerRG2GRAY)));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_BGGR, Encoding.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerRG2RGB)));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_BGGR, Encoding.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerRG2BGR)));
 
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_GBRG, Encoding.GRAY),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerGR2GRAY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_GBRG, Encoding.RGB),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerGR2RGB})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_GBRG, Encoding.BGR),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerGR2BGR})));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_GBRG, Encoding.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGR2GRAY)));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_GBRG, Encoding.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGR2RGB)));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_GBRG, Encoding.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGR2BGR)));
 
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_GRBG, Encoding.GRAY),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerGB2GRAY})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_GRBG, Encoding.RGB),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerGB2RGB})));
-      res.put(new Pair<Encoding, Encoding>(Encoding.BAYER_GRBG, Encoding.BGR),
-              new Vector<Integer>(Arrays.asList(new Integer[] {opencv_imgproc.COLOR_BayerGB2BGR})));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_GRBG, Encoding.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGB2GRAY)));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_GRBG, Encoding.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGB2RGB)));
+      conversionCodeMap.put(new Pair<>(Encoding.BAYER_GRBG, Encoding.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGB2BGR)));
 
-      return res;
+      return conversionCodeMap;
    }
 
-   protected static Encoding getEncoding(final String encoding)
+   public static Encoding getEncoding(String encoding)
    {
-      String lEncoding = encoding.toLowerCase();
+      encoding = encoding.toLowerCase();
 
-      if (lEncoding.equals(ImageEncodings.MONO8))
+      if (encoding.equals(ImageEncodings.MONO8))
          return Encoding.GRAY;
-      if (lEncoding.equals(ImageEncodings.BGR8))
+      if (encoding.equals(ImageEncodings.BGR8))
          return Encoding.BGR;
-      if (lEncoding.equals(ImageEncodings.RGB8))
+      if (encoding.equals(ImageEncodings.RGB8))
          return Encoding.RGB;
-      if (lEncoding.equals(ImageEncodings.BGRA8))
+      if (encoding.equals(ImageEncodings.BGRA8))
          return Encoding.BGRA;
-      if (lEncoding.equals(ImageEncodings.RGBA8))
+      if (encoding.equals(ImageEncodings.RGBA8))
          return Encoding.RGBA;
-      if (lEncoding.equals(ImageEncodings.YUV422))
+      if (encoding.equals(ImageEncodings.YUV422))
          return Encoding.YUV422;
 
-      if (lEncoding.equals(ImageEncodings.BAYER_RGGB8))
+      if (encoding.equals(ImageEncodings.BAYER_RGGB8))
          return Encoding.BAYER_RGGB;
-      if (lEncoding.equals(ImageEncodings.BAYER_BGGR8))
+      if (encoding.equals(ImageEncodings.BAYER_BGGR8))
          return Encoding.BAYER_BGGR;
-      if (lEncoding.equals(ImageEncodings.BAYER_GBRG8))
+      if (encoding.equals(ImageEncodings.BAYER_GBRG8))
          return Encoding.BAYER_GBRG;
-      if (lEncoding.equals(ImageEncodings.BAYER_GRBG8))
+      if (encoding.equals(ImageEncodings.BAYER_GRBG8))
          return Encoding.BAYER_GRBG;
 
       // We don't support conversions to/from other types
       return Encoding.INVALID;
    }
 
-   protected static Vector<Integer> getConversionCode(String src_encoding, String dst_encoding) throws Exception
+   public static Vector<Integer> getConversionCode(String sourceEncodingString, String destinationEncodingString) throws Exception
    {
-      Encoding src_encode = getEncoding(src_encoding);
-      Encoding dst_encode = getEncoding(dst_encoding);
+      Encoding sourceEncoding = getEncoding(sourceEncodingString);
+      Encoding destinationEncoding = getEncoding(destinationEncodingString);
 
-      boolean is_src_color_format =
-            ImageEncodings.isColor(src_encoding) || ImageEncodings.isMono(src_encoding) || ImageEncodings.isBayer(src_encoding) || (src_encoding.toLowerCase()
-                                                                                                                                                .equals(
-                                                                                                                                                      ImageEncodings.YUV422));
+      boolean isSourceColorFormat = ImageEncodings.isColor(sourceEncodingString)
+                                 || ImageEncodings.isMono(sourceEncodingString)
+                                 || ImageEncodings.isBayer(sourceEncodingString)
+                                 || (sourceEncodingString.equalsIgnoreCase(ImageEncodings.YUV422));
 
-      boolean is_dst_color_format =
-            ImageEncodings.isColor(dst_encoding) || ImageEncodings.isMono(dst_encoding) || ImageEncodings.isBayer(dst_encoding) || (dst_encoding.toLowerCase()
-                                                                                                                                                .equals(
-                                                                                                                                                      ImageEncodings.YUV422));
+      boolean isDestinationColorFormat = ImageEncodings.isColor(destinationEncodingString)
+                                      || ImageEncodings.isMono(destinationEncodingString)
+                                      || ImageEncodings.isBayer(destinationEncodingString)
+                                      || (destinationEncodingString.equalsIgnoreCase(ImageEncodings.YUV422));
 
-      boolean is_num_channels_the_same = ImageEncodings.numChannels(src_encoding) == ImageEncodings.numChannels(dst_encoding);
+      boolean isNumberOfChannelsTheSame = ImageEncodings.numChannels(sourceEncodingString) == ImageEncodings.numChannels(destinationEncodingString);
 
       // If we have no color info in the source, we can only convert to the same format which
       // was resolved in the previous condition. Otherwise, fail
-      if (!is_src_color_format)
+      if (!isSourceColorFormat)
       {
-         if (is_dst_color_format)
-            throw new Exception("[" + src_encoding + "] is not a color format. but [" + dst_encoding + "] is. The conversion does not make sense");
-         if (!is_num_channels_the_same)
-            throw new Exception("[" + src_encoding + "] and [" + dst_encoding + "] do not have the same number of channel");
-         return new Vector<Integer>(1, SAME_FORMAT);
+         if (isDestinationColorFormat)
+            throw new Exception("[" + sourceEncodingString + "] is not a color format. but [" + destinationEncodingString + "] is. The conversion does not make sense");
+         if (!isNumberOfChannelsTheSame)
+            throw new Exception("[" + sourceEncodingString + "] and [" + destinationEncodingString + "] do not have the same number of channel");
+         return new Vector<>(1, SAME_FORMAT);
       }
 
       // If we are converting from a color type to a non color type, we can only do so if we stick
       // to the number of channels
-      if (!is_dst_color_format)
+      if (!isDestinationColorFormat)
       {
-         if (!is_num_channels_the_same)
-            throw new Exception("[" + src_encoding + "] is a color format but [" + dst_encoding + "] "
+         if (!isNumberOfChannelsTheSame)
+            throw new Exception("[" + sourceEncodingString + "] is a color format but [" + destinationEncodingString + "] "
                                 + "is not so they must have the same OpenCV type, CV_8UC3, CV16UC1 ....");
-         return new Vector<Integer>(1, SAME_FORMAT);
+         return new Vector<>(1, SAME_FORMAT);
       }
 
       // If we are converting from a color type to another type, then everything is fine
-      final Map<Pair<Encoding, Encoding>, Vector<Integer>> CONVERSION_CODES = getConversionCodes();
+      final Map<Pair<Encoding, Encoding>, Vector<Integer>> conversionCodes = getConversionCodes();
 
-      Pair<Encoding, Encoding> key = new Pair<Encoding, Encoding>(src_encode, dst_encode);
-      Vector<Integer> res = CONVERSION_CODES.get(key);
+      Pair<Encoding, Encoding> key = new Pair<>(sourceEncoding, destinationEncoding);
+      Vector<Integer> codesVector = conversionCodes.get(key);
 
-      if (res == null)
-         throw new Exception("Unsupported conversion from [" + src_encoding + "] to [" + dst_encoding + "]");
+      if (codesVector == null)
+         throw new Exception("Unsupported conversion from [" + sourceEncodingString + "] to [" + destinationEncodingString + "]");
 
       // And deal with depth differences if the colors are different
-      if (ImageEncodings.bitDepth(src_encoding) != ImageEncodings.bitDepth(dst_encoding) && (getEncoding(src_encoding) != getEncoding(dst_encoding)))
-         res.add(SAME_FORMAT);
+      if (ImageEncodings.bitDepth(sourceEncodingString) != ImageEncodings.bitDepth(destinationEncodingString) && (getEncoding(sourceEncodingString) != getEncoding(destinationEncodingString)))
+         codesVector.add(SAME_FORMAT);
 
-      return res;
+      return codesVector;
    }
 }
