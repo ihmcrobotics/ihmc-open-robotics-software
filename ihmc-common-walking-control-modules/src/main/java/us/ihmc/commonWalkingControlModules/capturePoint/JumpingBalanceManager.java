@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCParamete
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.customPolicies.CustomCoMPositionPolicy;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.customPolicies.CustomDCMPositionPolicy;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.customPolicies.CustomMPCPolicy;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -55,7 +56,6 @@ public class JumpingBalanceManager
 
    private final JumpingControllerToolbox controllerToolbox;
 
-   private final YoDouble desiredWeightForStateChangeHeights = new YoDouble("desiredWeightForStateChangeHeights", registry);
 
    private final YoFramePoint3D yoDesiredDCM = new YoFramePoint3D("desiredDCM", worldFrame, registry);
    private final YoFrameVector3D yoDesiredDCMVelocity = new YoFrameVector3D("desiredDCMVelocity", worldFrame, registry);
@@ -113,12 +113,9 @@ public class JumpingBalanceManager
    private final BooleanProvider useAngularMomentumOffsetInStanding = new BooleanParameter("useAngularMomentumOffsetInStanding", registry, true);
    private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
 
+   private final JumpingHeuristics jumpingHeuristics;
    private final AngularMomentumHandler<ContactPlaneProvider> angularMomentumHandler;
    private final SE3ModelPredictiveController comTrajectoryPlanner;
-
-   private final CustomCoMPositionPolicy takeoffPolicy = new CustomCoMPositionPolicy();
-   private final CustomCoMPositionPolicy touchdownHeightPolicy = new CustomCoMPositionPolicy();
-   private final CustomDCMPositionPolicy touchdownXPolicy = new CustomDCMPositionPolicy();
 
    private final JumpingParameters jumpingParameters;
 
@@ -133,7 +130,6 @@ public class JumpingBalanceManager
    {
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
-      desiredWeightForStateChangeHeights.set(5e2);
 
       yoTime = controllerToolbox.getYoTime();
       this.controllerToolbox = controllerToolbox;
@@ -146,6 +142,7 @@ public class JumpingBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
 
+      jumpingHeuristics = new JumpingHeuristics(controllerToolbox, registry);
       double totalMass = controllerToolbox.getFullRobotModel().getTotalMass();
       double gravityZ = controllerToolbox.getGravityZ();
       angularMomentumHandler = new AngularMomentumHandler<>(totalMass,
@@ -181,13 +178,6 @@ public class JumpingBalanceManager
 
       ReferenceFrame comFrame = controllerToolbox.getCenterOfMassFrame();
       desiredWrench = new YoFixedFrameWrench("DesiredCoMWrench", worldFrame, comFrame, registry);
-
-      takeoffPolicy.getSelectionMatrix().clearSelection();
-      takeoffPolicy.getSelectionMatrix().selectZAxis(true);
-      touchdownHeightPolicy.getSelectionMatrix().clearSelection();
-      touchdownHeightPolicy.getSelectionMatrix().selectZAxis(true);
-      touchdownXPolicy.getSelectionMatrix().clearSelection();
-      touchdownXPolicy.getSelectionMatrix().selectXAxis(true);
 
       String graphicListName = getClass().getSimpleName();
 
@@ -427,29 +417,14 @@ public class JumpingBalanceManager
       }
 
       // update the takeoff and touchdown policies
-      tempPoint.setToZero(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame());
-      tempPoint.changeFrame(worldFrame);
+      jumpingHeuristics.computeJumpingHeuristics(jumpingGoal);
 
-      double touchdownHeight = Double.isNaN(jumpingGoal.getGoalHeight()) ? 0.0 : jumpingGoal.getGoalHeight();
-      touchdownHeight += controllerToolbox.getJumpingHeight();
-      takeoffPolicy.getDesiredComPosition().setZ(tempPoint.getZ() + controllerToolbox.getJumpingHeight());
-
-      touchdownHeightPolicy.getDesiredComPosition().setZ(touchdownHeight);
-      touchdownXPolicy.getDesiredComPosition().setX(jumpingGoal.getGoalLength());
-
-      takeoffPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
-      touchdownHeightPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
-      touchdownXPolicy.setPolicyWeight(desiredWeightForStateChangeHeights.getDoubleValue());
-
-      takeoffPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration());
-      touchdownHeightPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
-      touchdownXPolicy.setTimeOfPolicy(jumpingGoal.getSupportDuration() + jumpingGoal.getFlightDuration());
 
       if (!copTrajectoryState.getIsInFlight())
       {
-         comTrajectoryPlanner.addCustomPolicyToProcess(takeoffPolicy);
-         comTrajectoryPlanner.addCustomPolicyToProcess(touchdownHeightPolicy);
-         comTrajectoryPlanner.addCustomPolicyToProcess(touchdownXPolicy);
+         List<CustomMPCPolicy> heuristicPolicies = jumpingHeuristics.getCustomPolicies();
+         for (int i = 0; i < heuristicPolicies.size(); i++)
+            comTrajectoryPlanner.addCustomPolicyToProcess(heuristicPolicies.get(i));
 
          comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
       }
