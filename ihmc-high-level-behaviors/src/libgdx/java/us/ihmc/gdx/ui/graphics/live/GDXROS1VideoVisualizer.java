@@ -13,6 +13,7 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.perception.CvImage;
+import us.ihmc.perception.CvImageTools;
 import us.ihmc.perception.ImageEncodings;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
@@ -130,7 +131,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       try
       {
-         CvImage cvImage = CvImage.toCvCopy(image, ImageEncodings.RGBA8);
+         CvImage cvImage = CvImageTools.toCvCopy(image, ImageEncodings.RGBA8);
          Buffer buffer = cvImage.image.createBuffer();
          pixmap.setPixels((ByteBuffer) buffer);
       }
@@ -144,7 +145,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       try
       {
-         CvImage cvImage = CvImage.toCvCopy(compressedImage, ImageEncodings.RGBA8);
+         CvImage cvImage = CvImageTools.toCvCopy(compressedImage, ImageEncodings.RGBA8);
          Buffer buffer = cvImage.image.createBuffer();
          ensureTextureReady(cvImage.image.cols(), cvImage.image.rows());
          pixmap.setPixels((ByteBuffer) buffer);
