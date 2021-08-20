@@ -30,7 +30,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -161,11 +160,8 @@ public abstract class EndToEndCinderBlockFieldSCS2Test implements MultiRobotTest
       DRCRobotModel robotModel = getRobotModel();
       setupSimulation(cinderBlockFieldEnvironment);
       simulationTestHelper.start();
-
-      // TODO
-      //      SimulationConstructionSet scs = simulationTestHelper.getSimulationConstructionSet();
-      //      scs.setCameraFix(1.6, 0.0, 1.0);
-      //      scs.setCameraPosition(1.6, -6.0, 2.4);
+      simulationTestHelper.setCameraFocusPosition(1.6, 0.0, 1.0);
+      simulationTestHelper.setCameraPosition(1.6, -6.0, 2.4);
 
       assertTrue(simulationTestHelper.simulateAndWait(0.5));
       //      scs.setInPoint();
@@ -199,10 +195,8 @@ public abstract class EndToEndCinderBlockFieldSCS2Test implements MultiRobotTest
       physicsEngine.setGlobalContactParameters(contactParameters);
       simulationTestHelper.start();
 
-      // TODO
-      //      SimulationConstructionSet scs = simulationTestHelper.getSimulationConstructionSet();
-      //      scs.setCameraFix(2.0, 1.3, 1.0);
-      //      scs.setCameraPosition(6.0, 7.0, 3.25);
+      simulationTestHelper.setCameraFocusPosition(2.0, 1.3, 1.0);
+      simulationTestHelper.setCameraPosition(6.0, 7.0, 3.25);
 
       assertTrue(simulationTestHelper.simulateAndWait(0.5));
       //      scs.setInPoint();
@@ -241,14 +235,9 @@ public abstract class EndToEndCinderBlockFieldSCS2Test implements MultiRobotTest
       physicsEngine.setGlobalContactParameters(contactParameters);
       simulationTestHelper.start();
 
-      // TODO
-      //      SimulationConstructionSet scs = simulationTestHelper.getSimulationConstructionSet();
-      //      scs.setCameraFix(0.0, 0.0, 0.9);
-      //      scs.setCameraPosition(0.0, -6.0, 2.25);
-      //      scs.setCameraTracking(true, true, false, false);
-      //      scs.setCameraDolly(true, true, false, false);
-      //      scs.setCameraTrackingOffsets(0.0, 0.0, 0.0);
-      //      scs.setCameraDollyOffsets(0.0, 0.0, 0.0);
+      simulationTestHelper.setCameraFocusPosition(0.0, 0.0, 0.9);
+      simulationTestHelper.setCameraPosition(0.0, -6.0, 2.25);
+      simulationTestHelper.requestCameraRigidBodyTracking(getSimpleRobotName(), simulationTestHelper.getControllerFullRobotModel().getPelvis().getName());
 
       assertTrue(simulationTestHelper.simulateAndWait(0.5));
       //      scs.setInPoint();

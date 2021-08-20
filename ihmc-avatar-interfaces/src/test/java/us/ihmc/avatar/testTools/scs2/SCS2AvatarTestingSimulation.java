@@ -5,16 +5,17 @@ import static us.ihmc.robotics.Assert.fail;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javafx.application.Platform;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.SimulationSessionControls;
 import us.ihmc.scs2.simulation.robot.Robot;
@@ -31,6 +32,8 @@ public class SCS2AvatarTestingSimulation
    private final SimulationSessionControls simulationSessionControls;
    private final AtomicReference<Throwable> lastThrowable = new AtomicReference<>();
 
+   private SessionVisualizerControls sessionVisualizerControls;
+
    public SCS2AvatarTestingSimulation(SCS2AvatarSimulation avatarSimulation)
    {
       this.avatarSimulation = avatarSimulation;
@@ -40,8 +43,15 @@ public class SCS2AvatarTestingSimulation
 
    public void start()
    {
+      if (Platform.isImplicitExit())
+         Platform.setImplicitExit(false);
+
       avatarSimulation.start();
+      sessionVisualizerControls = avatarSimulation.getSessionVisualizerControls();
+      sessionVisualizerControls.addVisualizerShutdownListener(this::destroy);
    }
+
+   // Simulation controls:
 
    public boolean simulateAndWait(double duration)
    {
@@ -59,6 +69,24 @@ public class SCS2AvatarTestingSimulation
          fail("Joint was at " + rootJoint.getJointPose().getPosition() + ". Expecting it to be inside boundingBox " + boundingBox);
       }
    }
+
+   // GUI controls:
+   public void setCameraFocusPosition(double x, double y, double z)
+   {
+      sessionVisualizerControls.setCameraFocusPosition(x, y, z);
+   }
+
+   public void setCameraPosition(double x, double y, double z)
+   {
+      sessionVisualizerControls.setCameraPosition(x, y, z);
+   }
+
+   public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
+   {
+      sessionVisualizerControls.requestCameraRigidBodyTracking(robotName, rigidBodyName);
+   }
+
+   // Misc.
 
    public void destroy()
    {
