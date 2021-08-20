@@ -10,11 +10,25 @@ import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
 import std_msgs.Header;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Vector;
 
 public class CvImageTools
 {
+   public static void backMatWithNettyImageBuffer(sensor_msgs.Image ros1Image, Mat inputImageMat)
+   {
+      ChannelBuffer nettyImageData = ros1Image.getData();
+      ByteBuffer dataByteBuffer = nettyImageData.toByteBuffer();
+      int arrayOffset = nettyImageData.arrayOffset();
+      dataByteBuffer.position(arrayOffset);
+      ByteBuffer offsetByteBuffer = dataByteBuffer.slice();
+      System.out.println(dataByteBuffer.isDirect());
+
+      BytePointer imageDataPointer = new BytePointer(offsetByteBuffer);
+      inputImageMat.data(imageDataPointer);
+   }
+
    public static CvImage toCvCopy(final Image source) throws Exception
    {
       return toCvCopyImpl(matFromImage(source), source.getHeader(), source.getEncoding(), "");
