@@ -36,32 +36,32 @@ import java.util.Map;
  */
 //from http://stackoverflow.com/questions/11047756/getting-enum-associated-with-int-value
 //from http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
-public enum Format
+public enum OpenCVImageFormat
 {
    JPG("jpg"), JPEG("jpeg"), JPE("jpe"), PNG("png"), BMP("bmp"), DIB("dib"), PPM("ppm"), PGM("pgm"), PBM("pbm");
    protected String strFormat;
 
-   static private Map<Format, String> map = new HashMap<>();
+   static private Map<OpenCVImageFormat, String> map = new HashMap<>();
 
    static
    {
-      for (Format format : Format.values())
+      for (OpenCVImageFormat format : OpenCVImageFormat.values())
       {
          map.put(format, format.strFormat);
       }
    }
 
-   Format(final String strFormat)
+   OpenCVImageFormat(final String strFormat)
    {
       this.strFormat = strFormat;
    }
 
-   static public String valueOf(Format format)
+   static public String valueOf(OpenCVImageFormat format)
    {
       return map.get(format);
    }
 
-   static public String getExtension(Format format)
+   static public String getExtension(OpenCVImageFormat format)
    {
       String ext = ".";
       return ext.concat(map.get(format));

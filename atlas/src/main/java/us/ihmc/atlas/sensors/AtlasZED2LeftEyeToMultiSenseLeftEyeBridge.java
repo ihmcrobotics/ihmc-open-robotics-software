@@ -14,7 +14,6 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.communication.ROS2Tools;
@@ -24,10 +23,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.CvImage;
-import us.ihmc.perception.CvImageTools;
-import us.ihmc.perception.ImEncoding;
-import us.ihmc.perception.ImageEncodings;
+import us.ihmc.perception.ImageEncodingTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.UnitConversions;
@@ -40,13 +36,9 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.awt.*;
 import java.awt.color.ColorSpace;
-import java.awt.image.BufferedImage;
 import java.awt.image.ComponentColorModel;
 import java.awt.image.DataBuffer;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.Vector;
 
 public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
 {
@@ -77,11 +69,11 @@ public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
       ComponentColorModel colorModel = new ComponentColorModel(colorSpace, false, false, Transparency.OPAQUE, DataBuffer.TYPE_BYTE);
 
       String bgr8Name = "bgr8";
-      int bgr8 = ImEncoding.getCvType(bgr8Name);
+      int bgr8 = ImageEncodingTools.getCvType(bgr8Name);
       Mat inputImageMat = new Mat(720, 1280, opencv_core.CV_8UC3);
       Mat decodedImageMat = new Mat(720, 1280, opencv_core.CV_8UC3);
       Mat compressedImageMat = new Mat(720, 1280, opencv_core.CV_8UC3);
-//      ImEncoding.getConversionCode(bgr8Name, ImageEncodings.YUV422);
+//      ImEncoding.getColorConversionCode(bgr8Name, ImageEncodingTools.YUV422);
 //      YUVPicture yuvPicture = new YUVPicture(YUVPicture.YUVSubsamplingType.YUV420, 1280, 720);
 //      Vector<Integer> compressionParameters = new Vector<>(Arrays.asList(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75));
       IntPointer compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
@@ -127,7 +119,7 @@ public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
                         //                        opencv_imgcodecs.imdecode(inputImageMat, opencv_imgcodecs.IMREAD_ANYCOLOR, decodedImageMat);
 
 
-//                        CvImage cvImage = CvImageTools.toCvCopy(ros1Image, ImageEncodings.RGBA8);
+//                        CvImage cvImage = ROSOpenCVImageTools.toCvCopy(ros1Image, ImageEncodingTools.RGBA8);
 //                        Buffer cvBuffer = cvImage.image.createBuffer();
 //
 //

@@ -14,7 +14,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Vector;
 
-public class CvImageTools
+public class ROSOpenCVImageTools
 {
    public static void backMatWithNettyImageBuffer(sensor_msgs.Image ros1Image, Mat inputImageMat)
    {
@@ -41,12 +41,12 @@ public class CvImageTools
 
    public static CvImage toCvCopy(final CompressedImage source) throws Exception
    {
-      return toCvCopyImpl(matFromImage(source), source.getHeader(), ImageEncodings.BGR8, "");
+      return toCvCopyImpl(matFromImage(source), source.getHeader(), ImageEncodingTools.BGR8, "");
    }
 
    public static CvImage toCvCopy(final CompressedImage source, final String dst_encoding) throws Exception
    {
-      return toCvCopyImpl(matFromImage(source), source.getHeader(), ImageEncodings.BGR8, dst_encoding);
+      return toCvCopyImpl(matFromImage(source), source.getHeader(), ImageEncodingTools.BGR8, dst_encoding);
    }
 
    public static CvImage cvtColor(final CvImage source, String encoding) throws Exception
@@ -74,26 +74,26 @@ public class CvImageTools
       else
       {
          // Convert the source data to the desired encoding
-         final Vector<Integer> conversionCodes = ImEncoding.getConversionCode(sourceEncoding, destinationEncoding);
+         final Vector<Integer> conversionCodes = ImageEncodingTools.getColorConversionCode(sourceEncoding, destinationEncoding);
          Mat image1 = source;
          Mat image2 = new Mat();
 
          for (int i = 0; i < conversionCodes.size(); ++i)
          {
             int conversionCode = conversionCodes.get(i);
-            if (conversionCode == ImEncoding.SAME_FORMAT)
+            if (conversionCode == ImageEncodingTools.SAME_FORMAT)
             {
                //convert from Same number of channels, but different bit depth
 
                //double alpha = 1.0;
-               int sourceDepth = ImageEncodings.bitDepth(sourceEncoding);
-               int destinationDepth = ImageEncodings.bitDepth(destinationEncoding);
+               int sourceDepth = ImageEncodingTools.bitDepth(sourceEncoding);
+               int destinationDepth = ImageEncodingTools.bitDepth(destinationEncoding);
                // Do scaling between CV_8U [0,255] and CV_16U [0,65535] images.
                //from http://www.rubydoc.info/github/ruby-opencv/ruby-opencv/OpenCV/CvMat
                //from http://docs.opencv.org/modules/core/doc/basic_structures.html
                //TODO: check which value default for beta is ok.
                int beta = 0;
-               int image2Type = opencv_core.CV_MAKETYPE(opencv_core.CV_MAT_DEPTH(ImEncoding.getCvType(destinationEncoding)), image1.channels());
+               int image2Type = opencv_core.CV_MAKETYPE(opencv_core.CV_MAT_DEPTH(ImageEncodingTools.getCvType(destinationEncoding)), image1.channels());
                if (sourceDepth == 8 && destinationDepth == 16)
                   image1.convertTo(image2, image2Type, 65535. / 255., beta);
                else if (sourceDepth == 16 && destinationDepth == 8)
@@ -119,7 +119,7 @@ public class CvImageTools
       byte[] imageInBytes = source.getData().array();
       imageInBytes = Arrays.copyOfRange(imageInBytes, source.getData().arrayOffset(), imageInBytes.length);
       String encoding = source.getEncoding().toUpperCase();
-      Mat cvImage = new Mat(source.getHeight(), source.getWidth(), ImEncoding.getCvType(encoding));
+      Mat cvImage = new Mat(source.getHeight(), source.getWidth(), ImageEncodingTools.getCvType(encoding));
 
       BytePointer bytePointer = new BytePointer(imageInBytes);
       cvImage = cvImage.data(bytePointer);
