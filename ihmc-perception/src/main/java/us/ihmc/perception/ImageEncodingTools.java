@@ -113,6 +113,19 @@ public class ImageEncodingTools
               || encoding.equals(BGRA16);
    }
 
+   public static double getMaxBitValue(String encoding)
+   {
+      encoding = encoding.toLowerCase();
+      if (encoding.equals("32uc1"))
+         return 4294967295.0; // 2^32 - 1
+      if (encoding.equals("16uc1") || encoding.equals(MONO16))
+         return 65535.0; // 2^16 - 1
+      else if (encoding.equals("8uc1") || encoding.equals(MONO8))
+         return 255.0; // 2^8 - 1
+      else
+         return Double.NaN;
+   }
+
    public static boolean isMono(String encoding)
    {
       encoding = encoding.toLowerCase();
@@ -208,8 +221,6 @@ public class ImageEncodingTools
    public static int bitDepth(String encoding)
    {
       encoding = encoding.toLowerCase();
-      if (encoding.equals(MONO16))
-         return 16;
       if (encoding.equals(MONO8)
           || encoding.equals(BGR8)
           || encoding.equals(RGB8)
@@ -221,7 +232,8 @@ public class ImageEncodingTools
           || encoding.equals(BAYER_GRBG8))
          return 8;
 
-      if (encoding.equals(MONO16)
+      if (encoding.equals("16uc1") ||
+          encoding.equals(MONO16)
           || encoding.equals(BGR16)
           || encoding.equals(RGB16)
           || encoding.equals(BGRA16)
@@ -439,7 +451,7 @@ public class ImageEncodingTools
       return conversionCodeMap;
    }
 
-   public static OpenCVColorFormats getEncoding(String encoding)
+   public static OpenCVColorFormats getColorFormat(String encoding)
    {
       encoding = encoding.toLowerCase();
 
@@ -471,8 +483,8 @@ public class ImageEncodingTools
 
    public static Vector<Integer> getColorConversionCode(String sourceEncodingString, String destinationEncodingString)
    {
-      OpenCVColorFormats sourceEncoding = getEncoding(sourceEncodingString);
-      OpenCVColorFormats destinationEncoding = getEncoding(destinationEncodingString);
+      OpenCVColorFormats sourceEncoding = getColorFormat(sourceEncodingString);
+      OpenCVColorFormats destinationEncoding = getColorFormat(destinationEncodingString);
 
       boolean isSourceColorFormat = ImageEncodingTools.isColor(sourceEncodingString)
                                     || ImageEncodingTools.isMono(sourceEncodingString)
@@ -517,7 +529,7 @@ public class ImageEncodingTools
          throw new RuntimeException("Unsupported conversion from [" + sourceEncodingString + "] to [" + destinationEncodingString + "]");
 
       // And deal with depth differences if the colors are different
-      if (ImageEncodingTools.bitDepth(sourceEncodingString) != ImageEncodingTools.bitDepth(destinationEncodingString) && (getEncoding(sourceEncodingString) != getEncoding(destinationEncodingString)))
+      if (ImageEncodingTools.bitDepth(sourceEncodingString) != ImageEncodingTools.bitDepth(destinationEncodingString) && (getColorFormat(sourceEncodingString) != getColorFormat(destinationEncodingString)))
          codesVector.add(SAME_FORMAT);
 
       return codesVector;
