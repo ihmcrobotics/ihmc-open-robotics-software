@@ -46,7 +46,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    private long receivedCount = 0;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
-   private final ImBoolean useOpenCV = new ImBoolean(false);
+   private final ImBoolean useOpenCV = new ImBoolean(true);
    private Mat inputImageMat;
    private Mat decodedImageMat;
    private Mat decompressedImageMat;
