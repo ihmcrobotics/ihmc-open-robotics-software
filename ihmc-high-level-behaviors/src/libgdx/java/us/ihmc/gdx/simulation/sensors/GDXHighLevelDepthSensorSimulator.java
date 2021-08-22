@@ -16,6 +16,10 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
 import sensor_msgs.Image;
@@ -53,7 +57,6 @@ import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.function.LongSupplier;
 
@@ -111,6 +114,10 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final ImFloat cx;
    private final ImFloat cy;
 
+   private Mat rgba8Mat;
+   private Mat rgb8Mat;
+   private ByteBuffer rgb8Buffer;
+
    public GDXHighLevelDepthSensorSimulator(String sensorName,
                                            RosNodeInterface ros1Node,
                                            String ros1DepthImageTopic,
@@ -164,7 +171,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          ros1ColorCameraInfoPublisher = new RosCameraInfoPublisher();
          ros1Node.attachPublisher(ros1ColorCameraInfoTopic, ros1ColorCameraInfoPublisher);
          ros1Node.attachPublisher(ros1ColorImageTopic, ros1ColorPublisher);
-         ros1ColorChannelBuffer = ros1ColorPublisher.getChannelBufferFactory().getBuffer(4 * imageWidth * imageHeight);
+         ros1ColorChannelBuffer = ros1ColorPublisher.getChannelBufferFactory().getBuffer(3 * imageWidth * imageHeight);
       }
       if (ros2Node != null && ros2Topic != null)
       {
@@ -192,6 +199,10 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       pointCloudRenderer.create(imageWidth * imageHeight);
       if (debugCoordinateFrame.get())
          coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
+
+      rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
+      rgb8Buffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 3);
+      rgb8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3, new BytePointer(rgb8Buffer));
    }
 
    public void render(GDX3DSceneManager sceneManager)
@@ -241,66 +252,39 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    {
       if (ros1ColorPublisher.isConnected() && ros1ColorCameraInfoPublisher.isConnected() && !colorExecutor.isExecuting())
       {
-//         Pixmap colorPixmap = depthSensorSimulator.getColorPixmap();
-//         ArrayList<Integer> colors = depthSensorSimulator.getColors();
-//
-//         if (colors.isEmpty())
-//            return;
+//         ByteBuffer colorRGB8Buffer = depthSensorSimulator.getColorRGBA8Buffer();
+//         colorRGB8Buffer.rewind();
 
-         IntBuffer colorRGB8Buffer = depthSensorSimulator.getColorRGB8Buffer();
-         colorRGB8Buffer.rewind();
-//         ByteBuffer rawColorByteBuffer = depthSensorSimulator.getRawColorByteBuffer();
-//         rawColorByteBuffer.rewind();
+         opencv_imgproc.cvtColor(rgba8Mat, rgb8Mat, opencv_imgproc.COLOR_RGBA2RGB);
 
-         int bytesPerPixel = 4;
+//         int bytesPerPixel = 4;
+//         ros1ColorChannelBuffer.clear();
+//         int size = 4 * imageWidth * imageHeight;
+//         for (int y = 0; y < imageHeight; y++)
+//         {
+//            for (int x = 0; x < imageWidth; x++)
+//            {
+//               try
+//               {
+//                  int index = size - (x * bytesPerPixel + (y + 1) * imageHeight * bytesPerPixel);
+//                  ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
+//               }
+//               catch (IndexOutOfBoundsException e)
+//               {
+//                  System.err.println(e.getMessage());
+//               }
+//            }
+//         }
+
          ros1ColorChannelBuffer.clear();
-         int size = 4 * imageWidth * imageHeight;
-         for (int y = 0; y < imageHeight; y++)
-         {
-            for (int x = 0; x < imageWidth; x++)
-            {
-//               int pixelColor = colorPixmap.getPixel(x, y);
-//               ros1ColorChannelBuffer.writeInt(pixelColor);
-
-try
-{
-               int index = size - (x * bytesPerPixel + (y + 1) * imageHeight * bytesPerPixel);
-//               ros1ColorChannelBuffer.setInt(index, colorRGB8Buffer.get());
-//               ros1ColorChannelBuffer.setBytes(index, rawColorByteBuffer.g);
-//               ros1ColorChannelBuffer.setByte(index, rawColorByteBuffer.get());
-//               ros1ColorChannelBuffer.setByte(index + 1, rawColorByteBuffer.get());
-//               ros1ColorChannelBuffer.setByte(index + 2, rawColorByteBuffer.get());
-//               ros1ColorChannelBuffer.setByte(index + 3, rawColorByteBuffer.get());
-//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
-//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
-//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
-//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
-               ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
-//               ros1ColorChannelBuffer.setBytes(index, colorRGB8Buffer.get());
-
-}
-catch (IndexOutOfBoundsException e)
-{
-   System.err.println(e.getMessage());
-}
-//                 ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
-            }
-         }
-//         for (int i = 0; i < imageWidth * imageHeight; i++)
-//            ros1ColorChannelBuffer.writeInt(colors.get(i));
-//         for (int i = 0; i < imageWidth * imageHeight; i++)
-//            ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
-//
-//         colors.clear();
-
-         ros1ColorChannelBuffer.readerIndex(0);
-         ros1ColorChannelBuffer.writerIndex(size);
+         rgb8Buffer.rewind();
+         ros1ColorChannelBuffer.writeBytes(rgb8Buffer);
 
          colorExecutor.execute(() ->
          {
-            Image message = ros1ColorPublisher.createMessage(imageWidth, imageHeight, bytesPerPixel, "rgb8", ros1ColorChannelBuffer);
+            Image message = ros1ColorPublisher.createMessage(imageWidth, imageHeight, 3, "rgb8", ros1ColorChannelBuffer);
 
-            if(timestampSupplier != null)
+            if (timestampSupplier != null)
                message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(timestampSupplier.getAsLong())));
 
             ros1ColorPublisher.publish(message);
@@ -312,9 +296,9 @@ catch (IndexOutOfBoundsException e)
    {
       if (!colorROS2Executor.isExecuting())
       {
-         ByteBuffer colorRGB8Buffer = depthSensorSimulator.getRawColorByteBuffer();
-         colorRGB8Buffer.rewind();
-         int capacity = colorRGB8Buffer.capacity();
+         ByteBuffer colorRGBA8Buffer = depthSensorSimulator.getColorRGBA8Buffer();
+         colorRGBA8Buffer.rewind();
+         int capacity = colorRGBA8Buffer.capacity();
          for (int y = 0; y < imageHeight; y++)
          {
             for (int x = 0; x < imageWidth; x++)
@@ -324,15 +308,15 @@ catch (IndexOutOfBoundsException e)
                int iDest = (y * imageWidth + (imageWidth - x - 1)) * 4;
 
                // flipping RGBA to BGRA here
-               flippedColorByteBuffer.put(capacity - iDest - 4 + 0, colorRGB8Buffer.get(iSrc + 2));
-               flippedColorByteBuffer.put(capacity - iDest - 4 + 1, colorRGB8Buffer.get(iSrc + 1));
-               flippedColorByteBuffer.put(capacity - iDest - 4 + 2, colorRGB8Buffer.get(iSrc + 0));
-               flippedColorByteBuffer.put(capacity - iDest - 4 + 3, colorRGB8Buffer.get(iSrc + 3));
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 0, colorRGBA8Buffer.get(iSrc + 2));
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 1, colorRGBA8Buffer.get(iSrc + 1));
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 2, colorRGBA8Buffer.get(iSrc + 0));
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 3, colorRGBA8Buffer.get(iSrc + 3));
             }
          }
          flippedColorByteBuffer.rewind();
 
-         byte[] data = jpegCompressor.convertRGB8ToJPEGData(imageWidth, imageHeight, flippedColorByteBuffer);
+         byte[] data = jpegCompressor.convertBGRA8ToJPEGData(imageWidth, imageHeight, flippedColorByteBuffer);
 
          colorROS2Executor.execute(() ->
          {
