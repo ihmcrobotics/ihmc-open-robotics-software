@@ -94,13 +94,13 @@ public class CvImage
    }
 
    //TODO add a compression parameter.
-   public final CompressedImage toCompressedImageMessage(final CompressedImage rosImage, Format destinationFormat) throws Exception
+   public final CompressedImage toCompressedImageMessage(final CompressedImage rosImage, OpenCVImageFormat destinationFormat) throws Exception
    {
       rosImage.setHeader(header);
       Mat image;
-      if (!encoding.equals(ImageEncodings.BGR8))
+      if (!encoding.equals(ImageEncodingTools.BGR8))
       {
-         CvImage temp = CvImageTools.cvtColor(this, ImageEncodings.BGR8);
+         CvImage temp = ROSOpenCVImageTools.cvtColor(this, ImageEncodingTools.BGR8);
          image = temp.image;
       }
       else
@@ -113,8 +113,8 @@ public class CvImage
 
       //from http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html#Mat imread(const string& filename, int flags)
 
-      rosImage.setFormat(Format.valueOf(destinationFormat));
-      opencv_imgcodecs.imencode(Format.getExtension(destinationFormat), image, buffer);
+      rosImage.setFormat(OpenCVImageFormat.valueOf(destinationFormat));
+      opencv_imgcodecs.imencode(OpenCVImageFormat.getExtension(destinationFormat), image, buffer);
 
       ChannelBufferOutputStream stream = new ChannelBufferOutputStream(MessageBuffers.dynamicBuffer());
       //from https://github.com/bytedeco/javacpp-presets/issues/29#issuecomment-6408082977

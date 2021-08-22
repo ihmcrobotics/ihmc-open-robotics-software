@@ -33,27 +33,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 //from http://stackoverflow.com/questions/11047756/getting-enum-associated-with-int-value
-public enum Encoding
+public enum OpenCVColorFormats
 {
    INVALID(-1), GRAY(0), RGB(1), BGR(2), RGBA(3), BGRA(4), YUV422(5), BAYER_RGGB(6), BAYER_BGGR(7), BAYER_GBRG(8), BAYER_GRBG(9);
    protected int encodingNumber;
 
-   private static Map<Integer, Encoding> map = new HashMap<Integer, Encoding>();
+   private static final Map<Integer, OpenCVColorFormats> map = new HashMap<>();
 
    static
    {
-      for (Encoding encoding : Encoding.values())
+      for (OpenCVColorFormats encoding : OpenCVColorFormats.values())
       {
          map.put(encoding.encodingNumber, encoding);
       }
    }
 
-   Encoding(final int encodingNumber)
+   OpenCVColorFormats(final int encodingNumber)
    {
       this.encodingNumber = encodingNumber;
    }
 
-   public static Encoding valueOf(int encodingNumber)
+   public static OpenCVColorFormats valueOf(int encodingNumber)
    {
       return map.get(encodingNumber);
    }

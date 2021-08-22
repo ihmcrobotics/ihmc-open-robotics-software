@@ -5,16 +5,22 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.perception.CvImage;
-import us.ihmc.perception.CvImageTools;
-import us.ihmc.perception.ImageEncodings;
+import us.ihmc.perception.ROSOpenCVImageTools;
+import us.ihmc.perception.ImageEncodingTools;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -37,9 +43,14 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    private volatile CompressedImage compressedImage;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
-
    private long receivedCount = 0;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImBoolean useOpenCV = new ImBoolean(false);
+   private Mat inputImageMat;
+   private Mat decodedImageMat;
+   private Mat decompressedImageMat;
+   private Mat resizedImageMat;
 
    public GDXROS1VideoVisualizer(String title, String topic)
    {
@@ -99,6 +110,8 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
       super.renderImGuiWidgets();
       ImGui.text(topic);
       receivedPlot.render(receivedCount);
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Use OpenCV"), useOpenCV);
    }
 
    @Override
@@ -113,15 +126,27 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
 
          if (isCompressed && compressedImage != null)
          {
-            decompressAndDecodeUsingOpenCV(compressedImage);
-//            decompressAndDecodeTheOldWay(compressedImage);
+            if (useOpenCV.get())
+            {
+               decompressAndDecodeUsingOpenCV(compressedImage);
+            }
+            else
+            {
+               decompressAndDecodeTheOldWay(compressedImage);
+            }
             texture.draw(pixmap, 0, 0);
          }
          else if (image != null)
          {
             ensureTextureReady(image.getWidth(), image.getHeight());
-            decodeUsingOpenCV(image);
-            //            decodeTheOldWay(image);
+            if (useOpenCV.get())
+            {
+               decodeUsingOpenCV(image);
+            }
+            else
+            {
+               decodeTheOldWay(image);
+            }
             texture.draw(pixmap, 0, 0);
          }
       }
@@ -131,9 +156,42 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       try
       {
-         CvImage cvImage = CvImageTools.toCvCopy(image, ImageEncodings.RGBA8);
-         Buffer buffer = cvImage.image.createBuffer();
-         pixmap.setPixels((ByteBuffer) buffer);
+         if (inputImageMat == null)
+         {
+            String encoding = image.getEncoding();
+            int cvType = ImageEncodingTools.getCvType(encoding);
+            inputImageMat = new Mat(image.getHeight(), image.getWidth(), cvType);
+            decodedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
+            resizedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
+         }
+
+         ChannelBuffer nettyImageData = image.getData();
+         ByteBuffer dataByteBuffer = nettyImageData.toByteBuffer();
+         int arrayOffset = nettyImageData.arrayOffset();
+         dataByteBuffer.position(arrayOffset);
+         ByteBuffer offsetByteBuffer = dataByteBuffer.slice();
+
+         BytePointer imageDataPointer = new BytePointer(offsetByteBuffer);
+         inputImageMat.data(imageDataPointer);
+
+//         inputImageMat.convertTo();
+         opencv_core.normalize(inputImageMat, inputImageMat, 0.0, 65535., opencv_core.NORM_MINMAX, -1, opencv_core.noArray());
+
+//         int conversionCode = ImageEncodingTools.getColorConversionCode(ImageEncodingTools.GRAY, ImageEncodingTools.RGBA8).get(0);
+         opencv_imgproc.cvtColor(inputImageMat, decodedImageMat, opencv_imgproc.COLOR_GRAY2RGBA);
+//         opencv_core.nor(inputImageMat, decodedImageMat, opencv_imgproc.COLOR_GRAY2RGBA);
+
+
+         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4, 255. / 65535., 0);
+//         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4, 6000. / 65535., 0);
+//         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4);
+
+
+         pixmap.setPixels((ByteBuffer) resizedImageMat.createBuffer());
+
+//         CvImage cvImage = ROSOpenCVImageTools.toCvCopy(image, ImageEncodingTools.RGBA8);
+//         Buffer buffer = cvImage.image.createBuffer();
+//         pixmap.setPixels((ByteBuffer) buffer);
       }
       catch (Exception e)
       {
@@ -145,7 +203,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       try
       {
-         CvImage cvImage = CvImageTools.toCvCopy(compressedImage, ImageEncodings.RGBA8);
+         CvImage cvImage = ROSOpenCVImageTools.toCvCopy(compressedImage, ImageEncodingTools.RGBA8);
          Buffer buffer = cvImage.image.createBuffer();
          ensureTextureReady(cvImage.image.cols(), cvImage.image.rows());
          pixmap.setPixels((ByteBuffer) buffer);
@@ -226,7 +284,6 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             }
          }
       }
-      texture.draw(pixmap, 0, 0);
    }
 
    private void decompressAndDecodeTheOldWay(CompressedImage compressedImage)
