@@ -6,9 +6,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import org.apache.commons.lang3.StringUtils;
-import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
-import us.ihmc.behaviors.demo.BuildingExplorationBehaviorMode;
-import us.ihmc.behaviors.demo.BuildingExplorationBehaviorParameters;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehavior;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -21,7 +21,7 @@ import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
 
 public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterface
 {

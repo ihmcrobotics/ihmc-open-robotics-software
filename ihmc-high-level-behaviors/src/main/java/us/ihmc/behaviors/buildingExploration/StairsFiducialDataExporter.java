@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.demo;
+package us.ihmc.behaviors.buildingExploration;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
@@ -14,7 +13,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
 
 import java.io.File;
 import java.io.FileOutputStream;

@@ -16,8 +16,8 @@ import javafx.scene.text.Text;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.behaviors.demo.BuildingExplorationBehaviorOld;
-import us.ihmc.behaviors.demo.BuildingExplorationBehaviorOldAPI;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorOld;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorOldAPI;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIDefinition;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.behaviors.javafx.editors.WalkingGoalPlacementEditor;
@@ -26,7 +26,7 @@ import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.behaviors.demo.BuildingExplorationStateName;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationStateName;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepVisualizationGroup;
@@ -37,7 +37,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorOldAPI.*;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorOldAPI.*;
 
 public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
 {

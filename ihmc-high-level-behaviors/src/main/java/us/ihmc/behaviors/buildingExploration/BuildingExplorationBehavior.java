@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.demo;
+package us.ihmc.behaviors.buildingExploration;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.BehaviorDefinition;
@@ -16,9 +16,9 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorMode.*;
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorTools.NAN_POSE;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode.*;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorTools.NAN_POSE;
 
 public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
 {
