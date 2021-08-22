@@ -38,6 +38,7 @@ public class GDXPerceptionVisualizerUI
 
     private final GDXImGuiBasedUI baseUI;
     private final ImGuiMapSenseConfigurationPanel mapsenseConfigurationUI;
+    private final ImGuiTargetPlacementPanel targetPlacementPanel;
     private final ImGuiGDXGlobalVisualizersPanel globalVisualizersUI;
     private final GDXEnvironmentBuilderPanel environmentBuilderUI;
 
@@ -54,6 +55,7 @@ public class GDXPerceptionVisualizerUI
 
         baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", "Perception Visualizer");
         mapsenseConfigurationUI = new ImGuiMapSenseConfigurationPanel(ros1Node, ros2Node);
+        targetPlacementPanel = new ImGuiTargetPlacementPanel(ros1Node, ros2Node);
 
         globalVisualizersUI = new ImGuiGDXGlobalVisualizersPanel();
         GDXROS1PlanarRegionsVisualizer mapsenseRegionsVisualizer = new GDXROS1PlanarRegionsVisualizer("MapSense Planar Regions",
@@ -80,6 +82,7 @@ public class GDXPerceptionVisualizerUI
         baseUI.getImGuiPanelManager().addPanel(mapsenseRegionsVisualizer.getLoggingPanel());
 //        baseUI.getImGuiDockingSetup().addWindow(simulatedDepthSensor.getWindowName(), simulatedDepthSensor::renderImGuiWindow);
         baseUI.getImGuiPanelManager().addPanel(mapsenseConfigurationUI.getWindowName(), mapsenseConfigurationUI::render);
+        baseUI.getImGuiPanelManager().addPanel(targetPlacementPanel.getWindowName(), targetPlacementPanel::render);
         baseUI.getImGuiPanelManager().addPanel(environmentBuilderUI.getWindowName(), environmentBuilderUI::renderImGuiWindow);
 
         baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
