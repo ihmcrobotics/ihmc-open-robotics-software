@@ -43,27 +43,26 @@ import sensor_msgs.Image;
 import std_msgs.Header;
 
 /**
- * @author Tal Regev
+ * Taken from https://github.com/talregev/android_cv_bridge/tree/master/cv_bridge_javacv/src/cv_bridge
  */
-public class CvImage
+public class ROSOpenCVImage
 {
-   public static final String TAG = "cv_bridge::CvImage";
    public Header header;
    public Mat image = new Mat();
    public String encoding = "";
 
-   protected CvImage()
+   protected ROSOpenCVImage()
    {
    }
 
-   public CvImage(final Header header, final String encoding)
+   public ROSOpenCVImage(final Header header, final String encoding)
    {
       this.header = header;
       this.encoding = encoding.toUpperCase();
       this.image = new Mat();
    }
 
-   public CvImage(final Header header, final String encoding, final Mat image)
+   public ROSOpenCVImage(final Header header, final String encoding, final Mat image)
    {
       this.header = header;
       this.encoding = encoding.toUpperCase();
@@ -100,7 +99,7 @@ public class CvImage
       Mat image;
       if (!encoding.equals(ImageEncodingTools.BGR8))
       {
-         CvImage temp = ROSOpenCVImageTools.cvtColor(this, ImageEncodingTools.BGR8);
+         ROSOpenCVImage temp = ROSOpenCVImageTools.cvtColor(this, ImageEncodingTools.BGR8);
          image = temp.image;
       }
       else

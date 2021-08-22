@@ -18,7 +18,7 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
-import us.ihmc.perception.CvImage;
+import us.ihmc.perception.ROSOpenCVImage;
 import us.ihmc.perception.ROSOpenCVImageTools;
 import us.ihmc.perception.ImageEncodingTools;
 import us.ihmc.utilities.ros.RosNodeInterface;
@@ -154,58 +154,51 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
 
    private void decodeUsingOpenCV(Image image)
    {
-      try
+      if (inputImageMat == null)
       {
-         if (inputImageMat == null)
-         {
-            String encoding = image.getEncoding();
-            int cvType = ImageEncodingTools.getCvType(encoding);
-            inputImageMat = new Mat(image.getHeight(), image.getWidth(), cvType);
-            decodedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
-            resizedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
-         }
-
-         ChannelBuffer nettyImageData = image.getData();
-         ByteBuffer dataByteBuffer = nettyImageData.toByteBuffer();
-         int arrayOffset = nettyImageData.arrayOffset();
-         dataByteBuffer.position(arrayOffset);
-         ByteBuffer offsetByteBuffer = dataByteBuffer.slice();
-
-         BytePointer imageDataPointer = new BytePointer(offsetByteBuffer);
-         inputImageMat.data(imageDataPointer);
-
-//         inputImageMat.convertTo();
-         opencv_core.normalize(inputImageMat, inputImageMat, 0.0, 65535., opencv_core.NORM_MINMAX, -1, opencv_core.noArray());
-
-//         int conversionCode = ImageEncodingTools.getColorConversionCode(ImageEncodingTools.GRAY, ImageEncodingTools.RGBA8).get(0);
-         opencv_imgproc.cvtColor(inputImageMat, decodedImageMat, opencv_imgproc.COLOR_GRAY2RGBA);
-//         opencv_core.nor(inputImageMat, decodedImageMat, opencv_imgproc.COLOR_GRAY2RGBA);
-
-
-         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4, 255. / 65535., 0);
-//         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4, 6000. / 65535., 0);
-//         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4);
-
-
-         pixmap.setPixels((ByteBuffer) resizedImageMat.createBuffer());
-
-//         CvImage cvImage = ROSOpenCVImageTools.toCvCopy(image, ImageEncodingTools.RGBA8);
-//         Buffer buffer = cvImage.image.createBuffer();
-//         pixmap.setPixels((ByteBuffer) buffer);
+         String encoding = image.getEncoding();
+         int cvType = ImageEncodingTools.getCvType(encoding);
+         inputImageMat = new Mat(image.getHeight(), image.getWidth(), cvType);
+         decodedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
+         resizedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
       }
-      catch (Exception e)
+
+      ChannelBuffer nettyImageData = image.getData();
+      ByteBuffer dataByteBuffer = nettyImageData.toByteBuffer();
+      int arrayOffset = nettyImageData.arrayOffset();
+      dataByteBuffer.position(arrayOffset);
+      ByteBuffer offsetByteBuffer = dataByteBuffer.slice();
+
+      BytePointer imageDataPointer = new BytePointer(offsetByteBuffer);
+      inputImageMat.data(imageDataPointer);
+
+      if (ImageEncodingTools.isMono(image.getEncoding()))
       {
-         e.printStackTrace();
+         double min = 0.0;
+         double max = ImageEncodingTools.getMaxBitValue(image.getEncoding());
+         opencv_core.normalize(inputImageMat, inputImageMat, min, max, opencv_core.NORM_MINMAX, -1, opencv_core.noArray());
       }
+
+      int conversionCode = ImageEncodingTools.getColorConversionCode(image.getEncoding(), ImageEncodingTools.RGBA8).get(0);
+      opencv_imgproc.cvtColor(inputImageMat, decodedImageMat, conversionCode);
+
+      int sourceDepth = ImageEncodingTools.bitDepth(image.getEncoding());
+      double beta = 0.0;
+      if (sourceDepth == 16)
+         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4, 255. / 65535., beta);
+      else
+         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4);
+
+      pixmap.setPixels((ByteBuffer) resizedImageMat.createBuffer());
    }
 
    private void decompressAndDecodeUsingOpenCV(CompressedImage compressedImage)
    {
       try
       {
-         CvImage cvImage = ROSOpenCVImageTools.toCvCopy(compressedImage, ImageEncodingTools.RGBA8);
-         Buffer buffer = cvImage.image.createBuffer();
-         ensureTextureReady(cvImage.image.cols(), cvImage.image.rows());
+         ROSOpenCVImage ROSOpenCVImage = ROSOpenCVImageTools.toCvCopy(compressedImage, ImageEncodingTools.RGBA8);
+         Buffer buffer = ROSOpenCVImage.image.createBuffer();
+         ensureTextureReady(ROSOpenCVImage.image.cols(), ROSOpenCVImage.image.rows());
          pixmap.setPixels((ByteBuffer) buffer);
       }
       catch (Exception e)

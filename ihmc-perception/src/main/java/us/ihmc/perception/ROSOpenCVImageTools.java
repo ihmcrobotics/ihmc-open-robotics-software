@@ -29,32 +29,32 @@ public class ROSOpenCVImageTools
       inputImageMat.data(imageDataPointer);
    }
 
-   public static CvImage toCvCopy(final Image source) throws Exception
+   public static ROSOpenCVImage toCvCopy(final Image source) throws Exception
    {
-      return toCvCopyImpl(matFromImage(source), source.getHeader(), source.getEncoding(), "");
+      return toCvCopyImpl(matFromImageAndCopyData(source), source.getHeader(), source.getEncoding(), "");
    }
 
-   public static CvImage toCvCopy(final Image source, final String dst_encoding) throws Exception
+   public static ROSOpenCVImage toCvCopy(final Image source, final String dst_encoding) throws Exception
    {
-      return toCvCopyImpl(matFromImage(source), source.getHeader(), source.getEncoding(), dst_encoding);
+      return toCvCopyImpl(matFromImageAndCopyData(source), source.getHeader(), source.getEncoding(), dst_encoding);
    }
 
-   public static CvImage toCvCopy(final CompressedImage source) throws Exception
+   public static ROSOpenCVImage toCvCopy(final CompressedImage source) throws Exception
    {
-      return toCvCopyImpl(matFromImage(source), source.getHeader(), ImageEncodingTools.BGR8, "");
+      return toCvCopyImpl(matFromImageAndCopyData(source), source.getHeader(), ImageEncodingTools.BGR8, "");
    }
 
-   public static CvImage toCvCopy(final CompressedImage source, final String dst_encoding) throws Exception
+   public static ROSOpenCVImage toCvCopy(final CompressedImage source, final String dst_encoding) throws Exception
    {
-      return toCvCopyImpl(matFromImage(source), source.getHeader(), ImageEncodingTools.BGR8, dst_encoding);
+      return toCvCopyImpl(matFromImageAndCopyData(source), source.getHeader(), ImageEncodingTools.BGR8, dst_encoding);
    }
 
-   public static CvImage cvtColor(final CvImage source, String encoding) throws Exception
+   public static ROSOpenCVImage cvtColor(final ROSOpenCVImage source, String encoding) throws Exception
    {
       return toCvCopyImpl(source.image, source.header, source.encoding, encoding);
    }
 
-   public static CvImage toCvCopyImpl(final Mat source, final Header sourceHeader, final String sourceEncoding, final String destinationEncoding) throws Exception
+   public static ROSOpenCVImage toCvCopyImpl(final Mat source, final Header sourceHeader, final String sourceEncoding, final String destinationEncoding) throws Exception
    {
       /// @todo Handle endianness - e.g. 16-bit dc1394 camera images are big-endian
       /// Languages such as Java manage this for you so that Java code can run on any platform and programmers do not have to manage byte ordering.
@@ -62,14 +62,14 @@ public class ROSOpenCVImageTools
       /// need to check if it true in our case with this cameras.
 
       // Copy metadata
-      CvImage cvImage = new CvImage();
-      cvImage.header = sourceHeader;
+      ROSOpenCVImage ROSOpenCVImage = new ROSOpenCVImage();
+      ROSOpenCVImage.header = sourceHeader;
 
       // Copy to new buffer if same encoding requested
       if (destinationEncoding.isEmpty() || destinationEncoding.equals(sourceEncoding))
       {
-         cvImage.encoding = sourceEncoding;
-         source.copyTo(cvImage.image);
+         ROSOpenCVImage.encoding = sourceEncoding;
+         source.copyTo(ROSOpenCVImage.image);
       }
       else
       {
@@ -108,25 +108,50 @@ public class ROSOpenCVImageTools
             }
             image1 = image2;
          }
-         cvImage.image = image2;
-         cvImage.encoding = destinationEncoding;
+         ROSOpenCVImage.image = image2;
+         ROSOpenCVImage.encoding = destinationEncoding;
       }
-      return cvImage;
+      return ROSOpenCVImage;
    }
 
-   public static Mat matFromImage(final Image source) throws Exception
+   public static void convert()
+   {
+
+   }
+
+   public static Mat matFromImage(final Image source)
+   {
+      String encoding = source.getEncoding().toUpperCase();
+      return new Mat(source.getHeight(), source.getWidth(), ImageEncodingTools.getCvType(encoding));
+   }
+
+   public static Mat matFromImage(final CompressedImage source)
+   {
+      ChannelBuffer data = source.getData();
+      byte[] imageInBytes = data.array();
+      imageInBytes = Arrays.copyOfRange(imageInBytes, source.getData().arrayOffset(), imageInBytes.length);
+
+      int length = source.getData().array().length - source.getData().arrayOffset();
+      //from http://stackoverflow.com/questions/23202130/android-convert-byte-array-from-camera-api-to-color-mat-object-opencv
+      Mat cvImage = new Mat(1, imageInBytes.length, opencv_core.CV_8UC1);
+      BytePointer bytePointer = new BytePointer(imageInBytes);
+      cvImage = cvImage.data(bytePointer);
+
+      return opencv_imgcodecs.imdecode(cvImage, opencv_imgcodecs.IMREAD_ANYCOLOR);
+   }
+
+   public static Mat matFromImageAndCopyData(final Image source)
    {
       byte[] imageInBytes = source.getData().array();
       imageInBytes = Arrays.copyOfRange(imageInBytes, source.getData().arrayOffset(), imageInBytes.length);
-      String encoding = source.getEncoding().toUpperCase();
-      Mat cvImage = new Mat(source.getHeight(), source.getWidth(), ImageEncodingTools.getCvType(encoding));
+      Mat cvImage = matFromImage(source);
 
       BytePointer bytePointer = new BytePointer(imageInBytes);
       cvImage = cvImage.data(bytePointer);
       return cvImage;
    }
 
-   public static Mat matFromImage(final CompressedImage source) throws Exception
+   public static Mat matFromImageAndCopyData(final CompressedImage source)
    {
       ChannelBuffer data = source.getData();
       byte[] imageInBytes = data.array();

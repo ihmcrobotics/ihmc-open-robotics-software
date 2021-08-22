@@ -119,7 +119,7 @@ public class AtlasZED2LeftEyeToMultiSenseLeftEyeBridge
                         //                        opencv_imgcodecs.imdecode(inputImageMat, opencv_imgcodecs.IMREAD_ANYCOLOR, decodedImageMat);
 
 
-//                        CvImage cvImage = ROSOpenCVImageTools.toCvCopy(ros1Image, ImageEncodingTools.RGBA8);
+//                        ROSOpenCVImage cvImage = ROSOpenCVImageTools.toCvCopy(ros1Image, ImageEncodingTools.RGBA8);
 //                        Buffer cvBuffer = cvImage.image.createBuffer();
 //
 //
