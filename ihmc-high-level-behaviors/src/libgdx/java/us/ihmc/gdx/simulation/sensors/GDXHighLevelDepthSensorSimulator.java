@@ -252,29 +252,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    {
       if (ros1ColorPublisher.isConnected() && ros1ColorCameraInfoPublisher.isConnected() && !colorExecutor.isExecuting())
       {
-//         ByteBuffer colorRGB8Buffer = depthSensorSimulator.getColorRGBA8Buffer();
-//         colorRGB8Buffer.rewind();
-
          opencv_imgproc.cvtColor(rgba8Mat, rgb8Mat, opencv_imgproc.COLOR_RGBA2RGB);
-
-//         int bytesPerPixel = 4;
-//         ros1ColorChannelBuffer.clear();
-//         int size = 4 * imageWidth * imageHeight;
-//         for (int y = 0; y < imageHeight; y++)
-//         {
-//            for (int x = 0; x < imageWidth; x++)
-//            {
-//               try
-//               {
-//                  int index = size - (x * bytesPerPixel + (y + 1) * imageHeight * bytesPerPixel);
-//                  ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
-//               }
-//               catch (IndexOutOfBoundsException e)
-//               {
-//                  System.err.println(e.getMessage());
-//               }
-//            }
-//         }
 
          ros1ColorChannelBuffer.clear();
          rgb8Buffer.rewind();
