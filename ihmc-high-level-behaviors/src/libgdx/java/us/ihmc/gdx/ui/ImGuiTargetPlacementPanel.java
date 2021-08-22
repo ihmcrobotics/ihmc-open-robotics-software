@@ -1,10 +1,8 @@
 package us.ihmc.gdx.ui;
 
 import imgui.ImGui;
-import us.ihmc.behaviors.BehaviorRegistry;
-import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI;
 import us.ihmc.behaviors.tools.ManagedMessager;
-import us.ihmc.behaviors.tools.MessagerHelper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2NodeInterface;

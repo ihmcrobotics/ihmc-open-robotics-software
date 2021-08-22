@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorTools.NAN_POSE;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorTools.NAN_POSE;
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
 public class TraverseStairsBehavior extends ResettingNode implements BehaviorInterface
