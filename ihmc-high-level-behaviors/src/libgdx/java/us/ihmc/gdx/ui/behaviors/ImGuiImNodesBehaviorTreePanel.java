@@ -127,12 +127,15 @@ public class ImGuiImNodesBehaviorTreePanel
          {
             Map.Entry<String, JsonNode> entry = it.next();
 
-            int id = nodeNameToIdMap.get(entry.getKey());
-            String[] pos = entry.getValue().asText().split(",");
-            float x = Float.parseFloat(pos[0]);
-            float y = Float.parseFloat(pos[1]);
+            Integer id = nodeNameToIdMap.get(entry.getKey());
+            if (id != null)
+            {
+               String[] pos = entry.getValue().asText().split(",");
+               float x = Float.parseFloat(pos[0]);
+               float y = Float.parseFloat(pos[1]);
 
-            ImNodes.setNodeGridSpacePos(id, x, y);
+               ImNodes.setNodeGridSpacePos(id, x, y);
+            }
          }
       });
    }
