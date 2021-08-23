@@ -1,11 +1,9 @@
 package us.ihmc.gdx.ui.behaviors;
 
-import com.badlogic.gdx.graphics.Color;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorModule;
@@ -22,14 +20,13 @@ import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
+import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.gdx.ui.yo.ImGuiYoVariableClientManagerWidget;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.ros2.ROS2Node;
 
-import java.time.LocalDateTime;
-import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -45,6 +42,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    private final Stopwatch statusStopwatch = new Stopwatch();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Tree status", 1000, 230, 15);
+   private final ImGuiLogWidget logWidget;
    private volatile boolean messagerConnecting = false;
    private String messagerConnectedHost = "";
    private final MessagerHelper messagerHelper;
@@ -52,7 +50,6 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    private final GDXBehaviorUIInterface highestLevelUI;
    private final ImGuiBehaviorModuleDisabledNodeUI disabledNodeUI;
    private final BehaviorHelper behaviorHelper;
-   private final LinkedList<Pair<Integer, String>> logArray = new LinkedList<>();
    private final ImGuiImNodesBehaviorTreePanel behaviorTreePanel = new ImGuiImNodesBehaviorTreePanel("Behavior Tree", this.getClass());
    private final ImGuiPanel panel = new ImGuiPanel(windowName, this::renderRegularPanelImGuiWidgetsAndChildren);
    private final ImBoolean imEnabled = new ImBoolean(false);
@@ -66,21 +63,12 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       messagerHelper = behaviorHelper.getMessagerHelper();
       yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(behaviorHelper.getYoVariableClientHelper(),
                                                                              behaviorModuleHost::get, NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
-      logArray.addLast(Pair.of(Level.INFO.intLevel(), "Log started at " + LocalDateTime.now()));
-      behaviorHelper.subscribeViaCallback(StatusLog, logEntry ->
-      {
-         synchronized (logArray)
-         {
-            logArray.addLast(logEntry);
-         }
-      });
+      logWidget = new ImGuiLogWidget("Behavior status");
+      behaviorHelper.subscribeViaCallback(StatusLog, logWidget::submitEntry);
       behaviorHelper.subscribeViaCallback(ROS2Tools.TEXT_STATUS, textStatus ->
       {
-         synchronized (logArray)
-         {
-            LogTools.info("TextToSpeech: {}", textStatus.getTextToSpeakAsString());
-            logArray.addLast(Pair.of(Level.INFO.intLevel(), textStatus.getTextToSpeakAsString()));
-         }
+         LogTools.info("TextToSpeech: {}", textStatus.getTextToSpeakAsString());
+         logWidget.submitEntry(Level.INFO, textStatus.getTextToSpeakAsString());
       });
       behaviorHelper.subscribeViaCallback(BehaviorTreeStatus, status ->
       {
@@ -118,41 +106,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    @Override
    public void renderRegularPanelImGuiWidgets()
    {
-      synchronized (logArray)
-      {
-         ImGui.text("Behavior status log:");
-         ImGui.pushItemWidth(ImGui.getWindowWidth() - 10);
-         int numLogEntriesToShow = 20;
-         while (logArray.size() > numLogEntriesToShow)
-            logArray.removeFirst();
-         for (Pair<Integer, String> logEntry : logArray)
-         {
-            Color color = Color.WHITE;
-            float[] hsv = new float[3];
-            switch (logEntry.getLeft())
-            {
-               case 100:
-               case 200:
-                  color = Color.RED;
-                  break;
-               case 300:
-                  Color.YELLOW.toHsv(hsv);
-                  color = color.fromHsv(hsv[0], hsv[1], 0.7f);
-                  break;
-               case 400:
-                  color = Color.BLACK;
-                  break;
-               case 500:
-                  color = Color.CYAN;
-                  break;
-               case 600:
-                  color = Color.GREEN;
-                  break;
-            }
-            ImGui.textColored(color.r, color.g, color.b, 1.0f, logEntry.getRight());
-         }
-      }
-      ImGui.popItemWidth();
+      logWidget.renderImGuiWidgets();
    }
 
    @Override
