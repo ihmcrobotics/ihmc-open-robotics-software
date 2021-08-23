@@ -72,7 +72,6 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
          traverseStairsUI.setGoal(goalPose);
       }, Color.GREEN);
       baseUI.addImGui3DViewInputProcessor(goalAffordance::processImGui3DViewInput);
-      baseUI.get3DSceneManager().addRenderableProvider(this, GDXSceneLevel.VIRTUAL);
 
       lookAndStepUI.create(baseUI);
       traverseStairsUI.create(baseUI);

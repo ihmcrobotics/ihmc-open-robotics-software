@@ -91,7 +91,6 @@ public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements B
       return BehaviorTreeNodeStatus.SUCCESS;
    }
 
-   @Override
    public void setEnabled(boolean enabled)
    {
       LogTools.info("Fancy poses behavior selected = {}", enabled);

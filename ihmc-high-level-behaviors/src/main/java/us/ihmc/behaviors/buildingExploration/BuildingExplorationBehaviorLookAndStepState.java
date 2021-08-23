@@ -115,10 +115,6 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
       helper.publish(LookAndStepBehaviorAPI.RESET);
 
-      LogTools.info("Enabling look and step behavior");
-      buildingExplorationBehavior.getLookAndStepBehavior().setEnabled(true);
-      ThreadTools.sleep(100);
-
       if (!currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
       {
          LogTools.info("Waiting for BODY_PATH_PLANNING state...");
@@ -241,8 +237,6 @@ class BuildingExplorationBehaviorLookAndStepState implements State
    public void onExit(double timeInState)
    {
       LogTools.info("Exiting " + getClass().getSimpleName());
-
-      buildingExplorationBehavior.getLookAndStepBehavior().setEnabled(false);
 
       lookAndStepStarted = false;
       numberOfStepsToIgnoreDebris = 0;

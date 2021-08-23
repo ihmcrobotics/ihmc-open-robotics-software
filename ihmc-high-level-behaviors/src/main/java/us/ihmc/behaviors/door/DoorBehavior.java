@@ -134,12 +134,6 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
 //      helper.publishBehaviorControlMode(BehaviorControlModeEnum.STOP);
    }
 
-   @Override
-   public void setEnabled(boolean enabled)
-   {
-
-   }
-
    public Pose3DReadOnly getDoorPose()
    {
       return doorPose;

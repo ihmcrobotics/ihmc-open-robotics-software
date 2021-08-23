@@ -127,7 +127,6 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
       return BehaviorTreeNodeStatus.SUCCESS;
    }
 
-   @Override
    public void setEnabled(boolean enabled)
    {
       LogTools.info("Navigation behavior selected = {}", enabled);

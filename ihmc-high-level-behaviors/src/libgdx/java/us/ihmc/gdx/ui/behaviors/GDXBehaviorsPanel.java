@@ -14,6 +14,7 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.gdx.imgui.*;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
@@ -81,6 +82,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    {
       addChildPanelsIncludingChildren(panel);
       highestLevelUI.create(baseUI);
+      baseUI.get3DSceneManager().addRenderableProvider(highestLevelUI, GDXSceneLevel.VIRTUAL);
    }
 
    public void handleVREvents(GDXVRManager vrManager)
