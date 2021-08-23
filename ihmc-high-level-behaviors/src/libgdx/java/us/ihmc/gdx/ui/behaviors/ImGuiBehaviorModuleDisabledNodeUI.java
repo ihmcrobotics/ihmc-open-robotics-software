@@ -4,7 +4,6 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
@@ -13,7 +12,6 @@ public class ImGuiBehaviorModuleDisabledNodeUI extends GDXBehaviorUIInterface
 {
    private final BehaviorHelper helper;
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
-   private final Point2D nodePosition = new Point2D(16.0f, 226.0f);
    private final ImBoolean imEnabled = new ImBoolean(false);
    private final YoBooleanClientHelper yoEnabled;
 
@@ -56,12 +54,6 @@ public class ImGuiBehaviorModuleDisabledNodeUI extends GDXBehaviorUIInterface
    public void destroy()
    {
 
-   }
-
-   @Override
-   public Point2D getTreeNodeInitialPosition()
-   {
-      return nodePosition;
    }
 
    @Override

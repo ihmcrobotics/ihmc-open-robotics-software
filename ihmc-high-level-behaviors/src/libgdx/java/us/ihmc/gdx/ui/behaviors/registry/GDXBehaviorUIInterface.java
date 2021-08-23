@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.tools.behaviorTree.*;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRManager;
@@ -25,8 +24,6 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
    }
 
    public abstract void create(GDXImGuiBasedUI baseUI);
-
-//   public abstract void setEnabled(boolean enabled);
 
    public void handleVREvents(GDXVRManager vrManager)
    {
@@ -63,11 +60,6 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
    }
 
    public abstract void destroy();
-
-   public Point2D getTreeNodeInitialPosition()
-   {
-      return new Point2D(0, 0);
-   }
 
    public void addChild(GDXBehaviorUIInterface child)
    {
@@ -129,12 +121,14 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    }
 
-   public int generateUID() {
-      return this.toString().hashCode(); //maybe change later? works fine for now
+   public int generateUID()
+   {
+      return toString().hashCode(); //maybe change later? works fine for now
    }
 
    @Override
-   public String toString() {
+   public String toString()
+   {
       StringBuilder out = new StringBuilder();
 
       out.append(this.getType());
@@ -146,23 +140,4 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
       return out.toString();
    }
-
-   //   protected void enable3DVisualizations()
-//   {
-//   }
-//
-//   protected ROS2NodeInterface getRos2Node()
-//   {
-//      return ros2Node;
-//   }
-//
-//   protected Messager getBehaviorMessager()
-//   {
-//      return behaviorMessager;
-//   }
-//
-//   protected DRCRobotModel getRobotModel()
-//   {
-//      return robotModel;
-//   }
 }
