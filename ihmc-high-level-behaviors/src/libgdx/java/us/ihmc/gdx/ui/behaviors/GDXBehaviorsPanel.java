@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.behaviors;
 import com.badlogic.gdx.graphics.Color;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
@@ -10,20 +11,18 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.MessagerHelper;
-import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
+import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.gdx.imgui.ImGuiLabelMap;
-import us.ihmc.gdx.imgui.ImGuiMovingPlot;
-import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
+import us.ihmc.gdx.ui.yo.ImGuiYoVariableClientManagerWidget;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -44,19 +43,20 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    private final Point2D nodePosition = new Point2D(7.0, 5.0);
    private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
    private final Stopwatch statusStopwatch = new Stopwatch();
-   private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Tree status", 1000, 230, 15);
    private volatile boolean messagerConnecting = false;
    private String messagerConnectedHost = "";
    private final MessagerHelper messagerHelper;
-   private volatile boolean yoClientDisconnecting = false;
-   private final YoVariableClientHelper yoVariableClientHelper;
+   private final ImGuiYoVariableClientManagerWidget yoVariableClientManagerWidget;
    private final GDXBehaviorUIInterface highestLevelUI;
    private final ImGuiBehaviorModuleDisabledNodeUI disabledNodeUI;
    private final BehaviorHelper behaviorHelper;
    private final LinkedList<Pair<Integer, String>> logArray = new LinkedList<>();
    private final ImGuiImNodesBehaviorTreePanel behaviorTreePanel = new ImGuiImNodesBehaviorTreePanel("Behavior Tree", this.getClass());
    private final ImGuiPanel panel = new ImGuiPanel(windowName, this::renderRegularPanelImGuiWidgetsAndChildren);
+   private final ImBoolean imEnabled = new ImBoolean(false);
+   private final YoBooleanClientHelper yoEnabled;
 
    public GDXBehaviorsPanel(ROS2Node ros2Node,
                             Supplier<? extends DRCRobotModel> robotModelSupplier,
@@ -64,7 +64,8 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    {
       behaviorHelper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
       messagerHelper = behaviorHelper.getMessagerHelper();
-      yoVariableClientHelper = behaviorHelper.getYoVariableClientHelper();
+      yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(behaviorHelper.getYoVariableClientHelper(),
+                                                                             behaviorModuleHost::get, NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
       logArray.addLast(Pair.of(Level.INFO.intLevel(), "Log started at " + LocalDateTime.now()));
       behaviorHelper.subscribeViaCallback(StatusLog, logEntry ->
       {
@@ -91,6 +92,8 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       addChild(disabledNodeUI);
       highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
       addChild(highestLevelUI);
+
+      yoEnabled = behaviorHelper.subscribeToYoBoolean("enabled");
    }
 
    @Override
@@ -161,6 +164,11 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    @Override
    public void renderTreeNodeImGuiWidgets()
    {
+      ImGui.pushItemWidth(150.0f);
+      int flags = ImGuiInputTextFlags.None;
+      flags += ImGuiInputTextFlags.CallbackResize;
+      ImGui.inputText(labels.get("Behavior module host"), behaviorModuleHost, flags);
+      ImGui.popItemWidth();
       if (messagerConnecting)
       {
          ImGui.text("Messager connecting...");
@@ -175,12 +183,6 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       }
       else if (!messagerHelper.isConnected())
       {
-         ImGui.pushItemWidth(150.0f);
-         int flags = ImGuiInputTextFlags.None;
-         flags += ImGuiInputTextFlags.CallbackResize;
-         ImGui.inputText(ImGuiTools.uniqueIDOnly(getClass(), "messagerHost"), behaviorModuleHost, flags);
-         ImGui.popItemWidth();
-         ImGui.sameLine();
          if (ImGui.button("Connect messager")) // TODO: One button should connect both
          {
             connectViaKryo(behaviorModuleHost.get());
@@ -211,33 +213,16 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
             disconnectMessager();
          }
       }
-      if (yoVariableClientHelper.isConnecting())
-      {
-         ImGui.text("YoVariable client connecting...");
-      }
-      else if (yoClientDisconnecting)
-      {
-         ImGui.text("YoVariable client disconnecting...");
-      }
-      else if (!yoVariableClientHelper.isConnected())
-      {
-         if (ImGui.button("Connect YoVariable client"))
-         {
-            connectYoVariableClient();
-         }
-      }
-      else
-      {
-         ImGui.text("YoVariable client connected to: " + yoVariableClientHelper.getServerName());
-
-         if (ImGui.button("Disconnect YoVariable client"))
-         {
-            disconnectYoVariableClient();
-         }
-      }
+      yoVariableClientManagerWidget.renderImGuiWidgets();
       statusReceivedPlot.setNextValue((float) statusStopwatch.totalElapsed());
       statusReceivedPlot.calculate("");
-//      ImGui.text("Last tree status message: " + FormattingTools.getFormattedDecimal2D(statusStopwatch.totalElapsed()) + " s ago");
+
+      if (ImGui.checkbox(labels.get("Enabled"), imEnabled))
+      {
+         yoEnabled.set(imEnabled.get());
+      }
+      ImGui.sameLine();
+      ImGui.text("Server: " + yoEnabled.get());
    }
 
    public void connectViaKryo(String hostname)
@@ -250,17 +235,12 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
 
    public void connectYoVariableClient()
    {
-      yoVariableClientHelper.start(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
+      behaviorHelper.getYoVariableClientHelper().start(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
    }
 
    public void disconnectMessager()
    {
       messagerHelper.disconnect();
-   }
-
-   public void disconnectYoVariableClient()
-   {
-      yoVariableClientHelper.disconnect();
    }
 
    @Override
