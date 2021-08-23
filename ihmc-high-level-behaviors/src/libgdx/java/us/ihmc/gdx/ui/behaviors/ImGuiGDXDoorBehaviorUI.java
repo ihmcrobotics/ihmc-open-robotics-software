@@ -15,7 +15,6 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiEnumPlot;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
@@ -42,7 +41,6 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final BehaviorHelper helper;
    private final ResettableExceptionHandlingExecutorService behaviorStopperExecutor = MissingThreadTools.newSingleThreadExecutor("behavior_stopper", true);
-   private Point2D nodePosition = new Point2D(376.0, 213.0);
    private final AtomicReference<CurrentBehaviorStatus> status = new AtomicReference<>();
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(labels.get("Door behavior status"), 1000, 250, 15);
    private final AtomicReference<Double> distanceToDoor;
@@ -197,11 +195,5 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    public String getName()
    {
       return DEFINITION.getName();
-   }
-
-   @Override
-   public Point2D getTreeNodeInitialPosition()
-   {
-      return nodePosition;
    }
 }

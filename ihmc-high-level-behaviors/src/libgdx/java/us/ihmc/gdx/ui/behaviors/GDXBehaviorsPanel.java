@@ -13,7 +13,6 @@ import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
@@ -35,7 +34,6 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
 {
    private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors");
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
-   private final Point2D nodePosition = new Point2D(7.0, 5.0);
    private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
    private final Stopwatch statusStopwatch = new Stopwatch();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -44,9 +42,8 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    private final ImGuiMessagerManagerWidget messagerManagerWidget;
    private final ImGuiYoVariableClientManagerWidget yoVariableClientManagerWidget;
    private final GDXBehaviorUIInterface highestLevelUI;
-   private final ImGuiBehaviorModuleDisabledNodeUI disabledNodeUI;
    private final BehaviorHelper behaviorHelper;
-   private final ImGuiImNodesBehaviorTreePanel behaviorTreePanel = new ImGuiImNodesBehaviorTreePanel("Behavior Tree", this.getClass());
+   private final ImGuiImNodesBehaviorTreePanel behaviorTreePanel = new ImGuiImNodesBehaviorTreePanel("Behavior Tree");
    private final ImGuiPanel panel = new ImGuiPanel(windowName, this::renderRegularPanelImGuiWidgetsAndChildren);
    private final ImBoolean imEnabled = new ImBoolean(false);
    private final YoBooleanClientHelper yoEnabled;
@@ -72,9 +69,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
          statusStopwatch.reset();
          behaviorTreeStatus.set(status);
       });
-      panel.addChild(new ImGuiPanel(behaviorTreePanel.getWindowName(), () -> behaviorTreePanel.renderImGuiWidgets(this)));
-      disabledNodeUI = new ImGuiBehaviorModuleDisabledNodeUI(behaviorHelper);
-      addChild(disabledNodeUI);
+      panel.addChild(new ImGuiPanel(behaviorTreePanel.getWindowName(), () -> behaviorTreePanel.renderImGuiWidgets(this), false, true));
       highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
       addChild(highestLevelUI);
 
@@ -84,7 +79,6 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    @Override
    public void create(GDXImGuiBasedUI baseUI)
    {
-//      behaviorTreePanel.create();
       addChildPanelsIncludingChildren(panel);
       highestLevelUI.create(baseUI);
    }
@@ -104,12 +98,6 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    public void renderRegularPanelImGuiWidgets()
    {
       logWidget.renderImGuiWidgets();
-   }
-
-   @Override
-   public Point2D getTreeNodeInitialPosition()
-   {
-      return nodePosition;
    }
 
    @Override

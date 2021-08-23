@@ -11,7 +11,6 @@ import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -34,7 +33,6 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
    private final ImGuiGDXTraverseStairsBehaviorUI traverseStairsUI;
-   private final Point2D nodePosition = new Point2D(341.0, 5.0);
    private final ImGuiGDXDoorBehaviorUI doorUI;
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private volatile BuildingExplorationBehaviorMode mode = BuildingExplorationBehaviorMode.TELEOP;
@@ -79,12 +77,6 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       lookAndStepUI.create(baseUI);
       traverseStairsUI.create(baseUI);
       doorUI.create(baseUI);
-   }
-
-   @Override
-   public Point2D getTreeNodeInitialPosition()
-   {
-      return nodePosition;
    }
 
    @Override

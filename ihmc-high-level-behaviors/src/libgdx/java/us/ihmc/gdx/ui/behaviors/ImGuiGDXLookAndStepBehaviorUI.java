@@ -12,7 +12,6 @@ import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -46,7 +45,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
                                                                                         ImGuiGDXLookAndStepBehaviorUI::new);
 
    private final BehaviorHelper helper;
-   private final Point2D nodePosition = new Point2D(11.0, 362.0);
    private String currentState = "";
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImBoolean operatorReview = new ImBoolean(true);
@@ -151,12 +149,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    public void processImGui3DViewInput(ImGui3DViewInput input)
    {
       goalAffordance.processImGui3DViewInput(input);
-   }
-
-   @Override
-   public Point2D getTreeNodeInitialPosition()
-   {
-      return nodePosition;
    }
 
    @Override
