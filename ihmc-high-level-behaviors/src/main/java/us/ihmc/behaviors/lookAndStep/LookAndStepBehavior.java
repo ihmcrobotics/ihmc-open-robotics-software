@@ -195,15 +195,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       reset.queueReset();
    }
 
-   @Override
-   public void setEnabled(boolean enabled)
-   {
-      helper.setCommunicationCallbacksEnabled(enabled);
-      behaviorStateReference.broadcast();
-      reset.queueReset();
-      delayFixedPlanarRegionsSubscription.setEnabled(enabled);
-   }
-
    public void destroy()
    {
       delayFixedPlanarRegionsSubscription.destroy();

@@ -147,7 +147,6 @@ public class BehaviorModule
          yoRegistry.addChild(highestLevelNode.getYoRegistry());
       }
       helper.getMessagerHelper().setExternallyStartedMessager(messager);
-      highestLevelNode.setEnabled(true);
       rootNode.addChild(highestLevelNode);
 
       behaviorTreeTickThread = new PausablePeriodicThread("BehaviorTree", UnitConversions.hertzToSeconds(5.0), () ->

@@ -200,21 +200,6 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       stop();
    }
 
-   @Override
-   public void setEnabled(boolean enable)
-   {
-      LogTools.info((enable ? "Enable" : "Disable") + " requested");
-
-      if (enable)
-      {
-         start();
-      }
-      else
-      {
-         stop();
-      }
-   }
-
    private void stop()
    {
       if (!isRunning.getAndSet(false))

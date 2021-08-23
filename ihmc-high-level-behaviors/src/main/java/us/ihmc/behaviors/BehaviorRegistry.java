@@ -33,7 +33,7 @@ public class BehaviorRegistry
    private static volatile MessagerAPI MESSAGER_API;
    private static volatile BehaviorRegistry ACTIVE_REGISTRY;
 
-   private final BehaviorDefinition highestLevelNode;
+   private BehaviorDefinition highestLevelNode;
    private final LinkedHashSet<BehaviorDefinition> definitionEntries = new LinkedHashSet<>();
 
    public static BehaviorRegistry of(BehaviorDefinition highestLevelNode, BehaviorDefinition... entries)
@@ -50,6 +50,7 @@ public class BehaviorRegistry
    {
       this.highestLevelNode = highestLevelNode;
    }
+
    public void register(BehaviorDefinition definition)
    {
       definitionEntries.add(definition);
@@ -103,4 +104,8 @@ public class BehaviorRegistry
       return highestLevelNode;
    }
 
+   public void setHighestLevelNode(BehaviorDefinition highestLevelNode)
+   {
+      this.highestLevelNode = highestLevelNode;
+   }
 }

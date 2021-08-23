@@ -174,14 +174,6 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
    }
 
    @Override
-   public void setEnabled(boolean enabled)
-   {
-      helper.setCommunicationCallbacksEnabled(enabled);
-      if (!enabled)
-         lookAndStepBehavior.setEnabled(false);
-   }
-
-   @Override
    public String getName()
    {
       return DEFINITION.getName();
