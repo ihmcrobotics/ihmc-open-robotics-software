@@ -33,7 +33,7 @@ import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
 
 public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
 {
-   private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors");
+   private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors Status Log");
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
    private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
    private final Stopwatch statusStopwatch = new Stopwatch();
@@ -75,6 +75,11 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       addChild(highestLevelUI);
 
       yoEnabled = behaviorHelper.subscribeToYoBoolean("enabled");
+   }
+
+   public void switchBehaviors()
+   {
+      // TODO: This needs to be a message sent to the module. This panel should react to differently shaped incoming trees.
    }
 
    @Override
