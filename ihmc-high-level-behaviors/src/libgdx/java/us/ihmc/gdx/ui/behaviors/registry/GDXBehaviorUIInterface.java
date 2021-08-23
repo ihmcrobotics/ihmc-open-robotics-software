@@ -31,7 +31,8 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
    }
 
    /**
-    * For implementing: please ensure that nodes remain at a fixed size when rendering them - ImGui.dummy() can be used if node space should be reserved for later.
+    * Currently, nodes must remain at a fixed size when rendering them.
+    * ImGui.dummy() can be used if node space should be reserved for later.
     */
    public abstract void renderTreeNodeImGuiWidgets();
 
@@ -123,7 +124,7 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    public int generateUID()
    {
-      return toString().hashCode(); //maybe change later? works fine for now
+      return toString().hashCode(); // Maybe change later? Works fine for now
    }
 
    @Override
