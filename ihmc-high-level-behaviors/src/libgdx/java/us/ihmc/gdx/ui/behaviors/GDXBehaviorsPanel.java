@@ -6,9 +6,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.MessagerHelper;
 import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
@@ -21,10 +19,10 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
 import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
+import us.ihmc.gdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.gdx.ui.yo.ImGuiYoVariableClientManagerWidget;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.ros2.ROS2Node;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -43,9 +41,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Tree status", 1000, 230, 15);
    private final ImGuiLogWidget logWidget;
-   private volatile boolean messagerConnecting = false;
-   private String messagerConnectedHost = "";
-   private final MessagerHelper messagerHelper;
+   private final ImGuiMessagerManagerWidget messagerManagerWidget;
    private final ImGuiYoVariableClientManagerWidget yoVariableClientManagerWidget;
    private final GDXBehaviorUIInterface highestLevelUI;
    private final ImGuiBehaviorModuleDisabledNodeUI disabledNodeUI;
@@ -60,9 +56,10 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
                             GDXBehaviorUIRegistry behaviorRegistry)
    {
       behaviorHelper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
-      messagerHelper = behaviorHelper.getMessagerHelper();
+      messagerManagerWidget = new ImGuiMessagerManagerWidget(behaviorHelper.getMessagerHelper(), behaviorModuleHost::get);
       yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(behaviorHelper.getYoVariableClientHelper(),
-                                                                             behaviorModuleHost::get, NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
+                                                                             behaviorModuleHost::get,
+                                                                             NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
       logWidget = new ImGuiLogWidget("Behavior status");
       behaviorHelper.subscribeViaCallback(StatusLog, logWidget::submitEntry);
       behaviorHelper.subscribeViaCallback(ROS2Tools.TEXT_STATUS, textStatus ->
@@ -123,50 +120,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       flags += ImGuiInputTextFlags.CallbackResize;
       ImGui.inputText(labels.get("Behavior module host"), behaviorModuleHost, flags);
       ImGui.popItemWidth();
-      if (messagerConnecting)
-      {
-         ImGui.text("Messager connecting...");
-         if (messagerHelper.isConnected())
-         {
-            messagerConnecting = false;
-         }
-      }
-      else if (messagerHelper.isDisconnecting())
-      {
-         ImGui.text("Messager disconnecting...");
-      }
-      else if (!messagerHelper.isConnected())
-      {
-         if (ImGui.button("Connect messager")) // TODO: One button should connect both
-         {
-            connectViaKryo(behaviorModuleHost.get());
-         }
-
-         SharedMemoryMessager potentialSharedMemoryMessager = BehaviorModule.getSharedMemoryMessager();
-         if (potentialSharedMemoryMessager != null && potentialSharedMemoryMessager.isMessagerOpen())
-         {
-            if (ImGui.button("Use shared memory messager"))
-            {
-               messagerHelper.connectViaSharedMemory(potentialSharedMemoryMessager);
-            }
-         }
-      }
-      else
-      {
-         if (messagerHelper.isUsingSharedMemory())
-         {
-            ImGui.text("Using shared memory messager.");
-         }
-         else
-         {
-            ImGui.text("Messager connected to " + messagerConnectedHost + ".");
-         }
-         ImGui.sameLine();
-         if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect")))
-         {
-            disconnectMessager();
-         }
-      }
+      messagerManagerWidget.renderImGuiWidgets();
       yoVariableClientManagerWidget.renderImGuiWidgets();
       statusReceivedPlot.setNextValue((float) statusStopwatch.totalElapsed());
       statusReceivedPlot.calculate("");
@@ -182,9 +136,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    public void connectViaKryo(String hostname)
    {
       behaviorModuleHost.set(hostname);
-      messagerHelper.connectViaKryo(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
-      messagerConnectedHost = behaviorModuleHost.get();
-      messagerConnecting = true;
+      messagerManagerWidget.connectViaKryo(hostname);
    }
 
    public void connectYoVariableClient()
@@ -194,7 +146,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
 
    public void disconnectMessager()
    {
-      messagerHelper.disconnect();
+      messagerManagerWidget.disconnectMessager();
    }
 
    @Override
