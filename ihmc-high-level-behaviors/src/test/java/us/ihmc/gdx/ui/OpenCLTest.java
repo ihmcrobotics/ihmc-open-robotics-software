@@ -42,7 +42,8 @@ public class OpenCLTest
       context = clCreateContext(null, 1, device_id, null, null, ret_pointer);
 
       /* Create Command Queue */
-      command_queue = clCreateCommandQueue(context, device_id, 0, ret_pointer);
+      IntPointer properties = new IntPointer(new int[] {0});
+      command_queue = clCreateCommandQueueWithProperties(context, device_id, properties, ret_pointer);
 
       /* Create memory buffer*/
       memobj = clCreateBuffer(context, CL_MEM_READ_WRITE, MEM_SIZE * Loader.sizeof(FloatPointer.class), null, ret_pointer);
