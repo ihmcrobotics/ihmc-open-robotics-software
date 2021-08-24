@@ -19,7 +19,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.perception.ROSOpenCVImage;
-import us.ihmc.perception.ROSOpenCVImageTools;
+import us.ihmc.perception.ROSOpenCVTools;
 import us.ihmc.perception.ImageEncodingTools;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
@@ -196,7 +196,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       try
       {
-         ROSOpenCVImage ROSOpenCVImage = ROSOpenCVImageTools.toCvCopy(compressedImage, ImageEncodingTools.RGBA8);
+         ROSOpenCVImage ROSOpenCVImage = ROSOpenCVTools.toCvCopy(compressedImage, ImageEncodingTools.RGBA8);
          Buffer buffer = ROSOpenCVImage.image.createBuffer();
          ensureTextureReady(ROSOpenCVImage.image.cols(), ROSOpenCVImage.image.rows());
          pixmap.setPixels((ByteBuffer) buffer);

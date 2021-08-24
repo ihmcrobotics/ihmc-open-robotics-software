@@ -9,24 +9,22 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
 import std_msgs.Header;
+import us.ihmc.utilities.ros.RosTools;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Vector;
 
-public class ROSOpenCVImageTools
+public class ROSOpenCVTools
 {
-   public static void backMatWithNettyImageBuffer(sensor_msgs.Image ros1Image, Mat inputImageMat)
+   public static void backMatWithNettyBuffer(Mat mat, ChannelBuffer channelBuffer)
    {
-      ChannelBuffer nettyImageData = ros1Image.getData();
-      ByteBuffer dataByteBuffer = nettyImageData.toByteBuffer();
-      int arrayOffset = nettyImageData.arrayOffset();
-      dataByteBuffer.position(arrayOffset);
-      ByteBuffer offsetByteBuffer = dataByteBuffer.slice();
-      System.out.println(dataByteBuffer.isDirect());
+      ByteBuffer slicedBuffer = RosTools.sliceNettyBuffer(channelBuffer);
+      if (!slicedBuffer.isDirect())
+         throw new RuntimeException("Netty buffer is not direct somehow.");
 
-      BytePointer imageDataPointer = new BytePointer(offsetByteBuffer);
-      inputImageMat.data(imageDataPointer);
+      BytePointer imageDataPointer = new BytePointer(slicedBuffer);
+      mat.data(imageDataPointer);
    }
 
    public static ROSOpenCVImage toCvCopy(final Image source) throws Exception
