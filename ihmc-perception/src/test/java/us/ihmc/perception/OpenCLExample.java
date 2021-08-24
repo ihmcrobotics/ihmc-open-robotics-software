@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui;
+package us.ihmc.perception;
 
 import org.bytedeco.javacpp.*;
 
@@ -6,7 +6,7 @@ import org.bytedeco.opencl.*;
 
 import static org.bytedeco.opencl.global.OpenCL.*;
 
-public class OpenCLTest
+public class OpenCLExample
 {
    static final int MEM_SIZE = 128;
    static final int MAX_SOURCE_SIZE = 0x100000;
@@ -26,7 +26,11 @@ public class OpenCLTest
       int ret;
 
       FloatPointer mem = new FloatPointer(MEM_SIZE);
-      String source_str = "__kernel void vecAdd(__global float* a) {" + "    int gid = get_global_id(0);" + "    a[gid] += a[gid];" + "}";
+      String source_str = "__kernel void vecAdd(__global float* a) "
+                          + "{" +
+                          "    int gid = get_global_id(0);" +
+                          "    a[gid] += a[gid];"
+                          + "}";
 
       /* Initialize Data */
       for (int i = 0; i < MEM_SIZE; i++)
