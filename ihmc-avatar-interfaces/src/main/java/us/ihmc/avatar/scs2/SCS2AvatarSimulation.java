@@ -54,7 +54,10 @@ public class SCS2AvatarSimulation
       simulationSession.setSessionState(SessionState.ACTIVE);
 
       if (showGUI)
+      {
          sessionVisualizerControls = SessionVisualizer.startSessionVisualizer(simulationSession);
+         sessionVisualizerControls.addVisualizerShutdownListener(this::destroy);
+      }
       if (automaticallyStartSimulation)
          simulationSession.setSessionMode(SessionMode.RUNNING);
       if (realtimeROS2Node != null)

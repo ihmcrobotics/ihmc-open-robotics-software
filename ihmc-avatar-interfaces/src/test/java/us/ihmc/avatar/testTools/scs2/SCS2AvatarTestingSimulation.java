@@ -48,7 +48,6 @@ public class SCS2AvatarTestingSimulation
 
       avatarSimulation.start();
       sessionVisualizerControls = avatarSimulation.getSessionVisualizerControls();
-      sessionVisualizerControls.addVisualizerShutdownListener(this::destroy);
    }
 
    // Simulation controls:
@@ -68,6 +67,17 @@ public class SCS2AvatarTestingSimulation
       {
          fail("Joint was at " + rootJoint.getJointPose().getPosition() + ". Expecting it to be inside boundingBox " + boundingBox);
       }
+   }
+
+   // Buffer controls:
+   public void setBufferInPointToCurrent()
+   {
+      simulationSessionControls.setBufferInPointToCurrent();
+   }
+
+   public void setBufferOutPointToCurrent()
+   {
+      simulationSessionControls.setBufferOutPointToCurrent();
    }
 
    // GUI controls:
@@ -98,6 +108,11 @@ public class SCS2AvatarTestingSimulation
    {
       IHMCROS2Publisher ihmcros2Publisher = defaultControllerPublishers.get(message.getClass());
       ihmcros2Publisher.publish(message);
+   }
+
+   public ROS2Node getROS2Node()
+   {
+      return ros2Node;
    }
 
    public void setROS2Node(ROS2Node ros2Node)
