@@ -99,7 +99,7 @@ public class ROSOpenCVImage
       Mat image;
       if (!encoding.equals(ImageEncodingTools.BGR8))
       {
-         ROSOpenCVImage temp = ROSOpenCVImageTools.cvtColor(this, ImageEncodingTools.BGR8);
+         ROSOpenCVImage temp = ROSOpenCVTools.cvtColor(this, ImageEncodingTools.BGR8);
          image = temp.image;
       }
       else

@@ -7,6 +7,10 @@ import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Arrays;
+import org.bytedeco.javacpp.*;
+import org.bytedeco.opencl.*;
+import static org.bytedeco.opencl.global.OpenCL.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.Image;
@@ -15,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.perception.ROSOpenCVTools;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -50,7 +55,28 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    {
       super.create();
       pointCloudRenderer.create(MAX_POINTS);
+
+      // ouster width 1024 height 128, 9 fields, 216 bits
+      // 3 float32s XYZ
+      // 1 float 32 intensity
+      // unint32 t(time?),
+      // unint16 reflectivity
+      // uint8 ring
+      // unint32 range
+      // l515 width 151413 height 1, 4 float XYX(RGB), uint16 ambient
+      // zed2 1280x720, bgr8
+
+      l515WithRGB = new Mat(1, 151413, opencv_core.CV_32FC4);
+      l515RetainXYZChannels = new int[] {0, 0, 1, 1, 2, 2};
+      l515PointsOnlyBuffer = BufferUtils.newByteBuffer(151413 * 4 * 3);
+      l515PointsOnly = new Mat(1, 151413, opencv_core.CV_32FC3, new BytePointer(l515PointsOnlyBuffer));
+
+
    }
+
+   private int[] l515RetainXYZChannels;
+   private Mat l515WithRGB;
+   private Mat l515PointsOnly;
 
    @Override
    public void update()
@@ -65,19 +91,11 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
       {
          long ousterTimestamp = ousterPointCloud2.getHeader().getStamp().totalNsecs();
 
+         ROSOpenCVTools.backMatWithNettyBuffer(l515WithRGB, l515PointCloud2.getData());
+         opencv_core.mixChannels(l515WithRGB, 4, l515PointsOnly, 3, l515RetainXYZChannels, 3);
 
-         ChannelBuffer l515NettyImageData = l515PointCloud2.getData();
-         ByteBuffer l515DataByteBuffer = l515NettyImageData.toByteBuffer();
-         int arrayOffset = l515NettyImageData.arrayOffset();
-         l515DataByteBuffer.position(arrayOffset);
-         ByteBuffer offsetByteBuffer = l515DataByteBuffer.slice();
-         BytePointer imageDataPointer = new BytePointer(offsetByteBuffer);
-         Mat l515WithRGB = new Mat(l515PointCloud2.getHeight(), l515PointCloud2.getWidth(), opencv_core.CV_32FC4, imageDataPointer);
-         if (l515PointsOnlyBuffer == null)
-            l515PointsOnlyBuffer = BufferUtils.newByteBuffer(l515PointCloud2.getWidth() * l515PointCloud2.getHeight() * 3);
-         Mat l515PointsOnly = new Mat(l515PointCloud2.getHeight(), l515PointCloud2.getWidth(), opencv_core.CV_32FC3, new BytePointer(l515PointsOnlyBuffer));
-         int[] fromTo = new int[] {0, 0, 1, 1, 2, 2};
-         opencv_core.mixChannels(l515WithRGB, 4, l515PointsOnly, 3, fromTo, 3);
+
+
 
          // floats: X,Y,Z,R,G,B,A,0.01,1.0,0.0
          float[] coloredPointDataArray = pointCloudRenderer.getVerticesArray(); // Copy data to this array

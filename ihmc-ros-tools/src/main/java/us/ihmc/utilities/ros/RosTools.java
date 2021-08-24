@@ -14,10 +14,12 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.node.NodeConfiguration;
 
 import geometry_msgs.Point;
@@ -124,6 +126,17 @@ public class RosTools
       }
 
       return ret;
+   }
+
+   /**
+    * Returns a ByteBuffer that starts with the data part.
+    */
+   public static ByteBuffer sliceNettyBuffer(ChannelBuffer channelBuffer)
+   {
+      ByteBuffer originalByteBuffer = channelBuffer.toByteBuffer();
+      int arrayOffset = channelBuffer.arrayOffset();
+      originalByteBuffer.position(arrayOffset);
+      return originalByteBuffer.slice();
    }
 
    public static CameraPinholeBrown cameraIntrisicsFromCameraInfo(CameraInfo cameraInfo)
