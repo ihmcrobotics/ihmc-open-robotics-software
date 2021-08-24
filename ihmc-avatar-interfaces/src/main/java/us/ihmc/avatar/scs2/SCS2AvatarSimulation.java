@@ -8,6 +8,7 @@ import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -69,6 +70,7 @@ public class SCS2AvatarSimulation
       if (hasBeenDestroyed)
          return;
 
+      LogTools.info("Destroying simulation");
       hasBeenDestroyed = true;
 
       if (robotController != null)
