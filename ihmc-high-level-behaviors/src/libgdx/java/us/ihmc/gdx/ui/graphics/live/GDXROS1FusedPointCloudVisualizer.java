@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.perception.OpenCLContext;
 import us.ihmc.perception.ROSOpenCVTools;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
@@ -41,6 +42,10 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    private final ReferenceFrame l515Frame;
    private final ReferenceFrame zed2Frame;
    private ByteBuffer l515PointsOnlyBuffer;
+   private int[] l515RetainXYZChannels;
+   private Mat l515WithRGB;
+   private Mat l515PointsOnly;
+   private final OpenCLContext openCLContext = new OpenCLContext();
 
    public GDXROS1FusedPointCloudVisualizer(HumanoidReferenceFrames referenceFrames)
    {
@@ -71,12 +76,12 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
       l515PointsOnlyBuffer = BufferUtils.newByteBuffer(151413 * 4 * 3);
       l515PointsOnly = new Mat(1, 151413, opencv_core.CV_32FC3, new BytePointer(l515PointsOnlyBuffer));
 
-
+      openCLContext.create();
+      _cl_mem ousterInBufferObject = openCLContext.createBufferObject(1024 * 128 * 27);
+      _cl_mem ousterOutBufferObject = openCLContext.createBufferObject(1024 * 128 * 12);
+      _cl_kernel filterOusterXYZKernel = openCLContext.loadProgramAndCreateKernel("filterOusterXYZ");
    }
 
-   private int[] l515RetainXYZChannels;
-   private Mat l515WithRGB;
-   private Mat l515PointsOnly;
 
    @Override
    public void update()
