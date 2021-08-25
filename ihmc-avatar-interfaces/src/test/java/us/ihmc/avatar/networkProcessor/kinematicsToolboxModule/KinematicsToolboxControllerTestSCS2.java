@@ -13,15 +13,21 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.sun.javafx.tk.Toolkit;
+import com.sun.scenario.animation.AbstractMasterTimer;
 
 import controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import javafx.application.Platform;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.KinematicsToolboxTestRobot;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.SevenDoFArm;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.UpperBodyWithTwoManipulators;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -60,12 +66,12 @@ import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
+import us.ihmc.scs2.sessionVisualizer.jfx.xml.XMLTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.yoGraphic.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.VisualizationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
-import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
-import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -73,16 +79,15 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public final class KinematicsToolboxControllerTestSCS2
 {
+   static
+   {
+      XMLTools.loadResourcesNow();
+   }
    private static final boolean VERBOSE = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final MaterialDefinition ghostAppearance = new MaterialDefinition(ColorDefinitions.Yellow().derive(0.0, 1.0, 1.0, 0.75));
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final boolean visualize = simulationTestingParameters.getCreateGUI();
-   static
-   {
-      simulationTestingParameters.setDataBufferSize(1 << 16);
-   }
+   private static final boolean visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
    private CommandInputManager commandInputManager;
    private YoRegistry mainRegistry;
@@ -145,10 +150,13 @@ public final class KinematicsToolboxControllerTestSCS2
          session.addRobot(robot);
          session.getYoGraphicDefinitions().addAll(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
-         controls = SessionVisualizer.startSessionVisualizer(session);
+         LogTools.info("Starting GUI");
+         controls = SessionVisualizer.startSessionVisualizer(session, false);
          controls.setCameraFocusPosition(0.0, 0.0, 1.0);
          controls.setCameraPosition(8.0, 0.0, 3.0);
-         //         controls.waitUntilFullyUp();
+         LogTools.info("Waiting for GUI");
+         controls.waitUntilFullyUp();
+         LogTools.info("GUI's up");
       }
    }
 
@@ -157,32 +165,27 @@ public final class KinematicsToolboxControllerTestSCS2
       MultiBodySystemTools.copyJointsState(initialFullRobotModel.getAllJoints(), ghost.getAllJoints(), JointStateType.CONFIGURATION);
    }
 
+   @BeforeEach
+   public void showMemoryUsageBeforeTest()
+   {
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+   }
+
    @AfterEach
    public void tearDown()
    {
-      if (session != null)
+      if (visualize)
+      {
          session.setSessionMode(SessionMode.PAUSE);
-
-      if (simulationTestingParameters.getKeepSCSUp())
-         ThreadTools.sleepForever();
+//         controls.waitUntilDown();
+         LogTools.info("GUI's down");
+      }
 
       if (mainRegistry != null)
       {
          mainRegistry.clear();
          mainRegistry = null;
       }
-
-      initializationSucceeded = null;
-
-      yoGraphicsListRegistry = null;
-
-      commandInputManager = null;
-
-      toolboxController = null;
-
-      desiredFullRobotModel = null;
-      robot = null;
-      toolboxUpdater = null;
 
       if (session != null)
       {
@@ -195,7 +198,31 @@ public final class KinematicsToolboxControllerTestSCS2
          controls.shutdownNow();
          controls = null;
       }
+
+      commandInputManager = null;
+      yoGraphicsListRegistry = null;
+      toolboxController = null;
+      initializationSucceeded = null;
+      numberOfIterations = null;
+      finalSolutionQuality = null;
+
+      robot = null;
+      ghost = null;
+      toolboxUpdater = null;
+
+      desiredFullRobotModel = null;
+
+      System.gc();
+      MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+
+      @SuppressWarnings({"unused", "restriction"})
+      AbstractMasterTimer masterTimer = Toolkit.getToolkit().getMasterTimer();
+
+      if (counter++ >= 5)
+         ThreadTools.sleepForever();
    }
+
+   private static int counter = 0;
 
    @Test
    public void testHoldBodyPose() throws Exception
@@ -423,7 +450,7 @@ public final class KinematicsToolboxControllerTestSCS2
       SideDependentList<RigidBodyDefinition> handLinkDescriptions = new SideDependentList<>(side -> robotDescription.getRigidBodyDefinition(side.getCamelCaseName()
             + "HandLink"));
 
-      MaterialDefinition collisionGraphicAppearance = new MaterialDefinition(ColorDefinitions.SpringGreen().derive(0, 1.0, 1.0, 0.5));
+      MaterialDefinition collisionGraphicAppearance = new MaterialDefinition(ColorDefinitions.SpringGreen().derive(0, 1.0, 0.5, 0.15));
 
       VisualDefinitionFactory torsoCollisionGraphic = new VisualDefinitionFactory();
       torsoCollisionGraphic.appendTranslation(torsoCollisionShape.getPosition());
@@ -503,7 +530,7 @@ public final class KinematicsToolboxControllerTestSCS2
       }
    }
 
-   private void runKinematicsToolboxController(int numberOfIterations) throws SimulationExceededMaximumTimeException
+   private void runKinematicsToolboxController(int numberOfIterations)
    {
       initializationSucceeded.set(false);
       this.numberOfIterations.set(0);
