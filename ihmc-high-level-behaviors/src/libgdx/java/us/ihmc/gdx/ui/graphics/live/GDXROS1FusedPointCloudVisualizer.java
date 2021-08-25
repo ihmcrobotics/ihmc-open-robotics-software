@@ -6,20 +6,15 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.Arrays;
-import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
-import static org.bytedeco.opencl.global.OpenCL.*;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.Image;
 import sensor_msgs.PointCloud2;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.perception.OpenCLContext;
+import us.ihmc.perception.OpenCLManager;
 import us.ihmc.perception.ROSOpenCVTools;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
@@ -45,7 +40,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    private int[] l515RetainXYZChannels;
    private Mat l515WithRGB;
    private Mat l515PointsOnly;
-   private final OpenCLContext openCLContext = new OpenCLContext();
+   private final OpenCLManager openCLManager = new OpenCLManager();
 
    public GDXROS1FusedPointCloudVisualizer(HumanoidReferenceFrames referenceFrames)
    {
@@ -76,10 +71,10 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
       l515PointsOnlyBuffer = BufferUtils.newByteBuffer(151413 * 4 * 3);
       l515PointsOnly = new Mat(1, 151413, opencv_core.CV_32FC3, new BytePointer(l515PointsOnlyBuffer));
 
-      openCLContext.create();
-      _cl_mem ousterInBufferObject = openCLContext.createBufferObject(1024 * 128 * 27);
-      _cl_mem ousterOutBufferObject = openCLContext.createBufferObject(1024 * 128 * 12);
-      _cl_kernel filterOusterXYZKernel = openCLContext.loadProgramAndCreateKernel("filterOusterXYZ");
+      openCLManager.create();
+      _cl_mem ousterInBufferObject = openCLManager.createBufferObject(1024 * 128 * 27);
+      _cl_mem ousterOutBufferObject = openCLManager.createBufferObject(1024 * 128 * 12);
+      _cl_kernel filterOusterXYZKernel = openCLManager.loadProgramAndCreateKernel("filterOusterXYZ");
    }
 
 

@@ -11,7 +11,7 @@ import static org.bytedeco.opencl.global.OpenCL.*;
 /**
  * Reference: https://www.khronos.org/registry/OpenCL/sdk/2.2/docs/man/html/
  */
-public class OpenCLContext
+public class OpenCLManager
 {
    private _cl_platform_id platforms;
    private _cl_device_id devices;

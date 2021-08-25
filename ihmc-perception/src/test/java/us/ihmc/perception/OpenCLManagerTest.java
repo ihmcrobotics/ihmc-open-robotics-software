@@ -7,15 +7,15 @@ import org.bytedeco.opencl._cl_mem;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
-public class OpenCLContextTest
+public class OpenCLManagerTest
 {
    @Tag("gui")
    @Test
    public void testOpenCLContext()
    {
-      OpenCLContext openCLContext = new OpenCLContext();
-      openCLContext.create();
-      _cl_kernel kernel = openCLContext.loadProgramAndCreateKernel("vectorAddition");
+      OpenCLManager openCLManager = new OpenCLManager();
+      openCLManager.create();
+      _cl_kernel kernel = openCLManager.loadProgramAndCreateKernel("vectorAddition");
       long numberOfFloats = 128;
       long sizeInBytes = numberOfFloats * Loader.sizeof(FloatPointer.class);
       FloatPointer hostMemoryPointer = new FloatPointer(numberOfFloats);
@@ -23,11 +23,11 @@ public class OpenCLContextTest
       {
          hostMemoryPointer.put(i, i);
       }
-      _cl_mem bufferObject = openCLContext.createBufferObject(sizeInBytes);
-      openCLContext.enqueueWriteBuffer(bufferObject, sizeInBytes, hostMemoryPointer);
-      openCLContext.setKernelArgument(kernel, 0, bufferObject);
-      openCLContext.execute(kernel, numberOfFloats);
-      openCLContext.enqueueReadBuffer(bufferObject, sizeInBytes, hostMemoryPointer);
+      _cl_mem bufferObject = openCLManager.createBufferObject(sizeInBytes);
+      openCLManager.enqueueWriteBuffer(bufferObject, sizeInBytes, hostMemoryPointer);
+      openCLManager.setKernelArgument(kernel, 0, bufferObject);
+      openCLManager.execute(kernel, numberOfFloats);
+      openCLManager.enqueueReadBuffer(bufferObject, sizeInBytes, hostMemoryPointer);
 
       /* Display result */
       for (int i = 0; i < numberOfFloats; i++)
