@@ -1,8 +1,13 @@
 package us.ihmc.perception;
 
+import org.apache.pdfbox.encoding.StandardEncoding;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
+import us.ihmc.log.LogTools;
 
+import java.nio.Buffer;
+import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -10,13 +15,14 @@ import static org.bytedeco.opencl.global.OpenCL.*;
 
 /**
  * Reference: https://www.khronos.org/registry/OpenCL/sdk/2.2/docs/man/html/
+ * Use `clinfo` to get more info about your setup.
  */
 public class OpenCLManager
 {
-   private _cl_platform_id platforms;
-   private _cl_device_id devices;
-   private _cl_context context;
-   private _cl_command_queue commandQueue;
+   private _cl_platform_id platforms = new _cl_platform_id(null);
+   private _cl_device_id devices = new _cl_device_id(null);
+   private _cl_context context = new _cl_context(null);
+   private _cl_command_queue commandQueue = new _cl_command_queue(null);
    private final IntPointer numberOfDevices = new IntPointer(1);
    private final IntPointer numberOfPlatforms = new IntPointer(1);
    private final IntPointer nativeReturnCode = new IntPointer(1);
@@ -25,7 +31,7 @@ public class OpenCLManager
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
    private final ArrayList<_cl_mem> bufferObjects = new ArrayList<>();
    private final SizeTPointer globalWorkSize = new SizeTPointer(0, 0, 0);
-   private final SizeTPointer localWorkSize = new SizeTPointer(0, 0, 0);
+   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Find largest value
 
    public void create()
    {
@@ -47,10 +53,19 @@ public class OpenCLManager
 
       /* Create Kernel program from the read in source */
       _cl_program program = clCreateProgramWithSource(context, 1, new PointerPointer(sourceAsString), new SizeTPointer(1).put(sourceAsString.length()), nativeReturnCode);
+      nativeReturnCode.get(returnCode);
       programs.add(program);
 
       /* Build Kernel Program */
       returnCode = clBuildProgram(program, 1, devices, null, null, null);
+      CharPointer charPointer = new CharPointer(4050);
+      SizeTPointer length = new SizeTPointer(1);
+      clGetProgramBuildInfo(program, devices.getPointer(), CL_PROGRAM_BUILD_LOG, 4050, charPointer, length);
+      LogTools.info("OpenCL Build log:");
+
+//      CharBuffer charBuffer = new CharBuffer(0, 0, 4050, 4050, charPointer.getStringChars(), 0);
+//      StandardCharsets.UTF_8.encode()
+//      System.out.println(new String(charPointer.getStringChars(), StandardCharsets.UTF_8));
 
       /* Create OpenCL Kernel */
       _cl_kernel kernel = clCreateKernel(program, programName, nativeReturnCode);
@@ -88,7 +103,7 @@ public class OpenCLManager
    {
       /* Execute OpenCL kernel */
       globalWorkSize.put(workSize);
-      localWorkSize.put(workSize);
+//      localWorkSize.put(workSize);
       returnCode = clEnqueueNDRangeKernel(commandQueue, kernel, 1, null, globalWorkSize, localWorkSize, 0, (PointerPointer) null, null);
    }
 
