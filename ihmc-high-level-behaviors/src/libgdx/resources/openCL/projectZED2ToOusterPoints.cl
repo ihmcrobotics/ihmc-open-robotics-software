@@ -8,13 +8,13 @@ __kernel void projectZED2ToOusterPoints(__global unsigned char* ousterIn, __glob
 
    int ousterInIndex = gid * 48;
    float* ousterFloats = &ousterIn[ousterInIndex];
-   float ousterX = ousterFloats[0]
-   float ousterY = ousterFloats[1]
-   float ousterZ = ousterFloats[2]
+   float ousterX = ousterFloats[0];
+   float ousterY = ousterFloats[1];
+   float ousterZ = ousterFloats[2];
 
-   if (gid == 0)
+   if (gid == 2000)
    {
-        printf("x: %f, y: %y, z: %z", ousterX, ousterY, ousterZ);
+      // printf("x: %f, y: %f, z: %f", ousterX, ousterY, ousterZ);
    }
 
    int fusedOutIndex = gid * 10;

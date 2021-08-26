@@ -66,7 +66,6 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    public void create()
    {
       super.create();
-      pointCloudRenderer.create(MAX_POINTS);
 
       // ouster width 1024 height 128, 9 fields, 288 bits, 36 bytes, BUT! 48 bytes step
       // 3 float32s XYZ
@@ -102,6 +101,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
       openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 1, zed2InGPUBuffer);
       openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 2, fusedOutGPUBuffer);
 
+      pointCloudRenderer.create(numberOfOusterPoints);
       coloredPointCloudDataHostFloatBuffer = BufferUtils.newFloatBuffer(pointCloudRenderer.getVerticesArray().length);
       zed2PhonyHostBuffer = BufferUtils.newByteBuffer(zed2InBytesLength);
       ousterInHostBuffer = BufferUtils.newByteBuffer(ousterInBytesLength);
@@ -128,18 +128,25 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          ByteBuffer ousterInHeapBuffer = RosTools.sliceNettyBuffer(ousterPointCloud2.getData());
          ousterInHostBuffer.rewind();
          ousterInHostBuffer.put(ousterInHeapBuffer);
+         ousterInHostBuffer.rewind();
 //         ByteBuffer zed2InHostBuffer = RosTools.sliceNettyBuffer(zed2Image.getData());
          openCLManager.enqueueWriteBuffer(ousterInGPUBuffer, ousterInBytesLength, new BytePointer(ousterInHostBuffer));
 //         openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2InHostBuffer));
+         zed2PhonyHostBuffer.rewind();
          openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2PhonyHostBuffer));
 
          // global work size is the total number of ouster pixels
          // local work size should probably be the max supported
+
+         openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 0, ousterInGPUBuffer);
+         openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 1, zed2InGPUBuffer);
+         openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 2, fusedOutGPUBuffer);
          openCLManager.execute(projectZED2ToOusterPointsKernel, numberOfOusterPoints);
 
          // l515 points, make into XYZRGBA and stick at the end
          // should be 1024 * 128 jobs?
 
+         coloredPointCloudDataHostFloatBuffer.rewind();
          openCLManager.enqueueReadBuffer(fusedOutGPUBuffer, fusedOutBytesLength, new FloatPointer(coloredPointCloudDataHostFloatBuffer));
 
          // floats: X,Y,Z,R,G,B,A,0.01,1.0,0.0
@@ -198,5 +205,12 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    {
       if (isActive())
          pointCloudRenderer.getRenderables(renderables, pool);
+   }
+
+   public static void main(String[] args)
+   {
+      OpenCLManager openCLManager = new OpenCLManager();
+      openCLManager.create();
+      openCLManager.loadProgramAndCreateKernel("projectZED2ToOusterPoints");
    }
 }
