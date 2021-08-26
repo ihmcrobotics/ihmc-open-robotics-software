@@ -51,7 +51,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    private _cl_mem zed2InGPUBuffer;
    private int zed2InBytesLength;
    private int numberOfOusterPoints;
-   private ByteBuffer zed2PhonyHostBuffer;
+   private ByteBuffer zed2InHostBuffer;
    private ByteBuffer ousterInHostBuffer;
 
    public GDXROS1FusedPointCloudVisualizer(HumanoidReferenceFrames referenceFrames)
@@ -103,7 +103,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
 
       pointCloudRenderer.create(numberOfOusterPoints);
       coloredPointCloudDataHostFloatBuffer = BufferUtils.newFloatBuffer(pointCloudRenderer.getVerticesArray().length);
-      zed2PhonyHostBuffer = BufferUtils.newByteBuffer(zed2InBytesLength);
+      zed2InHostBuffer = BufferUtils.newByteBuffer(zed2InBytesLength);
       ousterInHostBuffer = BufferUtils.newByteBuffer(ousterInBytesLength);
    }
 
@@ -118,7 +118,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
       Image zed2Image = latestZED2Image.get();
 
 //      if (ousterPointCloud2 != null && l515PointCloud2 != null && zed2Image != null)
-      if (ousterPointCloud2 != null)
+      if (ousterPointCloud2 != null && zed2Image != null)
       {
          long ousterTimestamp = ousterPointCloud2.getHeader().getStamp().totalNsecs();
 
@@ -129,18 +129,14 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          ousterInHostBuffer.rewind();
          ousterInHostBuffer.put(ousterInHeapBuffer);
          ousterInHostBuffer.rewind();
-//         ByteBuffer zed2InHostBuffer = RosTools.sliceNettyBuffer(zed2Image.getData());
          openCLManager.enqueueWriteBuffer(ousterInGPUBuffer, ousterInBytesLength, new BytePointer(ousterInHostBuffer));
-//         openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2InHostBuffer));
-         zed2PhonyHostBuffer.rewind();
-         openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2PhonyHostBuffer));
 
-         // global work size is the total number of ouster pixels
-         // local work size should probably be the max supported
+         ByteBuffer zed2InHeapBuffer = RosTools.sliceNettyBuffer(zed2Image.getData());
+         zed2InHostBuffer.rewind();
+         zed2InHostBuffer.put(zed2InHeapBuffer);
+         zed2InHostBuffer.rewind();
+         openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2InHostBuffer));
 
-         openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 0, ousterInGPUBuffer);
-         openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 1, zed2InGPUBuffer);
-         openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 2, fusedOutGPUBuffer);
          openCLManager.execute(projectZED2ToOusterPointsKernel, numberOfOusterPoints);
 
          // l515 points, make into XYZRGBA and stick at the end
