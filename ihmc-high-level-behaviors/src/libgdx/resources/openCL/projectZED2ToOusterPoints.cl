@@ -12,6 +12,10 @@ __kernel void projectZED2ToOusterPoints(__global unsigned char* ousterIn, __glob
    float ousterY = ousterFloats[1];
    float ousterZ = ousterFloats[2];
 
+
+   // TODO: transform 3D point to camera
+
+
    int zed2InIndex = gid * 3;
    float zed2B;
    float zed2G;

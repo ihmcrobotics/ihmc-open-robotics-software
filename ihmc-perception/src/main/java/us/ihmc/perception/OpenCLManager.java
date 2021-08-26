@@ -30,7 +30,7 @@ public class OpenCLManager
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
    private final ArrayList<_cl_mem> bufferObjects = new ArrayList<>();
    private final SizeTPointer globalWorkSize = new SizeTPointer(0, 0, 0);
-   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Find largest value
+   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Rethink this
 
    public void create()
    {
