@@ -1,14 +1,13 @@
 package us.ihmc.gdx.ui.behaviors.registry;
 
 import us.ihmc.behaviors.BehaviorRegistry;
-import us.ihmc.behaviors.targetFollowing.TargetFollowingBehavior;
 import us.ihmc.gdx.ui.behaviors.*;
 
 import java.util.LinkedHashSet;
 
 public class GDXBehaviorUIRegistry extends BehaviorRegistry
 {
-   public static final GDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new GDXBehaviorUIRegistry(ImGuiGDXBuildingExplorationBehaviorUI.DEFINITION);
+   public static final GDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new GDXBehaviorUIRegistry(ImGuiGDXTargetFollowingBehaviorUI.DEFINITION);
    static
    {
       DEFAULT_BEHAVIORS.register(ImGuiGDXTargetFollowingBehaviorUI.DEFINITION);
