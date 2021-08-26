@@ -62,7 +62,6 @@ public abstract class GDXProcessManagerPanel
 
       // TODO: GUI selection
       GDXBehaviorUIRegistry behaviorRegistry = GDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
-      behaviorRegistry.setHighestLevelNode(ImGuiGDXLookAndStepBehaviorUI.DEFINITION);
 
       ros1MasterProcess = new ROS1MasterProcess();
       behaviorModuleProcess = new BehaviorModuleProcess(this::createRobotModel, ros2Mode, messagerMode, behaviorRegistry);
