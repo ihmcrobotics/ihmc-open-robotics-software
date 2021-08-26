@@ -83,20 +83,30 @@ public class SCS2AvatarTestingSimulation
    // GUI controls:
    public void setCameraFocusPosition(double x, double y, double z)
    {
-      sessionVisualizerControls.setCameraFocusPosition(x, y, z);
+      if (sessionVisualizerControls != null)
+         sessionVisualizerControls.setCameraFocusPosition(x, y, z);
    }
 
    public void setCameraPosition(double x, double y, double z)
    {
-      sessionVisualizerControls.setCameraPosition(x, y, z);
+      if (sessionVisualizerControls != null)
+         sessionVisualizerControls.setCameraPosition(x, y, z);
    }
 
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
    {
-      sessionVisualizerControls.requestCameraRigidBodyTracking(robotName, rigidBodyName);
+      if (sessionVisualizerControls != null)
+         sessionVisualizerControls.requestCameraRigidBodyTracking(robotName, rigidBodyName);
    }
 
    // Misc.
+   public void finishTest()
+   {
+      if (sessionVisualizerControls != null)
+         sessionVisualizerControls.waitUntilDown();
+      else
+         destroy();
+   }
 
    public void destroy()
    {
