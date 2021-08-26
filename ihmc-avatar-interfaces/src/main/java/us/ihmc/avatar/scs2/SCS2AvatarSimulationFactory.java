@@ -144,7 +144,7 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setYoVariableServer(yoVariableServer);
       avatarSimulation.setIntraprocessYoVariableLogger(intraprocessYoVariableLogger);
       avatarSimulation.setControllerThread(controllerThread);
-      avatarSimulation.setStateEstimationThread(estimatorThread);
+      avatarSimulation.setEstimatorThread(estimatorThread);
       avatarSimulation.setRobotController(robotController);
       avatarSimulation.setRobotDefinition(robotDefinition);
       avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);

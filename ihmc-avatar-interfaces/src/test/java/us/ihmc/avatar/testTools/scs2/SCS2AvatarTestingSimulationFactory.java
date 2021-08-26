@@ -22,6 +22,8 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 
 public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFactory
@@ -33,6 +35,36 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
 
    private DRCRobotModel robotModel;
    private ScriptedFootstepGenerator scriptedFootstepGenerator;
+
+   private boolean createVideo = false;
+
+   public static SCS2AvatarTestingSimulation createDefaultTestSimulation(DRCRobotModel robotModel, SimulationTestingParameters simulationTestingParameters)
+   {
+      return createDefaultTestSimulation(robotModel, new DefaultCommonAvatarEnvironment(), simulationTestingParameters);
+   }
+
+   public static SCS2AvatarTestingSimulation createDefaultTestSimulation(DRCRobotModel robotModel,
+                                                                         CommonAvatarEnvironmentInterface environment,
+                                                                         SimulationTestingParameters simulationTestingParameters)
+   {
+      return createDefaultTestSimulationFactory(robotModel, environment, simulationTestingParameters).createAvatarTestingSimulation();
+   }
+
+   public static SCS2AvatarTestingSimulationFactory createDefaultTestSimulationFactory(DRCRobotModel robotModel,
+                                                                                       SimulationTestingParameters simulationTestingParameters)
+   {
+      return createDefaultTestSimulationFactory(robotModel, new DefaultCommonAvatarEnvironment(), simulationTestingParameters);
+   }
+
+   public static SCS2AvatarTestingSimulationFactory createDefaultTestSimulationFactory(DRCRobotModel robotModel,
+                                                                                       CommonAvatarEnvironmentInterface environment,
+                                                                                       SimulationTestingParameters simulationTestingParameters)
+   {
+      SCS2AvatarTestingSimulationFactory simulationFactory = new SCS2AvatarTestingSimulationFactory(robotModel, environment);
+      simulationFactory.setDefaultHighLevelHumanoidControllerFactory();
+      simulationFactory.setup(simulationTestingParameters);
+      return simulationFactory;
+   }
 
    public SCS2AvatarTestingSimulationFactory(DRCRobotModel robotModel, CommonAvatarEnvironmentInterface environment)
    {
@@ -62,6 +94,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       SCS2AvatarTestingSimulation avatarTestingSimulation = new SCS2AvatarTestingSimulation(super.createAvatarSimulation());
       avatarTestingSimulation.setROS2Node(ros2Node);
       avatarTestingSimulation.setDefaultControllerPublishers(defaultControllerPublishers);
+      avatarTestingSimulation.setCreateVideo(createVideo);
       return avatarTestingSimulation;
    }
 
@@ -83,6 +116,20 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       if (scriptedFootstepGenerator == null)
          scriptedFootstepGenerator = new ScriptedFootstepGenerator(robotModel.createFullRobotModel());
       return scriptedFootstepGenerator;
+   }
+
+   public void setup(SimulationTestingParameters parameters)
+   {
+      setShowGUI(parameters.getCreateGUI());
+      setUsePerfectSensors(parameters.getUsePefectSensors());
+      setRunMultiThreaded(parameters.getRunMultiThreaded());
+      setSimulationDataBufferSize(parameters.getDataBufferSize());
+      setCreateVideo(parameters.getCreateSCSVideos());
+   }
+
+   public void setCreateVideo(boolean createVideo)
+   {
+      this.createVideo = createVideo;
    }
 
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
