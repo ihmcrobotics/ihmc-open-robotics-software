@@ -16,20 +16,15 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.sun.javafx.tk.Toolkit;
-import com.sun.scenario.animation.AbstractMasterTimer;
-
 import controller_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import javafx.application.Platform;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.KinematicsToolboxTestRobot;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.SevenDoFArm;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.UpperBodyWithTwoManipulators;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -99,7 +94,7 @@ public final class KinematicsToolboxControllerTestSCS2
    private YoDouble finalSolutionQuality;
 
    private VisualizationSession session;
-   private SessionVisualizerControls controls;
+   private SessionVisualizerControls guiControls;
 
    private Robot robot;
    private Robot ghost;
@@ -151,11 +146,11 @@ public final class KinematicsToolboxControllerTestSCS2
          session.getYoGraphicDefinitions().addAll(SCS1GraphicConversionTools.toYoGraphicDefinitions(yoGraphicsListRegistry));
 
          LogTools.info("Starting GUI");
-         controls = SessionVisualizer.startSessionVisualizer(session, false);
-         controls.setCameraFocusPosition(0.0, 0.0, 1.0);
-         controls.setCameraPosition(8.0, 0.0, 3.0);
+         guiControls = SessionVisualizer.startSessionVisualizer(session, false);
+         guiControls.setCameraFocusPosition(0.0, 0.0, 1.0);
+         guiControls.setCameraPosition(8.0, 0.0, 3.0);
          LogTools.info("Waiting for GUI");
-         controls.waitUntilFullyUp();
+         guiControls.waitUntilFullyUp();
          LogTools.info("GUI's up");
       }
    }
@@ -177,7 +172,7 @@ public final class KinematicsToolboxControllerTestSCS2
       if (visualize)
       {
          session.setSessionMode(SessionMode.PAUSE);
-//         controls.waitUntilDown();
+         guiControls.waitUntilDown();
          LogTools.info("GUI's down");
       }
 
@@ -187,16 +182,16 @@ public final class KinematicsToolboxControllerTestSCS2
          mainRegistry = null;
       }
 
+      if (guiControls != null)
+      {
+         guiControls.shutdownNow();
+         guiControls = null;
+      }
+
       if (session != null)
       {
          session.shutdownSession();
          session = null;
-      }
-
-      if (controls != null)
-      {
-         controls.shutdownNow();
-         controls = null;
       }
 
       commandInputManager = null;
@@ -214,15 +209,7 @@ public final class KinematicsToolboxControllerTestSCS2
 
       System.gc();
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
-
-      @SuppressWarnings({"unused", "restriction"})
-      AbstractMasterTimer masterTimer = Toolkit.getToolkit().getMasterTimer();
-
-      if (counter++ >= 5)
-         ThreadTools.sleepForever();
    }
-
-   private static int counter = 0;
 
    @Test
    public void testHoldBodyPose() throws Exception
