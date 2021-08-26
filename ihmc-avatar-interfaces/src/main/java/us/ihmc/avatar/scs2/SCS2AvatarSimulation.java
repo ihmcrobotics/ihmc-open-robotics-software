@@ -28,7 +28,7 @@ public class SCS2AvatarSimulation
    private YoVariableServer yoVariableServer;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private DisposableRobotController robotController;
-   private AvatarEstimatorThread stateEstimationThread;
+   private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
@@ -163,14 +163,24 @@ public class SCS2AvatarSimulation
       this.robotController = robotController;
    }
 
-   public void setStateEstimationThread(AvatarEstimatorThread stateEstimationThread)
+   public void setEstimatorThread(AvatarEstimatorThread estimatorThread)
    {
-      this.stateEstimationThread = stateEstimationThread;
+      this.estimatorThread = estimatorThread;
+   }
+
+   public AvatarEstimatorThread getEstimatorThread()
+   {
+      return estimatorThread;
    }
 
    public void setControllerThread(AvatarControllerThread controllerThread)
    {
       this.controllerThread = controllerThread;
+   }
+
+   public AvatarControllerThread getControllerThread()
+   {
+      return controllerThread;
    }
 
    public void setSimulatedRobotTimeProvider(SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider)
@@ -185,7 +195,7 @@ public class SCS2AvatarSimulation
 
    public void addRobotControllerOnEstimatorThread(RobotController controller)
    {
-      stateEstimationThread.addRobotController(controller);
+      estimatorThread.addRobotController(controller);
    }
 
    public void setRobotDefinition(RobotDefinition robotDefinition)
@@ -193,14 +203,29 @@ public class SCS2AvatarSimulation
       this.robotDefinition = robotDefinition;
    }
 
+   public RobotDefinition getRobotDefinition()
+   {
+      return robotDefinition;
+   }
+
    public void setRobotModel(DRCRobotModel robotModel)
    {
       this.robotModel = robotModel;
    }
 
+   public DRCRobotModel getRobotModel()
+   {
+      return robotModel;
+   }
+
    public void setShowGUI(boolean showGUI)
    {
       this.showGUI = showGUI;
+   }
+
+   public boolean getShowGUI()
+   {
+      return showGUI;
    }
 
    public void setAutomaticallyStartSimulation(boolean automaticallyStartSimulation)

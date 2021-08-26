@@ -135,8 +135,7 @@ public abstract class EndToEndCinderBlockFieldSCS2Test implements MultiRobotTest
       max.add(margin);
       simulationTestHelper.assertRobotsRootJointIsInBoundingBox(new BoundingBox3D(min, max));
 
-      // TODO
-      //      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public void testSteppingStonesA() throws Exception
@@ -159,7 +158,7 @@ public abstract class EndToEndCinderBlockFieldSCS2Test implements MultiRobotTest
       simulationTestHelper.setCameraPosition(1.6, -6.0, 2.4);
 
       assertTrue(simulationTestHelper.simulateAndWait(0.5));
-      simulationTestHelper.setBufferInPointToCurrent();
+      simulationTestHelper.setBufferInPointIndexToCurrent();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       simulationTestHelper.publishToController(footsteps);
@@ -194,7 +193,7 @@ public abstract class EndToEndCinderBlockFieldSCS2Test implements MultiRobotTest
       simulationTestHelper.setCameraPosition(6.0, 7.0, 3.25);
 
       assertTrue(simulationTestHelper.simulateAndWait(0.5));
-      simulationTestHelper.setBufferInPointToCurrent();
+      simulationTestHelper.setBufferInPointIndexToCurrent();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
@@ -235,7 +234,7 @@ public abstract class EndToEndCinderBlockFieldSCS2Test implements MultiRobotTest
       simulationTestHelper.requestCameraRigidBodyTracking(getSimpleRobotName(), simulationTestHelper.getControllerFullRobotModel().getPelvis().getName());
 
       assertTrue(simulationTestHelper.simulateAndWait(0.5));
-      simulationTestHelper.setBufferInPointToCurrent();
+      simulationTestHelper.setBufferInPointIndexToCurrent();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
