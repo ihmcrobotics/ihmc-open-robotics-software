@@ -6,6 +6,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.navigation.NavigationBehavior;
 import us.ihmc.behaviors.patrol.PatrolBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
+import us.ihmc.behaviors.targetFollowing.TargetFollowingBehavior;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 
 import java.util.HashSet;
