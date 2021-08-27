@@ -29,6 +29,7 @@
 
 package us.ihmc.perception;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 
@@ -397,56 +398,56 @@ public class ImageEncodingTools
 
       for (int i = 0; i <= 5; ++i)
       {
-         conversionCodeMap.put(new Pair<>(OpenCVColorFormats.valueOf(i), OpenCVColorFormats.valueOf(i)), new Vector<>(Collections.singletonList(SAME_FORMAT)));
+         conversionCodeMap.put(Pair.of(OpenCVColorFormats.valueOf(i), OpenCVColorFormats.valueOf(i)), new Vector<>(Collections.singletonList(SAME_FORMAT)));
       }
 
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.GRAY, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2RGB)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.GRAY, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2BGR)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.GRAY, OpenCVColorFormats.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2RGBA)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.GRAY, OpenCVColorFormats.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2BGRA)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.GRAY, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2RGB)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.GRAY, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2BGR)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.GRAY, OpenCVColorFormats.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2RGBA)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.GRAY, OpenCVColorFormats.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_GRAY2BGRA)));
 
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.RGB, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2GRAY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.RGB, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2BGR)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.RGB, OpenCVColorFormats.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2RGBA)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.RGB, OpenCVColorFormats.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2BGRA)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.RGB, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2GRAY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.RGB, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2BGR)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.RGB, OpenCVColorFormats.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2RGBA)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.RGB, OpenCVColorFormats.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGB2BGRA)));
 
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BGR, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2GRAY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BGR, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2RGB)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BGR, OpenCVColorFormats.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2RGBA)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BGR, OpenCVColorFormats.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2BGRA)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BGR, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2GRAY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BGR, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2RGB)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BGR, OpenCVColorFormats.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2RGBA)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BGR, OpenCVColorFormats.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGR2BGRA)));
 
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.RGBA, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2GRAY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.RGBA, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2RGB)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.RGBA, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2BGR)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.RGBA, OpenCVColorFormats.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2BGRA)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.RGBA, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2GRAY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.RGBA, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2RGB)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.RGBA, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2BGR)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.RGBA, OpenCVColorFormats.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_RGBA2BGRA)));
 
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BGRA, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2GRAY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BGRA, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2RGB)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BGRA, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2BGR)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BGRA, OpenCVColorFormats.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2RGBA)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BGRA, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2GRAY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BGRA, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2RGB)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BGRA, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2BGR)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BGRA, OpenCVColorFormats.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BGRA2RGBA)));
 
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.YUV422, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2GRAY_UYVY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.YUV422, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2RGB_UYVY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.YUV422, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2BGR_UYVY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.YUV422, OpenCVColorFormats.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2RGBA_UYVY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.YUV422, OpenCVColorFormats.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2BGRA_UYVY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.YUV422, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2GRAY_UYVY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.YUV422, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2RGB_UYVY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.YUV422, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2BGR_UYVY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.YUV422, OpenCVColorFormats.RGBA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2RGBA_UYVY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.YUV422, OpenCVColorFormats.BGRA), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_YUV2BGRA_UYVY)));
 
       // Deal with Bayer
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_RGGB, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerBG2GRAY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_RGGB, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerBG2RGB)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_RGGB, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerBG2BGR)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_RGGB, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerBG2GRAY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_RGGB, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerBG2RGB)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_RGGB, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerBG2BGR)));
 
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_BGGR, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerRG2GRAY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_BGGR, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerRG2RGB)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_BGGR, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerRG2BGR)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_BGGR, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerRG2GRAY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_BGGR, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerRG2RGB)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_BGGR, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerRG2BGR)));
 
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_GBRG, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGR2GRAY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_GBRG, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGR2RGB)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_GBRG, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGR2BGR)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_GBRG, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGR2GRAY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_GBRG, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGR2RGB)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_GBRG, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGR2BGR)));
 
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_GRBG, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGB2GRAY)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_GRBG, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGB2RGB)));
-      conversionCodeMap.put(new Pair<>(OpenCVColorFormats.BAYER_GRBG, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGB2BGR)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_GRBG, OpenCVColorFormats.GRAY), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGB2GRAY)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_GRBG, OpenCVColorFormats.RGB), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGB2RGB)));
+      conversionCodeMap.put(Pair.of(OpenCVColorFormats.BAYER_GRBG, OpenCVColorFormats.BGR), new Vector<>(Collections.singletonList(opencv_imgproc.COLOR_BayerGB2BGR)));
 
       return conversionCodeMap;
    }
@@ -522,7 +523,7 @@ public class ImageEncodingTools
       // If we are converting from a color type to another type, then everything is fine
       final Map<Pair<OpenCVColorFormats, OpenCVColorFormats>, Vector<Integer>> conversionCodes = getConversionCodes();
 
-      Pair<OpenCVColorFormats, OpenCVColorFormats> key = new Pair<>(sourceEncoding, destinationEncoding);
+      Pair<OpenCVColorFormats, OpenCVColorFormats> key = Pair.of(sourceEncoding, destinationEncoding);
       Vector<Integer> codesVector = conversionCodes.get(key);
 
       if (codesVector == null)
