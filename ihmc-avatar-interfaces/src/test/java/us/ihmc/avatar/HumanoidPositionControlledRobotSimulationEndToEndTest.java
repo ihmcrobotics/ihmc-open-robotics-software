@@ -22,7 +22,7 @@ import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
 import us.ihmc.avatar.multiContact.MultiContactScriptMatcher;
 import us.ihmc.avatar.multiContact.MultiContactScriptPostProcessor;
 import us.ihmc.avatar.multiContact.MultiContactScriptReader;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
@@ -201,7 +201,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    {
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       ghostRobotModel.getRobotDescription().setName("Ghost");
-      KinematicsToolboxControllerTest.recursivelyModifyGraphics(ghostRobotModel.getRobotDescription().getRootJoints().get(0), ghostApperance);
+      HumanoidKinematicsToolboxControllerTest.recursivelyModifyGraphics(ghostRobotModel.getRobotDescription().getRootJoints().get(0), ghostApperance);
       HumanoidFloatingRootJointRobot ghostRobot = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghostRobot.getRootJoint().setPosition(-1000.0, 0., 0.);
       ghostRobot.setDynamic(false);
