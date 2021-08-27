@@ -129,10 +129,10 @@ public class LookAndStepFootstepPlanningTask
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
          suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + planarRegionReceptionTimerSnapshot.hasBeenSet()
                                        + " timeSinceLastUpdate: " + planarRegionReceptionTimerSnapshot.getTimePassedSinceReset(),
-                                 () -> planarRegionReceptionTimerSnapshot.isExpired());
+                                 () -> !lookAndStepParameters.getAssumeFlatGround() && planarRegionReceptionTimerSnapshot.isExpired());
          suppressor.addCondition(() -> "No regions. "
                                        + (planarRegions == null ? null : (" isEmpty: " + planarRegions.isEmpty())),
-                                 () -> !(planarRegions != null && !planarRegions.isEmpty()));
+                                 () -> !lookAndStepParameters.getAssumeFlatGround() && (!(planarRegions != null && !planarRegions.isEmpty())));
          suppressor.addCondition(() -> "Capturability based status expired. haveReceivedAny: " + capturabilityBasedStatusExpirationTimer.hasBeenSet()
                                        + " timeSinceLastUpdate: " + capturabilityBasedStatusReceptionTimerSnapshot.getTimePassedSinceReset(),
                                  () -> capturabilityBasedStatusReceptionTimerSnapshot.isExpired());
@@ -275,7 +275,7 @@ public class LookAndStepFootstepPlanningTask
          planarRegionsHistory.addLast(bipedalSupportPlanarRegionCalculator.getSupportRegionsAsList());
       }
 
-      // detect flat ground
+      // detect flat ground; work in progress
       ConvexPolytope3D convexPolytope = new ConvexPolytope3D();
       for (Point3D point3D : capturabilityBasedStatus.getLeftFootSupportPolygon3d())
       {
@@ -287,7 +287,17 @@ public class LookAndStepFootstepPlanningTask
       }
       footholdVolume.set(convexPolytope.getVolume());
 
-      planarRegionsHistory.add(planarRegions);
+      if (lookAndStepParameters.getAssumeFlatGround())
+      {
+         bipedalSupportPlanarRegionCalculator.calculateSupportRegions(7.0,
+                                                                      capturabilityBasedStatus,
+                                                                      robotConfigurationData);
+         planarRegionsHistory.addLast(bipedalSupportPlanarRegionCalculator.getSupportRegionsAsList());
+      }
+      else
+      {
+         planarRegionsHistory.add(planarRegions);
+      }
 
       PlanarRegionsList combinedRegionsForPlanning = new PlanarRegionsList();
       planarRegionsHistory.forEach(combinedRegionsForPlanning::addPlanarRegionsList);
