@@ -51,15 +51,12 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
       {
          LogTools.info("Received mode: {}", newValue);
       });
-      //      helper.getOrCreateControllerStatusTracker().addNotWalkingStateAnymoreCallback(() ->
-      //      {
-      //      });
    }
 
    @Override
    public BehaviorTreeNodeStatus tickInternal()
    {
-      return null;
+      return tickLookAndStep();
    }
 
    private BehaviorTreeNodeStatus tickLookAndStep()
