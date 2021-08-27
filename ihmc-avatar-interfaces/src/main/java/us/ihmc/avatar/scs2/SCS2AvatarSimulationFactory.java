@@ -58,6 +58,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
+import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.yoGraphic.SCS1GraphicConversionTools;
@@ -329,7 +330,7 @@ public class SCS2AvatarSimulationFactory
          });
       }
 
-      List<HumanoidRobotControlTask> tasks = new ArrayList<HumanoidRobotControlTask>();
+      List<HumanoidRobotControlTask> tasks = new ArrayList<>();
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
       if (handControlTask != null)
@@ -380,7 +381,21 @@ public class SCS2AvatarSimulationFactory
       if (handControlThread != null)
          robotController.getYoRegistry().addChild(handControlThread.getYoVariableRegistry());
       robot.getRegistry().addChild(robotController.getYoRegistry());
-      robot.getControllerManager().addController(() -> robotController.doControl());
+      robot.getControllerManager().addController(new Controller()
+      {
+         @Override
+         public void doControl()
+         {
+            robotController.doControl();
+         }
+
+         @Override
+         public void pause()
+         {
+            if (robotController instanceof BarrierScheduledRobotController)
+               ((BarrierScheduledRobotController) robotController).waitUntilTasksDone();
+         }
+      });
    }
 
    private void setupLidarController()
@@ -548,7 +563,7 @@ public class SCS2AvatarSimulationFactory
 
    public void setSimulationDataRecordTimePeriod(double simulationDataRecordTimePeriod)
    {
-      this.simulationDataRecordTickPeriod.set((int) Math.max(1.0, simulationDataRecordTimePeriod / robotModel.get().getSimulateDT()));
+      simulationDataRecordTickPeriod.set((int) Math.max(1.0, simulationDataRecordTimePeriod / robotModel.get().getSimulateDT()));
    }
 
    public void setSimulationDataRecordTickPeriod(int simulationDataRecordTickPeriod)
