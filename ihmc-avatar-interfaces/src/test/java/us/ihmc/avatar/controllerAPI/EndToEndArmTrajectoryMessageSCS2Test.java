@@ -68,6 +68,11 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
       return 0.5;
    }
 
+   protected boolean isRobotJointDampingEnabled()
+   {
+      return false;
+   }
+
    @Test
    public void testSingleTrajectoryPoint() throws Exception
    {
@@ -76,7 +81,7 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      createSimulationTestHelper();
       simulationTestHelper.start();
 
       List<JointspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
@@ -147,6 +152,14 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
       simulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
+   public void createSimulationTestHelper()
+   {
+      SCS2AvatarTestingSimulationFactory testSimulationFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                                       simulationTestingParameters);
+      testSimulationFactory.setEnableSimulatedRobotDamping(isRobotJointDampingEnabled());
+      simulationTestHelper = testSimulationFactory.createAvatarTestingSimulation();
+   }
+
    @Test
    public void testForceExecutionWithSingleTrajectoryPoint() throws Exception
    {
@@ -155,7 +168,7 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      createSimulationTestHelper();
       simulationTestHelper.start();
 
       List<JointspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
@@ -239,7 +252,7 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      createSimulationTestHelper();
       simulationTestHelper.start();
 
       List<JointspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
@@ -367,7 +380,7 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
       simulationTestingParameters.setRunMultiThreaded(false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      createSimulationTestHelper();
       simulationTestHelper.start();
 
       List<JointspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
@@ -455,7 +468,7 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      createSimulationTestHelper();
       simulationTestHelper.start();
       List<JointspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
       simulationTestHelper.createSubscriberFromController(JointspaceTrajectoryStatusMessage.class, statusMessages::add);
@@ -626,7 +639,7 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
 
       Random random = new Random(564654L);
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      createSimulationTestHelper();
       simulationTestHelper.start();
 
       double controllerDT = getRobotModel().getControllerDT();
@@ -755,7 +768,7 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
       Random random = new Random(564654L);
       double epsilon = 1.0e-10;
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      createSimulationTestHelper();
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -895,7 +908,7 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      createSimulationTestHelper();
       simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
@@ -950,7 +963,7 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
 
       YoRegistry testRegistry = new YoRegistry("testStreaming");
 
-      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      createSimulationTestHelper();
       simulationTestHelper.start();
       simulationTestHelper.getSimulationSession().getRootRegistry().addChild(testRegistry);
 
@@ -1273,7 +1286,7 @@ public abstract class EndToEndArmTrajectoryMessageSCS2Test implements MultiRobot
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest();
+         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
          simulationTestHelper = null;
       }
 
