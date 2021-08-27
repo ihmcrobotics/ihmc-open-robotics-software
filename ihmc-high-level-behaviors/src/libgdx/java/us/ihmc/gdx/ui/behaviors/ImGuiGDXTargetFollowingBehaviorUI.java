@@ -71,7 +71,6 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends GDXBehaviorUIInterface
 
          ++pointNumber;
       });
-      periodicThread.start();
    }
 
    @Override

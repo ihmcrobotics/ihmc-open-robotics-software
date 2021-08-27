@@ -183,6 +183,11 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       bodyPathPlanning.acceptGoal(goal);
    }
 
+   public void setOperatorReviewEnabled(boolean enabled)
+   {
+      operatorReviewEnabledInput.set(enabled);
+   }
+
    @Override
    public BehaviorTreeNodeStatus tickInternal()
    {

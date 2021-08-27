@@ -7,6 +7,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -16,6 +17,8 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorTools.NAN_POSE;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.OperatorReviewEnabled;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.OperatorReviewEnabledToUI;
 
 public class TargetFollowingBehavior extends ResettingNode implements BehaviorInterface
 {
@@ -27,8 +30,10 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
    private final ROS2SyncedRobotModel syncedRobot;
    private final AtomicReference<Pose3D> goal = new AtomicReference<>(NAN_POSE);
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("CommsRelay", true);
+   private final ControllerStatusTracker controllerStatusTracker;
 
    private String lastTickedThing = "NONE";
+   private int lastNumberOfCompletedFoosteps = 0;
 
    public TargetFollowingBehavior(BehaviorHelper helper)
    {
@@ -51,18 +56,26 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
       {
          LogTools.info("Received mode: {}", newValue);
       });
+      controllerStatusTracker = helper.getOrCreateControllerStatusTracker();
    }
 
    @Override
    public BehaviorTreeNodeStatus tickInternal()
    {
-      return tickLookAndStep();
-   }
+      // if look and step took a step since we last looked
+      int numberOfCompletedFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
+      int newlyCompletedFootsteps = numberOfCompletedFootsteps - lastNumberOfCompletedFoosteps;
+      lastNumberOfCompletedFoosteps = numberOfCompletedFootsteps;
 
-   private BehaviorTreeNodeStatus tickLookAndStep()
-   {
-      if (lookAndStepBehavior.isReset())
+      helper.publish(OperatorReviewEnabled, false);
+      helper.publish(OperatorReviewEnabledToUI, false);
+
+      if (newlyCompletedFootsteps > 0 || lookAndStepBehavior.isReset())
+      {
+//         lookAndStepBehavior.setOperatorReviewEnabled(false);
          lookAndStepBehavior.acceptGoal(goal.get());
+      }
+
       lastTickedThing = "LOOK_AND_STEP";
       return lookAndStepBehavior.tick();
    }
