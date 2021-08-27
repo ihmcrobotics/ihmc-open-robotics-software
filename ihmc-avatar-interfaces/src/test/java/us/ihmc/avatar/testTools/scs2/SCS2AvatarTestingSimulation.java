@@ -62,7 +62,12 @@ public class SCS2AvatarTestingSimulation
       avatarSimulation.start();
       sessionVisualizerControls = avatarSimulation.getSessionVisualizerControls();
       if (sessionVisualizerControls != null)
+      {
          sessionVisualizerControls.waitUntilFullyUp();
+         sessionVisualizerControls.requestCameraRigidBodyTracking(avatarSimulation.getRobotModel().getSimpleRobotName(),
+                                                                  avatarSimulation.getControllerFullRobotModel().getPelvis().getName());
+         sessionVisualizerControls.setCameraZoom(6.0);
+      }
    }
 
    // Simulation controls:
@@ -115,9 +120,9 @@ public class SCS2AvatarTestingSimulation
    }
 
    // Misc.
-   public void finishTest()
+   public void finishTest(boolean waitUntilGUIIsDone)
    {
-      if (sessionVisualizerControls != null)
+      if (waitUntilGUIIsDone && sessionVisualizerControls != null)
          sessionVisualizerControls.waitUntilDown();
       else
          destroy();

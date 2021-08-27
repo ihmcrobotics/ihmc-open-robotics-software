@@ -59,6 +59,8 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.robot.JointDefinition;
+import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.yoGraphic.SCS1GraphicConversionTools;
@@ -105,6 +107,7 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<Boolean> automaticallyStartSimulation = new OptionalFactoryField<>("automaticallyStartSimulation", false);
 
    private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
+   private final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
 
    // TO CONSTRUCT
    private RobotDefinition robotDefinition;
@@ -164,6 +167,18 @@ public class SCS2AvatarSimulationFactory
       DRCRobotModel robotModel = this.robotModel.get();
 
       robotDefinition = RobotDefinitionTools.toRobotDefinition(robotModel.getRobotDescription());
+
+      if (!enableSimulatedRobotDamping.get())
+      {
+         for (JointDefinition joint : robotDefinition.getAllJoints())
+         {
+            if (joint instanceof OneDoFJointDefinition)
+            {
+               ((OneDoFJointDefinition) joint).setDamping(0.0);
+            }
+         }
+      }
+
       RobotCollisionModel collisionModel = robotModel.getSimulationRobotCollisionModel(collidableHelper, robotCollisionName, terrainCollisionName);
       if (collisionModel != null)
          RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
@@ -624,5 +639,10 @@ public class SCS2AvatarSimulationFactory
    public void setUseImpulseBasedPhysicsEngine(boolean useImpulseBasePhysicsEngine)
    {
       this.useImpulseBasePhysicsEngine.set(useImpulseBasePhysicsEngine);
+   }
+
+   public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
+   {
+      this.enableSimulatedRobotDamping.set(enableSimulatedRobotDamping);
    }
 }
