@@ -53,6 +53,8 @@ public class LookAndStepLocalizationTask
    protected Notification finishedWalkingNotification;
    protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
    protected ControllerStatusTracker controllerStatusTracker;
+   protected boolean newGoalSubmitted = false;
+   protected boolean didFootstepPlanningOnceToEnsureSomeProgress = false;
 
    public static class LookAndStepBodyPathLocalization extends LookAndStepLocalizationTask
    {
@@ -99,8 +101,15 @@ public class LookAndStepLocalizationTask
          capturabilityBasedStatusInput.set(capturabilityBasedStatus);
       }
 
+      public void acceptNewGoalSubmitted()
+      {
+         newGoalSubmitted = true;
+      }
+
       public void reset()
       {
+         newGoalSubmitted = false;
+         didFootstepPlanningOnceToEnsureSomeProgress = false;
          executor.interruptAndReset();
       }
 
@@ -191,8 +200,19 @@ public class LookAndStepLocalizationTask
          }
          ThreadTools.startAsDaemon(this::reachedGoalPublicationThread, "BroadcastReachedGoalWhenDoneWalking");
       }
+      else if (newGoalSubmitted && didFootstepPlanningOnceToEnsureSomeProgress)
+      {
+         newGoalSubmitted = false;
+         didFootstepPlanningOnceToEnsureSomeProgress = false;
+         statusLogger.info("Planning to new goal.");
+         if ((!isBeingReset.get()))
+         {
+            behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+         }
+      }
       else
       {
+         didFootstepPlanningOnceToEnsureSomeProgress = true;
          LookAndStepBodyPathLocalizationResult result = new LookAndStepBodyPathLocalizationResult(closestPointAlongPath,
                                                                                                   closestSegmentIndex,
                                                                                                   midFeetPose,

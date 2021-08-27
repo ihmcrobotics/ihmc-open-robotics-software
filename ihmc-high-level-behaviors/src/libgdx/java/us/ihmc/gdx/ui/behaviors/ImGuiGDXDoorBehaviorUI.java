@@ -11,6 +11,7 @@ import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolb
 import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.door.DoorType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -32,7 +33,6 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorTools.NAN_POSE;
 import static us.ihmc.behaviors.door.DoorBehaviorAPI.*;
 
 public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
@@ -49,7 +49,8 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    private final Stopwatch detectedFiducialMessageReceivedStopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot detectedFiducialReceivedPlot = new ImGuiMovingPlot("Detected fiducial", 1000, 230, 15);
    private volatile long latestFiducialID = -1;
-   private final AtomicReference<MutablePair<DoorType, Pose3D>> detectedDoorPose = new AtomicReference<>(MutablePair.of(DoorType.UNKNOWN_TYPE, NAN_POSE));
+   private final AtomicReference<MutablePair<DoorType, Pose3D>> detectedDoorPose = new AtomicReference<>(MutablePair.of(DoorType.UNKNOWN_TYPE,
+                                                                                                                        BehaviorTools.createNaNPose()));
    private final ImGuiMovingPlot distanceToDoorPlot = new ImGuiMovingPlot("Distance to door", 1000, 250, 15);
    private final ImGuiMovingPlot detectedDoorPlot = new ImGuiMovingPlot("Detected door", 1000, 250, 15);
    private final ImBoolean reviewDoorPose = new ImBoolean(true);
