@@ -315,8 +315,8 @@ public class RobotDescriptionFromSDFLoader
             {
                if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
                {
-                  double kLimit = jointNameMap.getDefaultKLimit();
-                  double bLimit = jointNameMap.getDefaultBLimit();
+                  double kLimit = jointNameMap.getJointKLimit(sanitizedJointName);
+                  double bLimit = jointNameMap.getJointBLimit(sanitizedJointName);
                   pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), kLimit, bLimit);
                }
                else
