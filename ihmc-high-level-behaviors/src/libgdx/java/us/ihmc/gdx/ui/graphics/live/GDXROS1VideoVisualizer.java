@@ -1,11 +1,9 @@
 package us.ihmc.gdx.ui.graphics.live;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -22,11 +20,8 @@ import us.ihmc.perception.ROSOpenCVImage;
 import us.ihmc.perception.ROSOpenCVTools;
 import us.ihmc.perception.ImageEncodingTools;
 import us.ihmc.utilities.ros.RosNodeInterface;
-import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
@@ -41,15 +36,11 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    private final ImGuiVideoPanel videoPanel;
    private volatile Image image;
    private volatile CompressedImage compressedImage;
-   private float lowestValueSeen = -1.0f;
-   private float highestValueSeen = -1.0f;
    private long receivedCount = 0;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
-   private final ImBoolean useOpenCV = new ImBoolean(true);
    private Mat inputImageMat;
    private Mat decodedImageMat;
-   private Mat decompressedImageMat;
    private Mat resizedImageMat;
 
    public GDXROS1VideoVisualizer(String title, String topic)
@@ -111,7 +102,6 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
       ImGui.text(topic);
       receivedPlot.render(receivedCount);
       ImGui.sameLine();
-      ImGui.checkbox(labels.get("Use OpenCV"), useOpenCV);
    }
 
    @Override
@@ -126,27 +116,13 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
 
          if (isCompressed && compressedImage != null)
          {
-            if (useOpenCV.get())
-            {
-               decompressAndDecodeUsingOpenCV(compressedImage);
-            }
-            else
-            {
-               decompressAndDecodeTheOldWay(compressedImage);
-            }
+            decompressAndDecodeUsingOpenCV(compressedImage);
             texture.draw(pixmap, 0, 0);
          }
          else if (image != null)
          {
             ensureTextureReady(image.getWidth(), image.getHeight());
-            if (useOpenCV.get())
-            {
-               decodeUsingOpenCV(image);
-            }
-            else
-            {
-               decodeTheOldWay(image);
-            }
+            decodeUsingOpenCV(image);
             texture.draw(pixmap, 0, 0);
          }
       }
@@ -204,121 +180,6 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
       catch (Exception e)
       {
          e.printStackTrace();
-      }
-   }
-
-   private void decodeTheOldWay(Image image)
-   {
-      boolean is16BitDepth = image.getEncoding().equals("16UC1");
-      boolean is8BitRGB = image.getEncoding().equals("rgb8");
-      boolean isBGR8 = image.getEncoding().equals("bgr8");
-
-      if (is8BitRGB)
-      {
-         ChannelBuffer data = image.getData();
-         int zeroedIndex = 0;
-         for (int y = 0; y < image.getHeight(); y++)
-         {
-            for (int x = 0; x < image.getWidth(); x++)
-            {
-               int r = Byte.toUnsignedInt(data.getByte(zeroedIndex + 0));
-               int g = Byte.toUnsignedInt(data.getByte(zeroedIndex + 1));
-               int b = Byte.toUnsignedInt(data.getByte(zeroedIndex + 2));
-               int a = 255;
-               zeroedIndex += 3;
-               int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
-               pixmap.drawPixel(x, y, rgb8888);
-            }
-         }
-      }
-      else if (isBGR8)
-      {
-         ChannelBuffer data = image.getData();
-         int zeroedIndex = 0;
-         for (int y = 0; y < image.getHeight(); y++)
-         {
-            for (int x = 0; x < image.getWidth(); x++)
-            {
-               int b = Byte.toUnsignedInt(data.getByte(zeroedIndex + 0));
-               int g = Byte.toUnsignedInt(data.getByte(zeroedIndex + 1));
-               int r = Byte.toUnsignedInt(data.getByte(zeroedIndex + 2));
-               int a = 255;
-               zeroedIndex += 3;
-               int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
-               pixmap.drawPixel(x, y, rgb8888);
-            }
-         }
-      }
-      else if (is16BitDepth)
-      {
-         ChannelBuffer data = image.getData();
-         byte[] array = data.array();
-         int dataIndex = data.arrayOffset();
-         for (int y = 0; y < image.getHeight(); y++)
-         {
-            for (int x = 0; x < image.getWidth(); x++)
-            {
-               int bigByte = array[dataIndex];
-               dataIndex++;
-               int smallByte = array[dataIndex];
-               dataIndex++;
-
-               float value = (float) (bigByte & 0xFF | smallByte << 8);
-
-               if (highestValueSeen < 0 || value > highestValueSeen)
-                  highestValueSeen = value;
-               if (lowestValueSeen < 0 || value < lowestValueSeen)
-                  lowestValueSeen = value;
-
-               float colorRange = highestValueSeen - lowestValueSeen;
-               float grayscale = (value - lowestValueSeen) / colorRange;
-
-               pixmap.drawPixel(x, y, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
-            }
-         }
-      }
-   }
-
-   private void decompressAndDecodeTheOldWay(CompressedImage compressedImage)
-   {
-      boolean is16BitDepth = compressedImage.getFormat().contains("16UC1"); // TODO: Support depth image
-      boolean is8BitRGB = compressedImage.getFormat().contains("rgb8");
-      boolean isBGR8 = compressedImage.getFormat().contains("bgr8");
-      BufferedImage bufferedImage = RosTools.bufferedImageFromRosMessageJpeg(compressedImage);
-      byte[] data = ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
-      int width = bufferedImage.getWidth();
-      int height = bufferedImage.getHeight();
-      ensureTextureReady(width, height);
-
-      if (is8BitRGB)
-      {
-         int zeroedIndex = 0;
-         for (int y = 0; y < height; y++)
-         {
-            for (int x = 0; x < width; x++)
-            {
-//                     int rgbaColor = data[zeroedIndex] << 24 | data[zeroedIndex + 1] << 16 | data[zeroedIndex + 2] << 8 | 255;
-               int color = bufferedImage.getRGB(x, y);
-               zeroedIndex += 3;
-               pixmap.drawPixel(x, y, (color << 8) | 255);
-            }
-         }
-      }
-      else if (isBGR8)
-      {
-         for (int y = 0; y < height; y++)
-         {
-            for (int x = 0; x < width; x++)
-            {
-               int i = (y * width + x) * 3;
-               int b = Byte.toUnsignedInt(data[i + 0]);
-               int g = Byte.toUnsignedInt(data[i + 1]);
-               int r = Byte.toUnsignedInt(data[i + 2]);
-               int a = 255;
-               int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
-            }
-            texture.draw(pixmap, 0, 0);
-         }
       }
    }
 
