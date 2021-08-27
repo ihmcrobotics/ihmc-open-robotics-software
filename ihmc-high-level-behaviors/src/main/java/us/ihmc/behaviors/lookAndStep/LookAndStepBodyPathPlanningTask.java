@@ -88,8 +88,8 @@ public class LookAndStepBodyPathPlanningTask
          // don't run two body path plans at the same time
          executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-         mapRegionsInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
-         goalInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
+         mapRegionsInput.addCallback(data -> run());
+         goalInput.addCallback(data -> run());
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
@@ -141,6 +141,11 @@ public class LookAndStepBodyPathPlanningTask
                                                                                    goal.getZ(),
                                                                                    goal.getYaw())
                                                                            .get()));
+      }
+
+      public void run()
+      {
+         executor.clearQueueAndExecute(this::evaluateAndRun);
       }
 
       public boolean isReset()

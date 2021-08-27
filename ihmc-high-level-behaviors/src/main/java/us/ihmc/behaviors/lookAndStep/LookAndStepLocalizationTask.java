@@ -208,6 +208,7 @@ public class LookAndStepLocalizationTask
          if ((!isBeingReset.get()))
          {
             behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+            bodyPathPlanning.run();
          }
       }
       else
