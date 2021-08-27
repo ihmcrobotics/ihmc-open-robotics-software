@@ -11,6 +11,11 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(useInitialSupportRegions);
    }
 
+   default boolean getAssumeFlatGround()
+   {
+      return get(assumeFlatGround);
+   }
+
    default double getSupportRegionScaleFactor()
    {
       return get(supportRegionScaleFactor);
