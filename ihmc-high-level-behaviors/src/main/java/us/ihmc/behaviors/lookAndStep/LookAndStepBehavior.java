@@ -180,6 +180,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    public void acceptGoal(Pose3DReadOnly goal)
    {
       behaviorStateReference.broadcast();
+      bodyPathLocalization.acceptNewGoalSubmitted();
       bodyPathPlanning.acceptGoal(goal);
    }
 

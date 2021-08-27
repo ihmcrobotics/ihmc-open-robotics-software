@@ -8,6 +8,7 @@ import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolb
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.ROS2Tools;
@@ -25,7 +26,6 @@ import us.ihmc.tools.Timer;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorTools.NAN_POSE;
 import static us.ihmc.behaviors.door.DoorBehaviorAPI.*;
 
 public class DoorBehavior extends ResettingNode implements BehaviorInterface
@@ -38,7 +38,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    private boolean doingBehavior = false;
    private final AtomicReference<CurrentBehaviorStatus> status = new AtomicReference<>();
    private final AtomicReference<DetectedFiducialPacket> detectedFiducial = new AtomicReference<>();
-   private final Pose3D doorPose = new Pose3D(NAN_POSE);
+   private final Pose3D doorPose = new Pose3D(BehaviorTools.createNaNPose());
    private double distanceToDoor = 0.0;
    private boolean isFacingDoor = false;
    private final Timer doorDetectedTimer = new Timer();

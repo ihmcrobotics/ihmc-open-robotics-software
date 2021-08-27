@@ -66,7 +66,6 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends GDXBehaviorUIInterface
          double y = radius * Math.sin(percentage2PI);
          double yaw = Math.PI / 2.0 + percentage2PI;
          goalPose.set(x, y, 0.0, yaw, 0.0, 0.0);
-
          lookAndStepUI.setGoal(goalPose);
 
          ++pointNumber;

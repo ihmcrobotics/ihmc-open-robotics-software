@@ -7,6 +7,7 @@ import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -18,7 +19,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode.*;
-import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorTools.NAN_POSE;
 
 public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
 {
@@ -29,7 +29,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final LookAndStepBehavior lookAndStepBehavior;
    private final DoorBehavior doorBehavior;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final AtomicReference<Pose3D> goal = new AtomicReference<>(NAN_POSE);
+   private final AtomicReference<Pose3D> goal = new AtomicReference<>(BehaviorTools.createNaNPose());
    private final AtomicReference<BuildingExplorationBehaviorMode> mode = new AtomicReference<>(TELEOP);
    private final TraverseStairsBehavior traverseStairsBehavior;
    private final BuildingExplorationBehaviorParameters parameters;
