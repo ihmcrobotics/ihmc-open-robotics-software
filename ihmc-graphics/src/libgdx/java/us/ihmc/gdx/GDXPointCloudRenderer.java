@@ -126,6 +126,18 @@ public class GDXPointCloudRenderer implements RenderableProvider
       }
    }
 
+   public float[] getVerticesArray()
+   {
+      return vertices;
+   }
+
+   public void updateMeshFast(int numberOfPoints)
+   {
+      renderable.meshPart.size = numberOfPoints;
+      renderable.meshPart.mesh.setVertices(vertices, 0, numberOfPoints * vertexSize);
+      renderable.meshPart.update();
+   }
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {

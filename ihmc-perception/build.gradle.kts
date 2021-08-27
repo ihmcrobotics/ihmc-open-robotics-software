@@ -56,27 +56,29 @@ openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCVVersion = "1.5.4"
+val javaCPPVersion = "1.5.6"
 
 bytedecoDependencies {
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.10-")
-   apiBytedecoNatives("opencv", "4.4.0-")
+   apiBytedecoNatives("openblas", "0.3.17-")
+   apiBytedecoNatives("opencv", "4.5.3-")
+   apiBytedecoNatives("opencl", "3.0-")
 }
 
 javacvDependencies {
-   apiBytedecoSelective("org.bytedeco:javacv:$javaCVVersion")
+   apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.10-")
-   apiBytedecoNatives("opencv", "4.4.0-")
+   apiBytedecoNatives("openblas", "0.3.17-")
+   apiBytedecoNatives("opencv", "4.5.3-")
+   apiBytedecoNatives("opencl", "3.0-")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:linux-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:windows-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:macosx-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
