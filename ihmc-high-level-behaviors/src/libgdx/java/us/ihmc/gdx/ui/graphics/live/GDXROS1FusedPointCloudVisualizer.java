@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
+import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -13,6 +14,7 @@ import sensor_msgs.Image;
 import sensor_msgs.PointCloud2;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.GDXPointCloudRenderer;
+import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.OpenCLManager;
@@ -34,6 +36,12 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    AtomicReference<Image> latestZED2Image = new AtomicReference<>();
    AtomicReference<PointCloud2> latestOusterPointCloud = new AtomicReference<>();
    private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
+   private long l515ReceivedCount = 0;
+   private long zed2ReceivedCount = 0;
+   private long ousterReceivedCount = 0;
+   private final ImGuiPlot l515ReceivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiPlot zed2ReceivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiPlot ousterReceivedPlot = new ImGuiPlot("", 1000, 230, 20);
    private final ReferenceFrame ousterFrame;
    private final ReferenceFrame l515Frame;
    private final ReferenceFrame zed2Frame;
@@ -157,6 +165,18 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      super.renderImGuiWidgets();
+      ImGui.text(RosTools.ZED2_LEFT_EYE_VIDEO);
+      zed2ReceivedPlot.render(zed2ReceivedCount);
+      ImGui.text(RosTools.L515_POINT_CLOUD);
+      l515ReceivedPlot.render(l515ReceivedCount);
+      ImGui.text(RosTools.OUSTER_POINT_CLOUD);
+      ousterReceivedPlot.render(ousterReceivedCount);
+   }
+
+   @Override
    public void subscribe(RosNodeInterface ros1Node)
    {
       zed2LeftEyeSubscriber = new AbstractRosTopicSubscriber<Image>(Image._TYPE)
@@ -164,6 +184,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          @Override
          public void onNewMessage(Image image)
          {
+            ++zed2ReceivedCount;
             latestZED2Image.set(image);
          }
       };
@@ -173,6 +194,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          @Override
          public void onNewMessage(PointCloud2 pointCloud2)
          {
+            ++l515ReceivedCount;
             latestL515PointCloud.set(pointCloud2);
          }
       };
@@ -182,6 +204,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          @Override
          public void onNewMessage(PointCloud2 pointCloud2)
          {
+            ++ousterReceivedCount;
             latestOusterPointCloud.set(pointCloud2);
          }
       };
