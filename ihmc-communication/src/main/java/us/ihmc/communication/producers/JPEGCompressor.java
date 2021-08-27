@@ -21,10 +21,10 @@ public class JPEGCompressor
       return convertYUVPictureToJPEGData(picture);
    }
 
-   public byte[] convertRGB8ToJPEGData(int width, int height, ByteBuffer rgb8Buffer)
+   public byte[] convertBGRA8ToJPEGData(int width, int height, ByteBuffer bgra8Buffer)
    {
       RGBPicture rgbPicture = new RGBPicture(width, height);
-      rgbPicture.putRGBA(rgb8Buffer);
+      rgbPicture.putRGBA(bgra8Buffer);
       YUVPicture yuvPicture = rgbPicture.toYUV(YUVSubsamplingType.YUV420);
       rgbPicture.delete();
       return convertYUVPictureToJPEGData(yuvPicture);
