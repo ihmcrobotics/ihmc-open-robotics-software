@@ -121,7 +121,7 @@ public class LookAndStepBodyPathPlanningTask
          suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
          suppressor.addCondition("Robot not in walking state", () -> !controllerStatusTracker.isInWalkingState());
-         suppressor.addCondition("Robot still walking", controllerStatusTracker::isWalking);
+//         suppressor.addCondition("Robot still walking", controllerStatusTracker::isWalking);
       }
 
       public void acceptMapRegions(PlanarRegionsListMessage planarRegionsListMessage)
