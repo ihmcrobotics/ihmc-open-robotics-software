@@ -12,7 +12,13 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -289,10 +295,61 @@ public class LookAndStepFootstepPlanningTask
 
       if (lookAndStepParameters.getAssumeFlatGround())
       {
-         bipedalSupportPlanarRegionCalculator.calculateSupportRegions(7.0,
-                                                                      capturabilityBasedStatus,
-                                                                      robotConfigurationData);
-         planarRegionsHistory.addLast(bipedalSupportPlanarRegionCalculator.getSupportRegionsAsList());
+         SideDependentList<Boolean> isInSupport = new SideDependentList<>(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty(),
+                                                                          !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty());
+         boolean bothInSupport = isInSupport.get(RobotSide.LEFT) && isInSupport.get(RobotSide.RIGHT);
+
+         RigidBodyTransform transformToWorld = new RigidBodyTransform();
+         if (bothInSupport)
+         {
+            FramePose3D leftSole = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
+            FramePose3D rightSole = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+            leftSole.changeFrame(ReferenceFrame.getWorldFrame());
+            rightSole.changeFrame(ReferenceFrame.getWorldFrame());
+            FramePose3D midFeetPose = new FramePose3D();
+            midFeetPose.set(leftSole);
+            midFeetPose.getPosition().interpolate(rightSole.getPosition(), 0.5);
+            midFeetPose.getOrientation().setToZero();
+            midFeetPose.get(transformToWorld);
+         }
+         else
+         {
+            for (RobotSide side : RobotSide.values)
+            {
+               if (isInSupport.get(side))
+               {
+                  FramePose3D supportSole = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(side));
+                  FramePose3D otherSole = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(side.getOppositeSide()));
+                  supportSole.changeFrame(ReferenceFrame.getWorldFrame());
+                  otherSole.changeFrame(ReferenceFrame.getWorldFrame());
+                  FramePose3D midFeetPose = new FramePose3D();
+                  midFeetPose.set(supportSole);
+                  Vector3D normal = new Vector3D(Axis3D.Z);
+                  midFeetPose.getOrientation().transform(normal);
+                  Plane3D plane = new Plane3D(midFeetPose.getPosition(), normal);
+                  Point3D projectedOtherSolePosition = EuclidGeometryTools.orthogonalProjectionOnPlane3D(otherSole.getPosition(),
+                                                                                                         plane.getPoint(),
+                                                                                                         plane.getNormal());
+                  midFeetPose.getPosition().interpolate(projectedOtherSolePosition, 0.5);
+                  midFeetPose.getOrientation().setToZero();
+                  midFeetPose.get(transformToWorld);
+               }
+            }
+         }
+         ArrayList<ConvexPolygon2D> polygons = new ArrayList<>();
+         ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
+         double radius = 1.2;
+         for (int i = 0; i < 40; i++)
+         {
+            double angle = (i / 40.0) * 2.0 * Math.PI;
+            convexPolygon2D.addVertex(radius * Math.cos(angle), radius * Math.sin(angle));
+         }
+         convexPolygon2D.update();
+         polygons.add(convexPolygon2D);
+         PlanarRegion circleRegion = new PlanarRegion(transformToWorld, polygons);
+         PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+         planarRegionsList.addPlanarRegion(circleRegion);
+         planarRegionsHistory.addLast(planarRegionsList);
       }
       else
       {
