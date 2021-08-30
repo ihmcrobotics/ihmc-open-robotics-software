@@ -7,25 +7,33 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
+import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.SimulationSessionControls;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools.VideoAndDataExporter;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class SCS2AvatarTestingSimulation
 {
@@ -101,10 +109,20 @@ public class SCS2AvatarTestingSimulation
    }
 
    // GUI controls:
+   public void setCameraFocusPosition(Point3DReadOnly focus)
+   {
+      setCameraFocusPosition(focus.getX(), focus.getY(), focus.getZ());
+   }
+
    public void setCameraFocusPosition(double x, double y, double z)
    {
       if (sessionVisualizerControls != null)
          sessionVisualizerControls.setCameraFocusPosition(x, y, z);
+   }
+
+   public void setCameraPosition(Point3DReadOnly position)
+   {
+      setCameraFocusPosition(position.getX(), position.getY(), position.getZ());
    }
 
    public void setCameraPosition(double x, double y, double z)
@@ -123,7 +141,10 @@ public class SCS2AvatarTestingSimulation
    public void finishTest(boolean waitUntilGUIIsDone)
    {
       if (waitUntilGUIIsDone && sessionVisualizerControls != null)
+      {
+         JavaFXMissingTools.runAndWait(getClass(), () -> new Alert(AlertType.INFORMATION, "Test complete!", ButtonType.OK).showAndWait());
          sessionVisualizerControls.waitUntilDown();
+      }
       else
          destroy();
    }
@@ -186,6 +207,13 @@ public class SCS2AvatarTestingSimulation
       return avatarSimulation.getControllerFullRobotModel();
    }
 
+   public CommonHumanoidReferenceFrames getReferenceFrames()
+   {
+      HighLevelHumanoidControllerFactory momentumBasedControllerFactory = avatarSimulation.getHighLevelHumanoidControllerFactory();
+      HighLevelHumanoidControllerToolbox highLevelHumanoidControllerToolbox = momentumBasedControllerFactory.getHighLevelHumanoidControllerToolbox();
+      return highLevelHumanoidControllerToolbox.getReferenceFrames();
+   }
+
    public HighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
    {
       return avatarSimulation.getHighLevelHumanoidControllerFactory();
@@ -202,6 +230,16 @@ public class SCS2AvatarTestingSimulation
    public SimulationSession getSimulationSession()
    {
       return avatarSimulation.getSimulationSession();
+   }
+
+   public YoVariable findVariable(String name)
+   {
+      return getSimulationSession().getRootRegistry().findVariable(name);
+   }
+
+   public YoVariable findVariable(String namespace, String name)
+   {
+      return getSimulationSession().getRootRegistry().findVariable(namespace, name);
    }
 
    public void createVideo(String simplifiedRobotModelName, int callStackHeight)
