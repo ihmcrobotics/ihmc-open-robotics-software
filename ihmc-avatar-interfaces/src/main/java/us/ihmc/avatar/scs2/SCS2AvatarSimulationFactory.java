@@ -208,6 +208,7 @@ public class SCS2AvatarSimulationFactory
             parameters.setBz(contactModelParameters.getZDamping());
             parameters.setKxy(contactModelParameters.getXYStiffness());
             parameters.setBxy(contactModelParameters.getXYDamping());
+            physicsEngine.setGroundContactParameters(parameters);
             return physicsEngine;
          };
       }
