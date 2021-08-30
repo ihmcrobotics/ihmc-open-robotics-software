@@ -3,6 +3,7 @@ package us.ihmc.avatar.testTools.scs2;
 import static us.ihmc.robotics.Assert.fail;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,6 +24,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.simulation.SimulationSession;
@@ -131,22 +133,36 @@ public class SCS2AvatarTestingSimulation
          sessionVisualizerControls.setCameraPosition(x, y, z);
    }
 
+   public void setCamera(Point3DReadOnly cameraFocus, Point3DReadOnly cameraPosition)
+   {
+      setCameraPosition(cameraPosition);
+      setCameraFocusPosition(cameraFocus);
+   }
+
    public void requestCameraRigidBodyTracking(String robotName, String rigidBodyName)
    {
       if (sessionVisualizerControls != null)
          sessionVisualizerControls.requestCameraRigidBodyTracking(robotName, rigidBodyName);
    }
 
+   public void addStaticVisuals(Collection<? extends VisualDefinition> visualDefinitions)
+   {
+      if (sessionVisualizerControls != null)
+         sessionVisualizerControls.addStaticVisuals(visualDefinitions);
+   }
+
    // Misc.
    public void finishTest(boolean waitUntilGUIIsDone)
    {
-      if (waitUntilGUIIsDone && sessionVisualizerControls != null)
+      if (waitUntilGUIIsDone && sessionVisualizerControls != null && !avatarSimulation.hasBeenDestroyed())
       {
          JavaFXMissingTools.runAndWait(getClass(), () -> new Alert(AlertType.INFORMATION, "Test complete!", ButtonType.OK).showAndWait());
          sessionVisualizerControls.waitUntilDown();
       }
       else
+      {
          destroy();
+      }
    }
 
    public void destroy()

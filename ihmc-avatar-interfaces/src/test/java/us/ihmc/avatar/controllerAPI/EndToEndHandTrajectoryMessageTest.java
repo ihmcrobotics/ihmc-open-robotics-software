@@ -86,6 +86,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTestInterface
@@ -1563,13 +1564,13 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       return RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper);
    }
 
-   public static void assertSingleWaypointExecuted(String bodyName, Pose3DReadOnly desiredPose, SimulationConstructionSet scs)
+   public static void assertSingleWaypointExecuted(String bodyName, Pose3DReadOnly desiredPose, YoVariableHolder scs)
    {
       assertSingleWaypointExecuted(bodyName, desiredPose.getPosition(), desiredPose.getOrientation(), scs);
    }
 
    public static void assertSingleWaypointExecuted(String bodyName, Point3DReadOnly desiredPosition, QuaternionReadOnly desiredOrientation,
-                                                   SimulationConstructionSet scs)
+                                                   YoVariableHolder scs)
    {
       EndToEndTestTools.assertTotalNumberOfWaypointsInTaskspaceManager(bodyName, 2, scs);
 

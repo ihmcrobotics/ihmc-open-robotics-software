@@ -100,6 +100,11 @@ public class SCS2AvatarSimulation
       }
    }
 
+   public boolean hasBeenDestroyed()
+   {
+      return hasBeenDestroyed;
+   }
+
    public SimulationSession getSimulationSession()
    {
       return simulationSession;

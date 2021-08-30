@@ -229,6 +229,8 @@ public class SCS2SensorReader implements SensorReader
 
       MultiBodySystemTools.copyJointsState(simJointList, controllerJointList, JointStateType.CONFIGURATION);
       MultiBodySystemTools.copyJointsState(simJointList, controllerJointList, JointStateType.VELOCITY);
+      MultiBodySystemTools.copyJointsState(simJointList, controllerJointList, JointStateType.ACCELERATION);
+      MultiBodySystemTools.copyJointsState(simJointList, controllerJointList, JointStateType.EFFORT);
       rootBody.updateFramesRecursively();
 
       if (usePerfectSensor)

@@ -192,8 +192,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       transform.setRotationYawAndZeroTranslation(startingLocationOffset.getYaw());
       Point3D cameraPosition = new Point3D(10.0, 5.0, cameraFocus.getZ() + 2.0);
       transform.transform(cameraPosition);
-      simulationTestHelper.setCameraFocusPosition(cameraFocus);
-      simulationTestHelper.setCameraPosition(cameraPosition);
+      simulationTestHelper.setCamera(cameraFocus, cameraPosition);
    }
 
    @BeforeEach
@@ -208,7 +207,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest(true);
+         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
          simulationTestHelper = null;
       }
 
