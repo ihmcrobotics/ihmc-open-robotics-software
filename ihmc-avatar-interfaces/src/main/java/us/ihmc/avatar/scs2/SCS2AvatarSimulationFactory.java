@@ -80,11 +80,13 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
+import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters.GroundContactModelParameters;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SCS2AvatarSimulationFactory
 {
@@ -391,10 +393,11 @@ public class SCS2AvatarSimulationFactory
          controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                               controllerThread.getYoVariableRegistry()));
       }
-      robotController.getYoRegistry().addChild(estimatorThread.getYoRegistry());
-      robotController.getYoRegistry().addChild(controllerThread.getYoVariableRegistry());
+
+      setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry());
+      setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry());
       if (handControlThread != null)
-         robotController.getYoRegistry().addChild(handControlThread.getYoVariableRegistry());
+         setupWithMirroredRegistry(handControlThread.getYoVariableRegistry(), handControlTask, robotController.getYoRegistry());
       robot.getRegistry().addChild(robotController.getYoRegistry());
       robot.getControllerManager().addController(new Controller()
       {
@@ -411,6 +414,13 @@ public class SCS2AvatarSimulationFactory
                ((BarrierScheduledRobotController) robotController).waitUntilTasksDone();
          }
       });
+   }
+
+   private static void setupWithMirroredRegistry(YoRegistry registry, HumanoidRobotControlTask owner, YoRegistry schedulerRegistry)
+   {
+      MirroredYoVariableRegistry mirroredRegistry = new MirroredYoVariableRegistry(registry);
+      owner.addRunnableOnSchedulerThread(() -> mirroredRegistry.updateMirror());
+      schedulerRegistry.addChild(mirroredRegistry);
    }
 
    private void setupLidarController()

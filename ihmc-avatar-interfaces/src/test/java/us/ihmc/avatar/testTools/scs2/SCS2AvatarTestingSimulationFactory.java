@@ -40,7 +40,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
 
    public static SCS2AvatarTestingSimulation createDefaultTestSimulation(DRCRobotModel robotModel, SimulationTestingParameters simulationTestingParameters)
    {
-      return createDefaultTestSimulation(robotModel, new DefaultCommonAvatarEnvironment(), simulationTestingParameters);
+      return createDefaultTestSimulation(robotModel, null, simulationTestingParameters);
    }
 
    public static SCS2AvatarTestingSimulation createDefaultTestSimulation(DRCRobotModel robotModel,
@@ -53,13 +53,15 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
    public static SCS2AvatarTestingSimulationFactory createDefaultTestSimulationFactory(DRCRobotModel robotModel,
                                                                                        SimulationTestingParameters simulationTestingParameters)
    {
-      return createDefaultTestSimulationFactory(robotModel, new DefaultCommonAvatarEnvironment(), simulationTestingParameters);
+      return createDefaultTestSimulationFactory(robotModel, null, simulationTestingParameters);
    }
 
    public static SCS2AvatarTestingSimulationFactory createDefaultTestSimulationFactory(DRCRobotModel robotModel,
                                                                                        CommonAvatarEnvironmentInterface environment,
                                                                                        SimulationTestingParameters simulationTestingParameters)
    {
+      if (environment == null)
+         environment = new DefaultCommonAvatarEnvironment();
       SCS2AvatarTestingSimulationFactory simulationFactory = new SCS2AvatarTestingSimulationFactory(robotModel, environment);
       simulationFactory.setDefaultHighLevelHumanoidControllerFactory();
       simulationFactory.setup(simulationTestingParameters);
