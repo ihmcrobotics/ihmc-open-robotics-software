@@ -30,6 +30,7 @@ import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.SimulationSessionControls;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.RobotInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools.VideoAndDataExporter;
@@ -84,13 +85,21 @@ public class SCS2AvatarTestingSimulation
 
    public boolean simulateAndWait(double duration)
    {
+      checkSimulationHasStarted();
       lastThrowable.set(null);
       return simulationSessionControls.simulateAndWait(duration);
    }
 
+   private void checkSimulationHasStarted()
+   {
+      if (!avatarSimulation.getSimulationSession().hasSessionStarted())
+         throw new IllegalStateException("The simulation has not been started.");
+   }
+
    public void assertRobotsRootJointIsInBoundingBox(BoundingBox3DReadOnly boundingBox)
    {
-      Robot robot = avatarSimulation.getSimulationSession().getPhysicsEngine().getRobots().get(0);
+      checkSimulationHasStarted();
+      RobotInterface robot = avatarSimulation.getSimulationSession().getPhysicsEngine().getRobots().get(0);
       FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
       boolean inside = boundingBox.isInsideInclusive(rootJoint.getJointPose().getPosition());
       if (!inside)

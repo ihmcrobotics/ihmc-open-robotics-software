@@ -49,7 +49,7 @@ public class SCS2SensorReaderFactory implements SensorReaderFactory
                      JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoRegistry parentRegistry)
    {
       if (usePerfectSensors)
-         sensorReader = SCS2SensorReader.newPerfectSensorReader(controllerInput, rootJoint);
+         sensorReader = SCS2SensorReader.newPerfectSensorReader(controllerInput, rootJoint, forceSensorDataHolderToUpdate);
       else
          sensorReader = SCS2SensorReader.newSensorReader(controllerInput,
                                                          rootJoint,

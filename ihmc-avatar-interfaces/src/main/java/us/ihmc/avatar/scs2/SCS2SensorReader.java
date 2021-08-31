@@ -68,19 +68,28 @@ public class SCS2SensorReader implements SensorReader
 
    private final boolean usePerfectSensor;
 
-   public static SCS2SensorReader newSensorReader(SimControllerInput controllerInput, FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions,
-                                                  ForceSensorDataHolder forceSensorDataHolder, SensorProcessingConfiguration sensorProcessingConfiguration)
+   public static SCS2SensorReader newSensorReader(SimControllerInput controllerInput,
+                                                  FloatingJointBasics rootJoint,
+                                                  IMUDefinition[] imuDefinitions,
+                                                  ForceSensorDataHolder forceSensorDataHolder,
+                                                  SensorProcessingConfiguration sensorProcessingConfiguration)
    {
       return new SCS2SensorReader(controllerInput, rootJoint, imuDefinitions, forceSensorDataHolder, sensorProcessingConfiguration, false);
    }
 
-   public static SCS2SensorReader newPerfectSensorReader(SimControllerInput controllerInput, FloatingJointBasics rootJoint)
+   public static SCS2SensorReader newPerfectSensorReader(SimControllerInput controllerInput,
+                                                         FloatingJointBasics rootJoint,
+                                                         ForceSensorDataHolder forceSensorDataHolderToUpdate)
    {
-      return new SCS2SensorReader(controllerInput, rootJoint, null, null, null, true);
+      return new SCS2SensorReader(controllerInput, rootJoint, null, forceSensorDataHolderToUpdate, null, true);
    }
 
-   private SCS2SensorReader(SimControllerInput controllerInput, FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions,
-                            ForceSensorDataHolder forceSensorDataHolder, SensorProcessingConfiguration sensorProcessingConfiguration, boolean usePerfectSensor)
+   private SCS2SensorReader(SimControllerInput controllerInput,
+                            FloatingJointBasics rootJoint,
+                            IMUDefinition[] imuDefinitions,
+                            ForceSensorDataHolder forceSensorDataHolder,
+                            SensorProcessingConfiguration sensorProcessingConfiguration,
+                            boolean usePerfectSensor)
    {
       this.controllerInput = controllerInput;
       this.usePerfectSensor = usePerfectSensor;
@@ -110,6 +119,7 @@ public class SCS2SensorReader implements SensorReader
          timestamp = new YoLong("timestamp", registry);
          controllerTimestamp = new YoLong("controllerTimestamp", registry);
          sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
+         addWrenchSensors(forceSensorDataHolder);
          perfectSensorOutputMap = new SensorOutputMapReadOnly()
          {
             @Override
@@ -212,7 +222,8 @@ public class SCS2SensorReader implements SensorReader
    @Override
    public void initialize()
    {
-      sensorProcessing.initialize();
+      if (!usePerfectSensor)
+         sensorProcessing.initialize();
    }
 
    @Override

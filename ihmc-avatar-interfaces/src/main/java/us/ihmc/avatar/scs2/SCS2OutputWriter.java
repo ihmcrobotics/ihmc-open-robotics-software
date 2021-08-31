@@ -5,6 +5,7 @@ import java.util.List;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
@@ -17,12 +18,14 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class SCS2OutputWriter implements JointDesiredOutputWriter
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final ControllerInput controllerInput;
    private final ControllerOutput controllerOutput;
    private final boolean writeBeforeEstimatorTick;
    private final List<JointController> jointControllers = new ArrayList<>();
 
-   public SCS2OutputWriter(ControllerOutput controllerOutput, boolean writeBeforeEstimatorTick)
+   public SCS2OutputWriter(ControllerInput controllerInput, ControllerOutput controllerOutput, boolean writeBeforeEstimatorTick)
    {
+      this.controllerInput = controllerInput;
       this.controllerOutput = controllerOutput;
       this.writeBeforeEstimatorTick = writeBeforeEstimatorTick;
    }
@@ -37,7 +40,8 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          OneDoFJointReadOnly controllerJoint = jointDesiredOutputList.getOneDoFJoint(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(i);
          OneDoFJointStateBasics simJointOutput = controllerOutput.getOneDoFJointOutput(controllerJoint);
-         jointControllers.add(new OneDoFJointController(controllerJoint, simJointOutput, jointDesiredOutput, registry));
+         OneDoFJointReadOnly simJointInput = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerJoint.getName());
+         jointControllers.add(new OneDoFJointController(simJointInput, simJointOutput, jointDesiredOutput, registry));
 
       }
    }
@@ -83,24 +87,24 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
 
    private class OneDoFJointController implements JointController
    {
-      private final OneDoFJointReadOnly controllerJoint;
-      private final OneDoFJointStateBasics simulatedJointState;
+      private final OneDoFJointReadOnly simOutput;
+      private final OneDoFJointStateBasics simInput;
       private final JointDesiredOutputReadOnly jointDesiredOutput;
 
       private final YoDouble kp, kd;
       private final YoDouble yoPositionError, yoVelocityError;
       private final YoDouble yoControllerTau, yoPositionTau, yoVelocityTau;
 
-      public OneDoFJointController(OneDoFJointReadOnly controllerJoint,
-                                   OneDoFJointStateBasics simulatedJointState,
+      public OneDoFJointController(OneDoFJointReadOnly simOutput,
+                                   OneDoFJointStateBasics simInput,
                                    JointDesiredOutputReadOnly jointDesiredOutput,
                                    YoRegistry registry)
       {
-         this.controllerJoint = controllerJoint;
-         this.simulatedJointState = simulatedJointState;
+         this.simOutput = simOutput;
+         this.simInput = simInput;
          this.jointDesiredOutput = jointDesiredOutput;
 
-         String prefix = controllerJoint.getName() + "LowLevel";
+         String prefix = simOutput.getName() + "LowLevel";
          kp = new YoDouble(prefix + "Kp", registry);
          kd = new YoDouble(prefix + "Kd", registry);
          yoPositionError = new YoDouble(prefix + "PositionError", registry);
@@ -122,12 +126,12 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
             yoControllerTau.set(0.0);
 
          if (jointDesiredOutput.hasDesiredPosition())
-            positionError = jointDesiredOutput.getDesiredPosition() - simulatedJointState.getConfiguration();
+            positionError = jointDesiredOutput.getDesiredPosition() - simOutput.getQ();
          else
             positionError = 0.0;
 
          if (jointDesiredOutput.hasDesiredVelocity())
-            velocityError = jointDesiredOutput.getDesiredVelocity() - simulatedJointState.getVelocity();
+            velocityError = jointDesiredOutput.getDesiredVelocity() - simOutput.getQ();
          else
             velocityError = 0.0;
 
@@ -144,13 +148,13 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
 
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
-         simulatedJointState.setEffort(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue());
+         simInput.setEffort(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue());
       }
 
       @Override
       public OneDoFJointReadOnly getControllerJoint()
       {
-         return controllerJoint;
+         return simOutput;
       }
    }
 }

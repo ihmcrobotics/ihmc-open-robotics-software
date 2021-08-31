@@ -110,6 +110,7 @@ public class SCS2AvatarSimulationFactory
 
    private final OptionalFactoryField<Boolean> useImpulseBasePhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
    private final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
+   private final OptionalFactoryField<List<Robot>> secondaryRobots = new OptionalFactoryField<>("secondaryRobots", new ArrayList<>());
 
    // TO CONSTRUCT
    private RobotDefinition robotDefinition;
@@ -218,6 +219,10 @@ public class SCS2AvatarSimulationFactory
       simulationSession.submitBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       simulationSession.addTerrainObject(terrainObjectDefinition.get());
       robot = simulationSession.addRobot(robotDefinition);
+
+      for (Robot secondaryRobot : secondaryRobots.get())
+         simulationSession.addRobot(secondaryRobot);
+
       simulationSession.setSessionDTSeconds(robotModel.getSimulateDT());
    }
 
@@ -234,7 +239,9 @@ public class SCS2AvatarSimulationFactory
 
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = new SCS2OutputWriter(robot.getControllerManager().getControllerOutput(), true);
+      simulationOutputWriter = new SCS2OutputWriter(robot.getControllerManager().getControllerInput(),
+                                                    robot.getControllerManager().getControllerOutput(),
+                                                    true);
    }
 
    private void setupStateEstimationThread()
@@ -557,6 +564,11 @@ public class SCS2AvatarSimulationFactory
       this.highLevelHumanoidControllerFactory.set(highLevelHumanoidControllerFactory);
    }
 
+   public HighLevelHumanoidControllerFactory getHighLevelHumanoidControllerFactory()
+   {
+      return highLevelHumanoidControllerFactory.get();
+   }
+
    public void setTerrainObjectDefinition(TerrainObjectDefinition terrainObjectDefinition)
    {
       this.terrainObjectDefinition.set(terrainObjectDefinition);
@@ -655,5 +667,10 @@ public class SCS2AvatarSimulationFactory
    public void setEnableSimulatedRobotDamping(boolean enableSimulatedRobotDamping)
    {
       this.enableSimulatedRobotDamping.set(enableSimulatedRobotDamping);
+   }
+
+   public void addSecondaryRobot(Robot secondaryRobot)
+   {
+      this.secondaryRobots.get().add(secondaryRobot);
    }
 }
