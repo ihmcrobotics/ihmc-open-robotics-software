@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -45,6 +46,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
                                                                                         ImGuiGDXLookAndStepBehaviorUI::new);
 
    private final BehaviorHelper helper;
+   private final AtomicReference<ArrayList<MinimalFootstep>> latestPlannedFootsteps;
+   private final AtomicReference<ArrayList<MinimalFootstep>> latestCommandedFootsteps;
    private String currentState = "";
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImBoolean operatorReview = new ImBoolean(true);
@@ -89,7 +92,9 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
             bodyPathPlanGraphic.generateMeshesAsync(bodyPath);
       });
       footstepPlanGraphic.setTransparency(0.2);
-      helper.subscribeViaCallback(FootstepPlanForUI, footsteps ->
+      latestPlannedFootsteps = helper.subscribeViaReference(PlannedFootstepsForUI, new ArrayList<>());
+      latestCommandedFootsteps = helper.subscribeViaReference(LastCommandedFootsteps, new ArrayList<>());
+      helper.subscribeViaCallback(PlannedFootstepsForUI, footsteps ->
       {
          reviewingBodyPath = false;
          footstepPlanGraphic.generateMeshesAsync(footsteps);
