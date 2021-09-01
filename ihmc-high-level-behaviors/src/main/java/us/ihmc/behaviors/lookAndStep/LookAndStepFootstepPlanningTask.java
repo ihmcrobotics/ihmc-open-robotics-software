@@ -64,6 +64,7 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepFootstepPlanningTask
 {
+   protected LookAndStepImminentStanceTracker imminentStanceTracker;
    protected BehaviorHelper helper;
    protected StatusLogger statusLogger;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
@@ -113,6 +114,7 @@ public class LookAndStepFootstepPlanningTask
          operatorReviewEnabledSupplier = lookAndStep.operatorReviewEnabledInput::get;
          behaviorStateReference = lookAndStep.behaviorStateReference::get;
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
+         imminentStanceTracker = lookAndStep.imminentStanceTracker;
          footholdVolume = new YoDouble("footholdVolume", lookAndStep.yoRegistry);
          helper = lookAndStep.helper;
          autonomousOutput = footstepPlan ->
@@ -367,7 +369,7 @@ public class LookAndStepFootstepPlanningTask
       Point3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
       int closestSegmentIndex = localizationResult.getClosestSegmentIndex();
       List<? extends Pose3DReadOnly> bodyPathPlan = localizationResult.getBodyPathPlan();
-      SideDependentList<MinimalFootstep> startFootPoses = localizationResult.getStanceForPlanning();
+      SideDependentList<MinimalFootstep> startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
 
       // move point along body path plan by plan horizon
       Pose3D subGoalPoseBetweenFeet = new Pose3D();

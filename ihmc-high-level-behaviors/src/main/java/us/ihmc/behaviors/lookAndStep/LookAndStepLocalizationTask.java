@@ -6,12 +6,9 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -59,7 +56,6 @@ public class LookAndStepLocalizationTask
    {
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
-      private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
       private final Input swingSleepCompleteInput = new Input();
       private LookAndStepImminentStanceTracker imminentStanceTracker;
 
@@ -95,11 +91,6 @@ public class LookAndStepLocalizationTask
          swingSleepCompleteInput.set();
       }
 
-      public void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
-      {
-         capturabilityBasedStatusInput.set(capturabilityBasedStatus);
-      }
-
       public void acceptNewGoalSubmitted()
       {
          newGoalSubmitted = true;
@@ -115,39 +106,8 @@ public class LookAndStepLocalizationTask
       private void snapshotAndRun()
       {
          bodyPathPlan = bodyPathPlanInput.getLatest();
-         capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          syncedRobot.update();
-
-         imminentStanceFeet = new SideDependentList<>();
-         for (RobotSide side : RobotSide.values)
-         {
-            FramePose3D solePose = new FramePose3D();
-            if (imminentStanceTracker.getImminentStancePoses().get(side) == null) // in the case we are just starting to walk and haven't sent a step for this foot yet
-            {
-               solePose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
-               solePose.changeFrame(ReferenceFrame.getWorldFrame());
-               us.ihmc.idl.IDLSequence.Object<Point3D> rawPolygon = side == RobotSide.LEFT ?
-                     capturabilityBasedStatus.getLeftFootSupportPolygon3d() : capturabilityBasedStatus.getRightFootSupportPolygon3d();
-               ConvexPolygon2D foothold = new ConvexPolygon2D();
-               for (Point3D vertex : rawPolygon)
-               {
-                  foothold.addVertex(vertex);
-               }
-               imminentStanceFeet.set(side, new MinimalFootstep(side, solePose, foothold, side.getPascalCaseName() + " Prior Stance"));
-            }
-            else
-            {
-               // TODO: We need to operate not on "eventual stance", but stance after this
-               // currently executing step would finish. We want to be reactive on each step.
-               imminentStanceTracker.getImminentStancePoses().get(side).getFootstepPose(solePose);
-               solePose.changeFrame(ReferenceFrame.getWorldFrame());
-               imminentStanceFeet.set(side,
-                                      new MinimalFootstep(side,
-                                                          solePose,
-                                                          imminentStanceTracker.getImminentStancePoses().get(side).getFoothold(),
-                                                          side.getPascalCaseName() + " Commanded Stance"));
-            }
-         }
+         imminentStanceFeet = imminentStanceTracker.calculateImminentStancePoses();
 
          run();
       }
@@ -219,8 +179,7 @@ public class LookAndStepLocalizationTask
          LookAndStepBodyPathLocalizationResult result = new LookAndStepBodyPathLocalizationResult(closestPointAlongPath,
                                                                                                   closestSegmentIndex,
                                                                                                   imminentMidFeetPose,
-                                                                                                  bodyPathPlan,
-                                                                                                  imminentStanceFeet);
+                                                                                                  bodyPathPlan);
          bodyPathLocalizationOutput.accept(result);
       }
    }

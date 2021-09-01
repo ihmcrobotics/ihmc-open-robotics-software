@@ -1,10 +1,15 @@
 package us.ihmc.behaviors.lookAndStep;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
@@ -18,12 +23,15 @@ public class LookAndStepImminentStanceTracker
 {
    private final ArrayDeque<PlannedFootstepReadOnly> commandedFootstepQueue = new ArrayDeque<>();
    private final ArrayDeque<PlannedFootstepReadOnly> previousCommandedFootstepQueue = new ArrayDeque<>();
-   private final SideDependentList<PlannedFootstepReadOnly> imminentStancePoses = new SideDependentList<>();
+   private final SideDependentList<PlannedFootstepReadOnly> commandedImminentStancePoses = new SideDependentList<>();
+   private final ROS2SyncedRobotModel syncedRobot;
    private int stepsCompletedSinceCommanded = Integer.MAX_VALUE;
    private int previousStepsCompletedSinceCommanded = Integer.MAX_VALUE;
+   private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
 
    public LookAndStepImminentStanceTracker(BehaviorHelper helper)
    {
+      this.syncedRobot = helper.newSyncedRobot();
       helper.subscribeToControllerViaCallback(FootstepStatusMessage.class, this::acceptFootstepStatusMessage);
    }
 
@@ -49,7 +57,7 @@ public class LookAndStepImminentStanceTracker
                   commandedFootstepQueue.removeFirst();
                   if (!commandedFootstepQueue.isEmpty())
                   {
-                     imminentStancePoses.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
+                     commandedImminentStancePoses.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
                   }
                }
             }
@@ -71,11 +79,16 @@ public class LookAndStepImminentStanceTracker
       }
    }
 
+   public void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      capturabilityBasedStatusInput.set(capturabilityBasedStatus);
+   }
+
    public void addCommandedFootsteps(FootstepPlan commandedFootstepPlan)
    {
       synchronized (this)
       {
-         imminentStancePoses.put(commandedFootstepPlan.getFootstep(0).getRobotSide(), commandedFootstepPlan.getFootstep(0));
+         commandedImminentStancePoses.put(commandedFootstepPlan.getFootstep(0).getRobotSide(), commandedFootstepPlan.getFootstep(0));
 
          previousCommandedFootstepQueue.clear();
          while (!commandedFootstepQueue.isEmpty())
@@ -91,9 +104,44 @@ public class LookAndStepImminentStanceTracker
       }
    }
 
-   public SideDependentList<PlannedFootstepReadOnly> getImminentStancePoses()
+   public SideDependentList<MinimalFootstep> calculateImminentStancePoses()
    {
-      return imminentStancePoses;
+      SideDependentList<MinimalFootstep> imminentStanceFeet = new SideDependentList<>();
+      syncedRobot.update();
+      synchronized (this)
+      {
+         CapturabilityBasedStatus capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
+         for (RobotSide side : RobotSide.values)
+         {
+            FramePose3D solePose = new FramePose3D();
+            if (commandedImminentStancePoses.get(side) == null) // in the case we are just starting to walk and haven't sent a step for this foot yet
+            {
+               solePose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+               solePose.changeFrame(ReferenceFrame.getWorldFrame());
+               us.ihmc.idl.IDLSequence.Object<Point3D> rawPolygon =
+                     side == RobotSide.LEFT ? capturabilityBasedStatus.getLeftFootSupportPolygon3d() : capturabilityBasedStatus.getRightFootSupportPolygon3d();
+               ConvexPolygon2D foothold = new ConvexPolygon2D();
+               for (Point3D vertex : rawPolygon)
+               {
+                  foothold.addVertex(vertex);
+               }
+               imminentStanceFeet.set(side, new MinimalFootstep(side, solePose, foothold, side.getPascalCaseName() + " Prior Stance"));
+            }
+            else
+            {
+               // TODO: We need to operate not on "eventual stance", but stance after this
+               // currently executing step would finish. We want to be reactive on each step.
+               commandedImminentStancePoses.get(side).getFootstepPose(solePose);
+               solePose.changeFrame(ReferenceFrame.getWorldFrame());
+               imminentStanceFeet.set(side,
+                                      new MinimalFootstep(side,
+                                                          solePose,
+                                                          commandedImminentStancePoses.get(side).getFoothold(),
+                                                          side.getPascalCaseName() + " Commanded Stance"));
+            }
+         }
+      }
+      return imminentStanceFeet;
    }
 
    public int getStepsCompletedSinceCommanded()
@@ -111,7 +159,7 @@ public class LookAndStepImminentStanceTracker
       synchronized (this)
       {
          commandedFootstepQueue.clear();
-         imminentStancePoses.clear();
+         commandedImminentStancePoses.clear();
       }
    }
 }
