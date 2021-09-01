@@ -111,11 +111,17 @@ public class HighLevelControlManagerFactory
 
       // Transform weights and gains to their parameterized versions.
       ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
-      ParameterTools.extract3DGainMap("Orientation", walkingControllerParameters.getTaskspaceOrientationControlGains(), taskspaceOrientationGainMap, bodyGainRegistry);
+      ParameterTools.extract3DGainMap("Orientation",
+                                      walkingControllerParameters.getTaskspaceOrientationControlGains(),
+                                      taskspaceOrientationGainMap,
+                                      bodyGainRegistry);
       ParameterTools.extract3DGainMap("Position", walkingControllerParameters.getTaskspacePositionControlGains(), taskspacePositionGainMap, bodyGainRegistry);
       ParameterTools.extractJointWeightMap("JointspaceWeight", momentumOptimizationSettings.getJointspaceWeights(), jointspaceWeightMap, momentumRegistry);
       ParameterTools.extractJointWeightMap("UserModeWeight", momentumOptimizationSettings.getUserModeWeights(), userModeWeightMap, momentumRegistry);
-      ParameterTools.extract3DWeightMap("AngularWeight", momentumOptimizationSettings.getTaskspaceAngularWeights(), taskspaceAngularWeightMap, momentumRegistry);
+      ParameterTools.extract3DWeightMap("AngularWeight",
+                                        momentumOptimizationSettings.getTaskspaceAngularWeights(),
+                                        taskspaceAngularWeightMap,
+                                        momentumRegistry);
       ParameterTools.extract3DWeightMap("LinearWeight", momentumOptimizationSettings.getTaskspaceLinearWeights(), taskspaceLinearWeightMap, momentumRegistry);
 
       loadedFootAngularWeight = new ParameterVector3D("LoadedFootAngularWeight", momentumOptimizationSettings.getLoadedFootAngularWeight(), momentumRegistry);
@@ -125,8 +131,12 @@ public class HighLevelControlManagerFactory
       holdFootGains = new ParameterizedPIDSE3Gains("HoldFoot", walkingControllerParameters.getHoldPositionFootControlGains(), footGainRegistry);
       toeOffFootGains = new ParameterizedPIDSE3Gains("ToeOffFoot", walkingControllerParameters.getToeOffFootControlGains(), footGainRegistry);
 
-      walkingControllerComHeightGains = new ParameterizedPIDGains("WalkingControllerComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
-      walkingControllerMaxComHeightVelocity = new DoubleParameter("MaximumVelocityWalkingControllerComHeight", comHeightGainRegistry, walkingControllerParameters.getMaximumVelocityCoMHeight());
+      walkingControllerComHeightGains = new ParameterizedPIDGains("WalkingControllerComHeight",
+                                                                  walkingControllerParameters.getCoMHeightControlGains(),
+                                                                  comHeightGainRegistry);
+      walkingControllerMaxComHeightVelocity = new DoubleParameter("MaximumVelocityWalkingControllerComHeight",
+                                                                  comHeightGainRegistry,
+                                                                  walkingControllerParameters.getMaximumVelocityCoMHeight());
       userModeComHeightGains = new ParameterizedPIDGains("UserModeComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
    }
 
@@ -154,11 +164,7 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(controllerToolbox,
-                                          walkingControllerParameters,
-                                          copTrajectoryParameters,
-                                          splitFractionParameters,
-                                          registry);
+      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, copTrajectoryParameters, splitFractionParameters, registry);
       return balanceManager;
    }
 
@@ -181,7 +187,17 @@ public class HighLevelControlManagerFactory
       return centerOfMassHeightManager;
    }
 
-   public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, ReferenceFrame controlFrame,
+   public RigidBodyControlManager getRigidBodyManager(RigidBodyBasics bodyToControl)
+   {
+      RigidBodyControlManager rigidBodyControlManager = rigidBodyManagerMapByBodyName.get(bodyToControl.getName());
+      if (rigidBodyControlManager == null)
+         throw new RuntimeException("Could not find a manager for " + bodyToControl);
+      return rigidBodyControlManager;
+   }
+
+   public RigidBodyControlManager getOrCreateRigidBodyManager(RigidBodyBasics bodyToControl,
+                                                              RigidBodyBasics baseBody,
+                                                              ReferenceFrame controlFrame,
                                                               ReferenceFrame baseFrame)
    {
       if (bodyToControl == null)
@@ -219,9 +235,22 @@ public class HighLevelControlManagerFactory
       YoGraphicsListRegistry graphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       RigidBodyControlMode defaultControlMode = walkingControllerParameters.getDefaultControlModesForRigidBodies().get(bodyName);
 
-      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl, baseBody, elevator, homeConfiguration, homePose, controlFrame, baseFrame,
-                                                                    taskspaceAngularWeight, taskspaceLinearWeight, taskspaceOrientationGains,
-                                                                    taskspacePositionGains, contactableBody, defaultControlMode, yoTime, graphicsListRegistry, registry);
+      RigidBodyControlManager manager = new RigidBodyControlManager(bodyToControl,
+                                                                    baseBody,
+                                                                    elevator,
+                                                                    homeConfiguration,
+                                                                    homePose,
+                                                                    controlFrame,
+                                                                    baseFrame,
+                                                                    taskspaceAngularWeight,
+                                                                    taskspaceLinearWeight,
+                                                                    taskspaceOrientationGains,
+                                                                    taskspacePositionGains,
+                                                                    contactableBody,
+                                                                    defaultControlMode,
+                                                                    yoTime,
+                                                                    graphicsListRegistry,
+                                                                    registry);
       manager.setGains(jointGainMap);
       manager.setWeights(jointspaceWeightMap, userModeWeightMap);
 
@@ -306,7 +335,10 @@ public class HighLevelControlManagerFactory
       PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
       LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
 
-      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox,
+      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains,
+                                                              pelvisOffsetWhileWalkingParameters,
+                                                              leapOfFaithParameters,
+                                                              controllerToolbox,
                                                               registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
