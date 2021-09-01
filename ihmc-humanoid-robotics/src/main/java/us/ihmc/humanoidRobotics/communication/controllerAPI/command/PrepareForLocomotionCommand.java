@@ -7,6 +7,7 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
 {
    private long sequenceId;
    private boolean prepareManipulation = true;
+   private boolean prepareChest = true;
    private boolean preparePelvis = true;
 
    public PrepareForLocomotionCommand()
@@ -18,6 +19,7 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
    {
       sequenceId = 0;
       prepareManipulation = true;
+      prepareChest = true;
       preparePelvis = true;
    }
 
@@ -26,6 +28,7 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
    {
       sequenceId = other.sequenceId;
       prepareManipulation = other.prepareManipulation;
+      prepareChest = other.prepareChest;
       preparePelvis = other.preparePelvis;
    }
 
@@ -34,6 +37,7 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
    {
       sequenceId = message.getSequenceId();
       prepareManipulation = message.getPrepareManipulation();
+      prepareChest = message.getPrepareChest();
       preparePelvis = message.getPreparePelvis();
 
    }
@@ -51,6 +55,18 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
    }
 
    /**
+    * Specifies if the chest orientation controller should be initialized before starting to walk. This
+    * is particularly useful when the chest was moved with respect to world during standing to prevent
+    * "leaving the chest behind" when the robot starts walking.
+    *
+    * @param prepareChest whether the chest orientation control should get prepared for walking.
+    */
+   public void setPrepareChest(boolean prepareChest)
+   {
+      this.prepareChest = prepareChest;
+   }
+
+   /**
     * Specifies if the pelvis orientation controller should be initialized before starting to walk.
     * When the controller is initialized, the pelvis will smoothly cancel out the user orientation
     * offset on the first transfer of a walking sequence.
@@ -65,6 +81,11 @@ public class PrepareForLocomotionCommand implements Command<PrepareForLocomotion
    public boolean isPrepareManipulation()
    {
       return prepareManipulation;
+   }
+
+   public boolean isPrepareChest()
+   {
+      return prepareChest;
    }
 
    public boolean isPreparePelvis()
