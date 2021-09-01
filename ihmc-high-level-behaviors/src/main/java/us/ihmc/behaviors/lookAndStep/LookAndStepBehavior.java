@@ -141,7 +141,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       helper.subscribeViaCallback(GOAL_INPUT, this::acceptGoal);
 
       bodyPathLocalization.initialize(this);
-      helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, bodyPathLocalization::acceptCapturabilityBasedStatus);
+      helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, imminentStanceTracker::acceptCapturabilityBasedStatus);
       helper.subscribeViaCallback(BodyPathInput, this::bodyPathPlanInput);
 
       footstepPlanning.initialize(this);
