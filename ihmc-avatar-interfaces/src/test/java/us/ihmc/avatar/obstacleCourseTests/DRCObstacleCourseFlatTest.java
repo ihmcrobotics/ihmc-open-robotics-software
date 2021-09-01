@@ -17,6 +17,7 @@ import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -26,9 +27,13 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -36,11 +41,14 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTraject
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSE3TrajectoryPointList;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -138,7 +146,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       assertTrue(success);
 
       YoDouble offsetHeightAboveGround = (YoDouble) drcSimulationTestHelper.getSimulationConstructionSet().findVariable("HeightOffsetHandler",
-                                                                                                                       "offsetHeightAboveGround");
+                                                                                                                        "offsetHeightAboveGround");
       offsetHeightAboveGround.set(0.15);
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
       assertTrue(success);
@@ -783,6 +791,127 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   @Test
+   public void testPrepareForLocomotion() throws SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), flatGround);
+      drcSimulationTestHelper.createSimulation("PrepareForLocomotionTest");
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      FullHumanoidRobotModel controllerFullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      { // Changing the chest and hands to be controlled in world
+         Quaternion currentChestOrientation = new Quaternion(controllerFullRobotModel.getChest().getBodyFixedFrame().getTransformToRoot().getRotation());
+
+         drcSimulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(0.5,
+                                                                                                       currentChestOrientation,
+                                                                                                       ReferenceFrame.getWorldFrame()));
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            Pose3D currentHandPose = new Pose3D(controllerFullRobotModel.getHandControlFrame(robotSide).getTransformToRoot());
+            drcSimulationTestHelper.publishToController(HumanoidMessageTools.createHandTrajectoryMessage(robotSide,
+                                                                                                         0.5,
+                                                                                                         currentHandPose,
+                                                                                                         ReferenceFrame.getWorldFrame()));
+         }
+      }
+
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      FrameQuaternion initialChestOrientation = new FrameQuaternion(controllerFullRobotModel.getChest().getBodyFixedFrame());
+      initialChestOrientation.changeFrame(controllerFullRobotModel.getPelvis().getBodyFixedFrame());
+
+      SideDependentList<FramePose3D> initialHandPoses = new SideDependentList<>(robotSide ->
+      {
+         FramePose3D handPose = new FramePose3D(controllerFullRobotModel.getHand(robotSide).getBodyFixedFrame());
+         handPose.changeFrame(controllerFullRobotModel.getChest().getBodyFixedFrame());
+         return handPose;
+      });
+
+      FootstepDataListMessage steps = generateSteps(controllerFullRobotModel, Math.toRadians(25), 10);
+      drcSimulationTestHelper.publishToController(steps);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(EndToEndTestTools.computeWalkingDuration(steps,
+                                                                                                                     getRobotModel().getWalkingControllerParameters())
+            + 3.0));
+
+      FrameQuaternion finalChestOrientation = new FrameQuaternion(controllerFullRobotModel.getChest().getBodyFixedFrame());
+      finalChestOrientation.changeFrame(controllerFullRobotModel.getPelvis().getBodyFixedFrame());
+
+      SideDependentList<FramePose3D> finalHandPoses = new SideDependentList<>(robotSide ->
+      {
+         FramePose3D handPose = new FramePose3D(controllerFullRobotModel.getHand(robotSide).getBodyFixedFrame());
+         handPose.changeFrame(controllerFullRobotModel.getChest().getBodyFixedFrame());
+         return handPose;
+      });
+
+      LogTools.info("Chest error: {}", initialChestOrientation.distance(finalChestOrientation));
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialChestOrientation, finalChestOrientation, 1.0e-2);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePose3D initialHandPose = initialHandPoses.get(robotSide);
+         FramePose3D finalHandPose = finalHandPoses.get(robotSide);
+         LogTools.info("{} hand error: position {}, orientation {}",
+                       robotSide.getCamelCaseName(),
+                       initialHandPose.getPosition().distance(finalHandPose.getPosition()),
+                       initialHandPose.getOrientation().distance(finalHandPose.getOrientation()));
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialHandPose.getPosition(), finalHandPose.getPosition(), 1.0e-2);
+         EuclidCoreTestTools.assertQuaternionGeometricallyEquals(initialHandPose.getOrientation(), finalHandPose.getOrientation(), 5.0e-2);
+      }
+   }
+
+   private FootstepDataListMessage generateSteps(FullHumanoidRobotModel fullRobotModel, double anglePerStep, int numberOfSteps)
+   {
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+
+      SideDependentList<FramePose3D> stepPositions = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+      stepPositions.forEach((side, position) -> position.setFromReferenceFrame(fullRobotModel.getSoleFrame(side)));
+
+      Pose3D origin = new Pose3D();
+      origin.interpolate(stepPositions.get(RobotSide.LEFT), stepPositions.get(RobotSide.RIGHT), 0.5);
+
+      PoseReferenceFrame walkingFrame = new PoseReferenceFrame("walkingFrame", ReferenceFrame.getWorldFrame());
+      walkingFrame.setPoseAndUpdate(origin);
+
+      stepPositions.forEach((side, position) -> position.changeFrame(walkingFrame));
+      FramePose3D temp = new FramePose3D();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         temp.setIncludingFrame(stepPositions.get(robotSide));
+         temp.changeFrame(ReferenceFrame.getWorldFrame());
+         FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(robotSide, temp);
+         footstepDataListMessage.getFootstepDataList().add().set(footstepDataMessage);
+      }
+
+      RobotSide side = RobotSide.LEFT;
+
+      for (int i = 0; i < numberOfSteps; i++)
+      {
+         origin.getOrientation().appendYawRotation(anglePerStep);
+         walkingFrame.setPoseAndUpdate(origin);
+         temp.setIncludingFrame(stepPositions.get(side));
+         temp.changeFrame(ReferenceFrame.getWorldFrame());
+
+         FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(side, temp);
+         footstepDataListMessage.getFootstepDataList().add().set(footstepDataMessage);
+         side = side.getOppositeSide();
+      }
+
+      temp.setIncludingFrame(stepPositions.get(side));
+      temp.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(side, temp);
+      footstepDataListMessage.getFootstepDataList().add().set(footstepDataMessage);
+
+      return footstepDataListMessage;
    }
 
    private void setupCameraForWalkingUpToRamp()
