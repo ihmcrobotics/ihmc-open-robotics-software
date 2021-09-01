@@ -16,6 +16,11 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(assumeFlatGround);
    }
 
+   default double getAssumedFlatGroundCircleRadius()
+   {
+      return get(assumedFlatGroundCircleRadius);
+   }
+
    default double getSupportRegionScaleFactor()
    {
       return get(supportRegionScaleFactor);
@@ -36,9 +41,9 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(flatGroundBodyPathPlan);
    }
 
-   default int getMinimumNumberOfPlannedSteps()
+   default int getNumberOfStepsToTryToPlan()
    {
-      return get(minimumNumberOfPlannedSteps);
+      return get(numberOfStepsToTryToPlan);
    }
 
    default double getMinimumStepTranslation()

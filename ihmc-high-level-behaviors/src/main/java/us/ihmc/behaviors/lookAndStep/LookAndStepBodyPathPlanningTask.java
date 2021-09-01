@@ -13,6 +13,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.tools.Timer;
@@ -40,6 +41,7 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 public class LookAndStepBodyPathPlanningTask
 {
+   protected BehaviorHelper helper;
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
    protected VisibilityGraphsParametersReadOnly visibilityGraphParameters;
@@ -71,6 +73,7 @@ public class LookAndStepBodyPathPlanningTask
       public void initialize(LookAndStepBehavior lookAndStep)
       {
          statusLogger = lookAndStep.statusLogger;
+         helper = lookAndStep.helper;
          uiPublisher = lookAndStep.helper::publish;
          visibilityGraphParameters = lookAndStep.visibilityGraphParameters;
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
@@ -216,6 +219,7 @@ public class LookAndStepBodyPathPlanningTask
       {
          if (operatorReviewEnabled.get())
          {
+            helper.getOrCreateRobotInterface().pauseWalking();
             review.review(bodyPathPlanForReview);
          }
          else

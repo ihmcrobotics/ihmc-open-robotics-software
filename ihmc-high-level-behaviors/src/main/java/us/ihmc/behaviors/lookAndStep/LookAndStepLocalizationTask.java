@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
@@ -62,11 +61,11 @@ public class LookAndStepLocalizationTask
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
       private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
       private final Input swingSleepCompleteInput = new Input();
-      private SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps;
+      private LookAndStepImminentStanceTracker imminentStanceTracker;
 
       public void initialize(LookAndStepBehavior lookAndStep)
       {
-         lastCommandedFootsteps = lookAndStep.lastCommandedFootsteps;
+         imminentStanceTracker = lookAndStep.imminentStanceTracker;
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
          finishedWalkingNotification = lookAndStep.helper.subscribeToWalkingCompletedViaNotification();
          ros2EmptyPublisher = lookAndStep.helper::publish;
@@ -119,11 +118,11 @@ public class LookAndStepLocalizationTask
          capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          syncedRobot.update();
 
-         eventualStanceFeet = new SideDependentList<>();
+         imminentStanceFeet = new SideDependentList<>();
          for (RobotSide side : RobotSide.values)
          {
             FramePose3D solePose = new FramePose3D();
-            if (lastCommandedFootsteps.get(side) == null) // in the case we are just starting to walk and haven't sent a step for this foot yet
+            if (imminentStanceTracker.getImminentStancePoses().get(side) == null) // in the case we are just starting to walk and haven't sent a step for this foot yet
             {
                solePose.setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
                solePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -134,17 +133,19 @@ public class LookAndStepLocalizationTask
                {
                   foothold.addVertex(vertex);
                }
-               eventualStanceFeet.set(side, new MinimalFootstep(side, solePose, foothold, side.getPascalCaseName() + " Prior Stance"));
+               imminentStanceFeet.set(side, new MinimalFootstep(side, solePose, foothold, side.getPascalCaseName() + " Prior Stance"));
             }
             else
             {
-               lastCommandedFootsteps.get(side).getFootstepPose(solePose);
+               // TODO: We need to operate not on "eventual stance", but stance after this
+               // currently executing step would finish. We want to be reactive on each step.
+               imminentStanceTracker.getImminentStancePoses().get(side).getFootstepPose(solePose);
                solePose.changeFrame(ReferenceFrame.getWorldFrame());
-               eventualStanceFeet.set(side,
+               imminentStanceFeet.set(side,
                                       new MinimalFootstep(side,
-                                                         solePose,
-                                                         lastCommandedFootsteps.get(side).getFoothold(),
-                                                         side.getPascalCaseName() + " Commanded Stance"));
+                                                          solePose,
+                                                          imminentStanceTracker.getImminentStancePoses().get(side).getFoothold(),
+                                                          side.getPascalCaseName() + " Commanded Stance"));
             }
          }
 
@@ -153,45 +154,47 @@ public class LookAndStepLocalizationTask
    }
 
    protected List<? extends Pose3DReadOnly> bodyPathPlan;
-   protected SideDependentList<MinimalFootstep> eventualStanceFeet;
+   protected SideDependentList<MinimalFootstep> imminentStanceFeet;
    protected CapturabilityBasedStatus capturabilityBasedStatus;
 
    protected void run()
    {
-      statusLogger.info("Localizing eventual pose to body path...");
+      statusLogger.info("Localizing imminent pose to body path...");
 
-      Pose3D midFeetPose = new Pose3D(eventualStanceFeet.get(RobotSide.LEFT).getSolePoseInWorld());
-      midFeetPose.interpolate(eventualStanceFeet.get(RobotSide.RIGHT).getSolePoseInWorld(), 0.5);
+      Pose3D imminentMidFeetPose = new Pose3D(imminentStanceFeet.get(RobotSide.LEFT).getSolePoseInWorld());
+      imminentMidFeetPose.interpolate(imminentStanceFeet.get(RobotSide.RIGHT).getSolePoseInWorld(), 0.5);
 
       Vector3D midFeetZNormal = new Vector3D(Axis3D.Z);
-      midFeetPose.getOrientation().transform(midFeetZNormal);
+      imminentMidFeetPose.getOrientation().transform(midFeetZNormal);
       Quaternion toZUp = new Quaternion();
       EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(midFeetZNormal, Axis3D.Z, toZUp);
-      midFeetPose.appendRotation(toZUp);
+      imminentMidFeetPose.appendRotation(toZUp);
 
       // find closest point along body path plan
       Point3D closestPointAlongPath = new Point3D();
-      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, midFeetPose.getPosition(), closestPointAlongPath);
+      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, imminentMidFeetPose.getPosition(), closestPointAlongPath);
 
-      Pose3D eventualPoseAlongPath = new Pose3D(midFeetPose);
-      eventualPoseAlongPath.getPosition().set(closestPointAlongPath);
-      uiPublisher.publishToUI(ClosestPointForUI, eventualPoseAlongPath);
+      Pose3D imminentPoseAlongPath = new Pose3D(imminentMidFeetPose);
+      imminentPoseAlongPath.getPosition().set(closestPointAlongPath);
+      uiPublisher.publishToUI(ClosestPointForUI, imminentPoseAlongPath);
 
       Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
       double distanceToExactGoal = closestPointAlongPath.distanceXY(terminalGoal.getPosition());
       boolean reachedGoalZone = distanceToExactGoal < lookAndStepParameters.getGoalSatisfactionRadius();
-      double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFeetPose.getYaw(), terminalGoal.getYaw()));
+      double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(imminentMidFeetPose.getYaw(), terminalGoal.getYaw()));
       reachedGoalZone &= yawToExactGoal < lookAndStepParameters.getGoalSatisfactionOrientationDelta();
 
-      statusLogger.info(StringTools.format("Eventual pose: {}", StringTools.zUpPoseString(eventualPoseAlongPath)));
+      statusLogger.info(StringTools.format("Imminent pose: {}", StringTools.zUpPoseString(imminentPoseAlongPath)));
       statusLogger.info(StringTools.format("Remaining distanceXY: {} < {} yaw: {} < {}",
                                            FormattingTools.getFormattedDecimal3D(distanceToExactGoal),
                                            lookAndStepParameters.getGoalSatisfactionRadius(),
                                            FormattingTools.getFormattedDecimal3D(yawToExactGoal),
                                            lookAndStepParameters.getGoalSatisfactionOrientationDelta()));
+      boolean newGoalWasSubmitted = newGoalSubmitted;
+      newGoalSubmitted = false;
       if (reachedGoalZone)
       {
-         statusLogger.info("Eventual pose reaches goal.");
+         statusLogger.info("Imminent pose reaches goal.");
          if ((!isBeingReset.get()))
          {
             ros2EmptyPublisher.accept(SLAMModuleAPI.CLEAR);
@@ -200,9 +203,8 @@ public class LookAndStepLocalizationTask
          }
          ThreadTools.startAsDaemon(this::reachedGoalPublicationThread, "BroadcastReachedGoalWhenDoneWalking");
       }
-      else if (newGoalSubmitted && didFootstepPlanningOnceToEnsureSomeProgress)
+      else if (newGoalWasSubmitted && didFootstepPlanningOnceToEnsureSomeProgress)
       {
-         newGoalSubmitted = false;
          didFootstepPlanningOnceToEnsureSomeProgress = false;
          statusLogger.info("Planning to new goal.");
          if ((!isBeingReset.get()))
@@ -216,9 +218,9 @@ public class LookAndStepLocalizationTask
          didFootstepPlanningOnceToEnsureSomeProgress = true;
          LookAndStepBodyPathLocalizationResult result = new LookAndStepBodyPathLocalizationResult(closestPointAlongPath,
                                                                                                   closestSegmentIndex,
-                                                                                                  midFeetPose,
+                                                                                                  imminentMidFeetPose,
                                                                                                   bodyPathPlan,
-                                                                                                  eventualStanceFeet);
+                                                                                                  imminentStanceFeet);
          bodyPathLocalizationOutput.accept(result);
       }
    }
