@@ -7,6 +7,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionCalculator;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
@@ -63,6 +64,7 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepFootstepPlanningTask
 {
+   protected BehaviorHelper helper;
    protected StatusLogger statusLogger;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
@@ -112,6 +114,7 @@ public class LookAndStepFootstepPlanningTask
          behaviorStateReference = lookAndStep.behaviorStateReference::get;
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
          footholdVolume = new YoDouble("footholdVolume", lookAndStep.yoRegistry);
+         helper = lookAndStep.helper;
          autonomousOutput = footstepPlan ->
          {
             if (!lookAndStep.isBeingReset.get())
@@ -153,9 +156,9 @@ public class LookAndStepFootstepPlanningTask
          suppressor.addCondition("Plan being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
          suppressor.addCondition("Robot not in walking state", () -> !controllerStatusTracker.isInWalkingState());
-         suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
-                                       + " > " + lookAndStepParameters.getAcceptableIncompleteFootsteps(),
-                                 () -> numberOfIncompleteFootsteps > lookAndStepParameters.getAcceptableIncompleteFootsteps());
+//         suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
+//                                       + " > " + lookAndStepParameters.getAcceptableIncompleteFootsteps(),
+//                                 () -> numberOfIncompleteFootsteps > lookAndStepParameters.getAcceptableIncompleteFootsteps());
          suppressor.addCondition(() -> "Swing planner type parameter not valid: " + lookAndStepParameters.getSwingPlannerType(),
                                  () -> swingPlannerType == null);
       }
@@ -338,8 +341,7 @@ public class LookAndStepFootstepPlanningTask
          }
          ArrayList<ConvexPolygon2D> polygons = new ArrayList<>();
          ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
-         // TODO: Make this a parameter
-         double radius = 2.0;
+         double radius = lookAndStepParameters.getAssumedFlatGroundCircleRadius();
          for (int i = 0; i < 40; i++)
          {
             double angle = (i / 40.0) * 2.0 * Math.PI;
@@ -364,7 +366,6 @@ public class LookAndStepFootstepPlanningTask
 
       Point3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
       int closestSegmentIndex = localizationResult.getClosestSegmentIndex();
-      Pose3DReadOnly midFeetAlongPath = localizationResult.getMidFeetAlongPath();
       List<? extends Pose3DReadOnly> bodyPathPlan = localizationResult.getBodyPathPlan();
       SideDependentList<MinimalFootstep> startFootPoses = localizationResult.getStanceForPlanning();
 
@@ -412,6 +413,10 @@ public class LookAndStepFootstepPlanningTask
       uiPublisher.publishToUI(StartAndGoalFootPosesForUI, startFootPosesForUI);
 
       RobotSide stanceSide;
+      // if last plan failed
+      // if foot is in the air
+      // if how many steps are left
+
       if (lastStanceSide != null)
       {
          // if planner failed last time, do not switch sides
@@ -443,7 +448,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       // TODO: Set start footholds!!
-      // TODO: Need to plan from where current stance and swing end are to prevent restepping in the same spot
+      // TODO: Need to plan from where current stance and swing end are to prevent re-stepping in the same spot
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(combinedRegionsForPlanning);
       footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeout());
@@ -454,7 +459,7 @@ public class LookAndStepFootstepPlanningTask
       footstepPlanningModule.getSwingPlanningModule().getSwingPlannerParameters().set(swingPlannerParameters);
       footstepPlanningModule.clearCustomTerminationConditions();
       footstepPlanningModule.addCustomTerminationCondition(
-            (plannerTime, iterations, bestPathFinalStep, bestSecondToFinalStep, bestPathSize) -> bestPathSize >= lookAndStepParameters.getMinimumNumberOfPlannedSteps());
+            (plannerTime, iterations, bestPathFinalStep, bestSecondToFinalStep, bestPathSize) -> bestPathSize >= lookAndStepParameters.getNumberOfStepsToTryToPlan());
       MinimumFootstepChecker stepInPlaceChecker = new MinimumFootstepChecker();
       stepInPlaceChecker.setStanceFeetPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(), startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       footstepPlanningModule.getChecker().clearCustomFootstepCheckers();
@@ -540,6 +545,7 @@ public class LookAndStepFootstepPlanningTask
 
          if (operatorReviewEnabledSupplier.get())
          {
+            helper.getOrCreateRobotInterface().pauseWalking();
             review.review(footstepPlan);
          }
          else
@@ -551,6 +557,9 @@ public class LookAndStepFootstepPlanningTask
 
    private void doFailureAction(String message)
    {
+      // Finish the currently swinging step and stop walking
+      helper.getOrCreateRobotInterface().pauseWalking();
+
       if (!planarRegionsHistory.isEmpty())
          planarRegionsHistory.removeLast();
 

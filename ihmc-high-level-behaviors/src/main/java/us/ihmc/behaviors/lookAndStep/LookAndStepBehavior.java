@@ -5,7 +5,6 @@ import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.behaviors.BehaviorDefinition;
@@ -24,7 +23,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Arrays;
@@ -56,7 +54,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    final AtomicBoolean isBeingReset = new AtomicBoolean();
    final AtomicReference<Boolean> operatorReviewEnabledInput;
    final AtomicReference<RobotSide> lastStanceSide;
-   final SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps;
+   final LookAndStepImminentStanceTracker imminentStanceTracker;
    final ControllerStatusTracker controllerStatusTracker;
    final TypedNotification<Boolean> approvalNotification;
    private final DelayFixedPlanarRegionsSubscription delayFixedPlanarRegionsSubscription;
@@ -127,7 +125,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
       lastStanceSide = new AtomicReference<>();
-      lastCommandedFootsteps = new SideDependentList<>();
+      imminentStanceTracker = new LookAndStepImminentStanceTracker(helper);
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publish);
       controllerStatusTracker = helper.getOrCreateControllerStatusTracker();
       reset.initialize(this);

@@ -7,17 +7,16 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.interfaces.RobotWalkRequester;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.interfaces.UIPublisher;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -38,7 +37,7 @@ public class LookAndStepSteppingTask
    protected ROS2SyncedRobotModel syncedRobot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected long previousStepMessageId = 0L;
-   protected SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps;
+   protected LookAndStepImminentStanceTracker imminentStanceTracker;
 
    public static class LookAndStepStepping extends LookAndStepSteppingTask
    {
@@ -48,7 +47,7 @@ public class LookAndStepSteppingTask
 
       public void initialize(LookAndStepBehavior lookAndStep)
       {
-         lastCommandedFootsteps = lookAndStep.lastCommandedFootsteps;
+         imminentStanceTracker = lookAndStep.imminentStanceTracker;
          statusLogger = lookAndStep.statusLogger;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
@@ -104,10 +103,7 @@ public class LookAndStepSteppingTask
 
    protected void performTask()
    {
-      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
-      {
-         lastCommandedFootsteps.put(footstepPlan.getFootstep(i).getRobotSide(), footstepPlan.getFootstep(i));
-      }
+      imminentStanceTracker.addCommandedFootsteps(footstepPlan);
 
       statusLogger.warn("Requesting walk");
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
@@ -116,7 +112,8 @@ public class LookAndStepSteppingTask
       // TODO: Add combo to look and step UI to chose which steps to visualize
       uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage));
 
-      ExecutionMode executionMode = previousStepMessageId == 0L ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
+//      ExecutionMode executionMode = previousStepMessageId == 0L ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
+      ExecutionMode executionMode = ExecutionMode.OVERRIDE;
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
       long messageId = UUID.randomUUID().getLeastSignificantBits();
       footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
@@ -130,6 +127,19 @@ public class LookAndStepSteppingTask
 
    private void sleepForPartOfSwingThread(double swingDuration)
    {
+      // first wait for a step from the previous command list to complete
+      // TODO: Figure out exactly how long to wait
+      // TODO: Or implement a timeout
+      boolean waitForPreviouslyCommandedStep = imminentStanceTracker.getPreviousStepsCompletedSinceCommanded() < 1;
+      if (waitForPreviouslyCommandedStep)
+      {
+         LogTools.info("Waiting for previously commanded step to complete...");
+      }
+      while (imminentStanceTracker.getPreviousStepsCompletedSinceCommanded() < 1)
+      {
+         ThreadTools.sleep(50);
+      }
+
       double percentSwingToWait = lookAndStepParameters.getPercentSwingToWait();
       double waitDuration = swingDuration * percentSwingToWait;
       statusLogger.info("Waiting {} s for {} % of swing...", waitDuration, percentSwingToWait);
