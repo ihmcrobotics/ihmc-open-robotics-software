@@ -7,7 +7,7 @@ import java.util.LinkedHashSet;
 
 public class GDXBehaviorUIRegistry extends BehaviorRegistry
 {
-   public static final GDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new GDXBehaviorUIRegistry(ImGuiGDXLookAndStepBehaviorUI.DEFINITION);
+   public static final GDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new GDXBehaviorUIRegistry(ImGuiGDXTargetFollowingBehaviorUI.DEFINITION);
    static
    {
       DEFAULT_BEHAVIORS.register(ImGuiGDXTargetFollowingBehaviorUI.DEFINITION);
