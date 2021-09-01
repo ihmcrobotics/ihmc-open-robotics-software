@@ -40,7 +40,7 @@ public class FootstepPlannerRejectionReasonReport
             FootstepPlannerEdgeData edgeData = footstepPlanningModule.getEdgeDataMap().get(edgeKey);
 
             BipedalFootstepPlannerNodeRejectionReason rejectionReason
-                  = BipedalFootstepPlannerNodeRejectionReason.fromByte((byte) edgeData.getDataBuffer()[7]);
+                  = BipedalFootstepPlannerNodeRejectionReason.fromByte((byte) edgeData.getDataBuffer()[10]);
             rejectionReasons.putIfAbsent(rejectionReason, new MutableInt());
             rejectionReasons.get(rejectionReason).increment();
             totalNumberOfRejections++;
