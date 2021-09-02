@@ -44,7 +44,7 @@ public class LookAndStepVisualizationGroup extends Group
       messager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
       footstepPlanGraphic = new FootstepPlanGraphic();
       footstepPlanGraphic.setTransparency(0.2);
-      messager.registerTopicListener(FootstepPlanForUI, footsteps ->
+      messager.registerTopicListener(PlannedFootstepsForUI, footsteps ->
       {
          reviewingBodyPath = false;
          footstepPlanGraphic.generateMeshesAsynchronously(footsteps);

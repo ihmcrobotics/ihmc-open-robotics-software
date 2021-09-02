@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.utilities.ros.ROS1Helper;
 
 import java.util.ArrayList;
@@ -15,12 +16,18 @@ public class ImGuiGDXGlobalVisualizersPanel extends ImGuiPanel implements Render
    private static final String WINDOW_NAME = "Global Visualizers";
 
    private final ArrayList<ImGuiGDXVisualizer> visualizers = new ArrayList<>();
-
-   private final ROS1Helper ros1Helper = new ROS1Helper("global_visualizers");
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ROS1Helper ros1Helper;
 
    public ImGuiGDXGlobalVisualizersPanel()
    {
+      this(new ROS1Helper("global_visualizers"));
+   }
+
+   public ImGuiGDXGlobalVisualizersPanel(ROS1Helper ros1Helper)
+   {
       super(WINDOW_NAME);
+      this.ros1Helper = ros1Helper;
       setRenderMethod(this::renderImGuiWidgets);
    }
 
@@ -59,6 +66,10 @@ public class ImGuiGDXGlobalVisualizersPanel extends ImGuiPanel implements Render
 
    public void renderImGuiWidgets()
    {
+      if (ImGui.button(labels.get("Reconnect ROS 1 Node")))
+      {
+         ros1Helper.reconnectEverything();
+      }
       for (ImGuiGDXVisualizer visualizer : visualizers)
       {
          visualizer.renderImGuiWidgets();

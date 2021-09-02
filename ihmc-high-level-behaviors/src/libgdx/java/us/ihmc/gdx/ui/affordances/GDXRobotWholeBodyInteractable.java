@@ -179,6 +179,11 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       }
    }
 
+   public void setInteractablesEnabled(boolean enabled)
+   {
+      interactablesEnabled.set(enabled);
+   }
+
    public ImGuiPanel getPanel()
    {
       return panel;
