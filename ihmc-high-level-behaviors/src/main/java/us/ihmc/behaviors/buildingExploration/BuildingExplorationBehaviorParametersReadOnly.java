@@ -1,8 +1,8 @@
-package us.ihmc.behaviors.demo;
+package us.ihmc.behaviors.buildingExploration;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorParameters.*;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParameters.*;
 
 public interface BuildingExplorationBehaviorParametersReadOnly extends StoredPropertySetReadOnly
 {

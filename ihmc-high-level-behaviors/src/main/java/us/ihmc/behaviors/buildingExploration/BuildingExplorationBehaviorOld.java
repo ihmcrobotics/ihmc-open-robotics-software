@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.demo;
+package us.ihmc.behaviors.buildingExploration;
 
 import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorOldAPI.*;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorOldAPI.*;
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
 
 public class BuildingExplorationBehaviorOld extends ResettingNode implements BehaviorInterface
@@ -171,14 +171,6 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
    public void reset()
    {
 
-   }
-
-   @Override
-   public void setEnabled(boolean enabled)
-   {
-      helper.setCommunicationCallbacksEnabled(enabled);
-      if (!enabled)
-         lookAndStepBehavior.setEnabled(false);
    }
 
    @Override

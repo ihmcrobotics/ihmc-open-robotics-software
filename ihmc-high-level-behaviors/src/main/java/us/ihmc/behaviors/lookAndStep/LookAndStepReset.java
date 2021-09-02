@@ -1,7 +1,5 @@
 package us.ihmc.behaviors.lookAndStep;
 
-import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
-import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.Timer;
@@ -73,7 +71,7 @@ public class LookAndStepReset
       lookAndStep.bodyPathPlanning.acceptGoal(null);
       lookAndStep.lastStanceSide.set(null);
       lookAndStep.helper.publish(ResetForUI);
-      lookAndStep.lastCommandedFootsteps.clear();
+      lookAndStep.imminentStanceTracker.clear();
       lookAndStep.controllerStatusTracker.reset();
 
       // REAStateRequestMessage clearMessage = new REAStateRequestMessage();

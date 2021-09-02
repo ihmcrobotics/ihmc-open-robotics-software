@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.demo;
+package us.ihmc.behaviors.buildingExploration;
 
 import controller_msgs.msg.dds.GoHomeMessage;
 import us.ihmc.behaviors.tools.BehaviorHelper;

@@ -2,6 +2,7 @@ package us.ihmc.gdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.log.LogTools;
@@ -15,6 +16,7 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    private final String panelName;
    private Runnable render;
    private final ImBoolean isShowing;
+   private final boolean hasMenuBar;
    private final TreeSet<ImGuiPanel> children = new TreeSet<>(Comparator.comparing(ImGuiPanel::getPanelName));
 
    private int lastDockID = -1;
@@ -31,9 +33,15 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
 
    public ImGuiPanel(String panelName, Runnable render, boolean isShowing)
    {
+      this(panelName, render, isShowing, false);
+   }
+
+   public ImGuiPanel(String panelName, Runnable render, boolean isShowing, boolean hasMenuBar)
+   {
       this.panelName = panelName;
       this.render = render;
       this.isShowing = new ImBoolean(isShowing);
+      this.hasMenuBar = hasMenuBar;
    }
 
    /* package-private */ void renderMenuItem()
@@ -58,7 +66,8 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       if (isTogglable() && isShowing.get())
       {
          handleSizeBeforeBegin();
-         ImGui.begin(panelName, isShowing);
+         int windowFlags = hasMenuBar ? ImGuiWindowFlags.MenuBar : ImGuiWindowFlags.None;
+         ImGui.begin(panelName, isShowing, windowFlags);
          handleSizeAfterBegin();
 
          int windowDockID = ImGui.getWindowDockID();
