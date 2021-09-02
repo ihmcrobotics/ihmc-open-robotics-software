@@ -112,7 +112,6 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
    public void generateMeshes(ArrayList<MinimalFootstep> footsteps)
    {
       meshBuilder.clear();
-      textRenderables.clear();
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       ConvexPolygon2D foothold = new ConvexPolygon2D();
@@ -158,6 +157,7 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
       buildMeshAndCreateModelInstance = () ->
       {
          // This can't be done outside the libGDX thread.
+         textRenderables.clear();
          for (int i = 0; i < footsteps.size(); i++)
          {
             MinimalFootstep minimalFootstep = footsteps.get(i);

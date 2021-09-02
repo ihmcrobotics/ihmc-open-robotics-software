@@ -48,22 +48,7 @@ public class ROS1Helper implements RosNodeInterface
       if (needsReconnect)
       {
          needsReconnect = false;
-         LogTools.info("Reconnecting ROS 1 node...");
-         if (ros1Node != null)
-            ros1Node.shutdown();
-
-         ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), nodeName);
-
-         for (Map.Entry<RosTopicPublisher<? extends Message>, String> publisher : publishers.entrySet())
-         {
-            ros1Node.attachPublisher(publisher.getValue(), publisher.getKey());
-         }
-         for (Map.Entry<RosTopicSubscriberInterface<? extends Message>, String> subscriber : subscribers.entrySet())
-         {
-            ros1Node.attachSubscriber(subscriber.getValue(), subscriber.getKey());
-         }
-
-         ros1Node.execute();
+         reconnectEverything();
       }
    }
 
@@ -79,6 +64,26 @@ public class ROS1Helper implements RosNodeInterface
       }
       scheduledFuture = scheduler.schedule(() -> ExceptionTools.handle(this::ensureConnected, DefaultExceptionHandler.PRINT_MESSAGE),
                                            333, TimeUnit.MILLISECONDS);
+   }
+
+   public void reconnectEverything()
+   {
+      LogTools.info("Reconnecting ROS 1 node...");
+      if (ros1Node != null)
+         ros1Node.shutdown();
+
+      ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), nodeName);
+
+      for (Map.Entry<RosTopicPublisher<? extends Message>, String> publisher : publishers.entrySet())
+      {
+         ros1Node.attachPublisher(publisher.getValue(), publisher.getKey());
+      }
+      for (Map.Entry<RosTopicSubscriberInterface<? extends Message>, String> subscriber : subscribers.entrySet())
+      {
+         ros1Node.attachSubscriber(subscriber.getValue(), subscriber.getKey());
+      }
+
+      ros1Node.execute();
    }
 
    @Override

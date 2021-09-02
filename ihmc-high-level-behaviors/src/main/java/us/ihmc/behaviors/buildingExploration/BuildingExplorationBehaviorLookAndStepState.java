@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.demo;
+package us.ihmc.behaviors.buildingExploration;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
@@ -114,10 +114,6 @@ class BuildingExplorationBehaviorLookAndStepState implements State
       lookAndStepStarted = false;
 
       helper.publish(LookAndStepBehaviorAPI.RESET);
-
-      LogTools.info("Enabling look and step behavior");
-      buildingExplorationBehavior.getLookAndStepBehavior().setEnabled(true);
-      ThreadTools.sleep(100);
 
       if (!currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
       {
@@ -241,8 +237,6 @@ class BuildingExplorationBehaviorLookAndStepState implements State
    public void onExit(double timeInState)
    {
       LogTools.info("Exiting " + getClass().getSimpleName());
-
-      buildingExplorationBehavior.getLookAndStepBehavior().setEnabled(false);
 
       lookAndStepStarted = false;
       numberOfStepsToIgnoreDebris = 0;
