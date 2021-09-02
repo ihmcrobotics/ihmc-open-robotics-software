@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.demo;
+package us.ihmc.behaviors.buildingExploration;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.BehaviorDefinition;
@@ -7,6 +7,7 @@ import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -16,9 +17,8 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorMode.*;
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorTools.NAN_POSE;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode.*;
 
 public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
 {
@@ -29,7 +29,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final LookAndStepBehavior lookAndStepBehavior;
    private final DoorBehavior doorBehavior;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final AtomicReference<Pose3D> goal = new AtomicReference<>(NAN_POSE);
+   private final AtomicReference<Pose3D> goal = new AtomicReference<>(BehaviorTools.createNaNPose());
    private final AtomicReference<BuildingExplorationBehaviorMode> mode = new AtomicReference<>(TELEOP);
    private final TraverseStairsBehavior traverseStairsBehavior;
    private final BuildingExplorationBehaviorParameters parameters;
@@ -142,14 +142,6 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    public void reset()
    {
 
-   }
-
-   @Override
-   public void setEnabled(boolean enabled)
-   {
-      helper.setCommunicationCallbacksEnabled(enabled);
-      if (!enabled)
-         lookAndStepBehavior.setEnabled(false);
    }
 
    @Override

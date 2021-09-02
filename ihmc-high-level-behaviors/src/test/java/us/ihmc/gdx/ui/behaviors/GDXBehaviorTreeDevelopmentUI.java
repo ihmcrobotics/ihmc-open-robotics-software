@@ -107,7 +107,7 @@ public class GDXBehaviorTreeDevelopmentUI
          }
       });
 
-      treePanel = new ImGuiImNodesBehaviorTreePanel("Test", this.getClass());
+      treePanel = new ImGuiImNodesBehaviorTreePanel("Test");
 
       treeGui = new ExampleSimpleNodeInterface("SequenceNode");
       GDXBehaviorUIInterface nodeGui = new ExampleSimpleNodeInterface("FallbackNode");

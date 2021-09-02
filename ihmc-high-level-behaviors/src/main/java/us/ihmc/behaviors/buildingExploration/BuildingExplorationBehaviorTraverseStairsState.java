@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.demo;
+package us.ihmc.behaviors.buildingExploration;
 
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
