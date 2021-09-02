@@ -74,6 +74,7 @@ tasks.getByPath("installDist").dependsOn("compositeJar")
 app.entrypoint("IHMCValkyrieJoystickApplication", "us.ihmc.valkyrie.joystick.ValkyrieJoystickBasedSteppingApplication")
 app.entrypoint("valkyrie-network-processor", "us.ihmc.valkyrie.ValkyrieNetworkProcessor")
 app.entrypoint("ValkyrieObstacleCourseNoUI", "us.ihmc.valkyrie.ValkyrieObstacleCourseNoUI")
+app.entrypoint("ValkyrieWallCourse", "us.ihmc.valkyrie.ValkyrieWallCourse")
 
 tasks.create("deployOCUApplications") {
    dependsOn("installDist")

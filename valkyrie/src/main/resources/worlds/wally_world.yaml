@@ -1,0 +1,113 @@
+---
+# Coordinate convention: relative to the robot, +x is forward, +y is to the left, +z is up
+# All length units are in meters.
+#
+# Wall format:
+# - center is a 3-element array containing the (x,y,z) center of the wall relative to world
+# - lengths is a 3-element array containing the x,y, and z dimensions of the wall,
+#   more or less length, thickness and height
+# - slopeRadians indicates the wall should be rotated about its center around the y axis
+# - yawDegrees indicates the wall should be rotated about its center around the z axis
+#
+# Rough plan:
+#
+# |---------|
+# |  |\  |  |
+# |  |  ^   |
+# |      |  |
+# |  |      |
+# |---------|
+# 
+# where ^ indicates the robot start point, facing in the direction of the arrowhead.
+#
+walls:
+  - name: "facing wall pt. 1"
+    center: [4, 4.25, 2]
+    lengths: [3.5, 0.25, 4]
+    yawDegrees: 90
+
+  - name: "facing wall pt. 2"
+    center: [4, -2.25, 2]
+    lengths: [3.5, 0.25, 4]
+    yawDegrees: 90
+
+  - name: "corridor, left wall"
+    center: [8.5, 2.5, 2]
+    lengths: [9, 0.25, 4]
+    yawDegrees: 0
+
+  - name: "corridor, right wall"
+    center: [10, -0.5, 2]
+    lengths: [12, 0.25, 4]
+    yawDegrees: 0
+
+  - name: "left outside wall"
+    center: [-1, 6, 2]
+    lengths: [10, 0.25, 4]
+    yawDegrees: 0
+
+  - name: "right outside wall pt. 1"
+    center: [-1, -4, 2]
+    lengths: [5, 0.25, 4]
+    yawDegrees: 0
+
+  - name: "right outside wall pt. 2 -- make doorways"
+    center: [-1, -4, 3]
+    lengths: [10, 0.25, 2]
+    yawDegrees: 0
+
+  - name: "rear outside wall"
+    center: [-6, 1, 2]
+    lengths: [10, 0.25, 4]
+    yawDegrees: 90
+
+  - name: "right divider"
+    center: [0, -1, 2]
+    lengths: [3, 0.25, 4]
+    yawDegrees: 0
+
+  - name: "left angle"
+    center: [0.5, 2.5, 2]
+    lengths: [2, 0.25, 4]
+    yawDegrees: 30
+
+  - name: "left angle2"
+    center: [-0.5, 3, 2]
+    lengths: [4, 0.25, 4]
+    yawDegrees: 0
+
+  - name: "left deadend"
+    center: [-5.5, 3, 2]
+    lengths: [1, 0.25, 4]
+    yawDegrees: 0
+
+  - name: "room2 facing wall"
+    center: [4, -7, 2]
+    lengths: [6, 0.25, 4]
+    yawDegrees: 90
+
+  - name: "room2 right wall"
+    center: [1, -10, 2]
+    lengths: [6, 0.25, 4]
+    yawDegrees: 0
+
+  - name: "room2 rear wall"
+    center: [-2, -7, 2]
+    lengths: [6, 0.25, 4]
+    yawDegrees: 90
+
+  - name: "room3 facing wall"
+    center: [16, 4, 2]
+    lengths: [9, 0.25, 4]
+    yawDegrees: 90
+
+  - name: "room3 left wall"
+    center: [12, 8.5, 2]
+    lengths: [8, 0.25, 4]
+    yawDegrees: 0
+
+  - name: "room3 rear wall"
+    center: [8, 5.5, 2]
+    lengths: [6, 0.25, 4]
+    yawDegrees: 90
+
