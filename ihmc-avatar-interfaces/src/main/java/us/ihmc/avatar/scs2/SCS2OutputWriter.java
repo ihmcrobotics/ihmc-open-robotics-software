@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
@@ -14,6 +15,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SCS2OutputWriter implements JointDesiredOutputWriter
 {
@@ -23,11 +25,21 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
    private final boolean writeBeforeEstimatorTick;
    private final List<JointController> jointControllers = new ArrayList<>();
 
+   private final YoDouble unstableVelocityThreshold = new YoDouble("unstableVelocityThreshold", registry);
+   private final YoInteger unstableVelocityNumberThreshold = new YoInteger("unstableVelocityNumberThreshold", registry);
+   private final YoDouble unstableVelocityLowDampingScale = new YoDouble("unstableVelocityLowDampingScale", registry);
+   private final YoDouble unstableVelocityLowDampingDuration = new YoDouble("unstableVelocityLowDampingDuration", registry);
+
    public SCS2OutputWriter(ControllerInput controllerInput, ControllerOutput controllerOutput, boolean writeBeforeEstimatorTick)
    {
       this.controllerInput = controllerInput;
       this.controllerOutput = controllerOutput;
       this.writeBeforeEstimatorTick = writeBeforeEstimatorTick;
+
+      unstableVelocityThreshold.set(0.45);
+      unstableVelocityNumberThreshold.set(10);
+      unstableVelocityLowDampingScale.set(0.25);
+      unstableVelocityLowDampingDuration.set(0.5);
    }
 
    @Override
@@ -39,9 +51,9 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       {
          OneDoFJointReadOnly controllerJoint = jointDesiredOutputList.getOneDoFJoint(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(i);
-         OneDoFJointStateBasics simJointOutput = controllerOutput.getOneDoFJointOutput(controllerJoint);
-         OneDoFJointReadOnly simJointInput = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerJoint.getName());
-         jointControllers.add(new OneDoFJointController(simJointInput, simJointOutput, jointDesiredOutput, registry));
+         OneDoFJointStateBasics simJointInput = controllerOutput.getOneDoFJointOutput(controllerJoint);
+         OneDoFJointReadOnly simJointOutput = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerJoint.getName());
+         jointControllers.add(new OneDoFJointController(simJointOutput, simJointInput, jointDesiredOutput, registry));
 
       }
    }
@@ -95,6 +107,10 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       private final YoDouble yoPositionError, yoVelocityError;
       private final YoDouble yoControllerTau, yoPositionTau, yoVelocityTau;
 
+      private final YoInteger unstableVelocityCounter;
+      private final YoDouble previousVelocity;
+      private final YoDouble unstableVelocityStartTime;
+
       public OneDoFJointController(OneDoFJointReadOnly simOutput,
                                    OneDoFJointStateBasics simInput,
                                    JointDesiredOutputReadOnly jointDesiredOutput,
@@ -112,6 +128,10 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          yoControllerTau = new YoDouble(prefix + "ControllerTau", registry);
          yoPositionTau = new YoDouble(prefix + "PositionTau", registry);
          yoVelocityTau = new YoDouble(prefix + "VelocityTau", registry);
+
+         unstableVelocityCounter = new YoInteger(prefix + "UnstableVelocityCounter", registry);
+         previousVelocity = new YoDouble(prefix + "PreviousVelocity", registry);
+         unstableVelocityStartTime = new YoDouble(prefix + "UnstableVelocityStartTime", registry);
       }
 
       @Override
@@ -131,7 +151,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
             positionError = 0.0;
 
          if (jointDesiredOutput.hasDesiredVelocity())
-            velocityError = jointDesiredOutput.getDesiredVelocity() - simOutput.getQ();
+            velocityError = jointDesiredOutput.getDesiredVelocity() - simOutput.getQd();
          else
             velocityError = 0.0;
 
@@ -146,9 +166,34 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          kp.set(jointDesiredOutput.hasStiffness() ? jointDesiredOutput.getStiffness() : 0.0);
          kd.set(jointDesiredOutput.hasDamping() ? jointDesiredOutput.getDamping() : 0.0);
 
+         updateUnstableVelocityCounter();
+         double time = controllerInput.getTime();
+         if (unstableVelocityCounter.getValue() >= unstableVelocityNumberThreshold.getValue())
+            unstableVelocityStartTime.set(time);
+
+         if (time - unstableVelocityStartTime.getValue() <= unstableVelocityLowDampingDuration.getValue())
+         {
+            double alpha = MathTools.clamp((time - unstableVelocityStartTime.getValue()) / unstableVelocityLowDampingDuration.getValue(), 0.0, 1.0);
+            kd.mul(EuclidCoreTools.interpolate(unstableVelocityLowDampingScale.getValue(), 1.0, alpha));
+         }
+
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
          simInput.setEffort(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue());
+         previousVelocity.set(simOutput.getQd());
+      }
+
+      private void updateUnstableVelocityCounter()
+      {
+         boolean unstable = simOutput.getQd() * previousVelocity.getValue() < 0.0;
+
+         if (unstable)
+            unstable = !EuclidCoreTools.epsilonEquals(simOutput.getQd(), previousVelocity.getValue(), unstableVelocityThreshold.getValue());
+
+         if (unstable)
+            unstableVelocityCounter.set(Math.min(unstableVelocityCounter.getValue() + 1, unstableVelocityNumberThreshold.getValue()));
+         else
+            unstableVelocityCounter.set(Math.max(unstableVelocityCounter.getValue() - 1, 0));
       }
 
       @Override

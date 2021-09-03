@@ -103,6 +103,11 @@ public class SCS2AvatarSimulationFactory
    private final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
    private final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    private final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
+   private final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
+                                                                                                                            (in,
+                                                                                                                             out) -> new SCS2OutputWriter(in,
+                                                                                                                                                          out,
+                                                                                                                                                          true));
    private final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", true);
    private final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
    private final OptionalFactoryField<Boolean> showGUI = new OptionalFactoryField<>("showGUI", true);
@@ -153,7 +158,7 @@ public class SCS2AvatarSimulationFactory
       avatarSimulation.setControllerThread(controllerThread);
       avatarSimulation.setEstimatorThread(estimatorThread);
       avatarSimulation.setRobotController(robotController);
-      avatarSimulation.setRobotDefinition(robotDefinition);
+      avatarSimulation.setRobot(robot);
       avatarSimulation.setSimulatedRobotTimeProvider(simulatedRobotTimeProvider);
       avatarSimulation.setFullHumanoidRobotModel(controllerThread.getFullRobotModel());
       avatarSimulation.setShowGUI(showGUI.get());
@@ -239,9 +244,8 @@ public class SCS2AvatarSimulationFactory
 
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = new SCS2OutputWriter(robot.getControllerManager().getControllerInput(),
-                                                    robot.getControllerManager().getControllerOutput(),
-                                                    true);
+      simulationOutputWriter = outputWriterFactory.get().build(robot.getControllerManager().getControllerInput(),
+                                                               robot.getControllerManager().getControllerOutput());
    }
 
    private void setupStateEstimationThread()
@@ -612,6 +616,11 @@ public class SCS2AvatarSimulationFactory
    public void setUsePerfectSensors(boolean usePerfectSensors)
    {
       this.usePerfectSensors.set(usePerfectSensors);
+   }
+
+   public void setOutputWriterFactory(SCS2JointDesiredOutputWriterFactory outputWriterFactory)
+   {
+      this.outputWriterFactory.set(outputWriterFactory);
    }
 
    public void setRunMultiThreaded(boolean runMultiThreaded)

@@ -30,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointspacePositionControllerState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -73,7 +72,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    {
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest(true);
+         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
          simulationTestHelper = null;
       }
    }
