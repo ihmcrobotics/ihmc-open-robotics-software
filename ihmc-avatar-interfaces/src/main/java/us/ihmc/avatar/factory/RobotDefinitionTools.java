@@ -58,6 +58,7 @@ import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadO
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCylinder3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPRamp3DReadOnly;
 import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.ForceSensorDescription;
@@ -97,6 +98,7 @@ import us.ihmc.scs2.definition.geometry.STPRamp3DDefinition;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
 import us.ihmc.scs2.definition.geometry.TriangleMesh3DDefinition;
 import us.ihmc.scs2.definition.geometry.TruncatedCone3DDefinition;
+import us.ihmc.scs2.definition.robot.CameraSensorDefinition;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
 import us.ihmc.scs2.definition.robot.GroundContactPointDefinition;
 import us.ihmc.scs2.definition.robot.IMUSensorDefinition;
@@ -241,6 +243,7 @@ public class RobotDefinitionTools
       destination.getTransformToParent().getTranslation().set(source.getOffsetFromParentJoint());
       source.getIMUSensors().forEach(imu -> destination.addSensorDefinition(toIMUSensorDefinition(imu)));
       source.getForceSensors().forEach(forceSensor -> destination.addSensorDefinition(toWrenchSensorDefinition(forceSensor)));
+      source.getCameraSensors().forEach(camera -> destination.addSensorDefinition(toCameraSensorDefinition(camera)));
 
       source.getKinematicPoints().forEach(kp -> destination.addKinematicPointDefinition(toKinematicPointDefinition(kp)));
       source.getExternalForcePoints().forEach(efp -> destination.addExternalWrenchPointDefinition(toExternalWrenchPointDefinition(efp)));
@@ -282,6 +285,22 @@ public class RobotDefinitionTools
    {
       WrenchSensorDefinition output = new WrenchSensorDefinition();
       copySensorProperties(source, output);
+      return output;
+   }
+
+   private static CameraSensorDefinition toCameraSensorDefinition(CameraSensorDescription source)
+   {
+      CameraSensorDefinition output = new CameraSensorDefinition();
+      copySensorProperties(source, output);
+      // TODO The transform in the description is x-forward and z-up while the camera should be z-forward and y-down
+      output.getTransformToJoint().appendYawRotation(-Math.PI / 2.0);
+      output.getTransformToJoint().appendRollRotation(-Math.PI / 2.0);
+      output.setFieldOfView(source.getFieldOfView());
+      output.setClipNear(source.getClipNear());
+      output.setClipFar(100000.0);//source.getClipFar()); // TODO Allows to view the entire scene, not sure if that's what we want
+      output.setImageWidth(source.getImageWidth());
+      output.setImageHeight(source.getImageHeight());
+      output.setUpdatePeriod(1000 / 25); // 25Hz // TODO Weird this is not present in the description. 
       return output;
    }
 

@@ -39,7 +39,7 @@ public class AtlasObstacleCourseNoUISCS2
       if (simEnvironment != null)
       {
          simEnvironment.getAvatarSimulationFactory().setSimulationDataRecordTimePeriod(recordFrequencySpeedup * robotModel.getControllerDT());
-         simEnvironment.createSimulation();
+         simEnvironment.build();
          simEnvironment.start();
       }
    }

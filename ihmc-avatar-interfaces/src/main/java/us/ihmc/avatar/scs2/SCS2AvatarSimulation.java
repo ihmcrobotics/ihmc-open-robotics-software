@@ -18,11 +18,12 @@ import us.ihmc.scs2.session.SessionState;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class SCS2AvatarSimulation
 {
-   private RobotDefinition robotDefinition;
+   private Robot robot;
    private SimulationSession simulationSession;
    private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private YoVariableServer yoVariableServer;
@@ -203,14 +204,19 @@ public class SCS2AvatarSimulation
       estimatorThread.addRobotController(controller);
    }
 
-   public void setRobotDefinition(RobotDefinition robotDefinition)
+   public void setRobot(Robot robot)
    {
-      this.robotDefinition = robotDefinition;
+      this.robot = robot;
+   }
+
+   public Robot getRobot()
+   {
+      return robot;
    }
 
    public RobotDefinition getRobotDefinition()
    {
-      return robotDefinition;
+      return robot.getRobotDefinition();
    }
 
    public void setRobotModel(DRCRobotModel robotModel)
