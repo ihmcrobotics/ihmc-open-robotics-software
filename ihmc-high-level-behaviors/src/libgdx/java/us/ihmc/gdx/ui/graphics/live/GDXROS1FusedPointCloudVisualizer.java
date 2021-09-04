@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
+import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -13,6 +14,7 @@ import sensor_msgs.Image;
 import sensor_msgs.PointCloud2;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.GDXPointCloudRenderer;
+import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.OpenCLManager;
@@ -34,6 +36,12 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    AtomicReference<Image> latestZED2Image = new AtomicReference<>();
    AtomicReference<PointCloud2> latestOusterPointCloud = new AtomicReference<>();
    private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
+   private long l515ReceivedCount = 0;
+   private long zed2ReceivedCount = 0;
+   private long ousterReceivedCount = 0;
+   private final ImGuiPlot l515ReceivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiPlot zed2ReceivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiPlot ousterReceivedPlot = new ImGuiPlot("", 1000, 230, 20);
    private final ReferenceFrame ousterFrame;
    private final ReferenceFrame l515Frame;
    private final ReferenceFrame zed2Frame;
@@ -51,7 +59,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    private _cl_mem zed2InGPUBuffer;
    private int zed2InBytesLength;
    private int numberOfOusterPoints;
-   private ByteBuffer zed2PhonyHostBuffer;
+   private ByteBuffer zed2InHostBuffer;
    private ByteBuffer ousterInHostBuffer;
 
    public GDXROS1FusedPointCloudVisualizer(HumanoidReferenceFrames referenceFrames)
@@ -66,7 +74,6 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    public void create()
    {
       super.create();
-      pointCloudRenderer.create(MAX_POINTS);
 
       // ouster width 1024 height 128, 9 fields, 288 bits, 36 bytes, BUT! 48 bytes step
       // 3 float32s XYZ
@@ -102,8 +109,9 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
       openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 1, zed2InGPUBuffer);
       openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 2, fusedOutGPUBuffer);
 
+      pointCloudRenderer.create(numberOfOusterPoints);
       coloredPointCloudDataHostFloatBuffer = BufferUtils.newFloatBuffer(pointCloudRenderer.getVerticesArray().length);
-      zed2PhonyHostBuffer = BufferUtils.newByteBuffer(zed2InBytesLength);
+      zed2InHostBuffer = BufferUtils.newByteBuffer(zed2InBytesLength);
       ousterInHostBuffer = BufferUtils.newByteBuffer(ousterInBytesLength);
    }
 
@@ -118,7 +126,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
       Image zed2Image = latestZED2Image.get();
 
 //      if (ousterPointCloud2 != null && l515PointCloud2 != null && zed2Image != null)
-      if (ousterPointCloud2 != null)
+      if (ousterPointCloud2 != null && zed2Image != null)
       {
          long ousterTimestamp = ousterPointCloud2.getHeader().getStamp().totalNsecs();
 
@@ -128,18 +136,21 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          ByteBuffer ousterInHeapBuffer = RosTools.sliceNettyBuffer(ousterPointCloud2.getData());
          ousterInHostBuffer.rewind();
          ousterInHostBuffer.put(ousterInHeapBuffer);
-//         ByteBuffer zed2InHostBuffer = RosTools.sliceNettyBuffer(zed2Image.getData());
+         ousterInHostBuffer.rewind();
          openCLManager.enqueueWriteBuffer(ousterInGPUBuffer, ousterInBytesLength, new BytePointer(ousterInHostBuffer));
-//         openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2InHostBuffer));
-         openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2PhonyHostBuffer));
 
-         // global work size is the total number of ouster pixels
-         // local work size should probably be the max supported
+         ByteBuffer zed2InHeapBuffer = RosTools.sliceNettyBuffer(zed2Image.getData());
+         zed2InHostBuffer.rewind();
+         zed2InHostBuffer.put(zed2InHeapBuffer);
+         zed2InHostBuffer.rewind();
+         openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2InHostBuffer));
+
          openCLManager.execute(projectZED2ToOusterPointsKernel, numberOfOusterPoints);
 
          // l515 points, make into XYZRGBA and stick at the end
          // should be 1024 * 128 jobs?
 
+         coloredPointCloudDataHostFloatBuffer.rewind();
          openCLManager.enqueueReadBuffer(fusedOutGPUBuffer, fusedOutBytesLength, new FloatPointer(coloredPointCloudDataHostFloatBuffer));
 
          // floats: X,Y,Z,R,G,B,A,0.01,1.0,0.0
@@ -154,6 +165,18 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    }
 
    @Override
+   public void renderImGuiWidgets()
+   {
+      super.renderImGuiWidgets();
+      ImGui.text(RosTools.ZED2_LEFT_EYE_VIDEO);
+      zed2ReceivedPlot.render(zed2ReceivedCount);
+      ImGui.text(RosTools.L515_POINT_CLOUD);
+      l515ReceivedPlot.render(l515ReceivedCount);
+      ImGui.text(RosTools.OUSTER_POINT_CLOUD);
+      ousterReceivedPlot.render(ousterReceivedCount);
+   }
+
+   @Override
    public void subscribe(RosNodeInterface ros1Node)
    {
       zed2LeftEyeSubscriber = new AbstractRosTopicSubscriber<Image>(Image._TYPE)
@@ -161,6 +184,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          @Override
          public void onNewMessage(Image image)
          {
+            ++zed2ReceivedCount;
             latestZED2Image.set(image);
          }
       };
@@ -170,6 +194,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          @Override
          public void onNewMessage(PointCloud2 pointCloud2)
          {
+            ++l515ReceivedCount;
             latestL515PointCloud.set(pointCloud2);
          }
       };
@@ -179,6 +204,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          @Override
          public void onNewMessage(PointCloud2 pointCloud2)
          {
+            ++ousterReceivedCount;
             latestOusterPointCloud.set(pointCloud2);
          }
       };
@@ -198,5 +224,12 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    {
       if (isActive())
          pointCloudRenderer.getRenderables(renderables, pool);
+   }
+
+   public static void main(String[] args)
+   {
+      OpenCLManager openCLManager = new OpenCLManager();
+      openCLManager.create();
+      openCLManager.loadProgramAndCreateKernel("projectZED2ToOusterPoints");
    }
 }
