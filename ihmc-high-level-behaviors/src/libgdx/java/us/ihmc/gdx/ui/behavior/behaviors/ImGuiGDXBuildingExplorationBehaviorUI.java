@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.behaviors;
+package us.ihmc.gdx.ui.behavior.behaviors;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -12,20 +12,19 @@ import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParamete
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
-import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
 
-public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterface
+public class ImGuiGDXBuildingExplorationBehaviorUI extends ImGuiGDXBehaviorUIInterface
 {
-   public static final GDXBehaviorUIDefinition DEFINITION = new GDXBehaviorUIDefinition(BuildingExplorationBehavior.DEFINITION,
-                                                                                        ImGuiGDXBuildingExplorationBehaviorUI::new);
+   public static final ImGuiGDXBehaviorUIDefinition DEFINITION = new ImGuiGDXBehaviorUIDefinition(BuildingExplorationBehavior.DEFINITION,
+                                                                                                  ImGuiGDXBuildingExplorationBehaviorUI::new);
 
    private final BehaviorHelper helper;
    private BuildingExplorationBehaviorParameters parameters;
@@ -108,11 +107,6 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
             helper.publish(Mode, modeValue);
          }
       }
-   }
-
-   @Override
-   public void renderRegularPanelImGuiWidgets()
-   {
    }
 
    @Override

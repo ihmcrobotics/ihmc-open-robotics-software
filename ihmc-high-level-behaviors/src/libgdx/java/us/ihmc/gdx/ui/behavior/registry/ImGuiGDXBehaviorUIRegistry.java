@@ -1,13 +1,13 @@
-package us.ihmc.gdx.ui.behaviors.registry;
+package us.ihmc.gdx.ui.behavior.registry;
 
 import us.ihmc.behaviors.BehaviorRegistry;
-import us.ihmc.gdx.ui.behaviors.*;
+import us.ihmc.gdx.ui.behavior.behaviors.*;
 
 import java.util.LinkedHashSet;
 
-public class GDXBehaviorUIRegistry extends BehaviorRegistry
+public class ImGuiGDXBehaviorUIRegistry extends BehaviorRegistry
 {
-   public static final GDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new GDXBehaviorUIRegistry(ImGuiGDXTargetFollowingBehaviorUI.DEFINITION);
+   public static final ImGuiGDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new ImGuiGDXBehaviorUIRegistry(ImGuiGDXTargetFollowingBehaviorUI.DEFINITION);
    static
    {
       DEFAULT_BEHAVIORS.register(ImGuiGDXTargetFollowingBehaviorUI.DEFINITION);
@@ -17,26 +17,26 @@ public class GDXBehaviorUIRegistry extends BehaviorRegistry
       DEFAULT_BEHAVIORS.register(ImGuiGDXTraverseStairsBehaviorUI.DEFINITION);
    }
 
-   private final LinkedHashSet<GDXBehaviorUIDefinition> uiDefinitionEntries = new LinkedHashSet<>();
+   private final LinkedHashSet<ImGuiGDXBehaviorUIDefinition> uiDefinitionEntries = new LinkedHashSet<>();
    private int numberOfUIs = 0;
    private String nameOfOnlyUIBehavior;
 
-   public static GDXBehaviorUIRegistry of(GDXBehaviorUIDefinition highestLevelNode, GDXBehaviorUIDefinition... entries)
+   public static ImGuiGDXBehaviorUIRegistry of(ImGuiGDXBehaviorUIDefinition highestLevelNode, ImGuiGDXBehaviorUIDefinition... entries)
    {
-      GDXBehaviorUIRegistry registry = new GDXBehaviorUIRegistry(highestLevelNode);
-      for (GDXBehaviorUIDefinition entry : entries)
+      ImGuiGDXBehaviorUIRegistry registry = new ImGuiGDXBehaviorUIRegistry(highestLevelNode);
+      for (ImGuiGDXBehaviorUIDefinition entry : entries)
       {
          registry.register(entry);
       }
       return registry;
    }
 
-   public GDXBehaviorUIRegistry(GDXBehaviorUIDefinition highestLevelNode)
+   public ImGuiGDXBehaviorUIRegistry(ImGuiGDXBehaviorUIDefinition highestLevelNode)
    {
       super(highestLevelNode);
    }
 
-   public void register(GDXBehaviorUIDefinition definition)
+   public void register(ImGuiGDXBehaviorUIDefinition definition)
    {
       super.register(definition);
       uiDefinitionEntries.add(definition);
@@ -48,7 +48,7 @@ public class GDXBehaviorUIRegistry extends BehaviorRegistry
       }
    }
 
-   public LinkedHashSet<GDXBehaviorUIDefinition> getUIDefinitionEntries()
+   public LinkedHashSet<ImGuiGDXBehaviorUIDefinition> getUIDefinitionEntries()
    {
       return uiDefinitionEntries;
    }
@@ -64,8 +64,8 @@ public class GDXBehaviorUIRegistry extends BehaviorRegistry
    }
 
    @Override
-   public GDXBehaviorUIDefinition getHighestLevelNode()
+   public ImGuiGDXBehaviorUIDefinition getHighestLevelNode()
    {
-      return (GDXBehaviorUIDefinition) super.getHighestLevelNode();
+      return (ImGuiGDXBehaviorUIDefinition) super.getHighestLevelNode();
    }
 }

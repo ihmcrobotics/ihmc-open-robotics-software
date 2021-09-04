@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.behaviors;
+package us.ihmc.gdx.ui.behavior;
 
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
@@ -16,8 +16,8 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIRegistry;
 import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.gdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.gdx.ui.yo.ImGuiYoVariableClientManagerWidget;
@@ -31,9 +31,8 @@ import java.util.function.Supplier;
 import static us.ihmc.behaviors.BehaviorModule.API.BehaviorTreeStatus;
 import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
 
-public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
+public class ImGuiGDXBehaviorUIManager
 {
-   private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors Status Log");
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
    private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
    private final Stopwatch statusStopwatch = new Stopwatch();
@@ -42,16 +41,17 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    private final ImGuiLogWidget logWidget;
    private final ImGuiMessagerManagerWidget messagerManagerWidget;
    private final ImGuiYoVariableClientManagerWidget yoVariableClientManagerWidget;
-   private final GDXBehaviorUIInterface highestLevelUI;
+   private final ImGuiGDXBehaviorUIInterface highestLevelUI;
    private final BehaviorHelper behaviorHelper;
-   private final ImGuiImNodesBehaviorTreePanel behaviorTreePanel = new ImGuiImNodesBehaviorTreePanel("Behavior Tree");
-   private final ImGuiPanel panel = new ImGuiPanel(windowName, this::renderRegularPanelImGuiWidgetsAndChildren);
+   private final ImGuiImNodesBehaviorTreeUI imNodeBehaviorTreeUI;
+   private final ImGuiPanel treeViewPanel;
    private final ImBoolean imEnabled = new ImBoolean(false);
    private final YoBooleanClientHelper yoEnabled;
+   private ImGuiGDXBehaviorUIInterface rootBehaviorUI;
 
-   public GDXBehaviorsPanel(ROS2Node ros2Node,
-                            Supplier<? extends DRCRobotModel> robotModelSupplier,
-                            GDXBehaviorUIRegistry behaviorRegistry)
+   public ImGuiGDXBehaviorUIManager(ROS2Node ros2Node,
+                                    Supplier<? extends DRCRobotModel> robotModelSupplier,
+                                    ImGuiGDXBehaviorUIRegistry behaviorRegistry)
    {
       behaviorHelper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
       messagerManagerWidget = new ImGuiMessagerManagerWidget(behaviorHelper.getMessagerHelper(), behaviorModuleHost::get);
@@ -70,9 +70,15 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
          statusStopwatch.reset();
          behaviorTreeStatus.set(status);
       });
-      panel.addChild(new ImGuiPanel(behaviorTreePanel.getWindowName(), () -> behaviorTreePanel.renderImGuiWidgets(this), false, true));
+
+      treeViewPanel = new ImGuiPanel(ImGuiTools.uniqueLabel(getClass(), "Behavior Tree Panel"), this::renderBehaviorTreeImGuiWidgets, false, true);
+      treeViewPanel.addChild(new ImGuiPanel("Behaviors Status Log", logWidget::renderImGuiWidgets));
+
+      rootBehaviorUI = new ImGuiGDXRootBehaviorUI(this::renderRootUIImGuiWidgets);
+      imNodeBehaviorTreeUI = new ImGuiImNodesBehaviorTreeUI(rootBehaviorUI);
+
       highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
-      addChild(highestLevelUI);
+      rootBehaviorUI.addChild(highestLevelUI);
 
       yoEnabled = behaviorHelper.subscribeToYoBoolean("enabled");
    }
@@ -82,10 +88,10 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       // TODO: This needs to be a message sent to the module. This panel should react to differently shaped incoming trees.
    }
 
-   @Override
    public void create(GDXImGuiBasedUI baseUI)
    {
-      addChildPanelsIncludingChildren(panel);
+      imNodeBehaviorTreeUI.create();
+
       highestLevelUI.create(baseUI);
       baseUI.get3DSceneManager().addRenderableProvider(highestLevelUI, GDXSceneLevel.VIRTUAL);
    }
@@ -95,20 +101,36 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       highestLevelUI.handleVREvents(vrManager);
    }
 
-   @Override
    public void update()
    {
-      syncTree(behaviorTreeStatus.get());
+      rootBehaviorUI.syncTree(behaviorTreeStatus.get());
    }
 
-   @Override
-   public void renderRegularPanelImGuiWidgets()
+   public void renderBehaviorTreeImGuiWidgets()
    {
-      logWidget.renderImGuiWidgets();
+      ImGui.beginMenuBar();
+      if (ImGui.beginMenu(labels.get("File")))
+      {
+         if (ImGui.menuItem(labels.get("Save imnodes layout")))
+         {
+            imNodeBehaviorTreeUI.saveLayoutToFile();
+         }
+         ImGui.endMenu();
+      }
+      if (ImGui.beginMenu(labels.get("Behavior")))
+      {
+         ImGui.text("Highest level behavior:");
+         //         if (ImGui.menuItem())
+         {
+
+         }
+      }
+      ImGui.endMenuBar();
+
+      imNodeBehaviorTreeUI.renderImGuiWidgets();
    }
 
-   @Override
-   public void renderTreeNodeImGuiWidgets()
+   public void renderRootUIImGuiWidgets()
    {
       ImGui.pushItemWidth(150.0f);
       int flags = ImGuiInputTextFlags.None;
@@ -144,20 +166,14 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       messagerManagerWidget.disconnectMessager();
    }
 
-   @Override
    public void destroy()
    {
       behaviorHelper.destroy();
       highestLevelUI.destroy();
    }
 
-   public String getWindowName()
-   {
-      return windowName;
-   }
-
    public ImGuiPanel getPanel()
    {
-      return panel;
+      return treeViewPanel;
    }
 }

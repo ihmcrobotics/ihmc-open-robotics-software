@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.behaviors;
+package us.ihmc.gdx.ui.behavior.behaviors;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -23,8 +23,8 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXBodyPathPlanGraphic;
 import us.ihmc.gdx.ui.graphics.GDXBoxVisualizer;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
@@ -40,10 +40,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
+public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
 {
-   public static final GDXBehaviorUIDefinition DEFINITION = new GDXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION,
-                                                                                        ImGuiGDXLookAndStepBehaviorUI::new);
+   public static final ImGuiGDXBehaviorUIDefinition DEFINITION = new ImGuiGDXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION,
+                                                                                                  ImGuiGDXLookAndStepBehaviorUI::new);
 
    private final BehaviorHelper helper;
    private final AtomicReference<ArrayList<MinimalFootstep>> latestPlannedFootsteps;
@@ -263,12 +263,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
 //      {
 //         ImGui.checkbox("Show tuner", showSwingPlanningParametersTuner);
 //      }
-   }
-
-   @Override
-   public void renderRegularPanelImGuiWidgets()
-   {
-
    }
 
    @Override
