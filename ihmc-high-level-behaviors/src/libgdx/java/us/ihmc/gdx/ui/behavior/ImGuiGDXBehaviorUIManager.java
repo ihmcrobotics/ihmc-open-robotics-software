@@ -1,11 +1,15 @@
 package us.ihmc.gdx.ui.behavior;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
@@ -16,8 +20,10 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIRegistry;
+import us.ihmc.gdx.ui.behavior.tree.ImGuiImNodesBehaviorTreeUI;
 import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.gdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.gdx.ui.yo.ImGuiYoVariableClientManagerWidget;
@@ -41,31 +47,34 @@ public class ImGuiGDXBehaviorUIManager
    private final ImGuiLogWidget logWidget;
    private final ImGuiMessagerManagerWidget messagerManagerWidget;
    private final ImGuiYoVariableClientManagerWidget yoVariableClientManagerWidget;
-   private final ImGuiGDXBehaviorUIInterface highestLevelUI;
-   private final BehaviorHelper behaviorHelper;
+   private ImGuiGDXBehaviorUIInterface highestLevelUI;
+   private final BehaviorHelper helper;
    private final ImGuiImNodesBehaviorTreeUI imNodeBehaviorTreeUI;
    private final ImGuiPanel treeViewPanel;
    private final ImBoolean imEnabled = new ImBoolean(false);
    private final YoBooleanClientHelper yoEnabled;
+   private final ImGuiGDXBehaviorUIRegistry behaviorRegistry;
    private ImGuiGDXBehaviorUIInterface rootBehaviorUI;
+   private boolean syncEnabled = true;
 
    public ImGuiGDXBehaviorUIManager(ROS2Node ros2Node,
                                     Supplier<? extends DRCRobotModel> robotModelSupplier,
                                     ImGuiGDXBehaviorUIRegistry behaviorRegistry)
    {
-      behaviorHelper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
-      messagerManagerWidget = new ImGuiMessagerManagerWidget(behaviorHelper.getMessagerHelper(), behaviorModuleHost::get);
-      yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(behaviorHelper.getYoVariableClientHelper(),
+      this.behaviorRegistry = behaviorRegistry;
+      helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
+      messagerManagerWidget = new ImGuiMessagerManagerWidget(helper.getMessagerHelper(), behaviorModuleHost::get);
+      yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(helper.getYoVariableClientHelper(),
                                                                              behaviorModuleHost::get,
                                                                              NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
       logWidget = new ImGuiLogWidget("Behavior status");
-      behaviorHelper.subscribeViaCallback(StatusLog, logWidget::submitEntry);
-      behaviorHelper.subscribeViaCallback(ROS2Tools.TEXT_STATUS, textStatus ->
+      helper.subscribeViaCallback(StatusLog, logWidget::submitEntry);
+      helper.subscribeViaCallback(ROS2Tools.TEXT_STATUS, textStatus ->
       {
          LogTools.info("TextToSpeech: {}", textStatus.getTextToSpeakAsString());
          logWidget.submitEntry(Level.INFO, textStatus.getTextToSpeakAsString());
       });
-      behaviorHelper.subscribeViaCallback(BehaviorTreeStatus, status ->
+      helper.subscribeViaCallback(BehaviorTreeStatus, status ->
       {
          statusStopwatch.reset();
          behaviorTreeStatus.set(status);
@@ -75,17 +84,33 @@ public class ImGuiGDXBehaviorUIManager
       treeViewPanel.addChild(new ImGuiPanel("Behaviors Status Log", logWidget::renderImGuiWidgets));
 
       rootBehaviorUI = new ImGuiGDXRootBehaviorUI(this::renderRootUIImGuiWidgets);
-      imNodeBehaviorTreeUI = new ImGuiImNodesBehaviorTreeUI(rootBehaviorUI);
+      imNodeBehaviorTreeUI = new ImGuiImNodesBehaviorTreeUI();
 
-      highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
+      yoEnabled = helper.subscribeToYoBoolean("enabled");
+
+      highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(helper);
       rootBehaviorUI.addChild(highestLevelUI);
-
-      yoEnabled = behaviorHelper.subscribeToYoBoolean("enabled");
+      imNodeBehaviorTreeUI.setRootNode(rootBehaviorUI);
    }
 
-   public void switchBehaviors()
+   public void switchHighestLevelBehavior(String behaviorName)
    {
       // TODO: This needs to be a message sent to the module. This panel should react to differently shaped incoming trees.
+
+      // disable things
+      yoEnabled.set(false);
+      syncEnabled = false;
+
+      helper.publish(BehaviorModule.API.SET_HIGHEST_LEVEL_BEHAVIOR, behaviorName);
+
+      highestLevelUI.destroy();
+
+      rootBehaviorUI.clearChildren();
+      behaviorRegistry.setHighestLevelNode(behaviorRegistry.getBehaviorFromName(behaviorName));
+      highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(helper);
+      rootBehaviorUI.addChild(highestLevelUI);
+
+      imNodeBehaviorTreeUI.setRootNode(rootBehaviorUI);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -93,7 +118,7 @@ public class ImGuiGDXBehaviorUIManager
       imNodeBehaviorTreeUI.create();
 
       highestLevelUI.create(baseUI);
-      baseUI.get3DSceneManager().addRenderableProvider(highestLevelUI, GDXSceneLevel.VIRTUAL);
+      baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
    }
 
    public void handleVREvents(GDXVRManager vrManager)
@@ -103,7 +128,10 @@ public class ImGuiGDXBehaviorUIManager
 
    public void update()
    {
-      rootBehaviorUI.syncTree(behaviorTreeStatus.get());
+//      if (syncEnabled)
+      {
+         rootBehaviorUI.syncTree(behaviorTreeStatus.get());
+      }
    }
 
    public void renderBehaviorTreeImGuiWidgets()
@@ -120,10 +148,17 @@ public class ImGuiGDXBehaviorUIManager
       if (ImGui.beginMenu(labels.get("Behavior")))
       {
          ImGui.text("Highest level behavior:");
-         //         if (ImGui.menuItem())
+         for (ImGuiGDXBehaviorUIDefinition behaviorUIDefinition : behaviorRegistry.getUIDefinitionEntries())
          {
-
+            String behaviorName = behaviorUIDefinition.getName();
+            boolean selected = behaviorName.equals(highestLevelUI.getName());
+            if (ImGui.radioButton(labels.get(behaviorName), selected))
+            {
+               switchHighestLevelBehavior(behaviorName);
+            }
          }
+
+         ImGui.endMenu();
       }
       ImGui.endMenuBar();
 
@@ -150,6 +185,11 @@ public class ImGuiGDXBehaviorUIManager
       ImGui.text("Server: " + yoEnabled.get());
    }
 
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      highestLevelUI.getRenderables(renderables, pool);
+   }
+
    public void connectViaKryo(String hostname)
    {
       behaviorModuleHost.set(hostname);
@@ -158,7 +198,7 @@ public class ImGuiGDXBehaviorUIManager
 
    public void connectYoVariableClient()
    {
-      behaviorHelper.getYoVariableClientHelper().start(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
+      helper.getYoVariableClientHelper().start(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
    }
 
    public void disconnectMessager()
@@ -168,7 +208,7 @@ public class ImGuiGDXBehaviorUIManager
 
    public void destroy()
    {
-      behaviorHelper.destroy();
+      helper.destroy();
       highestLevelUI.destroy();
    }
 

@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.behavior;
+package us.ihmc.gdx.ui.behavior.tree;
 
 import imgui.ImVec2;
 import imgui.extension.nodeditor.NodeEditor;

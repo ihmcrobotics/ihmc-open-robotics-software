@@ -110,6 +110,11 @@ public abstract class ImGuiGDXBehaviorUIInterface extends BehaviorTreeNode imple
 
    }
 
+   public void clearChildren()
+   {
+      children.clear();
+   }
+
    public int generateUID()
    {
       return toString().hashCode(); // Maybe change later? Works fine for now
