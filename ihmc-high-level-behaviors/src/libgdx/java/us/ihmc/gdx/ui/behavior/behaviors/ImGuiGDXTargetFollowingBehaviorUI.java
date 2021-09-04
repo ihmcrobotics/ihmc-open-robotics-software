@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.behaviors;
+package us.ihmc.gdx.ui.behavior.behaviors;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -14,17 +14,17 @@ import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
 
-public class ImGuiGDXTargetFollowingBehaviorUI extends GDXBehaviorUIInterface
+public class ImGuiGDXTargetFollowingBehaviorUI extends ImGuiGDXBehaviorUIInterface
 {
-   public static final GDXBehaviorUIDefinition DEFINITION = new GDXBehaviorUIDefinition(TargetFollowingBehavior.DEFINITION,
-                                                                                        ImGuiGDXTargetFollowingBehaviorUI::new);
+   public static final ImGuiGDXBehaviorUIDefinition DEFINITION = new ImGuiGDXBehaviorUIDefinition(TargetFollowingBehavior.DEFINITION,
+                                                                                                  ImGuiGDXTargetFollowingBehaviorUI::new);
 
    private final BehaviorHelper helper;
    private TargetFollowingBehaviorParameters parameters;
@@ -96,12 +96,6 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends GDXBehaviorUIInterface
          planarRegionsGraphic.update();
       }
       lookAndStepUI.update();
-   }
-
-   @Override
-   public void renderRegularPanelImGuiWidgets()
-   {
-      lookAndStepUI.renderRegularPanelImGuiWidgets();
    }
 
    @Override
