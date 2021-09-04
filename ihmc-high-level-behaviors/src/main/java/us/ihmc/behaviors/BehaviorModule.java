@@ -120,6 +120,7 @@ public class BehaviorModule
       {
          sharedMemoryMessager = new SharedMemoryMessager(behaviorRegistry.getMessagerAPI());
          helper.getMessagerHelper().connectViaSharedMemory(sharedMemoryMessager);
+         sharedMemoryMessager.startMessager();
       }
       statusLogger = new StatusLogger(helper.getMessagerHelper().getMessager()::submitMessage);
       rootNode.addChild(highestLevelNode);

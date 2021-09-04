@@ -275,7 +275,10 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return wasTickedRecently(0.5) && !currentState.isEmpty() && !currentState.equals(LookAndStepBehavior.State.RESET.name());
+      boolean wasTickedRecently = wasTickedRecently(0.5);
+      boolean currentStateIsNotEmpty = !currentState.isEmpty();
+      boolean notCurrentlyReset = !currentState.equals(LookAndStepBehavior.State.RESET.name());
+      return wasTickedRecently && currentStateIsNotEmpty && notCurrentlyReset;
    }
 
    @Override

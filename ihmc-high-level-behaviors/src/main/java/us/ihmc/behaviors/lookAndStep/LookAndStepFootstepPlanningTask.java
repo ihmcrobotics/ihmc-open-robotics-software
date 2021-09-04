@@ -547,7 +547,8 @@ public class LookAndStepFootstepPlanningTask
 
          if (operatorReviewEnabledSupplier.get())
          {
-            helper.getOrCreateRobotInterface().pauseWalking();
+            if (lookAndStepParameters.getMaxStepsToSendToController() > 1)
+               helper.getOrCreateRobotInterface().pauseWalking();
             review.review(footstepPlan);
          }
          else

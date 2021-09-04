@@ -38,18 +38,9 @@ public class ImGuiMessagerManagerWidget
       }
       else if (!messagerHelper.isConnected())
       {
-         if (ImGui.button("Connect messager")) // TODO: One button should connect both
+         if (ImGui.button("Connect messager"))
          {
-            connectViaKryo(hostSupplier.get());
-         }
-
-         SharedMemoryMessager potentialSharedMemoryMessager = BehaviorModule.getSharedMemoryMessager();
-         if (potentialSharedMemoryMessager != null && potentialSharedMemoryMessager.isMessagerOpen())
-         {
-            if (ImGui.button("Use shared memory messager"))
-            {
-               messagerHelper.connectViaSharedMemory(potentialSharedMemoryMessager);
-            }
+            connect();
          }
       }
       else
@@ -70,11 +61,19 @@ public class ImGuiMessagerManagerWidget
       }
    }
 
-   public void connectViaKryo(String hostname)
+   public void connect()
    {
-      messagerHelper.connectViaKryo(hostSupplier.get(), NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
-      messagerConnectedHost = hostSupplier.get();
-      messagerConnecting = true;
+      SharedMemoryMessager potentialSharedMemoryMessager = BehaviorModule.getSharedMemoryMessager();
+      if (potentialSharedMemoryMessager != null && potentialSharedMemoryMessager.isMessagerOpen())
+      {
+         messagerHelper.connectViaSharedMemory(potentialSharedMemoryMessager);
+      }
+      else
+      {
+         messagerHelper.connectViaKryo(hostSupplier.get(), NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
+         messagerConnectedHost = hostSupplier.get();
+         messagerConnecting = true;
+      }
    }
 
    public void disconnectMessager()
