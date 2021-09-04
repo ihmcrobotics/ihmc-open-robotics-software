@@ -7,7 +7,7 @@ import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.behavior.ImGuiImNodesBehaviorTreeUI;
+import us.ihmc.gdx.ui.behavior.tree.ImGuiImNodesBehaviorTreeUI;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.log.LogTools;
 
@@ -110,7 +110,8 @@ public class GDXBehaviorTreeDevelopmentUI
 
 
       treeGui = new ExampleSimpleNodeInterface("SequenceNode");
-      treePanel = new ImGuiImNodesBehaviorTreeUI(treeGui);
+      treePanel = new ImGuiImNodesBehaviorTreeUI();
+      treePanel.setRootNode(treeGui);
       ImGuiGDXBehaviorUIInterface nodeGui = new ExampleSimpleNodeInterface("FallbackNode");
       nodeGui.addChild(new ExampleSimpleNodeInterface("Primary"));
       nodeGui.addChild(new ExampleSimpleNodeInterface("Secondary"));

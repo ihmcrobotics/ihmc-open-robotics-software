@@ -3,7 +3,8 @@ package us.ihmc.gdx.ui.behavior.registry;
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.gdx.ui.behavior.behaviors.*;
 
-import java.util.LinkedHashSet;
+import java.util.Comparator;
+import java.util.TreeSet;
 
 public class ImGuiGDXBehaviorUIRegistry extends BehaviorRegistry
 {
@@ -17,9 +18,7 @@ public class ImGuiGDXBehaviorUIRegistry extends BehaviorRegistry
       DEFAULT_BEHAVIORS.register(ImGuiGDXTraverseStairsBehaviorUI.DEFINITION);
    }
 
-   private final LinkedHashSet<ImGuiGDXBehaviorUIDefinition> uiDefinitionEntries = new LinkedHashSet<>();
-   private int numberOfUIs = 0;
-   private String nameOfOnlyUIBehavior;
+   private final TreeSet<ImGuiGDXBehaviorUIDefinition> uiDefinitionEntries = new TreeSet<>(Comparator.comparing(ImGuiGDXBehaviorUIDefinition::getName));
 
    public static ImGuiGDXBehaviorUIRegistry of(ImGuiGDXBehaviorUIDefinition highestLevelNode, ImGuiGDXBehaviorUIDefinition... entries)
    {
@@ -40,27 +39,11 @@ public class ImGuiGDXBehaviorUIRegistry extends BehaviorRegistry
    {
       super.register(definition);
       uiDefinitionEntries.add(definition);
-
-      if (definition.getBehaviorUISupplier() != null)
-      {
-         ++numberOfUIs;
-         nameOfOnlyUIBehavior = definition.getName();
-      }
    }
 
-   public LinkedHashSet<ImGuiGDXBehaviorUIDefinition> getUIDefinitionEntries()
+   public TreeSet<ImGuiGDXBehaviorUIDefinition> getUIDefinitionEntries()
    {
       return uiDefinitionEntries;
-   }
-
-   public int getNumberOfUIs()
-   {
-      return numberOfUIs;
-   }
-
-   public String getNameOfOnlyUIBehavior()
-   {
-      return nameOfOnlyUIBehavior;
    }
 
    @Override
