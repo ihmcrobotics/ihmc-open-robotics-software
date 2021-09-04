@@ -1,12 +1,11 @@
 package us.ihmc.perception;
 
-import org.apache.pdfbox.encoding.StandardEncoding;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
+import us.ihmc.commons.Conversions;
 import us.ihmc.log.LogTools;
 
-import java.nio.Buffer;
-import java.nio.CharBuffer;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ public class OpenCLManager
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
    private final ArrayList<_cl_mem> bufferObjects = new ArrayList<>();
    private final SizeTPointer globalWorkSize = new SizeTPointer(0, 0, 0);
-   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Find largest value
+   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Rethink this
 
    public void create()
    {
@@ -58,14 +57,16 @@ public class OpenCLManager
 
       /* Build Kernel Program */
       returnCode = clBuildProgram(program, 1, devices, null, null, null);
-      CharPointer charPointer = new CharPointer(4050);
+      int preallocatedBytes = Conversions.megabytesToBytes(2);
+      CharPointer charPointer = new CharPointer(preallocatedBytes);
       SizeTPointer length = new SizeTPointer(1);
-      clGetProgramBuildInfo(program, devices.getPointer(), CL_PROGRAM_BUILD_LOG, 4050, charPointer, length);
+      clGetProgramBuildInfo(program, devices.getPointer(), CL_PROGRAM_BUILD_LOG, preallocatedBytes, charPointer, length);
       LogTools.info("OpenCL Build log:");
-
-//      CharBuffer charBuffer = new CharBuffer(0, 0, 4050, 4050, charPointer.getStringChars(), 0);
-//      StandardCharsets.UTF_8.encode()
-//      System.out.println(new String(charPointer.getStringChars(), StandardCharsets.UTF_8));
+      ByteBuffer byteBuffer = charPointer.asByteBuffer();
+      int logLength = (int) length.get();
+      byte[] bytes = new byte[logLength];
+      byteBuffer.get(bytes, 0, logLength);
+      System.out.println(new String(bytes, StandardCharsets.UTF_8));
 
       /* Create OpenCL Kernel */
       _cl_kernel kernel = clCreateKernel(program, programName, nativeReturnCode);
@@ -90,6 +91,7 @@ public class OpenCLManager
    public void enqueueWriteBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
    {
       /* Transfer data to memory buffer */
+      bufferObject.position(0);
       returnCode = clEnqueueWriteBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null);
    }
 
@@ -110,6 +112,7 @@ public class OpenCLManager
    public void enqueueReadBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
    {
       /* Transfer result from the memory buffer */
+      bufferObject.position(0);
       returnCode = clEnqueueReadBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null);
    }
 

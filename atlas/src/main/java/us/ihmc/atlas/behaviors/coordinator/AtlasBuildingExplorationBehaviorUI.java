@@ -4,7 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.behaviors.demo.BuildingExplorationBehaviorOld;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorOld;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.CommunicationMode;

@@ -1,6 +1,5 @@
 package us.ihmc.behaviors.tools;
 
-import us.ihmc.behaviors.RemoteBehaviorInterface;
 import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -28,16 +27,25 @@ public class MessagerHelper implements MessagerPublishSubscribeAPI
    private final MessagerAPI messagerAPI;
    private boolean disconnecting = false;
    private Messager messager;
-   private ManagedMessager managedMessager = new ManagedMessager();
+   private final ManagedMessager managedMessager = new ManagedMessager();
 
    public MessagerHelper(MessagerAPI messagerAPI)
    {
       this.messagerAPI = messagerAPI;
    }
 
+   public void startServer(int port)
+   {
+      BehaviorMessagerUpdateThread updateThread = new BehaviorMessagerUpdateThread(getClass().getSimpleName(), 5);
+      messager = KryoMessager.createServer(messagerAPI, port, updateThread);
+      ThreadTools.startAThread(() -> ExceptionTools.handle(messager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION),
+                               "KryoMessagerAsyncConnectionThread");
+      managedMessager.setMessager(messager);
+   }
+
    public void connectViaKryo(String hostname, int port)
    {
-      BehaviorMessagerUpdateThread updateThread = new BehaviorMessagerUpdateThread(RemoteBehaviorInterface.class.getSimpleName(), 5);
+      BehaviorMessagerUpdateThread updateThread = new BehaviorMessagerUpdateThread(getClass().getSimpleName(), 5);
       messager = KryoMessager.createClient(messagerAPI, hostname, port, updateThread);
       ThreadTools.startAThread(() -> ExceptionTools.handle(messager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION),
                                "KryoMessagerAsyncConnectionThread");

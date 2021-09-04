@@ -73,6 +73,9 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
 
    private final RosNodeInterface ros1Node;
+   private final String ros1DepthImageTopic;
+   private final String ros1ColorImageTopic;
+   private final ROS2Topic<?> ros2PointCloudTopic;
    private RosImagePublisher ros1DepthPublisher;
    private RosCameraInfoPublisher ros1DepthCameraInfoPublisher;
    private ChannelBuffer ros1DepthChannelBuffer;
@@ -126,7 +129,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
                                            String ros1ColorImageTopic,
                                            String ros1ColorCameraInfoTopic,
                                            ROS2NodeInterface ros2Node,
-                                           ROS2Topic<?> ros2Topic,
+                                           ROS2Topic<?> ros2PointCloudTopic,
                                            ROS2Topic<VideoPacket> ros2VideoTopic,
                                            ReferenceFrame sensorFrame,
                                            LongSupplier timestampSupplier,
@@ -141,8 +144,11 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       super(ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), sensorName + " Simulator"));
       setRenderMethod(this::renderImGuiWidgets);
       this.ros1Node = ros1Node;
+      this.ros1DepthImageTopic = ros1DepthImageTopic;
       this.depthCameraIntrinsics = depthCameraIntrinsics;
+      this.ros1ColorImageTopic = ros1ColorImageTopic;
       this.ros2Node = ros2Node;
+      this.ros2PointCloudTopic = ros2PointCloudTopic;
       this.sensorFrame = sensorFrame;
       this.timestampSupplier = timestampSupplier;
       this.imageWidth = imageWidth;
@@ -173,14 +179,14 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          ros1Node.attachPublisher(ros1ColorImageTopic, ros1ColorPublisher);
          ros1ColorChannelBuffer = ros1ColorPublisher.getChannelBufferFactory().getBuffer(3 * imageWidth * imageHeight);
       }
-      if (ros2Node != null && ros2Topic != null)
+      if (ros2Node != null && ros2PointCloudTopic != null)
       {
          ros2PointsToPublish = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D::new);
-         ros2IsLidarScan = ros2Topic.getType().equals(LidarScanMessage.class);
+         ros2IsLidarScan = ros2PointCloudTopic.getType().equals(LidarScanMessage.class);
          if (!ros2IsLidarScan)
             ros2ColorsToPublish = new int[imageWidth * imageHeight];
-         LogTools.info("Publishing ROS 2: {}", ros2Topic.getName());
-         publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
+         LogTools.info("Publishing ROS 2: {}", ros2PointCloudTopic.getName());
+         publisher = ROS2Tools.createPublisher(ros2Node, ros2PointCloudTopic, ROS2QosProfile.DEFAULT());
       }
       if (ros2Node != null && ros2VideoTopic != null)
       {
@@ -371,6 +377,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    public void renderImGuiWidgets()
    {
       tuning = true;
+      ImGui.text("Resolution: " + imageWidth + " x " + imageWidth);
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Sensor Enabled"), sensorEnabled);
       ImGui.sameLine();
       ImGui.checkbox("Show frame graphic", debugCoordinateFrame);
@@ -382,22 +389,26 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), getLowLevelSimulator().getColorPanel().getIsShowing());
       ImGui.text("Publish:");
-      ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth image (ROS 1)"), publishDepthImageROS1);
-      ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Point cloud (ROS 2)"), publishPointCloudROS2);
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 1)"), publishColorImageROS1);
+      if (ros1DepthImageTopic != null)
+         ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Depth image (" + ros1DepthImageTopic + ")"), publishDepthImageROS1);
+      if (ros1ColorImageTopic != null)
+         ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Color image (" + ros1ColorImageTopic + ")"), publishColorImageROS1);
+      if (ros2PointCloudTopic != null)
+         ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 2 Point cloud (" + ros2PointCloudTopic + ")"), publishPointCloudROS2);
       if (flippedColorByteBuffer != null)
       {
          ImGui.sameLine();
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 2)"), publishColorImageROS2);
       }
-      getLowLevelSimulator().renderTuningSliders();
-      ImGui.sliderFloat("Fx", fx.getData(), -1000.0f, 1000.0f);
-      ImGui.sliderFloat("Fy", fy.getData(), -1000.0f, 1000.0f);
-      ImGui.sliderFloat("Skew", skew.getData(), -1000.0f, 1000.0f);
-      ImGui.sliderFloat("Cx", cx.getData(), -1000.0f, 1000.0f);
-      ImGui.sliderFloat("Cy", cy.getData(), -1000.0f, 1000.0f);
+      if (ImGui.collapsingHeader("Tuning sliders"))
+      {
+         getLowLevelSimulator().renderTuningSliders();
+         ImGui.sliderFloat("Fx", fx.getData(), -1000.0f, 1000.0f);
+         ImGui.sliderFloat("Fy", fy.getData(), -1000.0f, 1000.0f);
+         ImGui.sliderFloat("Skew", skew.getData(), -1000.0f, 1000.0f);
+         ImGui.sliderFloat("Cx", cx.getData(), -1000.0f, 1000.0f);
+         ImGui.sliderFloat("Cy", cy.getData(), -1000.0f, 1000.0f);
+      }
    }
 
    private void publishPointCloudROS2()
