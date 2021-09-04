@@ -55,7 +55,6 @@ public class ImGuiGDXBehaviorUIManager
    private final YoBooleanClientHelper yoEnabled;
    private final ImGuiGDXBehaviorUIRegistry behaviorRegistry;
    private ImGuiGDXBehaviorUIInterface rootBehaviorUI;
-   private boolean syncEnabled = true;
 
    public ImGuiGDXBehaviorUIManager(ROS2Node ros2Node,
                                     Supplier<? extends DRCRobotModel> robotModelSupplier,
@@ -91,6 +90,8 @@ public class ImGuiGDXBehaviorUIManager
       highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(helper);
       rootBehaviorUI.addChild(highestLevelUI);
       imNodeBehaviorTreeUI.setRootNode(rootBehaviorUI);
+
+      highestLevelUI.addChildPanelsIncludingChildren(treeViewPanel);
    }
 
    public void switchHighestLevelBehavior(String behaviorName)
@@ -99,7 +100,6 @@ public class ImGuiGDXBehaviorUIManager
 
       // disable things
       yoEnabled.set(false);
-      syncEnabled = false;
 
       helper.publish(BehaviorModule.API.SET_HIGHEST_LEVEL_BEHAVIOR, behaviorName);
 
@@ -128,10 +128,8 @@ public class ImGuiGDXBehaviorUIManager
 
    public void update()
    {
-//      if (syncEnabled)
-      {
-         rootBehaviorUI.syncTree(behaviorTreeStatus.get());
-      }
+      rootBehaviorUI.syncTree(behaviorTreeStatus.get());
+      rootBehaviorUI.updateIncludingChildren();
    }
 
    public void renderBehaviorTreeImGuiWidgets()
@@ -193,7 +191,12 @@ public class ImGuiGDXBehaviorUIManager
    public void connectViaKryo(String hostname)
    {
       behaviorModuleHost.set(hostname);
-      messagerManagerWidget.connectViaKryo(hostname);
+      messagerManagerWidget.connect();
+   }
+
+   public void connectMessager()
+   {
+      messagerManagerWidget.connect();
    }
 
    public void connectYoVariableClient()
