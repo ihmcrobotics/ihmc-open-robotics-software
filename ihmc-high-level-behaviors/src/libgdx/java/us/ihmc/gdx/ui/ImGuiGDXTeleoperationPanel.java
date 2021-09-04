@@ -81,9 +81,9 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final float[] neckPitchSliderValue = new float[1];
    private final ImInt pumpPSI = new ImInt(1);
    private final String[] psiValues = new String[] {"1500", "2300", "2500", "2800"};
-   private final OneDoFJointBasics neckJoint;
-   private double neckJointJointLimitLower;
-   private double neckJointRange;
+//   private final OneDoFJointBasics neckJoint;
+//   private double neckJointJointLimitLower;
+//   private double neckJointRange;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlanningModule footstepPlanner;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
@@ -115,13 +115,13 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          throw new RuntimeException("Please add implementation of RobotLowLevelMessenger for " + robotName);
       }
 
-      neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
-      if (neckJoint != null)
-      {
-         double neckJointLimitUpper = neckJoint.getJointLimitUpper();
-         neckJointJointLimitLower = neckJoint.getJointLimitLower();
-         neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
-      }
+//      neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
+//      if (neckJoint != null)
+//      {
+//         double neckJointLimitUpper = neckJoint.getJointLimitUpper();
+//         neckJointJointLimitLower = neckJoint.getJointLimitLower();
+//         neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
+//      }
 
       throttledRobotStateCallback = new ThrottledRobotStateCallback(ros2Node, robotModel, 5.0, syncedRobot ->
       {
@@ -140,14 +140,14 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          double flippedChestSliderValue = 100.0 - newChestSliderValue;
          leanForwardSliderValue[0] = (float) flippedChestSliderValue;
 
-         if (neckJoint != null)
-         {
-            double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
-            double angleInRange = neckAngle - neckJointJointLimitLower;
-            double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
-            double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
-            neckPitchSliderValue[0] = (float) flippedNeckSliderValue;
-         }
+//         if (neckJoint != null)
+//         {
+//            double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
+//            double angleInRange = neckAngle - neckJointJointLimitLower;
+//            double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
+//            double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
+//            neckPitchSliderValue[0] = (float) flippedNeckSliderValue;
+//         }
       });
 
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
@@ -370,15 +370,15 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
             communicationHelper.publishToController(message);
          }
       }
-      if (neckJoint != null && imGuiSlider("Neck Pitch", neckPitchSliderValue))
-      {
-         double percent = neckPitchSliderValue[0] / 100.0;
-         percent = 1.0 - percent;
-         MathTools.checkIntervalContains(percent, 0.0, 1.0);
-         double jointAngle = neckJointJointLimitLower + percent * neckJointRange;
-         LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckPitchSliderValue[0], jointAngle);
-         communicationHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
-      }
+//      if (neckJoint != null && imGuiSlider("Neck Pitch", neckPitchSliderValue))
+//      {
+//         double percent = neckPitchSliderValue[0] / 100.0;
+//         percent = 1.0 - percent;
+//         MathTools.checkIntervalContains(percent, 0.0, 1.0);
+//         double jointAngle = neckJointJointLimitLower + percent * neckJointRange;
+//         LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckPitchSliderValue[0], jointAngle);
+//         communicationHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
+//      }
       ImGui.text("Footstep plan:");
       if (footstepPlannerOutput != null)
       {
