@@ -8,7 +8,9 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -72,6 +74,9 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
          fromTarget.normalize();
          fromTarget.scale(targetFollowingParameters.getMinimumDistanceToKeepFromTarget());
          approachPose.getPosition().add(fromTarget);
+         Vector3D toTarget = new Vector3D();
+         toTarget.sub(targetPoseGroundProjection.getPosition(), robotMidFeetUnderPelvisPose.getPosition());
+         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, toTarget, approachPose.getOrientation());
          helper.publish(TargetApproachPose, new Pose3D(approachPose));
 
          if (!lookAndStepGoalSubmissionTimer.isRunning(targetFollowingParameters.getLookAndStepGoalUpdatePeriod()))
