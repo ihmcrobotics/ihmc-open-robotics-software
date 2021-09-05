@@ -168,7 +168,9 @@ public class ImGuiGDXBehaviorUIManager
       ImGui.pushItemWidth(150.0f);
       int flags = ImGuiInputTextFlags.None;
       flags += ImGuiInputTextFlags.CallbackResize;
-      ImGui.inputText(labels.get("Behavior module host"), behaviorModuleHost, flags);
+      ImGui.text("Behavior module host:");
+      ImGui.sameLine();
+      ImGui.inputText(ImGuiTools.uniqueIDOnly(getClass(), "BehaviorModuleHostInput"), behaviorModuleHost, flags);
       ImGui.popItemWidth();
       messagerManagerWidget.renderImGuiWidgets();
       yoVariableClientManagerWidget.renderImGuiWidgets();
