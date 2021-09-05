@@ -21,6 +21,11 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(assumedFlatGroundCircleRadius);
    }
 
+   default boolean getSquareUpAtTheEnd()
+   {
+      return get(squareUpAtTheEnd);
+   }
+
    default double getSupportRegionScaleFactor()
    {
       return get(supportRegionScaleFactor);
