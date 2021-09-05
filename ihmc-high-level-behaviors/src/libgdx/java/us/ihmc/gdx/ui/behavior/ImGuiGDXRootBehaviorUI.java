@@ -35,4 +35,10 @@ public class ImGuiGDXRootBehaviorUI extends ImGuiGDXBehaviorUIInterface
    {
 
    }
+
+   @Override
+   public String getName()
+   {
+      return "Behavior Module";
+   }
 }
