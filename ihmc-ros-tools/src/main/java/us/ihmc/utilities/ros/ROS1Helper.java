@@ -68,7 +68,7 @@ public class ROS1Helper implements RosNodeInterface
 
    public void reconnectEverything()
    {
-      LogTools.info("Reconnecting ROS 1 node...");
+      LogTools.info("Reconnecting {} ROS 1 node...", nodeName);
       if (ros1Node != null)
          ros1Node.shutdown();
 
