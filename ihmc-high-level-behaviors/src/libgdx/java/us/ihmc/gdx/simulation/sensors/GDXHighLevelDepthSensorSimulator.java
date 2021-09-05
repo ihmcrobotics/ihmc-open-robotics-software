@@ -25,6 +25,7 @@ import org.ros.message.Time;
 import sensor_msgs.Image;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGCompressor;
@@ -117,6 +118,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final ImFloat cx;
    private final ImFloat cy;
 
+   private volatile boolean buffersCreated = false;
    private Mat rgba8Mat;
    private Mat rgb8Mat;
    private ByteBuffer rgb8Buffer;
@@ -206,16 +208,20 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       if (debugCoordinateFrame.get())
          coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
 
-      rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
-      rgb8Buffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 3);
-      rgb8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3, new BytePointer(rgb8Buffer));
+      ThreadTools.startAThread(() ->
+      {
+         rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
+         rgb8Buffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 3);
+         rgb8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3, new BytePointer(rgb8Buffer));
+         buffersCreated = true;
+      }, "LoadJavaCV");
    }
 
    public void render(GDX3DSceneManager sceneManager)
    {
-      if (sensorEnabled.get())
+      if (buffersCreated && sensorEnabled.get())
       {
-         if(sensorFrame != null)
+         if (sensorFrame != null)
             GDXTools.toGDX(sensorFrame.getTransformToWorldFrame(), gdxTransform);
          else
             GDXTools.toGDX(sensorFrameToWorldTransform, gdxTransform);

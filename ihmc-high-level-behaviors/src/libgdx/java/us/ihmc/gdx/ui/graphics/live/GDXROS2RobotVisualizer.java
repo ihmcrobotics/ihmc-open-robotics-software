@@ -38,7 +38,7 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
       super.create();
       RobotDescription robotDescription = robotModel.getRobotDescription();
       overrideModelColors(robotDescription);
-      loadRobotModelAndGraphics(robotDescription, syncedRobot.getFullRobotModel().getElevator());
+      loadRobotModelAndGraphics(robotDescription, syncedRobot.getFullRobotModel().getElevator(), robotModel);
    }
 
    private void overrideModelColors(RobotDescription robotDescription)
