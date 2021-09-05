@@ -8,7 +8,7 @@ import java.util.TreeSet;
 
 public class ImGuiGDXBehaviorUIRegistry extends BehaviorRegistry
 {
-   public static final ImGuiGDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new ImGuiGDXBehaviorUIRegistry(ImGuiGDXLookAndStepBehaviorUI.DEFINITION);
+   public static final ImGuiGDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new ImGuiGDXBehaviorUIRegistry(ImGuiGDXTargetFollowingBehaviorUI.DEFINITION);
    static
    {
       DEFAULT_BEHAVIORS.register(ImGuiGDXTargetFollowingBehaviorUI.DEFINITION);

@@ -29,6 +29,7 @@ import geometry_msgs.Vector3;
 import sensor_msgs.CameraInfo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -238,6 +239,17 @@ public class RosTools
       {
          throw new RuntimeException("Invalid ROS Master URI", e);
       }
+   }
+
+   public static void toEuclid(Pose rosPose, Pose3DBasics euclidPose)
+   {
+      euclidPose.getPosition().set(rosPose.getPosition().getX(),
+                                   rosPose.getPosition().getY(),
+                                   rosPose.getPosition().getZ());
+      euclidPose.getOrientation().set(rosPose.getOrientation().getX(),
+                                      rosPose.getOrientation().getY(),
+                                      rosPose.getOrientation().getZ(),
+                                      rosPose.getOrientation().getW());
    }
 
    public static void packRosQuaternionToEuclidQuaternion(Quaternion rosQuat, QuaternionBasics quat)
