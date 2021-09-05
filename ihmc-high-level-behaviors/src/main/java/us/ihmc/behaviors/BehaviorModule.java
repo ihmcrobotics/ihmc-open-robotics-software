@@ -138,12 +138,13 @@ public class BehaviorModule
          ThreadTools.startAsDaemon(this::destroy, "DestroyThread");
       });
 
-      DataServerSettings dataServerSettings = new DataServerSettings(false, true, BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort(), null);
+      int port = BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort();
+      DataServerSettings dataServerSettings = new DataServerSettings(false, true, port, null);
       yoVariableServer = new YoVariableServer(getClass().getSimpleName(), null, dataServerSettings, 0.01);
       yoVariableServer.setMainRegistry(yoRegistry, null);
-      LogTools.info("Starting YoVariableServer...");
+      LogTools.info("Starting YoVariableServer on {}...", port);
       yoVariableServer.start();
-      LogTools.info("Starting YoVariableServer update thread...");
+      LogTools.info("Starting YoVariableServer update thread for {}...", port);
       MutableLong timestamp = new MutableLong();
       LocalDateTime startTime = LocalDateTime.now();
       yoServerUpdateThread = new PausablePeriodicThread("YoServerUpdate", YO_VARIABLE_SERVER_UPDATE_PERIOD, () ->
