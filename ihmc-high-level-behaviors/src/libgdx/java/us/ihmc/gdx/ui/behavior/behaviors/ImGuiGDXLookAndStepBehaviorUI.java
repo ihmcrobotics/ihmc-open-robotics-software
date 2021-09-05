@@ -49,7 +49,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
    private final AtomicReference<ArrayList<MinimalFootstep>> latestPlannedFootsteps;
    private final AtomicReference<ArrayList<MinimalFootstep>> latestCommandedFootsteps;
    private String currentState = "";
-   private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean operatorReview = new ImBoolean(true);
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private long numberOfSteppingRegionsReceived = 0;
@@ -194,6 +194,9 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       goalAffordance.renderPlaceGoalButton();
       ImGui.sameLine();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Clear")))
+         clearGraphics();
 
       if (ImGui.checkbox("Operator review", operatorReview))
       {
@@ -295,6 +298,16 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          planarRegionsGraphic.getRenderables(renderables, pool);
          bodyPathPlanGraphic.getRenderables(renderables, pool);
       }
+   }
+
+   public void clearGraphics()
+   {
+      goalAffordance.clear();
+      footstepPlanGraphic.clear();
+      commandedFootstepsGraphic.clear();
+      startAndGoalFootstepsGraphic.clear();
+      planarRegionsGraphic.clear();
+      bodyPathPlanGraphic.clear();
    }
 
    @Override
