@@ -116,10 +116,13 @@ public class ImGuiGDXTargetFollowingBehaviorUI extends ImGuiGDXBehaviorUIInterfa
       // TODO: Need to get the state of the remote node. Is it actively being ticked?
       periodicThread.setRunning(wasTickedRecently(0.5));
 
-      syncedRobot.update();
-      goalPose.setIncludingFrame(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(), latestSemanticTargetPose.get().getTransform3D());
-      goalPose.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ());
+      if (latestSemanticTargetPose.get() != null)
+      {
+         syncedRobot.update();
+         goalPose.setIncludingFrame(syncedRobot.getReferenceFrames().getObjectDetectionCameraFrame(), latestSemanticTargetPose.get().getTransform3D());
+         goalPose.changeFrame(ReferenceFrame.getWorldFrame());
+         goalPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetZUpFrame).getZ());
+      }
 
       if (areGraphicsEnabled())
       {
