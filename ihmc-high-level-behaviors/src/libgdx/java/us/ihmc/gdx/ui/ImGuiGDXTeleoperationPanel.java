@@ -37,18 +37,16 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterK
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
-import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
@@ -75,7 +73,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final ROS2SyncedRobotModel syncedRobotForHeightSlider;
    private final ROS2SyncedRobotModel syncedRobotForChestSlider;
    private final GDXFootstepPlanGraphic footstepPlanGraphic;
-   private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final float[] stanceHeightSliderValue = new float[1];
    private final float[] leanForwardSliderValue = new float[1];
    private final float[] neckPitchSliderValue = new float[1];
@@ -417,6 +415,11 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          REAStateRequestMessage clearMessage = new REAStateRequestMessage();
          clearMessage.setRequestClear(true);
          communicationHelper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
+      }
+      if (ImGui.button(labels.get("Clear graphics")))
+      {
+         footstepPlanGraphic.clear();
+         footstepGoal.clear();
       }
    }
 
