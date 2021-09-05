@@ -503,7 +503,6 @@ public class LookAndStepFootstepPlanningTask
          {
             planarRegionsHistory.removeFirst();
          }
-         uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
 
          FootstepPlan footstepPlan = new FootstepPlan();
          for (int i = 0; i < lookAndStepParameters.getMaxStepsToSendToController()
@@ -513,6 +512,8 @@ public class LookAndStepFootstepPlanningTask
          }
          footstepPlan.setFinalTransferSplitFraction(footstepPlannerOutput.getFootstepPlan().getFinalTransferSplitFraction());
          footstepPlan.setFinalTransferWeightDistribution(footstepPlannerOutput.getFootstepPlan().getFinalTransferWeightDistribution());
+
+         uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlan, "Planned"));
 
          // Extend the swing duration if necessary.
          // TODO: Check and see if this is ensured by the footstep planner and remove it.
