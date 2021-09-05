@@ -1,5 +1,6 @@
 package us.ihmc.utilities.ros;
 
+import geometry_msgs.PoseStamped;
 import org.ros.internal.message.Message;
 import org.ros.message.Time;
 import org.ros.node.parameter.ParameterListener;
@@ -8,7 +9,10 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
+import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
+import us.ihmc.utilities.ros.subscriber.RosPoseStampedSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 import java.util.HashMap;
@@ -41,6 +45,8 @@ public class ROS1Helper implements RosNodeInterface
       this.nodeName = nodeName;
       scheduler = ThreadTools.newSingleDaemonThreadScheduledExecutor("ROS1HelperMaintenance");
    }
+
+   // TODO: Automate what ImGuiGDXROS1Visualizer is doing without putting the burden on the user
 
    private void ensureConnected()
    {
@@ -100,6 +106,20 @@ public class ROS1Helper implements RosNodeInterface
       subscribers.put(subscriber, topicName);
       needsReconnect = true;
       scheduleTentativeReconnect();
+   }
+
+   public RosTopicSubscriberInterface<? extends Message> subscribeToPoseViaCallback(String topicName, Consumer<PoseStamped> callback)
+   {
+      AbstractRosTopicSubscriber<PoseStamped> subscriber = new AbstractRosTopicSubscriber<PoseStamped>(PoseStamped._TYPE)
+      {
+         @Override
+         public void onNewMessage(PoseStamped poseStamped)
+         {
+            callback.accept(poseStamped);
+         }
+      };
+      attachSubscriber(topicName, subscriber);
+      return subscriber;
    }
 
    @Override
