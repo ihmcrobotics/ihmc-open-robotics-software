@@ -410,7 +410,7 @@ public class LookAndStepFootstepPlanningTask
          startFootPosesForUI.add(new MinimalFootstep(side,
                                                      new Pose3D(startFootPoses.get(side).getSolePoseInWorld()),
                                                      startFootPoses.get(side).getFoothold(),
-                                                     side.getPascalCaseName() + " Start"));
+                                                     "Look and Step " + side.getPascalCaseName() + " Start"));
       }
       uiPublisher.publishToUI(StartAndGoalFootPosesForUI, startFootPosesForUI);
 
@@ -513,7 +513,7 @@ public class LookAndStepFootstepPlanningTask
          footstepPlan.setFinalTransferSplitFraction(footstepPlannerOutput.getFootstepPlan().getFinalTransferSplitFraction());
          footstepPlan.setFinalTransferWeightDistribution(footstepPlannerOutput.getFootstepPlan().getFinalTransferWeightDistribution());
 
-         uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlan, "Planned"));
+         uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlan, "Look and Step Planned"));
 
          // Extend the swing duration if necessary.
          // TODO: Check and see if this is ensured by the footstep planner and remove it.

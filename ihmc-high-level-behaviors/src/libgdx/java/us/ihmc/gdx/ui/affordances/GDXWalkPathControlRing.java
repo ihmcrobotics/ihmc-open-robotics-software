@@ -117,7 +117,7 @@ public class GDXWalkPathControlRing
 
       if (footstepPlanToGenerateMeshes != null)
       {
-         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes, "plan"));
+         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes, "Walk Path Control Ring Plan"));
          footstepPlanToGenerateMeshes = null;
       }
       foostepPlanGraphic.update();

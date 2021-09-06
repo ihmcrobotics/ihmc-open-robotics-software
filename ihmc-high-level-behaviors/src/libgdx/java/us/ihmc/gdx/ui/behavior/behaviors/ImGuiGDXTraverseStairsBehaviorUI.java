@@ -65,7 +65,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
       this.helper = helper;
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.PLANNED_STEPS, footsteps ->
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps));
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, DEFINITION.getName()));
       });
       footstepPlanGraphic.setTransparency(0.5);
       distanceToStairs = helper.subscribeViaReference(DistanceToStairs, Double.NaN);
