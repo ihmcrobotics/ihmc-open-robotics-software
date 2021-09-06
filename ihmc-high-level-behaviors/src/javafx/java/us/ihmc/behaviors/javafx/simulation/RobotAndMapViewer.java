@@ -88,7 +88,7 @@ public class RobotAndMapViewer
       });
    }
 
-   public void setFootstepsToVisualize(FootstepPlan footstepPlan)
+   public void setFootstepsToVisualize(FootstepPlan footstepPlan, String description)
    {
       ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
@@ -97,7 +97,7 @@ public class RobotAndMapViewer
          footstepPlan.getFootstep(i).getFootstepPose(soleFramePoseToPack);
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
-      footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepLocations));
+      footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepLocations, description));
    }
 
    public void setBodyPathPlanToVisualize(List<? extends Pose3DReadOnly> bodyPath)

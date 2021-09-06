@@ -75,6 +75,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (for Look and Step)");
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
    private final GDXBoxVisualizer obstacleBoxVisualizer = new GDXBoxVisualizer();
+   private final ImBoolean invertShowGraphics = new ImBoolean(false);
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -197,11 +198,12 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       ImGui.sameLine();
 
       goalAffordance.renderPlaceGoalButton();
-      ImGui.sameLine();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear")))
          clearGraphics();
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Invert"), invertShowGraphics);
 
       if (ImGui.checkbox("Operator review", operatorReview))
       {
@@ -286,7 +288,10 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       boolean wasTickedRecently = wasTickedRecently(0.5);
       boolean currentStateIsNotEmpty = !currentState.isEmpty();
       boolean notCurrentlyReset = !currentState.equals(LookAndStepBehavior.State.RESET.name());
-      return wasTickedRecently && currentStateIsNotEmpty && notCurrentlyReset;
+      boolean areGraphicsEnabled = wasTickedRecently && currentStateIsNotEmpty && notCurrentlyReset;
+      if (invertShowGraphics.get())
+         areGraphicsEnabled = !areGraphicsEnabled;
+      return areGraphicsEnabled;
    }
 
    @Override

@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.*;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -91,6 +92,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
    private final ROS2Input<PlanarRegionsListMessage> lidarREARegions;
+   private final ImBoolean showGraphics = new ImBoolean(true);
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
@@ -151,7 +153,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps));
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
       footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
       footstepPlanner = communicationHelper.getOrCreateFootstepPlanner();
@@ -229,7 +231,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       }
       else
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
+                                                                                                 "Teleoperation Panel Planned"));
          this.footstepPlannerOutput = footstepPlannerOutput;
       }
    }
@@ -416,6 +419,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          clearMessage.setRequestClear(true);
          communicationHelper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
       }
+      ImGui.checkbox(labels.get("Show graphics"), showGraphics);
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Clear graphics")))
       {
          footstepPlanGraphic.clear();
@@ -439,8 +444,11 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      footstepPlanGraphic.getRenderables(renderables, pool);
-      footstepGoal.getRenderables(renderables, pool);
+      if (showGraphics.get())
+      {
+         footstepPlanGraphic.getRenderables(renderables, pool);
+         footstepGoal.getRenderables(renderables, pool);
+      }
    }
 
    private void sendPSIRequest()

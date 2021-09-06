@@ -111,7 +111,7 @@ public class LookAndStepSteppingTask
       footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
       FootstepDataMessageConverter.appendPlanToMessage(footstepPlan, footstepDataListMessage);
       // TODO: Add combo to look and step UI to chose which steps to visualize
-      uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage));
+      uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage, "Look and Step Last Commanded"));
 
       ExecutionMode executionMode;
       if (lookAndStepParameters.getMaxStepsToSendToController() > 1)
