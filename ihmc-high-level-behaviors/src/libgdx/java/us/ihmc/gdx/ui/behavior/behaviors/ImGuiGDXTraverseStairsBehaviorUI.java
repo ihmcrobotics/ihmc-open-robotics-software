@@ -91,7 +91,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends ImGuiGDXBehaviorUIInterfac
 
    public void setGoal(Pose3D goal)
    {
-      goalAffordance.setGoalPose(goal);
+      goalAffordance.setGoalPoseAndPassOn(goal);
    }
 
    @Override

@@ -15,4 +15,9 @@ public interface TargetFollowingBehaviorParametersReadOnly extends StoredPropert
    {
       return get(lookAndStepGoalUpdatePeriod);
    }
+
+   default double getTestLoopRadius()
+   {
+      return get(testLoopRadius);
+   }
 }
