@@ -30,6 +30,7 @@ import sensor_msgs.CameraInfo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -250,6 +251,17 @@ public class RosTools
                                       rosPose.getOrientation().getY(),
                                       rosPose.getOrientation().getZ(),
                                       rosPose.getOrientation().getW());
+   }
+
+   public static void toRos(Pose3DReadOnly euclidPose, Pose rosPose)
+   {
+      rosPose.getPosition().setX(euclidPose.getPosition().getX());
+      rosPose.getPosition().setY(euclidPose.getPosition().getY());
+      rosPose.getPosition().setZ(euclidPose.getPosition().getZ());
+      rosPose.getOrientation().setX(euclidPose.getOrientation().getX());
+      rosPose.getOrientation().setY(euclidPose.getOrientation().getY());
+      rosPose.getOrientation().setZ(euclidPose.getOrientation().getZ());
+      rosPose.getOrientation().setW(euclidPose.getOrientation().getS());
    }
 
    public static void packRosQuaternionToEuclidQuaternion(Quaternion rosQuat, QuaternionBasics quat)

@@ -13,6 +13,7 @@ public class TargetFollowingBehaviorParameters extends StoredPropertySet impleme
 
    public static final DoubleStoredPropertyKey minimumDistanceToKeepFromTarget = keys.addDoubleKey("Minimum distance to keep from target");
    public static final DoubleStoredPropertyKey lookAndStepGoalUpdatePeriod = keys.addDoubleKey("Look and step goal update period");
+   public static final DoubleStoredPropertyKey testLoopRadius = keys.addDoubleKey("Test loop radius");
 
    public TargetFollowingBehaviorParameters()
    {

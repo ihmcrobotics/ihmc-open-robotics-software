@@ -9,10 +9,8 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosPoseStampedSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 import java.util.HashMap;
@@ -100,6 +98,17 @@ public class ROS1Helper implements RosNodeInterface
       scheduleTentativeReconnect();
    }
 
+   public RosTopicPublisher<PoseStamped> publishPose(String topicName)
+   {
+      boolean latched = false; // TODO: What does this mean?
+      RosTopicPublisher<PoseStamped> publisher = new RosTopicPublisher<PoseStamped>(PoseStamped._TYPE, latched)
+      {
+         // ???
+      };
+      attachPublisher(topicName, publisher);
+      return publisher;
+   }
+
    @Override
    public void attachSubscriber(String topicName, RosTopicSubscriberInterface<? extends Message> subscriber)
    {
@@ -108,7 +117,7 @@ public class ROS1Helper implements RosNodeInterface
       scheduleTentativeReconnect();
    }
 
-   public RosTopicSubscriberInterface<? extends Message> subscribeToPoseViaCallback(String topicName, Consumer<PoseStamped> callback)
+   public AbstractRosTopicSubscriber<PoseStamped> subscribeToPoseViaCallback(String topicName, Consumer<PoseStamped> callback)
    {
       AbstractRosTopicSubscriber<PoseStamped> subscriber = new AbstractRosTopicSubscriber<PoseStamped>(PoseStamped._TYPE)
       {

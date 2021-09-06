@@ -67,6 +67,7 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
          RosTools.toEuclid(latestSemanticTargetPose.getPose(), targetPoseGroundProjection);
          targetPoseGroundProjection.changeFrame(ReferenceFrame.getWorldFrame());
          targetPoseGroundProjection.getPosition().setZ(robotMidFeetUnderPelvisPose.getZ());
+         helper.publish(TargetPose, new Pose3D(targetPoseGroundProjection));
 
          approachPose.set(targetPoseGroundProjection);
          Vector3D fromTarget = new Vector3D();
