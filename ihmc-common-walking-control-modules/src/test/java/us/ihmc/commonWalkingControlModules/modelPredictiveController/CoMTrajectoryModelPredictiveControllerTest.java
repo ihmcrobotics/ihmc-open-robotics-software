@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.ContactStateMagnitudeToForceMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCTestHelper;
@@ -692,7 +693,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
          expectedDCMPositionCommands++;
       assertEquals(expectedCoMPositionCommands, comPositionCommands.size());
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
-//      assertEquals(1, dcmPositionCommands.size());
+      assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
       assertEquals(1, comPositionContinuityCommands.size());
       assertEquals(1, comVelocityContinuityCommands.size());
       assertEquals(1, vrpPositionContinuityCommands.size());
@@ -749,10 +750,24 @@ public class CoMTrajectoryModelPredictiveControllerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(dcmPositionRightBefore, dcmPositionRightAfter, epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(vrpPositionRightBefore, vrpPositionRightAfter, 3e-3);
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(dcmPositionEndOfPreview, dcmPositionEndOfPreviewAfter, epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPositionEndOfPreview, comPositionEndOfPreviewAfter, 0.2);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comVelocityEndOfPreview, comVelocityEndOfPreviewAfter, 0.5);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(vrpPositionEndOfPreview, vrpPositionEndOfPreviewAfter, 6e-3);
+      double finalDCMEpsilon = epsilon;
+      double finalCoMEpsilon = epsilon;
+      double finalVRPEpsilon = epsilon;
+      double finalCoMVelocityEpsilon = epsilon;
+
+      if (MPCParameters.finalDCMPositionConstraintType != ConstraintType.EQUALITY)
+         finalDCMEpsilon = 0.25;
+      if (MPCParameters.finalCoMPositionConstraintType != ConstraintType.EQUALITY)
+         finalCoMEpsilon = 0.2;
+      if (MPCParameters.finalCoMVelocityConstraintType != ConstraintType.EQUALITY)
+         finalCoMVelocityEpsilon = 0.75;
+      if (MPCParameters.finalVRPPositionConstraintType != ConstraintType.EQUALITY)
+         finalVRPEpsilon = 0.25;
+
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(dcmPositionEndOfPreview, dcmPositionEndOfPreviewAfter, finalDCMEpsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPositionEndOfPreview, comPositionEndOfPreviewAfter, finalCoMEpsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comVelocityEndOfPreview, comVelocityEndOfPreviewAfter, finalCoMVelocityEpsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(vrpPositionEndOfPreview, vrpPositionEndOfPreviewAfter, finalVRPEpsilon);
 
       visualize(mpc, contactProviders, duration);
    }
