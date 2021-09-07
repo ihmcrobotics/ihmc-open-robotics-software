@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
@@ -16,6 +17,8 @@ public interface IMUSensorReadOnly
    public abstract ReferenceFrame getMeasurementFrame();
 
    public abstract RigidBodyBasics getMeasurementLink();
+
+   public abstract RigidBodyTransformReadOnly getTransformFromIMUToJoint();
 
    public abstract QuaternionReadOnly getOrientationMeasurement();
 
