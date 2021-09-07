@@ -536,7 +536,7 @@ public class RobotDescriptionFromSDFLoader
          linkToSensorInZUp.multiply(ModelFileLoaderConversionsHelper.poseToTransform(sdfSensor.getPose()));
 
          showCordinateSystem(jointDescription, linkToSensorInZUp);
-         IMUSensorDescription imuMount = new IMUSensorDescription(child.getName() + "_" + sdfSensor.getName(), linkToSensorInZUp);
+         IMUSensorDescription imuMount = new IMUSensorDescription(sdfSensor.getName(), linkToSensorInZUp);
 
          IMUNoise noise = imu.getNoise();
          if (noise != null)
