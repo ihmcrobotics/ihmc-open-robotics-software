@@ -746,17 +746,6 @@ public class NavigableRegionsManagerTest
       expectedPath.add(getClosestPointOnClusterToPoint(region2.getNavigableRegion().getHomeRegionCluster().getNavigableExtrusionsInWorld(), expectedPath.get(0)));
       expectedPath.add(getClosestPointOnClusterToPoint(region2.getNavigableRegion().getObstacleClusters().get(0).getNavigableExtrusionsInWorld(), expectedPath.get(1)));
 
-      InterRegionConnectionFilter prefToPrefFilter = parameters.getPreferredToPreferredInterRegionConnectionFilter();
-      Assert.assertTrue(region1.getAllPreferredNavigableNodes().size() == 1);
-      Assert.assertTrue(region2.getAllPreferredNavigableNodes().size() == 1);
-      Assert.assertTrue(region3.getAllPreferredNavigableNodes().size() == 1);
-
-      VisibilityGraphNode region1PrefNode = region1.getAllPreferredNavigableNodes().get(0);
-      VisibilityGraphNode region2PrefNode = region2.getAllPreferredNavigableNodes().get(0);
-      VisibilityGraphNode region3PrefNode = region3.getAllPreferredNavigableNodes().get(0);
-      Assert.assertTrue(prefToPrefFilter.isConnectionValid(region1PrefNode.getPointInWorld(), region2PrefNode.getPointInWorld()));
-      Assert.assertTrue(prefToPrefFilter.isConnectionValid(region1PrefNode.getPointInWorld(), region3PrefNode.getPointInWorld()));
-
       if (visualize)
       {
          visualize(posePath, parameters, planarRegionsList, start, goal, navigableRegionsManager.getNavigableRegionsList(), navigableRegionsManager.getVisibilityMapSolution(), 1.0);
