@@ -8,8 +8,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class MPCParameters
 {
    public static final boolean includeInitialCoMVelocityObjective = true;
-   public static final boolean includeFinalCoMPositionObjective = false;
-   public static final boolean includeFinalCoMVelocityObjective = true;
+   public static final boolean includeFinalCoMPositionObjective = true;
+   public static final boolean includeFinalCoMVelocityObjective = false;
    public static final boolean includeFinalDCMPositionObjective = true;
 
    public static final boolean includeRhoMinInequality = true;
@@ -22,27 +22,28 @@ public class MPCParameters
 
    private static final double defaultMinRhoValue = 0.0;//05;
 
-   public static final double defaultInitialComWeight = 5e3;
-   public static final double defaultInitialComVelocityWeight = 1e3;
+   public static final double defaultInitialComWeight = 5e2;
+   public static final double defaultInitialComVelocityWeight = 1e2;
    public static final double defaultFinalComWeight = 1e1;
    public static final double defaultFinalVRPWeight = 1e2;
-   public static final double defaultVrpTrackingWeight = 1e3;
+   public static final double defaultVrpTrackingWeight = 1e2;
    public static final double defaultRhoTrackingWeight = 1e-3;
    public static final double defaultRhoRateTrackingWeight = 1e-6;
    public static final double defaultForceTrackingWeight = 1e-4;
 
-   private static final double defaultOrientationAngleTrackingWeight = 1e-2;
+   private static final double defaultOrientationAngleTrackingWeight = 1e-3;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
    private static final double defaultInitialOrientationWeight = 1e3;
-   private static final double defaultFinalOrientationWeight = 1e2;
+   private static final double defaultFinalOrientationAngleWeight = 1e3;
+   private static final double defaultFinalOrientationVelocityWeight = 1e2;
 
-   private static final ConstraintType initialCoMPositionConstraintType = ConstraintType.EQUALITY;
-   private static final ConstraintType initialCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
-   private static final ConstraintType finalCoMPositionConstraintType = ConstraintType.EQUALITY;
-   private static final ConstraintType finalCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
-   private static final ConstraintType finalDCMPositionConstraintType = ConstraintType.EQUALITY;
-   private static final ConstraintType finalVRPPositionConstraintType = ConstraintType.OBJECTIVE;
+   public static final ConstraintType initialCoMPositionConstraintType = ConstraintType.OBJECTIVE;
+   public static final ConstraintType initialCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
+   public static final ConstraintType finalCoMPositionConstraintType = ConstraintType.EQUALITY;
+   public static final ConstraintType finalCoMVelocityConstraintType = ConstraintType.OBJECTIVE;
+   public static final ConstraintType finalDCMPositionConstraintType = ConstraintType.OBJECTIVE;
+   public static final ConstraintType finalVRPPositionConstraintType = ConstraintType.OBJECTIVE;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -59,7 +60,8 @@ public class MPCParameters
    private final YoDouble orientationAngleTrackingWeight = new YoDouble("orientationAngleTrackingWeight", registry);
    private final YoDouble orientationVelocityTrackingWeight = new YoDouble("orientationVelocityTrackingWeight", registry);
    private final YoDouble initialOrientationWeight = new YoDouble("initialOrientationWeight", registry);
-   private final YoDouble finalOrientationWeight = new YoDouble("finalOrientationWeight", registry);
+   private final YoDouble finalOrientationAngleWeight = new YoDouble("finalOrientationAngleWeight", registry);
+   private final YoDouble finalOrientationVelocityWeight = new YoDouble("finalOrientationVelocityWeight", registry);
 
    public MPCParameters(YoRegistry parentRegistry)
    {
@@ -76,7 +78,8 @@ public class MPCParameters
       orientationAngleTrackingWeight.set(defaultOrientationAngleTrackingWeight);
       orientationVelocityTrackingWeight.set(defaultOrientationVelocityTrackingWeight);
       initialOrientationWeight.set(defaultInitialOrientationWeight);
-      finalOrientationWeight.set(defaultFinalOrientationWeight);
+      finalOrientationAngleWeight.set(defaultFinalOrientationAngleWeight);
+      finalOrientationVelocityWeight.set(defaultFinalOrientationVelocityWeight);
 
       parentRegistry.addChild(registry);
    }
@@ -211,9 +214,14 @@ public class MPCParameters
       return initialOrientationWeight.getDoubleValue();
    }
 
-   public double getFinalOrientationWeight()
+   public double getFinalOrientationAngleWeight()
    {
-      return finalOrientationWeight.getDoubleValue();
+      return finalOrientationAngleWeight.getDoubleValue();
+   }
+
+   public double getFinalOrientationVelocityWeight()
+   {
+      return finalOrientationVelocityWeight.getDoubleValue();
    }
 
    public DoubleProvider getOrientationAngleTrackingWeightProvider()
