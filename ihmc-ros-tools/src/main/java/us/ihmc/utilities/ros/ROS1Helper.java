@@ -66,7 +66,7 @@ public class ROS1Helper implements RosNodeInterface
       {
          scheduledFuture.cancel(false);
       }
-      scheduledFuture = scheduler.schedule(() -> ExceptionTools.handle(this::ensureConnected, DefaultExceptionHandler.PRINT_MESSAGE),
+      scheduledFuture = scheduler.schedule(() -> ExceptionTools.handle(this::ensureConnected, e -> LogTools.error(e.getMessage())),
                                            333, TimeUnit.MILLISECONDS);
    }
 
