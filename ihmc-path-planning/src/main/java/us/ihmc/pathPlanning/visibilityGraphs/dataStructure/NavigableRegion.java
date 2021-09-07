@@ -129,9 +129,9 @@ public class NavigableRegion
 
       NavigableRegionsFactory.populateNavigableRegionCluster(this, clusterInfo.getOtherRegions(), clusterInfo.getOrthogonalAngle(),
                                                              clusterInfo.getClusterResolution(), clusterInfo.getObstacleRegionFilter(),
-                                                             clusterInfo.getPlanarRegionFilter(), clusterInfo.getPreferredNavigableCalculator(),
-                                                             clusterInfo.getNavigableCalculator(), clusterInfo.getPreferredObstacleCalculator(),
-                                                             clusterInfo.getObstacleCalculator(), clusterInfo.getIncludePreferredExtrusions());
+                                                             clusterInfo.getPlanarRegionFilter(),
+                                                             clusterInfo.getNavigableCalculator(),
+                                                             clusterInfo.getObstacleCalculator());
 
       haveClustersBeenPopulated = true;
    }
