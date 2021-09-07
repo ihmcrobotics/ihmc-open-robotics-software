@@ -802,7 +802,7 @@ public class SE3ModelPredictiveControllerTest
       assertEquals(omega, vrpPositionCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(finalDCM, vrpPositionCommands.get(0).getObjective(), epsilon);
 
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoMPosition, mpc.getDesiredCoMPosition(), 5e-3);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoMPosition, mpc.getDesiredCoMPosition(), 5e-2);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(initialCoMVelocity, mpc.getDesiredCoMVelocity(), 5e-2);
 
       double windowDelta = 0.0005;
