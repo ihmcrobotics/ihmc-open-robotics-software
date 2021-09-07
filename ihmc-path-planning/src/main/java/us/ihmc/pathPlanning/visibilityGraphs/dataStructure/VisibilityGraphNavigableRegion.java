@@ -137,12 +137,12 @@ public class VisibilityGraphNavigableRegion
          addCrossClusterVisibility(homeRegionNodes, targetNodes, allClusters, innerRegionEdges);
       }
 
-      // between all the obstacle non-preferred navigable nodes.
+      // between all the obstacle navigable nodes.
       for (int sourceIndex = 0; sourceIndex < obstacleNavigableNodes.size(); sourceIndex++)
       {
          List<VisibilityGraphNode> sourceNodes = obstacleNavigableNodes.get(sourceIndex);
 
-         for (int targetIndex = sourceIndex + 1; targetIndex < obstacleNavigableNodes.size(); targetIndex++)
+         for (int targetIndex = sourceIndex; targetIndex < obstacleNavigableNodes.size(); targetIndex++)
          {
             List<VisibilityGraphNode> targetNodes = obstacleNavigableNodes.get(targetIndex);
 
@@ -237,6 +237,8 @@ public class VisibilityGraphNavigableRegion
       for (int targetIndex = targetStartIndex; targetIndex < targetNodes.size(); targetIndex++)
       {
          VisibilityGraphNode targetNode = targetNodes.get(targetIndex);
+         if (sourceNode == targetNode)
+            continue;
 
          // Finally run the expensive test to verify if the target can be seen from the source.
          if (VisibilityTools.isPointVisibleToPointInSameRegion(allClusters, sourceNode.getPoint2DInLocal(), targetNode.getPoint2DInLocal()))

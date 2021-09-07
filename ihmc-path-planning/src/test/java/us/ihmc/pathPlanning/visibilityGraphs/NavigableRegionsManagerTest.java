@@ -62,7 +62,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 
 public class NavigableRegionsManagerTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
    private static final double epsilon = 1e-4;
    private static final double proximityEpsilon = 6e-2;
 
@@ -80,8 +80,8 @@ public class NavigableRegionsManagerTest
 
    private static final double obstacleExtrusionDistance = 0.2;
    private static final double preferredObstacleExtrusionDistance = 1.0;
-   private static final Vector3D walkerRadii = new Vector3D(obstacleExtrusionDistance, preferredObstacleExtrusionDistance, 0.5);
-   private static final Vector3D walkerBox = new Vector3D(2.0 * obstacleExtrusionDistance, 2.0 * preferredObstacleExtrusionDistance, 1.0);
+   private static final Vector3D walkerRadii = new Vector3D(obstacleExtrusionDistance, obstacleExtrusionDistance, 0.5);
+   private static final Vector3D walkerBox = new Vector3D(2.0 * obstacleExtrusionDistance, 2.0 * obstacleExtrusionDistance, 1.0);
 
    @BeforeEach
    public void setup()
