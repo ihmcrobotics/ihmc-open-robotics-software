@@ -14,7 +14,7 @@ public class VisibilityGraphParametersKeys
    public static final DoubleStoredPropertyKey navigableExtrusionDistance                  = keys.addDoubleKey("Navigable extrusion distance", 0.02);
    public static final DoubleStoredPropertyKey obstacleExtrusionDistance                   = keys.addDoubleKey("Obstacle extrusion distance", 0.4);
    public static final DoubleStoredPropertyKey obstacleExtrusionDistanceIfNotTooHighToStep = keys.addDoubleKey("Obstacle extrusion distance if not too high to step", 0.05);
-   public static final DoubleStoredPropertyKey tooHighToStepDistance                       = keys.addDoubleKey("Too high to step distance", 0.28);
+   public static final DoubleStoredPropertyKey tooHighToStepDistance                       = keys.addDoubleKey("Too high to step distance", 0.25);
    public static final DoubleStoredPropertyKey clusterResolution                           = keys.addDoubleKey("Cluster resolution", 0.2);
    public static final DoubleStoredPropertyKey explorationDistanceFromStartGoal            = keys.addDoubleKey("Exploration distance from start goal", Double.POSITIVE_INFINITY);
    public static final DoubleStoredPropertyKey planarRegionMinArea                         = keys.addDoubleKey("Planar region min area", 0.0);
@@ -22,7 +22,7 @@ public class VisibilityGraphParametersKeys
    public static final DoubleStoredPropertyKey regionOrthogonalAngle                       = keys.addDoubleKey("Region orthogonal angle", Math.toRadians(75.0));
    public static final DoubleStoredPropertyKey searchHostRegionEpsilon                     = keys.addDoubleKey("Search host region epsilon", 0.03);
    public static final DoubleStoredPropertyKey canDuckUnderHeight                          = keys.addDoubleKey("Can duck under height", 2.0);
-   public static final DoubleStoredPropertyKey heightForMaxAvoidance                       = keys.addDoubleKey("Height for max avoidance", 1.0);
+   public static final DoubleStoredPropertyKey heightForMaxAvoidance                       = keys.addDoubleKey("Height for max avoidance", 0.5);
    public static final DoubleStoredPropertyKey canEasilyStepOverHeight                     = keys.addDoubleKey("Can easily step over height", 0.03);
    public static final DoubleStoredPropertyKey lengthForLongInterRegionEdge                = keys.addDoubleKey("Length for long inter region edge", 0.3);
 
