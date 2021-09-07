@@ -6,6 +6,8 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -23,6 +25,8 @@ public class IMUSensor implements IMUSensorReadOnly
    private final RigidBodyBasics measurementLink;
 
    private final Quaternion orientationMeasurement = new Quaternion();
+   private final RigidBodyTransform transformFromIMUToJoint = new RigidBodyTransform();
+
    private final Vector3D angularVelocityMeasurement = new Vector3D();
    private final Vector3D linearAccelerationMeasurement = new Vector3D();
 
@@ -38,6 +42,7 @@ public class IMUSensor implements IMUSensorReadOnly
 
       measurementFrame = imuDefinition.getIMUFrame();
       measurementLink = imuDefinition.getRigidBody();
+      imuDefinition.getTransformFromIMUToJoint(transformFromIMUToJoint);
 
       if (sensorNoiseParameters != null)
       {
@@ -77,6 +82,12 @@ public class IMUSensor implements IMUSensorReadOnly
    public RigidBodyBasics getMeasurementLink()
    {
       return measurementLink;
+   }
+
+   @Override 
+   public RigidBodyTransformReadOnly getTransformFromIMUToJoint()
+   {
+      return transformFromIMUToJoint;
    }
 
    public void setOrientationMeasurement(Orientation3DReadOnly newOrientation)

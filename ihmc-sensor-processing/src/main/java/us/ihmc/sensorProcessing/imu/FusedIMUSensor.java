@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -191,6 +192,12 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       ReferenceFrame fusedMeasurementFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(sensorName + "Frame", firstMeasurementFrame.getParent(), fusedTransform);
 
       return fusedMeasurementFrame;
+   }
+
+   @Override
+   public RigidBodyTransformReadOnly getTransformFromIMUToJoint()
+   {
+      throw new RuntimeException("Implement me!");
    }
 
    public void update()
