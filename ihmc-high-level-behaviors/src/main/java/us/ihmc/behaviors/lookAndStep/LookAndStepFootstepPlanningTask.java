@@ -446,8 +446,7 @@ public class LookAndStepFootstepPlanningTask
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
-//      footstepPlannerRequest.getBodyPathWaypoints().add(bodyPathPlan.get(0)); // Not good, robot take steps to go here first
-      footstepPlannerRequest.getBodyPathWaypoints().add(subGoalPoseBetweenFeet);
+//      footstepPlannerRequest.getBodyPathWaypoints().add(waypoint); // use these to add waypoints between start and goal
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
