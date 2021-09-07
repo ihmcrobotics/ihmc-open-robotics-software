@@ -34,11 +34,11 @@ public class NativeMatrixBlock extends NativeMatrix
 
    public int getEndRow()
    {
-      return startRow + getNumRows();
+      return startRow + getNumRows() - 1;
    }
 
    public int getEndCol()
    {
-      return startCol + getNumCols();
+      return startCol + getNumCols() - 1;
    }
 }

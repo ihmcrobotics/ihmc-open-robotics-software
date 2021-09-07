@@ -1,6 +1,7 @@
 package us.ihmc.robotics.blockMatrix;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.matrixlib.NativeMatrix;
 
@@ -29,6 +30,36 @@ public class NativeBlockMatrixRMaj
       return matrixBlocks.get(blockIndex);
    }
 
+   public int getNumRows()
+   {
+      int maxEnd = 0;
+      for (int i = 0; i < getNumberOfBlocks(); i++)
+      {
+         maxEnd = Math.max(maxEnd, getBlock(i).getEndRow());
+      }
+
+      return maxEnd;
+   }
+
+   public int getNumCols()
+   {
+      int maxEnd = 0;
+      for (int i = 0; i < getNumberOfBlocks(); i++)
+      {
+         maxEnd = Math.max(maxEnd, getBlock(i).getEndCol());
+      }
+
+      return maxEnd;
+   }
+
+   public void addBlock(DMatrixRMaj block, int blockStartRow, int blockStartCol)
+   {
+      NativeMatrixBlock matrixBlock = matrixBlocks.add();
+      matrixBlock.set(block);
+      matrixBlock.setStartRow(blockStartRow);
+      matrixBlock.setStartCol(blockStartCol);
+   }
+
    public boolean getSubMatrix(int rowStart, int rowEnd, int colStart, int colEnd, NativeMatrixBlock matrixToPack)
    {
       List<NativeMatrixBlock> blocks = getBlocksThatAreVisible(rowStart, rowEnd, colStart, colEnd);
@@ -41,23 +72,29 @@ public class NativeBlockMatrixRMaj
       matrixToPack.setStartRow(rowStart);
       matrixToPack.setStartCol(colStart);
 
+      int dstCol0 = 0;
+      int dstRow0 = 0;
       for (int i = 0; i < blocks.size(); i++)
       {
          NativeMatrixBlock block = blocks.get(i);
 
-         int srcX0 = ;
-         int srcX1 = ;
-         int srcY0 = ;
-         int srcY1 = ;
-         int dstX0;
-         int dstY0;
-         matrixToPack.insert(block, srcY0, srcY1, srcX0, srcX1, dstY0, dstX0);
+         int srcCol0 = Math.max(0, colStart - block.getStartCol());
+         int srcCol1 = Math.min(block.getNumCols(), colEnd - block.getStartCol());
+         int srcRow0 = Math.max(0, rowStart - block.getStartRow());
+         int srcRow1 = Math.min(block.getNumRows(), rowEnd - block.getStartRow());
+
+         matrixToPack.insert(block, srcRow0, srcRow1, srcCol0, srcCol1, dstRow0, dstCol0);
+
+         dstRow0 += block.getNumRows();
+         dstCol0 += block.getNumCols();
       }
+
+      return true;
    }
 
    private final List<NativeMatrixBlock> blocksInRange = new ArrayList<>();
 
-   private List<NativeMatrixBlock> getBlocksThatAreVisible(int rowStart, int rowEnd, int colStart, int colEnd)
+   public List<NativeMatrixBlock> getBlocksThatAreVisible(int rowStart, int rowEnd, int colStart, int colEnd)
    {
       blocksInRange.clear();
 
