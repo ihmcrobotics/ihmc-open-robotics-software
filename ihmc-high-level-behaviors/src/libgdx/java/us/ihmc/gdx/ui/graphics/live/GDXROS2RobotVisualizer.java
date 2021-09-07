@@ -4,7 +4,6 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiPlot;
@@ -116,17 +115,12 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
          if (trackRobot.get())
          {
             syncedRobot.update();
-            FramePose3DReadOnly midFeetUnderPelvis = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
-            latestRobotMidFeetUnderPelvis.setX(midFeetUnderPelvis.getPosition().getX());
-            latestRobotMidFeetUnderPelvis.setY(midFeetUnderPelvis.getPosition().getY());
-            latestRobotMidFeetUnderPelvis.setZ(midFeetUnderPelvis.getPosition().getZ());
-
+            latestRobotMidFeetUnderPelvis.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getPosition());
             if (!previousRobotMidFeetUnderPelvis.containsNaN())
             {
                robotTranslationDifference.sub(latestRobotMidFeetUnderPelvis, previousRobotMidFeetUnderPelvis);
                cameraForTracking.translateCameraFocusPoint(robotTranslationDifference);
             }
-
             previousRobotMidFeetUnderPelvis.set(latestRobotMidFeetUnderPelvis);
          }
       }
