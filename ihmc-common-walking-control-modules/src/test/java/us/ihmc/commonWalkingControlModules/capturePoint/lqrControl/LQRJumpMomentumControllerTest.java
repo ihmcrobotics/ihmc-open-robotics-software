@@ -236,12 +236,12 @@ public class LQRJumpMomentumControllerTest
       coMTrajectoryPlanner.solveForTrajectory(contactStates);
 
       controller.setVRPTrajectory(coMTrajectoryPlanner.getVRPTrajectories(), contactStates);
-      controller.computeS1Segments();
-      controller.computeS2Segments();
+//      controller.computeS1Segments();
+//      controller.computeS2Segments();
 
       LQRCommonValues commonValues = new LQRCommonValues();
       commonValues.computeDynamicsMatrix(omega);
-      commonValues.computeEquivalentCostValues(LQRMomentumController.defaultMomentumRateWeight, LQRMomentumController.defaultVrpTrackingWeight);
+      commonValues.computeEquivalentCostValues(LQRJumpMomentumController.defaultMomentumRateWeight, LQRJumpMomentumController.defaultVrpTrackingWeight);
 
       AlgebraicS1Function finalS1Function = new AlgebraicS1Function();
       FlightS1Function flightS1Function = new FlightS1Function();

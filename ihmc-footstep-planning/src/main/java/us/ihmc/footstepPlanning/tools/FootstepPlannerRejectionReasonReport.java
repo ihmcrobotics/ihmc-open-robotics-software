@@ -4,8 +4,10 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
+import us.ihmc.footstepPlanning.log.VariableDescriptor;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 
 import java.util.*;
@@ -18,10 +20,17 @@ public class FootstepPlannerRejectionReasonReport
    private final TreeSet<BipedalFootstepPlannerNodeRejectionReason> sortedReasons
          = new TreeSet<>(Comparator.comparing(o -> -rejectionReasons.get(o).getValue()));
    private long totalNumberOfRejections = 0;
+   private final int rejectionReasonIndex;
 
    public FootstepPlannerRejectionReasonReport(FootstepPlanningModule footstepPlanningModule)
    {
       this.footstepPlanningModule = footstepPlanningModule;
+      VariableDescriptor rejectionReasonVariableDescriptor = footstepPlanningModule.getVariableDescriptors()
+                                                                                   .stream()
+                                                                                   .filter(v -> v.getName()
+                                                                                                 .equalsIgnoreCase(FootstepChecker.rejectionReasonVariable))
+                                                                                   .findFirst().get();
+      rejectionReasonIndex = footstepPlanningModule.getVariableDescriptors().indexOf(rejectionReasonVariableDescriptor);
    }
 
    public void update()
@@ -30,6 +39,7 @@ public class FootstepPlannerRejectionReasonReport
       totalNumberOfRejections = 0;
 
       List<FootstepPlannerIterationData> iterationDataList = footstepPlanningModule.getIterationData();
+
       for (int i = 0; i < iterationDataList.size(); i++)
       {
          FootstepPlannerIterationData iterationData = iterationDataList.get(i);
@@ -40,7 +50,7 @@ public class FootstepPlannerRejectionReasonReport
             FootstepPlannerEdgeData edgeData = footstepPlanningModule.getEdgeDataMap().get(edgeKey);
 
             BipedalFootstepPlannerNodeRejectionReason rejectionReason
-                  = BipedalFootstepPlannerNodeRejectionReason.fromByte((byte) edgeData.getDataBuffer()[7]);
+                  = BipedalFootstepPlannerNodeRejectionReason.fromByte((byte) edgeData.getDataBuffer()[rejectionReasonIndex]);
             rejectionReasons.putIfAbsent(rejectionReason, new MutableInt());
             rejectionReasons.get(rejectionReason).increment();
             totalNumberOfRejections++;

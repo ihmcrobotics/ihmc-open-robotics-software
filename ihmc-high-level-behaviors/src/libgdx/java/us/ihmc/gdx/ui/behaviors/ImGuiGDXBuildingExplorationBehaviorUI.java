@@ -6,12 +6,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import org.apache.commons.lang3.StringUtils;
-import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
-import us.ihmc.behaviors.demo.BuildingExplorationBehaviorMode;
-import us.ihmc.behaviors.demo.BuildingExplorationBehaviorParameters;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehavior;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -21,7 +20,7 @@ import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
 
 public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterface
 {
@@ -34,9 +33,8 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
    private final ImGuiGDXTraverseStairsBehaviorUI traverseStairsUI;
-   private final Point2D nodePosition = new Point2D(341.0, 5.0);
    private final ImGuiGDXDoorBehaviorUI doorUI;
-   private ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private volatile BuildingExplorationBehaviorMode mode = BuildingExplorationBehaviorMode.TELEOP;
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private String lastTickedThing = "NONE";
@@ -74,17 +72,10 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
          traverseStairsUI.setGoal(goalPose);
       }, Color.GREEN);
       baseUI.addImGui3DViewInputProcessor(goalAffordance::processImGui3DViewInput);
-      baseUI.get3DSceneManager().addRenderableProvider(this, GDXSceneLevel.VIRTUAL);
 
       lookAndStepUI.create(baseUI);
       traverseStairsUI.create(baseUI);
       doorUI.create(baseUI);
-   }
-
-   @Override
-   public Point2D getTreeNodeInitialPosition()
-   {
-      return nodePosition;
    }
 
    @Override

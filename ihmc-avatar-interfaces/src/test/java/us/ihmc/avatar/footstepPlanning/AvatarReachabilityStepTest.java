@@ -67,7 +67,7 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
 
       if (drcSimulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
+         /* destroy simulation is already called below */
          drcSimulationTestHelper = null;
       }
 

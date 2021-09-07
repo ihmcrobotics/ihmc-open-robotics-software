@@ -115,10 +115,17 @@ public class HumanoidKinematicsSimulation
 
    public static HumanoidKinematicsSimulation create(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
+      HumanoidKinematicsSimulation humanoidKinematicsSimulation = new HumanoidKinematicsSimulation(robotModel, kinematicsSimulationParameters);
+      humanoidKinematicsSimulation.setRunning(true);
+      return humanoidKinematicsSimulation;
+   }
+
+   public static HumanoidKinematicsSimulation createForPreviews(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
+   {
       return new HumanoidKinematicsSimulation(robotModel, kinematicsSimulationParameters);
    }
 
-   public HumanoidKinematicsSimulation(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
+   private HumanoidKinematicsSimulation(DRCRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
       this.kinematicsSimulationParameters = kinematicsSimulationParameters;
 
@@ -308,11 +315,25 @@ public class HumanoidKinematicsSimulation
       walkingOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
       walkingOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, this::processWalkingStatus);
 
-      initialize();
-
-      monotonicTimer.start();
       controlThread = new PausablePeriodicThread(getClass().getSimpleName(), kinematicsSimulationParameters.getUpdatePeriod(), 5, this::controllerTick);
-      controlThread.start();
+   }
+
+   public void setState()
+   {
+
+   }
+
+   public void setRunning(boolean running)
+   {
+      if (running && !controlThread.isRunning())
+      {
+         initialize();
+         controlThread.start();
+      }
+      else if (!running && controlThread.isRunning())
+      {
+         controlThread.stop();
+      }
    }
 
    public void initialize()
@@ -329,9 +350,11 @@ public class HumanoidKinematicsSimulation
       {
          contactStateHolders.put(robotSide, HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
       }
+
+      monotonicTimer.start();
    }
 
-   private void controllerTick()
+   public void controllerTick()
    {
       doControl();
 
@@ -340,7 +363,7 @@ public class HumanoidKinematicsSimulation
       robotConfigurationDataPublisher.publish(robotConfigurationData);
    }
 
-   public void doControl()
+   private void doControl()
    {
       yoTime.add(kinematicsSimulationParameters.getDt());
       fullRobotModel.updateFrames();
@@ -469,5 +492,10 @@ public class HumanoidKinematicsSimulation
       realtimeROS2Node.destroy();
       if (yoVariableServer != null)
          yoVariableServer.close();
+   }
+
+   public FullHumanoidRobotModel getFullRobotModel()
+   {
+      return fullRobotModel;
    }
 }

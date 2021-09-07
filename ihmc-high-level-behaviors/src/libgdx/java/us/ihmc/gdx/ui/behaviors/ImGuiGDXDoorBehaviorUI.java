@@ -3,7 +3,6 @@ package us.ihmc.gdx.ui.behaviors;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -12,11 +11,11 @@ import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolb
 import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.door.DoorType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiEnumPlot;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
@@ -34,7 +33,6 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorTools.NAN_POSE;
 import static us.ihmc.behaviors.door.DoorBehaviorAPI.*;
 
 public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
@@ -43,7 +41,6 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final BehaviorHelper helper;
    private final ResettableExceptionHandlingExecutorService behaviorStopperExecutor = MissingThreadTools.newSingleThreadExecutor("behavior_stopper", true);
-   private Point2D nodePosition = new Point2D(376.0, 213.0);
    private final AtomicReference<CurrentBehaviorStatus> status = new AtomicReference<>();
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(labels.get("Door behavior status"), 1000, 250, 15);
    private final AtomicReference<Double> distanceToDoor;
@@ -52,11 +49,13 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    private final Stopwatch detectedFiducialMessageReceivedStopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot detectedFiducialReceivedPlot = new ImGuiMovingPlot("Detected fiducial", 1000, 230, 15);
    private volatile long latestFiducialID = -1;
-   private final AtomicReference<MutablePair<DoorType, Pose3D>> detectedDoorPose = new AtomicReference<>(MutablePair.of(DoorType.UNKNOWN_TYPE, NAN_POSE));
+   private final AtomicReference<MutablePair<DoorType, Pose3D>> detectedDoorPose = new AtomicReference<>(MutablePair.of(DoorType.UNKNOWN_TYPE,
+                                                                                                                        BehaviorTools.createNaNPose()));
    private final ImGuiMovingPlot distanceToDoorPlot = new ImGuiMovingPlot("Distance to door", 1000, 250, 15);
    private final ImGuiMovingPlot detectedDoorPlot = new ImGuiMovingPlot("Detected door", 1000, 250, 15);
    private final ImBoolean reviewDoorPose = new ImBoolean(true);
    private GDXPushHandleRightDoorObject door;
+   private final ImBoolean showDetectedDoorGraphic = new ImBoolean(true);
 
    public ImGuiGDXDoorBehaviorUI(BehaviorHelper helper)
    {
@@ -172,6 +171,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
          helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
          helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
       }
+      ImGui.checkbox("Show detected door", showDetectedDoorGraphic);
    }
 
    @Override
@@ -188,7 +188,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (!distanceToDoor.get().isNaN())
+      if (showDetectedDoorGraphic.get() && !distanceToDoor.get().isNaN())
          door.getCollisionModelInstance().getRenderables(renderables, pool);
    }
 
@@ -196,11 +196,5 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    public String getName()
    {
       return DEFINITION.getName();
-   }
-
-   @Override
-   public Point2D getTreeNodeInitialPosition()
-   {
-      return nodePosition;
    }
 }

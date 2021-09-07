@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInterface
 {
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
@@ -68,7 +68,7 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
 
       if (drcSimulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
+         /* destroy simulation is already called below */
          drcSimulationTestHelper = null;
       }
 

@@ -113,6 +113,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private boolean useShapeCollision = false;
 
    private final RobotDescription robotDescription;
+   private String simpleRobotName = "Atlas";
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion)
    {
@@ -210,7 +211,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       robotDescription = createRobotDescription();
    }
 
-   private RobotDescription createRobotDescription()
+   public RobotDescription createRobotDescription()
+   {
+      return createRobotDescription(0.0);
+   }
+
+   public RobotDescription createRobotDescription(double transparency)
    {
       boolean useCollisionMeshes = false;
 
@@ -226,7 +232,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
       else
       {
-         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters, useCollisionMeshes);
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel,
+                                                                          jointMap,
+                                                                          contactPointParameters,
+                                                                          useCollisionMeshes,
+                                                                          transparency);
       }
 
       return robotDescription;
@@ -445,7 +455,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public String getStepReachabilityResourceName()
    {
-      return "ihmc-open-robotics-software/atlas/src/main/resources/us/ihmc/atlas/parameters/StepReachabilityMap.json";
+      return "us/ihmc/atlas/parameters/StepReachabilityMap.json";
    }
 
    @Override
@@ -528,7 +538,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public String getSimpleRobotName()
    {
-      return "Atlas";
+      return simpleRobotName;
+   }
+
+   public void setSimpleRobotName(String simpleRobotName)
+   {
+      this.simpleRobotName = simpleRobotName;
    }
 
    @Override

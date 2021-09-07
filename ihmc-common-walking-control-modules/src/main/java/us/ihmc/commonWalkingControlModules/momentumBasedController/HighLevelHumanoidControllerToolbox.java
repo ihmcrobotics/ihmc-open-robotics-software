@@ -712,7 +712,7 @@ public class HighLevelHumanoidControllerToolbox
    private void setFootPlaneContactPoints(RobotSide robotSide, List<Point2D> predictedContactPoints)
    {
       YoPlaneContactState footContactState = footContactStates.get(robotSide);
-      footContactState.getContactFramePoint2dsInContact(previousFootContactPoints.get(robotSide));
+      footContactState.getAllContactPoints(previousFootContactPoints.get(robotSide));
       footContactState.setContactPoints(predictedContactPoints);
    }
 

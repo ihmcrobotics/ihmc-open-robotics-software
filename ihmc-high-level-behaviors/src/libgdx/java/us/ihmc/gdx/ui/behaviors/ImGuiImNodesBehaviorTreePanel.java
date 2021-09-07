@@ -16,23 +16,22 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 
 import java.awt.geom.Rectangle2D;
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.function.Consumer;
 
 public class ImGuiImNodesBehaviorTreePanel
 {
@@ -42,15 +41,14 @@ public class ImGuiImNodesBehaviorTreePanel
    private int pinIndex = 0;
    private int linkIndex = 0;
    private boolean firstRun = true;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final HashMap<Integer, ImGuiMovingPlot> tickPlots = new HashMap<>();
-
-   private final HashMap<Integer, ImVec2> nodeSize = new HashMap<>();
+   private final HashMap<Integer, ImVec2> nodeSizeMap = new HashMap<>();
+   private final HashMap<Integer, String> nodeIdToNameMap = new HashMap<>();
+   private final HashMap<String, Integer> nodeNameToIdMap = new HashMap<>();
    private final HashMap<Integer, Boolean> nodeSizeHasChanged = new HashMap<>();
-
-   private final Class<?> parent;
-
-   private static final String propertiesDirectory = System.getProperty("user.home") + File.separator + ".ihmc"
-                                                     + File.separator + ImGuiImNodesBehaviorTreePanel.class.getSimpleName() + "Settings" + File.separator;
+   private static final Path configurationsPath = PathTools.findDirectoryInline("ihmc-open-robotics-software")
+                                                           .resolve("ihmc-high-level-behaviors/src/libgdx/resources/imnodeTrees");
    private boolean hasPrintedWarning = false;
 
    /***
@@ -58,10 +56,9 @@ public class ImGuiImNodesBehaviorTreePanel
     *
     * @param name The name of the window
     */
-   public ImGuiImNodesBehaviorTreePanel(String name, Class<?> parent)
+   public ImGuiImNodesBehaviorTreePanel(String name)
    {
       windowName = ImGuiTools.uniqueLabel(getClass(), name);
-      this.parent = parent;
    }
 
    private void resetNodeIndex(GDXBehaviorUIInterface tree)
@@ -86,6 +83,19 @@ public class ImGuiImNodesBehaviorTreePanel
 
    public void renderImGuiWidgets(GDXBehaviorUIInterface tree)
    {
+      Path treeNodesLayoutFile = configurationsPath.resolve(tree.getUIChildren().get(0).getName() + ".json");
+
+      ImGui.beginMenuBar();
+      if (ImGui.beginMenu(labels.get("File")))
+      {
+         if (ImGui.menuItem(labels.get("Save imnodes layout")))
+         {
+            saveLayoutToFile(treeNodesLayoutFile);
+         }
+         ImGui.endMenu();
+      }
+      ImGui.endMenuBar();
+
       ImGui.pushFont(ImGuiTools.getNodeFont());
       ImNodes.beginNodeEditor();
       resetNodeIndex(tree);
@@ -95,72 +105,52 @@ public class ImGuiImNodesBehaviorTreePanel
 
       if (firstRun)
       {
-         Path treeProperties = Paths.get(propertiesDirectory, "tree" + parent.getSimpleName());
-
-         if (Files.exists(treeProperties)) {
-            layoutNodesFromFile(treeProperties);
-         } else {
-            if (!applyDefaultNodeLayouts(tree)) //Returns false if no default layout exists
-               layoutNodes(tree);
-
-            new File(treeProperties.toAbsolutePath().getParent().toString()).mkdirs(); //Make necessary directories
-            saveLayoutToFile(treeProperties);
+         firstRun = false;
+         if (Files.exists(treeNodesLayoutFile))
+         {
+            loadLayoutNodesFromFile(treeNodesLayoutFile);
          }
       }
 
       ImNodes.endNodeEditor();
       ImGui.popFont();
-      firstRun = false;
    }
 
-   private void layoutNodesFromFile(Path file) {
-      JSONFileTools.load(file, jsonNode -> {
-         Iterator<Map.Entry<String, JsonNode>> it = jsonNode.fields();
-         while (it.hasNext()) {
+   private void loadLayoutNodesFromFile(Path file)
+   {
+      LogTools.info("Loading imnodes layout from {}", file);
+      JSONFileTools.load(file, jsonNode ->
+      {
+         JsonNode treeNodesNode = jsonNode.get("treeNodes");
+         Iterator<Map.Entry<String, JsonNode>> it = treeNodesNode.fields();
+         while (it.hasNext())
+         {
             Map.Entry<String, JsonNode> entry = it.next();
 
-            int id = Integer.parseInt(entry.getKey());
-            String[] pos = entry.getValue().asText().split(",");
-            float x = Float.parseFloat(pos[0]);
-            float y = Float.parseFloat(pos[1]);
+            Integer id = nodeNameToIdMap.get(entry.getKey());
+            if (id != null)
+            {
+               String[] pos = entry.getValue().asText().split(",");
+               float x = Float.parseFloat(pos[0]);
+               float y = Float.parseFloat(pos[1]);
 
-            ImNodes.setNodeGridSpacePos(id, x, y);
+               ImNodes.setNodeGridSpacePos(id, x, y);
+            }
          }
       });
    }
 
-   private void saveLayoutToFile(Path file) {
-      Consumer<ObjectNode> rootConsumer = root ->
+   private void saveLayoutToFile(Path file)
+   {
+      LogTools.info("Saving imnodes layout to {}", file);
+      JSONFileTools.save(file, root ->
       {
-         for (int node : nodeSize.keySet()) {
-            root.put(Integer.toString(node), ImNodes.getNodeGridSpacePosX(node) + "," + ImNodes.getNodeGridSpacePosY(node));
+         ObjectNode treeNodesNode = root.putObject("treeNodes");
+         for (int node : nodeSizeMap.keySet())
+         {
+            treeNodesNode.put(nodeIdToNameMap.get(node), ImNodes.getNodeGridSpacePosX(node) + "," + ImNodes.getNodeGridSpacePosY(node));
          }
-      };
-
-      JSONFileTools.save(file, rootConsumer);
-   }
-
-   private boolean applyDefaultNodeLayouts(GDXBehaviorUIInterface tree)
-   {
-      return applyDefaultNodeLayouts(tree, tree);
-   }
-
-   private boolean applyDefaultNodeLayouts(GDXBehaviorUIInterface tree, GDXBehaviorUIInterface root)
-   {
-      boolean out = false;
-      Point2D pos = tree.getTreeNodeInitialPosition();
-      if (pos.getX() != 0 || pos.getY() != 0)
-      {
-         out = true;
-         ImNodes.setNodeGridSpacePos(getIndexOfNode(tree, root), pos.getX32(), pos.getY32());
-      }
-
-      for (GDXBehaviorUIInterface child : tree.getUIChildren())
-      {
-         out |= applyDefaultNodeLayouts(child, root);
-      }
-
-      return out;
+      });
    }
 
    private void constructAbegoTree(GDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<GDXBehaviorUIInterface> layout)
@@ -212,14 +202,14 @@ public class ImGuiImNodesBehaviorTreePanel
          public double getWidth(GDXBehaviorUIInterface gdxBehaviorUIInterface)
          {
             int index = getIndexOfNode(gdxBehaviorUIInterface, tree);
-            return nodeSize.get(index).x;
+            return nodeSizeMap.get(index).x;
          }
 
          @Override
          public double getHeight(GDXBehaviorUIInterface gdxBehaviorUIInterface)
          {
             int index = getIndexOfNode(gdxBehaviorUIInterface, tree);
-            return nodeSize.get(index).y;
+            return nodeSizeMap.get(index).y;
          }
       }, new Configuration<GDXBehaviorUIInterface>()
       {
@@ -397,23 +387,29 @@ public class ImGuiImNodesBehaviorTreePanel
          ImVec2 size = new ImVec2();
          ImNodes.getNodeDimensions(nodeIndex, size);
 
-         nodeSize.put(nodeIndex, size);
+         nodeSizeMap.put(nodeIndex, size);
+         nodeIdToNameMap.put(nodeIndex, nodeName);
+         nodeNameToIdMap.put(nodeName, nodeIndex);
          nodeSizeHasChanged.put(nodeIndex, false);
-      } else {
+      }
+      else
+      {
          ImVec2 size = new ImVec2();
          ImNodes.getNodeDimensions(nodeIndex, size);
-         ImVec2 correct = nodeSize.get(nodeIndex);
+         ImVec2 correct = nodeSizeMap.get(nodeIndex);
 
-         if (size.x - correct.x > 0.5f || size.y - correct.y > 0.5f && !nodeSizeHasChanged.get(nodeIndex)) { //query nodeSizeHasChanged to prevent multiple warnings
+         // query nodeSizeHasChanged to prevent multiple warnings
+         if (size.x - correct.x > 0.5f || size.y - correct.y > 0.5f && !nodeSizeHasChanged.get(nodeIndex))
+         {
             nodeSizeHasChanged.put(nodeIndex, true);
             if (!hasPrintedWarning)
             {
                hasPrintedWarning = true;
-               LogTools.warn("Node size has changed for node " + nodeIndex + " (" + nodeName + ") - when implementing renderTreeNode(), ensure the node renders at a fixed size.");
+               LogTools.warn("Node size has changed for node " + nodeIndex +
+                             " (" + nodeName + ") - when implementing renderTreeNode(), ensure the node renders at a fixed size.");
             }
          }
       }
-
       nodeIndex++;
 
       ImNodes.popColorStyle();

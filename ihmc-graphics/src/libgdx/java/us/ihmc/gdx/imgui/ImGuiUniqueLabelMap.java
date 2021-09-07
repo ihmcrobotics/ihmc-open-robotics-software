@@ -38,4 +38,15 @@ public class ImGuiUniqueLabelMap
       }
       return label;
    }
+
+   public String get(String name, int moreSpecificIndex)
+   {
+      String label = namesToLabels.get(name + moreSpecificIndex);
+      if (label == null)
+      {
+         label = ImGuiTools.uniqueLabel(simpleName + index + "_" + moreSpecificIndex, name);
+         namesToLabels.put(name + moreSpecificIndex, label);
+      }
+      return label;
+   }
 }

@@ -14,10 +14,12 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 
 import javax.imageio.ImageIO;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.node.NodeConfiguration;
 
 import geometry_msgs.Point;
@@ -60,6 +62,8 @@ public class RosTools
    public static final String MAPSENSE_CONFIGURATION = "/map/config";
    // See https://www.stereolabs.com/docs/ros/zed-node/
    public static final String ZED2_LEFT_EYE_VIDEO_COMPRESSED = "/zed/zed_node/left/image_rect_color/compressed";
+   public static final String ZED2_LEFT_EYE_VIDEO = "/zed/color/left/image_raw";
+   public static final String ZED2_RIGHT_EYE_VIDEO = "/zed/color/right/image_raw";
    public static final String ZED2_POINT_CLOUD = "/zed/zed_node/point_cloud/cloud_registered";
 
    public static RosMainNode createRosNode(String uri, String name)
@@ -122,6 +126,17 @@ public class RosTools
       }
 
       return ret;
+   }
+
+   /**
+    * Returns a ByteBuffer that starts with the data part.
+    */
+   public static ByteBuffer sliceNettyBuffer(ChannelBuffer channelBuffer)
+   {
+      ByteBuffer originalByteBuffer = channelBuffer.toByteBuffer();
+      int arrayOffset = channelBuffer.arrayOffset();
+      originalByteBuffer.position(arrayOffset);
+      return originalByteBuffer.slice();
    }
 
    public static CameraPinholeBrown cameraIntrisicsFromCameraInfo(CameraInfo cameraInfo)

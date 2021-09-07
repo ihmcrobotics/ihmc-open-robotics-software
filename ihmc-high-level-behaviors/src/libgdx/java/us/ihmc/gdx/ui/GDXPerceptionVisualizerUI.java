@@ -12,12 +12,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilderPanel;
+import us.ihmc.gdx.simulation.environment.GDXEnvironment;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXL515SensorObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.behaviors.tools.perception.PeriodicPlanarRegionPublisher;
+import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.gdx.ui.graphics.live.*;
+import us.ihmc.gdx.ui.tools.GDXTransformTuner;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -39,12 +41,14 @@ public class GDXPerceptionVisualizerUI
     private final GDXImGuiBasedUI baseUI;
     private final ImGuiMapSenseConfigurationPanel mapsenseConfigurationUI;
     private final ImGuiGDXGlobalVisualizersPanel globalVisualizersUI;
-    private final GDXEnvironmentBuilderPanel environmentBuilderUI;
+    private final GDXEnvironment environmentUI;
 
     private final RigidBodyTransform depthSensorTransform = new RigidBodyTransform();
     private final Matrix4 gdxSensorTransform = new Matrix4();
+    private GDXTransformTuner l515TransformTuner;
 
     private final boolean LOW_RESOLUTION_SENSORS = true;
+    private GDXHighLevelDepthSensorSimulator steppingL515Simulator;
     private GDXL515SensorObject l515Model;
 
     public GDXPerceptionVisualizerUI()
@@ -69,18 +73,23 @@ public class GDXPerceptionVisualizerUI
         globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("SLAM Poses", RosTools.SLAM_POSE));
         globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("Internal Sensor Pose", "/atlas/sensors/chest_l515/pose"));
 
-        environmentBuilderUI = new GDXEnvironmentBuilderPanel();
-
 //        simulatedDepthSensor = createSimulatedDepthSensor(ros1Node);
 //        simulatedDepthSensor.setSensorFrameToWorldTransform(depthSensorTransform);
 //        simulatedDepthSensor.setRenderPointCloudDirectly(true);
 //        simulatedDepthSensor.setDebugCoordinateFrame(true);
 
+        environmentUI = new GDXEnvironment(baseUI.get3DSceneManager());
+
         baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
         baseUI.getImGuiPanelManager().addPanel(mapsenseRegionsVisualizer.getLoggingPanel());
 //        baseUI.getImGuiDockingSetup().addWindow(simulatedDepthSensor.getWindowName(), simulatedDepthSensor::renderImGuiWindow);
         baseUI.getImGuiPanelManager().addPanel(mapsenseConfigurationUI.getWindowName(), mapsenseConfigurationUI::render);
-        baseUI.getImGuiPanelManager().addPanel(environmentBuilderUI.getWindowName(), environmentBuilderUI::renderImGuiWindow);
+        baseUI.getImGuiPanelManager().addPanel(environmentUI.getPanelName(), environmentUI::renderImGuiWidgets);
+
+//        steppingL515Simulator = GDXSimulatedSensorFactory.createChestL515ForMapSense(syncedRobot, ros1Helper);
+
+//        l515TransformTuner = new GDXTransformTuner(robotModel.getSensorInformation().getSteppingCameraTransform());
+        baseUI.getImGuiPanelManager().addPanel("L515 Transform Tuner", l515TransformTuner::renderImGuiWidgets);
 
         baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
         {
@@ -94,11 +103,14 @@ public class GDXPerceptionVisualizerUI
 //                simulatedDepthSensor.create();
 //                baseUI.getSceneManager().addRenderableProvider(simulatedDepthSensor, GDXSceneLevel.VIRTUAL);
 
+                environmentUI.create(baseUI);
+                baseUI.get3DSceneManager().addRenderableProvider(environmentUI::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+                baseUI.get3DSceneManager().addRenderableProvider(environmentUI::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+                environmentUI.loadEnvironment("DemoPullDoor.json");
+
                 globalVisualizersUI.create();
-                environmentBuilderUI.create(baseUI);
 //                l515Model = new GDXL515SensorObject();
 //                environmentBuilderUI.getModelInput().addInstance(l515Model);
-                baseUI.get3DSceneManager().addRenderableProvider(environmentBuilderUI);
 
                 ros1Node.execute();
             }
@@ -119,6 +131,7 @@ public class GDXPerceptionVisualizerUI
             public void dispose()
             {
 //                simulatedDepthSensor.dispose();
+                environmentUI.destroy();
                 globalVisualizersUI.destroy();
                 baseUI.dispose();
                 ros2Node.destroy();

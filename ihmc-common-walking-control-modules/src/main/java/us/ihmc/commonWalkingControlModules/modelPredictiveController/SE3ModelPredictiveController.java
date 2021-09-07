@@ -42,8 +42,6 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final boolean defaultIncludeIntermediateOrientationTracking = true;
-
    private final double gravityZ;
    protected final double mass;
 
@@ -56,6 +54,9 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    private final FrameVector3DBasics referenceBodyAngularVelocity = new FrameVector3D(worldFrame);
 
    private final FrameVector3DBasics desiredBodyAngularAcceleration = new FrameVector3D(worldFrame);
+
+   private final FrameVector3DBasics desiredInternalAngularMomentum = new FrameVector3D(worldFrame);
+   private final FrameVector3DBasics desiredInternalAngularMomentumRate = new FrameVector3D(worldFrame);
 
    private final WrenchBasics desiredWrench = new Wrench(worldFrame, worldFrame);
 
@@ -140,7 +141,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       qpSolver.setFirstOrientationVariableRegularization(1e-10);
       qpSolver.setSecondOrientationVariableRegularization(1e-10);
 
-      includeIntermediateOrientationTracking.set(defaultIncludeIntermediateOrientationTracking);
+      includeIntermediateOrientationTracking.set(mpcParameters.includeIntermediateOrientationTracking());
 
       parentRegistry.addChild(registry);
    }
@@ -352,6 +353,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                        FixedFramePoint3DBasics ecmpPositionToPack)
    {
       linearTrajectoryHandler.compute(timeInPhase);
+      linearTrajectoryHandler.computeOutsidePreview(timeInPhase);
       wrenchTrajectoryHandler.compute(timeInPhase);
       orientationTrajectoryHandler.compute(timeInPhase);
 
@@ -369,6 +371,9 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       desiredBodyOrientation.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientation());
       desiredBodyAngularVelocity.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularVelocity());
       desiredBodyAngularAcceleration.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularAcceleration());
+
+      desiredInternalAngularMomentum.setMatchingFrame(orientationTrajectoryHandler.getDesiredInternalAngularMomentum());
+      desiredInternalAngularMomentumRate.setMatchingFrame(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
 
       desiredWrench.setMatchingFrame(wrenchTrajectoryHandler.getDesiredWrench());
 
@@ -412,6 +417,16 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    public FrameVector3DReadOnly getDesiredBodyAngularAccelerationSolution()
    {
       return desiredBodyAngularAcceleration;
+   }
+
+   public FrameVector3DReadOnly getDesiredInternalAngularMomentum()
+   {
+      return desiredInternalAngularMomentum;
+   }
+
+   public FrameVector3DReadOnly getDesiredInternalAngularMomentumRate()
+   {
+      return desiredInternalAngularMomentumRate;
    }
 
    public FrameOrientation3DReadOnly getReferenceBodyOrientation()

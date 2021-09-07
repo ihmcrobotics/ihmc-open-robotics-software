@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
@@ -121,6 +122,9 @@ public class InverseDynamicsOptimizationControlModule
       absoluteMaximumJointAcceleration.set(optimizationSettings.getMaximumJointAcceleration());
       qDDotMinMatrix = new DMatrixRMaj(numberOfDoFs, 1);
       qDDotMaxMatrix = new DMatrixRMaj(numberOfDoFs, 1);
+
+      CommonOps_DDRM.fill(qDDotMinMatrix, Double.NEGATIVE_INFINITY);
+      CommonOps_DDRM.fill(qDDotMaxMatrix, Double.POSITIVE_INFINITY);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {

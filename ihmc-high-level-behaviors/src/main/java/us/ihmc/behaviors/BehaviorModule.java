@@ -54,7 +54,7 @@ public class BehaviorModule
    private final YoBoolean enabled = new YoBoolean("enabled", yoRegistry);
    private PausablePeriodicThread yoServerUpdateThread;
    private StatusLogger statusLogger;
-   private final FallbackNode rootNode = new FallbackNode();
+   private BehaviorTreeControlFlowNode rootNode;
    private BehaviorInterface highestLevelNode;
    private PausablePeriodicThread behaviorTreeTickThread;
 
@@ -126,10 +126,18 @@ public class BehaviorModule
 
       statusLogger = new StatusLogger(messager::submitMessage);
 
+      rootNode = new BehaviorTreeControlFlowNode()
+      {
+         @Override
+         public BehaviorTreeNodeStatus tickInternal()
+         {
+            if (enabled.getValue())
+               return highestLevelNode.tick();
+            else
+               return BehaviorTreeNodeStatus.FAILURE;
+         }
+      };
       rootNode.setName("Behavior Module");
-      BehaviorTreeCondition disabledNode = new BehaviorTreeCondition(() -> !enabled.getValue());
-      disabledNode.setName("Disabled");
-      rootNode.addChild(disabledNode);
 
       BehaviorDefinition highestLevelNodeDefinition = behaviorRegistry.getHighestLevelNode();
       BehaviorHelper helper = new BehaviorHelper(highestLevelNodeDefinition.getName(), robotModel, ros2Node);
@@ -139,7 +147,6 @@ public class BehaviorModule
          yoRegistry.addChild(highestLevelNode.getYoRegistry());
       }
       helper.getMessagerHelper().setExternallyStartedMessager(messager);
-      highestLevelNode.setEnabled(true);
       rootNode.addChild(highestLevelNode);
 
       behaviorTreeTickThread = new PausablePeriodicThread("BehaviorTree", UnitConversions.hertzToSeconds(5.0), () ->

@@ -1,13 +1,13 @@
 package us.ihmc.gdx.ui.behaviors;
 
 import imgui.ImGui;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 
 public class ExampleSimpleNodeInterface extends GDXBehaviorUIInterface
 {
-   public ExampleSimpleNodeInterface(String name) {
+   public ExampleSimpleNodeInterface(String name)
+   {
       setName(name);
    }
 

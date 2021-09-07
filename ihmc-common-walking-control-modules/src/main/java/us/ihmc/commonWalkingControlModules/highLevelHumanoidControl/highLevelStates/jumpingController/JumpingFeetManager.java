@@ -27,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
@@ -103,6 +104,16 @@ public class JumpingFeetManager
       }
    }
 
+   public void initializeSwingTrajectoryPreview(RobotSide upcomingSwingSide, FramePose3DReadOnly footstepPoseRelativeToTouchdownCoM, double swingHeight, double swingTime)
+   {
+      footControlModules.get(upcomingSwingSide).initializeSwingTrajectoryPreview(footstepPoseRelativeToTouchdownCoM, swingHeight, swingTime);
+   }
+
+   public void updateSwingTrajectoryPreview(RobotSide upcomingSwingSide)
+   {
+      footControlModules.get(upcomingSwingSide).updateSwingTrajectoryPreview();
+   }
+
    public void requestSwing(RobotSide upcomingSwingSide,
                             FramePose3DReadOnly footstepPoseRelativeToTouchdownCoM,
                             double swingHeight,
@@ -111,6 +122,11 @@ public class JumpingFeetManager
       JumpingFootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
       footControlModule.setFootstep(footstepPoseRelativeToTouchdownCoM, swingHeight, swingTime);
       setContactStateForSwing(upcomingSwingSide);
+   }
+
+   public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getSwingTrajectory();
    }
 
    public ConstraintType getCurrentConstraintType(RobotSide robotSide)

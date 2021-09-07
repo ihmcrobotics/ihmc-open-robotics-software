@@ -91,4 +91,10 @@ public class ValkyrieStepReachabilityCalculator extends HumanoidStepReachability
    {
       return new ValkyrieFootstepPlannerCollisionModel(jointMap);
    }
+
+   @Override
+   protected String getResourcesDirectory()
+   {
+      return "ihmc-open-robotics-software/valkyrie/src/main/resources";
+   }
 }
