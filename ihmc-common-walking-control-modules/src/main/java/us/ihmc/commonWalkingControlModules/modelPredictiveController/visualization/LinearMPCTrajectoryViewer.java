@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class LinearMPCTrajectoryViewer
 {
    private static final int numberOfVectors = 100;
-   private static final double dt = 0.05;
+   private static final double dt = 0.01;
    private static final double ballSize = 0.005;
 
    private final BagOfVectors comTrajectoryVectors;
@@ -37,13 +37,13 @@ public class LinearMPCTrajectoryViewer
       orientationAppearance.setTransparency(0.8);
    }
 
-   public void compute(EuclideanModelPredictiveController mpc, double currentTimeInState)
+   public void compute(EuclideanModelPredictiveController mpc, double currentTimeInState, double durationToView)
    {
       comTrajectoryVectors.reset();
       dcmTrajectoryVectors.reset();
       vrpTrajectoryVectors.reset();
 
-      int max = Math.min(numberOfVectors, (int) (0.75 / dt));
+      int max = Math.min(numberOfVectors, (int) (durationToView / dt));
       for (int i = 0; i < max; i++)
       {
          double time = dt * i + currentTimeInState;

@@ -95,6 +95,12 @@ public class JumpingCoPTrajectoryGeneratorState extends YoSaveableModuleState
       footPolygonsInSole.get(robotSide).setMatchingFrame(supportPolygon, false);
    }
 
+   public void initializeStance(RobotSide robotSide, FrameConvexPolygon2DReadOnly supportPolygon, FramePose3DReadOnly footPose)
+   {
+      footPoses.get(robotSide).set(footPose);
+      footPolygonsInSole.get(robotSide).setMatchingFrame(supportPolygon, false);
+   }
+
    public void setJumpingGoal(JumpingGoal jumpingGoal)
    {
       this.jumpingGoal.set(jumpingGoal);

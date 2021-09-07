@@ -2,8 +2,10 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling
 
 import org.ejml.data.DMatrixRMaj;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCParameters;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis3D;
@@ -11,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
@@ -33,6 +36,7 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.Co
  */
 public class LinearMPCTrajectoryHandler
 {
+   private static final boolean debug = true;
    private final CoMTrajectoryPlanner positionInitializationCalculator;
 
    protected final RecyclingArrayList<ContactPlaneProvider> planningWindowForSolution = new RecyclingArrayList<>(ContactPlaneProvider::new);
@@ -185,12 +189,30 @@ public class LinearMPCTrajectoryHandler
          startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
       }
 
+
       overwriteTrajectoryOutsidePreviewWindow(omega);
       overwriteContactsOutsidePreviewWindow(fullContactSequence);
 
+      if (debug)
+      {
+         double epsilon = 1e-8;
+         for (int i = 0; i < comTrajectory.getCurrentNumberOfSegments() - 1; i++)
+         {
+            CoMTrajectorySegment currentSegment = comTrajectory.getSegment(i);
+            CoMTrajectorySegment nextSegment = comTrajectory.getSegment(i + 1);
+            currentSegment.compute(currentSegment.getTimeInterval().getDuration() - epsilon);
+            nextSegment.compute(epsilon);
+
+            if (!currentSegment.getPosition().epsilonEquals(nextSegment.getPosition(), 1e-4) && i < planningWindow.size() - 1 || (MPCParameters.includeFinalCoMPositionObjective && MPCParameters.finalCoMPositionConstraintType == ConstraintType.EQUALITY))
+               LogTools.error("C0 Discontinuous CoM trajectory. Position jumps from " + currentSegment.getPosition() + " to " + nextSegment.getPosition() + " at junction " + i);
+            if (!currentSegment.getVelocity().epsilonEquals(nextSegment.getVelocity(), 1e-4) && i < planningWindow.size() - 1)
+               LogTools.error("C1 Discontinuous CoM trajectory. Velocity jumps from " + currentSegment.getVelocity() + " to " + nextSegment.getVelocity() + " at junction " + i);
+         }
+      }
+
       hasTrajectory = true;
 
-      if (vrpTrajectories.size() != fullContactSet.size())
+      if (debug && vrpTrajectories.size() != fullContactSet.size())
          throw new RuntimeException("Somehow these didn't match up.");
    }
 
