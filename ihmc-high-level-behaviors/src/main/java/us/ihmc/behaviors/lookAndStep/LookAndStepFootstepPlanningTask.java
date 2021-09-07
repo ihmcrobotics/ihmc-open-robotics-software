@@ -446,11 +446,13 @@ public class LookAndStepFootstepPlanningTask
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
+//      footstepPlannerRequest.getBodyPathWaypoints().add(bodyPathPlan.get(0)); // Not good, robot take steps to go here first
+      footstepPlannerRequest.getBodyPathWaypoints().add(subGoalPoseBetweenFeet);
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       // TODO: Set start footholds!!
-      // TODO: Need to plan from where current stance and swing end are to prevent re-stepping in the same spot
+      // TODO: only set square up steps at the end
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(combinedRegionsForPlanning);
       footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeout());
