@@ -79,7 +79,6 @@ public class VisibilityGraph
 
    public void fullyExpandVisibilityGraph()
    {
-
       for (VisibilityGraphNavigableRegion visibilityGraphNavigableRegion : visibilityGraphNavigableRegions)
       {
          visibilityGraphNavigableRegion.createGraphBetweenInnerClusterRings();
