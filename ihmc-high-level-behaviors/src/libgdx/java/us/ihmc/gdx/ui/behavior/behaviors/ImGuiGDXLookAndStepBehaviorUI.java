@@ -108,7 +108,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootstepsGraphic.setTransparency(0.4);
-      helper.subscribeViaCallback(StartAndGoalFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
+      helper.subscribeViaCallback(ImminentFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
       helper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
       helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 15);

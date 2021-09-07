@@ -404,15 +404,15 @@ public class LookAndStepFootstepPlanningTask
       uiPublisher.publishToUI(ImpassibilityDetected, false);
 
       // update last stepped poses to plan from; initialize to current poses
-      ArrayList<MinimalFootstep> startFootPosesForUI = new ArrayList<>();
+      ArrayList<MinimalFootstep> imminentFootPosesForUI = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
       {
-         startFootPosesForUI.add(new MinimalFootstep(side,
+         imminentFootPosesForUI.add(new MinimalFootstep(side,
                                                      new Pose3D(startFootPoses.get(side).getSolePoseInWorld()),
                                                      startFootPoses.get(side).getFoothold(),
-                                                     "Look and Step " + side.getPascalCaseName() + " Start"));
+                                                     "Look and Step " + side.getPascalCaseName() + " Imminent"));
       }
-      uiPublisher.publishToUI(StartAndGoalFootPosesForUI, startFootPosesForUI);
+      uiPublisher.publishToUI(ImminentFootPosesForUI, imminentFootPosesForUI);
 
       RobotSide stanceSide;
       // if last plan failed

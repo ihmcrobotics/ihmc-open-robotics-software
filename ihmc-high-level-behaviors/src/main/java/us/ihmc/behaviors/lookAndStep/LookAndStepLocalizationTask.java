@@ -163,7 +163,8 @@ public class LookAndStepLocalizationTask
          }
          ThreadTools.startAsDaemon(this::reachedGoalPublicationThread, "BroadcastReachedGoalWhenDoneWalking");
       }
-      else if (newGoalWasSubmitted && didFootstepPlanningOnceToEnsureSomeProgress)
+//      else if (newGoalWasSubmitted && didFootstepPlanningOnceToEnsureSomeProgress)
+      else if (newGoalWasSubmitted)
       {
          didFootstepPlanningOnceToEnsureSomeProgress = false;
          statusLogger.info("Planning to new goal.");
