@@ -1000,7 +1000,6 @@ public class VisibilityGraphTest
          }
       };
       parameters.setClusterResolution(0.501);
-      parameters.setIncludePreferredExtrusions(false);
       return parameters;
    }
 
