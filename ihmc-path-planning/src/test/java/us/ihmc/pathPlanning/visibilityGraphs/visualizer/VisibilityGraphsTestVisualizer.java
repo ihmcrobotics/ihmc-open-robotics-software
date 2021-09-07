@@ -68,8 +68,6 @@ public class VisibilityGraphsTestVisualizer
    @FXML
    private ToggleButton showClusterRawPointsToggleButton, showClusterNavigableExtrusionsToggleButton, showClusterNonNavigableExtrusionsToggleButton;
    @FXML
-   private ToggleButton showClusterPreferredNavigableExtrusionsToggleButton, showClusterPreferredNonNavigableExtrusionsToggleButton;
-   @FXML
    private ToggleButton showInnerRegionMapsToggleButton, showInnerRegionHomeNodesToggleButton, showInterRegionMapToggleButton;
    @FXML
    private ToggleButton showStartMapToggleButton, showGoalMapToggleButton;
@@ -100,7 +98,7 @@ public class VisibilityGraphsTestVisualizer
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterPreferredNavigableExtrusions, ShowClusterPreferredNonNavigableExtrusions,
+      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints,
                                   ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, NavigableRegionData);
 
       navigableRegionMeshViewer = new NavigableRegionViewer(messager, executorService);
@@ -176,8 +174,6 @@ public class VisibilityGraphsTestVisualizer
       messager.bindBidirectional(ShowPlanarRegions, showPlanarRegionsToggleButton.selectedProperty(), true);
 
       messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), false);
-      messager.bindBidirectional(ShowClusterPreferredNavigableExtrusions, showClusterPreferredNavigableExtrusionsToggleButton.selectedProperty(), false);
-      messager.bindBidirectional(ShowClusterPreferredNonNavigableExtrusions, showClusterPreferredNonNavigableExtrusionsToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), false);
       messager.bindBidirectional(ShowInnerRegionVisibilityMapEdges, showInnerRegionMapsToggleButton.selectedProperty(), false);

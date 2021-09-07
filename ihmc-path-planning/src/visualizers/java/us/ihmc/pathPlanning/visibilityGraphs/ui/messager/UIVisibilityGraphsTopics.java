@@ -56,8 +56,6 @@ public class UIVisibilityGraphsTopics
    public static final Topic<Boolean> ShowBodyPath = topic("ShowBodyPath");
    public static final Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
    public static final Topic<Boolean> ShowClusterRawPoints = topic("ShowClusterRawPoints");
-   public static final Topic<Boolean> ShowClusterPreferredNavigableExtrusions = topic("ShowClusterPreferredNavigableExtrusions");
-   public static final Topic<Boolean> ShowClusterPreferredNonNavigableExtrusions = topic("ShowClusterPreferredNonNavigableExtrusions");
    public static final Topic<Boolean> ShowClusterNavigableExtrusions = topic("ShowClusterNavigableExtrusions");
    public static final Topic<Boolean> ShowClusterNonNavigableExtrusions = topic("ShowClusterNonNavigableExtrusions");
    public static final Topic<Boolean> exportUnitTestDataFile = topic("exportUnitTestDataFile");

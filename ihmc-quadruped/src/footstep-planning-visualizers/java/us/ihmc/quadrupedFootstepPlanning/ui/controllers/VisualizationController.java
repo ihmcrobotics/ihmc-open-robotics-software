@@ -34,10 +34,6 @@ public class VisualizationController
    @FXML
    private CheckBox showClusterNonNavigableExtrusionsToggleButton;
    @FXML
-   private CheckBox showClusterPreferredNavigableExtrusionsToggleButton;
-   @FXML
-   private CheckBox showClusterPreferredNonNavigableExtrusionsToggleButton;
-   @FXML
    private CheckBox showSolution;
 
    private JavaFXMessager messager;
@@ -55,8 +51,6 @@ public class VisualizationController
 
       messager.bindBidirectional(PawStepPlannerMessagerAPI.ShowPlanarRegionsTopic, showPlanarRegionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(PawStepPlannerMessagerAPI.ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(PawStepPlannerMessagerAPI.ShowClusterPreferredNavigableExtrusions, showClusterPreferredNavigableExtrusionsToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(PawStepPlannerMessagerAPI.ShowClusterPreferredNonNavigableExtrusions, showClusterPreferredNonNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(PawStepPlannerMessagerAPI.ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(PawStepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), true);
 

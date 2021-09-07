@@ -6,8 +6,6 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGrap
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.InterRegionVisibilityMap;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NavigableRegionData;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.NavigableRegionVisibilityMap;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterPreferredNavigableExtrusions;
-import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterPreferredNonNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterNonNavigableExtrusions;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics.ShowClusterRawPoints;
@@ -74,7 +72,7 @@ public class VisibilityGraphsRenderer
       bodyPathMeshViewer = new BodyPathMeshViewer(messager, executorService);
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
-      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints, ShowClusterPreferredNavigableExtrusions, ShowClusterPreferredNonNavigableExtrusions,
+      clusterMeshViewer.setTopics(GlobalReset, ShowClusterRawPoints,
                                   ShowClusterNavigableExtrusions, ShowClusterNonNavigableExtrusions, NavigableRegionData);
 
       startMapViewer = new VisibilityMapHolderViewer(messager, executorService);
