@@ -835,9 +835,20 @@ public class CoMTrajectoryModelPredictiveControllerTest
          }
       }
 
-      assertEquals(2, comPositionCommands.size());
-      assertEquals(2, comVelocityCommands.size());
-      assertEquals(0, dcmPositionCommands.size());
+      int expectedCoMPositionCommands = 1;
+      int expectedCoMVelocityCommands = 0;
+      int expectedDCMPositionCommands = 0;
+      if (MPCParameters.includeFinalCoMPositionObjective)
+         expectedCoMPositionCommands += 1;
+      if (MPCParameters.includeInitialCoMVelocityObjective)
+         expectedCoMVelocityCommands += 1;
+      if (MPCParameters.includeFinalDCMPositionObjective)
+         expectedDCMPositionCommands += 1;
+      if (MPCParameters.includeFinalCoMVelocityObjective)
+         expectedCoMVelocityCommands += 1;
+      assertEquals(expectedCoMPositionCommands, comPositionCommands.size());
+      assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
+      assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
       assertEquals(1, vrpPositionCommands.size());
       assertEquals(1, vrpTrackingCommands.size());
 
@@ -849,9 +860,12 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(omega, comVelocityCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comVelocityCommands.get(0).getObjective(), epsilon);
 
-      assertEquals(previewWindowLength.getDoubleValue(), comPositionCommands.get(1).getTimeOfObjective(), epsilon);
-      assertEquals(omega, comPositionCommands.get(1).getOmega(), epsilon);
-//      EuclidCoreTestTools.assertTuple3DEquals(initialCoM, comPositionCommands.get(1).getObjective(), epsilon);
+      if (MPCParameters.includeFinalCoMPositionObjective)
+      {
+         assertEquals(previewWindowLength.getDoubleValue(), comPositionCommands.get(1).getTimeOfObjective(), epsilon);
+         assertEquals(omega, comPositionCommands.get(1).getOmega(), epsilon);
+         //      EuclidCoreTestTools.assertTuple3DEquals(initialCoM, comPositionCommands.get(1).getObjective(), epsilon);
+      }
 
       assertEquals(previewWindowLength.getDoubleValue(), vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, vrpPositionCommands.get(0).getOmega(), epsilon);
