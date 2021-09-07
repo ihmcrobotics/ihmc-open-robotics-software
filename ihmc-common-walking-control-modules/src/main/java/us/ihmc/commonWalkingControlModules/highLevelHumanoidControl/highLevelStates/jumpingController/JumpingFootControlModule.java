@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -15,12 +16,15 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -86,7 +90,7 @@ public class JumpingFootControlModule
       String namePrefix = sidePrefix + "Foot";
       registry = new YoRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      footControlHelper = new JumpingFootControlHelper(robotSide, walkingControllerParameters, controllerToolbox);
+      footControlHelper = new JumpingFootControlHelper(robotSide, walkingControllerParameters, controllerToolbox, registry);
 
       this.controllerToolbox = controllerToolbox;
       this.robotSide = robotSide;
@@ -207,9 +211,30 @@ public class JumpingFootControlModule
       return currentConstraintType == ConstraintType.FULL;
    }
 
+   public void initializeSwingTrajectoryPreview(FramePose3DReadOnly footstepPoseRelativeToTouchdownCoM, double swingHeight, double swingDuration)
+   {
+      JumpingSwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      swingTrajectoryCalculator.setInitialConditionsToCurrent();
+      swingTrajectoryCalculator.setFootstep(footstepPoseRelativeToTouchdownCoM, swingHeight, swingDuration);
+      swingTrajectoryCalculator.setShouldVisualize(false);
+      swingTrajectoryCalculator.initializeTrajectoryWaypoints(true);
+   }
+
+   public void updateSwingTrajectoryPreview()
+   {
+      JumpingSwingTrajectoryCalculator swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
+      if (swingTrajectoryCalculator.doOptimizationUpdate())
+         swingTrajectoryCalculator.initializeTrajectoryWaypoints(false);
+   }
+
    public void setFootstep(FramePose3DReadOnly footstepPoseRelativeToTouchdownCoM, double swingHeight, double swingTime)
    {
       swingState.setFootstep(footstepPoseRelativeToTouchdownCoM, swingHeight, swingTime);
+   }
+
+   public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory()
+   {
+      return footControlHelper.getSwingTrajectoryCalculator().getSwingTrajectory();
    }
 
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()

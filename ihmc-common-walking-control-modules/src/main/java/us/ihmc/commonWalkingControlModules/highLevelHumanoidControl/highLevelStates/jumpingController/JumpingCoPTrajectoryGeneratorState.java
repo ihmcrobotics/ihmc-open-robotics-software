@@ -12,6 +12,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -25,6 +26,10 @@ public class JumpingCoPTrajectoryGeneratorState extends YoSaveableModuleState
    private final YoFramePoint3D initialCoP;
 
    private final JumpingGoalVariable jumpingGoal;
+
+   private final YoDouble timeAtStartOfState;
+   private final YoDouble currentTimeInState;
+   private final YoBoolean isInFlight;
 
    private final SideDependentList<FixedFrameConvexPolygon2DBasics> footPolygonsInSole = new SideDependentList<>();
    private final SideDependentList<FixedFramePose3DBasics> footPoses = new SideDependentList<>();
@@ -40,6 +45,13 @@ public class JumpingCoPTrajectoryGeneratorState extends YoSaveableModuleState
 
       initialCoP = new YoFramePoint3D("initialCoP", ReferenceFrame.getWorldFrame(), registry);
       YoSaveableModuleStateTools.registerYoTuple3DToSave(initialCoP, this);
+
+      timeAtStartOfState = new YoDouble("timeAtStartOfState", registry);
+      currentTimeInState = new YoDouble("currentTimeInState", registry);
+      isInFlight = new YoBoolean("isInFlight", registry);
+      registerVariableToSave(timeAtStartOfState);
+      registerVariableToSave(currentTimeInState);
+      registerVariableToSave(isInFlight);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -106,6 +118,36 @@ public class JumpingCoPTrajectoryGeneratorState extends YoSaveableModuleState
    public JumpingGoalVariable getJumpingGoal()
    {
       return jumpingGoal;
+   }
+
+   public void setTimeAtStartOfState(double timeAtStartOfState)
+   {
+      this.timeAtStartOfState.set(timeAtStartOfState);
+   }
+
+   public void setCurrentTimeInState(double currentTimeInState)
+   {
+      this.currentTimeInState.set(currentTimeInState);
+   }
+
+   public double getCurrentTimeInState()
+   {
+      return currentTimeInState.getDoubleValue();
+   }
+
+   public double getTimeAtStartOfState()
+   {
+      return timeAtStartOfState.getDoubleValue();
+   }
+
+   public void setIsInFlight(boolean isInFlight)
+   {
+      this.isInFlight.set(isInFlight);
+   }
+
+   public boolean getIsInFlight()
+   {
+      return isInFlight.getBooleanValue();
    }
 
    public double getFinalTransferDuration()
