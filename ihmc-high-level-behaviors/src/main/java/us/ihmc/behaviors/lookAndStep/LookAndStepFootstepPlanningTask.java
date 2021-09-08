@@ -404,15 +404,15 @@ public class LookAndStepFootstepPlanningTask
       uiPublisher.publishToUI(ImpassibilityDetected, false);
 
       // update last stepped poses to plan from; initialize to current poses
-      ArrayList<MinimalFootstep> startFootPosesForUI = new ArrayList<>();
+      ArrayList<MinimalFootstep> imminentFootPosesForUI = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
       {
-         startFootPosesForUI.add(new MinimalFootstep(side,
+         imminentFootPosesForUI.add(new MinimalFootstep(side,
                                                      new Pose3D(startFootPoses.get(side).getSolePoseInWorld()),
                                                      startFootPoses.get(side).getFoothold(),
-                                                     side.getPascalCaseName() + " Start"));
+                                                     "Look and Step " + side.getPascalCaseName() + " Imminent"));
       }
-      uiPublisher.publishToUI(StartAndGoalFootPosesForUI, startFootPosesForUI);
+      uiPublisher.publishToUI(ImminentFootPosesForUI, imminentFootPosesForUI);
 
       RobotSide stanceSide;
       // if last plan failed
@@ -446,11 +446,12 @@ public class LookAndStepFootstepPlanningTask
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
+//      footstepPlannerRequest.getBodyPathWaypoints().add(waypoint); // use these to add waypoints between start and goal
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       // TODO: Set start footholds!!
-      // TODO: Need to plan from where current stance and swing end are to prevent re-stepping in the same spot
+      // TODO: only set square up steps at the end
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(combinedRegionsForPlanning);
       footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeout());
@@ -503,7 +504,6 @@ public class LookAndStepFootstepPlanningTask
          {
             planarRegionsHistory.removeFirst();
          }
-         uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
 
          FootstepPlan footstepPlan = new FootstepPlan();
          for (int i = 0; i < lookAndStepParameters.getMaxStepsToSendToController()
@@ -513,6 +513,8 @@ public class LookAndStepFootstepPlanningTask
          }
          footstepPlan.setFinalTransferSplitFraction(footstepPlannerOutput.getFootstepPlan().getFinalTransferSplitFraction());
          footstepPlan.setFinalTransferWeightDistribution(footstepPlannerOutput.getFootstepPlan().getFinalTransferWeightDistribution());
+
+         uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlan, "Look and Step Planned"));
 
          // Extend the swing duration if necessary.
          // TODO: Check and see if this is ensured by the footstep planner and remove it.
@@ -547,7 +549,8 @@ public class LookAndStepFootstepPlanningTask
 
          if (operatorReviewEnabledSupplier.get())
          {
-            helper.getOrCreateRobotInterface().pauseWalking();
+            if (lookAndStepParameters.getMaxStepsToSendToController() > 1)
+               helper.getOrCreateRobotInterface().pauseWalking();
             review.review(footstepPlan);
          }
          else
@@ -575,28 +578,13 @@ public class LookAndStepFootstepPlanningTask
       private final Pose3D leftFootStancePose = new Pose3D();
       private final Pose3D rightFootStancePose = new Pose3D();
 
-      private double minimumTranslation = lookAndStepParameters.getMinimumStepTranslation();
-      private double minimumRotation = Math.toRadians(lookAndStepParameters.getMinimumStepOrientation());
-
-      public void setStanceFeetPoses(SideDependentList<Pose3DReadOnly> stanceFeetPoses)
-      {
-         setStanceFeetPoses(stanceFeetPoses.get(RobotSide.LEFT), stanceFeetPoses.get(RobotSide.RIGHT));
-      }
+      private final double minimumTranslation = lookAndStepParameters.getMinimumStepTranslation();
+      private final double minimumRotation = Math.toRadians(lookAndStepParameters.getMinimumStepOrientation());
 
       public void setStanceFeetPoses(Pose3DReadOnly leftFootStancePose, Pose3DReadOnly rightFootStancePose)
       {
          this.leftFootStancePose.set(leftFootStancePose);
          this.rightFootStancePose.set(rightFootStancePose);
-      }
-
-      public void setMinimumTranslation(double minimumTranslation)
-      {
-         this.minimumTranslation = minimumTranslation;
-      }
-
-      public void setMinimumRotation(double minimumRotation)
-      {
-         this.minimumRotation = minimumRotation;
       }
 
       @Override

@@ -25,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
@@ -180,6 +181,11 @@ public class FocusBasedGDXCamera extends Camera
          longitude = -longitude;
    }
 
+   public void translateCameraFocusPoint(Tuple3DReadOnly translation)
+   {
+      focusPointPose.getPosition().add(translation);
+   }
+
    private void updateCameraPose()
    {
       zoom = MathTools.clamp(zoom, 0.1, 100.0);
@@ -194,7 +200,6 @@ public class FocusBasedGDXCamera extends Camera
 
       focusPointAxisAngle.set(Axis3D.Z, -longitude);
 
-      focusPointPose.changeFrame(ReferenceFrame.getWorldFrame());
       focusPointPose.getOrientation().set(focusPointAxisAngle);
 
       focusPointSphere.nodes.get(0).translation.set((float) focusPointPose.getX(), (float) focusPointPose.getY(), (float) focusPointPose.getZ());

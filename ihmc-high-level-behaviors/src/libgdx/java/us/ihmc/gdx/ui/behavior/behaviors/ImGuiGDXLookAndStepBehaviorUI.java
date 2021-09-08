@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.behaviors;
+package us.ihmc.gdx.ui.behavior.behaviors;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -11,7 +11,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
@@ -23,8 +23,8 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXBodyPathPlanGraphic;
 import us.ihmc.gdx.ui.graphics.GDXBoxVisualizer;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
@@ -33,6 +33,7 @@ import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.gdx.visualizers.GDXSphereAndArrowGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -40,16 +41,16 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
+public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
 {
-   public static final GDXBehaviorUIDefinition DEFINITION = new GDXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION,
-                                                                                        ImGuiGDXLookAndStepBehaviorUI::new);
+   public static final ImGuiGDXBehaviorUIDefinition DEFINITION = new ImGuiGDXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION,
+                                                                                                  ImGuiGDXLookAndStepBehaviorUI::new);
 
    private final BehaviorHelper helper;
    private final AtomicReference<ArrayList<MinimalFootstep>> latestPlannedFootsteps;
    private final AtomicReference<ArrayList<MinimalFootstep>> latestCommandedFootsteps;
    private String currentState = "";
-   private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean operatorReview = new ImBoolean(true);
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private long numberOfSteppingRegionsReceived = 0;
@@ -63,6 +64,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    private final ImString latestFootstepPlannerLogPath = new ImString();
    private ArrayList<Pair<Integer, Double>> latestFootstepPlannerRejectionReasons = new ArrayList<>();
 
+   private final GDXSphereAndArrowGraphic subGoalGraphic = new GDXSphereAndArrowGraphic();
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final GDXBodyPathPlanGraphic bodyPathPlanGraphic = new GDXBodyPathPlanGraphic();
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
@@ -73,6 +75,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (for Look and Step)");
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
    private final GDXBoxVisualizer obstacleBoxVisualizer = new GDXBoxVisualizer();
+   private final ImBoolean invertShowGraphics = new ImBoolean(false);
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -86,6 +89,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);
       });
+      helper.subscribeViaCallback(GoalForUI, goalAffordance::setGoalPoseNoCallbacks);
+      helper.subscribeViaCallback(SubGoalForUI, subGoalGraphic::setToPose);
       helper.subscribeViaCallback(BodyPathPlanForUI, bodyPath ->
       {
          if (bodyPath != null)
@@ -103,7 +108,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootstepsGraphic.setTransparency(0.4);
-      helper.subscribeViaCallback(StartAndGoalFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
+      helper.subscribeViaCallback(ImminentFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
       helper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
       helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 15);
@@ -142,13 +147,14 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
                                         () -> helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
 
       goalAffordance.create(baseUI, goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
+      subGoalGraphic.create(0.027, 0.027 * 6.0, Color.YELLOW);
 
       baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
    }
 
-   public void setGoal(Pose3D goal)
+   public void setGoal(Pose3DBasics goal)
    {
-      goalAffordance.setGoalPose(goal);
+      goalAffordance.setGoalPoseAndPassOn(goal);
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -192,8 +198,12 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       ImGui.sameLine();
 
       goalAffordance.renderPlaceGoalButton();
-      ImGui.sameLine();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Clear")))
+         clearGraphics();
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Invert"), invertShowGraphics);
 
       if (ImGui.checkbox("Operator review", operatorReview))
       {
@@ -266,12 +276,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderRegularPanelImGuiWidgets()
-   {
-
-   }
-
-   @Override
    public void addChildPanels(ImGuiPanel parentPanel)
    {
       parentPanel.addChild(lookAndStepParameterTuner);
@@ -281,7 +285,13 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return wasTickedRecently(0.5) && !currentState.isEmpty() && !currentState.equals(LookAndStepBehavior.State.RESET.name());
+      boolean wasTickedRecently = wasTickedRecently(0.5);
+      boolean currentStateIsNotEmpty = !currentState.isEmpty();
+      boolean notCurrentlyReset = !currentState.equals(LookAndStepBehavior.State.RESET.name());
+      boolean areGraphicsEnabled = wasTickedRecently && currentStateIsNotEmpty && notCurrentlyReset;
+      if (invertShowGraphics.get())
+         areGraphicsEnabled = !areGraphicsEnabled;
+      return areGraphicsEnabled;
    }
 
    @Override
@@ -290,6 +300,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       if (areGraphicsEnabled())
       {
          goalAffordance.getRenderables(renderables, pool);
+         subGoalGraphic.getRenderables(renderables, pool);
          if (impassibilityDetected.get())
             obstacleBoxVisualizer.getRenderables(renderables, pool);
          footstepPlanGraphic.getRenderables(renderables, pool);
@@ -298,6 +309,17 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
          planarRegionsGraphic.getRenderables(renderables, pool);
          bodyPathPlanGraphic.getRenderables(renderables, pool);
       }
+   }
+
+   public void clearGraphics()
+   {
+      goalAffordance.clear();
+      subGoalGraphic.clear();
+      footstepPlanGraphic.clear();
+      commandedFootstepsGraphic.clear();
+      startAndGoalFootstepsGraphic.clear();
+      planarRegionsGraphic.clear();
+      bodyPathPlanGraphic.clear();
    }
 
    @Override

@@ -93,7 +93,7 @@ public class PatrolBehaviorUI extends JavaFXBehaviorUIInterface
       orientationYawEditor = new OrientationYawEditor(sceneNode);
 
       behaviorMessager.registerTopicListener(CurrentFootstepPlan, footstepPlan ->
-            footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepPlan)));
+            footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepPlan, DEFINITION.getName())));
       behaviorMessager.registerTopicListener(UpDownGoalPoses, result -> Platform.runLater(() -> upDownGoalGraphic.setResult(result)));
 
       Platform.runLater(() ->

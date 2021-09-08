@@ -219,7 +219,8 @@ public class LookAndStepBodyPathPlanningTask
       {
          if (operatorReviewEnabled.get())
          {
-            helper.getOrCreateRobotInterface().pauseWalking();
+            if (lookAndStepParameters.getMaxStepsToSendToController() > 1)
+               helper.getOrCreateRobotInterface().pauseWalking();
             review.review(bodyPathPlanForReview);
          }
          else
