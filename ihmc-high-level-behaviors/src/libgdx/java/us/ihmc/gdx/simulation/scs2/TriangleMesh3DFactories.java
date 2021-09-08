@@ -1342,7 +1342,7 @@ public class TriangleMesh3DFactories
                                                               description.getTopRadiusX(),
                                                               description.getTopRadiusY(),
                                                               description.getResolution(),
-                                                              description.isCentered());
+                                                              description.getCentered());
       if (meshDataHolder != null)
          meshDataHolder.setName(description.getName());
       return meshDataHolder;
