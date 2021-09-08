@@ -26,9 +26,7 @@ import java.util.List;
 
 public class StepReachabilityIOHelper
 {
-   private static final String auxiliaryDataTag = "Auxiliary Data";
    private static final String gridDataTag = "Reachability Grid Data";
-
    private static final String spacingTag = "spacingXYZ";
    private static final String gridSizeTag = "gridSizeYaw";
    private static final String yawDivisionsTag = "yawDivisions";
@@ -107,8 +105,7 @@ public class StepReachabilityIOHelper
          JsonNode jsonNode = objectMapper.readTree(inputStream);
 
          // Unpack auxiliary data
-         JsonNode auxDataNode = jsonNode.get(auxiliaryDataTag);
-         JsonNode gridDataNode = auxDataNode.get(gridDataTag);
+         JsonNode gridDataNode = jsonNode.get(1);
          stepReachabilityData.setGridData(gridDataNode.get(spacingTag).asDouble(),
                                           gridDataNode.get(gridSizeTag).asDouble(),
                                           gridDataNode.get(yawDivisionsTag).asInt());
