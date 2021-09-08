@@ -332,7 +332,6 @@ public class RobotDefinitionTools
       CollisionShapeDefinition output = new CollisionShapeDefinition();
       output.setCollisionMask(source.getCollisionMask());
       output.setCollisionGroup(source.getCollisionGroup());
-      output.setOriginPose(pose);
 
       FrameShape3DReadOnly shape = source.getShape();
 
@@ -432,6 +431,7 @@ public class RobotDefinitionTools
          pose.preMultiply(additionalTransform);
       }
 
+      output.setOriginPose(pose);
       output.setGeometryDefinition(geometry);
 
       return output;
