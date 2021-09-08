@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
@@ -116,7 +117,7 @@ public class GDXWalkPathControlRing
 
       if (footstepPlanToGenerateMeshes != null)
       {
-         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes, "plan"));
+         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes, "Walk Path Control Ring Plan"));
          footstepPlanToGenerateMeshes = null;
       }
       foostepPlanGraphic.update();
@@ -279,6 +280,15 @@ public class GDXWalkPathControlRing
       {
          footstepPlannerGoalGizmo.getRenderables(renderables, pool);
       }
+   }
+
+   public void clearGraphics()
+   {
+      leftStanceFootstepGraphic.setPose(BehaviorTools.createNaNPose());
+      rightStanceFootstepGraphic.setPose(BehaviorTools.createNaNPose());
+      leftGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
+      rightGoalFootstepGraphic.setPose(BehaviorTools.createNaNPose());
+      foostepPlanGraphic.clear();
    }
 
    public void destroy()

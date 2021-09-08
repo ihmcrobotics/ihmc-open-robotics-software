@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -36,6 +37,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final ArrayList<GDXRobotCollisionLink> environmentCollisionLinks = new ArrayList<>();
 
    private final ImGuiPanel panel = new ImGuiPanel("Whole Body Interactable", this::renderImGuiWidgets);
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean showSelfCollisionMeshes = new ImBoolean();
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
@@ -141,6 +143,9 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private void renderImGuiWidgets()
    {
       ImGui.checkbox("Interactables enabled", interactablesEnabled);
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Clear graphics")))
+         walkPathControlRing.clearGraphics();
       ImGui.checkbox("Show self collision meshes", showSelfCollisionMeshes);
       ImGui.checkbox("Show environment collision meshes", showEnvironmentCollisionMeshes);
       ImGui.text("TODO:");

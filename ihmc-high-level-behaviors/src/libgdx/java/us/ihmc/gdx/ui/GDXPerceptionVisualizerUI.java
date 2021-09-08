@@ -60,18 +60,32 @@ public class GDXPerceptionVisualizerUI
         mapsenseConfigurationUI = new ImGuiMapSenseConfigurationPanel(ros1Node, ros2Node);
 
         globalVisualizersUI = new ImGuiGDXGlobalVisualizersPanel();
+
+        globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Lidar REA planar regions", ros2Node, ROS2Tools.LIDAR_REA_REGIONS));
         GDXROS1PlanarRegionsVisualizer mapsenseRegionsVisualizer = new GDXROS1PlanarRegionsVisualizer("MapSense Planar Regions",
                                                                                                       ros2Node,
                                                                                                       RosTools.MAPSENSE_REGIONS);
         globalVisualizersUI.addVisualizer(mapsenseRegionsVisualizer);
-        globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Head Ouster", RosTools.OUSTER_POINT_CLOUD));
+
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Color Video", RosTools.L515_VIDEO));
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Depth Video", RosTools.L515_DEPTH));
         globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("L515 Compressed Video", RosTools.L515_COMPRESSED_VIDEO));
+
+        globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("D435 Compressed Color", RosTools.D435_VIDEO_COMPRESSED));
+        globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("D435 Color", RosTools.D435_VIDEO));
+
+        globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("ZED Left Color", RosTools.ZED2_LEFT_EYE_VIDEO));
+        globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("ZED Right Color", RosTools.ZED2_RIGHT_EYE_VIDEO));
+
+        globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Head Ouster", RosTools.OUSTER_POINT_CLOUD));
         globalVisualizersUI.addVisualizer(new GDXROS2PointCloudVisualizer("MultiSense lidar scan", ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN));
-        globalVisualizersUI.addVisualizer(new GDXROS2PlanarRegionsVisualizer("Lidar REA planar regions", ros2Node, ROS2Tools.LIDAR_REA_REGIONS));
+
         globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("SLAM Poses", RosTools.SLAM_POSE));
         globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("Internal Sensor Pose", "/atlas/sensors/chest_l515/pose"));
+
+        globalVisualizersUI.addVisualizer(new GDXROS1PointCloudVisualizer("Semantic Target Cloud", RosTools.SEMANTIC_TARGET_CLOUD));
+        globalVisualizersUI.addVisualizer(new GDXROS1VideoVisualizer("Semantic Mask", RosTools.SEMANTIC_MASK));
+        globalVisualizersUI.addVisualizer(new GDXROS1OdometryVisualizer("Semantic Target Pose", RosTools.SEMANTIC_TARGET_POSE));
 
 //        simulatedDepthSensor = createSimulatedDepthSensor(ros1Node);
 //        simulatedDepthSensor.setSensorFrameToWorldTransform(depthSensorTransform);
@@ -89,7 +103,7 @@ public class GDXPerceptionVisualizerUI
 //        steppingL515Simulator = GDXSimulatedSensorFactory.createChestL515ForMapSense(syncedRobot, ros1Helper);
 
 //        l515TransformTuner = new GDXTransformTuner(robotModel.getSensorInformation().getSteppingCameraTransform());
-        baseUI.getImGuiPanelManager().addPanel("L515 Transform Tuner", l515TransformTuner::renderImGuiWidgets);
+//        baseUI.getImGuiPanelManager().addPanel("L515 Transform Tuner", l515TransformTuner::renderImGuiWidgets);
 
         baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
         {

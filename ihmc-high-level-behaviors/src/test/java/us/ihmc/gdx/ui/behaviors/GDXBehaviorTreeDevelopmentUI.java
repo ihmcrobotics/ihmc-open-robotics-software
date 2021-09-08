@@ -7,7 +7,8 @@ import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
+import us.ihmc.gdx.ui.behavior.tree.ImGuiImNodesBehaviorTreeUI;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.log.LogTools;
 
 import java.util.Timer;
@@ -19,9 +20,9 @@ public class GDXBehaviorTreeDevelopmentUI
 
    private final GDXImGuiBasedUI baseUI;
 
-   private final ImGuiImNodesBehaviorTreePanel treePanel;
+   private final ImGuiImNodesBehaviorTreeUI treePanel;
    private final BehaviorTreeControlFlowNode tree;
-   private final GDXBehaviorUIInterface treeGui;
+   private final ImGuiGDXBehaviorUIInterface treeGui;
 
    private final Timer timer;
 
@@ -107,10 +108,11 @@ public class GDXBehaviorTreeDevelopmentUI
          }
       });
 
-      treePanel = new ImGuiImNodesBehaviorTreePanel("Test");
 
       treeGui = new ExampleSimpleNodeInterface("SequenceNode");
-      GDXBehaviorUIInterface nodeGui = new ExampleSimpleNodeInterface("FallbackNode");
+      treePanel = new ImGuiImNodesBehaviorTreeUI();
+      treePanel.setRootNode(treeGui);
+      ImGuiGDXBehaviorUIInterface nodeGui = new ExampleSimpleNodeInterface("FallbackNode");
       nodeGui.addChild(new ExampleSimpleNodeInterface("Primary"));
       nodeGui.addChild(new ExampleSimpleNodeInterface("Secondary"));
       nodeGui.addChild(new ExampleSimpleNodeInterface("Tertiary"));
@@ -137,9 +139,9 @@ public class GDXBehaviorTreeDevelopmentUI
             baseUI.create();
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.getImGuiPanelManager().addPanel("Tree Control", this::renderPanel);
-            baseUI.getImGuiPanelManager().addPanel(treePanel.getWindowName(), () -> {
+            baseUI.getImGuiPanelManager().addPanel("Behavior Tree Panel", () -> {
                treeGui.syncTree(tree);
-               treePanel.renderImGuiWidgets(treeGui);
+               treePanel.renderImGuiWidgets();
             });
 
             treePanel.create();
@@ -166,7 +168,7 @@ public class GDXBehaviorTreeDevelopmentUI
          @Override
          public void dispose()
          {
-            treePanel.dispose();
+            treePanel.destroy();
             baseUI.dispose();
          }
       });

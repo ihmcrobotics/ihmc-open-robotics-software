@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.behaviors;
+package us.ihmc.gdx.ui.behavior.behaviors;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -21,8 +21,8 @@ import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXPushHandleRightDoorObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
@@ -35,9 +35,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.door.DoorBehaviorAPI.*;
 
-public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
+public class ImGuiGDXDoorBehaviorUI extends ImGuiGDXBehaviorUIInterface
 {
-   public static final GDXBehaviorUIDefinition DEFINITION = new GDXBehaviorUIDefinition(DoorBehavior.DEFINITION, ImGuiGDXDoorBehaviorUI::new);
+   public static final ImGuiGDXBehaviorUIDefinition DEFINITION = new ImGuiGDXBehaviorUIDefinition(DoorBehavior.DEFINITION, ImGuiGDXDoorBehaviorUI::new);
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final BehaviorHelper helper;
    private final ResettableExceptionHandlingExecutorService behaviorStopperExecutor = MissingThreadTools.newSingleThreadExecutor("behavior_stopper", true);
@@ -172,11 +172,6 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
          helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
       }
       ImGui.checkbox("Show detected door", showDetectedDoorGraphic);
-   }
-
-   @Override
-   public void renderRegularPanelImGuiWidgets()
-   {
    }
 
    @Override

@@ -45,6 +45,11 @@ public class GDXBoxVisualizer implements RenderableProvider
       this.color.set(color);
    }
 
+   public void clear()
+   {
+      generateMesh(new Box3D());
+   }
+
    public void generateMeshAsync(Box3D box)
    {
       executorService.clearQueueAndExecute(() -> generateMesh(box));

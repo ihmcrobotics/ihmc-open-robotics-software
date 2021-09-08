@@ -41,7 +41,7 @@ public class LookAndStepVisualizationGroup extends Group
       startAndGoalFootPoses.setColor(RobotSide.LEFT, Color.BLUE);
       startAndGoalFootPoses.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootPoses.setTransparency(0.4);
-      messager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
+      messager.registerTopicListener(ImminentFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
       footstepPlanGraphic = new FootstepPlanGraphic();
       footstepPlanGraphic.setTransparency(0.2);
       messager.registerTopicListener(PlannedFootstepsForUI, footsteps ->
