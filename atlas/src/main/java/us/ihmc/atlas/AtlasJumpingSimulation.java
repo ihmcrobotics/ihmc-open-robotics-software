@@ -26,9 +26,9 @@ import java.awt.event.ActionListener;
 
 public class AtlasJumpingSimulation
 {
-   private static double jumpLength = 0.5;
+   private static double jumpLength = 0.75;
    private static double flightDuration = 0.25;
-   private static double supportDuration = 0.3;
+   private static double supportDuration = 0.25;
    private static final String parameterResourceName = "/us/ihmc/atlas/parameters/jumping_controller.xml";
 
    public static void main(String[] args)
