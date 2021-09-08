@@ -440,11 +440,6 @@ public class BalanceManager
       if (Double.isNaN(omega0))
          throw new RuntimeException("omega0 is NaN");
 
-//      if (supportLeg == null)
-//         pushRecoveryControlModule.updateForDoubleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
-//      else
-//         pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
-
       // --- compute adjusted desired capture point
       controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
       yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
