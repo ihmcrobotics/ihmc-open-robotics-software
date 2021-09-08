@@ -70,6 +70,8 @@ public class RosTools
    public static final String ZED2_LEFT_EYE_VIDEO = "/zed/color/left/image_raw";
    public static final String ZED2_RIGHT_EYE_VIDEO = "/zed/color/right/image_raw";
    public static final String ZED2_POINT_CLOUD = "/zed/zed_node/point_cloud/cloud_registered";
+   public static final String LOGITECH_BRIO_LEFT_COMPRESSED = "/logitech/left/cam/color/image_raw/compressed";
+   public static final String LOGITECH_BRIO_RIGHT_COMPRESSED = "/logitech/right/cam/color/image_raw/compressed";
 
    public static RosMainNode createRosNode(String uri, String name)
    {
