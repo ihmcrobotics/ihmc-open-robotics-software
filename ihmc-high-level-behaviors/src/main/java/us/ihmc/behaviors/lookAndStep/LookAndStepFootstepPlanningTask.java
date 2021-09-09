@@ -158,9 +158,10 @@ public class LookAndStepFootstepPlanningTask
          suppressor.addCondition("Plan being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
          suppressor.addCondition("Robot not in walking state", () -> !controllerStatusTracker.isInWalkingState());
-//         suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
-//                                       + " > " + lookAndStepParameters.getAcceptableIncompleteFootsteps(),
-//                                 () -> numberOfIncompleteFootsteps > lookAndStepParameters.getAcceptableIncompleteFootsteps());
+         suppressor.addCondition(() -> "numberOfIncompleteFootsteps " + numberOfIncompleteFootsteps
+                                       + " > " + lookAndStepParameters.getAcceptableIncompleteFootsteps(),
+                                 () -> lookAndStepParameters.getMaxStepsToSendToController() == 1
+                                       && numberOfIncompleteFootsteps > lookAndStepParameters.getAcceptableIncompleteFootsteps());
          suppressor.addCondition(() -> "Swing planner type parameter not valid: " + lookAndStepParameters.getSwingPlannerType(),
                                  () -> swingPlannerType == null);
       }
