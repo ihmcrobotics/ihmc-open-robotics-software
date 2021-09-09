@@ -339,7 +339,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       double magnitude = 350.0;
       double duration = 0.2;
-      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 2.5);
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 4.0);
    }
 
    @Test
@@ -370,6 +370,11 @@ public abstract class DRCPushRecoveryTest
       applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 4.0);
    }
 
+   public double getAngledPushMagnitude()
+   {
+      return 350.0;
+   }
+
    @Test
    public void testRecoveryAngledWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
@@ -393,7 +398,7 @@ public abstract class DRCPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 1.0, 0.0);
-      double magnitude = 350.0;
+      double magnitude = getAngledPushMagnitude();
       double duration = 0.2;
       applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 2.5);
    }
@@ -541,7 +546,7 @@ public abstract class DRCPushRecoveryTest
    {
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, pushDuration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationDuration));
-      assertTrue(currentHighLevelState.getEnumValue().equals(HighLevelControllerName.WALKING));
+      assertTrue("Not back to walking", currentHighLevelState.getEnumValue().equals(HighLevelControllerName.WALKING));
    }
 
    private class PushRecoveryTransferStartCondition implements StateTransitionCondition

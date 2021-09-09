@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie;
 
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
@@ -21,6 +22,12 @@ public class ValkyriePushRecoveryControllerParameters implements PushRecoveryCon
    }
 
    @Override
+   public double getMinimumRecoverySwingDuration()
+   {
+      return 0.3;
+   }
+
+   @Override
    public double getRecoveryTransferDuration()
    {
       return 0.1;
@@ -29,12 +36,20 @@ public class ValkyriePushRecoveryControllerParameters implements PushRecoveryCon
    @Override
    public double getMaxStepLength()
    {
-      return 0.7;
+      return 1.0;
    }
 
    @Override
    public double getMinStepWidth()
    {
-      return 0.15;
+      return 0.075;
    }
+
+
+   @Override
+   public double getMaxStepWidth()
+   {
+      return 0.6;
+   }
+
 }
