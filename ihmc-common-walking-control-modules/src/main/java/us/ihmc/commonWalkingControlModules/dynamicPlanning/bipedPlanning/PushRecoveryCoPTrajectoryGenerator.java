@@ -92,8 +92,7 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
       FramePoint3DReadOnly rightFootPosition = state.getFootPose(RobotSide.RIGHT).getPosition();
       if (combinedPolygon.isPointInside(startICP))
       {
-         stanceCMP.setX(InterpolationTools.linearInterpolate(leftFootPosition.getX(), rightFootPosition.getX(), 0.5));
-         stanceCMP.setY(InterpolationTools.linearInterpolate(leftFootPosition.getY(), rightFootPosition.getY(), 0.5));
+         stanceCMP.set(startICP);
       }
       else
       {
