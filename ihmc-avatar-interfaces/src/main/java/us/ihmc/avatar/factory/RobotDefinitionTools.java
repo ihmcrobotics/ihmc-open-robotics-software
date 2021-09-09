@@ -3,7 +3,6 @@ package us.ihmc.avatar.factory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -18,9 +17,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameSphere3DReadOnly;
 import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DReadOnly;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.SDFAppearance;
@@ -520,8 +517,7 @@ public class RobotDefinitionTools
                else if (instruction instanceof ExtrudedPolygonGraphics3DInstruction)
                {
                   ExtrudedPolygonGraphics3DInstruction extrusion = (ExtrudedPolygonGraphics3DInstruction) instruction;
-                  visualDefinition.setGeometryDefinition(new ExtrudedPolygon2DDefinition(extrusion.getPolygonPoints().stream().map(Point2D::new)
-                                                                                                  .collect(Collectors.toList()),
+                  visualDefinition.setGeometryDefinition(new ExtrudedPolygon2DDefinition(ExtrudedPolygon2DDefinition.toPoint2DDefinitionList(extrusion.getPolygonPoints()),
                                                                                          true,
                                                                                          extrusion.getExtrusionHeight()));
                }
@@ -536,8 +532,7 @@ public class RobotDefinitionTools
                else if (instruction instanceof PolygonGraphics3DInstruction)
                {
                   PolygonGraphics3DInstruction polygon = (PolygonGraphics3DInstruction) instruction;
-                  visualDefinition.setGeometryDefinition(new Polygon3DDefinition(polygon.getPolygonPoints().stream().map(Point3D::new)
-                                                                                        .collect(Collectors.toList()),
+                  visualDefinition.setGeometryDefinition(new Polygon3DDefinition(Polygon3DDefinition.toPoint3DDefinitionList(polygon.getPolygonPoints()),
                                                                                  true));
                }
                else if (instruction instanceof PyramidCubeGraphics3DInstruction)
