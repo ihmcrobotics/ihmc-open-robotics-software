@@ -61,7 +61,6 @@ import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizer;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
-import us.ihmc.scs2.sessionVisualizer.jfx.xml.XMLTools;
 import us.ihmc.scs2.sessionVisualizer.jfx.yoGraphic.SCS1GraphicConversionTools;
 import us.ihmc.scs2.simulation.VisualizationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
@@ -74,10 +73,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public final class KinematicsToolboxControllerTestSCS2
 {
-   static
-   {
-      XMLTools.loadResourcesNow();
-   }
    private static final boolean VERBOSE = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
