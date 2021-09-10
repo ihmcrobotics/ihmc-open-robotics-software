@@ -49,7 +49,7 @@ public class StepReachabilityLatticePoint
       sum += Math.abs(step.getYIndex() - yIndex);
       sum += Math.abs(step.getZIndex() - zIndex);
       sum += Math.abs(step.getYawIndex() - yawIndex);
-      return sum/4;
+      return sum / 4;
    }
 
    private static int computeHashCode(StepReachabilityLatticePoint cell)

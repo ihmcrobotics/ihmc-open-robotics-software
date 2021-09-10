@@ -13,7 +13,6 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
 {
    private ImBoolean active = new ImBoolean(false);
    private final String title;
-   private boolean activeChanged = false;
    private boolean createdYet = false;
 
    public ImGuiGDXVisualizer(String title)
@@ -32,7 +31,7 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      activeChanged = ImGui.checkbox(title, active);
+      ImGui.checkbox(title, active);
    }
 
    public void update()
@@ -51,11 +50,6 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
    public boolean isActive()
    {
       return active.get();
-   }
-
-   public boolean getActiveChanged()
-   {
-      return activeChanged;
    }
 
    @Override

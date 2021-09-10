@@ -341,7 +341,7 @@ public class AtlasCorridorNavigationTest
          // make robot walk a little of the path
          if (VISUALIZE)
          {
-            robotAndMapViewer.setFootstepsToVisualize(footstepPlan);
+            robotAndMapViewer.setFootstepsToVisualize(footstepPlan, "Corridor Navigation");
          }
 
          FootstepPlan shortenedFootstepPlan = new FootstepPlan();

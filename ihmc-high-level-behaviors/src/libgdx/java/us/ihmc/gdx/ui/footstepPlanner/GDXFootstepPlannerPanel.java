@@ -103,7 +103,8 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
          FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
          if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() > 0)
          {
-            foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "plan"));
+            foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
+                                                                                              "Footstep Planner Panel Plan"));
          }
       }
       catch (RuntimeException e)

@@ -84,11 +84,13 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
       stairsFootstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       stairsFootstepPlanGraphic.setTransparency(0.5);
       new IHMCROS2Callback<>(ros2Node, TraverseStairsBehaviorAPI.PLANNED_STEPS, footstepDataListMessage ->
-            stairsFootstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
+            stairsFootstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage,
+                                                                                                                  "Building Exploration Stairs")));
 
       controllerFootstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       new IHMCROS2Callback<>(ros2Node, ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotName), footstepDataListMessage ->
-            controllerFootstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage)));
+            controllerFootstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertFootstepDataListMessage(footstepDataListMessage,
+                                                                                                                      "Building Exploration Controller Spy")));
 
       goalGraphic = new PositionGraphic(Color.GRAY, 0.05);
       goalGraphic.setMouseTransparent(true);

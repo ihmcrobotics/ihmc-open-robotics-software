@@ -30,7 +30,7 @@ public class NavigationBehaviorUI extends JavaFXBehaviorUIInterface
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       get3DGroup().getChildren().add(footstepPlanGraphic);
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlan ->
-            footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepPlan)));
+            footstepPlanGraphic.generateMeshesAsynchronously(MinimalFootstep.convertPairListToMinimalFoostepList(footstepPlan, DEFINITION.getName())));
 
       bodyPathPlanGraphic = new BodyPathPlanGraphic();
       get3DGroup().getChildren().add(bodyPathPlanGraphic);

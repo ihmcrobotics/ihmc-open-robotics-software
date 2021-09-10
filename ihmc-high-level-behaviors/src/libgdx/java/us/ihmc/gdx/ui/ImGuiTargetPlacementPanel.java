@@ -2,15 +2,12 @@ package us.ihmc.gdx.ui;
 
 import imgui.ImGui;
 import us.ihmc.behaviors.BehaviorRegistry;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
-import us.ihmc.behaviors.tools.ManagedMessager;
 import us.ihmc.behaviors.tools.MessagerHelper;
-import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.utilities.ros.RosNodeInterface;
@@ -34,7 +31,7 @@ public class ImGuiTargetPlacementPanel
 
    public ImGuiTargetPlacementPanel(RosNodeInterface ros1Node, ROS2NodeInterface ros2Node)
    {
-      GDXBehaviorUIRegistry defaultBehaviors = GDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
+      ImGuiGDXBehaviorUIRegistry defaultBehaviors = ImGuiGDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
       defaultBehaviors.activateRegistry();
       messagerHelper = new MessagerHelper(BehaviorRegistry.getActiveRegistry().getMessagerAPI());
 

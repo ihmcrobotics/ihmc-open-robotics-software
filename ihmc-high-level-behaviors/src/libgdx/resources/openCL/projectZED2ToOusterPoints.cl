@@ -7,6 +7,7 @@ __kernel void projectZED2ToOusterPoints(__global unsigned char* ousterIn, __glob
    int gid = get_global_id(0); // index of point
 
    int ousterInIndex = gid * 48;
+   // TODO: This does not compile. Convert the chars to float in a different way
    float* ousterFloats = &ousterIn[ousterInIndex];
    float ousterX = ousterFloats[0];
    float ousterY = ousterFloats[1];

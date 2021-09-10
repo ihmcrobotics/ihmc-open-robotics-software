@@ -57,13 +57,13 @@ public abstract class RosTopicPublisher<T extends Message>
       }
    }
 
-   protected void publish(T message)
+   public void publish(T message)
    {
       checkInitialized();
       publisher.publish(message);
    }
 
-   protected T getMessage()
+   public T getMessage()
    {
       checkInitialized();
 
