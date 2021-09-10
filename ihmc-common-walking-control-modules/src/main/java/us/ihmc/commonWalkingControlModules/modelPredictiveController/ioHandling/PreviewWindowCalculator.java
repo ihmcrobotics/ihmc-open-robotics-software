@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.time.TimeIntervalBasics;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -76,7 +77,9 @@ public class PreviewWindowCalculator
       for (int i = 0; i < fullContactSequence.size(); i++)
       {
          TimeIntervalReadOnly timeInterval = fullContactSequence.get(i).getTimeInterval();
-         if (timeInterval.intervalContains(timeAtStartOfWindow))
+         boolean segmentIsValid = timeInterval.intervalContains(timeAtStartOfWindow);
+         boolean notAtEndOfSegment = i >= fullContactSequence.size() - 1 || timeAtStartOfWindow < timeInterval.getEndTime();
+         if (segmentIsValid && notAtEndOfSegment)
          {
             activeSegment = i;
             break;

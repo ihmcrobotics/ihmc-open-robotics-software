@@ -12,7 +12,7 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionS
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
-import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
+import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -105,6 +105,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
+   private StepReachabilityData stepReachabilityData;
 
    private SimulationLowLevelControllerFactory simulationLowLevelControllerFactory;
 
@@ -608,7 +609,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public StepReachabilityData getStepReachabilityData()
    {
-      return StepReachabilityFileTools.loadStepReachability(this);
+      if (stepReachabilityData == null)
+      {
+         stepReachabilityData = new StepReachabilityIOHelper().loadStepReachability(this);
+      }
+
+      return stepReachabilityData;
    }
 
    @Override

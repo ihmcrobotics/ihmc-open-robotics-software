@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.behaviors;
+package us.ihmc.gdx.ui.behavior.tree;
 
 import imgui.ImVec2;
 import imgui.extension.nodeditor.NodeEditor;
@@ -17,7 +17,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -60,14 +60,14 @@ public class ImGuiNodeEditorBehaviorTreePanel
       NodeEditor.pushStyleVar(NodeEditorStyleVar.NodeBorderWidth, 5);
    }
 
-   public void renderAsWindow(GDXBehaviorUIInterface tree)
+   public void renderAsWindow(ImGuiGDXBehaviorUIInterface tree)
    {
       ImGui.begin(windowName);
       renderWidgetsOnly(tree);
       ImGui.end();
    }
 
-   public void renderWidgetsOnly(GDXBehaviorUIInterface tree)
+   public void renderWidgetsOnly(ImGuiGDXBehaviorUIInterface tree)
    {
       NodeEditor.setCurrentEditor(context);
       ImGui.pushFont(ImGuiTools.getNodeFont());
@@ -98,24 +98,24 @@ public class ImGuiNodeEditorBehaviorTreePanel
       firstRun = false;
    }
 
-   private void resetNodeIndex(GDXBehaviorUIInterface tree)
+   private void resetNodeIndex(ImGuiGDXBehaviorUIInterface tree)
    {
       nodeIndex = tree.generateUID();
    }
 
-   private void constructAbegoTree(GDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<GDXBehaviorUIInterface> layout)
+   private void constructAbegoTree(ImGuiGDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<ImGuiGDXBehaviorUIInterface> layout)
    {
       if (tree == null)
          return;
 
-      for (GDXBehaviorUIInterface child : tree.getUIChildren())
+      for (ImGuiGDXBehaviorUIInterface child : tree.getUIChildren())
       {
          layout.addChild(tree, child);
          constructAbegoTree(child, layout);
       }
    }
 
-   private int getIndexOfNodeInternal(GDXBehaviorUIInterface node, GDXBehaviorUIInterface root)
+   private int getIndexOfNodeInternal(ImGuiGDXBehaviorUIInterface node, ImGuiGDXBehaviorUIInterface root)
    {
       if (root.equals(node))
       {
@@ -123,7 +123,7 @@ public class ImGuiNodeEditorBehaviorTreePanel
       }
       else
       {
-         for (GDXBehaviorUIInterface child : root.getUIChildren())
+         for (ImGuiGDXBehaviorUIInterface child : root.getUIChildren())
          {
             nodeIndex++;
             int val = getIndexOfNodeInternal(node, child);
@@ -136,34 +136,34 @@ public class ImGuiNodeEditorBehaviorTreePanel
       return -1;
    }
 
-   private int getIndexOfNode(GDXBehaviorUIInterface node, GDXBehaviorUIInterface tree)
+   private int getIndexOfNode(ImGuiGDXBehaviorUIInterface node, ImGuiGDXBehaviorUIInterface tree)
    {
       resetNodeIndex(tree);
       return getIndexOfNodeInternal(node, tree);
    }
 
-   public void layoutNodes(GDXBehaviorUIInterface tree)
+   public void layoutNodes(ImGuiGDXBehaviorUIInterface tree)
    {
-      DefaultTreeForTreeLayout<GDXBehaviorUIInterface> treeForLayout = new DefaultTreeForTreeLayout<>(tree);
+      DefaultTreeForTreeLayout<ImGuiGDXBehaviorUIInterface> treeForLayout = new DefaultTreeForTreeLayout<>(tree);
       constructAbegoTree(tree, treeForLayout);
 
-      TreeLayout<GDXBehaviorUIInterface> layout = new TreeLayout<>(treeForLayout, new NodeExtentProvider<GDXBehaviorUIInterface>()
+      TreeLayout<ImGuiGDXBehaviorUIInterface> layout = new TreeLayout<>(treeForLayout, new NodeExtentProvider<ImGuiGDXBehaviorUIInterface>()
       {
 
          @Override
-         public double getWidth(GDXBehaviorUIInterface gdxBehaviorUIInterface)
+         public double getWidth(ImGuiGDXBehaviorUIInterface gdxBehaviorUIInterface)
          {
             int index = getIndexOfNode(gdxBehaviorUIInterface, tree);
             return nodeSize.get(index).x;
          }
 
          @Override
-         public double getHeight(GDXBehaviorUIInterface gdxBehaviorUIInterface)
+         public double getHeight(ImGuiGDXBehaviorUIInterface gdxBehaviorUIInterface)
          {
             int index = getIndexOfNode(gdxBehaviorUIInterface, tree);
             return nodeSize.get(index).y;
          }
-      }, new Configuration<GDXBehaviorUIInterface>()
+      }, new Configuration<ImGuiGDXBehaviorUIInterface>()
       {
          @Override
          public Location getRootLocation()
@@ -184,14 +184,14 @@ public class ImGuiNodeEditorBehaviorTreePanel
          }
 
          @Override
-         public double getGapBetweenNodes(GDXBehaviorUIInterface node1, GDXBehaviorUIInterface node2)
+         public double getGapBetweenNodes(ImGuiGDXBehaviorUIInterface node1, ImGuiGDXBehaviorUIInterface node2)
          {
             return 25;
          }
       });
 
-      Map<GDXBehaviorUIInterface, Rectangle2D.Double> map = layout.getNodeBounds();
-      for (GDXBehaviorUIInterface node : map.keySet())
+      Map<ImGuiGDXBehaviorUIInterface, Rectangle2D.Double> map = layout.getNodeBounds();
+      for (ImGuiGDXBehaviorUIInterface node : map.keySet())
       {
          int index = getIndexOfNode(node, tree);
          Rectangle2D.Double pos = map.get(node);
@@ -208,7 +208,7 @@ public class ImGuiNodeEditorBehaviorTreePanel
       }
    }
 
-   private void renderNodeAndChildren(GDXBehaviorUIInterface node, int parentPin, ArrayList<Pair<Integer, Integer>> links)
+   private void renderNodeAndChildren(ImGuiGDXBehaviorUIInterface node, int parentPin, ArrayList<Pair<Integer, Integer>> links)
    {
       long timeSinceLastTick = -1;
 
@@ -309,7 +309,7 @@ public class ImGuiNodeEditorBehaviorTreePanel
       }
 
       int nodePinIndex = pinIndex;
-      for (GDXBehaviorUIInterface child : node.getUIChildren())
+      for (ImGuiGDXBehaviorUIInterface child : node.getUIChildren())
       {
          ImGui.sameLine();
 
@@ -388,7 +388,7 @@ public class ImGuiNodeEditorBehaviorTreePanel
 
       NodeEditor.popStyleColor(1);
 
-      for (GDXBehaviorUIInterface child : node.getUIChildren())
+      for (ImGuiGDXBehaviorUIInterface child : node.getUIChildren())
       {
          renderNodeAndChildren(child, nodePinIndex++, links);
       }

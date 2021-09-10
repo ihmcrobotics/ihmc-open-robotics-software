@@ -29,6 +29,8 @@ import geometry_msgs.Vector3;
 import sensor_msgs.CameraInfo;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -54,6 +56,9 @@ public class RosTools
    public static final String L515_POINT_CLOUD = "/chest_l515/depth/color/points";
    public static final String OUSTER_POINT_CLOUD = "/os_cloud_node/points";
    public static final String SLAM_POSE = "/mapsense/slam/pose";
+   public static final String SEMANTIC_TARGET_POSE = "/semantic/target/pose";
+   public static final String SEMANTIC_TARGET_CLOUD = "/semantic/object/points";
+   public static final String SEMANTIC_MASK = "/semantic/deeplab/mask";
    public static final String L515_COLOR_CAMERA_INFO = "/chest_l515/color/camera_info";
    public static final String L515_DEPTH_CAMERA_INFO = "/chest_l515/depth/camera_info";
    public static final String MAPSENSE_DEPTH_IMAGE = L515_DEPTH;
@@ -65,6 +70,8 @@ public class RosTools
    public static final String ZED2_LEFT_EYE_VIDEO = "/zed/color/left/image_raw";
    public static final String ZED2_RIGHT_EYE_VIDEO = "/zed/color/right/image_raw";
    public static final String ZED2_POINT_CLOUD = "/zed/zed_node/point_cloud/cloud_registered";
+   public static final String LOGITECH_BRIO_LEFT_COMPRESSED = "/logitech/left/cam/color/image_raw/compressed";
+   public static final String LOGITECH_BRIO_RIGHT_COMPRESSED = "/logitech/right/cam/color/image_raw/compressed";
 
    public static RosMainNode createRosNode(String uri, String name)
    {
@@ -235,6 +242,28 @@ public class RosTools
       {
          throw new RuntimeException("Invalid ROS Master URI", e);
       }
+   }
+
+   public static void toEuclid(Pose rosPose, Pose3DBasics euclidPose)
+   {
+      euclidPose.getPosition().set(rosPose.getPosition().getX(),
+                                   rosPose.getPosition().getY(),
+                                   rosPose.getPosition().getZ());
+      euclidPose.getOrientation().set(rosPose.getOrientation().getX(),
+                                      rosPose.getOrientation().getY(),
+                                      rosPose.getOrientation().getZ(),
+                                      rosPose.getOrientation().getW());
+   }
+
+   public static void toRos(Pose3DReadOnly euclidPose, Pose rosPose)
+   {
+      rosPose.getPosition().setX(euclidPose.getPosition().getX());
+      rosPose.getPosition().setY(euclidPose.getPosition().getY());
+      rosPose.getPosition().setZ(euclidPose.getPosition().getZ());
+      rosPose.getOrientation().setX(euclidPose.getOrientation().getX());
+      rosPose.getOrientation().setY(euclidPose.getOrientation().getY());
+      rosPose.getOrientation().setZ(euclidPose.getOrientation().getZ());
+      rosPose.getOrientation().setW(euclidPose.getOrientation().getS());
    }
 
    public static void packRosQuaternionToEuclidQuaternion(Quaternion rosQuat, QuaternionBasics quat)

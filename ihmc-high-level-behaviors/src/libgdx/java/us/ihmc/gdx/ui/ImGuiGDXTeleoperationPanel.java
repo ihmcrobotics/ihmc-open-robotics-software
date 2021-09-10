@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.*;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -37,18 +38,16 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterK
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
-import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
@@ -75,15 +74,15 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final ROS2SyncedRobotModel syncedRobotForHeightSlider;
    private final ROS2SyncedRobotModel syncedRobotForChestSlider;
    private final GDXFootstepPlanGraphic footstepPlanGraphic;
-   private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final float[] stanceHeightSliderValue = new float[1];
    private final float[] leanForwardSliderValue = new float[1];
    private final float[] neckPitchSliderValue = new float[1];
    private final ImInt pumpPSI = new ImInt(1);
    private final String[] psiValues = new String[] {"1500", "2300", "2500", "2800"};
-   private final OneDoFJointBasics neckJoint;
-   private double neckJointJointLimitLower;
-   private double neckJointRange;
+//   private final OneDoFJointBasics neckJoint;
+//   private double neckJointJointLimitLower;
+//   private double neckJointRange;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlanningModule footstepPlanner;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
@@ -93,6 +92,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
    private final ROS2Input<PlanarRegionsListMessage> lidarREARegions;
+   private final ImBoolean showGraphics = new ImBoolean(true);
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
@@ -115,13 +115,13 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          throw new RuntimeException("Please add implementation of RobotLowLevelMessenger for " + robotName);
       }
 
-      neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
-      if (neckJoint != null)
-      {
-         double neckJointLimitUpper = neckJoint.getJointLimitUpper();
-         neckJointJointLimitLower = neckJoint.getJointLimitLower();
-         neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
-      }
+//      neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
+//      if (neckJoint != null)
+//      {
+//         double neckJointLimitUpper = neckJoint.getJointLimitUpper();
+//         neckJointJointLimitLower = neckJoint.getJointLimitLower();
+//         neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
+//      }
 
       throttledRobotStateCallback = new ThrottledRobotStateCallback(ros2Node, robotModel, 5.0, syncedRobot ->
       {
@@ -140,20 +140,20 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          double flippedChestSliderValue = 100.0 - newChestSliderValue;
          leanForwardSliderValue[0] = (float) flippedChestSliderValue;
 
-         if (neckJoint != null)
-         {
-            double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
-            double angleInRange = neckAngle - neckJointJointLimitLower;
-            double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
-            double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
-            neckPitchSliderValue[0] = (float) flippedNeckSliderValue;
-         }
+//         if (neckJoint != null)
+//         {
+//            double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
+//            double angleInRange = neckAngle - neckJointJointLimitLower;
+//            double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
+//            double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
+//            neckPitchSliderValue[0] = (float) flippedNeckSliderValue;
+//         }
       });
 
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps));
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps, "Teleoperation Panel Controller Spy"));
       });
       footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
       footstepPlanner = communicationHelper.getOrCreateFootstepPlanner();
@@ -231,7 +231,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       }
       else
       {
-         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(),
+                                                                                                 "Teleoperation Panel Planned"));
          this.footstepPlannerOutput = footstepPlannerOutput;
       }
    }
@@ -370,15 +371,15 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
             communicationHelper.publishToController(message);
          }
       }
-      if (neckJoint != null && imGuiSlider("Neck Pitch", neckPitchSliderValue))
-      {
-         double percent = neckPitchSliderValue[0] / 100.0;
-         percent = 1.0 - percent;
-         MathTools.checkIntervalContains(percent, 0.0, 1.0);
-         double jointAngle = neckJointJointLimitLower + percent * neckJointRange;
-         LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckPitchSliderValue[0], jointAngle);
-         communicationHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
-      }
+//      if (neckJoint != null && imGuiSlider("Neck Pitch", neckPitchSliderValue))
+//      {
+//         double percent = neckPitchSliderValue[0] / 100.0;
+//         percent = 1.0 - percent;
+//         MathTools.checkIntervalContains(percent, 0.0, 1.0);
+//         double jointAngle = neckJointJointLimitLower + percent * neckJointRange;
+//         LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckPitchSliderValue[0], jointAngle);
+//         communicationHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
+//      }
       ImGui.text("Footstep plan:");
       if (footstepPlannerOutput != null)
       {
@@ -418,6 +419,13 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          clearMessage.setRequestClear(true);
          communicationHelper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
       }
+      ImGui.checkbox(labels.get("Show graphics"), showGraphics);
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Clear graphics")))
+      {
+         footstepPlanGraphic.clear();
+         footstepGoal.clear();
+      }
    }
 
    public void update()
@@ -436,8 +444,11 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      footstepPlanGraphic.getRenderables(renderables, pool);
-      footstepGoal.getRenderables(renderables, pool);
+      if (showGraphics.get())
+      {
+         footstepPlanGraphic.getRenderables(renderables, pool);
+         footstepGoal.getRenderables(renderables, pool);
+      }
    }
 
    private void sendPSIRequest()

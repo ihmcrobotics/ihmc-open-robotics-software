@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui.behaviors.registry;
+package us.ihmc.gdx.ui.behavior.registry;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
@@ -15,11 +15,11 @@ import java.util.ArrayList;
  * The UI has a tree structure, but not a decision or search one.
  * Currently calls propagate down to all the nodes so they can decide to take action.
  */
-public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements RenderableProvider
+public abstract class ImGuiGDXBehaviorUIInterface extends BehaviorTreeNode implements RenderableProvider
 {
-   private final ArrayList<GDXBehaviorUIInterface> children = new ArrayList<>();
+   private final ArrayList<ImGuiGDXBehaviorUIInterface> children = new ArrayList<>();
 
-   protected GDXBehaviorUIInterface()
+   protected ImGuiGDXBehaviorUIInterface()
    {
    }
 
@@ -36,38 +36,26 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
     */
    public abstract void renderTreeNodeImGuiWidgets();
 
-   public abstract void renderRegularPanelImGuiWidgets();
-
    public abstract void update();
 
    public final void updateIncludingChildren()
    {
       update();
 
-      for (GDXBehaviorUIInterface child : children)
+      for (ImGuiGDXBehaviorUIInterface child : children)
       {
          child.updateIncludingChildren();
       }
    }
 
-   public final void renderRegularPanelImGuiWidgetsAndChildren()
-   {
-      renderRegularPanelImGuiWidgets();
-
-      for (GDXBehaviorUIInterface child : children)
-      {
-         child.renderRegularPanelImGuiWidgetsAndChildren();
-      }
-   }
-
    public abstract void destroy();
 
-   public void addChild(GDXBehaviorUIInterface child)
+   public void addChild(ImGuiGDXBehaviorUIInterface child)
    {
       children.add(child);
    }
 
-   public ArrayList<GDXBehaviorUIInterface> getUIChildren()
+   public ArrayList<ImGuiGDXBehaviorUIInterface> getUIChildren()
    {
       return children;
    }
@@ -81,7 +69,7 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
    {
       addChildPanels(parentPanel);
 
-      for (GDXBehaviorUIInterface child : children)
+      for (ImGuiGDXBehaviorUIInterface child : children)
       {
          child.addChildPanelsIncludingChildren(parentPanel);
       }
@@ -99,7 +87,7 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
          BehaviorTreeControlFlowNodeBasics externalControlFlowNode = (BehaviorTreeControlFlowNodeBasics) externalNode;
          for (BehaviorTreeNodeBasics externalChild : externalControlFlowNode.getChildren())
          {
-            for (GDXBehaviorUIInterface child : children)
+            for (ImGuiGDXBehaviorUIInterface child : children)
             {
                if (externalChild.getName().equals(child.getName()))
                {
@@ -122,6 +110,11 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    }
 
+   public void clearChildren()
+   {
+      children.clear();
+   }
+
    public int generateUID()
    {
       return toString().hashCode(); // Maybe change later? Works fine for now
@@ -134,7 +127,7 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
       out.append(this.getType());
       out.append("(");
-      for (GDXBehaviorUIInterface child : this.getUIChildren()) {
+      for (ImGuiGDXBehaviorUIInterface child : this.getUIChildren()) {
          out.append(child.toString()).append(",");
       }
       out.append(")");

@@ -4,22 +4,17 @@ import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLVersion;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
-import imgui.type.ImString;
 import org.lwjgl.opengl.GL30;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.commons.nio.BasicPathVisitor;
-import us.ihmc.commons.nio.PathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.*;
@@ -37,7 +32,6 @@ import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 
 import java.nio.IntBuffer;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -59,9 +53,6 @@ public class GDXImGuiBasedUI
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
 //   private final GDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
-   private final Class<?> classForLoading;
-   private final String directoryNameToAssumePresent;
-   private final String subsequentPathToResourceFolder;
    private final String windowTitle;
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private String configurationExtraPath;
@@ -80,12 +71,7 @@ public class GDXImGuiBasedUI
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImBoolean shadows = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
-   private boolean needToReindexPerspectives = true;
-   private final ImString perspectiveNameToSave = new ImString("", 100);
-   private final ImBoolean perspectiveDefaultMode = new ImBoolean(false);
-   private final ArrayList<String> perspectives = new ArrayList<>();
-   private String currentPerspective = "Main";
-   private Texture currentGDXTexture = null;
+   private final GDXImGuiPerspectiveManager perspectiveManager;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -94,9 +80,6 @@ public class GDXImGuiBasedUI
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
    {
-      this.classForLoading = classForLoading;
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.windowTitle = windowTitle;
 
       configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
@@ -107,7 +90,31 @@ public class GDXImGuiBasedUI
                                                        configurationExtraPath);
 
       imGuiWindowAndDockSystem = new GDXImGuiWindowAndDockSystem();
-      applyPerspectiveDirectory();
+      perspectiveManager = new GDXImGuiPerspectiveManager(classForLoading,
+                                                          directoryNameToAssumePresent,
+                                                          subsequentPathToResourceFolder,
+                                                          configurationExtraPath,
+                                                          configurationBaseDirectory,
+      updatedPerspectiveDirectory ->
+      {
+         libGDXSettingsFile = new HybridFile(updatedPerspectiveDirectory, "GDXSettings.json");
+         imGuiWindowAndDockSystem.setDirectory(updatedPerspectiveDirectory);
+      },
+      loadWithDefaultMode ->
+      {
+         imGuiWindowAndDockSystem.loadConfiguration(loadWithDefaultMode);
+         Path libGDXFile = loadWithDefaultMode ? libGDXSettingsFile.getWorkspaceFile() : libGDXSettingsFile.getExternalFile();
+         JSONFileTools.load(libGDXFile, jsonNode ->
+         {
+            int width = jsonNode.get("windowWidth").asInt();
+            int height = jsonNode.get("windowHeight").asInt();
+            Gdx.graphics.setWindowedMode(width, height);
+         });
+      },
+      saveWithDefaultMode ->
+      {
+         saveApplicationSettings(saveWithDefaultMode);
+      });
 
 //      guiRecorder = new GDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
 //      onCloseRequestListeners.add(guiRecorder::stop);
@@ -214,104 +221,8 @@ public class GDXImGuiBasedUI
 
    private void renderMenuBar()
    {
-      if (needToReindexPerspectives)
-      {
-         needToReindexPerspectives = false;
-         Path directory = perspectiveDefaultMode.get() ? configurationBaseDirectory.getWorkspaceDirectory() : configurationBaseDirectory.getExternalDirectory();
-         perspectives.clear();
-         perspectives.add("Main");
-         PathTools.walkFlat(directory, new BasicPathVisitor()
-         {
-            @Override
-            public FileVisitResult visitPath(Path path, PathType pathType)
-            {
-               if (pathType == PathType.DIRECTORY)
-               {
-                  String directoryName = path.getFileName().toString();
-                  String matchString = "Perspective";
-                  if (directoryName.endsWith(matchString))
-                  {
-                     String perspectiveName = directoryName.substring(0, directoryName.lastIndexOf(matchString));
-                     LogTools.info("Found perspective {}", perspectiveName);
-                     perspectives.add(perspectiveName);
-                  }
-               }
-               return FileVisitResult.CONTINUE;
-            }
-         });
-      }
-
       ImGui.beginMainMenuBar();
-      if (ImGui.beginMenu("Perspective"))
-      {
-         for (String perspective : perspectives)
-         {
-            if (ImGui.radioButton(perspective, currentPerspective.equals(perspective)))
-            {
-               currentPerspective = perspective;
-               applyPerspectiveDirectory();
-               imGuiWindowAndDockSystem.loadConfiguration(perspectiveDefaultMode.get());
-               Path libGDXFile = perspectiveDefaultMode.get() ? libGDXSettingsFile.getWorkspaceFile() : libGDXSettingsFile.getExternalFile();
-               JSONFileTools.load(libGDXFile, jsonNode ->
-               {
-                  int width = jsonNode.get("windowWidth").asInt();
-                  int height = jsonNode.get("windowHeight").asInt();
-                  Gdx.graphics.setWindowedMode(width, height);
-               });
-
-            }
-            if (currentPerspective.equals(perspective))
-            {
-               ImGui.sameLine();
-               if (ImGui.button("Save"))
-               {
-                  saveApplicationSettings(perspectiveDefaultMode.get());
-               }
-            }
-         }
-
-         ImGui.text("New:");
-         ImGui.sameLine();
-         ImGui.inputText("###", perspectiveNameToSave , ImGuiInputTextFlags.CallbackResize);
-         String perpectiveNameToCreateString = perspectiveNameToSave.get();
-         if (!perpectiveNameToCreateString.isEmpty())
-         {
-            ImGui.sameLine();
-            if (ImGui.button("Create"))
-            {
-               String sanitizedName = perpectiveNameToCreateString.replaceAll(" ", "");
-               perspectives.add(sanitizedName);
-               currentPerspective = sanitizedName;
-               applyPerspectiveDirectory();
-               perspectiveNameToSave.clear();
-            }
-         }
-
-//         if (ImGui.button("Save"))
-//         {
-//            saveApplicationSettings(perspectiveDefaultMode.get());
-//         }
-//         ImGui.sameLine();
-//         if (ImGui.button("Load"))
-//         {
-//            imGuiWindowAndDockSystem.loadConfiguration(perspectiveDefaultMode.get());
-//         }
-
-         ImGui.separator();
-         ImGui.text("Save location:");
-         if (ImGui.radioButton("User home###PerspectiveUserHomeMode", !perspectiveDefaultMode.get()))
-         {
-            perspectiveDefaultMode.set(false);
-            needToReindexPerspectives = true;
-         }
-         ImGui.sameLine();
-         if (ImGui.radioButton("Version control###PerspectiveDefaultMode", perspectiveDefaultMode.get()))
-         {
-            perspectiveDefaultMode.set(true);
-            needToReindexPerspectives = true;
-         }
-         ImGui.endMenu();
-      }
+      perspectiveManager.renderImGuiPerspectiveMenu();
       if (ImGui.beginMenu("Panels"))
       {
          imGuiWindowAndDockSystem.renderMenuDockPanelItems();
@@ -422,17 +333,6 @@ public class GDXImGuiBasedUI
 
       ImGui.end();
       ImGui.popStyleVar();
-   }
-
-   private void applyPerspectiveDirectory()
-   {
-      perspectiveDirectory = new HybridDirectory(dotIHMCDirectory,
-                                                 directoryNameToAssumePresent,
-                                                 subsequentPathToResourceFolder,
-                                                 classForLoading,
-                                                 configurationExtraPath + (currentPerspective.equals("Main") ? "" : "/" + currentPerspective + "Perspective"));
-      libGDXSettingsFile = new HybridFile(perspectiveDirectory, "GDXSettings.json");
-      imGuiWindowAndDockSystem.setDirectory(perspectiveDirectory);
    }
 
    private void saveApplicationSettings(boolean saveDefault)
