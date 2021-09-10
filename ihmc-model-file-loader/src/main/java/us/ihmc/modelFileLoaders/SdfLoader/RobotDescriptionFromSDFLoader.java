@@ -330,6 +330,10 @@ public class RobotDescriptionFromSDFLoader
                }
                //System.out.println("SDFRobot: joint.getVelocityLimit()=" + joint.getVelocityLimit());
 
+               if (!Double.isNaN(joint.getEffortLimit()) && joint.getEffortLimit() >= 0.0)
+               {
+                  pinJoint.setEffortLimit(joint.getEffortLimit());
+               }
             }
          }
 
@@ -347,7 +351,8 @@ public class RobotDescriptionFromSDFLoader
             {
                if (!isJointInNeedOfReducedGains(joint))
                {
-                  pinJoint.setVelocityLimits(joint.getVelocityLimit(), 500.0);
+                  double velocityLimitDamping = jointNameMap.getDefaultVelocityLimitDamping();
+                  pinJoint.setVelocityLimits(joint.getVelocityLimit(), velocityLimitDamping);
                }
             }
          }
@@ -371,6 +376,26 @@ public class RobotDescriptionFromSDFLoader
             }
          }
 
+         sliderJoint.setDamping(joint.getDamping());
+         sliderJoint.setStiction(joint.getFriction());
+
+         if (!isJointInNeedOfReducedGains(joint))
+         {
+            if (!Double.isNaN(joint.getEffortLimit()) && joint.getEffortLimit() >= 0.0)
+            {
+               sliderJoint.setEffortLimit(joint.getEffortLimit());
+            }
+
+            if (!Double.isNaN(joint.getVelocityLimit()) && joint.getVelocityLimit() >= 0.0)
+            {
+               if (!isJointInNeedOfReducedGains(joint))
+               {
+                  double velocityLimitDamping = jointNameMap.getDefaultVelocityLimitDamping();
+                  sliderJoint.setVelocityLimits(joint.getVelocityLimit(), velocityLimitDamping);
+               }
+            }
+         }
+         
          sliderJoint.setDamping(joint.getDamping());
          sliderJoint.setStiction(joint.getFriction());
 
