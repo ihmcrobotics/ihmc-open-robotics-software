@@ -22,6 +22,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -299,24 +302,26 @@ public class LookAndStepFootstepPlanningTask
       }
       footholdVolume.set(convexPolytope.getVolume());
 
-      if (lookAndStepParameters.getAssumeFlatGround())
+      SideDependentList<MinimalFootstep> startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
+
+      if (lookAndStepParameters.getAssumeFlatGround() || lookAndStepParameters.getDetectFlatGround())
       {
          SideDependentList<Boolean> isInSupport = new SideDependentList<>(!capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty(),
                                                                           !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty());
          boolean bothInSupport = isInSupport.get(RobotSide.LEFT) && isInSupport.get(RobotSide.RIGHT);
 
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
+         RigidBodyTransform flatGroundCircleCenter = new RigidBodyTransform();
+         FramePose3D midFeetPose = new FramePose3D();
          if (bothInSupport)
          {
             FramePose3D leftSole = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
             FramePose3D rightSole = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
             leftSole.changeFrame(ReferenceFrame.getWorldFrame());
             rightSole.changeFrame(ReferenceFrame.getWorldFrame());
-            FramePose3D midFeetPose = new FramePose3D();
             midFeetPose.set(leftSole);
             midFeetPose.getPosition().interpolate(rightSole.getPosition(), 0.5);
             midFeetPose.getOrientation().setToZero();
-            midFeetPose.get(transformToWorld);
+            midFeetPose.get(flatGroundCircleCenter);
          }
          else
          {
@@ -328,7 +333,6 @@ public class LookAndStepFootstepPlanningTask
                   FramePose3D otherSole = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(side.getOppositeSide()));
                   supportSole.changeFrame(ReferenceFrame.getWorldFrame());
                   otherSole.changeFrame(ReferenceFrame.getWorldFrame());
-                  FramePose3D midFeetPose = new FramePose3D();
                   midFeetPose.set(supportSole);
                   Vector3D normal = new Vector3D(Axis3D.Z);
                   midFeetPose.getOrientation().transform(normal);
@@ -338,24 +342,61 @@ public class LookAndStepFootstepPlanningTask
                                                                                                          plane.getNormal());
                   midFeetPose.getPosition().interpolate(projectedOtherSolePosition, 0.5);
                   midFeetPose.getOrientation().setToZero();
-                  midFeetPose.get(transformToWorld);
+                  midFeetPose.get(flatGroundCircleCenter);
                }
             }
          }
-         ArrayList<ConvexPolygon2D> polygons = new ArrayList<>();
-         ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
-         double radius = lookAndStepParameters.getAssumedFlatGroundCircleRadius();
-         for (int i = 0; i < 40; i++)
+
+         if (lookAndStepParameters.getAssumeFlatGround())
          {
-            double angle = (i / 40.0) * 2.0 * Math.PI;
-            convexPolygon2D.addVertex(radius * Math.cos(angle), radius * Math.sin(angle));
+            planarRegionsHistory.addLast(constructFlatGroundCircleRegion(flatGroundCircleCenter));
          }
-         convexPolygon2D.update();
-         polygons.add(convexPolygon2D);
-         PlanarRegion circleRegion = new PlanarRegion(transformToWorld, polygons);
-         PlanarRegionsList planarRegionsList = new PlanarRegionsList();
-         planarRegionsList.addPlanarRegion(circleRegion);
-         planarRegionsHistory.addLast(planarRegionsList);
+         else // detect flat ground
+         {
+            ArrayList<PlanarRegion> largeRegions = new ArrayList<>();
+            for (int i = 0; i < planarRegions.getNumberOfPlanarRegions(); i++)
+            {
+               double area = PlanarRegionTools.computePlanarRegionArea(planarRegions.getPlanarRegion(i));
+               // TODO: If any vertices are close to the robot; otherwise discard and set the circle radius
+               //  && midFeetPose.getPosition().distance(planarRegions.getPlanarRegion(i).getPoint()) < 0.7
+               if (area > lookAndStepParameters.getDetectFlatGroundMinRegionAreaToConsider())
+               {
+                  largeRegions.add(planarRegions.getPlanarRegion(i));
+               }
+            }
+
+            // are the feet coplanar
+            boolean thingsAreCoplanar = true;
+            double leftZ = startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld().getPosition().getZ();
+            double rightZ = startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld().getPosition().getZ();
+            thingsAreCoplanar &= EuclidCoreTools.epsilonEquals(leftZ, rightZ, lookAndStepParameters.getDetectFlatGroundZTolerance());
+            QuaternionReadOnly leftOrientation = startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld().getOrientation();
+            QuaternionReadOnly rightOrientation = startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld().getOrientation();
+            thingsAreCoplanar &= leftOrientation.distancePrecise(rightOrientation) < lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
+
+            for (PlanarRegion largeRegion : largeRegions)
+            {
+               thingsAreCoplanar &= EuclidCoreTools.epsilonEquals(leftZ, largeRegion.getPoint().getZ(), lookAndStepParameters.getDetectFlatGroundZTolerance());
+               Quaternion regionOrientation = new Quaternion();
+               Vector3D largeRegionNormal = new Vector3D(largeRegion.getNormal());
+               Vector3D footNormal = new Vector3D(Axis3D.Z);
+               leftOrientation.transform(footNormal);
+               EuclidGeometryTools.orientation3DFromZUpToVector3D(largeRegionNormal, regionOrientation);
+               double orientationDifference = largeRegionNormal.angle(footNormal);
+               thingsAreCoplanar &= orientationDifference < lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
+            }
+
+            if (thingsAreCoplanar)
+            {
+               statusLogger.info("Flat ground detected.");
+               planarRegionsHistory.addLast(constructFlatGroundCircleRegion(flatGroundCircleCenter));
+            }
+            else
+            {
+               statusLogger.info("Flat ground not detected.");
+               planarRegionsHistory.add(planarRegions);
+            }
+         }
       }
       else
       {
@@ -370,7 +411,6 @@ public class LookAndStepFootstepPlanningTask
       Point3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
       int closestSegmentIndex = localizationResult.getClosestSegmentIndex();
       List<? extends Pose3DReadOnly> bodyPathPlan = localizationResult.getBodyPathPlan();
-      SideDependentList<MinimalFootstep> startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
 
       // move point along body path plan by plan horizon
       Pose3D subGoalPoseBetweenFeet = new Pose3D();
@@ -572,6 +612,24 @@ public class LookAndStepFootstepPlanningTask
       statusLogger.info(message);
       plannerFailedLastTime.set(true);
       planningFailedTimer.reset();
+   }
+
+   private PlanarRegionsList constructFlatGroundCircleRegion(RigidBodyTransform transformToWorld)
+   {
+      ArrayList<ConvexPolygon2D> polygons = new ArrayList<>();
+      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
+      double radius = lookAndStepParameters.getAssumedFlatGroundCircleRadius();
+      for (int i = 0; i < 40; i++)
+      {
+         double angle = (i / 40.0) * 2.0 * Math.PI;
+         convexPolygon2D.addVertex(radius * Math.cos(angle), radius * Math.sin(angle));
+      }
+      convexPolygon2D.update();
+      polygons.add(convexPolygon2D);
+      PlanarRegion circleRegion = new PlanarRegion(transformToWorld, polygons);
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+      planarRegionsList.addPlanarRegion(circleRegion);
+      return planarRegionsList;
    }
 
    private class MinimumFootstepChecker implements CustomFootstepChecker
