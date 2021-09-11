@@ -30,7 +30,10 @@ public enum HighLevelControllerName
    CALIBRATION,
    CUSTOM1,
    @RosEnumValueDocumentation(documentation = "State for recovering from a fall.")
-   FALLING_STATE;
+   FALLING_STATE,
+   @RosEnumValueDocumentation(documentation = "whole body force control employing IHMC push recovery algorithms")
+   PUSH_RECOVERY;
+
 
    public static final HighLevelControllerName[] values = values();
 
@@ -49,6 +52,7 @@ public enum HighLevelControllerName
       name.put(CALIBRATION, "CALIBRATION");
       name.put(CUSTOM1, "UNDEFINED");
       name.put(FALLING_STATE, "FALLING_STATE");
+      name.put(PUSH_RECOVERY, "PUSH_RECOVERY");
    }
 
    public static void setName(HighLevelControllerName state, String newName)

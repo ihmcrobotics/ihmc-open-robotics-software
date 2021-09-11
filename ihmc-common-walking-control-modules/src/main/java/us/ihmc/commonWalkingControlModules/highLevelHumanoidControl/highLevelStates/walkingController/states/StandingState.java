@@ -38,9 +38,13 @@ public class StandingState extends WalkingState
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
    private final FeetManager feetManager;
 
-   public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
-                        HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-                        WalkingFailureDetectionControlModule failureDetectionControlModule, WalkingControllerParameters walkingControllerParameters,
+   public StandingState(CommandInputManager commandInputManager,
+                        WalkingMessageHandler walkingMessageHandler,
+                        TouchdownErrorCompensator touchdownErrorCompensator,
+                        HighLevelHumanoidControllerToolbox controllerToolbox,
+                        HighLevelControlManagerFactory managerFactory,
+                        WalkingFailureDetectionControlModule failureDetectionControlModule,
+                        WalkingControllerParameters walkingControllerParameters,
                         YoRegistry parentRegistry)
    {
       super(WalkingStateEnum.STANDING, parentRegistry);
@@ -94,7 +98,6 @@ public class StandingState extends WalkingState
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
 
-      balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
       balanceManager.initializeICPPlanForStanding();
       balanceManager.setHoldSplitFractions(false);

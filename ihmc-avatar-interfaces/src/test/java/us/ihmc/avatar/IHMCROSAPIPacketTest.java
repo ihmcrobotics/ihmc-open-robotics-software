@@ -378,6 +378,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
+                                                                                                    robotModel.getPushRecoveryControllerParameters(),
                                                                                                     copTrajectoryParameters,
                                                                                                     robotModel.getSplitFractionCalculatorParameters());
 
