@@ -340,7 +340,7 @@ public class RobotDescriptionFromSDFLoader
          pinJoint.setDamping(joint.getDamping());
          pinJoint.setStiction(joint.getFriction());
 
-         if (!isJointInNeedOfReducedGains(joint))
+         if (jointNameMap != null && !isJointInNeedOfReducedGains(joint))
          {
             if (!Double.isNaN(joint.getEffortLimit()) && joint.getEffortLimit() >= 0.0)
             {
