@@ -94,6 +94,13 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
       super.testRecoveryAngledWhileInFlamingoStance();
    }
 
+   @Disabled
+   @Test
+   public void testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown();
+   }
+
    @Tag("humanoid-push-recovery")
    @Override
    @Test
