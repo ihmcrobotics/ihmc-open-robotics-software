@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.robotics.Assert;
 
 import java.util.Random;
 
@@ -228,6 +229,27 @@ public class CapturePointToolsTest
          expectedIcpPosition.scaleAdd(dt, icpVelocity, expectedIcpPosition);
 
          EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals("Failed at time " + time, expectedIcpPosition, icpPosition, 1e-3);
+      }
+   }
+
+   @Test
+   public void testComputeTimeToReachCapturePointUsingConstantCMP()
+   {
+      Random random = new Random(1738L);
+
+      for(int i = 0; i < iters; i++)
+      {
+         double swingTime = RandomNumbers.nextDouble(random, 0.01, 2.0);
+
+         FramePoint2D initialCapturePoint = EuclidFrameRandomTools.nextFramePoint2D(random, ReferenceFrame.getWorldFrame());
+         FramePoint2D constantCMP = EuclidFrameRandomTools.nextFramePoint2D(random, ReferenceFrame.getWorldFrame());
+
+         FramePoint2D finalCapturePoint = new FramePoint2D();
+         CapturePointTools.computeDesiredCapturePointPosition(omega, swingTime, initialCapturePoint, constantCMP, finalCapturePoint);
+
+         double estimatedSwingTime = CapturePointTools.computeTimeToReachCapturePointUsingConstantCMP(omega, finalCapturePoint, initialCapturePoint, constantCMP);
+
+         Assert.assertEquals(swingTime, estimatedSwingTime, 1.0e-6);
       }
    }
 

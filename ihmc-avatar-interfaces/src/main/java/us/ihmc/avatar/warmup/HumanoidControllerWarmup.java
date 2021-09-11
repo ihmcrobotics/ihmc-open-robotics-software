@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -77,6 +78,7 @@ public abstract class HumanoidControllerWarmup
    private OneDoFJointBasics[] oneDoFJoints;
 
    private HighLevelControlManagerFactory managerFactory;
+   private WholeBodyControllerCoreFactory controllerCoreFactory;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private WalkingControllerState walkingControllerState;
@@ -278,8 +280,12 @@ public abstract class HumanoidControllerWarmup
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
       managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
 
+      controllerCoreFactory = new WholeBodyControllerCoreFactory(managerFactoryParent);
+      controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+      controllerCoreFactory.setWalkingControllerParameters(walkingControllerParameters);
 
-      walkingControllerState = new WalkingControllerState(commandInputManager, statusOutputManager, managerFactory, controllerToolbox,
+      walkingControllerState = new WalkingControllerState(commandInputManager, statusOutputManager, managerFactory,
+                                                          controllerCoreFactory, controllerToolbox,
                                                           robotModel.getHighLevelControllerParameters(), robotModel.getWalkingControllerParameters());
    }
 

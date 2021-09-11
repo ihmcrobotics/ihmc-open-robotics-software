@@ -119,6 +119,12 @@ public class PushRecoveryState extends YoSaveableModuleState
       this.icpAtStartOfState.set(icpAtStartOfState);
    }
 
+   public void setIcpAtStartOfState(FramePoint3DReadOnly icpAtStartOfState)
+   {
+      this.icpAtStartOfState.set(icpAtStartOfState);
+   }
+
+
    public void clear()
    {
       for (int i = 0; i < footsteps.size(); i++)
