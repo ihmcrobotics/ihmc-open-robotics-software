@@ -220,8 +220,8 @@ public class SCS2AvatarSimulationFactory
       }
 
       simulationSession = new SimulationSession(physicsEngineFactory);
-      simulationSession.submitBufferSizeRequest(simulationDataBufferSize.get());
-      simulationSession.submitBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
+      simulationSession.initializeBufferSize(simulationDataBufferSize.get());
+      simulationSession.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       simulationSession.addTerrainObject(terrainObjectDefinition.get());
       robot = simulationSession.addRobot(robotDefinition);
 
