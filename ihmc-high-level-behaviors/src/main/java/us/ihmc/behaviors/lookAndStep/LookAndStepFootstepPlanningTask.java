@@ -17,10 +17,12 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -28,6 +30,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -276,6 +279,12 @@ public class LookAndStepFootstepPlanningTask
    protected int numberOfCompletedFootsteps;
    protected SwingPlannerType swingPlannerType;
 
+   private final RigidBodyTransform regionTransform = new RigidBodyTransform();
+   private final ReferenceFrame regionFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("regionFrame",
+                                                                                                       ReferenceFrame.getWorldFrame(),
+                                                                                                       regionTransform);
+   private final FramePoint3D vertex = new FramePoint3D();
+
    protected void performTask()
    {
       if (planarRegionsHistory.isEmpty()
@@ -349,7 +358,7 @@ public class LookAndStepFootstepPlanningTask
 
          if (lookAndStepParameters.getAssumeFlatGround())
          {
-            planarRegionsHistory.addLast(constructFlatGroundCircleRegion(flatGroundCircleCenter));
+            planarRegionsHistory.addLast(constructFlatGroundCircleRegion(flatGroundCircleCenter, lookAndStepParameters.getAssumedFlatGroundCircleRadius()));
          }
          else // detect flat ground
          {
@@ -359,7 +368,23 @@ public class LookAndStepFootstepPlanningTask
                double area = PlanarRegionTools.computePlanarRegionArea(planarRegions.getPlanarRegion(i));
                // TODO: If any vertices are close to the robot; otherwise discard and set the circle radius
                //  && midFeetPose.getPosition().distance(planarRegions.getPlanarRegion(i).getPoint()) < 0.7
-               if (area > lookAndStepParameters.getDetectFlatGroundMinRegionAreaToConsider())
+
+               boolean aVertexIsClose = false;
+               planarRegions.getPlanarRegion(i).getTransformToWorld(regionTransform);
+               regionFrame.update();
+               for (Point2D point2D : planarRegions.getPlanarRegion(i).getConcaveHull())
+               {
+                  vertex.setIncludingFrame(regionFrame, point2D.getX(), point2D.getY(), 0.0);
+                  vertex.changeFrame(ReferenceFrame.getWorldFrame());
+
+                  if (midFeetPose.getPosition().distance(vertex) < lookAndStepParameters.getDetectFlatGroundMinRadius())
+                  {
+                     aVertexIsClose = true;
+                     break;
+                  }
+               }
+
+               if (aVertexIsClose && area > lookAndStepParameters.getDetectFlatGroundMinRegionAreaToConsider())
                {
                   largeRegions.add(planarRegions.getPlanarRegion(i));
                }
@@ -372,24 +397,64 @@ public class LookAndStepFootstepPlanningTask
             thingsAreCoplanar &= EuclidCoreTools.epsilonEquals(leftZ, rightZ, lookAndStepParameters.getDetectFlatGroundZTolerance());
             QuaternionReadOnly leftOrientation = startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld().getOrientation();
             QuaternionReadOnly rightOrientation = startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld().getOrientation();
-            thingsAreCoplanar &= leftOrientation.distancePrecise(rightOrientation) < lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
+            Vector3D leftZUp = new Vector3D(Axis3D.Z);
+            Vector3D rightZUp = new Vector3D(Axis3D.Z);
+            leftOrientation.transform(leftZUp);
+            rightOrientation.transform(rightZUp);
+            thingsAreCoplanar &= leftZUp.angle(rightZUp) < lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
+            double detectedFlatGroundRadius = lookAndStepParameters.getAssumedFlatGroundCircleRadius();
 
-            for (PlanarRegion largeRegion : largeRegions)
+            for (int i = 0; i < planarRegions.getNumberOfPlanarRegions(); i++)
             {
-               thingsAreCoplanar &= EuclidCoreTools.epsilonEquals(leftZ, largeRegion.getPoint().getZ(), lookAndStepParameters.getDetectFlatGroundZTolerance());
-               Quaternion regionOrientation = new Quaternion();
-               Vector3D largeRegionNormal = new Vector3D(largeRegion.getNormal());
-               Vector3D footNormal = new Vector3D(Axis3D.Z);
-               leftOrientation.transform(footNormal);
-               EuclidGeometryTools.orientation3DFromZUpToVector3D(largeRegionNormal, regionOrientation);
-               double orientationDifference = largeRegionNormal.angle(footNormal);
-               thingsAreCoplanar &= orientationDifference < lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
+               PlanarRegion planarRegion = planarRegions.getPlanarRegion(i);
+               double area = PlanarRegionTools.computePlanarRegionArea(planarRegion);
+               boolean isLarge = area > lookAndStepParameters.getDetectFlatGroundMinRegionAreaToConsider();
+
+               if (isLarge)
+               {
+                  double closestDistanceToRobot = Double.POSITIVE_INFINITY;
+                  planarRegion.getTransformToWorld(regionTransform);
+                  regionFrame.update();
+                  for (Point2D point2D : planarRegion.getConcaveHull())
+                  {
+                     vertex.setIncludingFrame(regionFrame, point2D.getX(), point2D.getY(), 0.0);
+                     vertex.changeFrame(ReferenceFrame.getWorldFrame());
+
+                     double distanceToRobot = midFeetPose.getPosition().distance(vertex);
+                     if (distanceToRobot < closestDistanceToRobot)
+                     {
+                        closestDistanceToRobot = distanceToRobot;
+                     }
+                  }
+
+                  boolean localThingsAreCoplanar = true;
+                  localThingsAreCoplanar &= EuclidCoreTools.epsilonEquals(leftZ, planarRegion.getPoint().getZ(), lookAndStepParameters.getDetectFlatGroundZTolerance());
+                  Quaternion regionOrientation = new Quaternion();
+                  Vector3D largeRegionNormal = new Vector3D(planarRegion.getNormal());
+                  Vector3D footNormal = new Vector3D(Axis3D.Z);
+                  leftOrientation.transform(footNormal);
+                  EuclidGeometryTools.orientation3DFromZUpToVector3D(largeRegionNormal, regionOrientation);
+                  double orientationDifference = largeRegionNormal.angle(footNormal);
+                  localThingsAreCoplanar &= orientationDifference < lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
+
+                  if (localThingsAreCoplanar)
+                  {
+                     thingsAreCoplanar &= localThingsAreCoplanar;
+                  }
+                  else // this region is large and no coplanar with feet
+                  {
+                     if (closestDistanceToRobot < detectedFlatGroundRadius)
+                     {
+                        detectedFlatGroundRadius = closestDistanceToRobot;
+                     }
+                  }
+               }
             }
 
-            if (thingsAreCoplanar)
+            if (thingsAreCoplanar && detectedFlatGroundRadius >= lookAndStepParameters.getDetectFlatGroundMinRadius())
             {
                statusLogger.info("Flat ground detected.");
-               planarRegionsHistory.addLast(constructFlatGroundCircleRegion(flatGroundCircleCenter));
+               planarRegionsHistory.addLast(constructFlatGroundCircleRegion(flatGroundCircleCenter, detectedFlatGroundRadius));
             }
             else
             {
@@ -614,11 +679,10 @@ public class LookAndStepFootstepPlanningTask
       planningFailedTimer.reset();
    }
 
-   private PlanarRegionsList constructFlatGroundCircleRegion(RigidBodyTransform transformToWorld)
+   private PlanarRegionsList constructFlatGroundCircleRegion(RigidBodyTransform transformToWorld, double radius)
    {
       ArrayList<ConvexPolygon2D> polygons = new ArrayList<>();
       ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
-      double radius = lookAndStepParameters.getAssumedFlatGroundCircleRadius();
       for (int i = 0; i < 40; i++)
       {
          double angle = (i / 40.0) * 2.0 * Math.PI;

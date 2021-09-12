@@ -36,6 +36,11 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(detectFlatGroundMinRegionAreaToConsider);
    }
 
+   default double getDetectFlatGroundMinRadius()
+   {
+      return get(detectFlatGroundMinRadius);
+   }
+
    default double getAssumedFlatGroundCircleRadius()
    {
       return get(assumedFlatGroundCircleRadius);
