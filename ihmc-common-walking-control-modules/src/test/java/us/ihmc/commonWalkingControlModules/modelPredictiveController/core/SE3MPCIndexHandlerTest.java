@@ -55,7 +55,7 @@ public class SE3MPCIndexHandlerTest
 
       int comCoefficients = contactPolygon.getNumberOfVertices() * LinearMPCIndexHandler.coefficientsPerRho * 4;
       int totalSize = 3 * (LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + SE3MPCIndexHandler.variablesPerOrientationTick);
-
+      totalSize += 6; // final orientation tick
 
       assertEquals(totalSize, indexHandler.getTotalProblemSize());
       assertEquals(0, indexHandler.getOrientationStartIndex(0));
@@ -122,6 +122,7 @@ public class SE3MPCIndexHandlerTest
 
       int comCoefficients = contactPolygon.getNumberOfVertices() * LinearMPCIndexHandler.coefficientsPerRho * 4;
       int totalSize = 2 * (LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + SE3MPCIndexHandler.variablesPerOrientationTick);
+      totalSize += 6; // final orientation
 
 
 
