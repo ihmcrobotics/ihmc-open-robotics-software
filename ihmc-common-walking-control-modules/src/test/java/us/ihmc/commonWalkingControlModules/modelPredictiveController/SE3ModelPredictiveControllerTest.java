@@ -472,6 +472,7 @@ public class SE3ModelPredictiveControllerTest
       FrameVector3D initialAngularVelocity = new FrameVector3D();
       initialCoMPosition.setZ(nominalHeight);
 
+      mpc.linearTrajectoryHandler.setMaintainContinuity(false);
       mpc.setInitialCenterOfMassState(initialCoMPosition, initialCoMVelocity);
       mpc.setInitialBodyOrientationState(initialOrientation, initialAngularVelocity);
       mpc.setCurrentState(initialCoMPosition, initialCoMVelocity, initialOrientation, initialAngularVelocity, 0.0);
@@ -636,7 +637,7 @@ public class SE3ModelPredictiveControllerTest
 
          String errorMessage = "failed at time " + time;
 
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(errorMessage, modifiedCoM, mpc.getDesiredCoMPosition(), 1e-1);
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(errorMessage, modifiedCoM, mpc.getDesiredCoMPosition(), 1.5e-1);
          EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
       }
 
@@ -711,6 +712,7 @@ public class SE3ModelPredictiveControllerTest
 
       FramePoint3D finalDCM = new FramePoint3D(contactPose2.getPosition());
       finalDCM.setZ(nominalHeight);
+      mpc.linearTrajectoryHandler.setMaintainContinuity(false);
       mpc.solveForTrajectory(contactProviders);
       mpc.compute(0.0);
 
@@ -854,7 +856,7 @@ public class SE3ModelPredictiveControllerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(dcmPositionEndOfPreview, dcmPositionEndOfPreviewAfter, epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPositionEndOfPreview, comPositionEndOfPreviewAfter, epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comVelocityEndOfPreview, comVelocityEndOfPreviewAfter, 3e-2);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(vrpPositionEndOfPreview, vrpPositionEndOfPreviewAfter, 6e-3);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(vrpPositionEndOfPreview, vrpPositionEndOfPreviewAfter, 1.5e-2);
    }
 
    @Test
