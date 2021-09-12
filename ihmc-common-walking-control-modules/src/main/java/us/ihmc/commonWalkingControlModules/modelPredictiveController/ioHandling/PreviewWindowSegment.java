@@ -36,6 +36,8 @@ public class PreviewWindowSegment implements TimeIntervalReadOnly
    {
       reset();
 
+      setContactState(other.getContactState());
+
       for (int i = 0; i < other.getNumberOfContactPhasesInSegment(); i++)
       {
          ContactStateBasics<?> contact = other.getContactPhase(i);
