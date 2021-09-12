@@ -532,18 +532,14 @@ public class ClusterTools
       return new Point3D(closestPoint);
    }
 
-   public static Cluster createHomeRegionCluster(PlanarRegion homeRegion, NavigableExtrusionDistanceCalculator preferredCalculator,
-                                                 NavigableExtrusionDistanceCalculator calculator, boolean includePreferredExtrusions)
+   public static Cluster createHomeRegionCluster(PlanarRegion homeRegion, NavigableExtrusionDistanceCalculator calculator)
    {
       Cluster homeRegionCluster = new Cluster(ExtrusionSide.INSIDE, ClusterType.POLYGON);
       homeRegionCluster.setTransformToWorld(homeRegion.getTransformToWorld());
       homeRegionCluster.addRawPointsInLocal2D(homeRegion.getConcaveHull());
 
-      double preferredExtrusionDistance = preferredCalculator.computeNavigableExtrusionDistance(homeRegion);
       double extrusionDistance = calculator.computeNavigableExtrusionDistance(homeRegion);
 
-      ObstacleExtrusionDistanceCalculator preferredNonNavigableCalculator = (p, h) -> preferredExtrusionDistance - NAV_TO_NON_NAV_DISTANCE;
-      ObstacleExtrusionDistanceCalculator preferredNavigableCalculator = (p, h) -> preferredExtrusionDistance;
       ObstacleExtrusionDistanceCalculator nonNavigableCalculator = (p, h) -> extrusionDistance - NAV_TO_NON_NAV_DISTANCE;
       ObstacleExtrusionDistanceCalculator navigableCalculator = (p, h) -> extrusionDistance;
 
@@ -554,21 +550,13 @@ public class ClusterTools
       // Need to make sure they don't. But then also need to make sure these
       // NonNavigable regions are not treated as boundaries when making
       // inter region connections...
-      if (includePreferredExtrusions)
-      {
-         List<ConvexPolygon2D> polygons = homeRegion.getConvexPolygons();
-         homeRegionCluster.addPreferredNonNavigableExtrusionsInLocal(extrudePolygonInward(polygons, preferredNonNavigableCalculator));
-         homeRegionCluster.addPreferredNavigableExtrusionsInLocal(extrudePolygonInward(polygons, preferredNavigableCalculator));
-      }
       homeRegionCluster.addNonNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, nonNavigableCalculator));
       homeRegionCluster.addNavigableExtrusionsInLocal(extrudePolygon(extrudeToTheLeft, homeRegionCluster, navigableCalculator));
       return homeRegionCluster;
    }
 
    public static PairList<Cluster, PlanarRegion> createObstacleClusters(PlanarRegion homeRegion, List<PlanarRegion> obstacleRegions, double orthogonalAngle,
-                                                                        ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
-                                                                        ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
-                                                                        boolean includePreferredExtrusions)
+                                                                        ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator)
    {
       PairList<Cluster, PlanarRegion> obstacleClusters = new PairList<>();
 
@@ -576,19 +564,18 @@ public class ClusterTools
 
       for (PlanarRegion obstacleRegion : obstacleRegions)
       {
-         Cluster obstacleCluster = createObstacleCluster(homeRegion, preferredExtrusionDistanceCalculator, extrusionDistanceCalculator,
-                                                         homeRegion.getTransformToWorld(), zThresholdBeforeOrthogonal, obstacleRegion,
-                                                         includePreferredExtrusions);
+         Cluster obstacleCluster = createObstacleCluster(homeRegion, extrusionDistanceCalculator,
+                                                         homeRegion.getTransformToWorld(), zThresholdBeforeOrthogonal, obstacleRegion);
          obstacleClusters.add(obstacleCluster, obstacleRegion);
       }
 
       return obstacleClusters;
    }
 
-   private static Cluster createObstacleCluster(PlanarRegion homeRegion, ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator,
+   private static Cluster createObstacleCluster(PlanarRegion homeRegion,
                                                 ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
                                                 RigidBodyTransformReadOnly transformFromHomeRegionToWorld, double zThresholdBeforeOrthogonal,
-                                                PlanarRegion obstacleRegion, boolean includePreferredExtrusions)
+                                                PlanarRegion obstacleRegion)
    {
       List<Point2D> concaveHull = obstacleRegion.getConcaveHull();
 
@@ -622,37 +609,9 @@ public class ClusterTools
                                                                                                          nonNavigableExtrusionsInFlatWorld,
                                                                                                          transformFromWorldToHome);
 
-      List<ExtrusionHull> preferredNavigableExtrusionsInHomeRegionLocal = null;
-      List<ExtrusionHull> preferredNonNavigableExtrusionsInHomeRegionLocal = null;
-      if (includePreferredExtrusions)
-      {
-         // actually extrude the points
-         List<? extends Point2DReadOnly> preferredNavigableExtrusionsInFlatWorld = computeObstacleNavigableExtrusionsInLocal(obstacleClusterType,
-                                                                                                                             obstacleClusterPointsWithZeroZ,
-                                                                                                                             preferredExtrusionDistanceCalculator);
-
-         List<? extends Point2DReadOnly> preferredNonNavigableExtrusionsInFlatWorld = computeObstacleNonNavigableExtrusionsInLocal(obstacleClusterType,
-                                                                                                                                   obstacleClusterPointsWithZeroZ,
-                                                                                                                                   preferredExtrusionDistanceCalculator);
-
-         // Project the points back to the the home region.
-         preferredNavigableExtrusionsInHomeRegionLocal = new ArrayList<>();
-         preferredNavigableExtrusionsInHomeRegionLocal.add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNavigableExtrusionsInFlatWorld,
-                                                                                                      transformFromWorldToHome));
-
-         preferredNonNavigableExtrusionsInHomeRegionLocal = new ArrayList<>();
-         preferredNonNavigableExtrusionsInHomeRegionLocal.add(projectPointsVerticallyToPlanarRegionLocal(homeRegion, preferredNonNavigableExtrusionsInFlatWorld,
-                                                                                                         transformFromWorldToHome));
-      }
-
       Cluster cluster = new Cluster(ExtrusionSide.OUTSIDE, ClusterType.POLYGON);
       cluster.setTransformToWorld(transformFromHomeRegionToWorld);
       cluster.addRawPointsInWorld(obstacleConcaveHullInWorld);
-      if (includePreferredExtrusions)
-      {
-         cluster.setPreferredNavigableExtrusionsInLocal(preferredNavigableExtrusionsInHomeRegionLocal);
-         cluster.setPreferredNonNavigableExtrusionsInLocal(preferredNonNavigableExtrusionsInHomeRegionLocal);
-      }
       cluster.setNavigableExtrusionsInLocal(navigableExtrusionsInHomeRegionLocal);
       cluster.setNonNavigableExtrusionsInLocal(nonNavigableExtrusionsInHomeRegionLocal);
 

@@ -113,7 +113,6 @@ public abstract class PawStepPlannerToolboxDataSetTest
          xGaitSettings = getXGaitSettings();
 
       VisibilityGraphsParametersBasics visibilityGraphsParameters = new DefaultVisibilityGraphParameters();
-      visibilityGraphsParameters.setIncludePreferredExtrusions(false);
       visibilityGraphsParameters.setObstacleExtrusionDistance(0.6);
 //      visibilityGraphsParameters.setPerformPostProcessingNodeShifting(true);
 //      visibilityGraphsParameters.setComputeOrientationsToAvoidObstacles(true);

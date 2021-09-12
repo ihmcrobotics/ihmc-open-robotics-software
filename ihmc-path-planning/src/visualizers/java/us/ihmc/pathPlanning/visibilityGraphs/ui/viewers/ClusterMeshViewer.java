@@ -31,22 +31,16 @@ public class ClusterMeshViewer extends AnimationTimer
 
    private final Group root = new Group();
    private final Group rawPointsGroup = new Group();
-   private final Group preferredNavigableExtrusionsGroup = new Group();
    private final Group navigableExtrusionsGroup = new Group();
-   private final Group preferredNonNavigableExtrusionsGroup = new Group();
    private final Group nonNavigableExtrusionsGroup = new Group();
    private final AtomicReference<Map<Integer, MeshView>> rawPointsToRenderReference = new AtomicReference<>(null);
-   private final AtomicReference<Map<Integer, MeshView>> preferredNavigableExtrusionsToRenderReference = new AtomicReference<>(null);
    private final AtomicReference<Map<Integer, MeshView>> navigableExtrusionsToRenderReference = new AtomicReference<>(null);
-   private final AtomicReference<Map<Integer, MeshView>> preferredNonNavigableExtrusionsToRenderReference = new AtomicReference<>(null);
    private final AtomicReference<Map<Integer, MeshView>> nonNavigableExtrusionsToRenderReference = new AtomicReference<>(null);
 
    private AtomicReference<Boolean> resetRequested;
    private AtomicReference<Boolean> showRawPoints;
    private AtomicReference<Boolean> showNavigableExtrusions;
-   private AtomicReference<Boolean> showPreferredNavigableExtrusions;
    private AtomicReference<Boolean> showNonNavigableExtrusions;
-   private AtomicReference<Boolean> showPreferredNonNavigableExtrusions;
 
    private AtomicReference<List<VisibilityMapWithNavigableRegion>> newRequestReference;
 
@@ -69,17 +63,14 @@ public class ClusterMeshViewer extends AnimationTimer
          this.executorService = executorService;
 
       root.setMouseTransparent(true);
-      root.getChildren().addAll(rawPointsGroup, preferredNavigableExtrusionsGroup, navigableExtrusionsGroup, preferredNonNavigableExtrusionsGroup, nonNavigableExtrusionsGroup);
+      root.getChildren().addAll(rawPointsGroup, navigableExtrusionsGroup, nonNavigableExtrusionsGroup);
    }
 
-   public void setTopics(Topic<Boolean> resetRequestedTopic, Topic<Boolean> showClusterRawPointsTopic, Topic<Boolean> showClusterPreferredNavigableExtrusionsTopic,
-                         Topic<Boolean> showClusterPreferredNonNavigableExtrusionsTopic, Topic<Boolean> showClusterNavigableExtrusionsTopic,
+   public void setTopics(Topic<Boolean> resetRequestedTopic, Topic<Boolean> showClusterRawPointsTopic, Topic<Boolean> showClusterNavigableExtrusionsTopic,
                          Topic<Boolean> showClusterNonNavigableExtrusionsTopic, Topic<List<VisibilityMapWithNavigableRegion>> navigableRegionDataTopic)
    {
       resetRequested = messager.createInput(resetRequestedTopic, false);
       showRawPoints = messager.createInput(showClusterRawPointsTopic, false);
-      showPreferredNavigableExtrusions = messager.createInput(showClusterPreferredNavigableExtrusionsTopic, false);
-      showPreferredNonNavigableExtrusions = messager.createInput(showClusterPreferredNonNavigableExtrusionsTopic, false);
       showNavigableExtrusions = messager.createInput(showClusterNavigableExtrusionsTopic, false);
       showNonNavigableExtrusions = messager.createInput(showClusterNonNavigableExtrusionsTopic, false);
       newRequestReference = messager.createInput(navigableRegionDataTopic, null);
@@ -92,10 +83,6 @@ public class ClusterMeshViewer extends AnimationTimer
       {
          rawPointsGroup.getChildren().clear();
          rawPointsToRenderReference.getAndSet(null);
-         preferredNavigableExtrusionsGroup.getChildren().clear();
-         preferredNavigableExtrusionsToRenderReference.getAndSet(null);
-         preferredNonNavigableExtrusionsGroup.getChildren().clear();
-         preferredNonNavigableExtrusionsToRenderReference.getAndSet(null);
          navigableExtrusionsGroup.getChildren().clear();
          navigableExtrusionsToRenderReference.getAndSet(null);
          nonNavigableExtrusionsGroup.getChildren().clear();
@@ -123,16 +110,6 @@ public class ClusterMeshViewer extends AnimationTimer
             navigableExtrusionsGroup.getChildren().addAll(navigableExtrusionsRender.values());
       }
 
-      Map<Integer, MeshView> preferredNavigableExtrusionsRender = preferredNavigableExtrusionsToRenderReference.get();
-
-      if (preferredNavigableExtrusionsRender != null)
-      {
-         preferredNavigableExtrusionsGroup.getChildren().clear();
-
-         if (showPreferredNavigableExtrusions.get())
-            preferredNavigableExtrusionsGroup.getChildren().addAll(preferredNavigableExtrusionsRender.values());
-      }
-
       Map<Integer, MeshView> nonNavigableExtrusionsRender = nonNavigableExtrusionsToRenderReference.get();
 
       if (nonNavigableExtrusionsRender != null)
@@ -143,17 +120,7 @@ public class ClusterMeshViewer extends AnimationTimer
             nonNavigableExtrusionsGroup.getChildren().addAll(nonNavigableExtrusionsRender.values());
       }
 
-      Map<Integer, MeshView> preferredNonNavigableExtrusionsRender = preferredNonNavigableExtrusionsToRenderReference.get();
-
-      if (preferredNonNavigableExtrusionsRender != null)
-      {
-         preferredNonNavigableExtrusionsGroup.getChildren().clear();
-
-         if (showPreferredNonNavigableExtrusions.get())
-            preferredNonNavigableExtrusionsGroup.getChildren().addAll(preferredNonNavigableExtrusionsRender.values());
-      }
-
-      if (showRawPoints.get() || showPreferredNavigableExtrusions.get() || showNavigableExtrusions.get() || showPreferredNonNavigableExtrusions.get() || showNonNavigableExtrusions.get())
+      if (showRawPoints.get() || showNavigableExtrusions.get() || showNonNavigableExtrusions.get())
       {
          List<VisibilityMapWithNavigableRegion> newRequest = newRequestReference.getAndSet(null);
 
@@ -170,9 +137,7 @@ public class ClusterMeshViewer extends AnimationTimer
    private void processNavigableRegions(List<VisibilityMapWithNavigableRegion> navigableRegionLocalPlanners)
    {
       Map<Integer, JavaFXMeshBuilder> rawPointsMeshBuilders = new HashMap<>();
-      Map<Integer, JavaFXMeshBuilder> preferredNavigableExtrusionsMeshBuilders = new HashMap<>();
       Map<Integer, JavaFXMeshBuilder> navigableExtrusionsMeshBuilders = new HashMap<>();
-      Map<Integer, JavaFXMeshBuilder> preferredNonNavigableExtrusionsMeshBuilders = new HashMap<>();
       Map<Integer, JavaFXMeshBuilder> nonNavigableExtrusionsMeshBuilders = new HashMap<>();
       Map<Integer, Material> navigableMaterials = new HashMap<>();
       Map<Integer, Material> nonNavigableMaterials = new HashMap<>();
@@ -181,15 +146,11 @@ public class ClusterMeshViewer extends AnimationTimer
       {
          int regionId = navigableRegionLocalPlanner.getMapId();
          JavaFXMeshBuilder rawPointsMeshBuilder = getOrCreate(rawPointsMeshBuilders, regionId);
-         JavaFXMeshBuilder preferredNavigableExtrusionsMeshBuilder = getOrCreate(preferredNavigableExtrusionsMeshBuilders, regionId);
          JavaFXMeshBuilder navigableExtrusionsMeshBuilder = getOrCreate(navigableExtrusionsMeshBuilders, regionId);
-         JavaFXMeshBuilder preferredNonNavigableExtrusionsMeshBuilder = getOrCreate(preferredNonNavigableExtrusionsMeshBuilders, regionId);
          JavaFXMeshBuilder nonNavigableExtrusionsMeshBuilder = getOrCreate(nonNavigableExtrusionsMeshBuilders, regionId);
 
-         buildPreferredNavigableExtrusion(preferredNavigableExtrusionsMeshBuilder, navigableRegionLocalPlanner.getHomeRegionCluster());
          buildNavigableExtrusion(navigableExtrusionsMeshBuilder, navigableRegionLocalPlanner.getHomeRegionCluster());
          buildNonNavigableExtrusion(nonNavigableExtrusionsMeshBuilder, navigableRegionLocalPlanner.getHomeRegionCluster());
-         buildPreferredNonNavigableExtrusion(preferredNonNavigableExtrusionsMeshBuilder, navigableRegionLocalPlanner.getHomeRegionCluster());
 
          List<Cluster> allClusters = navigableRegionLocalPlanner.getAllClusters();
          for (Cluster cluster : allClusters)
@@ -203,7 +164,6 @@ public class ClusterMeshViewer extends AnimationTimer
          for (Cluster cluster : obstacleClusters)
          {
             buildNonNavigableExtrusion(nonNavigableExtrusionsMeshBuilder, cluster);
-            buildPreferredNonNavigableExtrusion(preferredNonNavigableExtrusionsMeshBuilder, cluster);
          }
 
          navigableMaterials.put(regionId, new PhongMaterial(getNavigableLineColor(regionId)));
@@ -211,9 +171,7 @@ public class ClusterMeshViewer extends AnimationTimer
       }
 
       HashMap<Integer, MeshView> rawPointsMapToRender = new HashMap<>();
-      HashMap<Integer, MeshView> preferredNavigableExtrusionsMapToRender = new HashMap<>();
       HashMap<Integer, MeshView> navigableExtrusionsMapToRender = new HashMap<>();
-      HashMap<Integer, MeshView> preferredNonNavigableExtrusionsMapToRender = new HashMap<>();
       HashMap<Integer, MeshView> nonNavigableExtrusionsMapToRender = new HashMap<>();
 
       for (Integer id : rawPointsMeshBuilders.keySet())
@@ -226,24 +184,14 @@ public class ClusterMeshViewer extends AnimationTimer
          navigableExtrusionsMeshView.setMaterial(navigableMaterials.get(id));
          navigableExtrusionsMapToRender.put(id, navigableExtrusionsMeshView);
 
-         MeshView preferredNavigableExtrusionsMeshView = new MeshView(preferredNavigableExtrusionsMeshBuilders.get(id).generateMesh());
-         preferredNavigableExtrusionsMeshView.setMaterial(navigableMaterials.get(id));
-         preferredNavigableExtrusionsMapToRender.put(id, preferredNavigableExtrusionsMeshView);
-
          MeshView nonNavigableExtrusionsMeshView = new MeshView(nonNavigableExtrusionsMeshBuilders.get(id).generateMesh());
          nonNavigableExtrusionsMeshView.setMaterial(nonNavigableMaterials.get(id));
          nonNavigableExtrusionsMapToRender.put(id, nonNavigableExtrusionsMeshView);
-
-         MeshView preferredNonNavigableExtrusionsMeshView = new MeshView(preferredNonNavigableExtrusionsMeshBuilders.get(id).generateMesh());
-         preferredNonNavigableExtrusionsMeshView.setMaterial(nonNavigableMaterials.get(id));
-         preferredNonNavigableExtrusionsMapToRender.put(id, preferredNonNavigableExtrusionsMeshView);
       }
 
       rawPointsToRenderReference.set(rawPointsMapToRender);
-      preferredNavigableExtrusionsToRenderReference.set(preferredNavigableExtrusionsMapToRender);
       navigableExtrusionsToRenderReference.set(navigableExtrusionsMapToRender);
       nonNavigableExtrusionsToRenderReference.set(nonNavigableExtrusionsMapToRender);
-      preferredNonNavigableExtrusionsToRenderReference.set(preferredNonNavigableExtrusionsMapToRender);
    }
 
    private void buildRawClusterPoints(JavaFXMeshBuilder rawPointsMeshBuilder, Cluster cluster)
@@ -251,38 +199,6 @@ public class ClusterMeshViewer extends AnimationTimer
       for (Point3DReadOnly rawPoint : cluster.getRawPointsInWorld())
       {
          rawPointsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_RAWPOINT_SIZE, rawPoint);
-      }
-   }
-
-   private void buildPreferredNavigableExtrusion(JavaFXMeshBuilder preferredNavigableExtrusionsMeshBuilder, Cluster cluster)
-   {
-      boolean close = cluster.isClosed();
-
-      for (List<Point3DReadOnly> extrusions : cluster.getPreferredNavigableExtrusionsInWorld())
-      {
-         preferredNavigableExtrusionsMeshBuilder
-               .addMultiLine(extrusions, VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, close);
-
-         for (Point3DReadOnly rawPoint : extrusions)
-         {
-            preferredNavigableExtrusionsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, rawPoint);
-         }
-      }
-   }
-
-   private void buildPreferredNonNavigableExtrusion(JavaFXMeshBuilder preferredNonNavigableExtrusionsMeshBuilder, Cluster cluster)
-   {
-      boolean close = cluster.isClosed();
-
-      for (List<Point3DReadOnly> extrusions : cluster.getPreferredNonNavigableExtrusionsInWorld())
-      {
-         preferredNonNavigableExtrusionsMeshBuilder
-               .addMultiLine(extrusions, VisualizationParameters.NON_NAVIGABLECLUSTER_LINE_THICKNESS, close);
-
-         for (Point3DReadOnly rawPoint : extrusions)
-         {
-            preferredNonNavigableExtrusionsMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, rawPoint);
-         }
       }
    }
 
