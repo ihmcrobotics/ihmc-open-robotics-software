@@ -162,7 +162,8 @@ public class SE3ModelPredictiveControllerTest
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
       assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
       assertEquals(1, vrpPositionCommands.size());
-      assertEquals(1, vrpTrackingCommands.size());
+      int numberOfSegments = mpc.previewWindowCalculator.getPlanningWindow().size();
+      assertEquals(numberOfSegments, vrpTrackingCommands.size());
 
       assertEquals(0.0, comPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, comPositionCommands.get(0).getOmega(), epsilon);
@@ -339,10 +340,11 @@ public class SE3ModelPredictiveControllerTest
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
       assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
       assertEquals(1, vrpPositionCommands.size());
-      assertEquals(2, vrpTrackingCommands.size());
-      assertEquals(1, comPositionContinuityCommands.size());
-      assertEquals(1, comVelocityContinuityCommands.size());
-      assertEquals(1, vrpPositionContinuityCommands.size());
+      int numberOfSegments = mpc.previewWindowCalculator.getPlanningWindow().size();
+      assertEquals(numberOfSegments, vrpTrackingCommands.size());
+      assertEquals(numberOfSegments - 1, comPositionContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, comVelocityContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, vrpPositionContinuityCommands.size());
 
       assertEquals(0.0, comPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, comPositionCommands.get(0).getOmega(), epsilon);
@@ -547,10 +549,11 @@ public class SE3ModelPredictiveControllerTest
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
       assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
       assertEquals(1, vrpPositionCommands.size());
-      assertEquals(2, vrpTrackingCommands.size());
-      assertEquals(1, comPositionContinuityCommands.size());
-      assertEquals(1, comVelocityContinuityCommands.size());
-      assertEquals(1, vrpPositionContinuityCommands.size());
+      int numberOfSegments = mpc.previewWindowCalculator.getPlanningWindow().size();
+      assertEquals(numberOfSegments, vrpTrackingCommands.size());
+      assertEquals(numberOfSegments - 1, comPositionContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, comVelocityContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, vrpPositionContinuityCommands.size());
 
       assertEquals(0.0, comPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, comPositionCommands.get(0).getOmega(), epsilon);
@@ -772,9 +775,10 @@ public class SE3ModelPredictiveControllerTest
       assertEquals(expectedCoMPositionCommands, comPositionCommands.size());
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
       //      assertEquals(1, dcmPositionCommands.size());
-      assertEquals(1, comPositionContinuityCommands.size());
-      assertEquals(1, comVelocityContinuityCommands.size());
-      assertEquals(1, vrpPositionContinuityCommands.size());
+      int numberOfSegments = mpc.previewWindowCalculator.getPlanningWindow().size();
+      assertEquals(numberOfSegments - 1, comPositionContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, comVelocityContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, vrpPositionContinuityCommands.size());
       assertEquals(1, vrpPositionCommands.size());
 
       assertEquals(0.0, comPositionCommands.get(0).getTimeOfObjective(), epsilon);
@@ -943,7 +947,8 @@ public class SE3ModelPredictiveControllerTest
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
       assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
       assertEquals(1, vrpPositionCommands.size());
-      assertEquals(1, vrpTrackingCommands.size());
+      int numberOfSegments = mpc.previewWindowCalculator.getPlanningWindow().size();
+      assertEquals(numberOfSegments, vrpTrackingCommands.size());
 
       assertEquals(0.0, comPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, comPositionCommands.get(0).getOmega(), epsilon);
