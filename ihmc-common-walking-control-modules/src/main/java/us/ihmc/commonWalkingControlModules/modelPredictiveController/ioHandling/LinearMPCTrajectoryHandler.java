@@ -70,6 +70,11 @@ public class LinearMPCTrajectoryHandler
       comTrajectory = new MultipleCoMSegmentTrajectoryGenerator("desiredCoMTrajectory", registry);
    }
 
+   public void setMaintainContinuity(boolean maintainContinuity)
+   {
+      positionInitializationCalculator.setMaintainInitialCoMVelocityContinuity(maintainContinuity);
+   }
+
    /**
     * Clears the CoM and VRP solution trajectories
     */
