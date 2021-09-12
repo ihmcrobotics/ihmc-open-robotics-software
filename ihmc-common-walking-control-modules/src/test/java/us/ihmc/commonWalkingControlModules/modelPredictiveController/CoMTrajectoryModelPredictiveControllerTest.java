@@ -131,7 +131,11 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
       assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
       assertEquals(1, vrpPositionCommands.size());
-      assertEquals(1, vrpTrackingCommands.size());
+      int numberOfSegments = mpc.previewWindowCalculator.getPlanningWindow().size();
+      int numberOfPhases = 0;
+      for (int i = 0; i < numberOfSegments; i++)
+         numberOfPhases += mpc.previewWindowCalculator.getPlanningWindow().get(i).getNumberOfContactPhasesInSegment();
+      assertEquals(numberOfPhases, vrpTrackingCommands.size());
 
       assertEquals(0.0, comPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, comPositionCommands.get(0).getOmega(), epsilon);
@@ -141,14 +145,15 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(omega, comVelocityCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comVelocityCommands.get(0).getObjective(), epsilon);
 
+      double finalSegmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(numberOfSegments - 1).getDuration();
       if (MPCParameters.includeFinalCoMPositionObjective)
       {
-         assertEquals(previewWindowLength.getDoubleValue(), comPositionCommands.get(1).getTimeOfObjective(), epsilon);
+         assertEquals(finalSegmentDuration, comPositionCommands.get(1).getTimeOfObjective(), epsilon);
          assertEquals(omega, comPositionCommands.get(1).getOmega(), epsilon);
          EuclidCoreTestTools.assertTuple3DEquals(initialCoM, comPositionCommands.get(1).getObjective(), epsilon);
       }
 
-      assertEquals(previewWindowLength.getDoubleValue(), vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
+      assertEquals(finalSegmentDuration, vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, vrpPositionCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(initialCoM, vrpPositionCommands.get(0).getObjective(), epsilon);
 
@@ -305,10 +310,14 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
       assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
       assertEquals(1, vrpPositionCommands.size());
-      assertEquals(2, vrpTrackingCommands.size());
-      assertEquals(1, comPositionContinuityCommands.size());
-      assertEquals(1, comVelocityContinuityCommands.size());
-      assertEquals(1, vrpPositionContinuityCommands.size());
+      int numberOfSegments = mpc.previewWindowCalculator.getPlanningWindow().size();
+      int numberOfPhases = 0;
+      for (int i = 0; i < numberOfSegments; i++)
+         numberOfPhases += mpc.previewWindowCalculator.getPlanningWindow().get(i).getNumberOfContactPhasesInSegment();
+      assertEquals(numberOfPhases, vrpTrackingCommands.size());
+      assertEquals(numberOfSegments - 1, comPositionContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, comVelocityContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, vrpPositionContinuityCommands.size());
 
       assertEquals(0.0, comPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, comPositionCommands.get(0).getOmega(), epsilon);
@@ -318,14 +327,15 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(omega, comVelocityCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comVelocityCommands.get(0).getObjective(), epsilon);
 
+      double finalSegmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(numberOfSegments - 1).getDuration();
       if (MPCParameters.includeFinalCoMPositionObjective)
       {
-         assertEquals(previewWindowLength.getDoubleValue() - duration, comPositionCommands.get(1).getTimeOfObjective(), epsilon);
+         assertEquals(finalSegmentDuration, comPositionCommands.get(1).getTimeOfObjective(), epsilon);
          assertEquals(omega, comPositionCommands.get(1).getOmega(), epsilon);
          //      EuclidCoreTestTools.assertTuple3DEquals(initialCoM, comPositionCommands.get(1).getObjective(), epsilon);
       }
 
-      assertEquals(previewWindowLength.getDoubleValue() - duration, vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
+      assertEquals(finalSegmentDuration, vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, vrpPositionCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(initialCoM, vrpPositionCommands.get(0).getObjective(), epsilon);
 
@@ -504,10 +514,14 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
       assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
       assertEquals(1, vrpPositionCommands.size());
-      assertEquals(2, vrpTrackingCommands.size());
-      assertEquals(1, comPositionContinuityCommands.size());
-      assertEquals(1, comVelocityContinuityCommands.size());
-      assertEquals(1, vrpPositionContinuityCommands.size());
+      int numberOfSegments = mpc.previewWindowCalculator.getPlanningWindow().size();
+      int numberOfPhases = 0;
+      for (int i = 0; i < numberOfSegments; i++)
+         numberOfPhases += mpc.previewWindowCalculator.getPlanningWindow().get(i).getNumberOfContactPhasesInSegment();
+      assertEquals(numberOfPhases, vrpTrackingCommands.size());
+      assertEquals(numberOfSegments - 1, comPositionContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, comVelocityContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, vrpPositionContinuityCommands.size());
 
       assertEquals(0.0, comPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, comPositionCommands.get(0).getOmega(), epsilon);
@@ -517,22 +531,23 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(omega, comVelocityCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comVelocityCommands.get(0).getObjective(), epsilon);
 
+      double finalSegmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(numberOfSegments - 1).getDuration();
       if (MPCParameters.includeFinalCoMPositionObjective)
       {
-         assertEquals(previewWindowLength.getDoubleValue() - duration, comPositionCommands.get(1).getTimeOfObjective(), epsilon);
+         assertEquals(finalSegmentDuration, comPositionCommands.get(1).getTimeOfObjective(), epsilon);
          assertEquals(omega, comPositionCommands.get(1).getOmega(), epsilon);
          //      EuclidCoreTestTools.assertTuple3DEquals(initialCoM, comPositionCommands.get(1).getObjective(), epsilon);
       }
 
       if (MPCParameters.includeFinalCoMVelocityObjective)
       {
-         assertEquals(previewWindowLength.getDoubleValue() - duration, comVelocityCommands.get(1).getTimeOfObjective(), epsilon);
+         assertEquals(finalSegmentDuration, comVelocityCommands.get(1).getTimeOfObjective(), epsilon);
          assertEquals(omega, comVelocityCommands.get(1).getOmega(), epsilon);
          //      EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comVelocityCommands.get(1).getObjective(), epsilon);
       }
 
 
-      assertEquals(previewWindowLength.getDoubleValue() - duration, vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
+      assertEquals(finalSegmentDuration, vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, vrpPositionCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(initialCoM, vrpPositionCommands.get(0).getObjective(), epsilon);
 
@@ -619,6 +634,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       finalDCM.setZ(nominalHeight);
 
       mpc.setCurrentCenterOfMassState(initialCoM, initialCoMVelocity, 0.0);
+      mpc.linearTrajectoryHandler.setMaintainContinuity(false);
       mpc.solveForTrajectory(contactProviders);
       mpc.compute(0.0);
 
@@ -694,9 +710,13 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(expectedCoMPositionCommands, comPositionCommands.size());
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
       assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
-      assertEquals(1, comPositionContinuityCommands.size());
-      assertEquals(1, comVelocityContinuityCommands.size());
-      assertEquals(1, vrpPositionContinuityCommands.size());
+      int numberOfSegments = mpc.previewWindowCalculator.getPlanningWindow().size();
+      int numberOfPhases = 0;
+      for (int i = 0; i < numberOfSegments; i++)
+         numberOfPhases += mpc.previewWindowCalculator.getPlanningWindow().get(i).getNumberOfContactPhasesInSegment();
+      assertEquals(numberOfSegments - 1, comPositionContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, comVelocityContinuityCommands.size());
+      assertEquals(numberOfSegments - 1, vrpPositionContinuityCommands.size());
       assertEquals(1, vrpPositionCommands.size());
 
       assertEquals(0.0, comPositionCommands.get(0).getTimeOfObjective(), epsilon);
@@ -712,7 +732,8 @@ public class CoMTrajectoryModelPredictiveControllerTest
 //      EuclidCoreTestTools.assertTuple3DEquals(finalDCM, dcmPositionCommands.get(0).getObjective(), epsilon);
 
 
-      assertEquals(previewWindowLength.getDoubleValue() - duration, vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
+      double finalSegmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(numberOfSegments - 1).getDuration();
+      assertEquals(finalSegmentDuration, vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, vrpPositionCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(finalDCM, vrpPositionCommands.get(0).getObjective(), epsilon);
 
@@ -762,7 +783,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       if (MPCParameters.finalCoMVelocityConstraintType != ConstraintType.EQUALITY)
          finalCoMVelocityEpsilon = 0.75;
       if (MPCParameters.finalVRPPositionConstraintType != ConstraintType.EQUALITY)
-         finalVRPEpsilon = 0.25;
+         finalVRPEpsilon = 0.35;
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(dcmPositionEndOfPreview, dcmPositionEndOfPreviewAfter, finalDCMEpsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comPositionEndOfPreview, comPositionEndOfPreviewAfter, finalCoMEpsilon);
@@ -864,8 +885,12 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(expectedCoMPositionCommands, comPositionCommands.size());
       assertEquals(expectedCoMVelocityCommands, comVelocityCommands.size());
       assertEquals(expectedDCMPositionCommands, dcmPositionCommands.size());
+      int numberOfSegments = mpc.previewWindowCalculator.getPlanningWindow().size();
+      int numberOfPhases = 0;
+      for (int i = 0; i < numberOfSegments; i++)
+         numberOfPhases += mpc.previewWindowCalculator.getPlanningWindow().get(i).getNumberOfContactPhasesInSegment();
       assertEquals(1, vrpPositionCommands.size());
-      assertEquals(1, vrpTrackingCommands.size());
+      assertEquals(numberOfPhases, vrpTrackingCommands.size());
 
       assertEquals(0.0, comPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, comPositionCommands.get(0).getOmega(), epsilon);
@@ -875,14 +900,15 @@ public class CoMTrajectoryModelPredictiveControllerTest
       assertEquals(omega, comVelocityCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(new Vector3D(), comVelocityCommands.get(0).getObjective(), epsilon);
 
+      double finalSegmentDuration = mpc.previewWindowCalculator.getPlanningWindow().get(numberOfSegments - 1).getDuration();
       if (MPCParameters.includeFinalCoMPositionObjective)
       {
-         assertEquals(previewWindowLength.getDoubleValue(), comPositionCommands.get(1).getTimeOfObjective(), epsilon);
+         assertEquals(finalSegmentDuration, comPositionCommands.get(1).getTimeOfObjective(), epsilon);
          assertEquals(omega, comPositionCommands.get(1).getOmega(), epsilon);
          //      EuclidCoreTestTools.assertTuple3DEquals(initialCoM, comPositionCommands.get(1).getObjective(), epsilon);
       }
 
-      assertEquals(previewWindowLength.getDoubleValue(), vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
+      assertEquals(finalSegmentDuration, vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, vrpPositionCommands.get(0).getOmega(), epsilon);
       EuclidCoreTestTools.assertTuple3DEquals(initialCoM, vrpPositionCommands.get(0).getObjective(), epsilon);
 
