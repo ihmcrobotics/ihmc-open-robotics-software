@@ -93,7 +93,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       statusLogger = helper.getOrCreateStatusLogger();
 
       visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
-      visibilityGraphParameters.setIncludePreferredExtrusions(false);
       visibilityGraphParameters.setTooHighToStepDistance(0.2);
 
       lookAndStepParameters = new LookAndStepBehaviorParameters();

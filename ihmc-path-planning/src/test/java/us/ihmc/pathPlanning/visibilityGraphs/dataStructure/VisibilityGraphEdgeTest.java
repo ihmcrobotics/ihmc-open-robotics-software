@@ -30,10 +30,10 @@ public class VisibilityGraphEdgeTest
          Point3D pointInWorld2 = EuclidCoreRandomTools.nextPoint3D(random, 100.0);
          NavigableRegion navigableRegion = new NavigableRegion(new PlanarRegion(), new Cluster(Cluster.ExtrusionSide.INSIDE, Cluster.ClusterType.POLYGON), new ArrayList<>());
          VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion, false);
-         VisibilityGraphNode nodeA = new VisibilityGraphNode(pointInWorld1, new Point2D(pointInWorld1), visibilityGraphNavigableRegion, false);
-         VisibilityGraphNode nodeB = new VisibilityGraphNode(pointInWorld1, new Point2D(pointInWorld1), visibilityGraphNavigableRegion, false);
-         VisibilityGraphNode nodeC = new VisibilityGraphNode(pointInWorld2, new Point2D(pointInWorld2), visibilityGraphNavigableRegion, false);
-         VisibilityGraphNode nodeD = new VisibilityGraphNode(pointInWorld2, new Point2D(pointInWorld2), visibilityGraphNavigableRegion, false);
+         VisibilityGraphNode nodeA = new VisibilityGraphNode(pointInWorld1, new Point2D(pointInWorld1), visibilityGraphNavigableRegion);
+         VisibilityGraphNode nodeB = new VisibilityGraphNode(pointInWorld1, new Point2D(pointInWorld1), visibilityGraphNavigableRegion);
+         VisibilityGraphNode nodeC = new VisibilityGraphNode(pointInWorld2, new Point2D(pointInWorld2), visibilityGraphNavigableRegion);
+         VisibilityGraphNode nodeD = new VisibilityGraphNode(pointInWorld2, new Point2D(pointInWorld2), visibilityGraphNavigableRegion);
 
          VisibilityGraphEdge edge1 = new VisibilityGraphEdge(nodeA, nodeC);
          VisibilityGraphEdge edge2 = new VisibilityGraphEdge(nodeA, nodeD);

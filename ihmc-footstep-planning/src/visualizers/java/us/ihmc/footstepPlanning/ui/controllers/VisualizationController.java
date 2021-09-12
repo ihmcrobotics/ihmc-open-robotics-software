@@ -37,10 +37,6 @@ public class VisualizationController
    @FXML
    private CheckBox showClusterNonNavigableExtrusionsToggleButton;
    @FXML
-   private CheckBox showClusterPreferredNavigableExtrusionsToggleButton;
-   @FXML
-   private CheckBox showClusterPreferredNonNavigableExtrusionsToggleButton;
-   @FXML
    private CheckBox showOccupancyMap;
    @FXML
    private CheckBox showSolution;
@@ -70,8 +66,6 @@ public class VisualizationController
 
       // Body path planner
       messager.bindBidirectional(ShowBodyPath, showBodyPathToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(ShowClusterPreferredNavigableExtrusions, showClusterPreferredNavigableExtrusionsToggleButton.selectedProperty(), true);
-      messager.bindBidirectional(ShowClusterPreferredNonNavigableExtrusions, showClusterPreferredNonNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterNavigableExtrusions, showClusterNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterNonNavigableExtrusions, showClusterNonNavigableExtrusionsToggleButton.selectedProperty(), true);
       messager.bindBidirectional(ShowClusterRawPoints, showClusterRawPointsToggleButton.selectedProperty(), true);

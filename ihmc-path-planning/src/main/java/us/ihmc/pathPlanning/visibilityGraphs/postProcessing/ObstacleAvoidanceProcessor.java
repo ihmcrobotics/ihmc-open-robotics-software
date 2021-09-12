@@ -29,6 +29,7 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
    private static final double minDistanceToMove = 0.01;
    private static final double waypointResolution = 0.1;
 
+   private static final double distanceFromObstacle = 1.0;
    private double desiredDistanceFromObstacleCluster;
 
    private final VisibilityGraphsParametersReadOnly parameters;
@@ -36,12 +37,12 @@ public class ObstacleAvoidanceProcessor implements BodyPathPostProcessor
    public ObstacleAvoidanceProcessor(VisibilityGraphsParametersReadOnly parameters)
    {
       this.parameters = parameters;
-      desiredDistanceFromObstacleCluster = parameters.getPreferredObstacleExtrusionDistance() - parameters.getObstacleExtrusionDistance();
+      desiredDistanceFromObstacleCluster = distanceFromObstacle - parameters.getObstacleExtrusionDistance();
    }
 
    public List<Point3DReadOnly> computePathFromNodes(List<VisibilityGraphNode> nodePath, VisibilityMapSolution visibilityMapSolution)
    {
-      desiredDistanceFromObstacleCluster = parameters.getPreferredObstacleExtrusionDistance() - parameters.getObstacleExtrusionDistance();
+      desiredDistanceFromObstacleCluster = distanceFromObstacle - parameters.getObstacleExtrusionDistance();
 
       List<Point3D> newPathPositions = nodePath.stream().map(node -> new Point3D(node.getPointInWorld())).collect(Collectors.toList());
 
