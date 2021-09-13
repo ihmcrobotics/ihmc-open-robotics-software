@@ -8,6 +8,7 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.matrixlib.MatrixTestTools;
@@ -39,7 +40,12 @@ public class LQRJumpMomentumControllerNoFlightTest
       contactStateProviders.add(new SettableContactStateProvider());
       contactStateProviders.get(0).setContactState(ContactState.IN_CONTACT);
 
-      controller.setVRPTrajectory(trajectories, contactStateProviders);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.setContactState(ContactState.IN_CONTACT);
+      List<PreviewWindowSegment> contactSegments = new ArrayList<>();
+      contactSegments.add(segment);
+
+      controller.setVRPTrajectory(trajectories, contactSegments);
 
       DMatrixRMaj AExpected = new DMatrixRMaj(6, 6);
       AExpected.set(0, 3, 1.0);
@@ -185,14 +191,16 @@ public class LQRJumpMomentumControllerNoFlightTest
       vrpTrajectory.setLinear(0.0, finalTime, vrpStart, vrpEnd);
       List<Polynomial3DReadOnly> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
-      List<SettableContactStateProvider> contactStateProviders = new ArrayList<>();
-      contactStateProviders.add(new SettableContactStateProvider());
-      contactStateProviders.get(0).setContactState(ContactState.IN_CONTACT);
+
+      List<PreviewWindowSegment> segments = new ArrayList<>();
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.setContactState(ContactState.IN_CONTACT);
+      segments.add(segment);
 
       DMatrixRMaj finalPosition = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalPosition);
 
-      controller.setVRPTrajectory(trajectories, contactStateProviders);
+      controller.setVRPTrajectory(trajectories, segments);
 
       controller.computeS1Segments();
       controller.computeS2Segments();
@@ -424,14 +432,16 @@ public class LQRJumpMomentumControllerNoFlightTest
       vrpTrajectory.setCubic(0.0, finalTime, vrpStart, vrpEnd);
       List<Polynomial3DReadOnly> trajectories = new ArrayList<>();
       trajectories.add(vrpTrajectory);
-      List<SettableContactStateProvider> contactStateProviders = new ArrayList<>();
-      contactStateProviders.add(new SettableContactStateProvider());
-      contactStateProviders.get(0).setContactState(ContactState.IN_CONTACT);
+
+      List<PreviewWindowSegment> segments = new ArrayList<>();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      segment1.setContactState(ContactState.IN_CONTACT);
+      segments.add(segment1);
 
       DMatrixRMaj finalPosition = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalPosition);
 
-      controller.setVRPTrajectory(trajectories, contactStateProviders);
+      controller.setVRPTrajectory(trajectories, segments);
 
       controller.computeS1Segments();
       controller.computeS2Segments();
@@ -666,16 +676,18 @@ public class LQRJumpMomentumControllerNoFlightTest
          relativeTrajectory.shiftTrajectory(-finalVRPState.get(0, 0), -finalVRPState.get(1, 0), -finalVRPState.get(2, 0));
       }
 
-      List<SettableContactStateProvider> contactStateProviders = new ArrayList<>();
-      contactStateProviders.add(new SettableContactStateProvider());
-      contactStateProviders.add(new SettableContactStateProvider());
-      contactStateProviders.get(0).setContactState(ContactState.IN_CONTACT);
-      contactStateProviders.get(1).setContactState(ContactState.IN_CONTACT);
+      List<PreviewWindowSegment> segments = new ArrayList<>();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      PreviewWindowSegment segment2 = new PreviewWindowSegment();
+      segment1.setContactState(ContactState.IN_CONTACT);
+      segment2.setContactState(ContactState.IN_CONTACT);
+      segments.add(segment1);
+      segments.add(segment2);
 
       DMatrixRMaj finalPosition = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalPosition);
 
-      controller.setVRPTrajectory(trajectories, contactStateProviders);
+      controller.setVRPTrajectory(trajectories, segments);
 
       controller.computeS1Segments();
       controller.computeS2Segments();
@@ -1107,18 +1119,21 @@ public class LQRJumpMomentumControllerNoFlightTest
       trajectories.add(vrpTrajectory2);
       trajectories.add(vrpTrajectory3);
 
-      List<SettableContactStateProvider> contactStateProviders = new ArrayList<>();
-      contactStateProviders.add(new SettableContactStateProvider());
-      contactStateProviders.add(new SettableContactStateProvider());
-      contactStateProviders.add(new SettableContactStateProvider());
-      contactStateProviders.get(0).setContactState(ContactState.IN_CONTACT);
-      contactStateProviders.get(1).setContactState(ContactState.IN_CONTACT);
-      contactStateProviders.get(2).setContactState(ContactState.IN_CONTACT);
+      List<PreviewWindowSegment> segments = new ArrayList<>();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      PreviewWindowSegment segment2 = new PreviewWindowSegment();
+      PreviewWindowSegment segment3 = new PreviewWindowSegment();
+      segment1.setContactState(ContactState.IN_CONTACT);
+      segment2.setContactState(ContactState.IN_CONTACT);
+      segment3.setContactState(ContactState.IN_CONTACT);
+      segments.add(segment1);
+      segments.add(segment2);
+      segments.add(segment3);
 
       DMatrixRMaj finalPosition = new DMatrixRMaj(3, 1);
       vrpEnd.get(finalPosition);
 
-      controller.setVRPTrajectory(trajectories, contactStateProviders);
+      controller.setVRPTrajectory(trajectories, segments);
 
       // double up on the computation to make sure things get zeroed properly between calls
       controller.computeS1Segments();

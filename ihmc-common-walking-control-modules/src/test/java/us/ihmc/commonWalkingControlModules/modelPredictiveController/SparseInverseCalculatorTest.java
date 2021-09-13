@@ -81,13 +81,13 @@ public class SparseInverseCalculatorTest
       VRPTrackingCommand vrpTrackingCommand = new VRPTrackingCommand();
       vrpTrackingCommand.setStartVRP(dcmObjective);
       vrpTrackingCommand.setEndVRP(dcmObjective);
-      vrpTrackingCommand.setSegmentDuration(duration);
+      vrpTrackingCommand.setTimeInterval(0.0, duration);
       vrpTrackingCommand.setSegmentNumber(0);
 
       VRPTrackingCommand vrpTrackingCommand2 = new VRPTrackingCommand();
       vrpTrackingCommand2.setStartVRP(dcmObjective);
       vrpTrackingCommand2.setEndVRP(dcmObjective);
-      vrpTrackingCommand2.setSegmentDuration(duration);
+      vrpTrackingCommand2.setTimeInterval(0.0, duration);
       vrpTrackingCommand2.setSegmentNumber(1);
 
       DCMPositionCommand dcmEndPositionCommand = new DCMPositionCommand();

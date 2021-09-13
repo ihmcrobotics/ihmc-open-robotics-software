@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,7 +19,7 @@ public class LinearMPCIndexHandlerTest
    {
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
@@ -30,7 +31,11 @@ public class LinearMPCIndexHandlerTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.addContact(contactPose, contactPolygon);
+      segment.addContactPhaseInSegment(contact, 0.0, 1.0);
+
+      contactProviders.add(segment);
 
       indexHandler.initialize(contactProviders);
 

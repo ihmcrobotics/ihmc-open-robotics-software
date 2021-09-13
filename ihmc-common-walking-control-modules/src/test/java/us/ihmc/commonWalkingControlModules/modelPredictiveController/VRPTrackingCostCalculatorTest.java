@@ -51,7 +51,7 @@ public class VRPTrackingCostCalculatorTest
       double duration = 0.7;
 
       VRPTrackingCommand command = new VRPTrackingCommand();
-      command.setSegmentDuration(duration);
+      command.setTimeInterval(0.0, duration);
       command.setSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(1.0);
@@ -259,7 +259,7 @@ public class VRPTrackingCostCalculatorTest
       double duration = 0.7;
 
       VRPTrackingCommand command = new VRPTrackingCommand();
-      command.setSegmentDuration(duration);
+      command.setTimeInterval(0.0, duration);
       command.setSegmentNumber(0);
       command.setOmega(omega);
       command.setWeight(1.0);

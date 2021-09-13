@@ -8,9 +8,11 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JumpingFlightState extends JumpingState
 {
@@ -23,9 +25,14 @@ public class JumpingFlightState extends JumpingState
    private final JumpingParameters jumpingParameters;
    private final JumpingGoalHandler jumpingGoalHandler;
 
+   private final RigidBodyTransform takeOffTransform = new RigidBodyTransform();
+   private final ReferenceFrame takeOffFrame;
    private final JumpingGoalFootholdCalculator jumpingGoalFootholdCalculator = new JumpingGoalFootholdCalculator();
 
    private final JumpingGoal jumpingGoal = new JumpingGoal();
+
+   private final YoDouble originalGoalLength = new YoDouble("originalGoalLength", registry);
+   private final YoDouble adjustedGoalLength = new YoDouble("adjustedGoalLength", registry);
 
    public JumpingFlightState(JumpingGoalHandler jumpingGoalHandler,
                              JumpingControllerToolbox controllerToolbox,
@@ -43,13 +50,31 @@ public class JumpingFlightState extends JumpingState
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       feetManager = managerFactory.getOrCreateFeetManager();
+
+      takeOffFrame = new ReferenceFrame("takeOffFrame", ReferenceFrame.getWorldFrame())
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.set(takeOffTransform);
+         }
+      };
    }
 
    @Override
    public void doAction(double timeInState)
    {
+      updateJumpingGoalPoseFromTouchdownPosition();
+
       for (RobotSide robotSide : RobotSide.values)
+      {
+         footGoalPose.setIncludingFrame(jumpingGoalFootholdCalculator.getFootGoalPose(robotSide));
+         footGoalPose.changeFrame(touchdownCoMFrame);
+
+         feetManager.adjustSwingTrajectory(robotSide, footGoalPose);
+
          balanceManager.setSwingFootTrajectory(robotSide, feetManager.getSwingTrajectory(robotSide));
+      }
 
       balanceManager.computeCoMPlanForJumping(jumpingGoal);
    }
@@ -61,35 +86,24 @@ public class JumpingFlightState extends JumpingState
    @Override
    public void onEntry()
    {
+      takeOffTransform.set(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame());
+
       jumpingGoalHandler.pollNextJumpingGoal(jumpingGoal);
       balanceManager.setMinimizeAngularMomentumRate(false);
+
+      originalGoalLength.set(jumpingGoal.getGoalLength());
 
       // need to always update biped support polygons after a change to the contact states
       for (RobotSide robotSide : RobotSide.values)
          controllerToolbox.setFootContactStateFree(robotSide);
       controllerToolbox.updateBipedSupportPolygons();
 
-      FramePoint3DReadOnly takeOffCoMPosition = controllerToolbox.getCenterOfMassJacobian().getCenterOfMass();
-      FrameVector3DReadOnly takeOffCoMVelocity = controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity();
       // FIXME need to re-target the orientation
+      updateJumpingGoalPoseFromTouchdownPosition();
 //      touchdownCoMPose.getOrientation().set(goalPose.getOrientation());
-      touchdownCoMPose.getPosition().scaleAdd(jumpingGoal.getFlightDuration(), takeOffCoMVelocity, takeOffCoMPosition);
-      touchdownCoMPose.getPosition().subZ(0.5 * controllerToolbox.getGravityZ() * MathTools.square(jumpingGoal.getFlightDuration()));
-      touchdownCoMFrame.setPoseAndUpdate(touchdownCoMPose);
-
-      correctTouchdownFootPose(jumpingGoal);
 
       // TODO trigger the swing in the feet manager
-      balanceManager.initializeCoMPlanForFlight(jumpingGoal);
-
-      double width;
-      if (!Double.isNaN(jumpingGoal.getGoalFootWidth()))
-         width = jumpingGoal.getGoalFootWidth();
-      else
-         width = jumpingParameters.getDefaultFootWidth();
-
-      jumpingGoalFootholdCalculator.computeGoalPose(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame(), jumpingGoal.getGoalLength(), width, jumpingGoal.getGoalHeight(),
-                                                    jumpingGoal.getGoalRotation());
+      balanceManager.initializeCoMPlanForFlight(jumpingGoal.getSupportDuration(), jumpingGoal.getFlightDuration());
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -113,20 +127,36 @@ public class JumpingFlightState extends JumpingState
 //      failureDetectionControlModule.setNextFootstep(null);
    }
 
-   private final FramePoint3D goalPoint = new FramePoint3D();
-   private final FrameVector3D comVelocity = new FrameVector3D();
-
-   private void correctTouchdownFootPose(JumpingGoal footPose)
+   private void updateJumpingGoalPoseFromTouchdownPosition()
    {
+      double width;
+      if (!Double.isNaN(jumpingGoal.getGoalFootWidth()))
+         width = jumpingGoal.getGoalFootWidth();
+      else
+         width = jumpingParameters.getDefaultFootWidth();
+
+      touchdownCoMPose.getPosition().set(balanceManager.getTouchdownCoMPosition());
+      touchdownCoMFrame.setPoseAndUpdate(touchdownCoMPose);
+
+      double omega = Math.sqrt(controllerToolbox.getGravityZ() / touchdownCoMPose.getPosition().getZ());
+
       comVelocity.setIncludingFrame(controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity());
       comVelocity.changeFrame(touchdownCoMFrame);
       goalPoint.setToZero(touchdownCoMFrame);
-      goalPoint.setX(comVelocity.getX() / controllerToolbox.getOmega0());
+      goalPoint.setX(comVelocity.getX() / omega);
 
-      goalPoint.changeFrame(controllerToolbox.getReferenceFrames().getMidFeetZUpFrame());
+      goalPoint.changeFrame(takeOffFrame);
 
-      footPose.setGoalLength(goalPoint.getX());
+      adjustedGoalLength.set(goalPoint.getX());
+
+      jumpingGoal.setGoalLength(adjustedGoalLength.getDoubleValue());
+
+      jumpingGoalFootholdCalculator.computeGoalPose(takeOffFrame, adjustedGoalLength.getDoubleValue(), width, jumpingGoal.getGoalHeight(), jumpingGoal.getGoalRotation());
    }
+
+   private final FramePoint3D goalPoint = new FramePoint3D();
+   private final FrameVector3D comVelocity = new FrameVector3D();
+
 
    @Override
    public void onExit()
@@ -135,6 +165,7 @@ public class JumpingFlightState extends JumpingState
    }
 
    private static final double minFractionThroughSwingForContact = 0.8;
+
    @Override
    public boolean isDone(double timeInState)
    {

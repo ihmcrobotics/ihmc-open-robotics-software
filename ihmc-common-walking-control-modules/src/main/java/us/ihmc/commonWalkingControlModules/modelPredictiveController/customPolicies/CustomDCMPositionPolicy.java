@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.customPoli
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.CoMPositionCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DCMPositionCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
@@ -14,23 +14,23 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
 import java.util.List;
 
-public class CustomCoMPositionPolicy implements CustomMPCPolicy
+public class CustomDCMPositionPolicy implements CustomMPCPolicy
 {
-   private final FramePoint3D desiredCoMPosition = new FramePoint3D();
+   private final FramePoint3D desiredDCMPosition = new FramePoint3D();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
    private double timeOfPolicy;
    private double weight;
 
-   private final CoMPositionCommand mpcCommand = new CoMPositionCommand();
+   private final DCMPositionCommand mpcCommand = new DCMPositionCommand();
 
-   public FramePoint3DBasics getDesiredComPosition()
+   public FramePoint3DBasics getDesiredDCMPosition()
    {
-      return desiredCoMPosition;
+      return desiredDCMPosition;
    }
 
-   public void setDesiredCoMPosition(FramePoint3DReadOnly desiredCoMPosition)
+   public void setDesiredDCMPosition(FramePoint3DReadOnly desiredDCMPosition)
    {
-      this.desiredCoMPosition.setIncludingFrame(desiredCoMPosition);
+      this.desiredDCMPosition.setIncludingFrame(desiredDCMPosition);
    }
 
    public SelectionMatrix3D getSelectionMatrix()
@@ -62,7 +62,7 @@ public class CustomCoMPositionPolicy implements CustomMPCPolicy
       mpcCommand.clear();
       mpcCommand.setSegmentNumber(segmentNumber);
       mpcCommand.setTimeOfObjective(timeInSegment);
-      mpcCommand.setObjective(desiredCoMPosition);
+      mpcCommand.setObjective(desiredDCMPosition);
       mpcCommand.setWeight(weight);
       mpcCommand.setOmega(omega);
       mpcCommand.setConstraintType(ConstraintType.OBJECTIVE);

@@ -221,41 +221,6 @@ public class MPCTestHelper
       return jacobian;
    }
 
-   public static DMatrixRMaj getContactPointAccelerationJacobian(double time, double omega, MPCContactPlane contactPlane)
-   {
-      int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + contactPlane.getCoefficientSize();
-      DMatrixRMaj jacobian = new DMatrixRMaj(3 * contactPlane.getNumberOfContactPoints(), coefficients);
-
-      double c2 = omega * omega * Math.exp(omega * time);
-      double c3 = omega * omega * Math.exp(-omega * time);
-      double c4 = 6 * time;
-      double c5 = 2;
-
-      int rhoIdx = 0;
-      for (int contactPointIdx  = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
-      {
-         for (int i = 0; i < contactPlane.getContactPointHelper(contactPointIdx).getRhoSize(); i++)
-         {
-            int startIdx = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoIdx;
-            FrameVector3DReadOnly basisVector = contactPlane.getContactPointHelper(contactPointIdx).getBasisVector(i);
-            basisVector.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-
-            int row = 3 * contactPointIdx;
-            for (int ordinal = 0; ordinal < 3; ordinal++)
-            {
-               jacobian.set(row + ordinal, startIdx, basisVector.getElement(ordinal) * (c2));
-               jacobian.set(row + ordinal, startIdx + 1, basisVector.getElement(ordinal) * (c3));
-               jacobian.set(row + ordinal, startIdx + 2, basisVector.getElement(ordinal) * (c4));
-               jacobian.set(row + ordinal, startIdx + 3, basisVector.getElement(ordinal) * (c5));
-            }
-
-            rhoIdx++;
-         }
-      }
-
-      return jacobian;
-   }
-
    public static NativeMatrix getCoMPositionJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
       return getCoMPositionJacobian(time, omega, rhoHelper.getRhoSize(), rhoHelper::getBasisVector);
