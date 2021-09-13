@@ -30,7 +30,7 @@ import java.util.List;
  */
 public class MPCQPSolver
 {
-   private static  final boolean debug = true;
+   private static  final boolean debug = false;
 
    private static final double violationFractionToAdd = 0.95;
    private static final double violationFractionToRemove = 0.8;
@@ -602,7 +602,7 @@ public class MPCQPSolver
             if (!MathTools.epsilonEquals(slackCost, 0.0, 1e-5) && Double.isFinite(slackCost))
                inverseSlackHessian.set(i, i, 1.0 / slackCost);
          }
-
+//
          CBarQInverseCBarTranspose.addEquals(inverseSlackHessian);
       }
       else
@@ -790,6 +790,17 @@ public class MPCQPSolver
       bigVectorForLagrangeMultiplierSolution.scale(-1.0, bigVectorForLagrangeMultiplierSolution);
 
       boolean wasInvertible = augmentedLagrangeMultipliers.solveCheck(bigMatrixForLagrangeMultiplierSolution, bigVectorForLagrangeMultiplierSolution);
+
+      if (debug)
+      {
+         NativeMatrix enforcementCheck = new NativeMatrix(bigVectorForLagrangeMultiplierSolution);
+         enforcementCheck.mult(bigMatrixForLagrangeMultiplierSolution, augmentedLagrangeMultipliers);
+         for (int i = 0; i < bigMatrixForLagrangeMultiplierSolution.getNumRows(); i++)
+         {
+            if (!MathTools.epsilonEquals(enforcementCheck.get(i, 0), bigVectorForLagrangeMultiplierSolution.get(i, 0), 1e-5))
+               LogTools.info("Crap." + wasInvertible);
+         }
+      }
 
       AAndC.reshape(numberOfAugmentedEqualityConstraints, numberOfVariables);
       AAndC.insert(linearEqualityConstraintsAMatrix, 0, 0);

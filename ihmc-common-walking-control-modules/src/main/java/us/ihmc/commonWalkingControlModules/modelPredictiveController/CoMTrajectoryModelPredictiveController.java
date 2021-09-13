@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -45,7 +46,7 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
    @Override
    protected void initializeIndexHandler()
    {
-      List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
+      List<PreviewWindowSegment> planningWindow = previewWindowCalculator.getPlanningWindow();
       indexHandler.initialize(planningWindow);
    }
 

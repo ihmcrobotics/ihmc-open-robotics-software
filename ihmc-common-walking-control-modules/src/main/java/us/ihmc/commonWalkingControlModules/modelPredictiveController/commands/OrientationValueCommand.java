@@ -163,6 +163,7 @@ public class OrientationValueCommand implements MPCCommand<OrientationValueComma
       setCMatrix(other.getCMatrix());
       setObjectiveValue(other.getObjectiveValue());
       setUseWeightScalar(other.useWeightScalar());
+      setObjectiveWeight(other.getObjectiveWeight());
       setWeightMatrix(other.getWeightMatrix());
    }
 }
