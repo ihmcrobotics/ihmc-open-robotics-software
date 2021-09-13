@@ -252,6 +252,11 @@ public class SCS2AvatarTestingSimulation
       avatarSimulation.addRobotControllerOnControllerThread(controller);
    }
 
+   public Robot getRobot()
+   {
+      return avatarSimulation.getRobot();
+   }
+
    public SimulationSession getSimulationSession()
    {
       return avatarSimulation.getSimulationSession();
