@@ -68,7 +68,7 @@ public class LookAndStepSteppingTask
          executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
          footstepPlanInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
 
-         suppressor = new BehaviorTaskSuppressor(statusLogger, "Robot motion");
+         suppressor = new BehaviorTaskSuppressor(statusLogger, "Stepping task");
          suppressor.addCondition("Not in robot motion state", () -> !lookAndStep.behaviorStateReference.get().equals(LookAndStepBehavior.State.STEPPING));
          suppressor.addCondition(() -> "Footstep plan not OK: numberOfSteps = " + (footstepPlan == null ? null : footstepPlan.getNumberOfSteps())
                                        + ". Planning again...",

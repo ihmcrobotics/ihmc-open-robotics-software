@@ -1,5 +1,6 @@
 package us.ihmc.gdx.ui.behavior.behaviors;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -94,7 +95,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       helper.subscribeViaCallback(BodyPathPlanForUI, bodyPath ->
       {
          if (bodyPath != null)
-            bodyPathPlanGraphic.generateMeshesAsync(bodyPath);
+            Gdx.app.postRunnable(() -> bodyPathPlanGraphic.generateMeshes(bodyPath));
       });
       footstepPlanGraphic.setTransparency(0.2);
       latestPlannedFootsteps = helper.subscribeViaReference(PlannedFootstepsForUI, new ArrayList<>());

@@ -83,6 +83,7 @@ public class LookAndStepLocalizationTask
 
       public void acceptBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)
       {
+         newGoalSubmitted = false;
          bodyPathPlanInput.set(bodyPathPlan);
       }
 
@@ -181,6 +182,7 @@ public class LookAndStepLocalizationTask
                                                                                                   closestSegmentIndex,
                                                                                                   imminentMidFeetPose,
                                                                                                   bodyPathPlan);
+         behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
          bodyPathLocalizationOutput.accept(result);
       }
    }
