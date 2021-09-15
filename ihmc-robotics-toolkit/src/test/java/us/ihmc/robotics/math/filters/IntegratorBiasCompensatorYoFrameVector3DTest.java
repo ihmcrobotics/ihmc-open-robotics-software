@@ -59,7 +59,7 @@ public class IntegratorBiasCompensatorYoFrameVector3DTest
          FrameVector3D bias = new FrameVector3D(threeDimensionFilter.getBiasEstimation());
          bias.changeFrame(ReferenceFrame.getWorldFrame());
 
-         double epsilon = 1.0e-12;
+         double epsilon = 1.0e-11;
 
          for (int axis = 0; axis < 3; axis++)
          {
