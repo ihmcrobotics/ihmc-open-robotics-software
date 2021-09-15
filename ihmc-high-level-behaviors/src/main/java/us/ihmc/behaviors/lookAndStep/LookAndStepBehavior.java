@@ -67,7 +67,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
     */
    public enum State
    {
-      RESET, BODY_PATH_PLANNING, FOOTSTEP_PLANNING, STEPPING;
+      RESET, BODY_PATH_PLANNING, LOCALIZATION, FOOTSTEP_PLANNING, STEPPING;
    }
 
    /**
@@ -170,7 +170,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    {
       if (!isBeingReset.get())
       {
-         behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+         behaviorStateReference.set(LookAndStepBehavior.State.LOCALIZATION);
          bodyPathLocalization.acceptBodyPathPlan(bodyPath);
       }
    }

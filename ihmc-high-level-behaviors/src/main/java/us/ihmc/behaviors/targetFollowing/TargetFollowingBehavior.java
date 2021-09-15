@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.targetFollowing;
 
 import geometry_msgs.PoseStamped;
+import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.utilities.ros.RosTools;
+import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,6 +38,7 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
    private final FramePose3D targetPoseGroundProjection = new FramePose3D();
    private final FramePose3D approachPose = new FramePose3D();
    private final FramePose3D robotMidFeetUnderPelvisPose = new FramePose3D();
+   private final RosTopicPublisher<PoseStamped> targetPosePublisher;
 
    public TargetFollowingBehavior(BehaviorHelper helper)
    {
@@ -51,6 +54,7 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
          this.targetFollowingParameters.setAllFromStrings(parameters);
       });
       helper.getROS1Helper().subscribeToPoseViaCallback(RosTools.SEMANTIC_TARGET_POSE, latestSemanticTargetPoseReference::set);
+      targetPosePublisher = helper.getROS1Helper().publishPose("/ihmc/target_pose_world");
    }
 
    @Override
@@ -68,6 +72,11 @@ public class TargetFollowingBehavior extends ResettingNode implements BehaviorIn
          targetPoseGroundProjection.changeFrame(ReferenceFrame.getWorldFrame());
          targetPoseGroundProjection.getPosition().setZ(robotMidFeetUnderPelvisPose.getZ());
          helper.publish(TargetPose, new Pose3D(targetPoseGroundProjection));
+         PoseStamped ros1Pose = targetPosePublisher.getMessage();
+         RosTools.toRos(targetPoseGroundProjection, ros1Pose.getPose());
+         ros1Pose.getHeader().setFrameId("world");
+         ros1Pose.getHeader().setStamp(new Time(helper.getROS1Helper().getROS1Node().getCurrentTime().totalNsecs()));
+         targetPosePublisher.publish(ros1Pose);
 
          approachPose.set(targetPoseGroundProjection);
          Vector3D fromTarget = new Vector3D();
