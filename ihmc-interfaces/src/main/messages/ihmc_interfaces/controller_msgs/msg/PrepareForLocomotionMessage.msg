@@ -6,5 +6,7 @@ uint32 sequence_id
 
 # When true, the controller will cancel any arm trajectory in progress, if any, before starting to walk.
 bool prepare_manipulation true
+# When true, the controller will cancel any chest trajectory in progress, if any, before starting to walk.
+bool prepare_chest true
 # When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
 bool prepare_pelvis true
