@@ -30,7 +30,7 @@ mainDependencies {
    api("us.ihmc:mecano:0.8.3")
    api("us.ihmc:mecano-yovariables:0.8.3")
    api("us.ihmc:ihmc-yovariables:0.9.11")
-   api("us.ihmc:ihmc-realtime:1.3.1")
+   api("us.ihmc:ihmc-realtime:1.4.0")
    api("us.ihmc:ihmc-ros-control:0.6.0")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
    api("us.ihmc:simulation-construction-set:0.21.10")
