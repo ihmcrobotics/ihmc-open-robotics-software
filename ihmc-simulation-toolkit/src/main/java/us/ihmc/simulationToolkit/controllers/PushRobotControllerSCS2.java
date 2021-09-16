@@ -15,9 +15,13 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
+import us.ihmc.scs2.definition.yoComposite.YoTuple3DDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicArrow3DDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.trackers.ExternalWrenchPoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -49,6 +53,10 @@ public class PushRobotControllerSCS2 implements Controller
 
    private final LinkedList<DelayedPush> delayedPushs = new LinkedList<>();
 
+   private final String jointNameToApplyForce;
+
+   private final double visualScale;
+
    public PushRobotControllerSCS2(DoubleProvider time, Robot pushableRobot, FullHumanoidRobotModel fullRobotModel)
    {
       this(time, pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, 0.3), 0.005);
@@ -62,6 +70,8 @@ public class PushRobotControllerSCS2 implements Controller
    public PushRobotControllerSCS2(DoubleProvider time, Robot pushableRobot, String jointNameToApplyForce, Vector3DReadOnly forcePointOffset, double visualScale)
    {
       yoTime = time;
+      this.jointNameToApplyForce = jointNameToApplyForce;
+      this.visualScale = visualScale;
       registry = new YoRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
       forcePoint = pushableRobot.getJoint(jointNameToApplyForce).getAuxialiryData()
                                 .addExternalWrenchPoint(new ExternalWrenchPointDefinition(jointNameToApplyForce + "_externalForcePoint", forcePointOffset));
@@ -79,10 +89,28 @@ public class PushRobotControllerSCS2 implements Controller
 
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
       pushForceMagnitude.set(0.0);
+   }
 
-      // FIXME Need to re-enable the visualization
-      //      forceVisualizer = new YoGraphicVector(jointNameToApplyForce
-      //            + "_pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), visualScale, YoAppearance.DarkBlue());
+   public YoGraphicDefinition getForceVizDefinition()
+   {
+      YoGraphicArrow3DDefinition definition = new YoGraphicArrow3DDefinition();
+      definition.setName(jointNameToApplyForce + "_pushForce");
+      YoFramePoint3D position = forcePoint.getPose().getPosition();
+      definition.setOrigin(new YoTuple3DDefinition(position.getYoX().getFullNameString(),
+                                                   position.getYoY().getFullNameString(),
+                                                   position.getYoZ().getFullNameString()));
+      YoFrameVector3D force = forcePoint.getWrench().getLinearPart();
+      definition.setDirection(new YoTuple3DDefinition(force.getYoX().getFullNameString(),
+                                                      force.getYoY().getFullNameString(),
+                                                      force.getYoZ().getFullNameString(),
+                                                      force.getReferenceFrame().getNameId()));
+      definition.setVisible(true);
+      definition.setScaleLength(true);
+      definition.setBodyLength(visualScale * 0.90);
+      definition.setHeadLength(visualScale * 0.10);
+      definition.setBodyRadius(0.015);
+      definition.setHeadRadius(0.0375);
+      return definition;
    }
 
    public YoGraphic getForceVisualizer()
