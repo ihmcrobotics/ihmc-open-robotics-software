@@ -1,13 +1,13 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -97,6 +97,8 @@ public class LinearMomentumRateControlModuleInput
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
 
+   private final FrameVector3D desiredDistributedLinearMomentumRate = new FrameVector3D();
+
    public void setOmega0(double omega0)
    {
       this.omega0 = omega0;
@@ -105,6 +107,16 @@ public class LinearMomentumRateControlModuleInput
    public double getOmega0()
    {
       return omega0;
+   }
+
+   public void setDesiredDistributedLinearMomentumRate(FrameVector3DReadOnly desiredDistributedLinearMomentumRate)
+   {
+      this.desiredDistributedLinearMomentumRate.setIncludingFrame(desiredDistributedLinearMomentumRate);
+   }
+
+   public FrameVector3DReadOnly getDesiredDistributedLinearMomentumRate()
+   {
+      return desiredDistributedLinearMomentumRate;
    }
 
    public void setUseMomentumRecoveryMode(boolean useMomentumRecoveryMode)

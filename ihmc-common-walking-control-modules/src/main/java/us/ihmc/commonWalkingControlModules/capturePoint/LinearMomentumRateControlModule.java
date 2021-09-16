@@ -23,9 +23,7 @@ import us.ihmc.commonWalkingControlModules.momentumControlCore.HeightController;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.PelvisHeightController;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -93,6 +91,8 @@ public class LinearMomentumRateControlModule
    private final FixedFramePoint2DBasics desiredCapturePoint = new FramePoint2D();
    private final FixedFrameVector2DBasics desiredCapturePointVelocity = new FrameVector2D();
 
+   private final FrameVector3DBasics desiredDistributedLinearMomentumRate = new FrameVector3D();
+
    private final FixedFramePoint2DBasics perfectCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
@@ -125,6 +125,8 @@ public class LinearMomentumRateControlModule
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
+
+   private final YoBoolean useLinearMomentumRateOffset = new YoBoolean("useLinearMomentumRateOffset", registry);
 
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
@@ -174,6 +176,7 @@ public class LinearMomentumRateControlModule
                                                                momentumOptimizationSettings.getRecoveryLinearMomentumWeight(),
                                                                registry);
       angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
+//      useLinearMomentumRateOffset.set(true);
 
       allowMomentumRecoveryWeight = new BooleanParameter("allowMomentumRecoveryWeight", registry, false);
       maxMomentumRateWeightChangeRate = new DoubleParameter("maxMomentumRateWeightChangeRate", registry, 10.0);
@@ -264,6 +267,7 @@ public class LinearMomentumRateControlModule
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
+      this.desiredDistributedLinearMomentumRate.setMatchingFrame(input.getDesiredDistributedLinearMomentumRate());
       this.controlHeightWithMomentum = input.getControlHeightWithMomentum();
       this.initializeOnStateChange = input.getInitializeOnStateChange();
       this.keepCoPInsideSupportPolygon = input.getKeepCoPInsideSupportPolygon();
@@ -482,11 +486,17 @@ public class LinearMomentumRateControlModule
       boolean success = true;
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
+      desiredDistributedLinearMomentumRate.changeFrame(worldFrame);
+
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, desiredCMP, fZ, totalMass, omega0);
       WrenchDistributorTools.computeForce(linearMomentumRateOfChange, centerOfMass, cmp3d, fZ);
       linearMomentumRateOfChange.checkReferenceFrameMatch(centerOfMassFrame);
-      linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
+      linearMomentumRateOfChange.subZ(totalMass * gravityZ);
+
+      desiredDistributedLinearMomentumRate.changeFrame(centerOfMassFrame);
+      if (useLinearMomentumRateOffset.getBooleanValue() && !desiredDistributedLinearMomentumRate.containsNaN())
+         linearMomentumRateOfChange.add(desiredDistributedLinearMomentumRate);
 
       if (linearMomentumRateOfChange.containsNaN())
       {
