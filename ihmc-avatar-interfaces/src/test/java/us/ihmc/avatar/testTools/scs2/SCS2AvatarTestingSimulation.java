@@ -25,6 +25,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.sessionVisualizer.jfx.SessionVisualizerControls;
 import us.ihmc.scs2.sessionVisualizer.jfx.tools.JavaFXMissingTools;
 import us.ihmc.scs2.simulation.SimulationSession;
@@ -158,6 +159,18 @@ public class SCS2AvatarTestingSimulation
    {
       if (sessionVisualizerControls != null)
          sessionVisualizerControls.addStaticVisuals(visualDefinitions);
+   }
+
+   public void addYoGraphicDefinition(YoGraphicDefinition yoGraphicDefinition)
+   {
+      if (sessionVisualizerControls != null)
+         sessionVisualizerControls.addYoGraphic(yoGraphicDefinition);
+   }
+   
+   public void addYoGraphicDefinition(String namespace, YoGraphicDefinition yoGraphicDefinition)
+   {
+      if (sessionVisualizerControls != null)
+         sessionVisualizerControls.addYoGraphic(namespace, yoGraphicDefinition);
    }
 
    // Misc.
