@@ -31,7 +31,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-state-estimation:source")
 
-   api("us.ihmc:simulation-construction-set-2-simulation:source")
+   api("us.ihmc:scs2-simulation:0.0")
 }
 
 testDependencies {
