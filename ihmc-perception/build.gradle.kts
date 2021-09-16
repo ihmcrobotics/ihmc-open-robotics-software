@@ -38,7 +38,7 @@ mainDependencies {
    api("org.ddogleg:ddogleg:0.18")
 
    api("us.ihmc:euclid:0.17.0")
-   api("us.ihmc:ihmc-yovariables:0.9.9")
+   api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:simulation-construction-set:0.21.10")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
