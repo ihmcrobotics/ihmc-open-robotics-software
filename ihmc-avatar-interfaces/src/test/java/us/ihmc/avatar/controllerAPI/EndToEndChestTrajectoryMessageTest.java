@@ -1499,7 +1499,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
                                                                            pushJointName,
                                                                            new Vector3D(0, 0, zOffset),
                                                                            1.0 / forceMagnitude);
-      //      simulationTestHelper.getSimulationConstructionSet().addYoGraphic(pushController.getForceVisualizer()); // FIXME
+      simulationTestHelper.addYoGraphicDefinition(pushController.getForceVizDefinition());
       pushController.applyForce(new Vector3D(1.0, 0.0, 0.0), forceMagnitude, Double.POSITIVE_INFINITY);
 
       // Need to hold in world to avoid error from slight robot motions.
