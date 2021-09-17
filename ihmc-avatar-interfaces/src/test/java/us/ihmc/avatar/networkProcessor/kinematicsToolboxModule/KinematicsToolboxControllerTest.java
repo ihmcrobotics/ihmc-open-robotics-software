@@ -71,7 +71,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public final class KinematicsToolboxControllerTestSCS2
+public final class KinematicsToolboxControllerTest
 {
    private static final boolean VERBOSE = false;
 
