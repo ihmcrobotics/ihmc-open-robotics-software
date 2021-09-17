@@ -15,7 +15,6 @@ import us.ihmc.avatar.testTools.AvatarRandomTestMessages;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -175,11 +174,6 @@ public abstract class EndToEndGoHomeMessageTest implements MultiRobotTestInterfa
    @AfterEach
    public void destroy()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       if (testHelper != null)
       {
          testHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
