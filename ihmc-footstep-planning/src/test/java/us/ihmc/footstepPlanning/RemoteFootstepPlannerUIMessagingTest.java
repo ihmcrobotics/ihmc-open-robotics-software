@@ -630,7 +630,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       VisibilityGraphsParametersBasics parameters = new DefaultVisibilityGraphParameters();
       parameters.setMaxInterRegionConnectionLength(maxInterRegionConnectionLength);
       parameters.setNormalZThresholdForAccessibleRegions(normalZThresholdForAccessibleRegions);
-      parameters.setPreferredObstacleExtrusionDistance(preferredExtrusionDistance);
       parameters.setObstacleExtrusionDistance(extrusionDistance);
       parameters.setObstacleExtrusionDistanceIfNotTooHighToStep(extrusionDistanceIfNotTooHighToStep);
       parameters.setTooHighToStepDistance(tooHighToStepDistance);

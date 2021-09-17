@@ -199,6 +199,14 @@ public class CapturePointTools
       cmpVelocityToPack.scaleAdd(-1.0 / omega0, capturePointAcceleration, capturePointVelocity);
    }
 
+   public static double computeTimeToReachCapturePointUsingConstantCMP(double omega0, FramePoint2DReadOnly desiredCapturePoint,
+                                                                       FramePoint2DReadOnly initialCapturePoint, FramePoint2DReadOnly constantDesiredCMP)
+   {
+      double desiredIcpToCMP = desiredCapturePoint.distance(constantDesiredCMP);
+      double initialIcpToCMP = initialCapturePoint.distance(constantDesiredCMP);
+      return (1.0/omega0) * Math.log( desiredIcpToCMP / initialIcpToCMP);
+   }
+
    /**
     * Compute the desired capture point position at a given time. x<sup>ICP<sub>des</sub></sup> =
     * (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0

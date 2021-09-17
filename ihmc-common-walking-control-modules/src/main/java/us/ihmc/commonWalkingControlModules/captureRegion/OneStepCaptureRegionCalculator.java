@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -72,7 +73,7 @@ public class OneStepCaptureRegionCalculator
                                          String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
-           soleZUpFrames, suffix, parentRegistry, yoGraphicsListRegistry);
+              soleZUpFrames, suffix, parentRegistry, yoGraphicsListRegistry);
    }
 
    public OneStepCaptureRegionCalculator(double footWidth, double kinematicStepRange,

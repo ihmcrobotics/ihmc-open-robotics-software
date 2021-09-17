@@ -234,10 +234,12 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).equals(privilegedConfigurationCommand.getJoint(i)))
+            OneDoFJointBasics joint = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+            if (joint.equals(privilegedConfigurationCommand.getJoint(i)))
             {
+               privilegedConfigurationCommand.setOneDoFJoint(i, PrivilegedConfigurationOption.AT_MID_RANGE);
                privilegedConfigurationCommand.setConfigurationGain(i, 200.0);
-               privilegedConfigurationCommand.setVelocityGain(i, 20.0);
+               privilegedConfigurationCommand.setVelocityGain(i, 5.0);
                privilegedConfigurationCommand.setWeight(i, 20.0);
             }
          }

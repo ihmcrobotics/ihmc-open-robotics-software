@@ -69,7 +69,6 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
-   private boolean dragging = false;
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
    private FocusBasedGDXCamera camera3D;
@@ -114,28 +113,21 @@ public class GDXPose3DGizmo implements RenderableProvider
    {
       updateFromSourceTransform();
 
+      boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
       boolean rightMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Right);
       boolean isWindowHovered = ImGui.isWindowHovered();
 
-      if (!rightMouseDown)
-      {
-         dragging = false;
-      }
-      if (isWindowHovered && !dragging)
+      if (isWindowHovered && !rightMouseDragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
 
-         if (rightMouseDown)
+         if (rightMouseDown && closestCollisionSelection != null)
          {
-            if (closestCollisionSelection != null)
-            {
-               dragging = true;
-               clockFaceDragAlgorithm.reset();
-            }
+            clockFaceDragAlgorithm.reset();
          }
       }
-      if (dragging)
+      if (rightMouseDragging && closestCollisionSelection != null)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 

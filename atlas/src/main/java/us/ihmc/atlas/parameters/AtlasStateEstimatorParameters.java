@@ -29,7 +29,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.euclid.YoVector3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -129,7 +128,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
             String name = jointMap.getSpineJointName(spineJointName);
             YoDouble bias = new YoDouble("q_offset_" + name, registry);
             if (runningOnRealRobot && spineJointName == SpineJointName.SPINE_ROLL)
-               bias.set(-0.05);
+               bias.set(0.015);
 
             sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(null, bias, false, name);
       }
@@ -203,9 +202,12 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 
       sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
 
-      YoVector3D chestIMUBias = new YoVector3D("chestIMUAngularVelocityBias", registry);
-      chestIMUBias.set(0.0075,0.0,-0.008);
-      sensorProcessing.addIMUAngularVelocityBiasOnlyForSpecifiedSensors(chestIMUBias, false, chestIMU);
+      if (runningOnRealRobot)
+      {
+         YoVector3D chestIMUBias = new YoVector3D("chestIMUAngularVelocityBias", registry);
+         chestIMUBias.set(0.0075,0.0,-0.008);
+         sensorProcessing.addIMUAngularVelocityBiasOnlyForSpecifiedSensors(chestIMUBias, false, chestIMU);
+      }
 
       sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, IMU_ORIENTATION);
       sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);

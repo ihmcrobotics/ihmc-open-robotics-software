@@ -18,6 +18,7 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
 
    private final HighLevelControllerName highLevelControllerName;
    protected final OneDoFJointBasics[] controlledJoints;
+   private HighLevelControllerName previousHighLevelControllerName = null;
 
    public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
                                    OneDoFJointBasics[] controlledJoints)
@@ -88,5 +89,15 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    public HighLevelControllerName getHighLevelControllerName()
    {
       return highLevelControllerName;
+   }
+
+   public void setPreviousHighLevelControllerName(HighLevelControllerName previousHighLevelControllerName)
+   {
+      this.previousHighLevelControllerName = previousHighLevelControllerName;
+   }
+
+   public HighLevelControllerName getPreviousHighLevelControllerName()
+   {
+      return previousHighLevelControllerName;
    }
 }

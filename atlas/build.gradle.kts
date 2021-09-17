@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.20"
+   id("us.ihmc.ihmc-cd") version "1.21"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
@@ -30,19 +30,19 @@ mainDependencies {
    api("org.boofcv:boofcv-recognition:0.36")
    api("com.github.wendykierp:JTransforms:3.1")
 
-   api("us.ihmc:euclid:0.16.2")
-   api("us.ihmc:euclid-geometry:0.16.2")
-   api("us.ihmc:euclid-frame:0.16.2")
-   api("us.ihmc:euclid-shape:0.16.2")
-   api("us.ihmc:euclid-frame-shape:0.16.2")
-   api("us.ihmc:mecano:0.8.2")
-   api("us.ihmc:mecano-yovariables:0.8.2")
-   api("us.ihmc:ihmc-yovariables:0.9.9")
+   api("us.ihmc:euclid:0.17.0")
+   api("us.ihmc:euclid-geometry:0.17.0")
+   api("us.ihmc:euclid-frame:0.17.0")
+   api("us.ihmc:euclid-shape:0.17.0")
+   api("us.ihmc:euclid-frame-shape:0.17.0")
+   api("us.ihmc:mecano:0.8.3")
+   api("us.ihmc:mecano-yovariables:0.8.3")
+   api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
-   api("us.ihmc:simulation-construction-set:0.21.9")
+   api("us.ihmc:simulation-construction-set:0.21.10")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-robot-description:0.21.2")
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
+   api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
    api("us.ihmc:ihmc-humanoid-behaviors:source")
    api("us.ihmc:ihmc-mocap:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")

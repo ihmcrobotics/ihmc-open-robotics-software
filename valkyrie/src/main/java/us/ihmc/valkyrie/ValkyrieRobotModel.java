@@ -12,12 +12,13 @@ import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionS
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
-import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
+import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -101,10 +102,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private CoPTrajectoryParameters copTrajectoryParameters;
    private WalkingControllerParameters walkingControllerParameters;
+   private PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
+   private StepReachabilityData stepReachabilityData;
 
    private SimulationLowLevelControllerFactory simulationLowLevelControllerFactory;
 
@@ -602,13 +605,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public String getStepReachabilityResourceName()
    {
-      return "ihmc-open-robotics-software/valkyrie/src/main/resources/us/ihmc/valkyrie/parameters/StepReachabilityMap.csv";
+      return "us/ihmc/valkyrie/parameters/StepReachabilityMap.json";
    }
 
    @Override
    public StepReachabilityData getStepReachabilityData()
    {
-      return StepReachabilityFileTools.loadFromFile(getStepReachabilityResourceName());
+      if (stepReachabilityData == null)
+      {
+         stepReachabilityData = new StepReachabilityIOHelper().loadStepReachability(this);
+      }
+
+      return stepReachabilityData;
    }
 
    @Override
@@ -678,6 +686,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (walkingControllerParameters == null)
          walkingControllerParameters = new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), target);
       return walkingControllerParameters;
+   }
+
+   @Override
+   public PushRecoveryControllerParameters getPushRecoveryControllerParameters()
+   {
+      if (pushRecoveryControllerParameters == null)
+         pushRecoveryControllerParameters = new ValkyriePushRecoveryControllerParameters(getJointMap());
+      return pushRecoveryControllerParameters;
    }
 
    @Override

@@ -32,15 +32,6 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(obstacleExtrusionDistance, distance);
    }
 
-   default void setPreferredNavigableExtrusionDistance(double distance)
-   {
-      set(preferredNavigableExtrusionDistance, distance);
-   }
-
-   default void setPreferredObstacleExtrusionDistance(double distance)
-   {
-      set(preferredObstacleExtrusionDistance, distance);
-   }
 
    default void setObstacleExtrusionDistanceIfNotTooHighToStep(double distance)
    {
@@ -127,11 +118,6 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(returnBestEffortSolution, returnBestEffort);
    }
 
-   default void setIncludePreferredExtrusions(boolean include)
-   {
-      set(includePreferredExtrusions, include);
-   }
-
    default void setHeuristicWeight(double weight)
    {
       set(heuristicWeight, weight);
@@ -152,9 +138,9 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
       set(occludedGoalEdgeWeight, weight);
    }
 
-   default void setWeightForNonPreferredEdge(double weight)
+   default void setOptimizeForNarrowPassage(boolean performOptimization)
    {
-      set(weightForNonPreferredEdge, weight);
+      set(optimizeForNarrowPassage, performOptimization);
    }
 
    default void set(VisibilityGraphsParametersPacket packet)
@@ -169,10 +155,6 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
          setNavigableExtrusionDistance(packet.getNavigableExtrusionDistance());
       if (packet.getObstacleExtrusionDistance() != noValue)
          setObstacleExtrusionDistance(packet.getObstacleExtrusionDistance());
-      if (packet.getPreferredNavigableExtrusionDistance() != noValue)
-         setPreferredNavigableExtrusionDistance(packet.getPreferredNavigableExtrusionDistance());
-      if (packet.getPreferredObstacleExtrusionDistance() != noValue)
-         setPreferredObstacleExtrusionDistance(packet.getPreferredObstacleExtrusionDistance());
       if (packet.getObstacleExtrusionDistanceIfNotTooHighToStep() != noValue)
          setObstacleExtrusionDistanceIfNotTooHighToStep(packet.getObstacleExtrusionDistanceIfNotTooHighToStep());
       if (packet.getTooHighToStepDistance() != noValue)
@@ -207,14 +189,12 @@ public interface VisibilityGraphsParametersBasics extends VisibilityGraphsParame
          setOccludedGoalEdgeWeight(packet.getOccludedGoalEdgeWeight());
       if (packet.getWeightForInterRegionEdge() != noValue)
          setWeightForInterRegionEdge(packet.getWeightForInterRegionEdge());
-      if (packet.getWeightForNonPreferredEdge() != noValue)
-         setWeightForNonPreferredEdge(packet.getWeightForNonPreferredEdge());
 
       setReturnBestEffortSolution(packet.getReturnBestEffortSolution());
       setPerformPostProcessingNodeShifting(packet.getPerformPostProcessingNodeShifting());
       setIntroduceMidpointsInPostProcessing(packet.getIntroduceMidpointsInPostProcessing());
       setComputeOrientationsToAvoidObstacles(packet.getComputeOrientationsToAvoidObstacles());
-      setIncludePreferredExtrusions(packet.getIncludePreferredExtrusions());
+      setOptimizeForNarrowPassage(packet.getOptimizeForNarrowPassage());
    }
 
 }

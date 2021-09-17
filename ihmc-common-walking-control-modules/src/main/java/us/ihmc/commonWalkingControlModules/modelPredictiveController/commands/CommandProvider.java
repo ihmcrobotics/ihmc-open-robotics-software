@@ -9,6 +9,7 @@ public class CommandProvider
 {
    private final RecyclingArrayList<CoMPositionCommand> comPositionCommandPool = new RecyclingArrayList<>(CoMPositionCommand::new);
    private final RecyclingArrayList<CoMVelocityCommand> comVelocityCommandPool = new RecyclingArrayList<>(CoMVelocityCommand::new);
+   private final RecyclingArrayList<CoMAccelerationCommand> comAccelerationCommandPool = new RecyclingArrayList<>(CoMAccelerationCommand::new);
    private final RecyclingArrayList<DCMPositionCommand> dcmPositionCommandPool = new RecyclingArrayList<>(DCMPositionCommand::new);
    private final RecyclingArrayList<DCMVelocityCommand> dcmVelocityCommandPool = new RecyclingArrayList<>(DCMVelocityCommand::new);
    private final RecyclingArrayList<VRPPositionCommand> vrpPositionCommandPool = new RecyclingArrayList<>(VRPPositionCommand::new);
@@ -33,6 +34,7 @@ public class CommandProvider
    {
       comPositionCommandPool.clear();
       comVelocityCommandPool.clear();
+      comAccelerationCommandPool.clear();
       dcmPositionCommandPool.clear();
       dcmVelocityCommandPool.clear();
       vrpPositionCommandPool.clear();
@@ -59,6 +61,11 @@ public class CommandProvider
    public CoMVelocityCommand getNextCoMVelocityCommand()
    {
       return comVelocityCommandPool.add();
+   }
+
+   public CoMAccelerationCommand getNextCoMAccelerationCommand()
+   {
+      return comAccelerationCommandPool.add();
    }
 
    public DCMPositionCommand getNextDCMPositionCommand()

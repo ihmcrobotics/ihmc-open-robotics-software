@@ -14,8 +14,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -34,13 +34,18 @@ public class StandingState extends WalkingState
    private final CenterOfMassHeightManager comHeightManager;
    private final BalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
+   private final RigidBodyControlManager chestManager;
    private final LegConfigurationManager legConfigurationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
    private final FeetManager feetManager;
 
-   public StandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
-                        HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-                        WalkingFailureDetectionControlModule failureDetectionControlModule, WalkingControllerParameters walkingControllerParameters,
+   public StandingState(CommandInputManager commandInputManager,
+                        WalkingMessageHandler walkingMessageHandler,
+                        TouchdownErrorCompensator touchdownErrorCompensator,
+                        HighLevelHumanoidControllerToolbox controllerToolbox,
+                        HighLevelControlManagerFactory managerFactory,
+                        WalkingFailureDetectionControlModule failureDetectionControlModule,
+                        WalkingControllerParameters walkingControllerParameters,
                         YoRegistry parentRegistry)
    {
       super(WalkingStateEnum.STANDING, parentRegistry);
@@ -51,26 +56,18 @@ public class StandingState extends WalkingState
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
 
-      RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
-      if (chest != null)
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      for (RobotSide robotSide : RobotSide.values)
       {
-         ReferenceFrame chestBodyFrame = chest.getBodyFixedFrame();
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
-            if (hand != null)
-            {
-               ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
-               RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
-               handManagers.put(robotSide, handManager);
-            }
-         }
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+         if (hand != null)
+            handManagers.put(robotSide, managerFactory.getRigidBodyManager(hand));
       }
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
+      chestManager = managerFactory.getRigidBodyManager(fullRobotModel.getChest());
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
    }
@@ -94,7 +91,6 @@ public class StandingState extends WalkingState
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
 
-      balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
       balanceManager.initializeICPPlanForStanding();
       balanceManager.setHoldSplitFractions(false);
@@ -105,8 +101,7 @@ public class StandingState extends WalkingState
       }
       else
       {
-         TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(
-               RobotSide.RIGHT);
+         TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.RIGHT);
          comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, 0.0);
       }
 
@@ -134,6 +129,9 @@ public class StandingState extends WalkingState
          if (handManagers.get(robotSide) != null)
             handManagers.get(robotSide).prepareForLocomotion();
       }
+
+      if (chestManager != null)
+         chestManager.prepareForLocomotion();
 
       if (pelvisOrientationManager != null)
       {

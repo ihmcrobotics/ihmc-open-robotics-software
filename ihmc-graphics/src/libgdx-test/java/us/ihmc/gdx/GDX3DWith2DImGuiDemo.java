@@ -19,8 +19,6 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class GDX3DWith2DImGuiDemo
 {
-   private ModelInstance boxes;
-   private ModelInstance coordinateFrame;
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
    private String glslVersion;
@@ -36,8 +34,8 @@ public class GDX3DWith2DImGuiDemo
          {
             sceneManager.create();
 
-            coordinateFrame = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
-            boxes = new BoxesDemoModel().newInstance();
+            sceneManager.addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
 
             GLFWErrorCallback.createPrint(System.err).set();
 
@@ -83,12 +81,7 @@ public class GDX3DWith2DImGuiDemo
             Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
             Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
 
-            sceneManager.renderBefore();
-
-            sceneManager.getModelBatch().render(coordinateFrame, sceneManager.getEnvironment());
-            sceneManager.getModelBatch().render(boxes, sceneManager.getEnvironment());
-
-            sceneManager.renderAfter();
+            sceneManager.render();
 
             imGuiGlfw.newFrame();
             ImGui.newFrame();

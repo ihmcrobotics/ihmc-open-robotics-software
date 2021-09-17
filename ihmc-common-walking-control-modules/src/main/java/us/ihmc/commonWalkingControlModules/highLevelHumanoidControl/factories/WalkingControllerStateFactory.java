@@ -15,7 +15,9 @@ public class WalkingControllerStateFactory implements HighLevelControllerStateFa
       if (walkingControllerState == null)
       {
          walkingControllerState = new WalkingControllerState(controllerFactoryHelper.getCommandInputManager(), controllerFactoryHelper.getStatusMessageOutputManager(),
-                                                             controllerFactoryHelper.getManagerFactory(), controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+                                                             controllerFactoryHelper.getManagerFactory(),
+                                                             controllerFactoryHelper.getWholeBodyControllerCoreFactory(),
+                                                             controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                              controllerFactoryHelper.getHighLevelControllerParameters(),
                                                              controllerFactoryHelper.getWalkingControllerParameters());
       }

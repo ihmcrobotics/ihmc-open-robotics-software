@@ -18,8 +18,9 @@ public class BehaviorTaskSuppressor
    public static final Runnable NOOP = () -> {};
 
    private ConditionHolder currentSuppressionCause;
-   private ConditionHolder lastSuppressionCause = new ConditionHolder(); // so first evaluation is always changed
+   private ConditionHolder lastSuppressionCause = new ConditionHolder(); // so first evaluation is always changed; not working
    private long unchangedEvalutionCount = 0;
+   private boolean firstEvaluation = false; // so first evaluation is always printed
 
    private final ArrayList<ConditionHolder> conditions = new ArrayList<>();
    private final StatusLogger statusLogger;
@@ -94,8 +95,10 @@ public class BehaviorTaskSuppressor
          }
       }
 
-      if (currentSuppressionCause != lastSuppressionCause)
+      if (firstEvaluation || currentSuppressionCause != lastSuppressionCause)
       {
+         firstEvaluation = false;
+
          String message = taskTitle;
          if (currentSuppressionCause != null)
          {

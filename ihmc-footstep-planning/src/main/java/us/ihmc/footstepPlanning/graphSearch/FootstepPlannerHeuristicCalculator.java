@@ -14,31 +14,25 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class FootstepPlannerHeuristicCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final FootstepSnapperReadOnly snapper;
 
    private final FootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
-   private double desiredHeading;
 
    private final Pose3D projectionPose = new Pose3D();
    private final Pose3D goalPose = new Pose3D();
 
-   public FootstepPlannerHeuristicCalculator(FootstepSnapperReadOnly snapper,
-                                             FootstepPlannerParametersReadOnly parameters,
+   public FootstepPlannerHeuristicCalculator(FootstepPlannerParametersReadOnly parameters,
                                              WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                                              YoRegistry parentRegistry)
    {
-      this.snapper = snapper;
-
       this.parameters = parameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       parentRegistry.addChild(registry);
    }
 
-   public void initialize(FramePose3DReadOnly goalPose, double desiredHeading)
+   public void initialize(FramePose3DReadOnly goalPose)
    {
       this.goalPose.set(goalPose);
-      this.desiredHeading = desiredHeading;
    }
 
    public double compute(FootstepGraphNode node)
@@ -59,11 +53,13 @@ public class FootstepPlannerHeuristicCalculator
       {
          double alphaMidFoot = bodyPathPlanHolder.getClosestPoint(midFootPose.getPosition(), projectionPose);
          int segmentIndex = bodyPathPlanHolder.getSegmentIndexFromAlpha(alphaMidFoot);
-         double pathHeading = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading);
 
-         initialTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), pathHeading)) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
+         double desiredRobotPostureHeading = bodyPathPlanHolder.getBodyPathPlan().getWaypoint(segmentIndex).getOrientation().getYaw();
+         double finalRobotPostureHeading = bodyPathPlanHolder.getBodyPathPlan().getWaypoint(bodyPathPlanHolder.getBodyPathPlan().getNumberOfWaypoints() - 1).getYaw();
+
+         initialTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), desiredRobotPostureHeading)) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
          walkDistance = xyDistanceToGoal;
-         finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pathHeading, goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
+         finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(finalRobotPostureHeading, goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
      }
 
       return parameters.getAStarHeuristicsWeight().getValue() * (initialTurnDistance + walkDistance + finalTurnDistance);

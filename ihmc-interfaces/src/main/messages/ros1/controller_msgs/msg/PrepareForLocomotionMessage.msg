@@ -8,6 +8,10 @@ uint32 sequence_id
 # Field default value True
 bool prepare_manipulation
 
+# When true, the controller will cancel any chest trajectory in progress, if any, before starting to walk.
+# Field default value True
+bool prepare_chest
+
 # When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
 # Field default value True
 bool prepare_pelvis

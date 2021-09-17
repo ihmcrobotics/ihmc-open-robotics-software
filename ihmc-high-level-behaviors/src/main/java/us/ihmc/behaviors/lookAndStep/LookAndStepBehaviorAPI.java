@@ -67,10 +67,11 @@ public class LookAndStepBehaviorAPI
    // Visualization only topics
    public static final MessagerAPIFactory.Topic<String> CurrentState = topic("CurrentState");
    public static final MessagerAPIFactory.Topic<Boolean> ToggleAllVisualization = topic("ToggleAllVisualization");
-   public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> StartAndGoalFootPosesForUI = topic("StartAndGoalFootPosesForUI");
-   public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> FootstepPlanForUI = topic("FootstepPlanForUI");
+   public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> ImminentFootPosesForUI = topic("ImminentFootPosesForUI");
+   public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> PlannedFootstepsForUI = topic("PlannedFootstepsForUI");
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> LastCommandedFootsteps = topic("LastCommandedFootsteps");
    public static final MessagerAPIFactory.Topic<Pose3D> ClosestPointForUI = topic("ClosestPointForUI");
+   public static final MessagerAPIFactory.Topic<Pose3D> GoalForUI = topic("GoalForUI");
    public static final MessagerAPIFactory.Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");
    public static final MessagerAPIFactory.Topic<Boolean> ImpassibilityDetected = topic("ImpassibilityDetected");

@@ -1,5 +1,6 @@
 package us.ihmc.utilities.ros;
 
+import geometry_msgs.PoseStamped;
 import org.ros.internal.message.Message;
 import org.ros.message.Time;
 import org.ros.node.parameter.ParameterListener;
@@ -9,6 +10,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
+import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 import java.util.HashMap;
@@ -42,28 +44,15 @@ public class ROS1Helper implements RosNodeInterface
       scheduler = ThreadTools.newSingleDaemonThreadScheduledExecutor("ROS1HelperMaintenance");
    }
 
+   // TODO: Automate what ImGuiGDXROS1Visualizer is doing without putting the burden on the user
+
    private void ensureConnected()
    {
       scheduledFuture = null;
       if (needsReconnect)
       {
          needsReconnect = false;
-         LogTools.info("Reconnecting ROS 1 node...");
-         if (ros1Node != null)
-            ros1Node.shutdown();
-
-         ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), nodeName);
-
-         for (Map.Entry<RosTopicPublisher<? extends Message>, String> publisher : publishers.entrySet())
-         {
-            ros1Node.attachPublisher(publisher.getValue(), publisher.getKey());
-         }
-         for (Map.Entry<RosTopicSubscriberInterface<? extends Message>, String> subscriber : subscribers.entrySet())
-         {
-            ros1Node.attachSubscriber(subscriber.getValue(), subscriber.getKey());
-         }
-
-         ros1Node.execute();
+         reconnectEverything();
       }
    }
 
@@ -77,8 +66,28 @@ public class ROS1Helper implements RosNodeInterface
       {
          scheduledFuture.cancel(false);
       }
-      scheduledFuture = scheduler.schedule(() -> ExceptionTools.handle(this::ensureConnected, DefaultExceptionHandler.PRINT_MESSAGE),
+      scheduledFuture = scheduler.schedule(() -> ExceptionTools.handle(this::ensureConnected, e -> LogTools.error(e.getMessage())),
                                            333, TimeUnit.MILLISECONDS);
+   }
+
+   public void reconnectEverything()
+   {
+      LogTools.info("Reconnecting {} ROS 1 node...", nodeName);
+      if (ros1Node != null)
+         ros1Node.shutdown();
+
+      ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), nodeName);
+
+      for (Map.Entry<RosTopicPublisher<? extends Message>, String> publisher : publishers.entrySet())
+      {
+         ros1Node.attachPublisher(publisher.getValue(), publisher.getKey());
+      }
+      for (Map.Entry<RosTopicSubscriberInterface<? extends Message>, String> subscriber : subscribers.entrySet())
+      {
+         ros1Node.attachSubscriber(subscriber.getValue(), subscriber.getKey());
+      }
+
+      ros1Node.execute();
    }
 
    @Override
@@ -89,12 +98,37 @@ public class ROS1Helper implements RosNodeInterface
       scheduleTentativeReconnect();
    }
 
+   public RosTopicPublisher<PoseStamped> publishPose(String topicName)
+   {
+      boolean latched = false; // TODO: What does this mean?
+      RosTopicPublisher<PoseStamped> publisher = new RosTopicPublisher<PoseStamped>(PoseStamped._TYPE, latched)
+      {
+         // ???
+      };
+      attachPublisher(topicName, publisher);
+      return publisher;
+   }
+
    @Override
    public void attachSubscriber(String topicName, RosTopicSubscriberInterface<? extends Message> subscriber)
    {
       subscribers.put(subscriber, topicName);
       needsReconnect = true;
       scheduleTentativeReconnect();
+   }
+
+   public AbstractRosTopicSubscriber<PoseStamped> subscribeToPoseViaCallback(String topicName, Consumer<PoseStamped> callback)
+   {
+      AbstractRosTopicSubscriber<PoseStamped> subscriber = new AbstractRosTopicSubscriber<PoseStamped>(PoseStamped._TYPE)
+      {
+         @Override
+         public void onNewMessage(PoseStamped poseStamped)
+         {
+            callback.accept(poseStamped);
+         }
+      };
+      attachSubscriber(topicName, subscriber);
+      return subscriber;
    }
 
    @Override

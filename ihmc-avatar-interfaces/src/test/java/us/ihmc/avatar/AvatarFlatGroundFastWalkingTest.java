@@ -35,8 +35,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 
 public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestInterface
 {
-   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-
+   protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @BeforeEach

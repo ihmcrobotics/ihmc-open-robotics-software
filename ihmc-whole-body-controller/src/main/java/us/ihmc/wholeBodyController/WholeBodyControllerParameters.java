@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.DefaultPushRecoveryControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -24,6 +26,11 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
    }
 
 	public WalkingControllerParameters getWalkingControllerParameters();
+
+   default PushRecoveryControllerParameters getPushRecoveryControllerParameters()
+   {
+      return new DefaultPushRecoveryControllerParameters();
+   }
 
 	public RobotContactPointParameters<E> getContactPointParameters();
 
