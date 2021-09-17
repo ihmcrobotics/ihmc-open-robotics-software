@@ -85,7 +85,7 @@ public class RobotiqHandModel implements HandModel
       }
    }
 
-   public static String getPlamFingerMiddleJointName(RobotSide robotSide)
+   public static String getPalmFingerMiddleJointName(RobotSide robotSide)
    {
       return robotSide.getShortLowerCaseName() + "_palm_finger_middle_joint";
    }
