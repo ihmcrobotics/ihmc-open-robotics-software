@@ -94,7 +94,7 @@ public class SimulatedRobotiqHandsController implements RobotController
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         palmMiddleFingerJoints.put(robotSide, fullRobotModel.getOneDoFJointByName(RobotiqHandModel.getPlamFingerMiddleJointName(robotSide)));
+         palmMiddleFingerJoints.put(robotSide, fullRobotModel.getOneDoFJointByName(RobotiqHandModel.getPalmFingerMiddleJointName(robotSide)));
          allFingerJoints.put(robotSide, new ArrayList<>());
 
          for (HandJointName jointEnum : handModel.getHandJointNames())
