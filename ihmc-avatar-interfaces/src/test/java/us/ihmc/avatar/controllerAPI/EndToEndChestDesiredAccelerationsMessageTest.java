@@ -118,11 +118,6 @@ public abstract class EndToEndChestDesiredAccelerationsMessageTest implements Mu
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
