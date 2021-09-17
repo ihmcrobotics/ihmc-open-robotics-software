@@ -62,7 +62,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 
 public class NavigableRegionsManagerTest
 {
-   private static boolean visualize = true;
+   private static boolean visualize = false;
    private static final double epsilon = 1e-4;
    private static final double proximityEpsilon = 6e-2;
 
@@ -80,8 +80,8 @@ public class NavigableRegionsManagerTest
 
    private static final double obstacleExtrusionDistance = 0.2;
    private static final double preferredObstacleExtrusionDistance = 1.0;
-   private static final Vector3D walkerRadii = new Vector3D(obstacleExtrusionDistance, preferredObstacleExtrusionDistance, 0.5);
-   private static final Vector3D walkerBox = new Vector3D(2.0 * obstacleExtrusionDistance, 2.0 * preferredObstacleExtrusionDistance, 1.0);
+   private static final Vector3D walkerRadii = new Vector3D(obstacleExtrusionDistance, obstacleExtrusionDistance, 0.5);
+   private static final Vector3D walkerBox = new Vector3D(2.0 * obstacleExtrusionDistance, 2.0 * obstacleExtrusionDistance, 1.0);
 
    @BeforeEach
    public void setup()
@@ -178,8 +178,8 @@ public class NavigableRegionsManagerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(TestEnvironmentTools.createFlatGroundWithWallEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      Point3D start = new Point3D(-15.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
-      Point3D goal = new Point3D(-5.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D start = new Point3D(-15.0, -0.05 * parameters.getObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -0.05 * parameters.getObstacleExtrusionDistance(), 0.0);
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
@@ -206,8 +206,8 @@ public class NavigableRegionsManagerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(TestEnvironmentTools.createFlatGroundWithWallEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      Point3D start = new Point3D(-15.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
-      Point3D goal = new Point3D(-5.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D start = new Point3D(-15.0, -0.1 * parameters.getObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -0.1 * parameters.getObstacleExtrusionDistance(), 0.0);
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
@@ -234,8 +234,8 @@ public class NavigableRegionsManagerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(TestEnvironmentTools.createFlatGroundWithWallEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      Point3D start = new Point3D(-15.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
-      Point3D goal = new Point3D(-5.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D start = new Point3D(-15.0, -0.95 * parameters.getObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -0.95 * parameters.getObstacleExtrusionDistance(), 0.0);
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
@@ -262,8 +262,8 @@ public class NavigableRegionsManagerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(TestEnvironmentTools.createFlatGroundWithWallEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      Point3D start = new Point3D(-15.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
-      Point3D goal = new Point3D(-5.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D start = new Point3D(-15.0, -1.05 * parameters.getObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -1.05 * parameters.getObstacleExtrusionDistance(), 0.0);
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
@@ -346,8 +346,8 @@ public class NavigableRegionsManagerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(TestEnvironmentTools.createFlatGroundWithBoxEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      Point3D start = new Point3D(-15.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
-      Point3D goal = new Point3D(-5.0, -0.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D start = new Point3D(-15.0, -0.05 * parameters.getObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -0.05 * parameters.getObstacleExtrusionDistance(), 0.0);
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
@@ -374,8 +374,8 @@ public class NavigableRegionsManagerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(TestEnvironmentTools.createFlatGroundWithBoxEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      Point3D start = new Point3D(-15.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
-      Point3D goal = new Point3D(-5.0, -0.1 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D start = new Point3D(-15.0, -0.1 * parameters.getObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -0.1 * parameters.getObstacleExtrusionDistance(), 0.0);
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
@@ -402,8 +402,8 @@ public class NavigableRegionsManagerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(TestEnvironmentTools.createFlatGroundWithBoxEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      Point3D start = new Point3D(-15.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
-      Point3D goal = new Point3D(-5.0, -0.95 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D start = new Point3D(-15.0, -0.95 * parameters.getObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -0.95 * parameters.getObstacleExtrusionDistance(), 0.0);
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
@@ -430,8 +430,8 @@ public class NavigableRegionsManagerTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(TestEnvironmentTools.createFlatGroundWithBoxEnvironment());
 
       // test on opposite sides of the wall, requiring going around it
-      Point3D start = new Point3D(-15.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
-      Point3D goal = new Point3D(-5.0, -1.05 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      Point3D start = new Point3D(-15.0, -1.05 * parameters.getObstacleExtrusionDistance(), 0.0);
+      Point3D goal = new Point3D(-5.0, -1.05 * parameters.getObstacleExtrusionDistance(), 0.0);
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
       BodyPathPostProcessor postProcessor = new ObstacleAvoidanceProcessor(parameters);
@@ -479,7 +479,7 @@ public class NavigableRegionsManagerTest
 
       checkPath(posePath, start, goal, parameters, planarRegionsList, navigableRegionsManager.getNavigableRegionsList());
 
-      start = new Point3D(-15.0, 1.0 * parameters.getPreferredObstacleExtrusionDistance(), 0.0);
+      start = new Point3D(-15.0, 1.0 * parameters.getObstacleExtrusionDistance(), 0.0);
 
       path = navigableRegionsManager.calculateBodyPath(start, goal);
       posePath = orientationCalculator.computePosesFromPath(path, navigableRegionsManager.getVisibilityMapSolution(), new Quaternion(), new Quaternion());
@@ -697,9 +697,6 @@ public class NavigableRegionsManagerTest
       VisibilityGraphsParametersReadOnly parameters = createVisibilityGraphParametersForTest();
       ((VisibilityGraphsParametersBasics) parameters).setPerformPostProcessingNodeShifting(false);
       ((VisibilityGraphsParametersBasics) parameters).setMaxInterRegionConnectionLength(0.25);
-      ((VisibilityGraphsParametersBasics) parameters).setPreferredObstacleExtrusionDistance(1.0);
-      ((VisibilityGraphsParametersBasics) parameters).setPreferredNavigableExtrusionDistance(0.2);
-      ((VisibilityGraphsParametersBasics) parameters).setIncludePreferredExtrusions(true);
 
       double heightDelta = 0.1;
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -745,17 +742,6 @@ public class NavigableRegionsManagerTest
       expectedPath.add(getClosestPointOnClusterToPoint(region1.getNavigableRegion().getObstacleClusters().get(0).getNavigableExtrusionsInWorld(), start));
       expectedPath.add(getClosestPointOnClusterToPoint(region2.getNavigableRegion().getHomeRegionCluster().getNavigableExtrusionsInWorld(), expectedPath.get(0)));
       expectedPath.add(getClosestPointOnClusterToPoint(region2.getNavigableRegion().getObstacleClusters().get(0).getNavigableExtrusionsInWorld(), expectedPath.get(1)));
-
-      InterRegionConnectionFilter prefToPrefFilter = parameters.getPreferredToPreferredInterRegionConnectionFilter();
-      Assert.assertTrue(region1.getAllPreferredNavigableNodes().size() == 1);
-      Assert.assertTrue(region2.getAllPreferredNavigableNodes().size() == 1);
-      Assert.assertTrue(region3.getAllPreferredNavigableNodes().size() == 1);
-
-      VisibilityGraphNode region1PrefNode = region1.getAllPreferredNavigableNodes().get(0);
-      VisibilityGraphNode region2PrefNode = region2.getAllPreferredNavigableNodes().get(0);
-      VisibilityGraphNode region3PrefNode = region3.getAllPreferredNavigableNodes().get(0);
-      Assert.assertTrue(prefToPrefFilter.isConnectionValid(region1PrefNode.getPointInWorld(), region2PrefNode.getPointInWorld()));
-      Assert.assertTrue(prefToPrefFilter.isConnectionValid(region1PrefNode.getPointInWorld(), region3PrefNode.getPointInWorld()));
 
       if (visualize)
       {
@@ -1184,8 +1170,6 @@ public class NavigableRegionsManagerTest
             }
          };
       parameters.setObstacleExtrusionDistance(obstacleExtrusionDistance);
-      parameters.setPreferredObstacleExtrusionDistance(preferredObstacleExtrusionDistance);
-      parameters.setPreferredNavigableExtrusionDistance(1.0);
 //      parameters.setClusterResolution(0.501);
       parameters.setIntroduceMidpointsInPostProcessing(true);
       parameters.setPerformPostProcessingNodeShifting(true);

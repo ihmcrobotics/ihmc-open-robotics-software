@@ -12,8 +12,6 @@ public interface BehaviorInterface extends BehaviorTreeControlFlowNodeBasics
 //      this.helper = helper;
 //   }
 
-   public abstract void setEnabled(boolean enabled);
-
    public default YoRegistry getYoRegistry()
    {
       return null;

@@ -31,8 +31,8 @@ public class VisibilityGraphNodeTest
          Point3D pointInWorld = EuclidCoreRandomTools.nextPoint3D(random, 100.0);
          NavigableRegion navigableRegion = new NavigableRegion(new PlanarRegion(), new Cluster(ExtrusionSide.INSIDE, ClusterType.POLYGON), new ArrayList<>());
          VisibilityGraphNavigableRegion visibilityGraphNavigableRegion = new VisibilityGraphNavigableRegion(navigableRegion, false);
-         VisibilityGraphNode nodeA = new VisibilityGraphNode(pointInWorld, new Point2D(pointInWorld), visibilityGraphNavigableRegion, false);
-         VisibilityGraphNode nodeB = new VisibilityGraphNode(pointInWorld, new Point2D(pointInWorld), visibilityGraphNavigableRegion, false);
+         VisibilityGraphNode nodeA = new VisibilityGraphNode(pointInWorld, new Point2D(pointInWorld), visibilityGraphNavigableRegion);
+         VisibilityGraphNode nodeB = new VisibilityGraphNode(pointInWorld, new Point2D(pointInWorld), visibilityGraphNavigableRegion);
 
          assertFalse(visibilityGraphNodes.contains(nodeB));
          visibilityGraphNodes.add(nodeA);

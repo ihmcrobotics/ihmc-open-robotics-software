@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCParameters;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -14,7 +13,7 @@ import java.util.function.DoubleConsumer;
 
 /**
  * Tracking command a nominal VRP trajectory. Specifies a nominal VRP trajectory for the motion function to try and achieve for the segment
- * {@link #getSegmentNumber()} over a duration {@link #getSegmentDuration()}. This motion function always takes the form of a linear function that goes from
+ * {@link #getSegmentNumber()} over a duration. This motion function always takes the form of a linear function that goes from
  * {@link #getStartVRP()} to {@link #getEndVRP()}.
  *
  * This tracking command can be formulated into a closed-form quadratic cost for the optimizer, and always represents an
@@ -34,9 +33,13 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
     */
    private int segmentNumber;
    /**
-    * Duration of the segment that is trying to track the VRP
+    * Start time of the segment that is trying to track the VRP
     */
-   private double segmentDuration;
+   private double startTime;
+   /**
+    * End time of the segment that is trying to track the VRP
+    */
+   private double endTime;
    /**
     * Time constant used in the motion function.
     */
@@ -83,7 +86,8 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    {
       costToGoConsumer = null;
       contactPlaneHelpers.clear();
-      segmentDuration = Double.NaN;
+      startTime = Double.NaN;
+      endTime = Double.NaN;
       segmentNumber = -1;
       startVRP.setToNaN();
       endVRP.setToNaN();
@@ -164,9 +168,10 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    /**
     * Sets the duration of the segment to track the VRP over.
     */
-   public void setSegmentDuration(double segmentDuration)
+   public void setTimeInterval(double startTime, double endTime)
    {
-      this.segmentDuration = segmentDuration;
+      this.startTime = startTime;
+      this.endTime = endTime;
    }
 
    public void setOmega(double omega)
@@ -184,9 +189,14 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
       return weight;
    }
 
-   public double getSegmentDuration()
+   public double getStartTime()
    {
-      return segmentDuration;
+      return startTime;
+   }
+
+   public double getEndTime()
+   {
+      return endTime;
    }
 
    public double getOmega()
@@ -232,7 +242,7 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
       clear();
       setCommandId(other.getCommandId());
       setSegmentNumber(other.getSegmentNumber());
-      setSegmentDuration(other.getSegmentDuration());
+      setTimeInterval(other.getStartTime(), other.getEndTime());
       setOmega(other.getOmega());
       setWeight(other.getWeight());
       setStartVRP(other.getStartVRP());
@@ -268,7 +278,9 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
             return false;
          if (segmentNumber != other.segmentNumber)
             return false;
-         if (segmentDuration != other.segmentDuration)
+         if (startTime != other.startTime)
+            return false;
+         if (endTime != other.endTime)
             return false;
          if (omega != other.omega)
             return false;
@@ -296,8 +308,8 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    @Override
    public String toString()
    {
-      String string = getClass().getSimpleName() + ": segment number: " + segmentNumber + ", segment duration: " + segmentDuration + ", omega: " + omega
-                      + ", weight: " + weight + ", start vrp: " + startVRP + ", end vrp: " + endVRP + ".";
+      String string = getClass().getSimpleName() + ": segment number: " + segmentNumber + ", segment start time: " + startTime + ", segment end time: " + endTime
+                      +", omega: " + omega + ", weight: " + weight + ", start vrp: " + startVRP + ", end vrp: " + endVRP + ".";
       for (int i = 0; i < contactPlaneHelpers.size(); i++)
       {
          string += "\ncontact " + i + ": " + contactPlaneHelpers.get(i);

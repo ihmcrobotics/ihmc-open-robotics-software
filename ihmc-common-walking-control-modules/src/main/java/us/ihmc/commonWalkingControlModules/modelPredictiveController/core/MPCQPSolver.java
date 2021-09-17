@@ -10,8 +10,10 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.convexOptimization.IntermediateSolutionListener;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.log.LogTools;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
 
+import java.lang.annotation.Native;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,13 +32,13 @@ public class MPCQPSolver
 {
    private static  final boolean debug = false;
 
-   private static final double violationFractionToAdd = 0.8;
-   private static final double violationFractionToRemove = 0.95;
+   private static final double violationFractionToAdd = 0.95;
+   private static final double violationFractionToRemove = 0.8;
    //private static final double violationFractionToAdd = 1.0;
    //private static final double violationFractionToRemove = 1.0;
-   private double convergenceThreshold = 1e-10;
+   private double convergenceThreshold = 1e-4;
    //private double convergenceThresholdForLagrangeMultipliers = 0.0;
-   private double convergenceThresholdForLagrangeMultipliers = 1e-10;
+   private double convergenceThresholdForLagrangeMultipliers = 1e-3;
    private int maxNumberOfIterations = 10;
    private boolean reportFailedConvergenceAsNaN = true;
    private boolean resetActiveSetOnSizeChange = true;
@@ -460,6 +462,8 @@ public class MPCQPSolver
 
    public int solve(DMatrix solutionToPack)
    {
+//      printActiveSetInfo("At beginning " );
+
       // TODO CHECK SIZE
       assertSizesCorrect();
       computeSymmetricHessian();
@@ -504,6 +508,7 @@ public class MPCQPSolver
          if (!activeSetWasModified)
          {
             solutionToPack.set(nativexSolutionMatrix);
+//            printActiveSetInfo("At end " );
 
             return numberOfIterations;
          }
@@ -522,7 +527,13 @@ public class MPCQPSolver
          solutionToPack.set(nativexSolutionMatrix);
       }
 
+      printActiveSetInfo("At end " );
       return numberOfIterations;
+   }
+
+   private void printActiveSetInfo(String prefix)
+   {
+      LogTools.info(prefix + " Active set size is " + activeInequalityIndices.size() + " out of " + getNumberOfInequalityConstraints() + " constraints.");
    }
 
    private boolean problemSizeChanged()
@@ -591,7 +602,7 @@ public class MPCQPSolver
             if (!MathTools.epsilonEquals(slackCost, 0.0, 1e-5) && Double.isFinite(slackCost))
                inverseSlackHessian.set(i, i, 1.0 / slackCost);
          }
-
+//
          CBarQInverseCBarTranspose.addEquals(inverseSlackHessian);
       }
       else
@@ -778,8 +789,19 @@ public class MPCQPSolver
 
       bigVectorForLagrangeMultiplierSolution.scale(-1.0, bigVectorForLagrangeMultiplierSolution);
 
-      augmentedLagrangeMultipliers.solve(bigMatrixForLagrangeMultiplierSolution, bigVectorForLagrangeMultiplierSolution);
-      
+      boolean wasInvertible = augmentedLagrangeMultipliers.solveCheck(bigMatrixForLagrangeMultiplierSolution, bigVectorForLagrangeMultiplierSolution);
+
+      if (debug)
+      {
+         NativeMatrix enforcementCheck = new NativeMatrix(bigVectorForLagrangeMultiplierSolution);
+         enforcementCheck.mult(bigMatrixForLagrangeMultiplierSolution, augmentedLagrangeMultipliers);
+         for (int i = 0; i < bigMatrixForLagrangeMultiplierSolution.getNumRows(); i++)
+         {
+            if (!MathTools.epsilonEquals(enforcementCheck.get(i, 0), bigVectorForLagrangeMultiplierSolution.get(i, 0), 1e-5))
+               LogTools.info("Crap." + wasInvertible);
+         }
+      }
+
       AAndC.reshape(numberOfAugmentedEqualityConstraints, numberOfVariables);
       AAndC.insert(linearEqualityConstraintsAMatrix, 0, 0);
       AAndC.insert(CBar, numberOfOriginalEqualityConstraints, 0);
@@ -791,6 +813,41 @@ public class MPCQPSolver
       xSolutionToPack.mult(-1.0, QInverse, tempVector);
       reportSolution(xSolutionToPack);
 
+      if (debug)
+      {
+         NativeMatrix enforcementCheck = new NativeMatrix(bigVectorForLagrangeMultiplierSolution);
+         enforcementCheck.mult(bigMatrixForLagrangeMultiplierSolution, augmentedLagrangeMultipliers);
+         boolean subspaceError = false;
+         for (int i = 0; i < bigMatrixForLagrangeMultiplierSolution.getNumRows(); i++)
+         {
+            if (!MathTools.epsilonEquals(enforcementCheck.get(i, 0), bigVectorForLagrangeMultiplierSolution.get(i, 0), 1e-5))
+               subspaceError = true;
+         }
+
+         boolean constraintError = false;
+         enforcementCheck.mult(linearEqualityConstraintsAMatrix, xSolutionToPack);
+         for (int i = 0; i < linearEqualityConstraintsBVector.getNumRows(); i++)
+         {
+            if (!MathTools.epsilonEquals(enforcementCheck.get(i, 0), linearEqualityConstraintsBVector.get(i, 0), 1e-3))
+               constraintError = true;
+         }
+         if (subspaceError)
+            LogTools.error("Crap. The subspace solution messed up." + wasInvertible);
+         if (constraintError)
+            LogTools.error("Crap. The equality constraints don't hold." + wasInvertible);
+
+         for (int row = 0; row < linearInequalityConstraintsCMatrixO.getNumRows(); row++)
+         {
+            if (valuesInRow(linearInequalityConstraintsCMatrixO, row) > 4)
+               LogTools.error("Wrong number of values in the row.");
+         }
+
+         for (int row = 0; row < linearInequalityConstraintsCMatrixO.getNumRows(); row++)
+         {
+            if (valuesInCol(linearInequalityConstraintsCMatrixO, row) > 4)
+               LogTools.error("Wrong number of values in the column.");
+         }
+      }
       int startRow = 0;
       int numberOfRows = numberOfOriginalEqualityConstraints;
       lagrangeEqualityConstraintMultipliersToPack.insert(augmentedLagrangeMultipliers, startRow, startRow + numberOfRows, 0, 1, 0, 0);
@@ -803,6 +860,31 @@ public class MPCQPSolver
          lagrangeInequalityConstraintMultipliersToPack.insert(augmentedLagrangeMultipliers, startRow + i, startRow + i + 1, 0, 1, inequalityConstraintIndex, 0);
       }
    }
+
+   private static int valuesInRow(NativeMatrix matrix, int row)
+   {
+      int counter = 0;
+      for (int col = 0; col < matrix.getNumCols(); col++)
+      {
+         if (!MathTools.epsilonEquals(matrix.get(row, col), 0.0, 1e-4))
+            counter++;
+      }
+
+      return counter;
+   }
+
+   private static int valuesInCol(NativeMatrix matrix, int col)
+   {
+      int counter = 0;
+      for (int row = 0; row < matrix.getNumRows(); row++)
+      {
+         if (!MathTools.epsilonEquals(matrix.get(row, col), 0.0, 1e-4))
+            counter++;
+      }
+
+      return counter;
+   }
+
 
    private void reportSolution(NativeMatrix solution)
    {

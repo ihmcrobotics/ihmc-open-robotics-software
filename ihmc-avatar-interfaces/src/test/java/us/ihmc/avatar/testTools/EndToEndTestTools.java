@@ -5,6 +5,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
@@ -19,7 +27,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTool
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.jointspace.OneDoFJointFeedbackController;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -44,6 +55,11 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationConstructionSetTools.dataExporter.DataExporterExcelWorkbookCreator;
+import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporterGraphCreator;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -71,7 +87,9 @@ public class EndToEndTestTools
       assertTotalNumberOfWaypointsInTaskspaceManager(bodyName, "", expectedNumberOfPoints, yoVariableHolder);
    }
 
-   public static void assertTotalNumberOfWaypointsInTaskspaceManager(String bodyName, String postfix, int expectedNumberOfPoints,
+   public static void assertTotalNumberOfWaypointsInTaskspaceManager(String bodyName,
+                                                                     String postfix,
+                                                                     int expectedNumberOfPoints,
                                                                      YoVariableHolder yoVariableHolder)
    {
       assertEquals(expectedNumberOfPoints,
@@ -79,14 +97,19 @@ public class EndToEndTestTools
                    "Unexpected number of waypoints:");
    }
 
-   public static void assertCurrentDesiredsMatchWaypoint(String bodyName, SO3TrajectoryPointMessage expectedWaypoint, double epsilon,
+   public static void assertCurrentDesiredsMatchWaypoint(String bodyName,
+                                                         SO3TrajectoryPointMessage expectedWaypoint,
+                                                         double epsilon,
                                                          YoVariableHolder yoVariableHolder)
    {
       assertCurrentDesiredsMatch(bodyName, expectedWaypoint.getOrientation(), expectedWaypoint.getAngularVelocity(), epsilon, yoVariableHolder);
    }
 
-   public static void assertCurrentDesiredsMatch(String bodyName, QuaternionReadOnly expectedOrientation, Vector3DReadOnly expectedAngularVelocity,
-                                                 double epsilon, YoVariableHolder yoVariableHolder)
+   public static void assertCurrentDesiredsMatch(String bodyName,
+                                                 QuaternionReadOnly expectedOrientation,
+                                                 Vector3DReadOnly expectedAngularVelocity,
+                                                 double epsilon,
+                                                 YoVariableHolder yoVariableHolder)
    {
       QuaternionReadOnly desiredOrientation = findFeedbackControllerDesiredOrientation(bodyName, yoVariableHolder);
       Vector3DReadOnly desiredAngularVelocity = findFeedbackControllerDesiredAngularVelocity(bodyName, yoVariableHolder);
@@ -94,8 +117,11 @@ public class EndToEndTestTools
       EuclidCoreTestTools.assertTuple3DEquals("Angular Velocity", expectedAngularVelocity, desiredAngularVelocity, epsilon, FORMAT);
    }
 
-   public static void assertWaypointInGeneratorMatches(String bodyName, int waypointIndexInController, SO3TrajectoryPointMessage expectedWaypoint,
-                                                       double epsilon, YoVariableHolder yoVariableHolder)
+   public static void assertWaypointInGeneratorMatches(String bodyName,
+                                                       int waypointIndexInController,
+                                                       SO3TrajectoryPointMessage expectedWaypoint,
+                                                       double epsilon,
+                                                       YoVariableHolder yoVariableHolder)
    {
       assertTrue(waypointIndexInController < RigidBodyTaskspaceControlState.maxPointsInGenerator, "Index too high: " + waypointIndexInController);
       SO3TrajectoryPoint actualWaypoint = findSO3TrajectoryPoint(bodyName, waypointIndexInController, yoVariableHolder);
@@ -112,8 +138,11 @@ public class EndToEndTestTools
                                               FORMAT);
    }
 
-   public static void assertOneDoFJointsFeebackControllerDesireds(String[] jointNames, double[] desiredJointPositions, double[] desiredJointVelocities,
-                                                                  double epsilon, YoVariableHolder yoVariableHolder)
+   public static void assertOneDoFJointsFeebackControllerDesireds(String[] jointNames,
+                                                                  double[] desiredJointPositions,
+                                                                  double[] desiredJointVelocities,
+                                                                  double epsilon,
+                                                                  YoVariableHolder yoVariableHolder)
    {
       for (int jointIndex = 0; jointIndex < jointNames.length; jointIndex++)
       {
@@ -125,58 +154,78 @@ public class EndToEndTestTools
       }
    }
 
-   public static void assertOneDoFJointFeedbackControllerDesireds(String jointName, double desiredPosition, double desiredVelocity, double epsilon,
+   public static void assertOneDoFJointFeedbackControllerDesireds(String jointName,
+                                                                  double desiredPosition,
+                                                                  double desiredVelocity,
+                                                                  double epsilon,
                                                                   YoVariableHolder yoVariableHolder)
    {
       assertOneDoFJointFeedbackControllerDesiredPosition(jointName, desiredPosition, epsilon, yoVariableHolder);
       assertOneDoFJointFeedbackControllerDesiredVelocity(jointName, desiredVelocity, epsilon, yoVariableHolder);
    }
 
-   public static void assertOneDoFJointFeedbackControllerDesiredPosition(String jointName, double desiredPosition, double epsilon,
+   public static void assertOneDoFJointFeedbackControllerDesiredPosition(String jointName,
+                                                                         double desiredPosition,
+                                                                         double epsilon,
                                                                          YoVariableHolder yoVariableHolder)
    {
       YoDouble scsDesiredPosition = findOneDoFJointFeedbackControllerDesiredPosition(jointName, yoVariableHolder);
       assertEquals(desiredPosition, scsDesiredPosition.getDoubleValue(), epsilon);
    }
 
-   public static void assertOneDoFJointFeedbackControllerDesiredVelocity(String jointName, double desiredVelocity, double epsilon,
+   public static void assertOneDoFJointFeedbackControllerDesiredVelocity(String jointName,
+                                                                         double desiredVelocity,
+                                                                         double epsilon,
                                                                          YoVariableHolder yoVariableHolder)
    {
       YoDouble scsDesiredVelocity = findOneDoFJointFeedbackControllerDesiredVelocity(jointName, yoVariableHolder);
       assertEquals(desiredVelocity, scsDesiredVelocity.getDoubleValue(), epsilon);
    }
 
-   public static void assertTotalNumberOfWaypointsInJointspaceManager(int expectedNumberOfTrajectoryPoints, String bodyName, String[] jointNames,
+   public static void assertTotalNumberOfWaypointsInJointspaceManager(int expectedNumberOfTrajectoryPoints,
+                                                                      String bodyName,
+                                                                      String[] jointNames,
                                                                       YoVariableHolder yoVariableHolder)
    {
       for (String jointName : jointNames)
          assertTotalNumberOfWaypointsInJointspaceManager(expectedNumberOfTrajectoryPoints, bodyName, jointName, yoVariableHolder);
    }
 
-   public static void assertTotalNumberOfWaypointsInJointspaceManager(int expectedNumberOfWaypoints, String bodyName, String jointName,
+   public static void assertTotalNumberOfWaypointsInJointspaceManager(int expectedNumberOfWaypoints,
+                                                                      String bodyName,
+                                                                      String jointName,
                                                                       YoVariableHolder yoVariableHolder)
    {
       int numberOfPoints = findTotalNumberOfWaypointsInJointspaceManager(bodyName, jointName, yoVariableHolder);
       assertEquals(expectedNumberOfWaypoints, numberOfPoints, "Unexpected number of trajectory points for " + jointName);
    }
 
-   public static void assertNumberOfWaypointsInJointspaceManagerGenerator(int expectedNumberOfWaypoints, String bodyName, String jointName,
+   public static void assertNumberOfWaypointsInJointspaceManagerGenerator(int expectedNumberOfWaypoints,
+                                                                          String bodyName,
+                                                                          String jointName,
                                                                           YoVariableHolder yoVariableHolder)
    {
       int numberOfPoints = findNumberOfWaypointsInJointspaceManagerGenerator(bodyName, jointName, yoVariableHolder);
       assertEquals(expectedNumberOfWaypoints, numberOfPoints, "Unexpected number of trajectory points for " + jointName);
    }
 
-   public static void assertNumberOfWaypointsInJointspaceManagerQueue(int expectedNumberOfWaypoints, String bodyName, String jointName,
+   public static void assertNumberOfWaypointsInJointspaceManagerQueue(int expectedNumberOfWaypoints,
+                                                                      String bodyName,
+                                                                      String jointName,
                                                                       YoVariableHolder yoVariableHolder)
    {
       int numberOfPoints = findNumberOfWaypointsInJointspaceManagerQueue(bodyName, jointName, yoVariableHolder);
       assertEquals(expectedNumberOfWaypoints, numberOfPoints, "Unexpected number of trajectory points for " + jointName);
    }
 
-   public static void assertJointspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
-                                                       double[] expectedDesiredPositions, String[] jointNames, JointspaceTrajectoryStatusMessage statusMessage,
-                                                       double epsilon, double controllerDT)
+   public static void assertJointspaceTrajectoryStatus(long expectedSequenceID,
+                                                       TrajectoryExecutionStatus expectedStatus,
+                                                       double expectedTimestamp,
+                                                       double[] expectedDesiredPositions,
+                                                       String[] jointNames,
+                                                       JointspaceTrajectoryStatusMessage statusMessage,
+                                                       double epsilon,
+                                                       double controllerDT)
    {
       assertJointspaceTrajectoryStatus(expectedSequenceID, expectedStatus, expectedTimestamp, jointNames, statusMessage, controllerDT);
 
@@ -186,8 +235,12 @@ public class EndToEndTestTools
       }
    }
 
-   public static void assertJointspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
-                                                       String[] jointNames, JointspaceTrajectoryStatusMessage statusMessage, double controllerDT)
+   public static void assertJointspaceTrajectoryStatus(long expectedSequenceID,
+                                                       TrajectoryExecutionStatus expectedStatus,
+                                                       double expectedTimestamp,
+                                                       String[] jointNames,
+                                                       JointspaceTrajectoryStatusMessage statusMessage,
+                                                       double controllerDT)
    {
       assertEquals(expectedSequenceID, statusMessage.getSequenceId());
       assertEquals(expectedStatus, TrajectoryExecutionStatus.fromByte(statusMessage.getTrajectoryExecutionStatus()));
@@ -202,9 +255,14 @@ public class EndToEndTestTools
       }
    }
 
-   public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
-                                                      Pose3DReadOnly expectedDesiredPose, String endEffectorName,
-                                                      TaskspaceTrajectoryStatusMessage statusMessage, double epsilon, double controllerDT)
+   public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID,
+                                                      TrajectoryExecutionStatus expectedStatus,
+                                                      double expectedTimestamp,
+                                                      Pose3DReadOnly expectedDesiredPose,
+                                                      String endEffectorName,
+                                                      TaskspaceTrajectoryStatusMessage statusMessage,
+                                                      double epsilon,
+                                                      double controllerDT)
    {
       assertTaskspaceTrajectoryStatus(expectedSequenceID,
                                       expectedStatus,
@@ -217,9 +275,14 @@ public class EndToEndTestTools
                                       controllerDT);
    }
 
-   public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
-                                                      Point3DReadOnly expectedDesiredPosition, Orientation3DReadOnly expectedDesiredOrientation,
-                                                      String endEffectorName, TaskspaceTrajectoryStatusMessage statusMessage, double epsilon,
+   public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID,
+                                                      TrajectoryExecutionStatus expectedStatus,
+                                                      double expectedTimestamp,
+                                                      Point3DReadOnly expectedDesiredPosition,
+                                                      Orientation3DReadOnly expectedDesiredOrientation,
+                                                      String endEffectorName,
+                                                      TaskspaceTrajectoryStatusMessage statusMessage,
+                                                      double epsilon,
                                                       double controllerDT)
    {
       if (expectedDesiredPosition != null)
@@ -296,8 +359,12 @@ public class EndToEndTestTools
       assertTaskspaceTrajectoryStatus(expectedSequenceID, expectedStatus, expectedTimestamp, endEffectorName, statusMessage, controllerDT);
    }
 
-   public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID, TrajectoryExecutionStatus expectedStatus, double expectedTimestamp,
-                                                      String endEffectorName, TaskspaceTrajectoryStatusMessage statusMessage, double controllerDT)
+   public static void assertTaskspaceTrajectoryStatus(long expectedSequenceID,
+                                                      TrajectoryExecutionStatus expectedStatus,
+                                                      double expectedTimestamp,
+                                                      String endEffectorName,
+                                                      TaskspaceTrajectoryStatusMessage statusMessage,
+                                                      double controllerDT)
    {
       assertEquals(expectedSequenceID, statusMessage.getSequenceId());
       assertEquals(expectedStatus, TrajectoryExecutionStatus.fromByte(statusMessage.getTrajectoryExecutionStatus()));
@@ -665,7 +732,7 @@ public class EndToEndTestTools
             message.getFootstepDataList().get(i).setSwingDuration(swingDuration);
          }
       }
-   
+
       if (Double.isFinite(transferDuration) && transferDuration > 0.0)
       {
          for (int i = 0; i < message.getFootstepDataList().size(); i++)
@@ -673,7 +740,132 @@ public class EndToEndTestTools
             message.getFootstepDataList().get(i).setTransferDuration(transferDuration);
          }
       }
-   
+
       return message;
+   }
+
+   public static void writeJointStatesMatlab(SimulationConstructionSet scs, File destination)
+   {
+      Robot robot = scs.getRobots()[0];
+      List<OneDegreeOfFreedomJoint> joints = new ArrayList<>();
+      robot.getAllOneDegreeOfFreedomJoints(joints);
+
+      List<String> jointStateVariableNames = new ArrayList<>();
+      joints.forEach(joint -> jointStateVariableNames.add(joint.getQYoVariable().getFullNameString()));
+      joints.forEach(joint -> jointStateVariableNames.add(joint.getQDYoVariable().getFullNameString()));
+      joints.forEach(joint -> jointStateVariableNames.add(joint.getTauYoVariable().getFullNameString()));
+      scs.setupVarGroup("jointState", jointStateVariableNames.toArray(new String[0]));
+
+      scs.writeMatlabData("jointState", destination);
+   }
+
+   public static void exportTorqueSpeedCurves(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix)
+   {
+      exportTorqueSpeedCurves(scs, dataParentFolder, dataNameSuffix, null);
+   }
+
+   // Pattern-matched from TorqueSpeedDataExporter
+   public static void exportTorqueSpeedCurves(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix, String info)
+   {
+      Robot robot = scs.getRobots()[0];
+      TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(robot, scs.getDataBuffer());
+      DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(robot, scs.getDataBuffer());
+
+      // Stop the sim and disable the GUI:
+      scs.stop();
+      scs.disableGUIComponents();
+
+      // Wait till done running:
+      while (scs.isSimulating())
+      {
+         ThreadTools.sleep(1000);
+      }
+
+      // Crop the Buffer to In/Out. This is important because of how we use the DataBuffer later and we assume that in point is at index=0:
+      scs.cropBuffer();
+      scs.gotoInPointNow();
+
+      String timeStamp = FormattingTools.getDateString() + "_" + FormattingTools.getTimeString();
+      String tagName;
+      if (dataNameSuffix != null)
+         tagName = timeStamp + "_" + robot.getName() + "_" + dataNameSuffix;
+      else
+         tagName = timeStamp + "_" + robot.getName();
+
+      File dataFolder = new File(dataParentFolder, tagName);
+      dataFolder.mkdir();
+
+      if (info != null)
+      {
+         System.out.println("Saving ReadMe");
+         writeReadme(new File(dataFolder, tagName + ".txt"), info);
+         System.out.println("Done Saving ReadMe");
+      }
+
+      try
+      {
+         System.out.println("Saving data");
+         scs.writeMatlabData("all", new File(dataFolder, tagName + ".mat"));
+         System.out.println("Done Saving Data");
+      }
+      catch (OutOfMemoryError exception)
+      {
+         System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+         exception.printStackTrace();
+      }
+
+      try
+      {
+         System.out.println("Saving data in Matlab format");
+         writeJointStatesMatlab(scs, new File(dataFolder, tagName + "_jointStates.mat"));
+         System.out.println("Done Saving Data in Matlab format");
+      }
+      catch (OutOfMemoryError exception)
+      {
+         System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
+         exception.printStackTrace();
+      }
+
+      System.out.println("creating torque and speed spreadsheet");
+      excelWorkbookCreator.createAndSaveTorqueAndSpeedSpreadSheet(dataFolder, tagName);
+      System.out.println("done creating torque and speed spreadsheet");
+
+      System.out.println("creating torque and speed graphs");
+      // make graph directory inside destination directory
+      File graphDirectory = new File(dataFolder, "graphs");
+      graphDirectory.mkdir();
+      graphCreator.createJointTorqueSpeedGraphs(graphDirectory, tagName, true, false);
+      System.out.println("done creating torque and speed graphs");
+
+      System.out.println("creating video");
+      scs.getStandardSimulationGUI().getViewportPanel().getStandardGUIActions().createVideo(new File(dataFolder, tagName + "_Video.mov"));
+      System.out.println("done creating video");
+
+      scs.enableGUIComponents();
+   }
+
+   private static void writeReadme(File readmeFile, String info)
+   {
+      try
+      {
+         FileWriter out = new FileWriter(readmeFile);
+         out.write(info);
+         out.close();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   public static final Path DATA_PATH = Paths.get("D:/DataAndVideos");
+
+   public static File getDataOutputFolder(String robotName, String folderName) throws IOException
+   {
+      Path path = DATA_PATH.resolve(robotName);
+      if (folderName != null)
+         path = path.resolve(folderName);
+      FileTools.ensureDirectoryExists(path);
+      return path.toFile();
    }
 }

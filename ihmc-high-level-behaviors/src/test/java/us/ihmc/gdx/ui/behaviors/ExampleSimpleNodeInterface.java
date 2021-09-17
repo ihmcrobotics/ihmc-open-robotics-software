@@ -1,13 +1,12 @@
 package us.ihmc.gdx.ui.behaviors;
 
-import imgui.ImGui;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 
-public class ExampleSimpleNodeInterface extends GDXBehaviorUIInterface
+public class ExampleSimpleNodeInterface extends ImGuiGDXBehaviorUIInterface
 {
-   public ExampleSimpleNodeInterface(String name) {
+   public ExampleSimpleNodeInterface(String name)
+   {
       setName(name);
    }
 
@@ -27,12 +26,6 @@ public class ExampleSimpleNodeInterface extends GDXBehaviorUIInterface
    public void renderTreeNodeImGuiWidgets()
    {
 
-   }
-
-   @Override
-   public void renderRegularPanelImGuiWidgets()
-   {
-      ImGui.dummy(80.0f, 30.0f);
    }
 
    @Override

@@ -13,19 +13,16 @@ public class LookAndStepBodyPathLocalizationResult
    private final int closestSegmentIndex;
    private final Pose3DReadOnly midFeetAlongPath;
    private final List<? extends Pose3DReadOnly> bodyPathPlan;
-   private final SideDependentList<MinimalFootstep> stanceForPlanning;
 
    public LookAndStepBodyPathLocalizationResult(Point3D closestPointAlongPath,
                                                 int closestSegmentIndex,
                                                 Pose3DReadOnly midFeetAlongPath,
-                                                List<? extends Pose3DReadOnly> bodyPathPlan,
-                                                SideDependentList<MinimalFootstep> stanceForPlanning)
+                                                List<? extends Pose3DReadOnly> bodyPathPlan)
    {
       this.closestPointAlongPath = closestPointAlongPath;
       this.closestSegmentIndex = closestSegmentIndex;
       this.midFeetAlongPath = midFeetAlongPath;
       this.bodyPathPlan = bodyPathPlan;
-      this.stanceForPlanning = stanceForPlanning;
    }
 
    public Point3D getClosestPointAlongPath()
@@ -46,10 +43,5 @@ public class LookAndStepBodyPathLocalizationResult
    public List<? extends Pose3DReadOnly> getBodyPathPlan()
    {
       return bodyPathPlan;
-   }
-
-   public SideDependentList<MinimalFootstep> getStanceForPlanning()
-   {
-      return stanceForPlanning;
    }
 }

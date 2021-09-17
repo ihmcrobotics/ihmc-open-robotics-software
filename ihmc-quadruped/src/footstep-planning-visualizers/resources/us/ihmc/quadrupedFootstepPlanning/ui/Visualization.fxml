@@ -24,10 +24,6 @@
 
                 <CheckBox fx:id="showPlanarRegionsToggleButton" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="2"
                               GridPane.rowIndex="1"/>
-                <CheckBox fx:id="showClusterPreferredNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show pref navigable extrusions"
-                          GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                <CheckBox fx:id="showClusterPreferredNonNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show pref non-navigable extrusions"
-                          GridPane.columnIndex="2" GridPane.rowIndex="3"/>
                 <CheckBox fx:id="showClusterNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show navigable extrusions"
                               GridPane.columnIndex="2" GridPane.rowIndex="4"/>
                 <CheckBox fx:id="showClusterNonNavigableExtrusionsToggleButton" mnemonicParsing="false" text="Show non-navigable extrusions"

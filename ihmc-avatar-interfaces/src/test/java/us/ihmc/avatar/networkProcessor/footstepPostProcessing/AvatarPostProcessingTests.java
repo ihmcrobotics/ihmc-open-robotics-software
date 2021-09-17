@@ -156,7 +156,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose,
                                                          footstepPlannerParameters);
-      request.setRequestedPathHeading(Math.toRadians(30.0));
+//      request.setRequestedPathHeading(Math.toRadians(30.0));
 
       request.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
 
@@ -425,6 +425,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getFootstepPlannerParameters().setMinimumFootholdPercent(0.99);
       footstepPlanningModule.getFootstepPlannerParameters().setMaximumStepZ(0.32);
+      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffBottoms(-1.0);
+      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffTops(-1.0);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
 
       System.out.println("output. " + plannerOutput.getFootstepPlanningResult());

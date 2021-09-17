@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.20"
+   id("us.ihmc.ihmc-cd") version "1.21"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
@@ -18,10 +18,10 @@ basicsDependencies {
    api("org.ejml:ejml-ddense:0.39")
 
    api("us.ihmc:jinput:2.0.6-ihmc2")
-   api("us.ihmc:euclid-frame:0.16.2")
-   api("us.ihmc:euclid-frame-shape:0.16.2")
-   api("us.ihmc:euclid-shape:0.16.2")
-   api("us.ihmc:ihmc-yovariables:0.9.9")
+   api("us.ihmc:euclid-frame:0.17.0")
+   api("us.ihmc:euclid-frame-shape:0.17.0")
+   api("us.ihmc:euclid-shape:0.17.0")
+   api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:ihmc-robot-description:0.21.2")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -71,7 +71,7 @@ footstepPlanningTestDependencies {
 communicationDependencies {
    api(ihmc.sourceSetProject("footstep-planning"))
 
-   api("us.ihmc:euclid-geometry:0.16.2")
+   api("us.ihmc:euclid-geometry:0.17.0")
 }
 
 communicationTestDependencies {

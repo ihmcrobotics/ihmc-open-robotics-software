@@ -22,7 +22,7 @@ $ sudo apt-get install gradle
 
 ### OSX 
 
-Gradle is available from [Homebrew](http://brew.sh/). Once you install homebrew, you can install Gradle as follows:
+Gradle is available from [Homebrew](https://brew.sh/). Once you install homebrew, you can install Gradle as follows:
 
 ```bash
 $ brew update

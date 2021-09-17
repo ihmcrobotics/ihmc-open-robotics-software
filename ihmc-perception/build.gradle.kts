@@ -7,7 +7,7 @@ buildscript {
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.20"
+   id("us.ihmc.ihmc-cd") version "1.21"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
@@ -37,9 +37,9 @@ mainDependencies {
    api("org.boofcv:boofcv-calibration:0.36")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.16.2")
-   api("us.ihmc:ihmc-yovariables:0.9.9")
-   api("us.ihmc:simulation-construction-set:0.21.9")
+   api("us.ihmc:euclid:0.17.0")
+   api("us.ihmc:ihmc-yovariables:0.9.11")
+   api("us.ihmc:simulation-construction-set:0.21.10")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -56,27 +56,29 @@ openpnpDependencies {
    api("org.openpnp:opencv:4.3.0-2")
 }
 
-val javaCVVersion = "1.5.4"
+val javaCPPVersion = "1.5.6"
 
 bytedecoDependencies {
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.10-")
-   apiBytedecoNatives("opencv", "4.4.0-")
+   apiBytedecoNatives("openblas", "0.3.17-")
+   apiBytedecoNatives("opencv", "4.5.3-")
+   apiBytedecoNatives("opencl", "3.0-")
 }
 
 javacvDependencies {
-   apiBytedecoSelective("org.bytedeco:javacv:$javaCVVersion")
+   apiBytedecoSelective("org.bytedeco:javacv:$javaCPPVersion")
    apiBytedecoNatives("javacpp")
-   apiBytedecoNatives("openblas", "0.3.10-")
-   apiBytedecoNatives("opencv", "4.4.0-")
+   apiBytedecoNatives("openblas", "0.3.17-")
+   apiBytedecoNatives("opencv", "4.5.3-")
+   apiBytedecoNatives("opencl", "3.0-")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
 {
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:linux-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:windows-x86_64")
-   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:macosx-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:linux-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:windows-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCPPVersion:macosx-x86_64")
 }
 
 fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
@@ -88,7 +90,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
 
 testDependencies {
    api("us.ihmc:ihmc-commons-testing:0.30.4")
-   api("us.ihmc:simulation-construction-set:0.21.9")
+   api("us.ihmc:simulation-construction-set:0.21.10")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

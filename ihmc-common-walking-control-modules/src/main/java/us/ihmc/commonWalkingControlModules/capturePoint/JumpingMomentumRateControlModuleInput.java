@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -19,7 +20,7 @@ public class JumpingMomentumRateControlModuleInput
    private boolean minimizeAngularMomentumRate;
    private boolean inFlight;
    private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(6));
-   private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
+   private final RecyclingArrayList<PreviewWindowSegment> contactStateProviders = new RecyclingArrayList<>(PreviewWindowSegment::new);
    private final FrameVector3D desiredLinearMomentumRateOfChange = new FrameVector3D();
    private final FrameVector3D desiredAngularMomentumRateOfChange = new FrameVector3D();
 
@@ -95,14 +96,14 @@ public class JumpingMomentumRateControlModuleInput
       return vrpTrajectories;
    }
 
-   public void setContactStateProviders(List<? extends ContactStateProvider> contactStateProviders)
+   public void setContactStateProviders(List<PreviewWindowSegment> contactStateProviders)
    {
       this.contactStateProviders.clear();
       for (int i = 0; i < contactStateProviders.size(); i++)
          this.contactStateProviders.add().set(contactStateProviders.get(i));
    }
 
-   public List<? extends ContactStateProvider> getContactStateProviders()
+   public List<PreviewWindowSegment> getContactStateProviders()
    {
       return contactStateProviders;
    }

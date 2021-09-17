@@ -57,6 +57,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private ReferenceFrame headCameraFrame;
    private ReferenceFrame steppingCameraFrame;
    private ReferenceFrame objectDetectionCameraFrame;
+   private ReferenceFrame headZED2CameraFrame;
+   private ReferenceFrame ousterLidarFrame;
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
    {
@@ -201,6 +203,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          steppingCameraFrame = sensorInformation.getSteppingCameraFrame(this);
          objectDetectionCameraFrame = sensorInformation.getObjectDetectionCameraFrame(this);
+         headZED2CameraFrame = sensorInformation.getHeadZED2CameraFrame(this);
+         ousterLidarFrame = sensorInformation.getOusterLidarFrame(this);
       }
    }
 
@@ -366,6 +370,8 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          steppingCameraFrame.update();
          objectDetectionCameraFrame.update();
+         headZED2CameraFrame.update();
+         ousterLidarFrame.update();
       }
    }
 
@@ -435,5 +441,15 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public ReferenceFrame getObjectDetectionCameraFrame()
    {
       return objectDetectionCameraFrame;
+   }
+
+   public ReferenceFrame getHeadZED2CameraFrame()
+   {
+      return headZED2CameraFrame;
+   }
+
+   public ReferenceFrame getOusterLidarFrame()
+   {
+      return ousterLidarFrame;
    }
 }

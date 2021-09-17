@@ -145,4 +145,12 @@ public class AtlasObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    {
       super.testRepeatedWalking();
    }
+
+   @Tag("humanoid-flat-ground-slow-4")
+   @Override
+   @Test
+   public void testPrepareForLocomotion() throws SimulationExceededMaximumTimeException
+   {
+      super.testPrepareForLocomotion();
+   }
 }

@@ -15,27 +15,21 @@ public class ClusterInfo
    private final double clusterResolution;
    private final ObstacleRegionFilter obstacleRegionFilter;
    private final PlanarRegionFilter planarRegionFilter;
-   private final NavigableExtrusionDistanceCalculator preferredNavigableCalculator;
    private final NavigableExtrusionDistanceCalculator navigableCalculator;
-   private final ObstacleExtrusionDistanceCalculator preferredObstacleCalculator;
    private final ObstacleExtrusionDistanceCalculator obstacleCalculator;
-   private final boolean includePreferredExtrusions;
 
    public ClusterInfo(List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution, ObstacleRegionFilter obstacleRegionFilter,
-                      PlanarRegionFilter planarRegionFilter, NavigableExtrusionDistanceCalculator preferredNavigableCalculator,
-                      NavigableExtrusionDistanceCalculator navigableCalculator, ObstacleExtrusionDistanceCalculator preferredObstacleCalculator,
-                      ObstacleExtrusionDistanceCalculator obstacleCalculator, boolean includePreferredExtrusions)
+                      PlanarRegionFilter planarRegionFilter,
+                      NavigableExtrusionDistanceCalculator navigableCalculator,
+                      ObstacleExtrusionDistanceCalculator obstacleCalculator)
    {
       this.otherRegions = otherRegions;
       this.orthogonalAngle = orthogonalAngle;
       this.clusterResolution = clusterResolution;
       this.obstacleRegionFilter = obstacleRegionFilter;
       this.planarRegionFilter = planarRegionFilter;
-      this.preferredNavigableCalculator = preferredNavigableCalculator;
       this.navigableCalculator = navigableCalculator;
-      this.preferredObstacleCalculator = preferredObstacleCalculator;
       this.obstacleCalculator = obstacleCalculator;
-      this.includePreferredExtrusions = includePreferredExtrusions;
    }
 
    public List<PlanarRegion> getOtherRegions()
@@ -63,28 +57,13 @@ public class ClusterInfo
       return planarRegionFilter;
    }
 
-   public NavigableExtrusionDistanceCalculator getPreferredNavigableCalculator()
-   {
-      return preferredNavigableCalculator;
-   }
-
    public NavigableExtrusionDistanceCalculator getNavigableCalculator()
    {
       return navigableCalculator;
    }
 
-   public ObstacleExtrusionDistanceCalculator getPreferredObstacleCalculator()
-   {
-      return preferredObstacleCalculator;
-   }
-
    public ObstacleExtrusionDistanceCalculator getObstacleCalculator()
    {
       return obstacleCalculator;
-   }
-
-   public boolean getIncludePreferredExtrusions()
-   {
-      return includePreferredExtrusions;
    }
 }

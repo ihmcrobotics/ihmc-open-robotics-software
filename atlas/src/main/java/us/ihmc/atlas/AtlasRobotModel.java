@@ -18,7 +18,7 @@ import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
-import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
+import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -104,6 +105,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasContactPointParameters contactPointParameters;
    private final AtlasSensorInformation sensorInformation;
    private final AtlasWalkingControllerParameters walkingControllerParameters;
+   private final AtlasPushRecoveryControllerParameters pushRecoveryControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
    private final AtlasCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder;
@@ -113,6 +115,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private boolean useShapeCollision = false;
 
    private final RobotDescription robotDescription;
+   private String simpleRobotName = "Atlas";
+   private StepReachabilityData stepReachabilityData = null;
 
    public AtlasRobotModel(AtlasRobotVersion atlasVersion)
    {
@@ -203,6 +207,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       highLevelControllerParameters = new AtlasHighLevelControllerParameters(runningOnRealRobot, jointMap);
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
+      pushRecoveryControllerParameters = new AtlasPushRecoveryControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
       collisionMeshDefinitionDataHolder = new AtlasCollisionMeshDefinitionDataHolder(jointMap, atlasPhysicalProperties);
 
@@ -210,7 +215,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       robotDescription = createRobotDescription();
    }
 
-   private RobotDescription createRobotDescription()
+   public RobotDescription createRobotDescription()
+   {
+      return createRobotDescription(0.0);
+   }
+
+   public RobotDescription createRobotDescription(double transparency)
    {
       boolean useCollisionMeshes = false;
 
@@ -226,7 +236,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       }
       else
       {
-         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, contactPointParameters, useCollisionMeshes);
+         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel,
+                                                                          jointMap,
+                                                                          contactPointParameters,
+                                                                          useCollisionMeshes,
+                                                                          transparency);
       }
 
       return robotDescription;
@@ -255,6 +269,13 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return walkingControllerParameters;
    }
+
+   @Override
+   public PushRecoveryControllerParameters getPushRecoveryControllerParameters()
+   {
+      return pushRecoveryControllerParameters;
+   }
+
 
    @Override
    public CoPTrajectoryParameters getCoPTrajectoryParameters()
@@ -445,13 +466,18 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public String getStepReachabilityResourceName()
    {
-      return "ihmc-open-robotics-software/atlas/src/main/resources/us/ihmc/atlas/parameters/StepReachabilityMap.csv";
+      return "us/ihmc/atlas/parameters/StepReachabilityMap.json";
    }
 
    @Override
    public StepReachabilityData getStepReachabilityData()
    {
-      return StepReachabilityFileTools.loadFromFile(getStepReachabilityResourceName());
+      if (stepReachabilityData == null)
+      {
+         stepReachabilityData = new StepReachabilityIOHelper().loadStepReachability(this);
+      }
+
+      return stepReachabilityData;
    }
 
    @Override
@@ -528,7 +554,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public String getSimpleRobotName()
    {
-      return "Atlas";
+      return simpleRobotName;
+   }
+
+   public void setSimpleRobotName(String simpleRobotName)
+   {
+      this.simpleRobotName = simpleRobotName;
    }
 
    @Override

@@ -3,11 +3,12 @@ package us.ihmc.simulationConstructionSetTools.dataExporter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class TorqueSpeedDataExporter implements ActionListener
 {
@@ -21,7 +22,7 @@ public class TorqueSpeedDataExporter implements ActionListener
    private final DataExporterExcelWorkbookCreator excelWorkbookCreator;
 
    private final Class<?> rootClassForDirectory;
-   private String rootDirectoryOverride = null;
+   private final ArrayList<String> rootDirectoryOverride = new ArrayList<>();
 
    public TorqueSpeedDataExporter(SimulationConstructionSet scs, Robot robot)
    {
@@ -44,20 +45,30 @@ public class TorqueSpeedDataExporter implements ActionListener
 
       this.rootClassForDirectory = rootClassForDirectory;
    }
-   
+
    public void setRootDirectory(String rootDirectory)
    {
-      this.rootDirectoryOverride = rootDirectory;
+      this.rootDirectoryOverride.add(rootDirectory);
    }
 
    @Override
    public void actionPerformed(ActionEvent e)
    {
-      File rootDirectory;
+      File rootDirectory = null;
 
-      if (rootDirectoryOverride != null)
+      if (!rootDirectoryOverride.isEmpty())
       {
-         rootDirectory = new File(rootDirectoryOverride);
+         // Find the first valid root directory, or the last if none of them exist yet:
+         for (String rootDirectoryToTry : rootDirectoryOverride)
+         {
+            {
+               rootDirectory = new File(rootDirectoryToTry);
+               if (rootDirectory.exists())
+               {
+                  break;
+               }
+            }
+         }
       }
       else
       {
@@ -96,8 +107,8 @@ public class TorqueSpeedDataExporter implements ActionListener
 
       if (!optionsPanel.isCancelled())
       {
-         if (optionsPanel.saveData() || optionsPanel.saveMatlabData() || optionsPanel.createSpreadSheet() || optionsPanel.createGraphsJPG() || optionsPanel.createGraphsPDF()
-                 || optionsPanel.createVideo() || optionsPanel.tagCode())
+         if (optionsPanel.saveData() || optionsPanel.saveMatlabData() || optionsPanel.createSpreadSheet() || optionsPanel.createGraphsJPG()
+               || optionsPanel.createGraphsPDF() || optionsPanel.createVideo() || optionsPanel.tagCode())
          {
             tagName = optionsPanel.tagName();
             System.out.println("Saving data using tag: " + tagName);
@@ -123,7 +134,7 @@ public class TorqueSpeedDataExporter implements ActionListener
                saveDataFile(dataAndVideosTagDirectory, tagName);
                System.out.println("Done Saving Data");
             }
-            
+
             if (optionsPanel.saveMatlabData())
             {
                System.out.println("Saving data in Matlab format");
@@ -132,7 +143,7 @@ public class TorqueSpeedDataExporter implements ActionListener
                   saveMatlabDataFile(dataAndVideosTagDirectory, tagName);
                   System.out.println("Done Saving Data in Matlab format");
                }
-               catch(OutOfMemoryError exception)
+               catch (OutOfMemoryError exception)
                {
                   System.err.println("Ran out of memory while saving to Matlab format. Try again with fewer points.");
                   exception.printStackTrace();
@@ -184,6 +195,7 @@ public class TorqueSpeedDataExporter implements ActionListener
 
    /**
     * Create video from current viewport using the file path and file header
+    * 
     * @param dataAndVideosTagDirectory
     * @param fileHeader
     */

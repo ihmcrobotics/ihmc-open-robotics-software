@@ -50,7 +50,8 @@ bool plan_body_path
 # Field default value True
 bool perform_a_star_search
 
-# Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+# Requested body path waypoints in world-frame. If non-empty, planner will follow this path and will not plan a body path
+# The robot will walk with the orientation of waypoint N between points N and N+1
 geometry_msgs/Pose[] body_path_waypoints
 
 # (In beta) acceptable xy distance from the given goal for the planner to terminate
@@ -60,10 +61,6 @@ float64 goal_distance_proximity
 # (In beta) acceptable yaw offset from the given goal for the planner to terminate
 # Field default value -1.0
 float64 goal_yaw_proximity
-
-# Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
-# The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-float64 requested_path_heading
 
 # Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
 # Field default value 5.0

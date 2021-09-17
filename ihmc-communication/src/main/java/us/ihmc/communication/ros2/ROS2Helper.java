@@ -10,7 +10,6 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * Supports:
@@ -69,6 +68,14 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public <T> void publish(ROS2Topic<T> topic, T message)
    {
       ros2PublisherMap.publish(topic, message);
+   }
+
+   @Override
+   public void publish(ROS2Topic<std_msgs.msg.dds.String> topic, String message)
+   {
+      std_msgs.msg.dds.String stringMessage = new std_msgs.msg.dds.String();
+      stringMessage.setData(message);
+      ros2PublisherMap.publish(topic, stringMessage);
    }
 
    @Override

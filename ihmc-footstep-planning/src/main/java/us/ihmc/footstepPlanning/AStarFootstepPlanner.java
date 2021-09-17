@@ -90,7 +90,7 @@ public class AStarFootstepPlanner
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, registry);
       this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, idealStepCalculator, footPolygons);
 
-      this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(snapper, footstepPlannerParameters, bodyPathPlanHolder, registry);
+      this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(footstepPlannerParameters, bodyPathPlanHolder, registry);
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, distanceAndYawHeuristics::compute, footPolygons, registry);
 
       this.iterationConductor = new AStarFootstepPlannerIterationConductor(expansion, checker, stepCostCalculator, distanceAndYawHeuristics::compute);
@@ -168,8 +168,8 @@ public class AStarFootstepPlanner
       FootstepGraphNode startNode = createStartNode(request);
       addFootPosesToSnapper(request);
       iterationConductor.initialize(startNode);
-      distanceAndYawHeuristics.initialize(goalMidFootPose, request.getDesiredHeading());
-      idealStepCalculator.initialize(goalSteps, request.getDesiredHeading());
+      distanceAndYawHeuristics.initialize(goalMidFootPose);
+      idealStepCalculator.initialize(goalSteps);
       completionChecker.initialize(startNode, goalSteps, request.getGoalDistanceProximity(), request.getGoalYawProximity());
       expansion.initialize();
       snapper.initialize();

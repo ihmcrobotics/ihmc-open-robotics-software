@@ -1,9 +1,10 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import org.ejml.data.DMatrixRMaj;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCParameters;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis3D;
@@ -11,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
@@ -33,10 +35,11 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.Co
  */
 public class LinearMPCTrajectoryHandler
 {
+   private static final boolean debug = true;
    private final CoMTrajectoryPlanner positionInitializationCalculator;
 
-   protected final RecyclingArrayList<ContactPlaneProvider> planningWindowForSolution = new RecyclingArrayList<>(ContactPlaneProvider::new);
-   private final RecyclingArrayList<ContactPlaneProvider> fullContactSet = new RecyclingArrayList<>(ContactPlaneProvider::new);
+   protected final RecyclingArrayList<PreviewWindowSegment> planningWindowForSolution = new RecyclingArrayList<>(PreviewWindowSegment::new);
+   private final RecyclingArrayList<PreviewWindowSegment> fullContactSet = new RecyclingArrayList<>(PreviewWindowSegment::new);
 
    private final LinearMPCIndexHandler indexHandler;
    private final double gravityZ;
@@ -61,7 +64,15 @@ public class LinearMPCTrajectoryHandler
       this.gravityZ = Math.abs(gravityZ);
 
       positionInitializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
+      positionInitializationCalculator.setComContinuityCalculator(new CoMContinuousContinuityCalculator(gravityZ, nominalCoMHeight, registry));
+      positionInitializationCalculator.setMaintainInitialCoMVelocityContinuity(true);
+
       comTrajectory = new MultipleCoMSegmentTrajectoryGenerator("desiredCoMTrajectory", registry);
+   }
+
+   public void setMaintainContinuity(boolean maintainContinuity)
+   {
+      positionInitializationCalculator.setMaintainInitialCoMVelocityContinuity(maintainContinuity);
    }
 
    /**
@@ -136,7 +147,7 @@ public class LinearMPCTrajectoryHandler
     * @param omega time constant for the motion function
     */
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
-                                               List<ContactPlaneProvider> planningWindow,
+                                               List<PreviewWindowSegment> planningWindow,
                                                List<? extends List<MPCContactPlane>> contactPlanes,
                                                List<ContactPlaneProvider> fullContactSequence,
                                                double omega)
@@ -164,7 +175,7 @@ public class LinearMPCTrajectoryHandler
       int startRow = 0;
       for (int i = 0; i < planningWindow.size(); i++)
       {
-         TimeIntervalReadOnly timeInterval = planningWindow.get(i).getTimeInterval();
+         TimeIntervalReadOnly timeInterval = planningWindow.get(i);
 
          fullContactSet.add().set(fullContactSequence.get(i));
          comTrajectory.appendSegment(timeInterval, omega, coefficientArray, startRow);
@@ -185,12 +196,30 @@ public class LinearMPCTrajectoryHandler
          startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
       }
 
+
       overwriteTrajectoryOutsidePreviewWindow(omega);
       overwriteContactsOutsidePreviewWindow(fullContactSequence);
 
+      if (debug)
+      {
+         double epsilon = 1e-8;
+         for (int i = 0; i < comTrajectory.getCurrentNumberOfSegments() - 1; i++)
+         {
+            CoMTrajectorySegment currentSegment = comTrajectory.getSegment(i);
+            CoMTrajectorySegment nextSegment = comTrajectory.getSegment(i + 1);
+            currentSegment.compute(currentSegment.getTimeInterval().getDuration() - epsilon);
+            nextSegment.compute(epsilon);
+
+            if (!currentSegment.getPosition().epsilonEquals(nextSegment.getPosition(), 1e-4) && (i < planningWindow.size() - 1 || (MPCParameters.includeFinalCoMPositionObjective && MPCParameters.finalCoMPositionConstraintType == ConstraintType.EQUALITY)))
+               LogTools.error("C0 Discontinuous CoM trajectory. Position jumps from " + currentSegment.getPosition() + " to " + nextSegment.getPosition() + " at junction " + i);
+            if (!currentSegment.getVelocity().epsilonEquals(nextSegment.getVelocity(), 1e-4) && i < planningWindow.size() - 1)
+               LogTools.error("C1 Discontinuous CoM trajectory. Velocity jumps from " + currentSegment.getVelocity() + " to " + nextSegment.getVelocity() + " at junction " + i);
+         }
+      }
+
       hasTrajectory = true;
 
-      if (vrpTrajectories.size() != fullContactSet.size())
+      if (debug && vrpTrajectories.size() != fullContactSet.size())
          throw new RuntimeException("Somehow these didn't match up.");
    }
 
@@ -198,7 +227,7 @@ public class LinearMPCTrajectoryHandler
    {
       if (planningWindowForSolution.size() > 0 && fullContactSet.size() > 0)
       {
-         while (fullContactSet.getLast().getTimeInterval().getEndTime() > planningWindowForSolution.getLast().getTimeInterval().getEndTime())
+         while (fullContactSet.getLast().getEndTime() > planningWindowForSolution.getLast().getEndTime())
          {
             int lastIndx = fullContactSet.size() - 1;
             fullContactSet.remove(lastIndx);
@@ -218,7 +247,7 @@ public class LinearMPCTrajectoryHandler
       if (existingEndTime >= comTrajectoryOutsideWindow.getEndTime())
          return;
 
-      int segmentIndexToAdd = getSegmentIndexContainingTime(existingEndTime + 1e-5, positionInitializationCalculator.getCoMTrajectory().getSegments());
+      int segmentIndexToAdd = getPhaseIndexContainingTime(existingEndTime + 1e-5, positionInitializationCalculator.getCoMTrajectory().getSegments());
       if (segmentIndexToAdd == -1)
          return;
 
@@ -266,28 +295,28 @@ public class LinearMPCTrajectoryHandler
    private void overwriteContactsOutsidePreviewWindow(List<ContactPlaneProvider> contactsToUse)
    {
       boolean hasContactsAlready = fullContactSet.size() > 0;
-      double existingEndTime = hasContactsAlready ? fullContactSet.getLast().getTimeInterval().getEndTime() : 0.0;
+      double existingEndTime = hasContactsAlready ? fullContactSet.getLast().getEndTime() : 0.0;
 
       if (hasContactsAlready && existingEndTime >= contactsToUse.get(contactsToUse.size() - 1).getTimeInterval().getEndTime())
          return;
 
-      int segmentIndexToAdd = getSegmentIndexContainingTime(existingEndTime + 1e-5, contactsToUse);
+      int segmentIndexToAdd = getPhaseIndexContainingTime(existingEndTime + 1e-5, contactsToUse);
       if (segmentIndexToAdd == -1)
          return;
 
       ContactPlaneProvider nextContact = contactsToUse.get(segmentIndexToAdd);
-      ContactPlaneProvider lastContactOfPreview = hasContactsAlready ? fullContactSet.get(fullContactSet.size() - 1) : null;
+      PreviewWindowSegment lastContactOfPreview = hasContactsAlready ? fullContactSet.get(fullContactSet.size() - 1) : null;
 
       // end of the preview starts perfectly with the next segment
-      if (lastContactOfPreview == null || TimeIntervalTools.areTimeIntervalsConsecutive(lastContactOfPreview, nextContact))
+      if (lastContactOfPreview == null || TimeIntervalTools.areTimeIntervalsConsecutive(lastContactOfPreview, nextContact.getTimeInterval(), 1e-2))
       {
          fullContactSet.add().set(nextContact);
       }
       else
       { // end of the preview is in one of the next segments, so we need to prune it.
-         ContactPlaneProvider contactPlaneToAppend = fullContactSet.add();
+         PreviewWindowSegment contactPlaneToAppend = fullContactSet.add();
          contactPlaneToAppend.set(nextContact);
-         contactSegmentHelper.cropInitialSegmentLength(contactPlaneToAppend, lastContactOfPreview.getTimeInterval().getEndTime());
+         contactSegmentHelper.cropInitialSegmentLength(contactPlaneToAppend, lastContactOfPreview.getEndTime());
       }
 
       segmentIndexToAdd++;
@@ -295,12 +324,24 @@ public class LinearMPCTrajectoryHandler
          fullContactSet.add().set(contactsToUse.get(segmentIndexToAdd));
    }
 
-   private static int getSegmentIndexContainingTime(double time, List<? extends TimeIntervalProvider> segments)
+   private static int getPhaseIndexContainingTime(double time, List<? extends TimeIntervalProvider> segments)
    {
       for (int i = 0; i < segments.size(); i++)
       {
-         TimeIntervalProvider segment = segments.get(i);
-         if (segment.getTimeInterval().intervalContains(time))
+         TimeIntervalReadOnly segment = segments.get(i).getTimeInterval();
+         if (segment.intervalContains(time))
+            return i;
+      }
+
+      return -1;
+   }
+
+   private static int getSegmentIndexContainingTime(double time, List<? extends TimeIntervalReadOnly> segments)
+   {
+      for (int i = 0; i < segments.size(); i++)
+      {
+         TimeIntervalReadOnly segment = segments.get(i);
+         if (segment.intervalContains(time))
             return i;
       }
 
@@ -339,7 +380,7 @@ public class LinearMPCTrajectoryHandler
 
    public void removeCompletedSegments(double timeToCrop)
    {
-      throw new NotImplementedException();
+      throw new RuntimeException("Not implemented.");
       /*
       while (comTrajectory.getCurrentNumberOfSegments() > 0 && comTrajectory.getSegment(0).getTimeInterval().getEndTime() <= timeToCrop)
          comTrajectory.removeSegment(0);
@@ -366,12 +407,12 @@ public class LinearMPCTrajectoryHandler
       return vrpTrajectories;
    }
 
-   public List<ContactPlaneProvider> getFullPlanningSequence()
+   public List<PreviewWindowSegment> getFullPlanningSequence()
    {
       return fullContactSet;
    }
 
-   public List<ContactPlaneProvider> getPlanningWindowForSolution()
+   public List<PreviewWindowSegment> getPlanningWindowForSolution()
    {
       return planningWindowForSolution;
    }

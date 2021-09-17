@@ -1,9 +1,11 @@
 package us.ihmc.gdx.ui.graphics;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.GDXGraphics3DNode;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
@@ -13,11 +15,13 @@ import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements RenderableProvider
 {
    private GDXGraphics3DNode robotRootNode;
    private GraphicsRobot graphicsRobot;
-   private Activator robotLoadedActivator = new Activator();
+   private final Activator robotLoadedActivator = new Activator();
 
    public GDXRobotModelGraphic(String title)
    {
@@ -26,22 +30,45 @@ public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements Renderab
 
    public void loadRobotModelAndGraphics(RobotDescription robotDescription, RigidBodyBasics rootBody)
    {
+      loadRobotModelAndGraphics(robotDescription, rootBody, new Object());
+   }
+
+   // syncObject is so that robots can be loaded in parallel but also with different default textures
+   // This sucks and SDFGraphics3DObject.DEFAULT_APPEARANCE is a terrible design
+   public void loadRobotModelAndGraphics(RobotDescription robotDescription, RigidBodyBasics rootBody, Object syncObject)
+   {
       if (robotRootNode != null)
          robotRootNode.destroy();
 
-      graphicsRobot = new GraphicsIDRobot(robotDescription.getName(), rootBody, robotDescription);
-      robotRootNode = new GDXGraphics3DNode(graphicsRobot.getRootNode());
-      //      robotRootNode.setMouseTransparent(true);
-      addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode);
-      robotRootNode.update();
-      robotLoadedActivator.activate();
+      ThreadTools.startAsDaemon(() ->
+      {
+         synchronized (syncObject)
+         {
+            graphicsRobot = new GraphicsIDRobot(robotDescription.getName(), rootBody, robotDescription);
+            robotRootNode = new GDXGraphics3DNode(graphicsRobot.getRootNode());
+            //      robotRootNode.setMouseTransparent(true);
+            addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode);
+            robotRootNode.update();
+            robotLoadedActivator.activate();
+         }
+      }, "RobotModelLoader");
    }
 
    private void addNodesRecursively(Graphics3DNode graphics3DNode, GDXGraphics3DNode parentNode)
    {
-      GDXGraphics3DNode node = new GDXGraphics3DNode(graphics3DNode);
-      parentNode.addChild(node);
-      graphics3DNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node));
+      AtomicReference<GDXGraphics3DNode> node = new AtomicReference<>();
+      Gdx.app.postRunnable(() ->
+      {
+         node.set(new GDXGraphics3DNode(graphics3DNode));
+      });
+
+      while (node.get() == null)
+      {
+         ThreadTools.sleep(100);
+      }
+
+      parentNode.addChild(node.get());
+      graphics3DNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node.get()));
    }
 
    @Override
