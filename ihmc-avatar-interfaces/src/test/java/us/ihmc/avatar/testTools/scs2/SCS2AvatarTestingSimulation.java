@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -68,8 +67,9 @@ public class SCS2AvatarTestingSimulation
 
    public void start()
    {
-      if (Platform.isImplicitExit())
-         Platform.setImplicitExit(false);
+      // Necessary to be able to restart the GUI during a series of tests.
+      avatarSimulation.setSystemExitOnDestroy(false);
+      avatarSimulation.setJavaFXThreadImplicitExit(false);
 
       avatarSimulation.start();
       sessionVisualizerControls = avatarSimulation.getSessionVisualizerControls();
@@ -166,7 +166,7 @@ public class SCS2AvatarTestingSimulation
       if (sessionVisualizerControls != null)
          sessionVisualizerControls.addYoGraphic(yoGraphicDefinition);
    }
-   
+
    public void addYoGraphicDefinition(String namespace, YoGraphicDefinition yoGraphicDefinition)
    {
       if (sessionVisualizerControls != null)

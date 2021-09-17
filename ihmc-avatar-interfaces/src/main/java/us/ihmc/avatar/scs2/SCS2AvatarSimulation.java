@@ -38,6 +38,8 @@ public class SCS2AvatarSimulation
    private boolean automaticallyStartSimulation;
    private RealtimeROS2Node realtimeROS2Node;
 
+   private boolean systemExitOnDestroy = true;
+   private boolean javaFXThreadImplicitExit = true;
    private SessionVisualizerControls sessionVisualizerControls;
 
    private boolean hasBeenDestroyed = false;
@@ -57,7 +59,7 @@ public class SCS2AvatarSimulation
 
       if (showGUI)
       {
-         sessionVisualizerControls = SessionVisualizer.startSessionVisualizer(simulationSession);
+         sessionVisualizerControls = SessionVisualizer.startSessionVisualizer(simulationSession, javaFXThreadImplicitExit);
          sessionVisualizerControls.addVisualizerShutdownListener(this::destroy);
       }
       if (automaticallyStartSimulation)
@@ -99,6 +101,12 @@ public class SCS2AvatarSimulation
          simulationSession.shutdownSession();
          simulationSession = null;
       }
+
+      if (systemExitOnDestroy)
+      {
+         // TODO Remove this when pub-sub is released with the IntraProcessDomainImpl threads setup as daemon.
+         System.exit(0);
+      }
    }
 
    public boolean hasBeenDestroyed()
@@ -119,6 +127,16 @@ public class SCS2AvatarSimulation
    public FullHumanoidRobotModel getControllerFullRobotModel()
    {
       return controllerFullRobotModel;
+   }
+
+   public void setSystemExitOnDestroy(boolean systemExitOnDestroy)
+   {
+      this.systemExitOnDestroy = systemExitOnDestroy;
+   }
+
+   public void setJavaFXThreadImplicitExit(boolean javaFXThreadImplicitExit)
+   {
+      this.javaFXThreadImplicitExit = javaFXThreadImplicitExit;
    }
 
    /**
