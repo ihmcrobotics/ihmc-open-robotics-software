@@ -907,12 +907,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
 
       currentPose = new FramePose3D(foot.getBodyFixedFrame());
       currentPose.changeFrame(worldFrame);
-      EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
-            + currentPose.getPosition().distance(controllerDesiredPose.getPosition()) + ", orientation: "
-            + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
-                                                              controllerDesiredPose,
-                                                              currentPose,
-                                                              1.0e-3);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(controllerDesiredPose.getPosition(), currentPose.getPosition(), 1.0e-2);
+      EuclidCoreTestTools.assertQuaternionGeometricallyEquals(controllerDesiredPose.getOrientation(), currentPose.getOrientation(), 2.0e-2);
    }
 
    //Creates a trajectory for the foot, depending on the number of iterations, it looks like a ribbon or a sphere
