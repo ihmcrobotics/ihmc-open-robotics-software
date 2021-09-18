@@ -32,7 +32,9 @@ public enum HighLevelControllerName
    @RosEnumValueDocumentation(documentation = "State for recovering from a fall.")
    FALLING_STATE,
    @RosEnumValueDocumentation(documentation = "whole body force control employing IHMC push recovery algorithms")
-   PUSH_RECOVERY;
+   PUSH_RECOVERY,
+   @RosEnumValueDocumentation(documentation = "State for controlling Atlas with remotly from another programming language")
+   REMOTE;
 
 
    public static final HighLevelControllerName[] values = values();
@@ -53,6 +55,7 @@ public enum HighLevelControllerName
       name.put(CUSTOM1, "UNDEFINED");
       name.put(FALLING_STATE, "FALLING_STATE");
       name.put(PUSH_RECOVERY, "PUSH_RECOVERY");
+      name.put(REMOTE, "REMOTE");
    }
 
    public static void setName(HighLevelControllerName state, String newName)

@@ -327,6 +327,14 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerFactoriesMap.put(HighLevelControllerName.DO_NOTHING_BEHAVIOR, controllerStateFactory);
    }
 
+   public void useRemoteControlState()
+   {
+      RemoteControllerStateFactory controllerStateFactory = new RemoteControllerStateFactory();
+
+      controllerStateFactories.add(controllerStateFactory);
+      controllerFactoriesMap.put(HighLevelControllerName.REMOTE, controllerStateFactory);
+   }
+
    public void useDefaultStandPrepControlState()
    {
       StandPrepControllerStateFactory controllerStateFactory = new StandPrepControllerStateFactory();
