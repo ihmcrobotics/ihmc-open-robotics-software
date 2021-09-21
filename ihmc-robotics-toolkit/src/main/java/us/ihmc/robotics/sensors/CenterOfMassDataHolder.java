@@ -57,7 +57,7 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    }
 
    @Override
-   public FramePoint3DReadOnly getCenterOfMassPosition()
+   public FixedFramePoint3DBasics getCenterOfMassPosition()
    {
       return centerOfMassPosition;
    }
@@ -69,9 +69,35 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    }
 
    @Override
-   public FrameVector3DReadOnly getCenterOfMassVelocity()
+   public FixedFrameVector3DBasics getCenterOfMassVelocity()
    {
       return centerOfMassVelocity;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof CenterOfMassDataHolder)
+      {
+         CenterOfMassDataHolder other = (CenterOfMassDataHolder) object;
+         if (hasPosition != other.hasPosition)
+            return false;
+         if (hasVelocity != other.hasVelocity)
+            return false;
+         if (!centerOfMassPosition.equals(other.centerOfMassPosition))
+            return false;
+         if (!centerOfMassVelocity.equals(other.centerOfMassVelocity))
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    public void calculateChecksum(GenericCRC32 checksum)

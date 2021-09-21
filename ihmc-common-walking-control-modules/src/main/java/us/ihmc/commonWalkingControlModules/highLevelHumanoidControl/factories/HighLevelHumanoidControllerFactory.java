@@ -49,6 +49,7 @@ import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -159,7 +160,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       this.footSensorNames = footForceSensorNames;
       this.footContactSensorNames = footContactSensorNames;
       this.wristSensorNames = wristSensorNames;
-
 
       commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
       try
@@ -369,7 +369,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerFactoriesMap.put(HighLevelControllerName.PUSH_RECOVERY, controllerStateFactory);
    }
 
-
    public void useDefaultExitWalkingTransitionControlState(HighLevelControllerName targetState)
    {
       HighLevelControllerStateFactory controllerStateFactory = new ExitWalkingTransitionControllerStateFactory(targetState);
@@ -465,6 +464,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                         YoGraphicsListRegistry yoGraphicsListRegistry,
                                         HumanoidRobotSensorInformation sensorInformation,
                                         ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                        CenterOfMassDataHolderReadOnly centerOfPressureDataHolderForController,
                                         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                         JointDesiredOutputListBasics lowLevelControllerOutput,
                                         JointBasics... jointsToIgnore)
