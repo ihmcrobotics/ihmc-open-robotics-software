@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.l_footWorkspaceLimiterControlModule.l_footIsSwingSingularityAvoidanceUsedOnHeight</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.RemoteControllerState.desiredPositionsl_leg_kny,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.RemoteControllerState.desiredPositionsr_leg_kny,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.RemoteControllerState.desiredPositionsl_leg_aky,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.RemoteControllerState.desiredPositionsr_leg_aky</Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSwingDesiredPositionX</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.RemoteControllerState.positionError_pdControllerJointl_leg_aky,root.atlas.q_l_leg_aky</Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSwingDesiredPositionY</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerToolbox.CommonHumanoidReferenceFramesVisualizer.centerOfMassX</Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.PushRecoveryControllerState.PushRecoveryHighLevelHumanoidController.pushRecoveryCurrentState</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.RemoteControllerState.positionError_pdControllerJointl_leg_kny,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.RemoteControllerState.positionError_pdControllerJointl_leg_hpy</Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -60,24 +60,8 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-</GraphGroup>
-<Entry Boxes Tab Pane>
-</Entry Boxes Tab Pane>
-
-<Number of ViewPorts>1</Number of ViewPorts>
- <Main Viewport> 
-<Visible> true</Visible>
-</Main Viewport>
-
-<Graph Array Window Size>1</Graph Array Window Size>
-<Graph Array Window1>
-<ScreenID>2</ScreenID>
-<WindowLocation>3907.0, 0.0</WindowLocation>
-<WindowSize>1853.0, 1200.0</WindowSize>
-<GraphGroup>
-	<Cols>3</Cols>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerToolbox.AngularMomentumX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.desiredAngularMomentumX</Variables>
+		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.RemoteControllerState.rateError_pdControllerJointl_leg_kny,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.RemoteControllerState.rateError_pdControllerJointl_leg_hpy</Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -88,140 +72,23 @@
 			<MinScaling>0.0</MinScaling>
 		</GraphConfig>
 	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerToolbox.AngularMomentumY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.desiredAngularMomentumY</Variables>
-		<GraphConfiguration>
-			<Name>config7</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerToolbox.AngularMomentumZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.desiredAngularMomentumZ</Variables>
-		<GraphConfiguration>
-			<Name>config8</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.desiredAngularMomentumRateX</Variables>
-		<GraphConfiguration>
-			<Name>config9</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.desiredAngularMomentumRateY</Variables>
-		<GraphConfiguration>
-			<Name>config10</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.desiredAngularMomentumRateZ</Variables>
-		<GraphConfiguration>
-			<Name>config11</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSwingDesiredSolePositionInWorldX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.predictedLeftFootPositionX</Variables>
-		<GraphConfiguration>
-			<Name>config12</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSwingDesiredSolePositionInWorldY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.predictedLeftFootPositionY</Variables>
-		<GraphConfiguration>
-			<Name>config13</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSwingDesiredSolePositionInWorldZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.predictedLeftFootPositionZ</Variables>
-		<GraphConfiguration>
-			<Name>config14</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSwingDesiredSoleLinearVelocityInWorldX,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.predictedLeftFootVelocityX</Variables>
-		<GraphConfiguration>
-			<Name>config15</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSwingDesiredSoleLinearVelocityInWorldY,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.predictedLeftFootVelocityY</Variables>
-		<GraphConfiguration>
-			<Name>config16</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
-	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSwingDesiredSoleLinearVelocityInWorldZ,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.BalanceManager.AngularMomentumHandler.ThreePotatoAngularMomentumCalculator.predictedLeftFootVelocityZ</Variables>
-		<GraphConfiguration>
-			<Name>config17</Name>
-			<ScalingMethod>1</ScalingMethod>
-			<PlotType>100</PlotType>
-			<ShowBaseLines>true</ShowBaseLines>
-			<BaseLines>0.0,</BaseLines>
-			<MaxScaling>1.0</MaxScaling>
-			<MinScaling>0.0</MinScaling>
-		</GraphConfig>
-	</Graph>
 </GraphGroup>
-</Graph Array Window1>
+<Entry Boxes Tab Pane>
+<EntryBoxTab>
+<Title>
+Tab0
+</Title>
+<Entry Boxes></Entry Boxes>
+</EntryBoxTab>
+</Entry Boxes Tab Pane>
+
+<Number of ViewPorts>1</Number of ViewPorts>
+ <Main Viewport> 
+<Visible> true</Visible>
+</Main Viewport>
+
+<Graph Array Window Size>0</Graph Array Window Size>
+
 
 <Extra Panels>
 <Main Viewport>
@@ -230,10 +97,10 @@ null,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>-8.6</Camera X>
- <Camera Y>-4.47</Camera Y>
- <Camera Z>0.58</Camera Z>
- <Dolly data>
+ <Camera X>6.0</Camera X>
+ <Camera Y>-2.0</Camera Y>
+ <Camera Z>4.5</Camera Z>
+ <Dolly data> 
  <Position X>2.0</Position X>
  <Position Y>12.0</Position Y>
  <Position Z>0.0</Position Z>
@@ -256,8 +123,8 @@ null,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>-4.68</Fix X>
-<Fix Y>-7.8</Fix Y>
-<Fix Z>0.55</Fix Z>
+<Fix X>-0.44</Fix X>
+<Fix Y>-0.17</Fix Y>
+<Fix Z>0.75</Fix Z>
 </Fix Position>
 </Canvas 1>

@@ -14,7 +14,9 @@ public class RemoteControllerStateFactory implements HighLevelControllerStateFac
    {
       if (remoteControllerState == null)
       {
-         remoteControllerState = new RemoteControllerState(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints(),
+         remoteControllerState = new RemoteControllerState(
+                 controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getControlledOneDoFJoints(),
+                 controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                  controllerFactoryHelper.getHighLevelControllerParameters());
       }
 
