@@ -41,6 +41,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
    public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
    private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
+   private static final boolean ESTIMATE_COM_STATE = false;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -52,6 +53,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final JointStateUpdater jointStateUpdater;
    private final PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
+   private final MomentumStateUpdater momentumStateUpdater;
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
@@ -191,6 +193,21 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                               yoGraphicsListRegistry,
                                                               registry);
 
+      if (ESTIMATE_COM_STATE)
+      {
+         momentumStateUpdater = new SimpleMomentumStateUpdater(rootJoint,
+                                                               gravitationalAcceleration,
+                                                               stateEstimatorParameters,
+                                                               footSwitches,
+                                                               estimatorCenterOfMassDataHolderToUpdate,
+                                                               yoGraphicsListRegistry);
+         registry.addChild(momentumStateUpdater.getRegistry());
+      }
+      else
+      {
+         momentumStateUpdater = null;
+      }
+
       if (yoGraphicsListRegistry != null)
       {
          copVisualizer = new CenterOfPressureVisualizer(footSwitches, yoGraphicsListRegistry, registry);
@@ -275,6 +292,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       }
       pelvisLinearStateUpdater.initialize();
 
+      if (momentumStateUpdater != null)
+         momentumStateUpdater.initialize();
+
       imuBiasStateEstimator.initialize();
       imuYawDriftEstimator.initialize();
    }
@@ -318,6 +338,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             pelvisLinearStateUpdater.updateRootJointPositionAndLinearVelocity();
             break;
       }
+
+      if (momentumStateUpdater != null)
+         momentumStateUpdater.update();
 
       yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
 
