@@ -26,6 +26,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -73,6 +74,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final ForceSensorDataHolderReadOnly forceSensorDataHolderForController;
+   private final CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController;
    private final CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator;
 
    private final ThreadDataSynchronizerInterface threadDataSynchronizer;
@@ -112,23 +114,30 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
    private final HumanoidRobotContextJointData proccessedJointData = new HumanoidRobotContextJointData();
 
-   public DRCControllerThread(String robotName, WholeBodyControllerParameters<RobotSide> robotModel, HumanoidRobotSensorInformation sensorInformation,
-                              HighLevelHumanoidControllerFactory controllerFactory, ThreadDataSynchronizerInterface threadDataSynchronizer,
-                              DRCOutputProcessor outputProcessor, RealtimeROS2Node realtimeROS2Node, RobotVisualizer robotVisualizer, double gravity,
+   public DRCControllerThread(String robotName,
+                              WholeBodyControllerParameters<RobotSide> robotModel,
+                              HumanoidRobotSensorInformation sensorInformation,
+                              HighLevelHumanoidControllerFactory controllerFactory,
+                              ThreadDataSynchronizerInterface threadDataSynchronizer,
+                              DRCOutputProcessor outputProcessor,
+                              RealtimeROS2Node realtimeROS2Node,
+                              RobotVisualizer robotVisualizer,
+                              double gravity,
                               double estimatorDT)
    {
       this.threadDataSynchronizer = threadDataSynchronizer;
       this.outputProcessor = outputProcessor;
       this.robotVisualizer = robotVisualizer;
-      this.controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
-      this.estimatorDTInNS = Conversions.secondsToNanoseconds(estimatorDT);
-      this.estimatorTicksPerControlTick = this.controlDTInNS / this.estimatorDTInNS;
-      this.controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
-      this.rootFrame = this.controllerFullRobotModel.getRootJoint().getFrameAfterJoint();
+      controlDTInNS = Conversions.secondsToNanoseconds(robotModel.getControllerDT());
+      estimatorDTInNS = Conversions.secondsToNanoseconds(estimatorDT);
+      estimatorTicksPerControlTick = controlDTInNS / estimatorDTInNS;
+      controllerFullRobotModel = threadDataSynchronizer.getControllerFullRobotModel();
+      rootFrame = controllerFullRobotModel.getRootJoint().getFrameAfterJoint();
 
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerFactory);
 
-      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, ControllerCrashNotificationPacket.class,
+      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
+                                                                      ControllerCrashNotificationPacket.class,
                                                                       ROS2Tools.getControllerOutputTopic(robotName));
 
       if (ALLOW_MODEL_CORRUPTION)
@@ -141,13 +150,23 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       }
 
       forceSensorDataHolderForController = threadDataSynchronizer.getControllerForceSensorDataHolder();
+      centerOfMassDataHolderForController = threadDataSynchronizer.getControllerCenterOfMassDataHolder();
       centerOfPressureDataHolderForEstimator = threadDataSynchronizer.getControllerCenterOfPressureDataHolder();
 
       JointBasics[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
 
-      robotController = createHighLevelController(controllerFullRobotModel, controllerFactory, controllerTime, robotModel.getControllerDT(), gravity,
-                                                  forceSensorDataHolderForController, centerOfPressureDataHolderForEstimator, sensorInformation,
-                                                  threadDataSynchronizer.getControllerDesiredJointDataHolder(), yoGraphicsListRegistry, registry,
+      robotController = createHighLevelController(controllerFullRobotModel,
+                                                  controllerFactory,
+                                                  controllerTime,
+                                                  robotModel.getControllerDT(),
+                                                  gravity,
+                                                  forceSensorDataHolderForController,
+                                                  centerOfMassDataHolderForController,
+                                                  centerOfPressureDataHolderForEstimator,
+                                                  sensorInformation,
+                                                  threadDataSynchronizer.getControllerDesiredJointDataHolder(),
+                                                  yoGraphicsListRegistry,
+                                                  registry,
                                                   arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, threadDataSynchronizer.getControllerRobotMotionStatusHolder());
@@ -178,8 +197,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
    }
 
    public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel,
-                                                                   WholeBodyControllerParameters<RobotSide> robotModel,
-                                                                   HumanoidRobotSensorInformation sensorInformation)
+                                                          WholeBodyControllerParameters<RobotSide> robotModel,
+                                                          HumanoidRobotSensorInformation sensorInformation)
    {
       ArrayList<JointBasics> listOfJointsToIgnore = new ArrayList<>();
 
@@ -221,20 +240,28 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       return fullRobotModelCorruptor;
    }
 
-   private ModularRobotController createHighLevelController(FullHumanoidRobotModel controllerModel, HighLevelHumanoidControllerFactory controllerFactory,
-                                                            YoDouble yoTime, double controlDT, double gravity,
+   private ModularRobotController createHighLevelController(FullHumanoidRobotModel controllerModel,
+                                                            HighLevelHumanoidControllerFactory controllerFactory,
+                                                            YoDouble yoTime,
+                                                            double controlDT,
+                                                            double gravity,
                                                             ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
+                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                            HumanoidRobotSensorInformation sensorInformation, JointDesiredOutputListBasics lowLevelControllerOutput,
-                                                            YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry,
+                                                            HumanoidRobotSensorInformation sensorInformation,
+                                                            JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                            YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                            YoRegistry registry,
                                                             JointBasics... jointsToIgnore)
    {
       if (CREATE_COM_CALIBRATION_TOOL)
       {
          try
          {
-            CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel, forceSensorDataHolderForController,
-                                                                                                      yoGraphicsListRegistry, registry);
+            CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel,
+                                                                                                      forceSensorDataHolderForController,
+                                                                                                      yoGraphicsListRegistry,
+                                                                                                      registry);
             controllerFactory.addUpdatable(centerOfMassCalibrationTool);
          }
          catch (Exception e)
@@ -243,9 +270,17 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
          }
       }
 
-      RobotController robotController = controllerFactory.getController(controllerModel, controlDT, gravity, yoTime, yoGraphicsListRegistry, sensorInformation,
+      RobotController robotController = controllerFactory.getController(controllerModel,
+                                                                        controlDT,
+                                                                        gravity,
+                                                                        yoTime,
+                                                                        yoGraphicsListRegistry,
+                                                                        sensorInformation,
                                                                         forceSensorDataHolderForController,
-                                                                        centerOfPressureDataHolderForEstimator, lowLevelControllerOutput, jointsToIgnore);
+                                                                        centerOfMassDataHolderForController,
+                                                                        centerOfPressureDataHolderForEstimator,
+                                                                        lowLevelControllerOutput,
+                                                                        jointsToIgnore);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.addRobotController(robotController);
