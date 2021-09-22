@@ -17,6 +17,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -52,8 +53,8 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
    private final YoFrameVector3D orientationError;
    private final YoFrameVector3D angularVelocityBias;
 
-   private final YoDouble proportionalGain;
-   private final YoDouble integralGain;
+   private final YoDouble proportionalGain, integralGain;
+   private final DoubleProvider proportionalGainProvider, integralGainProvider;
 
    private final YoDouble zeroAngularVelocityThreshold;
    private final YoDouble zeroLinearAccelerationThreshold;
@@ -104,6 +105,31 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
                             YoFrameVector3D estimatedAngularVelocity,
                             YoRegistry parentRegistry)
    {
+      this(imuName,
+           namePrefix,
+           nameSuffix,
+           updateDT,
+           createYawRateBiasEstimator,
+           sensorFrame,
+           estimatedOrientation,
+           estimatedAngularVelocity,
+           null,
+           null,
+           parentRegistry);
+   }
+
+   public YoIMUMahonyFilter(String imuName,
+                            String namePrefix,
+                            String nameSuffix,
+                            double updateDT,
+                            boolean createYawRateBiasEstimator,
+                            ReferenceFrame sensorFrame,
+                            YoFrameQuaternion estimatedOrientation,
+                            YoFrameVector3D estimatedAngularVelocity,
+                            DoubleProvider proportionalGain,
+                            DoubleProvider integralGain,
+                            YoRegistry parentRegistry)
+   {
       this.updateDT = updateDT;
       this.sensorFrame = sensorFrame;
 
@@ -126,8 +152,27 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       orientationError = new YoFrameVector3D(namePrefix + "OrientationError", nameSuffix, sensorFrame, registry);
       angularVelocityBias = new YoFrameVector3D(namePrefix + "AngularVelocityBias", nameSuffix, sensorFrame, registry);
 
-      proportionalGain = new YoDouble(namePrefix + "ProportionalGain" + nameSuffix, registry);
-      integralGain = new YoDouble(namePrefix + "IntegralGain" + nameSuffix, registry);
+      if (proportionalGain == null)
+      {
+         this.proportionalGain = new YoDouble(namePrefix + "ProportionalGain" + nameSuffix, registry);
+         this.proportionalGainProvider = this.proportionalGain;
+      }
+      else
+      {
+         this.proportionalGain = (proportionalGain instanceof YoDouble) ? (YoDouble) proportionalGain : null;
+         this.proportionalGainProvider = proportionalGain;
+      }
+
+      if (integralGain == null)
+      {
+         this.integralGain = new YoDouble(namePrefix + "IntegralGain" + nameSuffix, registry);
+         this.integralGainProvider = this.integralGain;
+      }
+      else
+      {
+         this.integralGain = (integralGain instanceof YoDouble) ? (YoDouble) integralGain : null;
+         this.integralGainProvider = integralGain;
+      }
 
       zeroLinearAccelerationThreshold = new YoDouble(namePrefix + "ZeroLinearAccelerationThreshold" + nameSuffix, registry);
 
@@ -285,7 +330,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
       if (success)
       {
-         angularVelocityTerm.scaleAdd(proportionalGain.getValue(), orientationError, inputAngularVelocity);
+         angularVelocityTerm.scaleAdd(proportionalGainProvider.getValue(), orientationError, inputAngularVelocity);
 
          boolean hasIntegralTerm = updateIntegralTerm(angularVelocityBias,
                                                       inputMagneticVector != null,
@@ -372,7 +417,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
                                       Vector3DReadOnly linearAcceleration,
                                       Vector3DReadOnly errorTerm)
    {
-      if (!Double.isFinite(integralGain.getValue()) || integralGain.getValue() <= 0.0)
+      if (!Double.isFinite(integralGainProvider.getValue()) || integralGainProvider.getValue() <= 0.0)
       {
          integralTerm.setToZero();
          return false;
@@ -386,7 +431,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       if (zeroLinearAccelerationThreshold.getValue() > 0.0 && a.lengthSquared() > MathTools.square(zeroLinearAccelerationThreshold.getValue()))
          return true;
 
-      integralTerm.scaleAdd(integralGain.getValue() * updateDT, errorTerm, integralTerm);
+      integralTerm.scaleAdd(integralGainProvider.getValue() * updateDT, errorTerm, integralTerm);
 
       if (hasMagneticVector)
          return true;
@@ -417,7 +462,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
          {
             normalPart.setAndScale(normalPartMagnitude, aRef);
             tangentialPart.sub(integralTerm, normalPart);
-            normalPart.scale(1.0 - integralGain.getValue());
+            normalPart.scale(1.0 - integralGainProvider.getValue());
             integralTerm.add(normalPart, tangentialPart);
          }
       }
