@@ -96,6 +96,8 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       this.sensorOutput = sensorOutputMap;
       this.footSwitchList = new ArrayList<>(footSwitches.values());
 
+      rootJoint = inverseDynamicsStructure.getRootJoint();
+
       usePelvisCorrector = new YoBoolean("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
 
@@ -258,7 +260,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          estimatedWrenchVisualizer = null;
       }
 
-      rootJoint = inverseDynamicsStructure.getRootJoint();
       yoRootTwist = new YoFixedFrameTwist("RootTwist",
                                           rootJoint.getFrameAfterJoint(),
                                           rootJoint.getFrameBeforeJoint(),
