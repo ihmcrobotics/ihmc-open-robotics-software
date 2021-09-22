@@ -58,6 +58,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -145,6 +146,7 @@ public class WalkingControllerTest
    private SimulationConstructionSet scs;
    private SideDependentList<TestFootSwitch> updatableFootSwitches;
    private FullHumanoidRobotModel fullRobotModel;
+   private CenterOfMassStateProvider centerOfMassStateProvider;
    private HumanoidReferenceFrames referenceFrames;
    private PerfectSimulatedOutputWriter writer;
    private OneDoFJointBasics[] oneDoFJoints;
@@ -478,6 +480,7 @@ public class WalkingControllerTest
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>(updatableFootSwitches);
 
       HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
+                                                                                                    centerOfMassStateProvider,
                                                                                                     referenceFrames,
                                                                                                     footSwitches,
                                                                                                     null,
@@ -525,6 +528,7 @@ public class WalkingControllerTest
 
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       fullRobotModel = robotModel.createFullRobotModel();
+      centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
