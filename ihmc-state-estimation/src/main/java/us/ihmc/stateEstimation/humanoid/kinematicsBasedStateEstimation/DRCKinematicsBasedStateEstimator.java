@@ -41,7 +41,8 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
    public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
    private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
-   private static final boolean ESTIMATE_COM_STATE = false;
+   private static final boolean ESTIMATE_COM_STATE = true;
+   private static final boolean USED_DISTRIBUTED_IMU_COM_ESTIMATOR = true;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -197,12 +198,25 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
       if (ESTIMATE_COM_STATE)
       {
-         momentumStateUpdater = new SimpleMomentumStateUpdater(rootJoint,
-                                                               gravitationalAcceleration,
-                                                               stateEstimatorParameters,
-                                                               footSwitches,
-                                                               estimatorCenterOfMassDataHolderToUpdate,
-                                                               yoGraphicsListRegistry);
+         if (USED_DISTRIBUTED_IMU_COM_ESTIMATOR)
+         {
+            momentumStateUpdater = new DistributedIMUBasedCenterOfMassStateUpdater(rootJoint,
+                                                                                   sensorOutputMap.getIMUOutputs(),
+                                                                                   estimatorDT,
+                                                                                   cancelGravityFromAccelerationMeasurement,
+                                                                                   gravitationalAcceleration,
+                                                                                   imuBiasStateEstimator,
+                                                                                   estimatorCenterOfMassDataHolderToUpdate);
+         }
+         else
+         {
+            momentumStateUpdater = new SimpleMomentumStateUpdater(rootJoint,
+                                                                  gravitationalAcceleration,
+                                                                  stateEstimatorParameters,
+                                                                  footSwitches,
+                                                                  estimatorCenterOfMassDataHolderToUpdate,
+                                                                  yoGraphicsListRegistry);
+         }
          registry.addChild(momentumStateUpdater.getRegistry());
       }
       else
