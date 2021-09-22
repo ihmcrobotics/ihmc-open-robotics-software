@@ -5,23 +5,29 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoFrameVector3D;
 import us.ihmc.robotics.math.filters.YoIMUMahonyFilter;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -56,16 +62,26 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
    private final FrameVector3D gravityVector = new FrameVector3D();
    private final IMUBiasProvider imuBiasProvider;
 
+   private final YoFramePoint3D estimatedCoMPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
+   private final YoFrameVector3D estimatedCoMVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
+
+   private final CenterOfMassJacobian centerOfMassJacobian;
+   private final YoFramePoint3D rawCoMPosition;
+   private final YoFrameVector3D rawCoMVelocity;
+   private final CenterOfMassDataHolder centerOfMassDataHolder;
+
    public DistributedIMUBasedCenterOfMassStateUpdater(FloatingJointReadOnly rootJoint,
                                                       List<? extends IMUSensorReadOnly> imuSensors,
                                                       double dt,
                                                       BooleanProvider cancelGravityFromAccelerationMeasurement,
                                                       double gravitationalAcceleration,
-                                                      IMUBiasProvider imuBiasProvider)
+                                                      IMUBiasProvider imuBiasProvider,
+                                                      CenterOfMassDataHolder centerOfMassDataHolder)
    {
       this.dt = dt;
       this.cancelGravityFromAccelerationMeasurement = cancelGravityFromAccelerationMeasurement;
       this.imuBiasProvider = imuBiasProvider;
+      this.centerOfMassDataHolder = centerOfMassDataHolder;
 
       linearVelocityKp = new YoDouble("linearVelocityKp", registry);
       linearVelocityKi = new YoDouble("linearVelocityKi", registry);
@@ -100,6 +116,19 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       estimators = new RigidBodyStateEstimator[rootJoint.getSuccessor().subtreeArray().length];
       estimators[0] = rootEstimator;
       buildEstimatorsRecursive(0, rootEstimator, imuSensorMap);
+
+      if (MORE_VARIABLES)
+      {
+         centerOfMassJacobian = new CenterOfMassJacobian(rootJoint.getPredecessor(), worldFrame);
+         rawCoMPosition = new YoFramePoint3D("rawCenterOfMassPosition", worldFrame, registry);
+         rawCoMVelocity = new YoFrameVector3D("rawCenterOfMassVelocity", worldFrame, registry);
+      }
+      else
+      {
+         centerOfMassJacobian = null;
+         rawCoMPosition = null;
+         rawCoMVelocity = null;
+      }
    }
 
    private int buildEstimatorsRecursive(int index, RigidBodyStateEstimator parent, Map<RigidBodyBasics, IMUSensorReadOnly> imuSensorMap)
@@ -130,6 +159,71 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       for (RigidBodyStateEstimator estimator : estimators)
       {
          estimator.updateState();
+      }
+
+      updateCoMState();
+   }
+
+   private final FramePoint3D tempPoint = new FramePoint3D();
+   private final FrameVector3D tempVector = new FrameVector3D();
+   private final Momentum tempMomentum = new Momentum(worldFrame);
+
+   private void updateCoMState()
+   {
+      double totalMass = 0.0;
+      estimatedCoMPosition.setToZero();
+      estimatedCoMVelocity.setToZero();
+
+      for (RigidBodyStateEstimator estimator : estimators)
+      {
+         SpatialInertiaReadOnly inertia = estimator.rigidBody.getInertia();
+         double mass = inertia.getMass();
+
+         tempPoint.setIncludingFrame(inertia.getCenterOfMassOffset());
+         if (estimator.isRoot())
+         {
+            tempPoint.changeFrame(worldFrame);
+         }
+         else
+         {
+            // We don't want to use tempPoint.changeFrame(worldFrame) as this would only use the kinematics data.
+            tempPoint.applyTransform(estimator.getEstimatedPose());
+            tempPoint.setReferenceFrame(worldFrame);
+         }
+         tempPoint.scale(mass);
+         estimatedCoMPosition.add(tempPoint);
+
+         tempMomentum.setReferenceFrame(inertia.getReferenceFrame());
+         if (estimator.isRoot())
+         {
+            tempMomentum.compute(inertia, estimator.rigidBody.getBodyFixedFrame().getTwistOfFrame());
+            tempVector.setIncludingFrame(tempMomentum.getLinearPart());
+            tempVector.changeFrame(worldFrame);
+         }
+         else
+         {
+            tempMomentum.compute(inertia, estimator.getEstimatedTwist());
+            tempVector.setIncludingFrame(tempMomentum.getLinearPart());
+            // We don't want to use tempMomentum.changeFrame(worldFrame) as this would only use the kinematics data.
+            tempVector.applyTransform(estimator.getEstimatedPose());
+            tempVector.setReferenceFrame(worldFrame);
+         }
+         estimatedCoMVelocity.add(tempVector);
+
+         totalMass += mass;
+      }
+
+      estimatedCoMPosition.scale(1.0 / totalMass);
+      estimatedCoMVelocity.scale(1.0 / totalMass);
+
+      centerOfMassDataHolder.setCenterOfMassPosition(estimatedCoMPosition);
+      centerOfMassDataHolder.setCenterOfMassVelocity(estimatedCoMVelocity);
+
+      if (MORE_VARIABLES)
+      {
+         centerOfMassJacobian.reset();
+         rawCoMPosition.set(centerOfMassJacobian.getCenterOfMass());
+         rawCoMVelocity.set(centerOfMassJacobian.getCenterOfMassVelocity());
       }
    }
 
