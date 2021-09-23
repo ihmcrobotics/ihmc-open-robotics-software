@@ -9,7 +9,6 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -27,9 +26,9 @@ public class QuadTreeForGroundTest
       Collection<Point3D> points = new ArrayList<>();
 
       //ensure 
-      for (double x = -0.5; x < 0.5; x += quadTreeParameters.getResolution() * 2)
+      for (double x = -0.5; x < 0.5; x += quadTreeParameters.getXYResolution() * 2)
       {
-         for (double y = -0.5; y < 0.5; y += quadTreeParameters.getResolution() * 2)
+         for (double y = -0.5; y < 0.5; y += quadTreeParameters.getXYResolution() * 2)
          {
             final double z = 0.1;
             Point3D p = new Point3D(x, y, z);

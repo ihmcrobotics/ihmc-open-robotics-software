@@ -29,7 +29,7 @@ public class HeightQuadTreeMessageConverter
       HeightQuadTreeMessage heightQuadTreeMessage = new HeightQuadTreeMessage();
       MessageTools.copyData(leaves, heightQuadTreeMessage.getLeaves());
       heightQuadTreeMessage.setDefaultHeight((float) rootNode.getDefaultHeightWhenNoPoints());
-      heightQuadTreeMessage.setResolution((float) quadTreeToConvert.getQuadTreeParameters().getResolution());
+      heightQuadTreeMessage.setResolution((float) quadTreeToConvert.getQuadTreeParameters().getXYResolution());
       Box bounds = quadTreeToConvert.getRootNode().getBounds();
       heightQuadTreeMessage.setSizeX((float) (bounds.maxX - bounds.minX));
       heightQuadTreeMessage.setSizeY((float) (bounds.maxY - bounds.minY));

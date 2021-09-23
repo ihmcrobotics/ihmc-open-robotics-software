@@ -2,6 +2,9 @@ package us.ihmc.robotics.quadTree;
 
 import us.ihmc.euclid.tuple3D.Point3D32;
 
+/**
+ * Primarily callbacks for UI. Doesn't affect core logic of QuadTree height map
+ */
 public interface QuadTreeForGroundListener
 {
    public void nodeAdded(String id, Box bounds, float x, float y, float height);

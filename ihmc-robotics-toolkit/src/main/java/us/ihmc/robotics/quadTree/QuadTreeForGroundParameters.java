@@ -2,7 +2,7 @@ package us.ihmc.robotics.quadTree;
 
 public class QuadTreeForGroundParameters
 {
-   private double resolution;
+   private double xyResolution;
    private double heightThreshold;
    private double maxMultiLevelZChangeToFilterNoise;
    private int maxSameHeightPointsPerNode;
@@ -13,7 +13,7 @@ public class QuadTreeForGroundParameters
    public QuadTreeForGroundParameters(double resolution, double heightThreshold, double maxMultiLevelZChangeToFilterNoise, int maxSameHeightPointsPerNode,
            double maxAllowableXYDistanceForAPointToBeConsideredClose, int maximumNumberOfPoints)
    {
-      this.resolution = resolution;
+      this.xyResolution = resolution;
       this.heightThreshold = heightThreshold;
       this.maxMultiLevelZChangeToFilterNoise = maxMultiLevelZChangeToFilterNoise;
       this.maxSameHeightPointsPerNode = maxSameHeightPointsPerNode;
@@ -21,14 +21,14 @@ public class QuadTreeForGroundParameters
       this.maximumNumberOfPoints = maximumNumberOfPoints;
    }
 
-   public double getResolution()
+   public double getXYResolution()
    {
-      return resolution;
+      return xyResolution;
    }
 
-   public void setResolution(double resolution)
+   public void setXyResolution(double xyResolution)
    {
-      this.resolution = resolution;
+      this.xyResolution = xyResolution;
    }
 
    public double getHeightThreshold()

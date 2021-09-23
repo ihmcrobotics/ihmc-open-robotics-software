@@ -136,6 +136,7 @@ public class QuadTreeForGroundNode
    
    public QuadTreeForGroundPutResult put(QuadTreeForGroundPoint point)
    {
+      // already divided, add to children
       if (this.hasChildren)
       {
          QuadTreeForGroundPutResult putResult = getChild(point.getX(), point.getY()).put(point);
@@ -143,6 +144,7 @@ public class QuadTreeForGroundNode
          return putResult;
       }
 
+      // enters on the first call, the leaf holds onto all points
       else if (this.leaf == null)
       {
          QuadTreeForGroundLeaf leaf = new QuadTreeForGroundLeaf(this, pointLimiter);
@@ -163,6 +165,7 @@ public class QuadTreeForGroundNode
       }
 
 
+      // quad tree is populated, don't divide again
       else if (isAtSmallestResolution())
       {
          boolean updateChangedTree = updateLeafValueIfHeightIsAppropriate(point);
@@ -192,6 +195,7 @@ public class QuadTreeForGroundNode
          return quadTreePutResult;
       }
 
+      // operates at a max resolution of 4 * resolution
       else if (isNotYetAtResonableResolution())
       {
          this.divide();
@@ -223,13 +227,13 @@ public class QuadTreeForGroundNode
 
    private boolean isAtSmallestResolution()
    {
-      return Math.abs(bounds.maxX - bounds.minX) < parameters.getResolution();
+      return Math.abs(bounds.maxX - bounds.minX) < parameters.getXYResolution();
    }
 
    private boolean isNotYetAtResonableResolution()
    {
       // TODO: Magic number 4.1. Do something about that...
-      return Math.abs(bounds.maxX - bounds.minX) > 4.1 * parameters.getResolution();
+      return Math.abs(bounds.maxX - bounds.minX) > 4.1 * parameters.getXYResolution();
    }
 
    public Box getBounds()

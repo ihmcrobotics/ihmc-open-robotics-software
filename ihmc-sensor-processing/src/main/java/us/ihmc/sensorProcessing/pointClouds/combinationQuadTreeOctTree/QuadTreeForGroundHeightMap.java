@@ -28,6 +28,9 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       this.readerAndWriter = readerAndWriter;
    }
 
+   /**
+    * The z-value of the first point added sets the nominal ground height
+    */
    @Override
    public boolean addPoint(double x, double y, double z)
    {
@@ -101,9 +104,9 @@ public class QuadTreeForGroundHeightMap extends QuadTreeForGround implements Qua
       ArrayList<Point3D> points = new ArrayList<Point3D>();
 
       lock();
-      for (double x = centerX - extentX; x <= centerX + extentX; x += getQuadTreeParameters().getResolution())
+      for (double x = centerX - extentX; x <= centerX + extentX; x += getQuadTreeParameters().getXYResolution())
       {
-         for (double y = centerY - extentY; y <= centerY + extentY; y += getQuadTreeParameters().getResolution())
+         for (double y = centerY - extentY; y <= centerY + extentY; y += getQuadTreeParameters().getXYResolution())
          {
             double height = getHeightAtPoint(x, y);
             if (!Double.isNaN(height))
