@@ -35,8 +35,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final ImString loadString = new ImString("terrain.yml", 100);
    private final ImString saveString = new ImString("terrain.yml", 100);
 
-   private GDXVRManager vrManager;
-
    private GDXEnvironmentObject modelBeingPlaced;
    private final GDXModelInput modelInput = new GDXModelInput();
    private final ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
@@ -45,7 +43,8 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      vrManager = baseUI.getVRManager();
+      GDXVRManager vrManager = baseUI.getVRManager();
+      vrManager.addVRInputProcessor(this::handleVREvents);
 
       modelInput.create();
 
@@ -53,7 +52,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 //      baseUI.addImGui3DViewInputProcessor(pose3DWidget::process3DViewInput);
 //      baseUI.getSceneManager().addRenderableProvider(pose3DWidget);
 
-      vrManager.create(() ->
+      vrManager.onCreate(() ->
       {
          vrManager.getContext().addListener(new GDXVRDeviceAdapter()
          {
@@ -94,9 +93,23 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       modelInput.updatePoseForSelections(input);
    }
 
-   public void handleVREvents()
+   public void handleVREvents(GDXVRManager vrManager)
    {
-      if (GDXVRManager.isVREnabled() && modelBeingPlaced != null)
+      if (vrManager.isNewlyPressed(RobotSide.RIGHT, SteamVR_Trigger))
+      {
+         modelBeingPlaced = new GDXLargeCinderBlockRoughed();
+         modelInput.addAndSelectInstance(modelBeingPlaced);
+      }
+      if (vrManager.isNewlyPressed(RobotSide.LEFT, SteamVR_Trigger))
+      {
+         modelInput.clear();
+      }
+      if (vrManager.isNewlyReleased(RobotSide.RIGHT, SteamVR_Trigger))
+      {
+         modelBeingPlaced = null;
+      }
+
+      if (modelBeingPlaced != null)
       {
          vrManager.getControllers().get(RobotSide.RIGHT).getPose(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
       }

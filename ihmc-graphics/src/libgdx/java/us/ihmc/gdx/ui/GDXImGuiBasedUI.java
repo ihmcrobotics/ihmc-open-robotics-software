@@ -63,7 +63,7 @@ public class GDXImGuiBasedUI
    private String statusText = ""; // TODO: Add status at bottom of window
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private ImGui3DViewInput inputCalculator;
-   private final ArrayList<Consumer<ImGui3DViewInput>> imGuiInputProcessors = new ArrayList<>();
+   private final ArrayList<Consumer<ImGui3DViewInput>> imgui3DViewInputProcessors = new ArrayList<>();
    private GLFrameBuffer frameBuffer;
    private float sizeX;
    private float sizeY;
@@ -170,40 +170,23 @@ public class GDXImGuiBasedUI
       inputCalculator = new ImGui3DViewInput(sceneManager.getCamera3D(), this::getViewportSizeX, this::getViewportSizeY);
 
       Gdx.input.setInputProcessor(null); // detach from getting input events from GDX. TODO: Should we do this here?
-      imGuiInputProcessors.add(sceneManager.getCamera3D()::processImGuiInput);
+      imgui3DViewInputProcessors.add(sceneManager.getCamera3D()::processImGuiInput);
 
       double isoZoomOut = 7.0;
       sceneManager.getCamera3D().changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
-
       sceneManager.addCoordinateFrame(0.3);
-
-      if (GDXVRManager.isVREnabled())
-      {
-         enableVR();
-      }
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
-   }
 
-   private void enableVR()
-   {
-      vrManager.create(sceneManager.getCamera3D());
       sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
       addImGui3DViewInputProcessor(vrManager::process3DViewInput);
    }
 
-   public void pollVREvents()
-   {
-      if (GDXVRManager.isVREnabled())
-      {
-         vrManager.pollEvents();
-      }
-   }
-
    public void renderBeforeOnScreenUI()
    {
+      vrManager.pollEvents();
       Gdx.graphics.setTitle(windowTitle + " - " + Gdx.graphics.getFramesPerSecond() + " FPS");
       GDX3DSceneTools.glClearGray(0.3f);
       imGuiWindowAndDockSystem.beforeWindowManagement();
@@ -214,9 +197,7 @@ public class GDXImGuiBasedUI
    public void renderEnd()
    {
       imGuiWindowAndDockSystem.afterWindowManagement();
-
-      if (GDXVRManager.isVREnabled())
-         vrManager.render(sceneManager);
+      vrManager.render(sceneManager);
    }
 
    private void renderMenuBar()
@@ -253,18 +234,7 @@ public class GDXImGuiBasedUI
       ImGui.sameLine(ImGui.getWindowSizeX() - 170.0f);
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
       ImGui.sameLine(ImGui.getWindowSizeX() - 100.0f);
-      if (GDXVRManager.isVREnabled())
-      {
-         ImGui.text("VR Enabled");
-      }
-      else if (ImGui.button("Enable VR"))
-      {
-         enableVR();
-      }
-      if (ImGui.isItemHovered())
-      {
-         ImGui.setTooltip("It is recommended to start SteamVR and power on the VR controllers before clicking this button.");
-      }
+      vrManager.renderImGuiEnableWidget();
       ImGui.endMainMenuBar();
    }
 
@@ -290,7 +260,7 @@ public class GDXImGuiBasedUI
       float renderSizeY = sizeY * ANTI_ALIASING;
 
       inputCalculator.compute();
-      for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imGuiInputProcessors)
+      for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imgui3DViewInputProcessors)
       {
          imGuiInputProcessor.accept(inputCalculator);
       }
@@ -358,8 +328,7 @@ public class GDXImGuiBasedUI
    public void dispose()
    {
       imGuiWindowAndDockSystem.dispose();
-      if (GDXVRManager.isVREnabled())
-         vrManager.dispose();
+      vrManager.dispose();
       sceneManager.dispose();
    }
 
@@ -370,7 +339,7 @@ public class GDXImGuiBasedUI
 
    public void addImGui3DViewInputProcessor(Consumer<ImGui3DViewInput> processImGuiInput)
    {
-      imGuiInputProcessors.add(processImGuiInput);
+      imgui3DViewInputProcessors.add(processImGuiInput);
    }
 
    public void setStatus(String statusText)

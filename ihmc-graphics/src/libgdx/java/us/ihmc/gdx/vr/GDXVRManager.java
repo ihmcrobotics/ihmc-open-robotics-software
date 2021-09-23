@@ -6,11 +6,14 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -21,13 +24,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Touchpad;
 
 public class GDXVRManager implements RenderableProvider
 {
-   private static boolean ENABLE_VR = Boolean.parseBoolean(System.getProperty("enable.vr"));
-
    private GDXVRContext context;
    private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private ModelInstance headsetModelInstance;
@@ -40,14 +42,13 @@ public class GDXVRManager implements RenderableProvider
    private final Vector3D deltaVRControllerPosition = new Vector3D();
    private final Point3D resultVRSpacePosition = new Point3D();
    private final Point3D lastVRSpacePosition = new Point3D();
-   private final ArrayList<Runnable> thingsToCreateOnEnable = new ArrayList<>();
    private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo();
+   private final ImBoolean vrEnabled = new ImBoolean(false);
+   private final ArrayList<Consumer<GDXVRManager>> vrInputProcessors = new ArrayList<>();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    public void create(FocusBasedGDXCamera camera3D)
    {
-      ENABLE_VR = true;
-      System.setProperty("enable.vr", "true");
-
       context = new GDXVRContext();
 
       scenePoseGizmo.create(camera3D);
@@ -146,9 +147,29 @@ public class GDXVRManager implements RenderableProvider
       }
    }
 
+   public void addVRInputProcessor(Consumer<GDXVRManager> processVRInput)
+   {
+      vrInputProcessors.add(processVRInput);
+   }
+
    public void pollEvents()
    {
       context.pollEvents();
+   }
+
+   public void renderImGuiEnableWidget()
+   {
+      if (ImGui.checkbox(labels.get("VR Enabled"), vrEnabled))
+      {
+         if (vrEnabled.get())
+            LogTools.info("Enabling VR");
+         else
+            LogTools.info("Disabling VR");
+      }
+      if (ImGui.isItemHovered())
+      {
+         ImGui.setTooltip("It is recommended to start SteamVR and power on the VR controllers before clicking this button.");
+      }
    }
 
    public void render(GDX3DSceneManager sceneManager)
@@ -219,11 +240,6 @@ public class GDXVRManager implements RenderableProvider
       }
    }
 
-   public void create(Runnable runnable)
-   {
-      thingsToCreateOnEnable.add(runnable);
-   }
-
    public void process3DViewInput(ImGui3DViewInput input)
    {
       scenePoseGizmo.process3DViewInput(input);
@@ -248,8 +264,8 @@ public class GDXVRManager implements RenderableProvider
       return context;
    }
 
-   public static boolean isVREnabled()
+   public boolean isVREnabled()
    {
-      return ENABLE_VR;
+      return vrEnabled.get();
    }
 }

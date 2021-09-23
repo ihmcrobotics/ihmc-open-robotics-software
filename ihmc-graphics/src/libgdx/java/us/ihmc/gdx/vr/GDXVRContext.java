@@ -4,6 +4,8 @@ import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import org.lwjgl.PointerBuffer;
@@ -70,6 +72,7 @@ public class GDXVRContext implements Disposable
    private final ArrayList<GDXVRDevice> devices = new ArrayList<>(VR.k_unMaxTrackedDeviceCount);
    private final Array<GDXVRDeviceListener> deviceListeners = new Array<>();
    private final VREvent event = VREvent.create();
+   private final HashMap<GDXVRDevice, TreeSet<Integer>> buttonsPressedThisFrame = new HashMap<>();
 
    // render models
    private final ObjectMap<String, Model> models = new ObjectMap<>();
@@ -220,6 +223,8 @@ public class GDXVRContext implements Disposable
          initialDevicesReported = true;
       }
 
+      // cache the devices; don't iterate over 64 every time?
+      // maybe do it at a lower frequency just to catch new devices?
       for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
       {
          GDXVRDevice device = devices.get(deviceIndex);
@@ -238,6 +243,7 @@ public class GDXVRContext implements Disposable
          }
       }
 
+      buttonsPressedThisFrame.get(deviceIndex)
       while (VRSystem.VRSystem_PollNextEvent(event))
       {
          int deviceIndex = event.trackedDeviceIndex();
