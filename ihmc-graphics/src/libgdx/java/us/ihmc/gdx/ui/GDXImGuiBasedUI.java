@@ -2,6 +2,7 @@ package us.ihmc.gdx.ui;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
@@ -345,6 +346,18 @@ public class GDXImGuiBasedUI
    public void setStatus(String statusText)
    {
       this.statusText = statusText;
+   }
+
+   public void setVsync(boolean enabled)
+   {
+      vsync.set(enabled);
+      Gdx.graphics.setVSync(enabled);
+   }
+
+   public void setForegroundFPS(int foregroundFPS)
+   {
+      this.foregroundFPS.set(foregroundFPS);
+      Gdx.graphics.setForegroundFPS(foregroundFPS);
    }
 
    public ImGuiPanelManager getImGuiPanelManager()

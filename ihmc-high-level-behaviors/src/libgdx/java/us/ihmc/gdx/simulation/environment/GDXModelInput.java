@@ -312,7 +312,7 @@ public class GDXModelInput
 
    public void handleVREvents(GDXVRManager vrManager)
    {
-      if (GDXVRManager.isVREnabled() && !selectedObjectIndexes.isEmpty())
+      if (!selectedObjectIndexes.isEmpty())
       {
          vrManager.getControllers().get(RobotSide.RIGHT).getPose(ReferenceFrame.getWorldFrame(),
                                                                  environmentObjects.get(selectedObjectIndexes.stream().findFirst().get())

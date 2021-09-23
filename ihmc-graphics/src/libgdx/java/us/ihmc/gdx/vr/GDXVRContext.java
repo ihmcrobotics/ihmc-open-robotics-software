@@ -3,9 +3,7 @@ package us.ihmc.gdx.vr;
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
 import java.nio.IntBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Consumer;
 
 import org.lwjgl.PointerBuffer;
@@ -56,7 +54,8 @@ public class GDXVRContext implements Disposable
 {
    // couple of scratch buffers
    private final IntBuffer error = BufferUtils.newIntBuffer(1);
-   private final IntBuffer scratch = BufferUtils.newIntBuffer(1), scratch2 = BufferUtils.newIntBuffer(1);
+   private final IntBuffer scratch = BufferUtils.newIntBuffer(1);
+   private final IntBuffer scratch2 = BufferUtils.newIntBuffer(1);
 
    // per eye data such as rendering surfaces, textures, regions, cameras etc. for each eye
    private final SideDependentList<GDXVRPerEyeData> perEyeData = new SideDependentList<>();
@@ -69,10 +68,13 @@ public class GDXVRContext implements Disposable
    private final TrackedDevicePose.Buffer trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
 
    // devices, their poses and listeners
-   private final ArrayList<GDXVRDevice> devices = new ArrayList<>(VR.k_unMaxTrackedDeviceCount);
-   private final Array<GDXVRDeviceListener> deviceListeners = new Array<>();
+   private final ArrayList<GDXVRDevice> devices = new ArrayList<>(VR.k_unMaxTrackedDeviceCount); // This is dumb, should be a different data structure
    private final VREvent event = VREvent.create();
-   private final HashMap<GDXVRDevice, TreeSet<Integer>> buttonsPressedThisFrame = new HashMap<>();
+   private final SideDependentList<TreeSet<Integer>> buttonsPressedThisFrame = new SideDependentList<>(new TreeSet<>(), new TreeSet<>());
+   private final SideDependentList<TreeSet<Integer>> buttonsReleasedThisFrame = new SideDependentList<>(new TreeSet<>(), new TreeSet<>());
+   private final SideDependentList<Integer> controllerIndexes = new SideDependentList<>(null, null);
+   private final HashMap<Integer, RobotSide> indexToControlllerSideMap = new HashMap<>();
+   private Integer headsetIndex = null;
 
    // render models
    private final ObjectMap<String, Model> models = new ObjectMap<>();
@@ -134,10 +136,7 @@ public class GDXVRContext implements Disposable
       VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, error);
       checkInitError(error);
 
-      for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
-      {
-         devices.add(null);
-      }
+      Collections.fill(devices, null);
 
       VRSystem.VRSystem_GetRecommendedRenderTargetSize(scratch, scratch2);
       int width = (int) (scratch.get(0) * renderTargetMultiplier);
@@ -214,10 +213,6 @@ public class GDXVRContext implements Disposable
             if (VRSystem.VRSystem_IsTrackedDeviceConnected(deviceIndex))
             {
                createDevice(deviceIndex);
-               for (GDXVRDeviceListener deviceListener : deviceListeners)
-               {
-                  deviceListener.connected(devices.get(deviceIndex));
-               }
             }
          }
          initialDevicesReported = true;
@@ -239,11 +234,16 @@ public class GDXVRContext implements Disposable
             device.getVelocity().set(velocity.v(0), velocity.v(1), velocity.v(2));
             device.getAngularVelocity().set(angularVelocity.v(0), angularVelocity.v(1), angularVelocity.v(2));
             device.setValid(trackedPose.bPoseIsValid());
-            device.updatePoseInTrackerFrame(openVRRigidBodyTransform);
+            device.updatePoseInTrackerFrame(openVRRigidBodyTransform, vrPlayAreaYUpZBackFrame);
          }
       }
 
-      buttonsPressedThisFrame.get(deviceIndex)
+      for (RobotSide side : RobotSide.values)
+      {
+         buttonsPressedThisFrame.get(side).clear();
+         buttonsReleasedThisFrame.get(side).clear();
+      }
+
       while (VRSystem.VRSystem_PollNextEvent(event))
       {
          int deviceIndex = event.trackedDeviceIndex();
@@ -255,43 +255,53 @@ public class GDXVRContext implements Disposable
          {
             case VR.EVREventType_VREvent_TrackedDeviceActivated:
                createDevice(deviceIndex);
-               for (GDXVRDeviceListener deviceListener : deviceListeners)
-               {
-                  deviceListener.connected(devices.get(deviceIndex));
-               }
                break;
             case VR.EVREventType_VREvent_TrackedDeviceDeactivated:
                deviceIndex = event.trackedDeviceIndex();
                if (devices.get(deviceIndex) == null)
                   continue;
-               for (GDXVRDeviceListener deviceListener : deviceListeners)
-               {
-                  deviceListener.disconnected(devices.get(deviceIndex));
-               }
-               devices.set(deviceIndex, null);
+               updateDevice(deviceIndex, null);
                break;
             case VR.EVREventType_VREvent_ButtonPress:
                if (devices.get(deviceIndex) == null)
                   continue;
                button = event.data().controller().button();
                devices.get(deviceIndex).setButton(button, true);
-               for (GDXVRDeviceListener deviceListener : deviceListeners)
-               {
-                  deviceListener.buttonPressed(devices.get(deviceIndex), button);
-               }
+               buttonsPressedThisFrame.get(indexToControlllerSideMap.get(deviceIndex)).add(button);
                break;
             case VR.EVREventType_VREvent_ButtonUnpress:
                if (devices.get(deviceIndex) == null)
                   continue;
                button = event.data().controller().button();
                devices.get(deviceIndex).setButton(button, false);
-               for (GDXVRDeviceListener deviceListener : deviceListeners)
-               {
-                  deviceListener.buttonReleased(devices.get(deviceIndex), button);
-               }
                break;
          }
       }
+   }
+
+   private void updateDevice(int deviceIndex, GDXVRDevice device)
+   {
+      if (device == null)
+      {
+         for (RobotSide side : RobotSide.values)
+         {
+            if (controllerIndexes.get(side) == deviceIndex)
+            {
+               controllerIndexes.set(side, null);
+            }
+
+            if (indexToControlllerSideMap.get(deviceIndex) != null)
+            {
+               indexToControlllerSideMap.put(deviceIndex, null);
+            }
+         }
+         if (headsetIndex == deviceIndex)
+         {
+            headsetIndex = null;
+         }
+      }
+
+      devices.set(deviceIndex, device);
    }
 
    private void createDevice(int deviceIndex)
@@ -302,6 +312,7 @@ public class GDXVRContext implements Disposable
       {
          case VR.ETrackedDeviceClass_TrackedDeviceClass_HMD:
             type = GDXVRDeviceType.HeadMountedDisplay;
+            headsetIndex = deviceIndex;
             break;
          case VR.ETrackedDeviceClass_TrackedDeviceClass_Controller:
             type = GDXVRDeviceType.Controller;
@@ -316,21 +327,25 @@ public class GDXVRContext implements Disposable
             return;
       }
 
-      GDXVRControllerRole role = GDXVRControllerRole.Unknown;
+      GDXVRControllerRole controllerRole = GDXVRControllerRole.Unknown;
       if (type == GDXVRDeviceType.Controller)
       {
-         int r = VRSystem.VRSystem_GetControllerRoleForTrackedDeviceIndex(deviceIndex);
-         switch (r)
+         int controllerRoleID = VRSystem.VRSystem_GetControllerRoleForTrackedDeviceIndex(deviceIndex);
+         switch (controllerRoleID)
          {
             case VR.ETrackedControllerRole_TrackedControllerRole_LeftHand:
-               role = GDXVRControllerRole.LeftHand;
+               controllerIndexes.set(RobotSide.LEFT, deviceIndex);
+               indexToControlllerSideMap.put(deviceIndex, RobotSide.LEFT);
+               controllerRole = GDXVRControllerRole.LeftHand;
                break;
             case VR.ETrackedControllerRole_TrackedControllerRole_RightHand:
-               role = GDXVRControllerRole.RightHand;
+               controllerIndexes.set(RobotSide.RIGHT, deviceIndex);
+               indexToControlllerSideMap.put(deviceIndex, RobotSide.RIGHT);
+               controllerRole = GDXVRControllerRole.RightHand;
                break;
          }
       }
-      devices.set(deviceIndex, new GDXVRDevice(this, deviceIndex, type, role));
+      updateDevice(deviceIndex, new GDXVRDevice(deviceIndex, type, controllerRole, this::loadRenderModel));
    }
 
    /**
@@ -496,22 +511,6 @@ public class GDXVRContext implements Disposable
    }
 
    /**
-    * Adds a {@link GDXVRDeviceListener} to receive events
-    */
-   public void addListener(GDXVRDeviceListener listener)
-   {
-      this.deviceListeners.add(listener);
-   }
-
-   /**
-    * Removes a {@link GDXVRDeviceListener}
-    */
-   public void removeListener(GDXVRDeviceListener listener)
-   {
-      this.deviceListeners.removeValue(listener, true);
-   }
-
-   /**
     * @return the first {@link GDXVRDevice} of the given {@link GDXVRDeviceType} or null.
     */
    public GDXVRDevice getDeviceByType(GDXVRDeviceType type)
@@ -563,6 +562,67 @@ public class GDXVRContext implements Disposable
             return device;
       }
       return null;
+   }
+
+   public GDXVRDevice getController(RobotSide side)
+   {
+      Integer controllerIndex = controllerIndexes.get(side);
+      if (controllerIndex != null)
+      {
+         return devices.get(controllerIndex);
+      }
+      else
+      {
+         return null;
+      }
+   }
+
+   public GDXVRDevice getHeadset()
+   {
+      if (headsetIndex != null)
+      {
+         return devices.get(headsetIndex);
+      }
+      else
+      {
+         return null;
+      }
+   }
+
+   public boolean isButtonPressed(RobotSide side, int button)
+   {
+      if (controllerIndexes.containsKey(side))
+      {
+         return devices.get(controllerIndexes.get(side)).isButtonPressed(button);
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   public boolean isButtonNewlyPressed(RobotSide side, int button)
+   {
+      if (controllerIndexes.containsKey(side))
+      {
+         return devices.get(controllerIndexes.get(side)).isButtonNewlyPressed(button);
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   public boolean isButtonNewlyReleased(RobotSide side, int button)
+   {
+      if (controllerIndexes.containsKey(side))
+      {
+         return devices.get(controllerIndexes.get(side)).isButtonNewlyReleased(button);
+      }
+      else
+      {
+         return false;
+      }
    }
 
    public SideDependentList<GDXVRPerEyeData> getPerEyeData()
