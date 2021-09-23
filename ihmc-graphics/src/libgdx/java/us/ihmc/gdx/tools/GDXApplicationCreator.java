@@ -4,7 +4,6 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.vr.GDXVRManager;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -26,13 +25,7 @@ public class GDXApplicationCreator
       applicationConfiguration.setTitle(title);
       applicationConfiguration.setWindowedMode((int) width, (int) height);
       // TODO: These options are work in progress. Not sure what is the best setting for everyone.
-      if (GDXVRManager.isVREnabled())
-      {
-         applicationConfiguration.useVsync(false); // important to disable vsync for VR
-         applicationConfiguration.setIdleFPS(240);
-         applicationConfiguration.setForegroundFPS(240);
-      }
-      else if (Boolean.parseBoolean(System.getProperty("gdx.free.spin")))
+      if (Boolean.parseBoolean(System.getProperty("gdx.free.spin")))
       {
          applicationConfiguration.setIdleFPS(Integer.MAX_VALUE);
          applicationConfiguration.setForegroundFPS(Integer.MAX_VALUE);

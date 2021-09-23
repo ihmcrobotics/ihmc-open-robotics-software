@@ -36,7 +36,6 @@ public class GDXImGuiVRDemo
          @Override
          public void render()
          {
-            baseUI.pollVREvents();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
