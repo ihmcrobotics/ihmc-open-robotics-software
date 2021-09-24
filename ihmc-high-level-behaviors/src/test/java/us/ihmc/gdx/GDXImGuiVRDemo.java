@@ -7,6 +7,7 @@ import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.tools.string.StringTools;
 
 public class GDXImGuiVRDemo
@@ -26,11 +27,17 @@ public class GDXImGuiVRDemo
          public void create()
          {
             baseUI.create();
+            baseUI.getVRManager().addVRInputProcessor(this::handleVREvents);
 
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
             baseUI.getImGuiPanelManager().addPanel("Window", this::renderPanel);
+         }
+
+         private void handleVREvents(GDXVRManager vrManager)
+         {
+
          }
 
          @Override
