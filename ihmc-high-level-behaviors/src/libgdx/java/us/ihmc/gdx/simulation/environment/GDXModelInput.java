@@ -314,9 +314,11 @@ public class GDXModelInput
    {
       if (!selectedObjectIndexes.isEmpty())
       {
-         vrManager.getControllers().get(RobotSide.RIGHT).getPose(ReferenceFrame.getWorldFrame(),
-                                                                 environmentObjects.get(selectedObjectIndexes.stream().findFirst().get())
-                                                                                   .getRealisticModelInstance().transform);
+         vrManager.getContext().getController(RobotSide.RIGHT, controller ->
+         {
+            Integer objectIndex = selectedObjectIndexes.stream().findFirst().get();
+            controller.getPose(ReferenceFrame.getWorldFrame(), environmentObjects.get(objectIndex).getRealisticModelInstance().transform);
+         });
       }
    }
 

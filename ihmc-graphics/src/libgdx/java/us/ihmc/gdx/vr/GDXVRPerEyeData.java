@@ -29,11 +29,11 @@ public class GDXVRPerEyeData
     **/
    private final org.lwjgl.openvr.Texture texture;
 
-   GDXVRPerEyeData(FrameBuffer buffer, TextureRegion region, GDXVRCamera cameras)
+   GDXVRPerEyeData(FrameBuffer buffer, TextureRegion region, GDXVRCamera camera)
    {
       this.buffer = buffer;
       this.region = region;
-      this.camera = cameras;
+      this.camera = camera;
       this.texture = org.lwjgl.openvr.Texture.create();
       this.texture.set(buffer.getColorBufferTexture().getTextureObjectHandle(), VR.ETextureType_TextureType_OpenGL, VR.EColorSpace_ColorSpace_Gamma);
    }

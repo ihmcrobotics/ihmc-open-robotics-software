@@ -13,6 +13,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.function.Supplier;
+
 /**
  * A {@link Camera} implementation for one {@link RobotSide}
  * of a {@link GDXVRContext}. All properties  will be overwritten
@@ -21,8 +23,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
  */
 public class GDXVRCamera extends Camera
 {
-   private final GDXVRContext context;
    private final RobotSide eye;
+   private final Supplier<GDXVRDevice> headsetSupplier;
    private final Matrix4 eyeSpace = new Matrix4();
    private final Matrix4 invEyeSpace = new Matrix4();
    private final HmdMatrix44 projectionMat = HmdMatrix44.create();
@@ -32,9 +34,9 @@ public class GDXVRCamera extends Camera
    private final Vector3D euclidDirection = new Vector3D();
    private final Vector3D euclidUp = new Vector3D();
 
-   public GDXVRCamera(GDXVRContext context, RobotSide eye)
+   public GDXVRCamera(RobotSide eye, Supplier<GDXVRDevice> headsetSupplier)
    {
-      this.context = context;
+      this.headsetSupplier = headsetSupplier;
       this.eye = eye;
    }
 
@@ -57,7 +59,7 @@ public class GDXVRCamera extends Camera
       invEyeSpace.set(eyeSpace).inv();
 
       // get the pose matrix from the HDM
-      GDXVRDevice hmd = context.getDeviceByType(GDXVRDeviceType.HeadMountedDisplay);
+      GDXVRDevice hmd = headsetSupplier.get();
       hmd.getPose().changeFrame(ReferenceFrame.getWorldFrame());
       euclidDirection.set(Axis3D.Z);
       euclidDirection.negate(); // Z is forward in libGDX, contrary to OpenVR where it's backward

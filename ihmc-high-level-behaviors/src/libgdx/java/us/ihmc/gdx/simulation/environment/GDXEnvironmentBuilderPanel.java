@@ -61,24 +61,26 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
    public void handleVREvents(GDXVRManager vrManager)
    {
-      if (vrManager.getContext().isButtonNewlyPressed(RobotSide.RIGHT, SteamVR_Trigger))
+      vrManager.getContext().getController(RobotSide.LEFT, controller ->
       {
-         modelBeingPlaced = new GDXLargeCinderBlockRoughed();
-         modelInput.addAndSelectInstance(modelBeingPlaced);
-      }
-      if (vrManager.getContext().isButtonNewlyPressed(RobotSide.LEFT, SteamVR_Trigger))
+         if (controller.isButtonNewlyPressed(SteamVR_Trigger))
+         {
+            modelInput.clear();
+         }
+      });
+      vrManager.getContext().getController(RobotSide.RIGHT, controller ->
       {
-         modelInput.clear();
-      }
-      if (vrManager.getContext().isButtonNewlyPressed(RobotSide.RIGHT, SteamVR_Trigger))
-      {
-         modelBeingPlaced = null;
-      }
-
-      if (modelBeingPlaced != null)
-      {
-         vrManager.getControllers().get(RobotSide.RIGHT).getPose(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
-      }
+         if (controller.isButtonNewlyPressed(SteamVR_Trigger))
+         {
+            modelBeingPlaced = new GDXLargeCinderBlockRoughed();
+            modelInput.addAndSelectInstance(modelBeingPlaced);
+            controller.getPose(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
+         }
+         if (controller.isButtonNewlyReleased(SteamVR_Trigger))
+         {
+            modelBeingPlaced = null;
+         }
+      });
    }
 
    public void renderImGuiWindow()
