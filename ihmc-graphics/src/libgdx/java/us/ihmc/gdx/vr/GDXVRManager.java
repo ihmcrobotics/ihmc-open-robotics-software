@@ -130,6 +130,9 @@ public class GDXVRManager implements RenderableProvider
       }
       if (ImGui.isItemHovered())
       {
+         float right = ImGui.getWindowPosX() + ImGui.getWindowSizeX();
+         float y = ImGui.getItemRectMaxY();
+         ImGui.setNextWindowPos(right - 600, y); // prevent the tooltip from creating a new window
          ImGui.setTooltip("It is recommended to start SteamVR and power on the VR controllers before clicking this button.");
       }
    }
