@@ -506,10 +506,15 @@ public class GDXVRContext implements Disposable
     */
    public void getHeadset(Consumer<GDXVRDevice> headsetIfConnected)
    {
-      if (headsetIndex != null)
+      if (isHeadsetConnected())
       {
          headsetIfConnected.accept(devices[headsetIndex]);
       }
+   }
+
+   public boolean isHeadsetConnected()
+   {
+      return headsetIndex != null;
    }
 
    public void getBaseStations(Consumer<GDXVRDevice> baseStationConsumer)

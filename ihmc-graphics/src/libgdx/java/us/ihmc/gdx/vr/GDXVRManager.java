@@ -59,7 +59,7 @@ public class GDXVRManager implements RenderableProvider
          //               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
          //               context.getToZUpXForward().transform(initialVRSpacePosition);
          //               lastVRSpacePosition.set(initialVRSpacePosition);
-         context.getHeadset(headset -> // Wait for VR setup to be ready. This is the primary indicator, called only when the headset is connected
+         if (context.isHeadsetConnected())
          {
             context.teleport(scenePoseGizmo.getTransform());
 
@@ -80,7 +80,7 @@ public class GDXVRManager implements RenderableProvider
             {
                //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
             }
-         });
+         }
 
          for (Consumer<GDXVRManager> vrInputProcessor : vrInputProcessors)
          {
@@ -118,15 +118,12 @@ public class GDXVRManager implements RenderableProvider
 
    public void render(GDX3DSceneManager sceneManager)
    {
-      if (vrEnabled.get() && context != null)
+      if (isVRReady())
       {
-         context.getHeadset(headset -> // Wait for VR setup to be ready. This is the primary indicator, called only when the headset is connected
-         {
-            context.begin();
-            renderScene(RobotSide.LEFT, sceneManager);
-            renderScene(RobotSide.RIGHT, sceneManager);
-            context.end();
-         });
+          context.begin();
+          renderScene(RobotSide.LEFT, sceneManager);
+          renderScene(RobotSide.RIGHT, sceneManager);
+          context.end();
       }
    }
 
@@ -156,6 +153,12 @@ public class GDXVRManager implements RenderableProvider
          context.dispose();
    }
 
+   public boolean isVRReady()
+   {
+      // Wait for VR setup to be ready. This is the primary indicator, called only when the headset is connected
+      return vrEnabled.get() && context != null && context.isHeadsetConnected();
+   }
+
    public void addVRInputProcessor(Consumer<GDXVRManager> processVRInput)
    {
       vrInputProcessors.add(processVRInput);
@@ -163,12 +166,9 @@ public class GDXVRManager implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (vrEnabled.get() && context != null)
+      if (isVRReady())
       {
-         context.getHeadset(headset ->
-         {
-            scenePoseGizmo.process3DViewInput(input);
-         });
+         scenePoseGizmo.process3DViewInput(input);
       }
    }
 
