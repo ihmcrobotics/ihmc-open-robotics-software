@@ -287,7 +287,8 @@ public class GDXVRContext
       {
          for (RobotSide side : RobotSide.values)
          {
-            if (controllerIndexes.get(side) == deviceIndex)
+            Integer controllerIndex = controllerIndexes.get(side);
+            if (controllerIndex != null && controllerIndex == deviceIndex)
             {
                controllerIndexes.set(side, null);
             }
