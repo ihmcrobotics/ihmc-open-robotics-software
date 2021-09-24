@@ -143,6 +143,16 @@ public class GDXVRDevice
       }
    }
 
+   public void setButtonPressed(int button)
+   {
+      buttonsPressedThisFrame.add(button);
+   }
+
+   public void setButtonReleased(int button)
+   {
+      buttonsReleasedThisFrame.add(button);
+   }
+
    public boolean isButtonNewlyPressed(int button)
    {
       return buttonsPressedThisFrame.contains(button);

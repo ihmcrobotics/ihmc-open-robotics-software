@@ -9,14 +9,12 @@ import java.util.function.Consumer;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.openvr.*;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -25,9 +23,7 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -53,15 +49,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 public class GDXVRContext implements Disposable
 {
    // couple of scratch buffers
-   private final IntBuffer error = BufferUtils.newIntBuffer(1);
-   private final IntBuffer scratch = BufferUtils.newIntBuffer(1);
-   private final IntBuffer scratch2 = BufferUtils.newIntBuffer(1);
+   private final IntBuffer errorPointer = BufferUtils.newIntBuffer(1);
+   private final IntBuffer widthPointer = BufferUtils.newIntBuffer(1);
+   private final IntBuffer heightPointer = BufferUtils.newIntBuffer(1);
 
    // per eye data such as rendering surfaces, textures, regions, cameras etc. for each eye
    private final SideDependentList<GDXVRPerEyeData> perEyeData = new SideDependentList<>();
-
-   // batcher to draw eye rendering surface to companion window
-   private final SpriteBatch batcher;
 
    // internal native objects to get device poses
    private final TrackedDevicePose.Buffer trackedDevicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
@@ -70,8 +63,6 @@ public class GDXVRContext implements Disposable
    // devices, their poses and listeners
    private final ArrayList<GDXVRDevice> devices = new ArrayList<>(VR.k_unMaxTrackedDeviceCount); // This is dumb, should be a different data structure
    private final VREvent event = VREvent.create();
-   private final SideDependentList<TreeSet<Integer>> buttonsPressedThisFrame = new SideDependentList<>(new TreeSet<>(), new TreeSet<>());
-   private final SideDependentList<TreeSet<Integer>> buttonsReleasedThisFrame = new SideDependentList<>(new TreeSet<>(), new TreeSet<>());
    private final SideDependentList<Integer> controllerIndexes = new SideDependentList<>(null, null);
    private final HashMap<Integer, RobotSide> indexToControlllerSideMap = new HashMap<>();
    private Integer headsetIndex = null;
@@ -126,27 +117,25 @@ public class GDXVRContext implements Disposable
     */
    public GDXVRContext(float renderTargetMultiplier, boolean hasStencil)
    {
-      int token = VR.VR_InitInternal(error, VR.EVRApplicationType_VRApplication_Scene);
-      checkInitError(error);
+      int token = VR.VR_InitInternal(errorPointer, VR.EVRApplicationType_VRApplication_Scene);
+      checkInitError(errorPointer);
       OpenVR.create(token);
 
-      VR.VR_GetGenericInterface(VR.IVRCompositor_Version, error);
-      checkInitError(error);
+      VR.VR_GetGenericInterface(VR.IVRCompositor_Version, errorPointer);
+      checkInitError(errorPointer);
 
-      VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, error);
-      checkInitError(error);
+      VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, errorPointer);
+      checkInitError(errorPointer);
 
       Collections.fill(devices, null);
 
-      VRSystem.VRSystem_GetRecommendedRenderTargetSize(scratch, scratch2);
-      int width = (int) (scratch.get(0) * renderTargetMultiplier);
-      int height = (int) (scratch2.get(0) * renderTargetMultiplier);
+      VRSystem.VRSystem_GetRecommendedRenderTargetSize(widthPointer, heightPointer);
+      int width = (int) (widthPointer.get(0) * renderTargetMultiplier);
+      int height = (int) (heightPointer.get(0) * renderTargetMultiplier);
       LogTools.info("VR render size: {} x {}", width, height);
 
       setupEye(RobotSide.LEFT, width, height, hasStencil);
       setupEye(RobotSide.RIGHT, width, height, hasStencil);
-
-      batcher = new SpriteBatch();
    }
 
    private void setupEye(RobotSide eye, int width, int height, boolean hasStencil)
@@ -154,7 +143,7 @@ public class GDXVRContext implements Disposable
       FrameBuffer buffer = new FrameBuffer(Format.RGBA8888, width, height, true, hasStencil);
       TextureRegion region = new TextureRegion(buffer.getColorBufferTexture());
       region.flip(false, true);
-      GDXVRCamera camera = new GDXVRCamera(this, eye);
+      GDXVRCamera camera = new GDXVRCamera(eye, () -> devices.get(headsetIndex));
       camera.near = 0.1f;
       camera.far = 1000f;
       perEyeData.set(eye, new GDXVRPerEyeData(buffer, region, camera));
@@ -240,8 +229,7 @@ public class GDXVRContext implements Disposable
 
       for (RobotSide side : RobotSide.values)
       {
-         buttonsPressedThisFrame.get(side).clear();
-         buttonsReleasedThisFrame.get(side).clear();
+         getController(side, GDXVRDevice::resetBeforeUpdate);
       }
 
       while (VRSystem.VRSystem_PollNextEvent(event))
@@ -267,13 +255,14 @@ public class GDXVRContext implements Disposable
                   continue;
                button = event.data().controller().button();
                devices.get(deviceIndex).setButton(button, true);
-               buttonsPressedThisFrame.get(indexToControlllerSideMap.get(deviceIndex)).add(button);
+               devices.get(deviceIndex).setButtonPressed(button);
                break;
             case VR.EVREventType_VREvent_ButtonUnpress:
                if (devices.get(deviceIndex) == null)
                   continue;
                button = event.data().controller().button();
                devices.get(deviceIndex).setButton(button, false);
+               devices.get(deviceIndex).setButtonReleased(button);
                break;
          }
       }
@@ -391,35 +380,10 @@ public class GDXVRContext implements Disposable
    {
       for (GDXVRPerEyeData eyeData : perEyeData)
          eyeData.getFrameBuffer().dispose();
-      batcher.dispose();
       VR_ShutdownInternal();
    }
 
-   /**
-    * Resizes the companion window so the rendering buffers
-    * can be displayed without stretching.
-    */
-   public void resizeCompanionWindow()
-   {
-      GLFrameBuffer<Texture> buffer = perEyeData.get(RobotSide.LEFT).getFrameBuffer();
-      Gdx.graphics.setWindowedMode(buffer.getWidth(), buffer.getHeight());
-   }
-
-   /**
-    * Renders the content of the given eye's rendering surface
-    * to the entirety of the companion window.
-    */
-   public void renderToCompanionWindow(RobotSide eye)
-   {
-      GLFrameBuffer<Texture> buffer = perEyeData.get(eye).getFrameBuffer();
-      TextureRegion region = perEyeData.get(eye).getRegion();
-      batcher.getProjectionMatrix().setToOrtho2D(0, 0, buffer.getWidth(), buffer.getHeight());
-      batcher.begin();
-      batcher.draw(region, 0, 0);
-      batcher.end();
-   }
-
-   public Model loadRenderModel(String name)
+   private Model loadRenderModel(String name)
    {
       if (models.containsKey(name))
          return models.get(name);
@@ -511,117 +475,25 @@ public class GDXVRContext implements Disposable
    }
 
    /**
-    * @return the first {@link GDXVRDevice} of the given {@link GDXVRDeviceType} or null.
+    * Gives a controller only if it's connected. Otherwise no worries.
     */
-   public GDXVRDevice getDeviceByType(GDXVRDeviceType type)
-   {
-      for (GDXVRDevice device : devices)
-      {
-         if (device != null && device.getType() == type)
-            return device;
-      }
-      return null;
-   }
-
-   /**
-    * @return all {@link GDXVRDevice} instances of the given {@link GDXVRDeviceType}.
-    */
-   public Array<GDXVRDevice> getDevicesByType(GDXVRDeviceType type)
-   {
-      Array<GDXVRDevice> result = new Array<>();
-      for (GDXVRDevice device : devices)
-      {
-         if (device != null && device.getType() == type)
-            result.add(device);
-      }
-      return result;
-   }
-
-   /**
-    * @return all currently connected {@link GDXVRDevice} instances.
-    */
-   public Array<GDXVRDevice> getDevices()
-   {
-      Array<GDXVRDevice> result = new Array<>();
-      for (GDXVRDevice device : devices)
-      {
-         if (device != null)
-            result.add(device);
-      }
-      return result;
-   }
-
-   /**
-    * @return the {@link GDXVRDevice} of ype {@link GDXVRDeviceType#Controller} that matches the role, or null.
-    */
-   public GDXVRDevice getControllerByRole(GDXVRControllerRole role)
-   {
-      for (GDXVRDevice device : devices)
-      {
-         if (device != null && device.getType() == GDXVRDeviceType.Controller && device.getControllerRole() == role)
-            return device;
-      }
-      return null;
-   }
-
-   public GDXVRDevice getController(RobotSide side)
+   public void getController(RobotSide side, Consumer<GDXVRDevice> controllerIfConnected)
    {
       Integer controllerIndex = controllerIndexes.get(side);
       if (controllerIndex != null)
       {
-         return devices.get(controllerIndex);
-      }
-      else
-      {
-         return null;
+         controllerIfConnected.accept(devices.get(controllerIndex));
       }
    }
 
-   public GDXVRDevice getHeadset()
+   /**
+    * Gives the headset only if it's connected. Otherwise no worries.
+    */
+   public void getHeadset(Consumer<GDXVRDevice> headsetIfConnected)
    {
       if (headsetIndex != null)
       {
-         return devices.get(headsetIndex);
-      }
-      else
-      {
-         return null;
-      }
-   }
-
-   public boolean isButtonPressed(RobotSide side, int button)
-   {
-      if (controllerIndexes.containsKey(side))
-      {
-         return devices.get(controllerIndexes.get(side)).isButtonPressed(button);
-      }
-      else
-      {
-         return false;
-      }
-   }
-
-   public boolean isButtonNewlyPressed(RobotSide side, int button)
-   {
-      if (controllerIndexes.containsKey(side))
-      {
-         return devices.get(controllerIndexes.get(side)).isButtonNewlyPressed(button);
-      }
-      else
-      {
-         return false;
-      }
-   }
-
-   public boolean isButtonNewlyReleased(RobotSide side, int button)
-   {
-      if (controllerIndexes.containsKey(side))
-      {
-         return devices.get(controllerIndexes.get(side)).isButtonNewlyReleased(button);
-      }
-      else
-      {
-         return false;
+         headsetIfConnected.accept(devices.get(headsetIndex));
       }
    }
 

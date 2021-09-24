@@ -20,7 +20,7 @@ public class GDXImGuiVRDemo
 
    public GDXImGuiVRDemo()
    {
-      GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
@@ -66,7 +66,7 @@ public class GDXImGuiVRDemo
          {
             baseUI.dispose();
          }
-      }, getClass());
+      });
    }
 
    public static void main(String[] args)
