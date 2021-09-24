@@ -91,22 +91,17 @@ public class AvatarEstimatorThread extends ModularRobotController
 
       try
       {
+         // In the case the SensorReader.compute() does fill the sensor data, it has to be called before initialize of the state estimator.
+         sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
+
          if (firstTick.getBooleanValue())
          {
-            // Resets filters
-            sensorReader.initialize();
-            // Fills up the sensor output map needed for the state estimator to initialize.
-            sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
             initialize();
 
             if (forceSensorStateUpdater != null)
                forceSensorStateUpdater.initialize();
 
             firstTick.set(false);
-         }
-         else
-         {
-            sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
          }
 
          for (int i = 0; i < secondaryStateEstimators.size(); i++)
