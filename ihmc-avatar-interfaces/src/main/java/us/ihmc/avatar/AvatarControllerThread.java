@@ -204,7 +204,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             double controlDT,
                                                             double gravity,
                                                             ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
-                                                            CenterOfMassDataHolderReadOnly centerOfPressureDataHolderForController,
+                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
                                                             JointDesiredOutputListBasics lowLevelControllerOutput,
@@ -235,7 +235,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                                         yoGraphicsListRegistry,
                                                                         sensorInformation,
                                                                         forceSensorDataHolderForController,
-                                                                        centerOfPressureDataHolderForController,
+                                                                        centerOfMassDataHolderForController,
                                                                         centerOfPressureDataHolderForEstimator,
                                                                         lowLevelControllerOutput,
                                                                         jointsToIgnore);
