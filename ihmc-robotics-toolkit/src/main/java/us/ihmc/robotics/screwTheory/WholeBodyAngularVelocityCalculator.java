@@ -13,6 +13,7 @@ public class WholeBodyAngularVelocityCalculator
 
    private final Momentum robotMomentum = new Momentum();
 
+   private final FrameVector3D linearMomentum = new FrameVector3D();
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D wholeBodyAngularVelocity = new FrameVector3D();
 
@@ -26,6 +27,11 @@ public class WholeBodyAngularVelocityCalculator
    public WholeBodyAngularVelocityCalculator(ReferenceFrame centerOfMassFrame, RigidBodyBasics rootBody)
    {
       this(centerOfMassFrame, rootBody.subtreeArray());
+   }
+
+   public FrameVector3DReadOnly getLinearMomentum()
+   {
+      return linearMomentum;
    }
 
    public FrameVector3DReadOnly getAngularMomentum()
@@ -43,6 +49,7 @@ public class WholeBodyAngularVelocityCalculator
       wholeBodyInertiaCalculator.compute();
       momentumCalculator.computeAndPack(robotMomentum);
 
+      linearMomentum.setIncludingFrame(robotMomentum.getLinearPart());
       angularMomentum.setIncludingFrame(robotMomentum.getAngularPart());
       wholeBodyAngularVelocity.setToZero(angularMomentum.getReferenceFrame());
 
