@@ -44,6 +44,11 @@ public class AngularExcursionCalculator
       angularExcursion.scaleAdd(dt, wholeBodyAngularVelocity, angularExcursion);
    }
 
+   public FrameVector3DReadOnly getLinearMomentum()
+   {
+      return angularVelocityCalculator.getLinearMomentum();
+   }
+
    public FrameVector3DReadOnly getAngularMomentum()
    {
       return angularVelocityCalculator.getAngularMomentum();
