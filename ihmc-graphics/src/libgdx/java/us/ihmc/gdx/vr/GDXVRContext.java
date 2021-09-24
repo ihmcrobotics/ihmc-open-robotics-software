@@ -6,6 +6,7 @@ import java.nio.IntBuffer;
 import java.util.*;
 import java.util.function.Consumer;
 
+import com.badlogic.gdx.Gdx;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.openvr.*;
 
@@ -28,6 +29,9 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -37,6 +41,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.MissingThreadTools;
 
 /**
  * Responsible for initializing the VR system, managing rendering surfaces,
@@ -46,7 +51,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * <p>
  * FIXME add multisampling plus draw/resolve buffers
  */
-public class GDXVRContext implements Disposable
+public class GDXVRContext
 {
    // couple of scratch buffers
    private final IntBuffer errorPointer = BufferUtils.newIntBuffer(1);
@@ -57,14 +62,19 @@ public class GDXVRContext implements Disposable
    private final SideDependentList<GDXVRPerEyeData> perEyeData = new SideDependentList<>();
 
    // internal native objects to get device poses
-   private final TrackedDevicePose.Buffer trackedDevicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
-   private final TrackedDevicePose.Buffer trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
+   private TrackedDevicePose.Buffer trackedDevicePoses;
+   private TrackedDevicePose.Buffer trackedDeviceGamePoses;
 
    // devices, their poses and listeners
    private final GDXVRDevice[] devices = new GDXVRDevice[VR.k_unMaxTrackedDeviceCount];
-   private final VREvent event = VREvent.create();
+   {
+      Arrays.fill(devices, null); // null means device is not connected
+   }
+   private VREvent event;
    private final SideDependentList<Integer> controllerIndexes = new SideDependentList<>(null, null);
    private final HashMap<Integer, RobotSide> indexToControlllerSideMap = new HashMap<>();
+   private int width;
+   private int height;
    private Integer headsetIndex = null;
    private final TreeSet<Integer> trackerIndexes = new TreeSet<>();
    private final TreeSet<Integer> genericIndexes = new TreeSet<>();
@@ -100,49 +110,50 @@ public class GDXVRContext implements Disposable
                                                                                   ReferenceFrame.getWorldFrame(),
                                                                                   totalTransformFromVRPlayAreaToIHMCZUpWorld);
 
-   /**
-    * Creates a new GDXVRContext, initializes the VR system, and
-    * sets up rendering surfaces with depth attachments.
-    */
-   public GDXVRContext()
+
+   public Notification initSystemOnAThread()
    {
-      this(1, false);
+      LogTools.info("initializing");
+      Notification finished = new Notification();
+      MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+      {
+         event = VREvent.create(); // takes 92 ms
+         trackedDevicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount); // 10 ms
+         trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount); // 10 ms
+
+         int token = VR.VR_InitInternal(errorPointer, VR.EVRApplicationType_VRApplication_Scene); // takes 148 ms
+         checkInitError(errorPointer);
+         OpenVR.create(token); // takes 24 ms
+
+         VR.VR_GetGenericInterface(VR.IVRCompositor_Version, errorPointer);
+         checkInitError(errorPointer);
+
+         VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, errorPointer);
+         checkInitError(errorPointer);
+
+         VRSystem.VRSystem_GetRecommendedRenderTargetSize(widthPointer, heightPointer);
+         float renderTargetMultiplier = 1.0f; // multiplier to scale the render surface dimensions as a replacement for multisampling
+         width = (int) (widthPointer.get(0) * renderTargetMultiplier);
+         height = (int) (heightPointer.get(0) * renderTargetMultiplier);
+
+         finished.set();
+      });
+      return finished;
    }
 
-   /**
-    * Creates a new GDXVRContext, initializes the VR system,
-    * and sets up rendering surfaces.
-    *
-    * @param renderTargetMultiplier multiplier to scale the render surface dimensions as a replacement for multisampling
-    * @param hasStencil             whether the rendering surfaces should have a stencil buffer
-    * @throws {@link GdxRuntimeException} if the system could not be initialized
-    */
-   public GDXVRContext(float renderTargetMultiplier, boolean hasStencil)
+   /** Needs to be on libGDX thread. */
+   public void setupEyes()
    {
-      int token = VR.VR_InitInternal(errorPointer, VR.EVRApplicationType_VRApplication_Scene);
-      checkInitError(errorPointer);
-      OpenVR.create(token);
-
-      VR.VR_GetGenericInterface(VR.IVRCompositor_Version, errorPointer);
-      checkInitError(errorPointer);
-
-      VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, errorPointer);
-      checkInitError(errorPointer);
-
-      Arrays.fill(devices, null);
-
-      VRSystem.VRSystem_GetRecommendedRenderTargetSize(widthPointer, heightPointer);
-      int width = (int) (widthPointer.get(0) * renderTargetMultiplier);
-      int height = (int) (heightPointer.get(0) * renderTargetMultiplier);
-      LogTools.info("VR render size: {} x {}", width, height);
-
-      setupEye(RobotSide.LEFT, width, height, hasStencil);
-      setupEye(RobotSide.RIGHT, width, height, hasStencil);
+      LogTools.info("VR per eye render size: {} x {}", width, height);
+      setupEye(RobotSide.LEFT);
+      setupEye(RobotSide.RIGHT);
    }
 
-   private void setupEye(RobotSide eye, int width, int height, boolean hasStencil)
+   private void setupEye(RobotSide eye)
    {
-      FrameBuffer buffer = new FrameBuffer(Format.RGBA8888, width, height, true, hasStencil);
+      boolean hasDepth = true;
+      boolean hasStencil = false;
+      FrameBuffer buffer = new FrameBuffer(Format.RGBA8888, width, height, hasDepth, hasStencil);
       TextureRegion region = new TextureRegion(buffer.getColorBufferTexture());
       region.flip(false, true);
       GDXVRCamera camera = new GDXVRCamera(eye, () -> devices[headsetIndex]);
@@ -384,6 +395,7 @@ public class GDXVRContext implements Disposable
          throw new GdxRuntimeException("Call begin() before end()");
       renderingStarted = false;
 
+      // TODO: Look into doing these submits in parallel; they are expensive
       VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Left, perEyeData.get(RobotSide.LEFT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
       VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Right, perEyeData.get(RobotSide.RIGHT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
    }
