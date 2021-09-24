@@ -187,7 +187,7 @@ public class GDXImGuiBasedUI
 
    public void renderBeforeOnScreenUI()
    {
-      vrManager.pollEvents();
+      vrManager.pollEvents(this);
       Gdx.graphics.setTitle(windowTitle + " - " + Gdx.graphics.getFramesPerSecond() + " FPS");
       GDX3DSceneTools.glClearGray(0.3f);
       imGuiWindowAndDockSystem.beforeWindowManagement();

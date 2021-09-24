@@ -61,11 +61,13 @@ public class GDXVRContext implements Disposable
    private final TrackedDevicePose.Buffer trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
 
    // devices, their poses and listeners
-   private final ArrayList<GDXVRDevice> devices = new ArrayList<>(VR.k_unMaxTrackedDeviceCount); // This is dumb, should be a different data structure
+   private final GDXVRDevice[] devices = new GDXVRDevice[VR.k_unMaxTrackedDeviceCount];
    private final VREvent event = VREvent.create();
    private final SideDependentList<Integer> controllerIndexes = new SideDependentList<>(null, null);
    private final HashMap<Integer, RobotSide> indexToControlllerSideMap = new HashMap<>();
    private Integer headsetIndex = null;
+   private final TreeSet<Integer> trackerIndexes = new TreeSet<>();
+   private final TreeSet<Integer> genericIndexes = new TreeSet<>();
 
    // render models
    private final ObjectMap<String, Model> models = new ObjectMap<>();
@@ -127,7 +129,7 @@ public class GDXVRContext implements Disposable
       VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, errorPointer);
       checkInitError(errorPointer);
 
-      Collections.fill(devices, null);
+      Arrays.fill(devices, null);
 
       VRSystem.VRSystem_GetRecommendedRenderTargetSize(widthPointer, heightPointer);
       int width = (int) (widthPointer.get(0) * renderTargetMultiplier);
@@ -143,7 +145,7 @@ public class GDXVRContext implements Disposable
       FrameBuffer buffer = new FrameBuffer(Format.RGBA8888, width, height, true, hasStencil);
       TextureRegion region = new TextureRegion(buffer.getColorBufferTexture());
       region.flip(false, true);
-      GDXVRCamera camera = new GDXVRCamera(eye, () -> devices.get(headsetIndex));
+      GDXVRCamera camera = new GDXVRCamera(eye, () -> devices[headsetIndex]);
       camera.near = 0.1f;
       camera.far = 1000f;
       perEyeData.set(eye, new GDXVRPerEyeData(buffer, region, camera));
@@ -211,7 +213,7 @@ public class GDXVRContext implements Disposable
       // maybe do it at a lower frequency just to catch new devices?
       for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
       {
-         GDXVRDevice device = devices.get(deviceIndex);
+         GDXVRDevice device = devices[deviceIndex];
          if (device != null)
          {
             TrackedDevicePose trackedPose = trackedDevicePoses.get(deviceIndex);
@@ -246,23 +248,23 @@ public class GDXVRContext implements Disposable
                break;
             case VR.EVREventType_VREvent_TrackedDeviceDeactivated:
                deviceIndex = event.trackedDeviceIndex();
-               if (devices.get(deviceIndex) == null)
+               if (devices[deviceIndex] == null)
                   continue;
                updateDevice(deviceIndex, null);
                break;
             case VR.EVREventType_VREvent_ButtonPress:
-               if (devices.get(deviceIndex) == null)
+               if (devices[deviceIndex] == null)
                   continue;
                button = event.data().controller().button();
-               devices.get(deviceIndex).setButton(button, true);
-               devices.get(deviceIndex).setButtonPressed(button);
+               devices[deviceIndex].setButton(button, true);
+               devices[deviceIndex].setButtonPressed(button);
                break;
             case VR.EVREventType_VREvent_ButtonUnpress:
-               if (devices.get(deviceIndex) == null)
+               if (devices[deviceIndex] == null)
                   continue;
                button = event.data().controller().button();
-               devices.get(deviceIndex).setButton(button, false);
-               devices.get(deviceIndex).setButtonReleased(button);
+               devices[deviceIndex].setButton(button, false);
+               devices[deviceIndex].setButtonReleased(button);
                break;
          }
       }
@@ -288,9 +290,11 @@ public class GDXVRContext implements Disposable
          {
             headsetIndex = null;
          }
+         trackerIndexes.remove(deviceIndex);
+         genericIndexes.remove(deviceIndex);
       }
 
-      devices.set(deviceIndex, device);
+      devices[deviceIndex] = device;
    }
 
    private void createDevice(int deviceIndex)
@@ -333,6 +337,14 @@ public class GDXVRContext implements Disposable
                controllerRole = GDXVRControllerRole.RightHand;
                break;
          }
+      }
+      if (type == GDXVRDeviceType.BaseStation)
+      {
+         trackerIndexes.add(deviceIndex);
+      }
+      if (type == GDXVRDeviceType.Generic)
+      {
+         genericIndexes.add(deviceIndex);
       }
       updateDevice(deviceIndex, new GDXVRDevice(deviceIndex, type, controllerRole, this::loadRenderModel));
    }
@@ -380,6 +392,9 @@ public class GDXVRContext implements Disposable
    {
       for (GDXVRPerEyeData eyeData : perEyeData)
          eyeData.getFrameBuffer().dispose();
+
+      // TODO: Dispose models
+
       VR_ShutdownInternal();
    }
 
@@ -482,7 +497,7 @@ public class GDXVRContext implements Disposable
       Integer controllerIndex = controllerIndexes.get(side);
       if (controllerIndex != null)
       {
-         controllerIfConnected.accept(devices.get(controllerIndex));
+         controllerIfConnected.accept(devices[controllerIndex]);
       }
    }
 
@@ -493,7 +508,23 @@ public class GDXVRContext implements Disposable
    {
       if (headsetIndex != null)
       {
-         headsetIfConnected.accept(devices.get(headsetIndex));
+         headsetIfConnected.accept(devices[headsetIndex]);
+      }
+   }
+
+   public void getBaseStations(Consumer<GDXVRDevice> baseStationConsumer)
+   {
+      for (Integer trackerIndex : trackerIndexes)
+      {
+         baseStationConsumer.accept(devices[trackerIndex]);
+      }
+   }
+
+   public void getGenericDevices(Consumer<GDXVRDevice> genericDeviceConsumer)
+   {
+      for (Integer trackerIndex : genericIndexes)
+      {
+         genericDeviceConsumer.accept(devices[trackerIndex]);
       }
    }
 
