@@ -3,6 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 
@@ -17,16 +18,16 @@ public class WholeBodyAngularVelocityCalculator
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D wholeBodyAngularVelocity = new FrameVector3D();
 
-   public WholeBodyAngularVelocityCalculator(ReferenceFrame centerOfMassFrame, RigidBodyBasics... rigidBodies)
+   public WholeBodyAngularVelocityCalculator(ReferenceFrame centerOfMassFrame, YoGraphicsListRegistry graphicsListRegistry, RigidBodyBasics... rigidBodies)
    {
-      this.wholeBodyInertiaCalculator = new WholeBodyInertiaCalculator(centerOfMassFrame, rigidBodies);
+      this.wholeBodyInertiaCalculator = new WholeBodyInertiaCalculator(centerOfMassFrame, graphicsListRegistry, rigidBodies);
       this.momentumCalculator = new MomentumCalculator(rigidBodies);
       robotMomentum.setReferenceFrame(centerOfMassFrame);
    }
 
-   public WholeBodyAngularVelocityCalculator(ReferenceFrame centerOfMassFrame, RigidBodyBasics rootBody)
+   public WholeBodyAngularVelocityCalculator(ReferenceFrame centerOfMassFrame, YoGraphicsListRegistry graphicsListRegistry, RigidBodyBasics rootBody)
    {
-      this(centerOfMassFrame, rootBody.subtreeArray());
+      this(centerOfMassFrame, graphicsListRegistry, rootBody.subtreeArray());
    }
 
    public FrameVector3DReadOnly getLinearMomentum()
