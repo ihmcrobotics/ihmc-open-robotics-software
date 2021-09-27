@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameCapsule3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameCylinder3DReadOnly;
@@ -18,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DRe
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.SDFAppearance;
@@ -64,12 +66,14 @@ import us.ihmc.robotics.robotDescription.IMUSensorDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.KinematicPointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.LoopClosureConstraintDescription;
 import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SensorDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
+import us.ihmc.scs2.definition.controller.interfaces.ControllerDefinition;
 import us.ihmc.scs2.definition.geometry.ArcTorus3DDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.Capsule3DDefinition;
@@ -115,6 +119,8 @@ import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.TextureDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimRigidBodyBasics;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -127,10 +133,15 @@ public class RobotDefinitionTools
       RigidBodyDefinition rootBody = new RigidBodyDefinition(robotDescription.getName() + "RootBody");
 
       for (JointDescription rootJointToCopy : robotDescription.getRootJoints())
-         createAndJointsRecursive(rootBody, rootJointToCopy);
+         createAndAddJointsRecursive(rootBody, rootJointToCopy);
+
+      List<ControllerDefinition> constraints = new ArrayList<>();
+      for (JointDescription rootJointToCopy : robotDescription.getRootJoints())
+         createLoopClosureConstraintRecursive(rootJointToCopy, constraints);
 
       RobotDefinition robotDefinition = new RobotDefinition(robotDescription.getName());
       robotDefinition.setRootBodyDefinition(rootBody);
+      constraints.forEach(robotDefinition::addControllerDefinition);
       return robotDefinition;
    }
 
@@ -180,7 +191,7 @@ public class RobotDefinitionTools
       }
    }
 
-   public static void createAndJointsRecursive(RigidBodyDefinition parentBody, JointDescription jointToCopy)
+   public static void createAndAddJointsRecursive(RigidBodyDefinition parentBody, JointDescription jointToCopy)
    {
       JointDefinition jointDefinition = toJointDefinition(jointToCopy);
       parentBody.addChildJoint(jointDefinition);
@@ -189,7 +200,7 @@ public class RobotDefinitionTools
       jointDefinition.setSuccessor(rigidBodyDefinition);
 
       for (JointDescription childJointToCopy : jointToCopy.getChildrenJoints())
-         createAndJointsRecursive(rigidBodyDefinition, childJointToCopy);
+         createAndAddJointsRecursive(rigidBodyDefinition, childJointToCopy);
    }
 
    public static RigidBodyDefinition toRigidBodyDefinition(LinkDescription source)
@@ -651,5 +662,36 @@ public class RobotDefinitionTools
    private static ColorDefinition toColorDefinition(MutableColor mutableColor, double transparency)
    {
       return new ColorDefinition(mutableColor.getX(), mutableColor.getY(), mutableColor.getZ(), 1.0 - transparency);
+   }
+
+   private static void createLoopClosureConstraintRecursive(JointDescription jointDescription, List<ControllerDefinition> controllerDefinitionsToPack)
+   {
+      List<LoopClosureConstraintDescription> constraintDescriptions = jointDescription.getChildrenConstraintDescriptions();
+
+      for (LoopClosureConstraintDescription constraintDescription : constraintDescriptions)
+      {
+         controllerDefinitionsToPack.add((controllerInput, controllerOutput) ->
+         {
+            String name = constraintDescription.getName();
+            Tuple3DReadOnly offsetFromParentJoint = constraintDescription.getOffsetFromParentJoint();
+            Tuple3DReadOnly offsetFromLinkParentJoint = constraintDescription.getOffsetFromLinkParentJoint();
+            Matrix3DReadOnly constraintForceSubSpace = constraintDescription.getConstraintForceSubSpace();
+            Matrix3DReadOnly constraintMomentSubSpace = constraintDescription.getConstraintMomentSubSpace();
+            LoopClosureSoftConstraintSCS2 constraint = new LoopClosureSoftConstraintSCS2(name,
+                                                                                         offsetFromParentJoint,
+                                                                                         offsetFromLinkParentJoint,
+                                                                                         constraintForceSubSpace,
+                                                                                         constraintMomentSubSpace);
+            constraint.setParentJoint((SimJointBasics) controllerInput.getInput().findJoint(jointDescription.getName()));
+            constraint.setRigidBody((SimRigidBodyBasics) controllerInput.getInput().findRigidBody(constraintDescription.getLink().getName()));
+            constraint.setGains(constraintDescription.getProportionalGains(), constraintDescription.getDerivativeGains());
+            return constraint;
+         });
+      }
+
+      for (JointDescription childJointDescription : jointDescription.getChildrenJoints())
+      {
+         createLoopClosureConstraintRecursive(childJointDescription, controllerDefinitionsToPack);
+      }
    }
 }
