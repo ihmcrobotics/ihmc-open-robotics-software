@@ -15,6 +15,7 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.ui.tools.ImPlotTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -215,7 +216,7 @@ public class ImPlotYoGraphPanel
 
       YoDoubleClientHelper yoDoubleHelper = yoClientHelper.subscribeToYoDouble(yoVariableName);
       LogTools.info("Setting up graph for variable: {}", yoDoubleHelper.getFullName());
-      Double[] values = new Double[bufferSize];
+      Double[] values = ImPlotTools.newNaNFilledBuffer(bufferSize);
       synchronized (graphs)
       {
          ArrayList<ImPlotYoGraph> graphsForServer = graphs.computeIfAbsent(serverName, key -> new ArrayList<>());
