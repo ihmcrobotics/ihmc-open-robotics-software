@@ -8,19 +8,24 @@ import java.util.Map;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.JointStateType;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointReadOnly;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointReadOnly;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimRigidBodyReadOnly;
 import us.ihmc.scs2.simulation.robot.sensors.SimIMUSensor;
 import us.ihmc.scs2.simulation.robot.sensors.SimWrenchSensor;
@@ -51,6 +56,7 @@ public class SCS2SensorReader implements SensorReader
    private final List<ForceSensorDefinition> wrenchSensorDefinitions = stateEstimatorSensorDefinitions.getForceSensorDefinitions();
    private ForceSensorDataHolder forceSensorOutputs = null;
 
+   private final List<JointSensorReader> jointSensorReaders = new ArrayList<>();
    private final List<OneDoFJointStateReadOnly> jointSensorOutputList = new ArrayList<>();
    private final Map<OneDoFJointBasics, OneDoFJointStateReadOnly> jointToSensorOutputMap = new HashMap<>();
 
@@ -180,6 +186,32 @@ public class SCS2SensorReader implements SensorReader
          sensorHeadPPSTimetamp = null;
          perfectSensorOutputMap = null;
       }
+
+      for (JointBasics controllerJoint : controllerJointList)
+      {
+         SimJointReadOnly simJoint = controllerInput.getInput().findJoint(controllerJoint.getName());
+
+         if (controllerJoint instanceof SixDoFJointBasics)
+         {
+            if (usePerfectSensor)
+            {
+               jointSensorReaders.add(new SixDoFJointSensorReader((SixDoFJointBasics) controllerJoint, (SixDoFJointReadOnly) simJoint));
+            }
+         }
+         else if (controllerJoint instanceof InvertedFourBarJoint)
+         {
+            InvertedFourBarJoint controllerInvertedFourBarJoint = (InvertedFourBarJoint) controllerJoint;
+            List<RevoluteJointBasics> loopJoints = controllerInvertedFourBarJoint.getFourBarFunction().getLoopJoints();
+            OneDoFJointReadOnly[] simJoints = loopJoints.stream()
+                                                        .map(loopJoint -> (OneDoFJointReadOnly) controllerInput.getInput().findJoint(loopJoint.getName()))
+                                                        .toArray(OneDoFJointReadOnly[]::new);
+            jointSensorReaders.add(new InvertedFourBarJointSensorReader(controllerInvertedFourBarJoint, simJoints, sensorProcessing));
+         }
+         else if (controllerJoint instanceof OneDoFJointBasics)
+         {
+            jointSensorReaders.add(new OneDoFJointSensorReader((OneDoFJointBasics) controllerJoint, (OneDoFJointReadOnly) simJoint, sensorProcessing));
+         }
+      }
    }
 
    private void addIMUSensor(IMUDefinition definition)
@@ -238,15 +270,14 @@ public class SCS2SensorReader implements SensorReader
          sensorHeadPPSTimetamp.set(timestamp);
       }
 
-      MultiBodySystemTools.copyJointsState(simJointList, controllerJointList, JointStateType.CONFIGURATION);
-      MultiBodySystemTools.copyJointsState(simJointList, controllerJointList, JointStateType.VELOCITY);
-      MultiBodySystemTools.copyJointsState(simJointList, controllerJointList, JointStateType.ACCELERATION);
-      MultiBodySystemTools.copyJointsState(simJointList, controllerJointList, JointStateType.EFFORT);
-      rootBody.updateFramesRecursively();
+      for (int i = 0; i < jointSensorReaders.size(); i++)
+      {
+         jointSensorReaders.get(i).read();
+      }
 
       if (usePerfectSensor)
       {
-
+         rootBody.updateFramesRecursively();
          for (int i = 0; i < imuSensorDefinitions.size(); i++)
          {
             IMUSensor controllerSensor = controllerIMUSensors.get(i);
@@ -265,14 +296,6 @@ public class SCS2SensorReader implements SensorReader
       }
       else
       {
-         for (int i = 0; i < sensorProcessing.getJointSensorDefinitions().size(); i++)
-         {
-            OneDoFJointBasics joint = sensorProcessing.getJointSensorDefinitions().get(i);
-            sensorProcessing.setJointPositionSensorValue(joint, joint.getQ());
-            sensorProcessing.setJointVelocitySensorValue(joint, joint.getQd());
-            sensorProcessing.setJointTauSensorValue(joint, joint.getTau());
-         }
-
          for (int i = 0; i < imuSensorDefinitions.size(); i++)
          {
             IMUDefinition definition = imuSensorDefinitions.get(i);
@@ -316,5 +339,117 @@ public class SCS2SensorReader implements SensorReader
    public YoRegistry getRegistry()
    {
       return registry;
+   }
+
+   private static interface JointSensorReader
+   {
+      void read();
+   }
+
+   private static class SixDoFJointSensorReader implements JointSensorReader
+   {
+      private final SixDoFJointBasics controllerJoint;
+      private final SixDoFJointReadOnly simJoint;
+
+      public SixDoFJointSensorReader(SixDoFJointBasics controllerJoint, SixDoFJointReadOnly simJoint)
+      {
+         this.controllerJoint = controllerJoint;
+         this.simJoint = simJoint;
+      }
+
+      @Override
+      public void read()
+      {
+         controllerJoint.setJointConfiguration(simJoint);
+         controllerJoint.setJointTwist(simJoint);
+         controllerJoint.setJointAcceleration(simJoint);
+         controllerJoint.setJointWrench(simJoint);
+      }
+   }
+
+   private static class OneDoFJointSensorReader implements JointSensorReader
+   {
+      private final OneDoFJointBasics controllerJoint;
+      private final OneDoFJointReadOnly simJoint;
+      private final SensorProcessing sensorProcessing;
+
+      public OneDoFJointSensorReader(OneDoFJointBasics controllerJoint, OneDoFJointReadOnly simJoint, SensorProcessing sensorProcessing)
+      {
+         this.controllerJoint = controllerJoint;
+         this.simJoint = simJoint;
+         this.sensorProcessing = sensorProcessing;
+      }
+
+      @Override
+      public void read()
+      {
+         if (sensorProcessing == null)
+         {
+            controllerJoint.setJointConfiguration(simJoint);
+            controllerJoint.setJointTwist(simJoint);
+            controllerJoint.setJointAcceleration(simJoint);
+            controllerJoint.setJointWrench(simJoint);
+         }
+         else
+         {
+            sensorProcessing.setJointPositionSensorValue(controllerJoint, simJoint.getQ());
+            sensorProcessing.setJointVelocitySensorValue(controllerJoint, simJoint.getQd());
+            sensorProcessing.setJointAccelerationSensorValue(controllerJoint, simJoint.getQdd());
+            sensorProcessing.setJointTauSensorValue(controllerJoint, simJoint.getTau());
+         }
+      }
+   }
+
+   private static class InvertedFourBarJointSensorReader implements JointSensorReader
+   {
+      private final InvertedFourBarJoint controllerJoint;
+      private final OneDoFJointReadOnly[] simJoints;
+      private final SensorProcessing sensorProcessing;
+
+      private final InvertedFourBarJoint localFourBarJoint;
+      private final int[] activeJointIndices;
+
+      public InvertedFourBarJointSensorReader(InvertedFourBarJoint controllerJoint, OneDoFJointReadOnly[] simJoints, SensorProcessing sensorProcessing)
+      {
+         this.controllerJoint = controllerJoint;
+         this.simJoints = simJoints;
+         this.sensorProcessing = sensorProcessing;
+
+         localFourBarJoint = InvertedFourBarJoint.cloneInvertedFourBarJoint(controllerJoint, ReferenceFrameTools.constructARootFrame("dummy"), "dummy");
+         if (controllerJoint.getJointA().isLoopClosure() || controllerJoint.getJointD().isLoopClosure())
+            activeJointIndices = new int[] {1, 2};
+         else
+            activeJointIndices = new int[] {0, 3};
+      }
+
+      @Override
+      public void read()
+      {
+         double q = simJoints[activeJointIndices[0]].getQ() + simJoints[activeJointIndices[1]].getQ();
+         double qd = simJoints[activeJointIndices[0]].getQd() + simJoints[activeJointIndices[1]].getQd();
+         double qdd = 0.0; // TODO simJoints[activeJointIndices[0]].getQdd() + simJoints[activeJointIndices[1]].getQdd();
+         localFourBarJoint.setQ(q);
+         localFourBarJoint.setQd(qd);
+         localFourBarJoint.setQdd(qdd);
+         localFourBarJoint.updateFrame();
+         DMatrixRMaj loopJacobian = localFourBarJoint.getFourBarFunction().getLoopJacobian();
+         double tau = loopJacobian.get(activeJointIndices[0]) * simJoints[activeJointIndices[0]].getTau()
+               + loopJacobian.get(activeJointIndices[1]) * simJoints[activeJointIndices[1]].getTau();
+
+         if (sensorProcessing == null)
+         {
+            controllerJoint.setQ(q);
+            controllerJoint.setQd(qd);
+            controllerJoint.setQdd(qdd);
+            controllerJoint.setTau(tau);
+         }
+         else
+         {
+            sensorProcessing.setJointPositionSensorValue(controllerJoint, q);
+            sensorProcessing.setJointVelocitySensorValue(controllerJoint, qd);
+            sensorProcessing.setJointAccelerationSensorValue(controllerJoint, qdd);
+            sensorProcessing.setJointTauSensorValue(controllerJoint, tau);
+         }
+      }
    }
 }
