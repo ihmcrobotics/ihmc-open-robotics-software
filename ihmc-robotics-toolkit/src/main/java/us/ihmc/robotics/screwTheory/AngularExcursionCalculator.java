@@ -4,17 +4,23 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class AngularExcursionCalculator
 {
    private final WholeBodyAngularVelocityCalculator angularVelocityCalculator;
-   private final YoFrameVector3D angularExcursion;
+   private final Vector3D axisAngle = new Vector3D();
+   private final Quaternion rotation = new Quaternion();
+   private final YoFrameQuaternion angularExcursion;
+   private final YoFrameYawPitchRoll angularExcursionRPY;
    private final YoFrameVector3D wholeBodyAngularVelocity;
    private final YoBoolean zeroAngularExcursionFlag;
    private final double dt;
@@ -27,7 +33,8 @@ public class AngularExcursionCalculator
       angularVelocityCalculator = new WholeBodyAngularVelocityCalculator(centerOfMassFrame, graphicsListRegistry, rootBody.subtreeArray());
 
       zeroAngularExcursionFlag = new YoBoolean("zeroAngularExcursionFlag", registry);
-      angularExcursion = new YoFrameVector3D("angularExcursion", centerOfMassFrame, registry);
+      angularExcursion = new YoFrameQuaternion("angularExcursion", centerOfMassFrame, registry);
+      angularExcursionRPY = new YoFrameYawPitchRoll("angularExcursion", centerOfMassFrame, registry);
       wholeBodyAngularVelocity = new YoFrameVector3D("wholeBodyAngularVelocity", centerOfMassFrame, registry);
    }
 
@@ -36,10 +43,10 @@ public class AngularExcursionCalculator
       angularExcursion.setToZero();
    }
 
-   public void setAngularExcursionValue(Vector3D value)
-   {
-      angularExcursion.set(value);
-   }
+//   public void setAngularExcursionValue(Vector3D value)
+//   {
+//      angularExcursion.set(value);
+//   }
 
    public void compute()
    {
@@ -52,7 +59,11 @@ public class AngularExcursionCalculator
       }
 
       wholeBodyAngularVelocity.set(angularVelocityCalculator.getWholeBodyAngularVelocity());
-      angularExcursion.scaleAdd(dt, wholeBodyAngularVelocity, angularExcursion);
+      axisAngle.setAndScale(dt, wholeBodyAngularVelocity);
+      rotation.setRotationVector(axisAngle);
+
+      angularExcursion.append(rotation);
+      angularExcursionRPY.set(angularExcursion);
    }
 
    public FrameVector3DReadOnly getLinearMomentum()
