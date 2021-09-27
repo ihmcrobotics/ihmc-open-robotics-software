@@ -7,6 +7,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PDController;
+import us.ihmc.robotics.controllers.ParameterizedPDController;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
@@ -43,20 +45,20 @@ public class RemoteControllerState extends HighLevelControllerState
       this.controllerToolbox = controllerToolbox;
 
       jointGains = new HashMap<String, Double>() {{
-         put("l_leg_aky", 500.0);
-         put("r_leg_aky", 500.0);
+         put("l_leg_aky", 2000.0);
+         put("r_leg_aky", 2000.0);
          put("l_leg_akx", 100.0);
          put("r_leg_akx", 100.0);
-         put("l_leg_kny", 500.0);
-         put("r_leg_kny", 500.0);
+         put("l_leg_kny", 1000.0);
+         put("r_leg_kny", 1000.0);
          put("l_leg_hpz", 100.0);
          put("r_leg_hpz", 100.0);
          put("l_leg_hpx", 300.0);
          put("r_leg_hpx", 300.0);
-         put("l_leg_hpy", 300.0);
-         put("r_leg_hpy", 300.0);
+         put("l_leg_hpy", 1000.0);
+         put("r_leg_hpy", 1000.0);
          put("back_bkz", 500.0);
-         put("back_bky", 500.0);
+         put("back_bky", 1500.0);
          put("back_bkx", 500.0);
          put("r_arm_shz", 100.0);
          put("l_arm_shx", 100.0);
@@ -78,9 +80,9 @@ public class RemoteControllerState extends HighLevelControllerState
       for (int i = 0; i < controlledJoints.length; i++) {
          lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(controlledJoints[i], JointDesiredControlMode.EFFORT);
          YoDouble proportionalGain = new YoDouble("proportionalGain" + controlledJoints[i].getName(), getYoRegistry());
-         proportionalGain.set(1.0f);
          YoDouble derivateGain = new YoDouble("derivateGain" + controlledJoints[i].getName(), getYoRegistry());
-         derivateGain.set(0.03f * proportionalGain.getValue());
+         proportionalGain.set(1.0f);
+         derivateGain.set(0.1 * proportionalGain.getValue());
          controllers[i] = new PDController(proportionalGain, derivateGain, "pdControllerJoint" + controlledJoints[i].getName(), getYoRegistry());
       }
 
@@ -91,11 +93,10 @@ public class RemoteControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
-      double dT = timeInState - lastTime;
       for (int i = 0; i < controlledJoints.length; i++)
       {
          desiredPositions[i].set(networker.getDesiredAngle(controlledJoints[i].getName()));
-         double torque = controllers[i].compute(controlledJoints[i].getQ(), desiredPositions[i].getDoubleValue(), controlledJoints[i].getQd(), 0);
+         double torque = controllers[i].computeForAngles(controlledJoints[i].getQ(), desiredPositions[i].getDoubleValue(), controlledJoints[i].getQd(), 0);
          String jointName = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(i).getName();
          if (torque > 1.0) {
             torque = 1.0;
@@ -159,7 +160,8 @@ public class RemoteControllerState extends HighLevelControllerState
          put("neck_ry", 0.0);
       }};
       // Do nothing
-      for (int i = 0; i < controlledJoints.length; i++) {
+      for (int i = 0; i < controlledJoints.length; i++)
+      {
          desiredPositions[i].set(controlledJoints[i].getQ() + initialPoseCorrections.get(controlledJoints[i].getName()));
          networker.setDesiredAngle(controlledJoints[i].getName(), desiredPositions[i].getDoubleValue());
       }
