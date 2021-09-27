@@ -50,7 +50,27 @@ public class AtlasRemoteTest extends DRCFlatGroundWalkingTest
    public void testRemote() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       getSimulationTestingParameters().setKeepSCSUp(true);
-      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+      robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
+      {
+         @Override
+         public double getSimulateDT()
+         {
+            return 0.00001;
+         }
+
+         @Override
+         public double getEstimatorDT()
+         {
+            return 0.0005;
+         }
+
+         @Override
+         public double getControllerDT()
+         {
+            return 0.001;
+         }
+      };
+
       DRCSimulationTestHelper drcSimulationTestHelper = new DRCSimulationTestHelper(super.getSimulationTestingParameters(), robotModel, new FlatGroundEnvironment());
       drcSimulationTestHelper.setAddFootstepMessageGenerator(true);
       drcSimulationTestHelper.setUseHeadingAndVelocityScript(true);
