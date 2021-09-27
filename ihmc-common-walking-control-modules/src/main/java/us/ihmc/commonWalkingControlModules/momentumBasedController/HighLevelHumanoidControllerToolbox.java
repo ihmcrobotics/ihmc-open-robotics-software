@@ -382,7 +382,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       yoCenterOfPressure.setToNaN();
 
       this.totalMass.set(totalMass);
-      angularExcursionCalculator = new AngularExcursionCalculator(centerOfMassFrame, fullRobotModel.getElevator(), controlDT, registry);
+      angularExcursionCalculator = new AngularExcursionCalculator(centerOfMassFrame, fullRobotModel.getElevator(), controlDT, registry, yoGraphicsListRegistry);
       yoAngularMomentum = new YoFrameVector3D("AngularMomentum", centerOfMassFrame, registry);
       yoLinearMomentum = new YoFrameVector3D("LinearMomentum", centerOfMassFrame, registry);
       
