@@ -20,6 +20,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class AvatarSimulation
 {
@@ -217,5 +218,15 @@ public class AvatarSimulation
    public void setRobotModel(DRCRobotModel robotModel)
    {
       this.robotModel = robotModel;
+   }
+
+   public YoRegistry getStateEstimationThreadRegistry()
+   {
+      return stateEstimationThread.getYoRegistry();
+   }
+
+   public YoRegistry getControllerThreadRegistry()
+   {
+      return controllerThread.getYoVariableRegistry();
    }
 }

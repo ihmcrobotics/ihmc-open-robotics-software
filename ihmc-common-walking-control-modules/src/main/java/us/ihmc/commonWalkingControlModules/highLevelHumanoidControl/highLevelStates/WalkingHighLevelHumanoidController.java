@@ -664,6 +664,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          {
             commandInputManager.submitMessage(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.PUSH_RECOVERY));
          }
+         else
+         {
+            walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
+            controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
+         }
       }
    }
 

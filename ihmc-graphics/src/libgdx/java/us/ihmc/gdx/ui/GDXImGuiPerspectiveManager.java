@@ -12,7 +12,8 @@ import us.ihmc.tools.io.HybridDirectory;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public class GDXImGuiPerspectiveManager
@@ -30,7 +31,7 @@ public class GDXImGuiPerspectiveManager
    private boolean needToReindexPerspectives = true;
    private final ImString perspectiveNameToSave = new ImString("", 100);
    private final ImBoolean perspectiveDefaultMode = new ImBoolean(false);
-   private final ArrayList<String> perspectives = new ArrayList<>();
+   private final TreeSet<String> perspectives = new TreeSet<>(Comparator.comparing(String::toString));
    private String currentPerspective = "Main";
 
    public GDXImGuiPerspectiveManager(Class<?> classForLoading,
@@ -103,20 +104,21 @@ public class GDXImGuiPerspectiveManager
             }
          }
 
-         ImGui.text("New:");
+         ImGui.text("Save as:");
          ImGui.sameLine();
          ImGui.inputText("###", perspectiveNameToSave , ImGuiInputTextFlags.CallbackResize);
          String perpectiveNameToCreateString = perspectiveNameToSave.get();
          if (!perpectiveNameToCreateString.isEmpty())
          {
             ImGui.sameLine();
-            if (ImGui.button("Create"))
+            if (ImGui.button("Save"))
             {
                String sanitizedName = perpectiveNameToCreateString.replaceAll(" ", "");
                perspectives.add(sanitizedName);
                currentPerspective = sanitizedName;
                applyPerspectiveDirectory();
                perspectiveNameToSave.clear();
+               save.accept(perspectiveDefaultMode.get());
             }
          }
 
