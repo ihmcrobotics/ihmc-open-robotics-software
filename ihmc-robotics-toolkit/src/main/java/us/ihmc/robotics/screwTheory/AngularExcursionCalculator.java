@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.YoQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -28,6 +29,7 @@ public class AngularExcursionCalculator
    private final YoBoolean zeroAngularExcursionFlag;
    private final double dt;
 
+   private final Vector3D tempVector = new Vector3D();
    private final YoFramePose3D comPose;
    private final ReferenceFrame centerOfMassFrame;
 
@@ -73,8 +75,12 @@ public class AngularExcursionCalculator
 
       wholeBodyAngularVelocity.set(angularVelocityCalculator.getWholeBodyAngularVelocity());
       wholeBodyAngularMomentum.set(angularVelocityCalculator.getAngularMomentum());
+
+
       axisAngle.setAndScale(dt, wholeBodyAngularVelocity);
+      angularExcursion.inverseTransform(axisAngle);
       rotation.setRotationVector(axisAngle);
+
 
       angularExcursion.append(rotation);
       angularExcursionRPY.set(angularExcursion);
