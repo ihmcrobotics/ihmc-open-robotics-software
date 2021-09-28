@@ -1,5 +1,6 @@
 package us.ihmc.avatar.angularMomentumTest;
 
+import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.io.BufferedWriter;
@@ -8,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -34,6 +36,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -43,6 +46,7 @@ import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -87,7 +91,7 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   private void setupTest()
+   private void setupTest() throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       String className = getClass().getSimpleName();
@@ -99,18 +103,104 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
       robotModel = getRobotModel();
 
       ThreadTools.sleep(1000);
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+   }
+
+   @Test
+   public void testMoveInPlace() throws SimulationExceededMaximumTimeException
+   {
+      // only set to true when saving new angular momentum data. output file usually needs to be manually moved to resources folder
+      setupTest();
+      setupCameraSideView();
+
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1.5, 0.9));
+
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("zeroAngularExcursionFlag")).set(true);
+
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1.5, 0.7));
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1.5, 0.9));
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
+
+      YoDouble angularExcursionYaw = (YoDouble) drcSimulationTestHelper.getYoVariable("angularExcursionYaw");
+      YoDouble angularExcursionPitch = (YoDouble) drcSimulationTestHelper.getYoVariable("angularExcursionPitch");
+      YoDouble angularExcursionRoll = (YoDouble) drcSimulationTestHelper.getYoVariable("angularExcursionRoll");
+
+      assertEquals(0.0, angularExcursionYaw.getDoubleValue(), 5e-3);
+      assertEquals(0.0, angularExcursionPitch.getDoubleValue(), 5e-3);
+      assertEquals(0.0, angularExcursionRoll.getDoubleValue(), 5e-3);
+   }
+
+   @Test
+   public void testForwardWalk() throws SimulationExceededMaximumTimeException
+   {
+      // only set to true when saving new angular momentum data. output file usually needs to be manually moved to resources folder
+      setupTest();
+      setupCameraSideView();
+
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("zeroAngularExcursionFlag")).set(true);
+
+      YoDouble angularExcursionYaw = (YoDouble) drcSimulationTestHelper.getYoVariable("angularExcursionYaw");
+      YoDouble angularExcursionPitch = (YoDouble) drcSimulationTestHelper.getYoVariable("angularExcursionPitch");
+      YoDouble angularExcursionRoll = (YoDouble) drcSimulationTestHelper.getYoVariable("angularExcursionRoll");
+
+      RobotSide side = RobotSide.LEFT;
+
+      double stepLength = getStepLength();
+      double stepWidth = getStepWidth();
+
+      FootstepDataListMessage footsteps = new FootstepDataListMessage();
+
+      double stepX = 0.0;
+      for (int currentStep = 0; currentStep < 4; currentStep++)
+      {
+         stepX += stepLength;
+         FramePose3D stepPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+         stepPose.getPosition().set(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
+         stepPose.changeFrame(ReferenceFrame.getWorldFrame());
+         footsteps.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, stepPose.getPosition(), stepPose.getOrientation()));
+
+         side = side.getOppositeSide();
+      }
+
+      FramePose3D closingStepPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+      closingStepPose.getPosition().set(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
+      closingStepPose.changeFrame(ReferenceFrame.getWorldFrame());
+      footsteps.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, closingStepPose.getPosition(), closingStepPose.getOrientation()));
+
+      drcSimulationTestHelper.publishToController(footsteps);
+
+
+      double initialTransfer = robotModel.getWalkingControllerParameters().getDefaultInitialTransferTime();
+      double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
+      double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
+
+      double simulationTime = initialTransfer + (transfer + swing) * (footsteps.getFootstepDataList().size() + 1) + 1.0;
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+      assertEquals(0.0, angularExcursionYaw.getDoubleValue(), 1e-2);
+      assertEquals(0.0, angularExcursionRoll.getDoubleValue(), 1e-2);
+      assertEquals(0.0, angularExcursionPitch.getDoubleValue(), 1e-1);
    }
 
    @Test
    public void testWalkInASquare() throws SimulationExceededMaximumTimeException
    {
       // only set to true when saving new angular momentum data. output file usually needs to be manually moved to resources folder
-      boolean exportAchievedAngularMomentum = false;
-
       setupTest();
       setupCameraSideView();
 
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("zeroAngularExcursionFlag")).set(true);
+
       drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1);
+
+      YoDouble angularExcursionYaw = (YoDouble) drcSimulationTestHelper.getYoVariable("angularExcursionYaw");
+      YoDouble angularExcursionPitch = (YoDouble) drcSimulationTestHelper.getYoVariable("angularExcursionPitch");
+      YoDouble angularExcursionRoll = (YoDouble) drcSimulationTestHelper.getYoVariable("angularExcursionRoll");
 
       int numberOfSteps = 4;
 
@@ -118,21 +208,37 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
       double transfer = robotModel.getWalkingControllerParameters().getDefaultTransferTime();
       double swing = robotModel.getWalkingControllerParameters().getDefaultSwingTime();
 
-      FootstepDataListMessage footsteps = createSquareFootstepMessage(numberOfSteps);
-      drcSimulationTestHelper.publishToController(footsteps);
+      PairList<FootstepDataListMessage, FootstepDataListMessage> footstepsSides = createSquareFootstepMessage(numberOfSteps);
+      for (int i = 0; i < footstepsSides.size(); i++)
+      {
+         FootstepDataListMessage sideFootsteps = footstepsSides.get(i).getLeft();
+         drcSimulationTestHelper.publishToController(sideFootsteps);
 
-      double simulationTime = initialTransfer + (transfer + swing) * (footsteps.getFootstepDataList().size() + 1) + 1.0;
+         double simulationTime = initialTransfer + (transfer + swing) * (sideFootsteps.getFootstepDataList().size() + 1) + 1.0;
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+//         assertEquals("Roll excursion is too great.", 0.0, angularExcursionRoll.getDoubleValue(), 1e-2);
+//         assertEquals("Pitch excursion is too great. ", 0.0, angularExcursionPitch.getDoubleValue(), 1e-3);
 
+         FootstepDataListMessage turnFootsteps = footstepsSides.get(i).getRight();
+         drcSimulationTestHelper.publishToController(turnFootsteps);
+
+         simulationTime = initialTransfer + (transfer + swing) * (turnFootsteps.getFootstepDataList().size() + 1) + 1.0;
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+
+//         assertEquals(0.0, angularExcursionPitch.getDoubleValue(), 1e-3);
+//         assertEquals(0.0, angularExcursionRoll.getDoubleValue(), 1e-3);
+      }
+
+      assertEquals(0.0, angularExcursionYaw.getDoubleValue(), 1e-3);
    }
 
 
-   private FootstepDataListMessage createSquareFootstepMessage(int stepsOnASide)
+   private PairList<FootstepDataListMessage, FootstepDataListMessage> createSquareFootstepMessage(int stepsOnASide)
    {
       double stepLength = getStepLength();
       double stepWidth = getStepWidth();
-      FootstepDataListMessage message = new FootstepDataListMessage();
+      PairList<FootstepDataListMessage, FootstepDataListMessage> stepSides = new PairList<>();
 
       PoseReferenceFrame planningFrame = new PoseReferenceFrame("planningFrame", ReferenceFrame.getWorldFrame());
       PoseReferenceFrame turningFrame = new PoseReferenceFrame("turningFrame", planningFrame);
@@ -141,6 +247,9 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
       {
          RobotSide side = RobotSide.LEFT;
 
+         FootstepDataListMessage sideMessage = new FootstepDataListMessage();
+         FootstepDataListMessage turnMessage = new FootstepDataListMessage();
+
          double stepX = 0.0;
          for (int currentStep = 0; currentStep < stepsOnASide; currentStep++)
          {
@@ -148,7 +257,7 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
             FramePose3D stepPose = new FramePose3D(planningFrame);
             stepPose.getPosition().set(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
             stepPose.changeFrame(ReferenceFrame.getWorldFrame());
-            message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, stepPose.getPosition(), stepPose.getOrientation()));
+            sideMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, stepPose.getPosition(), stepPose.getOrientation()));
 
             side = side.getOppositeSide();
          }
@@ -156,7 +265,7 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
          FramePose3D closingStepPose = new FramePose3D(planningFrame);
          closingStepPose.getPosition().set(stepX, side.negateIfRightSide(stepWidth / 2), 0.0);
          closingStepPose.changeFrame(ReferenceFrame.getWorldFrame());
-         message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, closingStepPose.getPosition(), closingStepPose.getOrientation()));
+         sideMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, closingStepPose.getPosition(), closingStepPose.getOrientation()));
 
          side = side.getOppositeSide();
 
@@ -177,7 +286,7 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
             stepPose.setY(side.negateIfRightSide(stepWidth / 2));
             stepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-            message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, stepPose.getPosition(), stepPose.getOrientation()));
+            turnMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, stepPose.getPosition(), stepPose.getOrientation()));
 
             side = side.getOppositeSide();
          }
@@ -192,14 +301,15 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
          stepPose.setY(side.negateIfRightSide(stepWidth / 2));
          stepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         message.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, stepPose.getPosition(), stepPose.getOrientation()));
+         turnMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(side, stepPose.getPosition(), stepPose.getOrientation()));
 
          turnedPose.changeFrame(ReferenceFrame.getWorldFrame());
          planningFrame.setPoseAndUpdate(turnedPose);
 
+         stepSides.add(sideMessage, turnMessage);
       }
 
-      return message;
+      return stepSides;
    }
 
    private void setupCameraSideView()
