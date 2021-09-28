@@ -2,6 +2,7 @@ package us.ihmc.avatar.factory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -12,6 +13,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
+import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.BarrierSchedulerTools;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
@@ -36,6 +38,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
@@ -177,7 +180,7 @@ public class AvatarSimulationFactory
       if (scsInitialSetup.get().getUseExperimentalPhysicsEngine())
       {
          experimentalSimulation = new ExperimentalSimulation(allSimulatedRobotList.toArray(new Robot[0]),
-                                                                                    simulationConstructionSetParameters.getDataBufferSize());
+                                                             simulationConstructionSetParameters.getDataBufferSize());
          experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -Math.abs(gravity.get())));
 
          CollidableHelper helper = new CollidableHelper();
@@ -252,8 +255,8 @@ public class AvatarSimulationFactory
    {
       String robotName = robotModel.get().getSimpleRobotName();
 
-      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotName);
 
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
       if (externalPelvisCorrectorSubscriber.hasValue())
@@ -312,9 +315,20 @@ public class AvatarSimulationFactory
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT());
+      int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / robotModel.getSimulateDT());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
-      SimulatedHandControlTask handControlTask = robotModel.createSimulatedHandController(humanoidFloatingRootJointRobot, realtimeROS2Node.get());
+
+      AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
+      SimulatedHandControlTask handControlTask = null;
+
+      if (handControlThread != null)
+      {
+         List<String> fingerJointNames = handControlThread.getControlledOneDoFJoints().stream().map(JointReadOnly::getName).collect(Collectors.toList());
+         SimulatedHandSensorReader handSensorReader = robotModel.createSimulatedHandSensorReader(humanoidFloatingRootJointRobot, fingerJointNames);
+         SimulatedHandOutputWriter handOutputWriter = robotModel.createSimulatedHandOutputWriter(humanoidFloatingRootJointRobot);
+         handControlTask = new SimulatedHandControlTask(handSensorReader, handControlThread, handOutputWriter, handControlDivisor, robotModel.getSimulateDT());
+      }
 
       // Previously done in estimator thread write
       if (simulationOutputWriter != null)
@@ -402,8 +416,13 @@ public class AvatarSimulationFactory
       controllerTask.addRunnableOnSchedulerThread(() -> controllerRobotVisualizer.update());
       addRegistryAndGraphics(estimatorRobotVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
       addRegistryAndGraphics(controllerRobotVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
+
       if (handControlTask != null)
-         robotController.getYoRegistry().addChild(handControlTask.getRegistry());
+      {
+         SimulationRobotVisualizer handControlVisualizer = new SimulationRobotVisualizer(handControlThread.getYoVariableRegistry(), null);
+         handControlTask.addRunnableOnSchedulerThread(() -> handControlVisualizer.update());
+         addRegistryAndGraphics(handControlVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
+      }
    }
 
    private static void addRegistryAndGraphics(SimulationRobotVisualizer visualizer, YoRegistry registry, SimulationConstructionSet scs)

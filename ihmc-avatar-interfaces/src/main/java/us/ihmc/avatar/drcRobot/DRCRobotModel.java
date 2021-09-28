@@ -1,18 +1,24 @@
 package us.ihmc.avatar.drcRobot;
 
+import java.util.List;
+
+import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DefaultShapeCollisionSettings;
-import us.ihmc.avatar.factory.SimulatedHandControlTask;
+import us.ihmc.avatar.factory.DefaultSimulatedHandOutputWriter;
+import us.ihmc.avatar.factory.DefaultSimulatedHandSensorReader;
+import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
+import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -30,7 +36,7 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJointHolder;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.UIParameters;
@@ -72,9 +78,19 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract DRCSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node);
 
-   public default SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
+   public default AvatarSimulatedHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node)
    {
       return null;
+   }
+
+   public default SimulatedHandSensorReader createSimulatedHandSensorReader(OneDegreeOfFreedomJointHolder robot, List<String> fingerJointNames)
+   {
+      return new DefaultSimulatedHandSensorReader(robot, fingerJointNames);
+   }
+
+   public default SimulatedHandOutputWriter createSimulatedHandOutputWriter(OneDegreeOfFreedomJointHolder robot)
+   {
+      return new DefaultSimulatedHandOutputWriter(robot);
    }
 
    public abstract DataServerSettings getLogSettings();

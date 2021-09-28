@@ -1,6 +1,10 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -8,7 +12,7 @@ import gnu.trove.set.TLongSet;
 import gnu.trove.set.hash.TLongHashSet;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.sensorProcessing.outputData.ImuData;
 import us.ihmc.sensorProcessing.outputData.LowLevelState;
@@ -39,6 +43,11 @@ public class SensorDataContext implements Settable<SensorDataContext>
       Arrays.asList(fullRobotModel.getOneDoFJoints()).forEach(joint -> registerJoint(joint.getName()));
       Arrays.asList(fullRobotModel.getIMUDefinitions()).forEach(imu -> registerImu(imu.getName()));
       Arrays.asList(fullRobotModel.getForceSensorDefinitions()).forEach(forceSensor -> registerForceSensor(forceSensor.getSensorName()));
+   }
+
+   public SensorDataContext(List<OneDoFJointBasics> joints)
+   {
+      joints.forEach(joint -> registerJoint(joint.getName()));
    }
 
    public LowLevelState registerJoint(String jointName)

@@ -29,9 +29,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -51,6 +51,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialVector;
@@ -132,7 +133,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
       robotDescription.setName("Ghost");
-      KinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
+      HumanoidKinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
       ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -449,7 +450,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       { // Let's move the arm joints
          RigidBodyBasics hand = controllerFullRobotModel.getHand(robotSide);
          double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, hand))
-                                                .mapToDouble(joint -> KinematicsToolboxControllerTest.nextJointConfiguration(random, 0.5, joint)).toArray();
+                                                .mapToDouble(joint -> nextJointConfiguration(random, 0.5, joint)).toArray();
          ArmTrajectoryMessage message = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, 1.0, desiredJointPositions);
          drcSimulationTestHelper.publishToController(message);
       }
@@ -457,14 +458,14 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       { // Let's move the neck joints
          RigidBodyBasics head = controllerFullRobotModel.getHead();
          double[] desiredJointPositions = Stream.of(MultiBodySystemTools.createOneDoFJointPath(chest, head))
-                                                .mapToDouble(joint -> KinematicsToolboxControllerTest.nextJointConfiguration(random, 0.5, joint)).toArray();
+                                                .mapToDouble(joint -> nextJointConfiguration(random, 0.5, joint)).toArray();
          NeckTrajectoryMessage message = HumanoidMessageTools.createNeckTrajectoryMessage(1.0, desiredJointPositions);
          drcSimulationTestHelper.publishToController(message);
       }
 
       { // Now the chest
          OneDoFJointBasics[] spineJointsCopy = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(pelvis, chest);
-         Arrays.asList(spineJointsCopy).forEach(joint -> joint.setQ(KinematicsToolboxControllerTest.nextJointConfiguration(random, 0.5, joint)));
+         Arrays.asList(spineJointsCopy).forEach(joint -> joint.setQ(nextJointConfiguration(random, 0.5, joint)));
          spineJointsCopy[0].getPredecessor().updateFramesRecursively();
 
          FrameQuaternion chestOrientation = new FrameQuaternion(spineJointsCopy[spineJointsCopy.length - 1].getSuccessor().getBodyFixedFrame());
@@ -535,8 +536,25 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
-   private void assertTrackingErrorMeanIsLow(RigidBodyTrackingWatcher watcher, double positionTreshold, double orientationTreshold,
-                                             double linearVelocityTreshold, double angularVelocityTreshold)
+   public static double nextJointConfiguration(Random random, double percentOfMotionRangeAllowed, OneDoFJointReadOnly joint)
+   {
+      double jointLimitLower = joint.getJointLimitLower();
+      if (Double.isInfinite(jointLimitLower))
+         jointLimitLower = -Math.PI;
+      double jointLimitUpper = joint.getJointLimitUpper();
+      if (Double.isInfinite(jointLimitUpper))
+         jointLimitUpper = -Math.PI;
+      double rangeReduction = (1.0 - percentOfMotionRangeAllowed) * (jointLimitUpper - jointLimitLower);
+      jointLimitLower += 0.5 * rangeReduction;
+      jointLimitUpper -= 0.5 * rangeReduction;
+      return RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper);
+   }
+
+   private void assertTrackingErrorMeanIsLow(RigidBodyTrackingWatcher watcher,
+                                             double positionTreshold,
+                                             double orientationTreshold,
+                                             double linearVelocityTreshold,
+                                             double angularVelocityTreshold)
    {
       double positionMean = watcher.yoPositionTrackingErrorMean.getValue();
       double orientationMean = watcher.yoOrientationTrackingErrorMean.getValue();
