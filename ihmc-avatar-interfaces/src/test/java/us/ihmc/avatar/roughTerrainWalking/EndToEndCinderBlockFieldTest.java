@@ -247,6 +247,51 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
    }
 
+   public void testSlantedCinderBlockAnkleRollLimit() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
+
+      Random random = new Random(674);
+
+      CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
+      cinderBlockFieldEnvironment.addFlatGround();
+      List<List<Pose3D>> cinderBlockPoses = cinderBlockFieldEnvironment.addCustomCinderBlockField2D(slantedCinderBlockLeveledFieldForAnkleRollLimit(random,
+                                                                                                                                                    new RigidBodyTransform(new Quaternion(),
+                                                                                                                                                                           new Vector3D(0.1,
+                                                                                                                                                                                        -0.2,
+                                                                                                                                                                                        0.0)),
+                                                                                                                                                    false));
+      FootstepDataListMessage footsteps = generateFootstepsForSlantedCinderBlockLeveledField(cinderBlockPoses, getStepHeightOffset(), false);
+
+      DRCRobotModel robotModel = getRobotModel();
+      useImpulseBasedPhysicsEngine = true;
+      setupSimulation(cinderBlockFieldEnvironment);
+      ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
+      contactParameters.setCoefficientOfFriction(0.80);
+      contactParameters.setCoulombMomentFrictionRatio(0.6);
+      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationSession().getPhysicsEngine();
+      physicsEngine.setGlobalContactParameters(contactParameters);
+      simulationTestHelper.start();
+
+      simulationTestHelper.setCameraFocusPosition(0.0, 0.0, 0.9);
+      simulationTestHelper.setCameraPosition(0.0, -6.0, 2.25);
+      simulationTestHelper.requestCameraRigidBodyTracking(getSimpleRobotName(), simulationTestHelper.getControllerFullRobotModel().getPelvis().getName());
+
+      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      simulationTestHelper.setBufferInPointIndexToCurrent();
+
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
+      for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
+      {
+         footsteps.getFootstepDataList().get(i).setSwingHeight(0.15);
+      }
+      simulationTestHelper.publishToController(footsteps);
+      double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+   }
+
    public abstract double getPelvisOffsetHeight();
 
    private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<? extends List<? extends Pose3DReadOnly>> cinderBlockPoses, double zOffset)
@@ -435,7 +480,42 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
             else if (i == length - 2)
                types[i][j] = CinderBlockType.SLANTED_FORWARD;
             else
-               types[i][j] = allSlantedTypes[random.nextInt(4)];
+               types[i][j] = allSlantedTypes[random.nextInt(allSlantedTypes.length)];
+         }
+      }
+
+      RigidBodyTransform centerBasePose = new RigidBodyTransform(startPose);
+      centerBasePose.appendTranslation(0.5 * stackSizes.length * CinderBlockFieldEnvironment.cinderBlockLength, 0.0, 0.0);
+      return CinderBlockStackDescription.grid2D(centerBasePose, stackSizes, types);
+   }
+
+   public static List<List<CinderBlockStackDescription>> slantedCinderBlockLeveledFieldForAnkleRollLimit(Random random,
+                                                                                                         RigidBodyTransformReadOnly startPose,
+                                                                                                         boolean varyHeight)
+   {
+      int width = 2;
+      int length = 20;
+      int[][] stackSizes = new int[length][width];
+      CinderBlockType[][] types = new CinderBlockType[length][width];
+      CinderBlockType[] allSlantedTypes = {CinderBlockType.SLANTED_LEFT, CinderBlockType.SLANTED_RIGHT};
+
+      for (int i = 0; i < stackSizes.length; i++)
+      {
+         for (int j = 0; j < stackSizes[i].length; j++)
+         {
+            if (i == 0 || i == length - 1)
+               stackSizes[i][j] = 0;
+            else if (i == 1 || i == length - 2)
+               stackSizes[i][j] = 1;
+            else
+               stackSizes[i][j] = 1 + (varyHeight ? random.nextInt(2) : 0);
+
+            if (i == 1)
+               types[i][j] = CinderBlockType.SLANTED_BACK;
+            else if (i == length - 2)
+               types[i][j] = CinderBlockType.SLANTED_FORWARD;
+            else
+               types[i][j] = allSlantedTypes[random.nextInt(allSlantedTypes.length)];
          }
       }
 
