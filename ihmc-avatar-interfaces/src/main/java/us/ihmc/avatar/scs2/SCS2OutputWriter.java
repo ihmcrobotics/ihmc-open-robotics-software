@@ -243,7 +243,6 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          else
             torqueSourceIndices = new int[] {0, 3};
 
-
          String prefix = controllerFourBarJoint.getName() + "LowLevel";
          kp = new YoDouble(prefix + "Kp", registry);
          kd = new YoDouble(prefix + "Kd", registry);
@@ -311,7 +310,12 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
           * 2-joint chain that goes through the 4-bar w/o relying on the loop closure makes it a little nicer
           * on SCS's soft constraint.
           */
-         // scsMasterJoint.setTau(tau_master);
+
+         for (OneDoFJointStateBasics simInput : simInputs)
+         {
+            if (simInput != null)
+               simInput.setEffort(0.0);
+         }
 
          for (int torqueSourceIndex : torqueSourceIndices)
          {
