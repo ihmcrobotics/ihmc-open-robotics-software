@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -338,5 +339,19 @@ public class GDXTools
    public static void setTransparency(ModelInstance modelInstance, float transparency)
    {
       modelInstance.materials.get(0).set(new BlendingAttribute(true, transparency));
+   }
+
+   public static void printShaderLog(ShaderProgram shaderProgram)
+   {
+      for (String line : shaderProgram.getLog().split("\n"))
+      {
+         if (line.isEmpty())
+            continue;
+
+         if (line.contains("error"))
+            LogTools.error(line);
+         else
+            LogTools.info(line);
+      }
    }
 }
