@@ -1,22 +1,21 @@
 package us.ihmc.gdx;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.particles.ParticleShader;
+import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.log.LogTools;
+import us.ihmc.gdx.shader.GDXShader;
 
 public class GDXPointCloudRenderer implements RenderableProvider
 {
    private static final int SIZE_AND_ROTATION_USAGE = 1 << 9;
-   private static boolean POINT_SPRITES_ENABLED = false;
    private Renderable renderable;
    private float[] vertices;
 
@@ -27,7 +26,17 @@ public class GDXPointCloudRenderer implements RenderableProvider
                                                                                               4,
                                                                                               ShaderProgram.COLOR_ATTRIBUTE),
                                                                           new VertexAttribute(SIZE_AND_ROTATION_USAGE, 3, "a_sizeAndRotation"));
+
    private final int vertexSize = 10;
+   public final static BaseShader.Uniform screenWidthUniform = new BaseShader.Uniform("u_screenWidth");
+   public final static BaseShader.Setter screenWidthSetter = new BaseShader.GlobalSetter()
+   {
+      @Override
+      public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes)
+      {
+         shader.set(inputID, (float) Gdx.graphics.getWidth());
+      }
+   };
 
    private RecyclingArrayList<Point3D32> pointsToRender;
    private ColorProvider colorProvider;
@@ -42,20 +51,9 @@ public class GDXPointCloudRenderer implements RenderableProvider
       public float getNextB();
    }
 
-   private static void enablePointSprites()
-   {
-      Gdx.gl30.glEnable(GL30.GL_VERTEX_PROGRAM_POINT_SIZE);
-      if (Gdx.app.getType() == Application.ApplicationType.Desktop)
-      {
-         Gdx.gl30.glEnable(0x8861); // GL_POINT_OES
-      }
-      POINT_SPRITES_ENABLED = true;
-   }
-
    public void create(int size)
    {
-      if (!POINT_SPRITES_ENABLED)
-         enablePointSprites();
+      Gdx.gl30.glEnable(GL30.GL_VERTEX_PROGRAM_POINT_SIZE);
 
       renderable = new Renderable();
       renderable.meshPart.primitiveType = GL30.GL_POINTS;
@@ -65,30 +63,18 @@ public class GDXPointCloudRenderer implements RenderableProvider
       vertices = new float[size * vertexSize];
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
-      renderable.meshPart.mesh = new Mesh(false, size, 0, vertexAttributes);
+      boolean isStatic = false;
+      int maxVertices = size;
+      int maxIndices = 0;
+      renderable.meshPart.mesh = new Mesh(isStatic, maxVertices, maxIndices, vertexAttributes);
 
-      ParticleShader.Config config = new ParticleShader.Config(ParticleShader.ParticleType.Point);
-      String prefix = ParticleShader.createPrefix(renderable, config);
-
-      ShaderProgram.pedantic = true;
-
-      final String fragmentShader = ParticleShader.getDefaultFragmentShader()
-                                                  .replace("gl_FragColor = texture2D(u_diffuseTexture, texCoord)* v_color", "gl_FragColor = v_color");
-
-      ShaderProgram shader = new ShaderProgram(prefix + ParticleShader.getDefaultVertexShader(), prefix + fragmentShader);
-      for (String s : shader.getLog().split("\n"))
-      {
-         if (s.isEmpty())
-            continue;
-
-         if (s.contains("error"))
-            LogTools.error(s);
-         else
-            LogTools.info(s);
-      }
-
-      renderable.shader = new ParticleShader(renderable, config, shader);
-      renderable.shader.init();
+      GDXShader shader = new GDXShader(getClass());
+      shader.create();
+      shader.getBaseShader().register(DefaultShader.Inputs.viewTrans, DefaultShader.Setters.viewTrans);
+      shader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
+      shader.getBaseShader().register(screenWidthUniform, screenWidthSetter);
+      shader.init(renderable);
+      renderable.shader = shader.getBaseShader();
    }
 
    public void updateMesh()
