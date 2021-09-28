@@ -54,7 +54,7 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
 {
    private static final boolean keepSCSUp = false;
 
-   private SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+   private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private DRCRobotModel robotModel;
    private final Random random = new Random(1738);
@@ -87,7 +87,6 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
          drcSimulationTestHelper = null;
       }
 
-      simulationTestingParameters = null;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
@@ -110,6 +109,7 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
    @Test
    public void testMoveInPlace() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       // only set to true when saving new angular momentum data. output file usually needs to be manually moved to resources folder
       setupTest();
       setupCameraSideView();
@@ -121,9 +121,17 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
       ((YoBoolean) drcSimulationTestHelper.getYoVariable("zeroAngularExcursionFlag")).set(true);
 
       drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1.5, 0.7));
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(1.0, new Quaternion(Math.toRadians(20.0), Math.toRadians(10.0), Math.toRadians(15.0)), ReferenceFrame.getWorldFrame()));
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(1.0, new Quaternion(Math.toRadians(-20.0), Math.toRadians(10.0), Math.toRadians(15.0)), ReferenceFrame.getWorldFrame()));
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(1.0, new Quaternion(Math.toRadians(-20.0), Math.toRadians(-10.0), Math.toRadians(15.0)), ReferenceFrame.getWorldFrame()));
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
+      drcSimulationTestHelper.publishToController(HumanoidMessageTools.createChestTrajectoryMessage(1.0, new Quaternion(), ReferenceFrame.getWorldFrame()));
       drcSimulationTestHelper.publishToController(HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1.5, 0.9));
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
 
       YoDouble angularExcursionYaw = (YoDouble) drcSimulationTestHelper.getYoVariable("angularExcursionYaw");
