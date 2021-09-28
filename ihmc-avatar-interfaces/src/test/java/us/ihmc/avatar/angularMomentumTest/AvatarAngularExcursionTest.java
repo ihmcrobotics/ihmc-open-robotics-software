@@ -147,6 +147,7 @@ public abstract class AvatarAngularExcursionTest implements MultiRobotTestInterf
    public void testForwardWalk() throws SimulationExceededMaximumTimeException
    {
       // only set to true when saving new angular momentum data. output file usually needs to be manually moved to resources folder
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
       setupCameraSideView();
 
