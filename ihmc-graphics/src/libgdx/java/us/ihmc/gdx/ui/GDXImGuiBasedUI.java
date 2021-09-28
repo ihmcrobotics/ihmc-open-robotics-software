@@ -1,20 +1,15 @@
 package us.ihmc.gdx.ui;
 
-import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
-import com.badlogic.gdx.graphics.glutils.GLVersion;
-import com.badlogic.gdx.utils.BufferUtils;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
-import org.lwjgl.opengl.GL30;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
@@ -32,14 +27,11 @@ import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 
-import java.nio.IntBuffer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-
-import static org.lwjgl.glfw.GLFW.*;
 
 public class GDXImGuiBasedUI
 {
@@ -146,26 +138,8 @@ public class GDXImGuiBasedUI
 
    public void create()
    {
-      LogTools.info("create()");
-
-      GLVersion version = new GLVersion(Application.ApplicationType.Desktop, glfwGetVersionString(), null, null);
-      if (version.isVersionEqualToOrHigher(4, 3))
-      {
-         IntBuffer buffer = BufferUtils.newIntBuffer(1);
-         Gdx.gl.glGetIntegerv(GL30.GL_CONTEXT_FLAGS, buffer);
-         int flags = buffer.get();
-
-         //GL_CONTEXT_FLAG_DEBUG_BIT - ensure debug context
-         if ((flags & 0b10) == 0)
-         {
-            throw new IllegalStateException("OpenGL did not create debug context!");
-         }
-      }
-      else
-      {
-         LogTools.warn("You are running a version of OpenGL which does not support debug contexts: " + glfwGetVersionString());
-         LogTools.warn("Error messages may not be complete, and some may not be registered at all.");
-      }
+      LogTools.info("Creating...");
+      GDXTools.printGLVersion();
 
       sceneManager.create(GDXInputMode.ImGui);
       inputCalculator = new ImGui3DViewInput(sceneManager.getCamera3D(), this::getViewportSizeX, this::getViewportSizeY);
