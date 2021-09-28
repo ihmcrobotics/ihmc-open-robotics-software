@@ -3,6 +3,8 @@ package us.ihmc.valkyrie.controllerAPI;
 import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -15,10 +17,12 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimOneDoFJointBasics;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.fingers.ValkyrieFingerControlParameters;
@@ -113,7 +117,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
                                                                                                                 .get(indexOfFinger));
       RobotSide robotSide = RobotSide.fromByte(valkyrieFingerTrajectoryMessage.getRobotSide());
 
-      ArrayList<OneDegreeOfFreedomJoint> handJoints = getAllHandJoints(robotSide, fingerMotorName);
+      List<? extends OneDoFJointReadOnly> handJoints = getAllHandJoints(robotSide, fingerMotorName);
 
       double[] handJointPositions = new double[handJoints.size()];
       for (int i = 0; i < handJoints.size(); i++)
@@ -131,7 +135,7 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
                                                                                                                 .get(indexOfFinger));
       RobotSide robotSide = RobotSide.fromByte(valkyrieFingerTrajectoryMessage.getRobotSide());
 
-      ArrayList<OneDegreeOfFreedomJoint> handJoints = getAllHandJoints(robotSide, fingerMotorName);
+      List<? extends OneDoFJointReadOnly> handJoints = getAllHandJoints(robotSide, fingerMotorName);
 
       double[] handJointPositions = new double[handJoints.size()];
       for (int i = 0; i < handJoints.size(); i++)
@@ -142,17 +146,18 @@ public class ValkyrieEndToEndHandFingerTrajectoryMessageTest extends EndToEndHan
       return handJointPositions;
    }
 
-   private ArrayList<OneDegreeOfFreedomJoint> getAllHandJoints(RobotSide robotSide, ValkyrieFingerMotorName fingerMotorName)
+   private List<? extends OneDoFJointReadOnly> getAllHandJoints(RobotSide robotSide, ValkyrieFingerMotorName fingerMotorName)
    {
-      ArrayList<OneDegreeOfFreedomJoint> handJoints = new ArrayList<OneDegreeOfFreedomJoint>();
+      List<OneDoFJointReadOnly> handJoints = new ArrayList<>();
 
       ValkyrieHandJointName firstHandJointName = fingerMotorName.getCorrespondingJointName(0);
-      Joint firstHandJoint = controllerFullRobotModel.getJoint(firstHandJointName.getJointName(robotSide));
+      Robot simRobot = simulationTestHelper.getRobot();
+      SimOneDoFJointBasics firstHandJoint = simRobot.getOneDoFJoint(firstHandJointName.getJointName(robotSide));
 
       if (fingerMotorName == ValkyrieFingerMotorName.ThumbMotorRoll)
-         handJoints.add((OneDegreeOfFreedomJoint) firstHandJoint);
+         handJoints.add(firstHandJoint);
       else
-         firstHandJoint.recursiveGetOneDegreeOfFreedomJoints(handJoints);
+         handJoints.addAll(SubtreeStreams.from(OneDoFJointReadOnly.class, firstHandJoint).collect(Collectors.toList()));
 
       return handJoints;
    }

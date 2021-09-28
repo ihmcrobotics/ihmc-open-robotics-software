@@ -475,4 +475,29 @@ public class AtlasJointMap implements HumanoidJointNameMap
       return new String[] {"hokuyo_joint"};
    }
 
+   @Override
+   public double getJointBLimit(String jointName)
+   {
+      double defaultValue = HumanoidJointNameMap.super.getJointBLimit(jointName);
+
+      if (!atlasVersion.hasRobotiqHands())
+      {
+         ImmutablePair<RobotSide, ArmJointName> pair = getArmJointName(jointName);
+
+         if (pair != null)
+         {
+            switch (pair.getValue())
+            {
+               case FIRST_WRIST_PITCH:
+               case SECOND_WRIST_PITCH:
+               case WRIST_ROLL:
+                  return 0.5 * defaultValue;
+               default:
+                  break;
+            }
+         }
+      }
+
+      return defaultValue;
+   }
 }

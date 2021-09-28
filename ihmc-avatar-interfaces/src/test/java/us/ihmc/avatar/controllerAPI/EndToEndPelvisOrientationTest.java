@@ -12,7 +12,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.PelvisOrientationTrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
