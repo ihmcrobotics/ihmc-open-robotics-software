@@ -37,7 +37,7 @@ public class GDXApplicationCreator
       }
       applicationConfiguration.useVsync(false); // vsync on seems to limit FPS to 30 so keep off
       applicationConfiguration.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
-      applicationConfiguration.useOpenGL3(true, 3, 2);
+      applicationConfiguration.useOpenGL3(true, 3, 3);
       return applicationConfiguration;
    }
 
@@ -50,7 +50,6 @@ public class GDXApplicationCreator
    {
       ThreadTools.startAThread(() ->
       {
-         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE); //This doesn't work unless you're running OpenGL 4.3 or later
          new Lwjgl3Application(applicationAdapter, applicationConfiguration);
       }, title);
    }

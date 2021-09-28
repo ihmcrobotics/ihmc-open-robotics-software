@@ -27,6 +27,8 @@ import us.ihmc.log.LogTools;
 
 import java.nio.FloatBuffer;
 
+import static org.lwjgl.glfw.GLFW.glfwGetVersionString;
+
 public class GDXTools
 {
    public static void syncLogLevelWithLogTools()
@@ -353,5 +355,11 @@ public class GDXTools
          else
             LogTools.info(line);
       }
+   }
+
+   public static void printGLVersion()
+   {
+      String versionString = glfwGetVersionString();
+      LogTools.info("Using OpenGL {}", versionString);
    }
 }
