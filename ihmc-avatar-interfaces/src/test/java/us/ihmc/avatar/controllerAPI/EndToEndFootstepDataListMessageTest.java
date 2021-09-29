@@ -18,7 +18,8 @@ import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -46,21 +47,29 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
    private static final CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
    private static final DRCStartingLocation location = DRCObstacleCourseStartingLocation.DEFAULT;
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
+
+   private void createSimulationTestHelper(CommonAvatarEnvironmentInterface environment, DRCStartingLocation location)
+   {
+      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(getRobotModel(),
+                                                                                                                         environment,
+                                                                                                                         simulationTestingParameters);
+      if (location != null)
+         factory.setStartingLocationOffset(location.getStartingLocationOffset());
+      simulationTestHelper = factory.createAvatarTestingSimulation();
+   }
 
    @Test
    public void testQueuing() throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(environment);
-      drcSimulationTestHelper.setStartingLocation(location);
-      drcSimulationTestHelper.createSimulation("Test");
-      setupCamera(drcSimulationTestHelper);
+      createSimulationTestHelper(environment, location);
+      simulationTestHelper.start();
+      setupCamera(simulationTestHelper);
       ThreadTools.sleep(1000);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+      assertTrue(simulationTestHelper.simulateAndWait(0.25));
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       referenceFrames.updateFrames();
       MovingReferenceFrame midFeetFrame = referenceFrames.getMidFootZUpGroundFrame();
@@ -124,42 +133,39 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       r.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
       r.getQueueingProperties().setPreviousMessageId(FootstepDataListMessage.VALID_MESSAGE_DEFAULT_ID);
 
-      YoVariable numberOfStepsInController = drcSimulationTestHelper.getSimulationConstructionSet().findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
+      YoVariable numberOfStepsInController = simulationTestHelper.findVariable(WalkingMessageHandler.class.getSimpleName(), "currentNumberOfFootsteps");
       int expectedNumberOfSteps = 0;
 
       double timeBetweenSendingMessages = nominalTransferTime / messages.size();
       double timeUntilDone = totalTime;
       for (int messageIdx = 0; messageIdx < messages.size(); messageIdx++)
       {
-         drcSimulationTestHelper.publishToController(messages.get(messageIdx));
+         simulationTestHelper.publishToController(messages.get(messageIdx));
          expectedNumberOfSteps += messages.get(messageIdx).getFootstepDataList().size();
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeBetweenSendingMessages));
+         assertTrue(simulationTestHelper.simulateAndWait(timeBetweenSendingMessages));
          assertEquals(expectedNumberOfSteps, (int) numberOfStepsInController.getValueAsLongBits());
          timeUntilDone -= timeBetweenSendingMessages;
       }
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(timeUntilDone + 0.25));
+      assertTrue(simulationTestHelper.simulateAndWait(timeUntilDone + 0.25));
       assertEquals(0, (int) numberOfStepsInController.getValueAsLongBits());
    }
 
    protected void testMessageIsHandled(FootstepDataListMessage messageInMidFeetZUp) throws SimulationExceededMaximumTimeException
    {
-      DRCRobotModel robotModel = getRobotModel();
       CommonAvatarEnvironmentInterface environment = new FlatGroundEnvironment();
       DRCStartingLocation location = DRCObstacleCourseStartingLocation.DEFAULT_BUT_ALMOST_PI;
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.setStartingLocation(location);
-      drcSimulationTestHelper.createSimulation("MessageTest");
-      ThreadTools.sleep(1000);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+      createSimulationTestHelper(environment, location);
+      simulationTestHelper.start();
+      assertTrue(simulationTestHelper.simulateAndWait(0.25));
 
-      MovingReferenceFrame messageFrame = drcSimulationTestHelper.getReferenceFrames().getMidFeetZUpFrame();
+      MovingReferenceFrame messageFrame = simulationTestHelper.getReferenceFrames().getMidFeetZUpFrame();
       transformMessageToWorld(messageFrame, messageInMidFeetZUp);
 
-      drcSimulationTestHelper.publishToController(messageInMidFeetZUp);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+      simulationTestHelper.publishToController(messageInMidFeetZUp);
+      assertTrue(simulationTestHelper.simulateAndWait(0.25));
 
-      int steps = (int) drcSimulationTestHelper.getYoVariable("currentNumberOfFootsteps").getValueAsDouble();
+      int steps = (int) simulationTestHelper.findVariable("currentNumberOfFootsteps").getValueAsDouble();
       assertEquals(messageInMidFeetZUp.getFootstepDataList().size(), steps);
    }
 
@@ -177,7 +183,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       }
    }
 
-   private static void setupCamera(DRCSimulationTestHelper drcSimulationTestHelper)
+   private static void setupCamera(SCS2AvatarTestingSimulation simulationTestHelper)
    {
       OffsetAndYawRobotInitialSetup startingLocationOffset = location.getStartingLocationOffset();
       Point3D cameraFocus = new Point3D(startingLocationOffset.getAdditionalOffset());
@@ -186,7 +192,7 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
       transform.setRotationYawAndZeroTranslation(startingLocationOffset.getYaw());
       Point3D cameraPosition = new Point3D(10.0, 5.0, cameraFocus.getZ() + 2.0);
       transform.transform(cameraPosition);
-      drcSimulationTestHelper.setupCameraForUnitTest(cameraFocus, cameraPosition);
+      simulationTestHelper.setCamera(cameraFocus, cameraPosition);
    }
 
    @BeforeEach
@@ -198,16 +204,11 @@ public abstract class EndToEndFootstepDataListMessageTest implements MultiRobotT
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");

@@ -16,8 +16,11 @@ public class BarrierScheduledRobotController implements DisposableRobotControlle
 
    private final ThreadTimer timer;
 
-   public BarrierScheduledRobotController(String name, List<HumanoidRobotControlTask> tasks, HumanoidRobotContextData masterContext,
-                                          TaskOverrunBehavior overrunBehavior, double schedulerDt)
+   public BarrierScheduledRobotController(String name,
+                                          List<HumanoidRobotControlTask> tasks,
+                                          HumanoidRobotContextData masterContext,
+                                          TaskOverrunBehavior overrunBehavior,
+                                          double schedulerDt)
    {
       this.masterContext = masterContext;
 
@@ -47,6 +50,18 @@ public class BarrierScheduledRobotController implements DisposableRobotControlle
       masterContext.setSchedulerTick(timer.getTickCount());
       barrierScheduler.run();
       timer.stop();
+   }
+
+   public void waitUntilTasksDone()
+   {
+      try
+      {
+         barrierScheduler.waitUntilTasksDone();
+      }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();
+      }
    }
 
    @Override

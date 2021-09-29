@@ -8,6 +8,12 @@ public class OptionalFactoryField<T> extends FactoryField<T>
    {
       super(fieldName);
    }
+
+   public OptionalFactoryField(String fieldName, T defaultValue)
+   {
+      this(fieldName);
+      setDefaultValue(defaultValue);
+   }
    
    public void setDefaultValue(T defaultValue)
    {

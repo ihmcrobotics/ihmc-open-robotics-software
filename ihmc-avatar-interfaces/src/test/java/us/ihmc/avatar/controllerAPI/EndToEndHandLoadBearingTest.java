@@ -14,8 +14,8 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -32,10 +32,9 @@ import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
+import us.ihmc.simulationToolkit.controllers.PushRobotControllerSCS2;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -43,7 +42,7 @@ import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestin
 public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInterface
 {
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   protected DRCSimulationTestHelper drcSimulationTestHelper;
+   protected SCS2AvatarTestingSimulation simulationTestHelper;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -52,23 +51,19 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      String testName = getClass().getSimpleName();
       TestingEnvironment testingEnvironment = new TestingEnvironment();
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel);
-      drcSimulationTestHelper.setTestEnvironment(testingEnvironment);
-      drcSimulationTestHelper.createSimulation(testName);
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel, testingEnvironment, simulationTestingParameters);
+      simulationTestHelper.start();
       double totalMass = fullRobotModel.getTotalMass();
-      PushRobotController pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel);
-      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(simulationTestHelper.getSimulationSession().getTime(), simulationTestHelper.getRobot(), fullRobotModel);
 
-      scs.setCameraPosition(0.2, -10.0, 1.0);
-      scs.setCameraFix(0.2, 0.0, 1.0);
-      scs.addYoGraphic(pushRobotController.getForceVisualizer());
+      simulationTestHelper.setCameraPosition(0.2, -10.0, 1.0);
+      simulationTestHelper.setCameraFocusPosition(0.2, 0.0, 1.0);
+      simulationTestHelper.addYoGraphicDefinition(pushRobotController.getForceVizDefinition());
 
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -79,8 +74,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       Quaternion chestOrientation = new Quaternion();
       chestOrientation.appendPitchRotation(Math.PI / 4.0);
       ChestTrajectoryMessage chestTrajectoryMessage = HumanoidMessageTools.createChestTrajectoryMessage(1.0, chestOrientation, worldFrame, pelvisZUpFrame);
-      drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      simulationTestHelper.publishToController(chestTrajectoryMessage);
+      success = simulationTestHelper.simulateAndWait(1.5);
       assertTrue(success);
 
       Quaternion handOrientation = new Quaternion();
@@ -93,8 +88,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       se3Trajectory1.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
       se3Trajectory1.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
       se3Trajectory1.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.6), handOrientation, new Vector3D(), new Vector3D()));
-      drcSimulationTestHelper.publishToController(handTrajectoryMessage1);
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+      simulationTestHelper.publishToController(handTrajectoryMessage1);
+      success = simulationTestHelper.simulateAndWait(2.0);
       assertTrue(success);
 
       HandTrajectoryMessage handTrajectoryMessage2 = new HandTrajectoryMessage();
@@ -103,8 +98,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       se3Trajectory2.getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestFrame));
       se3Trajectory2.getFrameInformation().setDataReferenceFrameId(MessageTools.toFrameId(worldFrame));
       se3Trajectory2.getTaskspaceTrajectoryPoints().add().set(HumanoidMessageTools.createSE3TrajectoryPointMessage(1.0, new Point3D(0.45, 0.3, 0.55), handOrientation, new Vector3D(), new Vector3D()));
-      drcSimulationTestHelper.publishToController(handTrajectoryMessage2);
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+      simulationTestHelper.publishToController(handTrajectoryMessage2);
+      success = simulationTestHelper.simulateAndWait(1.5);
       assertTrue(success);
 
       // Activate load bearing
@@ -117,8 +112,8 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       loadBearingMessage.getLoadBearingMessage().setCoefficientOfFriction(0.8);
       loadBearingMessage.getLoadBearingMessage().getContactNormalInWorldFrame().set(0.0, 0.0, 1.0);
       loadBearingMessage.getLoadBearingMessage().getBodyFrameToContactFrame().set(transformToContactFrame);
-      drcSimulationTestHelper.publishToController(loadBearingMessage);
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      simulationTestHelper.publishToController(loadBearingMessage);
+      success = simulationTestHelper.simulateAndWait(1.0);
       assertTrue(success);
 
       // Now push the robot
@@ -128,10 +123,10 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
       double duration = 2.0;
       pushRobotController.applyForce(forceDirection, magnitude, duration);
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
+      success = simulationTestHelper.simulateAndWait(3.0);
       assertTrue(success);
       
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+      simulationTestHelper.createVideo(getSimpleRobotName(), 2);
    }
 
    public class TestingEnvironment implements CommonAvatarEnvironmentInterface
@@ -183,16 +178,11 @@ public abstract class EndToEndHandLoadBearingTest implements MultiRobotTestInter
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper = null;
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());

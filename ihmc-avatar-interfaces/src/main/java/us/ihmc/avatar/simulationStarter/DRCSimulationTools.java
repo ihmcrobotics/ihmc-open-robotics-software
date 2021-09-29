@@ -12,9 +12,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -42,7 +56,7 @@ public abstract class DRCSimulationTools
       startSimulation(simulationStarter, operatorInterfaceClass, operatorInterfaceArgs, startingLocation, modulesToStart);
    }
 
-   @SuppressWarnings({"hiding", "unchecked"})
+   @SuppressWarnings({"hiding"})
    public static <T extends DRCStartingLocation, Enum> void startSimulation(SimulationStarterInterface simulationStarter,
                                                                             Class<?> operatorInterfaceClass,
                                                                             String[] operatorInterfaceArgs,
@@ -56,6 +70,33 @@ public abstract class DRCSimulationTools
          return;
 
       boolean automaticallyStartSimulation = true;
+      HumanoidNetworkProcessorParameters networkProcessorParameters = createNetworkProcessorParameters(modulesToStart);
+
+      if (modulesToStart.contains(Modules.SIMULATION))
+         simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
+
+      if (modulesToStart.contains(Modules.OPERATOR_INTERFACE))
+      {
+         if (modulesToStart.contains(Modules.SIMULATION))
+            startOpertorInterfaceUsingProcessSpawner(operatorInterfaceClass, operatorInterfaceArgs);
+         else
+            startOpertorInterface(operatorInterfaceClass, operatorInterfaceArgs);
+      }
+
+      if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
+         simulationStarter.startBehaviorVisualizer();
+
+      boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE);
+      boolean startREAUI = modulesToStart.contains(Modules.REA_UI);
+
+      if (startREAModule && startREAUI)
+         new JavaProcessSpawner(true, true).spawn(LidarBasedREAStandaloneLauncher.class);
+      else if (startREAUI)
+         new JavaProcessSpawner(true, true).spawn(RemoteLidarBasedREAUILauncher.class);
+   }
+
+   public static HumanoidNetworkProcessorParameters createNetworkProcessorParameters(List<Modules> modulesToStart)
+   {
       HumanoidNetworkProcessorParameters networkProcessorParameters;
       if (modulesToStart.contains(Modules.NETWORK_PROCESSOR))
       {
@@ -81,33 +122,12 @@ public abstract class DRCSimulationTools
       {
          networkProcessorParameters = null;
       }
-
-      if (modulesToStart.contains(Modules.SIMULATION))
-         simulationStarter.startSimulation(networkProcessorParameters, automaticallyStartSimulation);
-
-      if (modulesToStart.contains(Modules.OPERATOR_INTERFACE))
-      {
-         if (modulesToStart.contains(Modules.SIMULATION))
-            startOpertorInterfaceUsingProcessSpawner(operatorInterfaceClass, operatorInterfaceArgs);
-         else
-            startOpertorInterface(operatorInterfaceClass, operatorInterfaceArgs);
-      }
-
-      if (modulesToStart.contains(Modules.BEHAVIOR_VISUALIZER))
-         simulationStarter.startBehaviorVisualizer();
-
-      boolean startREAModule = modulesToStart.contains(Modules.REA_MODULE);
-      boolean startREAUI = modulesToStart.contains(Modules.REA_UI);
-
-      if (startREAModule && startREAUI)
-         new JavaProcessSpawner(true, true).spawn(LidarBasedREAStandaloneLauncher.class);
-      else if (startREAUI)
-         new JavaProcessSpawner(true, true).spawn(RemoteLidarBasedREAUILauncher.class);
+      return networkProcessorParameters;
    }
 
    @SuppressWarnings({"hiding", "unchecked", "rawtypes", "serial"})
-   private static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack,
-                                                                                                             T... possibleStartingLocations)
+   public static <T extends DRCStartingLocation, Enum> DRCStartingLocation showSelectorWithStartingLocation(List<Modules> modulesToStartListToPack,
+                                                                                                            T... possibleStartingLocations)
    {
       JPanel userPromptPanel = new JPanel(new BorderLayout());
       JPanel checkBoxesPanel = new JPanel(new GridLayout(4, 3));
@@ -315,10 +335,10 @@ public abstract class DRCSimulationTools
 
    /**
     * Creates and starts the operator interface. The operator interface needs the simulation and
-    * network processor to work properly, if started before any of these it will simply hang and
-    * wait for these two to start. Use {@link #spawnOperatorInterfaceInDifferentProcess} to either
-    * start the operator interface in the same process or a different one. Note that if started in a
-    * different process the debug mode will not work.
+    * network processor to work properly, if started before any of these it will simply hang and wait
+    * for these two to start. Use {@link #spawnOperatorInterfaceInDifferentProcess} to either start the
+    * operator interface in the same process or a different one. Note that if started in a different
+    * process the debug mode will not work.
     */
    public static void startOpertorInterfaceUsingProcessSpawner(Class<?> operatorInterfaceClass, String[] operatorInterfaceArgs)
    {

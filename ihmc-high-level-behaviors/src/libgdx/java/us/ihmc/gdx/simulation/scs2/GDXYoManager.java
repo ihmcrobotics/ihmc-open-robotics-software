@@ -41,10 +41,6 @@ public class GDXYoManager
       linkedRootRegistry = linkedYoVariableFactory.newLinkedYoRegistry(rootRegistry);
       linkedBufferProperties = linkedYoVariableFactory.newLinkedBufferProperties();
 
-      updatingYoVariables = true;
-      linkedRootRegistry.linkConsumerVariables();
-      linkedRootRegistry.linkManagerVariables();
-      updatingYoVariables = false;
       LogTools.info("UI linked YoVariables created");
    }
 
@@ -70,20 +66,6 @@ public class GDXYoManager
    public LinkedYoVariable<?> newLinkedYoVariable(YoVariable yoVariable)
    {
       return linkedYoVariableFactory.newLinkedYoVariable(yoVariable);
-   }
-
-   public void linkNewYoVariables()
-   {
-      updatingYoVariables = true;
-      linkedRootRegistry.linkConsumerVariables();
-      updatingYoVariables = false;
-   }
-
-   public void pullMissingYoVariables()
-   {
-      updatingYoVariables = true;
-      linkedRootRegistry.linkManagerVariables();
-      updatingYoVariables = false;
    }
 
    public YoRegistry getRootRegistry()
