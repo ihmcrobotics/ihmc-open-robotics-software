@@ -1352,6 +1352,22 @@ public class ConvexPolygonToolsTest
       }
    }
 
+   @Test
+   public void testComputeMinimumDistancePointsBug()
+   {
+      ConvexPolygon2D polygon1 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new Point2D(-0.964173902597, 0.063152759605),
+                                                                                         new Point2D(1.035825870746, 0.062200589754),
+                                                                                         new Point2D(0.742755947614, -0.308890986251),
+                                                                                         new Point2D(0.035576039489, -0.462323265823),
+                                                                                         new Point2D(-0.671457454488, -0.308217700493)));
+      ConvexPolygon2D polygon2 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(new Point2D(-2.343969106435, -1.557740484682 ),
+                                                                                         new Point2D(-2.343472477274, -0.507264050627 ),
+                                                                                         new Point2D(-0.542724054207, -0.508121359902 ),
+                                                                                         new Point2D(-0.543220683369, -1.558597793958 )));
+      double epsilon = 0.01;
+      new ConvexPolygonTools().computeMinimumDistancePoints(polygon1, polygon2, epsilon, new Point2D(), new Point2D());
+   }
+
    private void assertEqualsInEitherOrder(double expected0, double expected1, double actual0, double actual1)
    {
       if (expected0 == actual0)
