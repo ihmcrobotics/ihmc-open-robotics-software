@@ -11,14 +11,14 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.AdjustFootstepMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -30,14 +30,14 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
+import us.ihmc.scs2.simulation.TimeConsumer;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -46,34 +46,32 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    @Test
    public void testAdjustFootstepOnce() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper.start();
 
-      ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
       SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>(fullRobotModel.getSoleFrames());
-      drcSimulationTestHelper.publishToController(createFootsteps(soleFrames));
+      simulationTestHelper.publishToController(createFootsteps(soleFrames));
 
-      final SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
       final SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
       final SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
 
-      findWalkingStateVariables(scs, singleSupportStartConditions, doubleSupportStartConditions);
+      findWalkingStateVariables(simulationTestHelper.getControllerRegistry(), singleSupportStartConditions, doubleSupportStartConditions);
 
       final AtomicBoolean hasControllerAdjustedFootstep = new AtomicBoolean(false);
 
-      scs.addScript(new Script()
+      simulationTestHelper.getSimulationSession().addBeforePhysicsCallback(new TimeConsumer()
       {
          private boolean adjustedFootstep = false;
          private double swingInitialTime = Double.NaN;
@@ -85,33 +83,35 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          private Point3D adjustedLocation = new Point3D();
 
          @Override
-         public void doScript(double t)
+         public void accept(double time)
          {
             if (singleSupportStartConditions.get(swingSideForAdjusting).testCondition(Double.NaN))
             {
                if (Double.isNaN(swingInitialTime))
-                  swingInitialTime = t;
+                  swingInitialTime = time;
 
                if (!adjustedFootstep)
                {
-                  if (t >= swingInitialTime + delayBeforeAdjusting)
+                  if (time >= swingInitialTime + delayBeforeAdjusting)
                   {
                      Quaternion orientation = new Quaternion();
-                     Pose3D nextFootstepPose = findNextFootstepPose(scs);
+                     Pose3D nextFootstepPose = findNextFootstepPose(simulationTestHelper.getControllerRegistry());
                      adjustedLocation.set(nextFootstepPose.getPosition());
                      orientation.set(nextFootstepPose.getOrientation());
                      adjustedLocation.setX(adjustedLocation.getX() + 0.1);
                      adjustedLocation.setY(adjustedLocation.getY() - 0.15);
-                     AdjustFootstepMessage adjustFootstepMessage = HumanoidMessageTools.createAdjustFootstepMessage(swingSideForAdjusting, adjustedLocation, orientation);
-                     drcSimulationTestHelper.publishToController(adjustFootstepMessage);
+                     AdjustFootstepMessage adjustFootstepMessage = HumanoidMessageTools.createAdjustFootstepMessage(swingSideForAdjusting,
+                                                                                                                    adjustedLocation,
+                                                                                                                    orientation);
+                     simulationTestHelper.publishToController(adjustFootstepMessage);
                      adjustedFootstep = true;
                   }
                }
                else if (!checkedIfControllerAdjusted)
                {
-                  if (t >= swingInitialTime + delayBeforeAdjusting + delayBeforeChecking)
+                  if (time >= swingInitialTime + delayBeforeAdjusting + delayBeforeChecking)
                   {
-                     Pose3D nextFootstepPose = findNextFootstepPose(scs);
+                     Pose3D nextFootstepPose = findNextFootstepPose(simulationTestHelper.getControllerRegistry());
                      boolean xEquals = MathTools.epsilonEquals(adjustedLocation.getX(), nextFootstepPose.getX(), 1.0e-10);
                      boolean yEquals = MathTools.epsilonEquals(adjustedLocation.getY(), nextFootstepPose.getY(), 1.0e-10);
                      boolean zEquals = MathTools.epsilonEquals(adjustedLocation.getZ(), nextFootstepPose.getZ(), 1.0e-10);
@@ -123,13 +123,14 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          }
       });
 
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
+      success = simulationTestHelper.simulateAndWait(7.0);
       assertTrue(success);
       assertTrue("Controller did not adjust footstep", hasControllerAdjustedFootstep.get());
    }
 
-   private void findWalkingStateVariables(SimulationConstructionSet scs, SideDependentList<StateTransitionCondition> singleSupportStartConditions,
-         SideDependentList<StateTransitionCondition> doubleSupportStartConditions)
+   private void findWalkingStateVariables(YoVariableHolder scs,
+                                          SideDependentList<StateTransitionCondition> singleSupportStartConditions,
+                                          SideDependentList<StateTransitionCondition> doubleSupportStartConditions)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -137,10 +138,9 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
          final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.findVariable(sidePrefix + "FootControlModule",
-               footPrefix + "CurrentState");
+                                                                                                     footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController",
-               "walkingCurrentState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController", "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -171,7 +171,7 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
       return footstepDataListMessage;
    }
 
-   private static Pose3D findNextFootstepPose(SimulationConstructionSet scs)
+   private static Pose3D findNextFootstepPose(YoVariableHolder scs)
    {
       String sidePrefix = findUpcomingFootstepSide(0, scs).getCamelCaseNameForStartOfExpression();
       String namePrefix = sidePrefix + "Footstep0Pose";
@@ -179,17 +179,17 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
    }
 
    @SuppressWarnings("unchecked")
-   private static RobotSide findUpcomingFootstepSide(int index, SimulationConstructionSet scs)
+   private static RobotSide findUpcomingFootstepSide(int index, YoVariableHolder scs)
    {
-      return ((YoEnum<RobotSide>)scs.findVariable(WalkingMessageHandler.class.getSimpleName(), "upcomingFoostepSide" + index)).getEnumValue();
+      return ((YoEnum<RobotSide>) scs.findVariable(WalkingMessageHandler.class.getSimpleName(), "upcomingFoostepSide" + index)).getEnumValue();
    }
 
-   private static YoFramePose3D findYoFramePose(String namespace, String namePrefix, SimulationConstructionSet scs)
+   private static YoFramePose3D findYoFramePose(String namespace, String namePrefix, YoVariableHolder scs)
    {
       return findYoFramePose3D(namespace, namePrefix, "", scs);
    }
 
-   private static YoFramePose3D findYoFramePose3D(String namespace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
+   private static YoFramePose3D findYoFramePose3D(String namespace, String namePrefix, String nameSuffix, YoVariableHolder scs)
    {
       YoDouble x = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createXName(namePrefix, nameSuffix));
       YoDouble y = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createYName(namePrefix, nameSuffix));
@@ -255,16 +255,11 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");

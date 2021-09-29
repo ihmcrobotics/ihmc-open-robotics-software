@@ -7,44 +7,44 @@ import java.util.List;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.SimulatedHandControlTask;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
+public class SimulatedRobotiqHandsController implements RobotController
 {
    private final boolean DEBUG = false;
 
-   private final YoDouble handControllerTime;
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoBoolean sendFingerJointGains;
 
-   private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kpMap = new LinkedHashMap<>();
-   private final LinkedHashMap<OneDegreeOfFreedomJoint, YoDouble> kdMap = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJointBasics, YoDouble> kpMap = new LinkedHashMap<>();
+   private final LinkedHashMap<OneDoFJointBasics, YoDouble> kdMap = new LinkedHashMap<>();
 
    private final YoDouble fingerTrajectoryTime;
 
    private final SideDependentList<HandDesiredConfigurationMessageSubscriber> handDesiredConfigurationMessageSubscribers = new SideDependentList<>();
 
-   private final SideDependentList<List<OneDegreeOfFreedomJoint>> allFingerJoints = new SideDependentList<>();
+   private final SideDependentList<List<OneDoFJointBasics>> allFingerJoints = new SideDependentList<>();
 
    private final RobotiqHandModel handModel = new RobotiqHandModel();
 
@@ -52,19 +52,23 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
 
    private final SimulatedRobotiqHandJointAngleProducer jointAngleProducer;
 
-   private final SideDependentList<Boolean> hasRobotiqHand = new SideDependentList<Boolean>(false, false);
+   private final SideDependentList<Boolean> hasRobotiqHand = new SideDependentList<>(false, false);
 
-   private long timestamp;
+   // TODO These 2 joints don't exist on the real robot but are somehow present in the SDF. Need to keep them in place or they will drift.
+   private final SideDependentList<OneDoFJointBasics> palmMiddleFingerJoints = new SideDependentList<>();
+   private final YoDouble kpPalmFingerMiddleJoint = new YoDouble("kpPalmMiddleFingerJoint", registry);
+   private final YoDouble kdPalmFingerMiddleJoint = new YoDouble("kdPalmMiddleFingerJoint", registry);
 
-   private final MirroredYoVariableRegistry registry;
+   private final JointDesiredOutputListBasics jointDesiredOutputList;
 
-   public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node,
-                                          ROS2Topic outputTopic, ROS2Topic inputTopic)
+   public SimulatedRobotiqHandsController(FullRobotModel fullRobotModel,
+                                          JointDesiredOutputListBasics jointDesiredOutputList,
+                                          DoubleProvider yoTime,
+                                          RealtimeROS2Node realtimeROS2Node,
+                                          ROS2Topic<?> outputTopic,
+                                          ROS2Topic<?> inputTopic)
    {
-      super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
-
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      handControllerTime = new YoDouble("handControllerTime", registry);
+      this.jointDesiredOutputList = jointDesiredOutputList;
       sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
       fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
 
@@ -72,9 +76,10 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
 
       if (realtimeROS2Node != null)
       {
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, HandJointAnglePacket.class,
+         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
+                                                                                                                  HandJointAnglePacket.class,
                                                                                                                   outputTopic);
-         jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, simulatedRobot);
+         jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, fullRobotModel);
       }
       else
       {
@@ -89,11 +94,12 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         allFingerJoints.put(robotSide, new ArrayList<OneDegreeOfFreedomJoint>());
+         palmMiddleFingerJoints.put(robotSide, fullRobotModel.getOneDoFJointByName(RobotiqHandModel.getPalmFingerMiddleJointName(robotSide)));
+         allFingerJoints.put(robotSide, new ArrayList<>());
 
          for (HandJointName jointEnum : handModel.getHandJointNames())
          {
-            OneDegreeOfFreedomJoint fingerJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointEnum.getJointName(robotSide));
+            OneDoFJointBasics fingerJoint = fullRobotModel.getOneDoFJointByName(jointEnum.getJointName(robotSide));
             if (fingerJoint != null)
                hasRobotiqHand.put(robotSide, true);
             allFingerJoints.get(robotSide).add(fingerJoint);
@@ -107,20 +113,24 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
             handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
             if (realtimeROS2Node != null)
             {
-               ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HandDesiredConfigurationMessage.class, inputTopic,
+               ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                             HandDesiredConfigurationMessage.class,
+                                                             inputTopic,
                                                              handDesiredConfigurationSubscriber);
             }
 
-            IndividualRobotiqHandController individualHandController = new IndividualRobotiqHandController(robotSide, handControllerTime, fingerTrajectoryTime,
-                                                                                                           simulatedRobot, registry);
+            IndividualRobotiqHandController individualHandController = new IndividualRobotiqHandController(robotSide,
+                                                                                                           yoTime,
+                                                                                                           fingerTrajectoryTime,
+                                                                                                           fullRobotModel,
+                                                                                                           registry);
             individualHandControllers.put(robotSide, individualHandController);
          }
       }
-
-      this.registry = new MirroredYoVariableRegistry(registry);
    }
 
-   private void setupGains(EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap, EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap,
+   private void setupGains(EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap,
+                           EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap,
                            YoRegistry registry)
    {
       YoDouble kpFingerJoint1 = new YoDouble("kpFingerJoint1", registry);
@@ -129,6 +139,8 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
       YoDouble kpThumbJoint1 = new YoDouble("kpThumbJoint1", registry);
       YoDouble kpThumbJoint2 = new YoDouble("kpThumbJoint2", registry);
       YoDouble kpThumbJoint3 = new YoDouble("kpThumbJoint3", registry);
+
+      kpPalmFingerMiddleJoint.set(20.0);
 
       kpFingerJoint1.set(10.0);
       kpFingerJoint2.set(5.0);
@@ -159,6 +171,8 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
       YoDouble kdThumbJoint2 = new YoDouble("kdThumbJoint2", registry);
       YoDouble kdThumbJoint3 = new YoDouble("kdThumbJoint3", registry);
 
+      kdPalmFingerMiddleJoint.set(1.0);
+
       kdFingerJoint1.set(0.5);
       kdFingerJoint2.set(0.25);
       kdFingerJoint3.set(0.1);
@@ -182,25 +196,51 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
       kdEnumMap.put(RobotiqHandJointNameMinimal.FINGER_MIDDLE_JOINT_3, kdThumbJoint3);
    }
 
-   public void read()
+   @Override
+   public void initialize()
    {
-      handControllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
+   }
 
+   @Override
+   public void doControl()
+   {
       if (jointAngleProducer != null)
       {
          jointAngleProducer.sendHandJointAnglesPacket();
       }
-   }
 
-   @Override
-   public void execute()
-   {
       checkForNewHandDesiredConfigurationRequested();
 
       for (RobotSide robotSide : RobotSide.values)
       {
          if (hasRobotiqHand.get(robotSide))
             individualHandControllers.get(robotSide).doControl();
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (hasRobotiqHand.get(robotSide))
+         {
+            List<OneDoFJointBasics> oneSideFingerJoints = allFingerJoints.get(robotSide);
+
+            for (OneDoFJointBasics joint : oneSideFingerJoints)
+            {
+               JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+               jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
+               jointDesiredOutput.setStiffness(kpMap.get(joint).getDoubleValue());
+               jointDesiredOutput.setDamping(kdMap.get(joint).getDoubleValue());
+            }
+
+            JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(palmMiddleFingerJoints.get(robotSide));
+            jointDesiredOutput.setControlMode(JointDesiredControlMode.EFFORT);
+            jointDesiredOutput.setDesiredPosition(0.0);
+            jointDesiredOutput.setDesiredVelocity(0.0);
+            jointDesiredOutput.setStiffness(kpPalmFingerMiddleJoint.getValue());
+            jointDesiredOutput.setDamping(kdPalmFingerMiddleJoint.getValue());
+         }
+
+         if (hasRobotiqHand.get(robotSide))
+            individualHandControllers.get(robotSide).writeDesiredJointAngles(jointDesiredOutputList);
       }
    }
 
@@ -223,138 +263,100 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
                LogTools.debug("Recieved new HandDesiredConfiguration: " + handDesiredConfiguration);
             switch (handDesiredConfiguration)
             {
-            case OPEN:
-               individualRobotiqHandController.open();
-               break;
+               case OPEN:
+                  individualRobotiqHandController.open();
+                  break;
 
-            case OPEN_INDEX:
-               //TODO
-               break;
+               case OPEN_INDEX:
+                  //TODO
+                  break;
 
-            case OPEN_MIDDLE:
-               //TODO
-               break;
+               case OPEN_MIDDLE:
+                  //TODO
+                  break;
 
-            case OPEN_FINGERS:
-               individualRobotiqHandController.openFingers();
-               break;
+               case OPEN_FINGERS:
+                  individualRobotiqHandController.openFingers();
+                  break;
 
-            case OPEN_THUMB:
-               individualRobotiqHandController.openThumb();
-               break;
+               case OPEN_THUMB:
+                  individualRobotiqHandController.openThumb();
+                  break;
 
-            case CLOSE:
-               individualRobotiqHandController.close();
-               break;
+               case CLOSE:
+                  individualRobotiqHandController.close();
+                  break;
 
-            case CLOSE_FINGERS:
-               individualRobotiqHandController.closeFingers();
-               break;
+               case CLOSE_FINGERS:
+                  individualRobotiqHandController.closeFingers();
+                  break;
 
-            case CLOSE_THUMB:
-               individualRobotiqHandController.closeThumb();
-               break;
+               case CLOSE_THUMB:
+                  individualRobotiqHandController.closeThumb();
+                  break;
 
-            case RESET:
-               individualRobotiqHandController.reset();
-               break;
+               case RESET:
+                  individualRobotiqHandController.reset();
+                  break;
 
-            case HOOK:
-               individualRobotiqHandController.hook();
-               break;
+               case HOOK:
+                  individualRobotiqHandController.hook();
+                  break;
 
-            case CRUSH:
-               individualRobotiqHandController.crush();
-               break;
+               case CRUSH:
+                  individualRobotiqHandController.crush();
+                  break;
 
-            case CRUSH_INDEX:
-               //TODO
-               break;
+               case CRUSH_INDEX:
+                  //TODO
+                  break;
 
-            case CRUSH_MIDDLE:
-               //TODO
-               break;
+               case CRUSH_MIDDLE:
+                  //TODO
+                  break;
 
-            case CRUSH_THUMB:
-               individualRobotiqHandController.crushThumb();
-               break;
+               case CRUSH_THUMB:
+                  individualRobotiqHandController.crushThumb();
+                  break;
 
-            case STOP:
-               individualRobotiqHandController.stop();
+               case STOP:
+                  individualRobotiqHandController.stop();
 
-            case PINCH_GRIP:
-               individualRobotiqHandController.pinchGrip();
-               break;
+               case PINCH_GRIP:
+                  individualRobotiqHandController.pinchGrip();
+                  break;
 
-            case BASIC_GRIP:
-               individualRobotiqHandController.basicGrip();
-               break;
+               case BASIC_GRIP:
+                  individualRobotiqHandController.basicGrip();
+                  break;
 
-            case WIDE_GRIP:
-               individualRobotiqHandController.wideGrip();
-               break;
+               case WIDE_GRIP:
+                  individualRobotiqHandController.wideGrip();
+                  break;
 
-            default:
-               break;
+               default:
+                  break;
             }
          }
-      }
-   }
-
-   public void write()
-   {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (hasRobotiqHand.get(robotSide))
-         {
-            List<OneDegreeOfFreedomJoint> oneSideFingerJoints = allFingerJoints.get(robotSide);
-            for (int i = 0; i < oneSideFingerJoints.size(); i++)
-            {
-               OneDegreeOfFreedomJoint joint = oneSideFingerJoints.get(i);
-               joint.setKp(kpMap.get(joint).getDoubleValue());
-               joint.setKd(kdMap.get(joint).getDoubleValue());
-            }
-         }
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         if (hasRobotiqHand.get(robotSide))
-            individualHandControllers.get(robotSide).writeDesiredJointAngles();
       }
    }
 
    @Override
-   public YoRegistry getRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
 
-   public SideDependentList<List<OneDegreeOfFreedomJoint>> getAllFingerJoints()
+   public SideDependentList<List<OneDoFJointBasics>> getAllFingerJoints()
    {
       return allFingerJoints;
    }
 
-   @Override
    protected void cleanup()
    {
       if (jointAngleProducer != null)
       {
          jointAngleProducer.cleanup();
       }
-   }
-
-   @Override
-   protected void updateMasterContext(HumanoidRobotContextData context)
-   {
-      write();
-      registry.updateMirror();
-   }
-
-   @Override
-   protected void updateLocalContext(HumanoidRobotContextData context)
-   {
-      timestamp = context.getTimestamp();
-      read();
    }
 }

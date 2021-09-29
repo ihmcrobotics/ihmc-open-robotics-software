@@ -3,12 +3,13 @@ package us.ihmc.gdx.simulation.scs2;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.sharedMemory.LinkedYoRegistry;
-import us.ihmc.scs2.sharedMemory.tools.YoMirroredRegistryTools;
+import us.ihmc.scs2.sharedMemory.tools.SharedMemoryTools;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -24,7 +25,7 @@ public class GDXSimulatedRobot
    public GDXSimulatedRobot(RobotDefinition robotDefinition)
    {
       this.robotDefinition = robotDefinition;
-      mirroredBoxRegistry = YoMirroredRegistryTools.newRegistryFromNamespace(SimulationSession.ROOT_REGISTRY_NAME, robotDefinition.getName());
+      mirroredBoxRegistry = SharedMemoryTools.newRegistryFromNamespace(SimulationSession.ROOT_REGISTRY_NAME, robotDefinition.getName());
       originalRigidBody = robotDefinition.newIntance(ReferenceFrameTools.constructARootFrame("dummy"));
    }
 
@@ -35,7 +36,6 @@ public class GDXSimulatedRobot
                                                                     robotDefinition,
                                                                     mirroredBoxRegistry);
       robotLinkedYoRegistry = yoManager.newLinkedYoRegistry(mirroredBoxRegistry);
-      yoManager.linkNewYoVariables();
    }
 
    public void update()

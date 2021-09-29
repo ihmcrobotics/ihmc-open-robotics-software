@@ -4,13 +4,11 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,8 +19,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
@@ -95,6 +91,9 @@ public class AvatarEstimatorThread extends ModularRobotController
 
       try
       {
+         // In the case the SensorReader.compute() does fill the sensor data, it has to be called before initialize of the state estimator.
+         sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
+
          if (firstTick.getBooleanValue())
          {
             initialize();
@@ -111,8 +110,6 @@ public class AvatarEstimatorThread extends ModularRobotController
             if (secondaryStateEstimators.get(i).getLeft().getAsBoolean())
                secondaryStateEstimators.get(i).getRight().initializeEstimator(rootToWorldTransform);
          }
-
-         sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
 
          doControl();
 

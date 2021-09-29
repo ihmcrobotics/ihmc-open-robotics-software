@@ -9,7 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -43,8 +43,8 @@ public abstract class HumanoidRobotTransformOptimizerTest
       robotModelA.getRobotDescription().setName("RobotA");
       robotModelB.getRobotDescription().setName("RobotB");
       robotModelBCorrected.getRobotDescription().setName("RobotBCorrected");
-      KinematicsToolboxControllerTest.recursivelyModifyGraphics(robotModelB.getRobotDescription().getChildrenJoints().get(0), robotBApperance);
-      KinematicsToolboxControllerTest.recursivelyModifyGraphics(robotModelBCorrected.getRobotDescription().getChildrenJoints().get(0),
+      HumanoidKinematicsToolboxControllerTest.recursivelyModifyGraphics(robotModelB.getRobotDescription().getChildrenJoints().get(0), robotBApperance);
+      HumanoidKinematicsToolboxControllerTest.recursivelyModifyGraphics(robotModelBCorrected.getRobotDescription().getChildrenJoints().get(0),
                                                                 robotBCorrectedApperance);
    }
 

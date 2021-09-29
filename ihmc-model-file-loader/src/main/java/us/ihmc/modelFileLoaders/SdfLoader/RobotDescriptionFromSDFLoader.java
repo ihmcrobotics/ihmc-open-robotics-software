@@ -315,8 +315,8 @@ public class RobotDescriptionFromSDFLoader
             {
                if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
                {
-                  double kLimit = jointNameMap.getDefaultKLimit();
-                  double bLimit = jointNameMap.getDefaultBLimit();
+                  double kLimit = jointNameMap.getJointKLimit(sanitizedJointName);
+                  double bLimit = jointNameMap.getJointBLimit(sanitizedJointName);
                   pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), kLimit, bLimit);
                }
                else
@@ -561,7 +561,7 @@ public class RobotDescriptionFromSDFLoader
          linkToSensorInZUp.multiply(ModelFileLoaderConversionsHelper.poseToTransform(sdfSensor.getPose()));
 
          showCordinateSystem(jointDescription, linkToSensorInZUp);
-         IMUSensorDescription imuMount = new IMUSensorDescription(child.getName() + "_" + sdfSensor.getName(), linkToSensorInZUp);
+         IMUSensorDescription imuMount = new IMUSensorDescription(sdfSensor.getName(), linkToSensorInZUp);
 
          IMUNoise noise = imu.getNoise();
          if (noise != null)

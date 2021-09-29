@@ -16,6 +16,11 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
 {
    public double getControllerDT();
 
+   public default double getSimulatedHandControlDT()
+   {
+      return getControllerDT();
+   }
+
    public StateEstimatorParameters getStateEstimatorParameters();
 
    public CoPTrajectoryParameters getCoPTrajectoryParameters();
