@@ -1,11 +1,11 @@
 #type vertex
-#version 330
+#version 450
 
-in vec3 a_position;
-in vec4 a_color;
-in vec3 a_sizeAndRotation;
+layout(location = 0) in vec3 a_position;
+layout(location = 1) in vec4 a_color;
+layout(location = 2) in float a_size;
 
-out vec4 v_Color;
+out vec4 v_color;
 
 uniform mat4 u_viewTrans;
 uniform mat4 u_projTrans;
@@ -14,25 +14,24 @@ uniform sampler2D u_diffuseTexture;
 
 void main()
 {
+	float halfSize = 0.5 * a_size;
+	vec4 pointInCameraFrame = u_viewTrans * vec4(a_position, 1);
+	vec4 cornerPositionInScreen = u_projTrans * vec4(halfSize, halfSize, pointInCameraFrame.z, pointInCameraFrame.w);
+	gl_PointSize = u_screenWidth * cornerPositionInScreen.x / cornerPositionInScreen.w;
+	gl_Position = u_projTrans * pointInCameraFrame;
 
-	float halfSize = 0.5 * a_sizeAndRotation.x;
-	vec4 eyePos = u_viewTrans * vec4(a_position, 1);
-	vec4 projCorner = u_projTrans * vec4(halfSize, halfSize, eyePos.z, eyePos.w);
-	gl_PointSize = u_screenWidth * projCorner.x / projCorner.w;
-	gl_Position = u_projTrans * eyePos;
-
-	v_Color = a_color;
+	v_color = a_color;
 }
 
 #type fragment
-#version 330
+#version 450
 
-in vec4 v_Color;
+in vec4 v_color;
 
 out vec4 color;
 
 void main()
 {
-	// color = v_color; // Try this if solid color works.
-	color = vec4(0, 1, 0, 1);
+	color = v_color; // Try this if solid color works.
+	//color = vec4(0, 1, 0, 1);
 }

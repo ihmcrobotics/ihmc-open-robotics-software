@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.glutils.GLVersion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
@@ -343,7 +344,7 @@ public class GDXTools
       modelInstance.materials.get(0).set(new BlendingAttribute(true, transparency));
    }
 
-   public static void printShaderLog(ShaderProgram shaderProgram)
+   public static void printShaderLog(String shaderPath, ShaderProgram shaderProgram)
    {
       for (String line : shaderProgram.getLog().split("\n"))
       {
@@ -361,5 +362,7 @@ public class GDXTools
    {
       String versionString = glfwGetVersionString();
       LogTools.info("Using OpenGL {}", versionString);
+      GLVersion glVersion = Gdx.graphics.getGLVersion();
+      LogTools.info("Using OpenGL {}", glVersion.getRendererString(), glVersion.getVendorString());
    }
 }

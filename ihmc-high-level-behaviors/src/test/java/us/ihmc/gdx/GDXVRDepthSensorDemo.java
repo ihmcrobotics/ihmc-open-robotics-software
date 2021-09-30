@@ -1,5 +1,6 @@
 package us.ihmc.gdx;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -85,7 +86,7 @@ public class GDXVRDepthSensorDemo
          public void render()
          {
             depthSensorSimulator.render(baseUI.get3DSceneManager());
-            pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints());
+            pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints(), Color.VIOLET);
 
             GDX3DSceneTools.glClearGray();
             pointCloudRenderer.updateMesh();
