@@ -14,6 +14,8 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.shader.GDXShader;
 import us.ihmc.gdx.shader.GDXUniform;
 
+import java.util.ArrayList;
+
 public class GDXPointCloudRenderer implements RenderableProvider
 {
    private Renderable renderable;
@@ -34,6 +36,11 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private final GDXUniform screenWidthUniform = GDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
    {
       shader.set(inputID, (float) Gdx.graphics.getWidth());
+   });
+   private int multiColor = 0;
+   private final GDXUniform multiColorUniform = GDXUniform.createGlobalUniform("u_multiColor", (shader, inputID, renderable, combinedAttributes) ->
+   {
+      shader.set(inputID, multiColor);
    });
 
    private RecyclingArrayList<Point3D32> pointsToRender;
@@ -70,7 +77,8 @@ public class GDXPointCloudRenderer implements RenderableProvider
       shader.create();
       shader.getBaseShader().register(DefaultShader.Inputs.viewTrans, DefaultShader.Setters.viewTrans);
       shader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
-      shader.getBaseShader().register(screenWidthUniform.getUniform(), screenWidthUniform.getSetter());
+      shader.registerUniform(screenWidthUniform);
+      shader.registerUniform(multiColorUniform);
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
    }
@@ -100,14 +108,40 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + 6] = alpha; // alpha
 
             vertices[offset + 7] = pointScale; // size
-//            vertices[offset + 8] = 1.0f; // cosine [0-1]
-//            vertices[offset + 9] = 0.0f; // sine [0-1]
          }
 
          renderable.meshPart.size = pointsToRender.size();
          renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * floatsPerVertex);
          renderable.meshPart.update();
       }
+   }
+
+   public void updateMesh(RecyclingArrayList<Point3D32> pointsToRender, ArrayList<Integer> colors)
+   {
+      for (int i = 0; i < pointsToRender.size(); i++)
+      {
+         int offset = i * floatsPerVertex;
+
+         Point3D32 point = pointsToRender.get(i);
+         vertices[offset] = point.getX32();
+         vertices[offset + 1] = point.getY32();
+         vertices[offset + 2] = point.getZ32();
+
+         // color [0.0f - 1.0f]
+         if (colors.size() > i)
+         {
+            vertices[offset + 3] = ((colors.get(i) & 0xff000000) >>> 24) / 255f;
+            vertices[offset + 4] = ((colors.get(i) & 0x00ff0000) >>> 16) / 255f;
+            vertices[offset + 5] = ((colors.get(i) & 0x0000ff00) >>> 8) / 255f;
+            vertices[offset + 6] = ((colors.get(i) & 0x000000ff)) / 255f;
+         }
+
+         vertices[offset + 7] = pointScale; // size
+      }
+
+      renderable.meshPart.size = pointsToRender.size();
+      renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * floatsPerVertex);
+      renderable.meshPart.update();
    }
 
    public float[] getVerticesArray()
