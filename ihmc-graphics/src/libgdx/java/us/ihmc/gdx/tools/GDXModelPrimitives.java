@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
@@ -39,7 +39,7 @@ public class GDXModelPrimitives
       buildModel.accept(meshBuilder);
       Mesh mesh = meshBuilder.generateMesh();
 
-      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
+      MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
       Material material = new Material();
       Texture paletteTexture = GDXMultiColorMeshBuilder.loadPaletteTexture();
       material.set(TextureAttribute.createDiffuse(paletteTexture));

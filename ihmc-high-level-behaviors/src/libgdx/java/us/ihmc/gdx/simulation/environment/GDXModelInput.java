@@ -15,6 +15,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -78,7 +79,7 @@ public class GDXModelInput
 
    public void create()
    {
-      Gdx.gl.glLineWidth(8);
+      GL41.glLineWidth(8);
       ModelBuilder modelBuilder = new ModelBuilder();
 
       modelBuilder.begin();

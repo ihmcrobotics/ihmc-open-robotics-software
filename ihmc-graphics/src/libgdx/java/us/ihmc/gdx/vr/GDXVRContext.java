@@ -6,11 +6,10 @@ import java.nio.IntBuffer;
 import java.util.*;
 import java.util.function.Consumer;
 
-import com.badlogic.gdx.Gdx;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
 
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -26,11 +25,9 @@ import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -452,7 +449,7 @@ public class GDXVRContext
                            VertexAttribute.Position(),
                            VertexAttribute.Normal(),
                            VertexAttribute.TexCoords(0));
-      MeshPart meshPart = new MeshPart(name, mesh, 0, renderModel.unTriangleCount() * 3, GL20.GL_TRIANGLES);
+      MeshPart meshPart = new MeshPart(name, mesh, 0, renderModel.unTriangleCount() * 3, GL41.GL_TRIANGLES);
       RenderModelVertex.Buffer vertices = renderModel.rVertexData();
       float[] packedVertices = new float[8 * renderModel.unVertexCount()];
       int i = 0;

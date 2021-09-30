@@ -1,6 +1,5 @@
 package us.ihmc.gdx.lighting;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -9,6 +8,7 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.tools.GDXTools;
 
@@ -72,8 +72,8 @@ public class GDXPointLight
       {
          final Cubemap.CubemapSide side = Cubemap.CubemapSide.values()[sideIndex];
          framebuffer.bindSide(side, camera);
-         Gdx.gl.glClearColor(0, 0, 0, 1);
-         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+         GL41.glClearColor(0, 0, 0, 1);
+         GL41.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
          modelBatch.begin(camera);
          modelBatch.render(renderableProviders);

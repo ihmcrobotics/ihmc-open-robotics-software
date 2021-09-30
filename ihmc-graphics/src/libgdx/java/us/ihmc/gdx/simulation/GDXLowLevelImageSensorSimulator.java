@@ -1,8 +1,7 @@
 package us.ihmc.gdx.simulation;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.GL30;
+import org.lwjgl.opengl.GL41;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -11,7 +10,7 @@ import com.badlogic.gdx.graphics.glutils.SensorFrameBufferBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
@@ -69,14 +68,14 @@ public class GDXLowLevelImageSensorSimulator
       viewport = new ScreenViewport(camera);
 
 //      DefaultShader.Config config = new DefaultShader.Config();
-//      config.defaultCullFace = GL20.GL_BACK;
+//      config.defaultCullFace = GL41.GL_BACK;
 //      DefaultShaderProvider defaultShaderProvider = new DefaultShaderProvider(config);
 //      modelBatch = new ModelBatch(defaultShaderProvider);
       modelBatch = new ModelBatch();
 
       SensorFrameBufferBuilder frameBufferBuilder = new SensorFrameBufferBuilder(imageWidth, imageHeight);
       frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
-      frameBufferBuilder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT32F, GL30.GL_FLOAT);
+      frameBufferBuilder.addDepthTextureAttachment(GL41.GL_DEPTH_COMPONENT32F, GL41.GL_FLOAT);
       frameBuffer = frameBufferBuilder.build();
 
       rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
@@ -96,21 +95,21 @@ public class GDXLowLevelImageSensorSimulator
       frameBuffer.begin();
 
       float clear = 0.0f;
-      Gdx.gl.glClearColor(clear, clear, clear, 1.0f);
-//      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
-      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT);
+      GL41.glClearColor(clear, clear, clear, 1.0f);
+//      GL41.glClear(GL41.GL_COLOR_BUFFER_BIT | GL41.GL_DEPTH_BUFFER_BIT);
+      GL41.glClear(GL41.GL_COLOR_BUFFER_BIT);
 
       viewport.update(imageWidth, imageHeight);
       modelBatch.begin(camera);
-      Gdx.gl.glViewport(0, 0, imageWidth, imageHeight);
+      GL41.glViewport(0, 0, imageWidth, imageHeight);
 
       sceneManager.renderExternalBatch(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
 
       modelBatch.end();
 
-      Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+      GL41.glPixelStorei(GL41.GL_PACK_ALIGNMENT, 1);
       rawColorByteBuffer.rewind();
-      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, rawColorByteBuffer);
+      GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RGBA, GL41.GL_UNSIGNED_BYTE, rawColorByteBuffer);
 
       frameBuffer.end();
    }

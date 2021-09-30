@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
@@ -59,7 +60,7 @@ public class GDX3DWith2DUIDemo
          {
             sceneManager.render();
 
-            Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 1 / 4);
+            GL41.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() * 1 / 4);
             stage.getViewport().update(sceneManager.getCurrentWindowWidth(), sceneManager.getCurrentWindowHeight() * 1 / 4, true);
 
             stage.act(Gdx.graphics.getDeltaTime());

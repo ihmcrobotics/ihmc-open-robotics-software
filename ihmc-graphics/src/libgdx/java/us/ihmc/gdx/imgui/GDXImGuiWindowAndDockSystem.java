@@ -70,7 +70,7 @@ public class GDXImGuiWindowAndDockSystem
 //                  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 //                  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 //                  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-//                  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL20.GL_TRUE);            // Required on Mac
+//                  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL41.GL_TRUE);            // Required on Mac
 //               } else {
 //                  glslVersion = "#version 130";
 //                  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
