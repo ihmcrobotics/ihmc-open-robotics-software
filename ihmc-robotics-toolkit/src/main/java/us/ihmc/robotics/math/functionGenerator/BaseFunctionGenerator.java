@@ -34,7 +34,7 @@ public abstract class BaseFunctionGenerator
       setAngle(getAngle() + getAngleDot() * dt);
    }
 
-   private void markDirty()
+   void markDirty()
    {
       outputDirty = true;
    }
