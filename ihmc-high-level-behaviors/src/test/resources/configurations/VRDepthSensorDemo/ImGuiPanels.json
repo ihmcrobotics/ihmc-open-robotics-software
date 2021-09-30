@@ -1,4 +1,6 @@
 {
   "dockspacePanels" : { },
-  "windows" : { }
+  "windows" : {
+    "Point Cloud Settings" : true
+  }
 }

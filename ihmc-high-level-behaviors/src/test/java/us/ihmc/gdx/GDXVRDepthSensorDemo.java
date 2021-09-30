@@ -3,7 +3,9 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
+import imgui.internal.ImGui;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
@@ -24,6 +26,7 @@ public class GDXVRDepthSensorDemo
    private ModelInstance cylinder;
    private boolean moveWithController = true;
    private final Matrix4 tempTransform = new Matrix4();
+   private final float[] color = new float[4];
 
    public GDXVRDepthSensorDemo()
    {
@@ -59,6 +62,8 @@ public class GDXVRDepthSensorDemo
             }
 
             baseUI.getVRManager().addVRInputProcessor(this::handleVREvents);
+
+            baseUI.getImGuiPanelManager().addPanel("Point Cloud Settings", this::renderPointCloudSettings);
          }
 
          private void handleVREvents(GDXVRManager vrManager)
@@ -93,6 +98,11 @@ public class GDXVRDepthSensorDemo
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         private void renderPointCloudSettings()
+         {
+            ImGui.colorPicker4("Color", color);
          }
 
          @Override
