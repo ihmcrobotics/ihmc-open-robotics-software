@@ -2,15 +2,19 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -26,7 +30,10 @@ public class GDXVRDepthSensorDemo
    private ModelInstance cylinder;
    private boolean moveWithController = true;
    private final Matrix4 tempTransform = new Matrix4();
+   private final ImBoolean useSensorColor = new ImBoolean(false);
+   private final ImBoolean useGizmoToPoseSensor = new ImBoolean(false);
    private final float[] color = new float[4];
+   private final GDXPose3DGizmo gizmo = new GDXPose3DGizmo();
 
    public GDXVRDepthSensorDemo()
    {
@@ -64,6 +71,10 @@ public class GDXVRDepthSensorDemo
             baseUI.getVRManager().addVRInputProcessor(this::handleVREvents);
 
             baseUI.getImGuiPanelManager().addPanel("Point Cloud Settings", this::renderPointCloudSettings);
+
+            gizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewInputProcessor(gizmo::process3DViewInput);
+            baseUI.get3DSceneManager().addRenderableProvider(this::getRenderables);
          }
 
          private void handleVREvents(GDXVRManager vrManager)
@@ -87,14 +98,34 @@ public class GDXVRDepthSensorDemo
             });
          }
 
+         private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+         {
+            if (useGizmoToPoseSensor.get())
+            {
+               gizmo.getRenderables(renderables, pool);
+            }
+         }
+
          @Override
          public void render()
          {
-            depthSensorSimulator.render(baseUI.get3DSceneManager());
-            pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints(), Color.VIOLET);
+            if (useGizmoToPoseSensor.get())
+            {
+               GDXTools.toGDX(gizmo.getTransform(), tempTransform);
+               depthSensorSimulator.setCameraWorldTransform(tempTransform);
+            }
 
-            GDX3DSceneTools.glClearGray();
-            pointCloudRenderer.updateMesh();
+            depthSensorSimulator.render(baseUI.get3DSceneManager());
+
+            if (useSensorColor.get())
+            {
+               pointCloudRenderer.updateMesh(depthSensorSimulator.getPoints(), depthSensorSimulator.getColors());
+            }
+            else
+            {
+               pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints(), new Color(color[0], color[1], color[2], color[3]));
+               pointCloudRenderer.updateMesh();
+            }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -102,6 +133,8 @@ public class GDXVRDepthSensorDemo
 
          private void renderPointCloudSettings()
          {
+            ImGui.checkbox("Use Gizmo to pose sensor", useGizmoToPoseSensor);
+            ImGui.checkbox("Use Sensor Color", useSensorColor);
             ImGui.colorPicker4("Color", color);
          }
 

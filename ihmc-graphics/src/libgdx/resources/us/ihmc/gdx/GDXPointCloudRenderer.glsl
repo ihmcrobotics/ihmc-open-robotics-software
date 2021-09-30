@@ -11,6 +11,7 @@ uniform mat4 u_viewTrans;
 uniform mat4 u_projTrans;
 uniform float u_screenWidth;
 uniform sampler2D u_diffuseTexture;
+uniform int u_multiColor;
 
 void main()
 {

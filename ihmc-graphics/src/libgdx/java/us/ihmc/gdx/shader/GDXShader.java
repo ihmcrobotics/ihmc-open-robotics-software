@@ -60,6 +60,11 @@ public class GDXShader
       baseShader.init(shaderProgram, renderable);
    }
 
+   public void registerUniform(GDXUniform uniform)
+   {
+      baseShader.register(uniform.getUniform(), uniform.getSetter());
+   }
+
    public BaseShader getBaseShader()
    {
       return baseShader;
