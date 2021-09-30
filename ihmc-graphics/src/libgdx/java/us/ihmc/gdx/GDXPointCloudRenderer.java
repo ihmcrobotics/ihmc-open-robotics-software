@@ -4,18 +4,18 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.shader.GDXShader;
+import us.ihmc.gdx.shader.GDXUniform;
 
 public class GDXPointCloudRenderer implements RenderableProvider
 {
-   private static final int SIZE_AND_ROTATION_USAGE = 1 << 9;
    private Renderable renderable;
    private float[] vertices;
 
@@ -25,25 +25,16 @@ public class GDXPointCloudRenderer implements RenderableProvider
                                                                           new VertexAttribute(VertexAttributes.Usage.ColorUnpacked,
                                                                                               4,
                                                                                               ShaderProgram.COLOR_ATTRIBUTE),
-//                                                                          new VertexAttribute(SIZE_AND_ROTATION_USAGE,
-//                                                                                              1,
-//                                                                                              "a_size"));
                                                                           new VertexAttribute(VertexAttributes.Usage.Generic,
                                                                                               1,
-                                                                                              GL20.GL_FLOAT,
+                                                                                              GL41.GL_FLOAT,
                                                                                               false,
                                                                                               "a_size"));
-
-   private final int vertexSize = 8;
-   public final static BaseShader.Uniform screenWidthUniform = new BaseShader.Uniform("u_screenWidth");
-   public final static BaseShader.Setter screenWidthSetter = new BaseShader.GlobalSetter()
+   private final int floatsPerVertex = vertexAttributes.vertexSize / 4;
+   private final GDXUniform screenWidthUniform = GDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
    {
-      @Override
-      public void set(BaseShader shader, int inputID, Renderable renderable, Attributes combinedAttributes)
-      {
-         shader.set(inputID, (float) Gdx.graphics.getWidth());
-      }
-   };
+      shader.set(inputID, (float) Gdx.graphics.getWidth());
+   });
 
    private RecyclingArrayList<Point3D32> pointsToRender;
    private ColorProvider colorProvider;
@@ -60,14 +51,14 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    public void create(int size)
    {
-      Gdx.gl30.glEnable(GL30.GL_VERTEX_PROGRAM_POINT_SIZE);
+      GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
 
       renderable = new Renderable();
-      renderable.meshPart.primitiveType = GL30.GL_POINTS;
+      renderable.meshPart.primitiveType = GL41.GL_POINTS;
       renderable.meshPart.offset = 0;
       renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
-      vertices = new float[size * vertexSize];
+      vertices = new float[size * floatsPerVertex];
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
       boolean isStatic = false;
@@ -79,7 +70,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
       shader.create();
       shader.getBaseShader().register(DefaultShader.Inputs.viewTrans, DefaultShader.Setters.viewTrans);
       shader.getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
-      shader.getBaseShader().register(screenWidthUniform, screenWidthSetter);
+      shader.getBaseShader().register(screenWidthUniform.getUniform(), screenWidthUniform.getSetter());
       shader.init(renderable);
       renderable.shader = shader.getBaseShader();
    }
@@ -95,7 +86,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
       {
          for (int i = 0; i < pointsToRender.size(); i++)
          {
-            int offset = i * vertexSize;
+            int offset = i * floatsPerVertex;
 
             Point3D32 point = pointsToRender.get(i);
             vertices[offset] = point.getX32();
@@ -114,7 +105,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
          }
 
          renderable.meshPart.size = pointsToRender.size();
-         renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * vertexSize);
+         renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * floatsPerVertex);
          renderable.meshPart.update();
       }
    }
@@ -127,7 +118,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
    public void updateMeshFast(int numberOfPoints)
    {
       renderable.meshPart.size = numberOfPoints;
-      renderable.meshPart.mesh.setVertices(vertices, 0, numberOfPoints * vertexSize);
+      renderable.meshPart.mesh.setVertices(vertices, 0, numberOfPoints * floatsPerVertex);
       renderable.meshPart.update();
    }
 
