@@ -25,9 +25,16 @@ public class GDXPointCloudRenderer implements RenderableProvider
                                                                           new VertexAttribute(VertexAttributes.Usage.ColorUnpacked,
                                                                                               4,
                                                                                               ShaderProgram.COLOR_ATTRIBUTE),
-                                                                          new VertexAttribute(SIZE_AND_ROTATION_USAGE, 3, "a_sizeAndRotation"));
+//                                                                          new VertexAttribute(SIZE_AND_ROTATION_USAGE,
+//                                                                                              1,
+//                                                                                              "a_size"));
+                                                                          new VertexAttribute(VertexAttributes.Usage.Generic,
+                                                                                              1,
+                                                                                              GL20.GL_FLOAT,
+                                                                                              false,
+                                                                                              "a_size"));
 
-   private final int vertexSize = 10;
+   private final int vertexSize = 8;
    public final static BaseShader.Uniform screenWidthUniform = new BaseShader.Uniform("u_screenWidth");
    public final static BaseShader.Setter screenWidthSetter = new BaseShader.GlobalSetter()
    {
@@ -102,8 +109,8 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + 6] = alpha; // alpha
 
             vertices[offset + 7] = pointScale; // size
-            vertices[offset + 8] = 1.0f; // cosine [0-1]
-            vertices[offset + 9] = 0.0f; // sine [0-1]
+//            vertices[offset + 8] = 1.0f; // cosine [0-1]
+//            vertices[offset + 9] = 0.0f; // sine [0-1]
          }
 
          renderable.meshPart.size = pointsToRender.size();

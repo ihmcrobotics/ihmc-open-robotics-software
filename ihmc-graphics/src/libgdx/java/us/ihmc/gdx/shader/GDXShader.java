@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.log.LogTools;
 
 public class GDXShader
 {
@@ -20,17 +21,20 @@ public class GDXShader
 
    public void create()
    {
-      String combinedString = Gdx.files.classpath(clazz.getName().replace(".", "/") + ".glsl").readString();
+      String path = clazz.getName().replace(".", "/") + ".glsl";
+      String combinedString = Gdx.files.classpath(path).readString();
 
       String vertexMacro = "#type vertex\n";
       int vertexBegin = combinedString.indexOf(vertexMacro);
       String fragmentMacro = "#type fragment\n";
       int fragmentBegin = combinedString.indexOf(fragmentMacro);
 
-      String fragmentShader = combinedString.substring(vertexBegin + vertexMacro.length() - 1, fragmentBegin);
-      String vertexShader = combinedString.substring(fragmentBegin + fragmentMacro.length() - 1);
+      String vertexShader = combinedString.substring(vertexBegin + vertexMacro.length() - 1, fragmentBegin);
+      String fragmentShader = combinedString.substring(fragmentBegin + fragmentMacro.length() - 1);
       shaderProgram = new ShaderProgram(vertexShader, fragmentShader);
-      GDXTools.printShaderLog(shaderProgram);
+
+      LogTools.info("OpenGL shader compilation output for {}:\n{}", path, shaderProgram.getLog());
+//      GDXTools.printShaderLog(shaderProgram);
 
       baseShader = new GDXDefaultBaseShader()
       {
