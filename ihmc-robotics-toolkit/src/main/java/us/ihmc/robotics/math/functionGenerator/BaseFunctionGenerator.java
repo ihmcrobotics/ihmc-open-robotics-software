@@ -6,6 +6,8 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 public abstract class BaseFunctionGenerator
 {
    public static final DoubleProvider zeroDoubleProvider = () -> 0.0;
+   public static final double twoPi = 2.0 * Math.PI;
+
    private DoubleProvider offset = zeroDoubleProvider;
    private DoubleProvider amplitude = zeroDoubleProvider;
    private DoubleProvider frequency = zeroDoubleProvider;
@@ -134,7 +136,7 @@ public abstract class BaseFunctionGenerator
 
    public double getAngleDot()
    {
-      return 2.0 * Math.PI * frequency.getValue();
+      return twoPi * frequency.getValue();
    }
 
    public double getValue()
