@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.functionGenerator;
 
-public class SquarewaveFunctionGenerator extends BaseFunctionGenerator
+public class SquareWaveFunctionGenerator extends BaseFunctionGenerator
 {
    @Override
    protected double computeValue()

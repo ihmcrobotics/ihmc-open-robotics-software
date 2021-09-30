@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.functionGenerator;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
 
-public class SawtoothFunctionGenerator extends BaseFunctionGenerator
+public class SawtoothWaveFunctionGenerator extends BaseFunctionGenerator
 {
 
    @Override
@@ -18,8 +18,8 @@ public class SawtoothFunctionGenerator extends BaseFunctionGenerator
    protected double computeValueDot()
    {
       double amplitude = getAmplitude();
-      double angleDot = getAngleDot();
-      return 2.0 * amplitude * angleDot;
+      double frequency = getFrequency();
+      return 2.0 * amplitude * frequency;
    }
 
    @Override
