@@ -21,7 +21,7 @@ public class SinewaveFunctionGeneratorTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         SinewaveFunctionGenerator sinewave = new SinewaveFunctionGenerator();
+         SineWaveFunctionGenerator sinewave = new SineWaveFunctionGenerator();
          double offset = RandomNumbers.nextDouble(random, 5.0);
          double amplitude = RandomNumbers.nextDouble(random, 0.0, 5.0);
          double frequency = RandomNumbers.nextDouble(random, 0.0, 5.0);

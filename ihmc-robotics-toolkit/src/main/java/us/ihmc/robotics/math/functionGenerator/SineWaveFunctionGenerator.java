@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.functionGenerator;
 
-public class SinewaveFunctionGenerator extends BaseFunctionGenerator
+public class SineWaveFunctionGenerator extends BaseFunctionGenerator
 {
-   public SinewaveFunctionGenerator()
+   public SineWaveFunctionGenerator()
    {
    }
 
