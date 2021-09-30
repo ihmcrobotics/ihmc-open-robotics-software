@@ -1,7 +1,6 @@
 package us.ihmc.gdx.lighting;
 
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -14,6 +13,7 @@ import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import org.lwjgl.opengl.GL41;
 
 public class GDXShadowSceneShader extends BaseShader
 {
@@ -43,8 +43,8 @@ public class GDXShadowSceneShader extends BaseShader
    public void begin(Camera camera, RenderContext context)
    {
       super.begin(camera, context);
-      context.setDepthTest(GL20.GL_LEQUAL);
-      context.setCullFace(GL20.GL_BACK);
+      context.setDepthTest(GL41.GL_LEQUAL);
+      context.setCullFace(GL41.GL_BACK);
    }
 
    @Override
@@ -63,7 +63,7 @@ public class GDXShadowSceneShader extends BaseShader
    public void render(final Renderable renderable)
    {
       Material material = renderable.material;
-      context.setBlending(material.has(BlendingAttribute.Type), GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+      context.setBlending(material.has(BlendingAttribute.Type), GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA);
       if (!material.has(TextureAttribute.Diffuse))
       {
          Pixmap map = new Pixmap(100, 100, Pixmap.Format.RGBA8888);

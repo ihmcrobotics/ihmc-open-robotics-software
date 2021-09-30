@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -157,7 +158,7 @@ public class GDXVRManager implements RenderableProvider
 
       int width = eyeData.getFrameBuffer().getWidth();
       int height = eyeData.getFrameBuffer().getHeight();
-      Gdx.gl.glViewport(0, 0, width, height);
+      GL41.glViewport(0, 0, width, height);
 
       GDX3DSceneTools.glClearGray();
 

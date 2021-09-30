@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.lighting.*;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -31,7 +31,7 @@ public class GDX3DWithShadowsDemo
          public void create()
          {
             //GDX stuff
-            Gdx.gl.glEnable(GL30.GL_BLEND);
+            GL41.glEnable(GL41.GL_BLEND);
 
             //Camera initialization
             camera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -72,7 +72,7 @@ public class GDX3DWithShadowsDemo
 
             cameraController.update();
 
-            Gdx.gl.glViewport(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
+            GL41.glViewport(0, 0, Gdx.graphics.getBackBufferWidth(), Gdx.graphics.getBackBufferHeight());
 
             GDX3DSceneTools.glClearGray();
 

@@ -1,6 +1,5 @@
 package us.ihmc.gdx.simulation;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.glutils.*;
@@ -10,7 +9,7 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -98,7 +97,7 @@ public class GDXLowLevelDepthSensorSimulator
 
       SensorFrameBufferBuilder frameBufferBuilder = new SensorFrameBufferBuilder(imageWidth, imageHeight);
       frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
-      frameBufferBuilder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT32F, GL30.GL_FLOAT);
+      frameBufferBuilder.addDepthTextureAttachment(GL41.GL_DEPTH_COMPONENT32F, GL41.GL_FLOAT);
       frameBuffer = frameBufferBuilder.build();
 
       rawDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
@@ -129,12 +128,12 @@ public class GDXLowLevelDepthSensorSimulator
       frameBuffer.begin();
 
       float clear = 0.0f;
-      Gdx.gl.glClearColor(clear, clear, clear, 1.0f);
-      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
+      GL41.glClearColor(clear, clear, clear, 1.0f);
+      GL41.glClear(GL41.GL_COLOR_BUFFER_BIT | GL41.GL_DEPTH_BUFFER_BIT);
 
       viewport.update(imageWidth, imageHeight);
       modelBatch.begin(camera);
-      Gdx.gl.glViewport(0, 0, imageWidth, imageHeight);
+      GL41.glViewport(0, 0, imageWidth, imageHeight);
 
       sceneManager.renderExternalBatch(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
 
@@ -142,13 +141,13 @@ public class GDXLowLevelDepthSensorSimulator
 
       if (depthEnabled)
       {
-         Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 4);
+         GL41.glPixelStorei(GL41.GL_PACK_ALIGNMENT, 4);
          rawDepthByteBuffer.rewind();
-         Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_DEPTH_COMPONENT, GL30.GL_FLOAT, rawDepthByteBuffer);
+         GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_DEPTH_COMPONENT, GL41.GL_FLOAT, rawDepthByteBuffer);
       }
-      Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+      GL41.glPixelStorei(GL41.GL_PACK_ALIGNMENT, 1);
       rawColorByteBuffer.rewind();
-      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, rawColorByteBuffer);
+      GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RGBA, GL41.GL_UNSIGNED_BYTE, rawColorByteBuffer);
 
       frameBuffer.end();
 

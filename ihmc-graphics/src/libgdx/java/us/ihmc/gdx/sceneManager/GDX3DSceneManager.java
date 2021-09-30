@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.environment.PointLight;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.FocusBasedGDXCamera;
@@ -166,7 +167,7 @@ public class GDX3DSceneManager
          shadowsDisabledModelBatch.begin(camera3D);
       }
 
-      Gdx.gl.glViewport(x, y, width, height);
+      GL41.glViewport(x, y, width, height);
       GDX3DSceneTools.glClearGray();
    }
 
