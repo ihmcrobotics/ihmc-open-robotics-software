@@ -332,61 +332,115 @@ public class YoFunctionGeneratorNew
       return chirpLinearFunction.getAngle();
    }
 
+   /**
+    * Gets the current value of the signal.
+    * <p>
+    * IMPORTANT: call one of the update method to update the internal function over time.
+    * </p>
+    * 
+    * @return the current value of the signal.
+    * @see #update()
+    * @see #updateWithDT(double)
+    * @see #updateWithTime(double)
+    */
    public double getValue()
    {
       return value.getValue();
    }
 
+   /**
+    * Gets the current value of the first derivative of the signal if available, returns 0 otherwise.
+    * <p>
+    * IMPORTANT: call one of the update method to update the internal function over time.
+    * </p>
+    * 
+    * @return the current value of the first derivative of the signal if available, returns 0
+    *         otherwise.
+    * @see #update()
+    * @see #updateWithDT(double)
+    * @see #updateWithTime(double)
+    */
    public double getValueDot()
    {
       return valueDot.getValue();
    }
 
+   /**
+    * Gets the current value of the second derivative of the signal if available, returns 0 otherwise.
+    * <p>
+    * IMPORTANT: call one of the update method to update the internal function over time.
+    * </p>
+    * 
+    * @return the current value of the second derivative of the signal if available, returns 0
+    *         otherwise.
+    * @see #update()
+    * @see #updateWithDT(double)
+    * @see #updateWithTime(double)
+    */
    public double getValueDDot()
    {
       return valueDDot.getValue();
    }
 
+   /** Duration used to smooth changes in values of the inputs or to smooth switch between modes. */
+   public void setTransitionDuration(double transitionDuration)
+   {
+      this.transitionDuration.set(transitionDuration);
+   }
+
+   /** Signals will be centered around the offset. */
    public void setOffset(double offset)
    {
       this.offset.set(offset);
    }
 
+   /** Defines signals amplitude such as the resulting value oscillate in [-amplitude; +amplitude]. */
    public void setAmplitude(double amplitude)
    {
       this.amplitude.set(amplitude);
    }
 
+   /** Phase shift in radians of the signal. */
    public void setPhase(double phase)
    {
       this.phase.set(phase);
    }
 
+   /** Frequency of the signal. */
    public void setFrequency(double frequency)
    {
       this.frequency.set(frequency);
    }
 
+   /** Only for chirp signals, defines the lowest frequency spanned by the chirp. */
    public void setChirpLowFrequency(double chirpLowFrequency)
    {
       this.chirpLowFrequency.set(chirpLowFrequency);
    }
 
+   /** Only for chirp signals, defines the highest frequency spanned by the chirp. */
    public void setChirpHighFrequency(double chirpHighFrequency)
    {
       this.chirpHighFrequency.set(chirpHighFrequency);
    }
 
+   /**
+    * Only for chirp signals, defines the duration to span from low to high frequency and vice-versa.
+    */
    public void setChirpDuration(double chirpDuration)
    {
       this.chirpDuration.set(chirpDuration);
    }
 
+   /** Time before this function generator will automatically turn off. */
    public void setResetTime(double resetTime)
    {
       this.resetTime.set(resetTime);
    }
 
+   /**
+    * Sets the type of signal to use.
+    */
    public void setMode(YoFunctionGeneratorMode mode)
    {
       this.mode.set(mode);
