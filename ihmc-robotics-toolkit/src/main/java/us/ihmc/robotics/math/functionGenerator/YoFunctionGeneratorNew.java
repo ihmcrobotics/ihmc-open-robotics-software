@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class YoFunctionGenerator2
+public class YoFunctionGeneratorNew
 {
    /** Duration used to smooth changes in values of the inputs or to smooth switch between modes. */
    private final YoDouble transitionDuration;
@@ -56,22 +56,22 @@ public class YoFunctionGenerator2
    private final TimeToDTConverter timeToDTConverter;
    private final DoubleProvider dt;
 
-   public YoFunctionGenerator2(String namePrefix, YoRegistry registry)
+   public YoFunctionGeneratorNew(String namePrefix, YoRegistry registry)
    {
       this(namePrefix, null, new TimeToDTConverter(), registry);
    }
 
-   public YoFunctionGenerator2(String namePrefix, DoubleProvider time, YoRegistry registry)
+   public YoFunctionGeneratorNew(String namePrefix, DoubleProvider time, YoRegistry registry)
    {
       this(namePrefix, null, time, registry);
    }
 
-   public YoFunctionGenerator2(String namePrefix, double dt, YoRegistry registry)
+   public YoFunctionGeneratorNew(String namePrefix, double dt, YoRegistry registry)
    {
       this(namePrefix, () -> dt, null, registry);
    }
 
-   private YoFunctionGenerator2(String namePrefix, DoubleProvider dt, DoubleProvider time, YoRegistry registry)
+   private YoFunctionGeneratorNew(String namePrefix, DoubleProvider dt, DoubleProvider time, YoRegistry registry)
    {
       this.dt = dt;
       timeToDTConverter = new TimeToDTConverter(time);
