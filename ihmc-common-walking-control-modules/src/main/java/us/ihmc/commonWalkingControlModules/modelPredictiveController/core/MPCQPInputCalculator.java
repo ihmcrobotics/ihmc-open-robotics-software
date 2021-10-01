@@ -792,6 +792,7 @@ public class MPCQPInputCalculator
 
       if (objective.getSelectionMatrix().getNumberOfSelectedAxes() != 3)
       {
+         selectionMatrix.reshape(3, 3);
          objective.getSelectionMatrix().getCompactSelectionMatrixInFrame(ReferenceFrame.getWorldFrame(), 0, 0, selectionMatrix);
 
          selectedJacobian.reshape(selectionMatrix.getNumRows(), numberOfVariables);

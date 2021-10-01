@@ -110,7 +110,6 @@ public class CenterOfMassHeightManager
                        FrameVector2DReadOnly desiredCoMVelocity,
                        boolean isInDoubleSupport,
                        double omega0,
-                       boolean isRecoveringFromPush,
                        FeetManager feetManager)
    {
       stateMachine.doActionAndTransition();
@@ -119,7 +118,6 @@ public class CenterOfMassHeightManager
                                            desiredCoMVelocity,
                                            isInDoubleSupport,
                                            omega0,
-                                           isRecoveringFromPush,
                                            feetManager);
    }
 

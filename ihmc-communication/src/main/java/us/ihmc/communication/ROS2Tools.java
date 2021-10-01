@@ -192,6 +192,16 @@ public class ROS2Tools
       return HUMANOID_CONTROLLER.withRobot(robotName).withInput();
    }
 
+   public static ROS2Topic<WalkingControllerPreviewInputMessage> getControllerPreviewInputTopic(String robotName)
+   {
+      return WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput().withTypeName(WalkingControllerPreviewInputMessage.class);
+   }
+
+   public static ROS2Topic<WalkingControllerPreviewOutputMessage> getControllerPreviewOutputTopic(String robotName)
+   {
+      return WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput().withTypeName(WalkingControllerPreviewOutputMessage.class);
+   }
+
    public static ROS2Topic<?> getQuadrupedControllerOutputTopic(String robotName)
    {
       return QUADRUPED_CONTROLLER.withRobot(robotName).withOutput();

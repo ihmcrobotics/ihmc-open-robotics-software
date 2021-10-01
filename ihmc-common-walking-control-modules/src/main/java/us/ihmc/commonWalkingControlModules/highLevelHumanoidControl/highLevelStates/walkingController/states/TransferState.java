@@ -228,8 +228,6 @@ public abstract class TransferState extends WalkingState
          failureDetectionControlModule.setNextFootstep(null);
       }
 
-      balanceManager.resetPushRecovery();
-
       double transferTime = walkingMessageHandler.getNextTransferTime();
       pelvisOrientationManager.setTrajectoryTime(transferTime);
    }

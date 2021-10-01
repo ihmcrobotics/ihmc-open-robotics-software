@@ -68,7 +68,7 @@ public class MessagerStringSelectorNode extends BehaviorTreeControlFlowNode impl
          {
             enabledBehaviors.put(behaviorName, selected);
             statusLogger.info("{} {} behavior.", selected ? "Enabling" : "Disabling", behaviorName);
-            behavior.getValue().getRight().setEnabled(selected);
+            // behavior.getValue().getRight().setEnabled(selected);
          }
       }
       if (!selectedOne)
@@ -81,12 +81,6 @@ public class MessagerStringSelectorNode extends BehaviorTreeControlFlowNode impl
    public BehaviorTreeNodeStatus tickInternal()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
-   }
-
-   @Override
-   public void setEnabled(boolean enabled)
-   {
-
    }
 
    @Override

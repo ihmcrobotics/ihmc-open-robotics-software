@@ -46,13 +46,13 @@ public class SE3MPCTrajectoryViewer extends LinearMPCTrajectoryViewer
 
    private final FrameQuaternion orientation = new FrameQuaternion();
 
-   public void compute(SE3ModelPredictiveController mpc, double currentTimeInState)
+   public void compute(SE3ModelPredictiveController mpc, double currentTimeInState, double durationToView)
    {
-      super.compute((EuclideanModelPredictiveController) mpc, currentTimeInState);
+      super.compute((EuclideanModelPredictiveController) mpc, currentTimeInState, durationToView);
 
       orientationTrajectoryVectors.reset();
 
-      int max = Math.min(numberOfVectors, (int) (0.75 / dt));
+      int max = Math.min(numberOfVectors, (int) (durationToView / dt));
       for (int i = 0; i < max; i++)
       {
          double time = dt * i + currentTimeInState;

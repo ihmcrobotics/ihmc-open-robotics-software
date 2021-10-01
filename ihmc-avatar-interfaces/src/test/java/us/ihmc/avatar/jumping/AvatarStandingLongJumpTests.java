@@ -54,6 +54,7 @@ public abstract class AvatarStandingLongJumpTests
       runTest(shortJumpLength, 0.4);
    }
 
+   @Disabled
    @Test
    public void testStandingMediumJump() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {

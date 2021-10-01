@@ -5,6 +5,7 @@ import imgui.internal.ImGui;
 public class ImGuiMouseDragData
 {
    private final int button;
+   private boolean readyToDrag = false;
    private boolean dragging = false;
    private float dragBucketX;
    private float dragBucketY;
@@ -25,15 +26,18 @@ public class ImGuiMouseDragData
       if (!mouseDown)
       {
          dragging = false;
+         readyToDrag = false;
       }
-      else if (isWindowHovered && !dragging)
+      else if (isWindowHovered && !readyToDrag)
       {
-         dragging = true;
+         readyToDrag = true;
          dragBucketX = 0.0f;
          dragBucketY = 0.0f;
       }
-      if (dragging)
+      else if (readyToDrag && (mouseDragDeltaX != 0.0f || mouseDragDeltaY != 0.0f))
       {
+         dragging = true;
+
          mouseDraggedX = mouseDragDeltaX - dragBucketX;
          mouseDraggedY = mouseDragDeltaY - dragBucketY;
 

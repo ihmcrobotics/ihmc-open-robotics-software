@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
+import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
@@ -29,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorTools.NAN_POSE;
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
 public class TraverseStairsBehavior extends ResettingNode implements BehaviorInterface
@@ -63,7 +63,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
    private TraverseStairsStateName currentState = TraverseStairsStateName.SQUARE_UP;
    private final Timer stairsDetectedTimer = new Timer();
    private TraverseStairsLifecycleStateName currentLifeCycleState;
-   private final Pose3D stairsPose = new Pose3D(NAN_POSE);
+   private final Pose3D stairsPose = new Pose3D(BehaviorTools.createNaNPose());
    private double distanceToStairs = 0.0;
 
    public enum TraverseStairsStateName
@@ -198,21 +198,6 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
    public void reset()
    {
       stop();
-   }
-
-   @Override
-   public void setEnabled(boolean enable)
-   {
-      LogTools.info((enable ? "Enable" : "Disable") + " requested");
-
-      if (enable)
-      {
-         start();
-      }
-      else
-      {
-         stop();
-      }
    }
 
    private void stop()

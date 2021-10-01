@@ -315,8 +315,8 @@ public class RobotDescriptionFromSDFLoader
             {
                if ((joint.getContactKd() == 0.0) && (joint.getContactKp() == 0.0))
                {
-                  double kLimit = jointNameMap.getDefaultKLimit();
-                  double bLimit = jointNameMap.getDefaultBLimit();
+                  double kLimit = jointNameMap.getJointKLimit(sanitizedJointName);
+                  double bLimit = jointNameMap.getJointBLimit(sanitizedJointName);
                   pinJoint.setLimitStops(joint.getLowerLimit(), joint.getUpperLimit(), kLimit, bLimit);
                }
                else
@@ -330,13 +330,17 @@ public class RobotDescriptionFromSDFLoader
                }
                //System.out.println("SDFRobot: joint.getVelocityLimit()=" + joint.getVelocityLimit());
 
+               if (!Double.isNaN(joint.getEffortLimit()) && joint.getEffortLimit() >= 0.0)
+               {
+                  pinJoint.setEffortLimit(joint.getEffortLimit());
+               }
             }
          }
 
          pinJoint.setDamping(joint.getDamping());
          pinJoint.setStiction(joint.getFriction());
 
-         if (!isJointInNeedOfReducedGains(joint))
+         if (jointNameMap != null && !isJointInNeedOfReducedGains(joint))
          {
             if (!Double.isNaN(joint.getEffortLimit()) && joint.getEffortLimit() >= 0.0)
             {
@@ -347,7 +351,8 @@ public class RobotDescriptionFromSDFLoader
             {
                if (!isJointInNeedOfReducedGains(joint))
                {
-                  pinJoint.setVelocityLimits(joint.getVelocityLimit(), 500.0);
+                  double velocityLimitDamping = jointNameMap.getDefaultVelocityLimitDamping();
+                  pinJoint.setVelocityLimits(joint.getVelocityLimit(), velocityLimitDamping);
                }
             }
          }
@@ -371,6 +376,26 @@ public class RobotDescriptionFromSDFLoader
             }
          }
 
+         sliderJoint.setDamping(joint.getDamping());
+         sliderJoint.setStiction(joint.getFriction());
+
+         if (!isJointInNeedOfReducedGains(joint))
+         {
+            if (!Double.isNaN(joint.getEffortLimit()) && joint.getEffortLimit() >= 0.0)
+            {
+               sliderJoint.setEffortLimit(joint.getEffortLimit());
+            }
+
+            if (!Double.isNaN(joint.getVelocityLimit()) && joint.getVelocityLimit() >= 0.0)
+            {
+               if (!isJointInNeedOfReducedGains(joint))
+               {
+                  double velocityLimitDamping = jointNameMap.getDefaultVelocityLimitDamping();
+                  sliderJoint.setVelocityLimits(joint.getVelocityLimit(), velocityLimitDamping);
+               }
+            }
+         }
+         
          sliderJoint.setDamping(joint.getDamping());
          sliderJoint.setStiction(joint.getFriction());
 
@@ -536,7 +561,7 @@ public class RobotDescriptionFromSDFLoader
          linkToSensorInZUp.multiply(ModelFileLoaderConversionsHelper.poseToTransform(sdfSensor.getPose()));
 
          showCordinateSystem(jointDescription, linkToSensorInZUp);
-         IMUSensorDescription imuMount = new IMUSensorDescription(child.getName() + "_" + sdfSensor.getName(), linkToSensorInZUp);
+         IMUSensorDescription imuMount = new IMUSensorDescription(sdfSensor.getName(), linkToSensorInZUp);
 
          IMUNoise noise = imu.getNoise();
          if (noise != null)

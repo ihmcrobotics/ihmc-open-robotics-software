@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.providers.IntegerProvider;
@@ -33,10 +34,15 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
       orientationDt.set(intermediateDt);
    }
 
+   public void setOrientationDt(double orientationDt)
+   {
+      this.orientationDt.set(orientationDt);
+   }
+
    /**
     * Computes all the index values from the contact sequence directly.
     */
-   public void initialize(List<ContactPlaneProvider> previewWindowContactSequence)
+   public void initialize(List<PreviewWindowSegment> previewWindowContactSequence)
    {
       super.initialize(previewWindowContactSequence);
 
@@ -47,7 +53,7 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
       totalNumberOfOrientationTicks = 0;
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {
-         double segmentDuration = previewWindowContactSequence.get(segmentNumber).getTimeInterval().getDuration();
+         double segmentDuration = previewWindowContactSequence.get(segmentNumber).getDuration();
          int ticksInSegment = computeTicksInSegment(segmentDuration);
          double tickDuration = segmentDuration / ticksInSegment;
 
@@ -69,6 +75,10 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
 
          totalProblemSize += variablesPerOrientationTick;
       }
+
+      orientationStartIndices.add(totalProblemSize);
+      totalNumberOfOrientationTicks += variablesPerOrientationTick;
+      totalProblemSize += variablesPerOrientationTick;
    }
 
    public YoRegistry getRegistry()

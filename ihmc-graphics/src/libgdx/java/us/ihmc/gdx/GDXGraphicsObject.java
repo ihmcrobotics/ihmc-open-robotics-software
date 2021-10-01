@@ -21,12 +21,16 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateIn
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements RenderableProvider
 {
    private final ArrayList<Model> models = new ArrayList<>();
    private final ArrayList<ModelInstance> modelInstances = new ArrayList<>();
+   private final HashMap<ModelInstance, AffineTransform> transforms = new HashMap<>();
+   private final AffineTransform placementTransform = new AffineTransform();
+   private final AffineTransform tempTransform = new AffineTransform();
 
    public GDXGraphicsObject(Graphics3DObject graphics3dObject)
    {
@@ -94,12 +98,22 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
             return;
 
          Model model = GDXModelLoader.loadG3DModel(modifiedFileName);
+         if (model == null)
+         {
+            LogTools.warn("Could not load {}", modifiedFileName);
+            return;
+         }
          models.add(model);
 
          if (graphics3DAddModelFile.getAppearance() != null)
          {
             AppearanceDefinition appearance = graphics3DAddModelFile.getAppearance();
             Color color = GDXTools.toGDX(appearance);
+
+            if (model.materials.size == 0)
+            {
+               model.materials.add(new Material());
+            }
 
             Material firstMaterial = model.materials.get(0);
 
@@ -114,6 +128,7 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
          }
 
          ModelInstance modelInstance = new ModelInstance(model);
+         transforms.put(modelInstance, new AffineTransform(placementTransform));
          modelInstances.add(modelInstance);
       }
       catch (SerializationException e)
@@ -127,44 +142,25 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
    @Override
    protected void doIdentityInstruction()
    {
-//      currentNode = parentNode;
+      placementTransform.setIdentity();
    }
 
    @Override
-   protected void doRotateInstruction(Graphics3DRotateInstruction rot)
+   protected void doRotateInstruction(Graphics3DRotateInstruction rotateInstruction)
    {
-//      RotationMatrixReadOnly mat = rot.getRotationMatrix();
-//      Affine outputRotation = new Affine(new double[] {mat.getM00(), mat.getM01(), mat.getM02(), 0, mat.getM10(), mat.getM11(), mat.getM12(), 0, mat.getM20(),
-//            mat.getM21(), mat.getM22(), 0, 0, 0, 0, 1}, MatrixType.MT_3D_4x4, 0);
-//
-//      Group rotationGroup = new Group();
-//      rotationGroup.getTransforms().add(outputRotation);
-//      currentNode.getChildren().add(rotationGroup);
-//      currentNode = rotationGroup;
+      placementTransform.appendOrientation(rotateInstruction.getRotationMatrix());
    }
 
    @Override
    protected void doScaleInstruction(Graphics3DScaleInstruction graphics3DScale)
    {
-//      Vector3D scale = graphics3DScale.getScaleFactor();
-//      Scale outputScale = new Scale(scale.getX(), scale.getY(), scale.getZ());
-//
-//      Group scaleGroup = new Group();
-//      scaleGroup.getTransforms().add(outputScale);
-//      currentNode.getChildren().add(scaleGroup);
-//      currentNode = scaleGroup;
+      placementTransform.appendScale(graphics3DScale.getScaleFactor());
    }
 
    @Override
    protected void doTranslateInstruction(Graphics3DTranslateInstruction graphics3DTranslate)
    {
-//      Vector3D t = graphics3DTranslate.getTranslation();
-//      Translate outputTranslation = new Translate(t.getX(), t.getY(), t.getZ());
-//
-//      Group translationGroup = new Group();
-//      translationGroup.getTransforms().add(outputTranslation);
-//      currentNode.getChildren().add(translationGroup);
-//      currentNode = translationGroup;
+      placementTransform.appendTranslation(graphics3DTranslate.getTranslation());
    }
 
    @Override
@@ -323,7 +319,9 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
    {
       for (ModelInstance modelInstance : modelInstances)
       {
-         GDXTools.toGDX(worldTransform, modelInstance.transform);
+         tempTransform.set(transforms.get(modelInstance));
+         worldTransform.transform(tempTransform);
+         GDXTools.toGDX(tempTransform, modelInstance.transform);
       }
    }
 

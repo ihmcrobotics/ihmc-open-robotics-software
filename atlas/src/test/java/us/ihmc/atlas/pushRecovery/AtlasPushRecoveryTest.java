@@ -13,6 +13,12 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
 {
    @Override
+   public double getAngledPushMagnitude()
+   {
+      return 350.0;
+   }
+
+   @Override
    protected DRCRobotModel getRobotModel()
    {
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
@@ -112,5 +118,13 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
       super.testRecoveryWhileInFlamingoStance();
+   }
+
+   @Tag("humanoid-push-recovery")
+   @Override
+   @Test
+   public void testRecoveryForwardWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoveryForwardWhileInFlamingoStance();
    }
 }

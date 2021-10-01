@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.LeggedJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSegment;
@@ -40,13 +39,18 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
 
    private boolean useSoftGroundContactParameters;
 
-   public RobotContactPointParameters(LeggedJointNameMap<E> jointMap, double footWidth, double footLength,
+   public RobotContactPointParameters(LeggedJointNameMap<E> jointMap,
+                                      double footWidth,
+                                      double footLength,
                                       SegmentDependentList<E, RigidBodyTransform> soleToAnkleFrameTransforms)
    {
       this(jointMap, footWidth, footWidth, footLength, soleToAnkleFrameTransforms);
    }
 
-   public RobotContactPointParameters(LeggedJointNameMap<E> jointMap, double toeWidth, double footWidth, double footLength,
+   public RobotContactPointParameters(LeggedJointNameMap<E> jointMap,
+                                      double toeWidth,
+                                      double footWidth,
+                                      double footLength,
                                       SegmentDependentList<E, RigidBodyTransform> soleToAnkleFrameTransforms)
    {
       this.jointMap = jointMap;
@@ -64,7 +68,10 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
 
    protected void createFootContactPoints(FootContactPoints<E> footContactPoints)
    {
-      Map<String, List<Tuple3DBasics>> simulationContactPoints = footContactPoints.getSimulationContactPoints(footLength, footWidth, toeWidth, jointMap,
+      Map<String, List<Tuple3DBasics>> simulationContactPoints = footContactPoints.getSimulationContactPoints(footLength,
+                                                                                                              footWidth,
+                                                                                                              toeWidth,
+                                                                                                              jointMap,
                                                                                                               soleToAnkleFrameTransforms);
       for (String parentJointName : simulationContactPoints.keySet())
       {
@@ -178,13 +185,18 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       return additionalContactNames;
    }
 
-   public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
+   public GroundContactModelParameters getContactModelParameters()
    {
-      setupGroundContactModelParameters(linearGroundContactModel, 0.0001);
+      return getContactModelParameters(0.0001);
    }
 
-   public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel, double simDT)
+   public GroundContactModelParameters getContactModelParameters(double simDT)
    {
+      double zStiffness;
+      double zDamping;
+      double xyStiffness;
+      double xyDamping;
+
       // The gains were computed for simDT = 0.0001sec. This assumes that the gains should be inversely proportional to the simulation DT.
       double simDTRef = 0.0001;
       double modelScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
@@ -192,39 +204,77 @@ public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegme
       if (useSoftGroundContactParameters)
       {
          double scale = modelScale * Math.pow(simDTRef / simDT, 0.25);
-         linearGroundContactModel.setZStiffness(4000.0 * scale);
-         linearGroundContactModel.setZDamping(750.0 * scale);
-         linearGroundContactModel.setXYStiffness(50000.0 * scale);
-         linearGroundContactModel.setXYDamping(1000.0 * scale);
+         zStiffness = (4000.0 * scale);
+         zDamping = (750.0 * scale);
+         xyStiffness = (50000.0 * scale);
+         xyDamping = (1000.0 * scale);
       }
       else
       {
          double scale = modelScale * Math.pow(simDTRef / simDT, 0.6);
 
-         linearGroundContactModel.setZStiffness(2000.0 * scale);
-         linearGroundContactModel.setZDamping(1500.0 * scale);
-         linearGroundContactModel.setXYStiffness(50000.0 * scale);
-         linearGroundContactModel.setXYDamping(2000.0 * scale);
+         zStiffness = (2000.0 * scale);
+         zDamping = (1500.0 * scale);
+         xyStiffness = (50000.0 * scale);
+         xyDamping = (2000.0 * scale);
       }
+      return new GroundContactModelParameters(zStiffness, zDamping, xyStiffness, xyDamping);
+   }
+
+   public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel)
+   {
+      setupGroundContactModelParameters(linearGroundContactModel, 0.0001);
+   }
+
+   public void setupGroundContactModelParameters(LinearGroundContactModel linearGroundContactModel, double simDT)
+   {
+      GroundContactModelParameters contactModelParameters = getContactModelParameters(simDT);
+      linearGroundContactModel.setZStiffness(contactModelParameters.getZStiffness());
+      linearGroundContactModel.setZDamping(contactModelParameters.getZDamping());
+      linearGroundContactModel.setXYStiffness(contactModelParameters.getXYStiffness());
+      linearGroundContactModel.setXYDamping(contactModelParameters.getXYDamping());
    }
 
    public void setupGroundContactModelParameters(BidirectionGroundContactModel bidirectionGroundContactModel)
    {
-      double modelScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
+      GroundContactModelParameters contactModelParameters = getContactModelParameters();
+      bidirectionGroundContactModel.setZStiffness(contactModelParameters.getZStiffness());
+      bidirectionGroundContactModel.setZDamping(contactModelParameters.getZDamping());
+      bidirectionGroundContactModel.setXYStiffness(contactModelParameters.getXYStiffness());
+      bidirectionGroundContactModel.setXYDamping(contactModelParameters.getXYDamping());
+   }
 
-      if (useSoftGroundContactParameters)
+   public static class GroundContactModelParameters
+   {
+      private final double zStiffness, zDamping;
+      private final double xyStiffness, xyDamping;
+
+      public GroundContactModelParameters(double zStiffness, double zDamping, double xyStiffness, double xyDamping)
       {
-         bidirectionGroundContactModel.setZStiffness(modelScale * 4000.0);
-         bidirectionGroundContactModel.setZDamping(modelScale * 750.0);
-         bidirectionGroundContactModel.setXYStiffness(modelScale * 50000.0);
-         bidirectionGroundContactModel.setXYDamping(modelScale * 1000.0);
+         this.zStiffness = zStiffness;
+         this.zDamping = zDamping;
+         this.xyStiffness = xyStiffness;
+         this.xyDamping = xyDamping;
       }
-      else
+
+      public double getZStiffness()
       {
-         bidirectionGroundContactModel.setZStiffness(modelScale * 2000.0);
-         bidirectionGroundContactModel.setZDamping(modelScale * 1500.0);
-         bidirectionGroundContactModel.setXYStiffness(modelScale * 50000.0);
-         bidirectionGroundContactModel.setXYDamping(modelScale * 2000.0);
+         return zStiffness;
+      }
+
+      public double getZDamping()
+      {
+         return zDamping;
+      }
+
+      public double getXYStiffness()
+      {
+         return xyStiffness;
+      }
+
+      public double getXYDamping()
+      {
+         return xyDamping;
       }
    }
 }

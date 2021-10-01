@@ -6,6 +6,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.navigation.NavigationBehavior;
 import us.ihmc.behaviors.patrol.PatrolBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
+import us.ihmc.behaviors.targetFollowing.TargetFollowingBehavior;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 
 import java.util.HashSet;
@@ -33,7 +34,7 @@ public class BehaviorRegistry
    private static volatile MessagerAPI MESSAGER_API;
    private static volatile BehaviorRegistry ACTIVE_REGISTRY;
 
-   private final BehaviorDefinition highestLevelNode;
+   private BehaviorDefinition highestLevelNode;
    private final LinkedHashSet<BehaviorDefinition> definitionEntries = new LinkedHashSet<>();
 
    public static BehaviorRegistry of(BehaviorDefinition highestLevelNode, BehaviorDefinition... entries)
@@ -50,6 +51,7 @@ public class BehaviorRegistry
    {
       this.highestLevelNode = highestLevelNode;
    }
+
    public void register(BehaviorDefinition definition)
    {
       definitionEntries.add(definition);
@@ -103,4 +105,20 @@ public class BehaviorRegistry
       return highestLevelNode;
    }
 
+   public void setHighestLevelNode(BehaviorDefinition highestLevelNode)
+   {
+      this.highestLevelNode = highestLevelNode;
+   }
+
+   public BehaviorDefinition getBehaviorFromName(String behaviorName)
+   {
+      for (BehaviorDefinition definitionEntry : definitionEntries)
+      {
+         if (definitionEntry.getName().equals(behaviorName))
+         {
+            return definitionEntry;
+         }
+      }
+      return null;
+   }
 }

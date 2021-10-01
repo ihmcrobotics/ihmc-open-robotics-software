@@ -16,7 +16,9 @@ public class DirectOrientationValueCommand implements MPCCommand<DirectOrientati
 
    private final DMatrixRMaj objectiveValue = new DMatrixRMaj(6, 1);
 
+   private boolean useWeightScalar;
    private double objectiveWeight;
+   private final DMatrixRMaj weightMatrix = new DMatrixRMaj(6, 6);
 
    public void setCommandId(int commandId)
    {
@@ -36,6 +38,7 @@ public class DirectOrientationValueCommand implements MPCCommand<DirectOrientati
    {
       setSegmentNumber(-1);
       getObjectiveValue().zero();
+      useWeightScalar = true;
    }
 
    public int getSegmentNumber()
@@ -68,6 +71,16 @@ public class DirectOrientationValueCommand implements MPCCommand<DirectOrientati
       this.objectiveValue.set(objectiveValue);
    }
 
+   public void setUseWeightScalar(boolean useWeightScalar)
+   {
+      this.useWeightScalar = useWeightScalar;
+   }
+
+   public boolean useWeightScalar()
+   {
+      return useWeightScalar;
+   }
+
    public void setObjectiveWeight(double objectiveWeight)
    {
       this.objectiveWeight = objectiveWeight;
@@ -78,10 +91,23 @@ public class DirectOrientationValueCommand implements MPCCommand<DirectOrientati
       return objectiveWeight;
    }
 
+   public void setWeightMatrix(DMatrixRMaj weightMatrix)
+   {
+      this.weightMatrix.set(weightMatrix);
+   }
+
+   public DMatrixRMaj getWeightMatrix()
+   {
+      return weightMatrix;
+   }
+
    public void set(DirectOrientationValueCommand other)
    {
       setCommandId(other.getCommandId());
       setSegmentNumber(other.getSegmentNumber());
       setObjectiveValue(other.getObjectiveValue());
+      setUseWeightScalar(other.useWeightScalar());
+      setObjectiveWeight(other.getObjectiveWeight());
+      setWeightMatrix(other.getWeightMatrix());
    }
 }

@@ -12,6 +12,7 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -25,37 +26,23 @@ public class ReachableFootholdsCalculator
 {
    private static final int numberOfVertices = 5;
 
-   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final PoseReferenceFrame rotatedSoleFrame = new PoseReferenceFrame("rotatedSoleFrame", ReferenceFrame.getWorldFrame());
 
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final DoubleProvider lengthLimit;
+   private final DoubleProvider lengthBackLimit;
+   private final DoubleProvider innerLimit;
+   private final DoubleProvider outerLimit;
 
-   private final YoDouble lengthLimit;
-   private final YoDouble lengthBackLimit;
-   private final YoDouble innerLimit;
-   private final YoDouble outerLimit;
-
-   public ReachableFootholdsCalculator(double maxStepLength,
-                                       double maxBackwardStepLength,
-                                       double minStepWidth,
-                                       double maxStepWidth,
-                                       SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                       YoRegistry parentRegistry)
+   public ReachableFootholdsCalculator(DoubleProvider maxStepLength,
+                                       DoubleProvider maxBackwardStepLength,
+                                       DoubleProvider minStepWidth,
+                                       DoubleProvider maxStepWidth)
    {
-      this.soleZUpFrames = soleZUpFrames;
+      this.lengthLimit = maxStepLength;
+      this.lengthBackLimit = maxBackwardStepLength;
+      this.innerLimit = minStepWidth;
+      this.outerLimit = maxStepWidth;
       //      this.midFootAnkleXOffset = midFootAnkleXOffset;
-
-      lengthLimit = new YoDouble("MaxReachabilityLength", registry);
-      lengthBackLimit = new YoDouble("MaxReachabilityBackwardLength", registry);
-      innerLimit = new YoDouble("MinReachabilityWidth", registry);
-      outerLimit = new YoDouble("MaxReachabilityWidth", registry);
-
-      lengthLimit.set(maxStepLength);
-      lengthBackLimit.set(maxBackwardStepLength);
-      innerLimit.set(minStepWidth);
-      outerLimit.set(maxStepWidth);
-
-      parentRegistry.addChild(registry);
    }
 
    public void calculateReachableRegion(RobotSide swingSide,

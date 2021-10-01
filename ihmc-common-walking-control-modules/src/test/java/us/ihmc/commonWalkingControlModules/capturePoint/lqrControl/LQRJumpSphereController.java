@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -25,7 +26,7 @@ public class LQRJumpSphereController implements SphereControllerInterface
    private final YoFrameVector3D lqrForce = new YoFrameVector3D("lqrForce", ReferenceFrame.getWorldFrame(), registry);
 
    private final CoMTrajectoryProvider dcmPlan;
-   private final List<SettableContactStateProvider> contactStateProviders = new ArrayList<>();
+   private final List<PreviewWindowSegment> contactStateProviders = new ArrayList<>();
 
    public LQRJumpSphereController(SphereRobot sphereRobot, CoMTrajectoryProvider dcmPlan)
    {
@@ -83,7 +84,7 @@ public class LQRJumpSphereController implements SphereControllerInterface
    {
       for (int i = 0; i < contactStateProviders.size(); i++)
       {
-         if (contactStateProviders.get(i).getTimeInterval().intervalContains(sphereRobot.getScsRobot().getYoTime().getDoubleValue()))
+         if (contactStateProviders.get(i).intervalContains(sphereRobot.getScsRobot().getYoTime().getDoubleValue()))
             return i;
       }
 
@@ -92,13 +93,18 @@ public class LQRJumpSphereController implements SphereControllerInterface
 
    private double getTimeInPhase(int phase)
    {
-      return sphereRobot.getScsRobot().getYoTime().getDoubleValue() - contactStateProviders.get(phase).getTimeInterval().getStartTime();
+      return sphereRobot.getScsRobot().getYoTime().getDoubleValue() - contactStateProviders.get(phase).getStartTime();
    }
 
    public void solveForTrajectory(List<SettableContactStateProvider> stateProviders)
    {
       contactStateProviders.clear();
-      contactStateProviders.addAll(stateProviders);
+      stateProviders.forEach(state ->
+                             {
+                                PreviewWindowSegment segment = new PreviewWindowSegment();
+                                segment.addContactPhaseInSegment(state, state.getTimeInterval().getStartTime(), state.getTimeInterval().getEndTime());
+                                contactStateProviders.add(segment);
+                             });
 
       dcmPlan.solveForTrajectory(stateProviders);
    }

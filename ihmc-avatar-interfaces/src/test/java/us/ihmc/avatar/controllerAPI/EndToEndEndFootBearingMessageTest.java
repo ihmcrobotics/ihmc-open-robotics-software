@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
@@ -24,7 +25,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -33,7 +33,12 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
+
+   private void createSimulationTestHelper()
+   {
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+   }
 
    @SuppressWarnings("unchecked")
    @Test
@@ -41,14 +46,14 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      createSimulationTestHelper();
+      simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -61,26 +66,28 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
          footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
          FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, 0.0, desiredPosition, desiredOrientation);
-         drcSimulationTestHelper.publishToController(footTrajectoryMessage);
+         simulationTestHelper.publishToController(footTrajectoryMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
+         success = simulationTestHelper.simulateAndWait(0.5 + getRobotModel().getWalkingControllerParameters().getDefaultInitialTransferTime());
          assertTrue(success);
 
          // Now we can do the usual test.
          FootLoadBearingMessage footLoadBearingMessage = HumanoidMessageTools.createFootLoadBearingMessage(robotSide, LoadBearingRequest.LOAD);
 
-         drcSimulationTestHelper.publishToController(footLoadBearingMessage);
+         simulationTestHelper.publishToController(footLoadBearingMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5);
+         success = simulationTestHelper.simulateAndWait(2.5);
          assertTrue(success);
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
 
-         SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-
-         WalkingStateEnum walkingState = ((YoEnum<WalkingStateEnum>)scs.findVariable("WalkingHighLevelHumanoidController", "walkingCurrentState")).getEnumValue();
+         WalkingStateEnum walkingState = ((YoEnum<WalkingStateEnum>) simulationTestHelper.getControllerRegistry()
+                                                                                         .findVariable("WalkingHighLevelHumanoidController",
+                                                                                                       "walkingCurrentState")).getEnumValue();
          assertEquals(WalkingStateEnum.STANDING, walkingState);
-         ConstraintType footState = ((YoEnum<ConstraintType>)scs.findVariable(sidePrefix + "FootControlModule", sidePrefix + "FootCurrentState")).getEnumValue();
+         ConstraintType footState = ((YoEnum<ConstraintType>) simulationTestHelper.getControllerRegistry()
+                                                                                  .findVariable(sidePrefix + "FootControlModule",
+                                                                                                sidePrefix + "FootCurrentState")).getEnumValue();
          assertEquals(ConstraintType.FULL, footState);
       }
    }
@@ -94,16 +101,11 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");

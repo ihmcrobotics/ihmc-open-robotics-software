@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Or
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -42,7 +43,7 @@ public class OrientationTrajectoryInputCalculatorTest
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D leftContactPose = new FramePose3D();
@@ -67,9 +68,17 @@ public class OrientationTrajectoryInputCalculatorTest
       contact2.set(contact1);
       contact2.getTimeInterval().setInterval(1.0, 1.3);
 
-      contactProviders.add(contact0);
-      contactProviders.add(contact1);
-      contactProviders.add(contact2);
+      PreviewWindowSegment segment0 = new PreviewWindowSegment();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      PreviewWindowSegment segment2 = new PreviewWindowSegment();
+
+      segment0.set(contact0);
+      segment1.set(contact1);
+      segment2.set(contact2);
+
+      contactProviders.add(segment0);
+      contactProviders.add(segment1);
+      contactProviders.add(segment2);
 
       indexHandler.initialize(contactProviders);
 
@@ -159,7 +168,7 @@ public class OrientationTrajectoryInputCalculatorTest
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D leftContactPose = new FramePose3D();
@@ -184,9 +193,17 @@ public class OrientationTrajectoryInputCalculatorTest
       contact2.set(contact1);
       contact2.getTimeInterval().setInterval(1.0, 1.3);
 
-      contactProviders.add(contact0);
-      contactProviders.add(contact1);
-      contactProviders.add(contact2);
+      PreviewWindowSegment segment0 = new PreviewWindowSegment();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      PreviewWindowSegment segment2 = new PreviewWindowSegment();
+
+      segment0.set(contact0);
+      segment1.set(contact1);
+      segment2.set(contact2);
+
+      contactProviders.add(segment0);
+      contactProviders.add(segment1);
+      contactProviders.add(segment2);
 
       indexHandler.initialize(contactProviders);
 
@@ -281,7 +298,7 @@ public class OrientationTrajectoryInputCalculatorTest
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D leftContactPose = new FramePose3D();
@@ -306,9 +323,16 @@ public class OrientationTrajectoryInputCalculatorTest
       contact2.set(contact1);
       contact2.getTimeInterval().setInterval(1.0, 1.3);
 
-      contactProviders.add(contact0);
-      contactProviders.add(contact1);
-      contactProviders.add(contact2);
+      PreviewWindowSegment segment0 = new PreviewWindowSegment();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      PreviewWindowSegment segment2 = new PreviewWindowSegment();
+      segment0.set(contact0);
+      segment2.set(contact2);
+      segment1.set(contact1);
+
+      contactProviders.add(segment0);
+      contactProviders.add(segment1);
+      contactProviders.add(segment2);
 
       indexHandler.initialize(contactProviders);
 
@@ -353,7 +377,7 @@ public class OrientationTrajectoryInputCalculatorTest
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D leftContactPose = new FramePose3D();
@@ -378,9 +402,17 @@ public class OrientationTrajectoryInputCalculatorTest
       contact2.set(contact1);
       contact2.getTimeInterval().setInterval(1.0, 1.3);
 
-      contactProviders.add(contact0);
-      contactProviders.add(contact1);
-      contactProviders.add(contact2);
+
+      PreviewWindowSegment segment0 = new PreviewWindowSegment();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      PreviewWindowSegment segment2 = new PreviewWindowSegment();
+      segment0.set(contact0);
+      segment2.set(contact2);
+      segment1.set(contact1);
+
+      contactProviders.add(segment0);
+      contactProviders.add(segment1);
+      contactProviders.add(segment2);
 
       indexHandler.initialize(contactProviders);
 
@@ -437,7 +469,7 @@ public class OrientationTrajectoryInputCalculatorTest
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D leftContactPose = new FramePose3D();
@@ -462,9 +494,16 @@ public class OrientationTrajectoryInputCalculatorTest
       contact2.set(contact1);
       contact2.getTimeInterval().setInterval(1.0, 1.3);
 
-      contactProviders.add(contact0);
-      contactProviders.add(contact1);
-      contactProviders.add(contact2);
+      PreviewWindowSegment segment0 = new PreviewWindowSegment();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      PreviewWindowSegment segment2 = new PreviewWindowSegment();
+      segment0.set(contact0);
+      segment2.set(contact2);
+      segment1.set(contact1);
+
+      contactProviders.add(segment0);
+      contactProviders.add(segment1);
+      contactProviders.add(segment2);
 
       indexHandler.initialize(contactProviders);
 
@@ -520,7 +559,7 @@ public class OrientationTrajectoryInputCalculatorTest
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FramePose3D leftContactPose = new FramePose3D();
@@ -545,9 +584,16 @@ public class OrientationTrajectoryInputCalculatorTest
       contact2.set(contact1);
       contact2.getTimeInterval().setInterval(1.0, 1.3);
 
-      contactProviders.add(contact0);
-      contactProviders.add(contact1);
-      contactProviders.add(contact2);
+      PreviewWindowSegment segment0 = new PreviewWindowSegment();
+      PreviewWindowSegment segment1 = new PreviewWindowSegment();
+      PreviewWindowSegment segment2 = new PreviewWindowSegment();
+      segment0.set(contact0);
+      segment2.set(contact2);
+      segment1.set(contact1);
+
+      contactProviders.add(segment0);
+      contactProviders.add(segment1);
+      contactProviders.add(segment2);
 
       indexHandler.initialize(contactProviders);
 

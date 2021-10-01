@@ -99,6 +99,7 @@ public abstract class DRCFlatGroundWalkingTest implements MultiRobotTestInterfac
       return false;
    }
 
+   @Tag("humanoid-flat-ground")
    @Test
    public void testFlatGroundWalking() throws SimulationExceededMaximumTimeException, ControllerFailureException
    {

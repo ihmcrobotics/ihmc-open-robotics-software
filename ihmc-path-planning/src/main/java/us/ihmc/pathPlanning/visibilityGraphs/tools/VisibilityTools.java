@@ -238,19 +238,6 @@ public class VisibilityTools
       return minDistance;
    }
 
-   public static boolean checkIfPointIsInRegionAndOutsidePreferredNonNavigableZone(Point2DReadOnly query, PlanarRegion homeRegion, List<Cluster> allClusters)
-   {
-      // Check that the point is actually navigable
-      boolean isNavigable = PlanarRegionTools.isPointInLocalInsidePlanarRegion(homeRegion, query);
-
-      if (isNavigable)
-      {
-         isNavigable = allClusters.stream().noneMatch(cluster -> cluster.isInsidePreferredNonNavigableZone(query));
-      }
-
-      return isNavigable;
-   }
-
    public static boolean checkIfPointIsInRegionAndOutsideNonNavigableZone(Point2DReadOnly query, PlanarRegion homeRegion, List<Cluster> allClusters)
    {
       // Check that the point is actually navigable
@@ -266,35 +253,25 @@ public class VisibilityTools
 
    public static boolean isInnerRegionEdgeValid(VisibilityGraphNode sourceNode, VisibilityGraphNode targetNode)
    {
-      boolean bothEndsArePreferred = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
       List<Cluster> allClusters = sourceNode.getVisibilityGraphNavigableRegion().getNavigableRegion().getAllClusters();
 
       Point2DReadOnly sourceNodeInLocal = sourceNode.getPoint2DInLocal();
       Point2DReadOnly targetNodeInLocal = targetNode.getPoint2DInLocal();
 
-      return isPointVisibleToPointInSameRegion(allClusters, sourceNodeInLocal, targetNodeInLocal, bothEndsArePreferred);
+      return isPointVisibleToPointInSameRegion(allClusters, sourceNodeInLocal, targetNodeInLocal);
    }
 
-   static boolean isPointVisibleToPointInSameRegion(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
-   {
-      return isPointVisibleToPointInSameRegion(clusters, observer, targetPoint, false);
-   }
-
-   public static boolean isPointVisibleToPointInSameRegion(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint,
-                                                           boolean checkPreferredExtrusions)
+   public static boolean isPointVisibleToPointInSameRegion(List<Cluster> clusters, Point2DReadOnly observer, Point2DReadOnly targetPoint)
    {
       for (Cluster cluster : clusters)
       {
          boolean closed = cluster.isClosed();
 
-         List<ExtrusionHull> preferredNonNavigableExtrusions = cluster.getPreferredNonNavigableExtrusionsInLocal();
-
          // if it's an outer extrusion, it's an obstacle. This means that you cannot pass through it.
          boolean isAnOuterExtrusion = cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE;
          if (isAnOuterExtrusion)
          {
-            BoundingBox2DReadOnly outerMostBoundingBoxToCheck = checkPreferredExtrusions ?
-                  cluster.getPreferredNonNavigableExtrusionsBoundingBox() : cluster.getNonNavigableExtrusionsBoundingBox();
+            BoundingBox2DReadOnly outerMostBoundingBoxToCheck = cluster.getNonNavigableExtrusionsBoundingBox();
 
             // If either the target or observer or both are in the bounding box, we have to check the interior bounding box.
             // If both are outside the bounding box, then we can check if the line segment does not intersect.
@@ -305,22 +282,6 @@ public class VisibilityTools
                {
                   continue;
                }
-            }
-         }
-
-         // this is more expensive, as you potentially have to check multiple regions.
-         if (checkPreferredExtrusions)
-         {
-            // If we start in a preferred region, that means you're already in a preferred extrusion. If it's an outer extrusion, we want to get out of the
-            // non-preferred area, so we shouldn't check for visibility. If it's an inner extrusion, we want to cross into the non-preferred area.
-            boolean startsInPreferredRegion = preferredNonNavigableExtrusions.stream().anyMatch(
-                  extrusion -> PlanarRegionTools.isPointInsidePolygon(extrusion.getPoints(), observer));
-            if (isAnOuterExtrusion ^ startsInPreferredRegion)
-            {
-               boolean isNotVisible = preferredNonNavigableExtrusions.stream().anyMatch(
-                     extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
-               if (isNotVisible)
-                  return false;
             }
          }
 
@@ -371,23 +332,20 @@ public class VisibilityTools
       Point2D targetInSourceLocal = new Point2D(targetProjectedVerticallyOntoSource);
       Point2D sourceInTargetLocal = new Point2D(sourceProjectedVerticallyOntoTarget);
 
-      boolean checkForPreferredVisibility = sourceNode.isPreferredNode() && targetNode.isPreferredNode();
-
       //TODO: +++JerryPratt: Inter-region connections and obstacles still needs some thought and some good unit tests.
       boolean targetIsVisibleThroughSourceObstacles = VisibilityTools.isPointVisibleToPointInOtherRegion(sourceObstacleClusters, sourceObstacleRegions,
                                                                                                          sourceInSourceLocal, targetHomeRegion,
-                                                                                                         targetInSourceLocal, checkForPreferredVisibility);
+                                                                                                         targetInSourceLocal);
       boolean sourceIsVisibleThroughTargetObstacles = VisibilityTools.isPointVisibleToPointInOtherRegion(targetObstacleClusters, targetObstacleRegions,
                                                                                                          targetInTargetLocal,  sourceHomeRegion,
-                                                                                                         sourceInTargetLocal, checkForPreferredVisibility);
+                                                                                                         sourceInTargetLocal);
 
 
       return targetIsVisibleThroughSourceObstacles && sourceIsVisibleThroughTargetObstacles;
    }
 
    public static boolean isPointVisibleToPointInOtherRegion(List<Cluster> observerObstacleClusters, List<PlanarRegion> observerObstacleRegions,
-                                                            Point2DReadOnly observer, PlanarRegion targetRegion, Point2DReadOnly targetPoint,
-                                                           boolean checkPreferredExtrusions)
+                                                            Point2DReadOnly observer, PlanarRegion targetRegion, Point2DReadOnly targetPoint)
    {
       for (int i = 0; i < observerObstacleClusters.size(); i++)
       {
@@ -398,14 +356,11 @@ public class VisibilityTools
 
          boolean closed = cluster.isClosed();
 
-         List<ExtrusionHull> preferredNonNavigableExtrusions = cluster.getPreferredNonNavigableExtrusionsInLocal();
-
          // if it's an outer extrusion, it's an obstacle. This means that you cannot pass through it.
          boolean isAnOuterExtrusion = cluster.getExtrusionSide() == ExtrusionSide.OUTSIDE;
          if (isAnOuterExtrusion)
          {
-            BoundingBox2DReadOnly outerMostBoundingBoxToCheck = checkPreferredExtrusions ?
-                  cluster.getPreferredNonNavigableExtrusionsBoundingBox() : cluster.getNonNavigableExtrusionsBoundingBox();
+            BoundingBox2DReadOnly outerMostBoundingBoxToCheck = cluster.getNonNavigableExtrusionsBoundingBox();
 
             // If either the target or observer or both are in the bounding box, we have to check the interior bounding box.
             // If both are outside the bounding box, then we can check if the line segment does not intersect.
@@ -419,14 +374,6 @@ public class VisibilityTools
             }
          }
 
-         // this is more expensive, as you potentially have to check multiple regions.
-         if (checkPreferredExtrusions)
-         {
-            boolean isNotVisible = preferredNonNavigableExtrusions.stream().anyMatch(
-                  extrusion -> !VisibilityTools.isPointVisible(observer, targetPoint, extrusion, closed));
-            if (isNotVisible)
-               return false;
-         }
          else if (!VisibilityTools.isPointVisible(observer, targetPoint, cluster.getNonNavigableExtrusionsInLocal(), closed))
             return false;
       }

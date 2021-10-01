@@ -3,13 +3,14 @@ package us.ihmc.gdx.ui.missionControl;
 import imgui.internal.ImGui;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 public abstract class RestartableMissionControlProcess implements MissionControlProcess
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    volatile boolean starting = false;
    volatile boolean started = false;
    volatile boolean stopping = false;
@@ -36,13 +37,13 @@ public abstract class RestartableMissionControlProcess implements MissionControl
       ImGui.sameLine();
       if (started)
       {
-         if (ImGui.button(ImGuiTools.uniqueLabel(getName(), "Restart")))
+         if (ImGui.button(labels.get("Restart")))
          {
             stop();
             start();
          }
          ImGui.sameLine();
-         if (ImGui.button(ImGuiTools.uniqueLabel(getName(), "Stop")))
+         if (ImGui.button(labels.get("Stop")))
          {
             stop();
          }
@@ -50,14 +51,30 @@ public abstract class RestartableMissionControlProcess implements MissionControl
       else if (starting)
       {
          ImGui.text("Starting...");
+//         ImGui.sameLine();
+//         if (ImGui.button(labels.get("Cancel", 0)))
+//         {
+//            getOrCreateExecutor().interruptAndReset();
+//            starting = false;
+//            started = false;
+//            stopping = false;
+//         }
       }
       else if (stopping)
       {
          ImGui.text("Stopping...");
+//         ImGui.sameLine();
+//         if (ImGui.button(labels.get("Cancel", 1)))
+//         {
+//            getOrCreateExecutor().interruptAndReset();
+//            starting = false;
+//            started = false;
+//            stopping = false;
+//         }
       }
       else
       {
-         if (ImGui.button(ImGuiTools.uniqueLabel(getName(), "Start")))
+         if (ImGui.button(labels.get("Start")))
          {
             start();
          }

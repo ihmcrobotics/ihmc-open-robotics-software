@@ -12,7 +12,7 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
+import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIRegistry;
 import us.ihmc.gdx.ui.missionControl.MissionControlProcess;
 import us.ihmc.gdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.gdx.ui.missionControl.processes.*;
@@ -60,10 +60,10 @@ public abstract class GDXProcessManagerPanel
                                                                                     startingPose.getY());
 
       // TODO: GUI selection
-      GDXBehaviorUIRegistry defaultBehaviors = GDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
+      ImGuiGDXBehaviorUIRegistry behaviorRegistry = ImGuiGDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       ros1MasterProcess = new ROS1MasterProcess();
-      behaviorModuleProcess = new BehaviorModuleProcess(this::createRobotModel, ros2Mode, messagerMode);
+      behaviorModuleProcess = new BehaviorModuleProcess(this::createRobotModel, ros2Mode, messagerMode, behaviorRegistry);
       behaviorManagerProcess = new BehaviorManagerProcess(this::createRobotModel);
       footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::createRobotModel, this::getROS2Mode);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();

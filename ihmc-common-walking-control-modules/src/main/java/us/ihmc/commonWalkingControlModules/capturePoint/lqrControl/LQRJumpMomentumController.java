@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -82,7 +83,7 @@ public class LQRJumpMomentumController
    private final DMatrixRMaj linearMomentumRateHessian = new DMatrixRMaj(3, 3);
 
    final RecyclingArrayList<Polynomial3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
-   final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
+   final RecyclingArrayList<PreviewWindowSegment> contactStateProviders = new RecyclingArrayList<>(PreviewWindowSegment::new);
 
    private boolean shouldUpdateP = true;
    private boolean shouldUpdateCosts = true;
@@ -133,7 +134,7 @@ public class LQRJumpMomentumController
       shouldUpdateP = true;
    }
 
-   public void setVRPTrajectory(List<? extends Polynomial3DReadOnly> vrpTrajectory, List<? extends ContactStateProvider> contactStateProviders)
+   public void setVRPTrajectory(List<? extends Polynomial3DReadOnly> vrpTrajectory, List<PreviewWindowSegment> contactStateProviders)
    {
       if (vrpTrajectory.size() != contactStateProviders.size())
          throw new IllegalArgumentException("The contacts don't match the trajectory.");

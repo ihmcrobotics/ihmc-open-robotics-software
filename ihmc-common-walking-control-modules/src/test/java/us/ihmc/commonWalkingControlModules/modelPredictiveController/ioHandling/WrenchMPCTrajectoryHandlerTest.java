@@ -42,6 +42,7 @@ public class WrenchMPCTrajectoryHandlerTest
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> segmentProviders = new ArrayList<>();
       List<MPCContactPlane> contactPlanes = new ArrayList<>();
       List<List<MPCContactPlane>> contactPlanesList = new ArrayList<>();
 
@@ -52,9 +53,12 @@ public class WrenchMPCTrajectoryHandlerTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.set(contact);
       contactProviders.add(contact);
+      segmentProviders.add(segment);
 
-      indexHandler.initialize(contactProviders);
+      indexHandler.initialize(segmentProviders);
 
       DMatrixRMaj coefficients = new DMatrixRMaj(indexHandler.getTotalProblemSize(), 1);
 
@@ -75,8 +79,8 @@ public class WrenchMPCTrajectoryHandlerTest
          contactPlane.computeContactForceCoefficientMatrix(coefficients, 0);
 
          linearMPCTrajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactProviders);
-         linearMPCTrajectoryHandler.extractSolutionForPreviewWindow(coefficients, contactProviders, contactPlanesList, contactProviders, omega);
-         wrenchMPCTrajectoryHandler.extractSolutionForPreviewWindow(contactProviders, contactPlanesList, mass, omega);
+         linearMPCTrajectoryHandler.extractSolutionForPreviewWindow(coefficients, segmentProviders, contactPlanesList, contactProviders, omega);
+         wrenchMPCTrajectoryHandler.extractSolutionForPreviewWindow(segmentProviders, contactPlanesList, mass, omega);
 
          for (double time = startTime; time <= endTime; time += 1e-3)
          {

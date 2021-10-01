@@ -76,6 +76,15 @@ public class GDX3DSituatedText implements RenderableProvider
       modelInstance.transform.setToScaling(scale, scale, scale);
    }
 
+   public void scale(float height)
+   {
+      Pair<Integer, Integer> modelSize = MODEL_SIZES.get(this.model);
+
+      float scale = height / modelSize.getValue();
+
+      modelInstance.transform.scale(scale, scale, scale);
+   }
+
    public ModelInstance getModelInstance()
    {
       return modelInstance;

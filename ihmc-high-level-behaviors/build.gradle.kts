@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.20"
+   id("us.ihmc.ihmc-cd") version "1.21"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
@@ -22,7 +22,7 @@ mainDependencies {
 
 javafxDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
+   api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
@@ -36,7 +36,7 @@ libgdxDependencies {
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-perception-javacv:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:simulation-construction-set-2-simulation:alpha-20210724")
+   api("us.ihmc:scs2-simulation:0.0.4")
 }
 
 testDependencies {

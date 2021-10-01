@@ -40,6 +40,9 @@ module controller_msgs
       const octet FALLING_STATE =
       10;
 
+      const octet PUSH_RECOVERY =
+      11;
+
 
       /**
        * This message is part of the IHMC whole-body controller API.

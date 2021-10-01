@@ -46,6 +46,8 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -68,6 +70,9 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,6 +82,8 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
       cdr.write_type_4(data.getSequenceId());
 
       cdr.write_type_7(data.getPrepareManipulation());
+
+      cdr.write_type_7(data.getPrepareChest());
 
       cdr.write_type_7(data.getPreparePelvis());
 
@@ -88,6 +95,8 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
       	
       data.setPrepareManipulation(cdr.read_type_7());
       	
+      data.setPrepareChest(cdr.read_type_7());
+      	
       data.setPreparePelvis(cdr.read_type_7());
       	
 
@@ -98,6 +107,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_7("prepare_manipulation", data.getPrepareManipulation());
+      ser.write_type_7("prepare_chest", data.getPrepareChest());
       ser.write_type_7("prepare_pelvis", data.getPreparePelvis());
    }
 
@@ -106,6 +116,7 @@ public class PrepareForLocomotionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setPrepareManipulation(ser.read_type_7("prepare_manipulation"));
+      data.setPrepareChest(ser.read_type_7("prepare_chest"));
       data.setPreparePelvis(ser.read_type_7("prepare_pelvis"));
    }
 

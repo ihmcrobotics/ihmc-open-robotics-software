@@ -44,6 +44,11 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
+   public void clear()
+   {
+      generateMeshes(new PlanarRegionsList());
+   }
+
    public void generateFlatGround()
    {
       generateMeshes(PlanarRegionsList.flatGround(20.0));

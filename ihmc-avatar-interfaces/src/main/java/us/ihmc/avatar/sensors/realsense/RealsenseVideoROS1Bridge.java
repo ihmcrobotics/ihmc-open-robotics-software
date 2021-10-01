@@ -25,8 +25,8 @@ import java.nio.ByteBuffer;
 
 public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_msgs.CompressedImage>
 {
-   private static final boolean THROTTLE = false;
-   private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(24.0);
+   private static final boolean THROTTLE = true;
+   private final double outputFrequenct;
 
    private final IHMCROS2Publisher<VideoPacket> publisher;
    private final Timer throttleTimer = new Timer();
@@ -35,9 +35,14 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
    private final YUVPictureConverter converter = new YUVPictureConverter();
    private final JPEGEncoder encoder = new JPEGEncoder();
 
-   public RealsenseVideoROS1Bridge(RosMainNode ros1Node, ROS2Node ros2Node, String ros1InputTopic, ROS2Topic<VideoPacket> ros2OutputTopic)
+   public RealsenseVideoROS1Bridge(RosMainNode ros1Node,
+                                   ROS2Node ros2Node,
+                                   String ros1InputTopic,
+                                   ROS2Topic<VideoPacket> ros2OutputTopic,
+                                   double outputFrequency)
    {
       super(sensor_msgs.CompressedImage._TYPE);
+      outputFrequenct = UnitConversions.hertzToSeconds(outputFrequency);
 
       String ros1Topic = ros1InputTopic;
       LogTools.info("Subscribing ROS 1: {}", ros1Topic);
@@ -63,7 +68,7 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
 
    private void waitThenAct(sensor_msgs.CompressedImage ros1Image)
    {
-      throttleTimer.sleepUntilExpiration(MIN_PUBLISH_PERIOD);
+      throttleTimer.sleepUntilExpiration(outputFrequenct);
       throttleTimer.reset();
 
       compute(ros1Image);

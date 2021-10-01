@@ -1,5 +1,6 @@
 package us.ihmc.valkyrie.pushRecovery;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +12,12 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
+   @Override
+   public double getAngledPushMagnitude()
+   {
+      return 320.0;
+   }
+
    @Override
    protected DRCRobotModel getRobotModel()
    {
@@ -71,6 +78,27 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileInTransfer();
+   }
+
+   @Disabled
+   @Test
+   public void testFailureAfterRecoveryStep() throws SimulationExceededMaximumTimeException
+   {
+      super.testFailureAfterRecoveryStep();
+   }
+
+   @Disabled
+   @Test
+   public void testRecoveryAngledWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoveryAngledWhileInFlamingoStance();
+   }
+
+   @Disabled
+   @Test
+   public void testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown();
    }
 
    @Tag("humanoid-push-recovery")

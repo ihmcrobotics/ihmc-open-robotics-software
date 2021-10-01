@@ -42,7 +42,7 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
       Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
       {
          Color color = GDXTools.toGDX(collisionMeshColor);
-         meshBuilder.addBox((float) lengthX, (float) widthY, (float) heightZ, color);
+         meshBuilder.addBox((float) lengthX + 0.001, (float) widthY + 0.001, (float) heightZ + 0.001, color);
          meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
       }, "collisionModel" + INDEX.getAndIncrement());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));

@@ -7,9 +7,11 @@ import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public class ClockFaceRotation3DMouseDragAlgorithm
 {
@@ -22,6 +24,7 @@ public class ClockFaceRotation3DMouseDragAlgorithm
    private final Vector3D previousClockHand = new Vector3D();
    private final Vector3D crossProduct = new Vector3D();
    private final AxisAngle axisAngleToRotateBy = new AxisAngle();
+   private final RotationMatrix axisOfRotationAsRotationMatrix = new RotationMatrix();
 
    public void reset()
    {
@@ -30,7 +33,16 @@ public class ClockFaceRotation3DMouseDragAlgorithm
 
    public boolean calculate(Line3DReadOnly pickRay,
                             Point3D objectRayCollision,
-                            RotationMatrix axisOrientationInObjectFrame,
+                            Vector3DReadOnly axisOfRotation,
+                            RigidBodyTransformReadOnly objectTransform)
+   {
+      EuclidGeometryTools.orientation3DFromZUpToVector3D(axisOfRotation, axisOfRotationAsRotationMatrix);
+      return calculate(pickRay, objectRayCollision, axisOfRotationAsRotationMatrix, objectTransform);
+   }
+
+   public boolean calculate(Line3DReadOnly pickRay,
+                            Point3D objectRayCollision,
+                            RotationMatrixReadOnly axisOrientationInObjectFrame,
                             RigidBodyTransformReadOnly objectTransform)
    {
       axisLineAtObjectZero.getPoint().set(objectTransform.getTranslation());

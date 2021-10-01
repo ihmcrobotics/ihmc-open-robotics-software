@@ -13,6 +13,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.tools.Timer;
@@ -40,6 +41,7 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 public class LookAndStepBodyPathPlanningTask
 {
+   protected BehaviorHelper helper;
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
    protected VisibilityGraphsParametersReadOnly visibilityGraphParameters;
@@ -71,6 +73,7 @@ public class LookAndStepBodyPathPlanningTask
       public void initialize(LookAndStepBehavior lookAndStep)
       {
          statusLogger = lookAndStep.statusLogger;
+         helper = lookAndStep.helper;
          uiPublisher = lookAndStep.helper::publish;
          visibilityGraphParameters = lookAndStep.visibilityGraphParameters;
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
@@ -88,8 +91,8 @@ public class LookAndStepBodyPathPlanningTask
          // don't run two body path plans at the same time
          executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-         mapRegionsInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
-         goalInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
+         mapRegionsInput.addCallback(data -> run());
+         goalInput.addCallback(data -> run());
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
@@ -121,7 +124,7 @@ public class LookAndStepBodyPathPlanningTask
          suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
          suppressor.addCondition("Robot not in walking state", () -> !controllerStatusTracker.isInWalkingState());
-         suppressor.addCondition("Robot still walking", controllerStatusTracker::isWalking);
+//         suppressor.addCondition("Robot still walking", controllerStatusTracker::isWalking);
       }
 
       public void acceptMapRegions(PlanarRegionsListMessage planarRegionsListMessage)
@@ -141,6 +144,11 @@ public class LookAndStepBodyPathPlanningTask
                                                                                    goal.getZ(),
                                                                                    goal.getYaw())
                                                                            .get()));
+      }
+
+      public void run()
+      {
+         executor.clearQueueAndExecute(this::evaluateAndRun);
       }
 
       public boolean isReset()
@@ -211,6 +219,8 @@ public class LookAndStepBodyPathPlanningTask
       {
          if (operatorReviewEnabled.get())
          {
+            if (lookAndStepParameters.getMaxStepsToSendToController() > 1)
+               helper.getOrCreateRobotInterface().pauseWalking();
             review.review(bodyPathPlanForReview);
          }
          else

@@ -1,4 +1,5 @@
 {
+  "ambientLight" : 0.914,
   "objects" : [ {
     "type" : "GDXLabFloorObject",
     "x" : 7.993576526641846,
@@ -233,5 +234,41 @@
     "qy" : -0.20612373493784222,
     "qz" : -0.20790775363379396,
     "qs" : 0.673204418972328
+  }, {
+    "type" : "GDXPointLightObject",
+    "x" : 10.0,
+    "y" : 10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  }, {
+    "type" : "GDXPointLightObject",
+    "x" : -10.0,
+    "y" : 10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  }, {
+    "type" : "GDXPointLightObject",
+    "x" : -10.0,
+    "y" : -10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
+  }, {
+    "type" : "GDXPointLightObject",
+    "x" : 10.0,
+    "y" : -10.0,
+    "z" : 10.0,
+    "qx" : 0.0,
+    "qy" : 0.0,
+    "qz" : 0.0,
+    "qs" : 1.0
   } ]
 }

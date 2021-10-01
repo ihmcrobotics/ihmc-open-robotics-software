@@ -89,7 +89,8 @@ public class OrientationTrajectoryInputCalculator
    {
       inputToPack.setConstraintType(command.getConstraintType());
       inputToPack.setWeight(command.getObjectiveWeight());
-      inputToPack.setUseWeightScalar(true);
+      inputToPack.setUseWeightScalar(command.useWeightScalar());
+      inputToPack.setTaskWeightMatrix(command.getWeightMatrix());
       inputToPack.setNumberOfVariables(numberOfVariables);
       inputToPack.reshape(SE3MPCIndexHandler.variablesPerOrientationTick);
 

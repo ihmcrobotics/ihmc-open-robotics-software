@@ -11,6 +11,46 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(useInitialSupportRegions);
    }
 
+   default boolean getAssumeFlatGround()
+   {
+      return get(assumeFlatGround);
+   }
+
+   default boolean getDetectFlatGround()
+   {
+      return get(detectFlatGround);
+   }
+
+   default double getDetectFlatGroundZTolerance()
+   {
+      return get(detectFlatGroundZTolerance);
+   }
+
+   default double getDetectFlatGroundOrientationTolerance()
+   {
+      return get(detectFlatGroundOrientationTolerance);
+   }
+
+   default double getDetectFlatGroundMinRegionAreaToConsider()
+   {
+      return get(detectFlatGroundMinRegionAreaToConsider);
+   }
+
+   default double getDetectFlatGroundMinRadius()
+   {
+      return get(detectFlatGroundMinRadius);
+   }
+
+   default double getAssumedFlatGroundCircleRadius()
+   {
+      return get(assumedFlatGroundCircleRadius);
+   }
+
+   default boolean getSquareUpAtTheEnd()
+   {
+      return get(squareUpAtTheEnd);
+   }
+
    default double getSupportRegionScaleFactor()
    {
       return get(supportRegionScaleFactor);
@@ -21,14 +61,19 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(planarRegionsHistorySize);
    }
 
+   default int getMaxStepsToSendToController()
+   {
+      return get(maxStepsToSendToController);
+   }
+
    default boolean getFlatGroundBodyPathPlan()
    {
       return get(flatGroundBodyPathPlan);
    }
 
-   default int getMinimumNumberOfPlannedSteps()
+   default int getNumberOfStepsToTryToPlan()
    {
-      return get(minimumNumberOfPlannedSteps);
+      return get(numberOfStepsToTryToPlan);
    }
 
    default double getMinimumStepTranslation()
@@ -66,14 +111,14 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(footstepPlannerTimeout);
    }
 
-   default double getSwingTime()
+   default double getSwingDuration()
    {
-      return get(swingTime);
+      return get(swingDuration);
    }
 
-   default double getTransferTime()
+   default double getTransferDuration()
    {
-      return get(transferTime);
+      return get(transferDuration);
    }
 
    default double getWaitTimeAfterPlanFailed()

@@ -40,6 +40,7 @@ public class GDX3DDemo
          public void render()
          {
             sceneManager.setViewportBoundsToWindow();
+            sceneManager.renderShadowMap();
             sceneManager.render();
          }
       }, "GDX3DDemo", 1100, 800);

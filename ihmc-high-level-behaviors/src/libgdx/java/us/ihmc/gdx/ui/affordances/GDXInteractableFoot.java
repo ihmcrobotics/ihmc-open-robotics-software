@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -29,9 +28,6 @@ public class GDXInteractableFoot
    private boolean selected = false;
    private boolean modified = false;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
-   private int spaceKey;
-   private int deleteKey;
-   private int escapeKey;
    private boolean mouseIntersects;
 
    public GDXInteractableFoot(GDXRobotCollisionLink collisionLink, RobotSide side, ReferenceFrame syncedRobotFootFrame, ROS2ControllerHelper ros2Helper)
@@ -53,9 +49,6 @@ public class GDXInteractableFoot
    public void create(FocusBasedGDXCamera camera3D)
    {
       poseGizmo.create(camera3D);
-      spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
-      deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
-      escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -103,21 +96,21 @@ public class GDXInteractableFoot
       {
          poseGizmo.process3DViewInput(input);
 
-         if (ImGui.isKeyReleased(spaceKey))
+         if (ImGui.isKeyReleased(input.getSpaceKey()))
          {
             // TODO: Trajectory time in ImGui panel
             ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side, 1.2, poseGizmo.getPose()));
          }
       }
 
-      if (modified && selected && ImGui.isKeyReleased(deleteKey))
+      if (modified && selected && ImGui.isKeyReleased(input.getDeleteKey()))
       {
          selected = false;
          modified = false;
          collisionLink.overrideTransform(false);
       }
 
-      if (selected && ImGui.isKeyReleased(escapeKey))
+      if (selected && ImGui.isKeyReleased(input.getEscapeKey()))
       {
          selected = false;
       }

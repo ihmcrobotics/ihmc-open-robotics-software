@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 
 import java.util.List;
 import java.util.function.IntUnaryOperator;
@@ -36,7 +37,7 @@ public class LinearMPCIndexHandler
    /**
     * Computes all the index values from the contact sequence directly.
     */
-   public void initialize(List<ContactPlaneProvider> contactSequence)
+   public void initialize(List<PreviewWindowSegment> contactSequence)
    {
       listToSizeReturn.setContacts(contactSequence);
       initialize(listToSizeReturn, contactSequence.size());
@@ -130,9 +131,9 @@ public class LinearMPCIndexHandler
 
    protected static class ListToSizeReturn implements IntUnaryOperator
    {
-      private List<ContactPlaneProvider> contacts;
+      private List<PreviewWindowSegment> contacts;
 
-      public void setContacts(List<ContactPlaneProvider> contacts)
+      public void setContacts(List<PreviewWindowSegment> contacts)
       {
          this.contacts = contacts;
       }

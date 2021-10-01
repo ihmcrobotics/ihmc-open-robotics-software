@@ -1,34 +1,31 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
-import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class MultiStepPushRecoveryCalculator
 {
-   private static final boolean VISUALIZE = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private static final boolean useCentroidOfIntersectingRegionAsCapturePointAfterTransfer = false;
+   private boolean useCentroidAsCapturePoint = false;
+   private final FramePoint2D tmpCapturePointForTime = new FramePoint2D();
+   private final FramePoint2DBasics cmpToCentroidOfIntersectionRegion = new FramePoint2D();
+   private final FramePoint2DBasics cmpToCentroidOfIntersectionRegionSecond = new FramePoint2D();
+   private final FrameVector2D intersectionRegionCentroidToICPRay = new FrameVector2D();
 
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
@@ -38,112 +35,118 @@ public class MultiStepPushRecoveryCalculator
    private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
 
    private final FrameConvexPolygon2D reachableRegion = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D();
 
-   private final List<YoFramePoint2D> capturePointsAtTouchdown = new ArrayList<>();
-   private final List<YoFramePoint2D> recoveryStepLocations = new ArrayList<>();
+   private final RecyclingArrayList<FramePoint2DBasics> capturePointsAtTouchdown = new RecyclingArrayList<>(FramePoint2D::new);
+   private final RecyclingArrayList<FramePoint2DBasics> recoveryStepLocations = new RecyclingArrayList<>(FramePoint2D::new);
 
-   private final List<YoFrameConvexPolygon2D> yoCaptureRegions = new ArrayList<>();
-   private final List<YoFrameConvexPolygon2D> yoCaptureRegionsAtTouchdown = new ArrayList<>();
-   private final List<YoFrameConvexPolygon2D> yoReachableRegions = new ArrayList<>();
+   private final RecyclingArrayList<FrameConvexPolygon2DBasics> captureRegionsAtTouchdown = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
+   private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
+   private final RecyclingArrayList<FrameConvexPolygon2DBasics> intersectingRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
 
    private final PoseReferenceFrame stanceFrame = new PoseReferenceFrame("StanceFrame", worldFrame);
    private final FramePose3D stancePose = new FramePose3D();
    private final FramePoint2D stancePosition = new FramePoint2D();
 
+   private final FrameLine2D forwardLineAtNominalWidth = new FrameLine2D();
+   private final FramePoint2D forwardLineSegmentEnd = new FramePoint2D();
+
    private final FramePoint3D stepPosition = new FramePoint3D();
+   private final FramePoint3D squareUpPosition = new FramePoint3D();
+   private final FrameVector2D squaringStepDirection = new FrameVector2D();
 
    private final ConvexPolygon2DReadOnly defaultFootPolygon;
    private final FramePoint2D icpAtStart = new FramePoint2D();
    private final FrameConvexPolygon2DBasics stancePolygon = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2DBasics intersectingRegion = new FrameConvexPolygon2D();
 
    private final RecyclingArrayList<Footstep> recoveryFootsteps = new RecyclingArrayList<>(Footstep::new);
    private final RecyclingArrayList<FootstepTiming> recoveryFootstepTimings = new RecyclingArrayList<>(FootstepTiming::new);
 
-   private static final int maxRegionDepth = 3;
+   private final PushRecoveryControllerParameters pushRecoveryParameters;
 
-   private final int depth = 3;
+   private boolean isStateCapturable = false;
 
-   public MultiStepPushRecoveryCalculator(double kinematicsStepRange,
-                                          double footWidth,
+   private int depth = 3;
+
+   public MultiStepPushRecoveryCalculator(DoubleProvider kinematicsStepRange,
+                                          DoubleProvider footWidth,
+                                          PushRecoveryControllerParameters pushRecoveryParameters,
                                           SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                          ConvexPolygon2DReadOnly defaultFootPolygon,
-                                          String suffix,
-                                          YoRegistry parentRegistry,
-                                          YoGraphicsListRegistry graphicsListRegistry)
+                                          ConvexPolygon2DReadOnly defaultFootPolygon)
+   {
+      this(kinematicsStepRange, kinematicsStepRange, footWidth, kinematicsStepRange, pushRecoveryParameters, soleZUpFrames, defaultFootPolygon);
+   }
+
+   public MultiStepPushRecoveryCalculator(DoubleProvider maxStepLength,
+                                          DoubleProvider maxBackwardsStepLength,
+                                          DoubleProvider minStepWidth,
+                                          DoubleProvider maxStepWidth,
+                                          PushRecoveryControllerParameters pushRecoveryParameters,
+                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                          ConvexPolygon2DReadOnly defaultFootPolygon)
    {
       this.soleZUpFrames = soleZUpFrames;
       this.defaultFootPolygon = defaultFootPolygon;
-      reachableFootholdsCalculator = new ReachableFootholdsCalculator(kinematicsStepRange,
-                                                                      kinematicsStepRange,
-                                                                      footWidth,
-                                                                      kinematicsStepRange,
-                                                                      soleZUpFrames,
-                                                                      registry);
+      this.pushRecoveryParameters = pushRecoveryParameters;
+      reachableFootholdsCalculator = new ReachableFootholdsCalculator(maxStepLength,
+                                                                      maxBackwardsStepLength,
+                                                                      minStepWidth,
+                                                                      maxStepWidth);
       captureRegionCalculator = new AchievableCaptureRegionCalculatorWithDelay();
-
-      for (int i = 0; i < maxRegionDepth; i++)
-      {
-         capturePointsAtTouchdown.add(new YoFramePoint2D("capturePointAtTouchdown" + i, worldFrame, registry));
-         recoveryStepLocations.add(new YoFramePoint2D("recoveryStepLocation" + i, worldFrame, registry));
-      }
-
-      if (graphicsListRegistry != null && VISUALIZE)
-      {
-         String listName = getClass().getSimpleName();
-         for (int i = 0; i < maxRegionDepth; i++)
-         {
-            String captureName = "captureRegion" + i;
-
-            YoFrameConvexPolygon2D yoCaptureRegionPolygon = new YoFrameConvexPolygon2D(captureName, suffix, worldFrame, 30, registry);
-            yoCaptureRegions.add(yoCaptureRegionPolygon);
-
-            YoFrameConvexPolygon2D yoCaptureRegionPolygonAtTouchdown = new YoFrameConvexPolygon2D(captureName + "AtTouchdown", suffix, worldFrame, 30, registry);
-            yoCaptureRegionsAtTouchdown.add(yoCaptureRegionPolygonAtTouchdown);
-
-            YoArtifactPolygon capturePolygonArtifact = new YoArtifactPolygon(captureName + suffix, yoCaptureRegionPolygon, Color.RED, false);
-            YoArtifactPolygon capturePolygonAtTouchdownArtifact = new YoArtifactPolygon(captureName + "AtTouchdown" + suffix, yoCaptureRegionPolygonAtTouchdown, Color.RED, false, true);
-
-            String reachableName = "reachableRegion" + i;
-
-            YoFrameConvexPolygon2D yoReachableRegionPolygon = new YoFrameConvexPolygon2D(reachableName, suffix, worldFrame, 30, registry);
-            yoReachableRegions.add(yoReachableRegionPolygon);
-
-            YoArtifactPolygon reachablePolygonArtifact = new YoArtifactPolygon(reachableName + suffix, yoReachableRegionPolygon, Color.BLUE, false);
-
-            YoGraphicPosition touchdownICPViz = new YoGraphicPosition("capturePointTouchdown" + i + suffix,
-                                                                      capturePointsAtTouchdown.get(i),
-                                                                      0.01,
-                                                                      YoAppearance.Yellow(),
-                                                                      YoGraphicPosition.GraphicType.SOLID_BALL);
-            YoGraphicPosition footstepViz = new YoGraphicPosition("recoveryStepLocation" + i + suffix,
-                                                                  recoveryStepLocations.get(i),
-                                                                  0.025,
-                                                                  YoAppearance.Blue(),
-                                                                  YoGraphicPosition.GraphicType.SOLID_BALL);
-
-            graphicsListRegistry.registerArtifact(listName, capturePolygonArtifact);
-            graphicsListRegistry.registerArtifact(listName, capturePolygonAtTouchdownArtifact);
-            graphicsListRegistry.registerArtifact(listName, reachablePolygonArtifact);
-            graphicsListRegistry.registerArtifact(listName, touchdownICPViz.createArtifact());
-            graphicsListRegistry.registerArtifact(listName, footstepViz.createArtifact());
-         }
-      }
-
-      parentRegistry.addChild(registry);
    }
 
-
-
-   public void computeRecoverySteps(RobotSide swingSide,
-                                    double swingTimeRemaining,
-                                    double nextTransferDuration,
-                                    FramePoint2DReadOnly currentICP,
-                                    double omega0,
-                                    FrameConvexPolygon2DReadOnly footPolygon)
+   public void setMaxStepsToGenerateForRecovery(int depth)
    {
-      int numberOfRecoverySteps = calculateRecoveryStepLocations(swingSide, swingTimeRemaining, nextTransferDuration, currentICP, omega0, footPolygon);
+      this.depth = depth;
+   }
+
+   private final TDoubleArrayList candidateSwingTimes = new TDoubleArrayList();
+
+   public boolean computePreferredRecoverySteps(RobotSide swingSide,
+                                                double nextTransferDuration,
+                                                double swingTimeRemaining,
+                                                FramePoint2DReadOnly currentICP,
+                                                double omega0,
+                                                FrameConvexPolygon2DReadOnly footPolygon)
+   {
+      candidateSwingTimes.reset();
+      candidateSwingTimes.add(swingTimeRemaining);
+      useCentroidAsCapturePoint = false;
+
+      return computeRecoverySteps(swingSide, nextTransferDuration, swingTimeRemaining, candidateSwingTimes,
+         currentICP, omega0, footPolygon);
+   }
+
+   public boolean computeRecoverySteps(RobotSide swingSide,
+                                       double nextTransferDuration,
+                                       double minSwingTimeRemaining,
+                                       double maxSwingTimeRemaining,
+                                       FramePoint2DReadOnly currentICP,
+                                       double omega0,
+                                       FrameConvexPolygon2DReadOnly footPolygon)
+   {
+      candidateSwingTimes.reset();
+      candidateSwingTimes.add(minSwingTimeRemaining);
+      candidateSwingTimes.add(maxSwingTimeRemaining);
+      useCentroidAsCapturePoint = false;
+
+      return computeRecoverySteps(swingSide, nextTransferDuration, minSwingTimeRemaining, candidateSwingTimes,
+                                  currentICP, omega0, footPolygon);
+   }
+
+   public boolean computeRecoverySteps(RobotSide swingSide,
+                                       double nextTransferDuration,
+                                       double swingTimeToSet,
+                                       TDoubleArrayList candidateSwingTimes,
+                                       FramePoint2DReadOnly currentICP,
+                                       double omega0,
+                                       FrameConvexPolygon2DReadOnly footPolygon)
+   {
+      int numberOfRecoverySteps = calculateRecoveryStepLocations(swingSide,
+                                                                 nextTransferDuration,
+                                                                 candidateSwingTimes,
+                                                                 currentICP,
+                                                                 omega0,
+                                                                 footPolygon);
 
       recoveryFootsteps.clear();
       recoveryFootstepTimings.clear();
@@ -155,10 +158,21 @@ public class MultiStepPushRecoveryCalculator
          recoveryFootstep.setPose(stepPosition, stancePose.getOrientation());
          recoveryFootstep.setRobotSide(swingSide);
 
-         recoveryFootstepTimings.add().setTimings(swingTimeRemaining, nextTransferDuration);
+         if(useCentroidAsCapturePoint)
+         {
+            double swingTimeToCentroid = CapturePointTools.computeTimeToReachCapturePointUsingConstantCMP(
+                    omega0, tmpCapturePointForTime, currentICP, cmpToCentroidOfIntersectionRegion);
+            recoveryFootstepTimings.add().setTimings(swingTimeToCentroid, nextTransferDuration);
+         }
+         else
+         {
+            recoveryFootstepTimings.add().setTimings(swingTimeToSet, nextTransferDuration);
+         }
 
          swingSide = swingSide.getOppositeSide();
       }
+
+      return isStateCapturable;
    }
 
    public int getNumberOfRecoverySteps()
@@ -171,17 +185,37 @@ public class MultiStepPushRecoveryCalculator
       return recoveryFootsteps.get(stepIdx);
    }
 
+   public void computeSquareUpStep(double preferredWidth, RobotSide nextSupportSide, Footstep squareUpStepToPack)
+   {
+      recoveryStepLocations.clear();
+      FramePoint2DBasics squareUpLocation = recoveryStepLocations.add();
+      squareUpLocation.setToZero(soleZUpFrames.get(nextSupportSide));
+      squareUpLocation.changeFrame(worldFrame);
+
+      // set square position at preferred width distance from next support foot
+      squaringStepDirection.setToZero(soleZUpFrames.get(nextSupportSide));
+      squaringStepDirection.add(0.0, nextSupportSide.negateIfLeftSide(preferredWidth));
+      squaringStepDirection.changeFrame(worldFrame);
+      squareUpLocation.add(squaringStepDirection);
+      squareUpPosition.set(squareUpLocation);
+
+      squareUpStepToPack.setPose(squareUpPosition, stancePose.getOrientation());
+      squareUpStepToPack.setRobotSide(nextSupportSide.getOppositeSide());
+   }
+
    public FootstepTiming getRecoveryStepTiming(int stepIdx)
    {
       return recoveryFootstepTimings.get(stepIdx);
    }
 
-   public int calculateRecoveryStepLocations(RobotSide swingSide,
-                                             double swingTimeRemaining,
-                                             double nextTransferDuration,
-                                             FramePoint2DReadOnly currentICP,
-                                             double omega0,
-                                             FrameConvexPolygon2DReadOnly footPolygon)
+   private final FramePoint2D pointToThrowAway = new FramePoint2D();
+
+   private int calculateRecoveryStepLocations(RobotSide swingSide,
+                                              double nextTransferDuration,
+                                              TDoubleArrayList candidateSwingTimes,
+                                              FramePoint2DReadOnly currentICP,
+                                              double omega0,
+                                              FrameConvexPolygon2DReadOnly footPolygon)
    {
       icpAtStart.set(currentICP);
       stancePose.setToZero(soleZUpFrames.get(swingSide.getOppositeSide()));
@@ -191,56 +225,108 @@ public class MultiStepPushRecoveryCalculator
       stancePolygon.setIncludingFrame(footPolygon);
 
       int numberOfRecoverySteps = 0;
+      isStateCapturable = false;
+
+      recoveryStepLocations.clear();
+      capturePointsAtTouchdown.clear();
+      reachableRegions.clear();
+      captureRegionsAtTouchdown.clear();
+      intersectingRegions.clear();
 
       for (; depthIdx < depth; depthIdx++)
       {
          reachableFootholdsCalculator.calculateReachableRegion(swingSide, stancePose.getPosition(), stancePose.getOrientation(), reachableRegion);
 
-         if (captureRegionCalculator.calculateCaptureRegion(swingTimeRemaining, nextTransferDuration, icpAtStart, omega0, stancePose, stancePolygon))
-            break;
-
-         captureRegion.setIncludingFrame(captureRegionCalculator.getUnconstrainedCaptureRegion());
-         captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
-
-         if (VISUALIZE)
+         if (captureRegionCalculator.calculateCaptureRegion(nextTransferDuration, candidateSwingTimes, icpAtStart, omega0, stancePose, stancePolygon))
          {
-            yoCaptureRegionsAtTouchdown.get(depthIdx).setMatchingFrame(captureRegionCalculator.getUnconstrainedCaptureRegionAtTouchdown(), false);
-            yoCaptureRegions.get(depthIdx).set(captureRegion);
-            yoReachableRegions.get(depthIdx).set(reachableRegion);
+            isStateCapturable = true;
+            break;
          }
+
+         FrameConvexPolygon2DBasics captureRegionAtTouchdown =  captureRegionsAtTouchdown.add();
+
+         captureRegionAtTouchdown.setMatchingFrame(captureRegionCalculator.getCaptureRegion(), false);
+         reachableRegions.add().set(reachableRegion);
 
          stancePosition.set(stancePose.getPosition());
          numberOfRecoverySteps++;
 
-         if (polygonTools.computeIntersectionOfPolygons(captureRegion, reachableRegion, intersectingRegion))
+         FrameConvexPolygon2DBasics intersectingRegion = intersectingRegions.add();
+         polygonTools.computeIntersectionOfPolygons(captureRegionAtTouchdown, reachableRegion, intersectingRegion);
+
+         FramePoint2DBasics recoveryStepLocation = recoveryStepLocations.add();
+         FramePoint2DBasics capturePointAtTouchdown = capturePointsAtTouchdown.add();
+
+         if (!intersectingRegion.isEmpty())
          { // they do intersect
             FramePoint2DReadOnly centerOfIntersection = intersectingRegion.getCentroid();
 
-            EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(stancePosition,
-                                                                                          centerOfIntersection,
-                                                                                          intersectingRegion.getPolygonVerticesView(),
-                                                                                          intersectingRegion.getNumberOfVertices(),
-                                                                                          true,
-                                                                                          capturePointsAtTouchdown.get(depthIdx),
-                                                                                          null);
+            computeRecoveryStepAtNominalWidth(swingSide, stancePosition, centerOfIntersection, capturePointAtTouchdown);
 
-            recoveryStepLocations.get(depthIdx).set(capturePointsAtTouchdown.get(depthIdx));
+            if (!intersectingRegion.isPointInside(capturePointAtTouchdown))
+            {
+               if(useCentroidOfIntersectingRegionAsCapturePointAfterTransfer)
+               {
+                  intersectionRegionCentroidToICPRay.setToZero(worldFrame);
+                  intersectionRegionCentroidToICPRay.add(currentICP);
+                  intersectionRegionCentroidToICPRay.sub(centerOfIntersection);
+                  EuclidGeometryPolygonTools.intersectionBetweenRay2DAndConvexPolygon2D(centerOfIntersection,
+                          intersectionRegionCentroidToICPRay,
+                          footPolygon.getPolygonVerticesView(),
+                          footPolygon.getNumberOfVertices(),
+                          true,
+                          cmpToCentroidOfIntersectionRegion,
+                          cmpToCentroidOfIntersectionRegionSecond);
+                  AchievableCaptureRegionCalculatorWithDelay.computeCapturePointBeforeTransfer(
+                          centerOfIntersection, cmpToCentroidOfIntersectionRegion, omega0,
+                          nextTransferDuration, tmpCapturePointForTime);
+                  capturePointAtTouchdown.set(centerOfIntersection);
+                  useCentroidAsCapturePoint = true;
+               }
+               else
+               {
+                  EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(stancePosition,
+                          centerOfIntersection,
+                          intersectingRegion.getPolygonVerticesView(),
+                          intersectingRegion.getNumberOfVertices(),
+                          true,
+                          capturePointAtTouchdown,
+                          pointToThrowAway);
+               }
+            }
+
+            recoveryStepLocation.set(capturePointAtTouchdown);
+            isStateCapturable = true;
             depthIdx++;
             break;
          }
          else
          {
-            polygonTools.computeMinimumDistancePoints(reachableRegion,
-                                                      captureRegion,
-                                                      recoveryStepLocations.get(depthIdx),
-                                                      capturePointsAtTouchdown.get(depthIdx));
+            if (captureRegionAtTouchdown.getNumberOfVertices() == 0)
+            {
+               isStateCapturable = false;
+               break;
+            }
+            else if (captureRegionAtTouchdown.getNumberOfVertices() == 1)
+            {
+               capturePointAtTouchdown.set(captureRegionAtTouchdown.getVertex(0));
+               reachableRegion.orthogonalProjection(capturePointAtTouchdown, recoveryStepLocation);
+            }
+            else if (captureRegionAtTouchdown.getNumberOfVertices() == 2)
+            {
+               throw new RuntimeException("The event of the capture region having two points still needs to be implemented.");
+            }
+            else
+            {
+               polygonTools.computeMinimumDistancePoints(reachableRegion, captureRegionAtTouchdown, recoveryStepLocation, capturePointAtTouchdown);
+            }
          }
 
          swingSide = swingSide.getOppositeSide();
 
 
-         stancePose.getPosition().set(recoveryStepLocations.get(depthIdx));
-         icpAtStart.set(capturePointsAtTouchdown.get(depthIdx));
+         stancePose.getPosition().set(recoveryStepLocation);
+         icpAtStart.set(capturePointAtTouchdown);
 
          stanceFrame.setPoseAndUpdate(stancePose);
          stancePolygon.clear(stanceFrame);
@@ -250,20 +336,47 @@ public class MultiStepPushRecoveryCalculator
          stancePolygon.changeFrameAndProjectToXYPlane(worldFrame);
       }
 
-      if (VISUALIZE)
-      {
-         for (; depthIdx < depth; depthIdx++)
-         {
-            capturePointsAtTouchdown.get(depthIdx).setToNaN();
-            recoveryStepLocations.get(depthIdx).setToNaN();
-            yoReachableRegions.get(depthIdx).clearAndUpdate();
-            yoCaptureRegionsAtTouchdown.get(depthIdx).clearAndUpdate();
-            yoCaptureRegions.get(depthIdx).clearAndUpdate();
-         }
-      }
-
       return numberOfRecoverySteps;
    }
 
+   private void computeRecoveryStepAtNominalWidth(RobotSide swingSide,
+                                                  FramePoint2DReadOnly stancePosition,
+                                                  FramePoint2DReadOnly pointInDirectionOfStep,
+                                                  FramePoint2DBasics recoveryStepLocationToPack)
+   {
 
+      forwardLineAtNominalWidth.setToZero(stanceFrame);
+      forwardLineAtNominalWidth.set(stanceFrame, 0.0, swingSide.negateIfRightSide(pushRecoveryParameters.getPreferredStepWidth()), 1.0, 0.0);
+      forwardLineAtNominalWidth.changeFrame(worldFrame);
+
+      forwardLineSegmentEnd.set(forwardLineAtNominalWidth.getPoint());
+      forwardLineSegmentEnd.add(forwardLineAtNominalWidth.getDirection());
+      EuclidGeometryTools.intersectionBetweenTwoLine2Ds(stancePosition, pointInDirectionOfStep, forwardLineAtNominalWidth.getPoint(),
+                                                        forwardLineSegmentEnd, recoveryStepLocationToPack);
+   }
+
+   FramePoint2DReadOnly getCapturePointAtTouchdown(int i)
+   {
+      return capturePointsAtTouchdown.get(i);
+   }
+
+   FramePoint2DReadOnly getRecoveryStepLocation(int i)
+   {
+      return recoveryStepLocations.get(i);
+   }
+
+   public FrameConvexPolygon2DReadOnly getReachableRegion(int i)
+   {
+      return reachableRegions.get(i);
+   }
+
+   public FrameConvexPolygon2DReadOnly getCaptureRegionAtTouchdown(int i)
+   {
+      return captureRegionsAtTouchdown.get(i);
+   }
+
+   public FrameConvexPolygon2DReadOnly getIntersectingRegion(int i)
+   {
+      return intersectingRegions.get(i);
+   }
 }

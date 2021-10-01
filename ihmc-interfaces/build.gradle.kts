@@ -6,14 +6,14 @@ buildscript {
       jcenter()
    }
    dependencies {
-      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.19.4")
+      classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.20.5")
    }
 }
 
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.20"
+   id("us.ihmc.ihmc-cd") version "1.21"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
@@ -29,10 +29,10 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.16.2")
-   api("us.ihmc:euclid-geometry:0.16.2")
-   api("us.ihmc:ihmc-pub-sub:0.15.0")
-   api("us.ihmc:ros2-common-interfaces:0.19.4") {
+   api("us.ihmc:euclid:0.17.0")
+   api("us.ihmc:euclid-geometry:0.17.0")
+   api("us.ihmc:ihmc-pub-sub:0.16.2")
+   api("us.ihmc:ros2-common-interfaces:0.20.5") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
@@ -42,13 +42,13 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-ros2-library:0.19.4")
+   api("us.ihmc:ihmc-ros2-library:0.20.5")
 }
 
 generatorDependencies {
-   api("us.ihmc:euclid:0.16.2")
+   api("us.ihmc:euclid:0.17.0")
    api("us.ihmc:ihmc-commons:0.30.4")
-   api("us.ihmc:ros2-msg-to-pubsub-generator:0.19.4")
+   api("us.ihmc:ros2-msg-to-pubsub-generator:0.20.5")
 }
 
 val generator = us.ihmc.ros2.rosidl.ROS2InterfaceGenerator()

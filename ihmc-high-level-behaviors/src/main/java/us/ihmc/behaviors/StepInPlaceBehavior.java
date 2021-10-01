@@ -64,7 +64,6 @@ public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements 
       return BehaviorTreeNodeStatus.SUCCESS;
    }
 
-   @Override
    public void setEnabled(boolean enabled)
    {
       LogTools.info("Step in place behavior selected = {}", enabled);

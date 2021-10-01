@@ -96,6 +96,7 @@ public class HumanoidDynamicsSimulation
                                                                                                               .getWristForceSensorNames(),
                                                                                                     robotModel.getHighLevelControllerParameters(),
                                                                                                     robotModel.getWalkingControllerParameters(),
+                                                                                                    robotModel.getPushRecoveryControllerParameters(),
                                                                                                     copTrajectoryParameters,
                                                                                                     robotModel.getSplitFractionCalculatorParameters());
       controllerFactory.useDefaultDoNothingControlState();

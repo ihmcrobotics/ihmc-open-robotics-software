@@ -34,6 +34,7 @@ import us.ihmc.tools.MemoryTools;
 
 public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterface
 {
+   private static final boolean EXPORT_TORQUE_SPEED_DATA = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -75,7 +76,12 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       testStairs(testInfo, slow, up, swingDuration, transferDuration, heightOffset, null);
    }
 
-   public void testStairs(TestInfo testInfo, boolean slow, boolean up, double swingDuration, double transferDuration, double heightOffset,
+   public void testStairs(TestInfo testInfo,
+                          boolean slow,
+                          boolean up,
+                          double swingDuration,
+                          double transferDuration,
+                          double heightOffset,
                           Consumer<FootstepDataListMessage> corruptor)
          throws Exception
    {
@@ -113,6 +119,11 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       scs.setInPoint();
 
       publishFootstepsAndSimulate(robotModel, footsteps);
+
+      if (EXPORT_TORQUE_SPEED_DATA)
+      {
+         EndToEndTestTools.exportTorqueSpeedCurves(scs, EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null), testInfo.getTestMethod().get().getName());
+      }
    }
 
    private void publishHeightOffset(double heightOffset) throws Exception
@@ -142,7 +153,11 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       return message;
    }
 
-   private static FootstepDataListMessage createStairsFootsteps(boolean slow, boolean up, double stepHeight, double stepLength, double stanceWidth,
+   private static FootstepDataListMessage createStairsFootsteps(boolean slow,
+                                                                boolean up,
+                                                                double stepHeight,
+                                                                double stepLength,
+                                                                double stanceWidth,
                                                                 int numberOfSteps)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
@@ -197,8 +212,13 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       return footsteps;
    }
 
-   public static Consumer<FootstepDataListMessage> createFootstepCorruptor(Random random, double rangeX, double rangeY, double rangeZ, double rangeYaw,
-                                                                           double rangePitch, double rangeRoll)
+   public static Consumer<FootstepDataListMessage> createFootstepCorruptor(Random random,
+                                                                           double rangeX,
+                                                                           double rangeY,
+                                                                           double rangeZ,
+                                                                           double rangeYaw,
+                                                                           double rangePitch,
+                                                                           double rangeRoll)
    {
       return footstepDataList ->
       {

@@ -55,12 +55,11 @@ public class FootstepPlannerHeuristicCalculator
          int segmentIndex = bodyPathPlanHolder.getSegmentIndexFromAlpha(alphaMidFoot);
 
          double desiredRobotPostureHeading = bodyPathPlanHolder.getBodyPathPlan().getWaypoint(segmentIndex).getOrientation().getYaw();
-         double desiredRobotMotionHeading = bodyPathPlanHolder.getSegmentYaw(segmentIndex);
-         double pathHeading = EuclidCoreTools.angleDifferenceMinusPiToPi(desiredRobotPostureHeading, desiredRobotMotionHeading);
+         double finalRobotPostureHeading = bodyPathPlanHolder.getBodyPathPlan().getWaypoint(bodyPathPlanHolder.getBodyPathPlan().getNumberOfWaypoints() - 1).getYaw();
 
-         initialTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), pathHeading)) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
+         initialTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), desiredRobotPostureHeading)) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
          walkDistance = xyDistanceToGoal;
-         finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pathHeading, goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
+         finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(finalRobotPostureHeading, goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
      }
 
       return parameters.getAStarHeuristicsWeight().getValue() * (initialTurnDistance + walkDistance + finalTurnDistance);

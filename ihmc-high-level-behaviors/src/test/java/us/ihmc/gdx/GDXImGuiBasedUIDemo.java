@@ -2,12 +2,16 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.internal.ImGui;
+import org.apache.logging.log4j.Level;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.tools.string.StringTools;
+
+import java.time.LocalDateTime;
 
 public class GDXImGuiBasedUIDemo
 {
@@ -18,6 +22,7 @@ public class GDXImGuiBasedUIDemo
 
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
+   private final ImGuiLogWidget logWidget = new ImGuiLogWidget("Log");
    private long renderCount = 0;
 
    public GDXImGuiBasedUIDemo()
@@ -35,6 +40,12 @@ public class GDXImGuiBasedUIDemo
             baseUI.getImGuiPanelManager().addPanel("Window 1", GDXImGuiBasedUIDemo.this::renderWindow1);
             baseUI.getImGuiPanelManager().addPanel("Window 2", GDXImGuiBasedUIDemo.this::renderWindow2);
             baseUI.getImGuiPanelManager().addPanel("Window 3", GDXImGuiBasedUIDemo.this::renderWindow3);
+
+            logWidget.submitEntry(Level.WARN, "WARN at " + LocalDateTime.now());
+            logWidget.submitEntry(Level.ERROR, "ERROR at " + LocalDateTime.now());
+            logWidget.submitEntry(Level.DEBUG, "DEBUG at " + LocalDateTime.now());
+            logWidget.submitEntry(Level.FATAL, "FATAL at " + LocalDateTime.now());
+            logWidget.submitEntry(Level.TRACE, "TRACE at " + LocalDateTime.now());
          }
 
          @Override
@@ -72,6 +83,8 @@ public class GDXImGuiBasedUIDemo
       }
       ImGui.plotLines("Histogram", values, 100);
       renderPlot.calculate(renderCount++);
+
+      logWidget.renderImGuiWidgets();
    }
 
    private void renderWindow2()

@@ -392,7 +392,14 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       for (int i = 0; i < stateListeners.size(); i++)
       {
          SCSVisualizerStateListener stateListener = stateListeners.get(i);
-         stateListener.starting(scs, robot, this.registry);
+         try
+         {
+            stateListener.starting(scs, robot, this.registry);
+         }
+         catch (IOException | InterruptedException e)
+         {
+            e.printStackTrace();
+         }
       }
 
       for (String yoVariableName : buttons.keySet())

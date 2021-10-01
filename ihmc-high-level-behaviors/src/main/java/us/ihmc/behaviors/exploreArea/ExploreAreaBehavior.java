@@ -74,7 +74,6 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       mainThread = helper.createPausablePeriodicThread(getClass(), TICK_PERIOD, 5, this::tick);
    }
 
-   @Override
    public void setEnabled(boolean enabled)
    {
       helper.setCommunicationCallbacksEnabled(enabled);

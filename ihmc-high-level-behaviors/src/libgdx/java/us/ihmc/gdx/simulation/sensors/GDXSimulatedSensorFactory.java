@@ -137,13 +137,13 @@ public class GDXSimulatedSensorFactory
       int imageHeight = 480;
       double fx = 500.0;
       double fy = 500.0;
-      if (LOW_RESOLUTION_SENSORS)
-      {
-         imageWidth /= 2;
-         imageHeight /= 2;
-         fx /= 2;
-         fy /= 2;
-      }
+//      if (LOW_RESOLUTION_SENSORS)
+//      {
+//         imageWidth /= 2;
+//         imageHeight /= 2;
+//         fx /= 2;
+//         fy /= 2;
+//      }
       double minRange = 0.105;
       double maxRange = 5.0;
       CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
@@ -158,6 +158,45 @@ public class GDXSimulatedSensorFactory
                                                   null,
                                                   null,
                                                   syncedRobot.getReferenceFrames().getSteppingCameraFrame(),
+                                                  syncedRobot::getTimestamp,
+                                                  verticalFOV,
+                                                  imageWidth,
+                                                  imageHeight,
+                                                  minRange,
+                                                  maxRange,
+                                                  publishRateHz,
+                                                  false);
+   }
+
+   public static GDXHighLevelDepthSensorSimulator createOusterLidar(ROS2SyncedRobotModel syncedRobot, ROS2NodeInterface ros2Node)
+   {
+      double publishRateHz = 5.0;
+      double verticalFOV = 90.0;
+      int imageWidth = 1024;
+      int imageHeight = 128;
+      double fx = 500.0;
+      double fy = 500.0;
+      if (LOW_RESOLUTION_SENSORS)
+      {
+         imageWidth /= 2;
+         imageHeight /= 2;
+         fx /= 2;
+         fy /= 2;
+      }
+      double minRange = 0.105;
+      double maxRange = 15.0;
+      CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
+      return new GDXHighLevelDepthSensorSimulator("Ouster Lidar",
+                                                  null,
+                                                  null,
+                                                  null,
+                                                  depthCameraIntrinsics,
+                                                  null,
+                                                  null,
+                                                  ros2Node,
+                                                  ROS2Tools.MULTISENSE_LIDAR_SCAN,
+                                                  null,
+                                                  syncedRobot.getReferenceFrames().getOusterLidarFrame(),
                                                   syncedRobot::getTimestamp,
                                                   verticalFOV,
                                                   imageWidth,

@@ -7,6 +7,9 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRJumpMomentumController;
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateBasics;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -84,7 +87,14 @@ public class SimpleLQRSphereController implements SimpleSphereControllerInterfac
       sphereRobot.getDesiredDCM().set(dcmPlan.getDesiredDCMPosition());
       sphereRobot.getDesiredDCMVelocity().set(dcmPlan.getDesiredDCMVelocity());
 
-      lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories(), dcmPlan.getContactStateProviders());
+      List<PreviewWindowSegment> segments = new ArrayList<>();
+      for (ContactStateProvider<?> contact : dcmPlan.getContactStateProviders())
+      {
+         PreviewWindowSegment segment = new PreviewWindowSegment();
+         segment.setContactState(contact.getContactState());
+         segments.add(segment);
+      }
+      lqrMomentumController.setVRPTrajectory(dcmPlan.getVRPTrajectories(), segments);
       sphereRobot.getCenterOfMass().get(currentState);
       sphereRobot.getCenterOfMassVelocity().get(3, currentState);
       lqrMomentumController.computeControlInput(currentState, timeInPhase);

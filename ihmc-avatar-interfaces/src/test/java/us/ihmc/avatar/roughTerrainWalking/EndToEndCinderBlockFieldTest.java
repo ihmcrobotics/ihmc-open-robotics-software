@@ -14,8 +14,9 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -30,23 +31,24 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.physics.ContactParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.simulation.parameters.ContactParameters;
+import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment.CinderBlockStackDescription;
 import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment.CinderBlockType;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 
-@Tag("video")
 public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper simulationTestHelper;
+   private boolean useImpulseBasedPhysicsEngine = false;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    public abstract double getStepHeightOffset();
 
@@ -54,20 +56,16 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+      useImpulseBasedPhysicsEngine = false;
    }
 
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.destroySimulation();
+         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
          simulationTestHelper = null;
       }
 
@@ -79,23 +77,34 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       return false;
    }
 
+   private void setupSimulation(CommonAvatarEnvironmentInterface environment)
+   {
+      SCS2AvatarTestingSimulationFactory simulationFactory = new SCS2AvatarTestingSimulationFactory(getRobotModel(), environment);
+      simulationFactory.setDefaultHighLevelHumanoidControllerFactory();
+      simulationFactory.setShowGUI(simulationTestingParameters.getCreateGUI());
+      simulationFactory.setUsePerfectSensors(getUsePerfectSensors());
+      simulationFactory.setRunMultiThreaded(simulationTestingParameters.getRunMultiThreaded());
+      simulationFactory.setUseImpulseBasedPhysicsEngine(useImpulseBasedPhysicsEngine);
+      simulationTestHelper = simulationFactory.createAvatarTestingSimulation();
+   }
+
    @Test
    @Tag("fast")
+   @Tag("video")
    public void testWalkingOverCinderBlockField() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
 
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
       cinderBlockFieldEnvironment.addFlatGround();
       List<List<Pose3D>> cinderBlockPoses = cinderBlockFieldEnvironment.addDRCCinderBlockField();
       FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockPoses, getStepHeightOffset());
 
-      simulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), cinderBlockFieldEnvironment);
-      simulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
+      setupSimulation(cinderBlockFieldEnvironment);
+      simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = simulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
       FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
@@ -111,7 +120,7 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       double stepTime = walkingControllerParameters.getDefaultSwingTime() + walkingControllerParameters.getDefaultTransferTime();
       double initialFinalTransfer = walkingControllerParameters.getDefaultInitialTransferTime();
 
-      success = simulationTestHelper.simulateAndBlockAndCatchExceptions(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
+      success = simulationTestHelper.simulateAndWait(footsteps.getFootstepDataList().size() * stepTime + 2.0 * initialFinalTransfer + 1.0);
       assertTrue(success);
 
       Point3D step1 = footsteps.getFootstepDataList().get(footsteps.getFootstepDataList().size() - 1).getLocation();
@@ -143,20 +152,18 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       FootstepDataListMessage footsteps = generateFootstepsForSteppingStonesA(cinderBlockPoses, getStepHeightOffset());
 
       DRCRobotModel robotModel = getRobotModel();
-      simulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, cinderBlockFieldEnvironment);
-      simulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
+      setupSimulation(cinderBlockFieldEnvironment);
+      simulationTestHelper.start();
+      simulationTestHelper.setCameraFocusPosition(1.6, 0.0, 1.0);
+      simulationTestHelper.setCameraPosition(1.6, -6.0, 2.4);
 
-      SimulationConstructionSet scs = simulationTestHelper.getSimulationConstructionSet();
-      scs.setCameraFix(1.6, 0.0, 1.0);
-      scs.setCameraPosition(1.6, -6.0, 2.4);
-
-      assertTrue(simulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
-      scs.setInPoint();
+      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      simulationTestHelper.setBufferInPointIndexToCurrent();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       simulationTestHelper.publishToController(footsteps);
       double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
-      assertTrue(simulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
    }
 
    public void testSteppingStonesB() throws Exception
@@ -173,26 +180,26 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       FootstepDataListMessage footsteps = generateFootstepsForSteppingStonesB(cinderBlockPoses, getStepHeightOffset());
 
       DRCRobotModel robotModel = getRobotModel();
-      simulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, cinderBlockFieldEnvironment);
-      simulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
+      useImpulseBasedPhysicsEngine = true;
+      setupSimulation(cinderBlockFieldEnvironment);
+      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationSession().getPhysicsEngine();
       ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
       contactParameters.setCoefficientOfFriction(0.80);
       contactParameters.setCoulombMomentFrictionRatio(0.6);
-      simulationTestHelper.getSCSInitialSetup().setExperimentalPhysicsEngineContactParameters(contactParameters);
-      simulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
+      physicsEngine.setGlobalContactParameters(contactParameters);
+      simulationTestHelper.start();
 
-      SimulationConstructionSet scs = simulationTestHelper.getSimulationConstructionSet();
-      scs.setCameraFix(2.0, 1.3, 1.0);
-      scs.setCameraPosition(6.0, 7.0, 3.25);
+      simulationTestHelper.setCameraFocusPosition(2.0, 1.3, 1.0);
+      simulationTestHelper.setCameraPosition(6.0, 7.0, 3.25);
 
-      assertTrue(simulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
-      scs.setInPoint();
+      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      simulationTestHelper.setBufferInPointIndexToCurrent();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
       simulationTestHelper.publishToController(footsteps);
       double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
-      assertTrue(simulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
    }
 
    public void testSlantedCinderBlockField(boolean varyHeight) throws Exception
@@ -213,24 +220,21 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       FootstepDataListMessage footsteps = generateFootstepsForSlantedCinderBlockLeveledField(cinderBlockPoses, getStepHeightOffset(), varyHeight);
 
       DRCRobotModel robotModel = getRobotModel();
-      simulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, cinderBlockFieldEnvironment);
-      simulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
+      useImpulseBasedPhysicsEngine = true;
+      setupSimulation(cinderBlockFieldEnvironment);
       ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
       contactParameters.setCoefficientOfFriction(0.80);
       contactParameters.setCoulombMomentFrictionRatio(0.6);
-      simulationTestHelper.getSCSInitialSetup().setExperimentalPhysicsEngineContactParameters(contactParameters);
-      simulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
+      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationSession().getPhysicsEngine();
+      physicsEngine.setGlobalContactParameters(contactParameters);
+      simulationTestHelper.start();
 
-      SimulationConstructionSet scs = simulationTestHelper.getSimulationConstructionSet();
-      scs.setCameraFix(0.0, 0.0, 0.9);
-      scs.setCameraPosition(0.0, -6.0, 2.25);
-      scs.setCameraTracking(true, true, false, false);
-      scs.setCameraDolly(true, true, false, false);
-      scs.setCameraTrackingOffsets(0.0, 0.0, 0.0);
-      scs.setCameraDollyOffsets(0.0, 0.0, 0.0);
+      simulationTestHelper.setCameraFocusPosition(0.0, 0.0, 0.9);
+      simulationTestHelper.setCameraPosition(0.0, -6.0, 2.25);
+      simulationTestHelper.requestCameraRigidBodyTracking(getSimpleRobotName(), simulationTestHelper.getControllerFullRobotModel().getPelvis().getName());
 
-      assertTrue(simulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));
-      scs.setInPoint();
+      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      simulationTestHelper.setBufferInPointIndexToCurrent();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
@@ -240,7 +244,52 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       }
       simulationTestHelper.publishToController(footsteps);
       double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
-      assertTrue(simulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
+   }
+
+   public void testSlantedCinderBlockAnkleRollLimit() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      simulationTestingParameters.setUsePefectSensors(getUsePerfectSensors());
+
+      Random random = new Random(674);
+
+      CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
+      cinderBlockFieldEnvironment.addFlatGround();
+      List<List<Pose3D>> cinderBlockPoses = cinderBlockFieldEnvironment.addCustomCinderBlockField2D(slantedCinderBlockLeveledFieldForAnkleRollLimit(random,
+                                                                                                                                                    new RigidBodyTransform(new Quaternion(),
+                                                                                                                                                                           new Vector3D(0.1,
+                                                                                                                                                                                        -0.2,
+                                                                                                                                                                                        0.0)),
+                                                                                                                                                    false));
+      FootstepDataListMessage footsteps = generateFootstepsForSlantedCinderBlockLeveledField(cinderBlockPoses, getStepHeightOffset(), false);
+
+      DRCRobotModel robotModel = getRobotModel();
+      useImpulseBasedPhysicsEngine = true;
+      setupSimulation(cinderBlockFieldEnvironment);
+      ContactParameters contactParameters = ContactParameters.defaultIneslasticContactParameters(true);
+      contactParameters.setCoefficientOfFriction(0.80);
+      contactParameters.setCoulombMomentFrictionRatio(0.6);
+      ImpulseBasedPhysicsEngine physicsEngine = (ImpulseBasedPhysicsEngine) simulationTestHelper.getSimulationSession().getPhysicsEngine();
+      physicsEngine.setGlobalContactParameters(contactParameters);
+      simulationTestHelper.start();
+
+      simulationTestHelper.setCameraFocusPosition(0.0, 0.0, 0.9);
+      simulationTestHelper.setCameraPosition(0.0, -6.0, 2.25);
+      simulationTestHelper.requestCameraRigidBodyTracking(getSimpleRobotName(), simulationTestHelper.getControllerFullRobotModel().getPelvis().getName());
+
+      assertTrue(simulationTestHelper.simulateAndWait(0.5));
+      simulationTestHelper.setBufferInPointIndexToCurrent();
+
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
+      for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
+      {
+         footsteps.getFootstepDataList().get(i).setSwingHeight(0.15);
+      }
+      simulationTestHelper.publishToController(footsteps);
+      double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+      assertTrue(simulationTestHelper.simulateAndWait(simulationTime));
    }
 
    public abstract double getPelvisOffsetHeight();
@@ -431,7 +480,42 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
             else if (i == length - 2)
                types[i][j] = CinderBlockType.SLANTED_FORWARD;
             else
-               types[i][j] = allSlantedTypes[random.nextInt(4)];
+               types[i][j] = allSlantedTypes[random.nextInt(allSlantedTypes.length)];
+         }
+      }
+
+      RigidBodyTransform centerBasePose = new RigidBodyTransform(startPose);
+      centerBasePose.appendTranslation(0.5 * stackSizes.length * CinderBlockFieldEnvironment.cinderBlockLength, 0.0, 0.0);
+      return CinderBlockStackDescription.grid2D(centerBasePose, stackSizes, types);
+   }
+
+   public static List<List<CinderBlockStackDescription>> slantedCinderBlockLeveledFieldForAnkleRollLimit(Random random,
+                                                                                                         RigidBodyTransformReadOnly startPose,
+                                                                                                         boolean varyHeight)
+   {
+      int width = 2;
+      int length = 20;
+      int[][] stackSizes = new int[length][width];
+      CinderBlockType[][] types = new CinderBlockType[length][width];
+      CinderBlockType[] allSlantedTypes = {CinderBlockType.SLANTED_LEFT, CinderBlockType.SLANTED_RIGHT};
+
+      for (int i = 0; i < stackSizes.length; i++)
+      {
+         for (int j = 0; j < stackSizes[i].length; j++)
+         {
+            if (i == 0 || i == length - 1)
+               stackSizes[i][j] = 0;
+            else if (i == 1 || i == length - 2)
+               stackSizes[i][j] = 1;
+            else
+               stackSizes[i][j] = 1 + (varyHeight ? random.nextInt(2) : 0);
+
+            if (i == 1)
+               types[i][j] = CinderBlockType.SLANTED_BACK;
+            else if (i == length - 2)
+               types[i][j] = CinderBlockType.SLANTED_FORWARD;
+            else
+               types[i][j] = allSlantedTypes[random.nextInt(allSlantedTypes.length)];
          }
       }
 
@@ -441,7 +525,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
    }
 
    private static FootstepDataListMessage generateFootstepsForSlantedCinderBlockLeveledField(List<? extends List<? extends Pose3DReadOnly>> cinderBlockPoses,
-                                                                                             double zOffset, boolean slow)
+                                                                                             double zOffset,
+                                                                                             boolean slow)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
@@ -486,8 +571,13 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       return footsteps;
    }
 
-   private static void addFootstepFromCBPose(FootstepDataListMessage footsteps, RobotSide stepSide, Pose3DReadOnly cinderBlockPose, double xOffset,
-                                             double yOffset, double zOffset, double yawOffset)
+   private static void addFootstepFromCBPose(FootstepDataListMessage footsteps,
+                                             RobotSide stepSide,
+                                             Pose3DReadOnly cinderBlockPose,
+                                             double xOffset,
+                                             double yOffset,
+                                             double zOffset,
+                                             double yawOffset)
    {
       Pose3D footstepPose = new Pose3D(cinderBlockPose);
       footstepPose.appendYawRotation(yawOffset);
@@ -495,7 +585,8 @@ public abstract class EndToEndCinderBlockFieldTest implements MultiRobotTestInte
       footsteps.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(stepSide, footstepPose));
    }
 
-   private static SideDependentList<List<Pose3DReadOnly>> extractColumns(List<? extends List<? extends Pose3DReadOnly>> cinderBlockPoses, int indexForLeftSide,
+   private static SideDependentList<List<Pose3DReadOnly>> extractColumns(List<? extends List<? extends Pose3DReadOnly>> cinderBlockPoses,
+                                                                         int indexForLeftSide,
                                                                          int indexForRightSide)
    {
       SideDependentList<Integer> columnIndices = new SideDependentList<>(indexForLeftSide, indexForRightSide);

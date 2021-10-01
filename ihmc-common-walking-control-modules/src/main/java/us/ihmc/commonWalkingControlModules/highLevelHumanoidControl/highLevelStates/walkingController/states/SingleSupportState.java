@@ -86,10 +86,4 @@ public abstract class SingleSupportState extends WalkingState
 
       comHeightManager.setSupportLeg(swingSide.getOppositeSide());
    }
-
-   @Override
-   public void onExit()
-   {
-      balanceManager.resetPushRecovery();
-   }
 }

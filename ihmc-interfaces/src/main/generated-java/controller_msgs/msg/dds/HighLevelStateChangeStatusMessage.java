@@ -24,6 +24,7 @@ public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChan
    public static final byte CALIBRATION = (byte) 8;
    public static final byte CUSTOM1 = (byte) 9;
    public static final byte FALLING_STATE = (byte) 10;
+   public static final byte PUSH_RECOVERY = (byte) 11;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */

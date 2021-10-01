@@ -359,28 +359,6 @@ public class FootstepPlannerLogLoader
       {
          homeRegionCluster.getNonNavigableExtrusionsInLocal().addPoint(readPoint2D(false, dataFileReader.readLine()));
       }
-      int numberOfPreferredNaviableExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
-      for (int i = 0; i < numberOfPreferredNaviableExtrusions; i++)
-      {
-         int numberOfExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
-         ExtrusionHull extrusionHull = new ExtrusionHull();
-         for (int j = 0; j < numberOfExtrusions; j++)
-         {
-            extrusionHull.addPoint(readPoint2D(false, dataFileReader.readLine()));
-         }
-         homeRegionCluster.getPreferredNavigableExtrusionsInLocal().add(extrusionHull);
-      }
-      int numberOfPreferredNonNaviableExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
-      for (int i = 0; i < numberOfPreferredNonNaviableExtrusions; i++)
-      {
-         int numberOfExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
-         ExtrusionHull extrusionHull = new ExtrusionHull();
-         for (int j = 0; j < numberOfExtrusions; j++)
-         {
-            extrusionHull.addPoint(readPoint2D(false, dataFileReader.readLine()));
-         }
-         homeRegionCluster.getPreferredNonNavigableExtrusionsInLocal().add(extrusionHull);
-      }
 
       VisibilityMap visibilityMapInLocal = new VisibilityMap();
       loadVisibilityMap(dataFileReader, visibilityMapInLocal);

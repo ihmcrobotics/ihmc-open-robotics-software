@@ -28,6 +28,12 @@ public class AtlasStepReachabilityCalculator extends HumanoidStepReachabilityCal
    }
 
    @Override
+   protected String getResourcesDirectory()
+   {
+      return "ihmc-open-robotics-software/atlas/src/main/resources";
+   }
+
+   @Override
    protected RobotCollisionModel getRobotCollisionModel(HumanoidJointNameMap jointMap)
    {
       AtlasKinematicsCollisionModel collisionModel = new AtlasKinematicsCollisionModel(jointMap);

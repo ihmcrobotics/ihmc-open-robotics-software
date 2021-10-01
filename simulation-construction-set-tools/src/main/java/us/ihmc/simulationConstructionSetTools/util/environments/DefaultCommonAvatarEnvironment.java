@@ -682,7 +682,7 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
             point[0] = 3.2;
             point[1] = 0.0;
             rotatedPoint = rotateAroundOrigin(point, courseAngleDeg);
-            YoAppearanceTexture fiducialTexture = new YoAppearanceTexture("fiducials/fiducial50.png");
+            YoAppearanceTexture fiducialTexture = new YoAppearanceTexture(Fiducial.FIDUCIAL50.getPathString());
             double boxSideLength = 0.3;
             setUpSlopedBox(combinedTerrainObject, rotatedPoint[0], rotatedPoint[1], 1.5 + heightOffset, 0.3, 0.3, 0.3, 0.5 * Math.PI,
                            courseAngleDeg, fiducialTexture);

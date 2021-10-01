@@ -1,6 +1,7 @@
 package us.ihmc.gdx.input;
 
 import com.badlogic.gdx.math.Vector3;
+import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.euclid.geometry.Line3D;
@@ -33,6 +34,10 @@ public class ImGui3DViewInput
    private final Vector3 gdxDirection = new Vector3();
    private final Line3D pickRayInWorld = new Line3D();
    private boolean computedPickRay = false;
+   private boolean initialized = false;
+   private int spaceKey;
+   private int deleteKey;
+   private int escapeKey;
 
    public ImGui3DViewInput(FocusBasedGDXCamera camera, Supplier<Float> viewportSizeXSupplier, Supplier<Float> viewportSizeYSupplier)
    {
@@ -43,6 +48,14 @@ public class ImGui3DViewInput
 
    public void compute()
    {
+      if (!initialized)
+      {
+         initialized = true;
+         spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
+         deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
+         escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
+      }
+
       computedPickRay = false;
 
       isWindowHovered = ImGui.isWindowHovered();
@@ -122,5 +135,20 @@ public class ImGui3DViewInput
    public float getMouseWheelDelta()
    {
       return mouseWheelDelta;
+   }
+
+   public int getSpaceKey()
+   {
+      return spaceKey;
+   }
+
+   public int getDeleteKey()
+   {
+      return deleteKey;
+   }
+
+   public int getEscapeKey()
+   {
+      return escapeKey;
    }
 }

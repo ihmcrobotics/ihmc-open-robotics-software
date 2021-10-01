@@ -1,13 +1,17 @@
 package us.ihmc.gdx.simulation;
 
+import controller_msgs.msg.dds.DoorLocationPacket;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXPushHandleRightDoorObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
 public class GDXDoorSimulator
@@ -40,8 +44,8 @@ public class GDXDoorSimulator
    {
       if (door != null)
       {
-//         helper.publish(ROS2Tools::getDoorLocationTopic,
-//                        HumanoidMessageTools.createDoorLocationPacket(new RigidBodyTransform(door.getObjectTransform()), DoorLocationPacket.PUSH_HANDLE_RIGHT));
+         helper.publish(ROS2Tools::getDoorLocationTopic,
+                        HumanoidMessageTools.createDoorLocationPacket(new RigidBodyTransform(door.getObjectTransform()), DoorLocationPacket.PUSH_HANDLE_RIGHT));
       }
    }
 

@@ -181,7 +181,6 @@ public class PatrolBehavior extends BehaviorTreeControlFlowNode implements Behav
       return BehaviorTreeNodeStatus.SUCCESS;
    }
 
-   @Override
    public void setEnabled(boolean enabled)
    {
       LogTools.info("Patrol behavior selected = {}", enabled);

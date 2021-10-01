@@ -9,15 +9,15 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
-import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
-import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
+import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -47,10 +47,9 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
-import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
+import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerControlThread;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
@@ -101,10 +100,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private CoPTrajectoryParameters copTrajectoryParameters;
    private WalkingControllerParameters walkingControllerParameters;
+   private PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
+   private StepReachabilityData stepReachabilityData;
 
    private SimulationLowLevelControllerFactory simulationLowLevelControllerFactory;
 
@@ -497,30 +498,15 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SimulatedHandControlTask createSimulatedHandController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node)
+   public SimulatedValkyrieFingerControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node)
    {
       if (!robotVersion.hasFingers())
          return null;
 
-      boolean hasFingers = true;
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String handLinkName = getJointMap().getHandName(robotSide);
-         hasFingers = hasFingers && !simulatedRobot.getLink(handLinkName).getParentJoint().getChildrenJoints().isEmpty();
-      }
-
-      if (hasFingers)
-      {
-         return new SimulatedValkyrieFingerController(simulatedRobot,
+      return new SimulatedValkyrieFingerControlThread(createFullRobotModel(),
                                                       realtimeROS2Node,
-                                                      this,
                                                       ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
-      }
-      else
-      {
-         return null;
-      }
    }
 
    @Override
@@ -602,13 +588,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public String getStepReachabilityResourceName()
    {
-      return "ihmc-open-robotics-software/valkyrie/src/main/resources/us/ihmc/valkyrie/parameters/StepReachabilityMap.csv";
+      return "us/ihmc/valkyrie/parameters/StepReachabilityMap.json";
    }
 
    @Override
    public StepReachabilityData getStepReachabilityData()
    {
-      return StepReachabilityFileTools.loadFromFile(getStepReachabilityResourceName());
+      if (stepReachabilityData == null)
+      {
+         stepReachabilityData = new StepReachabilityIOHelper().loadStepReachability(this);
+      }
+
+      return stepReachabilityData;
    }
 
    @Override
@@ -678,6 +669,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (walkingControllerParameters == null)
          walkingControllerParameters = new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), target);
       return walkingControllerParameters;
+   }
+
+   @Override
+   public PushRecoveryControllerParameters getPushRecoveryControllerParameters()
+   {
+      if (pushRecoveryControllerParameters == null)
+         pushRecoveryControllerParameters = new ValkyriePushRecoveryControllerParameters(getJointMap());
+      return pushRecoveryControllerParameters;
    }
 
    @Override

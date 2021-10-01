@@ -1,7 +1,6 @@
 package us.ihmc.gdx.simulation.environment;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,6 +9,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImFloat;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -25,6 +25,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXDoorSimulator;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
@@ -38,10 +40,11 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.*;
 
-public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
+public class GDXEnvironment extends ImGuiPanel
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironment.class, "Environment");
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
+   private final ArrayList<GDXEnvironmentObject> lightObjects = new ArrayList<>();
    private GDXEnvironmentObject selectedObject;
    private GDXEnvironmentObject intersectedObject;
    private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo();
@@ -56,15 +59,18 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Point3D tempIntersection = new Point3D();
    private GDXDoorSimulator doorSimulator;
+   private final ImFloat ambientLight = new ImFloat(0.4f);
+   private final GDX3DSceneManager sceneManager;
 
-   public GDXEnvironment()
+   public GDXEnvironment(GDX3DSceneManager sceneManager)
    {
-      this(null, null);
+      this(sceneManager, null, null);
    }
 
-   public GDXEnvironment(ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
+   public GDXEnvironment(GDX3DSceneManager sceneManager, ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
    {
       super(WINDOW_NAME);
+      this.sceneManager = sceneManager;
       if (syncedRobot != null)
          doorSimulator = new GDXDoorSimulator(syncedRobot, helper);
       setRenderMethod(this::renderImGuiWidgets);
@@ -73,9 +79,10 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      baseUI.get3DSceneManager().addRenderableProvider(this);
+      sceneManager.addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+      sceneManager.addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
-      pose3DGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+      pose3DGizmo.create(sceneManager.getCamera3D());
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
@@ -180,10 +187,37 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
          }
 //         if (ImGui.button("Place Door Frame"))
 //            objectToPlace = new GDXDoorFrameObject();
+
+         ImGui.separator();
+
+         if (ImGui.sliderFloat("Ambient light", ambientLight.getData(), 0.0f, 1.0f))
+         {
+            sceneManager.setAmbientLight(ambientLight.get());
+         }
+         if (ImGui.button("Place Point Light"))
+         {
+            GDXPointLightObject pointLight = new GDXPointLightObject();
+            objectToPlace = pointLight;
+            sceneManager.addPointLight(pointLight.getLight());
+         }
+         if (ImGui.button("Place Directional Light"))
+         {
+            GDXDirectionalLightObject directionalLight = new GDXDirectionalLightObject();
+            objectToPlace = directionalLight;
+            sceneManager.addDirectionalLight(directionalLight.getLight());
+         }
+
+         ImGui.separator();
       }
       if (objectToPlace != null)
       {
+         if (objectToPlace instanceof GDXDirectionalLightObject)
+            lightObjects.add(objectToPlace);
+         else if (objectToPlace instanceof GDXPointLightObject)
+            lightObjects.add(objectToPlace);
+
          objects.add(objectToPlace);
+
          selectedObject = objectToPlace;
          placing = true;
       }
@@ -191,6 +225,19 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
       if (selectedObject != null && ImGui.button("Delete selected"))
       {
          objects.remove(selectedObject);
+         lightObjects.remove(selectedObject);
+
+         if (selectedObject instanceof GDXPointLightObject)
+         {
+            GDXPointLightObject lightObject = (GDXPointLightObject) selectedObject;
+            sceneManager.removePointLight(lightObject.getLight());
+         }
+         else if (selectedObject instanceof GDXDirectionalLightObject)
+         {
+            GDXDirectionalLightObject lightObject = (GDXDirectionalLightObject) selectedObject;
+            sceneManager.removeDirectionalLight(lightObject.getLight());
+         }
+
          selectedObject = null;
          intersectedObject = null;
       }
@@ -238,6 +285,7 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
                                        "environments/" + fileNameToSave,
          rootNode ->
          {
+            rootNode.put("ambientLight", ambientLight.get());
             ArrayNode objectsArrayNode = rootNode.putArray("objects");
             for (GDXEnvironmentObject object : this.objects)
             {
@@ -268,6 +316,10 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
    {
       selectedEnvironmentFile = environmentFile;
       objects.clear();
+
+      sceneManager.clearLights();
+      lightObjects.clear();
+
       selectedObject = null;
       intersectedObject = null;
       if (doorSimulator != null)
@@ -280,10 +332,18 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
                                          "environments/" + environmentFile.getFileName().toString(),
          node ->
          {
+            JsonNode ambientLightNode = node.get("ambientLight");
+            if (ambientLightNode != null)
+            {
+               float ambientValue = (float) ambientLightNode.asDouble();
+               ambientLight.set(ambientValue);
+               sceneManager.setAmbientLight(ambientLight.get());
+            }
             for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
             {
                JsonNode objectNode = it.next();
                GDXEnvironmentObject object = GDXEnvironmentObject.loadByName(objectNode.get("type").asText());
+
                tempTranslation.setX(objectNode.get("x").asDouble());
                tempTranslation.setY(objectNode.get("y").asDouble());
                tempTranslation.setZ(objectNode.get("z").asDouble());
@@ -295,7 +355,19 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
                object.set(tempTransform);
                objects.add(object);
 
-               if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
+               if (object instanceof GDXPointLightObject)
+               {
+                  GDXPointLightObject pointLightObject = (GDXPointLightObject) object;
+                  sceneManager.addPointLight(pointLightObject.getLight());
+                  lightObjects.add(pointLightObject);
+               }
+               else if (object instanceof GDXDirectionalLightObject)
+               {
+                  GDXDirectionalLightObject directionalLightObject = (GDXDirectionalLightObject) object;
+                  sceneManager.addDirectionalLight(directionalLightObject.getLight());
+                  lightObjects.add(directionalLightObject);
+               }
+               else if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
                {
                   doorSimulator.setDoor((GDXPushHandleRightDoorObject) object);
                }
@@ -334,10 +406,18 @@ public class GDXEnvironment extends ImGuiPanel implements RenderableProvider
       });
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       for (GDXEnvironmentObject object : objects)
+      {
+         if (!(object instanceof GDXPointLightObject) && !(object instanceof GDXDirectionalLightObject))
+            object.getRealisticModelInstance().getRenderables(renderables, pool);
+      }
+   }
+
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (GDXEnvironmentObject object : lightObjects)
       {
          object.getRealisticModelInstance().getRenderables(renderables, pool);
       }

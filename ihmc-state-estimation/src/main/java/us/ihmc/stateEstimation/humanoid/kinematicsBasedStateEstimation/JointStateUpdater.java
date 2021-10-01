@@ -7,6 +7,7 @@ import java.util.List;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -30,11 +31,14 @@ public class JointStateUpdater
    private final SensorOutputMapReadOnly sensorMap;
    private final List<IMUBasedJointStateEstimator> imuBasedJointStateEstimators;
 
+   private RigidBodyBasics rootBody;
+
    public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure,
                             SensorOutputMapReadOnly sensorOutputMapReadOnly,
                             StateEstimatorParameters stateEstimatorParameters,
                             YoRegistry parentRegistry)
    {
+      rootBody = inverseDynamicsStructure.getElevator();
       this.sensorMap = sensorOutputMapReadOnly;
 
       JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
@@ -128,16 +132,15 @@ public class JointStateUpdater
          for (int j = 0; j < imuBasedJointStateEstimators.size(); j++)
          {
             IMUBasedJointStateEstimator estimator = imuBasedJointStateEstimators.get(j);
-            OneDoFJointStateReadOnly state = estimator.getJointEstimatedState(oneDoFJoint);
 
-            if (state == null)
+            if (!estimator.containsJoint(oneDoFJoint))
                continue;
 
-            double estimatedJointPosition = state.getPosition();
+            double estimatedJointPosition = estimator.getEstimatedJointPosition(oneDoFJoint);
             if (!Double.isNaN(estimatedJointPosition))
                positionSensorData = estimatedJointPosition;
 
-            double estimatedJointVelocity = state.getVelocity();
+            double estimatedJointVelocity = estimator.getEstimatedJointVelocity(oneDoFJoint);
             if (!Double.isNaN(estimatedJointVelocity))
                velocitySensorData = estimatedJointVelocity;
 
@@ -147,7 +150,8 @@ public class JointStateUpdater
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setQd(velocitySensorData);
          oneDoFJoint.setTau(torqueSensorData);
-         oneDoFJoint.updateFrame();
       }
+
+      rootBody.updateFramesRecursively();
    }
 }

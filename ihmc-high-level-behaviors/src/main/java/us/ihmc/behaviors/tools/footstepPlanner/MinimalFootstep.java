@@ -35,14 +35,9 @@ public class MinimalFootstep
       description = null;
    }
 
-   public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld)
+   public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld, String description)
    {
-      this(side, solePoseInWorld, null, null);
-   }
-
-   public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld, ConvexPolygon2DReadOnly foothold)
-   {
-      this(side, solePoseInWorld, foothold, null);
+      this(side, solePoseInWorld, null, description);
    }
 
    public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld, ConvexPolygon2DReadOnly foothold, String description)
@@ -73,17 +68,18 @@ public class MinimalFootstep
       return foothold;
    }
 
-   public static ArrayList<MinimalFootstep> convertPairListToMinimalFoostepList(ArrayList<Pair<RobotSide, Pose3D>> pairList)
+   public static ArrayList<MinimalFootstep> convertPairListToMinimalFoostepList(ArrayList<Pair<RobotSide, Pose3D>> pairList, String description)
    {
       ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
-      for (Pair<RobotSide, Pose3D> pair : pairList)
+      for (int i = 0; i < pairList.size(); i++)
       {
-         minimalFootsteps.add(new MinimalFootstep(pair.getLeft(), pair.getRight()));
+         Pair<RobotSide, Pose3D> pair = pairList.get(i);
+         minimalFootsteps.add(new MinimalFootstep(pair.getLeft(), pair.getRight(), i == pairList.size() - 1 ? description : ""));
       }
       return minimalFootsteps;
    }
 
-   public static ArrayList<MinimalFootstep> convertFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage)
+   public static ArrayList<MinimalFootstep> convertFootstepDataListMessage(FootstepDataListMessage footstepDataListMessage, String description)
    {
       ArrayList<MinimalFootstep> minimalFootsteps = new ArrayList<>();
       int size = footstepDataListMessage.getFootstepDataList().size();
@@ -97,12 +93,12 @@ public class MinimalFootstep
          }
          foothold.update();
          Pose3D pose = new Pose3D(footstep.getLocation(), footstep.getOrientation());
-         minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(footstep.getRobotSide()), pose, foothold));
+         minimalFootsteps.add(new MinimalFootstep(RobotSide.fromByte(footstep.getRobotSide()), pose, foothold, i == size - 1 ? description : ""));
       }
       return minimalFootsteps;
    }
 
-   public static ArrayList<MinimalFootstep> reduceFootstepsForUIMessager(SideDependentList<PlannedFootstepReadOnly> footsteps)
+   public static ArrayList<MinimalFootstep> reduceFootstepsForUIMessager(SideDependentList<PlannedFootstepReadOnly> footsteps, String description)
    {
       ArrayList<MinimalFootstep> footstepLocations = new ArrayList<>();
       for (RobotSide side : RobotSide.values)  // this code makes the message smaller to send over the network, TODO investigate
@@ -113,7 +109,7 @@ public class MinimalFootstep
             FramePose3D soleFramePoseToPack = new FramePose3D();
             footstep.getFootstepPose(soleFramePoseToPack);
             soleFramePoseToPack.changeFrame(ReferenceFrame.getWorldFrame());
-            footstepLocations.add(new MinimalFootstep(footstep.getRobotSide(), new Pose3D(soleFramePoseToPack), footstep.getFoothold(), ""));
+            footstepLocations.add(new MinimalFootstep(footstep.getRobotSide(), new Pose3D(soleFramePoseToPack), footstep.getFoothold(), description));
          }
       }
       return footstepLocations;
@@ -128,7 +124,10 @@ public class MinimalFootstep
          PlannedFootstep footstep = footstepPlan.getFootstep(i);
          footstep.getFootstepPose(soleFramePoseToPack);
          soleFramePoseToPack.changeFrame(ReferenceFrame.getWorldFrame());
-         footstepLocations.add(new MinimalFootstep(footstep.getRobotSide(), new Pose3D(soleFramePoseToPack), footstep.getFoothold(), description));
+         footstepLocations.add(new MinimalFootstep(footstep.getRobotSide(),
+                                                   new Pose3D(soleFramePoseToPack),
+                                                   footstep.getFoothold(),
+                                                   i == footstepPlan.getNumberOfSteps() - 1 ? description : ""));
       }
       return footstepLocations;
    }

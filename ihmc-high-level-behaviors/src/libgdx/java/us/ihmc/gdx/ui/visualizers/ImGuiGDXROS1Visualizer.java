@@ -4,6 +4,8 @@ import us.ihmc.utilities.ros.RosNodeInterface;
 
 public abstract class ImGuiGDXROS1Visualizer extends ImGuiGDXVisualizer
 {
+   private boolean currentlySubscribed = false;
+
    public ImGuiGDXROS1Visualizer(String title)
    {
       super(title + " (ROS 1)");
@@ -15,9 +17,10 @@ public abstract class ImGuiGDXROS1Visualizer extends ImGuiGDXVisualizer
 
    public void updateSubscribers(RosNodeInterface ros1Node)
    {
-      if (getActiveChanged())
+      boolean active = isActive();
+      if (active != currentlySubscribed)
       {
-         if (isActive())
+         if (active)
          {
             subscribe(ros1Node);
          }
@@ -26,5 +29,6 @@ public abstract class ImGuiGDXROS1Visualizer extends ImGuiGDXVisualizer
             unsubscribe(ros1Node);
          }
       }
+      currentlySubscribed = active;
    }
 }

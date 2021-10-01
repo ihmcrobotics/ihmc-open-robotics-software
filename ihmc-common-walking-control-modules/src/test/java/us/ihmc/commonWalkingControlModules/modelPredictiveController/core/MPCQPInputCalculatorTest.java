@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlan
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -45,7 +46,7 @@ public class MPCQPInputCalculatorTest
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
@@ -58,7 +59,11 @@ public class MPCQPInputCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.addContact(contactPose, contactPolygon);
+      segment.addContactPhaseInSegment(contact, 0.0, 1.0);
+
+      contactProviders.add(segment);
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
       MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
@@ -273,7 +278,7 @@ public class MPCQPInputCalculatorTest
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
       MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
-      indexHandler.initialize(contactProviders);
+      indexHandler.initialize((i) -> contactPolygon.getNumberOfVertices(), 1);
 
       int rhoSize = 16;
       int rhoCoefficients = 4 * rhoSize;
@@ -385,7 +390,7 @@ public class MPCQPInputCalculatorTest
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
       MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
-      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      List<PreviewWindowSegment> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
@@ -398,7 +403,11 @@ public class MPCQPInputCalculatorTest
       contact.setStartECMPPosition(new FramePoint3D());
       contact.setEndECMPPosition(new FramePoint3D());
 
-      contactProviders.add(contact);
+      PreviewWindowSegment segment = new PreviewWindowSegment();
+      segment.addContactPhaseInSegment(contact, 0.0, 1.0);
+      segment.addContact(contactPose, contactPolygon);
+
+      contactProviders.add(segment);
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
       MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);

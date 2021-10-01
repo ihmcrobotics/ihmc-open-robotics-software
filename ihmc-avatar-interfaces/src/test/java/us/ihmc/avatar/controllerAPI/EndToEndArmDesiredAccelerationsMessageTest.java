@@ -12,8 +12,9 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyUserControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
@@ -26,15 +27,15 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 
 public abstract class EndToEndArmDesiredAccelerationsMessageTest implements MultiRobotTestInterface
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   private DRCSimulationTestHelper drcSimulationTestHelper;
+   private SCS2AvatarTestingSimulation simulationTestHelper;
 
    @Test
    public void testSimpleCommands() throws Exception
@@ -43,14 +44,14 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
       Random random = new Random(564654L);
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper.start();
 
       ThreadTools.sleep(1000);
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
-      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -60,29 +61,34 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
 
          OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
          double[] armDesiredJointAccelerations = RandomNumbers.nextDoubleArray(random, armJoints.length, 0.1);
-         ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = HumanoidMessageTools.createArmDesiredAccelerationsMessage(robotSide, armDesiredJointAccelerations);
+         ArmDesiredAccelerationsMessage armDesiredAccelerationsMessage = HumanoidMessageTools.createArmDesiredAccelerationsMessage(robotSide,
+                                                                                                                                   armDesiredJointAccelerations);
 
-         SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndTestTools.findRigidBodyControlManagerState(handName, scs));
-         drcSimulationTestHelper.publishToController(armDesiredAccelerationsMessage);
+         assertEquals(RigidBodyControlMode.JOINTSPACE,
+                      EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper.getControllerRegistry()));
+         simulationTestHelper.publishToController(armDesiredAccelerationsMessage);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
+         success = simulationTestHelper.simulateAndWait(RigidBodyUserControlState.TIME_WITH_NO_MESSAGE_BEFORE_ABORT - 0.05);
          assertTrue(success);
 
-         assertEquals(RigidBodyControlMode.USER, EndToEndTestTools.findRigidBodyControlManagerState(handName, scs));
-         double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(hand.getName(), robotSide, armJoints, scs);
+         assertEquals(RigidBodyControlMode.USER, EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper.getControllerRegistry()));
+         double[] controllerDesiredJointAccelerations = findControllerDesiredJointAccelerations(hand.getName(),
+                                                                                                robotSide,
+                                                                                                armJoints,
+                                                                                                simulationTestHelper.getControllerRegistry());
          assertArrayEquals(armDesiredJointAccelerations, controllerDesiredJointAccelerations, 1.0e-10);
-         double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, scs);
+         double[] qpOutputJointAccelerations = findQPOutputJointAccelerations(armJoints, simulationTestHelper.getControllerRegistry());
          assertArrayEquals(armDesiredJointAccelerations, qpOutputJointAccelerations, 1.0e-3);
 
-         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.07);
+         success = simulationTestHelper.simulateAndWait(0.07);
          assertTrue(success);
 
-         assertEquals(RigidBodyControlMode.JOINTSPACE, EndToEndTestTools.findRigidBodyControlManagerState(handName, scs));
+         assertEquals(RigidBodyControlMode.JOINTSPACE,
+                      EndToEndTestTools.findRigidBodyControlManagerState(handName, simulationTestHelper.getControllerRegistry()));
       }
    }
 
-   public static double[] findQPOutputJointAccelerations(OneDoFJointBasics[] armJoints, SimulationConstructionSet scs)
+   public static double[] findQPOutputJointAccelerations(OneDoFJointBasics[] armJoints, YoVariableHolder scs)
    {
       double[] qdd_ds = new double[armJoints.length];
       for (int i = 0; i < armJoints.length; i++)
@@ -92,7 +98,10 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
       return qdd_ds;
    }
 
-   public static double[] findControllerDesiredJointAccelerations(String bodyName, RobotSide robotSide, OneDoFJointBasics[] armJoints, SimulationConstructionSet scs)
+   public static double[] findControllerDesiredJointAccelerations(String bodyName,
+                                                                  RobotSide robotSide,
+                                                                  OneDoFJointBasics[] armJoints,
+                                                                  YoVariableHolder scs)
    {
       double[] qdd_ds = new double[armJoints.length];
       String namespace = bodyName + "UserControlModule";
@@ -114,16 +123,11 @@ public abstract class EndToEndArmDesiredAccelerationsMessageTest implements Mult
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");

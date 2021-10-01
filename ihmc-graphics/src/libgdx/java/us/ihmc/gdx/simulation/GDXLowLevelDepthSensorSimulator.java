@@ -24,7 +24,6 @@ import us.ihmc.tools.UnitConversions;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -68,7 +67,6 @@ public class GDXLowLevelDepthSensorSimulator
    private FloatBuffer rawDepthFloatBuffer;
    private FloatBuffer eyeDepthMetersBuffer;
    private ByteBuffer rawColorByteBuffer;
-   private IntBuffer rawColorIntBuffer;
 
    private final ImFloat depthPitchTuner = new ImFloat(-0.027f);
 
@@ -107,7 +105,6 @@ public class GDXLowLevelDepthSensorSimulator
       rawDepthFloatBuffer = rawDepthByteBuffer.asFloatBuffer();
 
       rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
-      rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
 
       eyeDepthMetersBuffer = BufferUtils.newFloatBuffer(imageWidth * imageHeight);
 
@@ -139,7 +136,7 @@ public class GDXLowLevelDepthSensorSimulator
       modelBatch.begin(camera);
       Gdx.gl.glViewport(0, 0, imageWidth, imageHeight);
 
-      sceneManager.renderRegisteredObjectsWithEnvironment(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
+      sceneManager.renderExternalBatch(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
 
       modelBatch.end();
 
@@ -252,12 +249,7 @@ public class GDXLowLevelDepthSensorSimulator
       return eyeDepthMetersBuffer;
    }
 
-   public IntBuffer getColorRGB8Buffer()
-   {
-      return rawColorIntBuffer;
-   }
-
-   public ByteBuffer getRawColorByteBuffer()
+   public ByteBuffer getColorRGBA8Buffer()
    {
       return rawColorByteBuffer;
    }

@@ -36,7 +36,7 @@ public class WaypointDefinedBodyPathPlanTest
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean showPlotter = false;
-   private static final double epsilon = 1.0e-15;
+   private static final double epsilon = 1.0e-7;
 
    @AfterEach
    public void tearDown()

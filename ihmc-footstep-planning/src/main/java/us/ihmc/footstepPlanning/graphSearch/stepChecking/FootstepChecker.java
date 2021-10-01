@@ -25,6 +25,7 @@ import java.util.Map;
 public class FootstepChecker implements FootstepCheckerInterface
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   public static final String rejectionReasonVariable = "rejectionReason";
 
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapAndWiggler snapper;
@@ -40,7 +41,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    private boolean assumeFlatGround = false;
 
    private final FootstepSnapData candidateStepSnapData = FootstepSnapData.identityData();
-   private final YoEnum<BipedalFootstepPlannerNodeRejectionReason> rejectionReason = new YoEnum<>("rejectionReason", "", registry, BipedalFootstepPlannerNodeRejectionReason.class, true);
+   private final YoEnum<BipedalFootstepPlannerNodeRejectionReason> rejectionReason = new YoEnum<>(rejectionReasonVariable, "", registry, BipedalFootstepPlannerNodeRejectionReason.class, true);
    private final YoDouble footAreaPercentage = new YoDouble("footAreaPercentage", registry);
    private final YoInteger footstepIndex = new YoInteger("footstepIndex", registry);
    private final YoDouble achievedDeltaInside = new YoDouble("achievedDeltaInside", registry);

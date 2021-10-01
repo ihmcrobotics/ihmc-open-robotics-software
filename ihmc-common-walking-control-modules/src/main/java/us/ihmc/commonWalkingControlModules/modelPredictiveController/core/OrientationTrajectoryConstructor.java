@@ -3,10 +3,13 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowSegment;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -26,11 +29,15 @@ public class OrientationTrajectoryConstructor
    private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
    private final Vector3D desiredNetAngularMomentumRate = new Vector3D();
 
+   private final Vector3D gravityVector = new Vector3D();
    private final SE3MPCIndexHandler indexHandler;
    private final DoubleProvider orientationAngleTrackingWeight;
    private final DoubleProvider orientationVelocityTrackingWeight;
 
+   private final FrameVector3D desiredAcceleration = new FrameVector3D();
+
    private final DoubleProvider omega;
+   private final double gravityZ;
 
    public OrientationTrajectoryConstructor(SE3MPCIndexHandler indexHandler,
                                            DoubleProvider orientationAngleTrackingWeight,
@@ -43,6 +50,9 @@ public class OrientationTrajectoryConstructor
       this.orientationAngleTrackingWeight = orientationAngleTrackingWeight;
       this.orientationVelocityTrackingWeight = orientationVelocityTrackingWeight;
       this.omega = omega;
+      this.gravityZ = gravity;
+
+      gravityVector.setZ(-Math.abs(gravityZ));
 
       dynamicsCalculator = new OrientationDynamicsCalculator(mass, gravity);
    }
@@ -52,7 +62,7 @@ public class OrientationTrajectoryConstructor
       return trajectoryCommandsForSegments;
    }
 
-   public void compute(List<ContactPlaneProvider> previewWindowContactSequence,
+   public void compute(List<PreviewWindowSegment> previewWindowContactSequence,
                        Matrix3DReadOnly momentOfInertia,
                        LinearMPCTrajectoryHandler linearTrajectoryHandler,
                        OrientationMPCTrajectoryHandler orientationTrajectoryHandler,
@@ -62,7 +72,9 @@ public class OrientationTrajectoryConstructor
 
       trajectoryCommandsForSegments.clear();
 
-      double trajectoryStartTime = previewWindowContactSequence.get(0).getTimeInterval().getStartTime();
+      double globalTime = previewWindowContactSequence.get(0).getStartTime();
+
+      int globalTick = 0;
 
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {
@@ -79,19 +91,18 @@ public class OrientationTrajectoryConstructor
 
          for (int tick = 0; tick < ticksInSegment; tick++)
          {
-            linearTrajectoryHandler.compute(trajectoryStartTime);
-            orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(trajectoryStartTime);
+            linearTrajectoryHandler.compute(globalTime);
 
-            FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation();
+            FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation(globalTick);
             // angular velocity in body frame
-            referenceBodyAngularVelocityInBodyFrame.set(orientationTrajectoryHandler.getReferenceBodyVelocity());
+            referenceBodyAngularVelocityInBodyFrame.set(orientationTrajectoryHandler.getReferenceBodyVelocity(globalTick));
             referenceOrientation.transform(referenceBodyAngularVelocityInBodyFrame);
 
             if (orientationTrajectoryHandler.hasInternalAngularMomentum())
             {
-               desiredInternalAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+               desiredInternalAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate(globalTick));
                if (contactPlaneHelpers.get(segmentNumber).size() > 0)
-                  desiredNetAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+                  desiredNetAngularMomentumRate.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate(globalTick));
                else
                   desiredNetAngularMomentumRate.setToZero();
             }
@@ -101,8 +112,14 @@ public class OrientationTrajectoryConstructor
                desiredInternalAngularMomentumRate.setToZero();
             }
 
+            desiredAcceleration.set(linearTrajectoryHandler.getDesiredCoMAcceleration());
+            if (SE3ModelPredictiveController.debugOrientation && contactPlaneHelpers.get(segmentNumber).size() == 0)
+            {
+               desiredAcceleration.set(gravityVector);
+            }
+
             dynamicsCalculator.compute(linearTrajectoryHandler.getDesiredCoMPosition(),
-                                       linearTrajectoryHandler.getDesiredCoMAcceleration(),
+                                       desiredAcceleration,
                                        referenceOrientation,
                                        referenceBodyAngularVelocityInBodyFrame,
                                        desiredNetAngularMomentumRate,
@@ -134,7 +151,32 @@ public class OrientationTrajectoryConstructor
                nextA.set(dynamicsCalculator.getDiscreteAMatrix());
             }
 
-            trajectoryStartTime += tickDuration;
+            if (SE3ModelPredictiveController.debugOrientation && contactPlaneHelpers.get(segmentNumber).size() == 0)
+            {
+               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB0()), 0.0, 1e-3))
+                  throw new RuntimeException("Poopy. B0 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB0()));
+               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB1()), 0.0, 1e-3))
+                  throw new RuntimeException("Poopy. B1 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB1()));
+               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB2()), 0.0, 1e-3))
+                  throw new RuntimeException("Poopy. B2 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB2()));
+//               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB3()), 0.0, 1e-3))
+//                  throw new RuntimeException("Poopy. B3 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB3()));
+               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB4()), 0.0, 1e-3))
+                  throw new RuntimeException("Poopy. B4 should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getB4()));
+
+               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getContinuousBMatrix()), 0.0, 1e-3))
+                  throw new RuntimeException("Poopy. Continuous B should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getContinuousBMatrix()));
+               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getContinuousCMatrix()), 0.0, 1e-3))
+                  throw new RuntimeException("Poopy. Continuous C should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getContinuousCMatrix()));
+
+               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getDiscreteBMatrix()), 0.0, 1e-3))
+                  throw new RuntimeException("Poopy. Discrete B should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getDiscreteBMatrix()));
+               if (!MathTools.epsilonEquals(CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getDiscreteCMatrix()), 0.0, 1e-3))
+                  throw new RuntimeException("Poopy. Discrete C should be zero. Actually " + CommonOps_DDRM.elementMaxAbs(dynamicsCalculator.getDiscreteCMatrix()));
+            }
+
+            globalTick++;
+            globalTime += tickDuration;
             timeInSegment += tickDuration;
          }
       }
