@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.apache.commons.lang3.mutable.MutableDouble;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -39,11 +40,28 @@ public class YoFunctionGenerator2
    private final SquareWaveFunctionGenerator squareFunction = new SquareWaveFunctionGenerator();
    private final WhiteNoiseFunctionGenerator whiteNoiseFunction = new WhiteNoiseFunctionGenerator();
    private final ChirpLinearFunctionGenerator chirpLinearFunction = new ChirpLinearFunctionGenerator();
-   private final double dt;
+   private final TimeToDTConverter timeToDTConverter;
+   private final DoubleProvider dt;
+
+   public YoFunctionGenerator2(String namePrefix, YoRegistry registry)
+   {
+      this(namePrefix, null, new TimeToDTConverter(), registry);
+   }
+
+   public YoFunctionGenerator2(String namePrefix, DoubleProvider time, YoRegistry registry)
+   {
+      this(namePrefix, null, time, registry);
+   }
 
    public YoFunctionGenerator2(String namePrefix, double dt, YoRegistry registry)
    {
+      this(namePrefix, () -> dt, null, registry);
+   }
+
+   private YoFunctionGenerator2(String namePrefix, DoubleProvider dt, DoubleProvider time, YoRegistry registry)
+   {
       this.dt = dt;
+      timeToDTConverter = new TimeToDTConverter(time);
 
       angle = new YoDouble(namePrefix + "Angle", registry);
 
@@ -108,6 +126,31 @@ public class YoFunctionGenerator2
 
    public void update()
    {
+      if (dt != null)
+      {
+         updateWithDT(dt.getValue());
+      }
+      else if (timeToDTConverter != null)
+      {
+         timeToDTConverter.update();
+         updateWithDT(timeToDTConverter.getValue());
+      }
+      else
+      {
+         throw new IllegalStateException("This function generator was not properly configured with time info.");
+      }
+   }
+
+   public void updateWithTime(double time)
+   {
+      if (dt != null)
+         throw new IllegalOperationException("This function generator was configured with DT");
+      timeToDTConverter.update(time);
+      updateWithDT(timeToDTConverter.getValue());
+   }
+
+   public void updateWithDT(double dt)
+   {
       for (InputFilter input : inputs)
       {
          input.update(dt);
@@ -137,8 +180,8 @@ public class YoFunctionGenerator2
 
       if (modeTransition.isTransitioning())
       { // In transition between 2 modes
-         angle.set(compute(modePrevious.getValue(), valueA, valueDotA, valueDDotA));
-         compute(mode.getValue(), valueB, valueDotB, valueDDotB);
+         angle.set(compute(modePrevious.getValue(), dt, valueA, valueDotA, valueDDotA));
+         compute(mode.getValue(), dt, valueB, valueDotB, valueDDotB);
          value.set(EuclidCoreTools.interpolate(valueA.getValue(), valueB.getValue(), modeTransition.getValue()));
          valueDot.set(EuclidCoreTools.interpolate(valueDotA.getValue(), valueDotB.getValue(), modeTransition.getValue()));
          valueDDot.set(EuclidCoreTools.interpolate(valueDDotA.getValue(), valueDDotB.getValue(), modeTransition.getValue()));
@@ -149,7 +192,7 @@ public class YoFunctionGenerator2
       }
       else
       {
-         angle.set(compute(mode.getValue(), valueA, valueDotA, valueDDotA));
+         angle.set(compute(mode.getValue(), dt, valueA, valueDotA, valueDDotA));
          value.set(valueA.doubleValue());
          valueDot.set(valueDotA.doubleValue());
          valueDDot.set(valueDDotA.doubleValue());
@@ -204,7 +247,7 @@ public class YoFunctionGenerator2
       }
    }
 
-   private double compute(YoFunctionGeneratorMode mode, MutableDouble value, MutableDouble valueDot, MutableDouble valueDDot)
+   private double compute(YoFunctionGeneratorMode mode, double dt, MutableDouble value, MutableDouble valueDot, MutableDouble valueDDot)
    {
       switch (mode)
       {
@@ -213,17 +256,17 @@ public class YoFunctionGenerator2
          case DC:
             return computeDC(value, valueDot, valueDDot);
          case WHITE_NOISE:
-            return computeFunction(whiteNoiseFunction, value, valueDot, valueDDot);
+            return computeFunction(whiteNoiseFunction, dt, value, valueDot, valueDDot);
          case SQUARE:
-            return computeFunction(squareFunction, value, valueDot, valueDDot);
+            return computeFunction(squareFunction, dt, value, valueDot, valueDDot);
          case SINE:
-            return computeFunction(sineFunction, value, valueDot, valueDDot);
+            return computeFunction(sineFunction, dt, value, valueDot, valueDDot);
          case SAWTOOTH:
-            return computeFunction(sawtoothFunction, value, valueDot, valueDDot);
+            return computeFunction(sawtoothFunction, dt, value, valueDot, valueDDot);
          case TRIANGLE:
-            return computeFunction(triangleFunction, value, valueDot, valueDDot);
+            return computeFunction(triangleFunction, dt, value, valueDot, valueDDot);
          case CHIRP_LINEAR:
-            return computeChirpLinear(value, valueDot, valueDDot);
+            return computeChirpLinear(dt, value, valueDot, valueDDot);
          default:
             return Double.NaN;
       }
@@ -245,7 +288,7 @@ public class YoFunctionGenerator2
       return 0.0;
    }
 
-   private double computeFunction(BaseFunctionGenerator function, MutableDouble value, MutableDouble valueDot, MutableDouble valueDDot)
+   private double computeFunction(BaseFunctionGenerator function, double dt, MutableDouble value, MutableDouble valueDot, MutableDouble valueDDot)
    {
       function.integrateAngle(dt);
       value.setValue(function.getValue());
@@ -254,7 +297,7 @@ public class YoFunctionGenerator2
       return function.getAngle();
    }
 
-   private double computeChirpLinear(MutableDouble value, MutableDouble valueDot, MutableDouble valueDDot)
+   private double computeChirpLinear(double dt, MutableDouble value, MutableDouble valueDot, MutableDouble valueDDot)
    {
       chirpLinearFunction.integrateAngle(dt);
       value.setValue(chirpLinearFunction.getValue());
@@ -358,14 +401,14 @@ public class YoFunctionGenerator2
       return angle;
    }
 
-   public YoEnum<YoFunctionGeneratorMode> getMode()
+   public YoFunctionGeneratorMode getMode()
    {
-      return mode;
+      return mode.getValue();
    }
 
-   public YoEnum<YoFunctionGeneratorMode> getModePrevious()
+   public YoFunctionGeneratorMode getModePrevious()
    {
-      return modePrevious;
+      return modePrevious.getValue();
    }
 
    private static class InputFilter implements DoubleProvider
@@ -425,6 +468,47 @@ public class YoFunctionGenerator2
       public double getValue()
       {
          return inputFiltered.getValue();
+      }
+   }
+
+   private static class TimeToDTConverter implements DoubleProvider
+   {
+      private double dt = 0.0;
+      private double timePrevious = Double.NaN;
+
+      private final DoubleProvider time;
+
+      public TimeToDTConverter()
+      {
+         this(null);
+      }
+
+      public TimeToDTConverter(DoubleProvider time)
+      {
+         this.time = time;
+      }
+
+      public void update()
+      {
+         update(time.getValue());
+      }
+
+      public void update(double time)
+      {
+         if (Double.isNaN(timePrevious))
+         {
+            timePrevious = time;
+         }
+         else
+         {
+            dt = time - timePrevious;
+         }
+      }
+
+      @Override
+      public double getValue()
+      {
+         return dt;
       }
    }
 }
