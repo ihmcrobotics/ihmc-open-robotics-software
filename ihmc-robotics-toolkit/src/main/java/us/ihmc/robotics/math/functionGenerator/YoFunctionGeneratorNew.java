@@ -140,6 +140,11 @@ public class YoFunctionGeneratorNew
    private final MutableDouble valueDotB = new MutableDouble();
    private final MutableDouble valueDDotB = new MutableDouble();
 
+   /**
+    * Updates the internal signal, should be called once per control tick.
+    * 
+    * @throws IllegalStateException if this was not constructed with either a time provider or a dt.
+    */
    public void update()
    {
       if (dt != null)
@@ -157,6 +162,12 @@ public class YoFunctionGeneratorNew
       }
    }
 
+   /**
+    * Updates the internal signal, should be called once per control tick.
+    * 
+    * @param time absolute time value.
+    * @throws IllegalOperationException if this was setup with a dt constant.
+    */
    public void updateWithTime(double time)
    {
       if (dt != null)
@@ -165,6 +176,11 @@ public class YoFunctionGeneratorNew
       updateWithDT(timeToDTConverter.getValue());
    }
 
+   /**
+    * Updates the internal signal, should be called once per control tick.
+    * 
+    * @param dt value of a time increment.
+    */
    public void updateWithDT(double dt)
    {
       for (InputFilter input : inputs)
