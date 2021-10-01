@@ -23,6 +23,7 @@ public class YoFunctionGeneratorNew
    private final InputFilter phase;
    /** Frequency of the signal. */
    private final InputFilter frequency;
+   private final YoDouble chirpCurrentFrequency;
    /** Only for chirp signals, defines the lowest frequency spanned by the chirp. */
    private final InputFilter chirpLowFrequency;
    /** Only for chirp signals, defines the highest frequency spanned by the chirp. */
@@ -88,6 +89,7 @@ public class YoFunctionGeneratorNew
       amplitude = new InputFilter(namePrefix + "Amp", transitionDuration, registry);
       phase = new InputFilter(namePrefix + "Phase", transitionDuration, registry);
       frequency = new InputFilter(namePrefix + "Freq", transitionDuration, registry);
+      chirpCurrentFrequency = new YoDouble(namePrefix + "ChirpCurrentFreq", registry);
       chirpLowFrequency = new InputFilter(namePrefix + "ChirpLowFreq", transitionDuration, registry);
       chirpHighFrequency = new InputFilter(namePrefix + "ChirpHighFreq", transitionDuration, registry);
       chirpDuration = new InputFilter(namePrefix + "ChirpDuration", transitionDuration, registry);
@@ -241,8 +243,8 @@ public class YoFunctionGeneratorNew
 
          if (mode.getValue() == YoFunctionGeneratorMode.CHIRP_LINEAR)
          {
-            frequency.set(chirpLinearFunction.getFrequency());
-            frequency.inputFiltered.set(chirpLinearFunction.getFrequency());
+            // For viz purposes
+            chirpCurrentFrequency.set(chirpLinearFunction.getFrequency());
          }
       }
    }
