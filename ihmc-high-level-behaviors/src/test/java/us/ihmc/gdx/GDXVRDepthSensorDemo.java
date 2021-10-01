@@ -8,7 +8,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
@@ -54,9 +57,14 @@ public class GDXVRDepthSensorDemo
             baseUI.get3DSceneManager().addModelInstance(cylinder);
             baseUI.get3DSceneManager().addModelInstance(depthSensorDemoObjectsModel.newInstance());
 
+            RigidBodyTransform initialCameraTransform = new RigidBodyTransform();
+            initialCameraTransform.appendOrientation(new AxisAngle(Axis3D.Z, Math.PI / 2.0));
+            initialCameraTransform.appendOrientation(new AxisAngle(Axis3D.Y, Math.PI / 4.0));
+            initialCameraTransform.appendTranslation(-0.8, 0.0, 0.0);
+
             depthSensorSimulator.create();
-            depthSensorSimulator.getCamera().position.set(0.0f, -1.0f, 1.0f);
-            depthSensorSimulator.getCamera().direction.set(0.0f, 0.0f, -1.0f);
+            GDXTools.toGDX(initialCameraTransform, tempTransform);
+            depthSensorSimulator.setCameraWorldTransform(tempTransform);
 
             pointCloudRenderer.create((int) depthSensorSimulator.getCamera().viewportHeight * (int) depthSensorSimulator.getCamera().viewportWidth);
             baseUI.get3DSceneManager().addRenderableProvider(pointCloudRenderer, GDXSceneLevel.VIRTUAL);
@@ -71,10 +79,13 @@ public class GDXVRDepthSensorDemo
             baseUI.getVRManager().addVRInputProcessor(this::handleVREvents);
 
             baseUI.getImGuiPanelManager().addPanel("Point Cloud Settings", this::renderPointCloudSettings);
+            baseUI.getImGuiPanelManager().addPanel(depthSensorSimulator.getColorPanel());
+            baseUI.getImGuiPanelManager().addPanel(depthSensorSimulator.getDepthPanel());
 
             gizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            gizmo.getTransform().set(initialCameraTransform);
             baseUI.addImGui3DViewInputProcessor(gizmo::process3DViewInput);
-            baseUI.get3DSceneManager().addRenderableProvider(this::getRenderables);
+            baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
          }
 
          private void handleVREvents(GDXVRManager vrManager)
@@ -98,7 +109,7 @@ public class GDXVRDepthSensorDemo
             });
          }
 
-         private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+         private void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
          {
             if (useGizmoToPoseSensor.get())
             {

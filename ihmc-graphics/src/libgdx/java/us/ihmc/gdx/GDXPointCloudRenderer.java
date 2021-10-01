@@ -141,7 +141,10 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
       renderable.meshPart.size = pointsToRender.size();
       renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * floatsPerVertex);
-      renderable.meshPart.update();
+      if (!pointsToRender.isEmpty())
+      {
+         renderable.meshPart.update();
+      }
    }
 
    public float[] getVerticesArray()
