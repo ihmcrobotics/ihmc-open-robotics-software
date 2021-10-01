@@ -13,14 +13,27 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class YoFunctionGenerator2
 {
+   /** Duration used to smooth changes in values of the inputs or to smooth switch between modes. */
    private final YoDouble transitionDuration;
+   /** Signals will be centered around the offset. */
    private final InputFilter offset;
+   /** Defines signals amplitude such as the resulting value oscillate in [-amplitude; +amplitude]. */
    private final InputFilter amplitude;
+   /** Phase shift in radians of the signal. */
    private final InputFilter phase;
+   /** Frequency of the signal. */
    private final InputFilter frequency;
+   /** Only for chirp signals, defines the lowest frequency spanned by the chirp. */
    private final InputFilter chirpLowFrequency;
+   /** Only for chirp signals, defines the highest frequency spanned by the chirp. */
    private final InputFilter chirpHighFrequency;
+   /**
+    * Only for chirp signals, defines the duration to span from low to high frequency and vice-versa.
+    */
    private final InputFilter chirpDuration;
+   /** Time before this function generator will automatically turn off. */
+   private final YoDouble resetTime;
+
    private final InputFilter[] inputs;
 
    private final YoDouble angle;
@@ -79,6 +92,9 @@ public class YoFunctionGenerator2
       chirpHighFrequency = new InputFilter(namePrefix + "ChirpHighFreq", transitionDuration, registry);
       chirpDuration = new InputFilter(namePrefix + "ChirpDuration", transitionDuration, registry);
       inputs = new InputFilter[] {offset, amplitude, phase, frequency, chirpLowFrequency, chirpHighFrequency, chirpDuration};
+
+      resetTime = new YoDouble(namePrefix + "ResetTime", registry);
+      resetTime.set(Double.POSITIVE_INFINITY);
 
       modeTransition = new InputFilter(namePrefix + "ModeTransition", transitionDuration, registry);
       mode = new YoEnum<>(namePrefix + "Mode", registry, YoFunctionGeneratorMode.class);
@@ -154,6 +170,16 @@ public class YoFunctionGenerator2
       for (InputFilter input : inputs)
       {
          input.update(dt);
+      }
+
+      if (mode.getValue() != YoFunctionGeneratorMode.OFF && Double.isFinite(resetTime.getValue()))
+      {
+         resetTime.sub(dt);
+         if (resetTime.getValue() <= 0.0)
+         {
+            resetTime.set(0.0);
+            mode.set(YoFunctionGeneratorMode.OFF);
+         }
       }
 
       if (!isModeValid(mode.getValue()))
@@ -356,6 +382,11 @@ public class YoFunctionGenerator2
       this.chirpDuration.set(chirpDuration);
    }
 
+   public void setResetTime(double resetTime)
+   {
+      this.resetTime.set(resetTime);
+   }
+
    public void setMode(YoFunctionGeneratorMode mode)
    {
       this.mode.set(mode);
@@ -394,6 +425,11 @@ public class YoFunctionGenerator2
    public double getChirpDuration()
    {
       return chirpDuration.getValue();
+   }
+
+   public double getResetTime()
+   {
+      return resetTime.getValue();
    }
 
    public YoDouble getAngle()
