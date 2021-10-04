@@ -545,7 +545,16 @@ public class YoFunctionGeneratorNew
          {
             hasUserInputChanged = false;
             double currentValue = inputFiltered.getValue();
-            filterRamp.set((desiredValue - currentValue) / transitionDuration.getValue());
+
+            if (transitionDuration.getValue() < dt)
+            {
+               inputFiltered.set(desiredValue);
+               filterRamp.set(0.0);
+            }
+            else
+            {
+               filterRamp.set((desiredValue - currentValue) / transitionDuration.getValue());
+            }
          }
 
          if (filterRamp.getValue() != 0.0)
