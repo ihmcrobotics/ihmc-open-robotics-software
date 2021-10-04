@@ -167,6 +167,16 @@ public class MainTabController
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, buildFlatGround());
    }
 
+   @FXML
+   public void planWithHeightMap()
+   {
+      if (bindStartToRobot.isSelected())
+         setStartFromRobot();
+      int newRequestID = currentPlannerRequestId.get() + 1;
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, newRequestID);
+      messager.submitMessage(PlanWithHeightMap, true);
+   }
+
    private PlanarRegionsList buildFlatGround()
    {
       humanoidReferenceFrames.updateFrames();

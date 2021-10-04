@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__HeightMap__idl__
-#define __controller_msgs__msg__HeightMap__idl__
+#ifndef __controller_msgs__msg__HeightMapMessage__idl__
+#define __controller_msgs__msg__HeightMapMessage__idl__
 
 module controller_msgs
 {
@@ -11,8 +11,8 @@ module controller_msgs
       /**
        * This message is part of the IHMC height map module
        */
-      @TypeCode(type="controller_msgs::msg::dds_::HeightMap_")
-      struct HeightMap
+      @TypeCode(type="controller_msgs::msg::dds_::HeightMapMessage_")
+      struct HeightMapMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
