@@ -147,6 +147,7 @@
                         <Button fx:id="computeSwing" mnemonicParsing="false" onAction="#computeSwing" prefWidth="130.0" text="Compute Swing" GridPane.halignment="CENTER" GridPane.rowIndex="1"/>
                         <Button fx:id="abortPlanning" mnemonicParsing="false" onAction="#abortPlanning" prefWidth="130.0" text="Halt Planning" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
                         <Button onAction="#clearFlat" prefWidth="130.0" text="Clear Flat" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                        <Button onAction="#planWithHeightMap" prefWidth="130.0" text="Plan With Height Map" GridPane.halignment="CENTER" GridPane.rowIndex="4" />
 
                         <CheckBox fx:id="acceptNewRegions" mnemonicParsing="false" selected="true" text="Accept New Planar Regions" GridPane.columnIndex="1" GridPane.columnSpan="2" />
                         <ComboBox fx:id="initialSupportSide" prefWidth="120.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />

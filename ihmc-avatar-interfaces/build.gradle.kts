@@ -73,4 +73,5 @@ visualizersDependencies {
    api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
+   api("us.ihmc:ihmc-footstep-planning-visualizers:source")
 }

@@ -5,7 +5,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 
-public class HeightMap
+public class HeightMapManager
 {
    private static final boolean debug = false;
 
@@ -19,10 +19,10 @@ public class HeightMap
    private final TIntArrayList xCells = new TIntArrayList();
    private final TIntArrayList yCells = new TIntArrayList();
 
-   public HeightMap(double gridResolutionXY, double gridSizeXY)
+   public HeightMapManager(double gridResolutionXY, double gridSizeXY)
    {
       this.gridResolutionXY = gridResolutionXY;
-      minMaxIndexXY = toIndex(gridSizeXY, gridResolutionXY, 0);
+      minMaxIndexXY = HeightMapTools.toIndex(gridSizeXY, gridResolutionXY, 0);
 
       int cellsPerAxis = 2 * minMaxIndexXY + 1;
       heightMapCells = new HeightMapCell[cellsPerAxis][cellsPerAxis];
@@ -41,8 +41,8 @@ public class HeightMap
          {
             Point3D point = new Point3D(pointCloud[i]);
 
-            int indexX = toIndex(point.getX() - gridCenterXY.getX(), gridResolutionXY, minMaxIndexXY);
-            int indexY = toIndex(point.getY() - gridCenterXY.getY(), gridResolutionXY, minMaxIndexXY);
+            int indexX = HeightMapTools.toIndex(point.getX() - gridCenterXY.getX(), gridResolutionXY, minMaxIndexXY);
+            int indexY = HeightMapTools.toIndex(point.getY() - gridCenterXY.getY(), gridResolutionXY, minMaxIndexXY);
             if (indexX < 0 || indexY < 0 || indexX >= heightMapCells.length || indexY >= heightMapCells.length)
             {
                continue;
@@ -76,15 +76,5 @@ public class HeightMap
    public TIntArrayList getYCells()
    {
       return yCells;
-   }
-
-   public static int toIndex(double coordinate, double resolution, int offset)
-   {
-      return (int) Math.round(coordinate / resolution) + offset;
-   }
-
-   static double toCoordinate(int index, double resolution)
-   {
-      return index * resolution;
    }
 }

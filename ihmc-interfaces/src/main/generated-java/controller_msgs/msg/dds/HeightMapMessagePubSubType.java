@@ -2,21 +2,21 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "HeightMap" defined in "HeightMap_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "HeightMapMessage" defined in "HeightMapMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from HeightMap_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit HeightMap_.idl instead.
+* This file was automatically generated from HeightMapMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit HeightMapMessage_.idl instead.
 *
 */
-public class HeightMapPubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HeightMap>
+public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.HeightMapMessage>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::HeightMap_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::HeightMapMessage_";
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.HeightMap data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.HeightMapMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +24,7 @@ public class HeightMapPubSubType implements us.ihmc.pubsub.TopicDataType<control
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HeightMap data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.HeightMapMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -56,12 +56,12 @@ public class HeightMapPubSubType implements us.ihmc.pubsub.TopicDataType<control
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.HeightMap data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.HeightMapMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.HeightMap data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.HeightMapMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -90,7 +90,7 @@ public class HeightMapPubSubType implements us.ihmc.pubsub.TopicDataType<control
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.HeightMap data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_4(data.getSequenceId());
 
@@ -112,7 +112,7 @@ public class HeightMapPubSubType implements us.ihmc.pubsub.TopicDataType<control
 
    }
 
-   public static void read(controller_msgs.msg.dds.HeightMap data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
       	
@@ -127,7 +127,7 @@ public class HeightMapPubSubType implements us.ihmc.pubsub.TopicDataType<control
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.HeightMap data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("xy_resolution", data.getXyResolution());
@@ -138,7 +138,7 @@ public class HeightMapPubSubType implements us.ihmc.pubsub.TopicDataType<control
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HeightMap data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HeightMapMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setXyResolution(ser.read_type_6("xy_resolution"));
@@ -148,15 +148,15 @@ public class HeightMapPubSubType implements us.ihmc.pubsub.TopicDataType<control
       ser.read_type_e("heights", data.getHeights());
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.HeightMap src, controller_msgs.msg.dds.HeightMap dest)
+   public static void staticCopy(controller_msgs.msg.dds.HeightMapMessage src, controller_msgs.msg.dds.HeightMapMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.HeightMap createData()
+   public controller_msgs.msg.dds.HeightMapMessage createData()
    {
-      return new controller_msgs.msg.dds.HeightMap();
+      return new controller_msgs.msg.dds.HeightMapMessage();
    }
    @Override
    public int getTypeSize()
@@ -170,24 +170,24 @@ public class HeightMapPubSubType implements us.ihmc.pubsub.TopicDataType<control
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.HeightMap data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.HeightMap data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.HeightMapMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.HeightMap src, controller_msgs.msg.dds.HeightMap dest)
+   public void copy(controller_msgs.msg.dds.HeightMapMessage src, controller_msgs.msg.dds.HeightMapMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public HeightMapPubSubType newInstance()
+   public HeightMapMessagePubSubType newInstance()
    {
-      return new HeightMapPubSubType();
+      return new HeightMapMessagePubSubType();
    }
 }
