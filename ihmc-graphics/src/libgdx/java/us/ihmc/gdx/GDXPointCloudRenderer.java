@@ -35,7 +35,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private final int floatsPerVertex = vertexAttributes.vertexSize / 4;
    private final GDXUniform screenWidthUniform = GDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
    {
-      shader.set(inputID, (float) Gdx.graphics.getWidth());
+      shader.set(inputID, shader.camera.viewportWidth);
    });
    private int multiColor = 0;
    private final GDXUniform multiColorUniform = GDXUniform.createGlobalUniform("u_multiColor", (shader, inputID, renderable, combinedAttributes) ->
