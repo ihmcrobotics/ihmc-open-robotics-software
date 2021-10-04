@@ -44,8 +44,22 @@ public class GDXVRManager implements RenderableProvider
    private final ArrayList<Consumer<GDXVRManager>> vrInputProcessors = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
-   public void pollEvents(GDXImGuiBasedUI baseUI)
+   /**
+    * Doing poll and render close together makes VR performance the best it can be
+    * and reduce dizziness.
+    */
+   public void pollEventsAndRender(GDXImGuiBasedUI baseUI, GDX3DSceneManager sceneManager)
    {
+      boolean posesReady = pollEvents(baseUI);
+      if (posesReady)
+      {
+         render(sceneManager);
+      }
+   }
+
+   private boolean pollEvents(GDXImGuiBasedUI baseUI)
+   {
+      boolean posesReady = false;
       if (vrEnabled.get())
       {
          if (!initializing && contextCreatedNotification == null) // should completely dispose and recreate?
@@ -58,7 +72,10 @@ public class GDXVRManager implements RenderableProvider
             initializing = false;
             context.setupEyes();
 
-            baseUI.setForegroundFPS(240);
+            if (!Boolean.parseBoolean(System.getProperty("gdx.free.spin")))
+            {
+               baseUI.setForegroundFPS(240);
+            }
             baseUI.setVsync(false); // important to disable vsync for VR
 
             scenePoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
@@ -71,43 +88,46 @@ public class GDXVRManager implements RenderableProvider
 
          if (contextInitialized)
          {
-            context.pollEvents();
+            posesReady = context.pollEvents();
 
-            // TODO: Implement VR teleport control here; extract teleportation manager
-            context.getController(RobotSide.RIGHT, controller ->
+            if (posesReady)
             {
-               holdingTouchpadToMove = controller.isButtonPressed(SteamVR_Touchpad);
-            });
-            //               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
-            //               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
-            //               context.getToZUpXForward().transform(initialVRSpacePosition);
-            //               lastVRSpacePosition.set(initialVRSpacePosition);
-            if (context.isHeadsetConnected())
-            {
-               context.teleport(scenePoseGizmo.getTransform());
-
-               if (holdingTouchpadToMove)
+               // TODO: Implement VR teleport control here; extract teleportation manager
+               context.getController(RobotSide.RIGHT, controller ->
                {
-                  //         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
-                  //         resultVRSpacePosition.set(initialVRSpacePosition);
-                  //         deltaVRControllerPosition.sub(currentVRControllerPosition, initialVRControllerPosition);
-                  //         resultVRSpacePosition.sub(deltaVRControllerPosition);
-                  //         resultVRSpacePosition.sub(lastVRSpacePosition);
-                  //         GDXTools.toGDX(resultVRSpacePosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
-                  //         lastVRSpacePosition.set(resultVRSpacePosition);
-                  //         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
-                  //         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
-                  //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.1f, 0.0f, 0.0f);
-               }
-               else
+                  holdingTouchpadToMove = controller.isButtonPressed(SteamVR_Touchpad);
+               });
+               //               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
+               //               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
+               //               context.getToZUpXForward().transform(initialVRSpacePosition);
+               //               lastVRSpacePosition.set(initialVRSpacePosition);
+               if (context.isHeadsetConnected())
                {
-                  //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
-               }
-            }
+                  context.teleport(scenePoseGizmo.getTransform());
 
-            for (Consumer<GDXVRManager> vrInputProcessor : vrInputProcessors)
-            {
-               vrInputProcessor.accept(this);
+                  if (holdingTouchpadToMove)
+                  {
+                     //         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
+                     //         resultVRSpacePosition.set(initialVRSpacePosition);
+                     //         deltaVRControllerPosition.sub(currentVRControllerPosition, initialVRControllerPosition);
+                     //         resultVRSpacePosition.sub(deltaVRControllerPosition);
+                     //         resultVRSpacePosition.sub(lastVRSpacePosition);
+                     //         GDXTools.toGDX(resultVRSpacePosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+                     //         lastVRSpacePosition.set(resultVRSpacePosition);
+                     //         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
+                     //         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+                     //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.1f, 0.0f, 0.0f);
+                  }
+                  else
+                  {
+                     //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
+                  }
+               }
+
+               for (Consumer<GDXVRManager> vrInputProcessor : vrInputProcessors)
+               {
+                  vrInputProcessor.accept(this);
+               }
             }
          }
       }
@@ -118,6 +138,7 @@ public class GDXVRManager implements RenderableProvider
             dispose();
          }
       }
+      return posesReady;
    }
 
    public void renderImGuiEnableWidget()
@@ -138,7 +159,7 @@ public class GDXVRManager implements RenderableProvider
       }
    }
 
-   public void render(GDX3DSceneManager sceneManager)
+   private void render(GDX3DSceneManager sceneManager)
    {
       if (isVRReady())
       {

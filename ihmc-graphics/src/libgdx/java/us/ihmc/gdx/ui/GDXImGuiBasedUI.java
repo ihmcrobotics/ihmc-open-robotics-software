@@ -161,9 +161,8 @@ public class GDXImGuiBasedUI
 
    public void renderBeforeOnScreenUI()
    {
-      vrManager.pollEvents(this);
+      vrManager.pollEventsAndRender(this, sceneManager);
       Gdx.graphics.setTitle(windowTitle + " - " + Gdx.graphics.getFramesPerSecond() + " FPS");
-      GDX3DSceneTools.glClearGray(0.3f);
       imGuiWindowAndDockSystem.beforeWindowManagement();
       render3DView();
       renderMenuBar();
@@ -172,7 +171,6 @@ public class GDXImGuiBasedUI
    public void renderEnd()
    {
       imGuiWindowAndDockSystem.afterWindowManagement();
-      vrManager.render(sceneManager);
    }
 
    private void renderMenuBar()

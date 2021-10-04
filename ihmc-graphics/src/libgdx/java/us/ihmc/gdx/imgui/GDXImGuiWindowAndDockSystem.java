@@ -13,6 +13,7 @@ import imgui.type.ImString;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
@@ -114,6 +115,7 @@ public class GDXImGuiWindowAndDockSystem
          loadUserConfigurationWithDefaultFallback();
       }
 
+      GDX3DSceneTools.glClearGray(0.3f);
       imGuiGlfw.newFrame();
       ImGui.newFrame();
 

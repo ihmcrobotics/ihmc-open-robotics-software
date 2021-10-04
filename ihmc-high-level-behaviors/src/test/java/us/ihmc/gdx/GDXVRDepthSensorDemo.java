@@ -33,6 +33,7 @@ public class GDXVRDepthSensorDemo
    private ModelInstance cylinder;
    private boolean moveWithController = true;
    private final Matrix4 tempTransform = new Matrix4();
+   private final ImBoolean enablePointCloudRender = new ImBoolean(true);
    private final ImBoolean useSensorColor = new ImBoolean(false);
    private final ImBoolean useGizmoToPoseSensor = new ImBoolean(false);
    private final float[] color = new float[4];
@@ -67,7 +68,6 @@ public class GDXVRDepthSensorDemo
             depthSensorSimulator.setCameraWorldTransform(tempTransform);
 
             pointCloudRenderer.create((int) depthSensorSimulator.getCamera().viewportHeight * (int) depthSensorSimulator.getCamera().viewportWidth);
-            baseUI.get3DSceneManager().addRenderableProvider(pointCloudRenderer, GDXSceneLevel.VIRTUAL);
 
             for (RobotSide side : RobotSide.values)
             {
@@ -115,6 +115,10 @@ public class GDXVRDepthSensorDemo
             {
                gizmo.getRenderables(renderables, pool);
             }
+            if (enablePointCloudRender.get())
+            {
+               pointCloudRenderer.getRenderables(renderables, pool);
+            }
          }
 
          @Override
@@ -126,16 +130,19 @@ public class GDXVRDepthSensorDemo
                depthSensorSimulator.setCameraWorldTransform(tempTransform);
             }
 
-            depthSensorSimulator.render(baseUI.get3DSceneManager());
+            if (enablePointCloudRender.get())
+            {
+               depthSensorSimulator.render(baseUI.get3DSceneManager());
 
-            if (useSensorColor.get())
-            {
-               pointCloudRenderer.updateMesh(depthSensorSimulator.getPoints(), depthSensorSimulator.getColors());
-            }
-            else
-            {
-               pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints(), new Color(color[0], color[1], color[2], color[3]));
-               pointCloudRenderer.updateMesh();
+               if (useSensorColor.get())
+               {
+                  pointCloudRenderer.updateMesh(depthSensorSimulator.getPoints(), depthSensorSimulator.getColors());
+               }
+               else
+               {
+                  pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints(), new Color(color[0], color[1], color[2], color[3]));
+                  pointCloudRenderer.updateMesh();
+               }
             }
 
             baseUI.renderBeforeOnScreenUI();
@@ -144,6 +151,7 @@ public class GDXVRDepthSensorDemo
 
          private void renderPointCloudSettings()
          {
+            ImGui.checkbox("Enable point cloud", enablePointCloudRender);
             ImGui.checkbox("Use Gizmo to pose sensor", useGizmoToPoseSensor);
             ImGui.checkbox("Use Sensor Color", useSensorColor);
             ImGui.colorPicker4("Color", color);
