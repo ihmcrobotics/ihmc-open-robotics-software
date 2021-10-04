@@ -39,6 +39,7 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 /**
  * Responsible for initializing the VR system, managing rendering surfaces,
@@ -106,7 +107,8 @@ public class GDXVRContext
          = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("vrPlayAreaFrame",
                                                                                   ReferenceFrame.getWorldFrame(),
                                                                                   totalTransformFromVRPlayAreaToIHMCZUpWorld);
-
+   private final ResettableExceptionHandlingExecutorService waitGetPosesExecutor = MissingThreadTools.newSingleThreadExecutor("PoseWaiterOnner", true, 1);
+   private final Notification posesReady = new Notification();
 
    public Notification initSystemOnAThread()
    {
@@ -167,115 +169,98 @@ public class GDXVRContext
          throw new GdxRuntimeException("VR Initialization error: " + VR.VR_GetVRInitErrorAsEnglishDescription(error));
       }
    }
-
-   public void teleport(Consumer<RigidBodyTransform> vrPlayAreaZUpConsumer)
-   {
-      vrPlayAreaZUpConsumer.accept(tempVRPlayAreaZUp);
-      teleport(tempVRPlayAreaZUp);
-   }
-
-   public void teleport(RigidBodyTransform vrPlayAreaZUp)
-   {
-      totalTransformFromVRPlayAreaToIHMCZUpWorld.set(openVRYUpToIHMCZUpSpace);
-      vrPlayAreaZUp.transform(totalTransformFromVRPlayAreaToIHMCZUpWorld);
-      vrPlayAreaYUpZBackFrame.update();
-   }
-
-   /**
-    * Start rendering. Call beginEye to setup rendering
-    * for each individual eye. End rendering by calling
-    * #end
-    */
-   public void begin()
-   {
-      if (renderingStarted)
-         throw new GdxRuntimeException("Last begin() call not completed, call end() before starting a new render");
-      renderingStarted = true;
-
-      perEyeData.get(RobotSide.LEFT).getCamera().update();
-      perEyeData.get(RobotSide.RIGHT).getCamera().update();
-   }
-
    /**
     * Get the latest tracking data and send events to {@link GDXVRDeviceListener} instance registered with the context.
     * <p>
     * Must be called before begin!
     */
-   public void pollEvents()
+   public boolean pollEvents()
    {
-      VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
-
-      if (!initialDevicesReported)
+      // Waiting for the poses on a thread allows for the rest of the application to keep
+      // cranking faster than VR can do stuff. This also makes the performance graph in Steam
+      // show the correct value and the OpenVR stack work much better.
+      waitGetPosesExecutor.clearQueueAndExecute(() ->
       {
+         VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
+         // VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
+         posesReady.set();
+      });
+
+      if (posesReady.poll())
+      {
+         if (!initialDevicesReported)
+         {
+            for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
+            {
+               if (VRSystem.VRSystem_IsTrackedDeviceConnected(deviceIndex))
+               {
+                  createDevice(deviceIndex);
+               }
+            }
+            initialDevicesReported = true;
+         }
+
+         // cache the devices; don't iterate over 64 every time?
+         // maybe do it at a lower frequency just to catch new devices?
          for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
          {
-            if (VRSystem.VRSystem_IsTrackedDeviceConnected(deviceIndex))
+            GDXVRDevice device = devices[deviceIndex];
+            if (device != null)
             {
-               createDevice(deviceIndex);
+               TrackedDevicePose trackedPose = trackedDevicePoses.get(deviceIndex);
+
+               HmdVector3 velocity = trackedPose.vVelocity();
+               HmdVector3 angularVelocity = trackedPose.vAngularVelocity();
+               HmdMatrix34 openVRRigidBodyTransform = trackedPose.mDeviceToAbsoluteTracking();
+
+               device.getVelocity().set(velocity.v(0), velocity.v(1), velocity.v(2));
+               device.getAngularVelocity().set(angularVelocity.v(0), angularVelocity.v(1), angularVelocity.v(2));
+               device.setValid(trackedPose.bPoseIsValid());
+               device.updatePoseInTrackerFrame(openVRRigidBodyTransform, vrPlayAreaYUpZBackFrame);
             }
          }
-         initialDevicesReported = true;
-      }
 
-      // cache the devices; don't iterate over 64 every time?
-      // maybe do it at a lower frequency just to catch new devices?
-      for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
-      {
-         GDXVRDevice device = devices[deviceIndex];
-         if (device != null)
+         for (RobotSide side : RobotSide.values)
          {
-            TrackedDevicePose trackedPose = trackedDevicePoses.get(deviceIndex);
+            getController(side, GDXVRDevice::resetBeforeUpdate);
+         }
 
-            HmdVector3 velocity = trackedPose.vVelocity();
-            HmdVector3 angularVelocity = trackedPose.vAngularVelocity();
-            HmdMatrix34 openVRRigidBodyTransform = trackedPose.mDeviceToAbsoluteTracking();
+         while (VRSystem.VRSystem_PollNextEvent(event))
+         {
+            int deviceIndex = event.trackedDeviceIndex();
+            if (deviceIndex < 0 || deviceIndex > VR.k_unMaxTrackedDeviceCount)
+               continue;
+            int button = 0;
 
-            device.getVelocity().set(velocity.v(0), velocity.v(1), velocity.v(2));
-            device.getAngularVelocity().set(angularVelocity.v(0), angularVelocity.v(1), angularVelocity.v(2));
-            device.setValid(trackedPose.bPoseIsValid());
-            device.updatePoseInTrackerFrame(openVRRigidBodyTransform, vrPlayAreaYUpZBackFrame);
+            switch (event.eventType())
+            {
+               case VR.EVREventType_VREvent_TrackedDeviceActivated:
+                  createDevice(deviceIndex);
+                  break;
+               case VR.EVREventType_VREvent_TrackedDeviceDeactivated:
+                  deviceIndex = event.trackedDeviceIndex();
+                  if (devices[deviceIndex] == null)
+                     continue;
+                  updateDevice(deviceIndex, null);
+                  break;
+               case VR.EVREventType_VREvent_ButtonPress:
+                  if (devices[deviceIndex] == null)
+                     continue;
+                  button = event.data().controller().button();
+                  devices[deviceIndex].setButton(button, true);
+                  devices[deviceIndex].setButtonPressed(button);
+                  break;
+               case VR.EVREventType_VREvent_ButtonUnpress:
+                  if (devices[deviceIndex] == null)
+                     continue;
+                  button = event.data().controller().button();
+                  devices[deviceIndex].setButton(button, false);
+                  devices[deviceIndex].setButtonReleased(button);
+                  break;
+            }
          }
       }
-
-      for (RobotSide side : RobotSide.values)
-      {
-         getController(side, GDXVRDevice::resetBeforeUpdate);
-      }
-
-      while (VRSystem.VRSystem_PollNextEvent(event))
-      {
-         int deviceIndex = event.trackedDeviceIndex();
-         if (deviceIndex < 0 || deviceIndex > VR.k_unMaxTrackedDeviceCount)
-            continue;
-         int button = 0;
-
-         switch (event.eventType())
-         {
-            case VR.EVREventType_VREvent_TrackedDeviceActivated:
-               createDevice(deviceIndex);
-               break;
-            case VR.EVREventType_VREvent_TrackedDeviceDeactivated:
-               deviceIndex = event.trackedDeviceIndex();
-               if (devices[deviceIndex] == null)
-                  continue;
-               updateDevice(deviceIndex, null);
-               break;
-            case VR.EVREventType_VREvent_ButtonPress:
-               if (devices[deviceIndex] == null)
-                  continue;
-               button = event.data().controller().button();
-               devices[deviceIndex].setButton(button, true);
-               devices[deviceIndex].setButtonPressed(button);
-               break;
-            case VR.EVREventType_VREvent_ButtonUnpress:
-               if (devices[deviceIndex] == null)
-                  continue;
-               button = event.data().controller().button();
-               devices[deviceIndex].setButton(button, false);
-               devices[deviceIndex].setButtonReleased(button);
-               break;
-         }
-      }
+      return posesReady.read();
    }
 
    private void updateDevice(int deviceIndex, GDXVRDevice device)
@@ -359,6 +344,21 @@ public class GDXVRContext
    }
 
    /**
+    * Start rendering. Call beginEye to setup rendering
+    * for each individual eye. End rendering by calling
+    * #end
+    */
+   public void begin()
+   {
+      if (renderingStarted)
+         throw new GdxRuntimeException("Last begin() call not completed, call end() before starting a new render");
+      renderingStarted = true;
+
+      perEyeData.get(RobotSide.LEFT).getCamera().update();
+      perEyeData.get(RobotSide.RIGHT).getCamera().update();
+   }
+
+   /**
     * Start rendering to the rendering surface for the given eye.
     * Complete by calling {@link #endEye()}.
     */
@@ -393,9 +393,13 @@ public class GDXVRContext
          throw new GdxRuntimeException("Call begin() before end()");
       renderingStarted = false;
 
-      // TODO: Look into doing these submits in parallel; they are expensive
-      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Left, perEyeData.get(RobotSide.LEFT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
-      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Right, perEyeData.get(RobotSide.RIGHT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
+//      eyeUpdateExecutor.clearQueueAndExecute(() ->
+//      {
+         // TODO: Look into doing these submits in parallel; they are expensive
+         VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Left, perEyeData.get(RobotSide.LEFT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
+         VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Right, perEyeData.get(RobotSide.RIGHT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
+//      });
+      GL41.glFlush();
    }
 
    public void dispose()
@@ -406,6 +410,19 @@ public class GDXVRContext
       // TODO: Dispose models
 
       VR_ShutdownInternal();
+   }
+
+   public void teleport(Consumer<RigidBodyTransform> vrPlayAreaZUpConsumer)
+   {
+      vrPlayAreaZUpConsumer.accept(tempVRPlayAreaZUp);
+      teleport(tempVRPlayAreaZUp);
+   }
+
+   public void teleport(RigidBodyTransform vrPlayAreaZUp)
+   {
+      totalTransformFromVRPlayAreaToIHMCZUpWorld.set(openVRYUpToIHMCZUpSpace);
+      vrPlayAreaZUp.transform(totalTransformFromVRPlayAreaToIHMCZUpWorld);
+      vrPlayAreaYUpZBackFrame.update();
    }
 
    private Model loadRenderModel(String name)
