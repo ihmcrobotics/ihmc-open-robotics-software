@@ -1,12 +1,14 @@
 package us.ihmc.sensorProcessing.heightMap;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.log.LogTools;
 
 public class HeightMap
 {
+   private static final boolean debug = false;
+
    private final double gridResolutionXY;
    private final int minMaxIndexXY;
    private final HeightMapCell[][] heightMapCells;
@@ -31,14 +33,13 @@ public class HeightMap
       gridCenterXY.set(xCenter, yCenter);
    }
 
-   public void update(Point3D[] pointCloud, RigidBodyTransform transform)
+   public void update(Point3D[] pointCloud)
    {
       for (int i = 0; i < pointCloud.length; i++)
       {
          if (pointCloud[i] != null)
          {
             Point3D point = new Point3D(pointCloud[i]);
-            point.applyTransform(transform);
 
             int indexX = toIndex(point.getX() - gridCenterXY.getX(), gridResolutionXY, minMaxIndexXY);
             int indexY = toIndex(point.getY() - gridCenterXY.getY(), gridResolutionXY, minMaxIndexXY);
@@ -58,7 +59,8 @@ public class HeightMap
          }
       }
 
-      System.out.println(xCells.size() + " cells");
+      if (debug)
+         LogTools.info(xCells.size() + " cells");
    }
 
    public double getHeightAt(int indexX, int indexY)
