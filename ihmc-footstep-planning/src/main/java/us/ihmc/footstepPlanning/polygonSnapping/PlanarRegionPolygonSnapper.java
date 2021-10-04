@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionPolygonSnapper
@@ -70,7 +71,7 @@ public class PlanarRegionPolygonSnapper
       return transformToReturn;
    }
 
-   private static void setTranslationSettingZAndPreservingXAndY(Point3DReadOnly highestVertex, RigidBodyTransform transformToReturn)
+   static void setTranslationSettingZAndPreservingXAndY(Point3DReadOnly highestVertex, RigidBodyTransform transformToReturn)
    {
       Vector3D newTranslation = new Vector3D(highestVertex.getX(), highestVertex.getY(), 0.0);
       transformToReturn.transform(newTranslation);
@@ -80,7 +81,7 @@ public class PlanarRegionPolygonSnapper
       transformToReturn.getTranslation().set(newTranslation);
    }
 
-   private static RigidBodyTransform createTransformToMatchSurfaceNormalPreserveX(Vector3D surfaceNormal)
+   static RigidBodyTransform createTransformToMatchSurfaceNormalPreserveX(Vector3DReadOnly surfaceNormal)
    {
       Vector3D xAxis = new Vector3D();
       Vector3D yAxis = new Vector3D(0.0, 1.0, 0.0);

@@ -9,7 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 /**
        * This message is part of the IHMC height map module
        */
-public class HeightMap extends Packet<HeightMap> implements Settable<HeightMap>, EpsilonComparable<HeightMap>
+public class HeightMapMessage extends Packet<HeightMapMessage> implements Settable<HeightMapMessage>, EpsilonComparable<HeightMapMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -21,7 +21,7 @@ public class HeightMap extends Packet<HeightMap> implements Settable<HeightMap>,
    public us.ihmc.idl.IDLSequence.Integer  y_cells_;
    public us.ihmc.idl.IDLSequence.Float  heights_;
 
-   public HeightMap()
+   public HeightMapMessage()
    {
       x_cells_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
 
@@ -31,13 +31,13 @@ public class HeightMap extends Packet<HeightMap> implements Settable<HeightMap>,
 
    }
 
-   public HeightMap(HeightMap other)
+   public HeightMapMessage(HeightMapMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(HeightMap other)
+   public void set(HeightMapMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -102,19 +102,19 @@ public class HeightMap extends Packet<HeightMap> implements Settable<HeightMap>,
    }
 
 
-   public static Supplier<HeightMapPubSubType> getPubSubType()
+   public static Supplier<HeightMapMessagePubSubType> getPubSubType()
    {
-      return HeightMapPubSubType::new;
+      return HeightMapMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return HeightMapPubSubType::new;
+      return HeightMapMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(HeightMap other, double epsilon)
+   public boolean epsilonEquals(HeightMapMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -140,9 +140,9 @@ public class HeightMap extends Packet<HeightMap> implements Settable<HeightMap>,
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof HeightMap)) return false;
+      if(!(other instanceof HeightMapMessage)) return false;
 
-      HeightMap otherMyClass = (HeightMap) other;
+      HeightMapMessage otherMyClass = (HeightMapMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -162,7 +162,7 @@ public class HeightMap extends Packet<HeightMap> implements Settable<HeightMap>,
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("HeightMap {");
+      builder.append("HeightMapMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("xy_resolution=");

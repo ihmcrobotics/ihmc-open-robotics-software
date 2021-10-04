@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui;
 
 import controller_msgs.msg.dds.REAStateRequestMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,6 +18,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
@@ -85,6 +87,7 @@ public class FootstepPlannerUI
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
    private final ManualFootstepAdjustmentListener manualFootstepAdjustmentListener;
    private final RobotIKVisualizer robotIKVisualizer;
+   private final HeightMapVisualizer heightMapVisualizer = new HeightMapVisualizer();
 
    private final List<Runnable> shutdownHooks = new ArrayList<>();
 
@@ -194,6 +197,7 @@ public class FootstepPlannerUI
       footstepPlannerLogVisualizerController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       robotOperationTabController.attachMessager(messager);
+      messager.registerTopicListener(HeightMapMessage, heightMapVisualizer::update);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
@@ -249,6 +253,7 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
       view3dFactory.addNodeToView(occupancyMapRenderer.getRoot());
       view3dFactory.addNodeToView(footstepPlannerLogRenderer.getRoot());
+      view3dFactory.addNodeToView(heightMapVisualizer.getRoot());
 
       if(fullHumanoidRobotModelFactory == null)
       {
@@ -258,6 +263,7 @@ public class FootstepPlannerUI
       {
          robotVisualizer = new JavaFXRobotVisualizer(fullHumanoidRobotModelFactory);
          messager.registerTopicListener(RobotConfigurationData, robotVisualizer::submitNewConfiguration);
+
          mainTabController.setFullRobotModel(robotVisualizer.getFullRobotModel());
          robotOperationTabController.setFullRobotModel(robotVisualizer.getFullRobotModel(), fullHumanoidRobotModelFactory);
          view3dFactory.addNodeToView(robotVisualizer.getRootNode());
@@ -316,6 +322,7 @@ public class FootstepPlannerUI
       manualFootstepAdjustmentListener.start();
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
+      heightMapVisualizer.start();
 
       if (auxiliaryRobotData != null)
       {
@@ -446,6 +453,7 @@ public class FootstepPlannerUI
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
       occupancyMapRenderer.stop();
+      heightMapVisualizer.stop();
 
       if(robotVisualizer != null)
          robotVisualizer.stop();

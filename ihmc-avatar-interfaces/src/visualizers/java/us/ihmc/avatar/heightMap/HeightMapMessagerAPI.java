@@ -1,5 +1,6 @@
 package us.ihmc.avatar.heightMap;
 
+import controller_msgs.msg.dds.HeightMapMessage;
 import sensor_msgs.PointCloud2;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
@@ -12,7 +13,7 @@ class HeightMapMessagerAPI
 
    // Perception data
    public static final MessagerAPIFactory.Topic<PointCloud2> PointCloudData = topic("PointCloudData");
-   public static final MessagerAPIFactory.Topic<HeightMapDataToVisualize> HeightMapData = topic("HeightMapData");
+   public static final MessagerAPIFactory.Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
 
    // Visualization control
 

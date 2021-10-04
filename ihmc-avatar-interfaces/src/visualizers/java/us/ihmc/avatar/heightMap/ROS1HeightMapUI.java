@@ -5,11 +5,14 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import sensor_msgs.PointCloud2;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -22,6 +25,7 @@ public class ROS1HeightMapUI extends Application
    private final PointCloudVisualizer pointCloudVisualizer = new PointCloudVisualizer();
 
    private RosMainNode ros1Node;
+   private ROS2Node ros2Node;
 
    private static final boolean SHOW_HEIGHT_MAP = true;
    private static final boolean SHOW_POINT_CLOUD = false;
@@ -29,8 +33,11 @@ public class ROS1HeightMapUI extends Application
    @Override
    public void start(Stage stage) throws Exception
    {
-      new HeightMapUpdater(messager);
-      heightMapVisualizer = new HeightMapVisualizer(messager);
+      ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
+      new HeightMapUpdater(messager, ros2Node);
+
+      heightMapVisualizer = new HeightMapVisualizer();
+//      messager.registerTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
 
       ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "height_map_viewer");
       ros1Node.attachSubscriber(RosTools.OUSTER_POINT_CLOUD, new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)

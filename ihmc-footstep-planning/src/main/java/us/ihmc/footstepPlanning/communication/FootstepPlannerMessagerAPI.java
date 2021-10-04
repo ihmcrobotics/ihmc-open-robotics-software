@@ -179,6 +179,10 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<HeadTrajectoryMessage> HeadTrajectoryMessageTopic = topic("HeadTrajectoryMessageTopic");
    public static final Topic<NeckTrajectoryMessage> NeckTrajectoryMessageTopic = topic("NeckTrajectoryMessageTopic");
 
+   // Height map
+   public static final Topic<Boolean> PlanWithHeightMap = topic("PlanWithHeightMap");
+   public static final Topic<HeightMapMessage> HeightMapMessage = topic("HeightMapMessage");
+
    // Logging
    public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");
    public static final Topic<FootstepPlannerLogLoader.LoadRequestType> RequestLoadLog = topic("RequestLoadLog");
@@ -198,6 +202,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowLoggedWiggledCandidateStep = topic("ShowLoggedWiggledCandidateStep");
    public static final Topic<Boolean> ShowLoggedIdealStep = topic("ShowLoggedIdealStep");
    public static final Topic<Boolean> ShowBodyBox = topic("ShowBodyBox");
+   public static final Topic<Boolean> ShowHeightMap = topic("ShowHeightMap");
 
    // Test dashboard, only displayed if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");
