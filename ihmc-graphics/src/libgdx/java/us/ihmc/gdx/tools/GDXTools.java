@@ -12,8 +12,11 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import org.apache.logging.log4j.Level;
+import org.lwjgl.opengl.GLDebugMessageCallback;
+import org.lwjgl.opengl.KHRDebug;
 import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
+import org.lwjgl.system.Callback;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -31,6 +34,11 @@ import java.nio.FloatBuffer;
 
 import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumber;
 import static org.lwjgl.glfw.GLFW.glfwGetVersionString;
+import static org.lwjgl.opengl.GL11C.glEnable;
+import static org.lwjgl.opengl.GL43C.*;
+import static org.lwjgl.opengl.GL43C.GL_DEBUG_SEVERITY_NOTIFICATION;
+import static org.lwjgl.system.APIUtil.apiUnknownToken;
+import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class GDXTools
 {
@@ -415,5 +423,119 @@ public class GDXTools
          new Throwable().printStackTrace();
       });
       return glProfiler;
+   }
+
+   /**
+    * TODO: Add support for all of the drivers.
+    * See org.lwjgl.opengl.GLUtil#setupDebugMessageCallback(java.io.PrintStream)
+    */
+   public static Callback setupDebugMessageCallback(int minimumDebugLevel)
+   {
+      LogTools.info("Using KHR_debug for OpenGL debugging");
+      GLDebugMessageCallback callback = GLDebugMessageCallback.create((source, type, id, severity, length, message, userParam) ->
+      {
+         if (getDebugSeverityLevel(severity) >= getDebugSeverityLevel(minimumDebugLevel))
+         {
+            String messageString =
+                  "[" + getDebugSeverity(severity) + "] ID: " + String.format("0x%X", id) + " Source: " + getDebugSource(source) + " Type: " + getDebugType(type)
+                  + " " + GLDebugMessageCallback.getMessage(length, message);
+            switch (severity)
+            {
+               case GL_DEBUG_SEVERITY_HIGH:
+                  LogTools.fatal(messageString);
+                  break;
+               case GL_DEBUG_SEVERITY_MEDIUM:
+                  LogTools.error(messageString);
+                  break;
+               case GL_DEBUG_SEVERITY_LOW:
+                  LogTools.warn(messageString);
+                  break;
+               case GL_DEBUG_SEVERITY_NOTIFICATION:
+               default:
+                  LogTools.info(messageString);
+                  break;
+            }
+         }
+      });
+      KHRDebug.glDebugMessageCallback(callback, NULL);
+      glEnable(GL_DEBUG_OUTPUT);
+      return callback;
+   }
+
+   private static int getDebugSeverityLevel(int severity)
+   {
+      switch (severity)
+      {
+         case GL_DEBUG_SEVERITY_HIGH:
+            return 5;
+         case GL_DEBUG_SEVERITY_MEDIUM:
+            return 4;
+         case GL_DEBUG_SEVERITY_LOW:
+            return 3;
+         case GL_DEBUG_SEVERITY_NOTIFICATION:
+         default:
+            return 2;
+      }
+   }
+
+   private static String getDebugSeverity(int severity)
+   {
+      switch (severity)
+      {
+         case GL_DEBUG_SEVERITY_HIGH:
+            return "HIGH";
+         case GL_DEBUG_SEVERITY_MEDIUM:
+            return "MEDIUM";
+         case GL_DEBUG_SEVERITY_LOW:
+            return "LOW";
+         case GL_DEBUG_SEVERITY_NOTIFICATION:
+            return "NOTIFICATION";
+         default:
+            return apiUnknownToken(severity);
+      }
+   }
+
+   private static String getDebugSource(int source)
+   {
+      switch (source)
+      {
+         case GL_DEBUG_SOURCE_API:
+            return "API";
+         case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+            return "WINDOW SYSTEM";
+         case GL_DEBUG_SOURCE_SHADER_COMPILER:
+            return "SHADER COMPILER";
+         case GL_DEBUG_SOURCE_THIRD_PARTY:
+            return "THIRD PARTY";
+         case GL_DEBUG_SOURCE_APPLICATION:
+            return "APPLICATION";
+         case GL_DEBUG_SOURCE_OTHER:
+            return "OTHER";
+         default:
+            return apiUnknownToken(source);
+      }
+   }
+
+   private static String getDebugType(int type)
+   {
+      switch (type)
+      {
+         case GL_DEBUG_TYPE_ERROR:
+            return "ERROR";
+         case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+            return "DEPRECATED BEHAVIOR";
+         case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+            return "UNDEFINED BEHAVIOR";
+         case GL_DEBUG_TYPE_PORTABILITY:
+            return "PORTABILITY";
+         case GL_DEBUG_TYPE_PERFORMANCE:
+            return "PERFORMANCE";
+         case GL_DEBUG_TYPE_OTHER:
+            return "OTHER";
+         case GL_DEBUG_TYPE_MARKER:
+            return "MARKER";
+         default:
+            return apiUnknownToken(type);
+      }
    }
 }
