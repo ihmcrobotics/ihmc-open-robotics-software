@@ -11,9 +11,11 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
 import imgui.type.ImString;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.system.Callback;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
@@ -28,6 +30,7 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SEVERITY_LOW;
 
 public class GDXImGuiWindowAndDockSystem
 {
@@ -43,6 +46,7 @@ public class GDXImGuiWindowAndDockSystem
    private HybridFile imGuiSettingsFile;
    private HybridFile panelsFile;
    private boolean isFirstRenderCall = true;
+   private Callback debugMessageCallback;
 
    public GDXImGuiWindowAndDockSystem()
    {
@@ -65,6 +69,7 @@ public class GDXImGuiWindowAndDockSystem
       {
          throw new IllegalStateException("Unable to initialize GLFW");
       }
+      glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 //               glfwDefaultWindowHints();
 //               if (SystemUtils.IS_OS_MAC) {
 //                  glslVersion = "#version 150";
@@ -81,6 +86,9 @@ public class GDXImGuiWindowAndDockSystem
 //               GL.createCapabilities();
 
       ImGui.createContext();
+
+//      debugMessageCallback = GLUtil.setupDebugMessageCallback(System.err);
+      debugMessageCallback = GDXTools.setupDebugMessageCallback(GL_DEBUG_SEVERITY_LOW);
 
       final ImGuiIO io = ImGui.getIO();
       io.setIniFilename(null); // We don't want to save .ini file
@@ -301,6 +309,7 @@ public class GDXImGuiWindowAndDockSystem
       imGuiGlfw.dispose();
 
       ImGui.destroyContext();
+      debugMessageCallback.free();
    }
 
    public ImGuiImplGl3 getImGuiGl3()
