@@ -7,9 +7,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.tuple.Pair;
 import sensor_msgs.PointCloud2;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -21,13 +26,14 @@ import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class HeightMapUI extends Application
+public abstract class HeightMapUI extends Application
 {
    private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(HeightMapMessagerAPI.API);
 
    private HeightMapVisualizer heightMapVisualizer;
    private PointCloudVisualizer pointCloudVisualizer;
 
+   private ROS2SyncedRobotModel syncedRobot;
    private RosMainNode ros1Node;
    private ROS2Node ros2Node;
    private BorderPane mainPane;
@@ -55,13 +61,19 @@ public class HeightMapUI extends Application
       heightMapVisualizer = new HeightMapVisualizer();
       messager.registerTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
 
+      DRCRobotModel robotModel = getRobotModel();
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+
       ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "height_map_viewer");
       ros1Node.attachSubscriber(RosTools.OUSTER_POINT_CLOUD, new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
       {
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, pointCloud);
+            syncedRobot.update();
+            FramePose3D ousterPose = new FramePose3D();
+            ousterPose.setToZero(syncedRobot.getReferenceFrames().getOusterLidarFrame());
+            messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Pair.of(pointCloud, ousterPose));
          }
       });
 
@@ -113,6 +125,8 @@ public class HeightMapUI extends Application
          e.printStackTrace();
       }
    }
+
+   protected abstract DRCRobotModel getRobotModel();
 
    public static void main(String[] args)
    {

@@ -1,7 +1,10 @@
 package us.ihmc.avatar.heightMap;
 
 import controller_msgs.msg.dds.HeightMapMessage;
+import org.apache.commons.lang3.tuple.Pair;
 import sensor_msgs.PointCloud2;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
@@ -12,7 +15,7 @@ class HeightMapMessagerAPI
    private static final MessagerAPIFactory.CategoryTheme HeightMap = apiFactory.createCategoryTheme("HeightMap");
 
    // Perception data
-   public static final MessagerAPIFactory.Topic<PointCloud2> PointCloudData = topic("PointCloudData");
+   public static final MessagerAPIFactory.Topic<Pair<PointCloud2, FramePose3D>> PointCloudData = topic("PointCloudData");
    public static final MessagerAPIFactory.Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
 
    // Visualization control

@@ -12,6 +12,6 @@ public class HeightMapParameterKeys
    public static final DoubleStoredPropertyKey gridSizeXY = keys.addDoubleKey ("Grid Size XY", 3.0);
    public static final DoubleStoredPropertyKey maxZ = keys.addDoubleKey("Max Z", 1.5);
    public static final DoubleStoredPropertyKey nominalVariance = keys.addDoubleKey("Nominal Std Dev", 1e-2);
-   public static final IntegerStoredPropertyKey maxPointsPerCell = keys.addIntegerKey("Max Points Per Cell", 6);
+   public static final IntegerStoredPropertyKey maxPointsPerCell = keys.addIntegerKey("Max Points Per Cell", 20);
    public static final DoubleStoredPropertyKey mahalonobisScale = keys.addDoubleKey ("Mahalonobis Scale", 1.5);
 }
