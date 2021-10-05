@@ -10,10 +10,10 @@ public class HeightMapManager
 {
    private static final boolean debug = false;
 
-   private static final double MIN_X = -1.0;
-   private static final double MAX_X = 4.0;
-   private static final double MIN_Y = -1.5;
-   private static final double MAX_Y = 1.5;
+   private static final double MIN_X = -0.5;
+   private static final double MAX_X = 3.25;
+   private static final double MIN_Y = -1.25;
+   private static final double MAX_Y = 1.25;
    private static final double MIN_Z = -10.0;
    private static final double MAX_Z = 0.0;
 
@@ -60,7 +60,7 @@ public class HeightMapManager
                continue;
             }
 
-            if (heightMapCells[indexX][indexY] == null)
+             if (heightMapCells[indexX][indexY] == null)
             {
                heightMapCells[indexX][indexY] = new HeightMapCell(parameters);
                xCells.add(indexX);

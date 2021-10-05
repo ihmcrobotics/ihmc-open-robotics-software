@@ -1,13 +1,18 @@
 package us.ihmc.avatar.heightMap;
 
 import controller_msgs.msg.dds.HeightMapMessage;
+import org.apache.commons.lang3.tuple.Pair;
 import sensor_msgs.PointCloud2;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.messager.Messager;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
@@ -24,8 +29,7 @@ public class HeightMapUpdater
    private final ExecutorService heightMapUpdater = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private final AtomicBoolean processing = new AtomicBoolean();
 
-   private final RigidBodyTransform transform = new RigidBodyTransform();
-
+   private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
    private final HeightMapManager heightMap;
    private final IHMCROS2Publisher<HeightMapMessage> publisher;
 
@@ -37,30 +41,33 @@ public class HeightMapUpdater
       parameters = new HeightMapParameters();
       heightMap = new HeightMapManager(parameters.getGridResolutionXY(), parameters.getGridSizeXY());
 
-      messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, pointCloud ->
+      messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, pointCloudData ->
       {
          if (!processing.getAndSet(true))
          {
-            heightMapUpdater.execute(() -> update(pointCloud));
+            heightMapUpdater.execute(() -> update(pointCloudData));
          }
       });
 
-      transform.getRotation().setToPitchOrientation(Math.toRadians(30.0));
-      transform.getTranslation().set(-0.2, 0.0, 1.0);
+//      transform.getRotation().setToPitchOrientation(Math.toRadians(30.0));
+//      transform.getTranslation().set(-0.2, 0.0, 1.0);
    }
 
-   private void update(PointCloud2 pointCloud)
+   private void update(Pair<PointCloud2, FramePose3D> pointCloudData)
    {
-      PointCloudData pointCloudData = new PointCloudData(pointCloud, 1000000, false);
+      PointCloudData pointCloud = new PointCloudData(pointCloudData.getKey(), 1000000, false);
+      ousterFrame.setPoseAndUpdate(pointCloudData.getRight());
 
       // Transform ouster data
-      for (int i = 0; i < pointCloudData.getPointCloud().length; i++)
+      for (int i = 0; i < pointCloud.getPointCloud().length; i++)
       {
-         pointCloudData.getPointCloud()[i].applyTransform(transform);
+         FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[i]);
+         point.changeFrame(ReferenceFrame.getWorldFrame());
+         pointCloud.getPointCloud()[i].set(point);
       }
 
       // Update height map
-      heightMap.update(pointCloudData.getPointCloud());
+      heightMap.update(pointCloud.getPointCloud());
 
       // Copy and report over messager
       HeightMapMessage message = new HeightMapMessage();
