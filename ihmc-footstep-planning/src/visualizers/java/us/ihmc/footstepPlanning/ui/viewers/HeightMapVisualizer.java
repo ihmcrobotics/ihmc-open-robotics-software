@@ -47,7 +47,7 @@ public class HeightMapVisualizer extends AnimationTimer
       rootNode.getChildren().add(heightMapMeshView);
 
       Color color = Color.OLIVE;
-      heightMapColor = Color.color(color.getRed(), color.getGreen(), color.getBlue(), 0.5);
+      heightMapColor = Color.color(color.getRed(), color.getGreen(), color.getBlue(), 0.7);
 
       HeightMapParameters parameters = new HeightMapParameters();
       gridResolutionXY = parameters.getGridResolutionXY();
