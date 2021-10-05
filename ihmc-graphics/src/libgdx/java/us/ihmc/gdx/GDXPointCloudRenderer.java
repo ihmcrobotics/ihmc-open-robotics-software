@@ -89,8 +89,11 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    public void updateMesh(float alpha)
    {
-      if (pointsToRender != null && !pointsToRender.isEmpty())
+      if (pointsToRender != null)
       {
+         if (pointsToRender.isEmpty()) // make sure there's always one point
+            pointsToRender.add().setToNaN();
+
          for (int i = 0; i < pointsToRender.size(); i++)
          {
             int offset = i * floatsPerVertex;
