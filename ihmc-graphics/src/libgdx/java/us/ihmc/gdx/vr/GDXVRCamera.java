@@ -34,10 +34,12 @@ public class GDXVRCamera extends Camera
    private final Vector3D euclidDirection = new Vector3D();
    private final Vector3D euclidUp = new Vector3D();
 
-   public GDXVRCamera(RobotSide eye, Supplier<GDXVRDevice> headsetSupplier)
+   public GDXVRCamera(RobotSide eye, Supplier<GDXVRDevice> headsetSupplier, int width, int height)
    {
       this.headsetSupplier = headsetSupplier;
       this.eye = eye;
+      viewportWidth = width;
+      viewportHeight = height;
    }
 
    @Override

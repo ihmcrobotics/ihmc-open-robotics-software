@@ -155,7 +155,7 @@ public class GDXVRContext
       FrameBuffer buffer = new FrameBuffer(Format.RGBA8888, width, height, hasDepth, hasStencil);
       TextureRegion region = new TextureRegion(buffer.getColorBufferTexture());
       region.flip(false, true);
-      GDXVRCamera camera = new GDXVRCamera(eye, () -> devices[headsetIndex]);
+      GDXVRCamera camera = new GDXVRCamera(eye, () -> devices[headsetIndex], width, height);
       camera.near = 0.1f;
       camera.far = 1000f;
       perEyeData.set(eye, new GDXVRPerEyeData(buffer, region, camera));
