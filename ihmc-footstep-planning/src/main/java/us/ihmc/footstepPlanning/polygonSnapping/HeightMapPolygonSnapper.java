@@ -1,8 +1,10 @@
 package us.ihmc.footstepPlanning.polygonSnapping;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
 import us.ihmc.robotics.geometry.PlaneFitter;
@@ -19,7 +21,7 @@ public class HeightMapPolygonSnapper
 {
    private final List<Point3D> pointsInsidePolyon = new ArrayList<>();
    private final Plane3D bestFitPlane = new Plane3D();
-   private final PlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
+   private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap)
    {
@@ -61,9 +63,44 @@ public class HeightMapPolygonSnapper
       }
 
       planeFitter.fitPlaneToPoints(pointsInsidePolyon, bestFitPlane);
+
+//      double averageHeight = 0.0;
+//      for (int i = 0; i < pointsInsidePolyon.size(); i++)
+//      {
+//         averageHeight += pointsInsidePolyon.get(i).getZ();
+//      }
+//      averageHeight /= pointsInsidePolyon.size();
+
+//      double ssRes = 0.0;
+//      double ssTot = 0.0;
+//      for (int i = 0; i < pointsInsidePolyon.size(); i++)
+//      {
+//         double zHat = bestFitPlane.getZOnPlane(pointsInsidePolyon.get(i).getX(), pointsInsidePolyon.get(i).getY());
+//
+//         ssRes += MathTools.square(zHat - pointsInsidePolyon.get(i).getZ());
+//         ssTot += MathTools.square(averageHeight - pointsInsidePolyon.get(i).getZ());
+//      }
+//
+//      double rSq = 1.0 - ssRes / ssTot;
+//      System.out.println("R-Sq: " + rSq);
+
+      if (bestFitPlane.containsNaN())
+      {
+         return null;
+      }
+
       RigidBodyTransform transformToReturn = createTransformToMatchSurfaceNormalPreserveX(bestFitPlane.getNormal());
-      setTranslationSettingZAndPreservingXAndY(pointsInsidePolyon.get(highestPointIndex), transformToReturn);
+
+      Point2DReadOnly centroid = polygonToSnap.getCentroid();
+      double height = bestFitPlane.getZOnPlane(centroid.getX(), centroid.getY());
+
+      setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
 
       return transformToReturn;
+   }
+
+   public Plane3D getBestFitPlane()
+   {
+      return bestFitPlane;
    }
 }

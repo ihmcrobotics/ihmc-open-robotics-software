@@ -13,6 +13,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -38,6 +39,8 @@ public class FootstepChecker implements FootstepCheckerInterface
    private final FootstepPoseReachabilityChecker reachabilityChecker;
 
    private PlanarRegionsList regionsForCollisionChecking = null;
+   private HeightMapData heightMapData = null;
+
    private boolean assumeFlatGround = false;
 
    private final FootstepSnapData candidateStepSnapData = FootstepSnapData.identityData();
@@ -91,7 +94,35 @@ public class FootstepChecker implements FootstepCheckerInterface
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
       achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
-      if (regionsForCollisionChecking == null || regionsForCollisionChecking.isEmpty())
+      if (heightMapData != null)
+      {
+         if (candidateStepSnapData.getSnapTransform().containsNaN())
+         {
+            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
+            return;
+         }
+
+         // Check incline
+         RigidBodyTransform snappedSoleTransform = candidateStepSnapData.getSnappedStepTransform(candidateStep);
+         double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());
+         if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
+         {
+            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
+            return;
+         }
+
+         if (stanceStep == null)
+         {
+            return;
+         }
+
+         // Check snapped footstep placement
+         BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = heuristicPoseChecker.checkStepValidity(candidateStep, stanceStep, startOfSwing);
+         rejectionReason.set(poseRejectionReason);
+
+         return;
+      }
+      else if (regionsForCollisionChecking == null || regionsForCollisionChecking.isEmpty())
       {
          return;
       }
@@ -265,6 +296,11 @@ public class FootstepChecker implements FootstepCheckerInterface
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
+   }
+
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      this.heightMapData = heightMapData;
    }
 
    private static void checkWiggleParameters(FootstepPlannerParametersReadOnly parameters)

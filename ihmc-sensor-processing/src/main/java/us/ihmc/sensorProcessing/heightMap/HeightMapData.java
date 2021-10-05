@@ -1,5 +1,6 @@
 package us.ihmc.sensorProcessing.heightMap;
 
+import controller_msgs.msg.dds.HeightMapMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.log.LogTools;
@@ -22,6 +23,22 @@ public class HeightMapData
       this.gridResolutionXY = gridResolutionXY;
       this.gridSizeXY = gridSizeXY;
       minMaxIndexXY = HeightMapTools.toIndex(gridSizeXY, gridResolutionXY, 0);
+   }
+
+   public HeightMapData(HeightMapMessage heightMapMessage)
+   {
+      this.gridResolutionXY = heightMapMessage.getXyResolution();
+      this.gridSizeXY = heightMapMessage.getGridSizeXy();
+      minMaxIndexXY = HeightMapTools.toIndex(gridSizeXY, gridResolutionXY, 0);
+
+      xCells.addAll(heightMapMessage.getXCells());
+      yCells.addAll(heightMapMessage.getYCells());
+      for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
+      {
+         heights.add(heightMapMessage.getHeights().get(i));
+      }
+
+      sort();
    }
 
    public TIntArrayList getXCells()

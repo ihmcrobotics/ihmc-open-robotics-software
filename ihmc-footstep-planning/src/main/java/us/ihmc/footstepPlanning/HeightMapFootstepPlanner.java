@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.log.LogTools;
@@ -20,6 +21,47 @@ import java.util.Vector;
 
 public class HeightMapFootstepPlanner
 {
+   public static FootstepPlan debug(SideDependentList<ConvexPolygon2D> footPolygons, HeightMapData heightMap)
+   {
+      List<Point3D> stepsToDebug = new ArrayList<>();
+      stepsToDebug.add(new Point3D(0.6, -0.04, 0.0));
+      stepsToDebug.add(new Point3D(0.6, 0.32, 0.0));
+      stepsToDebug.add(new Point3D(0.92, 0.55, 0.0));
+      stepsToDebug.add(new Point3D(0.92, 0.15, 0.0));
+      stepsToDebug.add(new Point3D(0.92, -0.25, 0.0));
+      stepsToDebug.add(new Point3D(1.35, 0.55, 0.0));
+      stepsToDebug.add(new Point3D(1.35, 0.15, 0.0));
+      stepsToDebug.add(new Point3D(1.35, -0.25, 0.0));
+
+      FootstepPlan footstepPlan = new FootstepPlan();
+      HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
+
+      for (int i = 0; i < stepsToDebug.size(); i++)
+      {
+         FramePose3D pose = new FramePose3D();
+         pose.getPosition().set(stepsToDebug.get(i));
+         pose.getPosition().setZ(-0.55);
+//         footstepPlan.addFootstep(RobotSide.LEFT, pose);
+
+         RigidBodyTransform footstepTransform = new RigidBodyTransform();
+         footstepTransform.getTranslation().set(pose.getPosition());
+         footstepTransform.getTranslation().setZ(0.0);
+         footstepTransform.getRotation().setToYawOrientation(pose.getYaw());
+
+         ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(RobotSide.LEFT));
+         footPolygon.applyTransform(footstepTransform);
+
+         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMap);
+         snapTransform.transform(footstepTransform);
+
+         FramePose3D step = new FramePose3D();
+         step.set(footstepTransform);
+         footstepPlan.addFootstep(RobotSide.LEFT, step);
+      }
+
+      return footstepPlan;
+   }
+
    public static FootstepPlan plan(Pose3DReadOnly start,
                                    Pose3DReadOnly goal,
                                    FootstepPlannerParametersReadOnly parameters,

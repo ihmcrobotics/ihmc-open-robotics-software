@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -18,6 +19,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -41,6 +43,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private final HashMap<DiscreteFootstep, FootstepSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
+   private HeightMapData heightMapData;
+   private HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
+
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
@@ -76,6 +81,11 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snapDataHolder.clear();
    }
 
+   public void setHeightMapData(HeightMapData heightMapData)
+   {
+      this.heightMapData = heightMapData;
+   }
+
    public void setFlatGroundHeight(double flatGroundHeight)
    {
       this.flatGroundHeight = flatGroundHeight;
@@ -88,7 +98,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private boolean flatGroundMode()
    {
-      return planarRegionsList == null || planarRegionsList.isEmpty();
+      return (planarRegionsList == null || planarRegionsList.isEmpty()) && heightMapData == null;
    }
 
    public FootstepSnapData snapFootstep(DiscreteFootstep footstep)
@@ -148,7 +158,16 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       double maximumRegionHeightToConsider = getMaximumRegionHeightToConsider(stanceStep);
       DiscreteFootstepTools.getFootPolygon(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), footPolygon);
 
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, maximumRegionHeightToConsider, planarRegionToPack);
+      RigidBodyTransform snapTransform;
+      if (heightMapData == null)
+      {
+         snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, maximumRegionHeightToConsider, planarRegionToPack);
+      }
+      else
+      {
+         snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, heightMapData);
+      }
+
       if (snapTransform == null)
       {
          return FootstepSnapData.emptyData();
@@ -156,8 +175,17 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       else
       {
          FootstepSnapData snapData = new FootstepSnapData(snapTransform);
-         snapData.setRegionIndex(getIndex(planarRegionToPack, planarRegionsList));
-         computeCroppedFoothold(footstepToSnap, snapData);
+
+         if (planarRegionsList != null)
+         {
+            snapData.setRegionIndex(getIndex(planarRegionToPack, planarRegionsList));
+            computeCroppedFoothold(footstepToSnap, snapData);
+         }
+         if (heightMapData != null)
+         {
+            snapData.getWiggleTransformInWorld().setIdentity();
+         }
+
          return snapData;
       }
    }

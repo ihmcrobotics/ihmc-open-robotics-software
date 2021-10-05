@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.heightMap;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
@@ -8,6 +9,13 @@ import us.ihmc.log.LogTools;
 public class HeightMapManager
 {
    private static final boolean debug = false;
+
+   private static final double MIN_X = -1.0;
+   private static final double MAX_X = 4.0;
+   private static final double MIN_Y = -1.5;
+   private static final double MAX_Y = 1.5;
+   private static final double MIN_Z = -10.0;
+   private static final double MAX_Z = 0.0;
 
    private final double gridResolutionXY;
    private final int minMaxIndexXY;
@@ -40,6 +48,10 @@ public class HeightMapManager
          if (pointCloud[i] != null)
          {
             Point3D point = new Point3D(pointCloud[i]);
+            if (!MathTools.intervalContains(point.getX(), MIN_X, MAX_X) ||
+                !MathTools.intervalContains(point.getY(), MIN_Y, MAX_Y) ||
+                !MathTools.intervalContains(point.getZ(), MIN_Z, MAX_Z))
+               continue;
 
             int indexX = HeightMapTools.toIndex(point.getX() - gridCenterXY.getX(), gridResolutionXY, minMaxIndexXY);
             int indexY = HeightMapTools.toIndex(point.getY() - gridCenterXY.getY(), gridResolutionXY, minMaxIndexXY);

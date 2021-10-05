@@ -20,7 +20,7 @@ class HeightMapCell
 
    private int oldestIndex;
    private final AtomicDouble estimatedHeight = new AtomicDouble();
-   private double variance;
+   private double standardDeviation;
 
    public HeightMapCell(HeightMapParameters parameters)
    {
@@ -43,7 +43,7 @@ class HeightMapCell
       }
       else
       {
-         if (heightMeasurements.isEmpty() || height > estimatedHeight.get() + parameters.getMahalanobisScale() * variance)
+         if (heightMeasurements.isEmpty() || height > estimatedHeight.get() + parameters.getMahalanobisScale() * standardDeviation)
          {
             // Reset, point is above height threshold to merge
             clear();
@@ -51,7 +51,7 @@ class HeightMapCell
 //            variance = parameters.getNominalHeightVariance();
             heightMeasurements.add(height);
          }
-         else if (height < estimatedHeight.get() - parameters.getMahalanobisScale() * variance)
+         else if (height < estimatedHeight.get() - parameters.getMahalanobisScale() * standardDeviation)
          {
             // Ignore, point is below height threshold to consider
          }
@@ -93,7 +93,7 @@ class HeightMapCell
 
       oldestIndex = 0;
       estimatedHeight.set(Double.NaN);
-      variance = Double.NaN;
+      standardDeviation = Double.NaN;
    }
 
    public double getEstimatedHeight()
