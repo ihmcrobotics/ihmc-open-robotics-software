@@ -53,6 +53,7 @@ public class GDX3DSceneManager
    private boolean addFocusSphere = true;
    private float ambientLight = 0.4f;
    private Runnable onCreate;
+   private GLProfiler glProfiler;
 
    public void create()
    {
@@ -61,7 +62,7 @@ public class GDX3DSceneManager
 
    public void create(GDXInputMode inputMode)
    {
-      new GLProfiler(Gdx.graphics).enable();
+      glProfiler = GDXTools.createGLProfiler();
       GDXTools.syncLogLevelWithLogTools();
 
       camera3D = new FocusBasedGDXCamera();
@@ -119,6 +120,8 @@ public class GDX3DSceneManager
          renderInternal(shadowsDisabledModelBatch, GDXSceneLevel.VIRTUAL);
       }
       postRender(GDXSceneLevel.VIRTUAL);
+
+      glProfiler.reset();
    }
 
    // For simulated sensors

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.glutils.GLVersion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -28,6 +29,7 @@ import us.ihmc.log.LogTools;
 
 import java.nio.FloatBuffer;
 
+import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumber;
 import static org.lwjgl.glfw.GLFW.glfwGetVersionString;
 
 public class GDXTools
@@ -364,5 +366,54 @@ public class GDXTools
       LogTools.info("Using OpenGL {}", versionString);
       GLVersion glVersion = Gdx.graphics.getGLVersion();
       LogTools.info("Using OpenGL {}", glVersion.getRendererString(), glVersion.getVendorString());
+   }
+
+   public static GLProfiler createGLProfiler()
+   {
+      GLProfiler glProfiler = new GLProfiler(Gdx.graphics);
+      glProfiler.enable();
+      glProfiler.setListener(error ->
+      {
+         int i = 0;
+         int checkIndex = 0;
+         int ihmcIndex = 0;
+         String glMethodName = null;
+         try
+         {
+            final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            for (; i < stack.length; i++)
+            {
+               if (stack[i].getMethodName().equals("check"))
+               {
+                  if (i + 1 < stack.length)
+                  {
+                     final StackTraceElement glMethod = stack[i + 1];
+                     glMethodName = glMethod.getMethodName();
+                     checkIndex = i + 1;
+                  }
+               }
+               if (glMethodName != null && stack[i].getClassName().contains("us.ihmc."))
+               {
+                  ihmcIndex = i;
+                  break;
+               }
+            }
+         }
+         catch (Exception ignored)
+         {
+         }
+
+         if (glMethodName != null)
+         {
+            LogTools.error(ihmcIndex, "GLProfiler: Error " + resolveErrorNumber(error) + " from " + glMethodName);
+         }
+         else
+         {
+            LogTools.error(ihmcIndex, "GLProfiler: Error " + resolveErrorNumber(error) + " at: " + new Exception());
+            // This will capture current stack trace for logging, if possible
+         }
+         new Throwable().printStackTrace();
+      });
+      return glProfiler;
    }
 }
