@@ -18,7 +18,8 @@ void main()
 	float halfSize = 0.5 * a_size;
 	vec4 pointInCameraFrame = u_viewTrans * vec4(a_position, 1);
 	vec4 cornerPositionInScreen = u_projTrans * vec4(halfSize, halfSize, pointInCameraFrame.z, pointInCameraFrame.w);
-	gl_PointSize = u_screenWidth * cornerPositionInScreen.x / cornerPositionInScreen.w;
+//	gl_PointSize = u_screenWidth * cornerPositionInScreen.x / cornerPositionInScreen.w;
+	gl_PointSize = 1.0;
 	gl_Position = u_projTrans * pointInCameraFrame;
 
 	v_color = a_color;
@@ -33,6 +34,5 @@ out vec4 color;
 
 void main()
 {
-	color = v_color; // Try this if solid color works.
-	//color = vec4(0, 1, 0, 1);
+	color = v_color;
 }
