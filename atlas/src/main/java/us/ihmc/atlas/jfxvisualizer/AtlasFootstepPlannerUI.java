@@ -151,25 +151,10 @@ public class AtlasFootstepPlannerUI extends Application
                                        return;
                                     }
 
-                                    HeightMapData heightMapData = new HeightMapData(heightMap.getXyResolution(), heightMap.getGridSizeXy());
+                                    HeightMapData heightMapData = new HeightMapData(heightMap);
+//                                    FootstepPlan footstepPlan = HeightMapFootstepPlanner.plan(start, goal, plannerParameters.get(), footPolygons, heightMapData);
+                                    FootstepPlan footstepPlan = HeightMapFootstepPlanner.debug(footPolygons, heightMapData);
 
-                                    int xSearch = 62;
-                                    int ySearch = 59;
-                                    for (int i = 0; i < heightMap.getXCells().size(); i++)
-                                    {
-                                       if (heightMap.getXCells().get(i) == xSearch && heightMap.getYCells().get(i) == ySearch)
-                                          System.out.println("Found (" + xSearch + ", " + ySearch + ") at index " + i);
-                                    }
-
-                                    heightMapData.getXCells().addAll(heightMap.getXCells());
-                                    heightMapData.getYCells().addAll(heightMap.getYCells());
-                                    for (int i = 0; i < heightMap.getHeights().size(); i++)
-                                    {
-                                       heightMapData.getHeights().add(heightMap.getHeights().get(i));
-                                    }
-
-                                    heightMapData.sort();
-                                    FootstepPlan footstepPlan = HeightMapFootstepPlanner.plan(start, goal, plannerParameters.get(), footPolygons, heightMapData);
                                     if (!footstepPlan.isEmpty())
                                     {
                                        FootstepDataListMessage outputMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(

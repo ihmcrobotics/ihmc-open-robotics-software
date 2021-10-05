@@ -1,7 +1,10 @@
 package us.ihmc.avatar.heightMap;
 
 import javafx.application.Application;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import sensor_msgs.PointCloud2;
@@ -13,19 +16,24 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class ROS1HeightMapUI extends Application
+public class HeightMapUI extends Application
 {
    private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(HeightMapMessagerAPI.API);
 
    private HeightMapVisualizer heightMapVisualizer;
-   private final PointCloudVisualizer pointCloudVisualizer = new PointCloudVisualizer();
+   private PointCloudVisualizer pointCloudVisualizer;
 
    private RosMainNode ros1Node;
    private ROS2Node ros2Node;
+   private BorderPane mainPane;
+
+   @FXML
+   private HeightMapParametersUIController heightMapParametersUIController;
 
    private static final boolean SHOW_HEIGHT_MAP = true;
    private static final boolean SHOW_POINT_CLOUD = false;
@@ -34,10 +42,18 @@ public class ROS1HeightMapUI extends Application
    public void start(Stage stage) throws Exception
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
+      pointCloudVisualizer = new PointCloudVisualizer(messager);
       new HeightMapUpdater(messager, ros2Node);
 
+      FXMLLoader loader = new FXMLLoader();
+      loader.setController(this);
+      loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
+      mainPane = loader.load();
+      SplitPane splitPane = (SplitPane) mainPane.getCenter();
+      BorderPane centerBorderPane = (BorderPane) splitPane.getItems().get(0);
+
       heightMapVisualizer = new HeightMapVisualizer();
-//      messager.registerTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
+      messager.registerTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
 
       ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "height_map_viewer");
       ros1Node.attachSubscriber(RosTools.OUSTER_POINT_CLOUD, new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
@@ -60,12 +76,17 @@ public class ROS1HeightMapUI extends Application
       if (SHOW_POINT_CLOUD)
          view3dFactory.addNodeToView(pointCloudVisualizer.getRoot());
 
+      HeightMapParameters parameters = new HeightMapParameters();
+      heightMapParametersUIController.setParameters(parameters);
+      heightMapParametersUIController.attachMessager(messager);
+      heightMapParametersUIController.bindControls();
+
       heightMapVisualizer.start();
       pointCloudVisualizer.start();
 
-      BorderPane mainPane = new BorderPane();
       view3dFactory.bindSubSceneSizeToPaneSize(mainPane);
-      mainPane.setCenter(view3dFactory.getSubScene());
+//      mainPane.setCenter(view3dFactory.getSubScene());
+      centerBorderPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
 
       stage.setScene(new Scene(mainPane, 1200, 800, true));
       stage.show();
@@ -74,6 +95,7 @@ public class ROS1HeightMapUI extends Application
       messager.startMessager();
 
       stage.setOnCloseRequest(event -> stop());
+      heightMapParametersUIController.onPrimaryStageLoaded();
    }
 
    public void stop()

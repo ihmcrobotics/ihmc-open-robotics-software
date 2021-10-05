@@ -45,7 +45,8 @@ public class HeightMapUpdater
          }
       });
 
-      transform.getRotation().setToPitchOrientation(Math.toRadians(45.0));
+      transform.getRotation().setToPitchOrientation(Math.toRadians(30.0));
+      transform.getTranslation().set(-0.2, 0.0, 1.0);
    }
 
    private void update(PointCloud2 pointCloud)
