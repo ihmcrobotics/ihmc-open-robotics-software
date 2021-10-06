@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.kryo.IHMCCommunicationKryoNetClassList;
 import us.ihmc.log.LogTools;
@@ -51,6 +50,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
    private final HashMap<RosJointStatePublisher, JointStatePublisherHelper> additionalJointStatePublisherMap = new HashMap<RosJointStatePublisher, JointStatePublisherHelper>();
    private RosJointStatePublisher[] additionalJointStatePublishers = new RosJointStatePublisher[0];
    private final RosJointStatePublisher jointStatePublisher;
+   private final String[] imuROSFrameIDs;
    private final RosImuPublisher[] imuPublishers;
    private final RosOdometryPublisher pelvisOdometryPublisher;
    private final RosStringPublisher robotMotionStatusPublisher;
@@ -98,6 +98,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
       this.robotBehaviorPublisher = new RosInt32Publisher(latched);
       this.lastReceivedMessagePublisher = new RosLastReceivedMessagePublisher(latched);
 
+      this.imuROSFrameIDs = new String[imuDefinitions.length];
       this.imuPublishers = new RosImuPublisher[imuDefinitions.length];
       for (int sensorNumber = 0; sensorNumber < imuDefinitions.length; sensorNumber++)
       {
@@ -105,6 +106,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          String imuName = imuDefinition.getName();
 
          RosImuPublisher rosImuPublisher = new RosImuPublisher(latched);
+         this.imuROSFrameIDs[sensorNumber] = imuDefinition.getName() + "_Frame";
          this.imuPublishers[sensorNumber] = rosImuPublisher;
          rosMainNode.attachPublisher(rosNameSpace + "/output/imu/" + imuName, rosImuPublisher);
       }
@@ -262,8 +264,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
             {
                RosImuPublisher rosImuPublisher = this.imuPublishers[sensorNumber];
                IMUPacket imuPacket = robotConfigurationData.getImuSensorData().get(sensorNumber);
-               ReferenceFrame imuFrame = imuDefinitions[sensorNumber].getIMUFrame();
-               rosImuPublisher.publish(timeStamp, imuPacket, imuFrame.getName());
+               rosImuPublisher.publish(timeStamp, imuPacket, imuROSFrameIDs[sensorNumber]);
             }
 
             pelvisOdometryPublisher.publish(timeStamp, pelvisTransform, robotConfigurationData.getPelvisLinearVelocity(),
