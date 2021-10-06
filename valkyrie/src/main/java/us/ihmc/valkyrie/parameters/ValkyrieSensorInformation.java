@@ -95,7 +95,7 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    public static final int MULTISENSE_LIDAR_ID = 0;
    public static final int MULTISENSE_STEREO_ID = 0;
 
-   private static final String multisense_namespace = "/multisense";
+   private static final String multisense_namespace = "multisense";
 
    private static final String left_frame_name = multisense_namespace + "/left_camera_frame";
    private static final String right_frame_name = multisense_namespace + "/right_camera_frame";
