@@ -155,7 +155,7 @@ public class GDXImGuiBasedUI
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
-      sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
+      sceneManager.addRenderableProvider(vrManager::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
       addImGui3DViewInputProcessor(vrManager::process3DViewInput);
    }
 

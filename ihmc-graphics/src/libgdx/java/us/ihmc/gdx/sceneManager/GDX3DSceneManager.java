@@ -15,6 +15,12 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.lighting.*;
@@ -55,6 +61,24 @@ public class GDX3DSceneManager
    private Runnable onCreate;
    private GLProfiler glProfiler;
 
+   // ReferenceFrame.getWorldFrame() is Z-up frame
+   // Finger axis definition is right hand, Thumb +Z, Index +X, Middle +Y
+   // The default orientation of the libGDX frame is such that
+   // your thumb is pointing forward away from your face and your index finger pointing left
+   // The default orientation of the IHMC Zup frame is such that
+   // your thumb is up and your index finger is pointing away from you
+   private final RigidBodyTransformReadOnly libGDXYUpToIHMCZUpSpace = new RigidBodyTransform(
+         new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
+            Math.toRadians(90.0),   // rotating around thumb, index goes forward to left
+            Math.toRadians(0.0),    // no rotation about middle finger
+            Math.toRadians(-90.0)   // rotating about index finger, thumb goes away from you
+         ),
+         new Point3D()
+   );
+   private final ReferenceFrame libGDXYUpFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("libGDXFrame",
+                                                                                                                   ReferenceFrame.getWorldFrame(),
+                                                                                                                   libGDXYUpToIHMCZUpSpace);
+
    public void create()
    {
       create(GDXInputMode.libGDX);
@@ -65,7 +89,7 @@ public class GDX3DSceneManager
       glProfiler = GDXTools.createGLProfiler();
       GDXTools.syncLogLevelWithLogTools();
 
-      camera3D = new FocusBasedGDXCamera();
+      camera3D = new FocusBasedGDXCamera(libGDXYUpFrame);
       if (inputMode == GDXInputMode.libGDX)
       {
          inputMultiplexer = new InputMultiplexer();

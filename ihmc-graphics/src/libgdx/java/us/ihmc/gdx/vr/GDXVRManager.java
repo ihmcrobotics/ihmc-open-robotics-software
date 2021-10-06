@@ -1,20 +1,16 @@
 package us.ihmc.gdx.vr;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
-import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
@@ -25,7 +21,7 @@ import java.util.function.Consumer;
 
 import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Touchpad;
 
-public class GDXVRManager implements RenderableProvider
+public class GDXVRManager
 {
    private final GDXVRContext context = new GDXVRContext();
    private Notification contextCreatedNotification;
@@ -51,9 +47,11 @@ public class GDXVRManager implements RenderableProvider
    public void pollEventsAndRender(GDXImGuiBasedUI baseUI, GDX3DSceneManager sceneManager)
    {
       boolean posesReady = pollEvents(baseUI);
-      if (posesReady)
+      if (posesReady && isVRReady())
       {
-         render(sceneManager);
+         skipHeadset = true;
+         context.renderEyes(sceneManager);
+         skipHeadset = false;
       }
    }
 
@@ -79,9 +77,6 @@ public class GDXVRManager implements RenderableProvider
             baseUI.setVsync(false); // important to disable vsync for VR
 
             scenePoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
-
-            context.getPerEyeData().get(RobotSide.LEFT).getCamera().far = 100f;
-            context.getPerEyeData().get(RobotSide.RIGHT).getCamera().far = 100f;
 
             contextInitialized = true;
          }
@@ -159,37 +154,6 @@ public class GDXVRManager implements RenderableProvider
       }
    }
 
-   private void render(GDX3DSceneManager sceneManager)
-   {
-      if (isVRReady())
-      {
-          context.begin();
-          renderScene(RobotSide.LEFT, sceneManager);
-          renderScene(RobotSide.RIGHT, sceneManager);
-          context.end();
-      }
-   }
-
-   private void renderScene(RobotSide eye, GDX3DSceneManager sceneManager)
-   {
-      GDXVRPerEyeData eyeData = context.getPerEyeData().get(eye);
-      GDXVRCamera camera = eyeData.getCamera();
-
-      context.beginEye(eye);
-
-      int width = eyeData.getFrameBuffer().getWidth();
-      int height = eyeData.getFrameBuffer().getHeight();
-      GL41.glViewport(0, 0, width, height);
-
-      GDX3DSceneTools.glClearGray();
-
-      skipHeadset = true;
-      sceneManager.renderToCamera(camera);
-      skipHeadset = false;
-
-      context.endEye();
-   }
-
    public void dispose()
    {
       if (contextCreatedNotification != null && contextInitialized)
@@ -219,18 +183,19 @@ public class GDXVRManager implements RenderableProvider
       }
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (vrEnabled.get() && contextInitialized)
       {
          if (!skipHeadset)
          {
             context.getHeadset(headset -> headset.getModelInstance().getRenderables(renderables, pool));
+            context.getHeadsetCoordinateFrame().getRenderables(renderables, pool);
          }
          for (RobotSide side : RobotSide.values)
          {
             context.getController(side, controller -> controller.getModelInstance().getRenderables(renderables, pool));
+            context.getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
          }
          context.getBaseStations(baseStation ->
          {
