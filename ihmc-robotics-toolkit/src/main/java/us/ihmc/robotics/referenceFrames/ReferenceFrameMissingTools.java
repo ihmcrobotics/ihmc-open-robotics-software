@@ -22,6 +22,7 @@ public class ReferenceFrameMissingTools
     * @param transformToParent the transform that can be used to transform a geometry object the new
     *                          frame to its parent frame. Not modified.
     * @return the new reference frame.
+    * @deprecated Use {@link us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools#constructFrameWithChangingTransformToParent} instead.
     */
    public static ReferenceFrame constructFrameWithChangingTransformToParent(String frameName,
                                                                             ReferenceFrame parentFrame,
