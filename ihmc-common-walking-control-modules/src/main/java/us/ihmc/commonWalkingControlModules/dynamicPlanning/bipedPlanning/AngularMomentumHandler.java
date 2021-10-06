@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateBasics;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingCoPTrajectoryGeneratorState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -79,14 +78,6 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
    }
 
    public void solveForAngularMomentumTrajectory(CoPTrajectoryGeneratorState state,
-                                                 List<? extends TimeIntervalProvider> timeIntervals,
-                                                 MultipleSegmentPositionTrajectoryGenerator<?> comTrajectory)
-   {
-      angularMomentumCalculator.predictFootTrajectories(state);
-      angularMomentumCalculator.computeAngularMomentumTrajectories(timeIntervals, comTrajectory);
-   }
-
-   public void solveForAngularMomentumTrajectory(JumpingCoPTrajectoryGeneratorState state,
                                                  List<? extends TimeIntervalProvider> timeIntervals,
                                                  MultipleSegmentPositionTrajectoryGenerator<?> comTrajectory)
    {
