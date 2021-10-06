@@ -11,6 +11,7 @@ import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.nio.IntBuffer;
@@ -64,6 +65,10 @@ public class GDXVRDevice
    {
       pose.setReferenceFrame(vrPlayAreaFrame);
       GDXTools.toEuclid(openVRRigidBodyTransform, pose);
+//      GDXVRContext.openVRYUpToIHMCZUpSpace.getRotation().transform(pose.getOrientation());
+//      pose.applyInverseTransform(GDXVRContext.openVRYUpToIHMCZUpSpace);
+      pose.changeFrame(ReferenceFrame.getWorldFrame());
+      //      pose.appendTransform(GDXVRContext.openVRYUpToIHMCZUpSpace);
 
       // update model instance
       if (modelInstance != null)

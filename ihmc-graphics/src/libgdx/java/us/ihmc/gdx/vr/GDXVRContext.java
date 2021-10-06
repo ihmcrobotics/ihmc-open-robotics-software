@@ -6,6 +6,7 @@ import java.nio.IntBuffer;
 import java.util.*;
 import java.util.function.Consumer;
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
@@ -15,14 +16,12 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.GdxRuntimeException;
@@ -30,12 +29,15 @@ import com.badlogic.gdx.utils.ObjectMap;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -57,7 +59,7 @@ public class GDXVRContext
    private final IntBuffer heightPointer = BufferUtils.newIntBuffer(1);
 
    // per eye data such as rendering surfaces, textures, regions, cameras etc. for each eye
-   private final SideDependentList<GDXVRPerEyeData> perEyeData = new SideDependentList<>();
+   private final SideDependentList<GDXVREye> eyes = new SideDependentList<>();
 
    // internal native objects to get device poses
    private TrackedDevicePose.Buffer trackedDevicePoses;
@@ -65,6 +67,9 @@ public class GDXVRContext
 
    // devices, their poses and listeners
    private final GDXVRDevice[] devices = new GDXVRDevice[VR.k_unMaxTrackedDeviceCount];
+   private final RigidBodyTransform tempHeadsetTransform = new RigidBodyTransform();
+   private ModelInstance headsetCoordinateFrame;
+
    {
       Arrays.fill(devices, null); // null means device is not connected
    }
@@ -82,7 +87,6 @@ public class GDXVRContext
 
    // book keeping
    private RobotSide currentEye = null;
-   private boolean renderingStarted = false;
    private boolean initialDevicesReported = false;
 
    // ReferenceFrame.getWorldFrame() is Z-up frame
@@ -91,7 +95,7 @@ public class GDXVRContext
    // your thumb is pointing at your face and your index finger pointing right
    // The default orientation of the IHMC Zup frame is such that
    // your thumb is up and your index finger is pointing away from you
-   private final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(
+   public static final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(
          new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
             Math.toRadians(-90.0),  // rotating around thumb, index goes forward to right
             Math.toRadians(0.0),    // no rotation about middle finger
@@ -104,9 +108,9 @@ public class GDXVRContext
    private final RigidBodyTransform totalTransformFromVRPlayAreaToIHMCZUpWorld = new RigidBodyTransform();
    /** The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame. */
    private final ReferenceFrame vrPlayAreaYUpZBackFrame
-         = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("vrPlayAreaFrame",
-                                                                                  ReferenceFrame.getWorldFrame(),
-                                                                                  totalTransformFromVRPlayAreaToIHMCZUpWorld);
+         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("vrPlayAreaFrame",
+                                                                           ReferenceFrame.getWorldFrame(),
+                                                                           totalTransformFromVRPlayAreaToIHMCZUpWorld);
    private final ResettableExceptionHandlingExecutorService waitGetPosesExecutor = MissingThreadTools.newSingleThreadExecutor("PoseWaiterOnner", true, 1);
    private final Notification posesReady = new Notification();
 
@@ -144,21 +148,11 @@ public class GDXVRContext
    public void setupEyes()
    {
       LogTools.info("VR per eye render size: {} x {}", width, height);
-      setupEye(RobotSide.LEFT);
-      setupEye(RobotSide.RIGHT);
-   }
-
-   private void setupEye(RobotSide eye)
-   {
-      boolean hasDepth = true;
-      boolean hasStencil = false;
-      FrameBuffer buffer = new FrameBuffer(Format.RGBA8888, width, height, hasDepth, hasStencil);
-      TextureRegion region = new TextureRegion(buffer.getColorBufferTexture());
-      region.flip(false, true);
-      GDXVRCamera camera = new GDXVRCamera(eye, () -> devices[headsetIndex], width, height);
-      camera.near = 0.1f;
-      camera.far = 1000f;
-      perEyeData.set(eye, new GDXVRPerEyeData(buffer, region, camera));
+      for (RobotSide side : RobotSide.values)
+      {
+         eyes.set(side, new GDXVREye(side, () -> devices[headsetIndex], vrPlayAreaYUpZBackFrame, width, height));
+      }
+      headsetCoordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.3);
    }
 
    private void checkInitError(IntBuffer errorBuffer)
@@ -169,11 +163,7 @@ public class GDXVRContext
          throw new GdxRuntimeException("VR Initialization error: " + VR.VR_GetVRInitErrorAsEnglishDescription(error));
       }
    }
-   /**
-    * Get the latest tracking data and send events to {@link GDXVRDeviceListener} instance registered with the context.
-    * <p>
-    * Must be called before begin!
-    */
+   /** Must be called before begin! */
    public boolean pollEvents()
    {
       // Waiting for the poses on a thread allows for the rest of the application to keep
@@ -200,8 +190,8 @@ public class GDXVRContext
             initialDevicesReported = true;
          }
 
-         // cache the devices; don't iterate over 64 every time?
-         // maybe do it at a lower frequency just to catch new devices?
+         // TODO: cache the devices; don't iterate over 64 every time?
+         // TODO: maybe do it at a lower frequency just to catch new devices?
          for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
          {
             GDXVRDevice device = devices[deviceIndex];
@@ -219,6 +209,14 @@ public class GDXVRContext
                device.updatePoseInTrackerFrame(openVRRigidBodyTransform, vrPlayAreaYUpZBackFrame);
             }
          }
+
+         getHeadset(headset ->
+         {
+            headset.getPose().changeFrame(ReferenceFrame.getWorldFrame());
+            headset.getPose().get(tempHeadsetTransform);
+            GDXTools.toGDX(tempHeadsetTransform, headsetCoordinateFrame.transform);
+            headset.getPose(ReferenceFrame.getWorldFrame(), headsetCoordinateFrame.transform);
+         });
 
          for (RobotSide side : RobotSide.values)
          {
@@ -344,69 +342,29 @@ public class GDXVRContext
    }
 
    /**
-    * Start rendering. Call beginEye to setup rendering
-    * for each individual eye. End rendering by calling
-    * #end
-    */
-   public void begin()
-   {
-      if (renderingStarted)
-         throw new GdxRuntimeException("Last begin() call not completed, call end() before starting a new render");
-      renderingStarted = true;
-
-      perEyeData.get(RobotSide.LEFT).getCamera().update();
-      perEyeData.get(RobotSide.RIGHT).getCamera().update();
-   }
-
-   /**
-    * Start rendering to the rendering surface for the given eye.
-    * Complete by calling {@link #endEye()}.
-    */
-   public void beginEye(RobotSide eye)
-   {
-      if (!renderingStarted)
-         throw new GdxRuntimeException("Call begin() before calling beginEye()");
-      if (currentEye != null)
-         throw new GdxRuntimeException("Last beginEye() call not completed, call endEye() before starting a new render");
-      currentEye = eye;
-      perEyeData.get(eye).getFrameBuffer().begin();
-   }
-
-   /**
-    * Completes rendering to the rendering surface for the given eye.
-    */
-   public void endEye()
-   {
-      if (currentEye == null)
-         throw new GdxRuntimeException("Call beginEye() before endEye()");
-      perEyeData.get(currentEye).getFrameBuffer().end();
-      currentEye = null;
-   }
-
-   /**
     * Completes rendering and submits the rendering surfaces to the
     * head mounted display.
     */
-   public void end()
+   public void renderEyes(GDX3DSceneManager sceneManager)
    {
-      if (!renderingStarted)
-         throw new GdxRuntimeException("Call begin() before end()");
-      renderingStarted = false;
+      for (RobotSide side : RobotSide.values)
+      {
+         eyes.get(side).render(sceneManager);
+      }
 
-//      eyeUpdateExecutor.clearQueueAndExecute(() ->
-//      {
-         // TODO: Look into doing these submits in parallel; they are expensive
-         VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Left, perEyeData.get(RobotSide.LEFT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
-         VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Right, perEyeData.get(RobotSide.RIGHT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
-//      });
-      GL41.glFlush();
+      // These lines take some time
+      // TODO: Do anti aliasing and set EVRSubmitFlags_Submit_GlRenderBuffer
+      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Left, eyes.get(RobotSide.LEFT).getOpenVRTexture(), null, VR.EVRSubmitFlags_Submit_Default);
+      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Right, eyes.get(RobotSide.RIGHT).getOpenVRTexture(), null, VR.EVRSubmitFlags_Submit_Default);
+      GL41.glFlush(); // recommended by OpenVR docs. Needed?
    }
 
    public void dispose()
    {
-      for (GDXVRPerEyeData eyeData : perEyeData)
+      for (GDXVREye eyeData : eyes)
          eyeData.getFrameBuffer().dispose();
 
+      waitGetPosesExecutor.destroy();
       // TODO: Dispose models
 
       VR_ShutdownInternal();
@@ -539,6 +497,11 @@ public class GDXVRContext
       }
    }
 
+   public ModelInstance getHeadsetCoordinateFrame()
+   {
+      return headsetCoordinateFrame;
+   }
+
    public boolean isHeadsetConnected()
    {
       return headsetIndex != null;
@@ -560,9 +523,9 @@ public class GDXVRContext
       }
    }
 
-   public SideDependentList<GDXVRPerEyeData> getPerEyeData()
+   public SideDependentList<GDXVREye> getEyes()
    {
-      return perEyeData;
+      return eyes;
    }
 
    public ReferenceFrame getVRPlayAreaFrame()
