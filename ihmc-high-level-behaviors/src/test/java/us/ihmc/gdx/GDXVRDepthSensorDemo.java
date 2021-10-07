@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -36,6 +37,7 @@ public class GDXVRDepthSensorDemo
    private final ImBoolean enablePointCloudRender = new ImBoolean(true);
    private final ImBoolean useSensorColor = new ImBoolean(false);
    private final ImBoolean useGizmoToPoseSensor = new ImBoolean(false);
+   private final ImFloat pointSize = new ImFloat(0.01f);
    private final float[] color = new float[4];
    private final GDXPose3DGizmo gizmo = new GDXPose3DGizmo();
 
@@ -134,6 +136,7 @@ public class GDXVRDepthSensorDemo
             {
                depthSensorSimulator.render(baseUI.get3DSceneManager());
 
+               pointCloudRenderer.setPointScale(pointSize.get());
                if (useSensorColor.get())
                {
                   pointCloudRenderer.updateMesh(depthSensorSimulator.getPoints(), depthSensorSimulator.getColors());
@@ -154,6 +157,7 @@ public class GDXVRDepthSensorDemo
             ImGui.checkbox("Enable point cloud", enablePointCloudRender);
             ImGui.checkbox("Use Gizmo to pose sensor", useGizmoToPoseSensor);
             ImGui.checkbox("Use Sensor Color", useSensorColor);
+            ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.02f);
             ImGui.colorPicker4("Color", color);
          }
 
