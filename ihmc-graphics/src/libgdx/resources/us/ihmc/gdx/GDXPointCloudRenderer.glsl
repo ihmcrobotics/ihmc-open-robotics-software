@@ -15,12 +15,21 @@ uniform int u_multiColor;
 
 void main()
 {
-	float halfSize = 0.5 * a_size;
+//	float halfSize = 0.5 * a_size;
+//	vec4 pointInCameraFrame = u_viewTrans * vec4(a_position, 1);
+//	vec4 cornerPositionInScreen = u_projTrans * vec4(halfSize, halfSize, pointInCameraFrame.z, pointInCameraFrame.w);
+////	gl_PointSize = u_screenWidth * cornerPositionInScreen.x / cornerPositionInScreen.w;
+////	gl_PointSize = u_screenWidth / 100.0;
+//	gl_PointSize = cornerPositionInScreen.x;
+////	gl_PointSize = cornerPositionInScreen.x / cornerPositionInScreen.w;
+
 	vec4 pointInCameraFrame = u_viewTrans * vec4(a_position, 1);
-	vec4 cornerPositionInScreen = u_projTrans * vec4(halfSize, halfSize, pointInCameraFrame.z, pointInCameraFrame.w);
-//	gl_PointSize = u_screenWidth * cornerPositionInScreen.x / cornerPositionInScreen.w;
-	gl_PointSize = 1.0;
+	vec4 projectedSpriteCorner = abs(u_projTrans * vec4(a_size, a_size, pointInCameraFrame.z, pointInCameraFrame.w));
+	vec2 projectedSize = u_screenWidth * projectedSpriteCorner.xy / projectedSpriteCorner.w;
+	gl_PointSize = 0.25 * (projectedSize.x + projectedSize.y);
+
 	gl_Position = u_projTrans * pointInCameraFrame;
+//	gl_Position = u_projTrans * vec4(halfSize, halfSize, pointInCameraFrame.z, pointInCameraFrame.w);;
 
 	v_color = a_color;
 }
