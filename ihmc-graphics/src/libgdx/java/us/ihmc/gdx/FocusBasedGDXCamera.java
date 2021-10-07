@@ -46,7 +46,7 @@ public class FocusBasedGDXCamera extends Camera
 
    private final RotationMatrix cameraOrientationOffset = new RotationMatrix();
 
-   private float fieldOfView;
+   private float verticalFieldOfView;
 
    private double zoomSpeedFactor = 0.1;
    private double latitudeSpeed = 0.005;
@@ -78,12 +78,13 @@ public class FocusBasedGDXCamera extends Camera
    public FocusBasedGDXCamera(ReferenceFrame libGDXYUpFrame)
    {
       this.libGDXYUpFrame = libGDXYUpFrame;
-      fieldOfView = 45.0f;
+      verticalFieldOfView = 45.0f;
       viewportWidth = Gdx.graphics.getWidth();
       viewportHeight = Gdx.graphics.getHeight();
       near = 0.05f;
       far = 2000.0f;
 
+      // TODO: Explain what's going on here
       cameraOffsetUp = new Vector3D(0.0, 0.0, 1.0);
       cameraOffsetForward = new Vector3D(1.0, 0.0, 0.0);
       cameraOffsetLeft = new Vector3D();
@@ -314,11 +315,13 @@ public class FocusBasedGDXCamera extends Camera
 
    final Vector3 tmp = new Vector3();
 
+   /** https://glprogramming.com/red/appendixf.html */
    @Override
    public void update(boolean updateFrustum)
    {
-      float aspect = viewportWidth / viewportHeight;
-      projection.setToProjection(Math.abs(near), Math.abs(far), fieldOfView, aspect);
+      float widthOverHeightRatio = viewportWidth / viewportHeight;
+      projection.setToProjection(Math.abs(near), Math.abs(far), verticalFieldOfView, widthOverHeightRatio);
+      // TODO: It'd be nice to switch to projection and view matrices with friendlier frames
       view.setToLookAt(position, tmp.set(position).add(direction), up);
       combined.set(projection);
       Matrix4.mul(combined.val, view.val);
