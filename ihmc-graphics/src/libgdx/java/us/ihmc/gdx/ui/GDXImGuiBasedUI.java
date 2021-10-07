@@ -238,6 +238,7 @@ public class GDXImGuiBasedUI
          imGuiInputProcessor.accept(inputCalculator);
       }
 
+      // Allows for dynamically resizing the 3D view panel. Grows by 2x when needed, but never shrinks.
       if (frameBuffer == null || frameBuffer.getWidth() < renderSizeX || frameBuffer.getHeight() < renderSizeY)
       {
          if (frameBuffer != null)
