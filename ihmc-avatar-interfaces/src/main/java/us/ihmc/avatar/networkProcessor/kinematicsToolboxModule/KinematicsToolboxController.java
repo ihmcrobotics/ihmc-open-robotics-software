@@ -133,7 +133,7 @@ public class KinematicsToolboxController extends ToolboxController
     * joints that are not handled by this solver.
     */
    private final OneDoFJointBasics[] oneDoFJoints;
-   private final Collection<? extends RigidBodyBasics> controllableRigidBodies;
+   private final List<? extends RigidBodyBasics> controllableRigidBodies;
 
    /**
     * Reference frame centered at the robot's center of mass. It is used to hold the initial center of
@@ -364,7 +364,7 @@ public class KinematicsToolboxController extends ToolboxController
       this.commandInputManager = commandInputManager;
       this.rootJoint = rootJoint;
       this.oneDoFJoints = oneDoFJoints;
-      this.controllableRigidBodies = controllableRigidBodies;
+      this.controllableRigidBodies = new ArrayList<>(controllableRigidBodies);
       this.updateDT = updateDT;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
@@ -1397,7 +1397,7 @@ public class KinematicsToolboxController extends ToolboxController
       return oneDoFJoints;
    }
 
-   public Collection<? extends RigidBodyBasics> getControllableRigidBodies()
+   public List<? extends RigidBodyBasics> getControllableRigidBodies()
    {
       return controllableRigidBodies;
    }

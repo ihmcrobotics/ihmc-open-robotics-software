@@ -269,7 +269,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
       toolboxRegistry = new YoRegistry("toolboxMain");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel));
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,
