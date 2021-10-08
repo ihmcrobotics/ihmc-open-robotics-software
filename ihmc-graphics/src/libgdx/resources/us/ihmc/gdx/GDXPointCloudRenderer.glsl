@@ -23,10 +23,24 @@ void main()
 //	gl_PointSize = cornerPositionInScreen.x;
 ////	gl_PointSize = cornerPositionInScreen.x / cornerPositionInScreen.w;
 
+	//	vec2 projectedSize = u_screenWidth * projectedSpriteCorner.xy / projectedSpriteCorner.w;
+	//	gl_PointSize = 0.25 * (projectedSize.x + projectedSize.y);
+
 	vec4 pointInCameraFrame = u_viewTrans * vec4(a_position, 1);
-	vec4 projectedSpriteCorner = abs(u_projTrans * vec4(a_size, a_size, pointInCameraFrame.z, pointInCameraFrame.w));
-	vec2 projectedSize = u_screenWidth * projectedSpriteCorner.xy / projectedSpriteCorner.w;
-	gl_PointSize = 0.25 * (projectedSize.x + projectedSize.y);
+	vec4 projectedSpriteCornerZero = u_projTrans * vec4(0.0, 0.0, pointInCameraFrame.z, pointInCameraFrame.w);
+	// In VR, this value should be 0 but isn't for either the right or left eyes. Smoking gun. Not sure yet. TODO: Fix
+	float shouldBeZeroButIsntSometimes = u_screenWidth * projectedSpriteCornerZero.x / projectedSpriteCornerZero.w;
+
+	vec4 projectedSpriteCorner = u_projTrans * vec4(a_size, a_size, pointInCameraFrame.z, pointInCameraFrame.w);
+	float projectedSize = u_screenWidth * projectedSpriteCorner.x / projectedSpriteCorner.w;
+	if (shouldBeZeroButIsntSometimes >= 0.0)
+	{
+		gl_PointSize = 0.5 * (projectedSize - shouldBeZeroButIsntSometimes);
+	}
+    else // in VR right eye
+	{
+		gl_PointSize = 0.5 * abs(shouldBeZeroButIsntSometimes - projectedSize);
+	}
 
 	gl_Position = u_projTrans * pointInCameraFrame;
 //	gl_Position = u_projTrans * vec4(halfSize, halfSize, pointInCameraFrame.z, pointInCameraFrame.w);;
