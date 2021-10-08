@@ -13,7 +13,11 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.shader.GDXShader;
 import us.ihmc.gdx.shader.GDXUniform;
 
+import java.nio.Buffer;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class GDXPointCloudRenderer implements RenderableProvider
 {
@@ -147,6 +151,18 @@ public class GDXPointCloudRenderer implements RenderableProvider
       {
          renderable.meshPart.update();
       }
+   }
+
+   public void updateMeshFastest(Function<FloatBuffer, Integer> bufferConsumer)
+   {
+      FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
+      floatBuffer.position(0);
+      floatBuffer.limit(floatBuffer.capacity());
+      int numberOfPoints = bufferConsumer.apply(floatBuffer);
+      floatBuffer.position(0);
+      floatBuffer.limit(numberOfPoints * floatsPerVertex);
+      renderable.meshPart.size = numberOfPoints;
+      renderable.meshPart.update();
    }
 
    public float[] getVerticesArray()
