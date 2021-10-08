@@ -38,7 +38,7 @@ public class GDXVRDepthSensorDemo
    private final ImBoolean useSensorColor = new ImBoolean(false);
    private final ImBoolean useGizmoToPoseSensor = new ImBoolean(false);
    private final ImFloat pointSize = new ImFloat(0.01f);
-   private final float[] color = new float[4];
+   private final float[] color = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
    private final GDXPose3DGizmo gizmo = new GDXPose3DGizmo();
 
    public GDXVRDepthSensorDemo()
