@@ -23,6 +23,8 @@ import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.nio.FloatBuffer;
+
 import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class GDXVRDepthSensorDemo
@@ -40,6 +42,7 @@ public class GDXVRDepthSensorDemo
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final float[] color = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
    private final GDXPose3DGizmo gizmo = new GDXPose3DGizmo();
+   private final Color pointColorFromPicker = new Color();
 
    public GDXVRDepthSensorDemo()
    {
@@ -134,28 +137,19 @@ public class GDXVRDepthSensorDemo
 
             if (enablePointCloudRender.get())
             {
-               pointCloudRenderer.updateMeshFastest(pointCloudBuffer ->
-               {
-                  Color pointColor = useSensorColor.get() ? null : new Color(color[0], color[1], color[2], color[3]);
-                  depthSensorSimulator.render(baseUI.get3DSceneManager(), pointCloudBuffer, pointColor, pointSize.get());
-                  return depthSensorSimulator.getPoints().size();
-               });
-//               depthSensorSimulator.render(baseUI.get3DSceneManager());
-//
-//               pointCloudRenderer.setPointScale(pointSize.get());
-//               if (useSensorColor.get())
-//               {
-//                  pointCloudRenderer.updateMesh(depthSensorSimulator.getPoints(), depthSensorSimulator.getColors());
-//               }
-//               else
-//               {
-//                  pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints(), new Color(color[0], color[1], color[2], color[3]));
-//                  pointCloudRenderer.updateMesh();
-//               }
+               pointCloudRenderer.updateMeshFastest(this::renderPointCloud);
             }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
+         }
+
+         private Integer renderPointCloud(FloatBuffer pointCloudBuffer)
+         {
+            pointColorFromPicker.set(color[0], color[1], color[2], color[3]);
+            Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
+            depthSensorSimulator.render(baseUI.get3DSceneManager(), pointCloudBuffer, pointColor, pointSize.get());
+            return depthSensorSimulator.getPoints().size();
          }
 
          private void renderPointCloudSettings()

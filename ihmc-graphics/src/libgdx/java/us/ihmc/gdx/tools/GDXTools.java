@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.lwjgl.opengl.GLDebugMessageCallback;
 import org.lwjgl.opengl.KHRDebug;
@@ -537,5 +538,19 @@ public class GDXTools
          default:
             return apiUnknownToken(type);
       }
+   }
+
+   public static Pair<String, String> loadCombinedShader(String pathForLoadingFromClasspath)
+   {
+      String combinedString = Gdx.files.classpath(pathForLoadingFromClasspath).readString();
+
+      String vertexMacro = "#type vertex\n";
+      int vertexBegin = combinedString.indexOf(vertexMacro);
+      String fragmentMacro = "#type fragment\n";
+      int fragmentBegin = combinedString.indexOf(fragmentMacro);
+
+      String vertexShader = combinedString.substring(vertexBegin + vertexMacro.length() - 1, fragmentBegin);
+      String fragmentShader = combinedString.substring(fragmentBegin + fragmentMacro.length() - 1);
+      return Pair.of(vertexShader, fragmentShader);
    }
 }

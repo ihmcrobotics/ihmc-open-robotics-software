@@ -3,12 +3,15 @@ package us.ihmc.gdx.shader;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
+import com.badlogic.gdx.graphics.g3d.utils.ShaderProvider;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 
-public class GDXShader
+public class GDXShader implements ShaderProvider
 {
    private final Class<?> clazz;
    private BaseShader baseShader;
@@ -22,15 +25,9 @@ public class GDXShader
    public void create()
    {
       String path = clazz.getName().replace(".", "/") + ".glsl";
-      String combinedString = Gdx.files.classpath(path).readString();
-
-      String vertexMacro = "#type vertex\n";
-      int vertexBegin = combinedString.indexOf(vertexMacro);
-      String fragmentMacro = "#type fragment\n";
-      int fragmentBegin = combinedString.indexOf(fragmentMacro);
-
-      String vertexShader = combinedString.substring(vertexBegin + vertexMacro.length() - 1, fragmentBegin);
-      String fragmentShader = combinedString.substring(fragmentBegin + fragmentMacro.length() - 1);
+      Pair<String, String> shaderStrings = GDXTools.loadCombinedShader(path);
+      String vertexShader = shaderStrings.getLeft();
+      String fragmentShader = shaderStrings.getRight();
       shaderProgram = new ShaderProgram(vertexShader, fragmentShader);
 
       LogTools.info("OpenGL shader compilation output for {}:\n{}", path, shaderProgram.getLog());
@@ -68,5 +65,17 @@ public class GDXShader
    public BaseShader getBaseShader()
    {
       return baseShader;
+   }
+
+   @Override
+   public Shader getShader(Renderable renderable)
+   {
+      return baseShader;
+   }
+
+   @Override
+   public void dispose()
+   {
+      baseShader.dispose();
    }
 }
