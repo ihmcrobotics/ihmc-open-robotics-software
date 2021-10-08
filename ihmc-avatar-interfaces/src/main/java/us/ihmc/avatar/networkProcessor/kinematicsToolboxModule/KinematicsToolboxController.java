@@ -364,7 +364,7 @@ public class KinematicsToolboxController extends ToolboxController
       this.commandInputManager = commandInputManager;
       this.rootJoint = rootJoint;
       this.oneDoFJoints = oneDoFJoints;
-      this.controllableRigidBodies = new ArrayList<>(controllableRigidBodies);
+      this.controllableRigidBodies = controllableRigidBodies == null ? null : new ArrayList<>(controllableRigidBodies);
       this.updateDT = updateDT;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
