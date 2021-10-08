@@ -43,3 +43,19 @@ bool enable_chest_taskspace true
 # Whether the pelvis should be controlled in task-space.
 # Default value is true.
 bool enable_pelvis_taskspace true
+
+# Reference frame in which the controller should be tracking the pose for the left hand as computed by the whole-body IK.
+# Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+int64 left_hand_trajectory_frame_id 83766130
+
+# Reference frame in which the controller should be tracking the pose for the right hand as computed by the whole-body IK.
+# Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+int64 right_hand_trajectory_frame_id 83766130
+
+# Reference frame in which the controller should be tracking the pose for the chest as computed by the whole-body IK.
+# Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+int64 chest_trajectory_frame_id 83766130
+
+# Reference frame in which the controller should be tracking the pose for the pelvis as computed by the whole-body IK.
+# Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+int64 pelvis_trajectory_frame_id 83766130

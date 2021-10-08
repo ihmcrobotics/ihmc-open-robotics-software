@@ -126,6 +126,11 @@ public class KSTStreamingMessageFactory
 
    public void computeHandStreamingMessage(RobotSide robotSide)
    {
+      computeHandStreamingMessage(robotSide, worldFrame);
+   }
+
+   public void computeHandStreamingMessage(RobotSide robotSide, ReferenceFrame trajectoryFrame)
+   {
       checkIfDataHasBeenSet();
 
       // TODO Add the option to define the control frame in the API instead of hardcoding it here.
@@ -135,7 +140,8 @@ public class KSTStreamingMessageFactory
       spatialVelocity(handControlFrame, worldFrame, enableVelocity, desiredSpatialVelocity);
       SE3StreamingMessage handStreamingMessage = select(robotSide, output.getLeftHandStreamingMessage(), output.getRightHandStreamingMessage());
       packCustomControlFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handControlFrame, handStreamingMessage);
-      handStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+      handStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
+      handStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
 
       packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, handStreamingMessage);
 
@@ -194,6 +200,11 @@ public class KSTStreamingMessageFactory
 
    public void computePelvisStreamingMessage()
    {
+      computePelvisStreamingMessage(worldFrame);
+   }
+
+   public void computePelvisStreamingMessage(ReferenceFrame trajectoryFrame)
+   {
       checkIfDataHasBeenSet();
 
       MovingReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
@@ -202,7 +213,8 @@ public class KSTStreamingMessageFactory
       spatialVelocity(pelvisFrame, worldFrame, enableVelocity, desiredSpatialVelocity);
 
       SE3StreamingMessage pelvisStreamingMessage = output.getPelvisStreamingMessage();
-      pelvisStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+      pelvisStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.hashCode());
+      pelvisStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
 
       packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, pelvisStreamingMessage);
 
@@ -214,7 +226,9 @@ public class KSTStreamingMessageFactory
       return robotSide == RobotSide.LEFT ? left : right;
    }
 
-   private static void angularVelocity(MovingReferenceFrame movingFrame, ReferenceFrame outputFrame, boolean enableVelocity,
+   private static void angularVelocity(MovingReferenceFrame movingFrame,
+                                       ReferenceFrame outputFrame,
+                                       boolean enableVelocity,
                                        FrameVector3DBasics angularVelocityToPack)
    {
       if (!enableVelocity)
@@ -228,7 +242,9 @@ public class KSTStreamingMessageFactory
       }
    }
 
-   private static void spatialVelocity(MovingReferenceFrame movingFrame, ReferenceFrame outputFrame, boolean enableVelocity,
+   private static void spatialVelocity(MovingReferenceFrame movingFrame,
+                                       ReferenceFrame outputFrame,
+                                       boolean enableVelocity,
                                        SpatialVectorBasics spatialVelocityToPack)
    {
       if (!enableVelocity)
@@ -255,15 +271,13 @@ public class KSTStreamingMessageFactory
       controlFrame.transformFromThisToDesiredFrame(endEffectorFrame, controlFramePose);
    }
 
-   public static void packSO3TrajectoryPointMessage(Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity,
-                                                    SO3StreamingMessage messageToPack)
+   public static void packSO3TrajectoryPointMessage(Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity, SO3StreamingMessage messageToPack)
    {
       messageToPack.getOrientation().set(orientation);
       messageToPack.getAngularVelocity().set(angularVelocity);
    }
 
-   public static void packSE3TrajectoryPointMessage(Pose3DReadOnly pose, SpatialVectorReadOnly spatialVelocity,
-                                                    SE3StreamingMessage messageToPack)
+   public static void packSE3TrajectoryPointMessage(Pose3DReadOnly pose, SpatialVectorReadOnly spatialVelocity, SE3StreamingMessage messageToPack)
    {
       messageToPack.getPosition().set(pose.getPosition());
       messageToPack.getOrientation().set(pose.getOrientation());
