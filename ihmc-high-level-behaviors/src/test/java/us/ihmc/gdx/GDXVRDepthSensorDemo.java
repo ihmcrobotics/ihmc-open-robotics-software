@@ -134,18 +134,24 @@ public class GDXVRDepthSensorDemo
 
             if (enablePointCloudRender.get())
             {
-               depthSensorSimulator.render(baseUI.get3DSceneManager());
-
-               pointCloudRenderer.setPointScale(pointSize.get());
-               if (useSensorColor.get())
+               pointCloudRenderer.updateMeshFastest(pointCloudBuffer ->
                {
-                  pointCloudRenderer.updateMesh(depthSensorSimulator.getPoints(), depthSensorSimulator.getColors());
-               }
-               else
-               {
-                  pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints(), new Color(color[0], color[1], color[2], color[3]));
-                  pointCloudRenderer.updateMesh();
-               }
+                  Color pointColor = useSensorColor.get() ? null : new Color(color[0], color[1], color[2], color[3]);
+                  depthSensorSimulator.render(baseUI.get3DSceneManager(), pointCloudBuffer, pointColor, pointSize.get());
+                  return depthSensorSimulator.getPoints().size();
+               });
+//               depthSensorSimulator.render(baseUI.get3DSceneManager());
+//
+//               pointCloudRenderer.setPointScale(pointSize.get());
+//               if (useSensorColor.get())
+//               {
+//                  pointCloudRenderer.updateMesh(depthSensorSimulator.getPoints(), depthSensorSimulator.getColors());
+//               }
+//               else
+//               {
+//                  pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints(), new Color(color[0], color[1], color[2], color[3]));
+//                  pointCloudRenderer.updateMesh();
+//               }
             }
 
             baseUI.renderBeforeOnScreenUI();

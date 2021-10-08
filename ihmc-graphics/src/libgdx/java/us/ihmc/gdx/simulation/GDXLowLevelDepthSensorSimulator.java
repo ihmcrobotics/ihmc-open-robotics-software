@@ -122,6 +122,11 @@ public class GDXLowLevelDepthSensorSimulator
 
    public void render(GDX3DSceneManager sceneManager)
    {
+      render(sceneManager, null, null, 0.01f);
+   }
+
+   public void render(GDX3DSceneManager sceneManager, FloatBuffer pointCloudBufferToPack, Color userPointColor, float pointSize)
+   {
       boolean updateThisTick = throttleTimer.isExpired(updatePeriod);
       if (updateThisTick)
          throttleTimer.reset();
@@ -213,6 +218,29 @@ public class GDXLowLevelDepthSensorSimulator
                   noiseVector.normalize();
                   noiseVector.scale((random.nextDouble() - 0.5) * 0.007);
                   point.add(noiseVector);
+
+                  if (pointCloudBufferToPack != null)
+                  {
+                     pointCloudBufferToPack.put(point.getX32());
+                     pointCloudBufferToPack.put(point.getY32());
+                     pointCloudBufferToPack.put(point.getZ32());
+
+                     if (userPointColor != null)
+                     {
+                        pointCloudBufferToPack.put(userPointColor.r);
+                        pointCloudBufferToPack.put(userPointColor.g);
+                        pointCloudBufferToPack.put(userPointColor.b);
+                        pointCloudBufferToPack.put(userPointColor.a);
+                     }
+                     else
+                     {
+                        pointCloudBufferToPack.put(((rawColorReading & 0xff000000) >>> 24) / 255f);
+                        pointCloudBufferToPack.put(((rawColorReading & 0x00ff0000) >>> 16) / 255f);
+                        pointCloudBufferToPack.put(((rawColorReading & 0x0000ff00) >>> 8) / 255f);
+                        pointCloudBufferToPack.put(((rawColorReading & 0x000000ff)) / 255f);
+                     }
+                     pointCloudBufferToPack.put(pointSize);
+                  }
 
                   colors.add(rawColorReading);
                }
