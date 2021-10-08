@@ -30,6 +30,7 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SEVERITY_HIGH;
 import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SEVERITY_LOW;
 
 public class GDXImGuiWindowAndDockSystem
@@ -88,7 +89,7 @@ public class GDXImGuiWindowAndDockSystem
       ImGui.createContext();
 
 //      debugMessageCallback = GLUtil.setupDebugMessageCallback(System.err);
-      debugMessageCallback = GDXTools.setupDebugMessageCallback(GL_DEBUG_SEVERITY_LOW);
+      debugMessageCallback = GDXTools.setupDebugMessageCallback(GL_DEBUG_SEVERITY_HIGH);
 
       final ImGuiIO io = ImGui.getIO();
       io.setIniFilename(null); // We don't want to save .ini file
