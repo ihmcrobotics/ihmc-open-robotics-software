@@ -159,6 +159,20 @@ public class GDXPointCloudRenderer implements RenderableProvider
       floatBuffer.position(0);
       floatBuffer.limit(floatBuffer.capacity());
       int numberOfPoints = bufferConsumer.apply(floatBuffer);
+
+      if (numberOfPoints == 0) // prevents errors when no point are there
+      {
+         numberOfPoints = 1;
+         floatBuffer.put(Float.NaN);
+         floatBuffer.put(Float.NaN);
+         floatBuffer.put(Float.NaN);
+         floatBuffer.put(1.0f);
+         floatBuffer.put(1.0f);
+         floatBuffer.put(1.0f);
+         floatBuffer.put(1.0f);
+         floatBuffer.put(1.0f);
+      }
+
       floatBuffer.position(0);
       floatBuffer.limit(numberOfPoints * floatsPerVertex);
       renderable.meshPart.size = numberOfPoints;
