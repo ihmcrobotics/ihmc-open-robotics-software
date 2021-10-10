@@ -549,8 +549,8 @@ public class GDXTools
       String fragmentMacro = "#type fragment\n";
       int fragmentBegin = combinedString.indexOf(fragmentMacro);
 
-      String vertexShader = combinedString.substring(vertexBegin + vertexMacro.length() - 1, fragmentBegin);
-      String fragmentShader = combinedString.substring(fragmentBegin + fragmentMacro.length() - 1);
+      String vertexShader = combinedString.substring(vertexBegin + vertexMacro.length() - 1, fragmentBegin).trim();
+      String fragmentShader = combinedString.substring(fragmentBegin + fragmentMacro.length() - 1).trim();
       return Pair.of(vertexShader, fragmentShader);
    }
 }
