@@ -11,7 +11,6 @@ import imgui.internal.ImGui;
 import imgui.type.ImFloat;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL41;
-import org.lwjgl.opengl.GL43;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -19,7 +18,6 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.shader.GDXShader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
@@ -68,6 +66,8 @@ public class GDXLowLevelDepthSensorSimulator
 
    private ByteBuffer rawDepthByteBuffer;
    private FloatBuffer rawDepthFloatBuffer;
+   private ByteBuffer processedDepthByteBuffer;
+   private FloatBuffer processedDepthFloatBuffer;
    private FloatBuffer eyeDepthMetersBuffer;
    private ByteBuffer rawColorByteBuffer;
    private IntBuffer rawColorIntBuffer;
@@ -102,18 +102,21 @@ public class GDXLowLevelDepthSensorSimulator
       Pair<String, String> shaderStrings = GDXTools.loadCombinedShader(getClass().getName().replace(".", "/") + ".glsl");
       String vertexShader = shaderStrings.getLeft();
       String fragmentShader = shaderStrings.getRight();
-      modelBatch = new ModelBatch(vertexShader, fragmentShader);
+      modelBatch = new ModelBatch(null, new DepthSensorShaderProvider(vertexShader, fragmentShader), null);
 
       SensorFrameBufferBuilder frameBufferBuilder = new SensorFrameBufferBuilder(imageWidth, imageHeight);
       frameBufferBuilder.addColorTextureAttachment(GL41.GL_RGBA8, GL41.GL_RGBA, GL41.GL_UNSIGNED_BYTE);
       frameBufferBuilder.addDepthTextureAttachment(GL41.GL_DEPTH_COMPONENT32F, GL41.GL_FLOAT);
+      frameBufferBuilder.addColorTextureAttachment(GL41.GL_R32F, GL41.GL_RED, GL41.GL_FLOAT);
       frameBuffer = frameBufferBuilder.build();
-
-      pointCloudBufferId = GL41.glGenBuffers();
-      GL41.glBufferData(pointCloudBufferId, imageWidth * imageHeight * 32, GL41.GL_DYNAMIC_COPY);
+//      frameBufferBuilder.addDepthTextureAttachment(GL41.GL_DEPTH_COMPONENT32F, GL41.GL_FLOAT);
+//      frameBufferBuilder.addFloatAttachment(GL41.GL_R32F, GL41.GL_RED, GL41.GL_FLOAT, false);
 
       rawDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
       rawDepthFloatBuffer = rawDepthByteBuffer.asFloatBuffer();
+
+      processedDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4 * 3);
+      processedDepthFloatBuffer = processedDepthByteBuffer.asFloatBuffer();
 
       rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
       rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
@@ -144,7 +147,6 @@ public class GDXLowLevelDepthSensorSimulator
          return;
 
       frameBuffer.begin();
-      GL41.glBindBuffer(GL43.GL_SHADER_STORAGE_BUFFER, pointCloudBufferId);
 
       float clear = 0.0f;
       GL41.glClearColor(clear, clear, clear, 1.0f);
@@ -158,19 +160,28 @@ public class GDXLowLevelDepthSensorSimulator
 
       modelBatch.end();
 
+      GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT0);
       if (depthEnabled)
       {
          GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read floats
          rawDepthByteBuffer.rewind();
+//         GL41.glReadBuffer(GL41.GL_DEPTH_ATTACHMENT);
+         // Apparently, reading from the depth attachment does not require a glReadBuffer command
          GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_DEPTH_COMPONENT, GL41.GL_FLOAT, rawDepthByteBuffer);
-         GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
       }
-      //      rawColorByteBuffer.rewind();
       GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read ints
       rawColorIntBuffer.rewind();
-      GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT0);
       GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RGBA, GL41.GL_UNSIGNED_INT_8_8_8_8, rawColorIntBuffer);
       GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
+
+      if (depthEnabled)
+      {
+         processedDepthByteBuffer.rewind();
+         GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT1);
+         GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read floats
+         GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RED, GL41.GL_FLOAT, processedDepthByteBuffer);
+         GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
+      }
 
       frameBuffer.end();
 
@@ -181,6 +192,7 @@ public class GDXLowLevelDepthSensorSimulator
       float farPlusNear = camera.far + camera.near;
       float farMinusNear = camera.far - camera.near;
       rawDepthFloatBuffer.rewind();
+      processedDepthFloatBuffer.rewind();
       eyeDepthMetersBuffer.rewind();
       rawColorIntBuffer.rewind();
       if (depthEnabled)
@@ -190,6 +202,9 @@ public class GDXLowLevelDepthSensorSimulator
             for (int x = 0; x < imageWidth; x++)
             {
                float rawDepthReading = rawDepthFloatBuffer.get(); // 0.0 to 1.0
+//               float processedDepthX = processedDepthFloatBuffer.get();
+//               float processedDepthY = processedDepthFloatBuffer.get();
+               float processedDepthZ = processedDepthFloatBuffer.get();
                int rawColorReading = rawColorIntBuffer.get();
                float imageY = (2.0f * y) / imageHeight - 1.0f;
 
@@ -219,6 +234,9 @@ public class GDXLowLevelDepthSensorSimulator
                   depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
                   depthPoint.y = imageY;
                   depthPoint.z = 2.0f * rawDepthReading - 1.0f;
+//                  depthPoint.z = 2.0f * processedDepthZ - 1.0f;
+//                  depthPoint.z = rawDepthReading;
+                  depthPoint.z = processedDepthZ;
                   depthPoint.prj(camera.invProjectionView);
 
                   Point3D32 point = points.add();
