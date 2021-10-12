@@ -371,10 +371,11 @@ public class GDXTools
 
    public static void printGLVersion()
    {
-      String versionString = glfwGetVersionString();
-      LogTools.info("Using OpenGL {}", versionString);
+      String glfwVersionString = glfwGetVersionString();
+      String openGLVersion = glGetString(GL_VERSION);
+      LogTools.info("Using GLFW {}", glfwVersionString);
       GLVersion glVersion = Gdx.graphics.getGLVersion();
-      LogTools.info("Using OpenGL {}", glVersion.getRendererString(), glVersion.getVendorString());
+      LogTools.info("Using OpenGL {} {}", openGLVersion, glVersion.getRendererString(), glVersion.getVendorString());
    }
 
    public static GLProfiler createGLProfiler()
