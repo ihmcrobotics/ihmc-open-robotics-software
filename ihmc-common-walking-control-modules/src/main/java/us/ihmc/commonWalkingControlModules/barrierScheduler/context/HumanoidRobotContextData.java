@@ -119,6 +119,7 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
    {
       processedJointData = new HumanoidRobotContextJointData();
       forceSensorDataHolder = new ForceSensorDataHolder();
+      centerOfMassDataHolder = new CenterOfMassDataHolder();
       centerOfPressureDataHolder = new CenterOfPressureDataHolder();
       robotMotionStatusHolder = new RobotMotionStatusHolder();
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
