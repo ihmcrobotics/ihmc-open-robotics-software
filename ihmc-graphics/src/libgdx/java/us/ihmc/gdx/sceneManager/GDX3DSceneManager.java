@@ -86,7 +86,9 @@ public class GDX3DSceneManager
 
    public void create(GDXInputMode inputMode)
    {
-      glProfiler = GDXTools.createGLProfiler();
+      if (GDXTools.ENABLE_OPENGL_DEBUGGER)
+         glProfiler = GDXTools.createGLProfiler();
+
       GDXTools.syncLogLevelWithLogTools();
 
       camera3D = new FocusBasedGDXCamera(libGDXYUpFrame);
@@ -145,7 +147,8 @@ public class GDX3DSceneManager
       }
       postRender(GDXSceneLevel.VIRTUAL);
 
-      glProfiler.reset();
+      if (GDXTools.ENABLE_OPENGL_DEBUGGER)
+         glProfiler.reset();
    }
 
    // For simulated sensors

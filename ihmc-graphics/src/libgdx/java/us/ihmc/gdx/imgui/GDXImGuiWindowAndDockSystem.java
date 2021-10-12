@@ -31,7 +31,6 @@ import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SEVERITY_HIGH;
-import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SEVERITY_LOW;
 
 public class GDXImGuiWindowAndDockSystem
 {
@@ -70,26 +69,29 @@ public class GDXImGuiWindowAndDockSystem
       {
          throw new IllegalStateException("Unable to initialize GLFW");
       }
-      glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-//               glfwDefaultWindowHints();
-//               if (SystemUtils.IS_OS_MAC) {
-//                  glslVersion = "#version 150";
-//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-//                  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-//                  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL41.GL_TRUE);            // Required on Mac
-//               } else {
-//                  glslVersion = "#version 130";
-//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-//               }
-//
-//               GL.createCapabilities();
+
+      if (GDXTools.ENABLE_OPENGL_DEBUGGER)
+         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+
+      // TODO: Something needed here for Mac support?
+      // glfwDefaultWindowHints();
+      // if (SystemUtils.IS_OS_MAC) {
+      //    glslVersion = "#version 150";
+      //    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+      //    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+      //    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+      //    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL41.GL_TRUE);            // Required on Mac
+      // } else {
+      //    glslVersion = "#version 130";
+      //    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+      //    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+      // }
+      // GL.createCapabilities();
 
       ImGui.createContext();
 
-//      debugMessageCallback = GLUtil.setupDebugMessageCallback(System.err);
-      debugMessageCallback = GDXTools.setupDebugMessageCallback(GL_DEBUG_SEVERITY_HIGH);
+      if (GDXTools.ENABLE_OPENGL_DEBUGGER)
+         debugMessageCallback = GDXTools.setupDebugMessageCallback(GL_DEBUG_SEVERITY_HIGH);
 
       final ImGuiIO io = ImGui.getIO();
       io.setIniFilename(null); // We don't want to save .ini file
