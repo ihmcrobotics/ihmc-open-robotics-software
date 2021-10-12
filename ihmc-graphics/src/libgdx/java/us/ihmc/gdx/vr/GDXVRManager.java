@@ -215,8 +215,8 @@ public class GDXVRManager
       return context;
    }
 
-   public boolean isVREnabled()
+   public ImBoolean getVREnabled()
    {
-      return vrEnabled.get();
+      return vrEnabled;
    }
 }
