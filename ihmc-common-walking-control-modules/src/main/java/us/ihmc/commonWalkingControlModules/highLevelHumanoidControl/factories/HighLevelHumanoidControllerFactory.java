@@ -71,6 +71,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -473,6 +474,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
+      YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
+      YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
+
       CenterOfMassStateProvider centerOfMassStateProvider = new CenterOfMassStateProvider()
       {
          CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
@@ -486,6 +490,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          @Override
          public FramePoint3DReadOnly getCenterOfMassPosition()
          {
+            usingEstimatorCoMPosition.set(centerOfMassDataHolderForController.hasCenterOfMassPosition());
             if (centerOfMassDataHolderForController.hasCenterOfMassPosition())
                return centerOfMassDataHolderForController.getCenterOfMassPosition();
             else
@@ -495,6 +500,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          @Override
          public FrameVector3DReadOnly getCenterOfMassVelocity()
          {
+            usingEstimatorCoMVelocity.set(centerOfMassDataHolderForController.hasCenterOfMassVelocity());
             if (centerOfMassDataHolderForController.hasCenterOfMassVelocity())
                return centerOfMassDataHolderForController.getCenterOfMassVelocity();
             else
