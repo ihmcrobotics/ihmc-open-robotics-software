@@ -80,7 +80,20 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
                             ReferenceFrame sensorFrame,
                             YoRegistry parentRegistry)
    {
-      this(imuName, namePrefix, nameSuffix, updateDT, createYawRateBiasEstimator, sensorFrame, null, null, parentRegistry);
+      this(imuName, namePrefix, nameSuffix, updateDT, createYawRateBiasEstimator, sensorFrame, (DoubleProvider) null, (DoubleProvider) null, parentRegistry);
+   }
+
+   public YoIMUMahonyFilter(String imuName,
+                            String namePrefix,
+                            String nameSuffix,
+                            double updateDT,
+                            boolean createYawRateBiasEstimator,
+                            ReferenceFrame sensorFrame,
+                            DoubleProvider proportionalGain,
+                            DoubleProvider integralGain,
+                            YoRegistry parentRegistry)
+   {
+      this(imuName, namePrefix, nameSuffix, updateDT, createYawRateBiasEstimator, sensorFrame, null, null, proportionalGain, integralGain, parentRegistry);
    }
 
    public YoIMUMahonyFilter(String imuName,
@@ -155,23 +168,23 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       if (proportionalGain == null)
       {
          this.proportionalGain = new YoDouble(namePrefix + "ProportionalGain" + nameSuffix, registry);
-         this.proportionalGainProvider = this.proportionalGain;
+         proportionalGainProvider = this.proportionalGain;
       }
       else
       {
          this.proportionalGain = (proportionalGain instanceof YoDouble) ? (YoDouble) proportionalGain : null;
-         this.proportionalGainProvider = proportionalGain;
+         proportionalGainProvider = proportionalGain;
       }
 
       if (integralGain == null)
       {
          this.integralGain = new YoDouble(namePrefix + "IntegralGain" + nameSuffix, registry);
-         this.integralGainProvider = this.integralGain;
+         integralGainProvider = this.integralGain;
       }
       else
       {
          this.integralGain = (integralGain instanceof YoDouble) ? (YoDouble) integralGain : null;
-         this.integralGainProvider = integralGain;
+         integralGainProvider = integralGain;
       }
 
       zeroLinearAccelerationThreshold = new YoDouble(namePrefix + "ZeroLinearAccelerationThreshold" + nameSuffix, registry);
@@ -192,7 +205,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
    /**
     * Sets the input variables to use when updating this filter.
-    * 
+    *
     * @param inputAngularVelocity    the variable holding the measurements from the gyroscope. Not
     *                                modified.
     * @param inputLinearAcceleration the variable holding the measurements from the accelerometer. Not
@@ -205,7 +218,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
    /**
     * Sets the input variables to use when updating this filter.
-    * 
+    *
     * @param inputAngularVelocity    the variable holding the measurements from the gyroscope. Not
     *                                modified.
     * @param inputLinearAcceleration the variable holding the measurements from the accelerometer. Not
@@ -222,14 +235,14 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       if (inputMagneticVector != null)
          inputMagneticVector.checkReferenceFrameMatch(sensorFrame);
 
-      this.rawAngularVelocity = inputAngularVelocity;
-      this.rawLinearAcceleration = inputLinearAcceleration;
-      this.rawMagneticVector = inputMagneticVector;
+      rawAngularVelocity = inputAngularVelocity;
+      rawLinearAcceleration = inputLinearAcceleration;
+      rawMagneticVector = inputMagneticVector;
    }
 
    /**
     * Sets the gains for this filter.
-    * 
+    *
     * @param proportionalGain gain used to correct the orientation according to the estimated error.
     * @param integralGain     gain used to update the gyroscope bias according to the estimated error.
     */
@@ -241,7 +254,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
    /**
     * Sets the gains for this filter.
-    * 
+    *
     * @param proportionalGain                gain used to correct the orientation according to the
     *                                        estimated error.
     * @param integralGain                    gain used to update the gyroscope bias according to the
@@ -272,7 +285,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
    /**
     * Mostly useful for test purpose, but can be used to reinitilize this filter by giving
     * {@code false}.
-    * 
+    *
     * @param value whether this filter has been initialized or not.
     */
    public void setHasBeenInitialized(boolean value)
@@ -481,7 +494,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
     * If there is no measurement from the magnetometer, i.e. {@code measuredMagneticVector == null},
     * the error is only computed from the accelerometer data.
     * </p>
-    * 
+    *
     * @param orientation    the current estimate of the sensor orientation with respect to world. Not
     *                       modified.
     * @param acceleration   the measurement from the accelerometer. Not modified.
@@ -560,7 +573,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
    /**
     * Computes the rotation matrix describing the orientation of the given x and z axes.
-    * 
+    *
     * @param xAxis             the x-axis to use in the calculation. Not modified.
     * @param zAxis             the z-axis to use in the calculation. Not modified.
     * @param orientationToPack the rotation matrix in which the result is stored. Modified.
