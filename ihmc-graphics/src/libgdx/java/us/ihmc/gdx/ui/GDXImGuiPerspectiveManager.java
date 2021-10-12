@@ -6,6 +6,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 
@@ -29,6 +30,7 @@ public class GDXImGuiPerspectiveManager
    private final Consumer<Boolean> save;
    private HybridDirectory perspectiveDirectory;
    private boolean needToReindexPerspectives = true;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString perspectiveNameToSave = new ImString("", 100);
    private final ImBoolean perspectiveDefaultMode = new ImBoolean(false);
    private final TreeSet<String> perspectives = new TreeSet<>(Comparator.comparing(String::toString));
@@ -84,11 +86,11 @@ public class GDXImGuiPerspectiveManager
          });
       }
 
-      if (ImGui.beginMenu("Perspective"))
+      if (ImGui.beginMenu(labels.get("Perspective")))
       {
          for (String perspective : perspectives)
          {
-            if (ImGui.radioButton(perspective, currentPerspective.equals(perspective)))
+            if (ImGui.radioButton(labels.get(perspective), currentPerspective.equals(perspective)))
             {
                currentPerspective = perspective;
                applyPerspectiveDirectory();
@@ -97,7 +99,7 @@ public class GDXImGuiPerspectiveManager
             if (currentPerspective.equals(perspective))
             {
                ImGui.sameLine();
-               if (ImGui.button("Save"))
+               if (ImGui.button(labels.get("Save", 0)))
                {
                   save.accept(perspectiveDefaultMode.get());
                }
@@ -106,12 +108,12 @@ public class GDXImGuiPerspectiveManager
 
          ImGui.text("Save as:");
          ImGui.sameLine();
-         ImGui.inputText("###", perspectiveNameToSave , ImGuiInputTextFlags.CallbackResize);
+         ImGui.inputText(labels.get("###NewSaveName"), perspectiveNameToSave , ImGuiInputTextFlags.CallbackResize);
          String perpectiveNameToCreateString = perspectiveNameToSave.get();
          if (!perpectiveNameToCreateString.isEmpty())
          {
             ImGui.sameLine();
-            if (ImGui.button("Save"))
+            if (ImGui.button(labels.get("Save", 1)))
             {
                String sanitizedName = perpectiveNameToCreateString.replaceAll(" ", "");
                perspectives.add(sanitizedName);
@@ -124,13 +126,13 @@ public class GDXImGuiPerspectiveManager
 
          ImGui.separator();
          ImGui.text("Save location:");
-         if (ImGui.radioButton("User home###PerspectiveUserHomeMode", !perspectiveDefaultMode.get()))
+         if (ImGui.radioButton(labels.get("User home###PerspectiveUserHomeMode"), !perspectiveDefaultMode.get()))
          {
             perspectiveDefaultMode.set(false);
             needToReindexPerspectives = true;
          }
          ImGui.sameLine();
-         if (ImGui.radioButton("Version control###PerspectiveDefaultMode", perspectiveDefaultMode.get()))
+         if (ImGui.radioButton(labels.get("Version control###PerspectiveDefaultMode"), perspectiveDefaultMode.get()))
          {
             perspectiveDefaultMode.set(true);
             needToReindexPerspectives = true;
