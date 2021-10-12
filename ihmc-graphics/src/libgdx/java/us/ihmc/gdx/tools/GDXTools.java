@@ -43,6 +43,8 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class GDXTools
 {
+   public static boolean ENABLE_OPENGL_DEBUGGER = Boolean.parseBoolean(System.getProperty("enable.opengl.debugger", "false"));
+
    public static void syncLogLevelWithLogTools()
    {
       Gdx.app.setLogLevel(toGDX(LogTools.getLevel()));
