@@ -4,6 +4,7 @@ import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
 import java.nio.IntBuffer;
 import java.util.*;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -169,12 +170,21 @@ public class GDXVRContext
       // Waiting for the poses on a thread allows for the rest of the application to keep
       // cranking faster than VR can do stuff. This also makes the performance graph in Steam
       // show the correct value and the OpenVR stack work much better.
-      waitGetPosesExecutor.clearQueueAndExecute(() ->
+      try
       {
-         VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
-         // VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
-         posesReady.set();
-      });
+         waitGetPosesExecutor.clearQueueAndExecute(() ->
+         {
+            VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
+            // VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
+            posesReady.set();
+         });
+      }
+      catch (RejectedExecutionException rejectedExecutionException)
+      {
+         // TODO: If this happens a lot but is fine, maybe it should be built into ResettableExceptionHandlingExecutorService
+         LogTools.info("Resetting the WaitGetPoses executor.");
+         waitGetPosesExecutor.interruptAndReset();
+      }
 
       if (posesReady.poll())
       {
