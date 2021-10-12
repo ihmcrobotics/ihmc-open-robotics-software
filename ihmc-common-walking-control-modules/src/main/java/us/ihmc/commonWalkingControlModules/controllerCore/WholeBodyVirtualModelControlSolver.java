@@ -73,6 +73,7 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector3D yoDesiredMomentumRateAngular;
    private final YoFrameVector3D yoAchievedMomentumRateAngular;
    private final FrameVector3D achievedMomentumRateLinear = new FrameVector3D();
+   private final FrameVector3D achievedMomentumRateAngular = new FrameVector3D();
 
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector3D residualRootJointForce = new FrameVector3D();
@@ -176,6 +177,7 @@ public class WholeBodyVirtualModelControlSolver
       yoAchievedMomentumRateLinear.setMatchingFrame(centroidalMomentumRateSolution.getLinearPart());
       yoAchievedMomentumRateAngular.setMatchingFrame(centroidalMomentumRateSolution.getAngularPart());
       achievedMomentumRateLinear.setIncludingFrame(yoAchievedMomentumRateLinear);
+      achievedMomentumRateAngular.setIncludingFrame(yoAchievedMomentumRateAngular);
 
       // submit forces for contact forces
       for (int bodyIndex = 0; bodyIndex < rigidBodiesWithExternalWrench.size(); bodyIndex++)
@@ -381,5 +383,10 @@ public class WholeBodyVirtualModelControlSolver
    public FrameVector3DReadOnly getAchievedMomentumRateLinear()
    {
       return achievedMomentumRateLinear;
+   }
+   
+   public FrameVector3DReadOnly getAchievedMomentumRateAngular()
+   {
+      return achievedMomentumRateAngular;
    }
 }

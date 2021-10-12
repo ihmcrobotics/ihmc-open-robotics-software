@@ -138,6 +138,7 @@ public class CrossRobotCommandResolver
    public void resolveControllerCoreOutput(ControllerCoreOutput in, ControllerCoreOutput out)
    {
       resolveFrameTuple3D(in.getLinearMomentumRate(), out.getLinearMomentumRate());
+      resolveFrameTuple3D(in.getAngularMomentumRate(), out.getAngularMomentumRate());
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureData(), out.getCenterOfPressureData());
       resolveDesiredExternalWrenchHolder(in.getDesiredExternalWrenchData(), out.getDesiredExternalWrenchData());
       out.setRootJointDesiredConfigurationData(in.getRootJointDesiredConfigurationData());

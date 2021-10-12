@@ -47,6 +47,24 @@ public interface ControllerCoreOutputReadOnly
     */
    public abstract void getLinearMomentumRate(FrameVector3DBasics linearMomentumRateToPack);
 
+   
+   /**
+    * Retrieves the angular momentum rate obtained after the optimization problem has been solved.
+    * <p>
+    * This is only available for the inverse dynamics as desired joint accelerations are required to
+    * compute the angular momentum rate.
+    * </p>
+    * <p>
+    * It is useful to compare against the desired momentum rate that provided to the controller core as
+    * input.
+    * </p>
+    * 
+    * @param linearMomentumRateToPack the angular momentum rate after optimization.
+    */
+   public abstract void getAngularMomentumRate(FrameVector3DBasics angularMomentumRateToPack);
+
+   
+   
    /**
     * Retrieves the desired state for the root joint.
     * <p>
@@ -68,4 +86,5 @@ public interface ControllerCoreOutputReadOnly
     * @return the desired state of the robot joints.
     */
    public abstract JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder();
+
 }
