@@ -202,6 +202,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          {
             momentumStateUpdater = new DistributedIMUBasedCenterOfMassStateUpdater(rootJoint,
                                                                                    sensorOutputMap.getIMUOutputs(),
+                                                                                   pelvisLinearStateUpdater.getCurrentListOfTrustedFeet(),
                                                                                    estimatorDT,
                                                                                    gravitationalAcceleration,
                                                                                    estimatorCenterOfMassDataHolderToUpdate);
