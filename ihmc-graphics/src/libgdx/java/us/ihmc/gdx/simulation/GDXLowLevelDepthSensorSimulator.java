@@ -55,6 +55,7 @@ public class GDXLowLevelDepthSensorSimulator
    private RecyclingArrayList<Point3D32> points;
    private ArrayList<Integer> colors;
    private boolean colorsAreBeingUsed = true;
+   private boolean eyeMetersIsUsed = true;
    private boolean depthEnabled = true;
 
    private Pixmap depthWindowPixmap;
@@ -167,7 +168,7 @@ public class GDXLowLevelDepthSensorSimulator
          rawDepthByteBuffer.rewind();
 //         GL41.glReadBuffer(GL41.GL_DEPTH_ATTACHMENT);
          // Apparently, reading from the depth attachment does not require a glReadBuffer command
-         GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_DEPTH_COMPONENT, GL41.GL_FLOAT, rawDepthByteBuffer);
+//         GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_DEPTH_COMPONENT, GL41.GL_FLOAT, rawDepthByteBuffer);
       }
       GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read ints
       rawColorIntBuffer.rewind();
@@ -201,21 +202,23 @@ public class GDXLowLevelDepthSensorSimulator
          {
             for (int x = 0; x < imageWidth; x++)
             {
-               float rawDepthReading = rawDepthFloatBuffer.get(); // 0.0 to 1.0
+//               float rawDepthReading = rawDepthFloatBuffer.get(); // 0.0 to 1.0
 //               float processedDepthX = processedDepthFloatBuffer.get();
 //               float processedDepthY = processedDepthFloatBuffer.get();
                float processedDepthZ = processedDepthFloatBuffer.get();
                int rawColorReading = rawColorIntBuffer.get();
                float imageY = (2.0f * y) / imageHeight - 1.0f;
 
+               boolean depthPanelIsUsed = depthPanel.getIsShowing().get();
                // From "How to render depth linearly in modern OpenGL with gl_FragCoord.z in fragment shader?"
                // https://stackoverflow.com/a/45710371/1070333
-               float normalizedDeviceCoordinateZ = 2.0f * rawDepthReading - 1.0f; // -1.0 to 1.0
+//               float normalizedDeviceCoordinateZ = 2.0f * rawDepthReading - 1.0f; // -1.0 to 1.0
+               float normalizedDeviceCoordinateZ = processedDepthZ; // -1.0 to 1.0
                float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear)); // in meters
                eyeDepth += imageY * depthPitchTuner.get();
                eyeDepthMetersBuffer.put(eyeDepth);
 
-               if (depthPanel.getIsShowing().get())
+               if (depthPanelIsUsed)
                {
                   if (highestValueSeen < 0 || eyeDepth > highestValueSeen)
                      highestValueSeen = eyeDepth;
@@ -233,7 +236,7 @@ public class GDXLowLevelDepthSensorSimulator
                {
                   depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
                   depthPoint.y = imageY;
-                  depthPoint.z = 2.0f * rawDepthReading - 1.0f;
+//                  depthPoint.z = 2.0f * rawDepthReading - 1.0f;
 //                  depthPoint.z = 2.0f * processedDepthZ - 1.0f;
 //                  depthPoint.z = rawDepthReading;
                   depthPoint.z = processedDepthZ;
@@ -281,6 +284,7 @@ public class GDXLowLevelDepthSensorSimulator
       }
 
       colorsAreBeingUsed = false;
+      eyeMetersIsUsed = false;
    }
 
    public void renderTuningSliders()
@@ -310,6 +314,7 @@ public class GDXLowLevelDepthSensorSimulator
 
    public FloatBuffer getEyeDepthMetersBuffer()
    {
+      eyeMetersIsUsed = true;
       return eyeDepthMetersBuffer;
    }
 

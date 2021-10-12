@@ -449,18 +449,7 @@ void main() {
     out_color.a = 1.0;
     #endif
 
-    gl_FragCoord.x;
-
-//    out_processedDepth.x = 1.0;
-//    out_processedDepth.y = 1.0;
-////    out_processedDepth.z = 1.0;
-//    out_processedDepth.z = 2.0 * out_depth - 1.0;
-//    out_processedDepth = 4.0 * out_depth - 1.0;
-    out_processedDepth = gl_FragCoord.z;
-    out_processedDepth = 2.0 * gl_FragCoord.z - 1.0;
-//    out_processedDepth = 1.0;
-//    out_processedDepth = 0.9;
-//    out_processedDepth = 0.7;
+    out_processedDepth = 2.0 * gl_FragCoord.z - 1.0; // Normalized to -1.0 to 1.0
 }
 
 
