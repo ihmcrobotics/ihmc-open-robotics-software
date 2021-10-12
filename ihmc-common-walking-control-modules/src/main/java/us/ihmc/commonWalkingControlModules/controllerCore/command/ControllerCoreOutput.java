@@ -38,8 +38,10 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
     * its data. This constructor should be removed after the thread refactor summer 2019.
     */
    @Deprecated
-   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder, DesiredExternalWrenchHolder desiredExternalWrenchHolder,
-                               OneDoFJointBasics[] controlledOneDoFJoints, JointDesiredOutputList lowLevelControllerOutput)
+   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder,
+                               DesiredExternalWrenchHolder desiredExternalWrenchHolder,
+                               OneDoFJointBasics[] controlledOneDoFJoints,
+                               JointDesiredOutputList lowLevelControllerOutput)
    {
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       this.desiredExternalWrenchHolder = desiredExternalWrenchHolder;
@@ -117,19 +119,18 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    {
       return linearMomentumRate;
    }
-   
-   
+
    public void setAngularMomentumRate(FrameVector3DReadOnly angularMomentumRate)
    {
-      this.angularMomentumRate.set(angularMomentumRate);
+      this.angularMomentumRate.setIncludingFrame(angularMomentumRate);
    }
-   
+
    @Override
    public void getAngularMomentumRate(FrameVector3DBasics angularMomentumRateToPack)
    {
       angularMomentumRateToPack.set(angularMomentumRate);
    }
-   
+
    public FrameVector3D getAngularMomentumRate()
    {
       return angularMomentumRate;
@@ -175,6 +176,7 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       centerOfPressureDataHolder.set(other.centerOfPressureDataHolder);
       desiredExternalWrenchHolder.set(other.desiredExternalWrenchHolder);
       linearMomentumRate.setIncludingFrame(other.linearMomentumRate);
+      angularMomentumRate.setIncludingFrame(other.angularMomentumRate);
       rootJointDesiredConfigurationData.set(other.rootJointDesiredConfigurationData);
       lowLevelOneDoFJointDesiredDataHolder.set(other.lowLevelOneDoFJointDesiredDataHolder);
    }
@@ -197,6 +199,8 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
          if (!desiredExternalWrenchHolder.equals(other.desiredExternalWrenchHolder))
             return false;
          if (!linearMomentumRate.equals(other.linearMomentumRate))
+            return false;
+         if (!angularMomentumRate.equals(other.angularMomentumRate))
             return false;
          if (!rootJointDesiredConfigurationData.equals(other.rootJointDesiredConfigurationData))
             return false;
