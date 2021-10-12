@@ -128,7 +128,7 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    @Override
    public void getAngularMomentumRate(FrameVector3DBasics angularMomentumRateToPack)
    {
-      angularMomentumRateToPack.set(angularMomentumRate);
+      angularMomentumRateToPack.setIncludingFrame(angularMomentumRate);
    }
 
    public FrameVector3D getAngularMomentumRate()
