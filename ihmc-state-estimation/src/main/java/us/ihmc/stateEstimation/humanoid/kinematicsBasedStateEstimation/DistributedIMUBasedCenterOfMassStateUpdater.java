@@ -8,7 +8,6 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
@@ -30,8 +29,8 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -50,7 +49,6 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final BooleanProvider cancelGravityFromAccelerationMeasurement;
    private final YoDouble linearVelocityKp, linearVelocityKi;
    private final YoDouble positionKp, positionKi;
    private final YoDouble orientationKp, orientationKi;
@@ -60,7 +58,6 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
    private final RigidBodyStateEstimator[] estimators;
 
    private final FrameVector3D gravityVector = new FrameVector3D();
-   private final IMUBiasProvider imuBiasProvider;
 
    private final YoFramePoint3D estimatedCoMPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
    private final YoFrameVector3D estimatedCoMVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
@@ -70,17 +67,18 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
    private final YoFrameVector3D rawCoMVelocity;
    private final CenterOfMassDataHolder centerOfMassDataHolder;
 
+   private final YoBoolean initialized = new YoBoolean("distIMUCoMEstimatorInitialized", registry);
+   private final YoBoolean enableOutput = new YoBoolean("distIMUCoMEstimatorEnableOutput", registry);
+   private final double gravitationalAcceleration;
+
    public DistributedIMUBasedCenterOfMassStateUpdater(FloatingJointReadOnly rootJoint,
                                                       List<? extends IMUSensorReadOnly> imuSensors,
                                                       double dt,
-                                                      BooleanProvider cancelGravityFromAccelerationMeasurement,
                                                       double gravitationalAcceleration,
-                                                      IMUBiasProvider imuBiasProvider,
                                                       CenterOfMassDataHolder centerOfMassDataHolder)
    {
       this.dt = dt;
-      this.cancelGravityFromAccelerationMeasurement = cancelGravityFromAccelerationMeasurement;
-      this.imuBiasProvider = imuBiasProvider;
+      this.gravitationalAcceleration = gravitationalAcceleration;
       this.centerOfMassDataHolder = centerOfMassDataHolder;
 
       linearVelocityKp = new YoDouble("linearVelocityKp", registry);
@@ -103,13 +101,20 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
 
       for (IMUSensorReadOnly imuSensor : imuSensors)
       {
-         if (imuSensorMap.containsKey(imuSensor.getMeasurementLink()))
+         RigidBodyBasics body = imuSensor.getMeasurementLink();
+         if (imuSensorMap.containsKey(body))
          {
-            LogTools.warn("Already have an IMU for " + imuSensor.getMeasurementLink() + ", ignoring IMU: " + imuSensor.getSensorName());
+            LogTools.warn("Already have an IMU for {}, ignoring IMU: {}", body, imuSensor.getSensorName());
             continue;
          }
 
-         imuSensorMap.put(imuSensor.getMeasurementLink(), imuSensor);
+         if (body.getName().toLowerCase().contains("foot"))
+         {
+            LogTools.warn("Ignoring IMU: {}", imuSensor.getSensorName());
+            continue;
+         }
+
+         imuSensorMap.put(body, imuSensor);
       }
 
       rootEstimator = new RigidBodyStateEstimator(null, rootJoint.getSuccessor(), null);
@@ -147,15 +152,27 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
    @Override
    public void initialize()
    {
+   }
+
+   private boolean initializeInternal()
+   {
+      if (initialized.getValue())
+         return false;
+
       for (RigidBodyStateEstimator estimator : estimators)
       {
          estimator.initialize();
       }
+      initialized.set(true);
+      return true;
    }
 
    @Override
    public void update()
    {
+      if (initializeInternal())
+         return;
+
       for (RigidBodyStateEstimator estimator : estimators)
       {
          estimator.updateState();
@@ -216,8 +233,15 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       estimatedCoMPosition.scale(1.0 / totalMass);
       estimatedCoMVelocity.scale(1.0 / totalMass);
 
-      centerOfMassDataHolder.setCenterOfMassPosition(estimatedCoMPosition);
-      centerOfMassDataHolder.setCenterOfMassVelocity(estimatedCoMVelocity);
+      if (enableOutput.getValue())
+      {
+         centerOfMassDataHolder.setCenterOfMassPosition(estimatedCoMPosition);
+         centerOfMassDataHolder.setCenterOfMassVelocity(estimatedCoMVelocity);
+      }
+      else
+      {
+         centerOfMassDataHolder.clear();
+      }
 
       if (MORE_VARIABLES)
       {
@@ -241,7 +265,9 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
 
       private final IntegratorBiasCompensatorYoFrameVector3D linearVelocityEstimate;
       private final IntegratorBiasCompensatorYoFrameVector3D positionEstimate;
-      private final YoIMUMahonyFilter orientationEstimate;
+      private final YoIMUMahonyFilter orientationFilter;
+
+      private final YoFrameVector3D expectedStaticAcceleration;
 
       private final YoFramePose3D yoEstimatedPose;
       private final YoFixedFrameTwist yoEstimatedTwist;
@@ -265,7 +291,8 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
             yoEstimatedTwist = null;
             linearVelocityEstimate = null;
             positionEstimate = null;
-            orientationEstimate = null;
+            orientationFilter = null;
+            expectedStaticAcceleration = null;
          }
          else
          {
@@ -282,25 +309,24 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
                positionEstimate = new IntegratorBiasCompensatorYoFrameVector3D(rigidBody.getName()
                      + "PositionEstimate", registry, positionKp, positionKi, worldFrame, getBodyFrame(), dt);
 
-               orientationEstimate = new YoIMUMahonyFilter(rigidBody.getName(),
-                                                           rigidBody.getName() + "OrientationEstimate",
-                                                           "",
-                                                           dt,
-                                                           false,
-                                                           getBodyFrame(),
-                                                           yoEstimatedPose.getOrientation(),
-                                                           yoEstimatedTwist.getAngularPart(),
-                                                           orientationKp,
-                                                           orientationKi,
-                                                           registry);
-               orientationEstimate.setGravityMagnitude(1.0);
-
+               orientationFilter = new YoIMUMahonyFilter(rigidBody.getName(),
+                                                         rigidBody.getName() + "OrientationEstimate",
+                                                         "",
+                                                         dt,
+                                                         false,
+                                                         getIMUFrame(),
+                                                         orientationKp,
+                                                         orientationKi,
+                                                         registry);
+               orientationFilter.setGravityMagnitude(gravitationalAcceleration);
+               expectedStaticAcceleration = new YoFrameVector3D(rigidBody.getName() + "ExpectedStaticAcceleration", getIMUFrame(), registry);
             }
             else
             {
                linearVelocityEstimate = null;
                positionEstimate = null;
-               orientationEstimate = null;
+               orientationFilter = null;
+               expectedStaticAcceleration = null;
             }
          }
 
@@ -328,7 +354,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
          {
             linearVelocityEstimate.reset();
             positionEstimate.reset();
-            orientationEstimate.initialize(getBodyFrame().getTransformToRoot().getRotation());
+            orientationFilter.initialize(getIMUFrame().getTransformToRoot().getRotation());
          }
 
          estimatedPose.set(getBodyFrame().getTransformToRoot());
@@ -344,9 +370,9 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       }
 
       private final FrameVector3D linearAcceleration = new FrameVector3D();
+      private final FrameVector3D gravityLocal = new FrameVector3D();
       private final FrameVector3D linearVelocity = new FrameVector3D();
       private final FrameVector3D angularVelocity = new FrameVector3D();
-      private final FrameVector3D upVector = new FrameVector3D();
       private final FrameVector3D northVector = new FrameVector3D();
 
       public void updateState()
@@ -369,34 +395,41 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
          if (imuSensor != null)
          {
             estimatedTwist.changeFrame(getIMUFrame());
+            linearAcceleration.setReferenceFrame(getIMUFrame());
+            expectedStaticAcceleration.setMatchingFrame(gravityVector);
+            expectedStaticAcceleration.negate();
+
+            // Estimate angular velocity & orientation
             linearAcceleration.setIncludingFrame(getIMUFrame(), imuSensor.getLinearAccelerationMeasurement());
-            FrameVector3DReadOnly bias = imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuSensor);
-            if (bias != null)
-               linearAcceleration.sub(bias);
-            if (cancelGravityFromAccelerationMeasurement.getValue())
-            {
-               linearAcceleration.changeFrame(worldFrame);
-               linearAcceleration.add(gravityVector);
-               linearAcceleration.changeFrame(getIMUFrame());
-            }
+            angularVelocity.setIncludingFrame(getIMUFrame(), imuSensor.getAngularVelocityMeasurement());
+            northVector.setIncludingFrame(worldFrame, Axis3D.X);
+            northVector.changeFrame(getIMUFrame());
+            orientationFilter.update(angularVelocity, linearAcceleration, northVector);
+            IMUBasedPelvisRotationalStateUpdater.computeOrientationAtEstimateFrame(getIMUFrame(),
+                                                                                   orientationFilter.getEstimatedOrientation(),
+                                                                                   getBodyFrame(),
+                                                                                   estimatedPose.getRotation());
+            estimatedTwist.getAngularPart().set(orientationFilter.getEstimatedAngularVelocity());
+
+            // Estimate linear velocity
+            gravityLocal.setIncludingFrame(gravityVector);
+            estimatedPose.getRotation().inverseTransform(gravityLocal);
+            gravityLocal.setReferenceFrame(getBodyFrame());
+            gravityLocal.changeFrame(getIMUFrame());
+            linearAcceleration.add(imuSensor.getLinearAccelerationMeasurement(), gravityLocal);
             linearVelocityEstimate.update(estimatedTwist.getLinearPart(), linearAcceleration);
             estimatedTwist.getLinearPart().set(linearVelocityEstimate);
             estimatedTwist.changeFrame(getBodyFrame());
-            yoEstimatedTwist.getLinearPart().set(estimatedTwist.getLinearPart());
+
+            // Estimate position
             linearVelocity.setIncludingFrame(estimatedTwist.getLinearPart());
-            linearVelocity.changeFrame(worldFrame);
+            estimatedPose.getRotation().inverseTransform(linearVelocity);
+            linearVelocity.setReferenceFrame(worldFrame);
             positionEstimate.update(getBodyFrame().getTransformToRoot().getTranslation(), linearVelocity);
-            yoEstimatedPose.getPosition().set(positionEstimate);
+            estimatedPose.getTranslation().set(positionEstimate);
 
-            angularVelocity.setIncludingFrame(getIMUFrame(), imuSensor.getAngularVelocityMeasurement());
-            angularVelocity.changeFrame(getBodyFrame());
-            upVector.setIncludingFrame(worldFrame, Axis3D.Z);
-            upVector.changeFrame(getBodyFrame());
-            northVector.setIncludingFrame(worldFrame, Axis3D.X);
-            northVector.changeFrame(getBodyFrame());
-            orientationEstimate.update(angularVelocity, upVector, northVector);
-
-            estimatedPose.set(orientationEstimate.getEstimatedOrientation(), positionEstimate);
+            yoEstimatedPose.set(estimatedPose);
+            yoEstimatedTwist.set(estimatedTwist);
          }
          else
          {

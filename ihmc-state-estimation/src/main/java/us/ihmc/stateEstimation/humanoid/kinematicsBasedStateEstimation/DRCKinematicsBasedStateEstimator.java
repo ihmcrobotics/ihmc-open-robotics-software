@@ -203,9 +203,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             momentumStateUpdater = new DistributedIMUBasedCenterOfMassStateUpdater(rootJoint,
                                                                                    sensorOutputMap.getIMUOutputs(),
                                                                                    estimatorDT,
-                                                                                   cancelGravityFromAccelerationMeasurement,
                                                                                    gravitationalAcceleration,
-                                                                                   imuBiasStateEstimator,
                                                                                    estimatorCenterOfMassDataHolderToUpdate);
          }
          else
