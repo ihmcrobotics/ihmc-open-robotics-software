@@ -20,6 +20,7 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
@@ -42,6 +43,7 @@ public class GDXImGuiBasedUI
 
    private final GDX3DSceneManager sceneManager = new GDX3DSceneManager();
    private final GDXVRManager vrManager = new GDXVRManager();
+   private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo();
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
 //   private final GDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
@@ -156,6 +158,7 @@ public class GDXImGuiBasedUI
 
       sceneManager.addRenderableProvider(vrManager::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
       addImGui3DViewInputProcessor(vrManager::process3DViewInput);
+      scenePoseGizmo.create(sceneManager.getCamera3D());
    }
 
    public void renderBeforeOnScreenUI()

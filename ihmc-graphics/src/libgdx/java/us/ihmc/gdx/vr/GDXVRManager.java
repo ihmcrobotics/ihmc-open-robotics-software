@@ -35,7 +35,6 @@ public class GDXVRManager
    private final Vector3D deltaVRControllerPosition = new Vector3D();
    private final Point3D resultVRSpacePosition = new Point3D();
    private final Point3D lastVRSpacePosition = new Point3D();
-   private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo();
    private final ImBoolean vrEnabled = new ImBoolean(false);
    private final ArrayList<Consumer<GDXVRManager>> vrInputProcessors = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -76,7 +75,6 @@ public class GDXVRManager
             }
             baseUI.setVsync(false); // important to disable vsync for VR
 
-            scenePoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
 
             contextInitialized = true;
          }
