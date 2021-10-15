@@ -1,10 +1,13 @@
 package us.ihmc.gdx;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
 import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.gdx.vr.GDXVRControllerButtons;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -20,12 +23,6 @@ public class GDXVROnlyDemo
    public GDXVROnlyDemo()
    {
       Lwjgl3NativesLoader.load();
-//      GL.createCapabilities();
-
-//      Gdx.graphics = new Lwjgl3Graphics(this);
-//      Gdx.gl30 = Gdx.graphics.getGL30();
-//      Gdx.gl20 = Gdx.gl30 != null ? Gdx.gl30 : Gdx.graphics.getGL20();
-//      Gdx.gl = Gdx.gl30 != null ? Gdx.gl30 : Gdx.gl20;
 
       errorCallback = GLFWErrorCallback.createPrint(System.err);
       GLFW.glfwSetErrorCallback(errorCallback);
@@ -37,6 +34,13 @@ public class GDXVROnlyDemo
       GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
       windowHandle = GLFW.glfwCreateWindow(640, 480, "", MemoryUtil.NULL, MemoryUtil.NULL);
       GLFW.glfwMakeContextCurrent(windowHandle);
+
+      GL.createCapabilities();
+      GDXTools.printGLVersion();
+
+      Gdx.gl30 = new Lwjgl3GL30ForMinimalVRDemo();
+      Gdx.gl = Gdx.gl30;
+      Gdx.gl20 = Gdx.gl30;
 
       sceneBasics = new GDX3DSceneBasics();
       sceneBasics.addCoordinateFrame(1.0);
