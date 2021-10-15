@@ -16,6 +16,8 @@ public class GDXVRControllerButtons
 
    public static final int INDEX_A = 2;
    public static final int INDEX_B = 1;
+   public static final int INDEX_JOYSTICK_BUTTON = 32;
+   public static final int INDEX_TRIGGER_AS_BUTTON = 33;
 
    public static final int ProximitySensor = 31;
 
