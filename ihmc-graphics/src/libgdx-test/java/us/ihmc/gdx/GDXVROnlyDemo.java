@@ -46,6 +46,7 @@ public class GDXVROnlyDemo
       Gdx.graphics = new MinimalGDXGraphics();
 
       sceneBasics = new GDX3DSceneBasics();
+      sceneBasics.create();
       sceneBasics.addCoordinateFrame(1.0);
 
       vrContext = new GDXVRContext();
