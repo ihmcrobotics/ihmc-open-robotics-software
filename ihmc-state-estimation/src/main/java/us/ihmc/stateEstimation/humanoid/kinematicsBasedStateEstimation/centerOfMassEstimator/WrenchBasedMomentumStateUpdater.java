@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
+package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +33,7 @@ import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialForce;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.MomentumStateUpdater;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
