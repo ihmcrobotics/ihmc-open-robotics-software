@@ -17,9 +17,11 @@ import us.ihmc.ekf.filter.sensor.Sensor;
 import us.ihmc.ekf.filter.state.State;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
@@ -32,6 +34,7 @@ import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
+import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -82,7 +85,7 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
    {
    }
 
-   private final DMatrixRMaj stateVector = new DMatrixRMaj(9, 1);
+   private final DMatrixRMaj stateVector = new DMatrixRMaj(MomentumState.size, 1);
 
    @Override
    public void update()
@@ -93,9 +96,9 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       {
          momentumEstimator.reset();
          stateVector.zero();
-         measuredCoMPosition.get(0, stateVector);
-         measuredLinearMomentum.get(3, stateVector);
-         measuredAngularMomentum.get(6, stateVector);
+         measuredCoMPosition.get(MomentumState.posCoM, stateVector);
+         measuredLinearMomentum.get(MomentumState.posLinMom, stateVector);
+         measuredAngularMomentum.get(MomentumState.posAngMom, stateVector);
          robotState.setStateVector(stateVector);
          hasBeenInitialized.set(true);
       }
@@ -126,15 +129,21 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
 
    private static class MomentumKinematicsBasedSensor extends Sensor
    {
-      private final int size = 6; // 3 for CoM position + 3 for angular momentum
+      private static final int posCoM = 0;
+      private static final int posLinMom = 3;
+      private static final int posAngMom = 6;
+      private static final int size = 9; // 3 for CoM position + 6 for momentum
       private final Point3DReadOnly measuredCoMPosition;
+      private final Vector3DReadOnly measuredLinearMomentum;
       private final Vector3DReadOnly measuredAngularMomentum;
 
       private final YoVector3D centerOfMassPositionResidual;
+      private final YoVector3D linearMomentumResidual;
       private final YoVector3D angularMomentumResidual;
 
       private final double sqrtHz;
       private final DoubleProvider centerOfMassVariance;
+      private final DoubleProvider linearMomentumVariance;
       private final DoubleProvider angularMomentumVariance;
 
       public MomentumKinematicsBasedSensor(Point3DReadOnly measuredCoMPosition,
@@ -144,13 +153,16 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
                                            YoRegistry registry)
       {
          this.measuredCoMPosition = measuredCoMPosition;
+         this.measuredLinearMomentum = measuredLinearMomentum;
          this.measuredAngularMomentum = measuredAngularMomentum;
 
          sqrtHz = 1.0 / Math.sqrt(dt);
-         centerOfMassVariance = FilterTools.findOrCreate("kinematicsBasedCenterOfMassVariance", registry, MathTools.square(0.0001));
-         angularMomentumVariance = FilterTools.findOrCreate("kinematicsBasedAngularMomentumVariance", registry, MathTools.square(0.1));
+         centerOfMassVariance = FilterTools.findOrCreate("kinematicsBasedCenterOfMassVariance", registry, MathTools.square(0.001));
+         linearMomentumVariance = FilterTools.findOrCreate("kinematicsBasedLinearMomentumVariance", registry, MathTools.square(1.0));
+         angularMomentumVariance = FilterTools.findOrCreate("kinematicsBasedAngularMomentumVariance", registry, MathTools.square(1.0));
 
          centerOfMassPositionResidual = new YoVector3D("centerOfMassPositionResidual", registry);
+         linearMomentumResidual = new YoVector3D("linearMomentumResidual", registry);
          angularMomentumResidual = new YoVector3D("angularMomentumResidual", registry);
       }
 
@@ -168,12 +180,15 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
 
       /**
        * <pre>
-       * / 1 0 0  0 0 0  0 0 0 \
-       * | 0 1 0  0 0 0  0 0 0 |
-       * | 0 0 1  0 0 0  0 0 0 |
-       * | 0 0 0  0 0 0  1 0 0 |
-       * | 0 0 0  0 0 0  0 1 0 |
-       * \ 0 0 0  0 0 0  0 0 1 /
+       * / 1 0 0  0 0 0  0 0 0  1 0  0 0 0 \
+       * | 0 1 0  0 0 0  0 0 0  0 1  0 0 0 |
+       * | 0 0 1  0 0 0  0 0 0  0 0  0 0 0 |
+       * | 0 0 0  1 0 0  0 0 0  0 0  1 0 0 |
+       * | 0 0 0  0 1 0  0 0 0  0 0  0 1 0 |
+       * | 0 0 0  0 0 1  0 0 0  0 0  0 0 1 |
+       * | 0 0 0  0 0 0  1 0 0  0 0  0 0 0 |
+       * | 0 0 0  0 0 0  0 1 0  0 0  0 0 0 |
+       * \ 0 0 0  0 0 0  0 0 1  0 0  0 0 0 /
        * </pre>
        */
       @Override
@@ -184,8 +199,15 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
 
          for (int i = 0; i < 3; i++)
          {
-            jacobianToPack.set(i, i, 1.0);
-            jacobianToPack.set(i + 3, i + 6, 1.0);
+            jacobianToPack.set(i + posCoM, i + MomentumState.posCoM, 1.0);
+            jacobianToPack.set(i + posLinMom, i + MomentumState.posLinMom, 1.0);
+            jacobianToPack.set(i + posLinMom, i + MomentumState.posLinMomOff, 1.0);
+            jacobianToPack.set(i + posAngMom, i + MomentumState.posAngMom, 1.0);
+         }
+
+         for (int i = 0; i < 2; i++)
+         {
+            jacobianToPack.set(i + posCoM, i + MomentumState.posCoMOff, 1.0);
          }
       }
 
@@ -207,14 +229,22 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
          robotState.getStateVector(stateVector);
          residualToPack.reshape(getMeasurementSize(), 1);
 
-         centerOfMassPositionResidual.set(0, stateVector);
-         angularMomentumResidual.set(6, stateVector);
+         centerOfMassPositionResidual.set(MomentumState.posCoM, stateVector);
+         linearMomentumResidual.set(MomentumState.posLinMom, stateVector);
+         angularMomentumResidual.set(MomentumState.posAngMom, stateVector);
+
+         for (int i = 0; i < 2; i++)
+            centerOfMassPositionResidual.setElement(i, centerOfMassPositionResidual.getElement(i) + stateVector.get(MomentumState.posCoMOff + i, 0));
+         for (int i = 0; i < 3; i++)
+            linearMomentumResidual.setElement(i, linearMomentumResidual.getElement(i) + stateVector.get(MomentumState.posLinMomOff + i, 0));
 
          centerOfMassPositionResidual.sub(measuredCoMPosition, centerOfMassPositionResidual);
+         linearMomentumResidual.sub(measuredLinearMomentum, linearMomentumResidual);
          angularMomentumResidual.sub(measuredAngularMomentum, angularMomentumResidual);
 
-         centerOfMassPositionResidual.get(0, residualToPack);
-         angularMomentumResidual.get(3, residualToPack);
+         centerOfMassPositionResidual.get(posCoM, residualToPack);
+         linearMomentumResidual.get(posLinMom, residualToPack);
+         angularMomentumResidual.get(posAngMom, residualToPack);
       }
 
       @Override
@@ -225,15 +255,21 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
 
          for (int i = 0; i < 3; i++)
          {
-            noiseCovarianceToPack.set(i, i, centerOfMassVariance.getValue() * sqrtHz);
-            noiseCovarianceToPack.set(i + 3, i + 3, angularMomentumVariance.getValue() * sqrtHz);
+            noiseCovarianceToPack.set(i + posCoM, i + posCoM, centerOfMassVariance.getValue() * sqrtHz);
+            noiseCovarianceToPack.set(i + posLinMom, i + posLinMom, linearMomentumVariance.getValue() * sqrtHz);
+            noiseCovarianceToPack.set(i + posAngMom, i + posAngMom, angularMomentumVariance.getValue() * sqrtHz);
          }
       }
    }
 
    private static class MomentumState extends State
    {
-      private final int size = 9; // 3 for CoM Position + 6 for momentum
+      private static final int posCoM = 0;
+      private static final int posLinMom = 3;
+      private static final int posAngMom = 6;
+      private static final int posCoMOff = 9;
+      private static final int posLinMomOff = 11;
+      private static final int size = 14; // 3 for CoM Position + 6 for momentum + 2 CoM offset + 3 Lin. Momentum offset
       private final DMatrixRMaj F = new DMatrixRMaj(size, size);
       private final DMatrixRMaj L;
       private final DMatrixRMaj FL = new DMatrixRMaj(size, size);
@@ -244,7 +280,7 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       private final double dt;
       private final double gravity;
 
-      private final ReferenceFrame measuredCoMFrame;
+      private final ReferenceFrame correctedCoMFrame;
 
       private final Wrench wrench = new Wrench();
 
@@ -254,44 +290,73 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       private final YoVector3D linearMomentumRateState;
       private final YoVector3D angularMomentumRateState;
 
+      private final YoVector2D centerOfMassOffsetState;
+      private final YoVector3D linearMomentumOffsetState;
+
       private final YoFixedFrameSpatialForce totalSpatialForceAtCoM;
       private final Vector3D comToFoot = new Vector3D();
 
       private final DoubleParameter forceSensorVariance;
       private final DoubleParameter torqueSensorVariance;
+      private final DoubleParameter centerOfMassOffsetVariance;
+      private final DoubleParameter linearMomentumOffsetVariance;
 
       private final double sqrtHz;
+      private final int nWrenchSensors;
 
       public MomentumState(ReferenceFrame measuredCoMFrame, List<WrenchSensor> wrenchSensors, double mass, double gravity, double dt, YoRegistry registry)
       {
-         this.measuredCoMFrame = measuredCoMFrame;
          this.wrenchSensors = wrenchSensors;
          this.mass = mass;
          this.gravity = gravity;
          this.dt = dt;
-
+         nWrenchSensors = wrenchSensors.size();
          sqrtHz = 1.0 / Math.sqrt(dt);
-         Qref = CommonOps_DDRM.identity(6 * wrenchSensors.size());
+         Qref = CommonOps_DDRM.identity(6 * nWrenchSensors + 5);
 
          DMatrixRMaj identity3D = CommonOps_DDRM.identity(3);
-         L = new DMatrixRMaj(size, 6 * wrenchSensors.size());
+         L = new DMatrixRMaj(size, 6 * nWrenchSensors + 5);
 
          for (int i = 0; i < wrenchSensors.size(); i++)
          {
-            CommonOps_DDRM.insert(identity3D, L, 3, i * 6 + 0);
-            CommonOps_DDRM.insert(identity3D, L, 6, i * 6 + 3);
+            CommonOps_DDRM.insert(identity3D, L, posLinMom, i * 6 + 0);
+            CommonOps_DDRM.insert(identity3D, L, posAngMom, i * 6 + 3);
          }
+         for (int i = 0; i < 2; i++)
+            L.set(posCoMOff + i, 6 * nWrenchSensors + i, 1.0);
+         for (int i = 0; i < 3; i++)
+            L.set(posLinMomOff + i, 6 * nWrenchSensors + i + 2, 1.0);
+
+         CommonOps_DDRM.setIdentity(F);
+
+         for (int i = 0; i < 3; i++)
+            F.set(posCoM + i, posLinMom + i, dt / mass);
 
          centerOfMassPositionState = new YoPoint3D("centerOfMassPositionState", registry);
          linearMomentumState = new YoVector3D("linearMomentumState", registry);
          angularMomentumState = new YoVector3D("angularMomentumState", registry);
          linearMomentumRateState = new YoVector3D("linearMomentumRateState", registry);
          angularMomentumRateState = new YoVector3D("angularMomentumRateState", registry);
+         centerOfMassOffsetState = new YoVector2D("centerOfMassOffsetState", registry);
+         linearMomentumOffsetState = new YoVector3D("linearMomentumOffsetState", registry);
 
-         totalSpatialForceAtCoM = new YoFixedFrameSpatialForce("totalSpatialForceAtCoM", measuredCoMFrame, registry);
+         correctedCoMFrame = new ReferenceFrame("correctedCoMFrame", measuredCoMFrame)
+         {
+            @Override
+            protected void updateTransformToParent(RigidBodyTransform transformToParent)
+            {
+               Vector3DBasics translation = transformToParent.getTranslation();
+               translation.set(centerOfMassOffsetState);
+               translation.negate();
+            }
+         };
+
+         totalSpatialForceAtCoM = new YoFixedFrameSpatialForce("totalSpatialForceAtCoM", correctedCoMFrame, registry);
 
          forceSensorVariance = new DoubleParameter("forceSensorVariance", registry, MathTools.square(0.06325));
          torqueSensorVariance = new DoubleParameter("torqueSensorVariance", registry, MathTools.square(0.0316));
+         centerOfMassOffsetVariance = new DoubleParameter("centerOfMassOffsetVariance", registry, MathTools.square(1.0));
+         linearMomentumOffsetVariance = new DoubleParameter("linearMomentumOffsetVariance", registry, MathTools.square(1.0));
       }
 
       @Override
@@ -304,18 +369,22 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       public void setStateVector(DMatrix1Row newState)
       {
          MatrixTools.checkMatrixDimensions(newState, getSize(), 1);
-         centerOfMassPositionState.set(0, newState);
-         linearMomentumState.set(3, newState);
-         angularMomentumState.set(6, newState);
+         centerOfMassPositionState.set(posCoM, newState);
+         linearMomentumState.set(posLinMom, newState);
+         angularMomentumState.set(posAngMom, newState);
+         centerOfMassOffsetState.set(posCoMOff, newState);
+         linearMomentumOffsetState.set(posLinMomOff, newState);
       }
 
       @Override
       public void getStateVector(DMatrix1Row stateVectorToPack)
       {
          stateVectorToPack.reshape(getSize(), 1);
-         centerOfMassPositionState.get(0, stateVectorToPack);
-         linearMomentumState.get(3, stateVectorToPack);
-         angularMomentumState.get(6, stateVectorToPack);
+         centerOfMassPositionState.get(posCoM, stateVectorToPack);
+         linearMomentumState.get(posLinMom, stateVectorToPack);
+         angularMomentumState.get(posAngMom, stateVectorToPack);
+         centerOfMassOffsetState.get(posCoMOff, stateVectorToPack);
+         linearMomentumOffsetState.get(posLinMomOff, stateVectorToPack);
       }
 
       @Override
@@ -336,31 +405,49 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       @Override
       public void predict()
       {
+         correctedCoMFrame.update();
          totalSpatialForceAtCoM.setToZero();
 
-         for (int i = 0; i < wrenchSensors.size(); i++)
+         for (int i = 0; i < nWrenchSensors; i++)
          {
             WrenchSensor wrenchSensor = wrenchSensors.get(i);
             wrenchSensor.getMeasuredWrench(wrench);
-            wrench.changeFrame(measuredCoMFrame);
+            wrench.changeFrame(correctedCoMFrame);
             totalSpatialForceAtCoM.add(wrench);
-
-            comToFoot.sub(wrenchSensor.getMeasurementFrame().getTransformToRoot().getTranslation(), measuredCoMFrame.getTransformToRoot().getTranslation());
-            insertSkewMatrix(6, i * 6, comToFoot, L);
          }
 
          linearMomentumRateState.set(totalSpatialForceAtCoM.getLinearPart());
          linearMomentumRateState.subZ(mass * gravity);
          angularMomentumRateState.set(totalSpatialForceAtCoM.getAngularPart());
 
-         F.zero();
-         for (int comIndex = 0; comIndex < 3; comIndex++)
-            F.set(comIndex, 3 + comIndex, dt / mass);
-         insertSkewMatrix(6, 0, dt, totalSpatialForceAtCoM.getLinearPart(), F);
-         for (int i = 0; i < 9; i++)
-            F.set(i, i, 1.0);
+         //         centerOfMassPositionState.scaleAdd(dt / mass, linearMomentumState, centerOfMassPositionState);
+         //         centerOfMassPositionState.scaleAdd(0.5 * dt * dt / mass, linearMomentumRateState, centerOfMassPositionState);
+         linearMomentumState.scaleAdd(dt, linearMomentumRateState, linearMomentumState);
+         angularMomentumState.scaleAdd(dt, angularMomentumRateState, angularMomentumState);
+         centerOfMassPositionState.scaleAdd(dt / mass, linearMomentumState, centerOfMassPositionState);
+
+         updateF();
+         updateQ();
+      }
+
+      private void updateF()
+      {
+         for (int sensorIndex = 0; sensorIndex < nWrenchSensors; sensorIndex++)
+         {
+            Vector3DBasics sensorPosition = wrenchSensors.get(sensorIndex).getMeasurementFrame().getTransformToRoot().getTranslation();
+            Vector3DBasics comPosition = correctedCoMFrame.getTransformToRoot().getTranslation();
+            comToFoot.sub(sensorPosition, comPosition);
+            insertSkewMatrix(posAngMom, sensorIndex * 6, comToFoot, L);
+         }
+
+         insertSkewMatrix(posAngMom, posCoM, dt, totalSpatialForceAtCoM.getLinearPart(), F);
+      }
+
+      private void updateQ()
+      {
          CommonOps_DDRM.mult(F, L, FL);
-         for (int sensorIndex = 0; sensorIndex < wrenchSensors.size(); sensorIndex++)
+
+         for (int sensorIndex = 0; sensorIndex < nWrenchSensors; sensorIndex++)
          {
             int startIndex = sensorIndex * 6;
 
@@ -372,14 +459,21 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
                Qref.set(torqueIndex, torqueIndex, torqueSensorVariance.getValue() * sqrtHz);
             }
          }
+
+         int index = 6 * nWrenchSensors;
+
+         for (int i = 0; i < 2; i++)
+         {
+            Qref.set(index, index, centerOfMassOffsetVariance.getValue() * sqrtHz);
+            index++;
+         }
+         for (int i = 0; i < 3; i++)
+         {
+            Qref.set(index, index, linearMomentumOffsetVariance.getValue() * sqrtHz);
+            index++;
+         }
          NativeFilterMatrixOps.computeABAt(Q, FL, Qref);
          CommonOps_DDRM.scale(dt, Q);
-
-         //         centerOfMassPositionState.scaleAdd(dt / mass, linearMomentumState, centerOfMassPositionState);
-         //         centerOfMassPositionState.scaleAdd(0.5 * dt * dt / mass, linearMomentumRateState, centerOfMassPositionState);
-         linearMomentumState.scaleAdd(dt, linearMomentumRateState, linearMomentumState);
-         angularMomentumState.scaleAdd(dt, angularMomentumRateState, angularMomentumState);
-         centerOfMassPositionState.scaleAdd(dt / mass, linearMomentumState, centerOfMassPositionState);
       }
 
       /**
