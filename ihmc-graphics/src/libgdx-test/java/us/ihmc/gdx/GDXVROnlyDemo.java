@@ -43,6 +43,7 @@ public class GDXVROnlyDemo
       Gdx.gl = Gdx.gl30;
       Gdx.gl20 = Gdx.gl30;
       Gdx.files = new Lwjgl3Files();
+      Gdx.graphics = new MinimalGDXGraphics();
 
       sceneBasics = new GDX3DSceneBasics();
       sceneBasics.addCoordinateFrame(1.0);
