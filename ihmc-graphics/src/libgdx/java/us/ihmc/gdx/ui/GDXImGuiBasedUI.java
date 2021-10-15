@@ -195,7 +195,7 @@ public class GDXImGuiBasedUI
          }
          if (ImGui.checkbox("Shadows", shadows))
          {
-            sceneManager.setShadowsEnabled(shadows.get());
+            sceneManager.getSceneBasics().setShadowsEnabled(shadows.get());
          }
          if (ImGui.inputInt("libGDX log level", libGDXLogLevel, 1))
          {

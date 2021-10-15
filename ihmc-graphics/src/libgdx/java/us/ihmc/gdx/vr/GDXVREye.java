@@ -16,8 +16,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -157,13 +157,13 @@ public class GDXVREye extends Camera
       GDXTools.toGDX(tempTransform, coordinateFrameInstance.transform);
    }
 
-   public void render(GDX3DSceneManager sceneManager)
+   public void render(GDX3DSceneBasics sceneBasics)
    {
       update();
       frameBuffer.begin();
       GL41.glViewport(0, 0, (int) viewportWidth, (int) viewportHeight);
       GDX3DSceneTools.glClearGray();
-      sceneManager.renderToCamera(this);
+      sceneBasics.renderToCamera(this);
       frameBuffer.end();
    }
 

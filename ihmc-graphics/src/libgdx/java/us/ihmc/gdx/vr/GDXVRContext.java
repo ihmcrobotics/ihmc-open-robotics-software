@@ -32,6 +32,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
@@ -334,11 +335,11 @@ public class GDXVRContext
     * Completes rendering and submits the rendering surfaces to the
     * head mounted display.
     */
-   public void renderEyes(GDX3DSceneManager sceneManager)
+   public void renderEyes(GDX3DSceneBasics sceneBasics)
    {
       for (RobotSide side : RobotSide.values)
       {
-         eyes.get(side).render(sceneManager);
+         eyes.get(side).render(sceneBasics);
       }
 
       // These lines take some time

@@ -19,6 +19,7 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -59,16 +60,16 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       modelInput.updatePoseForSelections(input);
    }
 
-   public void handleVREvents(GDXVRManager vrManager)
+   public void handleVREvents(GDXVRContext vrContext)
    {
-      vrManager.getContext().getController(RobotSide.LEFT, controller ->
+      vrContext.getController(RobotSide.LEFT, controller ->
       {
          if (controller.isButtonNewlyPressed(SteamVR_Trigger))
          {
             modelInput.clear();
          }
       });
-      vrManager.getContext().getController(RobotSide.RIGHT, controller ->
+      vrContext.getController(RobotSide.RIGHT, controller ->
       {
          if (controller.isButtonNewlyPressed(SteamVR_Trigger))
          {
