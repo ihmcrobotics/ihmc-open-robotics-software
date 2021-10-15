@@ -18,6 +18,7 @@ public class GDXVROnlyPointCloudDemo
 {
    private final GDXVRApplication vrApplication = new GDXVRApplication();
    private final GDXROS2PointCloudVisualizer fusedPointCloud;
+   private final ROS2Node ros2Node;
 
    public GDXVROnlyPointCloudDemo()
    {
@@ -28,7 +29,7 @@ public class GDXVROnlyPointCloudDemo
       vrApplication.getSceneBasics().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
       vrApplication.getVRContext().addVRInputProcessor(this::processVRInput);
 
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "vr_viewer");
+      ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "vr_viewer");
       fusedPointCloud = new GDXROS2PointCloudVisualizer("Fused Point Cloud", ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
       fusedPointCloud.create();
       fusedPointCloud.setActive(true);
@@ -49,13 +50,20 @@ public class GDXVROnlyPointCloudDemo
       vrApplication.getVRContext().getGenericDevices(genericDevice -> genericDevice.getModelInstance().getRenderables(renderables, pool));
    }
 
+   private void destroy()
+   {
+      vrApplication.exit();
+      ros2Node.destroy();
+      fusedPointCloud.destroy();
+   }
+
    private void processVRInput(GDXVRContext vrContext)
    {
       vrContext.getController(RobotSide.RIGHT, controller ->
       {
          if (controller.isButtonNewlyPressed(GDXVRControllerButtons.INDEX_A))
          {
-            vrApplication.exit();
+            destroy();
          }
       });
    }
