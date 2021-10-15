@@ -1,6 +1,7 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Files;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3NativesLoader;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -41,6 +42,7 @@ public class GDXVROnlyDemo
       Gdx.gl30 = new Lwjgl3GL30ForMinimalVRDemo();
       Gdx.gl = Gdx.gl30;
       Gdx.gl20 = Gdx.gl30;
+      Gdx.files = new Lwjgl3Files();
 
       sceneBasics = new GDX3DSceneBasics();
       sceneBasics.addCoordinateFrame(1.0);
