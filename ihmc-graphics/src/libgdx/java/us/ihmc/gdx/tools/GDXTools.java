@@ -13,6 +13,8 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
+import org.lwjgl.opengl.GL41;
+import org.lwjgl.opengl.GL43;
 import org.lwjgl.opengl.GLDebugMessageCallback;
 import org.lwjgl.opengl.KHRDebug;
 import org.lwjgl.openvr.HmdMatrix34;
@@ -35,9 +37,6 @@ import java.nio.FloatBuffer;
 
 import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumber;
 import static org.lwjgl.glfw.GLFW.glfwGetVersionString;
-import static org.lwjgl.opengl.GL11C.glEnable;
-import static org.lwjgl.opengl.GL43C.*;
-import static org.lwjgl.opengl.GL43C.GL_DEBUG_SEVERITY_NOTIFICATION;
 import static org.lwjgl.system.APIUtil.apiUnknownToken;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
@@ -374,10 +373,11 @@ public class GDXTools
    public static void printGLVersion()
    {
       String glfwVersionString = glfwGetVersionString();
-      String openGLVersion = glGetString(GL_VERSION);
       LogTools.info("Using GLFW {}", glfwVersionString);
-      GLVersion glVersion = Gdx.graphics.getGLVersion();
-      LogTools.info("Using OpenGL {} {}", openGLVersion, glVersion.getRendererString(), glVersion.getVendorString());
+      String openGLVersion = GL41.glGetString(GL41.GL_VERSION);
+      String openGLVendor = GL41.glGetString(GL41.GL_VENDOR);
+      String openGLRenderer = GL41.glGetString(GL41.GL_RENDERER);
+      LogTools.info("Using OpenGL {} {} {}", openGLVersion, openGLRenderer, openGLVendor);
    }
 
    public static GLProfiler createGLProfiler()
@@ -445,16 +445,16 @@ public class GDXTools
                   + " " + GLDebugMessageCallback.getMessage(length, message);
             switch (severity)
             {
-               case GL_DEBUG_SEVERITY_HIGH:
+               case GL43.GL_DEBUG_SEVERITY_HIGH:
                   LogTools.fatal(messageString);
                   break;
-               case GL_DEBUG_SEVERITY_MEDIUM:
+               case GL43.GL_DEBUG_SEVERITY_MEDIUM:
                   LogTools.error(messageString);
                   break;
-               case GL_DEBUG_SEVERITY_LOW:
+               case GL43.GL_DEBUG_SEVERITY_LOW:
                   LogTools.warn(messageString);
                   break;
-               case GL_DEBUG_SEVERITY_NOTIFICATION:
+               case GL43.GL_DEBUG_SEVERITY_NOTIFICATION:
                default:
                   LogTools.info(messageString);
                   break;
@@ -462,7 +462,7 @@ public class GDXTools
          }
       });
       KHRDebug.glDebugMessageCallback(callback, NULL);
-      glEnable(GL_DEBUG_OUTPUT);
+      GL41.glEnable(GL43.GL_DEBUG_OUTPUT);
       return callback;
    }
 
@@ -470,13 +470,13 @@ public class GDXTools
    {
       switch (severity)
       {
-         case GL_DEBUG_SEVERITY_HIGH:
+         case GL43.GL_DEBUG_SEVERITY_HIGH:
             return 5;
-         case GL_DEBUG_SEVERITY_MEDIUM:
+         case GL43.GL_DEBUG_SEVERITY_MEDIUM:
             return 4;
-         case GL_DEBUG_SEVERITY_LOW:
+         case GL43.GL_DEBUG_SEVERITY_LOW:
             return 3;
-         case GL_DEBUG_SEVERITY_NOTIFICATION:
+         case GL43.GL_DEBUG_SEVERITY_NOTIFICATION:
          default:
             return 2;
       }
@@ -486,13 +486,13 @@ public class GDXTools
    {
       switch (severity)
       {
-         case GL_DEBUG_SEVERITY_HIGH:
+         case GL43.GL_DEBUG_SEVERITY_HIGH:
             return "HIGH";
-         case GL_DEBUG_SEVERITY_MEDIUM:
+         case GL43.GL_DEBUG_SEVERITY_MEDIUM:
             return "MEDIUM";
-         case GL_DEBUG_SEVERITY_LOW:
+         case GL43.GL_DEBUG_SEVERITY_LOW:
             return "LOW";
-         case GL_DEBUG_SEVERITY_NOTIFICATION:
+         case GL43.GL_DEBUG_SEVERITY_NOTIFICATION:
             return "NOTIFICATION";
          default:
             return apiUnknownToken(severity);
@@ -503,17 +503,17 @@ public class GDXTools
    {
       switch (source)
       {
-         case GL_DEBUG_SOURCE_API:
+         case GL43.GL_DEBUG_SOURCE_API:
             return "API";
-         case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+         case GL43.GL_DEBUG_SOURCE_WINDOW_SYSTEM:
             return "WINDOW SYSTEM";
-         case GL_DEBUG_SOURCE_SHADER_COMPILER:
+         case GL43.GL_DEBUG_SOURCE_SHADER_COMPILER:
             return "SHADER COMPILER";
-         case GL_DEBUG_SOURCE_THIRD_PARTY:
+         case GL43.GL_DEBUG_SOURCE_THIRD_PARTY:
             return "THIRD PARTY";
-         case GL_DEBUG_SOURCE_APPLICATION:
+         case GL43.GL_DEBUG_SOURCE_APPLICATION:
             return "APPLICATION";
-         case GL_DEBUG_SOURCE_OTHER:
+         case GL43.GL_DEBUG_SOURCE_OTHER:
             return "OTHER";
          default:
             return apiUnknownToken(source);
@@ -524,19 +524,19 @@ public class GDXTools
    {
       switch (type)
       {
-         case GL_DEBUG_TYPE_ERROR:
+         case GL43.GL_DEBUG_TYPE_ERROR:
             return "ERROR";
-         case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+         case GL43.GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
             return "DEPRECATED BEHAVIOR";
-         case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+         case GL43.GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
             return "UNDEFINED BEHAVIOR";
-         case GL_DEBUG_TYPE_PORTABILITY:
+         case GL43.GL_DEBUG_TYPE_PORTABILITY:
             return "PORTABILITY";
-         case GL_DEBUG_TYPE_PERFORMANCE:
+         case GL43.GL_DEBUG_TYPE_PERFORMANCE:
             return "PERFORMANCE";
-         case GL_DEBUG_TYPE_OTHER:
+         case GL43.GL_DEBUG_TYPE_OTHER:
             return "OTHER";
-         case GL_DEBUG_TYPE_MARKER:
+         case GL43.GL_DEBUG_TYPE_MARKER:
             return "MARKER";
          default:
             return apiUnknownToken(type);
