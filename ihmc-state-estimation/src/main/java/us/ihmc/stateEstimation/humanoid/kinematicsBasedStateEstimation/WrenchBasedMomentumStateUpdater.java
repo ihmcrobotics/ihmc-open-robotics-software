@@ -8,6 +8,7 @@ import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.ekf.filter.FilterTools;
 import us.ihmc.ekf.filter.NativeFilterMatrixOps;
 import us.ihmc.ekf.filter.RobotState;
@@ -125,18 +126,15 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
 
    private static class MomentumKinematicsBasedSensor extends Sensor
    {
-      private final int size = 9; // 3 for CoM position + 3 for angular momentum + 3 linear momentum
+      private final int size = 6; // 3 for CoM position + 3 for angular momentum
       private final Point3DReadOnly measuredCoMPosition;
-      private final Vector3DReadOnly measuredLinearMomentum;
       private final Vector3DReadOnly measuredAngularMomentum;
 
       private final YoVector3D centerOfMassPositionResidual;
-      private final YoVector3D linearMomentumResidual;
       private final YoVector3D angularMomentumResidual;
 
       private final double sqrtHz;
       private final DoubleProvider centerOfMassVariance;
-      private final DoubleProvider linearMomentumVariance;
       private final DoubleProvider angularMomentumVariance;
 
       public MomentumKinematicsBasedSensor(Point3DReadOnly measuredCoMPosition,
@@ -146,16 +144,13 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
                                            YoRegistry registry)
       {
          this.measuredCoMPosition = measuredCoMPosition;
-         this.measuredLinearMomentum = measuredLinearMomentum;
          this.measuredAngularMomentum = measuredAngularMomentum;
 
          sqrtHz = 1.0 / Math.sqrt(dt);
-         centerOfMassVariance = FilterTools.findOrCreate("kinematicsBasedCenterOfMassVariance", registry, 0.0001);
-         linearMomentumVariance = FilterTools.findOrCreate("kinematicsBasedLinearMomentumVariance", registry, 0.1);
-         angularMomentumVariance = FilterTools.findOrCreate("kinematicsBasedAngularMomentumVariance", registry, 0.1);
+         centerOfMassVariance = FilterTools.findOrCreate("kinematicsBasedCenterOfMassVariance", registry, MathTools.square(0.0001));
+         angularMomentumVariance = FilterTools.findOrCreate("kinematicsBasedAngularMomentumVariance", registry, MathTools.square(0.1));
 
          centerOfMassPositionResidual = new YoVector3D("centerOfMassPositionResidual", registry);
-         linearMomentumResidual = new YoVector3D("linearMomentumResidual", registry);
          angularMomentumResidual = new YoVector3D("angularMomentumResidual", registry);
       }
 
@@ -171,21 +166,41 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
          return size;
       }
 
+      /**
+       * <pre>
+       * / 1 0 0  0 0 0  0 0 0 \
+       * | 0 1 0  0 0 0  0 0 0 |
+       * | 0 0 1  0 0 0  0 0 0 |
+       * | 0 0 0  0 0 0  1 0 0 |
+       * | 0 0 0  0 0 0  0 1 0 |
+       * \ 0 0 0  0 0 0  0 0 1 /
+       * </pre>
+       */
       @Override
       public void getMeasurementJacobian(DMatrix1Row jacobianToPack, RobotState robotState)
       {
          jacobianToPack.reshape(size, robotState.getSize());
          jacobianToPack.zero();
 
-         DMatrixRMaj identity3D = CommonOps_DDRM.identity(3);
-
-         CommonOps_DDRM.insert(identity3D, jacobianToPack, 0, 0);
-         CommonOps_DDRM.insert(identity3D, jacobianToPack, 3, 3);
-         CommonOps_DDRM.insert(identity3D, jacobianToPack, 6, 6);
+         for (int i = 0; i < 3; i++)
+         {
+            jacobianToPack.set(i, i, 1.0);
+            jacobianToPack.set(i + 3, i + 6, 1.0);
+         }
       }
 
       private final DMatrixRMaj stateVector = new DMatrixRMaj(9, 1);
 
+      /**
+       * <pre>
+       * / x_com^meas    - x_com^pred    \
+       * | y_com^meas    - y_com^pred    |
+       * | z_com^meas    - z_com^pred    |
+       * | x_angMom^meas - x_angMom^pred |
+       * | y_angMom^meas - y_angMom^pred |
+       * \ z_angMom^meas - z_angMom^pred /
+       * </pre>
+       */
       @Override
       public void getResidual(DMatrix1Row residualToPack, RobotState robotState)
       {
@@ -193,16 +208,13 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
          residualToPack.reshape(getMeasurementSize(), 1);
 
          centerOfMassPositionResidual.set(0, stateVector);
-         linearMomentumResidual.set(3, stateVector);
          angularMomentumResidual.set(6, stateVector);
 
          centerOfMassPositionResidual.sub(measuredCoMPosition, centerOfMassPositionResidual);
-         linearMomentumResidual.sub(measuredLinearMomentum, linearMomentumResidual);
          angularMomentumResidual.sub(measuredAngularMomentum, angularMomentumResidual);
 
          centerOfMassPositionResidual.get(0, residualToPack);
-         linearMomentumResidual.get(3, residualToPack);
-         angularMomentumResidual.get(6, residualToPack);
+         angularMomentumResidual.get(3, residualToPack);
       }
 
       @Override
@@ -214,8 +226,7 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
          for (int i = 0; i < 3; i++)
          {
             noiseCovarianceToPack.set(i, i, centerOfMassVariance.getValue() * sqrtHz);
-            noiseCovarianceToPack.set(i + 3, i + 3, linearMomentumVariance.getValue() * sqrtHz);
-            noiseCovarianceToPack.set(i + 6, i + 6, angularMomentumVariance.getValue() * sqrtHz);
+            noiseCovarianceToPack.set(i + 3, i + 3, angularMomentumVariance.getValue() * sqrtHz);
          }
       }
    }
@@ -279,8 +290,8 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
 
          totalSpatialForceAtCoM = new YoFixedFrameSpatialForce("totalSpatialForceAtCoM", measuredCoMFrame, registry);
 
-         forceSensorVariance = new DoubleParameter("forceSensorVariance", registry, 0.06325);
-         torqueSensorVariance = new DoubleParameter("torqueSensorVariance", registry, 0.0316);
+         forceSensorVariance = new DoubleParameter("forceSensorVariance", registry, MathTools.square(0.06325));
+         torqueSensorVariance = new DoubleParameter("torqueSensorVariance", registry, MathTools.square(0.0316));
       }
 
       @Override
@@ -313,6 +324,15 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
          return size;
       }
 
+      /**
+       * <pre>
+       * x_CoM^predic = l/m * dt
+       * l^predic     = lDot * dt
+       * k^predic     = kDot * dt
+       * lDot         = &sum; F^ext
+       * kDot         = &sum; T^ext(CoM)
+       * </pre>
+       */
       @Override
       public void predict()
       {
@@ -355,19 +375,50 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
          NativeFilterMatrixOps.computeABAt(Q, FL, Qref);
          CommonOps_DDRM.scale(dt, Q);
 
-//         centerOfMassPositionState.scaleAdd(dt / mass, linearMomentumState, centerOfMassPositionState);
-//         centerOfMassPositionState.scaleAdd(0.5 * dt * dt / mass, linearMomentumRateState, centerOfMassPositionState);
+         //         centerOfMassPositionState.scaleAdd(dt / mass, linearMomentumState, centerOfMassPositionState);
+         //         centerOfMassPositionState.scaleAdd(0.5 * dt * dt / mass, linearMomentumRateState, centerOfMassPositionState);
          linearMomentumState.scaleAdd(dt, linearMomentumRateState, linearMomentumState);
          angularMomentumState.scaleAdd(dt, angularMomentumRateState, angularMomentumState);
          centerOfMassPositionState.scaleAdd(dt / mass, linearMomentumState, centerOfMassPositionState);
       }
 
+      /**
+       * <pre>
+       *     /   0   0   0 m 0 0 0 0 0 \
+       *     |   0   0   0 0 m 0 0 0 0 |
+       *     |   0   0   0 0 0 m 0 0 0 |
+       *     |   0   0   0 0 0 0 0 0 0 |
+       * F = |   0   0   0 0 0 0 0 0 0 | * dt + I_9x9
+       *     |   0   0   0 0 0 0 0 0 0 |
+       *     |   0 -fz  fy 0 0 0 0 0 0 |
+       *     |  fz   0 -fx 0 0 0 0 0 0 |
+       *     \ -fy  fx   0 0 0 0 0 0 0 /
+       * </pre>
+       */
       @Override
       public void getFMatrix(DMatrix1Row fMatrixToPack)
       {
          fMatrixToPack.set(F);
       }
 
+      /**
+       * <pre>
+       *       /        0             0             0      0 0 0 \
+       *       |        0             0             0      0 0 0 |
+       *       |        0             0             0      0 0 0 |
+       * L_i = |        1             0             0      0 0 0 |
+       *       |        0             1             0      0 0 0 |
+       *       |        0             0             1      0 0 0 |
+       *       |        0      -(pi_z - c_z)  (pi_y - c_y) 1 0 0 |
+       *       |  (pi_z - c_z)        0      -(pi_x - c_x) 0 1 0 |
+       *       \ -(pi_y - c_y)  (pi_x - c_x)        0      0 0 1 /
+       * L = [L_0 L_1 ... L_N]
+       * </pre>
+       * 
+       * <pre>
+       * Q = F * L * Qc * L' * F' * dt
+       * </pre>
+       */
       @Override
       public void getQMatrix(DMatrix1Row noiseCovarianceToPack)
       {
