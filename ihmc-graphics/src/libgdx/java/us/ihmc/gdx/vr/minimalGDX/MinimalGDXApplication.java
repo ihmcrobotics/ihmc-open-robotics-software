@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.vr.minimalGDX;
 
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.utils.Clipboard;

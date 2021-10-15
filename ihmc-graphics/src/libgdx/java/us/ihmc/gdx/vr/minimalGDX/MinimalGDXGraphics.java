@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.vr.minimalGDX;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Graphics;
