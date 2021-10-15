@@ -31,6 +31,7 @@ public class GDXVROnlyPointCloudDemo
       ROS2Node ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "vr_viewer");
       fusedPointCloud = new GDXROS2PointCloudVisualizer("Fused Point Cloud", ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
       fusedPointCloud.create();
+      fusedPointCloud.setActive(true);
 
       vrApplication.run();
    }
