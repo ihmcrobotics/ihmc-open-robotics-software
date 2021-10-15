@@ -148,9 +148,9 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    {
       useVal2Scale = true;
       swingDuration = 0.8;
-      transferDuration = 0.35;
+      transferDuration = 0.40;
       maxStepLength = 0.20;
-      heightOffset = 0.05;
+      heightOffset = 0.04;
       torsoPitch = 0.666;
       testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
    }

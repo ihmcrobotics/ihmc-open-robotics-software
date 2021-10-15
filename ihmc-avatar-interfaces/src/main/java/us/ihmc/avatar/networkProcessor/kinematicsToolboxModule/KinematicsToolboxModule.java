@@ -67,7 +67,7 @@ public class KinematicsToolboxModule extends ToolboxModule
                                                                             registry);
       if (setupInitialConfiguration)
          kinematicsToolBoxController.setInitialRobotConfiguration(robotModel);
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel));
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel, kinematicsToolBoxController.getDesiredReferenceFrames()));
       startYoVariableServer();
    }
 

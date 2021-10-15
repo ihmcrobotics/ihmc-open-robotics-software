@@ -627,7 +627,6 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
       FullHumanoidRobotModel desiredFullRobotModel = getRobotModel().createFullRobotModel();
 
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
       double updateDT = 1.0e-3;
       HumanoidKinematicsToolboxController whik = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                                          statusOutputManager,
@@ -636,6 +635,7 @@ public abstract class AvatarWholeBodyTrajectoryToolboxControllerTest implements 
                                                                                          updateDT,
                                                                                          new YoGraphicsListRegistry(),
                                                                                          new YoRegistry("dummy"));
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, whik.getDesiredReferenceFrames()));
 
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelWithArmsAtMidRange();
       whik.updateRobotConfigurationData(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration));
