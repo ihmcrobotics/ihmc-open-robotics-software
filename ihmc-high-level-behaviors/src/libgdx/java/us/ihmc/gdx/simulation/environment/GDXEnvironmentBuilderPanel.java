@@ -41,7 +41,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    public void create(GDXImGuiBasedUI baseUI)
    {
       GDXVRManager vrManager = baseUI.getVRManager();
-      vrManager.addVRInputProcessor(this::handleVREvents);
+      vrManager.getContext().addVRInputProcessor(this::handleVREvents);
 
       modelInput.create();
 
