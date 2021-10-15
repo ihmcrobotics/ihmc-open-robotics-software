@@ -22,6 +22,8 @@ public interface ROS2PublishSubscribeAPI
 
    public <T> void publish(ROS2Topic<T> topic, T message);
 
+   public void publish(ROS2Topic<std_msgs.msg.dds.String> topic, String message);
+
    public void publish(ROS2Topic<Pose3D> topic, Pose3D message);
 
    public void publish(ROS2Topic<Empty> topic);

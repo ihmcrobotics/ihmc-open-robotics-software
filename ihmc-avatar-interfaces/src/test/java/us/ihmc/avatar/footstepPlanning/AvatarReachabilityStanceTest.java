@@ -11,7 +11,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.HumanoidRobotMutableInitialSetup;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
-import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
+import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -81,7 +81,9 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
    public void testStaticStances() throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
-      List<KinematicsToolboxSnapshotDescription> snapShots = StepReachabilityFileTools.loadKinematicsSnapshots(robotModel);
+      StepReachabilityIOHelper stepReachabilityIOHelper = new StepReachabilityIOHelper();
+      stepReachabilityIOHelper.loadStepReachability(robotModel);
+      List<KinematicsToolboxSnapshotDescription> snapShots = stepReachabilityIOHelper.getReachabilityIKData();
 
       LogTools.info("Filtering feasible solutions");
       List<KinematicsToolboxSnapshotDescription> feasibleSolutions = snapShots.stream()

@@ -11,6 +11,8 @@ import java.util.Set;
 
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -54,8 +56,11 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    }
 
    @Override
-   public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
-                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoRegistry parentRegistry)
+   public void build(FloatingJointBasics rootJoint,
+                     IMUDefinition[] imuDefinitions,
+                     ForceSensorDefinition[] forceSensorDefinitions,
+                     JointDesiredOutputListBasics estimatorDesiredJointDataHolder,
+                     YoRegistry parentRegistry)
    {
       List<Joint> rootJoints = robot.getRootJoints();
 
@@ -91,33 +96,49 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
          if (joint instanceof InvertedFourBarJoint)
          {
             InvertedFourBarJoint fourBarJoint = (InvertedFourBarJoint) joint;
+            InvertedFourBarJoint localFourBarJoint = InvertedFourBarJoint.cloneInvertedFourBarJoint(fourBarJoint,
+                                                                                                    ReferenceFrameTools.constructARootFrame("dummy"),
+                                                                                                    "dummy");
             OneDegreeOfFreedomJoint scsJointA = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointA().getName());
             OneDegreeOfFreedomJoint scsJointB = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointB().getName());
             OneDegreeOfFreedomJoint scsJointC = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointC().getName());
             OneDegreeOfFreedomJoint scsJointD = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointD().getName());
-
-            if (scsJointA != null && scsJointD != null)
+            OneDegreeOfFreedomJoint[] scsActiveJoints;
+            int[] activeJointIndices;
+            if (fourBarJoint.getJointA().isLoopClosure() || fourBarJoint.getJointD().isLoopClosure())
             {
-               position = () -> scsJointA.getQ() + scsJointD.getQ();
-               velocity = () -> scsJointA.getQD() + scsJointD.getQD();
-               tau = () ->
-               {
-                  // This is inaccurate as the Jacobian should be updated with the most recent position, but it shouldn't matter.
-                  DMatrixRMaj loopJacobian = fourBarJoint.getFourBarFunction().getLoopJacobian();
-                  return loopJacobian.get(0) * scsJointA.getTau() + loopJacobian.get(3) * scsJointD.getTau();
-               };
+               activeJointIndices = new int[] {1, 2};
+               scsActiveJoints = new OneDegreeOfFreedomJoint[] {scsJointB, scsJointC};
             }
             else
             {
-               position = () -> scsJointB.getQ() + scsJointC.getQ();
-               velocity = () -> scsJointB.getQD() + scsJointC.getQD();
-               tau = () ->
-               {
-                  // This is inaccurate as the Jacobian should be updated with the most recent position, but it shouldn't matter.
-                  DMatrixRMaj loopJacobian = fourBarJoint.getFourBarFunction().getLoopJacobian();
-                  return loopJacobian.get(1) * scsJointB.getTau() + loopJacobian.get(2) * scsJointC.getTau();
-               };
+               activeJointIndices = new int[] {0, 3};
+               scsActiveJoints = new OneDegreeOfFreedomJoint[] {scsJointA, scsJointD};
             }
+
+            position = () -> scsActiveJoints[0].getQ() + scsActiveJoints[1].getQ();
+            velocity = () -> scsActiveJoints[0].getQD() + scsActiveJoints[1].getQD();
+
+            tau = () ->
+            {
+               if (!MathTools.epsilonEquals(position.getValue(), localFourBarJoint.getQ(), 1.0e-6))
+               {
+                  localFourBarJoint.setQ(position.getValue());
+                  localFourBarJoint.updateFrame();
+               }
+               DMatrixRMaj loopJacobian = localFourBarJoint.getFourBarFunction().getLoopJacobian();
+               double tau_master = loopJacobian.get(activeJointIndices[0]) * scsActiveJoints[0].getTau()
+                     + loopJacobian.get(activeJointIndices[1]) * scsActiveJoints[1].getTau();
+
+               int masterJointIndex = localFourBarJoint.getFourBarFunction().getMasterJointIndex();
+
+               if (masterJointIndex == 0 || masterJointIndex == 3)
+                  tau_master /= (loopJacobian.get(0) + loopJacobian.get(3));
+               else
+                  tau_master /= (loopJacobian.get(1) + loopJacobian.get(2));
+
+               return tau_master;
+            };
          }
          else
          {

@@ -162,6 +162,8 @@ public class LegCollisionConstraintCalculator
       this.legCollisionShape = legCollisionShape;
       this.legShapeTransformToSoleFrame.set(legShapeTransformToSoleFrame);
       double lineRadiusWhenOneMeterLong = legCollisionShape.getRadius() / legCollisionShape.getLength();
-      legCollisionShapeGraphic.setLineRadiusWhenOneMeterLong(lineRadiusWhenOneMeterLong);
+
+      if (legCollisionShapeGraphic != null)
+         legCollisionShapeGraphic.setLineRadiusWhenOneMeterLong(lineRadiusWhenOneMeterLong);
    }
 }

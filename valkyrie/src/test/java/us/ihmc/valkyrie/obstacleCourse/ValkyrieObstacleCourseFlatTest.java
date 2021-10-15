@@ -134,4 +134,12 @@ public class ValkyrieObstacleCourseFlatTest extends DRCObstacleCourseFlatTest
    {
       super.testForMemoryLeaks();
    }
+
+   @Tag("humanoid-flat-ground-slow")
+   @Override
+   @Test
+   public void testPrepareForLocomotion() throws SimulationExceededMaximumTimeException
+   {
+      super.testPrepareForLocomotion();
+   }
 }

@@ -174,8 +174,6 @@ public class PawStepPlannerMessagerAPI
    public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = Root.child(VisibilityGraphs).child(InterRegion).child(Map).topic(Data);
 
    public static final Topic<Boolean> ShowClusterRawPoints = Root.child(VisibilityGraphs).child(Cluster).child(Raw).topic(Show);
-   public static final Topic<Boolean> ShowClusterPreferredNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(Preferred).child(Navigable).topic(Show);
-   public static final Topic<Boolean> ShowClusterPreferredNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(Preferred).child(NonNavigable).topic(Show);
    public static final Topic<Boolean> ShowClusterNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(Navigable).topic(Show);
    public static final Topic<Boolean> ShowClusterNonNavigableExtrusions = Root.child(VisibilityGraphs).child(Cluster).child(NonNavigable).topic(Show);
 

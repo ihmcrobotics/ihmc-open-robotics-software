@@ -1,5 +1,6 @@
 package us.ihmc.gdx.ui.graphics.live;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
@@ -12,6 +13,7 @@ import org.bytedeco.opencl.*;
 import org.bytedeco.opencv.opencv_core.Mat;
 import sensor_msgs.Image;
 import sensor_msgs.PointCloud2;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPlot;
@@ -61,6 +63,8 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    private int numberOfOusterPoints;
    private ByteBuffer zed2InHostBuffer;
    private ByteBuffer ousterInHostBuffer;
+   private volatile boolean created = false;
+   private volatile boolean pointCloudRendererCreated = false;
 
    public GDXROS1FusedPointCloudVisualizer(HumanoidReferenceFrames referenceFrames)
    {
@@ -75,44 +79,52 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    {
       super.create();
 
-      // ouster width 1024 height 128, 9 fields, 288 bits, 36 bytes, BUT! 48 bytes step
-      // 3 float32s XYZ
-      // 1 float 32 intensity
-      // 32 bits unused
-      // unint32 t(time?),
-      // unint16 reflectivity
-      // uint8 ring
-      // 8 bits unused
-      // unint16 ambient
-      // 16 bits unused
-      // unint32 range
-      // 12 byte waste
-      // l515 width 151413 height 1, 4 float XYX(RGB), uint16 ambient
-      // zed2 1280x720, bgr8
+      ThreadTools.startAsDaemon(() ->
+      {
+         // ouster width 1024 height 128, 9 fields, 288 bits, 36 bytes, BUT! 48 bytes step
+         // 3 float32s XYZ
+         // 1 float 32 intensity
+         // 32 bits unused
+         // unint32 t(time?),
+         // unint16 reflectivity
+         // uint8 ring
+         // 8 bits unused
+         // unint16 ambient
+         // 16 bits unused
+         // unint32 range
+         // 12 byte waste
+         // l515 width 151413 height 1, 4 float XYX(RGB), uint16 ambient
+         // zed2 1280x720, bgr8
 
-      l515WithRGB = new Mat(1, 151413, opencv_core.CV_32FC4);
-      l515RetainXYZChannels = new int[] {0, 0, 1, 1, 2, 2};
-      l515PointsOnlyHostBuffer = BufferUtils.newByteBuffer(151413 * 4 * 3);
-      l515PointsOnly = new Mat(1, 151413, opencv_core.CV_32FC3, new BytePointer(l515PointsOnlyHostBuffer));
+         l515WithRGB = new Mat(1, 151413, opencv_core.CV_32FC4);
+         l515RetainXYZChannels = new int[] {0, 0, 1, 1, 2, 2};
+         l515PointsOnlyHostBuffer = BufferUtils.newByteBuffer(151413 * 4 * 3);
+         l515PointsOnly = new Mat(1, 151413, opencv_core.CV_32FC3, new BytePointer(l515PointsOnlyHostBuffer));
 
-      openCLManager.create();
-      numberOfOusterPoints = 1024 * 128;
-      ousterInBytesLength = numberOfOusterPoints * 48;
-      zed2InBytesLength = 1280 * 720 * 3;
-      fusedOutBytesLength = numberOfOusterPoints * 4 * 10; // X,Y,Z,R,G,B,A,Size,Sin,Cos
-      BufferUtils.newByteBuffer(fusedOutBytesLength);
-      ousterInGPUBuffer = openCLManager.createBufferObject(ousterInBytesLength);
-      zed2InGPUBuffer = openCLManager.createBufferObject(zed2InBytesLength);
-      fusedOutGPUBuffer = openCLManager.createBufferObject(fusedOutBytesLength);
-      projectZED2ToOusterPointsKernel = openCLManager.loadProgramAndCreateKernel("projectZED2ToOusterPoints");
-      openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 0, ousterInGPUBuffer);
-      openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 1, zed2InGPUBuffer);
-      openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 2, fusedOutGPUBuffer);
+         openCLManager.create();
+         numberOfOusterPoints = 1024 * 128;
+         ousterInBytesLength = numberOfOusterPoints * 48;
+         zed2InBytesLength = 1280 * 720 * 3;
+         fusedOutBytesLength = numberOfOusterPoints * 4 * 10; // X,Y,Z,R,G,B,A,Size,Sin,Cos
+         BufferUtils.newByteBuffer(fusedOutBytesLength);
+         ousterInGPUBuffer = openCLManager.createBufferObject(ousterInBytesLength);
+         zed2InGPUBuffer = openCLManager.createBufferObject(zed2InBytesLength);
+         fusedOutGPUBuffer = openCLManager.createBufferObject(fusedOutBytesLength);
+         projectZED2ToOusterPointsKernel = openCLManager.loadProgramAndCreateKernel("projectZED2ToOusterPoints");
+         openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 0, ousterInGPUBuffer);
+         openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 1, zed2InGPUBuffer);
+         openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 2, fusedOutGPUBuffer);
 
-      pointCloudRenderer.create(numberOfOusterPoints);
-      coloredPointCloudDataHostFloatBuffer = BufferUtils.newFloatBuffer(pointCloudRenderer.getVerticesArray().length);
-      zed2InHostBuffer = BufferUtils.newByteBuffer(zed2InBytesLength);
-      ousterInHostBuffer = BufferUtils.newByteBuffer(ousterInBytesLength);
+         Gdx.app.postRunnable(() ->
+         {
+            pointCloudRenderer.create(numberOfOusterPoints);
+            pointCloudRendererCreated = true;
+         });
+         coloredPointCloudDataHostFloatBuffer = BufferUtils.newFloatBuffer(numberOfOusterPoints * 10);
+         zed2InHostBuffer = BufferUtils.newByteBuffer(zed2InBytesLength);
+         ousterInHostBuffer = BufferUtils.newByteBuffer(ousterInBytesLength);
+         created = true;
+      }, "InitializeOpenCL");
    }
 
 
@@ -121,46 +133,49 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    {
       super.update();
 
-      PointCloud2 ousterPointCloud2 = latestOusterPointCloud.get();
-      PointCloud2 l515PointCloud2 = latestL515PointCloud.get();
-      Image zed2Image = latestZED2Image.get();
-
-//      if (ousterPointCloud2 != null && l515PointCloud2 != null && zed2Image != null)
-      if (ousterPointCloud2 != null && zed2Image != null)
+      if (created && pointCloudRendererCreated)
       {
-         long ousterTimestamp = ousterPointCloud2.getHeader().getStamp().totalNsecs();
+         PointCloud2 ousterPointCloud2 = latestOusterPointCloud.get();
+         PointCloud2 l515PointCloud2 = latestL515PointCloud.get();
+         Image zed2Image = latestZED2Image.get();
 
-//         ROSOpenCVTools.backMatWithNettyBuffer(l515WithRGB, l515PointCloud2.getData());
-//         opencv_core.mixChannels(l515WithRGB, 4, l515PointsOnly, 3, l515RetainXYZChannels, 3);
+         //      if (ousterPointCloud2 != null && l515PointCloud2 != null && zed2Image != null)
+         if (ousterPointCloud2 != null && zed2Image != null)
+         {
+            long ousterTimestamp = ousterPointCloud2.getHeader().getStamp().totalNsecs();
 
-         ByteBuffer ousterInHeapBuffer = RosTools.sliceNettyBuffer(ousterPointCloud2.getData());
-         ousterInHostBuffer.rewind();
-         ousterInHostBuffer.put(ousterInHeapBuffer);
-         ousterInHostBuffer.rewind();
-         openCLManager.enqueueWriteBuffer(ousterInGPUBuffer, ousterInBytesLength, new BytePointer(ousterInHostBuffer));
+            //         ROSOpenCVTools.backMatWithNettyBuffer(l515WithRGB, l515PointCloud2.getData());
+            //         opencv_core.mixChannels(l515WithRGB, 4, l515PointsOnly, 3, l515RetainXYZChannels, 3);
 
-         ByteBuffer zed2InHeapBuffer = RosTools.sliceNettyBuffer(zed2Image.getData());
-         zed2InHostBuffer.rewind();
-         zed2InHostBuffer.put(zed2InHeapBuffer);
-         zed2InHostBuffer.rewind();
-         openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2InHostBuffer));
+            ByteBuffer ousterInHeapBuffer = RosTools.sliceNettyBuffer(ousterPointCloud2.getData());
+            ousterInHostBuffer.rewind();
+            ousterInHostBuffer.put(ousterInHeapBuffer);
+            ousterInHostBuffer.rewind();
+            openCLManager.enqueueWriteBuffer(ousterInGPUBuffer, ousterInBytesLength, new BytePointer(ousterInHostBuffer));
 
-         openCLManager.execute(projectZED2ToOusterPointsKernel, numberOfOusterPoints);
+            ByteBuffer zed2InHeapBuffer = RosTools.sliceNettyBuffer(zed2Image.getData());
+            zed2InHostBuffer.rewind();
+            zed2InHostBuffer.put(zed2InHeapBuffer);
+            zed2InHostBuffer.rewind();
+            openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2InHostBuffer));
 
-         // l515 points, make into XYZRGBA and stick at the end
-         // should be 1024 * 128 jobs?
+            openCLManager.execute(projectZED2ToOusterPointsKernel, numberOfOusterPoints);
 
-         coloredPointCloudDataHostFloatBuffer.rewind();
-         openCLManager.enqueueReadBuffer(fusedOutGPUBuffer, fusedOutBytesLength, new FloatPointer(coloredPointCloudDataHostFloatBuffer));
+            // l515 points, make into XYZRGBA and stick at the end
+            // should be 1024 * 128 jobs?
 
-         // floats: X,Y,Z,R,G,B,A,0.01,1.0,0.0
-         float[] coloredPointDataArray = pointCloudRenderer.getVerticesArray(); // Copy data to this array
-         coloredPointCloudDataHostFloatBuffer.rewind();
-         coloredPointCloudDataHostFloatBuffer.get(coloredPointDataArray);
-         // TODO: Data techinically getting copied twice extra here. Shouldn't be necessary.
-//         pointCloudRenderer.updateMeshFast(l515PointCloud2.getWidth() * l515PointCloud2.getHeight()
-//                                           + ousterPointCloud2.getWidth() * ousterPointCloud2.getHeight());
-         pointCloudRenderer.updateMeshFast(numberOfOusterPoints);
+            coloredPointCloudDataHostFloatBuffer.rewind();
+            openCLManager.enqueueReadBuffer(fusedOutGPUBuffer, fusedOutBytesLength, new FloatPointer(coloredPointCloudDataHostFloatBuffer));
+
+            // floats: X,Y,Z,R,G,B,A,0.01,1.0,0.0
+            float[] coloredPointDataArray = pointCloudRenderer.getVerticesArray(); // Copy data to this array
+            coloredPointCloudDataHostFloatBuffer.rewind();
+            coloredPointCloudDataHostFloatBuffer.get(coloredPointDataArray);
+            // TODO: Data techinically getting copied twice extra here. Shouldn't be necessary.
+            //         pointCloudRenderer.updateMeshFast(l515PointCloud2.getWidth() * l515PointCloud2.getHeight()
+            //                                           + ousterPointCloud2.getWidth() * ousterPointCloud2.getHeight());
+            pointCloudRenderer.updateMeshFast(numberOfOusterPoints);
+         }
       }
    }
 

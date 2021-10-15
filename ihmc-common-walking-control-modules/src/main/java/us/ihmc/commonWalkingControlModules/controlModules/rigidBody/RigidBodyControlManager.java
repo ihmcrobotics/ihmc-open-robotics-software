@@ -60,11 +60,22 @@ public class RigidBodyControlManager
    private final YoBoolean stateSwitched;
    private final YoBoolean doPrepareForLocomotion;
 
-   public RigidBodyControlManager(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
-                                  TObjectDoubleHashMap<String> homeConfiguration, Pose3D homePose, ReferenceFrame controlFrame, ReferenceFrame baseFrame,
-                                  Vector3DReadOnly taskspaceAngularWeight, Vector3DReadOnly taskspaceLinearWeight, PID3DGainsReadOnly taskspaceOrientationGains,
-                                  PID3DGainsReadOnly taskspacePositionGains, ContactablePlaneBody contactableBody, RigidBodyControlMode defaultControlMode,
-                                  YoDouble yoTime, YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
+   public RigidBodyControlManager(RigidBodyBasics bodyToControl,
+                                  RigidBodyBasics baseBody,
+                                  RigidBodyBasics elevator,
+                                  TObjectDoubleHashMap<String> homeConfiguration,
+                                  Pose3D homePose,
+                                  ReferenceFrame controlFrame,
+                                  ReferenceFrame baseFrame,
+                                  Vector3DReadOnly taskspaceAngularWeight,
+                                  Vector3DReadOnly taskspaceLinearWeight,
+                                  PID3DGainsReadOnly taskspaceOrientationGains,
+                                  PID3DGainsReadOnly taskspacePositionGains,
+                                  ContactablePlaneBody contactableBody,
+                                  RigidBodyControlMode defaultControlMode,
+                                  YoDouble yoTime,
+                                  YoGraphicsListRegistry graphicsListRegistry,
+                                  YoRegistry parentRegistry)
    {
       bodyName = bodyToControl.getName();
       String namePrefix = bodyName + "Manager";
@@ -370,7 +381,7 @@ public class RigidBodyControlManager
    public void prepareForLocomotion()
    {
       if (doPrepareForLocomotion.getValue())
-         holdInJointspace();
+         holdCurrentDesired();
    }
 
    public void holdInJointspace()

@@ -47,7 +47,7 @@ public class ValkyriePushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test
    public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(1500.0);
+      setPushMagnitude(1100.0);
       super.testPushRightInitialTransferState();
    }
 

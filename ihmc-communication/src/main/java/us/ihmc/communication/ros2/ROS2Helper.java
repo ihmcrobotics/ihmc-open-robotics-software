@@ -71,6 +71,14 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    }
 
    @Override
+   public void publish(ROS2Topic<std_msgs.msg.dds.String> topic, String message)
+   {
+      std_msgs.msg.dds.String stringMessage = new std_msgs.msg.dds.String();
+      stringMessage.setData(message);
+      ros2PublisherMap.publish(topic, stringMessage);
+   }
+
+   @Override
    public void publish(ROS2Topic<Pose3D> topic, Pose3D message)
    {
       ros2PublisherMap.publish(topic, message);

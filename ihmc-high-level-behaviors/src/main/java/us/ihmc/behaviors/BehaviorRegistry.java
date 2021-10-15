@@ -109,4 +109,16 @@ public class BehaviorRegistry
    {
       this.highestLevelNode = highestLevelNode;
    }
+
+   public BehaviorDefinition getBehaviorFromName(String behaviorName)
+   {
+      for (BehaviorDefinition definitionEntry : definitionEntries)
+      {
+         if (definitionEntry.getName().equals(behaviorName))
+         {
+            return definitionEntry;
+         }
+      }
+      return null;
+   }
 }

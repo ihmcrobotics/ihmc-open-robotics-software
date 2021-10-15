@@ -61,7 +61,7 @@ public class OpenCLManager
       CharPointer charPointer = new CharPointer(preallocatedBytes);
       SizeTPointer length = new SizeTPointer(1);
       clGetProgramBuildInfo(program, devices.getPointer(), CL_PROGRAM_BUILD_LOG, preallocatedBytes, charPointer, length);
-      LogTools.info("OpenCL Build log:");
+      LogTools.info("OpenCL Build log: openCL/{}.cl", programName);
       ByteBuffer byteBuffer = charPointer.asByteBuffer();
       int logLength = (int) length.get();
       byte[] bytes = new byte[logLength];

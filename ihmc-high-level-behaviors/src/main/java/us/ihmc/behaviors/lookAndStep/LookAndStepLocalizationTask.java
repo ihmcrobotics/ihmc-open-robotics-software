@@ -83,6 +83,7 @@ public class LookAndStepLocalizationTask
 
       public void acceptBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)
       {
+         newGoalSubmitted = false;
          bodyPathPlanInput.set(bodyPathPlan);
       }
 
@@ -163,7 +164,8 @@ public class LookAndStepLocalizationTask
          }
          ThreadTools.startAsDaemon(this::reachedGoalPublicationThread, "BroadcastReachedGoalWhenDoneWalking");
       }
-      else if (newGoalWasSubmitted && didFootstepPlanningOnceToEnsureSomeProgress)
+//      else if (newGoalWasSubmitted && didFootstepPlanningOnceToEnsureSomeProgress)
+      else if (newGoalWasSubmitted)
       {
          didFootstepPlanningOnceToEnsureSomeProgress = false;
          statusLogger.info("Planning to new goal.");
@@ -180,6 +182,7 @@ public class LookAndStepLocalizationTask
                                                                                                   closestSegmentIndex,
                                                                                                   imminentMidFeetPose,
                                                                                                   bodyPathPlan);
+         behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
          bodyPathLocalizationOutput.accept(result);
       }
    }

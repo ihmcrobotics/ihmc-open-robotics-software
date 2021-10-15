@@ -11,7 +11,13 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
 
    public static final BooleanStoredPropertyKey useInitialSupportRegions = keys.addBooleanKey("Use initial support regions");
    public static final BooleanStoredPropertyKey assumeFlatGround = keys.addBooleanKey("Assume flat ground");
+   public static final BooleanStoredPropertyKey detectFlatGround = keys.addBooleanKey("Detect flat ground");
+   public static final DoubleStoredPropertyKey detectFlatGroundZTolerance = keys.addDoubleKey("Detect flat ground z tolerance");
+   public static final DoubleStoredPropertyKey detectFlatGroundOrientationTolerance = keys.addDoubleKey("Detect flat ground orientation tolerance");
+   public static final DoubleStoredPropertyKey detectFlatGroundMinRegionAreaToConsider = keys.addDoubleKey("Detect flat ground min region area to consider");
+   public static final DoubleStoredPropertyKey detectFlatGroundMinRadius = keys.addDoubleKey("Detect flat ground min radius");
    public static final DoubleStoredPropertyKey assumedFlatGroundCircleRadius = keys.addDoubleKey("Assumed flat ground circle radius");
+   public static final BooleanStoredPropertyKey squareUpAtTheEnd = keys.addBooleanKey("Square up at the end");
    public static final DoubleStoredPropertyKey supportRegionScaleFactor = keys.addDoubleKey("Support region scale factor");
    public static final IntegerStoredPropertyKey planarRegionsHistorySize = keys.addIntegerKey("Planar regions history size");
    public static final IntegerStoredPropertyKey maxStepsToSendToController = keys.addIntegerKey("Max steps to send to controller");

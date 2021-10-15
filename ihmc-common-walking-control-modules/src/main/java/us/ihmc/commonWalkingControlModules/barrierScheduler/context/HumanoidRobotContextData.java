@@ -1,11 +1,13 @@
 package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import java.util.Arrays;
+import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.tasks.InPlaceCopyable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -107,6 +109,16 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       robotMotionStatusHolder = new RobotMotionStatusHolder();
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
       sensorDataContext = new SensorDataContext(fullRobotModel);
+   }
+
+   public HumanoidRobotContextData(List<OneDoFJointBasics> joints)
+   {
+      processedJointData = new HumanoidRobotContextJointData();
+      forceSensorDataHolder = new ForceSensorDataHolder();
+      centerOfPressureDataHolder = new CenterOfPressureDataHolder();
+      robotMotionStatusHolder = new RobotMotionStatusHolder();
+      jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(joints.toArray(new OneDoFJointBasics[0]));
+      sensorDataContext = new SensorDataContext(joints);
    }
 
    public HumanoidRobotContextJointData getProcessedJointData()

@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
-import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -61,7 +60,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -99,7 +97,6 @@ public class BalanceManager
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
-   private final PushRecoveryControlModule pushRecoveryControlModule;
    private final StepAdjustmentController stepAdjustmentController;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
@@ -151,7 +148,6 @@ public class BalanceManager
 
    private StepConstraintRegionHandler stepConstraintRegionHandler;
 
-   private final YoDouble safeDistanceFromSupportEdgesToStopCancelICPPlan = new YoDouble("safeDistanceFromSupportEdgesToStopCancelICPPlan", registry);
    private final YoDouble distanceToShrinkSupportPolygonWhenHoldingCurrent = new YoDouble("distanceToShrinkSupportPolygonWhenHoldingCurrent", registry);
 
    private final YoBoolean holdICPToCurrentCoMLocationInNextDoubleSupport = new YoBoolean("holdICPToCurrentCoMLocationInNextDoubleSupport", registry);
@@ -272,7 +268,6 @@ public class BalanceManager
       }
       blendICPTrajectories.set(true);
 
-      safeDistanceFromSupportEdgesToStopCancelICPPlan.set(0.05);
       distanceToShrinkSupportPolygonWhenHoldingCurrent.set(0.08);
 
       maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());
@@ -297,8 +292,6 @@ public class BalanceManager
       copTrajectory.registerState(copTrajectoryState);
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
-
-      pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
       stepAdjustmentController = new StepAdjustmentController(walkingControllerParameters,
                                                               controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
@@ -379,11 +372,6 @@ public class BalanceManager
       this.stepConstraintRegionHandler = planarRegionStepConstraint;
    }
 
-   public boolean checkAndUpdateFootstep(Footstep footstep)
-   {
-      return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
-   }
-
    public boolean checkAndUpdateStepAdjustment(Footstep footstep)
    {
       boolean usingStepAdjustment = stepAdjustmentController.useStepAdjustment();
@@ -410,7 +398,6 @@ public class BalanceManager
       footstep.setPose(stepAdjustmentController.getFootstepSolution());
       return footstepWasAdjusted;
    }
-
 
    public void clearICPPlan()
    {
@@ -452,11 +439,6 @@ public class BalanceManager
       double omega0 = controllerToolbox.getOmega0();
       if (Double.isNaN(omega0))
          throw new RuntimeException("omega0 is NaN");
-
-      if (supportLeg == null)
-         pushRecoveryControlModule.updateForDoubleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
-      else
-         pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
 
       // --- compute adjusted desired capture point
       controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
@@ -653,29 +635,14 @@ public class BalanceManager
       icpVelocityReductionFactor.set(Math.max(0.0, scaleUpdated));
    }
 
-   public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
-   {
-      pushRecoveryControlModule.packFootstepForRecoveringFromDisturbance(swingSide, swingTimeRemaining, footstepToPack);
-   }
-
    public void disablePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.disable();
    }
 
-   public void disablePushRecovery()
-   {
-      pushRecoveryControlModule.setIsEnabled(false);
-   }
-
    public void enablePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.enable();
-   }
-
-   public void enablePushRecovery()
-   {
-      pushRecoveryControlModule.setIsEnabled(true);
    }
 
    public double estimateTimeRemainingForSwingUnderDisturbance()
@@ -813,11 +780,6 @@ public class BalanceManager
       stepAdjustmentController.reset();
       comTrajectoryPlanner.reset();
       angularMomentumHandler.resetAngularMomentum();
-   }
-
-   public void prepareForDoubleSupportPushRecovery()
-   {
-      pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
    public void initializeICPPlanForSingleSupport()
@@ -968,41 +930,6 @@ public class BalanceManager
    public boolean isICPPlanDone()
    {
       return icpPlannerDone.getValue();
-   }
-
-   public boolean isPushRecoveryEnabled()
-   {
-      return pushRecoveryControlModule.isEnabled();
-   }
-
-   public boolean isRecovering()
-   {
-      return pushRecoveryControlModule.isRecovering();
-   }
-
-   public boolean isRecoveringFromDoubleSupportFall()
-   {
-      return pushRecoveryControlModule.isEnabled() && pushRecoveryControlModule.isRecoveringFromDoubleSupportFall();
-   }
-
-   public boolean isRecoveryImpossible()
-   {
-      return pushRecoveryControlModule.isCaptureRegionEmpty();
-   }
-
-   public boolean isRobotBackToSafeState()
-   {
-      return pushRecoveryControlModule.isRobotBackToSafeState();
-   }
-
-   public RobotSide isRobotFallingFromDoubleSupport()
-   {
-      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
-   }
-
-   public void resetPushRecovery()
-   {
-      pushRecoveryControlModule.reset();
    }
 
    public void requestICPPlannerToHoldCurrentCoMInNextDoubleSupport()

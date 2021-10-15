@@ -37,6 +37,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -138,6 +139,7 @@ public class GDXVRContext implements Disposable
       VRSystem.VRSystem_GetRecommendedRenderTargetSize(scratch, scratch2);
       int width = (int) (scratch.get(0) * renderTargetMultiplier);
       int height = (int) (scratch2.get(0) * renderTargetMultiplier);
+      LogTools.info("VR render size: {} x {}", width, height);
 
       setupEye(RobotSide.LEFT, width, height, hasStencil);
       setupEye(RobotSide.RIGHT, width, height, hasStencil);

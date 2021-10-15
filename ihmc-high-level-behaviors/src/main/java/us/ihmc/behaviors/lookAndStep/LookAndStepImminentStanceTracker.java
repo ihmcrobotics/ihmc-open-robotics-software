@@ -125,7 +125,8 @@ public class LookAndStepImminentStanceTracker
                {
                   foothold.addVertex(vertex);
                }
-               imminentStanceFeet.set(side, new MinimalFootstep(side, solePose, foothold, side.getPascalCaseName() + " Prior Stance"));
+               imminentStanceFeet.set(side, new MinimalFootstep(side, solePose, foothold,
+                                                                "Look and Step " + side.getPascalCaseName() + " Imminent Stance (Prior)"));
             }
             else
             {
@@ -137,7 +138,7 @@ public class LookAndStepImminentStanceTracker
                                       new MinimalFootstep(side,
                                                           solePose,
                                                           commandedImminentStancePoses.get(side).getFoothold(),
-                                                          side.getPascalCaseName() + " Commanded Stance"));
+                                                          side.getPascalCaseName() + " Imminent Stance (Commanded)"));
             }
          }
       }

@@ -170,6 +170,11 @@ public class WalkingMessageHandler
       parentRegistry.addChild(registry);
    }
 
+   public void setFinalTransferTime(double finalTransferTime)
+   {
+      this.finalTransferTime.set(finalTransferTime);
+   }
+
    public void handleFootstepDataListCommand(FootstepDataListCommand command)
    {
       if (command.getNumberOfFootsteps() > 0)

@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.CoMHeightController;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.HeightController;
@@ -139,6 +140,21 @@ public class LinearMomentumRateControlModule
                                                                                                             new PlaneContactStateCommand());
 
    private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
+
+
+   public LinearMomentumRateControlModule(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                          WalkingControllerParameters walkingControllerParameters,
+                                          YoRegistry parentRegistry)
+   {
+      this(controllerToolbox.getReferenceFrames(),
+           controllerToolbox.getContactableFeet(),
+           controllerToolbox.getFullRobotModel().getElevator(),
+           walkingControllerParameters,
+           controllerToolbox.getGravityZ(),
+           controllerToolbox.getControlDT(),
+           parentRegistry,
+           controllerToolbox.getYoGraphicsListRegistry());
+   }
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames,
                                           SideDependentList<ContactableFoot> contactableFeet,

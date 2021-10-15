@@ -50,7 +50,10 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
@@ -64,6 +67,9 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -135,7 +141,6 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
       FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel();
       commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
 
@@ -147,6 +152,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
                                                                   updateDT,
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, toolboxController.getDesiredReferenceFrames()));
       toolboxController.setInitialRobotConfiguration(robotModel);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
@@ -158,7 +164,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
       robotDescription.setName("Ghost");
-      KinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
+      recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
       ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -172,6 +178,41 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          scs.setCameraPosition(8.0, 0.0, 3.0);
          scs.startOnAThread();
          blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
+      }
+   }
+
+   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
+   {
+      if (joint == null)
+         return;
+      LinkDescription link = joint.getLink();
+      if (link == null)
+         return;
+      LinkGraphicsDescription linkGraphics = link.getLinkGraphics();
+
+      if (linkGraphics != null)
+      {
+         List<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
+
+         if (graphics3dInstructions == null)
+            return;
+
+         for (Graphics3DPrimitiveInstruction primitive : graphics3dInstructions)
+         {
+            if (primitive instanceof Graphics3DInstruction)
+            {
+               Graphics3DInstruction modelInstruction = (Graphics3DInstruction) primitive;
+               modelInstruction.setAppearance(ghostApperance);
+            }
+         }
+      }
+
+      if (joint.getChildrenJoints() == null)
+         return;
+
+      for (JointDescription child : joint.getChildrenJoints())
+      {
+         recursivelyModifyGraphics(child, ghostApperance);
       }
    }
 

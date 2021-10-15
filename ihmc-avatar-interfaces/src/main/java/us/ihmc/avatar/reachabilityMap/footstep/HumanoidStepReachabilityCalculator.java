@@ -1,6 +1,5 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
@@ -156,7 +155,6 @@ public abstract class HumanoidStepReachabilityCalculator
 
       FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel();
       commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsToolboxModule.supportedStatus());
 
@@ -168,6 +166,7 @@ public abstract class HumanoidStepReachabilityCalculator
                                                                   updateDT,
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, toolboxController.getDesiredReferenceFrames()));
       toolboxController.setInitialRobotConfiguration(robotModel);
 
       RobotCollisionModel collisionModel = getRobotCollisionModel(robotModel.getJointMap());
@@ -216,11 +215,7 @@ public abstract class HumanoidStepReachabilityCalculator
          case TEST_MULTIPLE_STEPS:
             List<StepReachabilityLatticePoint> leftFootPoseList = createLeftFootPoseList();
             FramePose3D rightFootPose = new FramePose3D();
-            MultiContactScriptWriter scriptWriter = new MultiContactScriptWriter();
-
-            String filePath = getResourcesDirectory().replace('/', File.separatorChar) + File.separator + robotModel.getStepReachabilityResourceName().replace('/', File.separatorChar);
-            File reachabilityFile = new File(filePath);
-            scriptWriter.startNewScript(reachabilityFile, true);
+            List<KinematicsToolboxSnapshotDescription> snapshotDescriptions = new ArrayList<>();
 
             // Loop through XYZs, free yaw
             for (int xyzLoopIndex = 0; xyzLoopIndex < leftFootPoseList.size(); xyzLoopIndex++)
@@ -241,18 +236,15 @@ public abstract class HumanoidStepReachabilityCalculator
                   {
                      leftFootPose = leftFootYawSweepList.get(yawLoopIndex);
                      snapshotDescription = testSingleStep(leftFootPose, rightFootPose, false);
-
-                     scriptWriter.recordConfiguration(snapshotDescription);
+                     snapshotDescriptions.add(snapshotDescription);
                   }
                }
             }
-            double[] gridData = new double[3];
-            gridData[0] = spacingXYZ;
-            gridData[1] = maximumOffsetYaw - minimumOffsetYaw;
-            gridData[2] = yawDivisions;
-            JsonNode gridDataNode = StepReachabilityFileTools.gridDataToJson(gridData);
-            scriptWriter.addAuxiliaryData(gridDataNode);
-            scriptWriter.writeScript();
+
+            String filePath = getResourcesDirectory().replace('/', File.separatorChar) + File.separator + robotModel.getStepReachabilityResourceName().replace('/', File.separatorChar);
+            File reachabilityFile = new File(filePath);
+            StepReachabilityIOHelper.writeToFile(reachabilityFile, snapshotDescriptions, spacingXYZ, yawDivisions, maximumOffsetYaw - minimumOffsetYaw);
+
             break;
 
          case TEST_VISUALIZATION:
@@ -261,36 +253,22 @@ public abstract class HumanoidStepReachabilityCalculator
             break;
 
          case TEST_WRITE_SCRIPT:
-            scriptWriter = new MultiContactScriptWriter();
-            Path path = Paths.get(WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software").toString(),
-                                  "/valkyrie/src/main/resources/us/ihmc/valkyrie/parameters/TestScript.json");
-            File testFile = path.toFile();
-            scriptWriter.startNewScript(testFile, true);
+            filePath = getResourcesDirectory().replace('/', File.separatorChar) + File.separator + robotModel.getStepReachabilityResourceName().replace('/', File.separatorChar);
+            reachabilityFile = new File(filePath);
 
-            double[] reachabilityGridData = new double[3];
-            reachabilityGridData[0] = spacingXYZ;
-            reachabilityGridData[1] = maximumOffsetYaw - minimumOffsetYaw;
-            reachabilityGridData[2] = yawDivisions;
-
-            JsonNode testGridDataNode = StepReachabilityFileTools.gridDataToJson(reachabilityGridData);
-            scriptWriter.addAuxiliaryData(testGridDataNode);
-            KinematicsToolboxSnapshotDescription snapshot = testSingleStep(new StepReachabilityLatticePoint(0, 1, 0, 0), new FramePose3D(), true);
-            scriptWriter.recordConfiguration(snapshot);
-            scriptWriter.writeScript();
+            snapshotDescriptions = new ArrayList<>();
+            snapshotDescriptions.add(testSingleStep(new StepReachabilityLatticePoint(0, 2, 0, 0), new FramePose3D(), false));
+            StepReachabilityIOHelper.writeToFile(reachabilityFile, snapshotDescriptions, spacingXYZ, yawDivisions, maximumOffsetYaw - minimumOffsetYaw);
             break;
 
          case TEST_LOAD_SCRIPT:
-            MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-            path = Paths.get(WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software").toString(),
-                             "/valkyrie/src/main/resources/us/ihmc/valkyrie/parameters/TestScript.json");
-            scriptReader.loadScript(path.toFile());
+            StepReachabilityIOHelper stepReachabilityIOHelper = new StepReachabilityIOHelper();
+            stepReachabilityData = stepReachabilityIOHelper.loadStepReachability(getRobotModel());
 
-            List<KinematicsToolboxSnapshotDescription> kinematicsSnapshots = scriptReader.getAllItems();
-            double[] testGridData = StepReachabilityFileTools.loadGridDataFromJson(scriptReader.getAuxiliaryData());
-            LogTools.info("Number of kinematic snapshots: " + kinematicsSnapshots.size());
-            LogTools.info("spacingXYZ: " + testGridData[0]);
-            LogTools.info("gridSizeYaw: " + testGridData[1]);
-            LogTools.info("yawDivisions: " + testGridData[2]);
+            LogTools.info("Number of kinematic snapshots: " + stepReachabilityIOHelper.getReachabilityIKData().size());
+            LogTools.info("spacingXYZ: " + stepReachabilityData.getXyzSpacing());
+            LogTools.info("gridSizeYaw: " + stepReachabilityData.getGridSizeYaw());
+            LogTools.info("yawDivisions: " + stepReachabilityData.getYawDivisions());
             break;
 
          default:

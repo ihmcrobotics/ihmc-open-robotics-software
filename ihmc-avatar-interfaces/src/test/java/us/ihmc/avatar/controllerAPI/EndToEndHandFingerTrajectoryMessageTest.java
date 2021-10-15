@@ -6,12 +6,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import us.ihmc.avatar.MultiRobotTestInterface;
-import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
+import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -22,9 +21,7 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
 
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
-   protected DRCSimulationTestHelper drcSimulationTestHelper;
-
-   protected HumanoidFloatingRootJointRobot controllerFullRobotModel;
+   protected SCS2AvatarTestingSimulation simulationTestHelper;
 
    public abstract Object createTrajectoryMessage(RobotSide robotSide, HandConfiguration handConfiguration);
 
@@ -32,18 +29,16 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper.start();
 
-      controllerFullRobotModel = drcSimulationTestHelper.getRobot();
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
-         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
+         simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
+      simulationTestHelper.simulateAndWait(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.CLOSE, epsilon);
@@ -53,28 +48,26 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper.start();
 
-      controllerFullRobotModel = drcSimulationTestHelper.getRobot();
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
-         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
+         simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
-
-      for (RobotSide robotSide : RobotSide.values)
-         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.STOP));
-
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
+      simulationTestHelper.simulateAndWait(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
-         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN));
+         simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.STOP));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
+      simulationTestHelper.simulateAndWait(1.0);
+
+      for (RobotSide robotSide : RobotSide.values)
+         simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN));
+
+      simulationTestHelper.simulateAndWait(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.OPEN, epsilon);
@@ -84,26 +77,24 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
-      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), simulationTestingParameters);
+      simulationTestHelper.start();
 
-      controllerFullRobotModel = drcSimulationTestHelper.getRobot();
-
-      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      boolean success = simulationTestHelper.simulateAndWait(0.5);
       assertTrue(success);
 
       for (RobotSide robotSide : RobotSide.values)
-         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
+         simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.CLOSE));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
+      simulationTestHelper.simulateAndWait(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.CLOSE, epsilon);
 
       for (RobotSide robotSide : RobotSide.values)
-         drcSimulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN_FINGERS));
+         simulationTestHelper.publishToController(createTrajectoryMessage(robotSide, HandConfiguration.OPEN_FINGERS));
 
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(7.0);
+      simulationTestHelper.simulateAndWait(7.0);
 
       for (RobotSide robotSide : RobotSide.values)
          assertDesiredFingerJoint(robotSide, HandConfiguration.OPEN_FINGERS, epsilon);
@@ -118,16 +109,11 @@ public abstract class EndToEndHandFingerTrajectoryMessageTest implements MultiRo
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
-      {
-         ThreadTools.sleepForever();
-      }
-
       // Do this here in case a test fails. That way the memory will be recycled.
-      if (drcSimulationTestHelper != null)
+      if (simulationTestHelper != null)
       {
-         drcSimulationTestHelper.destroySimulation();
-         drcSimulationTestHelper = null;
+         simulationTestHelper.finishTest(simulationTestingParameters.getKeepSCSUp());
+         simulationTestHelper = null;
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");

@@ -30,7 +30,7 @@ import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState;
@@ -270,7 +270,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
       toolboxRegistry = new YoRegistry("toolboxMain");
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
-      commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel));
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,
@@ -576,7 +575,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    {
       RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
       robotDescription.setName(robotName);
-      KinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), robotAppearance);
+      HumanoidKinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), robotAppearance);
       HumanoidFloatingRootJointRobot scsRobot = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       scsRobot.getRootJoint().setPinned(true);
       scsRobot.setDynamic(false);

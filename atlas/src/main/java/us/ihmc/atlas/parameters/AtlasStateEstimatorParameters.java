@@ -128,7 +128,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
             String name = jointMap.getSpineJointName(spineJointName);
             YoDouble bias = new YoDouble("q_offset_" + name, registry);
             if (runningOnRealRobot && spineJointName == SpineJointName.SPINE_ROLL)
-               bias.set(-0.05);
+               bias.set(0.015);
 
             sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(null, bias, false, name);
       }

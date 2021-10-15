@@ -28,7 +28,6 @@ import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.obstacleCourseTests.ForceSensorHysteresisCreator;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
@@ -49,7 +48,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -91,7 +89,6 @@ public class DRCSimulationTestHelper
 
    private NothingChangedVerifier nothingChangedVerifier;
    private BlockingSimulationRunner blockingSimulationRunner;
-   private final WalkingControllerParameters walkingControlParameters;
 
    private final DRCRobotModel robotModel;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -127,7 +124,6 @@ public class DRCSimulationTestHelper
                                   CommonAvatarEnvironmentInterface testEnvironment)
    {
       this.robotModel = robotModel;
-      this.walkingControlParameters = robotModel.getWalkingControllerParameters();
       this.simulationTestingParameters = simulationTestParameters;
 
       robotName = robotModel.getSimpleRobotName();
@@ -137,8 +133,7 @@ public class DRCSimulationTestHelper
       simulationStarter = new DRCSimulationStarter(robotModel, this.testEnvironment);
 
       fullRobotModel = robotModel.createFullRobotModel();
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      scriptedFootstepGenerator = new ScriptedFootstepGenerator(referenceFrames, fullRobotModel, walkingControlParameters);
+      scriptedFootstepGenerator = new ScriptedFootstepGenerator(fullRobotModel);
 
       guiInitialSetup = new DRCGuiInitialSetup(false, false, simulationTestingParameters);
 

@@ -11,8 +11,9 @@ public class TargetFollowingBehaviorAPI
    private static final MessagerAPIFactory.Category Root = apiFactory.createRootCategory("TargetFollowingRoot");
    private static final MessagerAPIFactory.CategoryTheme TargetFollower = apiFactory.createCategoryTheme("TargetFollower");
 
-   public static final MessagerAPIFactory.Topic<Pose3D> Goal = topic("Goal");
-   public static final MessagerAPIFactory.Topic<List<String>> Parameters = topic("Parameters");
+   public static final MessagerAPIFactory.Topic<Pose3D> TargetPose = topic("TargetPose");
+   public static final MessagerAPIFactory.Topic<Pose3D> TargetApproachPose = topic("TargetApproachPose");
+   public static final MessagerAPIFactory.Topic<List<String>> TargetFollowingParameters = topic("TargetFollowingParameters");
 
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 

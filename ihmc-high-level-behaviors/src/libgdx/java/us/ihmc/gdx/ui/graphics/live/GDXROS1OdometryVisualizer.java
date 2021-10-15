@@ -7,12 +7,17 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import geometry_msgs.PoseStamped;
 import imgui.internal.ImGui;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.ArrayList;
@@ -22,8 +27,11 @@ public class GDXROS1OdometryVisualizer extends ImGuiGDXROS1Visualizer implements
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private AbstractRosTopicSubscriber<PoseStamped> subscriber;
    private final String topic;
+   private ReferenceFrame frame;
    private PoseStamped pose;
-   private ArrayList<ModelInstance> poseModels = new ArrayList<>();
+   private final FramePose3D framePose = new FramePose3D();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final ArrayList<ModelInstance> poseModels = new ArrayList<>();
 
    private volatile Runnable toRender = null;
 
@@ -36,6 +44,11 @@ public class GDXROS1OdometryVisualizer extends ImGuiGDXROS1Visualizer implements
    {
       super(title);
       this.topic = topic;
+   }
+
+   public void setFrame(ReferenceFrame frame)
+   {
+      this.frame = frame;
    }
 
    @Override
@@ -65,10 +78,17 @@ public class GDXROS1OdometryVisualizer extends ImGuiGDXROS1Visualizer implements
    {
       toRender = () ->
       {
+         if (frame != null)
+            framePose.setToZero(frame);
+         else
+            framePose.setToZero(ReferenceFrame.getWorldFrame());
+
+         RosTools.toEuclid(pose.getPose(), framePose);
+         framePose.changeFrame(ReferenceFrame.getWorldFrame());
+
          modelInstance = GDXModelPrimitives.createCoordinateFrameInstance(0.1);
-         modelInstance.transform.translate((float) pose.getPose().getPosition().getX(),
-                                           (float) pose.getPose().getPosition().getY(),
-                                           (float) pose.getPose().getPosition().getZ());
+         GDXTools.toGDX(framePose, tempTransform, modelInstance.transform);
+         poseModels.clear();
          poseModels.add(modelInstance);
       };
    }

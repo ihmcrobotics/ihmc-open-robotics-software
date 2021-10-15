@@ -156,12 +156,12 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
       }
       buildMeshAndCreateModelInstance = () ->
       {
-         // This can't be done outside the libGDX thread.
+         // This can't be done outside the libGDX thread. TODO: Consider using Gdx.app.postRunnable
          textRenderables.clear();
          for (int i = 0; i < footsteps.size(); i++)
          {
             MinimalFootstep minimalFootstep = footsteps.get(i);
-            GDX3DSituatedText situatedText3D = new GDX3DSituatedText("" + i);
+            GDX3DSituatedText footstepIndexText = new GDX3DSituatedText("" + i);
             minimalFootstep.getSolePoseInWorld().get(tempTransform);
             double textHeight = 0.08;
             footstepFrame.update();
@@ -171,9 +171,20 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
             textFramePose.getPosition().addY(textHeight / 4.0);
             textFramePose.getPosition().addX(-textHeight / 2.0);
             textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            GDXTools.toGDX(textFramePose, tempTransform, situatedText3D.getModelInstance().transform);
-            situatedText3D.scale((float) textHeight);
-            textRenderables.add(situatedText3D);
+            GDXTools.toGDX(textFramePose, tempTransform, footstepIndexText.getModelInstance().transform);
+            footstepIndexText.scale((float) textHeight);
+            textRenderables.add(footstepIndexText);
+
+            if (!minimalFootstep.getDescription().isEmpty())
+            {
+               GDX3DSituatedText footstepListDescriptionText = new GDX3DSituatedText(minimalFootstep.getDescription());
+               textFramePose.changeFrame(footstepFrame);
+               textFramePose.getPosition().subY(0.12);
+               textFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+               GDXTools.toGDX(textFramePose, tempTransform, footstepListDescriptionText.getModelInstance().transform);
+               footstepListDescriptionText.scale((float) textHeight);
+               textRenderables.add(footstepListDescriptionText);
+            }
          }
 
          modelBuilder.begin();

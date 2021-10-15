@@ -55,11 +55,17 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
-   public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
-                                              TouchdownErrorCompensator touchdownErrorCompensator, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                              WalkingFailureDetectionControlModule failureDetectionControlModule, DoubleProvider minimumTransferTime,
-                                              DoubleProvider unloadFraction, DoubleProvider rhoMin, YoRegistry parentRegistry)
+   public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum,
+                                              WalkingMessageHandler walkingMessageHandler,
+                                              TouchdownErrorCompensator touchdownErrorCompensator,
+                                              HighLevelHumanoidControllerToolbox controllerToolbox,
+                                              HighLevelControlManagerFactory managerFactory,
+                                              WalkingControllerParameters walkingControllerParameters,
+                                              WalkingFailureDetectionControlModule failureDetectionControlModule,
+                                              DoubleProvider minimumTransferTime,
+                                              DoubleProvider unloadFraction,
+                                              DoubleProvider rhoMin,
+                                              YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction, rhoMin, parentRegistry);
 

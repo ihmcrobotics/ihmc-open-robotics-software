@@ -48,6 +48,13 @@ public final class ImPlotTools
       return output;
    }
 
+   public static Double[] newNaNFilledBuffer(int bufferSize)
+   {
+      Double[] buffer = new Double[bufferSize];
+      Arrays.fill(buffer, Double.NaN);
+      return buffer;
+   }
+
    public static <T extends Number> Integer[] createIndex(T[] array)
    {
       return createIndex(array, 0);
@@ -64,11 +71,13 @@ public final class ImPlotTools
       return output;
    }
 
+   /** @deprecated THIS METHOD IS SUPER EXPENSIVE, DON'T USE */
    public static Double[] removeNullElements(Double[] array)
    {
       return removeNullElements(array, Double.class);
    }
 
+   /** @deprecated THIS METHOD IS SUPER EXPENSIVE, DON'T USE */
    public static <T extends Number> T[] removeNullElements(T[] array, Class<T> arrayClass)
    {
       if (Arrays.stream(array).noneMatch(Objects::isNull))

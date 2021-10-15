@@ -280,7 +280,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
                                        FrameVector2DReadOnly desiredCoMVelocity,
                                        boolean isInDoubleSupport,
                                        double omega0,
-                                       boolean isRecoveringFromPush,
                                        FeetManager feetManager)
    {
       solve(comHeightPartialDerivatives, isInDoubleSupport);

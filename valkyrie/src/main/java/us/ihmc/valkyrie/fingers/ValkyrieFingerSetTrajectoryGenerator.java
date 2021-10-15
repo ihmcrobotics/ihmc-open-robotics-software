@@ -13,6 +13,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -41,7 +42,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       JOINTSPACE
    }
 
-   public ValkyrieFingerSetTrajectoryGenerator(Class<T> enumType, RobotSide robotSide, YoDouble yoTime, EnumMap<T, YoDouble> fingerControlSpaceMap,
+   public ValkyrieFingerSetTrajectoryGenerator(Class<T> enumType, RobotSide robotSide, DoubleProvider yoTime, EnumMap<T, YoDouble> fingerControlSpaceMap,
                                                YoRegistry parentRegistry)
    {
       this.robotSide = robotSide;
@@ -67,7 +68,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
 
          MultipleWaypointsTrajectoryGenerator trajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(robotSide + key.name() + "_traj", parentRegistry);
          trajectoryGenerator.clear();
-         trajectoryGenerator.appendWaypoint(yoTime.getDoubleValue(), initialValue, 0.0);
+         trajectoryGenerator.appendWaypoint(yoTime.getValue(), initialValue, 0.0);
          trajectoryGenerator.initialize();
          trajectoryGenerators.put(key, trajectoryGenerator);
 

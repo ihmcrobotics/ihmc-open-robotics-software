@@ -111,7 +111,7 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
       if (disableToeOff)
       {
          scs.findVariable("ToeOffManager", "doToeOffIfPossibleInDoubleSupport").setValueFromDouble(0);
-         scs.findVariable("ToeOffManager", "doToeOffWhenHittingAnkleLimit").setValueFromDouble(0);
+         scs.findVariable("LegJointLimitsInspector", "doToeOffWhenHittingAnkleLimit").setValueFromDouble(0);
       }
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5));

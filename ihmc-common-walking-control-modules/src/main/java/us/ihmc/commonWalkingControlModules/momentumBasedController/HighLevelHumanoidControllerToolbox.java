@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
@@ -126,6 +127,7 @@ public class HighLevelHumanoidControllerToolbox
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListeners = new ArrayList<>();
    private final ArrayList<RobotMotionStatusChangedListener> robotMotionStatusChangedListeners = new ArrayList<>();
+   private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
@@ -359,6 +361,8 @@ public class HighLevelHumanoidControllerToolbox
       alpha.set(0.95); // switch to break frequency and move to walking parameters
       filteredYoAngularMomentum = new AlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, alpha, yoAngularMomentum);
       momentumGain.set(0.0);
+
+      failureDetectionControlModule = new WalkingFailureDetectionControlModule(getContactableFeet(), registry);
 
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
    }
@@ -913,6 +917,11 @@ public class HighLevelHumanoidControllerToolbox
       {
          robotMotionStatusChangedListeners.get(i).robotMotionStatusHasChanged(newStatus, yoTime.getDoubleValue());
       }
+   }
+
+   public WalkingFailureDetectionControlModule getFailureDetectionControlModule()
+   {
+      return failureDetectionControlModule;
    }
 
    public void getWristRawMeasuredWrench(Wrench wrenchToPack, RobotSide robotSide)

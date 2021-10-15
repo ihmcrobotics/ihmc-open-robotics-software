@@ -6,21 +6,21 @@ import controller_msgs.msg.dds.HandJointAnglePacket;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandSensorData;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
 public class SimulatedRobotiqHandJointAngleProducer
 {
-   private final SideDependentList<EnumMap<RobotiqHandJointNameMinimal, OneDegreeOfFreedomJoint>> handJoints = SideDependentList.createListOfEnumMaps(RobotiqHandJointNameMinimal.class);
+   private final SideDependentList<EnumMap<RobotiqHandJointNameMinimal, OneDoFJointBasics>> handJoints = SideDependentList.createListOfEnumMaps(RobotiqHandJointNameMinimal.class);
 
    private final SideDependentList<Boolean> hasRobotiqHand = new SideDependentList<Boolean>(false, false);
 
    private final SideDependentList<HandJointAngleCommunicator> jointAngleCommunicators = new SideDependentList<>();
 
-   public SimulatedRobotiqHandJointAngleProducer(IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher, FloatingRootJointRobot simulatedRobot)
+   public SimulatedRobotiqHandJointAngleProducer(IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher, FullRobotModel fullRobotModel)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -28,7 +28,7 @@ public class SimulatedRobotiqHandJointAngleProducer
 
          for (RobotiqHandJointNameMinimal jointEnum : RobotiqHandJointNameMinimal.values)
          {
-            OneDegreeOfFreedomJoint fingerJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointEnum.getJointName(robotSide));
+            OneDoFJointBasics fingerJoint = fullRobotModel.getOneDoFJointByName(jointEnum.getJointName(robotSide));
 
             if (fingerJoint != null)
                hasRobotiqHand.put(robotSide, true);

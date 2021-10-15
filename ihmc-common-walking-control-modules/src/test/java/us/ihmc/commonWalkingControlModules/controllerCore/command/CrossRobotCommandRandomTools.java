@@ -1710,6 +1710,7 @@ public class CrossRobotCommandRandomTools
       next.setCenterOfPressureData(nextCenterOfPressureDataHolder(random, rootBody, possibleFrames));
       next.setDesiredExternalWrenchData(nextDesiredExternalWrenchHolder(random, rootBody, possibleFrames));
       next.setLinearMomentumRate(nextFrameVector3D(random, possibleFrames));
+      next.setAngularMomentumRate(nextFrameVector3D(random, possibleFrames));
       next.setRootJointDesiredConfigurationData(nextRootJointDesiredConfigurationData(random, possibleFrames));
       next.setLowLevelOneDoFJointDesiredDataHolder(nextJointDesiredOutputListBasics(random, rootBody, possibleFrames));
       return next;

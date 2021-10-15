@@ -66,7 +66,7 @@ public class ImPlotYoGraph
    {
       YoDoubleClientHelper variable = helper.subscribeToYoDouble(variableName);
       variables.add(variable);
-      variableValueBuffers.add(new Double[bufferSize]);
+      variableValueBuffers.add(ImPlotTools.newNaNFilledBuffer(bufferSize));
       requestAddVariable = false;
    }
 
@@ -100,11 +100,11 @@ public class ImPlotYoGraph
          {
             YoDoubleClientHelper variable = variableIterator.next();
             Double[] variableValueBuffer = variableValueBufferIterator.next();
-            variableValueBuffer[currentValueIndex] = variable.get();
-            Double[] variableValueBufferWithoutNulls = ImPlotTools.removeNullElements(variableValueBuffer);
+            double variableValue = variable.get();
+            variableValueBuffer[currentValueIndex] = variableValue;
 
-            String labelID = variable.getName() + " " + variable.get() + "###" + variable.getName();
-            ImPlot.plotLine(labelID, ImPlotTools.createIndex(variableValueBufferWithoutNulls), variableValueBufferWithoutNulls);
+            String labelID = variable.getName() + " " + variableValue + "###" + variable.getName();
+            ImPlot.plotLine(labelID, ImPlotTools.createIndex(variableValueBuffer), variableValueBuffer);
             if (ImPlot.beginLegendPopup(labelID))
             {
                showingLegendPopup = true;
@@ -146,7 +146,7 @@ public class ImPlotYoGraph
             {
                YoDoubleClientHelper yoDoubleHelper = helper.subscribeToYoDouble(payload);
                variables.add(yoDoubleHelper);
-               variableValueBuffers.add(new Double[bufferSize]);
+               variableValueBuffers.add(ImPlotTools.newNaNFilledBuffer(bufferSize));
             }
          }
          ImPlot.endPlot();

@@ -234,6 +234,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
+   public void publish(ROS2Topic<std_msgs.msg.dds.String> topic, String message)
+   {
+      ros2Helper.publish(topic, message);
+   }
+
+   @Override
    public void publish(ROS2Topic<Pose3D> topic, Pose3D message)
    {
       ros2Helper.publish(topic, message);

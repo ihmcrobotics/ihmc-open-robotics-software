@@ -283,7 +283,13 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
       return goalPoseForReading;
    }
 
-   public void setGoalPose(Pose3DReadOnly pose)
+   public void setGoalPoseAndPassOn(Pose3DReadOnly pose)
+   {
+      setGoalPoseNoCallbacks(pose);
+      placedPoseConsumer.accept(goalPoseForReading);
+   }
+
+   public void setGoalPoseNoCallbacks(Pose3DReadOnly pose)
    {
       if (pose == null)
       {
@@ -296,6 +302,5 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
          GDXTools.toGDX(pose, tempTransform, arrow.transform);
       }
       goalPoseForReading.set(pose);
-      placedPoseConsumer.accept(goalPoseForReading);
    }
 }

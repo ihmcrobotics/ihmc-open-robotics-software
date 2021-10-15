@@ -4,13 +4,14 @@ import imgui.internal.ImGui;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.MessagerHelper;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.messager.SharedMemoryMessager;
 
 import java.util.function.Supplier;
 
 public class ImGuiMessagerManagerWidget
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private volatile boolean messagerConnecting = false;
    private String messagerConnectedHost = "";
    private final MessagerHelper messagerHelper;
@@ -27,7 +28,8 @@ public class ImGuiMessagerManagerWidget
       if (messagerConnecting)
       {
          ImGui.text("Messager connecting...");
-         if (messagerHelper.isConnected())
+         ImGui.sameLine();
+         if (messagerHelper.isConnected() || ImGui.button(labels.get("Cancel")))
          {
             messagerConnecting = false;
          }
@@ -38,17 +40,18 @@ public class ImGuiMessagerManagerWidget
       }
       else if (!messagerHelper.isConnected())
       {
-         if (ImGui.button("Connect messager")) // TODO: One button should connect both
+         ImGui.text("Connect using:");
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Kryo")))
          {
-            connectViaKryo(hostSupplier.get());
+            connectKryo();
          }
-
-         SharedMemoryMessager potentialSharedMemoryMessager = BehaviorModule.getSharedMemoryMessager();
-         if (potentialSharedMemoryMessager != null && potentialSharedMemoryMessager.isMessagerOpen())
+         if (isSharedMemoryAvailable())
          {
-            if (ImGui.button("Use shared memory messager"))
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Shared memory")))
             {
-               messagerHelper.connectViaSharedMemory(potentialSharedMemoryMessager);
+               connectSharedMemory();
             }
          }
       }
@@ -63,14 +66,37 @@ public class ImGuiMessagerManagerWidget
             ImGui.text("Messager connected to " + messagerConnectedHost + ".");
          }
          ImGui.sameLine();
-         if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect")))
+         if (ImGui.button(labels.get("Disconnect")))
          {
             disconnectMessager();
          }
       }
    }
 
-   public void connectViaKryo(String hostname)
+   private boolean isSharedMemoryAvailable()
+   {
+      SharedMemoryMessager potentialSharedMemoryMessager = BehaviorModule.getSharedMemoryMessager();
+      return potentialSharedMemoryMessager != null && potentialSharedMemoryMessager.isMessagerOpen();
+   }
+
+   public void connect()
+   {
+      if (isSharedMemoryAvailable()) // Assumption: it's likely that if it's available that we should be using it
+      {
+         connectSharedMemory();
+      }
+      else
+      {
+         connectKryo();
+      }
+   }
+
+   private void connectSharedMemory()
+   {
+      messagerHelper.connectViaSharedMemory(BehaviorModule.getSharedMemoryMessager());
+   }
+
+   private void connectKryo()
    {
       messagerHelper.connectViaKryo(hostSupplier.get(), NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
       messagerConnectedHost = hostSupplier.get();

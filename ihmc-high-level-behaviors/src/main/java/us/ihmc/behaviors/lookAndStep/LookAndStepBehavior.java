@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -66,7 +67,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
     */
    public enum State
    {
-      RESET, BODY_PATH_PLANNING, FOOTSTEP_PLANNING, STEPPING;
+      RESET, BODY_PATH_PLANNING, LOCALIZATION, FOOTSTEP_PLANNING, STEPPING;
    }
 
    /**
@@ -92,7 +93,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       statusLogger = helper.getOrCreateStatusLogger();
 
       visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
-      visibilityGraphParameters.setIncludePreferredExtrusions(false);
       visibilityGraphParameters.setTooHighToStepDistance(0.2);
 
       lookAndStepParameters = new LookAndStepBehaviorParameters();
@@ -170,7 +170,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    {
       if (!isBeingReset.get())
       {
-         behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+         behaviorStateReference.set(LookAndStepBehavior.State.LOCALIZATION);
          bodyPathLocalization.acceptBodyPathPlan(bodyPath);
       }
    }
@@ -178,6 +178,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    public void acceptGoal(Pose3DReadOnly goal)
    {
       behaviorStateReference.broadcast();
+      helper.publish(GoalForUI, new Pose3D(goal));
       bodyPathLocalization.acceptNewGoalSubmitted();
       bodyPathPlanning.acceptGoal(goal);
    }
