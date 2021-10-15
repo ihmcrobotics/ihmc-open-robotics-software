@@ -27,6 +27,7 @@ import us.ihmc.gdx.ui.behavior.tree.ImGuiImNodesBehaviorTreeUI;
 import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.gdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.gdx.ui.yo.ImGuiYoVariableClientManagerWidget;
+import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
@@ -121,9 +122,9 @@ public class ImGuiGDXBehaviorUIManager
       baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
    }
 
-   public void handleVREvents(GDXVRManager vrManager)
+   public void handleVREvents(GDXVRContext vrContext)
    {
-      highestLevelUI.handleVREvents(vrManager);
+      highestLevelUI.handleVREvents(vrContext);
    }
 
    public void update()

@@ -92,7 +92,7 @@ public class GDXVRManager
       if (posesReady && isVRReady())
       {
          skipHeadset = true;
-         context.renderEyes(sceneManager);
+         context.renderEyes(sceneManager.getSceneBasics());
          skipHeadset = false;
       }
    }

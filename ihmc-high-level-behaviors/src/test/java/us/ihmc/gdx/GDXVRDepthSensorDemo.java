@@ -19,7 +19,7 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
-import us.ihmc.gdx.vr.GDXVRManager;
+import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -81,7 +81,7 @@ public class GDXVRDepthSensorDemo
                baseUI.get3DSceneManager().addModelInstance(coordinateFrameInstance, GDXSceneLevel.VIRTUAL);
             }
 
-            baseUI.getVRManager().addVRInputProcessor(this::handleVREvents);
+            baseUI.getVRManager().getContext().addVRInputProcessor(this::handleVREvents);
 
             baseUI.getImGuiPanelManager().addPanel("Point Cloud Settings", this::renderPointCloudSettings);
             baseUI.getImGuiPanelManager().addPanel(depthSensorSimulator.getColorPanel());
@@ -93,9 +93,9 @@ public class GDXVRDepthSensorDemo
             baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
          }
 
-         private void handleVREvents(GDXVRManager vrManager)
+         private void handleVREvents(GDXVRContext vrContext)
          {
-            vrManager.getContext().getController(RobotSide.LEFT, controller ->
+            vrContext.getController(RobotSide.LEFT, controller ->
             {
                if (controller.isButtonNewlyPressed(SteamVR_Trigger))
                {
@@ -108,7 +108,7 @@ public class GDXVRDepthSensorDemo
                   controllerCoordinateFrames.get(RobotSide.LEFT).transform.set(tempTransform); // TODO: Should be an option on the VR manager probably
                }
             });
-            vrManager.getContext().getController(RobotSide.RIGHT, controller ->
+            vrContext.getController(RobotSide.RIGHT, controller ->
             {
                controller.getPose(ReferenceFrame.getWorldFrame(), cylinder.nodes.get(0).globalTransform);
             });
