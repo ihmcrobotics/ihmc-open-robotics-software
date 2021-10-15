@@ -17,7 +17,6 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
@@ -133,7 +132,13 @@ public class KSTTools
                                                              toolboxControllerPeriod,
                                                              yoGraphicsListRegistry,
                                                              registry);
-      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
+
+      commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(ikController.getCurrentFullRobotModel(),
+                                                                                                  ikController.getCurrentReferenceFrames(),
+                                                                                                  desiredFullRobotModel,
+                                                                                                  ikController.getDesiredReferenceFrames()));
+
+      ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, ikController.getDesiredReferenceFrames()));
 
       ikController.setPreserveUserCommandHistory(false);
       ikController.minimizeAngularMomentum(true);
@@ -306,7 +311,7 @@ public class KSTTools
       for (RobotSide robotSide : RobotSide.values)
       {
          if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            streamingMessageFactory.computeHandStreamingMessage(robotSide);
+            streamingMessageFactory.computeHandStreamingMessage(robotSide, configurationCommand.getHandTrajectoryFrame(robotSide));
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             streamingMessageFactory.computeArmStreamingMessage(robotSide);
@@ -315,9 +320,9 @@ public class KSTTools
       if (isNeckJointspaceOutputEnabled.getValue())
          streamingMessageFactory.computeNeckStreamingMessage();
       if (isChestTaskspaceOutputEnabled.getValue())
-         streamingMessageFactory.computeChestStreamingMessage(ReferenceFrame.getWorldFrame());
+         streamingMessageFactory.computeChestStreamingMessage(configurationCommand.getChestTrajectoryFrame());
       if (isPelvisTaskspaceOutputEnabled.getValue())
-         streamingMessageFactory.computePelvisStreamingMessage();
+         streamingMessageFactory.computePelvisStreamingMessage(configurationCommand.getPelvisTrajectoryFrame());
 
       wholeBodyStreamingMessage.setEnableUserPelvisControl(true);
       wholeBodyStreamingMessage.setStreamIntegrationDuration((float) streamIntegrationDuration.getValue());
@@ -338,7 +343,7 @@ public class KSTTools
       for (RobotSide robotSide : RobotSide.values)
       {
          if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide);
+            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, configurationCommand.getHandTrajectoryFrame(robotSide));
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);
@@ -347,9 +352,9 @@ public class KSTTools
       if (isNeckJointspaceOutputEnabled.getValue())
          trajectoryMessageFactory.computeNeckTrajectoryMessage();
       if (isChestTaskspaceOutputEnabled.getValue())
-         trajectoryMessageFactory.computeChestTrajectoryMessage(ReferenceFrame.getWorldFrame());
+         trajectoryMessageFactory.computeChestTrajectoryMessage(configurationCommand.getChestTrajectoryFrame());
       if (isPelvisTaskspaceOutputEnabled.getValue())
-         trajectoryMessageFactory.computePelvisTrajectoryMessage();
+         trajectoryMessageFactory.computePelvisTrajectoryMessage(configurationCommand.getPelvisTrajectoryFrame());
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
       HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage,

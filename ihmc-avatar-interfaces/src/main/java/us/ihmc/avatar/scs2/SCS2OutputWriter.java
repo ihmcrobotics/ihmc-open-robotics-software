@@ -74,7 +74,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       }
    }
 
-   private void write()
+   protected void write()
    {
       for (int i = 0; i < jointControllers.size(); i++)
       {

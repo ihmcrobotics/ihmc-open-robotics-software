@@ -13,12 +13,12 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.sensorProcessing.frames.ReferenceFrames;
 
 /**
  * This class allows the retrieve the rigid-body from its hash code when converting a
@@ -32,10 +32,10 @@ public class KinematicsToolboxCommandConverter implements CommandConversionInter
    private final JointHashCodeResolver jointHashCodeResolver;
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
 
-   public KinematicsToolboxCommandConverter(FullHumanoidRobotModel fullRobotModel)
+   public KinematicsToolboxCommandConverter(FullHumanoidRobotModel fullRobotModel, ReferenceFrames referenceFrames)
    {
       rigidBodyHashCodeResolver = new RigidBodyHashCodeResolver(fullRobotModel);
-      referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, new HumanoidReferenceFrames(fullRobotModel));
+      referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       jointHashCodeResolver = new JointHashCodeResolver(fullRobotModel);
    }
 
