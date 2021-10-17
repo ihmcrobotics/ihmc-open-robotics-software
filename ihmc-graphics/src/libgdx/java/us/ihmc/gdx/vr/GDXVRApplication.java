@@ -7,6 +7,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryUtil;
+import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.minimalGDX.MinimalGDXApplication;
@@ -25,7 +26,7 @@ public class GDXVRApplication
    private GDX3DSceneBasics sceneBasics;
    private GDXVRContext vrContext;
 
-   public void create()
+   public void launch(Lwjgl3ApplicationAdapter applicationAdapter)
    {
       Lwjgl3NativesLoader.load();
 
@@ -56,16 +57,18 @@ public class GDXVRApplication
       vrContext = new GDXVRContext();
       vrContext.initSystem();
       vrContext.setupEyes();
-   }
 
-   public void run()
-   {
+      applicationAdapter.create();
+
       while (running)
       {
          vrContext.waitGetPoses();
          vrContext.pollEvents();
+         applicationAdapter.render();
          vrContext.renderEyes(sceneBasics);
       }
+
+      applicationAdapter.dispose();
 
       GLFW.glfwDestroyWindow(windowHandle);
       errorCallback.free();
