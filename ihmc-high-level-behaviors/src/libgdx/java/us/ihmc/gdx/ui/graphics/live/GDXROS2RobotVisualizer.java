@@ -33,6 +33,11 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
    private final ImGuiPlot receivedPlot = new ImGuiPlot("RobotConfigurationData", 1000, 230, 20);
    private volatile long receivedPackets = 0;
 
+   public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
+   {
+      this(robotModel, syncedRobot, () -> null);
+   }
+
    public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, Supplier<FocusBasedGDXCamera> cameraForTrackingSupplier)
    {
       super(robotModel.getSimpleRobotName() + " Robot Visualizer (ROS 2)");
@@ -112,7 +117,7 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
       {
          super.update();
 
-         if (trackRobot.get())
+         if (cameraForTracking != null && trackRobot.get())
          {
             syncedRobot.update();
             latestRobotMidFeetUnderPelvis.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getPosition());
