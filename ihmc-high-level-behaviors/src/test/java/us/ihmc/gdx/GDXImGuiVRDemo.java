@@ -4,9 +4,9 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.internal.ImGui;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.tools.BoxesDemoModel;
-import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.tools.string.StringTools;
 
 public class GDXImGuiVRDemo
@@ -20,12 +20,13 @@ public class GDXImGuiVRDemo
 
    public GDXImGuiVRDemo()
    {
-      GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
             baseUI.create();
+            baseUI.getVRManager().getContext().addVRInputProcessor(this::handleVREvents);
 
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
@@ -33,10 +34,14 @@ public class GDXImGuiVRDemo
             baseUI.getImGuiPanelManager().addPanel("Window", this::renderPanel);
          }
 
+         private void handleVREvents(GDXVRContext vrContext)
+         {
+
+         }
+
          @Override
          public void render()
          {
-            baseUI.pollVREvents();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
@@ -67,7 +72,7 @@ public class GDXImGuiVRDemo
          {
             baseUI.dispose();
          }
-      }, getClass());
+      });
    }
 
    public static void main(String[] args)

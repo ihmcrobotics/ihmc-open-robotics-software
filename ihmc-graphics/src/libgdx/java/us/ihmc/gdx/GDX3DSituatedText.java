@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import javafx.util.Pair;
-import org.lwjgl.opengl.GL30;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.log.LogTools;
 
 import javax.imageio.ImageIO;
@@ -202,7 +202,7 @@ public class GDX3DSituatedText implements RenderableProvider
       }
       Material material = new Material(TextureAttribute.createDiffuse(texture),
                                        ColorAttribute.createSpecular(1, 1, 1, 1),
-                                       new BlendingAttribute(GL30.GL_SRC_ALPHA, GL30.GL_ONE_MINUS_SRC_ALPHA));
+                                       new BlendingAttribute(GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA));
       long attributes = VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal | VertexAttributes.Usage.TextureCoordinates;
 
       Model model = BUILDER.createRect(0, 0, 0, width, 0, 0, width, height, 0, 0, height, 0, 0, 0, 1, material, attributes);

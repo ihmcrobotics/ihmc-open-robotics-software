@@ -16,15 +16,17 @@ public class HybridFile
    public HybridFile(HybridDirectory directory, String subsequentPathToFile)
    {
       String pathForResourceLoading = Paths.get(directory.getPathNecessaryForClasspathLoading()).resolve(subsequentPathToFile).toString();
+      // Get rid of Windows \ slashes; they don't work with classloader
+      String pathForResourceLoadingPathFiltered = pathForResourceLoading.replaceAll("\\\\", "/");
       if (directory.getClassForLoading() == null) // TODO: This is broken
       {
-         getResourceAsStream = () -> ClassLoader.getSystemResourceAsStream(pathForResourceLoading);
-         getResource = () -> ClassLoader.getSystemResource(pathForResourceLoading);
+         getResourceAsStream = () -> ClassLoader.getSystemResourceAsStream(pathForResourceLoadingPathFiltered);
+         getResource = () -> ClassLoader.getSystemResource(pathForResourceLoadingPathFiltered);
       }
       else
       {
-         getResourceAsStream = () -> directory.getClassForLoading().getResourceAsStream(pathForResourceLoading);
-         getResource = () -> directory.getClassForLoading().getResource(pathForResourceLoading);
+         getResourceAsStream = () -> directory.getClassForLoading().getResourceAsStream(pathForResourceLoadingPathFiltered);
+         getResource = () -> directory.getClassForLoading().getResource(pathForResourceLoadingPathFiltered);
       }
 
       externalFile = directory.getExternalDirectory().resolve(subsequentPathToFile);

@@ -19,10 +19,8 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.vr.GDXVRDevice;
+import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -35,8 +33,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final ImString loadString = new ImString("terrain.yml", 100);
    private final ImString saveString = new ImString("terrain.yml", 100);
 
-   private GDXVRManager vrManager;
-
    private GDXEnvironmentObject modelBeingPlaced;
    private final GDXModelInput modelInput = new GDXModelInput();
    private final ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
@@ -45,44 +41,14 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      vrManager = baseUI.getVRManager();
+      GDXVRManager vrManager = baseUI.getVRManager();
+      vrManager.getContext().addVRInputProcessor(this::handleVREvents);
 
       modelInput.create();
 
 //      pose3DWidget.create(baseUI);
 //      baseUI.addImGui3DViewInputProcessor(pose3DWidget::process3DViewInput);
 //      baseUI.getSceneManager().addRenderableProvider(pose3DWidget);
-
-      vrManager.create(() ->
-      {
-         vrManager.getContext().addListener(new GDXVRDeviceAdapter()
-         {
-            @Override
-            public void buttonPressed(GDXVRDevice device, int button)
-            {
-               LogTools.info("Pressed: {}, {}", device, button);
-               if (device == vrManager.getControllers().get(RobotSide.RIGHT) && button == SteamVR_Trigger)
-               {
-                  modelBeingPlaced = new GDXLargeCinderBlockRoughed();
-                  modelInput.addAndSelectInstance(modelBeingPlaced);
-               }
-               if (device == vrManager.getControllers().get(RobotSide.LEFT) && button == SteamVR_Trigger)
-               {
-                  modelInput.clear();
-               }
-            }
-
-            @Override
-            public void buttonReleased(GDXVRDevice device, int button)
-            {
-               LogTools.info("Released: {}, {}", device, button);
-               if (device == vrManager.getControllers().get(RobotSide.RIGHT) && button == SteamVR_Trigger)
-               {
-                  modelBeingPlaced = null;
-               }
-            }
-         });
-      });
 
       baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
    }
@@ -94,12 +60,28 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       modelInput.updatePoseForSelections(input);
    }
 
-   public void handleVREvents()
+   public void handleVREvents(GDXVRContext vrContext)
    {
-      if (GDXVRManager.isVREnabled() && modelBeingPlaced != null)
+      vrContext.getController(RobotSide.LEFT, controller ->
       {
-         vrManager.getControllers().get(RobotSide.RIGHT).getPose(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
-      }
+         if (controller.isButtonNewlyPressed(SteamVR_Trigger))
+         {
+            modelInput.clear();
+         }
+      });
+      vrContext.getController(RobotSide.RIGHT, controller ->
+      {
+         if (controller.isButtonNewlyPressed(SteamVR_Trigger))
+         {
+            modelBeingPlaced = new GDXLargeCinderBlockRoughed();
+            modelInput.addAndSelectInstance(modelBeingPlaced);
+            controller.getPose(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
+         }
+         if (controller.isButtonNewlyReleased(SteamVR_Trigger))
+         {
+            modelBeingPlaced = null;
+         }
+      });
    }
 
    public void renderImGuiWindow()

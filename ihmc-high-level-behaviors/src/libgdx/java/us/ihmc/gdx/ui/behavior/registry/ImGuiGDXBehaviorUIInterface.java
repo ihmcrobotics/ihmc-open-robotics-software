@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.vr.GDXVRManager;
+import us.ihmc.gdx.vr.GDXVRContext;
 
 import java.util.ArrayList;
 
@@ -25,7 +25,7 @@ public abstract class ImGuiGDXBehaviorUIInterface extends BehaviorTreeNode imple
 
    public abstract void create(GDXImGuiBasedUI baseUI);
 
-   public void handleVREvents(GDXVRManager vrManager)
+   public void handleVREvents(GDXVRContext vrContext)
    {
 
    }

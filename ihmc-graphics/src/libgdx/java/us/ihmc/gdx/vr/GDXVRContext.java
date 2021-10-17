@@ -3,42 +3,40 @@ package us.ihmc.gdx.vr;
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
 import java.nio.IntBuffer;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.function.Consumer;
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import org.lwjgl.PointerBuffer;
+import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.VertexAttribute;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
-import com.badlogic.gdx.graphics.glutils.FrameBuffer;
-import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
-import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
+import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -50,33 +48,43 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  * <p>
  * FIXME add multisampling plus draw/resolve buffers
  */
-public class GDXVRContext implements Disposable
+public class GDXVRContext
 {
    // couple of scratch buffers
-   private final IntBuffer error = BufferUtils.newIntBuffer(1);
-   private final IntBuffer scratch = BufferUtils.newIntBuffer(1), scratch2 = BufferUtils.newIntBuffer(1);
+   private final IntBuffer errorPointer = BufferUtils.newIntBuffer(1);
+   private final IntBuffer widthPointer = BufferUtils.newIntBuffer(1);
+   private final IntBuffer heightPointer = BufferUtils.newIntBuffer(1);
 
    // per eye data such as rendering surfaces, textures, regions, cameras etc. for each eye
-   private final SideDependentList<GDXVRPerEyeData> perEyeData = new SideDependentList<>();
-
-   // batcher to draw eye rendering surface to companion window
-   private final SpriteBatch batcher;
+   private final SideDependentList<GDXVREye> eyes = new SideDependentList<>();
 
    // internal native objects to get device poses
-   private final TrackedDevicePose.Buffer trackedDevicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
-   private final TrackedDevicePose.Buffer trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
+   private TrackedDevicePose.Buffer trackedDevicePoses;
+   private TrackedDevicePose.Buffer trackedDeviceGamePoses;
 
    // devices, their poses and listeners
-   private final ArrayList<GDXVRDevice> devices = new ArrayList<>(VR.k_unMaxTrackedDeviceCount);
-   private final Array<GDXVRDeviceListener> deviceListeners = new Array<>();
-   private final VREvent event = VREvent.create();
+   private final GDXVRDevice[] devices = new GDXVRDevice[VR.k_unMaxTrackedDeviceCount];
+   private final RigidBodyTransform tempHeadsetTransform = new RigidBodyTransform();
+   private ModelInstance headsetCoordinateFrame;
+
+   {
+      Arrays.fill(devices, null); // null means device is not connected
+   }
+   private VREvent event;
+   private final SideDependentList<Integer> controllerIndexes = new SideDependentList<>(null, null);
+   private final HashMap<Integer, RobotSide> indexToControlllerSideMap = new HashMap<>();
+   private int width;
+   private int height;
+   private Integer headsetIndex = null;
+   private final TreeSet<Integer> trackerIndexes = new TreeSet<>();
+   private final TreeSet<Integer> genericIndexes = new TreeSet<>();
+   private final ArrayList<Consumer<GDXVRContext>> vrInputProcessors = new ArrayList<>();
 
    // render models
    private final ObjectMap<String, Model> models = new ObjectMap<>();
 
    // book keeping
    private RobotSide currentEye = null;
-   private boolean renderingStarted = false;
    private boolean initialDevicesReported = false;
 
    // ReferenceFrame.getWorldFrame() is Z-up frame
@@ -85,7 +93,7 @@ public class GDXVRContext implements Disposable
    // your thumb is pointing at your face and your index finger pointing right
    // The default orientation of the IHMC Zup frame is such that
    // your thumb is up and your index finger is pointing away from you
-   private final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(
+   public static final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(
          new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
             Math.toRadians(-90.0),  // rotating around thumb, index goes forward to right
             Math.toRadians(0.0),    // no rotation about middle finger
@@ -98,64 +106,42 @@ public class GDXVRContext implements Disposable
    private final RigidBodyTransform totalTransformFromVRPlayAreaToIHMCZUpWorld = new RigidBodyTransform();
    /** The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame. */
    private final ReferenceFrame vrPlayAreaYUpZBackFrame
-         = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("vrPlayAreaFrame",
-                                                                                  ReferenceFrame.getWorldFrame(),
-                                                                                  totalTransformFromVRPlayAreaToIHMCZUpWorld);
+         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("vrPlayAreaFrame",
+                                                                           ReferenceFrame.getWorldFrame(),
+                                                                           totalTransformFromVRPlayAreaToIHMCZUpWorld);
 
-   /**
-    * Creates a new GDXVRContext, initializes the VR system, and
-    * sets up rendering surfaces with depth attachments.
-    */
-   public GDXVRContext()
+   public void initSystem()
    {
-      this(1, false);
+      LogTools.info("Initializing");
+      event = VREvent.create(); // takes 92 ms
+      trackedDevicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount); // 10 ms
+      trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount); // 10 ms
+
+      int token = VR.VR_InitInternal(errorPointer, VR.EVRApplicationType_VRApplication_Scene); // takes 148 ms
+      checkInitError(errorPointer);
+      OpenVR.create(token); // takes 24 ms
+
+      VR.VR_GetGenericInterface(VR.IVRCompositor_Version, errorPointer);
+      checkInitError(errorPointer);
+
+      VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, errorPointer);
+      checkInitError(errorPointer);
+
+      VRSystem.VRSystem_GetRecommendedRenderTargetSize(widthPointer, heightPointer);
+      float renderTargetMultiplier = 1.0f; // multiplier to scale the render surface dimensions as a replacement for multisampling
+      width = (int) (widthPointer.get(0) * renderTargetMultiplier);
+      height = (int) (heightPointer.get(0) * renderTargetMultiplier);
    }
 
-   /**
-    * Creates a new GDXVRContext, initializes the VR system,
-    * and sets up rendering surfaces.
-    *
-    * @param renderTargetMultiplier multiplier to scale the render surface dimensions as a replacement for multisampling
-    * @param hasStencil             whether the rendering surfaces should have a stencil buffer
-    * @throws {@link GdxRuntimeException} if the system could not be initialized
-    */
-   public GDXVRContext(float renderTargetMultiplier, boolean hasStencil)
+   /** Needs to be on libGDX thread. */
+   public void setupEyes()
    {
-      int token = VR.VR_InitInternal(error, VR.EVRApplicationType_VRApplication_Scene);
-      checkInitError(error);
-      OpenVR.create(token);
-
-      VR.VR_GetGenericInterface(VR.IVRCompositor_Version, error);
-      checkInitError(error);
-
-      VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, error);
-      checkInitError(error);
-
-      for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
+      LogTools.info("VR per eye render size: {} x {}", width, height);
+      for (RobotSide side : RobotSide.values)
       {
-         devices.add(null);
+         eyes.set(side, new GDXVREye(side, () -> devices[headsetIndex], vrPlayAreaYUpZBackFrame, width, height));
       }
-
-      VRSystem.VRSystem_GetRecommendedRenderTargetSize(scratch, scratch2);
-      int width = (int) (scratch.get(0) * renderTargetMultiplier);
-      int height = (int) (scratch2.get(0) * renderTargetMultiplier);
-      LogTools.info("VR render size: {} x {}", width, height);
-
-      setupEye(RobotSide.LEFT, width, height, hasStencil);
-      setupEye(RobotSide.RIGHT, width, height, hasStencil);
-
-      batcher = new SpriteBatch();
-   }
-
-   private void setupEye(RobotSide eye, int width, int height, boolean hasStencil)
-   {
-      FrameBuffer buffer = new FrameBuffer(Format.RGBA8888, width, height, true, hasStencil);
-      TextureRegion region = new TextureRegion(buffer.getColorBufferTexture());
-      region.flip(false, true);
-      GDXVRCamera camera = new GDXVRCamera(this, eye);
-      camera.near = 0.1f;
-      camera.far = 1000f;
-      perEyeData.set(eye, new GDXVRPerEyeData(buffer, region, camera));
+      headsetCoordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.3);
    }
 
    private void checkInitError(IntBuffer errorBuffer)
@@ -165,6 +151,212 @@ public class GDXVRContext implements Disposable
          int error = errorBuffer.get(0);
          throw new GdxRuntimeException("VR Initialization error: " + VR.VR_GetVRInitErrorAsEnglishDescription(error));
       }
+   }
+
+   /** This method waits for OpenVR to say "go" and gathers the latest data.
+    *  The goal is to submit frames to the eyes ASAP after this returns,
+    *  then get back to this method before the frame is over. */
+   public void waitGetPoses()
+   {
+      VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
+      // VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
+   }
+
+   /** Must be called before begin! */
+   public void pollEvents()
+   {
+      if (!initialDevicesReported)
+      {
+         for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
+         {
+            if (VRSystem.VRSystem_IsTrackedDeviceConnected(deviceIndex))
+            {
+               createDevice(deviceIndex);
+            }
+         }
+         initialDevicesReported = true;
+      }
+
+      // TODO: cache the devices; don't iterate over 64 every time?
+      // TODO: maybe do it at a lower frequency just to catch new devices?
+      for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
+      {
+         GDXVRDevice device = devices[deviceIndex];
+         if (device != null)
+         {
+            TrackedDevicePose trackedPose = trackedDevicePoses.get(deviceIndex);
+
+            HmdVector3 velocity = trackedPose.vVelocity();
+            HmdVector3 angularVelocity = trackedPose.vAngularVelocity();
+            HmdMatrix34 openVRRigidBodyTransform = trackedPose.mDeviceToAbsoluteTracking();
+
+            device.getVelocity().set(velocity.v(0), velocity.v(1), velocity.v(2));
+            device.getAngularVelocity().set(angularVelocity.v(0), angularVelocity.v(1), angularVelocity.v(2));
+            device.setValid(trackedPose.bPoseIsValid());
+            device.updatePoseInTrackerFrame(openVRRigidBodyTransform, vrPlayAreaYUpZBackFrame);
+         }
+      }
+
+      getHeadset(headset ->
+      {
+         headset.getPose().changeFrame(ReferenceFrame.getWorldFrame());
+         headset.getPose().get(tempHeadsetTransform);
+         GDXTools.toGDX(tempHeadsetTransform, headsetCoordinateFrame.transform);
+         headset.getPose(ReferenceFrame.getWorldFrame(), headsetCoordinateFrame.transform);
+      });
+
+      for (RobotSide side : RobotSide.values)
+      {
+         getController(side, GDXVRDevice::resetBeforeUpdate);
+      }
+
+      while (VRSystem.VRSystem_PollNextEvent(event))
+      {
+         int deviceIndex = event.trackedDeviceIndex();
+         if (deviceIndex < 0 || deviceIndex > VR.k_unMaxTrackedDeviceCount)
+            continue;
+         int button = 0;
+
+         switch (event.eventType())
+         {
+            case VR.EVREventType_VREvent_TrackedDeviceActivated:
+               createDevice(deviceIndex);
+               break;
+            case VR.EVREventType_VREvent_TrackedDeviceDeactivated:
+               deviceIndex = event.trackedDeviceIndex();
+               if (devices[deviceIndex] == null)
+                  continue;
+               updateDevice(deviceIndex, null);
+               break;
+            case VR.EVREventType_VREvent_ButtonPress:
+               if (devices[deviceIndex] == null)
+                  continue;
+               button = event.data().controller().button();
+               devices[deviceIndex].setButton(button, true);
+               devices[deviceIndex].setButtonPressed(button);
+               break;
+            case VR.EVREventType_VREvent_ButtonUnpress:
+               if (devices[deviceIndex] == null)
+                  continue;
+               button = event.data().controller().button();
+               devices[deviceIndex].setButton(button, false);
+               devices[deviceIndex].setButtonReleased(button);
+               break;
+         }
+      }
+
+      for (Consumer<GDXVRContext> vrInputProcessor : vrInputProcessors)
+      {
+         vrInputProcessor.accept(this);
+      }
+   }
+
+   private void updateDevice(int deviceIndex, GDXVRDevice device)
+   {
+      if (device == null)
+      {
+         for (RobotSide side : RobotSide.values)
+         {
+            Integer controllerIndex = controllerIndexes.get(side);
+            if (controllerIndex != null && controllerIndex == deviceIndex)
+            {
+               controllerIndexes.set(side, null);
+            }
+
+            if (indexToControlllerSideMap.get(deviceIndex) != null)
+            {
+               indexToControlllerSideMap.put(deviceIndex, null);
+            }
+         }
+         if (headsetIndex == deviceIndex)
+         {
+            headsetIndex = null;
+         }
+         trackerIndexes.remove(deviceIndex);
+         genericIndexes.remove(deviceIndex);
+      }
+
+      devices[deviceIndex] = device;
+   }
+
+   private void createDevice(int deviceIndex)
+   {
+      GDXVRDeviceType type;
+      int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
+      switch (deviceClass)
+      {
+         case VR.ETrackedDeviceClass_TrackedDeviceClass_HMD:
+            type = GDXVRDeviceType.HeadMountedDisplay;
+            headsetIndex = deviceIndex;
+            break;
+         case VR.ETrackedDeviceClass_TrackedDeviceClass_Controller:
+            type = GDXVRDeviceType.Controller;
+            break;
+         case VR.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
+            type = GDXVRDeviceType.BaseStation;
+            break;
+         case VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker:
+            type = GDXVRDeviceType.Generic;
+            break;
+         default:
+            return;
+      }
+
+      GDXVRControllerRole controllerRole = GDXVRControllerRole.Unknown;
+      if (type == GDXVRDeviceType.Controller)
+      {
+         int controllerRoleID = VRSystem.VRSystem_GetControllerRoleForTrackedDeviceIndex(deviceIndex);
+         switch (controllerRoleID)
+         {
+            case VR.ETrackedControllerRole_TrackedControllerRole_LeftHand:
+               controllerIndexes.set(RobotSide.LEFT, deviceIndex);
+               indexToControlllerSideMap.put(deviceIndex, RobotSide.LEFT);
+               controllerRole = GDXVRControllerRole.LeftHand;
+               break;
+            case VR.ETrackedControllerRole_TrackedControllerRole_RightHand:
+               controllerIndexes.set(RobotSide.RIGHT, deviceIndex);
+               indexToControlllerSideMap.put(deviceIndex, RobotSide.RIGHT);
+               controllerRole = GDXVRControllerRole.RightHand;
+               break;
+         }
+      }
+      if (type == GDXVRDeviceType.BaseStation)
+      {
+         trackerIndexes.add(deviceIndex);
+      }
+      if (type == GDXVRDeviceType.Generic)
+      {
+         genericIndexes.add(deviceIndex);
+      }
+      updateDevice(deviceIndex, new GDXVRDevice(deviceIndex, type, controllerRole, this::loadRenderModel));
+   }
+
+   /**
+    * Completes rendering and submits the rendering surfaces to the
+    * head mounted display.
+    */
+   public void renderEyes(GDX3DSceneBasics sceneBasics)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         eyes.get(side).render(sceneBasics);
+      }
+
+      // These lines take some time
+      // TODO: Do anti aliasing and set EVRSubmitFlags_Submit_GlRenderBuffer
+      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Left, eyes.get(RobotSide.LEFT).getOpenVRTexture(), null, VR.EVRSubmitFlags_Submit_Default);
+      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Right, eyes.get(RobotSide.RIGHT).getOpenVRTexture(), null, VR.EVRSubmitFlags_Submit_Default);
+      GL41.glFlush(); // recommended by OpenVR docs. Needed?
+   }
+
+   public void dispose()
+   {
+      for (GDXVREye eyeData : eyes)
+         eyeData.getFrameBuffer().dispose();
+
+      // TODO: Dispose models
+
+      VR_ShutdownInternal();
    }
 
    public void teleport(Consumer<RigidBodyTransform> vrPlayAreaZUpConsumer)
@@ -180,225 +372,7 @@ public class GDXVRContext implements Disposable
       vrPlayAreaYUpZBackFrame.update();
    }
 
-   /**
-    * Start rendering. Call beginEye to setup rendering
-    * for each individual eye. End rendering by calling
-    * #end
-    */
-   public void begin()
-   {
-      if (renderingStarted)
-         throw new GdxRuntimeException("Last begin() call not completed, call end() before starting a new render");
-      renderingStarted = true;
-
-      perEyeData.get(RobotSide.LEFT).getCamera().update();
-      perEyeData.get(RobotSide.RIGHT).getCamera().update();
-   }
-
-   /**
-    * Get the latest tracking data and send events to {@link GDXVRDeviceListener} instance registered with the context.
-    * <p>
-    * Must be called before begin!
-    */
-   public void pollEvents()
-   {
-      VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
-
-      if (!initialDevicesReported)
-      {
-         for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
-         {
-            if (VRSystem.VRSystem_IsTrackedDeviceConnected(deviceIndex))
-            {
-               createDevice(deviceIndex);
-               for (GDXVRDeviceListener deviceListener : deviceListeners)
-               {
-                  deviceListener.connected(devices.get(deviceIndex));
-               }
-            }
-         }
-         initialDevicesReported = true;
-      }
-
-      for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
-      {
-         GDXVRDevice device = devices.get(deviceIndex);
-         if (device != null)
-         {
-            TrackedDevicePose trackedPose = trackedDevicePoses.get(deviceIndex);
-
-            HmdVector3 velocity = trackedPose.vVelocity();
-            HmdVector3 angularVelocity = trackedPose.vAngularVelocity();
-            HmdMatrix34 openVRRigidBodyTransform = trackedPose.mDeviceToAbsoluteTracking();
-
-            device.getVelocity().set(velocity.v(0), velocity.v(1), velocity.v(2));
-            device.getAngularVelocity().set(angularVelocity.v(0), angularVelocity.v(1), angularVelocity.v(2));
-            device.setValid(trackedPose.bPoseIsValid());
-            device.updatePoseInTrackerFrame(openVRRigidBodyTransform);
-         }
-      }
-
-      while (VRSystem.VRSystem_PollNextEvent(event))
-      {
-         int deviceIndex = event.trackedDeviceIndex();
-         if (deviceIndex < 0 || deviceIndex > VR.k_unMaxTrackedDeviceCount)
-            continue;
-         int button = 0;
-
-         switch (event.eventType())
-         {
-            case VR.EVREventType_VREvent_TrackedDeviceActivated:
-               createDevice(deviceIndex);
-               for (GDXVRDeviceListener deviceListener : deviceListeners)
-               {
-                  deviceListener.connected(devices.get(deviceIndex));
-               }
-               break;
-            case VR.EVREventType_VREvent_TrackedDeviceDeactivated:
-               deviceIndex = event.trackedDeviceIndex();
-               if (devices.get(deviceIndex) == null)
-                  continue;
-               for (GDXVRDeviceListener deviceListener : deviceListeners)
-               {
-                  deviceListener.disconnected(devices.get(deviceIndex));
-               }
-               devices.set(deviceIndex, null);
-               break;
-            case VR.EVREventType_VREvent_ButtonPress:
-               if (devices.get(deviceIndex) == null)
-                  continue;
-               button = event.data().controller().button();
-               devices.get(deviceIndex).setButton(button, true);
-               for (GDXVRDeviceListener deviceListener : deviceListeners)
-               {
-                  deviceListener.buttonPressed(devices.get(deviceIndex), button);
-               }
-               break;
-            case VR.EVREventType_VREvent_ButtonUnpress:
-               if (devices.get(deviceIndex) == null)
-                  continue;
-               button = event.data().controller().button();
-               devices.get(deviceIndex).setButton(button, false);
-               for (GDXVRDeviceListener deviceListener : deviceListeners)
-               {
-                  deviceListener.buttonReleased(devices.get(deviceIndex), button);
-               }
-               break;
-         }
-      }
-   }
-
-   private void createDevice(int deviceIndex)
-   {
-      GDXVRDeviceType type;
-      int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-      switch (deviceClass)
-      {
-         case VR.ETrackedDeviceClass_TrackedDeviceClass_HMD:
-            type = GDXVRDeviceType.HeadMountedDisplay;
-            break;
-         case VR.ETrackedDeviceClass_TrackedDeviceClass_Controller:
-            type = GDXVRDeviceType.Controller;
-            break;
-         case VR.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
-            type = GDXVRDeviceType.BaseStation;
-            break;
-         case VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker:
-            type = GDXVRDeviceType.Generic;
-            break;
-         default:
-            return;
-      }
-
-      GDXVRControllerRole role = GDXVRControllerRole.Unknown;
-      if (type == GDXVRDeviceType.Controller)
-      {
-         int r = VRSystem.VRSystem_GetControllerRoleForTrackedDeviceIndex(deviceIndex);
-         switch (r)
-         {
-            case VR.ETrackedControllerRole_TrackedControllerRole_LeftHand:
-               role = GDXVRControllerRole.LeftHand;
-               break;
-            case VR.ETrackedControllerRole_TrackedControllerRole_RightHand:
-               role = GDXVRControllerRole.RightHand;
-               break;
-         }
-      }
-      devices.set(deviceIndex, new GDXVRDevice(this, deviceIndex, type, role));
-   }
-
-   /**
-    * Start rendering to the rendering surface for the given eye.
-    * Complete by calling {@link #endEye()}.
-    */
-   public void beginEye(RobotSide eye)
-   {
-      if (!renderingStarted)
-         throw new GdxRuntimeException("Call begin() before calling beginEye()");
-      if (currentEye != null)
-         throw new GdxRuntimeException("Last beginEye() call not completed, call endEye() before starting a new render");
-      currentEye = eye;
-      perEyeData.get(eye).getFrameBuffer().begin();
-   }
-
-   /**
-    * Completes rendering to the rendering surface for the given eye.
-    */
-   public void endEye()
-   {
-      if (currentEye == null)
-         throw new GdxRuntimeException("Call beginEye() before endEye()");
-      perEyeData.get(currentEye).getFrameBuffer().end();
-      currentEye = null;
-   }
-
-   /**
-    * Completes rendering and submits the rendering surfaces to the
-    * head mounted display.
-    */
-   public void end()
-   {
-      if (!renderingStarted)
-         throw new GdxRuntimeException("Call begin() before end()");
-      renderingStarted = false;
-
-      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Left, perEyeData.get(RobotSide.LEFT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
-      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Right, perEyeData.get(RobotSide.RIGHT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
-   }
-
-   public void dispose()
-   {
-      for (GDXVRPerEyeData eyeData : perEyeData)
-         eyeData.getFrameBuffer().dispose();
-      batcher.dispose();
-      VR_ShutdownInternal();
-   }
-
-   /**
-    * Resizes the companion window so the rendering buffers
-    * can be displayed without stretching.
-    */
-   public void resizeCompanionWindow()
-   {
-      GLFrameBuffer<Texture> buffer = perEyeData.get(RobotSide.LEFT).getFrameBuffer();
-      Gdx.graphics.setWindowedMode(buffer.getWidth(), buffer.getHeight());
-   }
-
-   /**
-    * Renders the content of the given eye's rendering surface
-    * to the entirety of the companion window.
-    */
-   public void renderToCompanionWindow(RobotSide eye)
-   {
-      GLFrameBuffer<Texture> buffer = perEyeData.get(eye).getFrameBuffer();
-      TextureRegion region = perEyeData.get(eye).getRegion();
-      batcher.getProjectionMatrix().setToOrtho2D(0, 0, buffer.getWidth(), buffer.getHeight());
-      batcher.begin();
-      batcher.draw(region, 0, 0);
-      batcher.end();
-   }
-
-   public Model loadRenderModel(String name)
+   private Model loadRenderModel(String name)
    {
       if (models.containsKey(name))
          return models.get(name);
@@ -439,7 +413,7 @@ public class GDXVRContext implements Disposable
                            VertexAttribute.Position(),
                            VertexAttribute.Normal(),
                            VertexAttribute.TexCoords(0));
-      MeshPart meshPart = new MeshPart(name, mesh, 0, renderModel.unTriangleCount() * 3, GL20.GL_TRIANGLES);
+      MeshPart meshPart = new MeshPart(name, mesh, 0, renderModel.unTriangleCount() * 3, GL41.GL_TRIANGLES);
       RenderModelVertex.Buffer vertices = renderModel.rVertexData();
       float[] packedVertices = new float[8 * renderModel.unVertexCount()];
       int i = 0;
@@ -489,79 +463,63 @@ public class GDXVRContext implements Disposable
       return model;
    }
 
-   /**
-    * Adds a {@link GDXVRDeviceListener} to receive events
-    */
-   public void addListener(GDXVRDeviceListener listener)
+   public void addVRInputProcessor(Consumer<GDXVRContext> processVRInput)
    {
-      this.deviceListeners.add(listener);
+      vrInputProcessors.add(processVRInput);
    }
 
    /**
-    * Removes a {@link GDXVRDeviceListener}
+    * Gives a controller only if it's connected. Otherwise no worries.
     */
-   public void removeListener(GDXVRDeviceListener listener)
+   public void getController(RobotSide side, Consumer<GDXVRDevice> controllerIfConnected)
    {
-      this.deviceListeners.removeValue(listener, true);
-   }
-
-   /**
-    * @return the first {@link GDXVRDevice} of the given {@link GDXVRDeviceType} or null.
-    */
-   public GDXVRDevice getDeviceByType(GDXVRDeviceType type)
-   {
-      for (GDXVRDevice device : devices)
+      Integer controllerIndex = controllerIndexes.get(side);
+      if (controllerIndex != null)
       {
-         if (device != null && device.getType() == type)
-            return device;
+         controllerIfConnected.accept(devices[controllerIndex]);
       }
-      return null;
    }
 
    /**
-    * @return all {@link GDXVRDevice} instances of the given {@link GDXVRDeviceType}.
+    * Gives the headset only if it's connected. Otherwise no worries.
     */
-   public Array<GDXVRDevice> getDevicesByType(GDXVRDeviceType type)
+   public void getHeadset(Consumer<GDXVRDevice> headsetIfConnected)
    {
-      Array<GDXVRDevice> result = new Array<>();
-      for (GDXVRDevice device : devices)
+      if (isHeadsetConnected())
       {
-         if (device != null && device.getType() == type)
-            result.add(device);
+         headsetIfConnected.accept(devices[headsetIndex]);
       }
-      return result;
    }
 
-   /**
-    * @return all currently connected {@link GDXVRDevice} instances.
-    */
-   public Array<GDXVRDevice> getDevices()
+   public ModelInstance getHeadsetCoordinateFrame()
    {
-      Array<GDXVRDevice> result = new Array<>();
-      for (GDXVRDevice device : devices)
-      {
-         if (device != null)
-            result.add(device);
-      }
-      return result;
+      return headsetCoordinateFrame;
    }
 
-   /**
-    * @return the {@link GDXVRDevice} of ype {@link GDXVRDeviceType#Controller} that matches the role, or null.
-    */
-   public GDXVRDevice getControllerByRole(GDXVRControllerRole role)
+   public boolean isHeadsetConnected()
    {
-      for (GDXVRDevice device : devices)
-      {
-         if (device != null && device.getType() == GDXVRDeviceType.Controller && device.getControllerRole() == role)
-            return device;
-      }
-      return null;
+      return headsetIndex != null;
    }
 
-   public SideDependentList<GDXVRPerEyeData> getPerEyeData()
+   public void getBaseStations(Consumer<GDXVRDevice> baseStationConsumer)
    {
-      return perEyeData;
+      for (Integer trackerIndex : trackerIndexes)
+      {
+         baseStationConsumer.accept(devices[trackerIndex]);
+      }
+   }
+
+   public void getGenericDevices(Consumer<GDXVRDevice> genericDeviceConsumer)
+   {
+      for (Integer trackerIndex : genericIndexes)
+      {
+         genericDeviceConsumer.accept(devices[trackerIndex]);
+      }
+   }
+
+   public SideDependentList<GDXVREye> getEyes()
+   {
+      return eyes;
    }
 
    public ReferenceFrame getVRPlayAreaFrame()

@@ -8,7 +8,7 @@ import imgui.ImGuiIO;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.BoxesDemoModel;
@@ -78,8 +78,8 @@ public class GDX3DWith2DImGuiDemo
          @Override
          public void render()
          {
-            Gdx.gl.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
-            Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
+            GL41.glClearColor(0.5019608f, 0.5019608f, 0.5019608f, 1.0f);
+            GL41.glClear(GL41.GL_COLOR_BUFFER_BIT | GL41.GL_DEPTH_BUFFER_BIT);
 
             sceneManager.render();
 

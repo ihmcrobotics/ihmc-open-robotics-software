@@ -5,7 +5,7 @@ import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 
 import java.io.ByteArrayOutputStream;
@@ -18,8 +18,8 @@ import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.lwjgl.opengl.GL32.glClear;
-import static org.lwjgl.opengl.GL32.glClearColor;
+import static org.lwjgl.opengl.GL41.glClear;
+import static org.lwjgl.opengl.GL41.glClearColor;
 
 public class ImGuiTools
 {
@@ -40,7 +40,7 @@ public class ImGuiTools
    public static void glClearDarkGray()
    {
       glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-      glClear(GL32.GL_COLOR_BUFFER_BIT);
+      glClear(GL41.GL_COLOR_BUFFER_BIT);
    }
 
    public static String uniqueLabel(String label)
