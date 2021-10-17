@@ -49,7 +49,8 @@ public class GDXVRApplication
       Gdx.gl20 = Gdx.gl30;
       Gdx.files = new Lwjgl3Files();
       Gdx.graphics = new MinimalGDXGraphics();
-      Gdx.app = new MinimalGDXApplication();
+      MinimalGDXApplication app = new MinimalGDXApplication();
+      Gdx.app = app;
 
       sceneBasics = new GDX3DSceneBasics();
       sceneBasics.create();
@@ -64,6 +65,10 @@ public class GDXVRApplication
       {
          vrContext.waitGetPoses();
          vrContext.pollEvents();
+         while (!app.getPostRunnables().isEmpty())
+         {
+            app.getPostRunnables().pollFirst().run();
+         }
          applicationAdapter.render();
          vrContext.renderEyes(sceneBasics);
       }
