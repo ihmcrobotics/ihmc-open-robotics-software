@@ -11,9 +11,12 @@ import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.nio.IntBuffer;
+import java.util.TreeSet;
+import java.util.function.Function;
 
 /**
  * Represents a tracked VR device such as the head mounted
@@ -21,7 +24,6 @@ import java.nio.IntBuffer;
  */
 public class GDXVRDevice
 {
-   private final GDXVRContext context;
    private final GDXVRDeviceType type;
    private final GDXVRControllerRole role;
    private long buttons = 0;
@@ -35,25 +37,38 @@ public class GDXVRDevice
    private final RotationMatrix tempRotationMatrix = new RotationMatrix();
    private boolean isValid;
    private final int deviceIndex;
+   private final TreeSet<Integer> buttonsPressedThisFrame = new TreeSet<>();
+   private final TreeSet<Integer> buttonsReleasedThisFrame = new TreeSet<>();
 
-   public GDXVRDevice(GDXVRContext context, int deviceIndex, GDXVRDeviceType type, GDXVRControllerRole role)
+   public GDXVRDevice(int deviceIndex, GDXVRDeviceType type, GDXVRControllerRole role, Function<String, Model> modelLoader)
    {
-      this.context = context;
       this.deviceIndex = deviceIndex;
       this.type = type;
       this.role = role;
-      Model model = context.loadRenderModel(getStringProperty(GDXVRDeviceProperty.RenderModelName_String));
-      this.modelInstance = model != null ? new ModelInstance(model) : null;
 
-      String roleName = role == GDXVRControllerRole.LeftHand ? role.name() : "";
+      Model model = modelLoader.apply(getStringProperty(GDXVRDeviceProperty.RenderModelName_String));
+      modelInstance = model != null ? new ModelInstance(model) : null;
+
+      String roleName;
+      roleName = role == GDXVRControllerRole.LeftHand ? role.name() : "";
       roleName += role == GDXVRControllerRole.RightHand ? role.name() : "";
       name = type.name() + roleName;
    }
 
-   public void updatePoseInTrackerFrame(HmdMatrix34 openVRRigidBodyTransform)
+   public void resetBeforeUpdate()
    {
-      pose.setReferenceFrame(context.getVRPlayAreaFrame());
+      buttonsPressedThisFrame.clear();
+      buttonsReleasedThisFrame.clear();
+   }
+
+   public void updatePoseInTrackerFrame(HmdMatrix34 openVRRigidBodyTransform, ReferenceFrame vrPlayAreaFrame)
+   {
+      pose.setReferenceFrame(vrPlayAreaFrame);
       GDXTools.toEuclid(openVRRigidBodyTransform, pose);
+//      GDXVRContext.openVRYUpToIHMCZUpSpace.getRotation().transform(pose.getOrientation());
+//      pose.applyInverseTransform(GDXVRContext.openVRYUpToIHMCZUpSpace);
+      pose.changeFrame(ReferenceFrame.getWorldFrame());
+      //      pose.appendTransform(GDXVRContext.openVRYUpToIHMCZUpSpace);
 
       // update model instance
       if (modelInstance != null)
@@ -121,7 +136,7 @@ public class GDXVRDevice
       return (buttons & (1L << button)) != 0;
    }
 
-   void setButton(int button, boolean pressed)
+   /** package-private */ void setButton(int button, boolean pressed)
    {
       if (pressed)
       {
@@ -131,6 +146,26 @@ public class GDXVRDevice
       {
          buttons ^= (1L << button);
       }
+   }
+
+   public void setButtonPressed(int button)
+   {
+      buttonsPressedThisFrame.add(button);
+   }
+
+   public void setButtonReleased(int button)
+   {
+      buttonsReleasedThisFrame.add(button);
+   }
+
+   public boolean isButtonNewlyPressed(int button)
+   {
+      return buttonsPressedThisFrame.contains(button);
+   }
+
+   public boolean isButtonNewlyReleased(int button)
+   {
+      return buttonsReleasedThisFrame.contains(button);
    }
 
    /**

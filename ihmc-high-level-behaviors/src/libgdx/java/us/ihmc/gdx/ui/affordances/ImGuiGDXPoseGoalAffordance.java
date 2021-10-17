@@ -31,8 +31,6 @@ import us.ihmc.gdx.input.editor.GDXUITrigger;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.vr.GDXVRDevice;
-import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -87,35 +85,6 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
       {
          placingGoal = false;
       });
-
-      GDXVRManager vrManager = baseUI.getVRManager();
-      if (GDXVRManager.isVREnabled())
-      {
-         vrManager.getContext().addListener(new GDXVRDeviceAdapter() // TODO: Make this kind of thing less verbose
-         {
-            @Override
-            public void buttonPressed(GDXVRDevice device, int button)
-            {
-               if (device == vrManager.getControllers().get(RobotSide.LEFT))
-               {
-                  if (button == SteamVR_Trigger)
-                  {
-                     placingGoal = true;
-                  }
-               }
-            }
-
-            @Override
-            public void buttonReleased(GDXVRDevice device, int button)
-            {
-               if (device == vrManager.getControllers().get(RobotSide.LEFT) && button == SteamVR_Trigger)
-               {
-                  placingGoal = false;
-                  placedPoseConsumer.accept(goalPoseForReading);
-               }
-            }
-         });
-      }
 
       clear();
    }
@@ -204,11 +173,21 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
 
    public void handleVREvents(GDXVRManager vrManager)
    {
-      if (placingGoal)
+      vrManager.getContext().getController(RobotSide.LEFT, controller ->
       {
-         vrManager.getControllers().get(RobotSide.LEFT).getPose(ReferenceFrame.getWorldFrame(), sphere.transform);
-         vrManager.getControllers().get(RobotSide.LEFT).getPose(ReferenceFrame.getWorldFrame(), arrow.transform);
-      }
+         if (controller.isButtonNewlyPressed(SteamVR_Trigger))
+         {
+            placingGoal = true;
+         }
+         if (controller.isButtonNewlyReleased(SteamVR_Trigger))
+         {
+            placingGoal = false;
+            placedPoseConsumer.accept(goalPoseForReading);
+         }
+
+         controller.getPose(ReferenceFrame.getWorldFrame(), sphere.transform);
+         controller.getPose(ReferenceFrame.getWorldFrame(), arrow.transform);
+      });
    }
 
    public void renderPlaceGoalButton()

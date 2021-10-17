@@ -1,7 +1,7 @@
 package us.ihmc.gdx.vr;
 
 /**
- * Type of a {@link GDXVRDevice}
+ * Type of {@link GDXVRDevice}
  */
 public enum GDXVRDeviceType
 {
