@@ -97,8 +97,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       }
       catch (NullPointerException nullPointerException)
       {
-         LogTools.error("Could not open log directory - does folder exist?");
-         LogTools.error(nullPointerException.getStackTrace());
+         LogTools.error("Error loading planar region log files (.prllog) in {}", logDirectory);
       }
 
       files.sort((o1, o2) -> //Sorts most recent first
