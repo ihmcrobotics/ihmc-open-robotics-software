@@ -40,6 +40,7 @@ public class GDX3DSceneManager
    private Runnable onCreate;
    private GLProfiler glProfiler;
 
+   // TODO: Review and understand this better
    // ReferenceFrame.getWorldFrame() is Z-up frame
    // Finger axis definition is right hand, Thumb +Z, Index +X, Middle +Y
    // The default orientation of the libGDX frame is such that

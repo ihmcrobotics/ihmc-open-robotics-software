@@ -77,7 +77,7 @@ public class FocusBasedGDXCamera extends Camera
 
    public FocusBasedGDXCamera(ReferenceFrame libGDXYUpFrame)
    {
-      this.libGDXYUpFrame = libGDXYUpFrame;
+      this.libGDXYUpFrame = libGDXYUpFrame; // TODO: Use and understand this
       verticalFieldOfView = 45.0f;
       viewportWidth = Gdx.graphics.getWidth();
       viewportHeight = Gdx.graphics.getHeight();
