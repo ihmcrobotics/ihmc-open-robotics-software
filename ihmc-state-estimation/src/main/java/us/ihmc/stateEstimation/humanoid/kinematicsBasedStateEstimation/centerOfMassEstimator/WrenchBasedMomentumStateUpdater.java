@@ -23,8 +23,10 @@ import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.MomentumStateUpdater;
+import us.ihmc.yoVariables.euclid.YoPoint2D;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -41,6 +43,7 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
    private final YoPoint3D measuredCoMPosition = new YoPoint3D("kinematicsBasedCoMPosition", registry);
    private final YoVector3D measuredLinearMomentum = new YoVector3D("kinematicsBasedLinearMomentum", registry);
    private final YoVector3D measuredAngularMomentum = new YoVector3D("kinematicsBasedAngularMomentum", registry);
+   private final YoPoint2D measuredCenterOfPressure = new YoPoint2D("measuredCenterOfPressure", registry);
    private final CenterOfMassReferenceFrame measuredCoMFrame;
    private final MomentumCalculator momentumCalculator;
 
@@ -48,6 +51,8 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
 
    private final RobotState robotState = new RobotState(null, Collections.emptyList());
    private final MomentumEstimatorIndexProvider indexProvider = MomentumEstimatorIndexProvider.newOffsetEstimator();
+   private final MomentumKinematicsBasedSensor sensor;
+   private final MomentumState state;
 
    private final DMatrixRMaj stateVector;
 
@@ -57,13 +62,15 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       double mass = TotalMassCalculator.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootJoint.getPredecessor()));
       measuredCoMFrame = new CenterOfMassReferenceFrame("comFrame", worldFrame, rootJoint.getPredecessor());
 
-      MomentumKinematicsBasedSensor sensor = new MomentumKinematicsBasedSensor(measuredCoMPosition,
-                                                                               measuredLinearMomentum,
-                                                                               measuredAngularMomentum,
-                                                                               indexProvider,
-                                                                               dt,
-                                                                               registry);
-      MomentumState state = new MomentumState(indexProvider, measuredCoMFrame, wrenchSensors, mass, gravity, dt, registry);
+      state = new MomentumState(indexProvider, measuredCoMFrame, wrenchSensors, mass, gravity, dt, registry);
+      sensor = new MomentumKinematicsBasedSensor(measuredCoMPosition,
+                                                 measuredLinearMomentum,
+                                                 measuredAngularMomentum,
+                                                 measuredCenterOfPressure,
+                                                 indexProvider,
+                                                 state.getMomentumRateCalculator(),
+                                                 dt,
+                                                 registry);
 
       robotState.addState(state);
       momentumEstimator = new StateEstimator(Collections.singletonList(sensor), robotState, registry);
@@ -98,6 +105,7 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       else
       {
          momentumEstimator.predict();
+         updateCoP();
          momentumEstimator.correct();
       }
    }
@@ -112,6 +120,21 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       momentumCalculator.computeAndPack(tempMomentum);
       measuredLinearMomentum.set(tempMomentum.getLinearPart());
       measuredAngularMomentum.set(tempMomentum.getAngularPart());
+   }
+
+   private void updateCoP()
+   {
+      YoFrameVector3D force = state.getMomentumRateCalculator().getTotalSpatialForceAtCoM().getLinearPart();
+      YoFrameVector3D torque = state.getMomentumRateCalculator().getTotalSpatialForceAtCoM().getAngularPart();
+      if (EuclidCoreTools.isZero(force.getZ(), 1.0e-3))
+      {
+         measuredCenterOfPressure.set(measuredCoMPosition);
+      }
+      else
+      {
+         measuredCenterOfPressure.setX(measuredCoMPosition.getX() - (measuredCoMPosition.getZ() * force.getX() + torque.getY()) / force.getZ());
+         measuredCenterOfPressure.setY(measuredCoMPosition.getY() - (measuredCoMPosition.getZ() * force.getY() + torque.getX()) / force.getZ());
+      }
    }
 
    @Override
