@@ -59,27 +59,27 @@ public class MomentumEstimatorIndexProvider
 
    public boolean hasCoMPosition()
    {
-      return comPosition > 0;
+      return comPosition > -1;
    }
 
    public boolean hasLinearMomentum()
    {
-      return linearMomentum > 0;
+      return linearMomentum > -1;
    }
 
    public boolean hasAngularMomentum()
    {
-      return angularMomentum > 0;
+      return angularMomentum > -1;
    }
 
    public boolean hasCoMPositionOffset()
    {
-      return comPositionOffset > 0;
+      return comPositionOffset > -1;
    }
 
    public boolean hasLinearMomentumOffset()
    {
-      return linearMomentumOffset > 0;
+      return linearMomentumOffset > -1;
    }
 
    public int getCoMPosition()
