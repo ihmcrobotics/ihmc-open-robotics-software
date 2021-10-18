@@ -211,6 +211,11 @@ public class MomentumState extends State
 
    private void updateF()
    {
+      insertSkewMatrix(posAngMom, posCoM, dt, momentumRateCalculator.getTotalSpatialForceAtCoM().getLinearPart(), F);
+   }
+
+   private void updateQ()
+   {
       for (int sensorIndex = 0; sensorIndex < nWrenchSensors; sensorIndex++)
       {
          Vector3DBasics sensorPosition = wrenchSensors.get(sensorIndex).getMeasurementFrame().getTransformToRoot().getTranslation();
@@ -219,11 +224,6 @@ public class MomentumState extends State
          insertSkewMatrix(posAngMom, sensorIndex * 6, comToFoot, L);
       }
 
-      insertSkewMatrix(posAngMom, posCoM, dt, momentumRateCalculator.getTotalSpatialForceAtCoM().getLinearPart(), F);
-   }
-
-   private void updateQ()
-   {
       CommonOps_DDRM.mult(F, L, FL);
 
       int index = 0;

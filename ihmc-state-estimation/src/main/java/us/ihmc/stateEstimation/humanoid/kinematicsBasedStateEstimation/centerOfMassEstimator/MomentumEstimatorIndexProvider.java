@@ -1,5 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator;
 
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater.Estimator;
+
 public class MomentumEstimatorIndexProvider
 {
    // State
@@ -9,6 +11,20 @@ public class MomentumEstimatorIndexProvider
    private final int comPositionOffset;
    private final int linearMomentumOffset;
    private final int size;
+
+   public static MomentumEstimatorIndexProvider newStateIndexProvider(Estimator estimator)
+   {
+      switch (estimator)
+      {
+         case MomentumEstimator:
+            return newMomentumEstimator();
+         case OffsetEstimator:
+         case CoPBasedOffsetEstimator:
+            return newOffsetEstimator();
+         default:
+            throw new IllegalArgumentException();
+      }
+   }
 
    public static MomentumEstimatorIndexProvider newMomentumEstimator()
    {

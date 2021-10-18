@@ -1,6 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator;
 
 import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater.addEquals;
+import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater.computeCoP;
 import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater.setDiagonalElements;
 
 import org.ejml.data.DMatrix1Row;
@@ -15,6 +16,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater.Estimator;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -49,10 +51,135 @@ public class MomentumKinematicsBasedSensor extends Sensor
 
    private final DMatrixRMaj stateVector;
 
+   public static MomentumKinematicsBasedSensor createEstimator(Estimator estimator,
+                                                               Point3DReadOnly measuredCoMPosition,
+                                                               Vector3DReadOnly measuredLinearMomentum,
+                                                               Vector3DReadOnly measuredAngularMomentum,
+                                                               Point2DReadOnly measuredCenterOfPressure,
+                                                               MomentumEstimatorIndexProvider stateIndexProvider,
+                                                               WrenchBasedMomentumRateCalculator momentumRateCalculator,
+                                                               double dt,
+                                                               YoRegistry registry)
+   {
+      switch (estimator)
+      {
+         case MomentumEstimator:
+            return createMomentumEstimatorSensor(measuredCoMPosition, measuredAngularMomentum, stateIndexProvider, dt, registry);
+         case OffsetEstimator:
+            return createOffsetEstimatorSensor(measuredCoMPosition, measuredLinearMomentum, measuredAngularMomentum, stateIndexProvider, dt, registry);
+         case CoPBasedOffsetEstimator:
+            return createCoPBasedOffsetEstimatorSensor(measuredCoMPosition,
+                                                       measuredLinearMomentum,
+                                                       measuredAngularMomentum,
+                                                       measuredCenterOfPressure,
+                                                       stateIndexProvider,
+                                                       momentumRateCalculator,
+                                                       dt,
+                                                       registry);
+         default:
+            throw new IllegalArgumentException();
+      }
+   }
+
+   public static MomentumKinematicsBasedSensor createMomentumEstimatorSensor(Point3DReadOnly measuredCoMPosition,
+                                                                             Vector3DReadOnly measuredAngularMomentum,
+                                                                             MomentumEstimatorIndexProvider stateIndexProvider,
+                                                                             double dt,
+                                                                             YoRegistry registry)
+   {
+      return new MomentumKinematicsBasedSensor(measuredCoMPosition,
+                                               null,
+                                               measuredAngularMomentum,
+                                               null,
+                                               FilterTools.findOrCreate("kinematicsBasedCenterOfMassVariance", registry, MathTools.square(0.0001)),
+                                               null,
+                                               FilterTools.findOrCreate("kinematicsBasedAngularMomentumVariance", registry, MathTools.square(0.1)),
+                                               null,
+                                               stateIndexProvider,
+                                               null,
+                                               dt,
+                                               registry);
+   }
+
+   public static MomentumKinematicsBasedSensor createOffsetEstimatorSensor(Point3DReadOnly measuredCoMPosition,
+                                                                           Vector3DReadOnly measuredLinearMomentum,
+                                                                           Vector3DReadOnly measuredAngularMomentum,
+                                                                           MomentumEstimatorIndexProvider stateIndexProvider,
+                                                                           double dt,
+                                                                           YoRegistry registry)
+   {
+      return new MomentumKinematicsBasedSensor(measuredCoMPosition,
+                                               measuredLinearMomentum,
+                                               measuredAngularMomentum,
+                                               null,
+                                               FilterTools.findOrCreate("kinematicsBasedCenterOfMassVariance", registry, MathTools.square(0.001)),
+                                               FilterTools.findOrCreate("kinematicsBasedLinearMomentumVariance", registry, MathTools.square(1.0)),
+                                               FilterTools.findOrCreate("kinematicsBasedAngularMomentumVariance", registry, MathTools.square(1.0)),
+                                               null,
+                                               stateIndexProvider,
+                                               null,
+                                               dt,
+                                               registry);
+   }
+
+   public static MomentumKinematicsBasedSensor createCoPBasedOffsetEstimatorSensor(Point3DReadOnly measuredCoMPosition,
+                                                                                   Vector3DReadOnly measuredLinearMomentum,
+                                                                                   Vector3DReadOnly measuredAngularMomentum,
+                                                                                   Point2DReadOnly measuredCenterOfPressure,
+                                                                                   MomentumEstimatorIndexProvider stateIndexProvider,
+                                                                                   WrenchBasedMomentumRateCalculator momentumRateCalculator,
+                                                                                   double dt,
+                                                                                   YoRegistry registry)
+   {
+      return new MomentumKinematicsBasedSensor(measuredCoMPosition,
+                                               measuredLinearMomentum,
+                                               measuredAngularMomentum,
+                                               measuredCenterOfPressure,
+                                               FilterTools.findOrCreate("kinematicsBasedCenterOfMassVariance", registry, MathTools.square(0.001)),
+                                               FilterTools.findOrCreate("kinematicsBasedLinearMomentumVariance", registry, MathTools.square(1.0)),
+                                               FilterTools.findOrCreate("kinematicsBasedAngularMomentumVariance", registry, MathTools.square(10.0)),
+                                               FilterTools.findOrCreate("measuredCenterOfPressureVariance", registry, MathTools.square(1.0)),
+                                               stateIndexProvider,
+                                               momentumRateCalculator,
+                                               dt,
+                                               registry);
+   }
+
    public MomentumKinematicsBasedSensor(Point3DReadOnly measuredCoMPosition,
                                         Vector3DReadOnly measuredLinearMomentum,
                                         Vector3DReadOnly measuredAngularMomentum,
                                         Point2DReadOnly measuredCenterOfPressure,
+                                        double centerOfMassVariance,
+                                        double linearMomentumVariance,
+                                        double angularMomentumVariance,
+                                        double centerOfPressureVariance,
+                                        MomentumEstimatorIndexProvider stateIndexProvider,
+                                        WrenchBasedMomentumRateCalculator momentumRateCalculator,
+                                        double dt,
+                                        YoRegistry registry)
+   {
+      this(measuredCoMPosition,
+           measuredLinearMomentum,
+           measuredAngularMomentum,
+           measuredCenterOfPressure,
+           FilterTools.findOrCreate("kinematicsBasedCenterOfMassVariance", registry, centerOfMassVariance),
+           FilterTools.findOrCreate("kinematicsBasedLinearMomentumVariance", registry, linearMomentumVariance),
+           FilterTools.findOrCreate("kinematicsBasedAngularMomentumVariance", registry, angularMomentumVariance),
+           FilterTools.findOrCreate("measuredCenterOfPressureVariance", registry, centerOfPressureVariance),
+           stateIndexProvider,
+           momentumRateCalculator,
+           dt,
+           registry);
+   }
+
+   public MomentumKinematicsBasedSensor(Point3DReadOnly measuredCoMPosition,
+                                        Vector3DReadOnly measuredLinearMomentum,
+                                        Vector3DReadOnly measuredAngularMomentum,
+                                        Point2DReadOnly measuredCenterOfPressure,
+                                        DoubleProvider centerOfMassVariance,
+                                        DoubleProvider linearMomentumVariance,
+                                        DoubleProvider angularMomentumVariance,
+                                        DoubleProvider centerOfPressureVariance,
                                         MomentumEstimatorIndexProvider stateIndexProvider,
                                         WrenchBasedMomentumRateCalculator momentumRateCalculator,
                                         double dt,
@@ -62,6 +189,10 @@ public class MomentumKinematicsBasedSensor extends Sensor
       this.measuredLinearMomentum = measuredLinearMomentum;
       this.measuredAngularMomentum = measuredAngularMomentum;
       this.measuredCenterOfPressure = measuredCenterOfPressure;
+      this.centerOfMassVariance = centerOfMassVariance;
+      this.linearMomentumVariance = linearMomentumVariance;
+      this.angularMomentumVariance = angularMomentumVariance;
+      this.centerOfPressureVariance = centerOfPressureVariance;
       this.stateIndexProvider = stateIndexProvider;
       this.momentumRateCalculator = momentumRateCalculator;
 
@@ -91,12 +222,10 @@ public class MomentumKinematicsBasedSensor extends Sensor
       size = currentIndex;
 
       sqrtHz = 1.0 / Math.sqrt(dt);
-      centerOfMassVariance = FilterTools.findOrCreate("kinematicsBasedCenterOfMassVariance", registry, MathTools.square(0.001));
       centerOfMassPositionResidual = new YoVector3D("centerOfMassPositionResidual", registry);
 
       if (measuredLinearMomentum != null)
       {
-         linearMomentumVariance = FilterTools.findOrCreate("kinematicsBasedLinearMomentumVariance", registry, MathTools.square(1.0));
          linearMomentumResidual = new YoVector3D("linearMomentumResidual", registry);
       }
       else
@@ -105,17 +234,14 @@ public class MomentumKinematicsBasedSensor extends Sensor
          linearMomentumResidual = null;
       }
 
-      angularMomentumVariance = FilterTools.findOrCreate("kinematicsBasedAngularMomentumVariance", registry, MathTools.square(1.0));
       angularMomentumResidual = new YoVector3D("angularMomentumResidual", registry);
 
       if (measuredCenterOfPressure != null)
       {
-         centerOfPressureVariance = FilterTools.findOrCreate("measuredCenterOfPressureVariance", registry, MathTools.square(1.0));
          centerOfPressureResidual = new YoVector2D("centerOfPressureResidual", registry);
       }
       else
       {
-         centerOfPressureVariance = null;
          centerOfPressureResidual = null;
       }
 
@@ -203,7 +329,10 @@ public class MomentumKinematicsBasedSensor extends Sensor
       angularMomentumResidual.set(stateIndexProvider.getAngularMomentum(), stateVector);
 
       if (stateIndexProvider.hasCoMPositionOffset())
-         addEquals(currentCoMState, stateVector, stateIndexProvider.getCoMPositionOffset(), 0);
+      {
+         currentCoMState.addX(stateVector.get(stateIndexProvider.getCoMPositionOffset(), 0));
+         currentCoMState.addY(stateVector.get(stateIndexProvider.getCoMPositionOffset() + 1, 0));
+      }
 
       if (measuredLinearMomentum != null && stateIndexProvider.hasLinearMomentumOffset())
          addEquals(linearMomentumResidual, stateVector, stateIndexProvider.getLinearMomentumOffset(), 0);
@@ -220,20 +349,8 @@ public class MomentumKinematicsBasedSensor extends Sensor
 
       if (measuredCenterOfPressure != null)
       {
-         YoFrameVector3D force = momentumRateCalculator.getTotalSpatialForceAtCoM().getLinearPart();
-         YoFrameVector3D torque = momentumRateCalculator.getTotalSpatialForceAtCoM().getAngularPart();
-
-         if (EuclidCoreTools.isZero(force.getZ(), 1.0e-3))
-         {
-            centerOfPressureResidual.setToZero();
-         }
-         else
-         {
-            centerOfPressureResidual.setX(currentCoMState.getX() - (currentCoMState.getZ() * force.getX() + torque.getY()));
-            centerOfPressureResidual.setY(currentCoMState.getY() - (currentCoMState.getZ() * force.getY() + torque.getX()));
-            centerOfPressureResidual.sub(measuredCenterOfPressure, centerOfPressureResidual);
-         }
-
+         computeCoP(currentCoMState, momentumRateCalculator.getTotalSpatialForceAtCoM(), centerOfPressureResidual);
+         centerOfPressureResidual.sub(measuredCenterOfPressure, centerOfPressureResidual);
          centerOfPressureResidual.get(posCoP, residualToPack);
       }
    }
@@ -248,6 +365,7 @@ public class MomentumKinematicsBasedSensor extends Sensor
       if (measuredLinearMomentum != null)
          setDiagonalElements(posLinMom, posLinMom, 3, linearMomentumVariance.getValue() * sqrtHz, noiseCovarianceToPack);
       setDiagonalElements(posAngMom, posAngMom, 3, angularMomentumVariance.getValue() * sqrtHz, noiseCovarianceToPack);
-      setDiagonalElements(posCoP, posCoP, 2, centerOfPressureVariance.getValue() * sqrtHz, noiseCovarianceToPack);
+      if (measuredCenterOfPressure != null)
+         setDiagonalElements(posCoP, posCoP, 2, centerOfPressureVariance.getValue() * sqrtHz, noiseCovarianceToPack);
    }
 }
