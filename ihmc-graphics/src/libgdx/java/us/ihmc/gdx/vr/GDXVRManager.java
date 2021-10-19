@@ -105,7 +105,7 @@ public class GDXVRManager
          if (!initializing && contextCreatedNotification == null) // should completely dispose and recreate?
          {
             initializing = true;
-            Notification contextCreatedNotification = new Notification();
+            contextCreatedNotification = new Notification();
             MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
             {
                context.initSystem();
