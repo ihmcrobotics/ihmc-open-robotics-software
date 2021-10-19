@@ -131,6 +131,8 @@ public class GDXVRContext
       float renderTargetMultiplier = 1.0f; // multiplier to scale the render surface dimensions as a replacement for multisampling
       width = (int) (widthPointer.get(0) * renderTargetMultiplier);
       height = (int) (heightPointer.get(0) * renderTargetMultiplier);
+
+      teleport(new RigidBodyTransform()); // Initialize the play space to Z up
    }
 
    /** Needs to be on libGDX thread. */
