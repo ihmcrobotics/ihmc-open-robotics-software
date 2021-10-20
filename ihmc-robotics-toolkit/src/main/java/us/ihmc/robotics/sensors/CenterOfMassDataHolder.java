@@ -7,6 +7,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 
 public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
@@ -30,16 +32,26 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
       centerOfMassVelocity.setToNaN();
    }
 
-   public void setCenterOfMassPosition(FramePoint3DReadOnly centerOfMassPosition)
+   public void setCenterOfMassPosition(ReferenceFrame referenceFrame, Point3DReadOnly centerOfMassPosition)
    {
       hasPosition = true;
-      this.centerOfMassPosition.setMatchingFrame(centerOfMassPosition);
+      this.centerOfMassPosition.setMatchingFrame(referenceFrame, centerOfMassPosition);
+   }
+
+   public void setCenterOfMassPosition(FramePoint3DReadOnly centerOfMassPosition)
+   {
+      setCenterOfMassPosition(centerOfMassPosition.getReferenceFrame(), centerOfMassPosition);
+   }
+
+   public void setCenterOfMassVelocity(ReferenceFrame referenceFrame, Vector3DReadOnly centerOfMassVelocity)
+   {
+      hasVelocity = true;
+      this.centerOfMassVelocity.setMatchingFrame(referenceFrame, centerOfMassVelocity);
    }
 
    public void setCenterOfMassVelocity(FrameVector3DReadOnly centerOfMassVelocity)
    {
-      hasVelocity = true;
-      this.centerOfMassVelocity.setMatchingFrame(centerOfMassVelocity);
+      setCenterOfMassVelocity(centerOfMassVelocity.getReferenceFrame(), centerOfMassVelocity);
    }
 
    public void set(CenterOfMassDataHolder other)
