@@ -26,6 +26,7 @@ import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -33,7 +34,6 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
-import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -70,7 +70,8 @@ public class GDXVRContext
    {
       Arrays.fill(devices, null); // null means device is not connected
    }
-   private VREvent event;
+   private final RecyclingArrayList<VREvent> eventsThisFrame = new RecyclingArrayList<>(VREvent::create);
+   private final HashMap<Integer, HashMap<Integer, VREvent>> deviceIndexToEventsThisFrameMap = new HashMap<>();
    private final SideDependentList<Integer> controllerIndexes = new SideDependentList<>(null, null);
    private final HashMap<Integer, RobotSide> indexToControlllerSideMap = new HashMap<>();
    private int width;
@@ -113,7 +114,8 @@ public class GDXVRContext
    public void initSystem()
    {
       LogTools.info("Initializing");
-      event = VREvent.create(); // takes 92 ms
+
+      eventsThisFrame.add(); // allocate an empty event to initialize the native call; about 92 ms
       trackedDevicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount); // 10 ms
       trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount); // 10 ms
 
@@ -209,43 +211,55 @@ public class GDXVRContext
 
       for (RobotSide side : RobotSide.values)
       {
-         getController(side, GDXVRDevice::resetBeforeUpdate);
+         getController(side, controller ->
+         {
+            controller.resetBeforeUpdate();
+            controller.updateControllerState();
+         });
       }
 
+      eventsThisFrame.clear();
+      deviceIndexToEventsThisFrameMap.clear();
+      VREvent event = eventsThisFrame.add();
       while (VRSystem.VRSystem_PollNextEvent(event))
       {
          int deviceIndex = event.trackedDeviceIndex();
-         if (deviceIndex < 0 || deviceIndex > VR.k_unMaxTrackedDeviceCount)
-            continue;
-         int button = 0;
-
-         switch (event.eventType())
+         if (deviceIndex >= 0 && deviceIndex < VR.k_unMaxTrackedDeviceCount)
          {
-            case VR.EVREventType_VREvent_TrackedDeviceActivated:
-               createDevice(deviceIndex);
-               break;
-            case VR.EVREventType_VREvent_TrackedDeviceDeactivated:
-               deviceIndex = event.trackedDeviceIndex();
-               if (devices[deviceIndex] == null)
-                  continue;
-               updateDevice(deviceIndex, null);
-               break;
-            case VR.EVREventType_VREvent_ButtonPress:
-               if (devices[deviceIndex] == null)
-                  continue;
-               button = event.data().controller().button();
-               devices[deviceIndex].setButton(button, true);
-               devices[deviceIndex].setButtonPressed(button);
-               break;
-            case VR.EVREventType_VREvent_ButtonUnpress:
-               if (devices[deviceIndex] == null)
-                  continue;
-               button = event.data().controller().button();
-               devices[deviceIndex].setButton(button, false);
-               devices[deviceIndex].setButtonReleased(button);
-               break;
+            int button = 0;
+            switch (event.eventType())
+            {
+               case VR.EVREventType_VREvent_TrackedDeviceActivated:
+                  createDevice(deviceIndex);
+                  break;
+               case VR.EVREventType_VREvent_TrackedDeviceDeactivated:
+                  deviceIndex = event.trackedDeviceIndex();
+                  if (devices[deviceIndex] == null)
+                     continue;
+                  updateDevice(deviceIndex, null);
+                  break;
+               case VR.EVREventType_VREvent_ButtonPress:
+                  if (devices[deviceIndex] == null)
+                     continue;
+                  button = event.data().controller().button();
+                  devices[deviceIndex].setButton(button, true);
+                  devices[deviceIndex].setButtonPressed(button);
+                  break;
+               case VR.EVREventType_VREvent_ButtonUnpress:
+                  if (devices[deviceIndex] == null)
+                     continue;
+                  button = event.data().controller().button();
+                  devices[deviceIndex].setButton(button, false);
+                  devices[deviceIndex].setButtonReleased(button);
+                  break;
+            }
+
+            deviceIndexToEventsThisFrameMap.computeIfAbsent(deviceIndex, k -> new HashMap<>());
+            deviceIndexToEventsThisFrameMap.get(deviceIndex).put(event.eventType(), event);
          }
+         event = eventsThisFrame.add();
       }
+      eventsThisFrame.remove(eventsThisFrame.size() - 1);
 
       for (Consumer<GDXVRContext> vrInputProcessor : vrInputProcessors)
       {
@@ -527,5 +541,10 @@ public class GDXVRContext
    public ReferenceFrame getVRPlayAreaFrame()
    {
       return vrPlayAreaYUpZBackFrame;
+   }
+
+   public HashMap<Integer, HashMap<Integer, VREvent>> getDeviceIndexToEventsThisFrameMap()
+   {
+      return deviceIndexToEventsThisFrameMap;
    }
 }
