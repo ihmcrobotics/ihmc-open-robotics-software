@@ -296,4 +296,34 @@ public class MomentumState extends State
    {
       return momentumRateCalculator;
    }
+
+   public ReferenceFrame getCorrectedCoMFrame()
+   {
+      return correctedCoMFrame;
+   }
+
+   public YoPoint3D getCenterOfMassPositionState()
+   {
+      return centerOfMassPositionState;
+   }
+
+   public YoVector3D getLinearMomentumState()
+   {
+      return linearMomentumState;
+   }
+
+   public YoVector3D getAngularMomentumState()
+   {
+      return angularMomentumState;
+   }
+
+   public YoVector2D getCenterOfMassOffsetState()
+   {
+      return centerOfMassOffsetState;
+   }
+
+   public YoVector3D getLinearMomentumOffsetState()
+   {
+      return linearMomentumOffsetState;
+   }
 }
