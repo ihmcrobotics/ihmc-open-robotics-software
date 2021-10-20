@@ -14,11 +14,6 @@ public class GDXVRControllerButtons
    public static final int DPad_Down = 6;
    public static final int A = 7;
 
-   public static final int INDEX_A = 2;
-   public static final int INDEX_B = 1;
-   public static final int INDEX_JOYSTICK_BUTTON = 32;
-   public static final int INDEX_TRIGGER_AS_BUTTON = 33;
-
    public static final int ProximitySensor = 31;
 
    public static final int Axis0 = 32;
@@ -32,4 +27,23 @@ public class GDXVRControllerButtons
    public static final int SteamVR_Trigger = Axis1;
 
    public static final int Dashboard_Back = Grip;
+
+   public static final int INDEX_B = 1;
+   public static final int INDEX_A = 2;
+   public static final int INDEX_JOYSTICK_BUTTON = 32;
+   public static final int INDEX_TRIGGER_AS_BUTTON = 33;
+   /**
+    * Index controllers:
+    * Touchpad and joystick:
+    *        1.0
+    * x -1.0     1.0
+    *       -1.0
+    *        y
+    * Trigger:
+    * 0.0 unpressed to 1.0 pressed before button is clicked.
+    *
+    */
+   public static final int INDEX_JOYSTICK_AND_TOUCHPAD_R_AXIS = 0;
+   public static final int INDEX_TRIGGER_R_AXIS = 0;
+
 }

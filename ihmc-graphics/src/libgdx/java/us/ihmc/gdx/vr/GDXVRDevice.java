@@ -11,7 +11,6 @@ import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.nio.IntBuffer;
@@ -27,7 +26,7 @@ public class GDXVRDevice
    private final GDXVRDeviceType type;
    private final GDXVRControllerRole role;
    private long buttons = 0;
-   private final VRControllerState state = VRControllerState.create();
+   private final VRControllerState controllerState = VRControllerState.create();
    private final ModelInstance modelInstance;
    private final String name;
    private final IntBuffer tempIntBuffer = BufferUtils.newIntBuffer(1);
@@ -59,6 +58,16 @@ public class GDXVRDevice
    {
       buttonsPressedThisFrame.clear();
       buttonsReleasedThisFrame.clear();
+   }
+
+   public void updateControllerState()
+   {
+      VRSystem.VRSystem_GetControllerState(deviceIndex, controllerState);
+   }
+
+   public VRControllerState getControllerState()
+   {
+      return controllerState;
    }
 
    public void updatePoseInTrackerFrame(HmdMatrix34 openVRRigidBodyTransform, ReferenceFrame vrPlayAreaFrame)
@@ -175,8 +184,8 @@ public class GDXVRDevice
    {
       if (axis < 0 || axis >= 5)
          return 0;
-      VRSystem.VRSystem_GetControllerState(deviceIndex, state);
-      return state.rAxis(axis).x();
+      VRSystem.VRSystem_GetControllerState(deviceIndex, controllerState);
+      return controllerState.rAxis(axis).x();
    }
 
    /**
@@ -186,8 +195,8 @@ public class GDXVRDevice
    {
       if (axis < 0 || axis >= 5)
          return 0;
-      VRSystem.VRSystem_GetControllerState(deviceIndex, state);
-      return state.rAxis(axis).y();
+      VRSystem.VRSystem_GetControllerState(deviceIndex, controllerState);
+      return controllerState.rAxis(axis).y();
    }
 
    /**
