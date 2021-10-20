@@ -188,7 +188,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                               imuBiasStateEstimator,
                                                               cancelGravityFromAccelerationMeasurement,
                                                               footSwitches,
-                                                              estimatorCenterOfMassDataHolderToUpdate,
                                                               centerOfPressureDataHolderFromController,
                                                               feet,
                                                               gravitationalAcceleration,
