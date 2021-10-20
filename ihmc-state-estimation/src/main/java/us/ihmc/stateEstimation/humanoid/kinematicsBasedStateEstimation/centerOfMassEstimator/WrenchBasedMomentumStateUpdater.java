@@ -11,6 +11,7 @@ import us.ihmc.ekf.filter.RobotState;
 import us.ihmc.ekf.filter.StateEstimator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -30,6 +31,8 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.MomentumS
 import us.ihmc.yoVariables.euclid.YoPoint2D;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
@@ -79,6 +82,7 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       this.centerOfMassDataHolder = centerOfMassDataHolder;
       gravity = Math.abs(gravity);
       mass = TotalMassCalculator.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootJoint.getPredecessor()));
+      wrenchSensors = addFrameCorruptors(wrenchSensors, registry); // TODO Remove me
       measuredCoMFrame = new CenterOfMassReferenceFrame("comFrame", worldFrame, rootJoint.getPredecessor());
 
       state = new MomentumState(indexProvider, measuredCoMFrame, wrenchSensors, mass, gravity, dt, registry);
@@ -259,6 +263,45 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       ReferenceFrame getMeasurementFrame();
 
       void getMeasuredWrench(Wrench wrenchToPack);
+   }
+
+   public static List<WrenchSensor> addFrameCorruptors(List<WrenchSensor> wrenchSensors, YoRegistry registry)
+   {
+      return wrenchSensors.stream().map(sensor -> addFrameCorruptor(sensor, registry)).collect(Collectors.toList());
+   }
+
+   public static WrenchSensor addFrameCorruptor(WrenchSensor wrenchSensor, YoRegistry registry)
+   {
+      ReferenceFrame measurementFrame = wrenchSensor.getMeasurementFrame();
+      YoFramePoseUsingYawPitchRoll offset = new YoFramePoseUsingYawPitchRoll(measurementFrame.getName() + "CorruptOffset", measurementFrame, registry);
+
+      ReferenceFrame corruptedFrame = new ReferenceFrame(measurementFrame.getName() + "Corrupted", measurementFrame)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            offset.get(transformToParent);
+         }
+      };
+
+      offset.attachVariableChangedListener(v -> corruptedFrame.update());
+
+      return new WrenchSensor()
+      {
+         @Override
+         public ReferenceFrame getMeasurementFrame()
+         {
+            return corruptedFrame;
+         }
+
+         @Override
+         public void getMeasuredWrench(Wrench wrenchToPack)
+         {
+            wrenchSensor.getMeasuredWrench(wrenchToPack);
+            wrenchToPack.setBodyFrame(corruptedFrame);
+            wrenchToPack.setReferenceFrame(corruptedFrame);
+         }
+      };
    }
 
    public static List<WrenchSensor> wrapFootSwitchInterfaces(List<FootSwitchInterface> footSwitchInterfaces)
