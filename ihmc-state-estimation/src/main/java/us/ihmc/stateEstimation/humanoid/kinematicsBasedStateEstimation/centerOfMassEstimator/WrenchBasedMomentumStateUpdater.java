@@ -24,6 +24,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.MomentumStateUpdater;
 import us.ihmc.yoVariables.euclid.YoPoint2D;
@@ -56,6 +57,7 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
 
    private final YoBoolean hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
 
+   private final double mass;
    private final RobotState robotState = new RobotState(null, Collections.emptyList());
    private final Estimator estimator = Estimator.CoPBasedOffsetEstimator;
    private final MomentumEstimatorIndexProvider indexProvider = MomentumEstimatorIndexProvider.newStateIndexProvider(estimator);
@@ -64,10 +66,19 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
 
    private final DMatrixRMaj stateVector;
 
-   public WrenchBasedMomentumStateUpdater(JointReadOnly rootJoint, List<WrenchSensor> wrenchSensors, double dt, double gravity)
+   private final YoBoolean enableOutput = new YoBoolean("enableWrenchBasedMomentumEstimatorOutput", registry);
+   private final CenterOfMassDataHolder centerOfMassDataHolder;
+   private final YoFrameVector3D centerOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
+
+   public WrenchBasedMomentumStateUpdater(JointReadOnly rootJoint,
+                                          List<WrenchSensor> wrenchSensors,
+                                          double dt,
+                                          double gravity,
+                                          CenterOfMassDataHolder centerOfMassDataHolder)
    {
+      this.centerOfMassDataHolder = centerOfMassDataHolder;
       gravity = Math.abs(gravity);
-      double mass = TotalMassCalculator.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootJoint.getPredecessor()));
+      mass = TotalMassCalculator.computeSubTreeMass(MultiBodySystemTools.getRootBody(rootJoint.getPredecessor()));
       measuredCoMFrame = new CenterOfMassReferenceFrame("comFrame", worldFrame, rootJoint.getPredecessor());
 
       state = new MomentumState(indexProvider, measuredCoMFrame, wrenchSensors, mass, gravity, dt, registry);
@@ -116,6 +127,19 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
          momentumEstimator.predict();
          updateCoP();
          momentumEstimator.correct();
+      }
+
+      centerOfMassVelocity.setMatchingFrame(state.getCorrectedCoMFrame(), state.getLinearMomentumState());
+      centerOfMassVelocity.scale(1.0 / mass);
+
+      if (enableOutput.getValue())
+      {
+         centerOfMassDataHolder.setCenterOfMassPosition(worldFrame, state.getCenterOfMassPositionState());
+         centerOfMassDataHolder.setCenterOfMassVelocity(centerOfMassVelocity);
+      }
+      else
+      {
+         centerOfMassDataHolder.clear();
       }
    }
 
