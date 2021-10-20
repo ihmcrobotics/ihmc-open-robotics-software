@@ -25,7 +25,6 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoInteger;
 import us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoFrameVector3D;
-import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -141,7 +140,6 @@ public class PelvisLinearStateUpdater
                                    IMUBiasProvider imuBiasProvider,
                                    BooleanProvider cancelGravityFromAccelerationMeasurement,
                                    Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
-                                   CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
                                    CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
                                    Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies,
                                    double gravitationalAcceleration,
