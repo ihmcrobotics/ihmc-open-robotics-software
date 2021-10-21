@@ -68,7 +68,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       FloatingJointDescription rootJointDescription = (FloatingJointDescription) description.getRootJoints().get(0);
       if (!rootJointDescription.getName().equals(sdfJointNameMap.getPelvisName()))
       {
-         throw new RuntimeException("Pelvis joint is assumed to be the root joint");
+         throw new RuntimeException("Pelvis joint is assumed to be the root joint. rootJointDescription.getName() = " + rootJointDescription.getName() + ", sdfJointNameMap.getPelvisName() = " + sdfJointNameMap.getPelvisName());
       }
 
 
