@@ -3,6 +3,7 @@ package us.ihmc.gdx.vr;
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -39,6 +40,8 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.io.WorkspaceDirectory;
+import us.ihmc.tools.io.WorkspaceFile;
 
 /**
  * Responsible for initializing the VR system, managing rendering surfaces,
@@ -63,9 +66,13 @@ public class GDXVRContext
    private TrackedDevicePose.Buffer trackedDeviceGamePoses;
 
    // devices, their poses and listeners
+   private final LongBuffer mainActionSetHandle = BufferUtils.newLongBuffer(1);
+   private final LongBuffer clickTriggerActionHandle = BufferUtils.newLongBuffer(1);
+   private VRActiveActionSet.Buffer activeActionSets;
    private final GDXVRDevice[] devices = new GDXVRDevice[VR.k_unMaxTrackedDeviceCount];
    private final RigidBodyTransform tempHeadsetTransform = new RigidBodyTransform();
    private ModelInstance headsetCoordinateFrame;
+   private InputDigitalActionData clickTriggerActionData;
 
    {
       Arrays.fill(devices, null); // null means device is not connected
@@ -135,6 +142,19 @@ public class GDXVRContext
       height = (int) (heightPointer.get(0) * renderTargetMultiplier);
 
       teleport(new RigidBodyTransform()); // Initialize the play space to Z up
+
+      WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-graphics/src/libgdx/resources", getClass(), "/vr");
+      WorkspaceFile actionManifestFile = new WorkspaceFile(directory, "actions.json");
+      VRInput.VRInput_SetActionManifestPath(actionManifestFile.getFilePath().toString());
+
+      VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
+      VRInput.VRInput_GetActionHandle("/actions/main/in/clicktrigger", clickTriggerActionHandle);
+
+      clickTriggerActionData = InputDigitalActionData.create();;
+
+      activeActionSets = VRActiveActionSet.create(1);
+      activeActionSets.ulActionSet(mainActionSetHandle.get(0));
+      activeActionSets.ulRestrictedToDevice(VR.k_ulInvalidInputValueHandle);
    }
 
    /** Needs to be on libGDX thread. */
@@ -263,6 +283,15 @@ public class GDXVRContext
          event = eventsThisFrame.add();
       }
       eventsThisFrame.remove(eventsThisFrame.size() - 1);
+
+      VRInput.VRInput_UpdateActionState(activeActionSets, VRActiveActionSet.SIZEOF);
+
+      VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
+
+      if (clickTriggerActionData.bChanged())
+      {
+         LogTools.info("Trigger click: {}", clickTriggerActionData.bState());
+      }
 
       for (Consumer<GDXVRContext> vrInputProcessor : vrInputProcessors)
       {
