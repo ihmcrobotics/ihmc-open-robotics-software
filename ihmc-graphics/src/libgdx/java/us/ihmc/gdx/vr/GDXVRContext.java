@@ -166,7 +166,10 @@ public class GDXVRContext
       // VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
    }
 
-   /** Must be called before begin! */
+   /** Must be called before begin!
+    *  For input, see https://github.com/ValveSoftware/openvr/wiki/SteamVR-Input
+    *  and https://github.com/ValveSoftware/openvr/issues/1151
+    */
    public void pollEvents()
    {
       if (!initialDevicesReported)
