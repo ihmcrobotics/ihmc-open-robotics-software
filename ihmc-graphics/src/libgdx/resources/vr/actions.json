@@ -1,0 +1,28 @@
+{
+   "action_sets" : [
+      {
+         "name" : "/actions/main",
+         "usage" : "leftright"
+      }
+   ],
+   "actions" : [
+      {
+         "name" : "/actions/main/in/clicktrigger",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      }
+   ],
+   "default_bindings" : [
+      {
+         "binding_url" : "index_bindings.json",
+         "controller_type" : "knuckles"
+      }
+   ],
+   "localization" : [
+      {
+         "/actions/main" : "My Game Actions",
+         "/actions/main/in/clicktrigger" : "Click Trigger",
+         "language_tag" : "en_us"
+      }
+   ]
+}
