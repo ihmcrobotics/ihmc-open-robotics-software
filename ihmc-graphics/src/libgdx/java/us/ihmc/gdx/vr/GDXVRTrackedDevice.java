@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.nio.IntBuffer;
-import java.util.function.Consumer;
 
 public abstract class GDXVRTrackedDevice
 {
