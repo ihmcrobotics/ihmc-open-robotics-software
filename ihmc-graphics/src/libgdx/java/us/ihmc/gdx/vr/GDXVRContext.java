@@ -96,7 +96,7 @@ public class GDXVRContext
 
    // book keeping
    private RobotSide currentEye = null;
-   private boolean initialDevicesReported = false;
+   private boolean initiallyConnectedDevicesHaveBeenRegistered = false;
 
    // ReferenceFrame.getWorldFrame() is Z-up frame
    // Finger axis definition is right hand, Thumb +Z, Index +X, Middle +Y
@@ -194,13 +194,13 @@ public class GDXVRContext
       // VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
    }
 
-   /** Must be called before begin!
+   /**
     *  For input, see https://github.com/ValveSoftware/openvr/wiki/SteamVR-Input
     *  and https://github.com/ValveSoftware/openvr/issues/1151
     */
    public void pollEvents()
    {
-      if (!initialDevicesReported)
+      if (!initiallyConnectedDevicesHaveBeenRegistered)
       {
          for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
          {
@@ -209,7 +209,7 @@ public class GDXVRContext
                createDevice(deviceIndex);
             }
          }
-         initialDevicesReported = true;
+         initiallyConnectedDevicesHaveBeenRegistered = true;
       }
 
       // TODO: cache the devices; don't iterate over 64 every time?
@@ -306,34 +306,6 @@ public class GDXVRContext
       }
    }
 
-   private void updateDevice(int deviceIndex, GDXVRDevice device)
-   {
-      if (device == null)
-      {
-         for (RobotSide side : RobotSide.values)
-         {
-            Integer controllerIndex = controllerIndexes.get(side);
-            if (controllerIndex != null && controllerIndex == deviceIndex)
-            {
-               controllerIndexes.set(side, null);
-            }
-
-            if (indexToControllerSideMap.get(deviceIndex) != null)
-            {
-               indexToControllerSideMap.put(deviceIndex, null);
-            }
-         }
-         if (headsetIndex == deviceIndex)
-         {
-            headsetIndex = null;
-         }
-         trackerIndexes.remove(deviceIndex);
-         genericIndexes.remove(deviceIndex);
-      }
-
-      devices[deviceIndex] = device;
-   }
-
    private void createDevice(int deviceIndex)
    {
       int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
@@ -367,6 +339,34 @@ public class GDXVRContext
          genericIndexes.add(deviceIndex);
       }
       updateDevice(deviceIndex, new GDXVRDevice(deviceIndex, deviceClass, this::loadRenderModel));
+   }
+
+   private void updateDevice(int deviceIndex, GDXVRDevice device)
+   {
+      if (device == null)
+      {
+         for (RobotSide side : RobotSide.values)
+         {
+            Integer controllerIndex = controllerIndexes.get(side);
+            if (controllerIndex != null && controllerIndex == deviceIndex)
+            {
+               controllerIndexes.set(side, null);
+            }
+
+            if (indexToControllerSideMap.get(deviceIndex) != null)
+            {
+               indexToControllerSideMap.put(deviceIndex, null);
+            }
+         }
+         if (headsetIndex == deviceIndex)
+         {
+            headsetIndex = null;
+         }
+         trackerIndexes.remove(deviceIndex);
+         genericIndexes.remove(deviceIndex);
+      }
+
+      devices[deviceIndex] = device;
    }
 
    /**
