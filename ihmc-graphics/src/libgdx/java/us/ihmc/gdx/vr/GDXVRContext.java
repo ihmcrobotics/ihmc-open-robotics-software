@@ -80,7 +80,7 @@ public class GDXVRContext
    private final RecyclingArrayList<VREvent> eventsThisFrame = new RecyclingArrayList<>(VREvent::create);
    private final HashMap<Integer, HashMap<Integer, VREvent>> deviceIndexToEventsThisFrameMap = new HashMap<>();
    private final SideDependentList<Integer> controllerIndexes = new SideDependentList<>(null, null);
-   private final HashMap<Integer, RobotSide> indexToControlllerSideMap = new HashMap<>();
+   private final HashMap<Integer, RobotSide> indexToControllerSideMap = new HashMap<>();
    private int width;
    private int height;
    private Integer headsetIndex = null;
@@ -310,9 +310,9 @@ public class GDXVRContext
                controllerIndexes.set(side, null);
             }
 
-            if (indexToControlllerSideMap.get(deviceIndex) != null)
+            if (indexToControllerSideMap.get(deviceIndex) != null)
             {
-               indexToControlllerSideMap.put(deviceIndex, null);
+               indexToControllerSideMap.put(deviceIndex, null);
             }
          }
          if (headsetIndex == deviceIndex)
@@ -335,7 +335,6 @@ public class GDXVRContext
          headsetIndex = deviceIndex;
       }
 
-      GDXVRControllerRole controllerRole = GDXVRControllerRole.Unknown;
       if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_Controller)
       {
          int controllerRoleID = VRSystem.VRSystem_GetControllerRoleForTrackedDeviceIndex(deviceIndex);
@@ -343,13 +342,11 @@ public class GDXVRContext
          {
             case VR.ETrackedControllerRole_TrackedControllerRole_LeftHand:
                controllerIndexes.set(RobotSide.LEFT, deviceIndex);
-               indexToControlllerSideMap.put(deviceIndex, RobotSide.LEFT);
-               controllerRole = GDXVRControllerRole.LeftHand;
+               indexToControllerSideMap.put(deviceIndex, RobotSide.LEFT);
                break;
             case VR.ETrackedControllerRole_TrackedControllerRole_RightHand:
                controllerIndexes.set(RobotSide.RIGHT, deviceIndex);
-               indexToControlllerSideMap.put(deviceIndex, RobotSide.RIGHT);
-               controllerRole = GDXVRControllerRole.RightHand;
+               indexToControllerSideMap.put(deviceIndex, RobotSide.RIGHT);
                break;
          }
       }
@@ -361,7 +358,7 @@ public class GDXVRContext
       {
          genericIndexes.add(deviceIndex);
       }
-      updateDevice(deviceIndex, new GDXVRDevice(deviceIndex, deviceClass, controllerRole, this::loadRenderModel));
+      updateDevice(deviceIndex, new GDXVRDevice(deviceIndex, deviceClass, this::loadRenderModel));
    }
 
    /**
