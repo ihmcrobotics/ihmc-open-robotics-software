@@ -1,8 +1,9 @@
 package us.ihmc.gdx;
 
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.vr.GDXVRApplication;
-import us.ihmc.gdx.vr.GDXVRControllerButtons;
+import us.ihmc.gdx.vr.GDXVRBaseStation;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GDXVROnlyDemo
@@ -21,9 +22,10 @@ public class GDXVROnlyDemo
 
             vrApplication.getVRContext().addVRInputProcessor(vrContext ->
             {
-               vrContext.getController(RobotSide.RIGHT, controller ->
+               vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
                {
-                  if (controller.isButtonNewlyPressed(GDXVRControllerButtons.INDEX_A))
+                  InputDigitalActionData aButton = controller.getAButtonActionData();
+                  if (aButton.bChanged() && aButton.bState())
                   {
                      vrApplication.exit();
                   }
@@ -34,11 +36,14 @@ public class GDXVROnlyDemo
             {
                for (RobotSide side : RobotSide.values)
                {
-                  vrApplication.getVRContext().getController(side, controller -> controller.getModelInstance().getRenderables(renderables, pool));
+                  vrApplication.getVRContext().getController(side).runIfConnected(controller ->
+                                                                                        controller.getModelInstance().getRenderables(renderables, pool));
                   vrApplication.getVRContext().getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
                }
-               vrApplication.getVRContext().getBaseStations(baseStation -> baseStation.getModelInstance().getRenderables(renderables, pool));
-               vrApplication.getVRContext().getGenericDevices(genericDevice -> genericDevice.getModelInstance().getRenderables(renderables, pool));
+               for (GDXVRBaseStation baseStation : vrApplication.getVRContext().getBaseStations())
+               {
+                  baseStation.getModelInstance().getRenderables(renderables, pool);
+               }
             }), GDXSceneLevel.VIRTUAL);
          }
 

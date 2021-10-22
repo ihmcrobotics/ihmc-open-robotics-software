@@ -3,12 +3,13 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.graphics.live.GDXROS2PointCloudVisualizer;
 import us.ihmc.gdx.vr.GDXVRApplication;
+import us.ihmc.gdx.vr.GDXVRBaseStation;
 import us.ihmc.gdx.vr.GDXVRContext;
-import us.ihmc.gdx.vr.GDXVRControllerButtons;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 
@@ -40,9 +41,10 @@ public class GDXVROnlyPointCloudDemo
 
          private void processVRInput(GDXVRContext vrContext)
          {
-            vrContext.getController(RobotSide.RIGHT, controller ->
+            vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
             {
-               if (controller.isButtonNewlyPressed(GDXVRControllerButtons.INDEX_A))
+               InputDigitalActionData aButton = controller.getAButtonActionData();
+               if (aButton.bChanged() && aButton.bState())
                {
                   vrApplication.exit();
                }
@@ -60,11 +62,14 @@ public class GDXVROnlyPointCloudDemo
             fusedPointCloud.getRenderables(renderables, pool);
             for (RobotSide side : RobotSide.values)
             {
-               vrApplication.getVRContext().getController(side, controller -> controller.getModelInstance().getRenderables(renderables, pool));
+               vrApplication.getVRContext().getController(side).runIfConnected(controller ->
+                                                                                     controller.getModelInstance().getRenderables(renderables, pool));
                vrApplication.getVRContext().getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
             }
-            vrApplication.getVRContext().getBaseStations(baseStation -> baseStation.getModelInstance().getRenderables(renderables, pool));
-            vrApplication.getVRContext().getGenericDevices(genericDevice -> genericDevice.getModelInstance().getRenderables(renderables, pool));
+            for (GDXVRBaseStation baseStation : vrApplication.getVRContext().getBaseStations())
+            {
+               baseStation.getModelInstance().getRenderables(renderables, pool);
+            }
          }
 
          @Override
