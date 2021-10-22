@@ -6,8 +6,11 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.openvr.*;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXModelLoader;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -18,6 +21,8 @@ public class GDXVRHandPlacedFootstepMode
 {
    private final ArrayList<ModelInstance> footModels = new ArrayList<>();
    private final SideDependentList<ModelInstance> feetBeingPlaced = new SideDependentList<>();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final FramePose3D poseForPlacement = new FramePose3D();
 
    public void processVRInput(GDXVRContext vrContext)
    {
@@ -43,7 +48,13 @@ public class GDXVRHandPlacedFootstepMode
             ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
             if (footBeingPlaced != null)
             {
-               controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), footBeingPlaced.transform);
+               poseForPlacement.setToZero(controller.getXForwardZUpControllerFrame());
+               poseForPlacement.getPosition().add(0.05, 0.0, 0.0);
+               poseForPlacement.getOrientation().appendPitchRotation(Math.toRadians(-90.0));
+               poseForPlacement.changeFrame(ReferenceFrame.getWorldFrame());
+               poseForPlacement.get(tempTransform);
+
+               GDXTools.toGDX(tempTransform, footBeingPlaced.transform);
             }
          });
       }
