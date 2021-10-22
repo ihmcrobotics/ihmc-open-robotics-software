@@ -1,50 +1,59 @@
 package us.ihmc.gdx.ui.vr;
 
+import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.openvr.*;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.vr.GDXVRContext;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 public class GDXVRHandPlacedFootstepMode
 {
+   private final ArrayList<ModelInstance> footModels = new ArrayList<>();
+   private final SideDependentList<ModelInstance> feetBeingPlaced = new SideDependentList<>();
+
    public void processVRInput(GDXVRContext vrContext)
    {
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-//            VRControllerState controllerState = controller.getControllerState();
-//            VRControllerAxis vrControllerAxis = controllerState.rAxis(2);
-//            LogTools.info("axis: {} {}", vrControllerAxis.x(), vrControllerAxis.y());
-////            LogTools.info("button pressed {}", controllerState.ulButtonPressed());
-////            LogTools.info("button touched {}", controllerState.ulButtonTouched());
-//
-//
-//
-//
-//
-//
-//            //            controller.isButtonNewlyPressed(GDXVRControllerAxes.SteamVR_Trigger)
-//            HashMap<Integer, VREvent> events = vrContext.getDeviceIndexToEventsThisFrameMap().get(controller.getDeviceIndex());
-//
-//            if (events != null)
-//            {
-//               VREvent buttonPress = events.get(VR.EVREventType_VREvent_ButtonPress);
-//               if (buttonPress != null)
-//               {
-//                  LogTools.info("{} button press {}", side, buttonPress.data().controller().button());
-//               }
-//               VREvent dualAnalogPress = events.get(VR.EVREventType_VREvent_DualAnalog_Press);
-//               if (dualAnalogPress != null)
-//               {
-//                  LogTools.info("{} dual analog {}, {}", side, dualAnalogPress.data().dualAnalog().x(),
-//                                dualAnalogPress.data().dualAnalog().y());
-//               }
-//            }
+            InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
+
+            if (triggerClick.bChanged() && triggerClick.bState())
+            {
+               Model footModel = GDXModelLoader.loadG3DModel(side.getSideNameFirstLowerCaseLetter() + "_foot.g3dj");
+               ModelInstance footModelInstance = new ModelInstance(footModel);
+               footModels.add(footModelInstance);
+               feetBeingPlaced.put(side, footModelInstance);
+            }
+
+            if (triggerClick.bChanged() && !triggerClick.bState())
+            {
+               feetBeingPlaced.put(side, null);
+            }
+
+            ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
+            if (footBeingPlaced != null)
+            {
+               controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), footBeingPlaced.transform);
+            }
          });
       }
+   }
 
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (ModelInstance footModel : footModels)
+      {
+         footModel.getRenderables(renderables, pool);
+      }
    }
 }
