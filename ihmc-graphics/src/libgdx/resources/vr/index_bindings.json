@@ -589,18 +589,6 @@
       "/actions/main" : {
          "sources" : [
             {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/main/in/clicktrigger"
-                  }
-               },
-               "mode" : "button",
-               "parameters" : {
-                  "force_input" : "click"
-               },
-               "path" : "/user/hand/right/input/trigger"
-            },
-            {
                "inputs" : {},
                "mode" : "none",
                "path" : "/user/hand/right/input/skeleton/right"
@@ -629,6 +617,66 @@
                "inputs" : {},
                "mode" : "none",
                "path" : "/user/hand/right/input/grip"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/main/in/right_clicktrigger"
+                  }
+               },
+               "mode" : "button",
+               "parameters" : {
+                  "force_input" : "click"
+               },
+               "path" : "/user/hand/right/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/main/in/left_clicktrigger"
+                  }
+               },
+               "mode" : "button",
+               "parameters" : {
+                  "force_input" : "click"
+               },
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/main/in/right_bbutton"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/b"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/main/in/right_abutton"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/right/input/a"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/main/in/left_bbutton"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/b"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/main/in/left_abutton"
+                  }
+               },
+               "mode" : "button",
+               "path" : "/user/hand/left/input/a"
             }
          ]
       }

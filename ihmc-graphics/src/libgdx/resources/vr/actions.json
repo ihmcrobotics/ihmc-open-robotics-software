@@ -7,7 +7,32 @@
    ],
    "actions" : [
       {
-         "name" : "/actions/main/in/clicktrigger",
+         "name" : "/actions/main/in/left_clicktrigger",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/right_clicktrigger",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/left_abutton",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/right_abutton",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/left_bbutton",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/right_bbutton",
          "requirement" : "mandatory",
          "type" : "boolean"
       }
@@ -21,7 +46,12 @@
    "localization" : [
       {
          "/actions/main" : "My Game Actions",
-         "/actions/main/in/clicktrigger" : "Click Trigger",
+         "/actions/main/in/left_clicktrigger" : "Click Trigger Left",
+         "/actions/main/in/right_clicktrigger" : "Click Trigger Right",
+         "/actions/main/in/left_abutton" : "A Button Left",
+         "/actions/main/in/right_abutton" : "A Button Right",
+         "/actions/main/in/left_bbutton" : "B Button Left",
+         "/actions/main/in/right_bbutton" : "B Button Right",
          "language_tag" : "en_us"
       }
    ]
