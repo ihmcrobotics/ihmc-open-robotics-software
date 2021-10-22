@@ -68,6 +68,9 @@ public class GDXVRContext
    // devices, their poses and listeners
    private final LongBuffer mainActionSetHandle = BufferUtils.newLongBuffer(1);
    private final LongBuffer clickTriggerActionHandle = BufferUtils.newLongBuffer(1);
+   private final LongBuffer userHeadInputSourceHandle = BufferUtils.newLongBuffer(1);
+   private final LongBuffer userHandLeftInputSourceHandle = BufferUtils.newLongBuffer(1);
+   private final LongBuffer userHandRightInputSourceHandle = BufferUtils.newLongBuffer(1);
    private VRActiveActionSet.Buffer activeActionSets;
    private InputDigitalActionData clickTriggerActionData;
    private final GDXVRDevice[] devices = new GDXVRDevice[VR.k_unMaxTrackedDeviceCount];
@@ -149,8 +152,13 @@ public class GDXVRContext
 
       VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
       VRInput.VRInput_GetActionHandle("/actions/main/in/clicktrigger", clickTriggerActionHandle);
+      VRInput.VRInput_GetInputSourceHandle("/user/head", userHeadInputSourceHandle);
+      VRInput.VRInput_GetInputSourceHandle("/user/hand/left", userHandLeftInputSourceHandle);
+      VRInput.VRInput_GetInputSourceHandle("/user/hand/right", userHandRightInputSourceHandle);
+      // TODO: Bindings for /user/gamepad
 
-      clickTriggerActionData = InputDigitalActionData.create();;
+
+      clickTriggerActionData = InputDigitalActionData.create();
 
       activeActionSets = VRActiveActionSet.create(1);
       activeActionSets.ulActionSet(mainActionSetHandle.get(0));
