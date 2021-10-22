@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.BufferUtils;
 import org.lwjgl.openvr.HmdMatrix34;
+import org.lwjgl.openvr.VR;
 import org.lwjgl.openvr.VRControllerState;
 import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -23,35 +24,29 @@ import java.util.function.Function;
  */
 public class GDXVRDevice
 {
-   private final GDXVRDeviceType type;
+   private final int deviceClass;
    private final GDXVRControllerRole role;
    private long buttons = 0;
    private final VRControllerState controllerState = VRControllerState.create();
    private final ModelInstance modelInstance;
-   private final String name;
-   private final IntBuffer tempIntBuffer = BufferUtils.newIntBuffer(1);
+   private final IntBuffer errorCode = BufferUtils.newIntBuffer(1);
    private final Vector3 velocity = new Vector3();
    private final Vector3 angularVelocity = new Vector3();
    private final FramePose3D pose = new FramePose3D();
    private final RotationMatrix tempRotationMatrix = new RotationMatrix();
-   private boolean isValid;
    private final int deviceIndex;
    private final TreeSet<Integer> buttonsPressedThisFrame = new TreeSet<>();
    private final TreeSet<Integer> buttonsReleasedThisFrame = new TreeSet<>();
 
-   public GDXVRDevice(int deviceIndex, GDXVRDeviceType type, GDXVRControllerRole role, Function<String, Model> modelLoader)
+   public GDXVRDevice(int deviceIndex, int deviceClass, GDXVRControllerRole role, Function<String, Model> modelLoader)
    {
       this.deviceIndex = deviceIndex;
-      this.type = type;
+      this.deviceClass = deviceClass;
       this.role = role;
 
-      Model model = modelLoader.apply(getStringProperty(GDXVRDeviceProperty.RenderModelName_String));
+      String renderModelName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_RenderModelName_String, errorCode);
+      Model model = modelLoader.apply(renderModelName);
       modelInstance = model != null ? new ModelInstance(model) : null;
-
-      String roleName;
-      roleName = role == GDXVRControllerRole.LeftHand ? role.name() : "";
-      roleName += role == GDXVRControllerRole.RightHand ? role.name() : "";
-      name = type.name() + roleName;
    }
 
    public void resetBeforeUpdate()
@@ -97,12 +92,9 @@ public class GDXVRDevice
       return pose;
    }
 
-   /**
-    * @return the {@link GDXVRDeviceType}
-    */
-   public GDXVRDeviceType getType()
+   public int getDeviceClass()
    {
-      return type;
+      return deviceClass;
    }
 
    /**
@@ -178,104 +170,6 @@ public class GDXVRDevice
    }
 
    /**
-    * @return the x-coordinate in the range [-1, 1] of the given axis from {@link GDXVRControllerAxes}
-    */
-   public float getAxisX(int axis)
-   {
-      if (axis < 0 || axis >= 5)
-         return 0;
-      VRSystem.VRSystem_GetControllerState(deviceIndex, controllerState);
-      return controllerState.rAxis(axis).x();
-   }
-
-   /**
-    * @return the y-coordinate in the range [-1, 1] of the given axis from {@link GDXVRControllerAxes}
-    */
-   public float getAxisY(int axis)
-   {
-      if (axis < 0 || axis >= 5)
-         return 0;
-      VRSystem.VRSystem_GetControllerState(deviceIndex, controllerState);
-      return controllerState.rAxis(axis).y();
-   }
-
-   /**
-    * Trigger a haptic pulse (vibrate) for the duration in microseconds. Subsequent calls
-    * to this method within 5ms will be ignored.
-    *
-    * @param duration pulse duration in microseconds
-    */
-   public void triggerHapticPulse(short duration)
-   {
-      VRSystem.VRSystem_TriggerHapticPulse(deviceIndex, 0, duration);
-   }
-
-   /**
-    * @return a boolean property or false if the query failed
-    */
-   public boolean getBooleanProperty(GDXVRDeviceProperty property)
-   {
-      tempIntBuffer.put(0, 0);
-      boolean result = VRSystem.VRSystem_GetBoolTrackedDeviceProperty(deviceIndex, property.value, tempIntBuffer);
-      if (tempIntBuffer.get(0) != 0)
-         return false;
-      else
-         return result;
-   }
-
-   /**
-    * @return a float property or 0 if the query failed
-    */
-   public float getFloatProperty(GDXVRDeviceProperty property)
-   {
-      tempIntBuffer.put(0, 0);
-      float result = VRSystem.VRSystem_GetFloatTrackedDeviceProperty(deviceIndex, property.value, tempIntBuffer);
-      if (tempIntBuffer.get(0) != 0)
-         return 0;
-      else
-         return result;
-   }
-
-   /**
-    * @return an int property or 0 if the query failed
-    */
-   public int getInt32Property(GDXVRDeviceProperty property)
-   {
-      tempIntBuffer.put(0, 0);
-      int result = VRSystem.VRSystem_GetInt32TrackedDeviceProperty(deviceIndex, property.value, tempIntBuffer);
-      if (tempIntBuffer.get(0) != 0)
-         return 0;
-      else
-         return result;
-   }
-
-   /**
-    * @return a long property or 0 if the query failed
-    */
-   public long getUInt64Property(GDXVRDeviceProperty property)
-   {
-      tempIntBuffer.put(0, 0);
-      long result = VRSystem.VRSystem_GetUint64TrackedDeviceProperty(deviceIndex, property.value, tempIntBuffer);
-      if (tempIntBuffer.get(0) != 0)
-         return 0;
-      else
-         return result;
-   }
-
-   /**
-    * @return a string property or null if the query failed
-    */
-   public String getStringProperty(GDXVRDeviceProperty property)
-   {
-      tempIntBuffer.put(0, 0);
-
-      String result = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, property.value, tempIntBuffer);
-      if (tempIntBuffer.get(0) != 0)
-         return null;
-      return result;
-   }
-
-   /**
     * @return a {@link ModelInstance} with the transform updated to the latest tracked position and orientation in world space for rendering or null
     */
    public ModelInstance getModelInstance()
@@ -304,23 +198,20 @@ public class GDXVRDevice
       return angularVelocity;
    }
 
-   /**
-    * whether the pose is valid our invalid, e.g. outdated because of tracking failure
-    **/
-   public boolean isValid()
-   {
-      return isValid;
-   }
-
-   public void setValid(boolean valid)
-   {
-      isValid = valid;
-   }
-
    @Override
    public String toString()
    {
-      return "VRDevice[manufacturer=" + getStringProperty(GDXVRDeviceProperty.ManufacturerName_String) + ", renderModel=" + getStringProperty(
-            GDXVRDeviceProperty.RenderModelName_String) + ", deviceIndex=" + deviceIndex + ", type=" + type + ", role=" + role + "]";
+      String manufacturerName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
+                                                                                 VR.ETrackedDeviceProperty_Prop_ManufacturerName_String,
+                                                                                 errorCode);
+      String renderModelName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
+                                                                                VR.ETrackedDeviceProperty_Prop_RenderModelName_String,
+                                                                                errorCode);
+      return "VRDevice[manufacturer=" + manufacturerName
+             + ", renderModel=" + renderModelName
+             + ", deviceIndex=" + deviceIndex
+             + ", type=" + deviceClass
+             + ", role=" + role
+             + "]";
    }
 }

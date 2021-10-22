@@ -69,10 +69,10 @@ public class GDXVRContext
    private final LongBuffer mainActionSetHandle = BufferUtils.newLongBuffer(1);
    private final LongBuffer clickTriggerActionHandle = BufferUtils.newLongBuffer(1);
    private VRActiveActionSet.Buffer activeActionSets;
+   private InputDigitalActionData clickTriggerActionData;
    private final GDXVRDevice[] devices = new GDXVRDevice[VR.k_unMaxTrackedDeviceCount];
    private final RigidBodyTransform tempHeadsetTransform = new RigidBodyTransform();
    private ModelInstance headsetCoordinateFrame;
-   private InputDigitalActionData clickTriggerActionData;
 
    {
       Arrays.fill(devices, null); // null means device is not connected
@@ -219,7 +219,6 @@ public class GDXVRContext
 
             device.getVelocity().set(velocity.v(0), velocity.v(1), velocity.v(2));
             device.getAngularVelocity().set(angularVelocity.v(0), angularVelocity.v(1), angularVelocity.v(2));
-            device.setValid(trackedPose.bPoseIsValid());
             device.updatePoseInTrackerFrame(openVRRigidBodyTransform, vrPlayAreaYUpZBackFrame);
          }
       }
@@ -329,29 +328,15 @@ public class GDXVRContext
 
    private void createDevice(int deviceIndex)
    {
-      GDXVRDeviceType type;
       int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
-      switch (deviceClass)
+
+      if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_HMD)
       {
-         case VR.ETrackedDeviceClass_TrackedDeviceClass_HMD:
-            type = GDXVRDeviceType.HeadMountedDisplay;
-            headsetIndex = deviceIndex;
-            break;
-         case VR.ETrackedDeviceClass_TrackedDeviceClass_Controller:
-            type = GDXVRDeviceType.Controller;
-            break;
-         case VR.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference:
-            type = GDXVRDeviceType.BaseStation;
-            break;
-         case VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker:
-            type = GDXVRDeviceType.Generic;
-            break;
-         default:
-            return;
+         headsetIndex = deviceIndex;
       }
 
       GDXVRControllerRole controllerRole = GDXVRControllerRole.Unknown;
-      if (type == GDXVRDeviceType.Controller)
+      if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_Controller)
       {
          int controllerRoleID = VRSystem.VRSystem_GetControllerRoleForTrackedDeviceIndex(deviceIndex);
          switch (controllerRoleID)
@@ -368,15 +353,15 @@ public class GDXVRContext
                break;
          }
       }
-      if (type == GDXVRDeviceType.BaseStation)
+      if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_TrackingReference)
       {
          trackerIndexes.add(deviceIndex);
       }
-      if (type == GDXVRDeviceType.Generic)
+      if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
       {
          genericIndexes.add(deviceIndex);
       }
-      updateDevice(deviceIndex, new GDXVRDevice(deviceIndex, type, controllerRole, this::loadRenderModel));
+      updateDevice(deviceIndex, new GDXVRDevice(deviceIndex, deviceClass, controllerRole, this::loadRenderModel));
    }
 
    /**
