@@ -25,7 +25,6 @@ import java.util.function.Function;
 public class GDXVRDevice
 {
    private final int deviceClass;
-   private final GDXVRControllerRole role;
    private long buttons = 0;
    private final VRControllerState controllerState = VRControllerState.create();
    private final ModelInstance modelInstance;
@@ -38,11 +37,10 @@ public class GDXVRDevice
    private final TreeSet<Integer> buttonsPressedThisFrame = new TreeSet<>();
    private final TreeSet<Integer> buttonsReleasedThisFrame = new TreeSet<>();
 
-   public GDXVRDevice(int deviceIndex, int deviceClass, GDXVRControllerRole role, Function<String, Model> modelLoader)
+   public GDXVRDevice(int deviceIndex, int deviceClass, Function<String, Model> modelLoader)
    {
       this.deviceIndex = deviceIndex;
       this.deviceClass = deviceClass;
-      this.role = role;
 
       String renderModelName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_RenderModelName_String, errorCode);
       Model model = modelLoader.apply(renderModelName);
@@ -95,28 +93,6 @@ public class GDXVRDevice
    public int getDeviceClass()
    {
       return deviceClass;
-   }
-
-   /**
-    * The {@link GDXVRControllerRole}, indicating if the {@link GDXVRDevice} is assigned
-    * to the left or right hand.
-    *
-    * <p>
-    * <strong>Note</strong>: the role is not reliable! If one controller is connected on
-    * startup, it will have a role of {@link GDXVRControllerRole#Unknown} and retain
-    * that role even if a second controller is connected (which will also haven an
-    * unknown role). The role is only reliable if two controllers are connected
-    * already, and none of the controllers disconnects during the application
-    * life-time.</br>
-    * At least on the HTC Vive, the first connected controller is always the right hand
-    * and the second connected controller is the left hand. The order stays the same
-    * even if controllers disconnect/reconnect during the application life-time.
-    * </p>
-    */
-   // FIXME role might change as per API, but never saw it
-   public GDXVRControllerRole getControllerRole()
-   {
-      return role;
    }
 
    /**
@@ -211,7 +187,6 @@ public class GDXVRDevice
              + ", renderModel=" + renderModelName
              + ", deviceIndex=" + deviceIndex
              + ", type=" + deviceClass
-             + ", role=" + role
              + "]";
    }
 }
