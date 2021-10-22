@@ -13,7 +13,7 @@ public class GDXVRHandPlacedFootstepMode
    {
       for (RobotSide side : RobotSide.values)
       {
-         vrContext.getController(side, controller ->
+         vrContext.getController(side).runIfConnected(controller ->
          {
 //            VRControllerState controllerState = controller.getControllerState();
 //            VRControllerAxis vrControllerAxis = controllerState.rAxis(2);

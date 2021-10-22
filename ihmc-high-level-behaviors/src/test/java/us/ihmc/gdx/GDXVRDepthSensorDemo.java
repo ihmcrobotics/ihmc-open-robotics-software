@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -24,8 +25,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.nio.FloatBuffer;
-
-import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class GDXVRDepthSensorDemo
 {
@@ -95,22 +94,23 @@ public class GDXVRDepthSensorDemo
 
          private void handleVREvents(GDXVRContext vrContext)
          {
-            vrContext.getController(RobotSide.LEFT, controller ->
+            vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
             {
-               if (controller.isButtonNewlyPressed(SteamVR_Trigger))
+               InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
+               if (triggerClick.bChanged() && triggerClick.bState())
                {
                   moveWithController = !moveWithController;
                }
                if (moveWithController)
                {
-                  controller.getPose(ReferenceFrame.getWorldFrame(), tempTransform);
+                  controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), tempTransform);
                   depthSensorSimulator.setCameraWorldTransform(tempTransform);
                   controllerCoordinateFrames.get(RobotSide.LEFT).transform.set(tempTransform); // TODO: Should be an option on the VR manager probably
                }
             });
-            vrContext.getController(RobotSide.RIGHT, controller ->
+            vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
             {
-               controller.getPose(ReferenceFrame.getWorldFrame(), cylinder.nodes.get(0).globalTransform);
+               controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), cylinder.nodes.get(0).globalTransform);
             });
          }
 
