@@ -218,16 +218,12 @@ public class GDXVRManager
          {
             context.getHeadset().runIfConnected(headset -> headset.getModelInstance().getRenderables(renderables, pool));
          }
+         context.getControllerRenderables(renderables, pool);
+         context.getBaseStationRenderables(renderables, pool);
          for (RobotSide side : RobotSide.values)
          {
-            context.getController(side).runIfConnected(controller -> controller.getModelInstance().getRenderables(renderables, pool));
             context.getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
          }
-         for (GDXVRBaseStation baseStation : context.getBaseStations())
-         {
-            baseStation.getModelInstance().getRenderables(renderables, pool);
-         }
-
          scenePoseGizmo.getRenderables(renderables, pool);
       }
    }

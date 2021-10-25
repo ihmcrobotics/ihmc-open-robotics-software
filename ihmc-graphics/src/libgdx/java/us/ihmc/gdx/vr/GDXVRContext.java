@@ -7,6 +7,10 @@ import java.nio.LongBuffer;
 import java.util.*;
 import java.util.function.Consumer;
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
 
@@ -71,6 +75,11 @@ public class GDXVRContext
          new Point3D()
    );
    private final RigidBodyTransform tempVRPlayAreaZUp = new RigidBodyTransform();
+   private final RigidBodyTransform teleportIHMCZUpToIHMCZUpWorld = new RigidBodyTransform();
+   private final ReferenceFrame teleportFrameIHMCZUp
+         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("teleportFrame",
+                                                                           ReferenceFrame.getWorldFrame(),
+                                                                           teleportIHMCZUpToIHMCZUpWorld);
    /** When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame. */
    private final RigidBodyTransform totalTransformFromVRPlayAreaToIHMCZUpWorld = new RigidBodyTransform();
    /** The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame. */
@@ -240,6 +249,34 @@ public class GDXVRContext
    public void addVRInputProcessor(Consumer<GDXVRContext> processVRInput)
    {
       vrInputProcessors.add(processVRInput);
+   }
+
+   public void getControllerRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         GDXVRController controller = controllers.get(side);
+         if (controller.isConnected())
+         {
+            ModelInstance modelInstance = controller.getModelInstance();
+            if (modelInstance != null)
+            {
+               modelInstance.getRenderables(renderables, pool);
+            }
+         }
+      }
+   }
+
+   public void getBaseStationRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      for (GDXVRBaseStation baseStation : baseStations.values())
+      {
+         ModelInstance modelInstance = baseStation.getModelInstance();
+         if (modelInstance != null)
+         {
+            modelInstance.getRenderables(renderables, pool);
+         }
+      }
    }
 
    public GDXVRController getController(RobotSide side)
