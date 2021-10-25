@@ -74,19 +74,17 @@ public class GDXVRContext
          ),
          new Point3D()
    );
-   private final RigidBodyTransform tempVRPlayAreaZUp = new RigidBodyTransform();
+   /** When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame. */
    private final RigidBodyTransform teleportIHMCZUpToIHMCZUpWorld = new RigidBodyTransform();
    private final ReferenceFrame teleportFrameIHMCZUp
          = ReferenceFrameTools.constructFrameWithChangingTransformToParent("teleportFrame",
                                                                            ReferenceFrame.getWorldFrame(),
                                                                            teleportIHMCZUpToIHMCZUpWorld);
-   /** When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame. */
-   private final RigidBodyTransform totalTransformFromVRPlayAreaToIHMCZUpWorld = new RigidBodyTransform();
    /** The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame. */
    private final ReferenceFrame vrPlayAreaYUpZBackFrame
-         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("vrPlayAreaFrame",
-                                                                           ReferenceFrame.getWorldFrame(),
-                                                                           totalTransformFromVRPlayAreaToIHMCZUpWorld);
+         = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
+                                                                           teleportFrameIHMCZUp,
+                                                                           openVRYUpToIHMCZUpSpace);
 
    private final GDXVRHeadset headset = new GDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<GDXVRController> controllers = new SideDependentList<>(new GDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
@@ -115,8 +113,6 @@ public class GDXVRContext
       float renderTargetMultiplier = 1.0f; // multiplier to scale the render surface dimensions as a replacement for multisampling
       width = (int) (widthPointer.get(0) * renderTargetMultiplier);
       height = (int) (heightPointer.get(0) * renderTargetMultiplier);
-
-      teleport(new RigidBodyTransform()); // Initialize the play space to Z up
 
       WorkspaceDirectory directory = new WorkspaceDirectory("ihmc-open-robotics-software", "ihmc-graphics/src/libgdx/resources", getClass(), "/vr");
       WorkspaceFile actionManifestFile = new WorkspaceFile(directory, "actions.json");
@@ -235,15 +231,8 @@ public class GDXVRContext
 
    public void teleport(Consumer<RigidBodyTransform> vrPlayAreaZUpConsumer)
    {
-      vrPlayAreaZUpConsumer.accept(tempVRPlayAreaZUp);
-      teleport(tempVRPlayAreaZUp);
-   }
-
-   public void teleport(RigidBodyTransform vrPlayAreaZUp)
-   {
-      totalTransformFromVRPlayAreaToIHMCZUpWorld.set(openVRYUpToIHMCZUpSpace);
-      vrPlayAreaZUp.transform(totalTransformFromVRPlayAreaToIHMCZUpWorld);
-      vrPlayAreaYUpZBackFrame.update();
+      vrPlayAreaZUpConsumer.accept(teleportIHMCZUpToIHMCZUpWorld);
+      teleportFrameIHMCZUp.update();
    }
 
    public void addVRInputProcessor(Consumer<GDXVRContext> processVRInput)
@@ -299,7 +288,7 @@ public class GDXVRContext
       return eyes;
    }
 
-   public ReferenceFrame getVRPlayAreaFrame()
+   public ReferenceFrame getOpenVRPlayAreaYUpFrame()
    {
       return vrPlayAreaYUpZBackFrame;
    }
