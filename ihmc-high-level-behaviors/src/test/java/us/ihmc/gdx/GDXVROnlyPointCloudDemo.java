@@ -60,15 +60,11 @@ public class GDXVROnlyPointCloudDemo
          private void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
          {
             fusedPointCloud.getRenderables(renderables, pool);
+            vrApplication.getVRContext().getControllerRenderables(renderables, pool);
+            vrApplication.getVRContext().getBaseStationRenderables(renderables, pool);
             for (RobotSide side : RobotSide.values)
             {
-               vrApplication.getVRContext().getController(side).runIfConnected(controller ->
-                                                                                     controller.getModelInstance().getRenderables(renderables, pool));
                vrApplication.getVRContext().getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
-            }
-            for (GDXVRBaseStation baseStation : vrApplication.getVRContext().getBaseStations())
-            {
-               baseStation.getModelInstance().getRenderables(renderables, pool);
             }
          }
 

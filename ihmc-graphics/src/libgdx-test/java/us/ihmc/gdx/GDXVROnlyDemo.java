@@ -3,7 +3,6 @@ package us.ihmc.gdx;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.vr.GDXVRApplication;
-import us.ihmc.gdx.vr.GDXVRBaseStation;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GDXVROnlyDemo
@@ -34,15 +33,11 @@ public class GDXVROnlyDemo
 
             vrApplication.getSceneBasics().addRenderableProvider(((renderables, pool) ->
             {
+               vrApplication.getVRContext().getControllerRenderables(renderables, pool);
+               vrApplication.getVRContext().getBaseStationRenderables(renderables, pool);
                for (RobotSide side : RobotSide.values)
                {
-                  vrApplication.getVRContext().getController(side).runIfConnected(controller ->
-                                                                                        controller.getModelInstance().getRenderables(renderables, pool));
                   vrApplication.getVRContext().getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
-               }
-               for (GDXVRBaseStation baseStation : vrApplication.getVRContext().getBaseStations())
-               {
-                  baseStation.getModelInstance().getRenderables(renderables, pool);
                }
             }), GDXSceneLevel.VIRTUAL);
          }
