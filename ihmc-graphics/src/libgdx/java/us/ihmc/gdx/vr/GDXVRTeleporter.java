@@ -114,7 +114,14 @@ public class GDXVRTeleporter
 
          if (!preparingToTeleport && bChanged)
          {
-
+            vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
+            {
+               proposedTeleportPose.get(teleportIHMCZUpToIHMCZUpWorld);
+//               vrContext.getHeadset().runIfConnected(headset ->
+//               {
+//                  headset.getPose()
+//               });
+            });
          }
       });
    }

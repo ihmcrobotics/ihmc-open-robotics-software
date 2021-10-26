@@ -229,9 +229,9 @@ public class GDXVRContext
       VR_ShutdownInternal();
    }
 
-   public void teleport(Consumer<RigidBodyTransform> vrPlayAreaZUpConsumer)
+   public void teleport(Consumer<RigidBodyTransform> teleportIHMCZUpToIHMCZUpWorldConsumer)
    {
-      vrPlayAreaZUpConsumer.accept(teleportIHMCZUpToIHMCZUpWorld);
+      teleportIHMCZUpToIHMCZUpWorldConsumer.accept(teleportIHMCZUpToIHMCZUpWorld);
       teleportFrameIHMCZUp.update();
    }
 
