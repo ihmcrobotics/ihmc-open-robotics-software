@@ -107,6 +107,7 @@ public class RemoteControllerState extends HighLevelControllerState
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(controlledJoints[i], jointGains.get(jointName) * torque);
 
          networker.setCurrentAngle(controlledJoints[i].getName(), controlledJoints[i].getQ());
+         networker.setJointSpeed(controlledJoints[i].getName(), controlledJoints[i].getQd());
          networker.setCenterOfMassFrame(controllerToolbox.getCenterOfMassFrame());
 
          FramePoint2D copFramePoint = new FramePoint2D();
@@ -116,7 +117,7 @@ public class RemoteControllerState extends HighLevelControllerState
          ForceSensorDataReadOnly dataLeft = controllerToolbox.getWristForceSensor(RobotSide.LEFT);
          networker.setWristLeft(dataLeft);
          ForceSensorDataReadOnly dataRight = controllerToolbox.getWristForceSensor(RobotSide.RIGHT);
-         networker.setWristRight(dataLeft);
+         networker.setWristRight(dataRight);
 
       }
       lastTime = timeInState;
@@ -162,7 +163,7 @@ public class RemoteControllerState extends HighLevelControllerState
       // Do nothing
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         desiredPositions[i].set(controlledJoints[i].getQ() + initialPoseCorrections.get(controlledJoints[i].getName()));
+//         desiredPositions[i].set(controlledJoints[i].getQ() + initialPoseCorrections.get(controlledJoints[i].getName()));
          networker.setDesiredAngle(controlledJoints[i].getName(), desiredPositions[i].getDoubleValue());
       }
       lastTime = 0;

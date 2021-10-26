@@ -61,13 +61,13 @@ public class AtlasRemoteTest extends DRCFlatGroundWalkingTest
          @Override
          public double getEstimatorDT()
          {
-            return 0.0005;
+            return 0.0001;
          }
 
          @Override
          public double getControllerDT()
          {
-            return 0.001;
+            return 0.0005;
          }
       };
 

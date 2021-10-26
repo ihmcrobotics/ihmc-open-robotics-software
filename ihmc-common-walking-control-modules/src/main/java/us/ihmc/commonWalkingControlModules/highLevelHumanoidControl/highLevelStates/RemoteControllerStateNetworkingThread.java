@@ -19,6 +19,7 @@ public class RemoteControllerStateNetworkingThread extends Thread {
 
     private HashMap<String, Double> desiredAngles;
     private HashMap<String, Double> currentAngles;
+    private HashMap<String, Double> currentJointSpeeds;
     private ReferenceFrame centerOfMassFrame;
     private FramePoint2D coP;
     private ForceSensorDataReadOnly wristLeft;
@@ -27,6 +28,7 @@ public class RemoteControllerStateNetworkingThread extends Thread {
     public RemoteControllerStateNetworkingThread(int l) {
         desiredAngles = new HashMap<>();
         currentAngles = new HashMap<>();
+        currentJointSpeeds = new HashMap<>();
     }
 
     public void run(){
@@ -67,10 +69,26 @@ public class RemoteControllerStateNetworkingThread extends Thread {
             first = false;
             out.print(jointName + "=" + currentAngles.get(jointName));
         }
+        out.print("/");
+        first = true;
+        for (String jointName: currentJointSpeeds.keySet()) {
+            if (!first) {
+                out.print(",");
+            }
+            first = false;
+            out.print(jointName + "=" + currentJointSpeeds.get(jointName));
+        }
+        String copFrame;
+        if (this.centerOfMassFrame != null) {
+            copFrame = this.centerOfMassFrame.getTransformToWorldFrame().getTranslationX() + "," +
+                    this.centerOfMassFrame.getTransformToWorldFrame().getTranslationY() + "," +
+                    this.centerOfMassFrame.getTransformToWorldFrame().getTranslationZ()
+            ;
+        } else {
+            copFrame = "0, 0, 1";
+        }
         out.print("/" +
-                this.centerOfMassFrame.getTransformToWorldFrame().getTranslationX() + "," +
-                this.centerOfMassFrame.getTransformToWorldFrame().getTranslationY() + "," +
-                this.centerOfMassFrame.getTransformToWorldFrame().getTranslationZ() +
+                copFrame +
                 "/" + this.coP + "/" + this.wristLeft + "/" + this.wristRight);
         out.println();
     }
@@ -89,6 +107,14 @@ public class RemoteControllerStateNetworkingThread extends Thread {
 
     public void setCurrentAngle(String i, double angle) {
         currentAngles.put(i, angle);
+    }
+
+    public double getJointSpeed(String i) {
+        return currentJointSpeeds.get(i);
+    }
+
+    public void setJointSpeed(String i, double angle) {
+        currentJointSpeeds.put(i, angle);
     }
 
     public void setCenterOfMassFrame(ReferenceFrame centerOfMassFrame) {
