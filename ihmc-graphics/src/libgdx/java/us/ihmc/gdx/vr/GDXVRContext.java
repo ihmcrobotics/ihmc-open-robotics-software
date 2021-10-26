@@ -292,4 +292,9 @@ public class GDXVRContext
    {
       return vrPlayAreaYUpZBackFrame;
    }
+
+   public ReferenceFrame getTeleportFrameIHMCZUp()
+   {
+      return teleportFrameIHMCZUp;
+   }
 }
