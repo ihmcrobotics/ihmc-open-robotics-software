@@ -17,6 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -37,19 +38,17 @@ public class GDXVRTeleporter
    private final Point3D planeRayIntesection = new Point3D();
    private final Vector3D orientationDeterminationVector = new Vector3D();
    private final FramePose3D proposedTeleportPose = new FramePose3D();
+   private double lineLength = 1.0;
 
    private ModelInstance arrow;
+   private final Color color = Color.WHITE;
 
    public void create()
    {
-      Color color = Color.WHITE;
       double ringThickness = 0.005;
       double innerRadius = 0.4;
       double outerRadius = 0.5;
-      lineModel = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-      {
-         meshBuilder.addLine(0.0, 0.0, 0.0, 5.0, 0.0, 0.0, 0.003, color);
-      }, "line");
+      lineModel = GDXModelPrimitives.buildModelInstance(this::buildLineMesh, "line");
       ring = GDXModelPrimitives.buildModelInstance(meshBuilder ->
       {
          meshBuilder.addHollowCylinder(ringThickness, outerRadius, innerRadius, new Point3D(), color);
@@ -64,6 +63,11 @@ public class GDXVRTeleporter
          orientation.setRoll(Math.toRadians(-90.0));
          meshBuilder.addIsoscelesTriangularPrism(0.2, 0.2, ringThickness, offset, orientation, color);
       }, "arrow");
+   }
+
+   private void buildLineMesh(GDXMultiColorMeshBuilder meshBuilder)
+   {
+      meshBuilder.addLine(0.0, 0.0, 0.0, lineLength, 0.0, 0.0, 0.005, color);
    }
 
    public void processVRInput(GDXVRContext vrContext)
@@ -82,8 +86,6 @@ public class GDXVRTeleporter
 
             pickRayPose.setToZero(controller.getXForwardZUpControllerFrame());
             pickRayPose.changeFrame(ReferenceFrame.getWorldFrame());
-            pickRayPose.get(tempTransform);
-            GDXTools.toGDX(tempTransform, lineModel.transform);
 
             currentPlayArea.setToZero(vrContext.getTeleportFrameIHMCZUp());
             currentPlayArea.changeFrame(ReferenceFrame.getWorldFrame());
@@ -107,6 +109,12 @@ public class GDXVRTeleporter
             EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X,
                                                                        orientationDeterminationVector,
                                                                        proposedTeleportPose.getOrientation());
+
+            lineLength = pickRayPose.getPosition().distance(proposedTeleportPose.getPosition());
+            GDXModelPrimitives.rebuildMesh(lineModel.nodes.get(0), this::buildLineMesh);
+
+            pickRayPose.get(tempTransform);
+            GDXTools.toGDX(tempTransform, lineModel.transform);
             proposedTeleportPose.get(tempTransform);
             GDXTools.toGDX(tempTransform, ring.transform);
             GDXTools.toGDX(tempTransform, arrow.transform);
