@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 
 import java.io.BufferedReader;
@@ -24,6 +25,8 @@ public class RemoteControllerStateNetworkingThread extends Thread {
     private FramePoint2D coP;
     private ForceSensorDataReadOnly wristLeft;
     private ForceSensorDataReadOnly wristRight;
+    private double time;
+    private ReferenceFrame pelvisFrame;
 
     public RemoteControllerStateNetworkingThread(int l) {
         desiredAngles = new HashMap<>();
@@ -40,8 +43,9 @@ public class RemoteControllerStateNetworkingThread extends Thread {
                 System.out.println("Remote controller connected");
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                printSensorReadings();
+                double step = this.time;
                 while (true) {
-                    printSensorReadings();
                     String desired = in.readLine();
                     if (desired != null) {
                         String[] angles = desired.split(",");
@@ -49,13 +53,18 @@ public class RemoteControllerStateNetworkingThread extends Thread {
                             String[] parts = angles[i].split("=");
                             desiredAngles.put(parts[0], Double.parseDouble(parts[1]));
                         }
-                        printSensorReadings();
                     } else {
                         System.out.println("Command was null");
                     }
+                    step++;
+                    long sleepTime = (long)(step * 1000. / 30. - this.time * 1000);
+                    if (sleepTime > 0) {
+                        Thread.sleep(sleepTime);
+                    }
+                    printSensorReadings();
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -79,13 +88,17 @@ public class RemoteControllerStateNetworkingThread extends Thread {
             out.print(jointName + "=" + currentJointSpeeds.get(jointName));
         }
         String copFrame;
-        if (this.centerOfMassFrame != null) {
-            copFrame = this.centerOfMassFrame.getTransformToWorldFrame().getTranslationX() + "," +
-                    this.centerOfMassFrame.getTransformToWorldFrame().getTranslationY() + "," +
-                    this.centerOfMassFrame.getTransformToWorldFrame().getTranslationZ()
-            ;
+        if (this.pelvisFrame != null) {
+            Quaternion quat = new Quaternion(this.pelvisFrame.getTransformToWorldFrame().getRotation());
+            copFrame = this.pelvisFrame.getTransformToWorldFrame().getTranslationX() + "," +
+                    this.pelvisFrame.getTransformToWorldFrame().getTranslationY() + "," +
+                    this.pelvisFrame.getTransformToWorldFrame().getTranslationZ() + "," +
+                    quat.getX() + "," +
+                    quat.getY() + "," +
+                    quat.getZ() + "," +
+                    quat.getS();
         } else {
-            copFrame = "0, 0, 1";
+            copFrame = "0, 0, 1, 0, 0, 0, 1";
         }
         out.print("/" +
                 copFrame +
@@ -147,5 +160,21 @@ public class RemoteControllerStateNetworkingThread extends Thread {
 
     public ForceSensorDataReadOnly getWristRight() {
         return wristRight;
+    }
+
+    public void setTime(double time) {
+        this.time = time;
+    }
+    
+    public double getTime() {
+        return time;
+    }
+
+    public void setPelvisFrame(ReferenceFrame pelvisFrame) {
+        this.pelvisFrame = pelvisFrame;
+    }
+
+    public ReferenceFrame getPelvisFrame() {
+        return pelvisFrame;
     }
 }

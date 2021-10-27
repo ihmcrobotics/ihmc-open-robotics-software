@@ -109,6 +109,8 @@ public class RemoteControllerState extends HighLevelControllerState
          networker.setCurrentAngle(controlledJoints[i].getName(), controlledJoints[i].getQ());
          networker.setJointSpeed(controlledJoints[i].getName(), controlledJoints[i].getQd());
          networker.setCenterOfMassFrame(controllerToolbox.getCenterOfMassFrame());
+         networker.setPelvisFrame(controllerToolbox.getPelvisZUpFrame());
+         networker.setTime(timeInState);
 
          FramePoint2D copFramePoint = new FramePoint2D();
          controllerToolbox.getCoP(copFramePoint);
@@ -118,7 +120,6 @@ public class RemoteControllerState extends HighLevelControllerState
          networker.setWristLeft(dataLeft);
          ForceSensorDataReadOnly dataRight = controllerToolbox.getWristForceSensor(RobotSide.RIGHT);
          networker.setWristRight(dataRight);
-
       }
       lastTime = timeInState;
 
