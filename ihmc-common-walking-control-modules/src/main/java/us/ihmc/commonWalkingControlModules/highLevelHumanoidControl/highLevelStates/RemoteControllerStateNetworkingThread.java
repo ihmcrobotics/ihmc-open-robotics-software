@@ -1,8 +1,13 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 
 import java.io.BufferedReader;
@@ -27,6 +32,7 @@ public class RemoteControllerStateNetworkingThread extends Thread {
     private ForceSensorDataReadOnly wristRight;
     private double time;
     private ReferenceFrame pelvisFrame;
+    private MovingReferenceFrame baseFrame;
 
     public RemoteControllerStateNetworkingThread(int l) {
         desiredAngles = new HashMap<>();
@@ -88,17 +94,28 @@ public class RemoteControllerStateNetworkingThread extends Thread {
             out.print(jointName + "=" + currentJointSpeeds.get(jointName));
         }
         String copFrame;
-        if (this.pelvisFrame != null) {
-            Quaternion quat = new Quaternion(this.pelvisFrame.getTransformToWorldFrame().getRotation());
-            copFrame = this.pelvisFrame.getTransformToWorldFrame().getTranslationX() + "," +
-                    this.pelvisFrame.getTransformToWorldFrame().getTranslationY() + "," +
-                    this.pelvisFrame.getTransformToWorldFrame().getTranslationZ() + "," +
-                    quat.getX() + "," +
-                    quat.getY() + "," +
-                    quat.getZ() + "," +
-                    quat.getS();
+        if (this.baseFrame != null) {
+            RigidBodyTransform basePose = baseFrame.getTransformToWorldFrame();
+            Vector3DBasics translation = basePose.getTranslation();
+            Quaternion baseOrientation = new Quaternion(baseFrame.getTransformToWorldFrame().getRotation());
+            FrameVector3DReadOnly baseLinearVelocity = baseFrame.getTwistOfFrame().getLinearPart();
+            FrameVector3DReadOnly baseAngularVelocity = baseFrame.getTwistOfFrame().getAngularPart();
+
+            copFrame = translation.getX() + "," +
+                    translation.getY() + "," +
+                    translation.getZ() + "," +
+                    baseOrientation.getX() + "," +
+                    baseOrientation.getY() + "," +
+                    baseOrientation.getZ() + "," +
+                    baseOrientation.getS() + "," +
+                    baseLinearVelocity.getX() + "," +
+                    baseLinearVelocity.getY() + "," +
+                    baseLinearVelocity.getZ() + "," +
+                    baseAngularVelocity.getX() + "," +
+                    baseAngularVelocity.getY() + "," +
+                    baseAngularVelocity.getZ();
         } else {
-            copFrame = "0, 0, 1, 0, 0, 0, 1";
+            copFrame = "0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0";
         }
         out.print("/" +
                 copFrame +
@@ -176,5 +193,13 @@ public class RemoteControllerStateNetworkingThread extends Thread {
 
     public ReferenceFrame getPelvisFrame() {
         return pelvisFrame;
+    }
+
+    public void setBaseFrame(MovingReferenceFrame baseFrame) {
+        this.baseFrame = baseFrame;
+    }
+
+    public MovingReferenceFrame getBaseFrame() {
+        return baseFrame;
     }
 }

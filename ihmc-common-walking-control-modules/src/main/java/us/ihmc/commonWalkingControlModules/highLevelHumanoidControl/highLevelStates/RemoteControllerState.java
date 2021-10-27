@@ -4,7 +4,12 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.controllers.ParameterizedPDController;
@@ -108,21 +113,24 @@ public class RemoteControllerState extends HighLevelControllerState
 
          networker.setCurrentAngle(controlledJoints[i].getName(), controlledJoints[i].getQ());
          networker.setJointSpeed(controlledJoints[i].getName(), controlledJoints[i].getQd());
-         networker.setCenterOfMassFrame(controllerToolbox.getCenterOfMassFrame());
-         networker.setPelvisFrame(controllerToolbox.getPelvisZUpFrame());
-         networker.setTime(timeInState);
-
-         FramePoint2D copFramePoint = new FramePoint2D();
-         controllerToolbox.getCoP(copFramePoint);
-         networker.setCoP(copFramePoint);
-
-         ForceSensorDataReadOnly dataLeft = controllerToolbox.getWristForceSensor(RobotSide.LEFT);
-         networker.setWristLeft(dataLeft);
-         ForceSensorDataReadOnly dataRight = controllerToolbox.getWristForceSensor(RobotSide.RIGHT);
-         networker.setWristRight(dataRight);
       }
-      lastTime = timeInState;
 
+      MovingReferenceFrame baseFrame = controllerToolbox.getFullRobotModel().getRootBody().getBodyFixedFrame();
+      networker.setCenterOfMassFrame(controllerToolbox.getCenterOfMassFrame());
+      networker.setBaseFrame(baseFrame);
+      networker.setPelvisFrame(controllerToolbox.getPelvisZUpFrame());
+      networker.setTime(timeInState);
+
+      FramePoint2D copFramePoint = new FramePoint2D();
+      controllerToolbox.getCoP(copFramePoint);
+      networker.setCoP(copFramePoint);
+
+      ForceSensorDataReadOnly dataLeft = controllerToolbox.getWristForceSensor(RobotSide.LEFT);
+      networker.setWristLeft(dataLeft);
+      ForceSensorDataReadOnly dataRight = controllerToolbox.getWristForceSensor(RobotSide.RIGHT);
+      networker.setWristRight(dataRight);
+
+      lastTime = timeInState;
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
    }
 
@@ -130,8 +138,8 @@ public class RemoteControllerState extends HighLevelControllerState
    public void onEntry()
    {
       HashMap<String, Double> initialPoseCorrections = new HashMap<String, Double>() {{
-         put("l_leg_aky", 0.2 / 180.0 * Math.PI);
-         put("r_leg_aky", 0.2 / 180.0 * Math.PI);
+         put("l_leg_aky", 0.3);
+         put("r_leg_aky", 0.3);
          put("l_leg_akx", 0.0);
          put("r_leg_akx", 0.0);
          put("l_leg_kny", 0.0);
@@ -140,14 +148,14 @@ public class RemoteControllerState extends HighLevelControllerState
          put("r_leg_hpz", 0.0);
          put("l_leg_hpx", 0.0);
          put("r_leg_hpx", 0.0);
-         put("l_leg_hpy", -1.1 / 180.0 * Math.PI);
-         put("r_leg_hpy", -1.1 / 180.0 * Math.PI);
+         put("l_leg_hpy", 0.0);
+         put("r_leg_hpy", 0.0);
          put("back_bkz", 0.0);
          put("back_bky", 0.0);
          put("back_bkx", 0.0);
          put("r_arm_shz", 0.0);
-         put("l_arm_shx", 0.0);
-         put("r_arm_shx", 0.0);
+         put("l_arm_shx", -1.0);
+         put("r_arm_shx", 1.0);
          put("l_arm_ely", 0.0);
          put("r_arm_ely", 0.0);
          put("l_arm_elx", 0.0);
@@ -164,7 +172,7 @@ public class RemoteControllerState extends HighLevelControllerState
       // Do nothing
       for (int i = 0; i < controlledJoints.length; i++)
       {
-//         desiredPositions[i].set(controlledJoints[i].getQ() + initialPoseCorrections.get(controlledJoints[i].getName()));
+         desiredPositions[i].set(initialPoseCorrections.get(controlledJoints[i].getName()));
          networker.setDesiredAngle(controlledJoints[i].getName(), desiredPositions[i].getDoubleValue());
       }
       lastTime = 0;
