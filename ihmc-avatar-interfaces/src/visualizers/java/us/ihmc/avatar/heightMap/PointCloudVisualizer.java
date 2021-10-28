@@ -28,15 +28,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static us.ihmc.avatar.heightMap.HeightMapUpdater.APPROX_OUSTER_TRANSFORM;
+import static us.ihmc.avatar.heightMap.HeightMapUpdater.USE_OUSTER_FRAME;
+
 public class PointCloudVisualizer extends AnimationTimer
 {
    private static final double POINT_SIZE = 0.015;
-   private static final double MIN_X = -0.5;
-   private static final double MAX_X = 3.25;
-   private static final double MIN_Y = -1.25;
-   private static final double MAX_Y = 1.25;
+   private static final double MIN_X = -2.0;
+   private static final double MAX_X = 2.0;
+   private static final double MIN_Y = -2.0;
+   private static final double MAX_Y = 2.0;
    private static final double MIN_Z = -10.0;
-   private static final double MAX_Z = 0.0;
+   private static final double MAX_Z = 0.6;
    private final Group rootNode = new Group();
 
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
@@ -50,9 +53,6 @@ public class PointCloudVisualizer extends AnimationTimer
    public PointCloudVisualizer(Messager messager)
    {
       rootNode.getChildren().add(meshView);
-//      transform.getRotation().setToPitchOrientation(Math.toRadians(30.0));
-//      transform.getTranslation().set(-0.2, -0.15, 1.0);
-
       messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, this::processPointCloud);
    }
 
@@ -85,19 +85,29 @@ public class PointCloudVisualizer extends AnimationTimer
       meshBuilder.clear();
 
       PointCloudData pointCloud = new PointCloudData(pointCloudData.getKey(), 1000000, false);
-      ousterFrame.setPoseAndUpdate(pointCloudData.getRight());
 
-      // Transform ouster data
-      for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+      if (USE_OUSTER_FRAME)
       {
-         FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[i]);
-         point.changeFrame(ReferenceFrame.getWorldFrame());
-         pointCloud.getPointCloud()[i].set(point);
+         ousterFrame.setPoseAndUpdate(pointCloudData.getRight());
 
-         if (MathTools.intervalContains(point.getX(), MIN_X, MAX_X) &&
-             MathTools.intervalContains(point.getY(), MIN_Y, MAX_Y) &&
-             MathTools.intervalContains(point.getZ(), MIN_Z, MAX_Z))
-            meshBuilder.addCube(POINT_SIZE, point, Color.RED);
+         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+         {
+            FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[i]);
+            point.changeFrame(ReferenceFrame.getWorldFrame());
+            pointCloud.getPointCloud()[i].set(point);
+
+            if (MathTools.intervalContains(point.getX(), MIN_X, MAX_X) &&
+                MathTools.intervalContains(point.getY(), MIN_Y, MAX_Y) &&
+                MathTools.intervalContains(point.getZ(), MIN_Z, MAX_Z))
+               meshBuilder.addCube(POINT_SIZE, point, Color.RED);
+         }
+      }
+      else
+      {
+         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+         {
+            pointCloud.getPointCloud()[i].applyTransform(APPROX_OUSTER_TRANSFORM);
+         }
       }
 
       pointCloudToRender.set(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
