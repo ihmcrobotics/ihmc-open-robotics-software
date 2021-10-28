@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,14 +25,14 @@ public class HeightMapFootstepPlanner
    public static FootstepPlan debug(SideDependentList<ConvexPolygon2D> footPolygons, HeightMapData heightMap)
    {
       List<Point3D> stepsToDebug = new ArrayList<>();
-      stepsToDebug.add(new Point3D(0.6, -0.04, 0.0));
-      stepsToDebug.add(new Point3D(0.6, 0.32, 0.0));
-      stepsToDebug.add(new Point3D(0.92, 0.55, 0.0));
-      stepsToDebug.add(new Point3D(0.92, 0.15, 0.0));
-      stepsToDebug.add(new Point3D(0.92, -0.25, 0.0));
-      stepsToDebug.add(new Point3D(1.35, 0.55, 0.0));
-      stepsToDebug.add(new Point3D(1.35, 0.15, 0.0));
-      stepsToDebug.add(new Point3D(1.35, -0.25, 0.0));
+      stepsToDebug.add(new Point3D(0.4, -0.04, 0.0));
+      stepsToDebug.add(new Point3D(0.4, 0.32, 0.0));
+      stepsToDebug.add(new Point3D(0.72, 0.55, 0.0));
+      stepsToDebug.add(new Point3D(0.72, 0.15, 0.0));
+      stepsToDebug.add(new Point3D(0.72, -0.25, 0.0));
+      stepsToDebug.add(new Point3D(1.15, 0.55, 0.0));
+      stepsToDebug.add(new Point3D(1.15, 0.15, 0.0));
+      stepsToDebug.add(new Point3D(1.15, -0.25, 0.0));
 
       FootstepPlan footstepPlan = new FootstepPlan();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
@@ -52,11 +53,18 @@ public class HeightMapFootstepPlanner
          footPolygon.applyTransform(footstepTransform);
 
          RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMap);
-         snapTransform.transform(footstepTransform);
 
-         FramePose3D step = new FramePose3D();
-         step.set(footstepTransform);
-         footstepPlan.addFootstep(RobotSide.LEFT, step);
+         if (snapTransform != null)
+         {
+            snapTransform.transform(footstepTransform);
+
+            FramePose3D step = new FramePose3D();
+            double zOnPlane = snapper.getBestFitPlane().getZOnPlane(pose.getX(), pose.getY());
+            step.getPosition().set(pose.getX(), pose.getY(), zOnPlane);
+
+            EuclidGeometryTools.orientation3DFromZUpToVector3D(snapper.getBestFitPlane().getNormal(), step.getOrientation());
+            footstepPlan.addFootstep(RobotSide.LEFT, step);
+         }
       }
 
       return footstepPlan;

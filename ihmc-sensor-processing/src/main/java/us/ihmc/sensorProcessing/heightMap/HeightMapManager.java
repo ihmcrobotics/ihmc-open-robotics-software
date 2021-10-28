@@ -10,12 +10,12 @@ public class HeightMapManager
 {
    private static final boolean debug = false;
 
-   private static final double MIN_X = -0.5;
-   private static final double MAX_X = 3.25;
-   private static final double MIN_Y = -1.25;
-   private static final double MAX_Y = 1.25;
-   private static final double MIN_Z = -0.5;
-   private static final double MAX_Z = 0.6;
+   private static final double MIN_X = -2.0;
+   private static final double MAX_X = 2.0;
+   private static final double MIN_Y = -2.0;
+   private static final double MAX_Y = 2.0;
+   private static final double MIN_Z = -10.0;
+   private static final double MAX_Z = 1.0;
 
    private final double gridResolutionXY;
    private final int minMaxIndexXY;

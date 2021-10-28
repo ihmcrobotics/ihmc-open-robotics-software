@@ -38,31 +38,30 @@ public class HeightMapPolygonSnapper
       pointsInsidePolyon.clear();
       bestFitPlane.setToNaN();
 
-      int highestPointIndex = -1;
-      double highestPointZ = Double.NEGATIVE_INFINITY;
+      int minMaxIndex = HeightMapTools.toIndex(heightMap.getGridSizeXY(), heightMap.getGridResolutionXY(), 0);
+      int minIndexX = HeightMapTools.toIndex(polygonToSnap.getMinX(), heightMap.getGridResolutionXY(), minMaxIndex);
+      int maxIndexX = HeightMapTools.toIndex(polygonToSnap.getMaxX(), heightMap.getGridResolutionXY(), minMaxIndex);
+      int minIndexY = HeightMapTools.toIndex(polygonToSnap.getMinY(), heightMap.getGridResolutionXY(), minMaxIndex);
+      int maxIndexY = HeightMapTools.toIndex(polygonToSnap.getMaxY(), heightMap.getGridResolutionXY(), minMaxIndex);
+      double averageHeight = 0.0;
 
-      for (double x = polygonToSnap.getMinX(); x <= polygonToSnap.getMaxX(); x += heightMap.getGridResolutionXY())
+      for (int i = minIndexX; i <= maxIndexX; i++)
       {
-         for (double y = polygonToSnap.getMinY(); y <= polygonToSnap.getMaxY(); y += heightMap.getGridResolutionXY())
+         for (int j = minIndexY; j < maxIndexY; j++)
          {
+            double x = HeightMapTools.toCoordinate(i, heightMap.getGridResolutionXY(), minMaxIndex);
+            double y = HeightMapTools.toCoordinate(j, heightMap.getGridResolutionXY(), minMaxIndex);
+
             if (!polygonToSnap.isPointInside(x, y))
             {
                continue;
             }
 
-            double height = heightMap.getHeightAt(x, y);
-            if (Double.isNaN(height))
+            double height = heightMap.getHeightAt(i, j);
+            if (!Double.isNaN(height))
             {
-               continue;
-            }
-
-            Point3D point = new Point3D(x, y, height);
-            pointsInsidePolyon.add(point);
-
-            if (point.getZ() > highestPointZ)
-            {
-               highestPointZ = point.getZ();
-               highestPointIndex = pointsInsidePolyon.size() - 1;
+               pointsInsidePolyon.add(new Point3D(x, y, height));
+               averageHeight += height;
             }
          }
       }
@@ -73,27 +72,18 @@ public class HeightMapPolygonSnapper
       }
 
       planeFitter.fitPlaneToPoints(pointsInsidePolyon, bestFitPlane);
-
-      double averageHeight = 0.0;
-      for (int i = 0; i < pointsInsidePolyon.size(); i++)
-      {
-         averageHeight += pointsInsidePolyon.get(i).getZ();
-      }
       averageHeight /= pointsInsidePolyon.size();
 
-      double ssRes = 0.0;
-      double ssTot = 0.0;
+      double residualSoS = 0.0;
+      double totalSoS = 0.0;
       for (int i = 0; i < pointsInsidePolyon.size(); i++)
       {
-         double zHat = bestFitPlane.getZOnPlane(pointsInsidePolyon.get(i).getX(), pointsInsidePolyon.get(i).getY());
-
-         ssRes += MathTools.square(zHat - pointsInsidePolyon.get(i).getZ());
-         ssTot += MathTools.square(averageHeight - pointsInsidePolyon.get(i).getZ());
+         double predictedHeight = bestFitPlane.getZOnPlane(pointsInsidePolyon.get(i).getX(), pointsInsidePolyon.get(i).getY());
+         residualSoS += MathTools.square(predictedHeight - pointsInsidePolyon.get(i).getZ());
+         totalSoS += MathTools.square(averageHeight - pointsInsidePolyon.get(i).getZ());
       }
 
-      rSquared = 1.0 - ssRes / ssTot;
-//      System.out.println("R-Sq: " + rSq);
-
+      rSquared = 1.0 - residualSoS / totalSoS;
       if (bestFitPlane.containsNaN())
       {
          return null;
@@ -103,7 +93,6 @@ public class HeightMapPolygonSnapper
 
       Point2DReadOnly centroid = polygonToSnap.getCentroid();
       double height = bestFitPlane.getZOnPlane(centroid.getX(), centroid.getY());
-
       setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
 
       return transformToReturn;

@@ -42,7 +42,7 @@ public abstract class HeightMapUI extends Application
    private HeightMapParametersUIController heightMapParametersUIController;
 
    private static final boolean SHOW_HEIGHT_MAP = true;
-   private static final boolean SHOW_POINT_CLOUD = false;
+   private static final boolean SHOW_POINT_CLOUD = true;
 
    @Override
    public void start(Stage stage) throws Exception
@@ -99,7 +99,6 @@ public abstract class HeightMapUI extends Application
       pointCloudVisualizer.start();
 
       view3dFactory.bindSubSceneSizeToPaneSize(mainPane);
-//      mainPane.setCenter(view3dFactory.getSubScene());
       centerBorderPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
 
       stage.setScene(new Scene(mainPane, 1200, 800, true));
