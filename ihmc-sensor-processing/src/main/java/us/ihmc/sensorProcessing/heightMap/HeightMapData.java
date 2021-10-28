@@ -23,6 +23,18 @@ public class HeightMapData
       this.gridResolutionXY = gridResolutionXY;
       this.gridSizeXY = gridSizeXY;
       minMaxIndexXY = HeightMapTools.toIndex(gridSizeXY, gridResolutionXY, 0);
+
+      sortedHeights = new double[2 * minMaxIndexXY + 1][2 * minMaxIndexXY + 1];
+      reset();
+   }
+
+   public void reset()
+   {
+      // initialize with NaN
+      for (int i = 0; i < sortedHeights.length; i++)
+      {
+         Arrays.fill(sortedHeights[i], Double.NaN);
+      }
    }
 
    public HeightMapData(HeightMapMessage heightMapMessage)
@@ -71,12 +83,6 @@ public class HeightMapData
       int cellsPerAxis = 2 * minMaxIndexXY + 1;
       sortedHeights = new double[cellsPerAxis][cellsPerAxis];
 
-      // initialize with NaN
-      for (int i = 0; i < sortedHeights.length; i++)
-      {
-         Arrays.fill(sortedHeights[i], Double.NaN);
-      }
-
       // set height data
       for (int i = 0; i < xCells.size(); i++)
       {
@@ -106,9 +112,28 @@ public class HeightMapData
       return sortedHeights[xIndex][yIndex];
    }
 
+   public void setHeightAt(double x, double y, double z)
+   {
+      int xIndex = HeightMapTools.toIndex(x, gridResolutionXY, minMaxIndexXY);
+      int yIndex = HeightMapTools.toIndex(y, gridResolutionXY, minMaxIndexXY);
+
+      if (xIndex < 0 || yIndex < 0 || xIndex >= sortedHeights.length || yIndex >= sortedHeights.length)
+      {
+         LogTools.error("Invalid index for point (" + x + ", " + y + "). Indices: (" + xIndex + ", " + yIndex + ")");
+         return;
+      }
+
+      sortedHeights[xIndex][yIndex] = z;
+   }
+
    public double getHeightAt(int xIndex, int yIndex)
    {
       return sortedHeights[xIndex][yIndex];
+   }
+
+   public int getMinMaxIndexXY()
+   {
+      return minMaxIndexXY;
    }
 
    public void clear()

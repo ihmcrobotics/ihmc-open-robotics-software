@@ -7,6 +7,7 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,7 +15,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
@@ -24,6 +24,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HeightMapUpdater
 {
+   static final boolean USE_OUSTER_FRAME = false;
+   static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+//      double ousterPitch = Math.toRadians(21.5);
+//      APPROX_OUSTER_TRANSFORM.getRotation().setToPitchOrientation(ousterPitch);
+
+      double ousterPitch = Math.toRadians(30.0);
+      APPROX_OUSTER_TRANSFORM.getRotation().setToPitchOrientation(ousterPitch);
+      APPROX_OUSTER_TRANSFORM.getTranslation().set(-0.2, 0.0, 1.0);
+   }
+
    private final Messager messager;
    private final HeightMapParameters parameters;
    private final ExecutorService heightMapUpdater = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
@@ -32,6 +44,19 @@ public class HeightMapUpdater
    private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
    private final HeightMapManager heightMap;
    private final IHMCROS2Publisher<HeightMapMessage> publisher;
+
+   private static final double FLYING_POINT_MIN_X = 1.092;
+   private static final double FLYING_POINT_MAX_X = 1.3;
+   private static final double FLYING_POINT_MIN_Y = -0.2;
+   private static final double FLYING_POINT_MAX_Y = 0.1;
+   private static final BoundingBox3D FLYING_POINT_BOUNDING_BOX = new BoundingBox3D();
+   private static final long[] FLYING_POINT_COUNTERS = new long[10];
+   private static long updateCount = 0;
+
+   static
+   {
+      FLYING_POINT_BOUNDING_BOX.set(FLYING_POINT_MIN_X, FLYING_POINT_MIN_Y, -10.0, FLYING_POINT_MAX_X, FLYING_POINT_MAX_Y, 10.0);
+   }
 
    public HeightMapUpdater(Messager messager, ROS2Node ros2Node)
    {
@@ -48,9 +73,6 @@ public class HeightMapUpdater
             heightMapUpdater.execute(() -> update(pointCloudData));
          }
       });
-
-//      transform.getRotation().setToPitchOrientation(Math.toRadians(30.0));
-//      transform.getTranslation().set(-0.2, 0.0, 1.0);
    }
 
    private void update(Pair<PointCloud2, FramePose3D> pointCloudData)
@@ -58,12 +80,36 @@ public class HeightMapUpdater
       PointCloudData pointCloud = new PointCloudData(pointCloudData.getKey(), 1000000, false);
       ousterFrame.setPoseAndUpdate(pointCloudData.getRight());
 
-      // Transform ouster data
-      for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+      if (USE_OUSTER_FRAME)
       {
-         FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[i]);
-         point.changeFrame(ReferenceFrame.getWorldFrame());
-         pointCloud.getPointCloud()[i].set(point);
+         // Transform ouster data
+         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+         {
+            FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[i]);
+            point.changeFrame(ReferenceFrame.getWorldFrame());
+            pointCloud.getPointCloud()[i].set(point);
+         }
+      }
+      else
+      {
+//         int flyingPointDebugCount = 0;
+
+         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+         {
+            pointCloud.getPointCloud()[i].applyTransform(APPROX_OUSTER_TRANSFORM);
+//            if (FLYING_POINT_BOUNDING_BOX.isInsideInclusive(pointCloud.getPointCloud()[i]))
+//               flyingPointDebugCount++;
+         }
+
+//         FLYING_POINT_COUNTERS[flyingPointDebugCount] = FLYING_POINT_COUNTERS[flyingPointDebugCount] + 1;
+//         if (updateCount++ > 500)
+//         {
+//            for (int i = 0; i < FLYING_POINT_COUNTERS.length; i++)
+//            {
+//               System.out.println(i + "\t" + FLYING_POINT_COUNTERS[i]);
+//            }
+//            updateCount = 0;
+//         }
       }
 
       // Update height map

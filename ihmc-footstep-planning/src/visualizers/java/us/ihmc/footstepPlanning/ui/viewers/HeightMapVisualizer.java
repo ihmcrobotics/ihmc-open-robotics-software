@@ -34,7 +34,7 @@ public class HeightMapVisualizer extends AnimationTimer
    private final AtomicReference<Pair<Mesh, Material>> heightMapToRender = new AtomicReference<>();
    private final MeshView heightMapMeshView = new MeshView();
 
-   private static final double renderedZeroHeight = -0.5;
+   private static final double renderedZeroHeight = -0.9;
 
    private final double gridResolutionXY;
    private final int minMaxIndexXY;
@@ -75,7 +75,7 @@ public class HeightMapVisualizer extends AnimationTimer
 
    private void computeMesh(HeightMapMessage heightMapData)
    {
-      LogTools.info("Computing mesh for " + heightMapData.getXCells().size() + " cells");
+//      LogTools.info("Computing mesh for " + heightMapData.getXCells().size() + " cells");
 
       /* Compute mesh */
       meshBuilder.clear();

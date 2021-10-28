@@ -9,6 +9,6 @@ public class HeightMapTools
 
    public static double toCoordinate(int index, double resolution, int minMaxIndexXY)
    {
-      return index * resolution + minMaxIndexXY;
+      return (index - minMaxIndexXY) * resolution;
    }
 }
