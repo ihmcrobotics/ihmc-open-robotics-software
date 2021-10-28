@@ -13,10 +13,8 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.shader.GDXShader;
 import us.ihmc.gdx.shader.GDXUniform;
 
-import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class GDXPointCloudRenderer implements RenderableProvider
@@ -49,6 +47,9 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private RecyclingArrayList<Point3D32> pointsToRender;
    private ColorProvider colorProvider;
    private float pointScale = 0.01f;
+   private int numberOfSegments;
+   private int segmentIndex = 0;
+   private int maxPoints;
 
    public interface ColorProvider
    {
@@ -61,6 +62,12 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    public void create(int size)
    {
+      create(size, 1);
+   }
+
+   public void create(int pointsPerSegment, int numberOfSegments)
+   {
+      this.numberOfSegments = numberOfSegments;
       GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
 
       renderable = new Renderable();
@@ -68,13 +75,13 @@ public class GDXPointCloudRenderer implements RenderableProvider
       renderable.meshPart.offset = 0;
       renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
-      vertices = new float[size * floatsPerVertex];
+      maxPoints = pointsPerSegment * numberOfSegments;
+      vertices = new float[maxPoints * floatsPerVertex];
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
       boolean isStatic = false;
-      int maxVertices = size;
       int maxIndices = 0;
-      renderable.meshPart.mesh = new Mesh(isStatic, maxVertices, maxIndices, vertexAttributes);
+      renderable.meshPart.mesh = new Mesh(isStatic, maxPoints, maxIndices, vertexAttributes);
 
       GDXShader shader = new GDXShader(getClass());
       shader.create();

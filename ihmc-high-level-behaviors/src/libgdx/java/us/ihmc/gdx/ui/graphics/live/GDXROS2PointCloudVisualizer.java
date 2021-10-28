@@ -22,10 +22,10 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements RenderableProvider
 {
-   private static final int MAX_POINTS = 500000;
-
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
+   private final int pointsPerSegment;
+   private final int numberOfSegments;
    private final ResettableExceptionHandlingExecutorService threadQueue;
 
    private GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
@@ -38,9 +38,16 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 
    public GDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
+      this(title, ros2Node, topic, 500000, 1);
+   }
+
+   public GDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic, int pointsPerSegment, int numberOfSegments)
+   {
       super(title);
       this.ros2Node = ros2Node;
       this.topic = topic;
+      this.pointsPerSegment = pointsPerSegment;
+      this.numberOfSegments = numberOfSegments;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
       if (topic.getType().equals(LidarScanMessage.class))
@@ -94,7 +101,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    public void create()
    {
       super.create();
-      pointCloudRenderer.create(MAX_POINTS);
+      pointCloudRenderer.create(pointsPerSegment, numberOfSegments);
    }
 
    @Override
