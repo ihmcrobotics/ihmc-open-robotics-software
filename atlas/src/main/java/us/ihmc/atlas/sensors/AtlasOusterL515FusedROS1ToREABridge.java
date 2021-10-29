@@ -20,6 +20,8 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.Throttler;
+import us.ihmc.tools.time.DurationStatisticPrinter;
+import us.ihmc.tools.time.FrequencyStatisticPrinter;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -72,6 +74,9 @@ public class AtlasOusterL515FusedROS1ToREABridge
       RigidBodyTransform ousterToWorldTransform = new RigidBodyTransform();
       Throttler throttler = new Throttler();
       AtomicReference<PointCloud2> latestL515PointCloud = new AtomicReference<>();
+      DurationStatisticPrinter durationStatisticPrinter = new DurationStatisticPrinter();
+      FrequencyStatisticPrinter ousterInput = new FrequencyStatisticPrinter();
+      FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
 
       ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("OusterL515ToREABridge", true);
 
@@ -94,7 +99,7 @@ public class AtlasOusterL515FusedROS1ToREABridge
       {
          @Override
          public void onNewMessage(PointCloud2 pointCloud2)
-         {
+         {ousterInput.ping();
             if (throttler.run(REA_OUTPUT_FREQUENCY))
             {
                executor.submit(() ->
@@ -102,6 +107,7 @@ public class AtlasOusterL515FusedROS1ToREABridge
                   syncedRobot.update();
 //                  if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(3.0))
                   {
+                     durationStatisticPrinter.before();
                      FramePose3DReadOnly l515Pose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getSteppingCameraFrame);
                      l515Pose.get(l515ToWorldTransform);
 
@@ -131,6 +137,8 @@ public class AtlasOusterL515FusedROS1ToREABridge
                      lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation());
                      lidarScanMessage.setSensorPoseConfidence(1.0);
                      ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
+                     durationStatisticPrinter.after();
+                     frequencyStatisticPrinter.ping();
                   }
                });
             }
