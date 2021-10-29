@@ -28,6 +28,35 @@ import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointClo
 
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This class is processing the
+ *
+ * L515:
+ * ~180000 points @ 8 Hz (neither number is exact here and is approximate)
+ * x, y, z, rgb - all 32-bit floats
+ * 16 bytes per point
+ * 23 MB/s bandwidth
+ *
+ * Ouster:
+ * 131072 points @ 10 Hz (number of points per message seems pretty contant)
+ * X, Y, Z, R, G, B, A, 0.01, 1.0, 0.0 - 32-bit floats
+ * 48 bytes per point
+ * 63 MB/s bandwidth
+ *
+ * Combined:
+ * 311072 points @ 10 Hz
+ * x, y, z - 32-bit floats
+ * 12 bytes per point
+ * 37 MB/s bandwidth
+ *
+ * For 144 Hz consumption:
+ * 100 ms / 6.9 ms = ~14
+ * Segmented by 14:
+ * 22220 @ 140 Hz
+ * x, y, z - 32-bit floats
+ * 12 bytes per point
+ * 37 MB/s bandwidth
+ */
 public class AtlasOusterL515FusedROS1ToREABridge
 {
    private static final double REA_OUTPUT_FREQUENCY = UnitConversions.hertzToSeconds(10.0);
@@ -45,6 +74,12 @@ public class AtlasOusterL515FusedROS1ToREABridge
       AtomicReference<PointCloud2> latestL515PointCloud = new AtomicReference<>();
 
       ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("OusterL515ToREABridge", true);
+
+      // TODO: Add remote interface to set:
+      // - Wait for robot pose
+      // - rates, bundling
+      // - which sensors to fuse
+      // - topics
 
       AbstractRosTopicSubscriber<PointCloud2> l515Subscriber = new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
       {
