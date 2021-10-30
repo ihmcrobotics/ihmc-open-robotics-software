@@ -99,7 +99,8 @@ public class AtlasOusterL515FusedROS1ToREABridge
       {
          @Override
          public void onNewMessage(PointCloud2 pointCloud2)
-         {ousterInput.ping();
+         {
+            ousterInput.ping();
             if (throttler.run(REA_OUTPUT_FREQUENCY))
             {
                executor.submit(() ->
