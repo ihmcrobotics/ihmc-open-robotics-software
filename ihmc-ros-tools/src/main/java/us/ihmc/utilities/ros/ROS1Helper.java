@@ -4,6 +4,7 @@ import geometry_msgs.PoseStamped;
 import org.ros.internal.message.Message;
 import org.ros.message.Time;
 import org.ros.node.parameter.ParameterListener;
+import sensor_msgs.PointCloud2;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -125,6 +126,20 @@ public class ROS1Helper implements RosNodeInterface
          public void onNewMessage(PoseStamped poseStamped)
          {
             callback.accept(poseStamped);
+         }
+      };
+      attachSubscriber(topicName, subscriber);
+      return subscriber;
+   }
+
+   public AbstractRosTopicSubscriber<PointCloud2> subscribeToPointCloud2ViaCallback(String topicName, Consumer<PointCloud2> callback)
+   {
+      AbstractRosTopicSubscriber<PointCloud2> subscriber = new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
+      {
+         @Override
+         public void onNewMessage(PointCloud2 pointCloud2)
+         {
+            callback.accept(pointCloud2);
          }
       };
       attachSubscriber(topicName, subscriber);
