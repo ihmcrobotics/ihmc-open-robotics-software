@@ -8,25 +8,27 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.behaviors.tools.yo.YoVariableServerHelper;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.Throttler;
 import us.ihmc.tools.time.DurationStatisticPrinter;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
-import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.ROS1Helper;
 import us.ihmc.utilities.ros.RosTools;
-import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -61,24 +63,31 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class AtlasOusterL515FusedROS1ToREABridge
 {
-   private static final double REA_OUTPUT_FREQUENCY = UnitConversions.hertzToSeconds(10.0);
+   public static final int YO_VARIABLE_SERVER_PORT = 6039;
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoVariableServerHelper yoVariableServerHelper = new YoVariableServerHelper(getClass(), registry, YO_VARIABLE_SERVER_PORT, 5.0);
+   private final YoDouble outputFrequency = new YoDouble("outputFrequency", registry);
+   private final YoBoolean publishOnlyWhenRobotIsWalking = new YoBoolean("publishOnlyWhenRobotIsWalking", registry);
+   private volatile boolean running = true;
+   private final ROS1Helper ros1Helper = new ROS1Helper("ousterl515_to_rea");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ousterl515_to_rea");
+   private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT);
+   private final CommunicationHelper ros2Helper = new CommunicationHelper(robotModel, ros2Node);
+   private final ROS2SyncedRobotModel syncedRobot = ros2Helper.newSyncedRobot();
+   private final RigidBodyTransform l515ToWorldTransform = new RigidBodyTransform();
+   private final RigidBodyTransform ousterToWorldTransform = new RigidBodyTransform();
+   private final Throttler throttler = new Throttler();
+   private final AtomicReference<PointCloud2> latestL515PointCloud = new AtomicReference<>();
+   private final AtomicReference<PointCloud2> latestOusterPointCloud = new AtomicReference<>();
+   private final DurationStatisticPrinter durationStatisticPrinter = new DurationStatisticPrinter();
+   private final FrequencyStatisticPrinter ousterInput = new FrequencyStatisticPrinter();
+   private final FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
+   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("OusterL515ToREABridge", true, 1);
 
    public AtlasOusterL515FusedROS1ToREABridge()
    {
-      RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "ousterl515_to_rea");
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ousterl515_to_rea");
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT);
-      CommunicationHelper ros2Helper = new CommunicationHelper(robotModel, ros2Node);
-      ROS2SyncedRobotModel syncedRobot = ros2Helper.newSyncedRobot();
-      RigidBodyTransform l515ToWorldTransform = new RigidBodyTransform();
-      RigidBodyTransform ousterToWorldTransform = new RigidBodyTransform();
-      Throttler throttler = new Throttler();
-      AtomicReference<PointCloud2> latestL515PointCloud = new AtomicReference<>();
-      DurationStatisticPrinter durationStatisticPrinter = new DurationStatisticPrinter();
-      FrequencyStatisticPrinter ousterInput = new FrequencyStatisticPrinter();
-      FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
-
-      ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("OusterL515ToREABridge", true);
+      outputFrequency.set(10.0);
+      publishOnlyWhenRobotIsWalking.set(false);
 
       // TODO: Add remote interface to set:
       // - Wait for robot pose
@@ -86,73 +95,69 @@ public class AtlasOusterL515FusedROS1ToREABridge
       // - which sensors to fuse
       // - topics
 
-      AbstractRosTopicSubscriber<PointCloud2> l515Subscriber = new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
-      {
-         @Override
-         public void onNewMessage(PointCloud2 pointCloud2)
-         {
-            latestL515PointCloud.set(pointCloud2);
-         }
-      };
-      ros1Node.attachSubscriber(RosTools.L515_POINT_CLOUD, l515Subscriber);
-      AbstractRosTopicSubscriber<PointCloud2> ousterSubscriber = new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
-      {
-         @Override
-         public void onNewMessage(PointCloud2 pointCloud2)
-         {
-            ousterInput.ping();
-            if (throttler.run(REA_OUTPUT_FREQUENCY))
-            {
-               executor.submit(() ->
-               {
-                  syncedRobot.update();
-//                  if (syncedRobot.getDataReceptionTimerSnapshot().isRunning(3.0))
-                  {
-                     durationStatisticPrinter.before();
-                     FramePose3DReadOnly l515Pose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getSteppingCameraFrame);
-                     l515Pose.get(l515ToWorldTransform);
+      ros1Helper.subscribeToPointCloud2ViaCallback(RosTools.L515_POINT_CLOUD, latestL515PointCloud::set);
+      ros1Helper.subscribeToPointCloud2ViaCallback(RosTools.OUSTER_POINT_CLOUD, latestOusterPointCloud::set);
 
-                     FramePose3DReadOnly ousterPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getOusterLidarFrame);
-                     ousterPose.get(ousterToWorldTransform);
-
-                     PointCloud2 latestL515PointCloud2 = latestL515PointCloud.get();
-                     Point3D[] l515Points = null;
-                     if (latestL515PointCloud2 != null)
-                     {
-                        UnpackedPointCloud unpackPointsAndIntensities = RosPointCloudSubscriber.unpackPointsAndIntensities(latestL515PointCloud2);
-                        l515Points = unpackPointsAndIntensities.getPoints();
-                        for (int i = 0; i < l515Points.length; i++)
-                        {
-                           double x = l515Points[i].getX();
-                           double y = l515Points[i].getY();
-                           double z = l515Points[i].getZ();
-                           l515Points[i].set(z, -x, -y);
-                           l515Points[i].applyTransform(l515ToWorldTransform);
-                        }
-                     }
-
-                     PointCloudData pointCloudData = new PointCloudData(pointCloud2, 1600000, false);
-                     pointCloudData.applyTransform(ousterToWorldTransform);
-                     LidarScanMessage lidarScanMessage = pointCloudData.toLidarScanMessage(null, l515Points);
-                     lidarScanMessage.getLidarPosition().set(ousterPose.getPosition());
-                     lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation());
-                     lidarScanMessage.setSensorPoseConfidence(1.0);
-                     ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
-                     durationStatisticPrinter.after();
-                     frequencyStatisticPrinter.ping();
-                  }
-               });
-            }
-         }
-      };
-      ros1Node.attachSubscriber(RosTools.OUSTER_POINT_CLOUD, ousterSubscriber);
-      ros1Node.execute();
+      yoVariableServerHelper.start();
 
       Runtime.getRuntime().addShutdownHook(new Thread(() ->
       {
+         LogTools.info("Shutting down...");
+         running = false;
+         yoVariableServerHelper.destroy();
          executor.destroy();
-         ros1Node.shutdown();
+         ros1Helper.destroy();
+         ros2Node.destroy();
+         durationStatisticPrinter.destroy();
+         frequencyStatisticPrinter.destroy();
       }, "IHMC-OusterROS1ToREABridgeShutdown"));
+
+      while (running)
+      {
+         ousterInput.ping();
+         if (throttler.run(outputFrequency.getValue()))
+         {
+            syncedRobot.update();
+            if (publishOnlyWhenRobotIsWalking.getValue() && syncedRobot.getDataReceptionTimerSnapshot().isRunning(3.0))
+            {
+               durationStatisticPrinter.before();
+
+               FramePose3DReadOnly l515Pose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getSteppingCameraFrame);
+               l515Pose.get(l515ToWorldTransform);
+
+               FramePose3DReadOnly ousterPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getOusterLidarFrame);
+               ousterPose.get(ousterToWorldTransform);
+
+               PointCloud2 latestL515PointCloud2 = latestL515PointCloud.get();
+               PointCloud2 latestOusterPointCloud2 = latestOusterPointCloud.get();
+
+               Point3D[] l515Points = null;
+               if (latestL515PointCloud2 != null)
+               {
+                  UnpackedPointCloud unpackPointsAndIntensities = RosPointCloudSubscriber.unpackPointsAndIntensities(latestL515PointCloud2);
+                  l515Points = unpackPointsAndIntensities.getPoints();
+                  for (int i = 0; i < l515Points.length; i++)
+                  {
+                     double x = l515Points[i].getX();
+                     double y = l515Points[i].getY();
+                     double z = l515Points[i].getZ();
+                     l515Points[i].set(z, -x, -y);
+                     l515Points[i].applyTransform(l515ToWorldTransform);
+                  }
+               }
+
+               PointCloudData pointCloudData = new PointCloudData(latestOusterPointCloud2, 1600000, false);
+               pointCloudData.applyTransform(ousterToWorldTransform);
+               LidarScanMessage lidarScanMessage = pointCloudData.toLidarScanMessage(null, l515Points);
+               lidarScanMessage.getLidarPosition().set(ousterPose.getPosition());
+               lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation());
+               lidarScanMessage.setSensorPoseConfidence(1.0);
+               ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
+               durationStatisticPrinter.after();
+               frequencyStatisticPrinter.ping();
+            }
+         }
+      }
    }
 
    public static void main(String[] args)

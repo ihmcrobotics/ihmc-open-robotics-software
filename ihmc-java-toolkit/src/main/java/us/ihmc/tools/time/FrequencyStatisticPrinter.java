@@ -26,6 +26,7 @@ public class FrequencyStatisticPrinter
 
    private final Stopwatch stopwatch = new Stopwatch();
 
+   private PausablePeriodicThread pausablePeriodicThread;
    private final double expiration = 1.0;
    private final Timer expirationTimer = new Timer();
 
@@ -39,12 +40,13 @@ public class FrequencyStatisticPrinter
       reset();
 
       boolean runAsDaemon = true;
-      new PausablePeriodicThread(getClass().getSimpleName(), 1.0, 0, runAsDaemon, () ->
+      pausablePeriodicThread = new PausablePeriodicThread(getClass().getSimpleName(), 1.0, 0, runAsDaemon, () ->
       {
          logReport();
          if (onLogReport != null)
             onLogReport.run();
-      }).start();
+      });
+      pausablePeriodicThread.start();
    }
 
    private void logReport()
@@ -126,5 +128,10 @@ public class FrequencyStatisticPrinter
       window = -1;
 
       stopwatch.reset();
+   }
+
+   public void destroy()
+   {
+      pausablePeriodicThread.destroy();
    }
 }
