@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPlot;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.ros2.ROS2Node;
@@ -28,13 +29,12 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    private final int numberOfSegments;
    private final ResettableExceptionHandlingExecutorService threadQueue;
 
-   private GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
+   private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
    private final RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
 
    private Point3D32[] points;
 
-   private long receivedCount = 0;
-   private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
 
    public GDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
@@ -62,7 +62,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)
    {
-      ++receivedCount;
+      frequencyPlot.onRecievedMessage();
       if (isActive())
       {
          threadQueue.clearQueueAndExecute(() ->
@@ -75,7 +75,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 
    private void queueRenderLidarScan(LidarScanMessage message)
    {
-      ++receivedCount;
+      frequencyPlot.onRecievedMessage();
       if (isActive())
       {
          threadQueue.clearQueueAndExecute(() ->
@@ -126,7 +126,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    {
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
-      receivedPlot.render(receivedCount);
+      frequencyPlot.renderImGuiWidgets();
    }
 
    @Override
