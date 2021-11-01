@@ -12,7 +12,8 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableServerHelper;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.compression.LZ4CompressionImplementation;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -84,6 +85,9 @@ public class AtlasOusterL515FusedROS1ToREABridge
    private final AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT);
    private final CommunicationHelper ros2Helper = new CommunicationHelper(robotModel, ros2Node);
    private final ROS2SyncedRobotModel syncedRobot = ros2Helper.newSyncedRobot();
+   private final ReferenceFrame l515Frame = syncedRobot.getReferenceFrames().getSteppingCameraFrame();
+   private final ReferenceFrame ousterFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
+   private final FramePoint3D tempPoint = new FramePoint3D();
    private final RigidBodyTransform l515ToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform ousterToWorldTransform = new RigidBodyTransform();
    private final Throttler throttler = new Throttler();
@@ -157,48 +161,73 @@ public class AtlasOusterL515FusedROS1ToREABridge
                PointCloud2 latestL515PointCloud2 = latestL515PointCloud.get();
                PointCloud2 latestOusterPointCloud2 = latestOusterPointCloud.get();
 
-               int numberOfL515Points = latestL515PointCloud2.getWidth() * latestL515PointCloud2.getHeight();
-               int numberOfOusterPoints = latestOusterPointCloud2.getWidth() * latestOusterPointCloud2.getHeight();
-
-               // We are only publishing X, Y, Z points in world to start with
-
-               Timer timer = new Timer();
-               for (int i = 0; i < numberOfSegments.getValue(); i++)
+               if (latestL515PointCloud2 != null && latestOusterPointCloud2 != null)
                {
-                  frequencyStatisticPrinter.ping();
-                  timer.reset();
+                  int numberOfL515Points = latestL515PointCloud2.getWidth() * latestL515PointCloud2.getHeight();
+                  int numberOfOusterPoints = latestOusterPointCloud2.getWidth() * latestOusterPointCloud2.getHeight();
+                  int l515Offset = latestL515PointCloud2.getData().arrayOffset();
+                  int ousterOffset = latestOusterPointCloud2.getData().arrayOffset();
+                  int l515PointStep = latestL515PointCloud2.getPointStep();
+                  int ousterPointStep = latestOusterPointCloud2.getPointStep();
+                  boolean l515IsBigendian = latestL515PointCloud2.getIsBigendian();
+                  boolean ousterIsBigendian = latestOusterPointCloud2.getIsBigendian();
+                  ByteBuffer l515Buffer = RosTools.wrapPointCloud2Array(latestL515PointCloud2);
+                  ByteBuffer ousterBuffer = RosTools.wrapPointCloud2Array(latestOusterPointCloud2);
 
-                  // Send one segment
-                  LidarScanMessage lidarScanMessage = new LidarScanMessage();
-                  lidarScanMessage.setRobotTimestamp(latestOusterPointCloud2.getHeader().getStamp().totalNsecs());
-                  lidarScanMessage.setSensorPoseConfidence(1.0); // TODO: ??
-                  lidarScanMessage.setNumberOfPoints(pointsPerSegment);
+                  // We are only publishing X, Y, Z points in world to start with
 
-                  for (int j = 0; j < pointsPerSegment; j++)
+                  Timer timer = new Timer();
+                  for (int i = 0; i < numberOfSegments.getValue(); i++)
                   {
-                     int pointIndex = i * pointsPerSegment + j;
-                     if (pointIndex > numberOfL515Points)
-                     {
+                     frequencyStatisticPrinter.ping();
+                     timer.reset();
 
-                     }
-                     else if (pointIndex > numberOfOusterPoints)
-                     {
+                     // Send one segment
+                     LidarScanMessage lidarScanMessage = new LidarScanMessage();
+                     lidarScanMessage.setRobotTimestamp(latestOusterPointCloud2.getHeader().getStamp().totalNsecs());
+                     lidarScanMessage.setSensorPoseConfidence(1.0); // TODO: ??
+                     lidarScanMessage.setNumberOfPoints(pointsPerSegment);
+                     lidarScanMessage.getLidarPosition().set(ousterPose.getPosition()); // TODO: ??
+                     lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation()); // TODO: ??
 
-                     }
-                     else
+                     compressionInputDirectBuffer.rewind();
+                     for (int j = 0; j < pointsPerSegment; j++)
                      {
-                        // NaN point
+                        int pointIndex = i * pointsPerSegment + j;
+                        if (pointIndex > numberOfL515Points)
+                        {
+                           float x = l515Buffer.getFloat();
+                           float y = l515Buffer.getFloat();
+                           float z = l515Buffer.getFloat();
+                           tempPoint.setIncludingFrame(l515Frame, x, y, z);
+                           tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+                        }
+                        else if (pointIndex > numberOfOusterPoints)
+                        {
+                           float x = ousterBuffer.getFloat();
+                           float y = ousterBuffer.getFloat();
+                           float z = ousterBuffer.getFloat();
+                           tempPoint.setIncludingFrame(ousterFrame, x, y, z);
+                           tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
+                        }
+                        else
+                        {
+                           // NaN point
+                           tempPoint.setToNaN();
+                        }
+                        compressionInputDirectBuffer.putFloat(tempPoint.getX32());
+                        compressionInputDirectBuffer.putFloat(tempPoint.getY32());
+                        compressionInputDirectBuffer.putFloat(tempPoint.getZ32());
                      }
+
+                     compressionOutputDirectBuffer.rewind();
+                     lz4Compressor.compress(compressionInputDirectBuffer, compressionOutputDirectBuffer);
+                     compressionOutputDirectBuffer.rewind();
+
+                     ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
+                     timer.sleepUntilExpiration(segmentPeriod);
                   }
-
-                  compressionOutputDirectBuffer.rewind();
-                  lz4Compressor.compress(compressionInputDirectBuffer, compressionOutputDirectBuffer);
-
-                  ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
-
-                  timer.sleepUntilExpiration(segmentPeriod);
                }
-
 
                Point3D[] l515Points = null;
                if (latestL515PointCloud2 != null)
