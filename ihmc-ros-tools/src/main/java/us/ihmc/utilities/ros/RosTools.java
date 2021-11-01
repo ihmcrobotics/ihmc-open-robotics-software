@@ -29,6 +29,7 @@ import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.PointCloud2;
+import sensor_msgs.PointField;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -40,6 +41,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.string.StringTools;
 
 public class RosTools
 {
@@ -260,6 +262,47 @@ public class RosTools
          byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
 
       return byteBuffer;
+   }
+
+   public static void printPointCloud2Info(String name, PointCloud2 pointCloud2)
+   {
+      LogTools.info("PointCloud2 Name: {}", name);
+      LogTools.info(StringTools.format("Height: {} Width: {} (Total: {}) Bigendian: {} Point step: {} Row step: {}",
+                                       pointCloud2.getHeight(),
+                                       pointCloud2.getWidth(),
+                                       pointCloud2.getHeight() * pointCloud2.getWidth(),
+                                       pointCloud2.getIsBigendian(),
+                                       pointCloud2.getPointStep(),
+                                       pointCloud2.getRowStep()));
+      int i = 0;
+      for (PointField field : pointCloud2.getFields())
+      {
+         String datatype = "";
+         if (field.getDatatype() == PointField.INT8)
+            datatype = "INT8";
+         if (field.getDatatype() == PointField.UINT8)
+            datatype = "UINT8";
+         if (field.getDatatype() == PointField.INT16)
+            datatype = "INT16";
+         if (field.getDatatype() == PointField.UINT16)
+            datatype = "UINT16";
+         if (field.getDatatype() == PointField.INT32)
+            datatype = "INT32";
+         if (field.getDatatype() == PointField.UINT32)
+            datatype = "UINT32";
+         if (field.getDatatype() == PointField.FLOAT32)
+            datatype = "FLOAT32";
+         if (field.getDatatype() == PointField.FLOAT64)
+            datatype = "FLOAT64";
+
+         LogTools.info(StringTools.format("Field {} Name: {} Count: {} Offset: {} Type: {}",
+                                          i,
+                                          field.getName(),
+                                          field.getCount(),
+                                          field.getOffset(),
+                                          datatype));
+         i++;
+      }
    }
 
    public static void toEuclid(Pose rosPose, Pose3DBasics euclidPose)

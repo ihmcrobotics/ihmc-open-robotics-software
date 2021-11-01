@@ -6,9 +6,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.FocusBasedGDXCamera;
-import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXRobotModelGraphic;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -30,8 +30,7 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiPlot receivedPlot = new ImGuiPlot("RobotConfigurationData", 1000, 230, 20);
-   private volatile long receivedPackets = 0;
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
 
    public GDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
@@ -44,7 +43,7 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.cameraForTrackingSupplier = cameraForTrackingSupplier;
-      syncedRobot.addRobotConfigurationDataReceivedCallback(() -> ++receivedPackets);
+      syncedRobot.addRobotConfigurationDataReceivedCallback(frequencyPlot::onRecievedMessage);
 
       previousRobotMidFeetUnderPelvis.setToNaN();
    }
@@ -135,7 +134,7 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
    public void renderImGuiWidgets()
    {
       super.renderImGuiWidgets();
-      receivedPlot.render(receivedPackets);
+      frequencyPlot.renderImGuiWidgets();
       if (ImGui.checkbox(labels.get("Track robot"), trackRobot))
       {
          if (!trackRobot.get())

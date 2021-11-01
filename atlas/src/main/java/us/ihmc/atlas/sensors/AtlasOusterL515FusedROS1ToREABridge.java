@@ -98,6 +98,8 @@ public class AtlasOusterL515FusedROS1ToREABridge
    private final ByteBuffer compressionOutputDirectBuffer;
    private final int numberOfL515Points = 180000;
    private final int numberOfOusterPoints = 131072;
+   private boolean hasPrintedInfo = false;
+   private final int outputBytesPerPoint = 3 * Integer.BYTES;
 
    // TODO: Add remote configuration settings:
    // - rates, bundling
@@ -111,8 +113,8 @@ public class AtlasOusterL515FusedROS1ToREABridge
       numberOfSegments.set(14);
       discreteResolution.set(0.003);
 
-      compressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment.getValue() * Float.BYTES);
-      compressionOutputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment.getValue() * Float.BYTES);
+      compressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment.getValue() * outputBytesPerPoint);
+      compressionOutputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment.getValue() * outputBytesPerPoint);
 
       ros1Helper.subscribeToPointCloud2ViaCallback(RosTools.L515_POINT_CLOUD, latestL515PointCloud::set);
       ros1Helper.subscribeToPointCloud2ViaCallback(RosTools.OUSTER_POINT_CLOUD, newValue ->
@@ -140,10 +142,11 @@ public class AtlasOusterL515FusedROS1ToREABridge
          double outputPeriod = UnitConversions.hertzToSeconds(outputFrequency.getValue());
          double segmentPeriod = outputPeriod / numberOfSegments.getValue();
          int pointsPerSegment = this.pointsPerSegment.getValue();
+         double discreteResolution = this.discreteResolution.getValue();
          if (throttler.run(outputPeriod))
          {
             syncedRobot.update();
-            if (publishOnlyWhenRobotIsWalking.getValue() && syncedRobot.getDataReceptionTimerSnapshot().isRunning(3.0))
+            if (!publishOnlyWhenRobotIsWalking.getValue() || syncedRobot.getDataReceptionTimerSnapshot().isRunning(3.0))
             {
                durationStatisticPrinter.before();
 
@@ -159,6 +162,13 @@ public class AtlasOusterL515FusedROS1ToREABridge
 
                if (latestL515PointCloud2 != null && latestOusterPointCloud2 != null)
                {
+                  if (!hasPrintedInfo)
+                  {
+                     hasPrintedInfo = true;
+                     RosTools.printPointCloud2Info(RosTools.L515_POINT_CLOUD, latestL515PointCloud2);
+                     RosTools.printPointCloud2Info(RosTools.OUSTER_POINT_CLOUD, latestOusterPointCloud2);
+                  }
+
                   int numberOfL515Points = latestL515PointCloud2.getWidth() * latestL515PointCloud2.getHeight();
                   int numberOfOusterPoints = latestOusterPointCloud2.getWidth() * latestOusterPointCloud2.getHeight();
                   ByteBuffer l515Buffer = RosTools.wrapPointCloud2Array(latestL515PointCloud2);
@@ -202,18 +212,22 @@ public class AtlasOusterL515FusedROS1ToREABridge
                         }
                         else
                         {
-                           // NaN point
-                           tempPoint.setToNaN();
+                           tempPoint.setToZero(); // TODO: Better solution?
                         }
-                        compressionInputDirectBuffer.putFloat(tempPoint.getX32());
-                        compressionInputDirectBuffer.putFloat(tempPoint.getY32());
-                        compressionInputDirectBuffer.putFloat(tempPoint.getZ32());
+                        int discritizedX = (int) (Math.round(tempPoint.getX() / discreteResolution));
+                        int discritizedY = (int) (Math.round(tempPoint.getY() / discreteResolution));
+                        int discritizedZ = (int) (Math.round(tempPoint.getZ() / discreteResolution));
+                        compressionInputDirectBuffer.putInt(discritizedX);
+                        compressionInputDirectBuffer.putInt(discritizedY);
+                        compressionInputDirectBuffer.putInt(discritizedZ);
                      }
 
                      compressionOutputDirectBuffer.rewind();
+                     compressionOutputDirectBuffer.limit(compressionInputDirectBuffer.position());
+                     compressionInputDirectBuffer.rewind();
                      lz4Compressor.compress(compressionInputDirectBuffer, compressionOutputDirectBuffer);
                      compressionOutputDirectBuffer.flip();
-                     for (int j = 0; j < pointsPerSegment * Float.BYTES; j++)
+                     for (int j = 0; j < compressionOutputDirectBuffer.limit(); j++)
                      {
                         lidarScanMessage.getScan().add(compressionOutputDirectBuffer.get());
                      }
