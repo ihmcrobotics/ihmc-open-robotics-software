@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import javax.imageio.ImageIO;
 
@@ -27,6 +28,7 @@ import geometry_msgs.Pose;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import sensor_msgs.CameraInfo;
+import sensor_msgs.PointCloud2;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -242,6 +244,22 @@ public class RosTools
       {
          throw new RuntimeException("Invalid ROS Master URI", e);
       }
+   }
+
+   public static ByteBuffer wrapPointCloud2Array(PointCloud2 pointCloud2)
+   {
+      int numberOfPoints = pointCloud2.getWidth() * pointCloud2.getHeight();
+      int offset = pointCloud2.getData().arrayOffset();
+      int pointStep = pointCloud2.getPointStep();
+
+      ByteBuffer byteBuffer = ByteBuffer.wrap(pointCloud2.getData().array(), offset, numberOfPoints * pointStep);
+
+      if (pointCloud2.getIsBigendian())
+         byteBuffer.order(ByteOrder.BIG_ENDIAN);
+      else
+         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+
+      return byteBuffer;
    }
 
    public static void toEuclid(Pose rosPose, Pose3DBasics euclidPose)
