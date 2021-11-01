@@ -8,7 +8,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableServerHelper;
 import us.ihmc.communication.ROS2Tools;
@@ -16,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -30,8 +28,6 @@ import us.ihmc.tools.time.DurationStatisticPrinter;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 import us.ihmc.utilities.ros.ROS1Helper;
 import us.ihmc.utilities.ros.RosTools;
-import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
-import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -165,12 +161,6 @@ public class AtlasOusterL515FusedROS1ToREABridge
                {
                   int numberOfL515Points = latestL515PointCloud2.getWidth() * latestL515PointCloud2.getHeight();
                   int numberOfOusterPoints = latestOusterPointCloud2.getWidth() * latestOusterPointCloud2.getHeight();
-                  int l515Offset = latestL515PointCloud2.getData().arrayOffset();
-                  int ousterOffset = latestOusterPointCloud2.getData().arrayOffset();
-                  int l515PointStep = latestL515PointCloud2.getPointStep();
-                  int ousterPointStep = latestOusterPointCloud2.getPointStep();
-                  boolean l515IsBigendian = latestL515PointCloud2.getIsBigendian();
-                  boolean ousterIsBigendian = latestOusterPointCloud2.getIsBigendian();
                   ByteBuffer l515Buffer = RosTools.wrapPointCloud2Array(latestL515PointCloud2);
                   ByteBuffer ousterBuffer = RosTools.wrapPointCloud2Array(latestOusterPointCloud2);
 
@@ -222,63 +212,21 @@ public class AtlasOusterL515FusedROS1ToREABridge
 
                      compressionOutputDirectBuffer.rewind();
                      lz4Compressor.compress(compressionInputDirectBuffer, compressionOutputDirectBuffer);
-                     compressionOutputDirectBuffer.rewind();
+                     compressionOutputDirectBuffer.flip();
+                     for (int j = 0; j < pointsPerSegment * Float.BYTES; j++)
+                     {
+                        lidarScanMessage.getScan().add(compressionOutputDirectBuffer.get());
+                     }
 
                      ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
                      timer.sleepUntilExpiration(segmentPeriod);
                   }
                }
 
-               Point3D[] l515Points = null;
-               if (latestL515PointCloud2 != null)
-               {
-                  UnpackedPointCloud unpackPointsAndIntensities = RosPointCloudSubscriber.unpackPointsAndIntensities(latestL515PointCloud2);
-                  l515Points = unpackPointsAndIntensities.getPoints();
-                  for (int i = 0; i < l515Points.length; i++)
-                  {
-                     double x = l515Points[i].getX();
-                     double y = l515Points[i].getY();
-                     double z = l515Points[i].getZ();
-                     l515Points[i].set(z, -x, -y);
-                     l515Points[i].applyTransform(l515ToWorldTransform);
-                  }
-               }
-
-               PointCloudData pointCloudData = new PointCloudData(latestOusterPointCloud2, 1600000, false);
-               pointCloudData.applyTransform(ousterToWorldTransform);
-               LidarScanMessage lidarScanMessage2 = pointCloudData.toLidarScanMessage(null, l515Points);
-               lidarScanMessage2.getLidarPosition().set(ousterPose.getPosition());
-               lidarScanMessage2.getLidarOrientation().set(ousterPose.getOrientation());
-               lidarScanMessage2.setSensorPoseConfidence(1.0);
-               ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage2);
-
                durationStatisticPrinter.after();
             }
          }
       }
-   }
-
-   private void addPointsToMessage(LidarScanMessage lidarScanMessage, PointCloud2 pointCloud2, int segmentIndex, int pointsPerSegment)
-   {
-      int numberOfPoints = pointCloud2.getWidth() * pointCloud2.getHeight();
-
-      int startIndex = segmentIndex * pointsPerSegment;
-      int endIndex = startIndex + pointsPerSegment;
-      for (int i = startIndex; i < endIndex; i++)
-      {
-         if (i < numberOfPoints)
-         {
-
-         }
-         else
-         {
-            // NaN point
-
-         }
-      }
-
-
-
    }
 
    public static void main(String[] args)
