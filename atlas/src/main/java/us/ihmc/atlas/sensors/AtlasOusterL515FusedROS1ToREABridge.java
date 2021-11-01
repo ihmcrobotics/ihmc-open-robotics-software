@@ -1,6 +1,8 @@
 package us.ihmc.atlas.sensors;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Factory;
 import sensor_msgs.PointCloud2;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -34,6 +36,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -74,6 +77,7 @@ public class AtlasOusterL515FusedROS1ToREABridge
    private final YoBoolean publishOnlyWhenRobotIsWalking = new YoBoolean("publishOnlyWhenRobotIsWalking", registry);
    private final YoInteger pointsPerSegment = new YoInteger("pointsPerSegment", registry);
    private final YoInteger numberOfSegments = new YoInteger("numberOfSegments", registry);
+   private final YoDouble discreteResolution = new YoDouble("discreteResolution", registry);
    private volatile boolean running = true;
    private final ROS1Helper ros1Helper = new ROS1Helper("ousterl515_to_rea");
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ousterl515_to_rea");
@@ -89,20 +93,26 @@ public class AtlasOusterL515FusedROS1ToREABridge
    private final FrequencyStatisticPrinter ousterInput = new FrequencyStatisticPrinter();
    private final FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("OusterL515ToREABridge", true, 1);
-   private final LZ4CompressionImplementation lz4Compressor = new LZ4CompressionImplementation();
+   private final LZ4Compressor lz4Compressor = LZ4Factory.nativeInstance().fastCompressor();
+   private final ByteBuffer compressionInputDirectBuffer;
+   private final ByteBuffer compressionOutputDirectBuffer;
+   private final int numberOfL515Points = 180000;
+   private final int numberOfOusterPoints = 131072;
 
+   // TODO: Add remote configuration settings:
+   // - rates, bundling
+   // - which sensors to fuse
+   // - topics
    public AtlasOusterL515FusedROS1ToREABridge()
    {
       outputFrequency.set(10.0);
       publishOnlyWhenRobotIsWalking.set(false);
       pointsPerSegment.set(22220);
       numberOfSegments.set(14);
+      discreteResolution.set(0.003);
 
-      // TODO: Add remote interface to set:
-      // - Wait for robot pose
-      // - rates, bundling
-      // - which sensors to fuse
-      // - topics
+      compressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment.getValue() * Float.BYTES);
+      compressionOutputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment.getValue() * Float.BYTES);
 
       ros1Helper.subscribeToPointCloud2ViaCallback(RosTools.L515_POINT_CLOUD, latestL515PointCloud::set);
       ros1Helper.subscribeToPointCloud2ViaCallback(RosTools.OUSTER_POINT_CLOUD, newValue ->
@@ -129,6 +139,7 @@ public class AtlasOusterL515FusedROS1ToREABridge
       {
          double outputPeriod = UnitConversions.hertzToSeconds(outputFrequency.getValue());
          double segmentPeriod = outputPeriod / numberOfSegments.getValue();
+         int pointsPerSegment = this.pointsPerSegment.getValue();
          if (throttler.run(outputPeriod))
          {
             syncedRobot.update();
@@ -146,6 +157,9 @@ public class AtlasOusterL515FusedROS1ToREABridge
                PointCloud2 latestL515PointCloud2 = latestL515PointCloud.get();
                PointCloud2 latestOusterPointCloud2 = latestOusterPointCloud.get();
 
+               int numberOfL515Points = latestL515PointCloud2.getWidth() * latestL515PointCloud2.getHeight();
+               int numberOfOusterPoints = latestOusterPointCloud2.getWidth() * latestOusterPointCloud2.getHeight();
+
                // We are only publishing X, Y, Z points in world to start with
 
                Timer timer = new Timer();
@@ -158,9 +172,27 @@ public class AtlasOusterL515FusedROS1ToREABridge
                   LidarScanMessage lidarScanMessage = new LidarScanMessage();
                   lidarScanMessage.setRobotTimestamp(latestOusterPointCloud2.getHeader().getStamp().totalNsecs());
                   lidarScanMessage.setSensorPoseConfidence(1.0); // TODO: ??
-                  lidarScanMessage.setNumberOfPoints(pointsPerSegment.getValue());
+                  lidarScanMessage.setNumberOfPoints(pointsPerSegment);
 
+                  for (int j = 0; j < pointsPerSegment; j++)
+                  {
+                     int pointIndex = i * pointsPerSegment + j;
+                     if (pointIndex > numberOfL515Points)
+                     {
 
+                     }
+                     else if (pointIndex > numberOfOusterPoints)
+                     {
+
+                     }
+                     else
+                     {
+                        // NaN point
+                     }
+                  }
+
+                  compressionOutputDirectBuffer.rewind();
+                  lz4Compressor.compress(compressionInputDirectBuffer, compressionOutputDirectBuffer);
 
                   ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
 
