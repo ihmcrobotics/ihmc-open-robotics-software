@@ -249,20 +249,20 @@ public interface JointDesiredOutputReadOnly
    
    
    /**
-    * Return true if a maximum feedback torque was set for this joint.
+    * Return true if a maximum torque was set for this joint.
     * @return
     */
-   default boolean hasFeedbackMaxTorque()
+   default boolean hasMaxTorque()
    {
-      return !Double.isNaN(getFeedbackMaxTorque());
+      return !Double.isNaN(getMaxTorque());
    }
    
    /**
-    * Gets the maximum torque applied by the feedback controller. 
+    * Gets the maximum torque applied by the feedback controller plus the feedforward torque. 
     * 
     * @return the maximum torque applied by the feedback controller
     */
-   double getFeedbackMaxTorque();
+   double getMaxTorque();
 
    /**
     * Convenience for clamping the desired position with {@link #getPositionFeedbackMaxError()} if it
@@ -472,7 +472,7 @@ public interface JointDesiredOutputReadOnly
             return false;
          if (Double.compare(getPositionFeedbackMaxError(), other.getPositionFeedbackMaxError()) != 0)
             return false;
-         if (Double.compare(getFeedbackMaxTorque(), other.getFeedbackMaxTorque()) != 0)
+         if (Double.compare(getMaxTorque(), other.getMaxTorque()) != 0)
             return false;
          return true;
       }
