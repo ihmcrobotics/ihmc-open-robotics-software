@@ -14,8 +14,8 @@ public class HeightMapManager
    private static final double MAX_X = 3.25;
    private static final double MIN_Y = -1.25;
    private static final double MAX_Y = 1.25;
-   private static final double MIN_Z = -10.0;
-   private static final double MAX_Z = 0.0;
+   private static final double MIN_Z = -0.5;
+   private static final double MAX_Z = 0.6;
 
    private final double gridResolutionXY;
    private final int minMaxIndexXY;
