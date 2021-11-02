@@ -4,6 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
@@ -47,22 +48,19 @@ public class HeightMapPolygonSnapper
 
       for (int i = minIndexX; i <= maxIndexX; i++)
       {
-         for (int j = minIndexY; j < maxIndexY; j++)
+         for (int j = minIndexY; j <= maxIndexY; j++)
          {
             double x = HeightMapTools.toCoordinate(i, heightMap.getGridResolutionXY(), minMaxIndex);
             double y = HeightMapTools.toCoordinate(j, heightMap.getGridResolutionXY(), minMaxIndex);
+            double height = heightMap.getHeightAt(i, j);
 
-            if (!polygonToSnap.isPointInside(x, y))
+            if (Double.isNaN(height) || polygonToSnap.distance(new Point2D(x, y)) > 0.01)
             {
                continue;
             }
 
-            double height = heightMap.getHeightAt(i, j);
-            if (!Double.isNaN(height))
-            {
-               pointsInsidePolyon.add(new Point3D(x, y, height));
-               averageHeight += height;
-            }
+            pointsInsidePolyon.add(new Point3D(x, y, height));
+            averageHeight += height;
          }
       }
 
