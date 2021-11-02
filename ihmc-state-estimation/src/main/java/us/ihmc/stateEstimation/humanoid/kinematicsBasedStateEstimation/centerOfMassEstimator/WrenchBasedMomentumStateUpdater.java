@@ -27,7 +27,6 @@ import us.ihmc.robotics.screwTheory.MomentumCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.MomentumStateUpdater;
 import us.ihmc.yoVariables.euclid.YoPoint2D;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
