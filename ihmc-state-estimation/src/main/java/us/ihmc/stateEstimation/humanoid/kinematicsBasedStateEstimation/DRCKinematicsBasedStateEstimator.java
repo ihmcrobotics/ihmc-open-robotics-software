@@ -1,5 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater.wrapFootSwitchInterfaces;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +31,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -41,8 +44,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
    public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
    private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
-   private static final boolean ESTIMATE_COM_STATE = true;
-   private static final boolean USED_DISTRIBUTED_IMU_COM_ESTIMATOR = true;
+
+   private enum MomentumEstimatorMode
+   {
+      NONE, SIMPLE, DISTRIBUTED_IMUS, WRENCH_BASED
+   };
+
+   private static final MomentumEstimatorMode MOMENTUM_ESTIMATOR_MODE = MomentumEstimatorMode.NONE;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -195,32 +203,40 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                               yoGraphicsListRegistry,
                                                               registry);
 
-      if (ESTIMATE_COM_STATE)
+      switch (MOMENTUM_ESTIMATOR_MODE)
       {
-         if (USED_DISTRIBUTED_IMU_COM_ESTIMATOR)
-         {
+         case DISTRIBUTED_IMUS:
             momentumStateUpdater = new DistributedIMUBasedCenterOfMassStateUpdater(rootJoint,
                                                                                    sensorOutputMap.getIMUOutputs(),
                                                                                    pelvisLinearStateUpdater.getCurrentListOfTrustedFeet(),
                                                                                    estimatorDT,
                                                                                    gravitationalAcceleration,
                                                                                    estimatorCenterOfMassDataHolderToUpdate);
-         }
-         else
-         {
+            break;
+         case SIMPLE:
             momentumStateUpdater = new SimpleMomentumStateUpdater(rootJoint,
                                                                   gravitationalAcceleration,
                                                                   stateEstimatorParameters,
                                                                   footSwitches,
                                                                   estimatorCenterOfMassDataHolderToUpdate,
                                                                   yoGraphicsListRegistry);
-         }
+            break;
+         case WRENCH_BASED:
+            momentumStateUpdater = new WrenchBasedMomentumStateUpdater(rootJoint,
+                                                                       wrapFootSwitchInterfaces(footSwitchList),
+                                                                       estimatorDT,
+                                                                       gravitationalAcceleration,
+                                                                       estimatorCenterOfMassDataHolderToUpdate);
+            break;
+         case NONE:
+            momentumStateUpdater = null;
+            break;
+         default:
+            throw new IllegalArgumentException("Unhandled mode: " + MOMENTUM_ESTIMATOR_MODE);
+      }
+
+      if (momentumStateUpdater != null)
          registry.addChild(momentumStateUpdater.getRegistry());
-      }
-      else
-      {
-         momentumStateUpdater = null;
-      }
 
       if (yoGraphicsListRegistry != null)
       {
