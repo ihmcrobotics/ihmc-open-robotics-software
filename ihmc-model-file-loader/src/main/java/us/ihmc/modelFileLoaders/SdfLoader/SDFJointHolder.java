@@ -15,7 +15,7 @@ public class SDFJointHolder
    public static final boolean DEBUG = false;
 
    // Data from SDF
-   private final String name;
+   private String name;
    private final SDFJointType type;
    private final Vector3D axisInModelFrame;
 
@@ -214,6 +214,11 @@ public class SDFJointHolder
    public String getName()
    {
       return name;
+   }
+
+   public void setName(String name)
+   {
+      this.name = name;
    }
 
    public SDFJointType getType()
