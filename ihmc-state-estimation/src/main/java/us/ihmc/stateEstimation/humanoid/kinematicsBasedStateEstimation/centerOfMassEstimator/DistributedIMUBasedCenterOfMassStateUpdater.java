@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
+package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,6 +29,7 @@ import us.ihmc.robotics.math.filters.IntegratorBiasCompensatorYoFrameVector3D;
 import us.ihmc.robotics.math.filters.YoIMUMahonyFilter;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.IMUBasedPelvisRotationalStateUpdater;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;

@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
+package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

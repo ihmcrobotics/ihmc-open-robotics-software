@@ -1,4 +1,4 @@
-package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
+package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator;
 
 import us.ihmc.yoVariables.registry.YoRegistry;
 
