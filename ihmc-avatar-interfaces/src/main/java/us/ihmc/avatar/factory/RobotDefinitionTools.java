@@ -1,6 +1,7 @@
 package us.ihmc.avatar.factory;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -51,6 +52,7 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DIdentityIns
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCapsule3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadOnly;
@@ -58,6 +60,7 @@ import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCylinder3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPRamp3DReadOnly;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.ForceSensorDescription;
@@ -65,7 +68,9 @@ import us.ihmc.robotics.robotDescription.GroundContactPointDescription;
 import us.ihmc.robotics.robotDescription.IMUSensorDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.KinematicPointDescription;
+import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.LoopClosureConstraintDescription;
 import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
@@ -105,6 +110,7 @@ import us.ihmc.scs2.definition.robot.GroundContactPointDefinition;
 import us.ihmc.scs2.definition.robot.IMUSensorDefinition;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.KinematicPointDefinition;
+import us.ihmc.scs2.definition.robot.LidarSensorDefinition;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 import us.ihmc.scs2.definition.robot.PrismaticJointDefinition;
 import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
@@ -251,6 +257,7 @@ public class RobotDefinitionTools
       destination.getTransformToParent().getTranslation().set(source.getOffsetFromParentJoint());
       source.getIMUSensors().forEach(imu -> destination.addSensorDefinition(toIMUSensorDefinition(imu)));
       source.getForceSensors().forEach(forceSensor -> destination.addSensorDefinition(toWrenchSensorDefinition(forceSensor)));
+      source.getLidarSensors().forEach(lidar -> destination.addSensorDefinition(toLidarSensorDefinition(lidar)));
       source.getCameraSensors().forEach(camera -> destination.addSensorDefinition(toCameraSensorDefinition(camera)));
 
       source.getKinematicPoints().forEach(kp -> destination.addKinematicPointDefinition(toKinematicPointDefinition(kp)));
@@ -293,6 +300,21 @@ public class RobotDefinitionTools
    {
       WrenchSensorDefinition output = new WrenchSensorDefinition();
       copySensorProperties(source, output);
+      return output;
+   }
+
+   private static LidarSensorDefinition toLidarSensorDefinition(LidarSensorDescription source)
+   {
+      LidarSensorDefinition output = new LidarSensorDefinition();
+      copySensorProperties(source, output);
+      output.setSweepYawMin(source.getSweepYawMin());
+      output.setSweepYawMax(source.getSweepYawMax());
+      output.setHeightPitchMin(source.getHeightPitchMin());
+      output.setHeightPitchMax(source.getHeightPitchMax());
+      output.setMinRange(source.getMinRange());
+      output.setMaxRange(source.getMaxRange());
+      output.setPointsPerSweep(source.getPointsPerSweep());
+      output.setScanHeight(source.getScanHeight());
       return output;
    }
 
@@ -693,5 +715,177 @@ public class RobotDefinitionTools
       {
          createLoopClosureConstraintRecursive(childJointDescription, controllerDefinitionsToPack);
       }
+   }
+
+   public static RobotDescription toRobotDescription(RobotDefinition robotDefinition)
+   {
+      RobotDescription robotDescription = new RobotDescription(robotDefinition.getName());
+
+      for (JointDefinition rootJointDefinition : robotDefinition.getRootJointDefinitions())
+         createAndAddJointsRecursive(robotDescription, rootJointDefinition);
+
+      return robotDescription;
+   }
+
+   public static void createAndAddJointsRecursive(RobotDescription robotDescription, JointDefinition jointToCopy)
+   {
+      JointDescription rootJointDescription = toJointDescription(jointToCopy);
+      robotDescription.addRootJoint(rootJointDescription);
+
+      LinkDescription linkDescription = toLinkDescription(jointToCopy.getSuccessor());
+      rootJointDescription.setLink(linkDescription);
+
+      for (JointDefinition childJointToCopy : jointToCopy.getSuccessor().getChildrenJoints())
+         createAndAddJointsRecursive(rootJointDescription, childJointToCopy);
+   }
+
+   public static void createAndAddJointsRecursive(JointDescription parentJoint, JointDefinition jointToCopy)
+   {
+      JointDescription jointDescription = toJointDescription(jointToCopy);
+      parentJoint.addJoint(jointDescription);
+
+      LinkDescription linkDescription = toLinkDescription(jointToCopy.getSuccessor());
+      jointDescription.setLink(linkDescription);
+
+      for (JointDefinition childJointToCopy : jointToCopy.getSuccessor().getChildrenJoints())
+         createAndAddJointsRecursive(jointDescription, childJointToCopy);
+   }
+
+   public static LinkDescription toLinkDescription(RigidBodyDefinition source)
+   {
+      LinkDescription output = new LinkDescription(source.getName());
+      output.setMass(source.getMass());
+      output.setCenterOfMassOffset(source.getCenterOfMassOffset());
+      output.setMomentOfInertia(source.getMomentOfInertia());
+      output.setLinkGraphics(toLinkGraphicsDescription(source.getVisualDefinitions()));
+      output.getCollisionMeshes().addAll(toCollisionMeshDescriptions(source.getCollisionShapeDefinitions()));
+      return output;
+   }
+
+   public static JointDescription toJointDescription(JointDefinition source)
+   {
+      if (source instanceof SixDoFJointDefinition)
+         return toFloatingJointDescription((SixDoFJointDefinition) source);
+      if (source instanceof RevoluteJointDefinition)
+         return toPinJointDescription((RevoluteJointDefinition) source);
+      if (source instanceof PrismaticJointDefinition)
+         return toSliderJointDescription((PrismaticJointDefinition) source);
+      return null;
+   }
+
+   public static FloatingJointDescription toFloatingJointDescription(SixDoFJointDefinition source)
+   {
+      FloatingJointDescription output = new FloatingJointDescription(source.getName());
+      copyJointProperties(source, output);
+      return output;
+   }
+
+   public static PinJointDescription toPinJointDescription(RevoluteJointDefinition source)
+   {
+      PinJointDescription output = new PinJointDescription(source.getName(), source.getTransformToParent().getTranslation(), source.getAxis());
+      copyOneDoFJointProperties(source, output);
+      return output;
+   }
+
+   public static SliderJointDescription toSliderJointDescription(PrismaticJointDefinition source)
+   {
+      SliderJointDescription output = new SliderJointDescription(source.getName(), source.getTransformToParent().getTranslation(), source.getAxis());
+      copyOneDoFJointProperties(source, output);
+      return output;
+   }
+
+   private static void copyOneDoFJointProperties(OneDoFJointDefinition source, OneDoFJointDescription destination)
+   {
+      copyJointProperties(source, destination);
+      destination.setLimitStops(source.getPositionLowerLimit(), source.getPositionUpperLimit(), source.getKpSoftLimitStop(), source.getKdSoftLimitStop());
+      destination.setVelocityLimits(source.getVelocityUpperLimit(), Double.NaN); // TODO Should maybe add this parameter to the definition
+      destination.setEffortLimit(source.getEffortUpperLimit());
+      destination.setStiction(source.getStiction());
+      destination.setDamping(source.getDamping());
+   }
+
+   private static void copyJointProperties(JointDefinition source, JointDescription destination)
+   {
+      if (!source.getTransformToParent().getRotation().isZeroOrientation())
+         LogTools.warn("Ignoring non-zero rotation for transform of joint: {}.", source.getName());
+      destination.setOffsetFromParentJoint(source.getTransformToParent().getTranslation());
+      source.getSensorDefinitions(IMUSensorDefinition.class).forEach(imu -> destination.addIMUSensor(toIMUSensorDescription(imu)));
+      source.getSensorDefinitions(WrenchSensorDefinition.class).forEach(forceSensor -> destination.addForceSensor(toForceSensorDescription(forceSensor)));
+      source.getSensorDefinitions(LidarSensorDefinition.class).forEach(lidar -> destination.addLidarSensor(toLidarSensorDescription(lidar)));
+      source.getSensorDefinitions(CameraSensorDefinition.class).forEach(camera -> destination.addCameraSensor(toCameraSensorDescription(camera)));
+
+      source.getKinematicPointDefinitions().forEach(kp -> destination.addKinematicPoint(toKinematicPointDescription(kp)));
+      source.getExternalWrenchPointDefinitions().forEach(efp -> destination.addExternalForcePoint(toExternalForcePointDescription(efp)));
+      source.getGroundContactPointDefinitions().forEach(gcp -> destination.addGroundContactPoint(toGroundContactPointDescription(gcp)));
+
+      // TODO This should probably also live in the definition
+      destination.setIsDynamic(true);
+   }
+
+   public static IMUSensorDescription toIMUSensorDescription(IMUSensorDefinition source)
+   {
+      IMUSensorDescription output = new IMUSensorDescription(source.getName(), new RigidBodyTransform(source.getTransformToJoint()));
+      output.setAccelerationNoiseMean(source.getAccelerationNoiseMean());
+      output.setAccelerationNoiseStandardDeviation(source.getAccelerationNoiseStandardDeviation());
+      output.setAccelerationBiasMean(source.getAccelerationBiasMean());
+      output.setAccelerationBiasStandardDeviation(source.getAccelerationBiasStandardDeviation());
+
+      output.setAngularVelocityNoiseMean(source.getAngularVelocityNoiseMean());
+      output.setAngularVelocityNoiseStandardDeviation(source.getAngularVelocityNoiseStandardDeviation());
+      output.setAngularVelocityBiasMean(source.getAngularVelocityBiasMean());
+      output.setAngularVelocityBiasStandardDeviation(source.getAngularVelocityBiasStandardDeviation());
+      return output;
+   }
+
+   public static ForceSensorDescription toForceSensorDescription(WrenchSensorDefinition source)
+   {
+
+   }
+
+   public static LidarSensorDescription toLidarSensorDescription(LidarSensorDefinition source)
+   {
+
+   }
+
+   public static CameraSensorDescription toCameraSensorDescription(CameraSensorDefinition source)
+   {
+   }
+
+   public static KinematicPointDescription toKinematicPointDescription(KinematicPointDefinition source)
+   {
+
+   }
+
+   public static ExternalForcePointDescription toExternalForcePointDescription(ExternalWrenchPointDefinition source)
+   {
+   }
+
+   public static GroundContactPointDescription toGroundContactPointDescription(GroundContactPointDefinition source)
+   {
+
+   }
+
+   public static LinkGraphicsDescription toLinkGraphicsDescription(Collection<? extends VisualDefinition> source)
+   {
+
+   }
+
+   public static Graphics3DObject toGraphics3dObject(Collection<? extends VisualDefinition> source)
+   {
+
+   }
+
+   public static Graphics3DObject toGraphics3DObject(VisualDefinition source)
+   {
+
+   }
+
+   public static List<CollisionMeshDescription> toCollisionMeshDescriptions(Collection<? extends CollisionShapeDefinition> source)
+   {
+   }
+
+   public static CollisionMeshDescription toCollisionMeshDescription(CollisionShapeDefinition source)
+   {
+
    }
 }
