@@ -62,9 +62,9 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
    private final double mass;
    private final RobotState robotState = new RobotState(null, Collections.emptyList());
    private final Estimator estimator = Estimator.CoPBasedOffsetEstimator;
-   private final MomentumEstimatorIndexProvider indexProvider = MomentumEstimatorIndexProvider.newStateIndexProvider(estimator);
-   private final MomentumKinematicsBasedSensor sensor;
-   private final MomentumState state;
+   private final MomentumEKFEstimatorIndexProvider indexProvider = MomentumEKFEstimatorIndexProvider.newStateIndexProvider(estimator);
+   private final MomentumKinematicsBasedEKFSensor sensor;
+   private final MomentumEKFState state;
 
    private final DMatrixRMaj stateVector;
 
@@ -84,8 +84,8 @@ public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
       wrenchSensors = addFrameCorruptors(wrenchSensors, registry); // TODO Remove me
       measuredCoMFrame = new CenterOfMassReferenceFrame("comFrame", worldFrame, rootJoint.getPredecessor());
 
-      state = new MomentumState(indexProvider, measuredCoMFrame, wrenchSensors, mass, gravity, dt, registry);
-      sensor = MomentumKinematicsBasedSensor.createEstimator(estimator,
+      state = new MomentumEKFState(indexProvider, measuredCoMFrame, wrenchSensors, mass, gravity, dt, registry);
+      sensor = MomentumKinematicsBasedEKFSensor.createEstimator(estimator,
                                                              measuredCoMPosition,
                                                              measuredLinearMomentum,
                                                              measuredAngularMomentum,

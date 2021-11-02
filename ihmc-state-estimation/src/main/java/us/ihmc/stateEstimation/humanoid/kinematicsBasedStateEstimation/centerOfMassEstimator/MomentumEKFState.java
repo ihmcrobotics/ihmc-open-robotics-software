@@ -24,7 +24,7 @@ import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class MomentumState extends State
+public class MomentumEKFState extends State
 {
    private final DMatrixRMaj F;
    private final DMatrixRMaj L;
@@ -65,13 +65,13 @@ public class MomentumState extends State
    private final boolean hasCoMOffset;
    private final boolean hasLinMomOffset;
 
-   public MomentumState(MomentumEstimatorIndexProvider indexProvider,
-                        ReferenceFrame measuredCoMFrame,
-                        List<WrenchSensor> wrenchSensors,
-                        double mass,
-                        double gravity,
-                        double dt,
-                        YoRegistry registry)
+   public MomentumEKFState(MomentumEKFEstimatorIndexProvider indexProvider,
+                           ReferenceFrame measuredCoMFrame,
+                           List<WrenchSensor> wrenchSensors,
+                           double mass,
+                           double gravity,
+                           double dt,
+                           YoRegistry registry)
    {
       this.wrenchSensors = wrenchSensors;
       this.mass = mass;
