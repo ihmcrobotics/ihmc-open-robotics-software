@@ -7,6 +7,8 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -75,7 +77,6 @@ public class HeightMapPolygonSnapperTest
    @Test
    public void testBestFitSnap()
    {
-      double epsilon = 1e-10;
       int numTests = 10;
       Random random = new Random(390223);
 
@@ -98,10 +99,12 @@ public class HeightMapPolygonSnapperTest
          double centroidY = HeightMapTools.toCoordinate(centroidIndexY, gridResolution, minMaxIndexXY);
 
          ConvexPolygon2D polygonToSnap = new ConvexPolygon2D();
-         polygonToSnap.addVertex(centroidX + 0.5, centroidY + 0.5);
-         polygonToSnap.addVertex(centroidX - 0.5, centroidY + 0.5);
-         polygonToSnap.addVertex(centroidX + 0.5, centroidY - 0.5);
-         polygonToSnap.addVertex(centroidX - 0.5, centroidY - 0.5);
+
+         double polygonWidth = 0.5;
+         polygonToSnap.addVertex(centroidX + polygonWidth, centroidY + polygonWidth);
+         polygonToSnap.addVertex(centroidX - polygonWidth, centroidY + polygonWidth);
+         polygonToSnap.addVertex(centroidX + polygonWidth, centroidY - polygonWidth);
+         polygonToSnap.addVertex(centroidX - polygonWidth, centroidY - polygonWidth);
          polygonToSnap.update();
 
          double nominalZ0 = plane.getZOnPlane(polygonToSnap.getVertex(0).getX(), polygonToSnap.getVertex(0).getY());
@@ -109,7 +112,7 @@ public class HeightMapPolygonSnapperTest
          double nominalZ2 = plane.getZOnPlane(polygonToSnap.getVertex(2).getX(), polygonToSnap.getVertex(2).getY());
          double nominalZ3 = plane.getZOnPlane(polygonToSnap.getVertex(3).getX(), polygonToSnap.getVertex(3).getY());
 
-         double offsetZ = 0.0 ; // EuclidCoreRandomTools.nextDouble(random, 0.01, 0.1); //
+         double offsetZ = EuclidCoreRandomTools.nextDouble(random, 0.01, 0.1);
          double offsetZ0 = nominalZ0 + offsetZ;
          double offsetZ1 = nominalZ1 - offsetZ;
          double offsetZ2 = nominalZ2 + offsetZ;
@@ -121,9 +124,10 @@ public class HeightMapPolygonSnapperTest
          heightMapData.setHeightAt(polygonToSnap.getVertex(3).getX(), polygonToSnap.getVertex(3).getY(), offsetZ3);
 
          HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
-         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData);
+         snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData);
 
-         System.out.println(plane.getNormal() + " \t " + snapper.getBestFitPlane().getNormal());
+         Assertions.assertTrue(plane.getNormal().epsilonEquals(snapper.getBestFitPlane().getNormal(), 1e-10));
+         Assertions.assertTrue(Math.abs(plane.getZOnPlane(0.0, 0.0) - snapper.getBestFitPlane().getZOnPlane(0.0, 0.0)) < 1e-10);
       }
    }
 }
