@@ -7,12 +7,12 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import imgui.internal.ImGui;
+import net.jpountz.lz4.LZ4Factory;
+import net.jpountz.lz4.LZ4FastDecompressor;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Callback;
-import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
-import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
@@ -21,20 +21,26 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements RenderableProvider
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
    private final int pointsPerSegment;
    private final int numberOfSegments;
    private final ResettableExceptionHandlingExecutorService threadQueue;
-
-   private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
-   private final RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
+   private final LZ4FastDecompressor lz4Decompressor = LZ4Factory.nativeInstance().fastDecompressor();
+   private final ByteBuffer decompressionInputDirectBuffer;
+   private final ByteBuffer decompressionOutputDirectBuffer;
+   private final int inputBytesPerPoint = 3 * Integer.BYTES;
+   private final AtomicReference<LidarScanMessage> latestLidarScanMessageReference = new AtomicReference<>(null);
 
    private Point3D32[] points;
-
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
 
    public GDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
@@ -49,6 +55,8 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
       this.pointsPerSegment = pointsPerSegment;
       this.numberOfSegments = numberOfSegments;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+      decompressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
+      decompressionOutputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment * inputBytesPerPoint);
 
       if (topic.getType().equals(LidarScanMessage.class))
       {
@@ -76,25 +84,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    private void queueRenderLidarScan(LidarScanMessage message)
    {
       frequencyPlot.onRecievedMessage();
-      if (isActive())
-      {
-         threadQueue.clearQueueAndExecute(() ->
-         {
-            int numberOfPoints = message.getNumberOfPoints();
-            Point3D32[] points = new Point3D32[numberOfPoints];
-//            int[] colors = new int[numberOfPoints];
-
-            LidarPointCloudCompression.decompressPointCloud(message.getScan(), numberOfPoints, (i, x, y, z) ->
-            {
-               points[i] = new Point3D32();
-               points[i].setX(x);
-               points[i].setY(y);
-               points[i].setZ(z);
-            });
-
-            this.points = points;
-         });
-      }
+      latestLidarScanMessageReference.set(message);
    }
 
    @Override
@@ -108,16 +98,47 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    public void update()
    {
       super.update();
-      if (isActive() && points != null)
+      if (isActive())
       {
-         pointsToRender.clear();
-         for (Point3D32 point : points)
-         {
-            pointsToRender.add().set(point);
-         }
+         LidarScanMessage latestLidarScanMessage = latestLidarScanMessageReference.getAndSet(null);
 
-         pointCloudRenderer.setPointsToRender(pointsToRender);
-         pointCloudRenderer.updateMesh();
+         if (latestLidarScanMessage != null)
+         {
+            decompressionInputDirectBuffer.rewind();
+            int numberOfBytes = latestLidarScanMessage.getScan().size();
+            decompressionInputDirectBuffer.limit(numberOfBytes);
+            for (int i = 0; i < numberOfBytes; i++)
+            {
+               decompressionInputDirectBuffer.put(latestLidarScanMessage.getScan().get(i));
+            }
+            decompressionInputDirectBuffer.flip();
+            decompressionOutputDirectBuffer.clear();
+            lz4Decompressor.decompress(decompressionInputDirectBuffer, decompressionOutputDirectBuffer);
+            decompressionOutputDirectBuffer.rewind();
+
+//            decompressionInputDirectBuffer.rewind(); // TEMP REMOVE
+            pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
+            {
+               for (int i = 0; i < pointsPerSegment; i++)
+               {
+                  float x = decompressionOutputDirectBuffer.getInt() * 0.003f;
+                  float y = decompressionOutputDirectBuffer.getInt() * 0.003f;
+                  float z = decompressionOutputDirectBuffer.getInt() * 0.003f;
+//                  float x = decompressionInputDirectBuffer.getFloat();
+//                  float y = decompressionInputDirectBuffer.getFloat();
+//                  float z = decompressionInputDirectBuffer.getFloat();
+                  xyzRGBASizeFloatBuffer.put(x);
+                  xyzRGBASizeFloatBuffer.put(y);
+                  xyzRGBASizeFloatBuffer.put(z);
+                  xyzRGBASizeFloatBuffer.put(1.0f);
+                  xyzRGBASizeFloatBuffer.put(1.0f);
+                  xyzRGBASizeFloatBuffer.put(1.0f);
+                  xyzRGBASizeFloatBuffer.put(1.0f);
+                  xyzRGBASizeFloatBuffer.put(0.01f);
+               }
+               return pointsPerSegment;
+            }, (int) latestLidarScanMessage.getSequenceId());
+         }
       }
    }
 

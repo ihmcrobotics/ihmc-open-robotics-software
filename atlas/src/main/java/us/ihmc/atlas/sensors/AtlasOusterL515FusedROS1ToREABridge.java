@@ -87,8 +87,8 @@ public class AtlasOusterL515FusedROS1ToREABridge
    private final RigidBodyTransform l515ToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform ousterToWorldTransform = new RigidBodyTransform();
    private final Throttler throttler = new Throttler();
-   private final AtomicReference<PointCloud2> latestL515PointCloud = new AtomicReference<>();
-   private final AtomicReference<PointCloud2> latestOusterPointCloud = new AtomicReference<>();
+   private final AtomicReference<PointCloud2> latestL515PointCloud2Reference = new AtomicReference<>();
+   private final AtomicReference<PointCloud2> latestOusterPointCloud2Reference = new AtomicReference<>();
    private final DurationStatisticPrinter durationStatisticPrinter = new DurationStatisticPrinter();
    private final FrequencyStatisticPrinter ousterInput = new FrequencyStatisticPrinter();
    private final FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
@@ -96,6 +96,7 @@ public class AtlasOusterL515FusedROS1ToREABridge
    private final LZ4Compressor lz4Compressor = LZ4Factory.nativeInstance().fastCompressor();
    private final ByteBuffer compressionInputDirectBuffer;
    private final ByteBuffer compressionOutputDirectBuffer;
+//   private final ByteBuffer tempFloatBuffer;
    private final int numberOfL515Points = 180000;
    private final int numberOfOusterPoints = 131072;
    private boolean hasPrintedInfo = false;
@@ -115,12 +116,13 @@ public class AtlasOusterL515FusedROS1ToREABridge
 
       compressionInputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment.getValue() * outputBytesPerPoint);
       compressionOutputDirectBuffer = ByteBuffer.allocateDirect(pointsPerSegment.getValue() * outputBytesPerPoint);
+//      tempFloatBuffer = ByteBuffer.allocate(pointsPerSegment.getValue() * outputBytesPerPoint);
 
-      ros1Helper.subscribeToPointCloud2ViaCallback(RosTools.L515_POINT_CLOUD, latestL515PointCloud::set);
+      ros1Helper.subscribeToPointCloud2ViaCallback(RosTools.L515_POINT_CLOUD, latestL515PointCloud2Reference::set);
       ros1Helper.subscribeToPointCloud2ViaCallback(RosTools.OUSTER_POINT_CLOUD, newValue ->
       {
          ousterInput.ping();
-         latestOusterPointCloud.set(newValue);
+         latestOusterPointCloud2Reference.set(newValue);
       });
 
       yoVariableServerHelper.start();
@@ -157,11 +159,14 @@ public class AtlasOusterL515FusedROS1ToREABridge
                ousterPose.get(ousterToWorldTransform);
 
                // These are uncompressed messages coming in
-               PointCloud2 latestL515PointCloud2 = latestL515PointCloud.get();
-               PointCloud2 latestOusterPointCloud2 = latestOusterPointCloud.get();
+               PointCloud2 latestL515PointCloud2 = latestL515PointCloud2Reference.get();
+               PointCloud2 latestOusterPointCloud2 = latestOusterPointCloud2Reference.get();
 
                if (latestL515PointCloud2 != null && latestOusterPointCloud2 != null)
                {
+                  latestL515PointCloud2Reference.set(null);
+                  latestOusterPointCloud2Reference.set(null);
+
                   if (!hasPrintedInfo)
                   {
                      hasPrintedInfo = true;
@@ -186,27 +191,42 @@ public class AtlasOusterL515FusedROS1ToREABridge
                      LidarScanMessage lidarScanMessage = new LidarScanMessage();
                      lidarScanMessage.setRobotTimestamp(latestOusterPointCloud2.getHeader().getStamp().totalNsecs());
                      lidarScanMessage.setSensorPoseConfidence(1.0); // TODO: ??
+                     lidarScanMessage.setSequenceId(i);
                      lidarScanMessage.setNumberOfPoints(pointsPerSegment);
                      lidarScanMessage.getLidarPosition().set(ousterPose.getPosition()); // TODO: ??
                      lidarScanMessage.getLidarOrientation().set(ousterPose.getOrientation()); // TODO: ??
 
+//                     tempFloatBuffer.rewind();
                      compressionInputDirectBuffer.rewind();
                      for (int j = 0; j < pointsPerSegment; j++)
                      {
                         int pointIndex = i * pointsPerSegment + j;
-                        if (pointIndex > numberOfL515Points)
+                        if (pointIndex < numberOfL515Points)
                         {
                            float x = l515Buffer.getFloat();
                            float y = l515Buffer.getFloat();
                            float z = l515Buffer.getFloat();
-                           tempPoint.setIncludingFrame(l515Frame, x, y, z);
+                           l515Buffer.getFloat(); // nothing
+                           float rgb = l515Buffer.getFloat();
+                           tempPoint.setIncludingFrame(l515Frame, z, -x, -y); // flip to Z up
                            tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
                         }
-                        else if (pointIndex > numberOfOusterPoints)
+                        else if (pointIndex < numberOfL515Points + numberOfOusterPoints)
                         {
                            float x = ousterBuffer.getFloat();
                            float y = ousterBuffer.getFloat();
                            float z = ousterBuffer.getFloat();
+                           ousterBuffer.getFloat(); // nothing
+                           float intensity = ousterBuffer.getFloat();
+                           long t = Integer.toUnsignedLong(ousterBuffer.getInt());
+                           int reflectivity = Short.toUnsignedInt(ousterBuffer.getShort());
+                           int ring = Byte.toUnsignedInt(ousterBuffer.get());
+                           ousterBuffer.get(); // nothing
+                           int ambient = Short.toUnsignedInt(ousterBuffer.getShort());
+                           ousterBuffer.getShort();
+                           long range = Integer.toUnsignedLong(ousterBuffer.getInt());
+                           ousterBuffer.getLong(); // nothing
+                           ousterBuffer.getInt(); // nothing
                            tempPoint.setIncludingFrame(ousterFrame, x, y, z);
                            tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
                         }
@@ -220,6 +240,9 @@ public class AtlasOusterL515FusedROS1ToREABridge
                         compressionInputDirectBuffer.putInt(discritizedX);
                         compressionInputDirectBuffer.putInt(discritizedY);
                         compressionInputDirectBuffer.putInt(discritizedZ);
+//                        tempFloatBuffer.putFloat(tempPoint.getX32());
+//                        tempFloatBuffer.putFloat(tempPoint.getY32());
+//                        tempFloatBuffer.putFloat(tempPoint.getZ32());
                      }
 
                      compressionOutputDirectBuffer.rewind();
@@ -231,6 +254,12 @@ public class AtlasOusterL515FusedROS1ToREABridge
                      {
                         lidarScanMessage.getScan().add(compressionOutputDirectBuffer.get());
                      }
+
+//                     tempFloatBuffer.rewind();
+//                     for (int j = 0; j < pointsPerSegment * outputBytesPerPoint; j++)
+//                     {
+//                        lidarScanMessage.getScan().add(tempFloatBuffer.get());
+//                     }
 
                      ros2Helper.publish(ROS2Tools.MULTISENSE_LIDAR_SCAN, lidarScanMessage);
                      timer.sleepUntilExpiration(segmentPeriod);
