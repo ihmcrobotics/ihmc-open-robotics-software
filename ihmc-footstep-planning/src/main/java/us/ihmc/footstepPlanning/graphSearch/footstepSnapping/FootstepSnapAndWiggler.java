@@ -159,6 +159,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       DiscreteFootstepTools.getFootPolygon(footstepToSnap, footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()), footPolygon);
 
       RigidBodyTransform snapTransform;
+
       if (heightMapData == null)
       {
          snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, maximumRegionHeightToConsider, planarRegionToPack);
@@ -184,6 +185,8 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          if (heightMapData != null)
          {
             snapData.getWiggleTransformInWorld().setIdentity();
+            snapData.setRSquaredHeightMap(heightMapSnapper.getRSquared());
+            snapData.setArea(heightMapSnapper.getArea());
          }
 
          return snapData;

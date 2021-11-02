@@ -102,6 +102,17 @@ public class FootstepChecker implements FootstepCheckerInterface
             return;
          }
 
+         // Area
+         double fullFootArea = footPolygons.get(candidateStep.getRobotSide()).getArea();
+         footAreaPercentage.set(candidateStepSnapData.getArea() / fullFootArea);
+
+         double epsilonAreaPercentage = 1e-4;
+         if (footAreaPercentage.getValue() < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
+         {
+            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
+            return;
+         }
+
          // Check incline
          RigidBodyTransform snappedSoleTransform = candidateStepSnapData.getSnappedStepTransform(candidateStep);
          double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());

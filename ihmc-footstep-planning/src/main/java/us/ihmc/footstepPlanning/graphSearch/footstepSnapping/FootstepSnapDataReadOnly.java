@@ -58,6 +58,10 @@ public interface FootstepSnapDataReadOnly
     */
    double getAchievedInsideDelta();
 
+   double getRSquaredHeightMap();
+
+   double getArea();
+
    default void packSnapAndWiggleTransform(RigidBodyTransform transformToPack)
    {
       transformToPack.set(getSnapTransform());

@@ -13,4 +13,9 @@ public class AtlasHeightMapUI extends HeightMapUI
    {
       return new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS);
    }
+
+   public static void main(String[] args)
+   {
+      launch();
+   }
 }
