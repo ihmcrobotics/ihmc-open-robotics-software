@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.heightMap;
 
 import controller_msgs.msg.dds.HeightMapMessage;
-import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.log.LogTools;
 
@@ -9,12 +8,11 @@ import java.util.Arrays;
 
 public class HeightMapData
 {
-   private final TIntArrayList xCells = new TIntArrayList();
-   private final TIntArrayList yCells = new TIntArrayList();
-   private final TDoubleArrayList heights = new TDoubleArrayList();
-   private double[][] sortedHeights;
+   private final TIntArrayList occupiedCells = new TIntArrayList();
+   private final double[] heights;
 
    private final int minMaxIndexXY;
+   private final int cellsPerAxis;
    private final double gridResolutionXY;
    private final double gridSizeXY;
 
@@ -22,50 +20,30 @@ public class HeightMapData
    {
       this.gridResolutionXY = gridResolutionXY;
       this.gridSizeXY = gridSizeXY;
-      minMaxIndexXY = HeightMapTools.toIndex(gridSizeXY, gridResolutionXY, 0);
+      this.minMaxIndexXY = HeightMapTools.toIndex(gridSizeXY, gridResolutionXY, 0);
+      cellsPerAxis = (2 * minMaxIndexXY + 1);
+      this.heights = new double[cellsPerAxis * cellsPerAxis];
 
-      sortedHeights = new double[2 * minMaxIndexXY + 1][2 * minMaxIndexXY + 1];
       reset();
-   }
-
-   public void reset()
-   {
-      // initialize with NaN
-      for (int i = 0; i < sortedHeights.length; i++)
-      {
-         Arrays.fill(sortedHeights[i], Double.NaN);
-      }
    }
 
    public HeightMapData(HeightMapMessage heightMapMessage)
    {
-      this.gridResolutionXY = heightMapMessage.getXyResolution();
-      this.gridSizeXY = heightMapMessage.getGridSizeXy();
-      minMaxIndexXY = HeightMapTools.toIndex(gridSizeXY, gridResolutionXY, 0);
+      this(heightMapMessage.getXyResolution(), heightMapMessage.getGridSizeXy());
 
-      xCells.addAll(heightMapMessage.getXCells());
-      yCells.addAll(heightMapMessage.getYCells());
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
-         heights.add(heightMapMessage.getHeights().get(i));
+         double height = heightMapMessage.getHeights().get(i);
+         int xyIndex = toXYIndex(heightMapMessage.getXCells().get(i), heightMapMessage.getYCells().get(i));
+         heights[xyIndex] = height;
+         occupiedCells.add(xyIndex);
       }
-
-      sort();
    }
 
-   public TIntArrayList getXCells()
+   public void reset()
    {
-      return xCells;
-   }
-
-   public TIntArrayList getYCells()
-   {
-      return yCells;
-   }
-
-   public TDoubleArrayList getHeights()
-   {
-      return heights;
+      occupiedCells.clear();
+      Arrays.fill(heights, Double.NaN);
    }
 
    public double getGridResolutionXY()
@@ -78,16 +56,14 @@ public class HeightMapData
       return gridSizeXY;
    }
 
-   public void sort()
+   public int getNumberOfCells()
    {
-      int cellsPerAxis = 2 * minMaxIndexXY + 1;
-      sortedHeights = new double[cellsPerAxis][cellsPerAxis];
+      return occupiedCells.size();
+   }
 
-      // set height data
-      for (int i = 0; i < xCells.size(); i++)
-      {
-         sortedHeights[xCells.get(i)][yCells.get(i)] = heights.get(i);
-      }
+   public double getHeight(int i)
+   {
+      return heights[occupiedCells.get(i)];
    }
 
    /**
@@ -95,21 +71,16 @@ public class HeightMapData
     */
    public double getHeightAt(double x, double y)
    {
-      if (sortedHeights == null)
-      {
-         LogTools.error("Sorted heights is null. Must call sort() before this is available");
-         return Double.NaN;
-      }
-
       int xIndex = HeightMapTools.toIndex(x, gridResolutionXY, minMaxIndexXY);
       int yIndex = HeightMapTools.toIndex(y, gridResolutionXY, minMaxIndexXY);
 
-      if (xIndex < 0 || yIndex < 0 || xIndex >= sortedHeights.length || yIndex >= sortedHeights.length)
+      if (xIndex < 0 || yIndex < 0 || xIndex > minMaxIndexXY || yIndex > minMaxIndexXY)
       {
          LogTools.error("Invalid index for point (" + x + ", " + y + "). Indices: (" + xIndex + ", " + yIndex + ")");
+         return Double.NaN;
       }
 
-      return sortedHeights[xIndex][yIndex];
+      return heights[toXYIndex(xIndex, yIndex)];
    }
 
    public void setHeightAt(double x, double y, double z)
@@ -117,18 +88,24 @@ public class HeightMapData
       int xIndex = HeightMapTools.toIndex(x, gridResolutionXY, minMaxIndexXY);
       int yIndex = HeightMapTools.toIndex(y, gridResolutionXY, minMaxIndexXY);
 
-      if (xIndex < 0 || yIndex < 0 || xIndex >= sortedHeights.length || yIndex >= sortedHeights.length)
+      if (xIndex < 0 || yIndex < 0 || xIndex > cellsPerAxis || yIndex > cellsPerAxis)
       {
          LogTools.error("Invalid index for point (" + x + ", " + y + "). Indices: (" + xIndex + ", " + yIndex + ")");
          return;
       }
 
-      sortedHeights[xIndex][yIndex] = z;
+      int xyIndex = toXYIndex(xIndex, yIndex);
+      if (Double.isNaN(heights[xyIndex]))
+      {
+         occupiedCells.add(xyIndex);
+      }
+
+      heights[xyIndex] = z;
    }
 
    public double getHeightAt(int xIndex, int yIndex)
    {
-      return sortedHeights[xIndex][yIndex];
+      return heights[toXYIndex(xIndex, yIndex)];
    }
 
    public int getMinMaxIndexXY()
@@ -136,11 +113,19 @@ public class HeightMapData
       return minMaxIndexXY;
    }
 
-   public void clear()
+   /* Maps xy indices to single value */
+   private int toXYIndex(int xIndex, int yIndex)
    {
-      xCells.clear();
-      yCells.clear();
-      heights.clear();
-      sortedHeights = null;
+      return xIndex + (2 * minMaxIndexXY + 1) * yIndex;
+   }
+
+   private int xIndex(int xyIndex)
+   {
+      return xyIndex % (2 * minMaxIndexXY + 1);
+   }
+
+   private int yIndex(int xyIndex)
+   {
+      return xyIndex / (2 * minMaxIndexXY + 1);
    }
 }
