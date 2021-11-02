@@ -2,7 +2,7 @@ package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOf
 
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater.Estimator;
 
-public class MomentumEstimatorIndexProvider
+public class MomentumEKFEstimatorIndexProvider
 {
    // State
    private final int comPosition;
@@ -12,7 +12,7 @@ public class MomentumEstimatorIndexProvider
    private final int linearMomentumOffset;
    private final int size;
 
-   public static MomentumEstimatorIndexProvider newStateIndexProvider(Estimator estimator)
+   public static MomentumEKFEstimatorIndexProvider newStateIndexProvider(Estimator estimator)
    {
       switch (estimator)
       {
@@ -26,17 +26,17 @@ public class MomentumEstimatorIndexProvider
       }
    }
 
-   public static MomentumEstimatorIndexProvider newMomentumEstimator()
+   public static MomentumEKFEstimatorIndexProvider newMomentumEstimator()
    {
-      return new MomentumEstimatorIndexProvider(3, 3, 3, 0, 0);
+      return new MomentumEKFEstimatorIndexProvider(3, 3, 3, 0, 0);
    }
 
-   public static MomentumEstimatorIndexProvider newOffsetEstimator()
+   public static MomentumEKFEstimatorIndexProvider newOffsetEstimator()
    {
-      return new MomentumEstimatorIndexProvider(3, 3, 3, 2, 3);
+      return new MomentumEKFEstimatorIndexProvider(3, 3, 3, 2, 3);
    }
 
-   public MomentumEstimatorIndexProvider(int comPositionSize,
+   public MomentumEKFEstimatorIndexProvider(int comPositionSize,
                                          int linearMomentumSize,
                                          int angularMomentumSize,
                                          int comPositionOffsetSize,
