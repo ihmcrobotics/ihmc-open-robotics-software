@@ -53,7 +53,7 @@ public abstract class HeightMapUI extends Application
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
-      loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
+      loader.setLocation(HeightMapUI.class.getResource("HeightMapUI.fxml"));
       mainPane = loader.load();
       SplitPane splitPane = (SplitPane) mainPane.getCenter();
       BorderPane centerBorderPane = (BorderPane) splitPane.getItems().get(0);
@@ -73,6 +73,8 @@ public abstract class HeightMapUI extends Application
             syncedRobot.update();
             FramePose3D ousterPose = new FramePose3D();
             ousterPose.setToZero(syncedRobot.getReferenceFrames().getOusterLidarFrame());
+            ousterPose.changeFrame(ReferenceFrame.getWorldFrame());
+
             messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Pair.of(pointCloud, ousterPose));
          }
       });
