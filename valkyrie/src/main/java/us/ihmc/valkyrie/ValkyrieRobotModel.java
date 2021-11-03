@@ -297,11 +297,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                                               ValkyrieSensorInformation.getForceSensorTransform(forceSensorName)));
             }
 
+            for (String jointName : jointMap.getLastSimulatedJoints())
+               robotDefinition.addSubtreeJointsToIgnore(jointName);
+
             RobotDefinitionTools.addGroundContactPoints(robotDefinition, getContactPointParameters());
+
             if (!Double.isNaN(transparency))
                RobotDefinitionTools.setRobotDefinitionTransparency(robotDefinition, transparency);
+
             if (modelSizeScale != 1.0)
                RobotDefinitionTools.scaleRobotDefinition(robotDefinition, modelSizeScale, modelMassScale, j -> !j.getName().contains("hokuyo"));
+
+            RobotDefinitionTools.adjustJointLimitStops(robotDefinition, jointMap);
 
             getRobotDefinitionMutator().accept(robotDefinition);
          }
