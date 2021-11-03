@@ -297,6 +297,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                                               ValkyrieSensorInformation.getForceSensorTransform(forceSensorName)));
             }
 
+            RobotDefinitionTools.addGroundContactPoints(robotDefinition, getContactPointParameters());
             if (!Double.isNaN(transparency))
                RobotDefinitionTools.setRobotDefinitionTransparency(robotDefinition, transparency);
             if (modelSizeScale != 1.0)
@@ -306,7 +307,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
          }
          catch (JAXBException e)
          {
-            e.printStackTrace();
+            throw new RuntimeException(e);
          }
       }
 

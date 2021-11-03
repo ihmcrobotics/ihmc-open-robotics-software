@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.LinearTransform3D;
@@ -62,11 +65,13 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstr
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.log.LogTools;
+import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCapsule3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCylinder3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPRamp3DReadOnly;
+import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
@@ -133,9 +138,11 @@ import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.TextureDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimRigidBodyBasics;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -183,6 +190,50 @@ public class RobotDefinitionTools
                material.getEmissiveColor().setAlpha(alpha);
             if (material.getSpecularColor() != null)
                material.getSpecularColor().setAlpha(alpha);
+         }
+      }
+   }
+
+   public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder)
+   {
+      addGroundContactPoints(robotDefinition, contactPointHolder, true);
+   }
+
+   public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder, boolean addVisualization)
+   {
+      if (contactPointHolder == null)
+         return;
+
+      LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
+      for (ImmutablePair<String, Vector3D> jointContactPoint : contactPointHolder.getJointNameGroundContactPointMap())
+      {
+         String jointName = jointContactPoint.getLeft();
+
+         int count;
+         if (counters.get(jointName) == null)
+            count = 0;
+         else
+            count = counters.get(jointName);
+
+         Vector3D gcOffset = jointContactPoint.getRight();
+
+         GroundContactPointDefinition groundContactPoint = new GroundContactPointDefinition();
+         groundContactPoint.setName("gc_" + ModelFileLoaderConversionsHelper.sanitizeJointName(jointName) + "_" + count++);
+         groundContactPoint.getTransformToParent().getTranslation().set(gcOffset);
+         groundContactPoint.setGroupIdentifier(contactPointHolder.getGroupIdentifier(jointContactPoint));
+
+         JointDefinition jointDefinition = robotDefinition.getJointDefinition(jointName);
+
+         jointDefinition.addGroundContactPointDefinition(groundContactPoint);
+
+         counters.put(jointName, count);
+
+         if (addVisualization)
+         {
+            VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
+            visualDefinitionFactory.appendTranslation(jointContactPoint.getRight());
+            visualDefinitionFactory.addSphere(0.01, new MaterialDefinition(ColorDefinitions.Orange()));
+            jointDefinition.getSuccessor().getVisualDefinitions().addAll(visualDefinitionFactory.getVisualDefinitions());
          }
       }
    }
