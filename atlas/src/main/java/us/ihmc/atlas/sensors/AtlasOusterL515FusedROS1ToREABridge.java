@@ -227,6 +227,7 @@ public class AtlasOusterL515FusedROS1ToREABridge
                            float z = ousterBuffer.getFloat();
                            ousterBuffer.getFloat(); // nothing
                            float intensity = ousterBuffer.getFloat();
+                           rgba8888 = Float.floatToRawIntBits(intensity);
                            long t = Integer.toUnsignedLong(ousterBuffer.getInt());
                            int reflectivity = Short.toUnsignedInt(ousterBuffer.getShort());
                            int ring = Byte.toUnsignedInt(ousterBuffer.get());
