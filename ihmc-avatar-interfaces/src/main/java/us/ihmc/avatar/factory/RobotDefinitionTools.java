@@ -1,12 +1,16 @@
 package us.ihmc.avatar.factory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameCapsule3DReadOnly;
@@ -20,8 +24,11 @@ import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DRe
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.SDFAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
@@ -77,6 +84,7 @@ import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SensorDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.scs2.definition.AffineTransformDefinition;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.controller.interfaces.ControllerDefinition;
 import us.ihmc.scs2.definition.geometry.ArcTorus3DDefinition;
@@ -102,6 +110,7 @@ import us.ihmc.scs2.definition.geometry.STPConvexPolytope3DDefinition;
 import us.ihmc.scs2.definition.geometry.STPCylinder3DDefinition;
 import us.ihmc.scs2.definition.geometry.STPRamp3DDefinition;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
+import us.ihmc.scs2.definition.geometry.Torus3DDefinition;
 import us.ihmc.scs2.definition.geometry.TriangleMesh3DDefinition;
 import us.ihmc.scs2.definition.geometry.TruncatedCone3DDefinition;
 import us.ihmc.scs2.definition.robot.CameraSensorDefinition;
@@ -839,53 +848,286 @@ public class RobotDefinitionTools
 
    public static ForceSensorDescription toForceSensorDescription(WrenchSensorDefinition source)
    {
-
+      ForceSensorDescription output = new ForceSensorDescription(source.getName(), new RigidBodyTransform(source.getTransformToJoint()));
+      output.setUseGroundContactPoints(true);
+      output.setUseShapeCollision(false);
+      return output;
    }
 
    public static LidarSensorDescription toLidarSensorDescription(LidarSensorDefinition source)
    {
-
+      LidarSensorDescription output = new LidarSensorDescription(source.getName(), source.getTransformToJoint());
+      output.setSweepYawMin(source.getSweepYawMin());
+      output.setSweepYawMax(source.getSweepYawMax());
+      output.setHeightPitchMin(source.getHeightPitchMin());
+      output.setHeightPitchMax(source.getHeightPitchMax());
+      output.setMinRange(source.getMinRange());
+      output.setMaxRange(source.getMaxRange());
+      output.setPointsPerSweep(source.getPointsPerSweep());
+      output.setScanHeight(source.getScanHeight());
+      return output;
    }
 
    public static CameraSensorDescription toCameraSensorDescription(CameraSensorDefinition source)
    {
+      CameraSensorDescription output = new CameraSensorDescription(source.getName(), source.getTransformToJoint());
+      // TODO Check if the transform has to be modified as in toCameraSensorDefinition(...)
+      output.setFieldOfView(source.getFieldOfView());
+      output.setClipNear(source.getClipNear());
+      output.setClipFar(source.getClipFar());
+      output.setImageWidth(source.getImageWidth());
+      output.setImageHeight(source.getImageHeight());
+      return output;
    }
 
    public static KinematicPointDescription toKinematicPointDescription(KinematicPointDefinition source)
    {
-
+      return new KinematicPointDescription(source.getName(), source.getTransformToParent().getTranslation());
    }
 
    public static ExternalForcePointDescription toExternalForcePointDescription(ExternalWrenchPointDefinition source)
    {
+      return new ExternalForcePointDescription(source.getName(), source.getTransformToParent().getTranslation());
    }
 
    public static GroundContactPointDescription toGroundContactPointDescription(GroundContactPointDefinition source)
    {
-
+      return new GroundContactPointDescription(source.getName(), new Vector3D(source.getTransformToParent().getTranslation()), source.getGroupIdentifier());
    }
 
    public static LinkGraphicsDescription toLinkGraphicsDescription(Collection<? extends VisualDefinition> source)
    {
-
+      LinkGraphicsDescription output = new LinkGraphicsDescription();
+      output.combine(toGraphics3DObject(source));
+      return output;
    }
 
-   public static Graphics3DObject toGraphics3dObject(Collection<? extends VisualDefinition> source)
+   public static Graphics3DObject toGraphics3DObject(Collection<? extends VisualDefinition> source)
    {
-
+      Graphics3DObject output = new Graphics3DObject();
+      for (VisualDefinition visualDefinition : source)
+         output.combine(toGraphics3DObject(visualDefinition));
+      return output;
    }
 
    public static Graphics3DObject toGraphics3DObject(VisualDefinition source)
    {
+      if (source == null)
+         return null;
 
+      Graphics3DObject output = new Graphics3DObject();
+      AffineTransformDefinition originPose = source.getOriginPose();
+
+      if (originPose.hasTranslation())
+      {
+         output.translate(originPose.getTranslation());
+      }
+
+      if (originPose.hasLinearTransform())
+      {
+         LinearTransform3D linearTransform = originPose.getLinearTransform();
+
+         if (linearTransform.isRotationMatrix())
+         {
+            output.rotate(linearTransform.getAsQuaternion());
+         }
+         else
+         {
+            if (!linearTransform.getPreScaleQuaternion().isZeroOrientation())
+               output.rotate(linearTransform.getPreScaleQuaternion());
+            output.scale(linearTransform.getScaleVector());
+            if (!linearTransform.getPostScaleQuaternion().isZeroOrientation())
+               output.rotate(linearTransform.getPostScaleQuaternion());
+         }
+      }
+
+      Graphics3DInstruction instruction = toGraphics3DPrimitiveInstruction(source.getGeometryDefinition());
+      if (instruction == null)
+         return null;
+
+      instruction.setAppearance(toAppearanceDefinition(source.getMaterialDefinition()));
+      output.addInstruction(instruction);
+      return output;
+   }
+
+   public static Graphics3DInstruction toGraphics3DPrimitiveInstruction(GeometryDefinition source)
+   {
+      if (source == null)
+         return null;
+
+      if (source instanceof ArcTorus3DDefinition)
+      {
+         ArcTorus3DDefinition arcTorus = (ArcTorus3DDefinition) source;
+         return new ArcTorusGraphics3DInstruction(arcTorus.getStartAngle(),
+                                                  arcTorus.getEndAngle(),
+                                                  arcTorus.getMajorRadius(),
+                                                  arcTorus.getMinorRadius(),
+                                                  arcTorus.getResolution());
+      }
+      else if (source instanceof Box3DDefinition)
+      {
+         Box3DDefinition box = (Box3DDefinition) source;
+         return new CubeGraphics3DInstruction(box.getSizeX(), box.getSizeY(), box.getSizeZ(), box.isCentered());
+      }
+      else if (source instanceof Capsule3DDefinition)
+      {
+         Capsule3DDefinition capsule = (Capsule3DDefinition) source;
+         return new CapsuleGraphics3DInstruction(capsule.getLength(),
+                                                 capsule.getRadiusX(),
+                                                 capsule.getRadiusY(),
+                                                 capsule.getRadiusZ(),
+                                                 capsule.getResolution());
+      }
+      else if (source instanceof Cone3DDefinition)
+      {
+         Cone3DDefinition cone = (Cone3DDefinition) source;
+         return new ConeGraphics3DInstruction(cone.getHeight(), cone.getRadius(), cone.getResolution());
+      }
+      else if (source instanceof ConvexPolytope3DDefinition)
+      {
+         return null; // TODO Not sure here
+      }
+      else if (source instanceof Cylinder3DDefinition)
+      {
+         Cylinder3DDefinition cylinder = (Cylinder3DDefinition) source; // FIXME Handle the offset along the cylinder's axis.
+         return new CylinderGraphics3DInstruction(cylinder.getRadius(), cylinder.getLength(), cylinder.getResolution());
+      }
+      else if (source instanceof Ellipsoid3DDefinition)
+      {
+         Ellipsoid3DDefinition ellipsoid = (Ellipsoid3DDefinition) source;
+         return new EllipsoidGraphics3DInstruction(ellipsoid.getRadiusX(), ellipsoid.getRadiusY(), ellipsoid.getRadiusZ(), ellipsoid.getResolution());
+      }
+      else if (source instanceof ExtrudedPolygon2DDefinition)
+      {
+         ExtrudedPolygon2DDefinition polygon = (ExtrudedPolygon2DDefinition) source; // FIXME handle the case that bottom-z is not 0
+         return new ExtrudedPolygonGraphics3DInstruction(polygon.getPolygonVertices(), polygon.getTopZ() - polygon.getBottomZ());
+      }
+      else if (source instanceof ExtrusionDefinition)
+      {
+         return null; // FIXME implement me
+      }
+      else if (source instanceof HemiEllipsoid3DDefinition)
+      {
+         HemiEllipsoid3DDefinition hemiEllipsoid = (HemiEllipsoid3DDefinition) source;
+         return new HemiEllipsoidGraphics3DInstruction(hemiEllipsoid.getRadiusX(),
+                                                       hemiEllipsoid.getRadiusY(),
+                                                       hemiEllipsoid.getRadiusZ(),
+                                                       hemiEllipsoid.getResolution());
+      }
+      else if (source instanceof ModelFileGeometryDefinition)
+      {
+         ModelFileGeometryDefinition model = (ModelFileGeometryDefinition) source;
+         String fileName = model.getFileName();
+         if (model.getSubmeshes().isEmpty())
+            return new Graphics3DAddModelFileInstruction(fileName, null, model.getResourceDirectories(), model.getResourceClassLoader());
+         else
+            return new Graphics3DAddModelFileInstruction(fileName,
+                                                         model.getSubmeshes().get(0).getName(),
+                                                         model.getSubmeshes().get(0).getCenter(),
+                                                         null,
+                                                         model.getResourceDirectories(),
+                                                         model.getResourceClassLoader());
+      }
+      else if (source instanceof PyramidBox3DDefinition)
+      {
+         PyramidBox3DDefinition pyramidBox = (PyramidBox3DDefinition) source;
+         return new PyramidCubeGraphics3DInstruction(pyramidBox.getBoxSizeX(),
+                                                     pyramidBox.getBoxSizeY(),
+                                                     pyramidBox.getBoxSizeZ(),
+                                                     pyramidBox.getPyramidHeight());
+      }
+      else if (source instanceof Ramp3DDefinition)
+      {
+         Ramp3DDefinition ramp = (Ramp3DDefinition) source; // FIXME The origin might not be the same.
+         return new WedgeGraphics3DInstruction(ramp.getSizeX(), ramp.getSizeY(), ramp.getSizeZ());
+      }
+      else if (source instanceof Sphere3DDefinition)
+      {
+         Sphere3DDefinition sphere = (Sphere3DDefinition) source;
+         return new SphereGraphics3DInstruction(sphere.getRadius(), sphere.getResolution());
+      }
+      else if (source instanceof Torus3DDefinition)
+      {
+         Torus3DDefinition torus = (Torus3DDefinition) source;
+         return new ArcTorusGraphics3DInstruction(0, 2.0 * Math.PI, torus.getMajorRadius(), torus.getMinorRadius(), torus.getResolution());
+      }
+      else if (source instanceof TriangleMesh3DDefinition)
+      {
+         TriangleMesh3DDefinition mesh = (TriangleMesh3DDefinition) source;
+         return new Graphics3DAddMeshDataInstruction(new MeshDataHolder(mesh.getVertices(),
+                                                                        mesh.getTextures() == null ? null
+                                                                              : Arrays.stream(mesh.getTextures())
+                                                                                      .map(t -> new TexCoord2f(t.getX32(), t.getY32()))
+                                                                                      .toArray(TexCoord2f[]::new),
+                                                                        mesh.getTriangleIndices(),
+                                                                        mesh.getNormals()),
+                                                     null);
+      }
+      else if (source instanceof TruncatedCone3DDefinition)
+      {
+         TruncatedCone3DDefinition cone = (TruncatedCone3DDefinition) source;
+         return new TruncatedConeGraphics3DInstruction(cone.getHeight(),
+                                                       cone.getBaseRadiusX(),
+                                                       cone.getBaseRadiusY(),
+                                                       cone.getTopRadiusX(),
+                                                       cone.getTopRadiusY(),
+                                                       cone.getResolution());
+      }
+      else
+      {
+         throw new IllegalArgumentException("Unsupported geometry type: " + source.getClass().getName());
+      }
+   }
+
+   public static AppearanceDefinition toAppearanceDefinition(MaterialDefinition source)
+   {
+      if (source == null)
+         return null;
+
+      ColorDefinition diffuseColor = source.getDiffuseColor();
+      ColorDefinition specularColor = source.getSpecularColor();
+      ColorDefinition ambientColor = source.getAmbientColor();
+
+      if (diffuseColor != null)
+      {
+         if (specularColor != null && ambientColor != null)
+         {
+            YoAppearanceMaterial output = new YoAppearanceMaterial();
+            output.setDiffuseColor((float) diffuseColor.getRed(), (float) diffuseColor.getGreen(), (float) diffuseColor.getBlue());
+            output.setSpecularColor((float) specularColor.getRed(), (float) specularColor.getGreen(), (float) specularColor.getBlue());
+            output.setAmbientColor((float) ambientColor.getRed(), (float) ambientColor.getGreen(), (float) ambientColor.getBlue());
+            output.setShininess((float) source.getShininess());
+            return output;
+         }
+         else
+         {
+            return new YoAppearanceRGBColor(diffuseColor.getRed(), diffuseColor.getGreen(), diffuseColor.getBlue(), 1.0 - diffuseColor.getAlpha());
+         }
+      }
+      else
+      {
+         TextureDefinition diffuseMap = source.getDiffuseMap();
+
+         if (diffuseMap == null)
+            return null;
+
+         if (diffuseMap.getFilename() != null)
+            return new YoAppearanceTexture(diffuseMap.getFilename());
+         if (diffuseMap.getFileURL() != null)
+            return new YoAppearanceTexture(diffuseMap.getFileURL().toExternalForm());
+         if (diffuseMap.getImage() != null)
+            return new YoAppearanceTexture(diffuseMap.getImage());
+         return null;
+      }
    }
 
    public static List<CollisionMeshDescription> toCollisionMeshDescriptions(Collection<? extends CollisionShapeDefinition> source)
    {
+      return source.stream().map(RobotDefinitionTools::toCollisionMeshDescription).filter(Objects::nonNull).collect(Collectors.toList());
    }
 
    public static CollisionMeshDescription toCollisionMeshDescription(CollisionShapeDefinition source)
    {
-
+      return null; // TODO implement me
    }
 }
