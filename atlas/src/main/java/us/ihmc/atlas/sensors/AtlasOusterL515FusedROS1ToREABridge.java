@@ -208,13 +208,14 @@ public class AtlasOusterL515FusedROS1ToREABridge
                            float y = l515Buffer.getFloat();
                            float z = l515Buffer.getFloat();
                            l515Buffer.getFloat(); // nothing
-                           float rgb = l515Buffer.getFloat(); // bgr?
+                           float rgb = l515Buffer.getFloat();
                            int intBits = Float.floatToRawIntBits(rgb);
                            intBits |= (int)((intBits >>> 24) * (255f / 254f)) << 24;
-                           float a = ((intBits & 0xff000000) >>> 24) / 255f;
-                           float b = ((intBits & 0x00ff0000) >>> 16) / 255f;
+                           // float a = ((intBits & 0xff000000) >>> 24) / 255f; // Always 0.0 on L515
+                           float a = 1.0f;
+                           float r = ((intBits & 0x00ff0000) >>> 16) / 255f;
                            float g = ((intBits & 0x0000ff00) >>> 8) / 255f;
-                           float r = ((intBits & 0x000000ff)) / 255f;
+                           float b = ((intBits & 0x000000ff)) / 255f;
                            rgba8888 = ((int)(r * 255) << 24) | ((int)(g * 255) << 16) | ((int)(b * 255) << 8) | (int)(a * 255);
                            tempPoint.setIncludingFrame(l515Frame, z, -x, -y); // flip to Z up
                            tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
