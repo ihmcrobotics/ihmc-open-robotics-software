@@ -72,6 +72,7 @@ import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadO
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCylinder3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPRamp3DReadOnly;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
+import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.robotDescription.CameraSensorDescription;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
@@ -192,6 +193,59 @@ public class RobotDefinitionTools
                material.getSpecularColor().setAlpha(alpha);
          }
       }
+   }
+
+   public static void adjustJointLimitStops(RobotDefinition robotDefinition, JointNameMap<?> jointNameMap)
+   {
+      for (JointDefinition joint : robotDefinition.getAllJoints())
+      {
+         if (joint instanceof RevoluteJointDefinition)
+         {
+            RevoluteJointDefinition revoluteJoint = (RevoluteJointDefinition) joint;
+
+            if (isJointInNeedOfReducedGains(joint.getName()))
+            {
+               revoluteJoint.setKpSoftLimitStop(10.0);
+               revoluteJoint.setKdSoftLimitStop(2.5);
+            }
+            else if (revoluteJoint.getKpSoftLimitStop() == 0.0 && revoluteJoint.getKdSoftLimitStop() == 0.0)
+            {
+               revoluteJoint.setKpSoftLimitStop(jointNameMap.getJointKLimit(joint.getName()));
+               revoluteJoint.setKdSoftLimitStop(jointNameMap.getJointBLimit(joint.getName()));
+            }
+            else
+            {
+               revoluteJoint.setKpSoftLimitStop(0.0001 * revoluteJoint.getKpSoftLimitStop());
+               revoluteJoint.setKdSoftLimitStop(0.1 * revoluteJoint.getKdSoftLimitStop());
+            }
+         }
+         else if (joint instanceof PrismaticJointDefinition)
+         {
+            PrismaticJointDefinition prismaticJoint = (PrismaticJointDefinition) joint;
+
+            if (isJointInNeedOfReducedGains(joint.getName()))
+            {
+               prismaticJoint.setKpSoftLimitStop(100.0);
+               prismaticJoint.setKdSoftLimitStop(20.0);
+            }
+            else if (prismaticJoint.getKpSoftLimitStop() == 0.0 && prismaticJoint.getKdSoftLimitStop() == 0.0)
+            {
+               prismaticJoint.setKpSoftLimitStop(jointNameMap.getJointKLimit(joint.getName()));
+               prismaticJoint.setKdSoftLimitStop(jointNameMap.getJointBLimit(joint.getName()));
+            }
+            else
+            {
+               prismaticJoint.setKpSoftLimitStop(0.0001 * prismaticJoint.getKpSoftLimitStop());
+               prismaticJoint.setKdSoftLimitStop(prismaticJoint.getKdSoftLimitStop());
+            }
+         }
+      }
+   }
+
+   private static boolean isJointInNeedOfReducedGains(String jointName)
+   {
+      return jointName.contains("f0") || jointName.contains("f1") || jointName.contains("f2") || jointName.contains("f3") || jointName.contains("palm")
+            || jointName.contains("finger");
    }
 
    public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder)
@@ -905,6 +959,8 @@ public class RobotDefinitionTools
 
       for (JointDefinition rootJointDefinition : robotDefinition.getRootJointDefinitions())
          createAndAddJointsRecursive(robotDescription, rootJointDefinition);
+      for (String jointName : robotDefinition.getNameOfJointsToIgnore())
+         robotDescription.getJointDescription(jointName).setIsDynamic(false);
 
       return robotDescription;
    }
