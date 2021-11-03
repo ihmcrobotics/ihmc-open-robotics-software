@@ -9,10 +9,12 @@ import controller_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import imgui.internal.ImGui;
+import imgui.type.ImFloat;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.gdx.GDXPointCloudRenderer;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
@@ -28,6 +30,8 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final ImFloat pointSize = new ImFloat(0.01f);
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
    private final int pointsPerSegment;
    private final int numberOfSegments;
@@ -136,7 +140,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 //                  float g = 1.0f;
 //                  float b = 1.0f;
 //                  float a = 1.0f;
-                  float size = 0.01f; // TODO: Add slider
+                  float size = pointSize.get(); // TODO: Add slider
                   xyzRGBASizeFloatBuffer.put(x);
                   xyzRGBASizeFloatBuffer.put(y);
                   xyzRGBASizeFloatBuffer.put(z);
@@ -157,6 +161,10 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    {
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
+      ImGui.sameLine();
+      ImGui.pushItemWidth(30.0f);
+      ImGui.dragFloat(labels.get("Size"), pointSize.getData(), 0.001f, 0.0005f, 0.1f);
+      ImGui.popItemWidth();
       frequencyPlot.renderImGuiWidgets();
    }
 
