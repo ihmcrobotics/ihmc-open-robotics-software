@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -158,6 +160,126 @@ public class RobotDefinitionTools
       robotDefinition.setRootBodyDefinition(rootBody);
       constraints.forEach(robotDefinition::addControllerDefinition);
       return robotDefinition;
+   }
+
+   public static void setRobotDefinitionTransparency(RobotDefinition robotDefinition, double transparency)
+   {
+      // TODO Not sure if that's how it used to be
+      double alpha = 1.0 - transparency;
+
+      for (RigidBodyDefinition body : robotDefinition.getAllRigidBodies())
+      {
+         for (VisualDefinition visual : body.getVisualDefinitions())
+         {
+            MaterialDefinition material = visual.getMaterialDefinition();
+            if (material == null)
+               continue;
+
+            if (material.getDiffuseColor() != null)
+               material.getDiffuseColor().setAlpha(alpha);
+            if (material.getAmbientColor() != null)
+               material.getAmbientColor().setAlpha(alpha);
+            if (material.getEmissiveColor() != null)
+               material.getEmissiveColor().setAlpha(alpha);
+            if (material.getSpecularColor() != null)
+               material.getSpecularColor().setAlpha(alpha);
+         }
+      }
+   }
+
+   public static void scaleRobotDefinition(RobotDefinition definition, double modelScale, double massScalePower, Predicate<JointDefinition> jointFilter)
+   {
+      scaleRigidBodyDefinitionRecursive(definition.getRootBodyDefinition(), modelScale, massScalePower, jointFilter, true);
+   }
+
+   private static void scaleRigidBodyDefinitionRecursive(RigidBodyDefinition definition,
+                                                         double modelScale,
+                                                         double massScalePower,
+                                                         Predicate<JointDefinition> jointFilter,
+                                                         boolean scaleInertia)
+   {
+      if (scaleInertia && definition.getParentJoint() != null)
+         scaleInertia &= jointFilter.test(definition.getParentJoint());
+
+      scaleRigidBodyDefinition(definition, modelScale, massScalePower, scaleInertia);
+
+      for (JointDefinition joint : definition.getChildrenJoints())
+      {
+         scaleJointDefinition(joint, modelScale);
+         scaleRigidBodyDefinitionRecursive(joint.getSuccessor(), modelScale, massScalePower, jointFilter, scaleInertia);
+      }
+   }
+
+   private static void scaleJointDefinition(JointDefinition definition, double modelScale)
+   {
+      definition.getTransformToParent().getTranslation().scale(modelScale);
+
+      for (SensorDefinition sensor : definition.getSensorDefinitions())
+         sensor.getTransformToJoint().getTranslation().scale(modelScale);
+      for (KinematicPointDefinition kp : definition.getKinematicPointDefinitions())
+         kp.getTransformToParent().getTranslation().scale(modelScale);
+      for (ExternalWrenchPointDefinition efp : definition.getExternalWrenchPointDefinitions())
+         efp.getTransformToParent().getTranslation().scale(modelScale);
+      for (GroundContactPointDefinition gcp : definition.getGroundContactPointDefinitions())
+         gcp.getTransformToParent().getTranslation().scale(modelScale);
+   }
+
+   private static void scaleRigidBodyDefinition(RigidBodyDefinition definition, double modelScale, double massScalePower, boolean scaleInertia)
+   {
+      // Center of mass offset scales with the scaling factor
+      definition.getCenterOfMassOffset().scale(modelScale);
+
+      // Mass scales with factor^massScalePower. massScalePower is 3 when considering constant density
+
+      if (scaleInertia)
+      {
+         double massScale = Math.pow(modelScale, massScalePower);
+         definition.setMass(massScale * definition.getMass());
+
+         if (definition.getMomentOfInertia() != null)
+         {
+            // The components of the inertia matrix are defined with int(r^2 dm). So they scale factor ^ (2 + massScalePower)
+            double inertiaScale = Math.pow(modelScale, massScalePower + 2);
+            definition.getMomentOfInertia().scale(inertiaScale);
+         }
+      }
+
+      for (VisualDefinition visual : definition.getVisualDefinitions())
+         visual.getOriginPose().appendScale(modelScale);
+      for (CollisionShapeDefinition collision : definition.getCollisionShapeDefinitions())
+         scaleCollisionShapeDefinition(collision, modelScale);
+   }
+
+   private static void scaleCollisionShapeDefinition(CollisionShapeDefinition definition, double scale)
+   {
+      throw new RuntimeException("TODO: Implement me");
+   }
+
+   public static Consumer<RobotDefinition> jointLimitRemover()
+   {
+      return jointLimitRemover(null);
+   }
+
+   public static Consumer<RobotDefinition> jointLimitRemover(String nameFilter)
+   {
+      return jointLimitMutator(nameFilter, -100.0, 100.0);
+   }
+
+   public static Consumer<RobotDefinition> jointLimitMutator(String nameFilter, double lowerLimit, double upperLimit)
+   {
+      return robotDefinition ->
+      {
+         for (JointDefinition joint : robotDefinition.getAllJoints())
+         {
+            String jointName = joint.getName();
+            if (!(joint instanceof OneDoFJointDefinition))
+               continue;
+            if (nameFilter != null && !nameFilter.isEmpty() && !jointName.contains(nameFilter))
+               continue;
+
+            ((OneDoFJointDefinition) joint).setPositionLimits(lowerLimit, upperLimit);
+         }
+      };
    }
 
    public static void addCollisionsToRobotDefinition(List<Collidable> collidables, RobotDefinition robotDefinition)
@@ -1018,7 +1140,7 @@ public class RobotDefinitionTools
       {
          ModelFileGeometryDefinition model = (ModelFileGeometryDefinition) source;
          String fileName = model.getFileName();
-         if (model.getSubmeshes().isEmpty())
+         if (model.getSubmeshes() == null || model.getSubmeshes().isEmpty())
             return new Graphics3DAddModelFileInstruction(fileName, null, model.getResourceDirectories(), model.getResourceClassLoader());
          else
             return new Graphics3DAddModelFileInstruction(fileName,
