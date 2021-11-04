@@ -17,6 +17,8 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    public long sequence_id_;
    public double xy_resolution_ = -1.0;
    public double grid_size_xy_ = -1.0;
+   public double grid_center_x_;
+   public double grid_center_y_;
    public us.ihmc.idl.IDLSequence.Integer  x_cells_;
    public us.ihmc.idl.IDLSequence.Integer  y_cells_;
    public us.ihmc.idl.IDLSequence.Float  heights_;
@@ -44,6 +46,10 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       xy_resolution_ = other.xy_resolution_;
 
       grid_size_xy_ = other.grid_size_xy_;
+
+      grid_center_x_ = other.grid_center_x_;
+
+      grid_center_y_ = other.grid_center_y_;
 
       x_cells_.set(other.x_cells_);
       y_cells_.set(other.y_cells_);
@@ -81,6 +87,24 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    public double getGridSizeXy()
    {
       return grid_size_xy_;
+   }
+
+   public void setGridCenterX(double grid_center_x)
+   {
+      grid_center_x_ = grid_center_x;
+   }
+   public double getGridCenterX()
+   {
+      return grid_center_x_;
+   }
+
+   public void setGridCenterY(double grid_center_y)
+   {
+      grid_center_y_ = grid_center_y;
+   }
+   public double getGridCenterY()
+   {
+      return grid_center_y_;
    }
 
 
@@ -125,6 +149,10 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_size_xy_, other.grid_size_xy_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_center_x_, other.grid_center_x_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_center_y_, other.grid_center_y_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.x_cells_, other.x_cells_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.y_cells_, other.y_cells_, epsilon)) return false;
@@ -150,6 +178,10 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if(this.grid_size_xy_ != otherMyClass.grid_size_xy_) return false;
 
+      if(this.grid_center_x_ != otherMyClass.grid_center_x_) return false;
+
+      if(this.grid_center_y_ != otherMyClass.grid_center_y_) return false;
+
       if (!this.x_cells_.equals(otherMyClass.x_cells_)) return false;
       if (!this.y_cells_.equals(otherMyClass.y_cells_)) return false;
       if (!this.heights_.equals(otherMyClass.heights_)) return false;
@@ -169,6 +201,10 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       builder.append(this.xy_resolution_);      builder.append(", ");
       builder.append("grid_size_xy=");
       builder.append(this.grid_size_xy_);      builder.append(", ");
+      builder.append("grid_center_x=");
+      builder.append(this.grid_center_x_);      builder.append(", ");
+      builder.append("grid_center_y=");
+      builder.append(this.grid_center_y_);      builder.append(", ");
       builder.append("x_cells=");
       builder.append(this.x_cells_);      builder.append(", ");
       builder.append("y_cells=");

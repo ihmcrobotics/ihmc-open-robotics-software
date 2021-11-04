@@ -9,6 +9,10 @@ float64 xy_resolution
 # Field default value -1.0
 float64 grid_size_xy
 
+float64 grid_center_x
+
+float64 grid_center_y
+
 int32[] x_cells
 
 int32[] y_cells
