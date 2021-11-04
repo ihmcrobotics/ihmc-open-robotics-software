@@ -21,6 +21,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.ui.viewers.HeightMapVisualizer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -160,6 +161,7 @@ public abstract class HeightMapUI extends Application
       int initialPublishFrequency = 5;
       messager.submitMessage(HeightMapMessagerAPI.PublishFrequency, initialPublishFrequency);
       messager.submitMessage(HeightMapMessagerAPI.EnableUpdates, true);
+      messager.submitMessage(HeightMapMessagerAPI.GridCenterX, 1.5);
    }
 
    public void stop()

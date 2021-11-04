@@ -89,6 +89,8 @@ public class HeightMapPolygonSnapper
       rSquared = 1.0 - residualSoS / totalSoS;
       rmsValue /= pointsInsidePolyon.size();
 
+      System.out.println("RMS: " + Math.sqrt(rmsValue));
+
       if (bestFitPlane.containsNaN())
       {
          return null;
