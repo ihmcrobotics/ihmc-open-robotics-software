@@ -46,6 +46,10 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -66,6 +70,12 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -98,6 +108,10 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getGridSizeXy());
 
+      cdr.write_type_6(data.getGridCenterX());
+
+      cdr.write_type_6(data.getGridCenterY());
+
       if(data.getXCells().size() <= 30000)
       cdr.write_type_e(data.getXCells());else
           throw new RuntimeException("x_cells field exceeds the maximum length");
@@ -120,6 +134,10 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       data.setGridSizeXy(cdr.read_type_6());
       	
+      data.setGridCenterX(cdr.read_type_6());
+      	
+      data.setGridCenterY(cdr.read_type_6());
+      	
       cdr.read_type_e(data.getXCells());	
       cdr.read_type_e(data.getYCells());	
       cdr.read_type_e(data.getHeights());	
@@ -132,6 +150,8 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("xy_resolution", data.getXyResolution());
       ser.write_type_6("grid_size_xy", data.getGridSizeXy());
+      ser.write_type_6("grid_center_x", data.getGridCenterX());
+      ser.write_type_6("grid_center_y", data.getGridCenterY());
       ser.write_type_e("x_cells", data.getXCells());
       ser.write_type_e("y_cells", data.getYCells());
       ser.write_type_e("heights", data.getHeights());
@@ -143,6 +163,8 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setXyResolution(ser.read_type_6("xy_resolution"));
       data.setGridSizeXy(ser.read_type_6("grid_size_xy"));
+      data.setGridCenterX(ser.read_type_6("grid_center_x"));
+      data.setGridCenterY(ser.read_type_6("grid_center_y"));
       ser.read_type_e("x_cells", data.getXCells());
       ser.read_type_e("y_cells", data.getYCells());
       ser.read_type_e("heights", data.getHeights());

@@ -22,6 +22,8 @@ module controller_msgs
         double xy_resolution;
         @defaultValue(value=-1.0)
         double grid_size_xy;
+        double grid_center_x;
+        double grid_center_y;
         sequence<long, 30000> x_cells;
         sequence<long, 30000> y_cells;
         sequence<float, 30000> heights;
