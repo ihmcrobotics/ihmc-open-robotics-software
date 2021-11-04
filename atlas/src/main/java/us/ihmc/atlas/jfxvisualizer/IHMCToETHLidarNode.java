@@ -44,7 +44,7 @@ public class IHMCToETHLidarNode
    public IHMCToETHLidarNode() throws URISyntaxException
    {
       URI rosuri = NetworkParameters.getROSURI();
-      System.out.println(rosuri);
+      System.out.println("ROS MASTER URI " + rosuri);
 //      URI rosuri = new URI("http://172.16.66.102:11311");
 
       RosMainNode rosNode = RosTools.createRosNode(rosuri, "ouster_turtle_sim");
@@ -56,15 +56,15 @@ public class IHMCToETHLidarNode
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            LogTools.info("received point cloud " + counter.getValue());
+//            LogTools.info("received point cloud " + counter.getValue());
             counter.increment();
             inputPointCloud.set(pointCloud);
          }
       });
 
 //      setupForTurtleSim(rosNode, inputPointCloud);
-      setupForAtlasSim(rosNode, inputPointCloud);
-//      setupForRealRobot(rosNode, inputPointCloud);
+//      setupForAtlasSim(rosNode, inputPointCloud);
+      setupForRealRobot(rosNode, inputPointCloud);
 
       rosNode.execute();
    }
@@ -137,6 +137,9 @@ public class IHMCToETHLidarNode
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
       ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS), ros2Node);
 
+      RosPointCloudPublisher publisher = new RosPointCloudPublisher(PointType.XYZI, false);
+      ros1Node.attachPublisher("/os_cloud_node2/points", publisher);
+
       RosTfPublisher tfPublisher = new RosTfPublisher(ros1Node, null);
 
       new Thread(() ->
@@ -149,32 +152,28 @@ public class IHMCToETHLidarNode
 
                     while (true)
                     {
-                       syncedRobot.update();
-                       ReferenceFrame ousterFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
-                       MovingReferenceFrame pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
-
-                       RigidBodyTransform ousterToWorld = ousterFrame.getTransformToWorldFrame();
-                       RigidBodyTransform pelvisToWorld = pelvisFrame.getTransformToWorldFrame();
-
-                       if (debug)
-                          System.out.println(ousterToWorld);
-
-                       if (inputPointCloud.get() != null)
+                       PointCloud2 pointCloud = inputPointCloud.getAndSet(null);
+                       if (pointCloud != null)
                        {
-                          //                       long timestamp = ros1Node.getCurrentTime().totalNsecs();
-                          //                       long timestamp = System.nanoTime();
-                          long timestamp = inputPointCloud.get().getHeader().getStamp().totalNsecs();
+                          syncedRobot.update();
+                          ReferenceFrame ousterFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
+                          MovingReferenceFrame pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
 
+                          RigidBodyTransform ousterToWorld = ousterFrame.getTransformToWorldFrame();
+                          RigidBodyTransform pelvisToWorld = pelvisFrame.getTransformToWorldFrame();
+
+                          if (debug)
+                             System.out.println(ousterToWorld);
+
+                          Time currentTime = ros1Node.getCurrentTime();
+                          long timestamp = currentTime.totalNsecs();
+                          System.out.println(currentTime.secs + "sec \t" + currentTime.nsecs + "ns");
                           tfPublisher.publish(ousterToWorld, timestamp, "odom", "os_sensor");
-                          tfPublisher.publish(pelvisToWorld, timestamp, "odom", atlasPelvisFrame);
 
-                          System.out.println(timestamp);
+                          pointCloud.getHeader().setStamp(currentTime);
+                          publisher.publish(pointCloud);
                        }
-
-
-                       ThreadTools.sleep(50);
                     }
-
                  }).start();
    }
 
