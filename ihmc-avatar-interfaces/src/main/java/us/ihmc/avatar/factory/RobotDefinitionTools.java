@@ -170,6 +170,12 @@ public class RobotDefinitionTools
       return robotDefinition;
    }
 
+   public static void removeCollisionShapeDefinitions(RobotDefinition robotDefinition)
+   {
+      for (RigidBodyDefinition body : robotDefinition.getAllRigidBodies())
+         body.getCollisionShapeDefinitions().clear();
+   }
+
    public static void setRobotDefinitionTransparency(RobotDefinition robotDefinition, double transparency)
    {
       // TODO Not sure if that's how it used to be
@@ -208,7 +214,7 @@ public class RobotDefinitionTools
                revoluteJoint.setKpSoftLimitStop(10.0);
                revoluteJoint.setKdSoftLimitStop(2.5);
             }
-            else if (revoluteJoint.getKpSoftLimitStop() == 0.0 && revoluteJoint.getKdSoftLimitStop() == 0.0)
+            else if (revoluteJoint.getKpSoftLimitStop() <= 0.0 && revoluteJoint.getKdSoftLimitStop() <= 0.0)
             {
                revoluteJoint.setKpSoftLimitStop(jointNameMap.getJointKLimit(joint.getName()));
                revoluteJoint.setKdSoftLimitStop(jointNameMap.getJointBLimit(joint.getName()));
@@ -228,7 +234,7 @@ public class RobotDefinitionTools
                prismaticJoint.setKpSoftLimitStop(100.0);
                prismaticJoint.setKdSoftLimitStop(20.0);
             }
-            else if (prismaticJoint.getKpSoftLimitStop() == 0.0 && prismaticJoint.getKdSoftLimitStop() == 0.0)
+            else if (prismaticJoint.getKpSoftLimitStop() <= 0.0 && prismaticJoint.getKdSoftLimitStop() <= 0.0)
             {
                prismaticJoint.setKpSoftLimitStop(jointNameMap.getJointKLimit(joint.getName()));
                prismaticJoint.setKdSoftLimitStop(jointNameMap.getJointBLimit(joint.getName()));
@@ -238,6 +244,18 @@ public class RobotDefinitionTools
                prismaticJoint.setKpSoftLimitStop(0.0001 * prismaticJoint.getKpSoftLimitStop());
                prismaticJoint.setKdSoftLimitStop(prismaticJoint.getKdSoftLimitStop());
             }
+         }
+      }
+   }
+
+   public static void adjustRigidBodyInterias(RobotDefinition robotDefinition)
+   {
+      for (JointDefinition joint : robotDefinition.getAllJoints())
+      {
+         if (isJointInNeedOfReducedGains(joint.getName()))
+         {
+            RigidBodyDefinition successor = joint.getSuccessor();
+            successor.getMomentOfInertia().scale(100.0);
          }
       }
    }
@@ -1170,16 +1188,20 @@ public class RobotDefinitionTools
          }
       }
 
-      Graphics3DInstruction instruction = toGraphics3DPrimitiveInstruction(source.getGeometryDefinition());
-      if (instruction == null)
+      List<Graphics3DPrimitiveInstruction> instructions = toGraphics3DPrimitiveInstruction(source.getGeometryDefinition());
+      if (instructions == null || instructions.isEmpty())
          return null;
 
-      instruction.setAppearance(toAppearanceDefinition(source.getMaterialDefinition()));
-      output.addInstruction(instruction);
+      for (Graphics3DPrimitiveInstruction instruction : instructions)
+      {
+         if (instruction instanceof Graphics3DInstruction)
+            ((Graphics3DInstruction) instruction).setAppearance(toAppearanceDefinition(source.getMaterialDefinition()));
+         output.addInstruction(instruction);
+      }
       return output;
    }
 
-   public static Graphics3DInstruction toGraphics3DPrimitiveInstruction(GeometryDefinition source)
+   public static List<Graphics3DPrimitiveInstruction> toGraphics3DPrimitiveInstruction(GeometryDefinition source)
    {
       if (source == null)
          return null;
@@ -1187,30 +1209,30 @@ public class RobotDefinitionTools
       if (source instanceof ArcTorus3DDefinition)
       {
          ArcTorus3DDefinition arcTorus = (ArcTorus3DDefinition) source;
-         return new ArcTorusGraphics3DInstruction(arcTorus.getStartAngle(),
-                                                  arcTorus.getEndAngle(),
-                                                  arcTorus.getMajorRadius(),
-                                                  arcTorus.getMinorRadius(),
-                                                  arcTorus.getResolution());
+         return Collections.singletonList(new ArcTorusGraphics3DInstruction(arcTorus.getStartAngle(),
+                                                                            arcTorus.getEndAngle(),
+                                                                            arcTorus.getMajorRadius(),
+                                                                            arcTorus.getMinorRadius(),
+                                                                            arcTorus.getResolution()));
       }
       else if (source instanceof Box3DDefinition)
       {
          Box3DDefinition box = (Box3DDefinition) source;
-         return new CubeGraphics3DInstruction(box.getSizeX(), box.getSizeY(), box.getSizeZ(), box.isCentered());
+         return Collections.singletonList(new CubeGraphics3DInstruction(box.getSizeX(), box.getSizeY(), box.getSizeZ(), box.isCentered()));
       }
       else if (source instanceof Capsule3DDefinition)
       {
          Capsule3DDefinition capsule = (Capsule3DDefinition) source;
-         return new CapsuleGraphics3DInstruction(capsule.getLength(),
-                                                 capsule.getRadiusX(),
-                                                 capsule.getRadiusY(),
-                                                 capsule.getRadiusZ(),
-                                                 capsule.getResolution());
+         return Collections.singletonList(new CapsuleGraphics3DInstruction(capsule.getLength(),
+                                                                           capsule.getRadiusX(),
+                                                                           capsule.getRadiusY(),
+                                                                           capsule.getRadiusZ(),
+                                                                           capsule.getResolution()));
       }
       else if (source instanceof Cone3DDefinition)
       {
          Cone3DDefinition cone = (Cone3DDefinition) source;
-         return new ConeGraphics3DInstruction(cone.getHeight(), cone.getRadius(), cone.getResolution());
+         return Collections.singletonList(new ConeGraphics3DInstruction(cone.getHeight(), cone.getRadius(), cone.getResolution()));
       }
       else if (source instanceof ConvexPolytope3DDefinition)
       {
@@ -1219,17 +1241,20 @@ public class RobotDefinitionTools
       else if (source instanceof Cylinder3DDefinition)
       {
          Cylinder3DDefinition cylinder = (Cylinder3DDefinition) source; // FIXME Handle the offset along the cylinder's axis.
-         return new CylinderGraphics3DInstruction(cylinder.getRadius(), cylinder.getLength(), cylinder.getResolution());
+         return Collections.singletonList(new CylinderGraphics3DInstruction(cylinder.getRadius(), cylinder.getLength(), cylinder.getResolution()));
       }
       else if (source instanceof Ellipsoid3DDefinition)
       {
          Ellipsoid3DDefinition ellipsoid = (Ellipsoid3DDefinition) source;
-         return new EllipsoidGraphics3DInstruction(ellipsoid.getRadiusX(), ellipsoid.getRadiusY(), ellipsoid.getRadiusZ(), ellipsoid.getResolution());
+         return Collections.singletonList(new EllipsoidGraphics3DInstruction(ellipsoid.getRadiusX(),
+                                                                             ellipsoid.getRadiusY(),
+                                                                             ellipsoid.getRadiusZ(),
+                                                                             ellipsoid.getResolution()));
       }
       else if (source instanceof ExtrudedPolygon2DDefinition)
       {
          ExtrudedPolygon2DDefinition polygon = (ExtrudedPolygon2DDefinition) source; // FIXME handle the case that bottom-z is not 0
-         return new ExtrudedPolygonGraphics3DInstruction(polygon.getPolygonVertices(), polygon.getTopZ() - polygon.getBottomZ());
+         return Collections.singletonList(new ExtrudedPolygonGraphics3DInstruction(polygon.getPolygonVertices(), polygon.getTopZ() - polygon.getBottomZ()));
       }
       else if (source instanceof ExtrusionDefinition)
       {
@@ -1238,69 +1263,77 @@ public class RobotDefinitionTools
       else if (source instanceof HemiEllipsoid3DDefinition)
       {
          HemiEllipsoid3DDefinition hemiEllipsoid = (HemiEllipsoid3DDefinition) source;
-         return new HemiEllipsoidGraphics3DInstruction(hemiEllipsoid.getRadiusX(),
-                                                       hemiEllipsoid.getRadiusY(),
-                                                       hemiEllipsoid.getRadiusZ(),
-                                                       hemiEllipsoid.getResolution());
+         return Collections.singletonList(new HemiEllipsoidGraphics3DInstruction(hemiEllipsoid.getRadiusX(),
+                                                                                 hemiEllipsoid.getRadiusY(),
+                                                                                 hemiEllipsoid.getRadiusZ(),
+                                                                                 hemiEllipsoid.getResolution()));
       }
       else if (source instanceof ModelFileGeometryDefinition)
       {
          ModelFileGeometryDefinition model = (ModelFileGeometryDefinition) source;
-         String fileName = model.getFileName();
+         List<Graphics3DPrimitiveInstruction> output = new ArrayList<>();
+         if (model.getScale() != null)
+            output.add(new Graphics3DScaleInstruction(model.getScale()));
          if (model.getSubmeshes() == null || model.getSubmeshes().isEmpty())
-            return new Graphics3DAddModelFileInstruction(fileName, null, model.getResourceDirectories(), model.getResourceClassLoader());
+            output.add(new Graphics3DAddModelFileInstruction(model.getFileName(), null, model.getResourceDirectories(), model.getResourceClassLoader()));
          else
-            return new Graphics3DAddModelFileInstruction(fileName,
-                                                         model.getSubmeshes().get(0).getName(),
-                                                         model.getSubmeshes().get(0).getCenter(),
-                                                         null,
-                                                         model.getResourceDirectories(),
-                                                         model.getResourceClassLoader());
+            output.add(new Graphics3DAddModelFileInstruction(model.getFileName(),
+                                                             model.getSubmeshes().get(0).getName(),
+                                                             model.getSubmeshes().get(0).getCenter(),
+                                                             null,
+                                                             model.getResourceDirectories(),
+                                                             model.getResourceClassLoader()));
+         return output;
       }
       else if (source instanceof PyramidBox3DDefinition)
       {
          PyramidBox3DDefinition pyramidBox = (PyramidBox3DDefinition) source;
-         return new PyramidCubeGraphics3DInstruction(pyramidBox.getBoxSizeX(),
-                                                     pyramidBox.getBoxSizeY(),
-                                                     pyramidBox.getBoxSizeZ(),
-                                                     pyramidBox.getPyramidHeight());
+         return Collections.singletonList(new PyramidCubeGraphics3DInstruction(pyramidBox.getBoxSizeX(),
+                                                                               pyramidBox.getBoxSizeY(),
+                                                                               pyramidBox.getBoxSizeZ(),
+                                                                               pyramidBox.getPyramidHeight()));
       }
       else if (source instanceof Ramp3DDefinition)
       {
          Ramp3DDefinition ramp = (Ramp3DDefinition) source; // FIXME The origin might not be the same.
-         return new WedgeGraphics3DInstruction(ramp.getSizeX(), ramp.getSizeY(), ramp.getSizeZ());
+         return Collections.singletonList(new WedgeGraphics3DInstruction(ramp.getSizeX(), ramp.getSizeY(), ramp.getSizeZ()));
       }
       else if (source instanceof Sphere3DDefinition)
       {
          Sphere3DDefinition sphere = (Sphere3DDefinition) source;
-         return new SphereGraphics3DInstruction(sphere.getRadius(), sphere.getResolution());
+         return Collections.singletonList(new SphereGraphics3DInstruction(sphere.getRadius(), sphere.getResolution()));
       }
       else if (source instanceof Torus3DDefinition)
       {
          Torus3DDefinition torus = (Torus3DDefinition) source;
-         return new ArcTorusGraphics3DInstruction(0, 2.0 * Math.PI, torus.getMajorRadius(), torus.getMinorRadius(), torus.getResolution());
+         return Collections.singletonList(new ArcTorusGraphics3DInstruction(0,
+                                                                            2.0 * Math.PI,
+                                                                            torus.getMajorRadius(),
+                                                                            torus.getMinorRadius(),
+                                                                            torus.getResolution()));
       }
       else if (source instanceof TriangleMesh3DDefinition)
       {
          TriangleMesh3DDefinition mesh = (TriangleMesh3DDefinition) source;
-         return new Graphics3DAddMeshDataInstruction(new MeshDataHolder(mesh.getVertices(),
-                                                                        mesh.getTextures() == null ? null
-                                                                              : Arrays.stream(mesh.getTextures())
-                                                                                      .map(t -> new TexCoord2f(t.getX32(), t.getY32()))
-                                                                                      .toArray(TexCoord2f[]::new),
-                                                                        mesh.getTriangleIndices(),
-                                                                        mesh.getNormals()),
-                                                     null);
+         return Collections.singletonList(new Graphics3DAddMeshDataInstruction(new MeshDataHolder(mesh.getVertices(),
+                                                                                                  mesh.getTextures() == null ? null
+                                                                                                        : Arrays.stream(mesh.getTextures())
+                                                                                                                .map(t -> new TexCoord2f(t.getX32(),
+                                                                                                                                         t.getY32()))
+                                                                                                                .toArray(TexCoord2f[]::new),
+                                                                                                  mesh.getTriangleIndices(),
+                                                                                                  mesh.getNormals()),
+                                                                               null));
       }
       else if (source instanceof TruncatedCone3DDefinition)
       {
          TruncatedCone3DDefinition cone = (TruncatedCone3DDefinition) source;
-         return new TruncatedConeGraphics3DInstruction(cone.getHeight(),
-                                                       cone.getBaseRadiusX(),
-                                                       cone.getBaseRadiusY(),
-                                                       cone.getTopRadiusX(),
-                                                       cone.getTopRadiusY(),
-                                                       cone.getResolution());
+         return Collections.singletonList(new TruncatedConeGraphics3DInstruction(cone.getHeight(),
+                                                                                 cone.getBaseRadiusX(),
+                                                                                 cone.getBaseRadiusY(),
+                                                                                 cone.getTopRadiusX(),
+                                                                                 cone.getTopRadiusY(),
+                                                                                 cone.getResolution()));
       }
       else
       {
