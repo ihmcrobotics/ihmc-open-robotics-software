@@ -2,6 +2,7 @@ package us.ihmc.sensorProcessing.heightMap;
 
 import controller_msgs.msg.dds.HeightMapMessage;
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 
 import java.util.Arrays;
@@ -15,21 +16,23 @@ public class HeightMapData
    private final int cellsPerAxis;
    private final double gridResolutionXY;
    private final double gridSizeXY;
+   private final Point2D gridCenter = new Point2D();
 
-   public HeightMapData(double gridResolutionXY, double gridSizeXY)
+   public HeightMapData(double gridResolutionXY, double gridSizeXY, double gridCenterX, double gridCenterY)
    {
       this.gridResolutionXY = gridResolutionXY;
       this.gridSizeXY = gridSizeXY;
-      this.minMaxIndexXY = HeightMapTools.toIndex(gridSizeXY, gridResolutionXY, 0);
-      cellsPerAxis = (2 * minMaxIndexXY + 1);
+      this.minMaxIndexXY = HeightMapTools.minMaxIndex(gridSizeXY, gridResolutionXY);
+      this.cellsPerAxis = (2 * minMaxIndexXY + 1);
       this.heights = new double[cellsPerAxis * cellsPerAxis];
+      this.gridCenter.set(gridCenterX, gridCenterY);
 
       reset();
    }
 
    public HeightMapData(HeightMapMessage heightMapMessage)
    {
-      this(heightMapMessage.getXyResolution(), heightMapMessage.getGridSizeXy());
+      this(heightMapMessage.getXyResolution(), heightMapMessage.getGridSizeXy(), heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY());
 
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
@@ -71,8 +74,8 @@ public class HeightMapData
     */
    public double getHeightAt(double x, double y)
    {
-      int xIndex = HeightMapTools.toIndex(x, gridResolutionXY, minMaxIndexXY);
-      int yIndex = HeightMapTools.toIndex(y, gridResolutionXY, minMaxIndexXY);
+      int xIndex = HeightMapTools.toIndex(x, gridCenter.getX(), gridResolutionXY, minMaxIndexXY);
+      int yIndex = HeightMapTools.toIndex(y, gridCenter.getY(), gridResolutionXY, minMaxIndexXY);
 
       if (xIndex < 0 || yIndex < 0 || xIndex > minMaxIndexXY || yIndex > minMaxIndexXY)
       {
@@ -85,8 +88,8 @@ public class HeightMapData
 
    public void setHeightAt(double x, double y, double z)
    {
-      int xIndex = HeightMapTools.toIndex(x, gridResolutionXY, minMaxIndexXY);
-      int yIndex = HeightMapTools.toIndex(y, gridResolutionXY, minMaxIndexXY);
+      int xIndex = HeightMapTools.toIndex(x, gridCenter.getX(), gridResolutionXY, minMaxIndexXY);
+      int yIndex = HeightMapTools.toIndex(y, gridCenter.getY(), gridResolutionXY, minMaxIndexXY);
 
       if (xIndex < 0 || yIndex < 0 || xIndex > cellsPerAxis || yIndex > cellsPerAxis)
       {

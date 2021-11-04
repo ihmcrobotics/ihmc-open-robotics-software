@@ -17,11 +17,13 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,12 +36,6 @@ import static us.ihmc.avatar.heightMap.HeightMapUpdater.USE_OUSTER_FRAME;
 public class PointCloudVisualizer extends AnimationTimer
 {
    private static final double POINT_SIZE = 0.015;
-   private static final double MIN_X = -2.0;
-   private static final double MAX_X = 2.0;
-   private static final double MIN_Y = -2.0;
-   private static final double MAX_Y = 2.0;
-   private static final double MIN_Z = -10.0;
-   private static final double MAX_Z = 0.6;
    private final Group rootNode = new Group();
 
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
@@ -48,12 +44,17 @@ public class PointCloudVisualizer extends AnimationTimer
    private final MeshView meshView = new MeshView();
    private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
 
+   private final AtomicReference<Point2D> gridCenter;
+   private final double gridSizeXY;
+
    private final ExecutorService pointCloudUpdater = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
-   public PointCloudVisualizer(Messager messager)
+   public PointCloudVisualizer(Messager messager, HeightMapParameters parameters)
    {
       rootNode.getChildren().add(meshView);
       messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, this::processPointCloud);
+      gridCenter = messager.createInput(HeightMapMessagerAPI.GridCenter, new Point2D());
+      gridSizeXY = parameters.getGridSizeXY();
    }
 
    @Override
@@ -96,10 +97,16 @@ public class PointCloudVisualizer extends AnimationTimer
             point.changeFrame(ReferenceFrame.getWorldFrame());
             pointCloud.getPointCloud()[i].set(point);
 
-            if (MathTools.intervalContains(point.getX(), MIN_X, MAX_X) &&
-                MathTools.intervalContains(point.getY(), MIN_Y, MAX_Y) &&
-                MathTools.intervalContains(point.getZ(), MIN_Z, MAX_Z))
+            Point2D gridCenter = this.gridCenter.get();
+            double minX = gridCenter.getX() - 0.5 * gridSizeXY;
+            double maxX = gridCenter.getX() + 0.5 * gridSizeXY;
+            double minY = gridCenter.getY() - 0.5 * gridSizeXY;
+            double maxY = gridCenter.getY() + 0.5 * gridSizeXY;
+
+            if (MathTools.intervalContains(point.getX(), minX, maxX) && MathTools.intervalContains(point.getY(), minY, maxY))
+            {
                meshBuilder.addCube(POINT_SIZE, point, Color.RED);
+            }
          }
       }
       else

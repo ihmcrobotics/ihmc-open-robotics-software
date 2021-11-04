@@ -34,11 +34,6 @@ public class HeightMapVisualizer extends AnimationTimer
    private final AtomicReference<Pair<Mesh, Material>> heightMapToRender = new AtomicReference<>();
    private final MeshView heightMapMeshView = new MeshView();
 
-   private static final double renderedZeroHeight = -0.9;
-
-   private final double gridResolutionXY;
-   private final int minMaxIndexXY;
-
    private final ExecutorService meshComputation = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private final AtomicBoolean processing = new AtomicBoolean(false);
 
@@ -48,10 +43,6 @@ public class HeightMapVisualizer extends AnimationTimer
 
       Color color = Color.OLIVE;
       heightMapColor = Color.color(color.getRed(), color.getGreen(), color.getBlue(), 0.7);
-
-      HeightMapParameters parameters = new HeightMapParameters();
-      gridResolutionXY = parameters.getGridResolutionXY();
-      minMaxIndexXY = HeightMapTools.toIndex(parameters.getGridSizeXY(), gridResolutionXY, 0);
    }
 
    public void update(HeightMapMessage data)
@@ -75,18 +66,21 @@ public class HeightMapVisualizer extends AnimationTimer
 
    private void computeMesh(HeightMapMessage heightMapData)
    {
-//      LogTools.info("Computing mesh for " + heightMapData.getXCells().size() + " cells");
-
       /* Compute mesh */
       meshBuilder.clear();
       TIntArrayList xCells = heightMapData.getXCells();
       TIntArrayList yCells = heightMapData.getYCells();
       IDLSequence.Float heights = heightMapData.getHeights();
+      double gridResolutionXY = heightMapData.getXyResolution();
+      int minMaxIndex = HeightMapTools.minMaxIndex(heightMapData.getGridSizeXy(), gridResolutionXY);
+
+      float minHeight = heightMapData.getHeights().min();
+      double renderedZeroHeight = minHeight - 0.15;
 
       for (int i = 0; i < xCells.size(); i++)
       {
-         double x = (xCells.get(i) - minMaxIndexXY) * gridResolutionXY;
-         double y = (yCells.get(i) - minMaxIndexXY) * gridResolutionXY;
+         double x = HeightMapTools.toCoordinate(xCells.get(i), heightMapData.getGridCenterX(), gridResolutionXY, minMaxIndex);
+         double y = HeightMapTools.toCoordinate(yCells.get(i), heightMapData.getGridCenterY(), gridResolutionXY, minMaxIndex);
          double height = heights.get(i);
 
          double renderedHeight = Math.max(0.0, height - renderedZeroHeight);

@@ -25,14 +25,7 @@ public class HeightMapFootstepPlanner
    public static FootstepPlan debug(SideDependentList<ConvexPolygon2D> footPolygons, HeightMapData heightMap)
    {
       List<Point3D> stepsToDebug = new ArrayList<>();
-      stepsToDebug.add(new Point3D(0.4, -0.04, 0.0));
-      stepsToDebug.add(new Point3D(0.4, 0.32, 0.0));
-      stepsToDebug.add(new Point3D(0.72, 0.55, 0.0));
-      stepsToDebug.add(new Point3D(0.72, 0.15, 0.0));
-      stepsToDebug.add(new Point3D(0.72, -0.25, 0.0));
-      stepsToDebug.add(new Point3D(1.15, 0.55, 0.0));
-      stepsToDebug.add(new Point3D(1.15, 0.15, 0.0));
-      stepsToDebug.add(new Point3D(1.15, -0.25, 0.0));
+      stepsToDebug.add(new Point3D(1.3, 0.0, 0.0));
 
       FootstepPlan footstepPlan = new FootstepPlan();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
@@ -41,8 +34,8 @@ public class HeightMapFootstepPlanner
       {
          FramePose3D pose = new FramePose3D();
          pose.getPosition().set(stepsToDebug.get(i));
-         pose.getPosition().setZ(-0.55);
-//         footstepPlan.addFootstep(RobotSide.LEFT, pose);
+
+         //         footstepPlan.addFootstep(RobotSide.LEFT, pose);
 
          RigidBodyTransform footstepTransform = new RigidBodyTransform();
          footstepTransform.getTranslation().set(pose.getPosition());
@@ -59,10 +52,15 @@ public class HeightMapFootstepPlanner
             snapTransform.transform(footstepTransform);
 
             FramePose3D step = new FramePose3D();
-            double zOnPlane = snapper.getBestFitPlane().getZOnPlane(pose.getX(), pose.getY());
-            step.getPosition().set(pose.getX(), pose.getY(), zOnPlane);
+            step.set(footstepTransform);
 
-            EuclidGeometryTools.orientation3DFromZUpToVector3D(snapper.getBestFitPlane().getNormal(), step.getOrientation());
+            System.out.println("step translation: " + step.getPosition());
+            System.out.println("step ypr: " + step.getOrientation().getYaw() + ", " + step.getOrientation().getPitch() + ", " + step.getRoll());
+
+//            double zOnPlane = snapper.getBestFitPlane().getZOnPlane(pose.getX(), pose.getY());
+//            step.getPosition().set(pose.getX(), pose.getY(), zOnPlane);
+//
+//            EuclidGeometryTools.orientation3DFromZUpToVector3D(snapper.getBestFitPlane().getNormal(), step.getOrientation());
             footstepPlan.addFootstep(RobotSide.LEFT, step);
          }
       }
@@ -97,11 +95,7 @@ public class HeightMapFootstepPlanner
          footPolygon.applyTransform(footstepTransform);
 
          RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMap);
-         if (snapTransform == null)
-         {
-//            break;
-         }
-         else
+         if (snapTransform != null)
          {
             snapTransform.transform(footstepTransform);
          }

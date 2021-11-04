@@ -1,5 +1,9 @@
 package us.ihmc.avatar.heightMap;
 
+import geometry_msgs.Quaternion;
+import geometry_msgs.Transform;
+import geometry_msgs.TransformStamped;
+import geometry_msgs.Vector3;
 import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -8,7 +12,9 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
+import org.ros.internal.message.Message;
 import sensor_msgs.PointCloud2;
+import tf2_msgs.TFMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
@@ -26,9 +32,13 @@ import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
+import java.net.URI;
+import java.util.concurrent.atomic.AtomicReference;
+
 public abstract class HeightMapUI extends Application
 {
    private final JavaFXMessager messager = new SharedMemoryJavaFXMessager(HeightMapMessagerAPI.API);
+   private static final boolean useROS2 = false;
 
    private HeightMapVisualizer heightMapVisualizer;
    private PointCloudVisualizer pointCloudVisualizer;
@@ -42,13 +52,15 @@ public abstract class HeightMapUI extends Application
    private HeightMapParametersUIController heightMapParametersUIController;
 
    private static final boolean SHOW_HEIGHT_MAP = true;
-   private static final boolean SHOW_POINT_CLOUD = true;
+   private static final boolean SHOW_POINT_CLOUD = false;
 
    @Override
    public void start(Stage stage) throws Exception
    {
+      HeightMapParameters parameters = new HeightMapParameters();
+
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
-      pointCloudVisualizer = new PointCloudVisualizer(messager);
+      pointCloudVisualizer = new PointCloudVisualizer(messager, parameters);
       new HeightMapUpdater(messager, ros2Node);
 
       FXMLLoader loader = new FXMLLoader();
@@ -64,20 +76,56 @@ public abstract class HeightMapUI extends Application
       DRCRobotModel robotModel = getRobotModel();
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-      ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "height_map_viewer");
-      ros1Node.attachSubscriber(RosTools.OUSTER_POINT_CLOUD, new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
+      URI rosuri = NetworkParameters.getROSURI();
+//      URI rosuri = new URI("http://172.16.66.102:11311");
+
+      ros1Node = RosTools.createRosNode(rosuri, "height_map_viewer");
+      AtomicReference<Transform> ros1OusterTransform = new AtomicReference<>();
+
+      ros1Node.attachSubscriber("os_cloud_node2/points", new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
       {
          @Override
          public void onNewMessage(PointCloud2 pointCloud)
          {
-            syncedRobot.update();
             FramePose3D ousterPose = new FramePose3D();
-            ousterPose.setToZero(syncedRobot.getReferenceFrames().getOusterLidarFrame());
-            ousterPose.changeFrame(ReferenceFrame.getWorldFrame());
+            if (useROS2)
+            {
+               syncedRobot.update();
+               ousterPose.setToZero(syncedRobot.getReferenceFrames().getOusterLidarFrame());
+               ousterPose.changeFrame(ReferenceFrame.getWorldFrame());
+            }
+            else if (ros1OusterTransform.get() != null)
+            {
+               Transform ousterTransform = ros1OusterTransform.get();
+               Vector3 ros1Translation = ousterTransform.getTranslation();
+               Quaternion ros1Orientation = ousterTransform.getRotation();
+
+               ousterPose.getPosition().set(ros1Translation.getX(), ros1Translation.getY(), ros1Translation.getZ());
+               ousterPose.getOrientation().set(ros1Orientation.getX(), ros1Orientation.getY(), ros1Orientation.getZ(), ros1Orientation.getW());
+            }
 
             messager.submitMessage(HeightMapMessagerAPI.PointCloudData, Pair.of(pointCloud, ousterPose));
          }
       });
+
+      if (!useROS2)
+      {
+         ros1Node.attachSubscriber("/tf", new AbstractRosTopicSubscriber<TFMessage>(TFMessage._TYPE)
+         {
+            @Override
+            public void onNewMessage(TFMessage message)
+            {
+               for (int i = 0; i < message.getTransforms().size(); i++)
+               {
+                  TransformStamped transform = message.getTransforms().get(i);
+                  if (transform.getChildFrameId().equals("os_sensor"))
+                  {
+                     ros1OusterTransform.set(transform.getTransform());
+                  }
+               }
+            }
+         });
+      }
 
       stage.setTitle(getClass().getSimpleName());
 
@@ -90,7 +138,6 @@ public abstract class HeightMapUI extends Application
       if (SHOW_POINT_CLOUD)
          view3dFactory.addNodeToView(pointCloudVisualizer.getRoot());
 
-      HeightMapParameters parameters = new HeightMapParameters();
       heightMapParametersUIController.setParameters(parameters);
       heightMapParametersUIController.attachMessager(messager);
       heightMapParametersUIController.bindControls();
@@ -109,6 +156,9 @@ public abstract class HeightMapUI extends Application
 
       stage.setOnCloseRequest(event -> stop());
       heightMapParametersUIController.onPrimaryStageLoaded();
+
+      int initialPublishFrequency = 5;
+      messager.submitMessage(HeightMapMessagerAPI.PublishFrequency, initialPublishFrequency);
    }
 
    public void stop()

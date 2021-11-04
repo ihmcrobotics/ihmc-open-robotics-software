@@ -6,21 +6,41 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.heightMap.HeightMapParametersUIController">
-
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.control.Label?>
+<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.heightMap.HeightMapParametersUIController" prefHeight="300">
     <left>
-        <HBox alignment="CENTER" BorderPane.alignment="CENTER">
-            <Region prefWidth="5"/>
-            <VBox>
-                <Button onAction="#saveParameters" text="Save Parameters"/>
-                <Button onAction="#loadFile" text="Load File"/>
-            </VBox>
-            <Region prefWidth="5"/>
-        </HBox>
-    </left>
+        <GridPane>
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="149.0" />
+                <ColumnConstraints hgrow="ALWAYS" maxWidth="300.0" minWidth="10.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0"  />
+                <RowConstraints minHeight="10.0" prefHeight="30.0"  />
+                <RowConstraints minHeight="10.0" prefHeight="30.0"  />
+                <RowConstraints minHeight="10.0" prefHeight="30.0"  />
+            </rowConstraints>
 
+            <Button onAction="#saveParameters" text="Save Parameters" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+            <Button onAction="#loadFile" text="Load File" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+
+            <Label text="Grid Center X" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+            <Label text="Grid Center Y" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+            <Spinner fx:id="gridCenterX" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Spinner fx:id="gridCenterY" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+            <Button onAction="#loadFile" text="Reset center" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+            <Button onAction="#export" text="Export" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+
+            <Label text="Publish freq" GridPane.columnIndex="0" GridPane.rowIndex="6" />
+            <Spinner fx:id="publishFreq" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+        </GridPane>
+    </left>
     <center>
         <TableView fx:id="parameterTable"/>
     </center>
-
 </BorderPane>
