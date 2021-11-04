@@ -1,7 +1,11 @@
 package us.ihmc.avatar.heightMap;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.HeightMapMessagePubSubType;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
 import sensor_msgs.PointCloud2;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
@@ -15,18 +19,15 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
@@ -51,19 +52,20 @@ public class HeightMapUpdater
       APPROX_OUSTER_TRANSFORM.getTranslation().set(-0.2, 0.0, 1.0);
    }
 
+   private final Stage stage;
    private final Messager messager;
    private final HeightMapParameters parameters;
    private final ExecutorService heightMapUpdater = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
-   private final AtomicBoolean processing = new AtomicBoolean();
+   private final AtomicBoolean heightMapLock = new AtomicBoolean();
 
    private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
    private final HeightMapManager heightMap;
    private final IHMCROS2Publisher<HeightMapMessage> publisher;
    private final AtomicReference<Point2D> gridCenter;
+   private final AtomicReference<HeightMapMessage> latestMessage = new AtomicReference<>();
 
    private int publishFrequencyCounter = 0;
    private final AtomicInteger publishFrequency = new AtomicInteger();
-   private final AtomicBoolean export = new AtomicBoolean();
 
    private static final double FLYING_POINT_MIN_X = 1.092;
    private static final double FLYING_POINT_MAX_X = 1.3;
@@ -77,17 +79,24 @@ public class HeightMapUpdater
       FLYING_POINT_BOUNDING_BOX.set(FLYING_POINT_MIN_X, FLYING_POINT_MIN_Y, -10.0, FLYING_POINT_MAX_X, FLYING_POINT_MAX_Y, 10.0);
    }
 
-   public HeightMapUpdater(Messager messager, ROS2Node ros2Node)
+   public HeightMapUpdater(Messager messager, ROS2Node ros2Node, Stage stage)
    {
+      this.stage = stage;
       this.messager = messager;
       publisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
 
       parameters = new HeightMapParameters();
       heightMap = new HeightMapManager(parameters.getGridResolutionXY(), parameters.getGridSizeXY());
+      AtomicReference<Boolean> enableUpdates = messager.createInput(HeightMapMessagerAPI.EnableUpdates);
 
       messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, pointCloudData ->
       {
-         if (!processing.getAndSet(true))
+         if (!enableUpdates.get())
+         {
+            return;
+         }
+
+         if (!heightMapLock.getAndSet(true))
          {
             heightMapUpdater.execute(() -> update(pointCloudData));
          }
@@ -95,7 +104,8 @@ public class HeightMapUpdater
 
       gridCenter = messager.createInput(HeightMapMessagerAPI.GridCenter);
       messager.registerTopicListener(HeightMapMessagerAPI.PublishFrequency, publishFrequency::set);
-      messager.registerTopicListener(HeightMapMessagerAPI.Export, export::set);
+      messager.registerTopicListener(HeightMapMessagerAPI.Export, e -> ThreadTools.startAThread(this::export, "Height map exporter"));
+      messager.registerTopicListener(HeightMapMessagerAPI.Import, i -> importHeightMap());
    }
 
    private void update(Pair<PointCloud2, FramePose3D> pointCloudData)
@@ -141,15 +151,11 @@ public class HeightMapUpdater
          messager.submitMessage(HeightMapMessagerAPI.HeightMapData, message);
          publisher.publish(message);
 
-         if (export.getAndSet(false))
-         {
-            ThreadTools.startAThread(() -> export(message), "Height map exporter");
-         }
-
          publishFrequencyCounter = publishFrequency.get();
+         latestMessage.set(message);
       }
 
-      processing.set(false);
+      heightMapLock.set(false);
    }
 
    private HeightMapMessage buildMessage()
@@ -171,8 +177,34 @@ public class HeightMapUpdater
       return message;
    }
 
-   private void export(HeightMapMessage message)
+   private boolean firstTick = true;
+   private long startTime;
+   private int updateFrequencyCounter = 0;
+
+   private void updateFrequency()
    {
+      if (firstTick)
+      {
+         startTime = System.currentTimeMillis();
+         firstTick = false;
+      }
+      else
+      {
+         updateFrequencyCounter++;
+         double timePerCallSeconds = 1e-3 * ((double) (System.currentTimeMillis() - startTime) / updateFrequencyCounter);
+         System.out.println("Frequency: " + (1 / timePerCallSeconds) + " Hz");
+      }
+   }
+
+   private void export()
+   {
+      HeightMapMessage message = latestMessage.get();
+      if (message == null)
+      {
+         LogTools.info("No height map available, cannot export.");
+         return;
+      }
+
       try
       {
          JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
@@ -197,22 +229,41 @@ public class HeightMapUpdater
       }
    }
 
-   private boolean firstTick = true;
-   private long startTime;
-   private int updateFrequencyCounter = 0;
+   private final AtomicBoolean importing = new AtomicBoolean();
 
-   private void updateFrequency()
+   private void importHeightMap()
    {
-      if (firstTick)
-      {
-         startTime = System.currentTimeMillis();
-         firstTick = false;
-      }
-      else
-      {
-         updateFrequencyCounter++;
-         double timePerCallSeconds = 1e-3 * ((double) (System.currentTimeMillis() - startTime) / updateFrequencyCounter);
-         System.out.println("Frequency: " + (1 / timePerCallSeconds) + " Hz");
-      }
+      ThreadTools.startAThread(() ->
+                               {
+                                  if (importing.getAndSet(true))
+                                  {
+                                     return;
+                                  }
+
+                                  messager.submitMessage(HeightMapMessagerAPI.EnableUpdates, false);
+
+                                  FileChooser fileChooser = new FileChooser();
+                                  fileChooser.setTitle("Import Height Map");
+                                  fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Height Map Files (*.json)", "*.json"));
+                                  File file = fileChooser.showOpenDialog(stage);
+
+                                  ObjectMapper objectMapper = new ObjectMapper();
+                                  try
+                                  {
+                                     JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
+                                     InputStream inputStream = new FileInputStream(file);
+                                     JsonNode jsonNode = objectMapper.readTree(inputStream);
+                                     HeightMapMessage heightMapMessage = serializer.deserialize(jsonNode.toString());
+                                     inputStream.close();
+
+                                     messager.submitMessage(HeightMapMessagerAPI.HeightMapData, heightMapMessage);
+                                  }
+                                  catch (IOException e)
+                                  {
+                                     e.printStackTrace();
+                                  }
+
+                                  importing.set(false);
+                               }, "Height map importer");
    }
 }

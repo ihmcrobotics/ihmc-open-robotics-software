@@ -1,6 +1,7 @@
 package us.ihmc.avatar.heightMap;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableView;
@@ -23,6 +24,10 @@ public class HeightMapParametersUIController
    private Spinner<Double> gridCenterX;
    @FXML
    private Spinner<Double> gridCenterY;
+   @FXML
+   private CheckBox enableUpdates;
+   @FXML
+   private Spinner<Integer> snapTestId;
 
    @FXML
    private TableView<StoredPropertyTableViewWrapper.ParametersTableRow> parameterTable;
@@ -46,10 +51,14 @@ public class HeightMapParametersUIController
       publishFreq.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
       gridCenterX.setValueFactory(createGridCenterFactory());
       gridCenterY.setValueFactory(createGridCenterFactory());
+      snapTestId.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(-1, Integer.MAX_VALUE));
+      snapTestId.getValueFactory().setValue(-1);
+      snapTestId.valueProperty().addListener((obs, vOld, vNew) -> messager.submitMessage(HeightMapMessagerAPI.SnapTestId, snapTestId.getValue()));
 
       messager.bindBidirectional(HeightMapMessagerAPI.PublishFrequency, publishFreq.getValueFactory().valueProperty(), false);
       gridCenterX.getValueFactory().valueProperty().addListener((obs, vOld, vNew) -> messager.submitMessage(HeightMapMessagerAPI.GridCenter, new Point2D(gridCenterX.getValue(), gridCenterY.getValue())));
       gridCenterY.getValueFactory().valueProperty().addListener((obs, vOld, vNew) -> messager.submitMessage(HeightMapMessagerAPI.GridCenter, new Point2D(gridCenterX.getValue(), gridCenterY.getValue())));
+      messager.bindBidirectional(HeightMapMessagerAPI.EnableUpdates, enableUpdates.selectedProperty(), false);
    }
 
    public void onPrimaryStageLoaded()
@@ -74,6 +83,12 @@ public class HeightMapParametersUIController
    public void export()
    {
       messager.submitMessage(HeightMapMessagerAPI.Export, true);
+   }
+
+   @FXML
+   public void importHeightMap()
+   {
+      messager.submitMessage(HeightMapMessagerAPI.Import, true);
    }
 
    private SpinnerValueFactory.DoubleSpinnerValueFactory createGridCenterFactory()

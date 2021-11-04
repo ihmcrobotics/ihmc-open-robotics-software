@@ -39,21 +39,21 @@ public class HeightMapPolygonSnapper
    {
       pointsInsidePolyon.clear();
       bestFitPlane.setToNaN();
-      double gridCenterXY = 0.0;
+      Point2D gridCenter = heightMap.getGridCenter();
 
       int minMaxIndex = HeightMapTools.minMaxIndex(heightMap.getGridSizeXY(), heightMap.getGridResolutionXY());
-      int minIndexX = HeightMapTools.toIndex(polygonToSnap.getMinX(), gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
-      int maxIndexX = HeightMapTools.toIndex(polygonToSnap.getMaxX(), gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
-      int minIndexY = HeightMapTools.toIndex(polygonToSnap.getMinY(), gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
-      int maxIndexY = HeightMapTools.toIndex(polygonToSnap.getMaxY(), gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
+      int minIndexX = HeightMapTools.toIndex(polygonToSnap.getMinX(), gridCenter.getX(), heightMap.getGridResolutionXY(), minMaxIndex);
+      int maxIndexX = HeightMapTools.toIndex(polygonToSnap.getMaxX(), gridCenter.getX(), heightMap.getGridResolutionXY(), minMaxIndex);
+      int minIndexY = HeightMapTools.toIndex(polygonToSnap.getMinY(), gridCenter.getY(), heightMap.getGridResolutionXY(), minMaxIndex);
+      int maxIndexY = HeightMapTools.toIndex(polygonToSnap.getMaxY(), gridCenter.getY(), heightMap.getGridResolutionXY(), minMaxIndex);
       double averageHeight = 0.0;
 
       for (int i = minIndexX; i <= maxIndexX; i++)
       {
          for (int j = minIndexY; j <= maxIndexY; j++)
          {
-            double x = HeightMapTools.toCoordinate(i, gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
-            double y = HeightMapTools.toCoordinate(j, gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
+            double x = HeightMapTools.toCoordinate(i, gridCenter.getX(), heightMap.getGridResolutionXY(), minMaxIndex);
+            double y = HeightMapTools.toCoordinate(j, gridCenter.getY(), heightMap.getGridResolutionXY(), minMaxIndex);
             double height = heightMap.getHeightAt(i, j);
 
             if (Double.isNaN(height) || polygonToSnap.distance(new Point2D(x, y)) > 0.01)
