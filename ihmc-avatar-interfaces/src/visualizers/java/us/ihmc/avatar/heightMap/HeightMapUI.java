@@ -61,7 +61,7 @@ public abstract class HeightMapUI extends Application
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
       pointCloudVisualizer = new PointCloudVisualizer(messager, parameters);
-      new HeightMapUpdater(messager, ros2Node);
+      new HeightMapUpdater(messager, ros2Node, stage);
 
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -159,6 +159,7 @@ public abstract class HeightMapUI extends Application
 
       int initialPublishFrequency = 5;
       messager.submitMessage(HeightMapMessagerAPI.PublishFrequency, initialPublishFrequency);
+      messager.submitMessage(HeightMapMessagerAPI.EnableUpdates, true);
    }
 
    public void stop()

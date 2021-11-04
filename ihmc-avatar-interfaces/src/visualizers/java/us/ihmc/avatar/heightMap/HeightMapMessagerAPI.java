@@ -21,6 +21,10 @@ class HeightMapMessagerAPI
    public static final MessagerAPIFactory.Topic<Point2D> GridCenter = topic("GridCenter");
    public static final MessagerAPIFactory.Topic<Integer> PublishFrequency = topic("PublishRate");
    public static final MessagerAPIFactory.Topic<Boolean> Export = topic("Export");
+   public static final MessagerAPIFactory.Topic<Boolean> Import = topic("Import");
+   public static final MessagerAPIFactory.Topic<Integer> SnapTestId = topic("SnapTestId");
+
+   public static final MessagerAPIFactory.Topic<Boolean> EnableUpdates = topic("EnableUpdates");
 
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 

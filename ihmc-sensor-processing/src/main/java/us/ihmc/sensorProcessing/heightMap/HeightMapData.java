@@ -69,6 +69,15 @@ public class HeightMapData
       return heights[occupiedCells.get(i)];
    }
 
+   public Point2D getCellPosition(int i)
+   {
+      int cell = occupiedCells.get(i);
+      int indexX = xIndex(cell);
+      int indexY = yIndex(cell);
+      return new Point2D(HeightMapTools.toCoordinate(indexX, gridCenter.getX(), gridResolutionXY, minMaxIndexXY),
+                         HeightMapTools.toCoordinate(indexY, gridCenter.getY(), gridResolutionXY, minMaxIndexXY));
+   }
+
    /**
     * Returns height at the given (x,y) position, or NaN if there is no height at the given point
     */
@@ -130,5 +139,22 @@ public class HeightMapData
    private int yIndex(int xyIndex)
    {
       return xyIndex / (2 * minMaxIndexXY + 1);
+   }
+
+   public Point2D getGridCenter()
+   {
+      return gridCenter;
+   }
+
+   public double minHeight()
+   {
+      double minValue = Double.POSITIVE_INFINITY;
+      for (int i = 0; i < heights.length; i++)
+      {
+         if (!Double.isNaN(heights[i]) && heights[i] < minValue)
+            minValue = heights[i];
+      }
+
+      return minValue;
    }
 }
