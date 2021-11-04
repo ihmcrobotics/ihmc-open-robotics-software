@@ -61,7 +61,7 @@ public class HeightMapUpdater
    private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
    private final HeightMapManager heightMap;
    private final IHMCROS2Publisher<HeightMapMessage> publisher;
-   private final AtomicReference<Point2D> gridCenter;
+   private final AtomicReference<Point2D> gridCenter = new AtomicReference<>(new Point2D());
    private final AtomicReference<HeightMapMessage> latestMessage = new AtomicReference<>();
 
    private int publishFrequencyCounter = 0;
@@ -102,7 +102,9 @@ public class HeightMapUpdater
          }
       });
 
-      gridCenter = messager.createInput(HeightMapMessagerAPI.GridCenter);
+      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterX, x -> gridCenter.set(new Point2D(x, gridCenter.get().getY())));
+      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterY, y -> gridCenter.set(new Point2D(gridCenter.get().getX(), y)));
+
       messager.registerTopicListener(HeightMapMessagerAPI.PublishFrequency, publishFrequency::set);
       messager.registerTopicListener(HeightMapMessagerAPI.Export, e -> ThreadTools.startAThread(this::export, "Height map exporter"));
       messager.registerTopicListener(HeightMapMessagerAPI.Import, i -> importHeightMap());

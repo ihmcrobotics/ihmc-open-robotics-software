@@ -44,7 +44,7 @@ public class PointCloudVisualizer extends AnimationTimer
    private final MeshView meshView = new MeshView();
    private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
 
-   private final AtomicReference<Point2D> gridCenter;
+   private final AtomicReference<Point2D> gridCenter = new AtomicReference<>(new Point2D());
    private final double gridSizeXY;
 
    private final ExecutorService pointCloudUpdater = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
@@ -53,7 +53,8 @@ public class PointCloudVisualizer extends AnimationTimer
    {
       rootNode.getChildren().add(meshView);
       messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, this::processPointCloud);
-      gridCenter = messager.createInput(HeightMapMessagerAPI.GridCenter, new Point2D());
+      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterX, x -> gridCenter.set(new Point2D(x, gridCenter.get().getY())));
+      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterY, y -> gridCenter.set(new Point2D(gridCenter.get().getX(), y)));
       gridSizeXY = parameters.getGridSizeXY();
    }
 

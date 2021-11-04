@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.HeightMapMessagePubSubType;
 import javafx.stage.FileChooser;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
@@ -30,12 +32,10 @@ public class HeightMapSnapperVisualizer
 {
    public HeightMapSnapperVisualizer()
    {
-      JFileChooser fileChooser = new JFileChooser();
-      fileChooser.setDialogTitle("Import Height Map");
-      fileChooser.setFileFilter(new FileNameExtensionFilter("JSON log", "json"));
-      fileChooser.setCurrentDirectory(new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs"));
-      int chooserState = fileChooser.showOpenDialog(null);
-      if (chooserState != JFileChooser.APPROVE_OPTION)
+//      File file = loadThroughChooser();
+      File file = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "stepping_stones.json");
+
+      if (file == null)
          return;
 
       ObjectMapper objectMapper = new ObjectMapper();
@@ -43,7 +43,7 @@ public class HeightMapSnapperVisualizer
       try
       {
          JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
-         InputStream inputStream = new FileInputStream(fileChooser.getSelectedFile());
+         InputStream inputStream = new FileInputStream(file);
          JsonNode jsonNode = objectMapper.readTree(inputStream);
          heightMapMessage = serializer.deserialize(jsonNode.toString());
          inputStream.close();
@@ -57,19 +57,60 @@ public class HeightMapSnapperVisualizer
       HeightMapData heightMapData = new HeightMapData(heightMapMessage);
 
       ConvexPolygon2D polygon = new ConvexPolygon2D();
-      polygon.addVertex(0.5, 0.5);
-      polygon.addVertex(0.5, -0.5);
-      polygon.addVertex(-0.5, 0.5);
-      polygon.addVertex(-0.5, -0.5);
+      polygon.addVertex(0.11, 0.043);
+      polygon.addVertex(0.11, -0.043);
+      polygon.addVertex(-0.11, 0.055);
+      polygon.addVertex(-0.11, -0.055);
       polygon.update();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(buildHeightMapGraphics(heightMapData));
-      scs.addStaticLinkGraphics(buildSnapGraphics(heightMapData, polygon, new Pose2D(1.2, 0.0, 0.0)));
+
+      // good values
+      scs.addStaticLinkGraphics(buildSnapGraphics(heightMapData,
+                                                  polygon,
+                                                  new Pose2D(1.35, 0.25, -0.9),
+                                                  new Pose2D(1.7, 0.7, 0.4),
+                                                  new Pose2D(2.0, 0.3, -0.8),
+                                                  new Pose2D(2.5, 0.7, 1.5),
+                                                  new Pose2D(2.65, 0.15, 0.0),
+                                                  new Pose2D(1.28, 0.25, 0.8),
+                                                  new Pose2D(1.68, 0.7, -1.2),
+                                                  new Pose2D(2.05, 0.36, 0.8),
+                                                  new Pose2D(2.38, 0.7, 1.5),
+                                                  new Pose2D(2.7, 0.26, 0.0)
+                                                              ));
+
+      // bad values
+//      scs.addStaticLinkGraphics(buildSnapGraphics(heightMapData,
+//                                                  polygon,
+//                                                  new Pose2D(1.35, 0.0, 1.6),
+//                                                  new Pose2D(1.84, 0.7, 0.4),
+//                                                  new Pose2D(1.91, 0.3, -0.8),
+//                                                  new Pose2D(2.5, 0.57, 1.5),
+//                                                  new Pose2D(2.52, 0.28, 0.0),
+//
+//                                                  new Pose2D(1.2, 0.38, 0.8),
+//                                                  new Pose2D(1.5, 0.7, -1.2),
+//                                                  new Pose2D(1.8, 0.5, 0.8),
+//                                                  new Pose2D(2.22, 0.55, 1.5)
+//                                                                    ));
 
       scs.startOnAThread();
       ThreadTools.sleepForever();
+   }
+
+   private File loadThroughChooser()
+   {
+      JFileChooser fileChooser = new JFileChooser();
+      fileChooser.setDialogTitle("Import Height Map");
+      fileChooser.setFileFilter(new FileNameExtensionFilter("JSON log", "json"));
+      fileChooser.setCurrentDirectory(new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs"));
+      int chooserState = fileChooser.showOpenDialog(null);
+      if (chooserState != JFileChooser.APPROVE_OPTION)
+         return null;
+      return fileChooser.getSelectedFile();
    }
 
    private static Graphics3DObject buildHeightMapGraphics(HeightMapData heightMapData)
@@ -79,8 +120,8 @@ public class HeightMapSnapperVisualizer
 
       double minHeight = heightMapData.minHeight();
       double zeroHeight = minHeight - 0.2;
-      AppearanceDefinition olive = YoAppearance.Olive();
-      olive.setTransparency(0.7);
+      AppearanceDefinition low = YoAppearance.Black();
+      AppearanceDefinition high = YoAppearance.Olive();
 
       for (int i = 0; i < heightMapData.getNumberOfCells(); i++)
       {
@@ -90,7 +131,11 @@ public class HeightMapSnapperVisualizer
 
          graphics3DObject.identity();
          graphics3DObject.translate(cellPosition.getX(), cellPosition.getY(), zeroHeight + 0.5 * renderedHeight);
-         graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, olive);
+         double alpha = MathTools.clamp((height - minHeight) / 0.2, 0.0, 1.0);
+         AppearanceDefinition interpolatedColor = YoAppearance.RGBColor(EuclidCoreTools.interpolate(low.getColor().getX(), high.getColor().getX(), alpha),
+                                                                        EuclidCoreTools.interpolate(low.getColor().getY(), high.getColor().getY(), alpha),
+                                                                        EuclidCoreTools.interpolate(low.getColor().getZ(), high.getColor().getZ(), alpha));
+         graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, interpolatedColor);
       }
 
       return graphics3DObject;
@@ -111,12 +156,16 @@ public class HeightMapSnapperVisualizer
          stepTransform.getRotation().setToYawOrientation(pose.getYaw());
          polygonToSnap.applyTransform(stepTransform);
 
+         graphics3DObject.identity();
+         graphics3DObject.transform(stepTransform);
+         graphics3DObject.translate(0.0, 0.0, 0.1);
+         graphics3DObject.addExtrudedPolygon(polygon, 0.02, YoAppearance.Glass());
+
          RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData);
          snapTransform.transform(stepTransform);
 
          graphics3DObject.identity();
          graphics3DObject.transform(stepTransform);
-         System.out.println(stepTransform);
          graphics3DObject.addCoordinateSystem(0.3);
          graphics3DObject.addExtrudedPolygon(polygon, 0.02, YoAppearance.Red());
       }

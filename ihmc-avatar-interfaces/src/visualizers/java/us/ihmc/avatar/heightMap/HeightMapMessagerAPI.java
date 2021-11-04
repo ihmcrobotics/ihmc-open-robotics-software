@@ -18,7 +18,8 @@ class HeightMapMessagerAPI
    public static final MessagerAPIFactory.Topic<Pair<PointCloud2, FramePose3D>> PointCloudData = topic("PointCloudData");
    public static final MessagerAPIFactory.Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
    public static final MessagerAPIFactory.Topic<HeightMapParameters> parameters = topic("Parameters");
-   public static final MessagerAPIFactory.Topic<Point2D> GridCenter = topic("GridCenter");
+   public static final MessagerAPIFactory.Topic<Double> GridCenterX = topic("GridCenterX");
+   public static final MessagerAPIFactory.Topic<Double> GridCenterY = topic("GridCenterY");
    public static final MessagerAPIFactory.Topic<Integer> PublishFrequency = topic("PublishRate");
    public static final MessagerAPIFactory.Topic<Boolean> Export = topic("Export");
    public static final MessagerAPIFactory.Topic<Boolean> Import = topic("Import");

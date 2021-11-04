@@ -56,8 +56,8 @@ public class HeightMapParametersUIController
       snapTestId.valueProperty().addListener((obs, vOld, vNew) -> messager.submitMessage(HeightMapMessagerAPI.SnapTestId, snapTestId.getValue()));
 
       messager.bindBidirectional(HeightMapMessagerAPI.PublishFrequency, publishFreq.getValueFactory().valueProperty(), false);
-      gridCenterX.getValueFactory().valueProperty().addListener((obs, vOld, vNew) -> messager.submitMessage(HeightMapMessagerAPI.GridCenter, new Point2D(gridCenterX.getValue(), gridCenterY.getValue())));
-      gridCenterY.getValueFactory().valueProperty().addListener((obs, vOld, vNew) -> messager.submitMessage(HeightMapMessagerAPI.GridCenter, new Point2D(gridCenterX.getValue(), gridCenterY.getValue())));
+      messager.bindBidirectional(HeightMapMessagerAPI.GridCenterX, gridCenterX.getValueFactory().valueProperty(), false);
+      messager.bindBidirectional(HeightMapMessagerAPI.GridCenterY, gridCenterY.getValueFactory().valueProperty(), false);
       messager.bindBidirectional(HeightMapMessagerAPI.EnableUpdates, enableUpdates.selectedProperty(), false);
    }
 
