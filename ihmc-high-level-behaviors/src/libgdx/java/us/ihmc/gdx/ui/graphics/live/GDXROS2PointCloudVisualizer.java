@@ -14,10 +14,12 @@ import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.gdx.GDXPointCloudRenderer;
+import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -30,6 +32,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final ImGuiPlot segmentIndexPlot = new ImGuiPlot("Segment", 1000, 230, 20);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
@@ -43,6 +46,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    private final AtomicReference<LidarScanMessage> latestLidarScanMessageReference = new AtomicReference<>(null);
    private final AtomicReference<FusedSensorHeadPointCloudMessage> latestFusedSensorHeadPointCloudMessageReference = new AtomicReference<>(null);
    private final Color color = new Color();
+   private int latestSegmentIndex = -1;
 
    public GDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
@@ -70,7 +74,10 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
       }
       else if (topic.getType().equals(FusedSensorHeadPointCloudMessage.class))
       {
-         new IHMCROS2Callback<>(ros2Node, topic.withType(FusedSensorHeadPointCloudMessage.class), this::queueRenderFusedSensorHeadPointCloud);
+         new IHMCROS2Callback<>(ros2Node,
+                                topic.withType(FusedSensorHeadPointCloudMessage.class),
+                                ROS2QosProfile.BEST_EFFORT(),
+                                this::queueRenderFusedSensorHeadPointCloud);
       }
    }
 
@@ -128,6 +135,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
             lz4Decompressor.decompress(decompressionInputDirectBuffer, decompressionOutputDirectBuffer);
             decompressionOutputDirectBuffer.rewind();
 
+            latestSegmentIndex = (int) message.getSegmentIndex();
             pointCloudRenderer.updateMeshFastest(xyzRGBASizeFloatBuffer ->
             {
                for (int i = 0; i < pointsPerSegment; i++)
@@ -151,7 +159,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
                   xyzRGBASizeFloatBuffer.put(size);
                }
                return pointsPerSegment;
-            }, (int) message.getSegmentIndex());
+            }, latestSegmentIndex);
          }
       }
    }
@@ -166,6 +174,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
       ImGui.dragFloat(labels.get("Size"), pointSize.getData(), 0.001f, 0.0005f, 0.1f);
       ImGui.popItemWidth();
       frequencyPlot.renderImGuiWidgets();
+      segmentIndexPlot.render(latestSegmentIndex);
    }
 
    @Override
