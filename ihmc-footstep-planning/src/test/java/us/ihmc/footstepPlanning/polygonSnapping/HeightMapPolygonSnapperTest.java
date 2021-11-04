@@ -38,16 +38,17 @@ public class HeightMapPolygonSnapperTest
          polygonToSnap.translate(EuclidCoreRandomTools.nextDouble(random, 1.0), EuclidCoreRandomTools.nextDouble(random, 1.0));
 
          double gridResolution = 0.01;
-         double gridSizeXY = 2.0;
-         HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY);
+         double gridSizeXY = 4.0;
+         double gridCenterXY = 0.0;
+         HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY, gridCenterXY, gridCenterXY);
          int minMaxIndexXY = heightMapData.getMinMaxIndexXY();
 
          for (int xIndex = 0; xIndex < 2 * minMaxIndexXY + 1; xIndex++)
          {
             for (int yIndex = 0; yIndex < 2 * minMaxIndexXY + 1; yIndex++)
             {
-               double x = HeightMapTools.toCoordinate(xIndex, gridResolution, minMaxIndexXY);
-               double y = HeightMapTools.toCoordinate(yIndex, gridResolution, minMaxIndexXY);
+               double x = HeightMapTools.toCoordinate(xIndex, gridCenterXY, gridResolution, minMaxIndexXY);
+               double y = HeightMapTools.toCoordinate(yIndex, gridCenterXY, gridResolution, minMaxIndexXY);
                double z = plane.getZOnPlane(x, y);
                heightMapData.setHeightAt(x, y, z);
             }
@@ -90,13 +91,14 @@ public class HeightMapPolygonSnapperTest
 
          double gridResolution = 0.01;
          double gridSizeXY = 2.0;
-         HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY);
+         double gridCenterXY = 0.0;
+         HeightMapData heightMapData = new HeightMapData(gridResolution, gridSizeXY, gridCenterXY, gridCenterXY);
          int minMaxIndexXY = heightMapData.getMinMaxIndexXY();
 
-         int centroidIndexX = HeightMapTools.toIndex(EuclidCoreRandomTools.nextDouble(random, 0.5), gridResolution, minMaxIndexXY);
-         int centroidIndexY = HeightMapTools.toIndex(EuclidCoreRandomTools.nextDouble(random, 0.5), gridResolution, minMaxIndexXY);
-         double centroidX = HeightMapTools.toCoordinate(centroidIndexX, gridResolution, minMaxIndexXY);
-         double centroidY = HeightMapTools.toCoordinate(centroidIndexY, gridResolution, minMaxIndexXY);
+         int centroidIndexX = HeightMapTools.toIndex(EuclidCoreRandomTools.nextDouble(random, 0.5), gridCenterXY, gridResolution, minMaxIndexXY);
+         int centroidIndexY = HeightMapTools.toIndex(EuclidCoreRandomTools.nextDouble(random, 0.5), gridCenterXY, gridResolution, minMaxIndexXY);
+         double centroidX = HeightMapTools.toCoordinate(centroidIndexX, gridCenterXY, gridResolution, minMaxIndexXY);
+         double centroidY = HeightMapTools.toCoordinate(centroidIndexY, gridCenterXY, gridResolution, minMaxIndexXY);
 
          ConvexPolygon2D polygonToSnap = new ConvexPolygon2D();
 

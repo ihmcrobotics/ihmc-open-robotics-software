@@ -63,10 +63,6 @@ public class HeightMapManager
             int indexX = HeightMapTools.toIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, minMaxIndexXY);
             int indexY = HeightMapTools.toIndex(point.getY(), gridCenterXY.getY(), gridResolutionXY, minMaxIndexXY);
 
-            double x = HeightMapTools.toCoordinate(indexX, gridCenterXY.getX(), gridResolutionXY, minMaxIndexXY);
-            double y = HeightMapTools.toCoordinate(indexY, gridCenterXY.getX(), gridResolutionXY, minMaxIndexXY);
-            System.out.println(x + " " + y);
-
             if (indexX < 0 || indexY < 0 || indexX >= heightMapCells.length || indexY >= heightMapCells.length)
             {
                continue;

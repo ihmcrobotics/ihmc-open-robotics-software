@@ -41,7 +41,8 @@ public class StoredPropertyTableViewWrapper
                                          double cellLabelWidth,
                                          int tableColumns,
                                          TableView<ParametersTableRow> parameterTable,
-                                         JavaFXStoredPropertyMap javaFXStoredPropertyMap)
+                                         JavaFXStoredPropertyMap javaFXStoredPropertyMap,
+                                         int numberOfExtraRows)
    {
       this.cellWidth = cellWidth;
       this.cellLabelWidth = cellLabelWidth;
@@ -49,10 +50,10 @@ public class StoredPropertyTableViewWrapper
       this.parameterTable = parameterTable;
       this.javaFXStoredPropertyMap = javaFXStoredPropertyMap;
 
-      setup();
+      setup(numberOfExtraRows);
    }
 
-   private void setup()
+   private void setup(int numberOfExtraRows)
    {
       parameterTable.setPadding(new Insets(10.0));
 
@@ -74,9 +75,7 @@ public class StoredPropertyTableViewWrapper
 
       // TableView sometimes doesn't show final row, add extra at the bottom...
       // make a parameter if this is too much, but for 2 rows it would still sometimes not render the bottom
-      int additionalRows = 5;
-
-      for (int row = 0; row < numRows + additionalRows; row++)
+      for (int row = 0; row < numRows + numberOfExtraRows; row++)
       {
          ParametersTableRow tableRow = new ParametersTableRow();
          for (int col = 0; col < tableColumns; col++)

@@ -26,6 +26,7 @@ public class HeightMapPolygonSnapper
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
    private double rSquared;
+   private double rmsValue;
    private final double areaPerCell;
 
    public HeightMapPolygonSnapper()
@@ -38,20 +39,21 @@ public class HeightMapPolygonSnapper
    {
       pointsInsidePolyon.clear();
       bestFitPlane.setToNaN();
+      double gridCenterXY = 0.0;
 
-      int minMaxIndex = HeightMapTools.toIndex(heightMap.getGridSizeXY(), heightMap.getGridResolutionXY(), 0);
-      int minIndexX = HeightMapTools.toIndex(polygonToSnap.getMinX(), heightMap.getGridResolutionXY(), minMaxIndex);
-      int maxIndexX = HeightMapTools.toIndex(polygonToSnap.getMaxX(), heightMap.getGridResolutionXY(), minMaxIndex);
-      int minIndexY = HeightMapTools.toIndex(polygonToSnap.getMinY(), heightMap.getGridResolutionXY(), minMaxIndex);
-      int maxIndexY = HeightMapTools.toIndex(polygonToSnap.getMaxY(), heightMap.getGridResolutionXY(), minMaxIndex);
+      int minMaxIndex = HeightMapTools.minMaxIndex(heightMap.getGridSizeXY(), heightMap.getGridResolutionXY());
+      int minIndexX = HeightMapTools.toIndex(polygonToSnap.getMinX(), gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
+      int maxIndexX = HeightMapTools.toIndex(polygonToSnap.getMaxX(), gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
+      int minIndexY = HeightMapTools.toIndex(polygonToSnap.getMinY(), gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
+      int maxIndexY = HeightMapTools.toIndex(polygonToSnap.getMaxY(), gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
       double averageHeight = 0.0;
 
       for (int i = minIndexX; i <= maxIndexX; i++)
       {
          for (int j = minIndexY; j <= maxIndexY; j++)
          {
-            double x = HeightMapTools.toCoordinate(i, heightMap.getGridResolutionXY(), minMaxIndex);
-            double y = HeightMapTools.toCoordinate(j, heightMap.getGridResolutionXY(), minMaxIndex);
+            double x = HeightMapTools.toCoordinate(i, gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
+            double y = HeightMapTools.toCoordinate(j, gridCenterXY, heightMap.getGridResolutionXY(), minMaxIndex);
             double height = heightMap.getHeightAt(i, j);
 
             if (Double.isNaN(height) || polygonToSnap.distance(new Point2D(x, y)) > 0.01)
@@ -74,14 +76,19 @@ public class HeightMapPolygonSnapper
 
       double residualSoS = 0.0;
       double totalSoS = 0.0;
+      rmsValue = 0.0;
+
       for (int i = 0; i < pointsInsidePolyon.size(); i++)
       {
          double predictedHeight = bestFitPlane.getZOnPlane(pointsInsidePolyon.get(i).getX(), pointsInsidePolyon.get(i).getY());
          residualSoS += MathTools.square(predictedHeight - pointsInsidePolyon.get(i).getZ());
          totalSoS += MathTools.square(averageHeight - pointsInsidePolyon.get(i).getZ());
+         rmsValue += MathTools.square(predictedHeight - pointsInsidePolyon.get(i).getZ());
       }
 
       rSquared = 1.0 - residualSoS / totalSoS;
+      rmsValue /= pointsInsidePolyon.size();
+
       if (bestFitPlane.containsNaN())
       {
          return null;

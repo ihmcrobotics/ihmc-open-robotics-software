@@ -6,18 +6,18 @@ package us.ihmc.sensorProcessing.heightMap;
  */
 public class HeightMapTools
 {
-   public static int toIndex(double coordinate, double resolution, int minMaxIndexXY)
+   public static int toIndex(double coordinate, double gridCenter, double resolution, int minMaxIndexXY)
    {
-      return (int) Math.round(coordinate / resolution) + minMaxIndexXY;
+      return (int) Math.round((coordinate - gridCenter) / resolution) + minMaxIndexXY;
    }
 
-   public static double toCoordinate(int index, double resolution, int minMaxIndexXY)
+   public static double toCoordinate(int index, double gridCenter, double resolution, int minMaxIndexXY)
    {
-      return (index - minMaxIndexXY) * resolution;
+      return (index - minMaxIndexXY) * resolution + gridCenter;
    }
 
-   public static int minMaxIndex(double maxXYCoordinate, double resolution)
+   public static int minMaxIndex(double gridSizeXY, double resolution)
    {
-      return (int) Math.round(maxXYCoordinate / resolution);
+      return (int) Math.round(0.5 * gridSizeXY / resolution);
    }
 }

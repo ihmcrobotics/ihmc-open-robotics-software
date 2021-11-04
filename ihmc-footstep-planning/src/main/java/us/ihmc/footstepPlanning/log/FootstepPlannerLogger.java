@@ -67,7 +67,6 @@ public class FootstepPlannerLogger
    static final String bodyPathParametersFileName = "BodyPathParametersPacket.json";
    static final String footstepParametersFileName = "FootstepParametersPacket.json";
    static final String swingParametersFileName = "SwingParametersPacket.json";
-   static final String splitFractionParametersFileName = "SplitFractionParametersPacket.json";
    static final String statusPacketFileName = "StatusPacket.json";
    static final String bodyPathPlanFileName = "BodyPathPlanData.log";
    static final String headerFileName = "Header.txt";

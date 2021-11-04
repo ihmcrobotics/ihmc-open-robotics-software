@@ -28,24 +28,36 @@ public class HeightMapParameters extends StoredPropertySet
       loadUnsafe();
    }
 
+   /**
+    * Resolution of the height map grid
+    */
    public double getGridResolutionXY()
    {
       return get(HeightMapParameterKeys.gridResolutionXY);
    }
 
+   /**
+    * Length of the side of the square height map grid
+    */
    public double getGridSizeXY()
    {
       return get(HeightMapParameterKeys.gridSizeXY);
    }
 
+   /**
+    * Max z relative to robot mid foot z. Points above this threshold are ignored.
+    */
    public double getMaxZ()
    {
       return get(HeightMapParameterKeys.maxZ);
    }
 
-   public double getNominalVariance()
+   /**
+    * When calibrated on flat ground, this is the average standard deviation observed for a grid cell.
+    */
+   public double getNominalStandardDeviation()
    {
-      return get(HeightMapParameterKeys.nominalVariance);
+      return get(HeightMapParameterKeys.nominalStandardDeviation);
    }
 
    public int getMaxPointsPerCell()
@@ -53,6 +65,10 @@ public class HeightMapParameters extends StoredPropertySet
       return get(HeightMapParameterKeys.maxPointsPerCell);
    }
 
+   /**
+    * If a grid cell is at height h, points below (h - s * m) are ignored, and points above (h + s * m) will cause the cell to throw out old data and reset.
+    * where s is getNominalStandardDeviation() and m is this value.
+    */
    public double getMahalanobisScale()
    {
       return get(HeightMapParameterKeys.mahalonobisScale);
