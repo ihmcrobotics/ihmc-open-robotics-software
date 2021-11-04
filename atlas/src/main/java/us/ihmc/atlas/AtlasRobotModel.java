@@ -1,12 +1,14 @@
 package us.ihmc.atlas;
 
 import java.io.InputStream;
-import java.util.List;
+import java.util.Arrays;
+import java.util.function.Consumer;
+
+import javax.xml.bind.JAXBException;
 
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
@@ -27,7 +29,7 @@ import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.avatar.DRCSimulationOutputWriterForControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
@@ -46,27 +48,13 @@ import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityDa
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
-import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
-import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFContactSensor;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFForceSensor;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFLinkHolder;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
-import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
@@ -82,6 +70,11 @@ import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsControlThread;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.robot.JointDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
+import us.ihmc.scs2.definition.robot.sdf.SDFTools;
+import us.ihmc.scs2.definition.robot.sdf.items.SDFRoot;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -92,7 +85,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
-public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
+public class AtlasRobotModel implements DRCRobotModel
 {
    public final static boolean SCALE_ATLAS = false;
    private final static double DESIRED_ATLAS_HEIGHT = 0.66;
@@ -112,8 +105,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
    public static final boolean BATTERY_MASS_SIMULATOR_IN_ROBOT = false;
 
-   private final JaxbSDFLoader loader;
-
    private final AtlasPhysicalProperties atlasPhysicalProperties;
    private final AtlasJointMap jointMap;
    private final AtlasContactPointParameters contactPointParameters;
@@ -122,13 +113,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    private final AtlasPushRecoveryControllerParameters pushRecoveryControllerParameters;
    private final AtlasStateEstimatorParameters stateEstimatorParameters;
    private final AtlasHighLevelControllerParameters highLevelControllerParameters;
-   private final AtlasCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder;
 
    private AtlasSensorSuiteManager sensorSuiteManager;
 
-   private boolean useShapeCollision = false;
-
-   private final RobotDescription robotDescription;
+   private Consumer<RobotDefinition> robotDefinitionMutator;
+   private RobotDefinition robotDefinition, robotDefinitionWithSDFCollision;
+   private RobotDescription robotDescription;
    private String simpleRobotName = "Atlas";
    private StepReachabilityData stepReachabilityData = null;
 
@@ -203,19 +193,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 
       this.target = target;
 
-      InputStream stream = selectedVersion.getSdfFileAsStream();
-      if (stream == null)
-      {
-         LogTools.error("Selected version {} could not be found: stream is null", selectedVersion);
-      }
-      this.loader = DRCRobotSDFLoader.loadDRCRobot(selectedVersion.getResourceDirectories(), stream, this);
-
       sensorInformation = new AtlasSensorInformation(atlasVersion, target);
-
-      for (String forceSensorNames : sensorInformation.getForceSensorNames())
-      {
-         loader.addForceSensor(jointMap, forceSensorNames, forceSensorNames, new RigidBodyTransform());
-      }
 
       boolean runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -223,52 +201,102 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       walkingControllerParameters = new AtlasWalkingControllerParameters(target, jointMap, contactPointParameters);
       pushRecoveryControllerParameters = new AtlasPushRecoveryControllerParameters(target, jointMap, contactPointParameters);
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
-      collisionMeshDefinitionDataHolder = new AtlasCollisionMeshDefinitionDataHolder(jointMap, atlasPhysicalProperties);
+   }
 
-      this.useShapeCollision = useShapeCollision;
-      robotDescription = createRobotDescription();
+   public RobotDefinition getRobotDefinition()
+   {
+      return getRobotDefinition(Double.NaN);
+   }
+
+   public RobotDefinition getRobotDefinition(double transparency)
+   {
+      if (robotDefinition == null)
+      {
+         try
+         {
+            InputStream stream = selectedVersion.getSdfFileAsStream();
+            if (stream == null)
+               LogTools.error("Selected version {} could not be found: stream is null", selectedVersion);
+            SDFRoot sdfRoot = SDFTools.loadSDFRoot(stream, Arrays.asList(selectedVersion.getResourceDirectories()), getClass().getClassLoader());
+            robotDefinition = SDFTools.toFloatingRobotDefinition(sdfRoot.getModels().get(0));
+
+            for (String forceSensorName : sensorInformation.getForceSensorNames())
+            {
+               JointDefinition jointDefinition = robotDefinition.getJointDefinition(forceSensorName);
+               jointDefinition.addSensorDefinition(new WrenchSensorDefinition(forceSensorName, new RigidBodyTransform()));
+            }
+
+            for (String jointName : jointMap.getLastSimulatedJoints())
+               robotDefinition.addSubtreeJointsToIgnore(jointName);
+
+            RobotDefinitionTools.addGroundContactPoints(robotDefinition, getContactPointParameters());
+
+            if (!Double.isNaN(transparency))
+               RobotDefinitionTools.setRobotDefinitionTransparency(robotDefinition, transparency);
+
+            if (jointMap.getModelScale() != 1.0)
+               RobotDefinitionTools.scaleRobotDefinition(robotDefinition,
+                                                         jointMap.getModelScale(),
+                                                         jointMap.getMassScalePower(),
+                                                         j -> !j.getName().contains("hokuyo"));
+
+            RobotDefinitionTools.adjustJointLimitStops(robotDefinition, jointMap);
+            RobotDefinitionTools.adjustRigidBodyInterias(robotDefinition);
+
+            getRobotDefinitionMutator().accept(robotDefinition);
+
+            robotDefinitionWithSDFCollision = new RobotDefinition(robotDefinition);
+            RobotDefinitionTools.removeCollisionShapeDefinitions(robotDefinition);
+         }
+         catch (JAXBException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+      return robotDefinition;
+   }
+
+   public void setRobotDefinitionMutator(Consumer<RobotDefinition> robotDefinitionMutator)
+   {
+      if (robotDefinition != null)
+         throw new IllegalArgumentException("Cannot set customModel once generalizedRobotModel has been created.");
+      this.robotDefinitionMutator = robotDefinitionMutator;
+   }
+
+   public Consumer<RobotDefinition> getRobotDefinitionMutator()
+   {
+      if (robotDefinitionMutator == null)
+         robotDefinitionMutator = new AtlasRobotDefinitionMutator(getJointMap());
+      return robotDefinitionMutator;
    }
 
    public RobotDescription createRobotDescription()
    {
-      return createRobotDescription(0.0);
+      return createRobotDescription(Double.NaN);
    }
 
    public RobotDescription createRobotDescription(double transparency)
    {
-      boolean useCollisionMeshes = false;
+      RobotDefinition robotDefinitionToUse;
 
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
-      RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      RobotDescription robotDescription;
-      if (useShapeCollision)
+      if (!Double.isNaN(transparency) && transparency > 0.0)
       {
-         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMap, useShapeCollision);
-         collisionMeshDefinitionDataHolder.setVisible(false);
-
-         robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
+         robotDefinitionToUse = new RobotDefinition(getRobotDefinition());
+         RobotDefinitionTools.setRobotDefinitionTransparency(robotDefinitionToUse, transparency);
       }
       else
       {
-         robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel,
-                                                                          jointMap,
-                                                                          contactPointParameters,
-                                                                          useCollisionMeshes,
-                                                                          transparency);
+         robotDefinitionToUse = getRobotDefinition();
       }
 
-      return robotDescription;
-   }
-
-   @Override
-   public DRCRobotModelShapeCollisionSettings getShapeCollisionSettings()
-   {
-      return new AtlasRobotModelShapeCollisionSettings(useShapeCollision);
+      return RobotDefinitionTools.toRobotDescription(robotDefinitionToUse);
    }
 
    @Override
    public RobotDescription getRobotDescription()
    {
+      if (robotDescription == null)
+         robotDescription = createRobotDescription();
       return robotDescription;
    }
 
@@ -289,7 +317,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    {
       return pushRecoveryControllerParameters;
    }
-
 
    @Override
    public CoPTrajectoryParameters getCoPTrajectoryParameters()
@@ -381,8 +408,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public FullHumanoidRobotModel createFullRobotModel()
    {
-      RobotDescription robotDescription = loader.createRobotDescription(getJointMap(), getContactPointParameters());
-      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelFromDescription(robotDescription,
+      FullHumanoidRobotModel fullRobotModel = new FullHumanoidRobotModelFromDescription(getRobotDescription(),
                                                                                         getJointMap(),
                                                                                         sensorInformation.getSensorFramesToTrack());
       for (RobotSide robotSide : RobotSide.values())
@@ -423,7 +449,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
-      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(robotDescription,
+      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(getRobotDescription(),
                                                                                                          jointMap,
                                                                                                          enableJointDamping,
                                                                                                          enableTorqueVelocityLimits);
@@ -446,11 +472,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public double getControllerDT()
    {
       return CONTROL_DT;
-   }
-
-   private GeneralizedSDFRobotModel getGeneralizedRobotModel()
-   {
-      return loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
    }
 
    @Override
@@ -578,341 +599,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {
-      return new AtlasCollisionBoxProvider(loader, getJointMap());
-   }
-
-   @Override
-   public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
-   {
-      if (this.jointMap.getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   @Override
-   public void mutateLinkForModel(GeneralizedSDFRobotModel model, SDFLinkHolder linkHolder)
-   {
-      if (this.jointMap.getModelName().equals(model.getName()))
-      {
-         List<SDFVisual> visuals = linkHolder.getVisuals();
-         if (visuals != null)
-         {
-            for (SDFVisual sdfVisual : visuals)
-            {
-               SDFGeometry geometry = sdfVisual.getGeometry();
-               if (geometry != null)
-               {
-                  SDFGeometry.Mesh mesh = geometry.getMesh();
-                  if (mesh != null)
-                  {
-                     String meshUri = mesh.getUri();
-                     if (meshUri.contains("meshes_unplugged"))
-                     {
-                        String replacedURI = meshUri.replace(".dae", ".obj");
-                        mesh.setUri(replacedURI);
-                     }
-                  }
-               }
-
-            }
-         }
-
-         switch (linkHolder.getName())
-         {
-            case "pelvis":
-               break;
-            case "utorso":
-               addCustomCrashProtectionVisual(linkHolder);
-
-               if (BATTERY_MASS_SIMULATOR_IN_ROBOT)
-               {
-                  modifyLinkInertialPose(linkHolder, "-0.043 0.00229456 0.316809 0 -0 0");
-                  modifyLinkMass(linkHolder, 84.609);
-               }
-               else
-               {
-                  modifyLinkInertialPose(linkHolder, "0.017261 0.0032352 0.3483 0 0 0");
-                  modifyLinkMass(linkHolder, 60.009);
-                  double ixx = 1.5;
-                  double ixy = 0.0;
-                  double ixz = 0.1;
-                  double iyy = 1.5;
-                  double iyz = 0.0;
-                  double izz = 0.5;
-                  modifyLinkInertia(linkHolder, new Matrix3D(ixx, ixy, ixz, ixy, iyy, iyz, ixz, iyz, izz));
-               }
-
-               addChestIMU(linkHolder);
-               break;
-            case "l_lfarm":
-            case "r_lfarm":
-               modifyLinkMass(linkHolder, 1.6);
-               break;
-            case "l_hand":
-               modifyLeftHand(linkHolder);
-               break;
-            case "r_hand":
-               modifyRightHand(linkHolder);
-               break;
-            case "l_finger_1_link_0":
-               modifyLinkPose(linkHolder, "0.0903097 1.15155 0.38309 1.5708 0.000796327 1.5708");
-               break;
-            case "l_finger_1_link_1":
-               modifyLinkPose(linkHolder, "0.0903097 1.15155 0.38309 1.5708 0.000796327 1.5708");
-               break;
-            case "l_finger_1_link_2":
-               modifyLinkPose(linkHolder, "0.0903092 1.20153 0.35505 1.5708 0.520796 1.57081");
-               break;
-            case "l_finger_1_link_3":
-               modifyLinkPose(linkHolder, "0.0903088 1.23536 0.335645 1.5708 0.000796327 1.5708");
-               break;
-            case "l_finger_2_link_0":
-               modifyLinkPose(linkHolder, "0.16231 1.15155 0.38309 1.5708 0.000796327 1.5708");
-               break;
-            case "l_finger_2_link_1":
-               modifyLinkPose(linkHolder, "0.16231 1.15155 0.38309 1.5708 0.000796327 1.5708");
-               break;
-            case "l_finger_2_link_2":
-               modifyLinkPose(linkHolder, "0.162309 1.20153 0.35505 1.5708 0.520796 1.57081");
-               break;
-            case "l_finger_2_link_3":
-               modifyLinkPose(linkHolder, "0.162309 1.23536 0.335645 1.5708 0.000796327 1.5708");
-               break;
-            case "l_finger_middle_link_0":
-               modifyLinkPose(linkHolder, "0.12631 1.15155 0.47409 -1.57079 -0.000796327 1.5708");
-               break;
-            case "l_finger_middle_link_1":
-               modifyLinkPose(linkHolder, "0.12631 1.15155 0.47409 -1.57079 -0.000796327 1.5708");
-               break;
-            case "l_finger_middle_link_2":
-               modifyLinkPose(linkHolder, "0.12631 1.20153 0.50213 -1.57079 -0.520796 1.57079");
-               break;
-            case "l_finger_middle_link_3":
-               modifyLinkPose(linkHolder, "0.126311 1.23536 0.521535 -1.57079 -0.000796327 1.5708");
-               break;
-            case "r_finger_1_link_0":
-               modifyLinkPose(linkHolder, "0.16231 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
-               break;
-            case "r_finger_1_link_1":
-               modifyLinkPose(linkHolder, "0.16231 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
-               break;
-            case "r_finger_1_link_2":
-               modifyLinkPose(linkHolder, "0.16231 -1.20153 0.35505 1.57079 0.520796 -1.57079");
-               break;
-            case "r_finger_1_link_3":
-               modifyLinkPose(linkHolder, "0.16231 -1.23536 0.335645 1.57079 0.000796327 -1.57079");
-               break;
-            case "r_finger_2_link_0":
-               modifyLinkPose(linkHolder, "0.0903097 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
-               break;
-            case "r_finger_2_link_1":
-               modifyLinkPose(linkHolder, "0.0903097 -1.15155 0.38309 1.57079 0.000796327 -1.57079");
-               break;
-            case "r_finger_2_link_2":
-               modifyLinkPose(linkHolder, "0.0903099 -1.20153 0.35505 1.57079 0.520796 -1.57079");
-               break;
-            case "r_finger_2_link_3":
-               modifyLinkPose(linkHolder, "0.09031 -1.23536 0.335645 1.57079 0.000796327 -1.57079");
-               break;
-            case "r_finger_middle_link_0":
-               modifyLinkPose(linkHolder, "0.12631 -1.15155 0.47409 -1.5708 -0.000796327 -1.5708");
-               break;
-            case "r_finger_middle_link_1":
-               modifyLinkPose(linkHolder, "0.12631 -1.15155 0.47409 -1.5708 -0.000796327 -1.5708");
-               break;
-            case "r_finger_middle_link_2":
-               modifyLinkPose(linkHolder, "0.12631 -1.20153 0.50213 -1.5708 -0.520796 -1.57079");
-               break;
-            case "r_finger_middle_link_3":
-               modifyLinkPose(linkHolder, "0.126311 -1.23536 0.521535 -1.5708 -0.000796327 -1.5708");
-               break;
-            case "hokuyo_link":
-               modifyHokuyoInertia(linkHolder);
-            default:
-               break;
-         }
-      }
-   }
-
-   @Override
-   public void mutateSensorForModel(GeneralizedSDFRobotModel model, SDFSensor sensor)
-   {
-      if (this.jointMap.getModelName().equals(model.getName()))
-      {
-         if (sensor.getType().equals("imu") && sensor.getName().equals("imu_sensor"))
-         {
-            sensor.setName("imu_sensor_at_pelvis_frame");
-         }
-
-         if (sensor.getType().equals("gpu_ray") && sensor.getName().equals("head_hokuyo_sensor"))
-         {
-            sensor.getRay().getScan().getHorizontal().setSamples("720");
-            sensor.getRay().getScan().getHorizontal().setMinAngle("-1.5708");
-            sensor.getRay().getScan().getHorizontal().setMaxAngle("1.5708");
-         }
-      }
-   }
-
-   @Override
-   public void mutateForceSensorForModel(GeneralizedSDFRobotModel model, SDFForceSensor forceSensor)
-   {
-      if (this.jointMap.getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   @Override
-   public void mutateContactSensorForModel(GeneralizedSDFRobotModel model, SDFContactSensor contactSensor)
-   {
-      if (this.jointMap.getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   @Override
-   public void mutateModelWithAdditions(GeneralizedSDFRobotModel model)
-   {
-      if (this.jointMap.getModelName().equals(model.getName()))
-      {
-
-      }
-   }
-
-   private void addChestIMU(SDFLinkHolder chestLink)
-   {
-      SDFSensor chestIMU = new SDFSensor();
-      chestIMU.setName("imu_sensor_chest");
-      chestIMU.setType("imu");
-
-      // Position only approximate. If we start using the acceleration measurements this will have to be fixed.
-      String piHalf = String.valueOf(Math.PI / 2.0);
-      String negativePiHalf = String.valueOf(-Math.PI / 2.0);
-      chestIMU.setPose("-0.15 0.0 0.3 " + piHalf + " 0.0 " + negativePiHalf);
-
-      SDFSensor.IMU imu = new SDFSensor.IMU();
-      chestIMU.setImu(imu);
-
-      chestLink.getSensors().add(chestIMU);
-   }
-
-   private void modifyHokuyoInertia(SDFLinkHolder linkHolder)
-   {
-      linkHolder.getInertia().setM00(0.000401606); // i_xx
-      linkHolder.getInertia().setM01(4.9927e-08); // i_xy
-      linkHolder.getInertia().setM02(1.0997e-05); // i_xz
-      linkHolder.getInertia().setM11(0.00208115); // i_yy
-      linkHolder.getInertia().setM12(-9.8165e-09); // i_yz
-      linkHolder.getInertia().setM22(0.00178402); // i_zz
-   }
-
-   private void addCustomCrashProtectionVisual(SDFLinkHolder linkHolder)
-   {
-      List<SDFVisual> visuals = linkHolder.getVisuals();
-
-      SDFVisual crashProtectionVisual = new SDFVisual();
-      crashProtectionVisual.setName("utorso_crash_visual");
-
-      SDFVisual.SDFMaterial crashProtectionVisualMaterial = new SDFVisual.SDFMaterial();
-      crashProtectionVisualMaterial.setLighting("1");
-      crashProtectionVisualMaterial.setAmbient("0.75686275 0 0.75686275 1");
-      crashProtectionVisualMaterial.setDiffuse(".7 0 .7 1");
-      crashProtectionVisualMaterial.setSpecular("1 0 1 1");
-      crashProtectionVisualMaterial.setEmissive("0 0 1 1");
-
-      SDFGeometry crashProtectionGeometry = new SDFGeometry();
-      SDFGeometry.Mesh crashProtectionGeometryMesh = new SDFGeometry.Mesh();
-      crashProtectionGeometryMesh.setScale("1 1 1");
-      crashProtectionGeometryMesh.setUri("model://atlas_description/meshes_unplugged/ATLAS_UNPLUGGED_UPPER_BODY_CRASH_PROTECTION_NO_SHOULDER.stl");
-
-      crashProtectionGeometry.setMesh(crashProtectionGeometryMesh);
-
-      crashProtectionVisual.setMaterial(crashProtectionVisualMaterial);
-      crashProtectionVisual.setPose("0 0 0 0 -0 0");
-      crashProtectionVisual.setGeometry(crashProtectionGeometry);
-
-      visuals.add(crashProtectionVisual);
-   }
-
-   private void modifyLeftHand(SDFLinkHolder linkHolder)
-   {
-      modifyLinkMass(linkHolder, 2.7);
-      modifyLinkInertialPose(linkHolder, "-0.0 0.04 0.0 0 -0 0");
-      List<SDFVisual> visuals = linkHolder.getVisuals();
-      if (visuals != null)
-      {
-         for (SDFVisual sdfVisual : visuals)
-         {
-            if (sdfVisual.getName().equals("l_hand_visual"))
-            {
-               sdfVisual.setPose("-0.00179 0.126 0 0 -1.57079 0");
-            }
-         }
-      }
-   }
-
-   private void modifyRightHand(SDFLinkHolder linkHolder)
-   {
-      modifyLinkMass(linkHolder, 2.7);
-      modifyLinkInertialPose(linkHolder, "-0.0 -0.04 0.0 0 -0 0");
-      List<SDFVisual> visuals = linkHolder.getVisuals();
-
-      if (visuals != null)
-      {
-         for (SDFVisual sdfVisual : visuals)
-         {
-            if (sdfVisual.getName().equals("r_hand_visual"))
-            {
-               sdfVisual.setPose("-0.00179 -0.126 0 3.14159 -1.57079 0");
-
-               sdfVisual.getGeometry().getMesh().setUri("model://robotiq_hand_description/meshes/s-model_articulated/visual/palmRight.STL");
-            }
-         }
-
-         addCheckerboardToRightHand(visuals);
-      }
-
-   }
-
-   private void addCheckerboardToRightHand(List<SDFVisual> visuals)
-   {
-      SDFVisual chessboardVisual = new SDFVisual();
-      chessboardVisual.setName("r_hand_chessboard");
-      chessboardVisual.setPose("0.065 -0.198 0.04 0 1.57 0");
-
-      SDFGeometry chessboardVisualGeometry = new SDFGeometry();
-      SDFGeometry.Mesh chessboardVisualGeometryMesh = new SDFGeometry.Mesh();
-
-      chessboardVisualGeometryMesh.setScale(".75 .75 .01");
-      chessboardVisualGeometryMesh.setUri("model://ihmc/calibration_cube.dae");
-
-      chessboardVisualGeometry.setMesh(chessboardVisualGeometryMesh);
-
-      chessboardVisual.setGeometry(chessboardVisualGeometry);
-
-      visuals.add(chessboardVisual);
-   }
-
-   private void modifyLinkMass(SDFLinkHolder linkHolder, double mass)
-   {
-      linkHolder.setMass(mass);
-   }
-
-   private void modifyLinkPose(SDFLinkHolder linkHolder, String pose)
-   {
-      linkHolder.getTransformFromModelReferenceFrame().set(ModelFileLoaderConversionsHelper.poseToTransform(pose));
-   }
-
-   private void modifyLinkInertialPose(SDFLinkHolder linkHolder, String pose)
-   {
-      linkHolder.setInertialFrameWithRespectToLinkFrame(ModelFileLoaderConversionsHelper.poseToTransform(pose));
-   }
-
-   private void modifyLinkInertia(SDFLinkHolder linkHolder, Matrix3D inertia)
-   {
-      linkHolder.setInertia(inertia);
+      return new AtlasCollisionBoxProvider(robotDefinitionWithSDFCollision, getJointMap());
    }
 
    @Override
