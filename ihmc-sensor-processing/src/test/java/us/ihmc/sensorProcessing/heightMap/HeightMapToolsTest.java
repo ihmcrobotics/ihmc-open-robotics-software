@@ -17,15 +17,16 @@ public class HeightMapToolsTest
       for (int i = 0; i < iterations; i++)
       {
          double resolution = EuclidCoreRandomTools.nextDouble(random, 1e-4, 0.5);
-         int minMaxIndex = 2 + random.nextInt(50);
-         double minMaxCoordinate = minMaxIndex * resolution;
-         int computedMinMaxCoordinate = HeightMapTools.minMaxIndex(minMaxCoordinate, resolution);
+         double gridCenter = EuclidCoreRandomTools.nextDouble(random, 1.0);
+         int minMaxIndex = 1 + random.nextInt(50);
+         double gridSizeXY = 2.0 * minMaxIndex * resolution;
+         int computedMinMaxCoordinate = HeightMapTools.minMaxIndex(gridSizeXY, resolution);
          Assertions.assertEquals(minMaxIndex, computedMinMaxCoordinate, "Min max coordinates in height map are not equal");
 
-         double coordinate = EuclidCoreRandomTools.nextDouble(random, minMaxCoordinate);
-         int index = HeightMapTools.toIndex(coordinate, resolution, minMaxIndex);
-         double roundedCoordinate = HeightMapTools.toCoordinate(index, resolution, minMaxIndex);
-         int recomputedIndex = HeightMapTools.toIndex(roundedCoordinate, resolution, minMaxIndex);
+         double coordinate = EuclidCoreRandomTools.nextDouble(random, gridSizeXY);
+         int index = HeightMapTools.toIndex(coordinate, gridCenter, resolution, minMaxIndex);
+         double roundedCoordinate = HeightMapTools.toCoordinate(index, gridCenter, resolution, minMaxIndex);
+         int recomputedIndex = HeightMapTools.toIndex(roundedCoordinate, gridCenter, resolution, minMaxIndex);
          Assertions.assertEquals(index, recomputedIndex, "Height map indexing computes incorrect coordinate");
          Assertions.assertTrue(Math.abs(coordinate - roundedCoordinate) < 0.5 * resolution + 1e-10, "Height map indexing computes incorrect coordinate");
       }

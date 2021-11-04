@@ -1,9 +1,11 @@
 package us.ihmc.avatar.heightMap;
 
 import controller_msgs.msg.dds.HeightMapMessage;
+import controller_msgs.msg.dds.HeightMapMessagePubSubType;
 import org.apache.commons.lang3.tuple.Pair;
 import sensor_msgs.PointCloud2;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -12,19 +14,32 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HeightMapUpdater
 {
-   static final boolean USE_OUSTER_FRAME = false;
+   private static final boolean printFrequency = false;
+
+   static final boolean USE_OUSTER_FRAME = true;
    static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
    static
    {
@@ -44,6 +59,11 @@ public class HeightMapUpdater
    private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
    private final HeightMapManager heightMap;
    private final IHMCROS2Publisher<HeightMapMessage> publisher;
+   private final AtomicReference<Point2D> gridCenter;
+
+   private int publishFrequencyCounter = 0;
+   private final AtomicInteger publishFrequency = new AtomicInteger();
+   private final AtomicBoolean export = new AtomicBoolean();
 
    private static final double FLYING_POINT_MIN_X = 1.092;
    private static final double FLYING_POINT_MAX_X = 1.3;
@@ -51,7 +71,6 @@ public class HeightMapUpdater
    private static final double FLYING_POINT_MAX_Y = 0.1;
    private static final BoundingBox3D FLYING_POINT_BOUNDING_BOX = new BoundingBox3D();
    private static final long[] FLYING_POINT_COUNTERS = new long[10];
-   private static long updateCount = 0;
 
    static
    {
@@ -73,10 +92,19 @@ public class HeightMapUpdater
             heightMapUpdater.execute(() -> update(pointCloudData));
          }
       });
+
+      gridCenter = messager.createInput(HeightMapMessagerAPI.GridCenter);
+      messager.registerTopicListener(HeightMapMessagerAPI.PublishFrequency, publishFrequency::set);
+      messager.registerTopicListener(HeightMapMessagerAPI.Export, export::set);
    }
 
    private void update(Pair<PointCloud2, FramePose3D> pointCloudData)
    {
+      if (printFrequency)
+      {
+         updateFrequency();
+      }
+
       PointCloudData pointCloud = new PointCloudData(pointCloudData.getKey(), 1000000, false);
       ousterFrame.setPoseAndUpdate(pointCloudData.getRight());
 
@@ -92,33 +120,46 @@ public class HeightMapUpdater
       }
       else
       {
-//         int flyingPointDebugCount = 0;
-
          for (int i = 0; i < pointCloud.getPointCloud().length; i++)
          {
             pointCloud.getPointCloud()[i].applyTransform(APPROX_OUSTER_TRANSFORM);
-//            if (FLYING_POINT_BOUNDING_BOX.isInsideInclusive(pointCloud.getPointCloud()[i]))
-//               flyingPointDebugCount++;
          }
+      }
 
-//         FLYING_POINT_COUNTERS[flyingPointDebugCount] = FLYING_POINT_COUNTERS[flyingPointDebugCount] + 1;
-//         if (updateCount++ > 500)
-//         {
-//            for (int i = 0; i < FLYING_POINT_COUNTERS.length; i++)
-//            {
-//               System.out.println(i + "\t" + FLYING_POINT_COUNTERS[i]);
-//            }
-//            updateCount = 0;
-//         }
+      Point2D gridCenter = this.gridCenter.getAndSet(null);
+      if (gridCenter != null)
+      {
+         heightMap.setGridCenter(gridCenter.getX(), gridCenter.getY());
       }
 
       // Update height map
       heightMap.update(pointCloud.getPointCloud());
 
+      if (--publishFrequencyCounter <= 0)
+      {
+         HeightMapMessage message = buildMessage();
+         messager.submitMessage(HeightMapMessagerAPI.HeightMapData, message);
+         publisher.publish(message);
+
+         if (export.getAndSet(false))
+         {
+            ThreadTools.startAThread(() -> export(message), "Height map exporter");
+         }
+
+         publishFrequencyCounter = publishFrequency.get();
+      }
+
+      processing.set(false);
+   }
+
+   private HeightMapMessage buildMessage()
+   {
       // Copy and report over messager
       HeightMapMessage message = new HeightMapMessage();
       message.setGridSizeXy(parameters.getGridSizeXY());
       message.setXyResolution(parameters.getGridResolutionXY());
+      message.setGridCenterX(heightMap.getGridCenterXY().getX());
+      message.setGridCenterY(heightMap.getGridCenterXY().getY());
 
       message.getXCells().addAll(heightMap.getXCells());
       message.getYCells().addAll(heightMap.getYCells());
@@ -127,9 +168,51 @@ public class HeightMapUpdater
          message.getHeights().add((float) heightMap.getHeightAt(heightMap.getXCells().get(i), heightMap.getYCells().get(i)));
       }
 
-      messager.submitMessage(HeightMapMessagerAPI.HeightMapData, message);
-      publisher.publish(message);
+      return message;
+   }
 
-      processing.set(false);
+   private void export(HeightMapMessage message)
+   {
+      try
+      {
+         JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
+         byte[] serializedHeightMap = serializer.serializeToBytes(message);
+
+         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+         String fileName = "HeightMap" + dateFormat.format(new Date()) + ".json";
+         String file = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + fileName;
+
+         FileTools.ensureFileExists(new File(file).toPath());
+         FileOutputStream outputStream = new FileOutputStream(file);
+         PrintStream printStream = new PrintStream(outputStream);
+
+         printStream.write(serializedHeightMap);
+         printStream.flush();
+         outputStream.close();
+         printStream.close();
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   private boolean firstTick = true;
+   private long startTime;
+   private int updateFrequencyCounter = 0;
+
+   private void updateFrequency()
+   {
+      if (firstTick)
+      {
+         startTime = System.currentTimeMillis();
+         firstTick = false;
+      }
+      else
+      {
+         updateFrequencyCounter++;
+         double timePerCallSeconds = 1e-3 * ((double) (System.currentTimeMillis() - startTime) / updateFrequencyCounter);
+         System.out.println("Frequency: " + (1 / timePerCallSeconds) + " Hz");
+      }
    }
 }

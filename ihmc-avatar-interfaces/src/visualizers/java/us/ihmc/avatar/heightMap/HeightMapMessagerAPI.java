@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import sensor_msgs.PointCloud2;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
@@ -14,14 +15,12 @@ class HeightMapMessagerAPI
    private static final MessagerAPIFactory.Category Root = apiFactory.createRootCategory("HeightMapRoot");
    private static final MessagerAPIFactory.CategoryTheme HeightMap = apiFactory.createCategoryTheme("HeightMap");
 
-   // Perception data
    public static final MessagerAPIFactory.Topic<Pair<PointCloud2, FramePose3D>> PointCloudData = topic("PointCloudData");
    public static final MessagerAPIFactory.Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
-
-   // Visualization control
-
-   // Parameters
    public static final MessagerAPIFactory.Topic<HeightMapParameters> parameters = topic("Parameters");
+   public static final MessagerAPIFactory.Topic<Point2D> GridCenter = topic("GridCenter");
+   public static final MessagerAPIFactory.Topic<Integer> PublishFrequency = topic("PublishRate");
+   public static final MessagerAPIFactory.Topic<Boolean> Export = topic("Export");
 
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 

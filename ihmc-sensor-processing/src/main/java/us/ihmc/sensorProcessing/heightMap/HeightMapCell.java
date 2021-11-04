@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.heightMap;
 import com.google.common.util.concurrent.AtomicDouble;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.providers.LongProvider;
@@ -12,6 +13,7 @@ import us.ihmc.yoVariables.providers.LongProvider;
  */
 class HeightMapCell
 {
+   /* Option to simply take highest point at each cell */
    private static final boolean QUICK_UPDATE = false;
 
    /** Observed heights within cell */
@@ -20,7 +22,6 @@ class HeightMapCell
 
    private int oldestIndex;
    private final AtomicDouble estimatedHeight = new AtomicDouble();
-   private double standardDeviation;
 
    public HeightMapCell(HeightMapParameters parameters)
    {
@@ -43,15 +44,17 @@ class HeightMapCell
       }
       else
       {
-         if (heightMeasurements.isEmpty() || height > estimatedHeight.get() + parameters.getMahalanobisScale() * standardDeviation)
+         double lowerBound = estimatedHeight.get() - parameters.getMahalanobisScale() * parameters.getNominalStandardDeviation();
+         double upperBound = estimatedHeight.get() + parameters.getMahalanobisScale() * parameters.getNominalStandardDeviation();
+
+         if (heightMeasurements.isEmpty() || height > upperBound)
          {
             // Reset, point is above height threshold to merge
             clear();
             estimatedHeight.set(height);
-//            variance = parameters.getNominalHeightVariance();
             heightMeasurements.add(height);
          }
-         else if (height < estimatedHeight.get() - parameters.getMahalanobisScale() * standardDeviation)
+         else if (height < lowerBound)
          {
             // Ignore, point is below height threshold to consider
          }
@@ -60,44 +63,55 @@ class HeightMapCell
             // Replace oldest point
             heightMeasurements.set(oldestIndex, height);
             oldestIndex = (oldestIndex + 1) % parameters.getMaxPointsPerCell();
-            updateHeightEstimate(false);
+            updateHeightEstimate();
          }
          else
          {
             // Merge with height estimate
             heightMeasurements.add(height);
-            updateHeightEstimate(true);
+            updateHeightEstimate();
          }
       }
    }
 
-   private void updateHeightEstimate(boolean recomputeVariance)
+   private void updateHeightEstimate()
    {
-      double estimatedHeight = 0.0;
-      for (int i = 0; i < heightMeasurements.size(); i++)
-      {
-         estimatedHeight += heightMeasurements.get(i);
-      }
-      estimatedHeight /= heightMeasurements.size();
-      this.estimatedHeight.set(estimatedHeight);
-
-      if (recomputeVariance)
-      {
-//         variance = parameters.getNominalHeightVariance() / Math.sqrt(heightMeasurements.size());
-      }
+      estimatedHeight.set(heightMeasurements.sum() / heightMeasurements.size());
    }
 
    void clear()
    {
       heightMeasurements.clear();
-
       oldestIndex = 0;
       estimatedHeight.set(Double.NaN);
-      standardDeviation = Double.NaN;
    }
 
    public double getEstimatedHeight()
    {
       return estimatedHeight.get();
+   }
+
+   public double computeHeightVariance()
+   {
+      if (heightMeasurements.isEmpty())
+      {
+         return Double.NaN;
+      }
+
+      double average = 0.0;
+      for (int i = 0; i < heightMeasurements.size(); i++)
+      {
+         average += heightMeasurements.get(i);
+      }
+
+      average /= heightMeasurements.size();
+
+      double sigma = 0.0;
+      for (int i = 0; i < heightMeasurements.size(); i++)
+      {
+         sigma += MathTools.square(heightMeasurements.get(i) - average);
+      }
+
+      return sigma / heightMeasurements.size();
    }
 }
