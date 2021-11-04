@@ -154,7 +154,7 @@ public class ImGuiGlfwWindow
       imGuiWindowAndDockSystem.getPanelManager().addPanel(mainPanel);
       ThreadTools.startAThread(() ->
       {
-         run(() -> { }, () -> { });
+         run(() -> { }, () -> System.exit(0));
       }, glfwWindowForImGui.getWindowTitle());
    }
 
