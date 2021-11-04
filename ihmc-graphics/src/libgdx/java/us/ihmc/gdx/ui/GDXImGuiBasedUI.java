@@ -315,6 +315,7 @@ public class GDXImGuiBasedUI
       imgui3DViewInputProcessors.add(processImGuiInput);
    }
 
+   /** TODO: Implement status bar */
    public void setStatus(String statusText)
    {
       this.statusText = statusText;
