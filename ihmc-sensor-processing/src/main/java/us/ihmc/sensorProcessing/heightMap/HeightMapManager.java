@@ -6,6 +6,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 
+import java.util.Arrays;
+
 public class HeightMapManager
 {
    private static final boolean debug = false;
@@ -16,13 +18,11 @@ public class HeightMapManager
    private final double gridResolutionXY;
    private final int minMaxIndexXY;
    private final int cellsPerAxis;
-   private HeightMapCell[][] heightMapCells;
+   private final HeightMapCell[] heightMapCells;
+   private final TIntArrayList occupiedCells = new TIntArrayList();
 
    private final HeightMapParameters parameters = new HeightMapParameters(null);
    private final Point2D gridCenterXY = new Point2D();
-
-   private final TIntArrayList xCells = new TIntArrayList();
-   private final TIntArrayList yCells = new TIntArrayList();
 
    public HeightMapManager(double gridResolutionXY, double gridSizeXY)
    {
@@ -30,7 +30,7 @@ public class HeightMapManager
       minMaxIndexXY = HeightMapTools.minMaxIndex(gridSizeXY, gridResolutionXY);
 
       cellsPerAxis = 2 * minMaxIndexXY + 1;
-      heightMapCells = new HeightMapCell[cellsPerAxis][cellsPerAxis];
+      heightMapCells = new HeightMapCell[cellsPerAxis * cellsPerAxis];
    }
 
    /**
@@ -47,9 +47,8 @@ public class HeightMapManager
     */
    public void clear()
    {
-      heightMapCells = new HeightMapCell[cellsPerAxis][cellsPerAxis];
-      xCells.clear();
-      yCells.clear();
+      Arrays.fill(heightMapCells, null);
+      occupiedCells.clear();
    }
 
    public void update(Point3D[] pointCloud)
@@ -62,46 +61,82 @@ public class HeightMapManager
 
             int indexX = HeightMapTools.toIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, minMaxIndexXY);
             int indexY = HeightMapTools.toIndex(point.getY(), gridCenterXY.getY(), gridResolutionXY, minMaxIndexXY);
+            int indexXY = HeightMapTools.toXYIndex(indexX, indexY, minMaxIndexXY);
 
-            if (indexX < 0 || indexY < 0 || indexX >= heightMapCells.length || indexY >= heightMapCells.length)
+            if (indexX < 0 || indexY < 0 || indexX >= cellsPerAxis || indexY >= cellsPerAxis)
             {
                continue;
             }
 
-            boolean noCellPresent = heightMapCells[indexX][indexY] == null;
-            if (noCellPresent && xCells.size() >= maxCellCount)
+            boolean noCellPresent = heightMapCells[indexXY] == null;
+            if (noCellPresent && occupiedCells.size() >= maxCellCount)
             {
                continue;
             }
 
             if (noCellPresent)
             {
-               heightMapCells[indexX][indexY] = new HeightMapCell(parameters);
-               xCells.add(indexX);
-               yCells.add(indexY);
+               heightMapCells[indexXY] = new HeightMapCell(parameters);
+               occupiedCells.add(indexXY);
             }
 
-            heightMapCells[indexX][indexY].addPoint(point.getZ());
+            heightMapCells[indexXY].addPoint(point.getZ());
          }
       }
 
       if (debug)
-         LogTools.info(xCells.size() + " cells");
+         LogTools.info(occupiedCells.size() + " cells");
    }
 
    public double getHeightAt(int indexX, int indexY)
    {
-      return heightMapCells[indexX][indexY].getEstimatedHeight();
+      return heightMapCells[HeightMapTools.toXYIndex(indexX, indexY, minMaxIndexXY)].getEstimatedHeight();
    }
 
-   public TIntArrayList getXCells()
+   public TIntArrayList getOccupiedCells()
    {
-      return xCells;
+      return occupiedCells;
    }
 
-   public TIntArrayList getYCells()
+   public int getNumberOfCells()
    {
-      return yCells;
+      return occupiedCells.size();
+   }
+
+   public int getXIndex(int i)
+   {
+      return HeightMapTools.xIndex(occupiedCells.get(i), minMaxIndexXY);
+   }
+
+   public int getYIndex(int i)
+   {
+      return HeightMapTools.yIndex(occupiedCells.get(i), minMaxIndexXY);
+   }
+
+   public double getHeightAt(int i)
+   {
+      return heightMapCells[occupiedCells.get(i)].getEstimatedHeight();
+   }
+
+   public void clearCell(int i)
+   {
+      heightMapCells[occupiedCells.get(i)] = null;
+      occupiedCells.removeAt(i);
+   }
+
+   public void resetAtHeight(int i, double height)
+   {
+      heightMapCells[occupiedCells.get(i)].resetAtHeight(height);
+   }
+
+   public boolean isCellPresent(int xIndex, int yIndex)
+   {
+      return occupiedCells.contains(HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY));
+   }
+
+   public int getCellsPerAxis()
+   {
+      return cellsPerAxis;
    }
 
    public Point2D getGridCenterXY()

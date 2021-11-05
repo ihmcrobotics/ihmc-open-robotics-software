@@ -20,4 +20,21 @@ public class HeightMapTools
    {
       return (int) Math.round(0.5 * gridSizeXY / resolution);
    }
+
+   /* Maps xy indices to single value */
+   public static int toXYIndex(int xIndex, int yIndex, int minMaxIndexXY)
+   {
+      return xIndex + (2 * minMaxIndexXY + 1) * yIndex;
+   }
+
+   public static int xIndex(int xyIndex, int minMaxIndexXY)
+   {
+      return xyIndex % (2 * minMaxIndexXY + 1);
+   }
+
+   public static  int yIndex(int xyIndex, int minMaxIndexXY)
+   {
+      return xyIndex / (2 * minMaxIndexXY + 1);
+   }
+
 }

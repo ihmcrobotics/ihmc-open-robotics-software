@@ -19,15 +19,13 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    public double grid_size_xy_ = -1.0;
    public double grid_center_x_;
    public double grid_center_y_;
-   public us.ihmc.idl.IDLSequence.Integer  x_cells_;
-   public us.ihmc.idl.IDLSequence.Integer  y_cells_;
+   public double estimated_ground_height_;
+   public us.ihmc.idl.IDLSequence.Integer  cells_;
    public us.ihmc.idl.IDLSequence.Float  heights_;
 
    public HeightMapMessage()
    {
-      x_cells_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
-
-      y_cells_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
+      cells_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
 
       heights_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
 
@@ -51,8 +49,9 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       grid_center_y_ = other.grid_center_y_;
 
-      x_cells_.set(other.x_cells_);
-      y_cells_.set(other.y_cells_);
+      estimated_ground_height_ = other.estimated_ground_height_;
+
+      cells_.set(other.cells_);
       heights_.set(other.heights_);
    }
 
@@ -107,16 +106,19 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       return grid_center_y_;
    }
 
-
-   public us.ihmc.idl.IDLSequence.Integer  getXCells()
+   public void setEstimatedGroundHeight(double estimated_ground_height)
    {
-      return x_cells_;
+      estimated_ground_height_ = estimated_ground_height;
+   }
+   public double getEstimatedGroundHeight()
+   {
+      return estimated_ground_height_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Integer  getYCells()
+   public us.ihmc.idl.IDLSequence.Integer  getCells()
    {
-      return y_cells_;
+      return cells_;
    }
 
 
@@ -153,9 +155,9 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.grid_center_y_, other.grid_center_y_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.x_cells_, other.x_cells_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.estimated_ground_height_, other.estimated_ground_height_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.y_cells_, other.y_cells_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.cells_, other.cells_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
 
@@ -182,8 +184,9 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if(this.grid_center_y_ != otherMyClass.grid_center_y_) return false;
 
-      if (!this.x_cells_.equals(otherMyClass.x_cells_)) return false;
-      if (!this.y_cells_.equals(otherMyClass.y_cells_)) return false;
+      if(this.estimated_ground_height_ != otherMyClass.estimated_ground_height_) return false;
+
+      if (!this.cells_.equals(otherMyClass.cells_)) return false;
       if (!this.heights_.equals(otherMyClass.heights_)) return false;
 
       return true;
@@ -205,10 +208,10 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       builder.append(this.grid_center_x_);      builder.append(", ");
       builder.append("grid_center_y=");
       builder.append(this.grid_center_y_);      builder.append(", ");
-      builder.append("x_cells=");
-      builder.append(this.x_cells_);      builder.append(", ");
-      builder.append("y_cells=");
-      builder.append(this.y_cells_);      builder.append(", ");
+      builder.append("estimated_ground_height=");
+      builder.append(this.estimated_ground_height_);      builder.append(", ");
+      builder.append("cells=");
+      builder.append(this.cells_);      builder.append(", ");
       builder.append("heights=");
       builder.append(this.heights_);
       builder.append("}");
