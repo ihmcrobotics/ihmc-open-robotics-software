@@ -75,6 +75,9 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.definition.robot.sdf.SDFTools;
 import us.ihmc.scs2.definition.robot.sdf.items.SDFRoot;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -205,11 +208,6 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public RobotDefinition getRobotDefinition()
    {
-      return getRobotDefinition(Double.NaN);
-   }
-
-   public RobotDefinition getRobotDefinition(double transparency)
-   {
       if (robotDefinition == null)
       {
          try
@@ -230,9 +228,6 @@ public class AtlasRobotModel implements DRCRobotModel
                robotDefinition.addSubtreeJointsToIgnore(jointName);
 
             RobotDefinitionTools.addGroundContactPoints(robotDefinition, getContactPointParameters());
-
-            if (!Double.isNaN(transparency))
-               RobotDefinitionTools.setRobotDefinitionTransparency(robotDefinition, transparency);
 
             if (jointMap.getModelScale() != 1.0)
                RobotDefinitionTools.scaleRobotDefinition(robotDefinition,
@@ -277,12 +272,25 @@ public class AtlasRobotModel implements DRCRobotModel
 
    public RobotDescription createRobotDescription(double transparency)
    {
+      if (Double.isNaN(transparency) || transparency < 0.0)
+         return createRobotDescription((MaterialDefinition) null);
+      else
+         return createRobotDescription(ColorDefinitions.Orange().derive(0, 1, 1, 1.0 - transparency));
+   }
+
+   public RobotDescription createRobotDescription(ColorDefinition diffuseColor)
+   {
+      return createRobotDescription(new MaterialDefinition(diffuseColor));
+   }
+
+   public RobotDescription createRobotDescription(MaterialDefinition materialDefinition)
+   {
       RobotDefinition robotDefinitionToUse;
 
-      if (!Double.isNaN(transparency) && transparency > 0.0)
+      if (materialDefinition != null)
       {
          robotDefinitionToUse = new RobotDefinition(getRobotDefinition());
-         RobotDefinitionTools.setRobotDefinitionTransparency(robotDefinitionToUse, transparency);
+         RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinitionToUse, materialDefinition);
       }
       else
       {
