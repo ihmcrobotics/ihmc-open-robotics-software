@@ -183,29 +183,17 @@ public class RobotDefinitionTools
          body.getCollisionShapeDefinitions().clear();
    }
 
-   public static void setRobotDefinitionTransparency(RobotDefinition robotDefinition, double transparency)
+   public static void setRobotDefinitionMaterial(RobotDefinition robotDefinition, MaterialDefinition materialDefinition)
    {
-      // TODO Not sure if that's how it used to be
-      double alpha = 1.0 - transparency;
-
       for (RigidBodyDefinition body : robotDefinition.getAllRigidBodies())
       {
-         for (VisualDefinition visual : body.getVisualDefinitions())
-         {
-            MaterialDefinition material = visual.getMaterialDefinition();
-            if (material == null)
-               continue;
-
-            if (material.getDiffuseColor() != null)
-               material.getDiffuseColor().setAlpha(alpha);
-            if (material.getAmbientColor() != null)
-               material.getAmbientColor().setAlpha(alpha);
-            if (material.getEmissiveColor() != null)
-               material.getEmissiveColor().setAlpha(alpha);
-            if (material.getSpecularColor() != null)
-               material.getSpecularColor().setAlpha(alpha);
-         }
+         body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(materialDefinition));
       }
+   }
+
+   public static void setRobotDefinitionTransparency(RobotDefinition robotDefinition, double transparency)
+   {
+      setRobotDefinitionMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Orange().derive(0, 1, 1, 1.0 - transparency)));
    }
 
    public static void adjustJointLimitStops(RobotDefinition robotDefinition, JointNameMap<?> jointNameMap)

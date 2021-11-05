@@ -46,6 +46,9 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.definition.robot.sdf.SDFTools;
 import us.ihmc.scs2.definition.robot.sdf.items.SDFRoot;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
@@ -83,7 +86,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private double modelSizeScale = 1.0;
    private double modelMassScale = 1.0;
-   private double transparency = Double.NaN;
+   private MaterialDefinition robotMaterial = null;
    private boolean useOBJGraphics = true;
    private String customModel = null;
    private FootContactPoints<RobotSide> simulationContactPoints = null;
@@ -190,13 +193,33 @@ public class ValkyrieRobotModel implements DRCRobotModel
    /**
     * Overrides the transparency of the robot visuals.
     *
-    * @param transparency the new transparency, default value {@link Double#NaN}.
+    * @param transparency the new transparency.
     */
    public void setTransparency(double transparency)
    {
+      setDiffuseColor(ColorDefinitions.LightGreen().derive(0, 1.0, 1.0, 1.0 - transparency));
+   }
+
+   /**
+    * Overrides the robot visuals with a material that has the given diffuse color.
+    *
+    * @param diffuseColor the new diffuse color for the robot's meshes.
+    */
+   public void setDiffuseColor(ColorDefinition diffuseColor)
+   {
+      setMaterial(new MaterialDefinition(diffuseColor));
+   }
+
+   /**
+    * Overrides the robot visuals with the given material.
+    *
+    * @param robotMaterial the new material for the robot's meshes, default value {@link null}.
+    */
+   public void setMaterial(MaterialDefinition robotMaterial)
+   {
       if (robotDescription != null)
-         throw new IllegalArgumentException("Cannot set transparency once robotDescription has been created.");
-      this.transparency = transparency;
+         throw new IllegalArgumentException("Cannot set robotMaterial once robotDescription has been created.");
+      this.robotMaterial = robotMaterial;
    }
 
    /**
@@ -297,18 +320,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                                               ValkyrieSensorInformation.getForceSensorTransform(forceSensorName)));
             }
 
-            for (String jointName : jointMap.getLastSimulatedJoints())
+            for (String jointName : getJointMap().getLastSimulatedJoints())
                robotDefinition.addSubtreeJointsToIgnore(jointName);
 
             RobotDefinitionTools.addGroundContactPoints(robotDefinition, getContactPointParameters());
 
-            if (!Double.isNaN(transparency))
-               RobotDefinitionTools.setRobotDefinitionTransparency(robotDefinition, transparency);
+            if (robotMaterial != null)
+               RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
 
             if (modelSizeScale != 1.0)
                RobotDefinitionTools.scaleRobotDefinition(robotDefinition, modelSizeScale, modelMassScale, j -> !j.getName().contains("hokuyo"));
 
-            RobotDefinitionTools.adjustJointLimitStops(robotDefinition, jointMap);
+            RobotDefinitionTools.adjustJointLimitStops(robotDefinition, getJointMap());
 
             getRobotDefinitionMutator().accept(robotDefinition);
          }
