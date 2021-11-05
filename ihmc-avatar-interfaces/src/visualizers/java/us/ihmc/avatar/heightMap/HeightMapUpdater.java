@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -29,6 +30,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -66,18 +68,6 @@ public class HeightMapUpdater
 
    private int publishFrequencyCounter = 0;
    private final AtomicInteger publishFrequency = new AtomicInteger();
-
-   private static final double FLYING_POINT_MIN_X = 1.092;
-   private static final double FLYING_POINT_MAX_X = 1.3;
-   private static final double FLYING_POINT_MIN_Y = -0.2;
-   private static final double FLYING_POINT_MAX_Y = 0.1;
-   private static final BoundingBox3D FLYING_POINT_BOUNDING_BOX = new BoundingBox3D();
-   private static final long[] FLYING_POINT_COUNTERS = new long[10];
-
-   static
-   {
-      FLYING_POINT_BOUNDING_BOX.set(FLYING_POINT_MIN_X, FLYING_POINT_MIN_Y, -10.0, FLYING_POINT_MAX_X, FLYING_POINT_MAX_Y, 10.0);
-   }
 
    public HeightMapUpdater(Messager messager, ROS2Node ros2Node, Stage stage)
    {
@@ -149,7 +139,16 @@ public class HeightMapUpdater
 
       if (--publishFrequencyCounter <= 0)
       {
+         /* estimate ground height */
+         double estimatedGroundHeight = estimateGroundHeight(pointCloud.getPointCloud());
+
+         /* filter near and below ground height and outliers that seem too high */
+         performFiltering(estimatedGroundHeight);
+
          HeightMapMessage message = buildMessage();
+
+         message.setEstimatedGroundHeight(estimatedGroundHeight);
+
          messager.submitMessage(HeightMapMessagerAPI.HeightMapData, message);
          publisher.publish(message);
 
@@ -169,14 +168,95 @@ public class HeightMapUpdater
       message.setGridCenterX(heightMap.getGridCenterXY().getX());
       message.setGridCenterY(heightMap.getGridCenterXY().getY());
 
-      message.getXCells().addAll(heightMap.getXCells());
-      message.getYCells().addAll(heightMap.getYCells());
-      for (int i = 0; i < heightMap.getXCells().size(); i++)
+      message.getCells().addAll(heightMap.getOccupiedCells());
+      for (int i = 0; i < heightMap.getNumberOfCells(); i++)
       {
-         message.getHeights().add((float) heightMap.getHeightAt(heightMap.getXCells().get(i), heightMap.getYCells().get(i)));
+         message.getHeights().add((float) heightMap.getHeightAt(i));
       }
 
       return message;
+   }
+
+   private double estimateGroundHeight(Point3D[] pointCloud)
+   {
+      double[] sortedHeights = Arrays.stream(pointCloud).mapToDouble(Point3D::getZ).sorted().toArray();
+      double minPercentile = 0.02;
+      double maxPercentile = 0.06;
+      int minIndex = (int) (minPercentile * sortedHeights.length);
+      int maxIndex = (int) (maxPercentile * sortedHeights.length);
+
+      double estimatedGroundHeight = 0.0;
+      for (int i = minIndex; i < maxIndex; i++)
+      {
+         estimatedGroundHeight += sortedHeights[i];
+      }
+
+      return estimatedGroundHeight / (maxIndex - minIndex);
+   }
+
+   private static final int[] xOffsetEightConnectedGrid = new int[]{-1, -1, 0, 1, 1,  1, 0,  -1};
+   private static final int[] yOffsetEightConnectedGrid = new int[]{0,  1,  1, 1, 0, -1, -1 , -1};
+
+   private void performFiltering(double estimatedGroundHeight)
+   {
+      /* Remove cells near ground height */
+      double groundEpsilonToFilter = 0.03;
+      double groundHeightThreshold = groundEpsilonToFilter + estimatedGroundHeight;
+
+      for (int i = heightMap.getNumberOfCells() - 1; i >= 0; i--)
+      {
+         if (heightMap.getHeightAt(i) < groundHeightThreshold)
+            heightMap.clearCell(i);
+      }
+
+      /* Remove cells with no neighbors and reset height of cells which are higher than all neighbors */
+      int minNumberOfNeighbors = 2;
+      int minNumberOfNeighborsToResetHeight = 3;
+      double epsilonHeightReset = 0.04;
+
+      for (int i = heightMap.getNumberOfCells() - 1; i >= 0; i--)
+      {
+         int xIndex = heightMap.getXIndex(i);
+         int yIndex = heightMap.getYIndex(i);
+
+         if (xIndex == 0 || yIndex == 0 || xIndex == heightMap.getCellsPerAxis() - 1 || yIndex == heightMap.getCellsPerAxis() - 1)
+         {
+            continue;
+         }
+
+         boolean higherThanAllNeighbors = true;
+         double heightThreshold = heightMap.getHeightAt(i) - epsilonHeightReset;
+         int numberOfNeighbors = 0;
+         for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
+         {
+            int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
+            int yNeighbor = yIndex + yOffsetEightConnectedGrid[j];
+            if (heightMap.isCellPresent(xNeighbor, yNeighbor))
+            {
+               numberOfNeighbors++;
+               higherThanAllNeighbors = higherThanAllNeighbors && heightMap.getHeightAt(xNeighbor, yNeighbor) < heightThreshold;
+            }
+         }
+
+         if (numberOfNeighbors < minNumberOfNeighbors)
+         {
+            heightMap.clearCell(i);
+         }
+         else if (numberOfNeighbors >= minNumberOfNeighborsToResetHeight)
+         {
+            double resetHeight = 0.0;
+            for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
+            {
+               int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
+               int yNeighbor = yIndex + yOffsetEightConnectedGrid[j];
+               if (heightMap.isCellPresent(xNeighbor, yNeighbor))
+               {
+                  resetHeight += heightMap.getHeightAt(xNeighbor, yNeighbor);
+               }
+            }
+            heightMap.resetAtHeight(i, resetHeight / numberOfNeighbors);
+         }
+      }
    }
 
    private boolean firstTick = true;

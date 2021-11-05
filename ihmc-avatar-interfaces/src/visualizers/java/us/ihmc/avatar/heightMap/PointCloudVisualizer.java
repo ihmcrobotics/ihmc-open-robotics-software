@@ -71,6 +71,11 @@ public class PointCloudVisualizer extends AnimationTimer
 
    public void processPointCloud(Pair<PointCloud2, FramePose3D> pointCloudData)
    {
+      if (isProcessing.getAndSet(true))
+      {
+         return;
+      }
+
       pointCloudUpdater.execute(() -> processPointCloudInternal(pointCloudData));
    }
 
@@ -78,11 +83,6 @@ public class PointCloudVisualizer extends AnimationTimer
 
    private void processPointCloudInternal(Pair<PointCloud2, FramePose3D> pointCloudData)
    {
-      if (isProcessing.getAndSet(true))
-      {
-         return;
-      }
-
       /* Compute mesh */
       meshBuilder.clear();
 
@@ -92,23 +92,37 @@ public class PointCloudVisualizer extends AnimationTimer
       {
          ousterFrame.setPoseAndUpdate(pointCloudData.getRight());
 
-         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+         for (int i = 0; i < 64; i++)
          {
-            FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[i]);
-            point.changeFrame(ReferenceFrame.getWorldFrame());
-            pointCloud.getPointCloud()[i].set(point);
-
-            Point2D gridCenter = this.gridCenter.get();
-            double minX = gridCenter.getX() - 0.5 * gridSizeXY;
-            double maxX = gridCenter.getX() + 0.5 * gridSizeXY;
-            double minY = gridCenter.getY() - 0.5 * gridSizeXY;
-            double maxY = gridCenter.getY() + 0.5 * gridSizeXY;
-
-            if (MathTools.intervalContains(point.getX(), minX, maxX) && MathTools.intervalContains(point.getY(), minY, maxY))
+            int v = 10;
+            for (int j = 0; j < 2048; j++)
             {
-               meshBuilder.addCube(POINT_SIZE, point, Color.RED);
+               FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[2048 * i + j]);
+               point.changeFrame(ReferenceFrame.getWorldFrame());
+               pointCloud.getPointCloud()[i].set(point);
+
+               double alpha = i / 65.0;
+               meshBuilder.addCube(POINT_SIZE, point, Color.RED.interpolate(Color.BLUE, alpha));
             }
          }
+
+         //         for (int i = 0; i < pointCloud.getPointCloud().length; i++)
+//         {
+//            FramePoint3D point = new FramePoint3D(ousterFrame, pointCloud.getPointCloud()[i]);
+//            point.changeFrame(ReferenceFrame.getWorldFrame());
+//            pointCloud.getPointCloud()[i].set(point);
+//
+//            Point2D gridCenter = this.gridCenter.get();
+//            double minX = gridCenter.getX() - 0.5 * gridSizeXY;
+//            double maxX = gridCenter.getX() + 0.5 * gridSizeXY;
+//            double minY = gridCenter.getY() - 0.5 * gridSizeXY;
+//            double maxY = gridCenter.getY() + 0.5 * gridSizeXY;
+//
+//            if (MathTools.intervalContains(point.getX(), minX, maxX) && MathTools.intervalContains(point.getY(), minY, maxY))
+//            {
+//               meshBuilder.addCube(POINT_SIZE, point, Color.RED);
+//            }
+//         }
       }
       else
       {

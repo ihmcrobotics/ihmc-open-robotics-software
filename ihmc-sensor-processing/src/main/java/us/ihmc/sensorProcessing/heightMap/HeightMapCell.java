@@ -86,6 +86,13 @@ class HeightMapCell
       estimatedHeight.set(Double.NaN);
    }
 
+   void resetAtHeight(double height)
+   {
+      clear();
+      estimatedHeight.set(height);
+      heightMeasurements.add(height);
+   }
+
    public double getEstimatedHeight()
    {
       return estimatedHeight.get();
