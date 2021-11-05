@@ -6,8 +6,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import javax.xml.bind.JAXBException;
-
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
@@ -44,8 +42,6 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
-import us.ihmc.scs2.definition.robot.sdf.SDFTools;
-import us.ihmc.scs2.definition.robot.sdf.items.SDFRoot;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -308,37 +304,27 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if (robotDefinition == null)
       {
-         try
+         robotDefinition = RobotDefinitionTools.loadSDFModel(getSDFModelInputStream(),
+                                                             Arrays.asList(getResourceDirectories()),
+                                                             getClass().getClassLoader(),
+                                                             getJointMap().getModelName(),
+                                                             getContactPointParameters(),
+                                                             getJointMap());
+
+         for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
          {
-            SDFRoot sdfRoot = SDFTools.loadSDFRoot(getSDFModelInputStream(), Arrays.asList(getResourceDirectories()), getClass().getClassLoader());
-            robotDefinition = SDFTools.toFloatingRobotDefinition(sdfRoot.getModels().get(0));
-
-            for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
-            {
-               JointDefinition jointDefinition = robotDefinition.getJointDefinition(forceSensorName);
-               jointDefinition.addSensorDefinition(new WrenchSensorDefinition(forceSensorName,
-                                                                              ValkyrieSensorInformation.getForceSensorTransform(forceSensorName)));
-            }
-
-            for (String jointName : getJointMap().getLastSimulatedJoints())
-               robotDefinition.addSubtreeJointsToIgnore(jointName);
-
-            RobotDefinitionTools.addGroundContactPoints(robotDefinition, getContactPointParameters());
-
-            if (robotMaterial != null)
-               RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
-
-            if (modelSizeScale != 1.0)
-               RobotDefinitionTools.scaleRobotDefinition(robotDefinition, modelSizeScale, modelMassScale, j -> !j.getName().contains("hokuyo"));
-
-            RobotDefinitionTools.adjustJointLimitStops(robotDefinition, getJointMap());
-
-            getRobotDefinitionMutator().accept(robotDefinition);
+            JointDefinition jointDefinition = robotDefinition.getJointDefinition(forceSensorName);
+            jointDefinition.addSensorDefinition(new WrenchSensorDefinition(forceSensorName,
+                                                                           ValkyrieSensorInformation.getForceSensorTransform(forceSensorName)));
          }
-         catch (JAXBException e)
-         {
-            throw new RuntimeException(e);
-         }
+
+         if (robotMaterial != null)
+            RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
+
+         if (modelSizeScale != 1.0)
+            RobotDefinitionTools.scaleRobotDefinition(robotDefinition, modelSizeScale, modelMassScale, j -> !j.getName().contains("hokuyo"));
+
+         getRobotDefinitionMutator().accept(robotDefinition);
       }
 
       return robotDefinition;

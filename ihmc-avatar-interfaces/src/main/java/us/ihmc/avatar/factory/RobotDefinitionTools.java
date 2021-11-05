@@ -1,5 +1,6 @@
 package us.ihmc.avatar.factory;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,6 +14,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -143,6 +146,8 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.SensorDefinition;
 import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
+import us.ihmc.scs2.definition.robot.sdf.SDFTools;
+import us.ihmc.scs2.definition.robot.sdf.items.SDFRoot;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
@@ -160,6 +165,37 @@ import us.ihmc.simulationconstructionset.Robot;
 
 public class RobotDefinitionTools
 {
+   public static RobotDefinition loadSDFModel(InputStream stream,
+                                              Collection<String> resourceDirectories,
+                                              ClassLoader classLoader,
+                                              String modelName,
+                                              ContactPointDefinitionHolder contactPointDefinitionHolder,
+                                              JointNameMap<?> jointNameMap)
+   {
+      try
+      {
+         SDFRoot sdfRoot = SDFTools.loadSDFRoot(stream, resourceDirectories, classLoader);
+         RobotDefinition robotDefinition = SDFTools.toFloatingRobotDefinition(sdfRoot, modelName);
+
+         if (contactPointDefinitionHolder != null)
+            addGroundContactPoints(robotDefinition, contactPointDefinitionHolder);
+
+         if (jointNameMap != null)
+         {
+            for (String jointName : jointNameMap.getLastSimulatedJoints())
+               robotDefinition.addSubtreeJointsToIgnore(jointName);
+            adjustJointLimitStops(robotDefinition, jointNameMap);
+         }
+         adjustRigidBodyInterias(robotDefinition);
+
+         return robotDefinition;
+      }
+      catch (JAXBException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
    public static RobotDefinition toRobotDefinition(RobotDescription robotDescription)
    {
       RigidBodyDefinition rootBody = new RigidBodyDefinition(robotDescription.getName() + "RootBody");

@@ -4,8 +4,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import javax.xml.bind.JAXBException;
-
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
@@ -73,8 +71,6 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
-import us.ihmc.scs2.definition.robot.sdf.SDFTools;
-import us.ihmc.scs2.definition.robot.sdf.items.SDFRoot;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -210,43 +206,32 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       if (robotDefinition == null)
       {
-         try
+         InputStream stream = selectedVersion.getSdfFileAsStream();
+         if (stream == null)
+            LogTools.error("Selected version {} could not be found: stream is null", selectedVersion);
+         robotDefinition = RobotDefinitionTools.loadSDFModel(stream,
+                                                             Arrays.asList(selectedVersion.getResourceDirectories()),
+                                                             getClass().getClassLoader(),
+                                                             selectedVersion.getModelName(),
+                                                             getContactPointParameters(),
+                                                             jointMap);
+
+         for (String forceSensorName : sensorInformation.getForceSensorNames())
          {
-            InputStream stream = selectedVersion.getSdfFileAsStream();
-            if (stream == null)
-               LogTools.error("Selected version {} could not be found: stream is null", selectedVersion);
-            SDFRoot sdfRoot = SDFTools.loadSDFRoot(stream, Arrays.asList(selectedVersion.getResourceDirectories()), getClass().getClassLoader());
-            robotDefinition = SDFTools.toFloatingRobotDefinition(sdfRoot.getModels().get(0));
-
-            for (String forceSensorName : sensorInformation.getForceSensorNames())
-            {
-               JointDefinition jointDefinition = robotDefinition.getJointDefinition(forceSensorName);
-               jointDefinition.addSensorDefinition(new WrenchSensorDefinition(forceSensorName, new RigidBodyTransform()));
-            }
-
-            for (String jointName : jointMap.getLastSimulatedJoints())
-               robotDefinition.addSubtreeJointsToIgnore(jointName);
-
-            RobotDefinitionTools.addGroundContactPoints(robotDefinition, getContactPointParameters());
-
-            if (jointMap.getModelScale() != 1.0)
-               RobotDefinitionTools.scaleRobotDefinition(robotDefinition,
-                                                         jointMap.getModelScale(),
-                                                         jointMap.getMassScalePower(),
-                                                         j -> !j.getName().contains("hokuyo"));
-
-            RobotDefinitionTools.adjustJointLimitStops(robotDefinition, jointMap);
-            RobotDefinitionTools.adjustRigidBodyInterias(robotDefinition);
-
-            getRobotDefinitionMutator().accept(robotDefinition);
-
-            robotDefinitionWithSDFCollision = new RobotDefinition(robotDefinition);
-            RobotDefinitionTools.removeCollisionShapeDefinitions(robotDefinition);
+            JointDefinition jointDefinition = robotDefinition.getJointDefinition(forceSensorName);
+            jointDefinition.addSensorDefinition(new WrenchSensorDefinition(forceSensorName, new RigidBodyTransform()));
          }
-         catch (JAXBException e)
-         {
-            throw new RuntimeException(e);
-         }
+
+         if (jointMap.getModelScale() != 1.0)
+            RobotDefinitionTools.scaleRobotDefinition(robotDefinition,
+                                                      jointMap.getModelScale(),
+                                                      jointMap.getMassScalePower(),
+                                                      j -> !j.getName().contains("hokuyo"));
+
+         getRobotDefinitionMutator().accept(robotDefinition);
+
+         robotDefinitionWithSDFCollision = new RobotDefinition(robotDefinition);
+         RobotDefinitionTools.removeCollisionShapeDefinitions(robotDefinition);
       }
       return robotDefinition;
    }
