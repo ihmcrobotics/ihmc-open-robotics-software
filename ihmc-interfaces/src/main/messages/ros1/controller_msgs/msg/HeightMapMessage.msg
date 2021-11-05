@@ -13,9 +13,9 @@ float64 grid_center_x
 
 float64 grid_center_y
 
-int32[] x_cells
+float64 estimated_ground_height
 
-int32[] y_cells
+int32[] cells
 
 float32[] heights
 

@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class HeightMapVisualizer extends AnimationTimer
 {
    private final Color heightMapColor;
+   private final Color groundPlaneColor;
    private final Group rootNode = new Group();
 
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
@@ -41,8 +42,10 @@ public class HeightMapVisualizer extends AnimationTimer
    {
       rootNode.getChildren().add(heightMapMeshView);
 
-      Color color = Color.OLIVE;
-      heightMapColor = Color.color(color.getRed(), color.getGreen(), color.getBlue(), 0.7);
+      Color olive = Color.OLIVE;
+      Color blue = Color.BLUE;
+      heightMapColor = Color.color(olive.getRed(), olive.getGreen(), olive.getBlue(), 0.7);
+      groundPlaneColor = Color.color(blue.getRed(), blue.getGreen(), blue.getBlue(), 0.8).brighter();
    }
 
    public void update(HeightMapMessage data)
@@ -64,29 +67,33 @@ public class HeightMapVisualizer extends AnimationTimer
       }
    }
 
-   private void computeMesh(HeightMapMessage heightMapData)
+   private void computeMesh(HeightMapMessage heightMapMessage)
    {
       /* Compute mesh */
       meshBuilder.clear();
-      TIntArrayList xCells = heightMapData.getXCells();
-      TIntArrayList yCells = heightMapData.getYCells();
-      IDLSequence.Float heights = heightMapData.getHeights();
-      double gridResolutionXY = heightMapData.getXyResolution();
-      int minMaxIndex = HeightMapTools.minMaxIndex(heightMapData.getGridSizeXy(), gridResolutionXY);
+      IDLSequence.Float heights = heightMapMessage.getHeights();
+      double gridResolutionXY = heightMapMessage.getXyResolution();
+      int minMaxIndex = HeightMapTools.minMaxIndex(heightMapMessage.getGridSizeXy(), gridResolutionXY);
 
-      float minHeight = heightMapData.getHeights().min();
-      double renderedZeroHeight = minHeight - 0.15;
-
-      for (int i = 0; i < xCells.size(); i++)
+      for (int i = 0; i < heights.size(); i++)
       {
-         double x = HeightMapTools.toCoordinate(xCells.get(i), heightMapData.getGridCenterX(), gridResolutionXY, minMaxIndex);
-         double y = HeightMapTools.toCoordinate(yCells.get(i), heightMapData.getGridCenterY(), gridResolutionXY, minMaxIndex);
+         int xIndex = HeightMapTools.xIndex(heightMapMessage.getCells().get(i), minMaxIndex);
+         int yIndex = HeightMapTools.yIndex(heightMapMessage.getCells().get(i), minMaxIndex);
+         double x = HeightMapTools.toCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, minMaxIndex);
+         double y = HeightMapTools.toCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, minMaxIndex);
          double height = heights.get(i);
 
-         double renderedHeight = Math.max(0.0, height - renderedZeroHeight);
+         double renderedHeight = Math.max(0.0, height - heightMapMessage.getEstimatedGroundHeight());
 
-         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, renderedZeroHeight + 0.5 * renderedHeight), heightMapColor);
+         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight), heightMapColor);
       }
+
+      double renderedGroundPlaneHeight = 0.01;
+      meshBuilder.addBox(heightMapMessage.getGridSizeXy(),
+                         heightMapMessage.getGridSizeXy(),
+                         renderedGroundPlaneHeight,
+                         new Point3D(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY(), heightMapMessage.getEstimatedGroundHeight()),
+                         groundPlaneColor);
 
       heightMapToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
       processing.set(false);

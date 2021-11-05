@@ -61,7 +61,6 @@ public abstract class HeightMapUI extends Application
       HeightMapParameters parameters = new HeightMapParameters();
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "height_map");
-      pointCloudVisualizer = new PointCloudVisualizer(messager, parameters);
       new HeightMapUpdater(messager, ros2Node, stage);
 
       FXMLLoader loader = new FXMLLoader();
@@ -70,9 +69,6 @@ public abstract class HeightMapUI extends Application
       mainPane = loader.load();
       SplitPane splitPane = (SplitPane) mainPane.getCenter();
       BorderPane centerBorderPane = (BorderPane) splitPane.getItems().get(0);
-
-      heightMapVisualizer = new HeightMapVisualizer();
-      messager.registerTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
 
       DRCRobotModel robotModel = getRobotModel();
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
@@ -135,16 +131,32 @@ public abstract class HeightMapUI extends Application
       view3dFactory.addWorldCoordinateSystem(0.3);
 
       if (SHOW_HEIGHT_MAP)
+      {
+         heightMapVisualizer = new HeightMapVisualizer();
+         messager.registerTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
          view3dFactory.addNodeToView(heightMapVisualizer.getRoot());
+         heightMapVisualizer.start();
+      }
+      else
+      {
+         heightMapVisualizer = null;
+      }
+
       if (SHOW_POINT_CLOUD)
+      {
+         pointCloudVisualizer = new PointCloudVisualizer(messager, parameters);
          view3dFactory.addNodeToView(pointCloudVisualizer.getRoot());
+         pointCloudVisualizer.start();
+      }
+      else
+      {
+         pointCloudVisualizer = null;
+      }
 
       heightMapParametersUIController.setParameters(parameters);
       heightMapParametersUIController.attachMessager(messager);
       heightMapParametersUIController.bindControls();
 
-      heightMapVisualizer.start();
-      pointCloudVisualizer.start();
 
       view3dFactory.bindSubSceneSizeToPaneSize(mainPane);
       centerBorderPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
@@ -161,13 +173,16 @@ public abstract class HeightMapUI extends Application
       int initialPublishFrequency = 5;
       messager.submitMessage(HeightMapMessagerAPI.PublishFrequency, initialPublishFrequency);
       messager.submitMessage(HeightMapMessagerAPI.EnableUpdates, true);
-      messager.submitMessage(HeightMapMessagerAPI.GridCenterX, 1.5);
+      messager.submitMessage(HeightMapMessagerAPI.GridCenterX, 2.0);
+      messager.submitMessage(HeightMapMessagerAPI.GridCenterY, 0.0);
    }
 
    public void stop()
    {
-      heightMapVisualizer.stop();
-      pointCloudVisualizer.stop();
+      if (SHOW_HEIGHT_MAP)
+         heightMapVisualizer.stop();
+      if (SHOW_POINT_CLOUD)
+         pointCloudVisualizer.stop();
       ros1Node.shutdown();
 
       try

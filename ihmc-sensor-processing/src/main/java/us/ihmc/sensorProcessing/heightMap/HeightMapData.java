@@ -17,6 +17,7 @@ public class HeightMapData
    private final double gridResolutionXY;
    private final double gridSizeXY;
    private final Point2D gridCenter = new Point2D();
+   private double estimatedGroundHeight = Double.NaN;
 
    public HeightMapData(double gridResolutionXY, double gridSizeXY, double gridCenterX, double gridCenterY)
    {
@@ -37,7 +38,7 @@ public class HeightMapData
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
          double height = heightMapMessage.getHeights().get(i);
-         int xyIndex = toXYIndex(heightMapMessage.getXCells().get(i), heightMapMessage.getYCells().get(i));
+         int xyIndex = heightMapMessage.getCells().get(i);
          heights[xyIndex] = height;
          occupiedCells.add(xyIndex);
       }
@@ -47,6 +48,7 @@ public class HeightMapData
    {
       occupiedCells.clear();
       Arrays.fill(heights, Double.NaN);
+      estimatedGroundHeight = Double.NaN;
    }
 
    public double getGridResolutionXY()
@@ -72,8 +74,8 @@ public class HeightMapData
    public Point2D getCellPosition(int i)
    {
       int cell = occupiedCells.get(i);
-      int indexX = xIndex(cell);
-      int indexY = yIndex(cell);
+      int indexX = HeightMapTools.xIndex(cell, minMaxIndexXY);
+      int indexY = HeightMapTools.yIndex(cell, minMaxIndexXY);
       return new Point2D(HeightMapTools.toCoordinate(indexX, gridCenter.getX(), gridResolutionXY, minMaxIndexXY),
                          HeightMapTools.toCoordinate(indexY, gridCenter.getY(), gridResolutionXY, minMaxIndexXY));
    }
@@ -92,7 +94,7 @@ public class HeightMapData
          return Double.NaN;
       }
 
-      return heights[toXYIndex(xIndex, yIndex)];
+      return heights[HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY)];
    }
 
    public void setHeightAt(double x, double y, double z)
@@ -106,7 +108,7 @@ public class HeightMapData
          return;
       }
 
-      int xyIndex = toXYIndex(xIndex, yIndex);
+      int xyIndex = HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY);
       if (Double.isNaN(heights[xyIndex]))
       {
          occupiedCells.add(xyIndex);
@@ -117,28 +119,22 @@ public class HeightMapData
 
    public double getHeightAt(int xIndex, int yIndex)
    {
-      return heights[toXYIndex(xIndex, yIndex)];
+      return heights[HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY)];
+   }
+
+   public void setEstimatedGroundHeight(double estimatedGroundHeight)
+   {
+      this.estimatedGroundHeight = estimatedGroundHeight;
+   }
+
+   public double getEstimatedGroundHeight()
+   {
+      return estimatedGroundHeight;
    }
 
    public int getMinMaxIndexXY()
    {
       return minMaxIndexXY;
-   }
-
-   /* Maps xy indices to single value */
-   private int toXYIndex(int xIndex, int yIndex)
-   {
-      return xIndex + (2 * minMaxIndexXY + 1) * yIndex;
-   }
-
-   private int xIndex(int xyIndex)
-   {
-      return xyIndex % (2 * minMaxIndexXY + 1);
-   }
-
-   private int yIndex(int xyIndex)
-   {
-      return xyIndex / (2 * minMaxIndexXY + 1);
    }
 
    public Point2D getGridCenter()

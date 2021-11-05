@@ -50,7 +50,7 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -84,12 +84,11 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getXCells().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getYCells().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getCells().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -112,13 +111,11 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getGridCenterY());
 
-      if(data.getXCells().size() <= 30000)
-      cdr.write_type_e(data.getXCells());else
-          throw new RuntimeException("x_cells field exceeds the maximum length");
+      cdr.write_type_6(data.getEstimatedGroundHeight());
 
-      if(data.getYCells().size() <= 30000)
-      cdr.write_type_e(data.getYCells());else
-          throw new RuntimeException("y_cells field exceeds the maximum length");
+      if(data.getCells().size() <= 30000)
+      cdr.write_type_e(data.getCells());else
+          throw new RuntimeException("cells field exceeds the maximum length");
 
       if(data.getHeights().size() <= 30000)
       cdr.write_type_e(data.getHeights());else
@@ -138,8 +135,9 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       data.setGridCenterY(cdr.read_type_6());
       	
-      cdr.read_type_e(data.getXCells());	
-      cdr.read_type_e(data.getYCells());	
+      data.setEstimatedGroundHeight(cdr.read_type_6());
+      	
+      cdr.read_type_e(data.getCells());	
       cdr.read_type_e(data.getHeights());	
 
    }
@@ -152,8 +150,8 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_6("grid_size_xy", data.getGridSizeXy());
       ser.write_type_6("grid_center_x", data.getGridCenterX());
       ser.write_type_6("grid_center_y", data.getGridCenterY());
-      ser.write_type_e("x_cells", data.getXCells());
-      ser.write_type_e("y_cells", data.getYCells());
+      ser.write_type_6("estimated_ground_height", data.getEstimatedGroundHeight());
+      ser.write_type_e("cells", data.getCells());
       ser.write_type_e("heights", data.getHeights());
    }
 
@@ -165,8 +163,8 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       data.setGridSizeXy(ser.read_type_6("grid_size_xy"));
       data.setGridCenterX(ser.read_type_6("grid_center_x"));
       data.setGridCenterY(ser.read_type_6("grid_center_y"));
-      ser.read_type_e("x_cells", data.getXCells());
-      ser.read_type_e("y_cells", data.getYCells());
+      data.setEstimatedGroundHeight(ser.read_type_6("estimated_ground_height"));
+      ser.read_type_e("cells", data.getCells());
       ser.read_type_e("heights", data.getHeights());
    }
 

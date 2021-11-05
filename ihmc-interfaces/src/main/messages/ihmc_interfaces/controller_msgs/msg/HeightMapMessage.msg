@@ -7,7 +7,7 @@ float64 xy_resolution -1.0
 float64 grid_size_xy -1.0
 float64 grid_center_x 0.0
 float64 grid_center_y 0.0
+float64 estimated_ground_height 0.0
 
-int32[<=30000] x_cells
-int32[<=30000] y_cells
+int32[<=30000] cells
 float32[<=30000] heights
