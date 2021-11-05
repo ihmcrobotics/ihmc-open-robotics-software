@@ -6,12 +6,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -66,6 +69,8 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstru
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
 import us.ihmc.log.LogTools;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.robotModels.description.InvertedFourBarJointDefinition;
+import us.ihmc.robotModels.description.InvertedFourBarJointDescription;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCapsule3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadOnly;
@@ -87,6 +92,7 @@ import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.LoopClosureConstraintDescription;
+import us.ihmc.robotics.robotDescription.LoopClosurePinConstraintDescription;
 import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -128,6 +134,7 @@ import us.ihmc.scs2.definition.robot.IMUSensorDefinition;
 import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.KinematicPointDefinition;
 import us.ihmc.scs2.definition.robot.LidarSensorDefinition;
+import us.ihmc.scs2.definition.robot.LoopClosureDefinition;
 import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
 import us.ihmc.scs2.definition.robot.PrismaticJointDefinition;
 import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
@@ -977,26 +984,55 @@ public class RobotDefinitionTools
 
       for (JointDefinition rootJointDefinition : robotDefinition.getRootJointDefinitions())
          createAndAddJointsRecursive(robotDescription, rootJointDefinition);
+
+      createAndAddLoopClosureJoints(robotDescription, robotDefinition);
+
+      // Fixed the inner joints of four bar joints: The 2 first inner joints needs to be connected to the four-bar parent joint.
+      for (JointDefinition jointDefinition : robotDefinition.getAllJoints())
+      {
+         if (!(jointDefinition instanceof InvertedFourBarJointDefinition))
+            continue;
+
+         InvertedFourBarJointDefinition fourBarDefinition = (InvertedFourBarJointDefinition) jointDefinition;
+         InvertedFourBarJointDescription fourBarDescription = (InvertedFourBarJointDescription) robotDescription.getJointDescription(fourBarDefinition.getName());
+
+         for (JointDefinition loopJointDefinition : fourBarDefinition.getFourBarJoints())
+         {
+            if (loopJointDefinition.isLoopClosure())
+               continue;
+
+            if (loopJointDefinition.getParentJoint() == fourBarDefinition.getParentJoint())
+            {
+               PinJointDescription loopJointDescription = Arrays.stream(fourBarDescription.getFourBarJoints())
+                                                                .filter(j -> j.getName().equals(loopJointDefinition.getName())).findFirst().get();
+               loopJointDescription.setParentJoint(fourBarDescription.getParentJoint());
+            }
+         }
+      }
+
       for (String jointName : robotDefinition.getNameOfJointsToIgnore())
          robotDescription.getJointDescription(jointName).setIsDynamic(false);
 
       return robotDescription;
    }
 
-   public static void createAndAddJointsRecursive(RobotDescription robotDescription, JointDefinition jointToCopy)
+   public static void createAndAddJointsRecursive(RobotDescription robotDescription, JointDefinition rootJointToCopy)
    {
-      JointDescription rootJointDescription = toJointDescription(jointToCopy);
+      JointDescription rootJointDescription = toJointDescription(rootJointToCopy);
       robotDescription.addRootJoint(rootJointDescription);
 
-      LinkDescription linkDescription = toLinkDescription(jointToCopy.getSuccessor());
+      LinkDescription linkDescription = toLinkDescription(rootJointToCopy.getSuccessor());
       rootJointDescription.setLink(linkDescription);
 
-      for (JointDefinition childJointToCopy : jointToCopy.getSuccessor().getChildrenJoints())
+      for (JointDefinition childJointToCopy : rootJointToCopy.getSuccessor().getChildrenJoints())
          createAndAddJointsRecursive(rootJointDescription, childJointToCopy);
    }
 
    public static void createAndAddJointsRecursive(JointDescription parentJoint, JointDefinition jointToCopy)
    {
+      if (jointToCopy.isLoopClosure())
+         return; // We address the loop closures in a second pass.
+
       JointDescription jointDescription = toJointDescription(jointToCopy);
       parentJoint.addJoint(jointDescription);
 
@@ -1005,6 +1041,34 @@ public class RobotDefinitionTools
 
       for (JointDefinition childJointToCopy : jointToCopy.getSuccessor().getChildrenJoints())
          createAndAddJointsRecursive(jointDescription, childJointToCopy);
+   }
+
+   private static void createAndAddLoopClosureJoints(RobotDescription robotDescription, RobotDefinition robotDefinition)
+   {
+      for (JointDefinition jointDefinition : robotDefinition.getAllJoints())
+      {
+         if (!jointDefinition.isLoopClosure())
+            continue;
+
+         if (!(jointDefinition instanceof RevoluteJointDefinition))
+            throw new UnsupportedOperationException("Only supports revolute loop closures.");
+
+         RevoluteJointDefinition revoluteJointDefinition = (RevoluteJointDefinition) jointDefinition;
+         LoopClosureDefinition loopClosureDefinition = revoluteJointDefinition.getLoopClosureDefinition();
+
+         String name = revoluteJointDefinition.getName();
+         Vector3D offsetFromParentJoint = jointDefinition.getTransformToParent().getTranslation();
+         Vector3D offsetFromLinkParentJoint = loopClosureDefinition.getTransformToSuccessorParent().getTranslation();
+         Vector3D axis = revoluteJointDefinition.getAxis();
+         LoopClosurePinConstraintDescription loopClosurePinConstraintDescription = new LoopClosurePinConstraintDescription(name,
+                                                                                                                           offsetFromParentJoint,
+                                                                                                                           offsetFromLinkParentJoint,
+                                                                                                                           axis);
+         loopClosurePinConstraintDescription.setGains(loopClosureDefinition.getKpSoftConstraint(), loopClosureDefinition.getKdSoftConstraint());
+         robotDescription.getJointDescription(revoluteJointDefinition.getParentJoint().getName()).addConstraint(loopClosurePinConstraintDescription);
+         loopClosurePinConstraintDescription.setLink(robotDescription.getJointDescription(revoluteJointDefinition.getSuccessor().getParentJoint().getName())
+                                                                     .getLink());
+      }
    }
 
    public static LinkDescription toLinkDescription(RigidBodyDefinition source)
@@ -1026,6 +1090,8 @@ public class RobotDefinitionTools
          return toPinJointDescription((RevoluteJointDefinition) source);
       if (source instanceof PrismaticJointDefinition)
          return toSliderJointDescription((PrismaticJointDefinition) source);
+      if (source instanceof InvertedFourBarJointDefinition)
+         return toInvertedFourBarJointDescription((InvertedFourBarJointDefinition) source);
       return null;
    }
 
@@ -1047,6 +1113,58 @@ public class RobotDefinitionTools
    {
       SliderJointDescription output = new SliderJointDescription(source.getName(), source.getTransformToParent().getTranslation(), source.getAxis());
       copyOneDoFJointProperties(source, output);
+      return output;
+   }
+
+   public static InvertedFourBarJointDescription toInvertedFourBarJointDescription(InvertedFourBarJointDefinition source)
+   {
+      Map<String, JointDefinition> nameToJointDefinitionMap = Arrays.stream(source.getFourBarJoints())
+                                                                    .collect(Collectors.toMap(JointDefinition::getName, Function.identity()));
+
+      InvertedFourBarJointDescription output = new InvertedFourBarJointDescription(source.getName());
+
+      RevoluteJointDefinition loopClosureJointDefinition = Arrays.stream(source.getFourBarJoints()).filter(j -> j.isLoopClosure()).findFirst().get();
+      LoopClosureDefinition loopClosureInfo = loopClosureJointDefinition.getLoopClosureDefinition();
+      MutableObject<LinkDescription> loopClosureLink = new MutableObject<>();
+
+      output.setFourBarJoints(Arrays.stream(source.getFourBarJoints()).filter(j -> !j.isLoopClosure()).map(j ->
+      {
+         PinJointDescription jointDescription = toPinJointDescription(j);
+         LinkDescription linkDescription = toLinkDescription(j.getSuccessor());
+         if (linkDescription.getName().equals(loopClosureJointDefinition.getSuccessor().getName()))
+            loopClosureLink.setValue(linkDescription);
+         jointDescription.setLink(linkDescription);
+         return jointDescription;
+      }).toArray(PinJointDescription[]::new));
+
+      String name = loopClosureJointDefinition.getName();
+      Vector3D offsetFromParentJoint = loopClosureJointDefinition.getTransformToParent().getTranslation();
+      Vector3D offsetFromLinkParentJoint = loopClosureInfo.getTransformToSuccessorParent().getTranslation();
+      Vector3D axis = loopClosureJointDefinition.getAxis();
+      LoopClosurePinConstraintDescription fourBarClosure = new LoopClosurePinConstraintDescription(name,
+                                                                                                   offsetFromParentJoint,
+                                                                                                   offsetFromLinkParentJoint,
+                                                                                                   axis);
+      fourBarClosure.setGains(loopClosureInfo.getKpSoftConstraint(), loopClosureInfo.getKdSoftConstraint());
+      fourBarClosure.setLink(loopClosureLink.getValue());
+      output.setFourBarClosure(fourBarClosure);
+
+      Map<String, JointDescription> nameToJointDescriptionMap = Arrays.stream(output.getFourBarJoints())
+                                                                      .collect(Collectors.toMap(JointDescription::getName, Function.identity()));
+
+      // Connect joints
+      for (JointDescription jointDescription : output.getFourBarJoints())
+      {
+         String parentJointName = nameToJointDefinitionMap.get(jointDescription.getName()).getParentJoint().getName();
+         if (!parentJointName.equals(source.getParentJoint().getName())) // Can't connect these yet
+            nameToJointDescriptionMap.get(parentJointName).addJoint(jointDescription);
+      }
+
+      { // Loop closure
+         String parentJointName = loopClosureJointDefinition.getParentJoint().getName();
+         nameToJointDescriptionMap.get(parentJointName).addConstraint(fourBarClosure);
+      }
+
       return output;
    }
 
