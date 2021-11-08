@@ -1,6 +1,5 @@
 package us.ihmc.robotModels;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,8 +33,6 @@ public class FullRobotModelTestTools
 {
    public static class RandomFullHumanoidRobotModel implements FullHumanoidRobotModel
    {
-      private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
       private static final Vector3D roll = new Vector3D(1.0, 0.0, 0.0);
       private static final Vector3D pitch = new Vector3D(0.0, 1.0, 0.0);
       private static final Vector3D yaw = new Vector3D(0.0, 0.0, 1.0);
@@ -54,8 +51,6 @@ public class FullRobotModelTestTools
 
       private final SideDependentList<HashMap<ArmJointName, OneDoFJointBasics>> armJoints = new SideDependentList<>();
       private final SideDependentList<HashMap<LegJointName, OneDoFJointBasics>> legJoints = new SideDependentList<>();
-      private final SideDependentList<ArrayList<OneDoFJointBasics>> armJointIDsList = new SideDependentList<>();
-      private final SideDependentList<ArrayList<OneDoFJointBasics>> legJointIDsList = new SideDependentList<>();
 
       private final LegJointName[] legJointNames;
       private final ArmJointName[] armJointNames;
@@ -93,11 +88,9 @@ public class FullRobotModelTestTools
          {
             endEffectors.put(robotSide, new HashMap<>());
 
-            armJointIDsList.put(robotSide, new ArrayList<>());
             armJoints.put(robotSide, new HashMap<>());
             addArm(robotSide, random);
 
-            legJointIDsList.put(robotSide, new ArrayList<>());
             legJoints.put(robotSide, new HashMap<>());
             addLeg(robotSide, random);
 
@@ -220,14 +213,6 @@ public class FullRobotModelTestTools
          armJoints.get(robotSide).put(ArmJointName.FIRST_WRIST_PITCH, firstWristPitch);
          armJoints.get(robotSide).put(ArmJointName.WRIST_ROLL, wristRoll);
 
-         armJointIDsList.get(robotSide).add(shoulderYaw);
-         armJointIDsList.get(robotSide).add(shoulderRoll);
-         armJointIDsList.get(robotSide).add(shoulderPitch);
-         armJointIDsList.get(robotSide).add(elbowPitch);
-         armJointIDsList.get(robotSide).add(elbowYaw);
-         armJointIDsList.get(robotSide).add(firstWristPitch);
-         armJointIDsList.get(robotSide).add(wristRoll);
-
          hands.put(robotSide, hand);
          endEffectors.get(robotSide).put(LimbName.ARM, hand);
 
@@ -268,13 +253,6 @@ public class FullRobotModelTestTools
          legJoints.get(robotSide).put(LegJointName.KNEE_PITCH, kneePitch);
          legJoints.get(robotSide).put(LegJointName.ANKLE_ROLL, ankleRoll);
          legJoints.get(robotSide).put(LegJointName.ANKLE_PITCH, anklePitch);
-
-         legJointIDsList.get(robotSide).add(hipYaw);
-         legJointIDsList.get(robotSide).add(hipRoll);
-         legJointIDsList.get(robotSide).add(hipPitch);
-         legJointIDsList.get(robotSide).add(kneePitch);
-         legJointIDsList.get(robotSide).add(ankleRoll);
-         legJointIDsList.get(robotSide).add(anklePitch);
 
          feet.put(robotSide, foot);
          endEffectors.get(robotSide).put(LimbName.LEG, foot);
@@ -348,12 +326,6 @@ public class FullRobotModelTestTools
       }
 
       @Override
-      public RigidBodyBasics getPelvis()
-      {
-         return pelvis;
-      }
-
-      @Override
       public RigidBodyBasics getRootBody()
       {
          return pelvis;
@@ -404,12 +376,6 @@ public class FullRobotModelTestTools
       }
 
       @Override
-      public MovingReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName)
-      {
-         return legJoints.get(robotSide).get(legJointName).getFrameAfterJoint();
-      }
-
-      @Override
       public OneDoFJointBasics getLegJoint(RobotSide robotSide, LegJointName legJointName)
       {
          return legJoints.get(robotSide).get(legJointName);
@@ -448,42 +414,13 @@ public class FullRobotModelTestTools
       @Override
       public MovingReferenceFrame getHandControlFrame(RobotSide robotSide)
       {
-         return hands.get(robotSide).getBodyFixedFrame();
-      }
-
-      @Override
-      public MovingReferenceFrame getSoleFrame(RobotSide robotSide)
-      {
-         return soleFrames.get(robotSide);
+         return getHand(robotSide).getBodyFixedFrame();
       }
 
       @Override
       public SideDependentList<MovingReferenceFrame> getSoleFrames()
       {
          return soleFrames;
-      }
-
-      @Override
-      public void setJointAngles(RobotSide side, LimbName limb, double[] q)
-      {
-         int i = 0;
-         if (limb == LimbName.ARM)
-         {
-            for (OneDoFJointBasics joint : armJointIDsList.get(side))
-            {
-               joint.setQ(q[i]);
-               i++;
-            }
-         }
-         else if (limb == LimbName.LEG)
-         {
-            for (OneDoFJointBasics jnt : legJointIDsList.get(side))
-            {
-               jnt.setQ(q[i]);
-               i++;
-            }
-         }
-
       }
 
       @Override

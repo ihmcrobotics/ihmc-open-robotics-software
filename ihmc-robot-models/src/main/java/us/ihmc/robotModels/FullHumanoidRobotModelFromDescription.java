@@ -30,9 +30,6 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    private SideDependentList<EnumMap<ArmJointName, OneDoFJointBasics>> armJointLists;
    private SideDependentList<EnumMap<LegJointName, OneDoFJointBasics>> legJointLists;
 
-   private SideDependentList<ArrayList<OneDoFJointBasics>> armJointIDsList;
-   private SideDependentList<ArrayList<OneDoFJointBasics>> legJointIDsList;
-
    private RigidBodyBasics[] endEffectors = new RigidBodyBasics[4];
    private SideDependentList<RigidBodyBasics> feet;
    private SideDependentList<RigidBodyBasics> hands;
@@ -103,28 +100,6 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       oneDoFJointsExcludingHands = getAllJointsExcludingHands();
    }
 
-   @Override
-   public void setJointAngles(RobotSide side, LimbName limb, double[] q)
-   {
-      int i = 0;
-      if (limb == LimbName.ARM)
-      {
-         for (OneDoFJointBasics joint : armJointIDsList.get(side))
-         {
-            joint.setQ(q[i]);
-            i++;
-         }
-      }
-      else if (limb == LimbName.LEG)
-      {
-         for (OneDoFJointBasics jnt : legJointIDsList.get(side))
-         {
-            jnt.setQ(q[i]);
-            i++;
-         }
-      }
-   }
-
    /** {@inheritDoc} */
    @Override
    public OneDoFJointBasics[] getControllableOneDoFJoints()
@@ -134,23 +109,9 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    /** {@inheritDoc} */
    @Override
-   public MovingReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName)
-   {
-      return getLegJoint(robotSide, legJointName).getFrameAfterJoint();
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public OneDoFJointBasics getLegJoint(RobotSide robotSide, LegJointName legJointName)
    {
       return legJointLists.get(robotSide).get(legJointName);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public RigidBodyBasics getPelvis()
-   {
-      return getRootBody();
    }
 
    /** {@inheritDoc} */
@@ -172,14 +133,14 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    @Override
    public RigidBodyBasics getFoot(RobotSide robotSide)
    {
-      return getEndEffector(robotSide, LimbName.LEG);
+      return feet.get(robotSide);
    }
 
    /** {@inheritDoc} */
    @Override
    public RigidBodyBasics getHand(RobotSide robotSide)
    {
-      return getEndEffector(robotSide, LimbName.ARM);
+      return hands.get(robotSide);
    }
 
    /** {@inheritDoc} */
@@ -197,20 +158,6 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       }
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public MovingReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
-   {
-      return getEndEffector(robotSide, limbName).getParentJoint().getFrameAfterJoint();
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public MovingReferenceFrame getSoleFrame(RobotSide robotSide)
-   {
-      return soleFrames.get(robotSide);
-   }
-
    @Override
    public SideDependentList<MovingReferenceFrame> getSoleFrames()
    {
@@ -223,68 +170,6 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
    {
       return handControlFrames.get(robotSide);
    }
-
-   //   private void copyAllJointsButKeepOneFootFixed( OneDoFJoint[] jointsToCopyFrom, RobotSide sideOfSole )
-   //   {
-   //      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();
-   //      int numJoints = getOneDoFJoints().length;
-   //
-   //      for (int i=0; i<numJoints; i++)  {
-   //         newJointAngles.put( jointsToCopyFrom[i].getName() ,  jointsToCopyFrom[i].getQ() );
-   //      }
-   //      updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
-   //   }
-   //
-   //   private void copyAllJointsButKeepOneFootFixed( ArrayList<OneDoFJoint> jointsToCopyFrom, RobotSide sideOfSole )
-   //   {
-   //      HashMap<String, Double> newJointAngles = new HashMap<String, Double>();
-   //
-   //      for (int i=0; i<jointsToCopyFrom.size(); i++)  {
-   //         newJointAngles.put( jointsToCopyFrom.get(i).getName() ,  jointsToCopyFrom.get(i).getQ() );
-   //      }
-   //      updateJointsAngleButKeepOneFootFixed( newJointAngles, sideOfSole);
-   //   }
-   //
-   //   private void updateJointsAngleButKeepOneFootFixed( Map<String, Double> jointsAngles, RobotSide sideOfSole )
-   //   {
-   //      updateJointsStateButKeepOneFootFixed( jointsAngles,null, sideOfSole);
-   //   }
-   //
-   //   private void updateJointsStateButKeepOneFootFixed( Map<String, Double> jointsAngles, Map<String, Double> jointsVelocities, RobotSide sideOfSole )
-   //   {
-   //      // next line of code must be executed BEFORE modifying the model
-   //      RigidBodyTransform worldToFoot  = getSoleFrame(sideOfSole).getTransformToWorldFrame();
-   //
-   //      if( jointsAngles != null)
-   //      {
-   //         for ( Map.Entry<String, Double> entry: jointsAngles.entrySet() )
-   //         {
-   //             getOneDoFJointByName( entry.getKey() ).setQ( entry.getValue() );
-   //         }
-   //      }
-   //
-   //      if( jointsVelocities != null)
-   //      {
-   //         for ( Map.Entry<String, Double> entry: jointsVelocities.entrySet() )
-   //         {
-   //             getOneDoFJointByName( entry.getKey() ).setQd( entry.getValue() );
-   //         }
-   //      }
-   //
-   //      this.updateFrames();
-   //
-   //      ReferenceFrame footFrame   = getSoleFrame(sideOfSole);
-   //      ReferenceFrame pelvisFrame = getRootJoint().getFrameAfterJoint();
-   //
-   //      RigidBodyTransform footToPelvis = pelvisFrame.getTransformToDesiredFrame( footFrame );
-   //
-   //      RigidBodyTransform worldToPelvis = new RigidBodyTransform();
-   //      worldToPelvis.multiply( worldToFoot, footToPelvis );
-   //
-   //      getRootJoint().setPositionAndRotation(worldToPelvis);
-   //
-   //      this.updateFrames();
-   //   }
 
    @Override
    protected void mapRigidBody(JointDescription joint, OneDoFJointBasics inverseDynamicsJoint, RigidBodyBasics rigidBody)
@@ -328,12 +213,10 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
          case ARM:
             ImmutablePair<RobotSide, ArmJointName> armJointName = humanoidJointNameMap.getArmJointName(joint.getName());
             armJointLists.get(armJointName.getLeft()).put(armJointName.getRight(), inverseDynamicsJoint);
-            armJointIDsList.get(armJointName.getLeft()).add(inverseDynamicsJoint);
             break;
          case LEG:
             ImmutablePair<RobotSide, LegJointName> legJointName = humanoidJointNameMap.getLegJointName(joint.getName());
             legJointLists.get(legJointName.getLeft()).put(legJointName.getRight(), inverseDynamicsJoint);
-            legJointIDsList.get(legJointName.getLeft()).add(inverseDynamicsJoint);
             break;
          case NECK:
             NeckJointName neckJointName = humanoidJointNameMap.getNeckJointName(joint.getName());
@@ -353,9 +236,6 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       {
          armJointLists = SideDependentList.createListOfEnumMaps(ArmJointName.class);
          legJointLists = SideDependentList.createListOfEnumMaps(LegJointName.class);
-
-         armJointIDsList = SideDependentList.createListOfArrayLists();
-         legJointIDsList = SideDependentList.createListOfArrayLists();
 
          feet = new SideDependentList<RigidBodyBasics>();
          hands = new SideDependentList<RigidBodyBasics>();
@@ -380,11 +260,5 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
          }
       }
       return joints.toArray(new OneDoFJointBasics[0]);
-   }
-
-   @Override
-   public RobotSide[] getRobotSegments()
-   {
-      return RobotSide.values;
    }
 }
