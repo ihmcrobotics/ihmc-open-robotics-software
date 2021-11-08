@@ -435,7 +435,7 @@ public class FullRobotModelWrapper implements FullRobotModel
       RigidBodyBasics rigidBody = createRigidBody(jointDescription.getLink(), joint);
 
       for (JointDescription child : jointDescription.getChildrenJoints())
-         createJoint(child, rigidBody);
+         addJointRecursive(child, rigidBody);
       return joint;
    }
 

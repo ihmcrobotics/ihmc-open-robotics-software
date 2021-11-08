@@ -1,9 +1,11 @@
 package us.ihmc.robotModels;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -12,7 +14,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
@@ -31,6 +32,7 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
    private SideDependentList<EnumMap<ArmJointName, OneDoFJointBasics>> armJointMaps;
    private SideDependentList<MovingReferenceFrame> soleFrames;
    private SideDependentList<MovingReferenceFrame> handControlFrames;
+   private OneDoFJointBasics[] controllableOneDoFJoints;
 
    public FullHumanoidRobotModelWrapper(FullHumanoidRobotModelWrapper other)
    {
@@ -39,14 +41,18 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
          setupHumanoidJointNameMap(other.jointNameMap);
    }
 
-   public FullHumanoidRobotModelWrapper(RobotDefinition robotDefinition, JointNameMap<?> jointNameMap)
+   public FullHumanoidRobotModelWrapper(RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
    {
-      super(robotDefinition, jointNameMap);
+      this(robotDefinition.newIntance(ReferenceFrame.getWorldFrame()));
+      setupHumanoidJointNameMap(jointNameMap);
+      setupRobotDefinition(robotDefinition);
    }
 
-   public FullHumanoidRobotModelWrapper(RobotDescription robotDescription, JointNameMap<?> jointNameMap)
+   public FullHumanoidRobotModelWrapper(RobotDescription robotDescription, HumanoidJointNameMap jointNameMap)
    {
-      super(robotDescription, jointNameMap);
+      this(instantiateRobot(robotDescription, ReferenceFrame.getWorldFrame()));
+      setupHumanoidJointNameMap(jointNameMap);
+      setupRobotDescription(robotDescription);
    }
 
    public FullHumanoidRobotModelWrapper(RigidBodyBasics elevator)
@@ -63,6 +69,7 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
       feet = new SideDependentList<>();
       hands = new SideDependentList<>();
+      soleFrames = new SideDependentList<>();
       handControlFrames = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -113,6 +120,35 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
                break;
          }
       }
+
+      if (getHand(RobotSide.LEFT) == null && getHand(RobotSide.RIGHT) == null)
+      {
+         controllableOneDoFJoints = getOneDoFJoints();
+      }
+      else
+      {
+         controllableOneDoFJoints = Arrays.stream(getOneDoFJoints()).filter(joint ->
+         {
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               RigidBodyBasics hand = getHand(robotSide);
+               RigidBodyBasics predecessor = joint.getPredecessor();
+
+               if (hand == null)
+                  continue;
+
+               if (predecessor == hand || MultiBodySystemTools.isAncestor(predecessor, hand))
+                  return false;
+            }
+            return true;
+         }).toArray(OneDoFJointBasics[]::new);
+      }
+   }
+
+   @Override
+   public OneDoFJointBasics[] getControllableOneDoFJoints()
+   {
+      return controllableOneDoFJoints;
    }
 
    @Override
