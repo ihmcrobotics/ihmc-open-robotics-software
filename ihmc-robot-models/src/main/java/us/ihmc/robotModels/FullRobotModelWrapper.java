@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -71,15 +72,76 @@ public class FullRobotModelWrapper implements FullRobotModel
    private JointNameMap<?> jointNameMap;
    private RigidBodyBasics headBody;
    private Map<Enum<?>, RigidBodyBasics> endEffectors;
-   protected EnumMap<NeckJointName, OneDoFJointBasics> neckJoints;
-   protected EnumMap<SpineJointName, OneDoFJointBasics> spineJoints;
+   private EnumMap<NeckJointName, OneDoFJointBasics> neckJoints;
+   private EnumMap<SpineJointName, OneDoFJointBasics> spineJoints;
 
    // Fields initialized with RobotDefinition
    private IMUDefinition[] imuDefinitions;
    private ForceSensorDefinition[] forceSensorDefinitions;
+   private Map<String, JointBasics> cameraJoints;
    private Map<String, ReferenceFrame> cameraFrames;
    private Map<String, JointBasics> lidarJoints;
    private Map<String, RigidBodyTransform> lidarBaseToSensorTransform;
+
+   public FullRobotModelWrapper(FullRobotModelWrapper other)
+   {
+      this(other.elevator);
+      if (other.jointNameMap != null)
+         setupJointNameMap(other.jointNameMap);
+
+      if (other.imuDefinitions != null)
+      {
+         imuDefinitions = new IMUDefinition[other.imuDefinitions.length];
+
+         for (int i = 0; i < other.imuDefinitions.length; i++)
+         {
+            IMUDefinition otherIMUDefinition = other.imuDefinitions[i];
+            RigidBodyBasics body = MultiBodySystemTools.findRigidBody(elevator, otherIMUDefinition.getRigidBody().getName());
+            imuDefinitions[i] = new IMUDefinition(otherIMUDefinition.getName(), body, otherIMUDefinition.getTransformFromIMUToJoint());
+         }
+      }
+
+      if (other.forceSensorDefinitions != null)
+      {
+         forceSensorDefinitions = new ForceSensorDefinition[other.forceSensorDefinitions.length];
+
+         for (int i = 0; i < other.forceSensorDefinitions.length; i++)
+         {
+            ForceSensorDefinition otherForceSensorDefinition = other.forceSensorDefinitions[i];
+            RigidBodyBasics body = MultiBodySystemTools.findRigidBody(elevator, otherForceSensorDefinition.getRigidBody().getName());
+            ReferenceFrame sensorFrame = ForceSensorDefinition.createSensorFrame(otherForceSensorDefinition.getSensorName(),
+                                                                                 body,
+                                                                                 otherForceSensorDefinition.getSensorFrame().getTransformToParent());
+            forceSensorDefinitions[i] = new ForceSensorDefinition(otherForceSensorDefinition.getSensorName(), body, sensorFrame);
+         }
+      }
+
+      if (other.cameraJoints != null && other.cameraFrames != null)
+      {
+         cameraJoints = new HashMap<>();
+         cameraFrames = new HashMap<>();
+
+         for (Entry<String, ReferenceFrame> entry : other.cameraFrames.entrySet())
+         {
+            JointBasics joint = MultiBodySystemTools.findJoint(elevator, other.cameraJoints.get(entry.getKey()).getName());
+            cameraJoints.put(entry.getKey(), joint);
+            cameraFrames.put(entry.getKey(), new FixedReferenceFrame(entry.getKey(), joint.getFrameAfterJoint(), entry.getValue().getTransformToParent()));
+         }
+      }
+
+      if (other.lidarJoints != null && other.lidarBaseToSensorTransform != null)
+      {
+         lidarJoints = new HashMap<>();
+         lidarBaseToSensorTransform = new HashMap<>();
+
+         for (Entry<String, RigidBodyTransform> entry : other.lidarBaseToSensorTransform.entrySet())
+         {
+            JointBasics joint = MultiBodySystemTools.findJoint(elevator, other.lidarJoints.get(entry.getKey()).getName());
+            lidarJoints.put(entry.getKey(), joint);
+            lidarBaseToSensorTransform.put(entry.getKey(), new RigidBodyTransform(entry.getValue()));
+         }
+      }
+   }
 
    public FullRobotModelWrapper(RobotDefinition robotDefinition, JointNameMap<?> jointNameMap)
    {
@@ -117,8 +179,9 @@ public class FullRobotModelWrapper implements FullRobotModel
     *
     * @param robotDefinition
     */
-   public void setupRobotDefinition(RobotDefinition robotDefinition)
+   protected void setupRobotDefinition(RobotDefinition robotDefinition)
    {
+      cameraJoints = new HashMap<>();
       cameraFrames = new HashMap<>();
       lidarJoints = new HashMap<>();
       lidarBaseToSensorTransform = new HashMap<>();
@@ -133,9 +196,7 @@ public class FullRobotModelWrapper implements FullRobotModel
          {
             if (sensorDefinition instanceof IMUSensorDefinition)
             {
-               imuDefinitionList.add(new IMUDefinition(sensorDefinition.getName(),
-                                                       joint.getSuccessor(),
-                                                       new RigidBodyTransform(sensorDefinition.getTransformToJoint())));
+               imuDefinitionList.add(new IMUDefinition(sensorDefinition.getName(), joint.getSuccessor(), sensorDefinition.getTransformToJoint()));
             }
             else if (sensorDefinition instanceof WrenchSensorDefinition)
             {
@@ -146,6 +207,7 @@ public class FullRobotModelWrapper implements FullRobotModel
             }
             else if (sensorDefinition instanceof CameraSensorDefinition)
             {
+               cameraJoints.put(sensorDefinition.getName(), joint);
                cameraFrames.put(sensorDefinition.getName(),
                                 new FixedReferenceFrame(sensorDefinition.getName(), joint.getFrameAfterJoint(), sensorDefinition.getTransformToJoint()));
             }
@@ -166,8 +228,9 @@ public class FullRobotModelWrapper implements FullRobotModel
     *
     * @param robotDescription
     */
-   public void setupRobotDescription(RobotDescription robotDescription)
+   protected void setupRobotDescription(RobotDescription robotDescription)
    {
+      cameraJoints = new HashMap<>();
       cameraFrames = new HashMap<>();
       lidarJoints = new HashMap<>();
       lidarBaseToSensorTransform = new HashMap<>();
@@ -191,6 +254,7 @@ public class FullRobotModelWrapper implements FullRobotModel
          }
          for (CameraSensorDescription cameraSensorDescription : jointDescription.getCameraSensors())
          {
+            cameraJoints.put(cameraSensorDescription.getName(), joint);
             cameraFrames.put(cameraSensorDescription.getName(),
                              new FixedReferenceFrame(cameraSensorDescription.getName(),
                                                      joint.getFrameAfterJoint(),
@@ -219,7 +283,7 @@ public class FullRobotModelWrapper implements FullRobotModel
     *
     * @param jointNameMap
     */
-   public void setupJointNameMap(JointNameMap<?> jointNameMap)
+   protected void setupJointNameMap(JointNameMap<?> jointNameMap)
    {
       this.jointNameMap = jointNameMap;
 

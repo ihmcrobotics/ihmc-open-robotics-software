@@ -141,15 +141,6 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    }
 
    @Override
-   public MovingReferenceFrame getFrameAfterLegJoint(RobotQuadrant robotQuadrant, LegJointName legJointName)
-   {
-      if (hasQuadrant(robotQuadrant))
-         return getLegJoint(robotQuadrant, legJointName).getFrameAfterJoint();
-      else
-         return null;
-   }
-
-   @Override
    public OneDoFJointBasics getLegJoint(RobotQuadrant robotQuadrant, LegJointName legJointName)
    {
       if (hasQuadrant(robotQuadrant))
@@ -192,12 +183,6 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
          return getEndEffector(robotQuadrant, limbName).getParentJoint().getFrameAfterJoint();
       else
          return null;
-   }
-
-   @Override
-   public MovingReferenceFrame getSoleFrame(RobotQuadrant robotQuadrant)
-   {
-      return soleFrames.get(robotQuadrant);
    }
 
    @Override
