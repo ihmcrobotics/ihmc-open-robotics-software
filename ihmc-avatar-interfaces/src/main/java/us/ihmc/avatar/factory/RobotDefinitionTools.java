@@ -196,6 +196,28 @@ public class RobotDefinitionTools
       }
    }
 
+   public static void setDefaultMaterial(RobotDefinition robotDefinition)
+   {
+      setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Orange().derive(0, 1, 1, 0.4)));
+   }
+
+   public static void setDefaultMaterial(RobotDefinition robotDefinition, MaterialDefinition defaultMaterial)
+   {
+      for (RigidBodyDefinition rigidBodyDefinition : robotDefinition.getAllRigidBodies())
+      {
+         for (VisualDefinition visualDefinition : rigidBodyDefinition.getVisualDefinitions())
+         {
+            if (visualDefinition.getMaterialDefinition() != null)
+               continue;
+            GeometryDefinition geometryDefinition = visualDefinition.getGeometryDefinition();
+            if (geometryDefinition instanceof ModelFileGeometryDefinition
+                  && !((ModelFileGeometryDefinition) geometryDefinition).getFileName().toLowerCase().endsWith(".stl"))
+               continue;
+            visualDefinition.setMaterialDefinition(defaultMaterial);
+         }
+      }
+   }
+
    public static RobotDefinition toRobotDefinition(RobotDescription robotDescription)
    {
       RigidBodyDefinition rootBody = new RigidBodyDefinition(robotDescription.getName() + "RootBody");
