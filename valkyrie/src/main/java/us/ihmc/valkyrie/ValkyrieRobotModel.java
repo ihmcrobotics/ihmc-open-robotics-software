@@ -310,6 +310,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                              getJointMap().getModelName(),
                                                              getContactPointParameters(),
                                                              getJointMap());
+         RobotDefinitionTools.setDefaultMaterial(robotDefinition);
 
          for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
          {

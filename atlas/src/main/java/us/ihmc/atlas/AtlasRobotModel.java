@@ -215,6 +215,7 @@ public class AtlasRobotModel implements DRCRobotModel
                                                              selectedVersion.getModelName(),
                                                              getContactPointParameters(),
                                                              jointMap);
+         RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
 
          for (String forceSensorName : sensorInformation.getForceSensorNames())
          {
