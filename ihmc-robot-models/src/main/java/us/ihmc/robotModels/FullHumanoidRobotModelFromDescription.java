@@ -24,7 +24,6 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 
 public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDescription implements FullHumanoidRobotModel
 {
@@ -44,7 +43,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
 
    private final SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<MovingReferenceFrame> handControlFrames = new SideDependentList<>();
-   private final ArrayList<OneDoFJointBasics> oneDoFJointsExcludingHands = new ArrayList<>();
+   private final OneDoFJointBasics[] oneDoFJointsExcludingHands;
 
    private HumanoidJointNameMap humanoidJointNameMap;
 
@@ -101,7 +100,7 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
          index++;
       }
 
-      getAllJointsExcludingHands(oneDoFJointsExcludingHands);
+      oneDoFJointsExcludingHands = getAllJointsExcludingHands();
    }
 
    @Override
@@ -126,64 +125,11 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       }
    }
 
-//   public void getJointAngles(RobotSide side, LimbName limb, double[] q)
-//   {
-//      int i = 0;
-//      if (limb == LimbName.ARM)
-//      {
-//         for (OneDoFJoint jnt : armJointIDsList.get(side))
-//         {
-//            q[i] = jnt.getQ();
-//            i++;
-//         }
-//      }
-//      else if (limb == LimbName.LEG)
-//      {
-//         for (OneDoFJoint jnt : legJointIDsList.get(side))
-//         {
-//            q[i] = jnt.getQ();
-//            i++;
-//         }
-//      }
-//   }
-
-//   public void copyJointAnglesAcrossSide(RobotSide sourceSide, LimbName limb)
-//   {
-//      SideDependentList<ArrayList<OneDoFJoint>> joints;
-//      if (limb == LimbName.ARM)
-//      {
-//         joints = armJointIDsList;
-//      }
-//      else if (limb == LimbName.LEG)
-//      {
-//         joints = legJointIDsList;
-//      }
-//      else
-//      {
-//         return;
-//      }
-//
-//      ArrayList<OneDoFJoint> sourceJoints = joints.get(sourceSide);
-//      ArrayList<OneDoFJoint> destJoints = joints.get(sourceSide.getOppositeSide());
-//
-//      for (int i = 0; i < sourceJoints.size(); i++)
-//      {
-//         destJoints.get(i).setQ(sourceJoints.get(i).getQ());
-//      }
-//   }
-
    /** {@inheritDoc} */
    @Override
    public OneDoFJointBasics[] getControllableOneDoFJoints()
    {
-      return oneDoFJointsExcludingHands.toArray(new OneDoFJointBasics[oneDoFJointsExcludingHands.size()]);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-   {
-      oneDoFJointsToPack.addAll(oneDoFJointsExcludingHands);
+      return oneDoFJointsExcludingHands;
    }
 
    /** {@inheritDoc} */
@@ -417,9 +363,10 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
       }
    }
 
-   private void getAllJointsExcludingHands(ArrayList<OneDoFJointBasics> jointsToPack)
+   private OneDoFJointBasics[] getAllJointsExcludingHands()
    {
-      getOneDoFJoints(jointsToPack);
+      List<OneDoFJointBasics> joints = new ArrayList<>();
+      getOneDoFJoints(joints);
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = getHand(robotSide);
@@ -428,10 +375,11 @@ public class FullHumanoidRobotModelFromDescription extends FullRobotModelFromDes
             OneDoFJointBasics[] fingerJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.collectSubtreeJoints(hand), OneDoFJointBasics.class);
             for (OneDoFJointBasics fingerJoint : fingerJoints)
             {
-               jointsToPack.remove(fingerJoint);
+               joints.remove(fingerJoint);
             }
          }
       }
+      return joints.toArray(new OneDoFJointBasics[0]);
    }
 
    @Override

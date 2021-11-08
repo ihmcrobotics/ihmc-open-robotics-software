@@ -1,11 +1,8 @@
 package us.ihmc.robotModels;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -106,7 +103,9 @@ public class FullRobotModelTestTools
 
             RigidBodyTransform soleToAnkleTransform = new RigidBodyTransform();
             String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-            MovingReferenceFrame soleFrame = MovingReferenceFrame.constructFrameFixedInParent(sidePrefix + "Sole", getEndEffectorFrame(robotSide, LimbName.LEG), soleToAnkleTransform);
+            MovingReferenceFrame soleFrame = MovingReferenceFrame.constructFrameFixedInParent(sidePrefix + "Sole",
+                                                                                              getEndEffectorFrame(robotSide, LimbName.LEG),
+                                                                                              soleToAnkleTransform);
             soleFrames.put(robotSide, soleFrame);
          }
 
@@ -288,208 +287,184 @@ public class FullRobotModelTestTools
          oneDoFJoints.put(anklePitch.getName(), anklePitch);
       }
 
-      @Override public RobotSpecificJointNames getRobotSpecificJointNames()
+      @Override
+      public RobotSpecificJointNames getRobotSpecificJointNames()
       {
          return robotSpecificJointNames;
       }
 
-      @Override public void updateFrames()
-      {
-         elevator.updateFramesRecursively();
-      }
-
-      @Override public MovingReferenceFrame getElevatorFrame()
-      {
-         return elevator.getBodyFixedFrame();
-      }
-
-      @Override public FloatingJointBasics getRootJoint()
+      @Override
+      public FloatingJointBasics getRootJoint()
       {
          return rootJoint;
       }
 
-      @Override public RigidBodyBasics getElevator()
+      @Override
+      public RigidBodyBasics getElevator()
       {
          return elevator;
       }
 
-      @Override public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
+      @Override
+      public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
       {
          return spineJoints.get(spineJointName);
       }
 
-      @Override public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
+      @Override
+      public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
       }
 
-      @Override public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
+      @Override
+      public OneDoFJointBasics getNeckJoint(NeckJointName neckJointName)
       {
          return neckJoints.get(neckJointName);
       }
 
-      @Override public JointBasics getLidarJoint(String lidarName)
+      @Override
+      public JointBasics getLidarJoint(String lidarName)
       {
          return null;
       }
 
-      @Override public ReferenceFrame getLidarBaseFrame(String name)
+      @Override
+      public ReferenceFrame getLidarBaseFrame(String name)
       {
          return null;
       }
 
-      @Override public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+      @Override
+      public RigidBodyTransform getLidarBaseToSensorTransform(String name)
       {
          return null;
       }
 
-      @Override public ReferenceFrame getCameraFrame(String name)
+      @Override
+      public ReferenceFrame getCameraFrame(String name)
       {
          return null;
       }
 
-      @Override public RigidBodyBasics getPelvis()
+      @Override
+      public RigidBodyBasics getPelvis()
       {
          return pelvis;
       }
 
-      @Override public RigidBodyBasics getRootBody()
+      @Override
+      public RigidBodyBasics getRootBody()
       {
          return pelvis;
       }
 
-      @Override public RigidBodyBasics getChest()
+      @Override
+      public RigidBodyBasics getChest()
       {
          return chest;
       }
 
-      @Override public RigidBodyBasics getHead()
+      @Override
+      public RigidBodyBasics getHead()
       {
          return head;
       }
 
-      @Override public ReferenceFrame getHeadBaseFrame()
-      {
-         return head.getParentJoint().getFrameAfterJoint();
-      }
-
-      @Override public OneDoFJointBasics[] getOneDoFJoints()
+      @Override
+      public OneDoFJointBasics[] getOneDoFJoints()
       {
          OneDoFJointBasics[] oneDoFJointsAsArray = new OneDoFJointBasics[oneDoFJoints.size()];
          oneDoFJoints.values().toArray(oneDoFJointsAsArray);
          return oneDoFJointsAsArray;
       }
 
-      @Override public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
+      @Override
+      public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return oneDoFJoints;
       }
 
-      @Override public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-         oneDoFJointsToPack.clear();
-         JointBasics parent = oneDoFJointAtEndOfChain;
-
-         while (parent != rootJoint)
-         {
-            if (parent instanceof OneDoFJointBasics)
-            {
-               oneDoFJointsToPack.add((OneDoFJointBasics) parent);
-            }
-
-            parent = parent.getPredecessor().getParentJoint();
-         }
-
-         Collections.reverse(oneDoFJointsToPack);
-      }
-
-      @Override public OneDoFJointBasics[] getControllableOneDoFJoints()
-      {
-         return getOneDoFJoints();
-      }
-
-      @Override public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-         Collection<OneDoFJointBasics> values = oneDoFJoints.values();
-         oneDoFJointsToPack.addAll(values);
-      }
-
-      @Override public OneDoFJointBasics getOneDoFJointByName(String name)
-      {
-         return oneDoFJoints.get(name);
-      }
-
-      @Override public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-         getOneDoFJoints(oneDoFJointsToPack);
-      }
-
-      @Override public IMUDefinition[] getIMUDefinitions()
+      @Override
+      public IMUDefinition[] getIMUDefinitions()
       {
          return imuDefinitions;
       }
 
-      @Override public ForceSensorDefinition[] getForceSensorDefinitions()
+      @Override
+      public ForceSensorDefinition[] getForceSensorDefinitions()
       {
          return forceSensorDefinitions;
       }
 
-      @Override public double getTotalMass()
+      @Override
+      public double getTotalMass()
       {
          return totalMass;
       }
 
-      @Override public MovingReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName)
+      @Override
+      public MovingReferenceFrame getFrameAfterLegJoint(RobotSide robotSide, LegJointName legJointName)
       {
          return legJoints.get(robotSide).get(legJointName).getFrameAfterJoint();
       }
 
-      @Override public OneDoFJointBasics getLegJoint(RobotSide robotSide, LegJointName legJointName)
+      @Override
+      public OneDoFJointBasics getLegJoint(RobotSide robotSide, LegJointName legJointName)
       {
          return legJoints.get(robotSide).get(legJointName);
       }
 
-      @Override public OneDoFJointBasics getArmJoint(RobotSide robotSide, ArmJointName armJointName)
+      @Override
+      public OneDoFJointBasics getArmJoint(RobotSide robotSide, ArmJointName armJointName)
       {
          return armJoints.get(robotSide).get(armJointName);
       }
 
-      @Override public RigidBodyBasics getFoot(RobotSide robotSide)
+      @Override
+      public RigidBodyBasics getFoot(RobotSide robotSide)
       {
          return feet.get(robotSide);
       }
 
-      @Override public RigidBodyBasics getHand(RobotSide robotSide)
+      @Override
+      public RigidBodyBasics getHand(RobotSide robotSide)
       {
          return hands.get(robotSide);
       }
 
-      @Override public RigidBodyBasics getEndEffector(RobotSide robotSide, LimbName limbName)
+      @Override
+      public RigidBodyBasics getEndEffector(RobotSide robotSide, LimbName limbName)
       {
          return endEffectors.get(robotSide).get(limbName);
       }
 
-      @Override public MovingReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
+      @Override
+      public MovingReferenceFrame getEndEffectorFrame(RobotSide robotSide, LimbName limbName)
       {
          return endEffectors.get(robotSide).get(limbName).getBodyFixedFrame();
       }
 
-      @Override public MovingReferenceFrame getHandControlFrame(RobotSide robotSide)
+      @Override
+      public MovingReferenceFrame getHandControlFrame(RobotSide robotSide)
       {
          return hands.get(robotSide).getBodyFixedFrame();
       }
 
-      @Override public MovingReferenceFrame getSoleFrame(RobotSide robotSide)
+      @Override
+      public MovingReferenceFrame getSoleFrame(RobotSide robotSide)
       {
          return soleFrames.get(robotSide);
       }
 
-      @Override public SideDependentList<MovingReferenceFrame> getSoleFrames()
+      @Override
+      public SideDependentList<MovingReferenceFrame> getSoleFrames()
       {
          return soleFrames;
       }
 
-      @Override public void setJointAngles(RobotSide side, LimbName limb, double[] q)
+      @Override
+      public void setJointAngles(RobotSide side, LimbName limb, double[] q)
       {
          int i = 0;
          if (limb == LimbName.ARM)

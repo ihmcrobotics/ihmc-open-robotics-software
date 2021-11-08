@@ -1,8 +1,6 @@
 package us.ihmc.robotModels;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -18,7 +16,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -70,7 +67,6 @@ public class FullRobotModelFromDescription implements FullRobotModel
    private final ArrayList<IMUDefinition> imuDefinitions = new ArrayList<IMUDefinition>();
    private final ArrayList<ForceSensorDefinition> forceSensorDefinitions = new ArrayList<ForceSensorDefinition>();
    private final HashMap<String, ReferenceFrame> cameraFrames = new HashMap<String, ReferenceFrame>();
-   private final HashMap<String, ReferenceFrame> lidarBaseFrames = new HashMap<String, ReferenceFrame>();
    private final HashMap<String, RigidBodyTransform> lidarBaseToSensorTransform = new HashMap<String, RigidBodyTransform>();
    private final HashMap<String, JointBasics> lidarJoints = new HashMap<>();
    private final HashMap<String, ReferenceFrame> sensorFrames = new HashMap<String, ReferenceFrame>();
@@ -89,7 +85,9 @@ public class FullRobotModelFromDescription implements FullRobotModel
       this(description, sdfJointNameMap, sensorLinksToTrack, false);
    }
 
-   public FullRobotModelFromDescription(RobotDescription description, JointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
+   public FullRobotModelFromDescription(RobotDescription description,
+                                        JointNameMap sdfJointNameMap,
+                                        String[] sensorLinksToTrack,
                                         boolean makeReferenceFramesAlignWithTheJoints)
    {
       super();
@@ -150,20 +148,20 @@ public class FullRobotModelFromDescription implements FullRobotModel
       return endEffectors.get(segmentEnum);
    }
 
-//   public String getModelName()
-//   {
-//      return sdfJointNameMap.getModelName();
-//   }
+   //   public String getModelName()
+   //   {
+   //      return sdfJointNameMap.getModelName();
+   //   }
 
    protected void addSensorDefinitions(JointBasics joint, JointDescription jointDescription)
    {
       List<IMUSensorDescription> imuSensors = jointDescription.getIMUSensors();
 
       // The linkRotation transform is to make sure that the linkToSensor is in a zUpFrame.
-//      RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
-//      linkRotation.setTranslation(0.0, 0.0, 0.0);
-//      RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
-//      linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sensor.getPose()));
+      //      RigidBodyTransform linkRotation = new RigidBodyTransform(child.getTransformFromModelReferenceFrame());
+      //      linkRotation.setTranslation(0.0, 0.0, 0.0);
+      //      RigidBodyTransform linkToSensorInZUp = new RigidBodyTransform();
+      //      linkToSensorInZUp.multiply(linkRotation, SDFConversionsHelper.poseToTransform(sensor.getPose()));
 
       for (IMUSensorDescription imuSensor : imuSensors)
       {
@@ -181,8 +179,6 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
       for (LidarSensorDescription lidarSensor : jointDescription.getLidarSensors())
       {
-         ReferenceFrame lidarFrame = joint.getFrameAfterJoint();
-         lidarBaseFrames.put(lidarSensor.getName(), lidarFrame);
          lidarBaseToSensorTransform.put(lidarSensor.getName(), lidarSensor.getTransformToJoint());
          lidarJoints.put(lidarSensor.getName(), joint);
       }
@@ -194,20 +190,6 @@ public class FullRobotModelFromDescription implements FullRobotModel
    public RobotSpecificJointNames getRobotSpecificJointNames()
    {
       return sdfJointNameMap;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public synchronized void updateFrames()
-   {
-      elevator.updateFramesRecursively();
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public MovingReferenceFrame getElevatorFrame()
-   {
-      return elevator.getBodyFixedFrame();
    }
 
    /** {@inheritDoc} */
@@ -266,38 +248,10 @@ public class FullRobotModelFromDescription implements FullRobotModel
       return oneDoFJointsAsArray;
    }
 
-   /** {@inheritDoc} */
-   @Override
-   public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-   {
-      Collection<OneDoFJointBasics> values = oneDoFJoints.values();
-      oneDoFJointsToPack.addAll(values);
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public OneDoFJointBasics[] getControllableOneDoFJoints()
-   {
-      return getOneDoFJoints();
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-   {
-      getOneDoFJoints(oneDoFJointsToPack);
-   }
-
    @Override
    public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
    {
-      return Collections.unmodifiableMap(oneDoFJoints);
-   }
-
-   @Override
-   public OneDoFJointBasics getOneDoFJointByName(String name)
-   {
-      return oneDoFJoints.get(name);
+      return oneDoFJoints;
    }
 
    /** {@inheritDoc} */
@@ -319,7 +273,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    @Override
    public List<String> getLidarSensorNames()
    {
-      return new ArrayList<>(lidarBaseFrames.keySet());
+      return new ArrayList<>(lidarJoints.keySet());
    }
 
    @Override
@@ -335,30 +289,9 @@ public class FullRobotModelFromDescription implements FullRobotModel
    }
 
    @Override
-   public ReferenceFrame getLidarBaseFrame(String name)
-   {
-      //      for(String st : lidarBaseFrames.keySet())
-      //      {
-      //         System.out.println(st);
-      //      }
-      return lidarBaseFrames.get(name);
-   }
-
-   @Override
    public RigidBodyTransform getLidarBaseToSensorTransform(String name)
    {
       return lidarBaseToSensorTransform.get(name);
-   }
-
-   @Override
-   public ReferenceFrame getHeadBaseFrame()
-   {
-      if (head != null)
-      {
-         JointBasics headJoint = head.getParentJoint();
-         return headJoint.getFrameAfterJoint();
-      }
-      return null;
    }
 
    protected void checkLinkIsNeededForSensor(JointBasics joint, JointDescription jointDescription)
@@ -577,7 +510,8 @@ public class FullRobotModelFromDescription implements FullRobotModel
          addLoopClosureConstraintRecursive(childJoint, constraintPredecessor);
    }
 
-   public static RevoluteJoint createLoopClosureJoint(RigidBodyBasics predecessor, RigidBodyBasics successor,
+   public static RevoluteJoint createLoopClosureJoint(RigidBodyBasics predecessor,
+                                                      RigidBodyBasics successor,
                                                       LoopClosureConstraintDescription constraintDescription)
    {
       RevoluteJoint constraintJoint;
@@ -635,25 +569,6 @@ public class FullRobotModelFromDescription implements FullRobotModel
                break;
          }
       }
-   }
-
-   @Override
-   public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
-   {
-      oneDoFJointsToPack.clear();
-      JointBasics parent = oneDoFJointAtEndOfChain;
-
-      while (parent != rootJoint)
-      {
-         if (parent instanceof OneDoFJointBasics)
-         {
-            oneDoFJointsToPack.add((OneDoFJointBasics) parent);
-         }
-
-         parent = parent.getPredecessor().getParentJoint();
-      }
-
-      Collections.reverse(oneDoFJointsToPack);
    }
 
    @Override
