@@ -32,7 +32,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphPa
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
+import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -401,7 +401,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public FullHumanoidRobotModel createFullRobotModel()
    {
-      return new FullHumanoidRobotModelFromDescription(getRobotDescription(), getJointMap(), getSensorInformation().getSensorFramesToTrack());
+      return new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap());
    }
 
    @Override
