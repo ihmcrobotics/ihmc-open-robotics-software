@@ -55,7 +55,7 @@ public class ValkyrieFullRobotModelVisualizer
 
 //      ((OneDoFJoint)fullRobotModel.getChest().getParentJoint()).setQ(1.0);
 
-      GraphicsRobot robotGraphics = new GraphicsIDRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription, false);
+      GraphicsRobot robotGraphics = new GraphicsIDRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription);
       robotGraphics.update();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

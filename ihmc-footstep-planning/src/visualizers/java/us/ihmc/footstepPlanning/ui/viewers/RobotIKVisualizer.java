@@ -216,7 +216,6 @@ public class RobotIKVisualizer
                        new GraphicsIDRobot(ikMode.name(),
                                            Collections.singletonList(firstJoint),
                                            robotDescription,
-                                           false,
                                            Collections.singletonList(terminalBody)));
 
       JavaFXGraphics3DNode jfxArmGraphicsNode = new JavaFXGraphics3DNode(limbGraphics.get(ikMode).getRootNode());

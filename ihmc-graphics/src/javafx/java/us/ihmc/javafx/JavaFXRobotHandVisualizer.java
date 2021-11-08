@@ -61,7 +61,7 @@ public class JavaFXRobotHandVisualizer
          {
             linkDescription.setLinkGraphics(new LinkGraphicsDescription());
          }
-         graphicsRobot = new GraphicsIDRobot(robotSide.getCamelCaseNameForStartOfExpression() + "HandGraphics", handBody, robotDescription, false);
+         graphicsRobot = new GraphicsIDRobot(robotSide.getCamelCaseNameForStartOfExpression() + "HandGraphics", handBody, robotDescription);
 
          robotRootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode());
          robotRootNode.setMouseTransparent(true);
