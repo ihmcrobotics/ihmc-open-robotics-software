@@ -91,7 +91,7 @@ public class InvertedFourBarJointDefinition extends OneDoFJointDefinition
 
       if (jointDDefinition != null)
       {
-         jointD = jointDDefinition.toJoint(predecessor);
+         jointD = jointDDefinition.toJoint(bodyAD);
          bodyCD = jointDDefinition.getSuccessor().toRigidBody(jointD);
       }
 
