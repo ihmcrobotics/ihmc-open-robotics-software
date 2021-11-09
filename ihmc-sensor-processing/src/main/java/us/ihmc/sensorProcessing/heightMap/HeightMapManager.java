@@ -59,6 +59,28 @@ public class HeightMapManager
          {
             Point3D point = new Point3D(pointCloud[i]);
 
+            // cinders
+//            if (point.getZ() > 0.4)
+//               continue;
+
+            // stairs side
+//            if (point.getX() < 0.5 && point.getZ() > 0.3)
+//               continue;
+//            if (point.getY() > 1.0 && point.getZ() > 0.3)
+//               continue;
+
+            // stairs
+//            if (point.getX() < 0.6 && point.getZ() > -0.2)
+//               continue;
+
+            // narrow passage
+//            if (point.getX() < 0.6 && point.getZ() > 0.2)
+//               continue;
+
+            // stepping stones
+//            if (point.getZ() > 0.4)
+//               continue;
+
             int indexX = HeightMapTools.toIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, minMaxIndexXY);
             int indexY = HeightMapTools.toIndex(point.getY(), gridCenterXY.getY(), gridResolutionXY, minMaxIndexXY);
             int indexXY = HeightMapTools.toXYIndex(indexX, indexY, minMaxIndexXY);

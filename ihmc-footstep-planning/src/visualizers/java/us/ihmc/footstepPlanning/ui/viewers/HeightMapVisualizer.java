@@ -44,7 +44,7 @@ public class HeightMapVisualizer extends AnimationTimer
 
       Color olive = Color.OLIVE;
       Color blue = Color.BLUE;
-      heightMapColor = Color.color(olive.getRed(), olive.getGreen(), olive.getBlue(), 0.7);
+      heightMapColor = Color.color(olive.getRed(), olive.getGreen(), olive.getBlue(), 0.95f);
       groundPlaneColor = Color.color(blue.getRed(), blue.getGreen(), blue.getBlue(), 0.8).brighter();
    }
 
@@ -83,9 +83,10 @@ public class HeightMapVisualizer extends AnimationTimer
          double y = HeightMapTools.toCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, minMaxIndex);
          double height = heights.get(i);
 
-         double renderedHeight = Math.max(0.0, height - heightMapMessage.getEstimatedGroundHeight());
+         double estimatedGroundHeight = heightMapMessage.getHeights().min() - 0.2;
+         double renderedHeight = Math.max(0.0, height - estimatedGroundHeight);
 
-         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight), heightMapColor);
+         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, estimatedGroundHeight + 0.5 * renderedHeight), heightMapColor);
       }
 
       double renderedGroundPlaneHeight = 0.01;
