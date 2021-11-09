@@ -42,6 +42,8 @@ public class HeightMapData
          heights[xyIndex] = height;
          occupiedCells.add(xyIndex);
       }
+
+      this.estimatedGroundHeight = heightMapMessage.getEstimatedGroundHeight();
    }
 
    public void reset()
@@ -88,13 +90,21 @@ public class HeightMapData
       int xIndex = HeightMapTools.toIndex(x, gridCenter.getX(), gridResolutionXY, minMaxIndexXY);
       int yIndex = HeightMapTools.toIndex(y, gridCenter.getY(), gridResolutionXY, minMaxIndexXY);
 
-      if (xIndex < 0 || yIndex < 0 || xIndex > minMaxIndexXY || yIndex > minMaxIndexXY)
+      if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
       {
          LogTools.error("Invalid index for point (" + x + ", " + y + "). Indices: (" + xIndex + ", " + yIndex + ")");
          return Double.NaN;
       }
 
-      return heights[HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY)];
+      int xyIndex = HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY);
+      if (occupiedCells.contains(xyIndex))
+      {
+         return heights[xyIndex];
+      }
+      else
+      {
+         return estimatedGroundHeight;
+      }
    }
 
    public void setHeightAt(double x, double y, double z)
@@ -102,7 +112,7 @@ public class HeightMapData
       int xIndex = HeightMapTools.toIndex(x, gridCenter.getX(), gridResolutionXY, minMaxIndexXY);
       int yIndex = HeightMapTools.toIndex(y, gridCenter.getY(), gridResolutionXY, minMaxIndexXY);
 
-      if (xIndex < 0 || yIndex < 0 || xIndex > cellsPerAxis || yIndex > cellsPerAxis)
+      if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
       {
          LogTools.error("Invalid index for point (" + x + ", " + y + "). Indices: (" + xIndex + ", " + yIndex + ")");
          return;
@@ -119,6 +129,12 @@ public class HeightMapData
 
    public double getHeightAt(int xIndex, int yIndex)
    {
+      if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
+      {
+         LogTools.error("Invalid index (" + xIndex + ", " + yIndex + ")");
+         return Double.NaN;
+      }
+
       return heights[HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY)];
    }
 
