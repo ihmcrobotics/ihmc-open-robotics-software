@@ -3,7 +3,6 @@ package us.ihmc.tools.time;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
