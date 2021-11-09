@@ -22,10 +22,26 @@ public class GDXVRController extends GDXVRTrackedDevice
 
    private final LongBuffer clickTriggerActionHandle = BufferUtils.newLongBuffer(1);
    private InputDigitalActionData clickTriggerActionData;
+   private final LongBuffer triggerTouchedActionHandle = BufferUtils.newLongBuffer(1);
+   private InputDigitalActionData triggerTouchedActionData;
+   private final LongBuffer triggerActionHandle = BufferUtils.newLongBuffer(1);
+   private InputAnalogActionData triggerActionData;
    private final LongBuffer aButtonActionHandle = BufferUtils.newLongBuffer(1);
    private InputDigitalActionData aButtonActionData;
+   private final LongBuffer aTouchedActionHandle = BufferUtils.newLongBuffer(1);
+   private InputDigitalActionData aTouchedActionData;
    private final LongBuffer bButtonActionHandle = BufferUtils.newLongBuffer(1);
    private InputDigitalActionData bButtonActionData;
+   private final LongBuffer bTouchedActionHandle = BufferUtils.newLongBuffer(1);
+   private InputDigitalActionData bTouchedActionData;
+   private final LongBuffer joystickPressActionHandle = BufferUtils.newLongBuffer(1);
+   private InputDigitalActionData joystickPressActionData;
+   private final LongBuffer touchpadActionHandle = BufferUtils.newLongBuffer(1);
+   private InputAnalogActionData touchpadActionData;
+   private final LongBuffer joystickActionHandle = BufferUtils.newLongBuffer(1);
+   private InputAnalogActionData joystickActionData;
+   private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
+   private InputAnalogActionData gripActionData;
 
    private final RigidBodyTransform controllerToWorldTransform = new RigidBodyTransform();
    private final ReferenceFrame xRightZDownControllerFrame;
@@ -61,10 +77,26 @@ public class GDXVRController extends GDXVRTrackedDevice
 
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_clicktrigger", clickTriggerActionHandle);
       clickTriggerActionData = InputDigitalActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_triggertouched", triggerTouchedActionHandle);
+      triggerTouchedActionData = InputDigitalActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_trigger", triggerActionHandle);
+      triggerActionData = InputAnalogActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_abutton", aButtonActionHandle);
       aButtonActionData = InputDigitalActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_atouched", aTouchedActionHandle);
+      aTouchedActionData = InputDigitalActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_bbutton", bButtonActionHandle);
       bButtonActionData = InputDigitalActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_btouched", bTouchedActionHandle);
+      bTouchedActionData = InputDigitalActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_joystickpress", joystickPressActionHandle);
+      joystickPressActionData = InputDigitalActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_touchpad", touchpadActionHandle);
+      touchpadActionData = InputAnalogActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_joystick", joystickActionHandle);
+      joystickActionData = InputAnalogActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_grip", gripActionHandle);
+      gripActionData = InputAnalogActionData.create();
    }
 
    public void update(TrackedDevicePose.Buffer trackedDevicePoses)
@@ -80,8 +112,16 @@ public class GDXVRController extends GDXVRTrackedDevice
       xRightZDownControllerFrame.update();
 
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetDigitalActionData(triggerTouchedActionHandle.get(0), triggerTouchedActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetAnalogActionData(triggerActionHandle.get(0), triggerActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(aButtonActionHandle.get(0), aButtonActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetDigitalActionData(aTouchedActionHandle.get(0), aTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(bButtonActionHandle.get(0), bButtonActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetDigitalActionData(bTouchedActionHandle.get(0), bTouchedActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetDigitalActionData(joystickPressActionHandle.get(0), joystickPressActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetAnalogActionData(touchpadActionHandle.get(0), touchpadActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
    }
 
    public InputDigitalActionData getClickTriggerActionData()
@@ -89,14 +129,54 @@ public class GDXVRController extends GDXVRTrackedDevice
       return clickTriggerActionData;
    }
 
+   public InputDigitalActionData getTriggerTouchedActionData()
+   {
+      return triggerTouchedActionData;
+   }
+
+   public InputAnalogActionData getTriggerActionData()
+   {
+      return triggerActionData;
+   }
+
    public InputDigitalActionData getAButtonActionData()
    {
       return aButtonActionData;
    }
 
+   public InputDigitalActionData getATouchedActionData()
+   {
+      return aTouchedActionData;
+   }
+
    public InputDigitalActionData getBButtonActionData()
    {
       return bButtonActionData;
+   }
+
+   public InputDigitalActionData getBTouchedActionData()
+   {
+      return bTouchedActionData;
+   }
+
+   public InputDigitalActionData getJoystickPressActionData()
+   {
+      return joystickPressActionData;
+   }
+
+   public InputAnalogActionData getTouchpadActionData()
+   {
+      return touchpadActionData;
+   }
+
+   public InputAnalogActionData getJoystickActionData()
+   {
+      return joystickActionData;
+   }
+
+   public InputAnalogActionData getGripActionData()
+   {
+      return gripActionData;
    }
 
    public ReferenceFrame getXForwardZUpControllerFrame()
