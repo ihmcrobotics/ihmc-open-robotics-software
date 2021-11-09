@@ -17,12 +17,42 @@
          "type" : "boolean"
       },
       {
+         "name" : "/actions/main/in/left_triggertouched",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/right_triggertouched",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/left_trigger",
+         "requirement" : "mandatory",
+         "type" : "vector1"
+      },
+      {
+         "name" : "/actions/main/in/right_trigger",
+         "requirement" : "mandatory",
+         "type" : "vector1"
+      },
+      {
          "name" : "/actions/main/in/left_abutton",
          "requirement" : "mandatory",
          "type" : "boolean"
       },
       {
          "name" : "/actions/main/in/right_abutton",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/left_atouched",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/right_atouched",
          "requirement" : "mandatory",
          "type" : "boolean"
       },
@@ -35,6 +65,56 @@
          "name" : "/actions/main/in/right_bbutton",
          "requirement" : "mandatory",
          "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/left_btouched",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/right_btouched",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/left_joystickpress",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/right_joystickpress",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/left_touchpad",
+         "requirement" : "mandatory",
+         "type" : "vector2"
+      },
+      {
+         "name" : "/actions/main/in/right_touchpad",
+         "requirement" : "mandatory",
+         "type" : "vector2"
+      },
+      {
+         "name" : "/actions/main/in/left_joystick",
+         "requirement" : "mandatory",
+         "type" : "vector2"
+      },
+      {
+         "name" : "/actions/main/in/right_joystick",
+         "requirement" : "mandatory",
+         "type" : "vector2"
+      },
+      {
+         "name" : "/actions/main/in/left_grip",
+         "requirement" : "mandatory",
+         "type" : "vector1"
+      },
+      {
+         "name" : "/actions/main/in/right_grip",
+         "requirement" : "mandatory",
+         "type" : "vector1"
       }
    ],
    "default_bindings" : [
@@ -48,10 +128,26 @@
          "/actions/main" : "My Game Actions",
          "/actions/main/in/left_clicktrigger" : "Click Trigger Left",
          "/actions/main/in/right_clicktrigger" : "Click Trigger Right",
+         "/actions/main/in/left_triggertouched" : "Trigger Touched Left",
+         "/actions/main/in/right_triggertouched" : "Trigger Touched Right",
+         "/actions/main/in/left_trigger" : "Trigger Left",
+         "/actions/main/in/right_trigger" : "Trigger Right",
          "/actions/main/in/left_abutton" : "A Button Left",
          "/actions/main/in/right_abutton" : "A Button Right",
+         "/actions/main/in/left_atouched" : "A Touched Left",
+         "/actions/main/in/right_atouched" : "A Touched Right",
          "/actions/main/in/left_bbutton" : "B Button Left",
          "/actions/main/in/right_bbutton" : "B Button Right",
+         "/actions/main/in/left_btouched" : "B Touched Left",
+         "/actions/main/in/right_btouched" : "B Touched Right",
+         "/actions/main/in/left_joystickpress" : "Joystick Press Left",
+         "/actions/main/in/right_joystickpress" : "Joystick Press Right",
+         "/actions/main/in/left_joystick" : "Joystick Left",
+         "/actions/main/in/right_joystick" : "Joystick Right",
+         "/actions/main/in/left_touchpad" : "Touchpad Left",
+         "/actions/main/in/right_touchpad" : "Touchpad Right",
+         "/actions/main/in/left_grip" : "Grip Left",
+         "/actions/main/in/right_grip" : "Grip Right",
          "language_tag" : "en_us"
       }
    ]
