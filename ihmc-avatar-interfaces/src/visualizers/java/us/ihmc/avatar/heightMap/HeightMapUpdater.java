@@ -214,6 +214,7 @@ public class HeightMapUpdater
       int minNumberOfNeighborsToResetHeight = 3;
       double epsilonHeightReset = 0.04;
 
+      outerLoop:
       for (int i = heightMap.getNumberOfCells() - 1; i >= 0; i--)
       {
          int xIndex = heightMap.getXIndex(i);
@@ -236,13 +237,18 @@ public class HeightMapUpdater
                numberOfNeighbors++;
                higherThanAllNeighbors = higherThanAllNeighbors && heightMap.getHeightAt(xNeighbor, yNeighbor) < heightThreshold;
             }
+
+            if (numberOfNeighbors >= minNumberOfNeighbors && !higherThanAllNeighbors)
+            {
+               continue outerLoop;
+            }
          }
 
          if (numberOfNeighbors < minNumberOfNeighbors)
          {
             heightMap.clearCell(i);
          }
-         else if (numberOfNeighbors >= minNumberOfNeighborsToResetHeight)
+         else if (numberOfNeighbors >= minNumberOfNeighborsToResetHeight && higherThanAllNeighbors)
          {
             double resetHeight = 0.0;
             for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
