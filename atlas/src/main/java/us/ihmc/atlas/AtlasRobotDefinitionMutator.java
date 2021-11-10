@@ -3,20 +3,27 @@ package us.ihmc.atlas;
 import java.util.List;
 import java.util.function.Consumer;
 
+import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.IMUSensorDefinition;
+import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.MomentOfInertiaDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 public class AtlasRobotDefinitionMutator implements Consumer<RobotDefinition>
 {
    private final AtlasJointMap jointMap;
+   private final AtlasSensorInformation sensorInformation;
 
-   public AtlasRobotDefinitionMutator(AtlasJointMap jointMap)
+   public AtlasRobotDefinitionMutator(AtlasJointMap jointMap, AtlasSensorInformation sensorInformation)
    {
       this.jointMap = jointMap;
+      this.sensorInformation = sensorInformation;
    }
 
    @Override
@@ -45,6 +52,18 @@ public class AtlasRobotDefinitionMutator implements Consumer<RobotDefinition>
          if (imu.getName().equals("imu_sensor"))
             imu.setName("imu_sensor_at_pelvis_frame");
       }
+
+      for (String forceSensorName : sensorInformation.getForceSensorNames())
+      {
+         JointDefinition jointDefinition = robotDefinition.getJointDefinition(forceSensorName);
+         jointDefinition.addSensorDefinition(new WrenchSensorDefinition(forceSensorName, new RigidBodyTransform()));
+      }
+
+      if (jointMap.getModelScale() != 1.0)
+         RobotDefinitionTools.scaleRobotDefinition(robotDefinition,
+                                                   jointMap.getModelScale(),
+                                                   jointMap.getMassScalePower(),
+                                                   j -> !j.getName().contains("hokuyo"));
    }
 
    private void mutateChest(RigidBodyDefinition chest)

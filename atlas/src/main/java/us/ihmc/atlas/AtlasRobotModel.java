@@ -46,7 +46,6 @@ import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityDa
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -68,14 +67,11 @@ import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsControlThread;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
-import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -217,18 +213,6 @@ public class AtlasRobotModel implements DRCRobotModel
                                                              jointMap);
          RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
 
-         for (String forceSensorName : sensorInformation.getForceSensorNames())
-         {
-            JointDefinition jointDefinition = robotDefinition.getJointDefinition(forceSensorName);
-            jointDefinition.addSensorDefinition(new WrenchSensorDefinition(forceSensorName, new RigidBodyTransform()));
-         }
-
-         if (jointMap.getModelScale() != 1.0)
-            RobotDefinitionTools.scaleRobotDefinition(robotDefinition,
-                                                      jointMap.getModelScale(),
-                                                      jointMap.getMassScalePower(),
-                                                      j -> !j.getName().contains("hokuyo"));
-
          getRobotDefinitionMutator().accept(robotDefinition);
 
          robotDefinitionWithSDFCollision = new RobotDefinition(robotDefinition);
@@ -247,7 +231,7 @@ public class AtlasRobotModel implements DRCRobotModel
    public Consumer<RobotDefinition> getRobotDefinitionMutator()
    {
       if (robotDefinitionMutator == null)
-         robotDefinitionMutator = new AtlasRobotDefinitionMutator(getJointMap());
+         robotDefinitionMutator = new AtlasRobotDefinitionMutator(getJointMap(), getSensorInformation());
       return robotDefinitionMutator;
    }
 
@@ -394,7 +378,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public HumanoidRobotSensorInformation getSensorInformation()
+   public AtlasSensorInformation getSensorInformation()
    {
       return sensorInformation;
    }

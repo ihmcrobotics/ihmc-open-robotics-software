@@ -39,9 +39,7 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.robot.WrenchSensorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
@@ -310,21 +308,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                              getJointMap().getModelName(),
                                                              getContactPointParameters(),
                                                              getJointMap());
-         RobotDefinitionTools.setDefaultMaterial(robotDefinition);
-
-         for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
-         {
-            JointDefinition jointDefinition = robotDefinition.getJointDefinition(forceSensorName);
-            jointDefinition.addSensorDefinition(new WrenchSensorDefinition(forceSensorName,
-                                                                           ValkyrieSensorInformation.getForceSensorTransform(forceSensorName)));
-         }
-
          if (robotMaterial != null)
             RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
-
-         if (modelSizeScale != 1.0)
-            RobotDefinitionTools.scaleRobotDefinition(robotDefinition, modelSizeScale, modelMassScale, j -> !j.getName().contains("hokuyo"));
-
          getRobotDefinitionMutator().accept(robotDefinition);
       }
 
