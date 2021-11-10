@@ -199,27 +199,63 @@ public class AtlasRobotModel implements DRCRobotModel
       stateEstimatorParameters = new AtlasStateEstimatorParameters(jointMap, sensorInformation, runningOnRealRobot, getEstimatorDT());
    }
 
+   public RobotDefinition createRobotDefinition()
+   {
+      return createRobotDefinition(Double.NaN);
+   }
+
+   public RobotDefinition createRobotDefinition(double transparency)
+   {
+      if (Double.isNaN(transparency) || transparency < 0.0)
+         return createRobotDefinition((MaterialDefinition) null);
+      else
+         return createRobotDefinition(ColorDefinitions.Orange().derive(0, 1, 1, 1.0 - transparency));
+   }
+
+   public RobotDefinition createRobotDefinition(ColorDefinition diffuseColor)
+   {
+      return createRobotDefinition(new MaterialDefinition(diffuseColor));
+   }
+
+   public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition)
+   {
+      return createRobotDefinition(materialDefinition, true);
+   }
+
+   public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition, boolean removeCollisions)
+   {
+      InputStream stream = selectedVersion.getSdfFileAsStream();
+      if (stream == null)
+         LogTools.error("Selected version {} could not be found: stream is null", selectedVersion);
+      RobotDefinition robotDefinition = RobotDefinitionTools.loadSDFModel(stream,
+                                                                          Arrays.asList(selectedVersion.getResourceDirectories()),
+                                                                          getClass().getClassLoader(),
+                                                                          selectedVersion.getModelName(),
+                                                                          getContactPointParameters(),
+                                                                          jointMap);
+      RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
+
+      getRobotDefinitionMutator().accept(robotDefinition);
+
+      if (removeCollisions)
+         RobotDefinitionTools.removeCollisionShapeDefinitions(robotDefinition);
+
+      return robotDefinition;
+   }
+
+   @Override
    public RobotDefinition getRobotDefinition()
    {
       if (robotDefinition == null)
-      {
-         InputStream stream = selectedVersion.getSdfFileAsStream();
-         if (stream == null)
-            LogTools.error("Selected version {} could not be found: stream is null", selectedVersion);
-         robotDefinition = RobotDefinitionTools.loadSDFModel(stream,
-                                                             Arrays.asList(selectedVersion.getResourceDirectories()),
-                                                             getClass().getClassLoader(),
-                                                             selectedVersion.getModelName(),
-                                                             getContactPointParameters(),
-                                                             jointMap);
-         RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
-
-         getRobotDefinitionMutator().accept(robotDefinition);
-
-         robotDefinitionWithSDFCollision = new RobotDefinition(robotDefinition);
-         RobotDefinitionTools.removeCollisionShapeDefinitions(robotDefinition);
-      }
+         robotDefinition = createRobotDefinition();
       return robotDefinition;
+   }
+
+   public RobotDefinition getRobotDefinitionWithSDFCollision()
+   {
+      if (robotDefinitionWithSDFCollision == null)
+         robotDefinitionWithSDFCollision = createRobotDefinition(null, false);
+      return robotDefinitionWithSDFCollision;
    }
 
    public void setRobotDefinitionMutator(Consumer<RobotDefinition> robotDefinitionMutator)
@@ -576,7 +612,7 @@ public class AtlasRobotModel implements DRCRobotModel
    @Override
    public CollisionBoxProvider getCollisionBoxProvider()
    {
-      return new AtlasCollisionBoxProvider(robotDefinitionWithSDFCollision, getJointMap());
+      return new AtlasCollisionBoxProvider(getRobotDefinitionWithSDFCollision(), getJointMap());
    }
 
    @Override
