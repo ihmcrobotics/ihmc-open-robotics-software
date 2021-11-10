@@ -85,7 +85,7 @@ public class GDXVRHandPlacedFootstepMode
             }
 
             InputDigitalActionData aButton = controller.getAButtonActionData();
-            if (aButton.bChanged() && !aButton.bState())
+            if (side == RobotSide.RIGHT && aButton.bChanged() && !aButton.bState())
             {
                // send the placed footsteps
                FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
@@ -107,7 +107,14 @@ public class GDXVRHandPlacedFootstepMode
                   GDXTools.setTransparency(placedFootstep.getModelInstance(), 0.5f);
                   sentFootsteps.add(placedFootstep);
                }
+               placedFootsteps.clear();
                controllerHelper.publishToController(footstepDataListMessage);
+            }
+
+            InputDigitalActionData bButton = controller.getBButtonActionData();
+            if (side == RobotSide.LEFT && bButton.bChanged() && !bButton.bState())
+            {
+               placedFootsteps.clear();
             }
          });
       }
