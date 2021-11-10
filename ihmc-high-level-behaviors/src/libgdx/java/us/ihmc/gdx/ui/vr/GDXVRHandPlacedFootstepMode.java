@@ -5,7 +5,12 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import org.lwjgl.openvr.*;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -14,15 +19,35 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class GDXVRHandPlacedFootstepMode
 {
-   private final ArrayList<ModelInstance> footModels = new ArrayList<>();
+   private final SideDependentList<Model> footModels = new SideDependentList<>();
+//   private final SideDependentList<ModelInstance> unplacedFadeInFootsteps = new SideDependentList<>();
    private final SideDependentList<ModelInstance> feetBeingPlaced = new SideDependentList<>();
+   private final ArrayList<GDXVRHandPlacedFootstep> placedFootsteps = new ArrayList<>();
+   private final ArrayList<GDXVRHandPlacedFootstep> sentFootsteps = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D poseForPlacement = new FramePose3D();
+   private WalkingControllerParameters walkingControllerParameters;
+   private ROS2ControllerHelper controllerHelper;
+   private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
+
+   public void create(DRCRobotModel robotModel, ROS2ControllerHelper controllerHelper)
+   {
+      this.controllerHelper = controllerHelper;
+      walkingControllerParameters = robotModel.getWalkingControllerParameters();
+
+      for (RobotSide side : RobotSide.values)
+      {
+         footModels.put(side, GDXModelLoader.loadG3DModel(side.getSideNameFirstLowerCaseLetter() + "_foot.g3dj"));
+//         unplacedFadeInFootsteps.set(side, new ModelInstance(footModels.get(side)));
+      }
+   }
 
    public void processVRInput(GDXVRContext vrContext)
    {
@@ -30,19 +55,21 @@ public class GDXVRHandPlacedFootstepMode
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
+            double triggerPressedAmount = controller.getTriggerActionData().x(); // 0.0 not pressed -> 1.0 pressed
             InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
 
             if (triggerClick.bChanged() && triggerClick.bState())
             {
-               Model footModel = GDXModelLoader.loadG3DModel(side.getSideNameFirstLowerCaseLetter() + "_foot.g3dj");
-               ModelInstance footModelInstance = new ModelInstance(footModel);
-               footModels.add(footModelInstance);
+               ModelInstance footModelInstance = new ModelInstance(footModels.get(side));
                feetBeingPlaced.put(side, footModelInstance);
             }
 
             if (triggerClick.bChanged() && !triggerClick.bState())
             {
+               ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
                feetBeingPlaced.put(side, null);
+
+               placedFootsteps.add(new GDXVRHandPlacedFootstep(side, footBeingPlaced));
             }
 
             ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
@@ -56,15 +83,47 @@ public class GDXVRHandPlacedFootstepMode
 
                GDXTools.toGDX(tempTransform, footBeingPlaced.transform);
             }
+
+            InputDigitalActionData aButton = controller.getAButtonActionData();
+            if (aButton.bChanged() && !aButton.bState())
+            {
+               // send the placed footsteps
+               FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+               footstepDataListMessage.setDefaultSwingDuration(walkingControllerParameters.getDefaultSwingTime());
+               footstepDataListMessage.setDefaultTransferDuration(walkingControllerParameters.getDefaultTransferTime());
+               footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
+               for (GDXVRHandPlacedFootstep placedFootstep : placedFootsteps)
+               {
+                  FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
+
+                  footstepDataMessage.setSequenceId(sequenceId++);
+                  footstepDataMessage.setRobotSide(placedFootstep.getSide().toByte());
+                  footstepDataMessage.getLocation().set(placedFootstep.getPose().getPosition());
+                  footstepDataMessage.getOrientation().set(placedFootstep.getPose().getOrientation());
+                  footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte()); // TODO: Expose option; show preview trajectories, waypoints
+                  // TODO: Support all types of swings
+                  // TODO: Support partial footholds
+
+                  sentFootsteps.add(placedFootstep);
+               }
+               controllerHelper.publishToController(footstepDataListMessage);
+            }
          });
       }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (ModelInstance footModel : footModels)
+      for (ModelInstance footBeingPlaced : feetBeingPlaced)
       {
-         footModel.getRenderables(renderables, pool);
+         if (footBeingPlaced != null)
+            footBeingPlaced.getRenderables(renderables, pool);
+      }
+
+
+      for (GDXVRHandPlacedFootstep placedFootstep : placedFootsteps)
+      {
+         placedFootstep.getModelInstance().getRenderables(renderables, pool);
       }
    }
 }
