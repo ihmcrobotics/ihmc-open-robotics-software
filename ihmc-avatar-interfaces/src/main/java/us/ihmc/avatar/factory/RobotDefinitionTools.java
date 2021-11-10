@@ -58,9 +58,16 @@ public class RobotDefinitionTools
                                               ClassLoader classLoader,
                                               String modelName,
                                               ContactPointDefinitionHolder contactPointDefinitionHolder,
-                                              JointNameMap<?> jointNameMap)
+                                              JointNameMap<?> jointNameMap,
+                                              boolean removeCollisionMeshes)
    {
-      return RobotDefinitionLoader.loadSDFModel(stream, resourceDirectories, classLoader, modelName, contactPointDefinitionHolder, jointNameMap);
+      return RobotDefinitionLoader.loadSDFModel(stream,
+                                                resourceDirectories,
+                                                classLoader,
+                                                modelName,
+                                                contactPointDefinitionHolder,
+                                                jointNameMap,
+                                                removeCollisionMeshes);
    }
 
    public static void setDefaultMaterial(RobotDefinition robotDefinition)

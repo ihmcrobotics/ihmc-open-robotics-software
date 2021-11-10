@@ -232,13 +232,11 @@ public class AtlasRobotModel implements DRCRobotModel
                                                                           getClass().getClassLoader(),
                                                                           selectedVersion.getModelName(),
                                                                           getContactPointParameters(),
-                                                                          jointMap);
+                                                                          jointMap,
+                                                                          removeCollisions);
       RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
 
       getRobotDefinitionMutator().accept(robotDefinition);
-
-      if (removeCollisions)
-         RobotDefinitionTools.removeCollisionShapeDefinitions(robotDefinition);
 
       return robotDefinition;
    }
