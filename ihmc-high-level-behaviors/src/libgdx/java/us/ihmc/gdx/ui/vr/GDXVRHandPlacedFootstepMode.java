@@ -104,6 +104,7 @@ public class GDXVRHandPlacedFootstepMode
                   // TODO: Support all types of swings
                   // TODO: Support partial footholds
 
+                  GDXTools.setTransparency(placedFootstep.getModelInstance(), 0.5f);
                   sentFootsteps.add(placedFootstep);
                }
                controllerHelper.publishToController(footstepDataListMessage);
@@ -120,10 +121,14 @@ public class GDXVRHandPlacedFootstepMode
             footBeingPlaced.getRenderables(renderables, pool);
       }
 
-
       for (GDXVRHandPlacedFootstep placedFootstep : placedFootsteps)
       {
          placedFootstep.getModelInstance().getRenderables(renderables, pool);
+      }
+
+      for (GDXVRHandPlacedFootstep sentFootstep : sentFootsteps)
+      {
+         sentFootstep.getModelInstance().getRenderables(renderables, pool);
       }
    }
 }
