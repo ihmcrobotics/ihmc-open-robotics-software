@@ -40,6 +40,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotModels.description.RobotDescriptionConverter;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -190,7 +191,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    {
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       ghostRobotModel.getRobotDescription().setName("Ghost");
-      RobotDefinition ghostRobotDefinition = RobotDefinitionTools.toRobotDefinition(ghostRobotModel.getRobotDescription());
+      RobotDefinition ghostRobotDefinition = RobotDescriptionConverter.toRobotDefinition(ghostRobotModel.getRobotDescription());
       MaterialDefinition ghostMaterial = new MaterialDefinition(ghostApperance);
       ghostRobotDefinition.getAllRigidBodies()
                           .forEach(rigidBodyDefinition -> rigidBodyDefinition.getVisualDefinitions()
