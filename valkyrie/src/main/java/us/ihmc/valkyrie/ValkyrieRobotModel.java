@@ -308,7 +308,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                              getClass().getClassLoader(),
                                                              getJointMap().getModelName(),
                                                              getContactPointParameters(),
-                                                             getJointMap());
+                                                             getJointMap(),
+                                                             true);
          if (robotMaterial != null)
             RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
          getRobotDefinitionMutator().accept(robotDefinition);

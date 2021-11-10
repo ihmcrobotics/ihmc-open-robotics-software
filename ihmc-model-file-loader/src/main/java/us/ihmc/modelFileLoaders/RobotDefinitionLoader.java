@@ -40,7 +40,8 @@ public class RobotDefinitionLoader
                                               ClassLoader classLoader,
                                               String modelName,
                                               ContactPointDefinitionHolder contactPointDefinitionHolder,
-                                              JointNameMap<?> jointNameMap)
+                                              JointNameMap<?> jointNameMap,
+                                              boolean removeCollisionMeshes)
    {
       try
       {
@@ -57,6 +58,9 @@ public class RobotDefinitionLoader
             adjustJointLimitStops(robotDefinition, jointNameMap);
          }
          adjustRigidBodyInterias(robotDefinition);
+
+         if (removeCollisionMeshes)
+            removeCollisionShapeDefinitions(robotDefinition);
 
          return robotDefinition;
       }
