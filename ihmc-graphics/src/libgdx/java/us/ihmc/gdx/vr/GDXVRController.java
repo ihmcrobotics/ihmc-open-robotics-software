@@ -174,9 +174,9 @@ public class GDXVRController extends GDXVRTrackedDevice
       return touchpadActionData;
    }
 
-   public LongBuffer getTouchpadTouchedActionHandle()
+   public InputDigitalActionData getTouchpadTouchedActionData()
    {
-      return touchpadTouchedActionHandle;
+      return touchpadTouchedActionData;
    }
 
    public InputAnalogActionData getJoystickActionData()

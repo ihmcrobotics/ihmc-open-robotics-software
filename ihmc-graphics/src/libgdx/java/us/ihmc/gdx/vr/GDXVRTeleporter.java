@@ -28,6 +28,7 @@ public class GDXVRTeleporter
 
    private ModelInstance lineModel;
    private ModelInstance ring;
+   private ModelInstance arrow;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D pickRayPose = new FramePose3D();
    private final FrameLine3D pickRay = new FrameLine3D();
@@ -39,9 +40,8 @@ public class GDXVRTeleporter
    private final Vector3D orientationDeterminationVector = new Vector3D();
    private final FramePose3D proposedTeleportPose = new FramePose3D();
    private double lineLength = 1.0;
-
-   private ModelInstance arrow;
    private final Color color = Color.WHITE;
+   private double lastTouchpadY = Double.NaN;
 
    public void create()
    {
@@ -130,6 +130,21 @@ public class GDXVRTeleporter
 //                  headset.getPose()
 //               });
             });
+         }
+
+         if (controller.getTouchpadTouchedActionData().bState())
+         {
+            double y = controller.getTouchpadActionData().y();
+            if (!Double.isNaN(lastTouchpadY))
+            {
+               double delta = y - lastTouchpadY;
+               vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld -> teleportIHMCZUpToIHMCZUpWorld.getTranslation().addZ(delta * 0.3));
+            }
+            lastTouchpadY = y;
+         }
+         else
+         {
+            lastTouchpadY = Double.NaN;
          }
       });
    }
