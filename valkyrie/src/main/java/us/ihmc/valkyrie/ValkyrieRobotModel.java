@@ -33,6 +33,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -320,7 +321,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public RobotDescription getRobotDescription()
    {
       if (robotDescription == null)
-         robotDescription = RobotDefinitionTools.toRobotDescription(getRobotDefinition());
+         robotDescription = RobotDefinitionConverter.toRobotDescription(getRobotDefinition());
 
       return robotDescription;
    }

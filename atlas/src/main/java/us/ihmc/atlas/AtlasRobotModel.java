@@ -58,6 +58,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -267,7 +268,7 @@ public class AtlasRobotModel implements DRCRobotModel
          robotDefinitionToUse = getRobotDefinition();
       }
 
-      return RobotDefinitionTools.toRobotDescription(robotDefinitionToUse);
+      return RobotDefinitionConverter.toRobotDescription(robotDefinitionToUse);
    }
 
    @Override
