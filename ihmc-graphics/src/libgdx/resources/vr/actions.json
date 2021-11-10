@@ -87,6 +87,16 @@
          "type" : "boolean"
       },
       {
+         "name" : "/actions/main/in/left_touchpadtouched",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
+         "name" : "/actions/main/in/right_touchpadtouched",
+         "requirement" : "mandatory",
+         "type" : "boolean"
+      },
+      {
          "name" : "/actions/main/in/left_touchpad",
          "requirement" : "mandatory",
          "type" : "vector2"
@@ -144,6 +154,8 @@
          "/actions/main/in/right_joystickpress" : "Joystick Press Right",
          "/actions/main/in/left_joystick" : "Joystick Left",
          "/actions/main/in/right_joystick" : "Joystick Right",
+         "/actions/main/in/left_touchpadtouched" : "Touchpad Touched Left",
+         "/actions/main/in/right_touchpadtouched" : "Touchpad Touched Right",
          "/actions/main/in/left_touchpad" : "Touchpad Left",
          "/actions/main/in/right_touchpad" : "Touchpad Right",
          "/actions/main/in/left_grip" : "Grip Left",

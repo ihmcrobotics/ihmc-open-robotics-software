@@ -36,6 +36,8 @@ public class GDXVRController extends GDXVRTrackedDevice
    private InputDigitalActionData bTouchedActionData;
    private final LongBuffer joystickPressActionHandle = BufferUtils.newLongBuffer(1);
    private InputDigitalActionData joystickPressActionData;
+   private final LongBuffer touchpadTouchedActionHandle = BufferUtils.newLongBuffer(1);
+   private InputDigitalActionData touchpadTouchedActionData;
    private final LongBuffer touchpadActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData touchpadActionData;
    private final LongBuffer joystickActionHandle = BufferUtils.newLongBuffer(1);
@@ -91,6 +93,8 @@ public class GDXVRController extends GDXVRTrackedDevice
       bTouchedActionData = InputDigitalActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_joystickpress", joystickPressActionHandle);
       joystickPressActionData = InputDigitalActionData.create();
+      VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_touchpadtouched", touchpadTouchedActionHandle);
+      touchpadTouchedActionData = InputDigitalActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_touchpad", touchpadActionHandle);
       touchpadActionData = InputAnalogActionData.create();
       VRInput.VRInput_GetActionHandle("/actions/main/in/" + side.getLowerCaseName() + "_joystick", joystickActionHandle);
@@ -120,6 +124,7 @@ public class GDXVRController extends GDXVRTrackedDevice
       VRInput.VRInput_GetDigitalActionData(bTouchedActionHandle.get(0), bTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(joystickPressActionHandle.get(0), joystickPressActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(touchpadActionHandle.get(0), touchpadActionData, VR.k_ulInvalidInputValueHandle);
+      VRInput.VRInput_GetDigitalActionData(touchpadTouchedActionHandle.get(0), touchpadTouchedActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(joystickActionHandle.get(0), joystickActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetAnalogActionData(gripActionHandle.get(0), gripActionData, VR.k_ulInvalidInputValueHandle);
    }
@@ -167,6 +172,11 @@ public class GDXVRController extends GDXVRTrackedDevice
    public InputAnalogActionData getTouchpadActionData()
    {
       return touchpadActionData;
+   }
+
+   public LongBuffer getTouchpadTouchedActionHandle()
+   {
+      return touchpadTouchedActionHandle;
    }
 
    public InputAnalogActionData getJoystickActionData()

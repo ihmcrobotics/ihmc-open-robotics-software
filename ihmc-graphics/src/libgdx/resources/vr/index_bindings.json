@@ -589,63 +589,12 @@
       "/actions/main" : {
          "sources" : [
             {
-               "inputs" : {},
-               "mode" : "none",
-               "path" : "/user/hand/right/input/skeleton/right"
-            },
-            {
-               "inputs" : {},
-               "mode" : "none",
-               "path" : "/user/hand/right/input/skeleton/right"
-            },
-            {
-               "inputs" : {},
-               "mode" : "none",
-               "path" : "/user/hand/right/input/skeleton/right"
-            },
-            {
-               "inputs" : {},
-               "mode" : "none",
-               "path" : "/user/hand/right/input/skeleton/right"
-            },
-            {
-               "inputs" : {},
-               "mode" : "none",
-               "path" : "/user/hand/right/input/pinch"
-            },
-            {
-               "inputs" : {},
-               "mode" : "none",
-               "path" : "/user/hand/right/input/grip"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/main/in/right_clicktrigger"
-                  }
-               },
-               "mode" : "button",
-               "parameters" : {
-                  "force_input" : "click"
-               },
-               "path" : "/user/hand/right/input/trigger"
-            },
-            {
-               "inputs" : {
-                  "click" : {
-                     "output" : "/actions/main/in/left_clicktrigger"
-                  }
-               },
-               "mode" : "button",
-               "parameters" : {
-                  "force_input" : "click"
-               },
-               "path" : "/user/hand/left/input/trigger"
-            },
-            {
                "inputs" : {
                   "click" : {
                      "output" : "/actions/main/in/right_bbutton"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/right_btouched"
                   }
                },
                "mode" : "button",
@@ -655,6 +604,9 @@
                "inputs" : {
                   "click" : {
                      "output" : "/actions/main/in/right_abutton"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/right_atouched"
                   }
                },
                "mode" : "button",
@@ -664,6 +616,9 @@
                "inputs" : {
                   "click" : {
                      "output" : "/actions/main/in/left_bbutton"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/left_btouched"
                   }
                },
                "mode" : "button",
@@ -673,18 +628,117 @@
                "inputs" : {
                   "click" : {
                      "output" : "/actions/main/in/left_abutton"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/left_atouched"
                   }
                },
                "mode" : "button",
                "path" : "/user/hand/left/input/a"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/main/in/left_touchpad"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/left_touchpadtouched"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/left/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/main/in/left_joystickpress"
+                  },
+                  "position" : {
+                     "output" : "/actions/main/in/left_joystick"
+                  }
+               },
+               "mode" : "joystick",
+               "path" : "/user/hand/left/input/thumbstick"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/main/in/right_joystickpress"
+                  },
+                  "position" : {
+                     "output" : "/actions/main/in/right_joystick"
+                  }
+               },
+               "mode" : "joystick",
+               "path" : "/user/hand/right/input/thumbstick"
+            },
+            {
+               "inputs" : {
+                  "position" : {
+                     "output" : "/actions/main/in/right_touchpad"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/right_touchpadtouched"
+                  }
+               },
+               "mode" : "trackpad",
+               "path" : "/user/hand/right/input/trackpad"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/main/in/left_grip"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/grip"
+            },
+            {
+               "inputs" : {
+                  "pull" : {
+                     "output" : "/actions/main/in/right_grip"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/grip"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/main/in/left_clicktrigger"
+                  },
+                  "pull" : {
+                     "output" : "/actions/main/in/left_trigger"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/left_triggertouched"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/left/input/trigger"
+            },
+            {
+               "inputs" : {
+                  "click" : {
+                     "output" : "/actions/main/in/right_clicktrigger"
+                  },
+                  "pull" : {
+                     "output" : "/actions/main/in/right_trigger"
+                  },
+                  "touch" : {
+                     "output" : "/actions/main/in/right_triggertouched"
+                  }
+               },
+               "mode" : "trigger",
+               "path" : "/user/hand/right/input/trigger"
             }
          ]
       }
    },
    "category" : "steamvr_input",
    "controller_type" : "knuckles",
-   "description" : "Default binding values for legacy apps using the Index Controller",
-   "name" : "Index Controller Legacy Defaults",
+   "description" : "Binding values for IHMC apps using the Index controller.",
+   "name" : "IHMC Index Controller Bindings",
    "options" : {
       "mirror_actions" : false,
       "simulated_controller_type" : "none"
