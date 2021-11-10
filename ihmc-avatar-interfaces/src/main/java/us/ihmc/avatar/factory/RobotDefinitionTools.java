@@ -2,14 +2,9 @@ package us.ihmc.avatar.factory;
 
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
@@ -22,8 +17,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameSphere3DReadOnly;
 import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
+import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCapsule3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadOnly;
@@ -38,7 +32,6 @@ import us.ihmc.scs2.definition.geometry.Capsule3DDefinition;
 import us.ihmc.scs2.definition.geometry.ConvexPolytope3DDefinition;
 import us.ihmc.scs2.definition.geometry.Ellipsoid3DDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
-import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.geometry.Point3DDefinition;
 import us.ihmc.scs2.definition.geometry.Ramp3DDefinition;
 import us.ihmc.scs2.definition.geometry.STPBox3DDefinition;
@@ -47,24 +40,12 @@ import us.ihmc.scs2.definition.geometry.STPConvexPolytope3DDefinition;
 import us.ihmc.scs2.definition.geometry.STPCylinder3DDefinition;
 import us.ihmc.scs2.definition.geometry.STPRamp3DDefinition;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
-import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
-import us.ihmc.scs2.definition.robot.GroundContactPointDefinition;
 import us.ihmc.scs2.definition.robot.JointDefinition;
-import us.ihmc.scs2.definition.robot.KinematicPointDefinition;
-import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
-import us.ihmc.scs2.definition.robot.PrismaticJointDefinition;
-import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.robot.SensorDefinition;
-import us.ihmc.scs2.definition.robot.sdf.SDFTools;
-import us.ihmc.scs2.definition.robot.sdf.items.SDFRoot;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -79,273 +60,72 @@ public class RobotDefinitionTools
                                               ContactPointDefinitionHolder contactPointDefinitionHolder,
                                               JointNameMap<?> jointNameMap)
    {
-      try
-      {
-         SDFRoot sdfRoot = SDFTools.loadSDFRoot(stream, resourceDirectories, classLoader);
-         RobotDefinition robotDefinition = SDFTools.toFloatingRobotDefinition(sdfRoot, modelName);
-
-         if (contactPointDefinitionHolder != null)
-            addGroundContactPoints(robotDefinition, contactPointDefinitionHolder);
-
-         if (jointNameMap != null)
-         {
-            for (String jointName : jointNameMap.getLastSimulatedJoints())
-               robotDefinition.addSubtreeJointsToIgnore(jointName);
-            adjustJointLimitStops(robotDefinition, jointNameMap);
-         }
-         adjustRigidBodyInterias(robotDefinition);
-
-         return robotDefinition;
-      }
-      catch (JAXBException e)
-      {
-         throw new RuntimeException(e);
-      }
+      return RobotDefinitionLoader.loadSDFModel(stream, resourceDirectories, classLoader, modelName, contactPointDefinitionHolder, jointNameMap);
    }
 
    public static void setDefaultMaterial(RobotDefinition robotDefinition)
    {
-      setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Orange().derive(0, 1, 1, 0.4)));
+      RobotDefinitionLoader.setDefaultMaterial(robotDefinition);
    }
 
    public static void setDefaultMaterial(RobotDefinition robotDefinition, MaterialDefinition defaultMaterial)
    {
-      for (RigidBodyDefinition rigidBodyDefinition : robotDefinition.getAllRigidBodies())
-      {
-         for (VisualDefinition visualDefinition : rigidBodyDefinition.getVisualDefinitions())
-         {
-            if (visualDefinition.getMaterialDefinition() != null)
-               continue;
-            GeometryDefinition geometryDefinition = visualDefinition.getGeometryDefinition();
-            if (geometryDefinition instanceof ModelFileGeometryDefinition
-                  && !((ModelFileGeometryDefinition) geometryDefinition).getFileName().toLowerCase().endsWith(".stl"))
-               continue;
-            visualDefinition.setMaterialDefinition(defaultMaterial);
-         }
-      }
+      RobotDefinitionLoader.setDefaultMaterial(robotDefinition, defaultMaterial);
    }
 
    public static void removeCollisionShapeDefinitions(RobotDefinition robotDefinition)
    {
-      for (RigidBodyDefinition body : robotDefinition.getAllRigidBodies())
-         body.getCollisionShapeDefinitions().clear();
+      RobotDefinitionLoader.removeCollisionShapeDefinitions(robotDefinition);
    }
 
    public static void setRobotDefinitionMaterial(RobotDefinition robotDefinition, MaterialDefinition materialDefinition)
    {
-      for (RigidBodyDefinition body : robotDefinition.getAllRigidBodies())
-      {
-         body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(materialDefinition));
-      }
+      RobotDefinitionLoader.setRobotDefinitionMaterial(robotDefinition, materialDefinition);
    }
 
    public static void setRobotDefinitionTransparency(RobotDefinition robotDefinition, double transparency)
    {
-      setRobotDefinitionMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Orange().derive(0, 1, 1, 1.0 - transparency)));
+      RobotDefinitionLoader.setRobotDefinitionTransparency(robotDefinition, transparency);
    }
 
    public static void adjustJointLimitStops(RobotDefinition robotDefinition, JointNameMap<?> jointNameMap)
    {
-      for (JointDefinition joint : robotDefinition.getAllJoints())
-      {
-         if (joint instanceof RevoluteJointDefinition)
-         {
-            RevoluteJointDefinition revoluteJoint = (RevoluteJointDefinition) joint;
-
-            if (isJointInNeedOfReducedGains(joint.getName()))
-            {
-               revoluteJoint.setKpSoftLimitStop(10.0);
-               revoluteJoint.setKdSoftLimitStop(2.5);
-            }
-            else if (revoluteJoint.getKpSoftLimitStop() <= 0.0 && revoluteJoint.getKdSoftLimitStop() <= 0.0)
-            {
-               revoluteJoint.setKpSoftLimitStop(jointNameMap.getJointKLimit(joint.getName()));
-               revoluteJoint.setKdSoftLimitStop(jointNameMap.getJointBLimit(joint.getName()));
-            }
-            else
-            {
-               revoluteJoint.setKpSoftLimitStop(0.0001 * revoluteJoint.getKpSoftLimitStop());
-               revoluteJoint.setKdSoftLimitStop(0.1 * revoluteJoint.getKdSoftLimitStop());
-            }
-         }
-         else if (joint instanceof PrismaticJointDefinition)
-         {
-            PrismaticJointDefinition prismaticJoint = (PrismaticJointDefinition) joint;
-
-            if (isJointInNeedOfReducedGains(joint.getName()))
-            {
-               prismaticJoint.setKpSoftLimitStop(100.0);
-               prismaticJoint.setKdSoftLimitStop(20.0);
-            }
-            else if (prismaticJoint.getKpSoftLimitStop() <= 0.0 && prismaticJoint.getKdSoftLimitStop() <= 0.0)
-            {
-               prismaticJoint.setKpSoftLimitStop(jointNameMap.getJointKLimit(joint.getName()));
-               prismaticJoint.setKdSoftLimitStop(jointNameMap.getJointBLimit(joint.getName()));
-            }
-            else
-            {
-               prismaticJoint.setKpSoftLimitStop(0.0001 * prismaticJoint.getKpSoftLimitStop());
-               prismaticJoint.setKdSoftLimitStop(prismaticJoint.getKdSoftLimitStop());
-            }
-         }
-      }
+      RobotDefinitionLoader.adjustJointLimitStops(robotDefinition, jointNameMap);
    }
 
    public static void adjustRigidBodyInterias(RobotDefinition robotDefinition)
    {
-      for (JointDefinition joint : robotDefinition.getAllJoints())
-      {
-         if (isJointInNeedOfReducedGains(joint.getName()))
-         {
-            RigidBodyDefinition successor = joint.getSuccessor();
-            successor.getMomentOfInertia().scale(100.0);
-         }
-      }
-   }
-
-   private static boolean isJointInNeedOfReducedGains(String jointName)
-   {
-      return jointName.contains("f0") || jointName.contains("f1") || jointName.contains("f2") || jointName.contains("f3") || jointName.contains("palm")
-            || jointName.contains("finger");
+      RobotDefinitionLoader.adjustRigidBodyInterias(robotDefinition);
    }
 
    public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder)
    {
-      addGroundContactPoints(robotDefinition, contactPointHolder, true);
+      RobotDefinitionLoader.addGroundContactPoints(robotDefinition, contactPointHolder);
    }
 
    public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder, boolean addVisualization)
    {
-      if (contactPointHolder == null)
-         return;
-
-      LinkedHashMap<String, Integer> counters = new LinkedHashMap<String, Integer>();
-      for (ImmutablePair<String, Vector3D> jointContactPoint : contactPointHolder.getJointNameGroundContactPointMap())
-      {
-         String jointName = jointContactPoint.getLeft();
-
-         int count;
-         if (counters.get(jointName) == null)
-            count = 0;
-         else
-            count = counters.get(jointName);
-
-         Vector3D gcOffset = jointContactPoint.getRight();
-
-         GroundContactPointDefinition groundContactPoint = new GroundContactPointDefinition();
-         groundContactPoint.setName("gc_" + ModelFileLoaderConversionsHelper.sanitizeJointName(jointName) + "_" + count++);
-         groundContactPoint.getTransformToParent().getTranslation().set(gcOffset);
-         groundContactPoint.setGroupIdentifier(contactPointHolder.getGroupIdentifier(jointContactPoint));
-
-         JointDefinition jointDefinition = robotDefinition.getJointDefinition(jointName);
-
-         jointDefinition.addGroundContactPointDefinition(groundContactPoint);
-
-         counters.put(jointName, count);
-
-         if (addVisualization)
-         {
-            VisualDefinitionFactory visualDefinitionFactory = new VisualDefinitionFactory();
-            visualDefinitionFactory.appendTranslation(jointContactPoint.getRight());
-            visualDefinitionFactory.addSphere(0.01, new MaterialDefinition(ColorDefinitions.Orange()));
-            jointDefinition.getSuccessor().getVisualDefinitions().addAll(visualDefinitionFactory.getVisualDefinitions());
-         }
-      }
+      RobotDefinitionLoader.addGroundContactPoints(robotDefinition, contactPointHolder, addVisualization);
    }
 
    public static void scaleRobotDefinition(RobotDefinition definition, double modelScale, double massScalePower, Predicate<JointDefinition> jointFilter)
    {
-      scaleRigidBodyDefinitionRecursive(definition.getRootBodyDefinition(), modelScale, massScalePower, jointFilter, true);
-   }
-
-   private static void scaleRigidBodyDefinitionRecursive(RigidBodyDefinition definition,
-                                                         double modelScale,
-                                                         double massScalePower,
-                                                         Predicate<JointDefinition> jointFilter,
-                                                         boolean scaleInertia)
-   {
-      if (scaleInertia && definition.getParentJoint() != null)
-         scaleInertia &= jointFilter.test(definition.getParentJoint());
-
-      scaleRigidBodyDefinition(definition, modelScale, massScalePower, scaleInertia);
-
-      for (JointDefinition joint : definition.getChildrenJoints())
-      {
-         scaleJointDefinition(joint, modelScale);
-         scaleRigidBodyDefinitionRecursive(joint.getSuccessor(), modelScale, massScalePower, jointFilter, scaleInertia);
-      }
-   }
-
-   private static void scaleJointDefinition(JointDefinition definition, double modelScale)
-   {
-      definition.getTransformToParent().getTranslation().scale(modelScale);
-
-      for (SensorDefinition sensor : definition.getSensorDefinitions())
-         sensor.getTransformToJoint().getTranslation().scale(modelScale);
-      for (KinematicPointDefinition kp : definition.getKinematicPointDefinitions())
-         kp.getTransformToParent().getTranslation().scale(modelScale);
-      for (ExternalWrenchPointDefinition efp : definition.getExternalWrenchPointDefinitions())
-         efp.getTransformToParent().getTranslation().scale(modelScale);
-      for (GroundContactPointDefinition gcp : definition.getGroundContactPointDefinitions())
-         gcp.getTransformToParent().getTranslation().scale(modelScale);
-   }
-
-   private static void scaleRigidBodyDefinition(RigidBodyDefinition definition, double modelScale, double massScalePower, boolean scaleInertia)
-   {
-      // Center of mass offset scales with the scaling factor
-      definition.getCenterOfMassOffset().scale(modelScale);
-
-      // Mass scales with factor^massScalePower. massScalePower is 3 when considering constant density
-
-      if (scaleInertia)
-      {
-         double massScale = Math.pow(modelScale, massScalePower);
-         definition.setMass(massScale * definition.getMass());
-
-         if (definition.getMomentOfInertia() != null)
-         {
-            // The components of the inertia matrix are defined with int(r^2 dm). So they scale factor ^ (2 + massScalePower)
-            double inertiaScale = Math.pow(modelScale, massScalePower + 2);
-            definition.getMomentOfInertia().scale(inertiaScale);
-         }
-      }
-
-      for (VisualDefinition visual : definition.getVisualDefinitions())
-         visual.getOriginPose().appendScale(modelScale);
-      for (CollisionShapeDefinition collision : definition.getCollisionShapeDefinitions())
-         scaleCollisionShapeDefinition(collision, modelScale);
-   }
-
-   private static void scaleCollisionShapeDefinition(CollisionShapeDefinition definition, double scale)
-   {
-      throw new RuntimeException("TODO: Implement me");
+      RobotDefinitionLoader.scaleRobotDefinition(definition, modelScale, massScalePower, jointFilter);
    }
 
    public static Consumer<RobotDefinition> jointLimitRemover()
    {
-      return jointLimitRemover(null);
+      return RobotDefinitionLoader.jointLimitRemover();
    }
 
    public static Consumer<RobotDefinition> jointLimitRemover(String nameFilter)
    {
-      return jointLimitMutator(nameFilter, -100.0, 100.0);
+      return RobotDefinitionLoader.jointLimitRemover(nameFilter);
    }
 
    public static Consumer<RobotDefinition> jointLimitMutator(String nameFilter, double lowerLimit, double upperLimit)
    {
-      return robotDefinition ->
-      {
-         for (JointDefinition joint : robotDefinition.getAllJoints())
-         {
-            String jointName = joint.getName();
-            if (!(joint instanceof OneDoFJointDefinition))
-               continue;
-            if (nameFilter != null && !nameFilter.isEmpty() && !jointName.contains(nameFilter))
-               continue;
-
-            ((OneDoFJointDefinition) joint).setPositionLimits(lowerLimit, upperLimit);
-         }
-      };
+      return RobotDefinitionLoader.jointLimitMutator(nameFilter, lowerLimit, upperLimit);
    }
 
    public static void addCollisionsToRobotDefinition(List<Collidable> collidables, RobotDefinition robotDefinition)
