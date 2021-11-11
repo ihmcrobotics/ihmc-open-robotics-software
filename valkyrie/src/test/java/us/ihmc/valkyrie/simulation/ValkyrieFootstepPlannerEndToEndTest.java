@@ -8,13 +8,16 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.roughTerrainWalking.AvatarBipedalFootstepPlannerEndToEndTest;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.robotDescription.JointDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.geometry.Cylinder3DDefinition;
+import us.ihmc.scs2.definition.robot.JointDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.Link;
@@ -78,7 +81,7 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
       private final double shinLength = 0.25;
       private final double shinZOffset = -0.3;
 
-      private final AppearanceDefinition collisionAppearance = YoAppearance.Glass(0.4);
+      private final MaterialDefinition collisionAppearance = new MaterialDefinition(ColorDefinitions.SkyBlue().derive(0, 1, 1, 0.6));
       private final RigidBodyTransform tempTransform = new RigidBodyTransform();
       private final CollisionDetectionResult collisionDetectionResult = new CollisionDetectionResult();
 
@@ -93,7 +96,7 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
       {
          super(simTicksPerCollisionCheck);
 
-         if(showCollisionGraphics)
+         if (showCollisionGraphics)
             setupGraphics();
       }
 
@@ -101,7 +104,7 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
       protected boolean collisionDetected()
       {
          // has to be set up first tick cause robot hasn't been set up when constructor is called
-         if(firstTick)
+         if (firstTick)
          {
             setupCollisionDetector();
             firstTick = false;
@@ -127,17 +130,21 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
          tempTransform.getTranslation().set(thighXOffset, thighYOffset, thighZOffset + 0.5 * thighLength);
          shapeFactory.addShape(leftThigh, tempTransform, new CylinderShapeDescription<>(thighRadius, thighLength), false, 0b01, 0b10);
 
-         tempTransform.getTranslation().set(thighXOffset, - thighYOffset, thighZOffset + 0.5 * thighLength);
+         tempTransform.getTranslation().set(thighXOffset, -thighYOffset, thighZOffset + 0.5 * thighLength);
          shapeFactory.addShape(rightThigh, tempTransform, new CylinderShapeDescription<>(thighRadius, thighLength), false, 0b01, 0b10);
 
-         shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(), 0.5 * bollardEnvironment.getBollardWidth(), bollardEnvironment.getBollardHeight()));
-         shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(), 0.5 * bollardEnvironment.getBollardWidth(), bollardEnvironment.getBollardHeight()));
+         shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(),
+                                                      0.5 * bollardEnvironment.getBollardWidth(),
+                                                      bollardEnvironment.getBollardHeight()));
+         shapeFactory.addShape(shapeFactory.createBox(0.5 * bollardEnvironment.getBollardWidth(),
+                                                      0.5 * bollardEnvironment.getBollardWidth(),
+                                                      bollardEnvironment.getBollardHeight()));
 
          tempTransform.setIdentity();
          tempTransform.getTranslation().set(0.0, 0.5 * BOLLARD_DISTANCE, 0.0);
          collisionDetector.getCollisionObjects().get(4).setTransformToWorld(tempTransform);
 
-         tempTransform.getTranslation().set(0.0, - 0.5 * BOLLARD_DISTANCE, 0.0);
+         tempTransform.getTranslation().set(0.0, -0.5 * BOLLARD_DISTANCE, 0.0);
          collisionDetector.getCollisionObjects().get(5).setTransformToWorld(tempTransform);
 
          collisionDetector.getCollisionObjects().get(4).setCollisionGroup(0b10);
@@ -149,33 +156,31 @@ public class ValkyrieFootstepPlannerEndToEndTest extends AvatarBipedalFootstepPl
 
       private void setupGraphics()
       {
-         RobotDescription robotDescription = getRobotModel().getRobotDescription();
+         RobotDefinition robotDescription = getRobotModel().getRobotDefinition();
 
-         JointDescription leftKneeJoint = robotDescription.getJointDescription(leftKneeJointName);
-         JointDescription rightKneeJoint = robotDescription.getJointDescription(rightKneeJointName);
-         JointDescription leftThighJoint = robotDescription.getJointDescription(leftHipJointName);
-         JointDescription rightThighJoint = robotDescription.getJointDescription(rightHipJointName);
+         JointDefinition leftKneeJoint = robotDescription.getJointDefinition(leftKneeJointName);
+         JointDefinition rightKneeJoint = robotDescription.getJointDefinition(rightKneeJointName);
+         JointDefinition leftThighJoint = robotDescription.getJointDefinition(leftHipJointName);
+         JointDefinition rightThighJoint = robotDescription.getJointDefinition(rightHipJointName);
 
-         Graphics3DObject leftKneeGraphics = leftKneeJoint.getLink().getLinkGraphics();
-         Graphics3DObject rightKneeGraphics = rightKneeJoint.getLink().getLinkGraphics();
-         Graphics3DObject leftThighGraphics = leftThighJoint.getLink().getLinkGraphics();
-         Graphics3DObject rightThighGraphics = rightThighJoint.getLink().getLinkGraphics();
+         RigidBodyDefinition leftKneeSuccessor = leftKneeJoint.getSuccessor();
+         RigidBodyDefinition rightKneeSuccessor = rightKneeJoint.getSuccessor();
+         RigidBodyDefinition leftThighSuccessor = leftThighJoint.getSuccessor();
+         RigidBodyDefinition rightThighSuccessor = rightThighJoint.getSuccessor();
 
-         leftKneeGraphics.identity();
-         leftKneeGraphics.translate(0.0, 0.0, shinZOffset);
-         leftKneeGraphics.addCylinder(shinLength, shinRadius, collisionAppearance);
+         leftKneeSuccessor.addVisualDefinition(new VisualDefinition(new Point3D(0, 0, shinZOffset),
+                                                                    new Cylinder3DDefinition(shinLength, shinRadius, false),
+                                                                    collisionAppearance));
+         rightKneeSuccessor.addVisualDefinition(new VisualDefinition(new Point3D(0, 0, shinZOffset),
+                                                                     new Cylinder3DDefinition(shinLength, shinRadius, false),
+                                                                     collisionAppearance));
 
-         rightKneeGraphics.identity();
-         rightKneeGraphics.translate(0.0, 0.0, shinZOffset);
-         rightKneeGraphics.addCylinder(shinLength, shinRadius, collisionAppearance);
-
-         leftThighGraphics.identity();
-         leftThighGraphics.translate(thighXOffset, thighYOffset, thighZOffset);
-         leftThighGraphics.addCylinder(thighLength, thighRadius, collisionAppearance);
-
-         rightThighGraphics.identity();
-         rightThighGraphics.translate(thighXOffset, -thighYOffset, thighZOffset);
-         rightThighGraphics.addCylinder(thighLength, thighRadius, collisionAppearance);
+         leftThighSuccessor.addVisualDefinition(new VisualDefinition(new Point3D(thighXOffset, thighYOffset, thighZOffset),
+                                                                     new Cylinder3DDefinition(thighLength, thighRadius, false),
+                                                                     collisionAppearance));
+         rightThighSuccessor.addVisualDefinition(new VisualDefinition(new Point3D(thighXOffset, -thighYOffset, thighZOffset),
+                                                                      new Cylinder3DDefinition(thighLength, thighRadius, false),
+                                                                      collisionAppearance));
       }
    }
 }

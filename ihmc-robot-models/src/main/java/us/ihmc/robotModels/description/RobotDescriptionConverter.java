@@ -445,7 +445,7 @@ public class RobotDescriptionConverter
       return visualDefinitions;
    }
 
-   private static MaterialDefinition toMaterialDefinition(AppearanceDefinition appearanceDefinition)
+   public static MaterialDefinition toMaterialDefinition(AppearanceDefinition appearanceDefinition)
    {
       if (appearanceDefinition == null)
          return null;
@@ -485,7 +485,7 @@ public class RobotDescriptionConverter
       return output;
    }
 
-   private static ColorDefinition toColorDefinition(MutableColor mutableColor, double transparency)
+   public static ColorDefinition toColorDefinition(MutableColor mutableColor, double transparency)
    {
       return new ColorDefinition(mutableColor.getX(), mutableColor.getY(), mutableColor.getZ(), 1.0 - transparency);
    }

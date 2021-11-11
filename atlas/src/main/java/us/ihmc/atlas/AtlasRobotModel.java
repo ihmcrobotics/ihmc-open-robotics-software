@@ -305,7 +305,6 @@ public class AtlasRobotModel implements DRCRobotModel
       return RobotDefinitionConverter.toRobotDescription(robotDefinitionToUse);
    }
 
-   @Override
    public RobotDescription getRobotDescription()
    {
       if (robotDescription == null)

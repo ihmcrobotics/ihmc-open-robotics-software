@@ -1,23 +1,24 @@
 package us.ihmc.behaviors.javafx.tools;
 
+import java.util.concurrent.ExecutorService;
+
 import javafx.scene.Group;
 import javafx.scene.transform.Translate;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.javafx.PrivateAnimationTimer;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
-
-import java.util.concurrent.ExecutorService;
 
 public class JavaFXRemoteRobotVisualizer extends Group
 {
@@ -40,7 +41,7 @@ public class JavaFXRemoteRobotVisualizer extends Group
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
       executor = ThreadTools.newSingleDaemonThreadExecutor("RobotVisualizerLoading");
-      executor.submit(() -> loadRobotModelAndGraphics(robotModel.getRobotDescription()));
+      executor.submit(() -> loadRobotModelAndGraphics(robotModel.getRobotDefinition()));
 
       animationTimer.start();
    }
@@ -92,9 +93,9 @@ public class JavaFXRemoteRobotVisualizer extends Group
       }
    }
 
-   private void loadRobotModelAndGraphics(RobotDescription robotDescription)
+   private void loadRobotModelAndGraphics(RobotDefinition robotDefinition)
    {
-      graphicsRobot = new GraphicsIDRobot(robotDescription.getName(), syncedRobot.getFullRobotModel().getElevator(), robotDescription);
+      graphicsRobot = new GraphicsIDRobot(robotDefinition.getName(), syncedRobot.getFullRobotModel().getElevator(), RobotDefinitionTools.toGraphicsObjectsHolder(robotDefinition));
       robotRootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode());
       robotRootNode.setMouseTransparent(true);
       addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode);

@@ -157,7 +157,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Sets the period of a controller tick in second.
-    * 
+    *
     * @param controllerDT the period of the controller thread in second.
     */
    public void setControllerDT(double controllerDT)
@@ -167,7 +167,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Sets the period of a estimator tick in second.
-    * 
+    *
     * @param estimatorDT the period of the estimator thread in second.
     */
    public void setEstimatorDT(double estimatorDT)
@@ -177,7 +177,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Sets the period of a simulation tick in second.
-    * 
+    *
     * @param simulateDT the period of the simulation thread in second.
     */
    public void setSimulateDT(double simulateDT)
@@ -212,8 +212,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
     */
    public void setMaterial(MaterialDefinition robotMaterial)
    {
-      if (robotDescription != null)
-         throw new IllegalArgumentException("Cannot set robotMaterial once robotDescription has been created.");
+      if (robotDefinition != null)
+         throw new IllegalArgumentException("Cannot set robotMaterial once robotDefinition has been created.");
       this.robotMaterial = robotMaterial;
    }
 
@@ -226,7 +226,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public void setUseOBJGraphics(boolean useOBJGraphics)
    {
       if (robotDefinition != null)
-         throw new IllegalArgumentException("Cannot change to use OBJ graphics once generalizedRobotModel has been created.");
+         throw new IllegalArgumentException("Cannot change to use OBJ graphics once robotDefinition has been created.");
       this.useOBJGraphics = useOBJGraphics;
    }
 
@@ -281,7 +281,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public void setRobotDefinitionMutator(Consumer<RobotDefinition> robotDefinitionMutator)
    {
       if (robotDefinition != null)
-         throw new IllegalArgumentException("Cannot set customModel once generalizedRobotModel has been created.");
+         throw new IllegalArgumentException("Cannot set customModel once robotDefinition has been created.");
       this.robotDefinitionMutator = robotDefinitionMutator;
    }
 
@@ -299,6 +299,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return robotDefinitionMutator;
    }
 
+   @Override
    public RobotDefinition getRobotDefinition()
    {
       if (robotDefinition == null)
@@ -318,7 +319,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return robotDefinition;
    }
 
-   @Override
    public RobotDescription getRobotDescription()
    {
       if (robotDescription == null)
