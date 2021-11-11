@@ -8,9 +8,7 @@ import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
-import us.ihmc.robotModels.FullRobotModelFromDescription;
-import us.ihmc.robotModels.description.RobotDefinitionConverter;
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotModels.FullRobotModelWrapper;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
@@ -20,7 +18,6 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
    private final RhinoBeetleJointNameMapAndContactDefinition jointMapAndContactInfo;
 
    private final RobotDefinition robotDefinition;
-   private final RobotDescription robotDescription;
 
    public RhinoBeetleModelFactory()
    {
@@ -34,19 +31,18 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
                                                            jointMapAndContactInfo,
                                                            jointMapAndContactInfo,
                                                            true);
-      robotDescription = RobotDefinitionConverter.toRobotDescription(robotDefinition);
    }
 
    public FloatingRootJointRobot createSdfRobot()
    {
 
-      return new FloatingRootJointRobot(robotDescription);
+      return new FloatingRootJointRobot(robotDefinition);
    }
 
+   @Override
    public FullRobotModel createFullRobotModel()
    {
-      String[] sensorLinksToTrack = new String[] {};
-      return new FullRobotModelFromDescription(robotDescription, getJointNameMap(), sensorLinksToTrack);
+      return new FullRobotModelWrapper(robotDefinition, jointMapAndContactInfo);
    }
 
    public LogModelProvider createLogModelProvider()
@@ -61,11 +57,6 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
    public RobotDefinition getRobotDefinition()
    {
       return robotDefinition;
-   }
-
-   public RobotDescription getRobotDescription()
-   {
-      return robotDescription;
    }
 
    public RhinoBeetleJointNameMapAndContactDefinition getJointNameMap()

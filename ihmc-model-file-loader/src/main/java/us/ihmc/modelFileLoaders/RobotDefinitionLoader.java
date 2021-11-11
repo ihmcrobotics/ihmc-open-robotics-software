@@ -200,7 +200,7 @@ public class RobotDefinitionLoader
          Vector3D gcOffset = jointContactPoint.getRight();
 
          GroundContactPointDefinition groundContactPoint = new GroundContactPointDefinition();
-         groundContactPoint.setName("gc_" + ModelFileLoaderConversionsHelper.sanitizeJointName(jointName) + "_" + count++);
+         groundContactPoint.setName("gc_" + jointName + "_" + count++);
          groundContactPoint.getTransformToParent().getTranslation().set(gcOffset);
          groundContactPoint.setGroupIdentifier(contactPointHolder.getGroupIdentifier(jointContactPoint));
 
