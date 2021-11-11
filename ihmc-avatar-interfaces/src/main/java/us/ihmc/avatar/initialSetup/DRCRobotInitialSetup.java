@@ -1,6 +1,9 @@
 package us.ihmc.avatar.initialSetup;
 
+import java.util.List;
+
 import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
@@ -9,9 +12,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-
-import java.util.List;
 
 public interface DRCRobotInitialSetup<T extends Robot>
 {
