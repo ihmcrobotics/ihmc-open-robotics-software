@@ -1,19 +1,17 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
-import java.io.FileNotFoundException;
+import java.util.Arrays;
 
-import javax.xml.bind.JAXBException;
-
-import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
+import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelFromDescription;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 
 public class RhinoBeetleModelFactory implements FullRobotModelFactory
@@ -21,8 +19,7 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
    private final RhinoBeetleSDFParameters sdfParameters;
    private final RhinoBeetleJointNameMapAndContactDefinition jointMapAndContactInfo;
 
-   private final GeneralizedSDFRobotModel generalizedSDFRobotModel;
-
+   private final RobotDefinition robotDefinition;
    private final RobotDescription robotDescription;
 
    public RhinoBeetleModelFactory()
@@ -30,28 +27,14 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
       sdfParameters = new RhinoBeetleSDFParameters();
       jointMapAndContactInfo = new RhinoBeetleJointNameMapAndContactDefinition();
 
-      JaxbSDFLoader loader;
-      try
-      {
-         loader = new JaxbSDFLoader(sdfParameters.getSdfAsInputStream(), sdfParameters.getResourceDirectories(), null);
-         generalizedSDFRobotModel = loader.getGeneralizedSDFRobotModel(sdfParameters.getSdfModelName());
-      }
-      catch (FileNotFoundException | JAXBException e)
-      {
-         throw new RuntimeException("Cannot load model", e);
-      }
-
-      boolean useCollisionMeshes = false;
-
-      GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
-      RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-      robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, jointMapAndContactInfo, jointMapAndContactInfo,
-            useCollisionMeshes);
-   }
-
-   private GeneralizedSDFRobotModel getGeneralizedRobotModel()
-   {
-      return generalizedSDFRobotModel;
+      robotDefinition = RobotDefinitionLoader.loadSDFModel(sdfParameters.getSdfAsInputStream(),
+                                                           Arrays.asList(sdfParameters.getResourceDirectories()),
+                                                           getClass().getClassLoader(),
+                                                           sdfParameters.getSdfModelName(),
+                                                           jointMapAndContactInfo,
+                                                           jointMapAndContactInfo,
+                                                           true);
+      robotDescription = RobotDefinitionConverter.toRobotDescription(robotDefinition);
    }
 
    public FloatingRootJointRobot createSdfRobot()
@@ -68,10 +51,18 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
 
    public LogModelProvider createLogModelProvider()
    {
-      return new DefaultLogModelProvider<>(SDFModelLoader.class, sdfParameters.getSdfModelName(), sdfParameters.getSdfAsInputStream(), sdfParameters.getResourceDirectories());
+      return new DefaultLogModelProvider<>(SDFModelLoader.class,
+                                           sdfParameters.getSdfModelName(),
+                                           sdfParameters.getSdfAsInputStream(),
+                                           sdfParameters.getResourceDirectories());
    }
 
    @Override
+   public RobotDefinition getRobotDefinition()
+   {
+      return robotDefinition;
+   }
+
    public RobotDescription getRobotDescription()
    {
       return robotDescription;

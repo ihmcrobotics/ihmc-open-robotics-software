@@ -44,23 +44,23 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
 
    private final RobotQuadrant[] robotQuadrants;
 
-   public FullQuadrupedRobotModelFromDescription(RobotDescription description, QuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
+   public FullQuadrupedRobotModelFromDescription(RobotDescription description,
+                                                 QuadrupedJointNameMap sdfJointNameMap,
                                                  Map<QuadrupedJointName, JointLimit> jointLimits)
    {
-      this(RobotQuadrant.values, description, sdfJointNameMap, sensorLinksToTrack);
+      this(RobotQuadrant.values, description, sdfJointNameMap);
 
       this.jointLimits.putAll(jointLimits);
    }
 
-   public FullQuadrupedRobotModelFromDescription(RobotDescription description, QuadrupedJointNameMap sdfJointNameMap, String[] sensorLinksToTrack)
+   public FullQuadrupedRobotModelFromDescription(RobotDescription description, QuadrupedJointNameMap sdfJointNameMap)
    {
-      this(RobotQuadrant.values, description, sdfJointNameMap, sensorLinksToTrack);
+      this(RobotQuadrant.values, description, sdfJointNameMap);
    }
 
-   public FullQuadrupedRobotModelFromDescription(RobotQuadrant[] robotQuadrants, RobotDescription description, QuadrupedJointNameMap sdfJointNameMap,
-                                                 String[] sensorLinksToTrack)
+   public FullQuadrupedRobotModelFromDescription(RobotQuadrant[] robotQuadrants, RobotDescription description, QuadrupedJointNameMap sdfJointNameMap)
    {
-      super(description, sdfJointNameMap, sensorLinksToTrack);
+      super(description, sdfJointNameMap, null);
 
       this.robotQuadrants = robotQuadrants;
 
@@ -79,8 +79,9 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
       for (RobotQuadrant robotQuadrant : robotQuadrants)
       {
          RigidBodyTransform soleToParentTransform = sdfJointNameMap.getSoleToParentFrameTransform(robotQuadrant);
-         MovingReferenceFrame soleFrame = MovingReferenceFrame
-               .constructFrameFixedInParent(robotQuadrant.toString() + "SoleFrame", getEndEffectorFrame(robotQuadrant, LimbName.LEG), soleToParentTransform);
+         MovingReferenceFrame soleFrame = MovingReferenceFrame.constructFrameFixedInParent(robotQuadrant.toString() + "SoleFrame",
+                                                                                           getEndEffectorFrame(robotQuadrant, LimbName.LEG),
+                                                                                           soleToParentTransform);
          soleFrames.put(robotQuadrant, soleFrame);
       }
    }
@@ -119,11 +120,11 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
       {
          switch (jointRole)
          {
-         case LEG:
-            ImmutablePair<RobotQuadrant, LegJointName> legJointName = jointMap.getLegJointName(joint.getName());
-            legJointMaps.get(legJointName.getLeft()).put(legJointName.getRight(), inverseDynamicsJoint);
-            legJointLists.get(legJointName.getLeft()).add(inverseDynamicsJoint);
-            break;
+            case LEG:
+               ImmutablePair<RobotQuadrant, LegJointName> legJointName = jointMap.getLegJointName(joint.getName());
+               legJointMaps.get(legJointName.getLeft()).put(legJointName.getRight(), inverseDynamicsJoint);
+               legJointLists.get(legJointName.getLeft()).add(inverseDynamicsJoint);
+               break;
          }
       }
    }
@@ -149,9 +150,12 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
          return null;
    }
 
-   /* (non-Javadoc)
-       * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getFoot(us.ihmc.robotics.robotSide.RobotQuadrant)
-       */
+   /*
+    * (non-Javadoc)
+    * @see
+    * us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getFoot(us.ihmc.robotics.robotSide.
+    * RobotQuadrant)
+    */
    @Override
    public RigidBodyBasics getFoot(RobotQuadrant robotQuadrant)
    {
@@ -163,10 +167,10 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
    {
       switch (limbName)
       {
-      case LEG:
-         return feet.get(robotQuadrant);
-      default:
-         throw new RuntimeException("Unknown end effector");
+         case LEG:
+            return feet.get(robotQuadrant);
+         default:
+            throw new RuntimeException("Unknown end effector");
       }
    }
 
@@ -191,8 +195,11 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
       return soleFrames;
    }
 
-   /* (non-Javadoc)
-    * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getNameForOneDoFJoint(us.ihmc.robotics.screwTheory.OneDoFJoint)
+   /*
+    * (non-Javadoc)
+    * @see
+    * us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getNameForOneDoFJoint(us.ihmc.robotics
+    * .screwTheory.OneDoFJoint)
     */
    @Override
    public QuadrupedJointName getNameForOneDoFJoint(OneDoFJointBasics oneDoFJoint)
@@ -200,8 +207,11 @@ public class FullQuadrupedRobotModelFromDescription extends FullRobotModelFromDe
       return jointNameOneDoFJointBiMap.inverse().get(oneDoFJoint);
    }
 
-   /* (non-Javadoc)
-    * @see us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getJointLimit(us.ihmc.modelFileLoaders.SdfLoader.partNames.QuadrupedJointName)
+   /*
+    * (non-Javadoc)
+    * @see
+    * us.ihmc.modelFileLoaders.SdfLoader.FullQuadrupedRobotModel#getJointLimit(us.ihmc.modelFileLoaders
+    * .SdfLoader.partNames.QuadrupedJointName)
     */
    @Deprecated
    @Override

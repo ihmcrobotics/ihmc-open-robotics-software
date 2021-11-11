@@ -225,11 +225,11 @@ public class RobotDefinitionLoader
       scaleRigidBodyDefinitionRecursive(definition.getRootBodyDefinition(), modelScale, massScalePower, jointFilter, true);
    }
 
-   private static void scaleRigidBodyDefinitionRecursive(RigidBodyDefinition definition,
-                                                         double modelScale,
-                                                         double massScalePower,
-                                                         Predicate<JointDefinition> jointFilter,
-                                                         boolean scaleInertia)
+   public static void scaleRigidBodyDefinitionRecursive(RigidBodyDefinition definition,
+                                                        double modelScale,
+                                                        double massScalePower,
+                                                        Predicate<JointDefinition> jointFilter,
+                                                        boolean scaleInertia)
    {
       if (scaleInertia && definition.getParentJoint() != null)
          scaleInertia &= jointFilter.test(definition.getParentJoint());
@@ -243,7 +243,7 @@ public class RobotDefinitionLoader
       }
    }
 
-   private static void scaleJointDefinition(JointDefinition definition, double modelScale)
+   public static void scaleJointDefinition(JointDefinition definition, double modelScale)
    {
       definition.getTransformToParent().getTranslation().scale(modelScale);
 
@@ -257,7 +257,7 @@ public class RobotDefinitionLoader
          gcp.getTransformToParent().getTranslation().scale(modelScale);
    }
 
-   private static void scaleRigidBodyDefinition(RigidBodyDefinition definition, double modelScale, double massScalePower, boolean scaleInertia)
+   public static void scaleRigidBodyDefinition(RigidBodyDefinition definition, double modelScale, double massScalePower, boolean scaleInertia)
    {
       // Center of mass offset scales with the scaling factor
       definition.getCenterOfMassOffset().scale(modelScale);

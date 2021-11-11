@@ -17,7 +17,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameSphere3DReadOnly;
 import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.color.MutableColor;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
+import us.ihmc.robotModels.description.RobotDescriptionConverter;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCapsule3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadOnly;
@@ -26,6 +32,9 @@ import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPRamp3DReadOnly;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
+import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
+import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.Capsule3DDefinition;
@@ -45,7 +54,9 @@ import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -53,88 +64,6 @@ import us.ihmc.simulationconstructionset.Robot;
 
 public class RobotDefinitionTools
 {
-   public static RobotDefinition loadSDFModel(InputStream stream,
-                                              Collection<String> resourceDirectories,
-                                              ClassLoader classLoader,
-                                              String modelName,
-                                              ContactPointDefinitionHolder contactPointDefinitionHolder,
-                                              JointNameMap<?> jointNameMap,
-                                              boolean removeCollisionMeshes)
-   {
-      return RobotDefinitionLoader.loadSDFModel(stream,
-                                                resourceDirectories,
-                                                classLoader,
-                                                modelName,
-                                                contactPointDefinitionHolder,
-                                                jointNameMap,
-                                                removeCollisionMeshes);
-   }
-
-   public static void setDefaultMaterial(RobotDefinition robotDefinition)
-   {
-      RobotDefinitionLoader.setDefaultMaterial(robotDefinition);
-   }
-
-   public static void setDefaultMaterial(RobotDefinition robotDefinition, MaterialDefinition defaultMaterial)
-   {
-      RobotDefinitionLoader.setDefaultMaterial(robotDefinition, defaultMaterial);
-   }
-
-   public static void removeCollisionShapeDefinitions(RobotDefinition robotDefinition)
-   {
-      RobotDefinitionLoader.removeCollisionShapeDefinitions(robotDefinition);
-   }
-
-   public static void setRobotDefinitionMaterial(RobotDefinition robotDefinition, MaterialDefinition materialDefinition)
-   {
-      RobotDefinitionLoader.setRobotDefinitionMaterial(robotDefinition, materialDefinition);
-   }
-
-   public static void setRobotDefinitionTransparency(RobotDefinition robotDefinition, double transparency)
-   {
-      RobotDefinitionLoader.setRobotDefinitionTransparency(robotDefinition, transparency);
-   }
-
-   public static void adjustJointLimitStops(RobotDefinition robotDefinition, JointNameMap<?> jointNameMap)
-   {
-      RobotDefinitionLoader.adjustJointLimitStops(robotDefinition, jointNameMap);
-   }
-
-   public static void adjustRigidBodyInterias(RobotDefinition robotDefinition)
-   {
-      RobotDefinitionLoader.adjustRigidBodyInterias(robotDefinition);
-   }
-
-   public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder)
-   {
-      RobotDefinitionLoader.addGroundContactPoints(robotDefinition, contactPointHolder);
-   }
-
-   public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder, boolean addVisualization)
-   {
-      RobotDefinitionLoader.addGroundContactPoints(robotDefinition, contactPointHolder, addVisualization);
-   }
-
-   public static void scaleRobotDefinition(RobotDefinition definition, double modelScale, double massScalePower, Predicate<JointDefinition> jointFilter)
-   {
-      RobotDefinitionLoader.scaleRobotDefinition(definition, modelScale, massScalePower, jointFilter);
-   }
-
-   public static Consumer<RobotDefinition> jointLimitRemover()
-   {
-      return RobotDefinitionLoader.jointLimitRemover();
-   }
-
-   public static Consumer<RobotDefinition> jointLimitRemover(String nameFilter)
-   {
-      return RobotDefinitionLoader.jointLimitRemover(nameFilter);
-   }
-
-   public static Consumer<RobotDefinition> jointLimitMutator(String nameFilter, double lowerLimit, double upperLimit)
-   {
-      return RobotDefinitionLoader.jointLimitMutator(nameFilter, lowerLimit, upperLimit);
-   }
-
    public static void addCollisionsToRobotDefinition(List<Collidable> collidables, RobotDefinition robotDefinition)
    {
       for (Collidable collidable : collidables)
@@ -291,5 +220,177 @@ public class RobotDefinitionTools
       output.setGeometryDefinition(geometry);
 
       return output;
+   }
+
+   // --------------------------------------------------------
+   // RobotDefinitionLoader redirections:
+   // --------------------------------------------------------
+
+   public static RobotDefinition loadSDFModel(InputStream stream,
+                                              Collection<String> resourceDirectories,
+                                              ClassLoader classLoader,
+                                              String modelName,
+                                              ContactPointDefinitionHolder contactPointDefinitionHolder,
+                                              JointNameMap<?> jointNameMap,
+                                              boolean removeCollisionMeshes)
+   {
+      return RobotDefinitionLoader.loadSDFModel(stream,
+                                                resourceDirectories,
+                                                classLoader,
+                                                modelName,
+                                                contactPointDefinitionHolder,
+                                                jointNameMap,
+                                                removeCollisionMeshes);
+   }
+
+   public static void setDefaultMaterial(RobotDefinition robotDefinition)
+   {
+      RobotDefinitionLoader.setDefaultMaterial(robotDefinition);
+   }
+
+   public static void setDefaultMaterial(RobotDefinition robotDefinition, MaterialDefinition defaultMaterial)
+   {
+      RobotDefinitionLoader.setDefaultMaterial(robotDefinition, defaultMaterial);
+   }
+
+   public static void removeCollisionShapeDefinitions(RobotDefinition robotDefinition)
+   {
+      RobotDefinitionLoader.removeCollisionShapeDefinitions(robotDefinition);
+   }
+
+   public static void setRobotDefinitionMaterial(RobotDefinition robotDefinition, MaterialDefinition materialDefinition)
+   {
+      RobotDefinitionLoader.setRobotDefinitionMaterial(robotDefinition, materialDefinition);
+   }
+
+   public static void setRobotDefinitionTransparency(RobotDefinition robotDefinition, double transparency)
+   {
+      RobotDefinitionLoader.setRobotDefinitionTransparency(robotDefinition, transparency);
+   }
+
+   public static void adjustJointLimitStops(RobotDefinition robotDefinition, JointNameMap<?> jointNameMap)
+   {
+      RobotDefinitionLoader.adjustJointLimitStops(robotDefinition, jointNameMap);
+   }
+
+   public static void adjustRigidBodyInterias(RobotDefinition robotDefinition)
+   {
+      RobotDefinitionLoader.adjustRigidBodyInterias(robotDefinition);
+   }
+
+   public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder)
+   {
+      RobotDefinitionLoader.addGroundContactPoints(robotDefinition, contactPointHolder);
+   }
+
+   public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder, boolean addVisualization)
+   {
+      RobotDefinitionLoader.addGroundContactPoints(robotDefinition, contactPointHolder, addVisualization);
+   }
+
+   public static void scaleRobotDefinition(RobotDefinition definition, double modelScale, double massScalePower, Predicate<JointDefinition> jointFilter)
+   {
+      RobotDefinitionLoader.scaleRobotDefinition(definition, modelScale, massScalePower, jointFilter);
+   }
+
+   public static void scaleRigidBodyDefinitionRecursive(RigidBodyDefinition definition,
+                                                        double modelScale,
+                                                        double massScalePower,
+                                                        Predicate<JointDefinition> jointFilter,
+                                                        boolean scaleInertia)
+   {
+      RobotDefinitionLoader.scaleRigidBodyDefinitionRecursive(definition, modelScale, massScalePower, jointFilter, scaleInertia);
+   }
+
+   public static void scaleJointDefinition(JointDefinition definition, double modelScale)
+   {
+      RobotDefinitionLoader.scaleJointDefinition(definition, modelScale);
+   }
+
+   public static void scaleRigidBodyDefinition(RigidBodyDefinition definition, double modelScale, double massScalePower, boolean scaleInertia)
+   {
+      RobotDefinitionLoader.scaleRigidBodyDefinition(definition, modelScale, massScalePower, scaleInertia);
+   }
+
+   public static Consumer<RobotDefinition> jointLimitRemover()
+   {
+      return RobotDefinitionLoader.jointLimitRemover();
+   }
+
+   public static Consumer<RobotDefinition> jointLimitRemover(String nameFilter)
+   {
+      return RobotDefinitionLoader.jointLimitRemover(nameFilter);
+   }
+
+   public static Consumer<RobotDefinition> jointLimitMutator(String nameFilter, double lowerLimit, double upperLimit)
+   {
+      return RobotDefinitionLoader.jointLimitMutator(nameFilter, lowerLimit, upperLimit);
+   }
+
+   // --------------------------------------------------
+   // RobotDefinitionConverter redirections:
+   // --------------------------------------------------
+   public static GraphicsObjectsHolder toGraphicsObjectsHolder(RobotDefinition robotDefinition)
+   {
+      return RobotDefinitionConverter.toGraphicsObjectsHolder(robotDefinition);
+   }
+
+   public static RobotDescription toRobotDescription(RobotDefinition robotDefinition)
+   {
+      return RobotDefinitionConverter.toRobotDescription(robotDefinition);
+   }
+
+   public static Graphics3DObject toGraphics3DObject(Collection<? extends VisualDefinition> source)
+   {
+      return RobotDefinitionConverter.toGraphics3DObject(source);
+   }
+
+   public static Graphics3DObject toGraphics3DObject(VisualDefinition source)
+   {
+      return RobotDefinitionConverter.toGraphics3DObject(source);
+   }
+
+   public static List<Graphics3DPrimitiveInstruction> toGraphics3DPrimitiveInstruction(GeometryDefinition source)
+   {
+      return RobotDefinitionConverter.toGraphics3DPrimitiveInstruction(source);
+   }
+
+   public static AppearanceDefinition toAppearanceDefinition(MaterialDefinition source)
+   {
+      return RobotDefinitionConverter.toAppearanceDefinition(source);
+   }
+
+   public static List<CollisionMeshDescription> toCollisionMeshDescriptions(Collection<? extends CollisionShapeDefinition> source)
+   {
+      return RobotDefinitionConverter.toCollisionMeshDescriptions(source);
+   }
+
+   public static CollisionMeshDescription toCollisionMeshDescription(CollisionShapeDefinition source)
+   {
+      return RobotDefinitionConverter.toCollisionMeshDescription(source);
+   }
+
+   // --------------------------------------------------
+   // RobotDescriptionConverter redirections:
+   // --------------------------------------------------
+
+   public static RobotDefinition toRobotDefinition(RobotDescription robotDescription)
+   {
+      return RobotDescriptionConverter.toRobotDefinition(robotDescription);
+   }
+
+   public static List<VisualDefinition> toVisualDefinitions(Graphics3DObject graphics3DObject)
+   {
+      return RobotDescriptionConverter.toVisualDefinitions(graphics3DObject);
+   }
+
+   public static MaterialDefinition toMaterialDefinition(AppearanceDefinition appearanceDefinition)
+   {
+      return RobotDescriptionConverter.toMaterialDefinition(appearanceDefinition);
+   }
+
+   public static ColorDefinition toColorDefinition(MutableColor mutableColor, double transparency)
+   {
+      return RobotDescriptionConverter.toColorDefinition(mutableColor, transparency);
    }
 }

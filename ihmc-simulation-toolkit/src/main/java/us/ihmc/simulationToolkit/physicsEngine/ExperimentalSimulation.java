@@ -118,7 +118,9 @@ public class ExperimentalSimulation extends Simulation
       this.gravity = gravity;
    }
 
-   public void addEnvironmentCollidables(CollidableHelper helper, String robotCollisionMask, String environmentCollisionMask,
+   public void addEnvironmentCollidables(CollidableHelper helper,
+                                         String robotCollisionMask,
+                                         String environmentCollisionMask,
                                          CommonAvatarEnvironmentInterface environment)
    {
       addEnvironmentCollidables(toCollidables(helper.getCollisionMask(environmentCollisionMask), helper.createCollisionGroup(robotCollisionMask), environment));
@@ -163,7 +165,9 @@ public class ExperimentalSimulation extends Simulation
    /**
     * Adds and configures a new robot to the simulation.
     */
-   public void addRobot(RobotDescription robotDescription, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter,
+   public void addRobot(RobotDescription robotDescription,
+                        RobotCollisionModel robotCollisionModel,
+                        MultiBodySystemStateWriter robotInitialStateWriter,
                         MultiBodySystemStateWriter controllerOutputWriter)
    {
       RobotFromDescription scsRobot = new RobotFromDescription(robotDescription);
@@ -192,7 +196,7 @@ public class ExperimentalSimulation extends Simulation
     */
    public void configureRobot(FullRobotModelFactory robotFactory, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter)
    {
-      String robotName = robotFactory.getRobotDescription().getName();
+      String robotName = robotFactory.getRobotDefinition().getName();
       RigidBodyBasics rootBody = robotFactory.createFullRobotModel().getElevator();
       configureRobot(robotName, rootBody, robotCollisionModel, robotInitialStateWriter);
    }
@@ -201,7 +205,9 @@ public class ExperimentalSimulation extends Simulation
     * Configures the physics for a robot that was already added via the constructor or
     * {@link #addRobot(Robot)}.
     */
-   public void configureRobot(String robotName, RigidBodyBasics rootBody, RobotCollisionModel robotCollisionModel,
+   public void configureRobot(String robotName,
+                              RigidBodyBasics rootBody,
+                              RobotCollisionModel robotCollisionModel,
                               MultiBodySystemStateWriter robotInitialStateWriter)
    {
       Robot scsRobot = Stream.of(getRobots()).filter(candidate -> candidate.getName().toLowerCase().equals(robotName.toLowerCase())).findFirst().get();
@@ -518,12 +524,14 @@ public class ExperimentalSimulation extends Simulation
    }
 
    public static MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<HumanoidFloatingRootJointRobot, HumanoidJointNameMap> initialSetup,
-                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory, HumanoidJointNameMap jointMap)
+                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory,
+                                                                      HumanoidJointNameMap jointMap)
    {
       return toRobotInitialStateWriter(initialSetup, robotFactory.createHumanoidFloatingRootJointRobot(false), jointMap);
    }
 
-   public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<T, HumanoidJointNameMap> initialSetup, T robot,
+   public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<T, HumanoidJointNameMap> initialSetup,
+                                                                                        T robot,
                                                                                         HumanoidJointNameMap jointMap)
    {
       initialSetup.accept(robot, jointMap);

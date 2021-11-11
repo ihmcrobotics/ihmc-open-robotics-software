@@ -14,7 +14,6 @@ import org.junit.jupiter.api.TestInfo;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
 import us.ihmc.avatar.multiContact.MultiContactScriptMatcher;
@@ -40,7 +39,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotModels.description.RobotDescriptionConverter;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
@@ -190,8 +188,8 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
          throws Exception
    {
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
-      ghostRobotModel.getRobotDescription().setName("Ghost");
-      RobotDefinition ghostRobotDefinition = RobotDescriptionConverter.toRobotDefinition(ghostRobotModel.getRobotDescription());
+      RobotDefinition ghostRobotDefinition = ghostRobotModel.getRobotDefinition();
+      ghostRobotDefinition.setName("Ghost");
       MaterialDefinition ghostMaterial = new MaterialDefinition(ghostApperance);
       ghostRobotDefinition.getAllRigidBodies()
                           .forEach(rigidBodyDefinition -> rigidBodyDefinition.getVisualDefinitions()

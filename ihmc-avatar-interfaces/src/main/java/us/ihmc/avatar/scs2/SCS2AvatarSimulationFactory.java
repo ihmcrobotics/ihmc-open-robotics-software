@@ -51,7 +51,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.description.RobotDescriptionConverter;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -176,7 +175,7 @@ public class SCS2AvatarSimulationFactory
    {
       DRCRobotModel robotModel = this.robotModel.get();
 
-      robotDefinition = RobotDescriptionConverter.toRobotDefinition(robotModel.getRobotDescription());
+      robotDefinition = robotModel.getRobotDefinition();
 
       if (!enableSimulatedRobotDamping.get())
       {
