@@ -58,11 +58,9 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
-import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsControlThread;
@@ -114,7 +112,6 @@ public class AtlasRobotModel implements DRCRobotModel
 
    private Consumer<RobotDefinition> robotDefinitionMutator;
    private RobotDefinition robotDefinition, robotDefinitionWithSDFCollision;
-   private RobotDescription robotDescription;
    private String simpleRobotName = "Atlas";
    private StepReachabilityData stepReachabilityData = null;
 
@@ -270,48 +267,6 @@ public class AtlasRobotModel implements DRCRobotModel
       return robotDefinitionMutator;
    }
 
-   public RobotDescription createRobotDescription()
-   {
-      return createRobotDescription(Double.NaN);
-   }
-
-   public RobotDescription createRobotDescription(double transparency)
-   {
-      if (Double.isNaN(transparency) || transparency < 0.0)
-         return createRobotDescription((MaterialDefinition) null);
-      else
-         return createRobotDescription(ColorDefinitions.Orange().derive(0, 1, 1, 1.0 - transparency));
-   }
-
-   public RobotDescription createRobotDescription(ColorDefinition diffuseColor)
-   {
-      return createRobotDescription(new MaterialDefinition(diffuseColor));
-   }
-
-   public RobotDescription createRobotDescription(MaterialDefinition materialDefinition)
-   {
-      RobotDefinition robotDefinitionToUse;
-
-      if (materialDefinition != null)
-      {
-         robotDefinitionToUse = new RobotDefinition(getRobotDefinition());
-         RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinitionToUse, materialDefinition);
-      }
-      else
-      {
-         robotDefinitionToUse = getRobotDefinition();
-      }
-
-      return RobotDefinitionConverter.toRobotDescription(robotDefinitionToUse);
-   }
-
-   public RobotDescription getRobotDescription()
-   {
-      if (robotDescription == null)
-         robotDescription = createRobotDescription();
-      return robotDescription;
-   }
-
    @Override
    public HighLevelControllerParameters getHighLevelControllerParameters()
    {
@@ -459,8 +414,8 @@ public class AtlasRobotModel implements DRCRobotModel
    public HumanoidFloatingRootJointRobot createHumanoidFloatingRootJointRobot(boolean createCollisionMeshes, boolean enableJointDamping)
    {
       boolean enableTorqueVelocityLimits = false;
-      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(getRobotDescription(),
-                                                                                                         jointMap,
+      HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot = new HumanoidFloatingRootJointRobot(getRobotDefinition(),
+                                                                                                         getJointMap(),
                                                                                                          enableJointDamping,
                                                                                                          enableTorqueVelocityLimits);
       return humanoidFloatingRootJointRobot;

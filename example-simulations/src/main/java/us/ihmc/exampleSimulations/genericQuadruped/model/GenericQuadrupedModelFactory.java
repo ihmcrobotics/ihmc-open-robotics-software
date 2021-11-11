@@ -8,10 +8,8 @@ import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.quadrupedRobotics.model.QuadrupedModelFactory;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelWrapper;
-import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotics.partNames.QuadrupedJointName;
 import us.ihmc.robotics.partNames.QuadrupedJointNameMap;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
@@ -23,7 +21,6 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
    private final GenericQuadrupedJointNameMapAndContactDefinition jointMapAndContactInfo;
 
    private final RobotDefinition robotDefinition;
-   private final RobotDescription robotDescription;
 
    public GenericQuadrupedModelFactory()
    {
@@ -36,7 +33,6 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
                                                            jointMapAndContactInfo,
                                                            jointMapAndContactInfo,
                                                            true);
-      robotDescription = RobotDefinitionConverter.toRobotDescription(robotDefinition);
    }
 
    @Override
@@ -67,11 +63,6 @@ public class GenericQuadrupedModelFactory extends QuadrupedModelFactory
    public RobotDefinition getRobotDefinition()
    {
       return robotDefinition;
-   }
-
-   public RobotDescription getRobotDescription()
-   {
-      return robotDescription;
    }
 
    @Override

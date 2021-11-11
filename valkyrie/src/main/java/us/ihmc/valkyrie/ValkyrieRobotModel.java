@@ -33,10 +33,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
-import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -86,7 +84,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private String customModel = null;
    private FootContactPoints<RobotSide> simulationContactPoints = null;
    private RobotDefinition robotDefinition;
-   private RobotDescription robotDescription;
    private Consumer<RobotDefinition> robotDefinitionMutator;
 
    private ValkyriePhysicalProperties robotPhysicalProperties;
@@ -319,14 +316,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return robotDefinition;
    }
 
-   public RobotDescription getRobotDescription()
-   {
-      if (robotDescription == null)
-         robotDescription = RobotDefinitionConverter.toRobotDescription(getRobotDefinition());
-
-      return robotDescription;
-   }
-
    private String[] getResourceDirectories()
    {
       return resourceDirectories;
@@ -396,24 +385,24 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       boolean enableTorqueVelocityLimits = false;
 
-      HumanoidFloatingRootJointRobot sdfRobot = new HumanoidFloatingRootJointRobot(getRobotDescription(),
-                                                                                   getJointMap(),
-                                                                                   enableJointDamping,
-                                                                                   enableTorqueVelocityLimits);
+      HumanoidFloatingRootJointRobot robot = new HumanoidFloatingRootJointRobot(getRobotDefinition(),
+                                                                                getJointMap(),
+                                                                                enableJointDamping,
+                                                                                enableTorqueVelocityLimits);
 
       if (PRINT_MODEL)
       {
          System.out.println("\nValkyrieRobotModel Link Masses:");
 
          StringBuffer stringBuffer = new StringBuffer();
-         sdfRobot.printRobotJointsAndMasses(stringBuffer);
+         robot.printRobotJointsAndMasses(stringBuffer);
          System.out.println(stringBuffer);
          System.out.println();
 
-         System.out.println("ValkyrieRobotModel: \n" + sdfRobot);
+         System.out.println("ValkyrieRobotModel: \n" + robot);
       }
 
-      return sdfRobot;
+      return robot;
    }
 
    @Override
