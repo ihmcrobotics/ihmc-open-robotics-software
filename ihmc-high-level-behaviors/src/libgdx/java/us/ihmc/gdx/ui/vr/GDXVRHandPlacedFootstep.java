@@ -1,8 +1,8 @@
 package us.ihmc.gdx.ui.vr;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -12,15 +12,16 @@ public class GDXVRHandPlacedFootstep
    private final RobotSide side;
    private final ModelInstance modelInstance;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final FramePose3D pose = new FramePose3D();
+   private final Pose3D solePose = new Pose3D();
 
-   public GDXVRHandPlacedFootstep(RobotSide side, ModelInstance modelInstance)
+   public GDXVRHandPlacedFootstep(RobotSide side, ModelInstance modelInstance, RigidBodyTransform soleToAnkleTransform)
    {
       this.side = side;
       this.modelInstance = modelInstance;
 
       GDXTools.toEuclid(modelInstance.transform, tempTransform);
-      pose.setIncludingFrame(ReferenceFrame.getWorldFrame(), tempTransform);
+      solePose.set(tempTransform);
+      solePose.appendTransform(soleToAnkleTransform);
    }
 
    public ModelInstance getModelInstance()
@@ -33,8 +34,8 @@ public class GDXVRHandPlacedFootstep
       return side;
    }
 
-   public FramePose3D getPose()
+   public Pose3DReadOnly getSolePose()
    {
-      return pose;
+      return solePose;
    }
 }
