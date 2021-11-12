@@ -13,10 +13,8 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.shader.GDXShader;
 import us.ihmc.gdx.shader.GDXUniform;
 
-import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class GDXPointCloudRenderer implements RenderableProvider
@@ -35,7 +33,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
                                                                                               GL41.GL_FLOAT,
                                                                                               false,
                                                                                               "a_size"));
-   private final int floatsPerVertex = vertexAttributes.vertexSize / 4;
+   private final int floatsPerVertex = vertexAttributes.vertexSize / Float.BYTES;
    private final GDXUniform screenWidthUniform = GDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
    {
       shader.set(inputID, shader.camera.viewportWidth);
@@ -49,6 +47,11 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private RecyclingArrayList<Point3D32> pointsToRender;
    private ColorProvider colorProvider;
    private float pointScale = 0.01f;
+   private int pointsPerSegment;
+   private int numberOfSegments;
+   private boolean hasTurnedOver = false;
+   private int currentSegmentIndex = 0;
+   private int maxPoints;
 
    public interface ColorProvider
    {
@@ -61,6 +64,13 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    public void create(int size)
    {
+      create(size, 1);
+   }
+
+   public void create(int pointsPerSegment, int numberOfSegments)
+   {
+      this.pointsPerSegment = pointsPerSegment;
+      this.numberOfSegments = numberOfSegments;
       GL41.glEnable(GL41.GL_VERTEX_PROGRAM_POINT_SIZE);
 
       renderable = new Renderable();
@@ -68,13 +78,13 @@ public class GDXPointCloudRenderer implements RenderableProvider
       renderable.meshPart.offset = 0;
       renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
-      vertices = new float[size * floatsPerVertex];
+      maxPoints = pointsPerSegment * numberOfSegments;
+      vertices = new float[maxPoints * floatsPerVertex];
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
       boolean isStatic = false;
-      int maxVertices = size;
       int maxIndices = 0;
-      renderable.meshPart.mesh = new Mesh(isStatic, maxVertices, maxIndices, vertexAttributes);
+      renderable.meshPart.mesh = new Mesh(isStatic, maxPoints, maxIndices, vertexAttributes);
 
       GDXShader shader = new GDXShader(getClass());
       shader.create();
@@ -118,7 +128,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
          renderable.meshPart.size = pointsToRender.size();
          renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * floatsPerVertex);
-         renderable.meshPart.update();
+//         renderable.meshPart.update();
       }
    }
 
@@ -149,34 +159,60 @@ public class GDXPointCloudRenderer implements RenderableProvider
       renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * floatsPerVertex);
       if (!pointsToRender.isEmpty())
       {
-         renderable.meshPart.update();
+//         renderable.meshPart.update();
       }
    }
 
    public void updateMeshFastest(Function<FloatBuffer, Integer> bufferConsumer)
    {
+      updateMeshFastest(bufferConsumer, currentSegmentIndex);
+   }
+
+   public void updateMeshFastest(Function<FloatBuffer, Integer> bufferConsumer, int segmentToUpdate)
+   {
+      if (!hasTurnedOver && segmentToUpdate > currentSegmentIndex)
+         return;
+
       FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
-      floatBuffer.position(0);
-      floatBuffer.limit(floatBuffer.capacity());
+      floatBuffer.position(segmentToUpdate * pointsPerSegment * floatsPerVertex);
+      floatBuffer.limit(floatBuffer.position() + pointsPerSegment * floatsPerVertex);
       int numberOfPoints = bufferConsumer.apply(floatBuffer);
 
-      if (numberOfPoints == 0) // prevents errors when no point are there
+      if (numberOfPoints < pointsPerSegment) // special use case here
       {
-         numberOfPoints = 1;
-         floatBuffer.put(Float.NaN);
-         floatBuffer.put(Float.NaN);
-         floatBuffer.put(Float.NaN);
-         floatBuffer.put(1.0f);
-         floatBuffer.put(1.0f);
-         floatBuffer.put(1.0f);
-         floatBuffer.put(1.0f);
-         floatBuffer.put(1.0f);
+         if (numberOfPoints == 0) // prevents errors when no point are there
+         {
+            numberOfPoints = 1;
+            floatBuffer.put(Float.NaN);
+            floatBuffer.put(Float.NaN);
+            floatBuffer.put(Float.NaN);
+            floatBuffer.put(1.0f);
+            floatBuffer.put(1.0f);
+            floatBuffer.put(1.0f);
+            floatBuffer.put(1.0f);
+            floatBuffer.put(1.0f);
+         }
+
+         floatBuffer.position(0);
+         floatBuffer.limit(numberOfPoints * floatsPerVertex);
+         renderable.meshPart.size = numberOfPoints;
+      }
+      else // numberOfPoints == pointsPerSegment
+      {
+         floatBuffer.position(0);
+         if (hasTurnedOver)
+            floatBuffer.limit(maxPoints * floatsPerVertex);
+         else
+            floatBuffer.limit((segmentToUpdate + 1) * pointsPerSegment * floatsPerVertex);
+         renderable.meshPart.size = maxPoints;
       }
 
-      floatBuffer.position(0);
-      floatBuffer.limit(numberOfPoints * floatsPerVertex);
-      renderable.meshPart.size = numberOfPoints;
-      renderable.meshPart.update();
+      currentSegmentIndex = segmentToUpdate + 1;
+      if (currentSegmentIndex == numberOfSegments)
+      {
+         hasTurnedOver = true;
+         currentSegmentIndex = 0;
+      }
    }
 
    public float[] getVerticesArray()
@@ -188,7 +224,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
    {
       renderable.meshPart.size = numberOfPoints;
       renderable.meshPart.mesh.setVertices(vertices, 0, numberOfPoints * floatsPerVertex);
-      renderable.meshPart.update();
+//      renderable.meshPart.update();
    }
 
    @Override

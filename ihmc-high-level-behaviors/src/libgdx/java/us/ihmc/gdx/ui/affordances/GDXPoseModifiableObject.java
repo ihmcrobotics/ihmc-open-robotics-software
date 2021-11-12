@@ -49,10 +49,10 @@ public class GDXPoseModifiableObject
       {
          if (viewInput.isWindowHovered())
          {
-            boolean intesects = object.intersect(viewInput.getPickRayInWorld(), tempIntersection);
-            showCollisionMesh = intesects;
+            boolean intersects = object.intersect(viewInput.getPickRayInWorld(), tempIntersection);
+            showCollisionMesh = intersects;
 
-            if (viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && intesects)
+            if (viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && intersects)
             {
                isSelected = true;
                pose3DGizmo.getTransform().set(object.getObjectTransform());

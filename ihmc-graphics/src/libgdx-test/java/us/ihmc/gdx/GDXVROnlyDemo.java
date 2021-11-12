@@ -1,8 +1,8 @@
 package us.ihmc.gdx;
 
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.vr.GDXVRApplication;
-import us.ihmc.gdx.vr.GDXVRControllerButtons;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GDXVROnlyDemo
@@ -11,34 +11,49 @@ public class GDXVROnlyDemo
 
    public GDXVROnlyDemo()
    {
-      vrApplication.create();
-
-      vrApplication.getSceneBasics().addDefaultLighting();
-      vrApplication.getSceneBasics().addCoordinateFrame(1.0);
-
-      vrApplication.getSceneBasics().addRenderableProvider(((renderables, pool) ->
+      vrApplication.launch(new Lwjgl3ApplicationAdapter()
       {
-         for (RobotSide side : RobotSide.values)
+         @Override
+         public void create()
          {
-            vrApplication.getVRContext().getController(side, controller -> controller.getModelInstance().getRenderables(renderables, pool));
-            vrApplication.getVRContext().getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
-         }
-         vrApplication.getVRContext().getBaseStations(baseStation -> baseStation.getModelInstance().getRenderables(renderables, pool));
-         vrApplication.getVRContext().getGenericDevices(genericDevice -> genericDevice.getModelInstance().getRenderables(renderables, pool));
-      }), GDXSceneLevel.VIRTUAL);
+            vrApplication.getSceneBasics().addDefaultLighting();
+            vrApplication.getSceneBasics().addCoordinateFrame(1.0);
 
-      vrApplication.getVRContext().addVRInputProcessor(vrContext ->
-      {
-         vrContext.getController(RobotSide.RIGHT, controller ->
-         {
-            if (controller.isButtonNewlyPressed(GDXVRControllerButtons.INDEX_A))
+            vrApplication.getVRContext().addVRInputProcessor(vrContext ->
             {
-               vrApplication.exit();
-            }
-         });
-      });
+               vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+               {
+                  InputDigitalActionData aButton = controller.getAButtonActionData();
+                  if (aButton.bChanged() && aButton.bState())
+                  {
+                     vrApplication.exit();
+                  }
+               });
+            });
 
-      vrApplication.run();
+            vrApplication.getSceneBasics().addRenderableProvider(((renderables, pool) ->
+            {
+               vrApplication.getVRContext().getControllerRenderables(renderables, pool);
+               vrApplication.getVRContext().getBaseStationRenderables(renderables, pool);
+               for (RobotSide side : RobotSide.values)
+               {
+                  vrApplication.getVRContext().getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
+               }
+            }), GDXSceneLevel.VIRTUAL);
+         }
+
+         @Override
+         public void render()
+         {
+
+         }
+
+         @Override
+         public void dispose()
+         {
+
+         }
+      });
    }
 
    public static void main(String[] args)

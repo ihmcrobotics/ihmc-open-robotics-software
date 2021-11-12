@@ -12,6 +12,7 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImFloat;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -38,8 +39,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.Consumer;
-
-import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
 {
@@ -173,20 +172,21 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
 
    public void handleVREvents(GDXVRManager vrManager)
    {
-      vrManager.getContext().getController(RobotSide.LEFT, controller ->
+      vrManager.getContext().getController(RobotSide.LEFT).runIfConnected(controller ->
       {
-         if (controller.isButtonNewlyPressed(SteamVR_Trigger))
+         InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
+         if (triggerClick.bChanged() && triggerClick.bState())
          {
             placingGoal = true;
          }
-         if (controller.isButtonNewlyReleased(SteamVR_Trigger))
+         if (triggerClick.bChanged() && !triggerClick.bState())
          {
             placingGoal = false;
             placedPoseConsumer.accept(goalPoseForReading);
          }
 
-         controller.getPose(ReferenceFrame.getWorldFrame(), sphere.transform);
-         controller.getPose(ReferenceFrame.getWorldFrame(), arrow.transform);
+         controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), sphere.transform);
+         controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), arrow.transform);
       });
    }
 
