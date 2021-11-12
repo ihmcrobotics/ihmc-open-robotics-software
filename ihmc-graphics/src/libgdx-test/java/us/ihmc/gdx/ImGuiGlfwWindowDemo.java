@@ -7,7 +7,7 @@ public class ImGuiGlfwWindowDemo
 {
    public ImGuiGlfwWindowDemo()
    {
-      ImGuiGlfwWindow imGuiGlfwWindow = new ImGuiGlfwWindow(getClass().getSimpleName(), 800, 600);
+      ImGuiGlfwWindow imGuiGlfwWindow = new ImGuiGlfwWindow(getClass(), "ihmc-open-robotics-software", "ihmc-graphics/src/libgdx-test/resources");
       imGuiGlfwWindow.getPanelManager().addPrimaryPanel("Window");
       imGuiGlfwWindow.run(this::render, this::dispose);
    }

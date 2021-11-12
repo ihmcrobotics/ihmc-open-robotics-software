@@ -20,7 +20,6 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
@@ -316,6 +315,7 @@ public class GDXImGuiBasedUI
       imgui3DViewInputProcessors.add(processImGuiInput);
    }
 
+   /** TODO: Implement status bar */
    public void setStatus(String statusText)
    {
       this.statusText = statusText;

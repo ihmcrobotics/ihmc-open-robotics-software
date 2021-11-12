@@ -3,8 +3,12 @@ package us.ihmc.gdx.vr.minimalGDX;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.utils.Clipboard;
 
+import java.util.ArrayDeque;
+
 public class MinimalGDXApplication implements Application
 {
+   private final ArrayDeque<Runnable> postRunnables = new ArrayDeque();
+
    @Override
    public ApplicationListener getApplicationListener()
    {
@@ -140,7 +144,7 @@ public class MinimalGDXApplication implements Application
    @Override
    public void postRunnable(Runnable runnable)
    {
-
+      postRunnables.addLast(runnable);
    }
 
    @Override
@@ -159,5 +163,10 @@ public class MinimalGDXApplication implements Application
    public void removeLifecycleListener(LifecycleListener listener)
    {
 
+   }
+
+   public ArrayDeque<Runnable> getPostRunnables()
+   {
+      return postRunnables;
    }
 }
