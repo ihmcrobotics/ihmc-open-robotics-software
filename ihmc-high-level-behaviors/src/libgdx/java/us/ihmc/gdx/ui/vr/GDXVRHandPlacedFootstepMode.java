@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -61,6 +62,7 @@ public class GDXVRHandPlacedFootstepMode
             if (triggerClick.bChanged() && triggerClick.bState())
             {
                ModelInstance footModelInstance = new ModelInstance(footModels.get(side));
+               GDXTools.setDiffuseColor(footModelInstance, GDXFootstepGraphic.FOOT_COLORS.get(side));
                feetBeingPlaced.put(side, footModelInstance);
             }
 
@@ -68,7 +70,6 @@ public class GDXVRHandPlacedFootstepMode
             {
                ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
                feetBeingPlaced.put(side, null);
-
                placedFootsteps.add(new GDXVRHandPlacedFootstep(side, footBeingPlaced));
             }
 
