@@ -43,7 +43,7 @@ public class FootTrajectoryPredictor
    private final FramePose3D midFootPosition = new FramePose3D();
    private final FramePose3D midstancePose = new FramePose3D();
    private final PoseReferenceFrame midstanceFrame = new PoseReferenceFrame("midstanceFrame", ReferenceFrame.getWorldFrame());
-   private final ZUpFrame midstanceZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), midstanceFrame, "midstanceZUpFrame");
+   private final ZUpFrame midstanceZUpFrame = new ZUpFrame(midstanceFrame, "midstanceZUpFrame");
    private final FramePose3D goalPose = new FramePose3D();
    private final PoseReferenceFrame goalPoseFrame = new PoseReferenceFrame("goalPoseFrame", ReferenceFrame.getWorldFrame());
    private final FramePoint3D footGoalPosition = new FramePoint3D();

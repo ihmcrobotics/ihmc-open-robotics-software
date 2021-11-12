@@ -416,7 +416,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
          ReferenceFrame ankleFrame = contactableFoot.getFrameAfterParentJoint();
          ankleFrames.put(robotSide, ankleFrame);
-         ankleZUpFrames.put(robotSide, new ZUpFrame(worldFrame, ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
+         ankleZUpFrames.put(robotSide, new ZUpFrame(ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
 
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          RigidBodyBasics foot = contactableFoot.getRigidBody();

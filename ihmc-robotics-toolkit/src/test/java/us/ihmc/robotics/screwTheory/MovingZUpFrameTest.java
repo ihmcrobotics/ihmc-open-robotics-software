@@ -227,7 +227,7 @@ public class MovingZUpFrameTest
       {
          MovingReferenceFrame frameAfterJoint = joint.getFrameAfterJoint();
 
-         ZUpFrame zUpFrameAfterJoint = new ZUpFrame(frameAfterJoint.getRootFrame(), frameAfterJoint, frameAfterJoint.getName() + "ZUp");
+         ZUpFrame zUpFrameAfterJoint = new ZUpFrame(frameAfterJoint, frameAfterJoint.getName() + "ZUp");
          MovingZUpFrame movingZUpFrameAfterJoint = new MovingZUpFrame(frameAfterJoint, frameAfterJoint.getName() + "ZUp");
 
          zUpFramesToMovingZUpFrames.put(zUpFrameAfterJoint, movingZUpFrameAfterJoint);
