@@ -30,8 +30,8 @@ public class FootstepPoseHeuristicChecker
    private final TransformReferenceFrame startOfSwingFrame = new TransformReferenceFrame("startOfSwingFrame", ReferenceFrame.getWorldFrame());
    private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
    private final TransformReferenceFrame candidateFootFrame = new TransformReferenceFrame("candidateFootFrame", ReferenceFrame.getWorldFrame());
-   private final ZUpFrame startOfSwingZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), startOfSwingFrame, "startOfSwingZUpFrame");
-   private final ZUpFrame stanceFootZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), stanceFootFrame, "stanceFootZUpFrame");
+   private final ZUpFrame startOfSwingZUpFrame = new ZUpFrame(startOfSwingFrame, "startOfSwingZUpFrame");
+   private final ZUpFrame stanceFootZUpFrame = new ZUpFrame(stanceFootFrame, "stanceFootZUpFrame");
    private final FramePose3D stanceFootPose = new FramePose3D();
    private final FramePose3D candidateFootPose = new FramePose3D();
 

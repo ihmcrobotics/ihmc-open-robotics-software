@@ -123,7 +123,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
             nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, getParent());
          }
       };
-      nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");
+      nextSoleZUpFrame = new ZUpFrame(nextSoleFrame, "nextAnkleZUp");
 
       pelvisOrientationOffsetTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvisOffset", false, desiredPelvisFrame, registry);
       if (leapOfFaithParameters != null)
