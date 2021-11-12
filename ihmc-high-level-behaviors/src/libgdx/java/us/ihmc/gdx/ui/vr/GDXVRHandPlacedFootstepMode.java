@@ -10,7 +10,6 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import org.lwjgl.openvr.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -34,14 +33,14 @@ public class GDXVRHandPlacedFootstepMode
    private final ArrayList<GDXVRHandPlacedFootstep> sentFootsteps = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D poseForPlacement = new FramePose3D();
-   private WalkingControllerParameters walkingControllerParameters;
+   private DRCRobotModel robotModel;
    private ROS2ControllerHelper controllerHelper;
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
 
    public void create(DRCRobotModel robotModel, ROS2ControllerHelper controllerHelper)
    {
+      this.robotModel = robotModel;
       this.controllerHelper = controllerHelper;
-      walkingControllerParameters = robotModel.getWalkingControllerParameters();
 
       for (RobotSide side : RobotSide.values)
       {
@@ -70,7 +69,7 @@ public class GDXVRHandPlacedFootstepMode
             {
                ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
                feetBeingPlaced.put(side, null);
-               placedFootsteps.add(new GDXVRHandPlacedFootstep(side, footBeingPlaced));
+               placedFootsteps.add(new GDXVRHandPlacedFootstep(side, footBeingPlaced, robotModel.getJointMap().getSoleToParentFrameTransform(side)));
             }
 
             ModelInstance footBeingPlaced = feetBeingPlaced.get(side);
@@ -90,8 +89,8 @@ public class GDXVRHandPlacedFootstepMode
             {
                // send the placed footsteps
                FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-               footstepDataListMessage.setDefaultSwingDuration(walkingControllerParameters.getDefaultSwingTime());
-               footstepDataListMessage.setDefaultTransferDuration(walkingControllerParameters.getDefaultTransferTime());
+               footstepDataListMessage.setDefaultSwingDuration(robotModel.getWalkingControllerParameters().getDefaultSwingTime());
+               footstepDataListMessage.setDefaultTransferDuration(robotModel.getWalkingControllerParameters().getDefaultTransferTime());
                footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
                for (GDXVRHandPlacedFootstep placedFootstep : placedFootsteps)
                {
@@ -99,8 +98,8 @@ public class GDXVRHandPlacedFootstepMode
 
                   footstepDataMessage.setSequenceId(sequenceId++);
                   footstepDataMessage.setRobotSide(placedFootstep.getSide().toByte());
-                  footstepDataMessage.getLocation().set(placedFootstep.getPose().getPosition());
-                  footstepDataMessage.getOrientation().set(placedFootstep.getPose().getOrientation());
+                  footstepDataMessage.getLocation().set(placedFootstep.getSolePose().getPosition());
+                  footstepDataMessage.getOrientation().set(placedFootstep.getSolePose().getOrientation());
                   footstepDataMessage.setTrajectoryType(TrajectoryType.DEFAULT.toByte()); // TODO: Expose option; show preview trajectories, waypoints
                   // TODO: Support all types of swings
                   // TODO: Support partial footholds
