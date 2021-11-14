@@ -2,9 +2,10 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
-import imgui.ImGui;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
+import imgui.internal.ImGui;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.BoxesDemoModel;
@@ -26,10 +27,11 @@ public class GDX3DSituatedImGuiPanelsDemo
          {
             sceneManager.create();
 
+            ImGui.createContext(); // There's usually going to be another context so let's make one.
             imGuiGlfw.init(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), true);
             imGuiGl3.init();
 
-            situatedImGuiPanelManager.create(imGuiGlfw, imGuiGl3);
+            situatedImGuiPanelManager.create(imGuiGlfw, imGuiGl3, ImGuiTools.setupFonts(ImGui.getIO()));
             GDX3DSituatedImGuiPanel panel = new GDX3DSituatedImGuiPanel("Test Panel", () ->
             {
                ImGui.text("This is a 3D situated panel.");
@@ -45,11 +47,10 @@ public class GDX3DSituatedImGuiPanelsDemo
          @Override
          public void render()
          {
+            situatedImGuiPanelManager.render();
+
             GDX3DSceneTools.glClearGray();
             sceneManager.setViewportBoundsToWindow();
-
-            situatedImGuiPanelManager.update();
-
             sceneManager.render();
          }
 
