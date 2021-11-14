@@ -169,7 +169,12 @@ public class GDXImGuiBasedUI
 
    public void renderEnd()
    {
-      imGuiWindowAndDockSystem.afterWindowManagement();
+      renderEnd(null);
+   }
+
+   public void renderEnd(Runnable extraRender)
+   {
+      imGuiWindowAndDockSystem.afterWindowManagement(extraRender);
    }
 
    private void renderMenuBar()
@@ -356,5 +361,10 @@ public class GDXImGuiBasedUI
    public GDXVRManager getVRManager()
    {
       return vrManager;
+   }
+
+   public GDXImGuiWindowAndDockSystem getImGuiWindowAndDockSystem()
+   {
+      return imGuiWindowAndDockSystem;
    }
 }
