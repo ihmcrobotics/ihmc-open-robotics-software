@@ -43,7 +43,7 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
    public FullHumanoidRobotModelWrapper(RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
    {
-      this(robotDefinition.newIntance(ReferenceFrame.getWorldFrame()));
+      this(robotDefinition.newInstance(ReferenceFrame.getWorldFrame()));
       setupHumanoidJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }

@@ -145,7 +145,7 @@ public class FullRobotModelWrapper implements FullRobotModel
 
    public FullRobotModelWrapper(RobotDefinition robotDefinition, JointNameMap<?> jointNameMap)
    {
-      this(robotDefinition.newIntance(ReferenceFrame.getWorldFrame()));
+      this(robotDefinition.newInstance(ReferenceFrame.getWorldFrame()));
       setupJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
