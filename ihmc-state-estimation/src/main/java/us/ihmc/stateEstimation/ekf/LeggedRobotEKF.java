@@ -24,6 +24,7 @@ import us.ihmc.ekf.filter.state.implementations.JointState;
 import us.ihmc.ekf.filter.state.implementations.PoseState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -305,10 +306,11 @@ public class LeggedRobotEKF implements StateEstimatorController
    }
 
    @Override
-   public void initializeEstimator(RigidBodyTransform rootJointTransform)
+   public void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform)
    {
+      rootTransform.set(rootJointTransform);
       rootTwist.setToZero(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint());
-      rootState.initialize(rootJointTransform, rootTwist);
+      rootState.initialize(rootTransform, rootTwist);
 
       stateEstimator.reset();
       for (int i = 0; i < linearAccelerationSensors.size(); i++)
@@ -322,7 +324,7 @@ public class LeggedRobotEKF implements StateEstimatorController
    }
 
    @Override
-   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
+   public void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       for (int jointIdx = 0; jointIdx < oneDoFJoints.size(); jointIdx++)
       {
