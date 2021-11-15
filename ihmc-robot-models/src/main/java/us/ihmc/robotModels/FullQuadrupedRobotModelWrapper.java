@@ -58,7 +58,7 @@ public class FullQuadrupedRobotModelWrapper extends FullRobotModelWrapper implem
 
    public FullQuadrupedRobotModelWrapper(RobotDefinition robotDefinition, QuadrupedJointNameMap jointNameMap)
    {
-      super(robotDefinition.newIntance(ReferenceFrame.getWorldFrame()));
+      super(robotDefinition.newInstance(ReferenceFrame.getWorldFrame()));
       setupQuadrupedJointNameMap(jointNameMap);
       setupRobotDefinition(robotDefinition);
    }
