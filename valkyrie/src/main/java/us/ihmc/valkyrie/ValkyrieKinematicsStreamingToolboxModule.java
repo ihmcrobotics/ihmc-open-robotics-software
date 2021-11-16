@@ -39,7 +39,7 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
       RobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       HumanoidJointNameMap jointMap = robotModel.getJointMap();
-      defaultRobotInitialSetup.initializeRobot(robot, jointMap);
+      defaultRobotInitialSetup.initializeRobot(robot);
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {

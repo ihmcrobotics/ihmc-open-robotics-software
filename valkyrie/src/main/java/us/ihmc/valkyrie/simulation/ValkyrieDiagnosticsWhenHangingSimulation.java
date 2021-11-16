@@ -35,7 +35,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       ValkyrieRobotModelWithHoist robotModel = new ValkyrieRobotModelWithHoist(RobotTarget.SCS, false);
       double groundZ = 0.0;
       double initialYaw = 0.0;
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw);
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw, robotModel.getJointMap());
       
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
 //      humanoidJointPoseList.createPoseSetters();

@@ -157,7 +157,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
+      robotInitialSetup.initializeRobot(sdfRobot);
       DRCSimulationOutputWriterForControllerThread outputWriter = new DRCSimulationOutputWriterForControllerThread(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(controllerCommunicatorServer);
 
@@ -255,7 +255,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
+      robotInitialSetup.initializeRobot(sdfRobot);
       DRCSimulationOutputWriterForControllerThread outputWriter = new DRCSimulationOutputWriterForControllerThread(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(packetCommunicatorServer);
 

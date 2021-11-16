@@ -190,7 +190,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          plotterFactory.createOverheadPlotter();
       }
 
-      getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot, getRobotModel().getJointMap());
+      getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot);
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(2.0);
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(fullRobotModelAtInitialConfiguration);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
@@ -844,7 +844,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotModel.getDefaultRobotInitialSetup(0.0, initialYaw).initializeRobot(robot, robotModel.getJointMap());
+      robotModel.getDefaultRobotInitialSetup(0.0, initialYaw).initializeRobot(robot);
       DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
       SensorDataContext sensorDataContext = new SensorDataContext();

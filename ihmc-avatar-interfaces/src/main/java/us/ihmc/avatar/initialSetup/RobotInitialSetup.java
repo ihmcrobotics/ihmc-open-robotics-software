@@ -10,12 +10,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.simulationconstructionset.Robot;
 
 public interface RobotInitialSetup<T extends Robot>
 {
-   void initializeRobot(T robot, HumanoidJointNameMap jointMap);
 
    default List<Double> getInitialJointAngles()
    {
@@ -28,6 +26,8 @@ public interface RobotInitialSetup<T extends Robot>
       LogTools.warn("Please implement getInitialPelvisPose");
       return null;
    }
+
+   void initializeRobot(T robot);
 
    default void initializeFullRobotModel(FullHumanoidRobotModel fullRobotModel)
    {
@@ -52,18 +52,21 @@ public interface RobotInitialSetup<T extends Robot>
    }
 
    void setInitialYaw(double yaw);
+
    double getInitialYaw();
 
    void setInitialGroundHeight(double groundHeight);
+
    double getInitialGroundHeight();
 
    void setOffset(Vector3D additionalOffset);
+
    void getOffset(Vector3D offsetToPack);
 
    /**
-    * Indicates whether the robot can be reset to its initial sim configuration with the implementation of this
-    * interface setup after the first time. This is deprecated since all initial setups should support this eventually.
-    * An example of an initial setup that can be reused is the Atlas one.
+    * Indicates whether the robot can be reset to its initial sim configuration with the implementation
+    * of this interface setup after the first time. This is deprecated since all initial setups should
+    * support this eventually. An example of an initial setup that can be reused is the Atlas one.
     *
     * @return whether this initial setup will work more then once.
     */

@@ -96,7 +96,7 @@ public class AvatarSimulation
       humanoidFloatingRootJointRobot.getRootJoint().setAngularVelocityInBody(new Vector3D());
       humanoidFloatingRootJointRobot.getRootJoint().setVelocity(0, 0, 0);
 
-      robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot, robotModel.getJointMap());
+      robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot);
       AvatarSimulationFactory.initializeEstimator(humanoidFloatingRootJointRobot, stateEstimationThread);
       controllerThread.initialize();
 

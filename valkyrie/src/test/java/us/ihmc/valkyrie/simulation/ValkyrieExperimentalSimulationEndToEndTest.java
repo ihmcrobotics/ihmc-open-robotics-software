@@ -15,6 +15,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -24,7 +25,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperimentalSimulationEndToEndTest
 {
@@ -54,7 +54,7 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
       simulationTestingParameters.setUsePefectSensors(true);
 
       ValkyrieRobotModel robotModel = getRobotModel();
-      robotModel.setRobotInitialSetup(new FlyingValkyrieInitialSetup());
+      robotModel.setRobotInitialSetup(new FlyingValkyrieInitialSetup(robotModel.getJointMap()));
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
       drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
@@ -74,15 +74,18 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
 
    private static class FlyingValkyrieInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
    {
-
       private HumanoidFloatingRootJointRobot robot;
-      private HumanoidJointNameMap jointMap;
+      private final HumanoidJointNameMap jointMap;
+
+      public FlyingValkyrieInitialSetup(HumanoidJointNameMap jointMap)
+      {
+         this.jointMap = jointMap;
+      }
 
       @Override
-      public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
+      public void initializeRobot(HumanoidFloatingRootJointRobot robot)
       {
          this.robot = robot;
-         this.jointMap = jointMap;
 
          setJoint(RobotSide.LEFT, LegJointName.HIP_PITCH, -0.7, 0.0);
          setJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH, 1.5, 0.0);

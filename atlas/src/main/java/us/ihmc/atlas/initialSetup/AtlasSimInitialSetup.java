@@ -29,31 +29,31 @@ public class AtlasSimInitialSetup implements RobotInitialSetup<HumanoidFloatingR
       PELVIS_POSE.getPosition().set(0.0, 0.0, 0.9286147465454951);
       PELVIS_POSE.getOrientation().set(0.0, 0.0, 0.841, 0.540); // not sure about these two values
 
-      JOINT_Qs.add(+0.0             );
-      JOINT_Qs.add(+0.0             );
-      JOINT_Qs.add(+0.0             );
-      JOINT_Qs.add(+0.785398        );
-      JOINT_Qs.add(-0.52379         );
-      JOINT_Qs.add(+2.33708         );
-      JOINT_Qs.add(+2.35619         );
-      JOINT_Qs.add(-0.337807        );
-      JOINT_Qs.add(+0.20773         );
-      JOINT_Qs.add(-0.026599        );
-      JOINT_Qs.add(+0.0             );
-      JOINT_Qs.add(+0.0             );
-      JOINT_Qs.add(-JOINT_Qs.get(3) );
-      JOINT_Qs.add(-JOINT_Qs.get(4) );
-      JOINT_Qs.add(+JOINT_Qs.get(5) );
-      JOINT_Qs.add(-JOINT_Qs.get(6) );
-      JOINT_Qs.add(+JOINT_Qs.get(7) );
-      JOINT_Qs.add(-JOINT_Qs.get(8) );
-      JOINT_Qs.add(+JOINT_Qs.get(9) );
-      JOINT_Qs.add(+0.0             );
-      JOINT_Qs.add(+0.062           );
-      JOINT_Qs.add(-0.233           );
-      JOINT_Qs.add(+0.518           );
-      JOINT_Qs.add(-0.276           );
-      JOINT_Qs.add(-0.062           );
+      JOINT_Qs.add(+0.0);
+      JOINT_Qs.add(+0.0);
+      JOINT_Qs.add(+0.0);
+      JOINT_Qs.add(+0.785398);
+      JOINT_Qs.add(-0.52379);
+      JOINT_Qs.add(+2.33708);
+      JOINT_Qs.add(+2.35619);
+      JOINT_Qs.add(-0.337807);
+      JOINT_Qs.add(+0.20773);
+      JOINT_Qs.add(-0.026599);
+      JOINT_Qs.add(+0.0);
+      JOINT_Qs.add(+0.0);
+      JOINT_Qs.add(-JOINT_Qs.get(3));
+      JOINT_Qs.add(-JOINT_Qs.get(4));
+      JOINT_Qs.add(+JOINT_Qs.get(5));
+      JOINT_Qs.add(-JOINT_Qs.get(6));
+      JOINT_Qs.add(+JOINT_Qs.get(7));
+      JOINT_Qs.add(-JOINT_Qs.get(8));
+      JOINT_Qs.add(+JOINT_Qs.get(9));
+      JOINT_Qs.add(+0.0);
+      JOINT_Qs.add(+0.062);
+      JOINT_Qs.add(-0.233);
+      JOINT_Qs.add(+0.518);
+      JOINT_Qs.add(-0.276);
+      JOINT_Qs.add(-0.062);
       JOINT_Qs.add(+JOINT_Qs.get(19));
       JOINT_Qs.add(-JOINT_Qs.get(20));
       JOINT_Qs.add(+JOINT_Qs.get(21));
@@ -70,33 +70,35 @@ public class AtlasSimInitialSetup implements RobotInitialSetup<HumanoidFloatingR
    private final Vector3D positionInWorld = new Vector3D();
    private final Vector3D offset = new Vector3D();
    private final Quaternion rotation = new Quaternion();
+   private final HumanoidJointNameMap jointMap;
 
-   public AtlasSimInitialSetup()
+   public AtlasSimInitialSetup(HumanoidJointNameMap jointMap)
    {
-      this(0.0, 0.0);
+      this(0.0, 0.0, jointMap);
    }
 
-   public AtlasSimInitialSetup(double groundZ, double initialYaw)
+   public AtlasSimInitialSetup(double groundZ, double initialYaw, HumanoidJointNameMap jointMap)
    {
-      this(groundZ, initialYaw, 0.0, 0.0);
+      this(groundZ, initialYaw, 0.0, 0.0, jointMap);
    }
 
-   public AtlasSimInitialSetup(double groundZ, double initialYaw, double initialX, double initialY)
+   public AtlasSimInitialSetup(double groundZ, double initialYaw, double initialX, double initialY, HumanoidJointNameMap jointMap)
    {
       this.groundZ = groundZ;
       this.initialYaw = initialYaw;
       this.initialX = initialX;
       this.initialY = initialY;
+      this.jointMap = jointMap;
    }
 
    @Override
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot)
    {
-      setActuatorPositions(robot, jointMap);
+      setActuatorPositions(robot);
       positionRobotInWorld(robot);
    }
 
-   public void setActuatorPositions(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
+   public void setActuatorPositions(HumanoidFloatingRootJointRobot robot)
    {
       // Avoid singularities at startup
       for (RobotSide robotSide : RobotSide.values)
@@ -120,7 +122,11 @@ public class AtlasSimInitialSetup implements RobotInitialSetup<HumanoidFloatingR
       robot.update();
    }
 
-   private void setArmJointPosition(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap, RobotSide robotSide, ArmJointName armJointName, double q)
+   private void setArmJointPosition(HumanoidFloatingRootJointRobot robot,
+                                    HumanoidJointNameMap jointMap,
+                                    RobotSide robotSide,
+                                    ArmJointName armJointName,
+                                    double q)
    {
       String armJointString = jointMap.getArmJointName(robotSide, armJointName);
       if (armJointString == null)

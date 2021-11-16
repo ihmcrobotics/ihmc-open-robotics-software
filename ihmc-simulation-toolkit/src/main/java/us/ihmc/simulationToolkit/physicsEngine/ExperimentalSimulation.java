@@ -3,7 +3,7 @@ package us.ihmc.simulationToolkit.physicsEngine;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -41,7 +41,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullRobotModelFactory;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.ExperimentalPhysicsEngine;
@@ -523,18 +522,15 @@ public class ExperimentalSimulation extends Simulation
       return collidables;
    }
 
-   public static MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<HumanoidFloatingRootJointRobot, HumanoidJointNameMap> initialSetup,
-                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory,
-                                                                      HumanoidJointNameMap jointMap)
+   public static MultiBodySystemStateWriter toRobotInitialStateWriter(Consumer<HumanoidFloatingRootJointRobot> initialSetup,
+                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory)
    {
-      return toRobotInitialStateWriter(initialSetup, robotFactory.createHumanoidFloatingRootJointRobot(false), jointMap);
+      return toRobotInitialStateWriter(initialSetup, robotFactory.createHumanoidFloatingRootJointRobot(false));
    }
 
-   public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<T, HumanoidJointNameMap> initialSetup,
-                                                                                        T robot,
-                                                                                        HumanoidJointNameMap jointMap)
+   public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(Consumer<T> initialSetup, T robot)
    {
-      initialSetup.accept(robot, jointMap);
+      initialSetup.accept(robot);
       return toMultiBodySystemStateWriter(robot);
    }
 

@@ -8,12 +8,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class HumanoidRobotMutableInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
@@ -28,7 +28,7 @@ public class HumanoidRobotMutableInitialSetup implements RobotInitialSetup<Human
    }
 
    @Override
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot)
    {
       robot.getRootJoint().setPosition(rootJointPosition);
       robot.getRootJoint().setOrientation(rootJointOrientation);

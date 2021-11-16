@@ -75,9 +75,9 @@ public abstract class HumanoidRobotTransformOptimizerTest
       FullHumanoidRobotModel idRobotB = robotModelB.createFullRobotModel();
       FullHumanoidRobotModel idRobotBCorrected = robotModelBCorrected.createFullRobotModel();
 
-      initialSetupA.initializeRobot(scsRobotA, robotModelA.getJointMap());
-      initialSetupB.initializeRobot(scsRobotB, robotModelB.getJointMap());
-      initialSetupB.initializeRobot(scsRobotBCorrected, robotModelBCorrected.getJointMap());
+      initialSetupA.initializeRobot(scsRobotA);
+      initialSetupB.initializeRobot(scsRobotB);
+      initialSetupB.initializeRobot(scsRobotBCorrected);
 
       copyRobotState(scsRobotA, idRobotA);
       copyRobotState(scsRobotB, idRobotB);
