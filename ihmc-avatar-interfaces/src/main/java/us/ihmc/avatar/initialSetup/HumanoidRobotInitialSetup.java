@@ -23,7 +23,10 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.state.OneDoFJointState;
+import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
@@ -158,11 +161,39 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
             FloatingJointBasics floatingJoint = (FloatingJointBasics) rootJoint;
             Pose3DBasics jointPose = floatingJoint.getJointPose();
             FixedFrameTwistBasics jointTwist = floatingJoint.getJointTwist();
-            jointPose.set(rootJointPosition, rootJointOrientation);
+            jointPose.getPosition().set(rootJointPosition);
+            jointPose.getPosition().add(additionalOffset);
+            jointPose.getPosition().addZ(initialGroundHeight);
+            jointPose.getOrientation().set(rootJointOrientation);
+            jointPose.getOrientation().prependYawRotation(initialYaw);
             jointTwist.getAngularPart().set(rootJointAngularVelocityInBody);
             jointPose.getOrientation().inverseTransform(rootJointLinearVelocityInWorld, jointTwist.getLinearPart());
          }
       }
+   }
+
+   @Override
+   public void initializeRobotDefinition(RobotDefinition robotDefinition)
+   {
+      JointDefinition rootJoint = robotDefinition.getJointDefinition(jointMap.getRootBodyName());
+      if (rootJoint != null)
+      {
+         Point3D position = new Point3D(rootJointPosition);
+         position.add(additionalOffset);
+         position.addZ(initialGroundHeight);
+         Quaternion orientation = new Quaternion(rootJointOrientation);
+         orientation.prependYawRotation(initialYaw);
+         SixDoFJointState rootJointState = new SixDoFJointState(orientation, position);
+         rootJoint.setInitialJointState(rootJointState);
+      }
+
+      robotDefinition.forEachOneDoFJointDefinition(jointDefinition ->
+      {
+         Double jointPosition = getJointPosition(jointDefinition.getName());
+
+         if (jointPosition != null)
+            jointDefinition.setInitialJointState(new OneDoFJointState(jointPosition));
+      });
    }
 
    @Override
