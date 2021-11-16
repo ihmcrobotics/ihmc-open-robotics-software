@@ -15,7 +15,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
-public class HumanoidRobotMutableInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
+public class HumanoidRobotMutableInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    public final Point3D rootJointPosition = new Point3D();
    public final Quaternion rootJointOrientation = new Quaternion();

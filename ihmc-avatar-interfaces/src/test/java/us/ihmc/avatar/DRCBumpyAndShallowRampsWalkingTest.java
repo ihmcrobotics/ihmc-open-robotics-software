@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.RandomNumbers;
@@ -103,7 +103,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       boolean drawGroundProfile = false;
 
       double rampEndX = combinedTerrainObjectAndRampEndX.getRight();
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
 
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters,
                                                              null,
@@ -194,7 +194,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       boolean drawGroundProfile = false;
 
       double rampEndX = combinedTerrainObjectAndRampEndX.getRight();
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.01, 0);
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.01, 0);
 
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters,
                                                              null,
@@ -320,7 +320,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
       boolean drawGroundProfile = true;
 
       WalkingControllerParameters drcControlParameters = robotModel.getWalkingControllerParameters();
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
 
       DRCFlatGroundWalkingTrack track = setupSimulationTrack(drcControlParameters,
                                                              groundProfile,
@@ -379,7 +379,7 @@ public abstract class DRCBumpyAndShallowRampsWalkingTest implements MultiRobotTe
    private DRCFlatGroundWalkingTrack setupSimulationTrack(WalkingControllerParameters drcControlParameters, GroundProfile3D groundProfile,
                                                           GroundProfile3D groundProfile3D, boolean drawGroundProfile, boolean useVelocityAndHeadingScript,
                                                           boolean cheatWithGroundHeightAtForFootstep,
-                                                          DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+                                                          RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
 

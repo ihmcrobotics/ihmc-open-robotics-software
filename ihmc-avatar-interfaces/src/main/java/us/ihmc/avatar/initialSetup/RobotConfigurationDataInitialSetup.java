@@ -10,7 +10,7 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
-public class RobotConfigurationDataInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
+public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    private final RobotConfigurationData robotConfigurationData;
    private final OneDoFJointBasics[] allJointsExcludingHands;

@@ -2,7 +2,7 @@ package us.ihmc.valkyrie;
 
 import java.util.List;
 
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,7 +19,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
-public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
+public class ValkyrieInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    private double groundZ;
    private double initialYaw;

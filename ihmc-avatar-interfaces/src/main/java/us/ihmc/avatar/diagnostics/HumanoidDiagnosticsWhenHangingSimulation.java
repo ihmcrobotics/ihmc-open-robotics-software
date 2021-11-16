@@ -14,7 +14,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -48,7 +48,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
    private final boolean computeTorqueOffsetsBasedOnAverages;
 
    public HumanoidDiagnosticsWhenHangingSimulation(HumanoidJointPoseList humanoidJointPoseList, boolean useArms, boolean robotIsHanging, DRCRobotModel model,
-                                                   DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup,
+                                                   RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup,
                                                    boolean computeTorqueOffsetsBasedOnAverages)
    {
       this.computeTorqueOffsetsBasedOnAverages = computeTorqueOffsetsBasedOnAverages;

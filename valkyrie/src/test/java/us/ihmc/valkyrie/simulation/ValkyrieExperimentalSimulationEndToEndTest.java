@@ -7,7 +7,7 @@ import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.HumanoidExperimentalSimulationEndToEndTest;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -72,7 +72,7 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
       assertOneDoFJointsAreWithingLimits(elevator, 2.0e-2);
    }
 
-   private static class FlyingValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
+   private static class FlyingValkyrieInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
    {
 
       private HumanoidFloatingRootJointRobot robot;
