@@ -17,10 +17,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameSphere3DReadOnly;
 import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.color.MutableColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotModels.description.RobotDescriptionConverter;
@@ -54,6 +57,8 @@ import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
+import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
+import us.ihmc.scs2.definition.state.interfaces.SixDoFJointStateBasics;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
@@ -64,6 +69,60 @@ import us.ihmc.simulationconstructionset.Robot;
 
 public class RobotDefinitionTools
 {
+   public static void setRobotInitialState(RobotDefinition definition, Robot robot)
+   {
+      definition.forEachJointDefinition(jointDefinition ->
+      {
+         if (jointDefinition.getInitialJointState() == null)
+            return;
+         Joint joint = robot.getJoint(jointDefinition.getName());
+         if (joint == null)
+         {
+            LogTools.error("Could not find joint {} during initialization.", jointDefinition.getName());
+            return;
+         }
+
+         if (joint instanceof FloatingJoint)
+         {
+            SixDoFJointStateBasics initialState = (SixDoFJointStateBasics) jointDefinition.getInitialJointState();
+            FloatingJoint floatingJoint = (FloatingJoint) joint;
+            if (initialState.hasOutputFor(JointStateType.CONFIGURATION))
+            {
+               floatingJoint.setPosition(initialState.getConfiguration().getPosition());
+               floatingJoint.setOrientation(initialState.getConfiguration().getOrientation());
+            }
+            if (initialState.hasOutputFor(JointStateType.VELOCITY))
+            {
+               floatingJoint.setAngularVelocityInBody(initialState.getLinearVelocity());
+               Vector3D linearVelocity = new Vector3D();
+               floatingJoint.getOrientation().transform(initialState.getLinearVelocity(), linearVelocity);
+               floatingJoint.setVelocity(linearVelocity);
+            }
+            if (initialState.hasOutputFor(JointStateType.ACCELERATION))
+               LogTools.warn("Acceleration is not supported.");
+            if (initialState.hasOutputFor(JointStateType.EFFORT))
+               LogTools.warn("Effort is not supported.");
+         }
+         else if (joint instanceof OneDegreeOfFreedomJoint)
+         {
+            OneDoFJointStateBasics initialState = (OneDoFJointStateBasics) jointDefinition.getInitialJointState();
+            OneDegreeOfFreedomJoint oneDoFJoint = (OneDegreeOfFreedomJoint) joint;
+            if (initialState.hasOutputFor(JointStateType.CONFIGURATION))
+               oneDoFJoint.setQ(initialState.getConfiguration());
+            if (initialState.hasOutputFor(JointStateType.VELOCITY))
+               oneDoFJoint.setQ(initialState.getVelocity());
+            if (initialState.hasOutputFor(JointStateType.ACCELERATION))
+               oneDoFJoint.setQ(initialState.getAcceleration());
+            if (initialState.hasOutputFor(JointStateType.EFFORT))
+               oneDoFJoint.setQ(initialState.getEffort());
+         }
+         else
+         {
+            LogTools.warn("Joint type not supported for initialization: {} ", joint.getClass().getSimpleName());
+         }
+      });
+   }
+
    public static void addCollisionsToRobotDefinition(List<Collidable> collidables, RobotDefinition robotDefinition)
    {
       for (Collidable collidable : collidables)

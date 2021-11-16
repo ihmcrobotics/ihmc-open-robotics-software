@@ -24,7 +24,7 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
    public void initializeRobot(HumanoidFloatingRootJointRobot robot)
    {
       robot.getRootJoint().setPosition(robotConfigurationData.getRootTranslation());
-      robot.getRootJoint().setQuaternion(robotConfigurationData.getRootOrientation());
+      robot.getRootJoint().setOrientation(robotConfigurationData.getRootOrientation());
 
       TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
       TFloatArrayList jointVelocities = robotConfigurationData.getJointVelocities();

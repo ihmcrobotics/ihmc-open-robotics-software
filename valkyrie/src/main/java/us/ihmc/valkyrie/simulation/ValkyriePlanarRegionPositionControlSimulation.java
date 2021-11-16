@@ -138,7 +138,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             if (!oneDoFJoints[i].getName().contains("hokuyo"))
-               initialSetup.jointPositions.put(oneDoFJoints[i].getName(), (double) robotConfigurationData.getJointAngles().get(i));
+               initialSetup.setJoint(oneDoFJoints[i].getName(), (double) robotConfigurationData.getJointAngles().get(i));
          }
 
          simulationStarter.setRobotInitialSetup(initialSetup);
