@@ -332,18 +332,9 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   public RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup()
    {
-      return new AtlasSimInitialSetup(groundHeight, initialYaw, getJointMap());
-   }
-
-   @Override
-   public RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight,
-                                                                                        double initialYaw,
-                                                                                        double initialX,
-                                                                                        double initialY)
-   {
-      return new AtlasSimInitialSetup(groundHeight, initialYaw, initialX, initialY, getJointMap());
+      return new AtlasSimInitialSetup(getJointMap());
    }
 
    @Override

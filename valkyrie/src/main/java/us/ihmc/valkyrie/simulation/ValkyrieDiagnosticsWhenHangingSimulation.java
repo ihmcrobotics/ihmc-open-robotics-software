@@ -17,7 +17,6 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationConstructionSetTools.util.virtualHoist.VirtualHoist;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.valkyrie.ValkyrieInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrieRosControl.ValkyrieTorqueOffsetPrinter;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerState;
@@ -35,7 +34,7 @@ public class ValkyrieDiagnosticsWhenHangingSimulation
       ValkyrieRobotModelWithHoist robotModel = new ValkyrieRobotModelWithHoist(RobotTarget.SCS, false);
       double groundZ = 0.0;
       double initialYaw = 0.0;
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = new ValkyrieInitialSetup(groundZ, initialYaw, robotModel.getJointMap());
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundZ, initialYaw);
       
       HumanoidJointPoseList humanoidJointPoseList = new HumanoidJointPoseList();
 //      humanoidJointPoseList.createPoseSetters();
