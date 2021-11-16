@@ -362,7 +362,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup()
    {
       if (valkyrieInitialSetup == null)
-         valkyrieInitialSetup = new ValkyrieInitialSetup(getJointMap());
+         valkyrieInitialSetup = new ValkyrieInitialSetup(getRobotDefinition(), getJointMap());
       return valkyrieInitialSetup;
    }
 
