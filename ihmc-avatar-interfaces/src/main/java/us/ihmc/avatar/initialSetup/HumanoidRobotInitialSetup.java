@@ -1,15 +1,14 @@
 package us.ihmc.avatar.initialSetup;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -44,16 +43,6 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
    public HumanoidRobotInitialSetup(HumanoidJointNameMap jointMap)
    {
       this.jointMap = jointMap;
-   }
-
-   public List<Double> getInitialJointAngles() // Implement for kinematics sim & start pose
-   {
-      return null;
-   }
-
-   public Pose3DReadOnly getInitialPelvisPose() // Implement for kinematics sim & start pose
-   {
-      return null;
    }
 
    public void setJoint(RobotSide robotSide, LegJointName legJointName, double q)
@@ -139,6 +128,7 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
       initializeRobot(fullRobotModel.getElevator());
    }
 
+   @Override
    public void initializeRobot(RigidBodyBasics rootBody)
    {
       initializeRobot(rootBody, true);
@@ -200,15 +190,15 @@ public abstract class HumanoidRobotInitialSetup implements RobotInitialSetup<Hum
    }
 
    @Override
-   public void setOffset(Vector3D additionalOffset)
+   public void setOffset(Tuple3DReadOnly additionalOffset)
    {
       this.additionalOffset.set(additionalOffset);
    }
 
    @Override
-   public void getOffset(Vector3D offsetToPack)
+   public Vector3D getOffset()
    {
-      offsetToPack.set(additionalOffset);
+      return additionalOffset;
    }
 
    public Double getJointPosition(String jointName)

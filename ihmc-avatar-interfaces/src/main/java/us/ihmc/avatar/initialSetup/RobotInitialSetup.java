@@ -1,54 +1,18 @@
 package us.ihmc.avatar.initialSetup;
 
-import java.util.List;
-
-import org.ejml.data.DMatrixRMaj;
-
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.simulationconstructionset.Robot;
 
 public interface RobotInitialSetup<T extends Robot>
 {
-   default List<Double> getInitialJointAngles()
-   {
-      LogTools.warn("Please implement getInitialJointAngles");
-      return null;
-   }
-
-   default Pose3DReadOnly getInitialPelvisPose()
-   {
-      LogTools.warn("Please implement getInitialPelvisPose");
-      return null;
-   }
-
    void initializeRobot(T robot);
 
-   default void initializeFullRobotModel(FullHumanoidRobotModel fullRobotModel)
-   {
-      OneDoFJointBasics[] allJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      List<Double> initialJointAngles = getInitialJointAngles();
-      if (initialJointAngles != null)
-      {
-         for (int i = 0; i < initialJointAngles.size(); i++)
-         {
-            allJointsExcludingHands[i].setQ(initialJointAngles.get(i));
-            allJointsExcludingHands[i].setQd(0.0);
-         }
-      }
+   void initializeFullRobotModel(FullHumanoidRobotModel fullRobotModel);
 
-      Pose3DReadOnly initialPelvisPose = getInitialPelvisPose();
-      if (initialPelvisPose != null)
-      {
-         fullRobotModel.getRootJoint().getJointPose().set(initialPelvisPose);
-      }
-      fullRobotModel.getRootJoint().setJointVelocity(0, new DMatrixRMaj(6, 1));
-      fullRobotModel.getRootJoint().getPredecessor().updateFramesRecursively();
-   }
+   void initializeRobot(RigidBodyBasics rootBody);
 
    void setInitialYaw(double yaw);
 
@@ -58,9 +22,9 @@ public interface RobotInitialSetup<T extends Robot>
 
    double getInitialGroundHeight();
 
-   void setOffset(Vector3D additionalOffset);
+   void setOffset(Tuple3DReadOnly additionalOffset);
 
-   void getOffset(Vector3D offsetToPack);
+   Vector3DReadOnly getOffset();
 
    /**
     * Indicates whether the robot can be reset to its initial sim configuration with the implementation

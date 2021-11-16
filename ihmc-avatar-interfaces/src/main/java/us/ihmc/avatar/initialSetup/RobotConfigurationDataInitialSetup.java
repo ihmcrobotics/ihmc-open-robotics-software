@@ -2,8 +2,13 @@ package us.ihmc.avatar.initialSetup;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -39,6 +44,44 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
    }
 
    @Override
+   public void initializeFullRobotModel(FullHumanoidRobotModel fullRobotModel)
+   {
+      Pose3DBasics rootJointPose = fullRobotModel.getRootJoint().getJointPose();
+      rootJointPose.getPosition().set(robotConfigurationData.getRootTranslation());
+      rootJointPose.getOrientation().set(robotConfigurationData.getRootOrientation());
+
+      TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
+      TFloatArrayList jointVelocities = robotConfigurationData.getJointVelocities();
+
+      for (int i = 0; i < allJointsExcludingHands.length; i++)
+      {
+         String jointName = allJointsExcludingHands[i].getName();
+         OneDoFJointBasics joint = fullRobotModel.getOneDoFJointByName(jointName);
+         joint.setQ(jointAngles.get(i));
+         joint.setQd(jointVelocities.get(i));
+      }
+   }
+
+   @Override
+   public void initializeRobot(RigidBodyBasics rootBody)
+   {
+      Pose3DBasics rootJointPose = ((FloatingJointBasics) rootBody.getChildrenJoints().get(0)).getJointPose();
+      rootJointPose.getPosition().set(robotConfigurationData.getRootTranslation());
+      rootJointPose.getOrientation().set(robotConfigurationData.getRootOrientation());
+
+      TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
+      TFloatArrayList jointVelocities = robotConfigurationData.getJointVelocities();
+
+      for (int i = 0; i < allJointsExcludingHands.length; i++)
+      {
+         String jointName = allJointsExcludingHands[i].getName();
+         OneDoFJointBasics joint = (OneDoFJointBasics) MultiBodySystemTools.findJoint(rootBody, jointName);
+         joint.setQ(jointAngles.get(i));
+         joint.setQd(jointVelocities.get(i));
+      }
+   }
+
+   @Override
    public void setInitialYaw(double yaw)
    {
    }
@@ -61,13 +104,13 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
    }
 
    @Override
-   public void setOffset(Vector3D additionalOffset)
+   public void setOffset(Tuple3DReadOnly additionalOffset)
    {
    }
 
    @Override
-   public void getOffset(Vector3D offsetToPack)
+   public Vector3D getOffset()
    {
-      offsetToPack.set(robotConfigurationData.getRootTranslation());
+      return robotConfigurationData.getRootTranslation();
    }
 }
