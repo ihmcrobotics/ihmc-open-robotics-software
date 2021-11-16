@@ -101,7 +101,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       if (robotInitialSetup == null)
          robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      robotInitialSetup.initializeRobot(simulatedRobot, robotModel.getJointMap());
+      robotInitialSetup.initializeRobot(simulatedRobot);
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       YoDouble yoTime = simulatedRobot.getYoTime();

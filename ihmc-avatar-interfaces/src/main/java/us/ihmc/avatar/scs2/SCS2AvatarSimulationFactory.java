@@ -193,7 +193,7 @@ public class SCS2AvatarSimulationFactory
          RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                              robotDefinition);
       HumanoidFloatingRootJointRobot tempRobotForInitialState = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotInitialSetup.get().initializeRobot(tempRobotForInitialState, robotModel.getJointMap());
+      robotInitialSetup.get().initializeRobot(tempRobotForInitialState);
       RobotDefinitionTools.addInitialStateToRobotDefinition(tempRobotForInitialState, robotDefinition);
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(lastSimulatedJoint -> robotDefinition.addSubtreeJointsToIgnore(lastSimulatedJoint));
@@ -468,7 +468,7 @@ public class SCS2AvatarSimulationFactory
           * robot-determined world coordinates..
           */
          HumanoidFloatingRootJointRobot tempRobot = robotModel.get().createHumanoidFloatingRootJointRobot(false);
-         robotInitialSetup.get().initializeRobot(tempRobot, robotModel.get().getJointMap());
+         robotInitialSetup.get().initializeRobot(tempRobot);
          try
          {
             tempRobot.update();

@@ -10,14 +10,13 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
@@ -27,15 +26,18 @@ public class ValkyrieInitialSetup implements RobotInitialSetup<HumanoidFloatingR
    private final Vector3D positionInWorld = new Vector3D();
    private final Vector3D offset = new Vector3D();
    private final Quaternion rotation = new Quaternion();
+   private final HumanoidJointNameMap jointMap;
 
-   public ValkyrieInitialSetup()
+   public ValkyrieInitialSetup(HumanoidJointNameMap jointMap)
    {
+      this.jointMap = jointMap;
    }
 
-   public ValkyrieInitialSetup(double groundZ, double initialYaw)
+   public ValkyrieInitialSetup(double groundZ, double initialYaw, HumanoidJointNameMap jointMap)
    {
       setInitialGroundHeight(groundZ);
       setInitialYaw(initialYaw);
+      this.jointMap = jointMap;
    }
 
    public List<Double> getInitialJointAngles() // Implement for kinematics sim & start pose
@@ -49,13 +51,13 @@ public class ValkyrieInitialSetup implements RobotInitialSetup<HumanoidFloatingR
    }
 
    @Override
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot)
    {
-      setActuatorPositions(robot, jointMap);
+      setActuatorPositions(robot);
       positionRobotInWorld(robot);
    }
 
-   private void setActuatorPositions(FloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
+   private void setActuatorPositions(FloatingRootJointRobot robot)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

@@ -22,8 +22,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -124,7 +124,7 @@ public class AvatarSimulationFactory
    private void createHumanoidFloatingRootJointRobot()
    {
       humanoidFloatingRootJointRobot = robotModel.get().createHumanoidFloatingRootJointRobot(createCollisionMeshes.get());
-      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot);
    }
 
    private void initializeCollisionManager()
@@ -190,8 +190,7 @@ public class AvatarSimulationFactory
          String environmentCollisionMask = "ground";
          String robotCollisionMask = robotModel.get().getSimpleRobotName();
          MultiBodySystemStateWriter robotInitialStateWriter = ExperimentalSimulation.toRobotInitialStateWriter(robotInitialSetup.get()::initializeRobot,
-                                                                                                               robotModel.get(),
-                                                                                                               robotModel.get().getJointMap());
+                                                                                                               robotModel.get());
          experimentalSimulation.addEnvironmentCollidables(helper, robotCollisionMask, environmentCollisionMask, commonAvatarEnvironment.get());
          RobotCollisionModel simulationRobotCollisionModel = robotModel.get()
                                                                        .getSimulationRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask);
@@ -469,7 +468,7 @@ public class AvatarSimulationFactory
           * need to move to where the robot itself determines coordinates, and the sensors are all in the
           * robot-determined world coordinates..
           */
-         robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+         robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot);
          try
          {
             humanoidFloatingRootJointRobot.update();
@@ -598,7 +597,7 @@ public class AvatarSimulationFactory
       }
 
       scsInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get(), null);
-      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot);
       humanoidFloatingRootJointRobot.update();
    }
 

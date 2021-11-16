@@ -578,7 +578,7 @@ public class WalkingControllerTest
    {
       robot.setDynamic(false);
       RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      initialSetup.initializeRobot(robot, robotModel.getJointMap());
+      initialSetup.initializeRobot(robot);
 
       writer = new PerfectSimulatedOutputWriter(robot, fullRobotModel);
 
