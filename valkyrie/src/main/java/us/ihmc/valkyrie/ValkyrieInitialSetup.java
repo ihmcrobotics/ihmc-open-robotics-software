@@ -33,13 +33,6 @@ public class ValkyrieInitialSetup implements RobotInitialSetup<HumanoidFloatingR
       this.jointMap = jointMap;
    }
 
-   public ValkyrieInitialSetup(double groundZ, double initialYaw, HumanoidJointNameMap jointMap)
-   {
-      setInitialGroundHeight(groundZ);
-      setInitialYaw(initialYaw);
-      this.jointMap = jointMap;
-   }
-
    public List<Double> getInitialJointAngles() // Implement for kinematics sim & start pose
    {
       return null;

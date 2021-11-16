@@ -74,20 +74,6 @@ public class AtlasSimInitialSetup implements RobotInitialSetup<HumanoidFloatingR
 
    public AtlasSimInitialSetup(HumanoidJointNameMap jointMap)
    {
-      this(0.0, 0.0, jointMap);
-   }
-
-   public AtlasSimInitialSetup(double groundZ, double initialYaw, HumanoidJointNameMap jointMap)
-   {
-      this(groundZ, initialYaw, 0.0, 0.0, jointMap);
-   }
-
-   public AtlasSimInitialSetup(double groundZ, double initialYaw, double initialX, double initialY, HumanoidJointNameMap jointMap)
-   {
-      this.groundZ = groundZ;
-      this.initialYaw = initialYaw;
-      this.initialX = initialX;
-      this.initialY = initialY;
       this.jointMap = jointMap;
    }
 

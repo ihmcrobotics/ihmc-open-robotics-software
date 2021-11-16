@@ -14,7 +14,6 @@ import us.ihmc.simulationconstructionset.Robot;
 
 public interface RobotInitialSetup<T extends Robot>
 {
-
    default List<Double> getInitialJointAngles()
    {
       LogTools.warn("Please implement getInitialJointAngles");
