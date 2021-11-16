@@ -4,6 +4,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationconstructionset.Robot;
 
 public interface RobotInitialSetup<T extends Robot>
@@ -13,6 +14,8 @@ public interface RobotInitialSetup<T extends Robot>
    void initializeFullRobotModel(FullHumanoidRobotModel fullRobotModel);
 
    void initializeRobot(RigidBodyBasics rootBody);
+
+   void initializeRobotDefinition(RobotDefinition robotDefinition);
 
    void setInitialYaw(double yaw);
 

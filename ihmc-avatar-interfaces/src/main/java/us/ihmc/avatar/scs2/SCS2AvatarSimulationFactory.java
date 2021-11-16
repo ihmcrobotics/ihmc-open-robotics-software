@@ -28,8 +28,8 @@ import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
 import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.factory.TerrainObjectDefinitionTools;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -192,9 +192,7 @@ public class SCS2AvatarSimulationFactory
       if (collisionModel != null)
          RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                              robotDefinition);
-      HumanoidFloatingRootJointRobot tempRobotForInitialState = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotInitialSetup.get().initializeRobot(tempRobotForInitialState);
-      RobotDefinitionTools.addInitialStateToRobotDefinition(tempRobotForInitialState, robotDefinition);
+      robotInitialSetup.get().initializeRobotDefinition(robotDefinition);
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(lastSimulatedJoint -> robotDefinition.addSubtreeJointsToIgnore(lastSimulatedJoint));
 

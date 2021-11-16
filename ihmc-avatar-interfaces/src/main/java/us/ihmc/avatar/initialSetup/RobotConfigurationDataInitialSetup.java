@@ -11,6 +11,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
@@ -78,6 +80,22 @@ public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<Hum
          OneDoFJointBasics joint = (OneDoFJointBasics) MultiBodySystemTools.findJoint(rootBody, jointName);
          joint.setQ(jointAngles.get(i));
          joint.setQd(jointVelocities.get(i));
+      }
+   }
+
+   @Override
+   public void initializeRobotDefinition(RobotDefinition robotDefinition)
+   {
+      SixDoFJointState initialRootJointState = new SixDoFJointState(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+      robotDefinition.getRootJointDefinitions().get(0).setInitialJointState(initialRootJointState);
+
+      TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
+      TFloatArrayList jointVelocities = robotConfigurationData.getJointVelocities();
+
+      for (int i = 0; i < allJointsExcludingHands.length; i++)
+      {
+         String jointName = allJointsExcludingHands[i].getName();
+         robotDefinition.getOneDoFJointDefinition(jointName).setInitialJointState(jointAngles.get(i), jointVelocities.get(i));
       }
    }
 
