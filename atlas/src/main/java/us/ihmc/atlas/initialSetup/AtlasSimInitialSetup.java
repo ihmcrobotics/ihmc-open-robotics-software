@@ -3,7 +3,7 @@ package us.ihmc.atlas.initialSetup;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -20,7 +20,7 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 
-public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
+public class AtlasSimInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    public static final Pose3D PELVIS_POSE = new Pose3D();
    public static final ArrayList<Double> JOINT_Qs = new ArrayList<>(31);

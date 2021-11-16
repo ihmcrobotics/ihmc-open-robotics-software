@@ -7,7 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -64,7 +64,7 @@ public abstract class HumanoidRobotTransformOptimizerTest
       ThreadTools.sleepForever();
    }
 
-   public void runTest(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupA, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupB,
+   public void runTest(RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupA, RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupB,
                        double epsilon)
    {
       HumanoidFloatingRootJointRobot scsRobotA = robotModelA.createHumanoidFloatingRootJointRobot(false);

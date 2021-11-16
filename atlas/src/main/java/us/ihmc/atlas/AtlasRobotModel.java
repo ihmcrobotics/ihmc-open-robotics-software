@@ -29,7 +29,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
@@ -332,13 +332,13 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   public RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       return new AtlasSimInitialSetup(groundHeight, initialYaw);
    }
 
    @Override
-   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight,
+   public RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight,
                                                                                            double initialYaw,
                                                                                            double initialX,
                                                                                            double initialY)

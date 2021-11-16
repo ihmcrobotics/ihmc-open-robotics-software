@@ -13,7 +13,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.simulationconstructionset.Robot;
 
-public interface DRCRobotInitialSetup<T extends Robot>
+public interface RobotInitialSetup<T extends Robot>
 {
    void initializeRobot(T robot, HumanoidJointNameMap jointMap);
 

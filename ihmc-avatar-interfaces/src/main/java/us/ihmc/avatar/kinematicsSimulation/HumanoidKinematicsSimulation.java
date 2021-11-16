@@ -14,7 +14,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
@@ -216,10 +216,10 @@ public class HumanoidKinematicsSimulation
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(kinematicsSimulationParameters.getInitialGroundHeight(),
-                                                                                                                      kinematicsSimulationParameters.getInitialRobotYaw(),
-                                                                                                                      kinematicsSimulationParameters.getInitialRobotX(),
-                                                                                                                      kinematicsSimulationParameters.getInitialRobotY());
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(kinematicsSimulationParameters.getInitialGroundHeight(),
+                                                                                                                   kinematicsSimulationParameters.getInitialRobotYaw(),
+                                                                                                                   kinematicsSimulationParameters.getInitialRobotX(),
+                                                                                                                   kinematicsSimulationParameters.getInitialRobotY());
       KinematicsToolboxHelper.setRobotStateFromRawData(robotInitialSetup.getInitialPelvisPose(),
                                                        robotInitialSetup.getInitialJointAngles(),
                                                        fullRobotModel.getRootJoint(),

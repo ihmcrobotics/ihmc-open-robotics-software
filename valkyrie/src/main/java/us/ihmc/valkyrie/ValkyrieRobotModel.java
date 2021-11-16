@@ -10,7 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
@@ -98,7 +98,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
-   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
+   private RobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
    private StepReachabilityData stepReachabilityData;
 
    private SimulationLowLevelControllerFactory simulationLowLevelControllerFactory;
@@ -282,7 +282,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.robotDefinitionMutator = robotDefinitionMutator;
    }
 
-   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup)
+   public void setRobotInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup)
    {
       if (this.valkyrieInitialSetup != null)
          throw new IllegalArgumentException("Cannot set valkyrieInitialSetup once it has been created.");
@@ -359,7 +359,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   public RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
    {
       if (valkyrieInitialSetup == null)
          valkyrieInitialSetup = new ValkyrieInitialSetup();
