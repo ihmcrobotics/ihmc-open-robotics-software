@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.fourBarLinkage;
 
-import static us.ihmc.exampleSimulations.fourBarLinkage.InvertedFourBarLinkageRobotDescription.HAS_SHOULDER_JOINT;
-import static us.ihmc.exampleSimulations.fourBarLinkage.InvertedFourBarLinkageRobotDescription.HAS_WRIST_JOINT;
+import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDescription.HAS_SHOULDER_JOINT;
+import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDescription.HAS_WRIST_JOINT;
 
 import java.util.List;
 import java.util.Random;
@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunction;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -42,7 +43,6 @@ import us.ihmc.robotics.robotDescription.LoopClosurePinConstraintDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunction;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -56,7 +56,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * Controller demonstrating the usage of the {@link InverseDynamicsCalculator} in the presence of a
  * four bar linkage.
  */
-public class InvertedFourBarLinkageIDController implements RobotController
+public class CrossFourBarLinkageIDController implements RobotController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean APPLY_EXTERNAL_FORCE = true;
@@ -93,7 +93,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
 
    private ExternalForcePoint wristExternalForcePoint = null;
 
-   public InvertedFourBarLinkageIDController(InvertedFourBarLinkageRobotDescription robotDescription, Robot robot)
+   public CrossFourBarLinkageIDController(CrossFourBarLinkageRobotDescription robotDescription, Robot robot)
    {
       rootBody = toInverseDynamicsRobot(robotDescription);
       multiBodySystem = MultiBodySystemBasics.toMultiBodySystemBasics(rootBody);

@@ -9,6 +9,7 @@ import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -18,7 +19,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointReadOnly;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -198,9 +198,9 @@ public class SCS2SensorReader implements SensorReader
                jointSensorReaders.add(new SixDoFJointSensorReader((SixDoFJointBasics) controllerJoint, (SixDoFJointReadOnly) simJoint));
             }
          }
-         else if (controllerJoint instanceof InvertedFourBarJoint)
+         else if (controllerJoint instanceof CrossFourBarJoint)
          {
-            InvertedFourBarJoint controllerInvertedFourBarJoint = (InvertedFourBarJoint) controllerJoint;
+            CrossFourBarJoint controllerInvertedFourBarJoint = (CrossFourBarJoint) controllerJoint;
             List<RevoluteJointBasics> loopJoints = controllerInvertedFourBarJoint.getFourBarFunction().getLoopJoints();
             OneDoFJointReadOnly[] simJoints = loopJoints.stream()
                                                         .map(loopJoint -> (OneDoFJointReadOnly) controllerInput.getInput().findJoint(loopJoint.getName()))
@@ -402,20 +402,20 @@ public class SCS2SensorReader implements SensorReader
 
    private static class InvertedFourBarJointSensorReader implements JointSensorReader
    {
-      private final InvertedFourBarJoint controllerJoint;
+      private final CrossFourBarJoint controllerJoint;
       private final OneDoFJointReadOnly[] simJoints;
       private final SensorProcessing sensorProcessing;
 
-      private final InvertedFourBarJoint localFourBarJoint;
+      private final CrossFourBarJoint localFourBarJoint;
       private final int[] activeJointIndices;
 
-      public InvertedFourBarJointSensorReader(InvertedFourBarJoint controllerJoint, OneDoFJointReadOnly[] simJoints, SensorProcessing sensorProcessing)
+      public InvertedFourBarJointSensorReader(CrossFourBarJoint controllerJoint, OneDoFJointReadOnly[] simJoints, SensorProcessing sensorProcessing)
       {
          this.controllerJoint = controllerJoint;
          this.simJoints = simJoints;
          this.sensorProcessing = sensorProcessing;
 
-         localFourBarJoint = InvertedFourBarJoint.cloneInvertedFourBarJoint(controllerJoint, ReferenceFrameTools.constructARootFrame("dummy"), "dummy");
+         localFourBarJoint = CrossFourBarJoint.cloneCrossFourBarJoint(controllerJoint, ReferenceFrameTools.constructARootFrame("dummy"), "dummy");
          if (controllerJoint.getJointA().isLoopClosure() || controllerJoint.getJointD().isLoopClosure())
             activeJointIndices = new int[] {1, 2};
          else

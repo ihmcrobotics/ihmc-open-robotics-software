@@ -6,9 +6,9 @@ import java.util.List;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
@@ -55,15 +55,15 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          OneDoFJointReadOnly controllerJoint = jointDesiredOutputList.getOneDoFJoint(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(i);
 
-         if (controllerJoint instanceof InvertedFourBarJoint)
+         if (controllerJoint instanceof CrossFourBarJoint)
          {
-            InvertedFourBarJoint controllerFourBarJoint = (InvertedFourBarJoint) controllerJoint;
+            CrossFourBarJoint controllerFourBarJoint = (CrossFourBarJoint) controllerJoint;
             List<RevoluteJointBasics> loopJoints = controllerFourBarJoint.getFourBarFunction().getLoopJoints();
             OneDoFJointStateBasics[] simInputs = loopJoints.stream().map(joint -> controllerOutput.getOneDoFJointOutput(joint))
                                                            .toArray(OneDoFJointStateBasics[]::new);
             OneDoFJointReadOnly[] simOutputs = loopJoints.stream().map(joint -> (OneDoFJointReadOnly) controllerInput.getInput().findJoint(joint.getName()))
                                                          .toArray(OneDoFJointReadOnly[]::new);
-            jointControllers.add(new InvertedFourBarJointController(controllerFourBarJoint, simOutputs, simInputs, jointDesiredOutput, registry));
+            jointControllers.add(new CrossFourBarJointController(controllerFourBarJoint, simOutputs, simInputs, jointDesiredOutput, registry));
          }
          else
          {
@@ -211,9 +211,9 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       }
    }
 
-   private class InvertedFourBarJointController implements JointController
+   private class CrossFourBarJointController implements JointController
    {
-      private final InvertedFourBarJoint localFourBarJoint;
+      private final CrossFourBarJoint localFourBarJoint;
       private final OneDoFJointReadOnly[] simOutputs;
       private final int[] torqueSourceIndices;
       private final OneDoFJointStateBasics[] simInputs;
@@ -227,16 +227,16 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       private final YoDouble previousVelocity;
       private final YoDouble unstableVelocityStartTime;
 
-      public InvertedFourBarJointController(InvertedFourBarJoint controllerFourBarJoint,
-                                            OneDoFJointReadOnly[] simOutputs,
-                                            OneDoFJointStateBasics[] simInputs,
-                                            JointDesiredOutputReadOnly jointDesiredOutput,
-                                            YoRegistry registry)
+      public CrossFourBarJointController(CrossFourBarJoint controllerFourBarJoint,
+                                         OneDoFJointReadOnly[] simOutputs,
+                                         OneDoFJointStateBasics[] simInputs,
+                                         JointDesiredOutputReadOnly jointDesiredOutput,
+                                         YoRegistry registry)
       {
          this.simOutputs = simOutputs;
          this.simInputs = simInputs;
          this.jointDesiredOutput = jointDesiredOutput;
-         localFourBarJoint = InvertedFourBarJoint.cloneInvertedFourBarJoint(controllerFourBarJoint, ReferenceFrameTools.constructARootFrame("dummy"), "dummy");
+         localFourBarJoint = CrossFourBarJoint.cloneCrossFourBarJoint(controllerFourBarJoint, ReferenceFrameTools.constructARootFrame("dummy"), "dummy");
 
          if (controllerFourBarJoint.getJointA().isLoopClosure() || controllerFourBarJoint.getJointD().isLoopClosure())
             torqueSourceIndices = new int[] {1, 2};
