@@ -82,11 +82,9 @@ public class HeightMapVisualizer extends AnimationTimer
          double x = HeightMapTools.toCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, minMaxIndex);
          double y = HeightMapTools.toCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, minMaxIndex);
          double height = heights.get(i);
+         double renderedHeight = height - heightMapMessage.getEstimatedGroundHeight();
 
-         double estimatedGroundHeight = heightMapMessage.getHeights().min() - 0.2;
-         double renderedHeight = Math.max(0.0, height - estimatedGroundHeight);
-
-         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, estimatedGroundHeight + 0.5 * renderedHeight), heightMapColor);
+         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight), heightMapColor);
       }
 
       double renderedGroundPlaneHeight = 0.01;
