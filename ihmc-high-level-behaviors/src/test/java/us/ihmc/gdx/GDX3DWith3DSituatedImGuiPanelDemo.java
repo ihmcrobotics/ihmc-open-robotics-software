@@ -1,5 +1,6 @@
 package us.ihmc.gdx;
 
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Pixmap;
@@ -29,7 +30,6 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
-import us.ihmc.gdx.tools.GDXTools;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
@@ -48,6 +48,8 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
       {
          private int width = 400;
          private int height = 500;
+         private int mouseX = 0;
+         private int mouseY = 0;
          private FrameBuffer frameBuffer;
 
          @Override
@@ -68,6 +70,7 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
 
             final ImGuiIO io = ImGui.getIO();
             io.setIniFilename(null); // We don't want to save .ini file
+            io.setMouseDrawCursor(true);
             ImGuiTools.setupFonts(io);
             ImGui.styleColorsLight();
 //            io.setDisplaySize(width, height);
@@ -130,6 +133,17 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
             ModelInstance modelInstance = new ModelInstance(model);
             modelInstance.transform.scale(0.005f, 0.005f, 0.005f);
             sceneManager.addRenderableProvider(modelInstance);
+
+            sceneManager.addLibGDXInputProcessor(new InputAdapter()
+            {
+               @Override
+               public boolean mouseMoved(int screenX, int screenY)
+               {
+                  mouseX = screenX;
+                  mouseY = screenY;
+                  return false;
+               }
+            });
          }
 
          @Override
@@ -142,6 +156,8 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
 
             imGuiGlfw.newFrame();
             ImGui.newFrame();
+
+            ImGui.getIO().setMousePos(mouseX, mouseY);
 
             ImGui.setNextWindowPos(0.0f, 0.0f);
             ImGui.setNextWindowSize(width, height);
