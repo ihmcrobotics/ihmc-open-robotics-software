@@ -74,12 +74,12 @@ public class HeightMapManager
 //               continue;
 
             // narrow passage
-            if ((point.getX() < 0.6 || point.getY() < -1.5) && point.getZ() > 0.2)
-               continue;
+//            if ((point.getX() < 0.6 || point.getY() < -1.5) && point.getZ() > 0.2)
+//               continue;
 
             // stepping stones
-//            if (point.getZ() > 0.4)
-//               continue;
+            if (point.getZ() > 0.4)
+               continue;
 
             int indexX = HeightMapTools.toIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, minMaxIndexXY);
             int indexY = HeightMapTools.toIndex(point.getY(), gridCenterXY.getY(), gridResolutionXY, minMaxIndexXY);
