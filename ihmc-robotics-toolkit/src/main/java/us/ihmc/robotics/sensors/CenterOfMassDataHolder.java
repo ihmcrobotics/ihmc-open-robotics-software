@@ -11,6 +11,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 
+/**
+ * Data holder used to pass center of mass position and velocity from the state estimator thread to
+ * the controller thread.
+ */
 public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
