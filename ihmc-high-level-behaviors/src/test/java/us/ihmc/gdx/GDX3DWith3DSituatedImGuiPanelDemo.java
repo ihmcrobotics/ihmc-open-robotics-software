@@ -19,6 +19,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.flag.ImGuiMouseButton;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.glfw.GLFW;
@@ -50,6 +51,7 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
          private int height = 500;
          private int mouseX = 0;
          private int mouseY = 0;
+         private boolean mouseDown = false;
          private FrameBuffer frameBuffer;
 
          @Override
@@ -72,7 +74,7 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
             io.setIniFilename(null); // We don't want to save .ini file
             io.setMouseDrawCursor(true);
             ImGuiTools.setupFonts(io);
-            ImGui.styleColorsLight();
+//            ImGui.styleColorsLight();
 //            io.setDisplaySize(width, height);
 
 //            windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
@@ -143,6 +145,20 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
                   mouseY = screenY;
                   return false;
                }
+
+               @Override
+               public boolean touchDown(int screenX, int screenY, int pointer, int button)
+               {
+                  mouseDown = true;
+                  return false;
+               }
+
+               @Override
+               public boolean touchUp(int screenX, int screenY, int pointer, int button)
+               {
+                  mouseDown = false;
+                  return false;
+               }
             });
          }
 
@@ -155,9 +171,11 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
 
 
             imGuiGlfw.newFrame();
+            ImGuiIO io = ImGui.getIO();
+            io.setMousePos(mouseX, mouseY);
+            io.setMouseDown(ImGuiMouseButton.Left, mouseDown);
             ImGui.newFrame();
 
-            ImGui.getIO().setMousePos(mouseX, mouseY);
 
             ImGui.setNextWindowPos(0.0f, 0.0f);
             ImGui.setNextWindowSize(width, height);
