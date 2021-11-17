@@ -62,7 +62,7 @@ public class CrossFourBarLinkageRobotDescription extends RobotDescription
 
    public CrossFourBarLinkageRobotDescription()
    {
-      super("InvertedFourBarLinkageRobot");
+      super("CrossFourBarLinkageRobot");
 
       double lengthAB = 0.2 * Math.sqrt(2.0);
       double lengthBC = 0.2;

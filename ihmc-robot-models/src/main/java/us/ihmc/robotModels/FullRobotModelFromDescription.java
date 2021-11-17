@@ -28,7 +28,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotModels.description.InvertedFourBarJointDescription;
+import us.ihmc.robotModels.description.CrossFourBarJointDescription;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -430,9 +430,9 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    public static OneDoFJointBasics createOneDoFJoint(OneDoFJointDescription jointDescription, RigidBodyBasics predecessor)
    {
-      if (jointDescription instanceof InvertedFourBarJointDescription)
+      if (jointDescription instanceof CrossFourBarJointDescription)
       {
-         return createInvertedFourBarJoint(jointDescription, predecessor);
+         return createCrossFourBarJoint(jointDescription, predecessor);
       }
       else
       {
@@ -471,9 +471,9 @@ public class FullRobotModelFromDescription implements FullRobotModel
       }
    }
 
-   private static OneDoFJointBasics createInvertedFourBarJoint(OneDoFJointDescription jointDescription, RigidBodyBasics predecessor)
+   private static OneDoFJointBasics createCrossFourBarJoint(OneDoFJointDescription jointDescription, RigidBodyBasics predecessor)
    {
-      InvertedFourBarJointDescription fourBarDescription = (InvertedFourBarJointDescription) jointDescription;
+      CrossFourBarJointDescription fourBarDescription = (CrossFourBarJointDescription) jointDescription;
 
       RevoluteJoint jointA = null, jointB = null, jointC = null, jointD = null;
       PinJointDescription jointADescription = null, jointBDescription = null, jointCDescription = null, jointDDescription = null;

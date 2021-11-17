@@ -5,13 +5,13 @@ import us.ihmc.robotics.robotDescription.LoopClosurePinConstraintDescription;
 import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 
-public class InvertedFourBarJointDescription extends OneDoFJointDescription
+public class CrossFourBarJointDescription extends OneDoFJointDescription
 {
    private PinJointDescription[] fourBarJoints;
    private LoopClosurePinConstraintDescription fourBarClosure;
    private int masterJointIndex;
 
-   public InvertedFourBarJointDescription(String name)
+   public CrossFourBarJointDescription(String name)
    {
       super(name, new Vector3D(Double.NaN, Double.NaN, Double.NaN), new Vector3D(Double.NaN, Double.NaN, Double.NaN));
    }
@@ -47,7 +47,7 @@ public class InvertedFourBarJointDescription extends OneDoFJointDescription
    }
 
    @Override
-   public InvertedFourBarJointDescription copy()
+   public CrossFourBarJointDescription copy()
    {
       throw new UnsupportedOperationException();
    }
