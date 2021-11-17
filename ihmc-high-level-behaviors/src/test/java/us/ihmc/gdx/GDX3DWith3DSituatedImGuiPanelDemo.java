@@ -1,5 +1,6 @@
 package us.ihmc.gdx;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
@@ -19,9 +20,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import imgui.ImGui;
 import imgui.ImGuiIO;
+import imgui.ImGuiPlatformIO;
 import imgui.flag.ImGuiMouseButton;
 import imgui.gl3.ImGuiImplGl3;
-import imgui.glfw.ImGuiImplGlfw;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL41;
@@ -38,7 +39,6 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class GDX3DWith3DSituatedImGuiPanelDemo
 {
-   private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
    private long windowHandle;
 
@@ -77,14 +77,10 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
 //            ImGui.styleColorsLight();
 //            io.setDisplaySize(width, height);
 
-//            windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
-
             GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
             windowHandle = GLFW.glfwCreateWindow(width, height, "", MemoryUtil.NULL, MemoryUtil.NULL);
 
-            imGuiGlfw.init(windowHandle, true);
-            String glslVersion = null;
-            imGuiGl3.init(glslVersion);
+            imGuiGl3.init();
 
             ModelBuilder modelBuilder = new ModelBuilder();
             modelBuilder.begin();
@@ -117,10 +113,6 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
 
             MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
             Material material = new Material();
-
-//            TextureProvider.FileTextureProvider fileTextureProvider = new TextureProvider.FileTextureProvider();
-//            Texture debugImageTexture = fileTextureProvider.load("debugImageTexture.jpg");
-//            material.set(TextureAttribute.createDiffuse(debugImageTexture));
 
             GLFrameBuffer.FrameBufferBuilder frameBufferBuilder = new GLFrameBuffer.FrameBufferBuilder(width, height);
             frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
@@ -169,13 +161,19 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
 
             sceneManager.render();
 
-
-            imGuiGlfw.newFrame();
             ImGuiIO io = ImGui.getIO();
+            io.setDisplaySize(width, height);
+            io.setDisplayFramebufferScale(1.0f, 1.0f);
             io.setMousePos(mouseX, mouseY);
             io.setMouseDown(ImGuiMouseButton.Left, mouseDown);
-            ImGui.newFrame();
 
+            ImGuiPlatformIO platformIO = ImGui.getPlatformIO();
+            platformIO.resizeMonitors(0);
+            platformIO.pushMonitors(0.0f, 0.0f, width, height, 0.0f, 0.0f, width, height, 1.0f);
+
+            io.setDeltaTime(Gdx.app.getGraphics().getDeltaTime());
+
+            ImGui.newFrame();
 
             ImGui.setNextWindowPos(0.0f, 0.0f);
             ImGui.setNextWindowSize(width, height);
@@ -193,7 +191,6 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
             ImGui.end();
 
             ImGui.render();
-//            imGuiGl3.renderDrawData(ImGui.getDrawData());
 
             frameBuffer.begin();
             GDX3DSceneTools.glClearGray();
@@ -210,7 +207,7 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
          {
             sceneManager.dispose();
             imGuiGl3.dispose();
-            imGuiGlfw.dispose();
+//            imGuiGlfw.dispose();
 
             ImGui.destroyContext();
          }
