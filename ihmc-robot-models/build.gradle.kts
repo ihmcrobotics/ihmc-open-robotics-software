@@ -20,7 +20,7 @@ mainDependencies {
    api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:ihmc-robot-description:0.21.3")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
-   api("us.ihmc:scs2-definition:0.0.4")
+   api("us.ihmc:scs2-definition:0.1.1")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
