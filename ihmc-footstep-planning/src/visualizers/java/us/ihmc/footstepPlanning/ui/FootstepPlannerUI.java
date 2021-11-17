@@ -146,8 +146,15 @@ public class FootstepPlannerUI
    public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, boolean showTestDashboard, SideDependentList<List<Point2D>> defaultContactPoints)
          throws Exception
    {
-      this(primaryStage, messager, new DefaultVisibilityGraphParameters(), new DefaultFootstepPlannerParameters(), new DefaultSwingPlannerParameters(), null,
-           null, showTestDashboard, defaultContactPoints);
+      this(primaryStage,
+           messager,
+           new DefaultVisibilityGraphParameters(),
+           new DefaultFootstepPlannerParameters(),
+           new DefaultSwingPlannerParameters(),
+           null,
+           null,
+           showTestDashboard,
+           defaultContactPoints);
    }
 
    public FootstepPlannerUI(Stage primaryStage,
@@ -161,8 +168,18 @@ public class FootstepPlannerUI
                             SideDependentList<List<Point2D>> defaultContactPoints)
          throws Exception
    {
-      this(primaryStage, messager, visibilityGraphsParameters, plannerParameters, swingPlannerParameters, fullHumanoidRobotModelFactory, null, null,
-           walkingControllerParameters, null, showTestDashboard, defaultContactPoints);
+      this(primaryStage,
+           messager,
+           visibilityGraphsParameters,
+           plannerParameters,
+           swingPlannerParameters,
+           fullHumanoidRobotModelFactory,
+           null,
+           null,
+           walkingControllerParameters,
+           null,
+           showTestDashboard,
+           defaultContactPoints);
    }
 
    public FootstepPlannerUI(Stage primaryStage,
