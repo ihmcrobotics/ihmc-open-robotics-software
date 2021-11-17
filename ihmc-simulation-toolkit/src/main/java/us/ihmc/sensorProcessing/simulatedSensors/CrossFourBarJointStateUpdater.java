@@ -11,13 +11,13 @@ public class CrossFourBarJointStateUpdater implements Runnable
    private final CrossFourBarJoint crossFourBarJoint;
    private final OneDegreeOfFreedomJoint scsJointA, scsJointB, scsJointC, scsJointD;
 
-   public CrossFourBarJointStateUpdater(CrossFourBarJoint invertedFourBarJoint,
+   public CrossFourBarJointStateUpdater(CrossFourBarJoint crossFourBarJoint,
                                         OneDegreeOfFreedomJoint scsJointA,
                                         OneDegreeOfFreedomJoint scsJointB,
                                         OneDegreeOfFreedomJoint scsJointC,
                                         OneDegreeOfFreedomJoint scsJointD)
    {
-      this.crossFourBarJoint = invertedFourBarJoint;
+      this.crossFourBarJoint = crossFourBarJoint;
       this.scsJointA = scsJointA;
       this.scsJointB = scsJointB;
       this.scsJointC = scsJointC;

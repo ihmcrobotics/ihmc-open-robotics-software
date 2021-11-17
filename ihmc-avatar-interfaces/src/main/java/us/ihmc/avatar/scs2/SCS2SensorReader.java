@@ -200,12 +200,12 @@ public class SCS2SensorReader implements SensorReader
          }
          else if (controllerJoint instanceof CrossFourBarJoint)
          {
-            CrossFourBarJoint controllerInvertedFourBarJoint = (CrossFourBarJoint) controllerJoint;
-            List<RevoluteJointBasics> loopJoints = controllerInvertedFourBarJoint.getFourBarFunction().getLoopJoints();
+            CrossFourBarJoint controllerCrossFourBarJoint = (CrossFourBarJoint) controllerJoint;
+            List<RevoluteJointBasics> loopJoints = controllerCrossFourBarJoint.getFourBarFunction().getLoopJoints();
             OneDoFJointReadOnly[] simJoints = loopJoints.stream()
                                                         .map(loopJoint -> (OneDoFJointReadOnly) controllerInput.getInput().findJoint(loopJoint.getName()))
                                                         .toArray(OneDoFJointReadOnly[]::new);
-            jointSensorReaders.add(new InvertedFourBarJointSensorReader(controllerInvertedFourBarJoint, simJoints, sensorProcessing));
+            jointSensorReaders.add(new CrossFourBarJointSensorReader(controllerCrossFourBarJoint, simJoints, sensorProcessing));
          }
          else if (controllerJoint instanceof OneDoFJointBasics)
          {
@@ -400,7 +400,7 @@ public class SCS2SensorReader implements SensorReader
       }
    }
 
-   private static class InvertedFourBarJointSensorReader implements JointSensorReader
+   private static class CrossFourBarJointSensorReader implements JointSensorReader
    {
       private final CrossFourBarJoint controllerJoint;
       private final OneDoFJointReadOnly[] simJoints;
@@ -409,7 +409,7 @@ public class SCS2SensorReader implements SensorReader
       private final CrossFourBarJoint localFourBarJoint;
       private final int[] activeJointIndices;
 
-      public InvertedFourBarJointSensorReader(CrossFourBarJoint controllerJoint, OneDoFJointReadOnly[] simJoints, SensorProcessing sensorProcessing)
+      public CrossFourBarJointSensorReader(CrossFourBarJoint controllerJoint, OneDoFJointReadOnly[] simJoints, SensorProcessing sensorProcessing)
       {
          this.controllerJoint = controllerJoint;
          this.simJoints = simJoints;
