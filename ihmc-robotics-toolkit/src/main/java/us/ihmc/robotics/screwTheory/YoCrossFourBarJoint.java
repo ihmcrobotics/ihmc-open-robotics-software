@@ -1,17 +1,18 @@
 package us.ihmc.robotics.screwTheory;
 
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class YoInvertedFourBarJoint extends InvertedFourBarJoint
+public class YoCrossFourBarJoint extends CrossFourBarJoint
 {
    private final YoDouble q, qd, qdd, tau;
    private final YoDouble jointLimitLower, jointLimitUpper;
    private final YoDouble velocityLimitLower, velocityLimitUpper;
    private final YoDouble effortLimitLower, effortLimitUpper;
 
-   public YoInvertedFourBarJoint(String name, RevoluteJointBasics[] fourBarJoints, int masterJointIndex, YoRegistry registry)
+   public YoCrossFourBarJoint(String name, RevoluteJointBasics[] fourBarJoints, int masterJointIndex, YoRegistry registry)
    {
       super(name, fourBarJoints, masterJointIndex);
 

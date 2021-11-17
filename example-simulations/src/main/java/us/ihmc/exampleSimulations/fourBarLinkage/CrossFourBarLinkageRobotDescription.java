@@ -48,7 +48,7 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
  *                 D     B
  * </pre>
  */
-public class InvertedFourBarLinkageRobotDescription extends RobotDescription
+public class CrossFourBarLinkageRobotDescription extends RobotDescription
 {
    public static final boolean HAS_SHOULDER_JOINT = true;
    public static final boolean HAS_WRIST_JOINT = true;
@@ -60,7 +60,7 @@ public class InvertedFourBarLinkageRobotDescription extends RobotDescription
    private final String jointDName = "fourBarD";
    private final String wristJointName = "wrist";
 
-   public InvertedFourBarLinkageRobotDescription()
+   public CrossFourBarLinkageRobotDescription()
    {
       super("InvertedFourBarLinkageRobot");
 

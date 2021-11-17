@@ -6,15 +6,15 @@ import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
-public class InvertedFourBarLinkageSimulation
+public class CrossFourBarLinkageSimulation
 {
-   public InvertedFourBarLinkageSimulation()
+   public CrossFourBarLinkageSimulation()
    {
-      InvertedFourBarLinkageRobotDescription robotDescription = new InvertedFourBarLinkageRobotDescription();
+      CrossFourBarLinkageRobotDescription robotDescription = new CrossFourBarLinkageRobotDescription();
       RobotFromDescription robot = new RobotFromDescription(robotDescription);
 
       double dt = 1.0e-5;
-      robot.setController(new InvertedFourBarOneDoFJointWBCController(robotDescription, robot, dt));
+      robot.setController(new CrossFourBarOneDoFJointWBCController(robotDescription, robot, dt));
       //      robot.setController(new InvertedFourBarLinkageIDController(robotDescription, robot));
 //            robot.setController(new InvertedFourBarLinkageWBCController(robotDescription, robot, dt));
 
@@ -31,6 +31,6 @@ public class InvertedFourBarLinkageSimulation
 
    public static void main(String[] args)
    {
-      new InvertedFourBarLinkageSimulation();
+      new CrossFourBarLinkageSimulation();
    }
 }

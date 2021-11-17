@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -46,7 +47,6 @@ import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
@@ -553,7 +553,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
          masterJointIndex = 2;
       else if (masterJointDescription == jointDDescription)
          masterJointIndex = 3;
-      return new InvertedFourBarJoint(fourBarDescription.getName(), fourBarRevoluteJoints, masterJointIndex);
+      return new CrossFourBarJoint(fourBarDescription.getName(), fourBarRevoluteJoints, masterJointIndex);
    }
 
    protected void addLoopClosureConstraintRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
