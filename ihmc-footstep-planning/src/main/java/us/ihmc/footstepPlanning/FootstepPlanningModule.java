@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTr
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -165,6 +164,15 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       output.setRequestId(request.getRequestId());
       bodyPathPlanHolder.getPlan().clear();
 
+      if (request.getHeightMapMessage() == null || request.getHeightMapMessage().getHeights().isEmpty())
+      {
+         aStarFootstepPlanner.setHeightMapData(null);
+      }
+      else
+      {
+         aStarFootstepPlanner.setHeightMapData(new HeightMapData(request.getHeightMapMessage()));
+      }
+
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
 
@@ -280,11 +288,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                                     request.getSwingPlannerType());
          statusCallbacks.forEach(callback -> callback.accept(output));
       }
-   }
-
-   public void setHeightMap(HeightMapData heightMapData)
-   {
-      aStarFootstepPlanner.setHeightMapData(heightMapData);
    }
 
    private static void setNominalOrientations(List<Pose3DReadOnly> waypoints)

@@ -30,6 +30,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
@@ -37,6 +38,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,7 @@ public class FootstepPlannerMessagerAPI
    // Robot state
    public static final Topic<RobotConfigurationData> RobotConfigurationData = topic("RobotConfigurationData");
    public static final Topic<DataSetName> DataSetSelected = topic("DataSetSelected");
+   public static final Topic<HeightMapDataSetName> HeightMapDataSetSelected = topic("HeightMapDataSetSelected");
    public static final Topic<ConvexPolygon2D> LeftFootStartSupportPolygon = topic("LeftFootStartSupportPolygon");
    public static final Topic<ConvexPolygon2D> RightFootStartSupportPolygon = topic("RightFootStartSupportPolygon");
    public static final Topic<Pose3DReadOnly> LeftFootPose = topic("LeftStartPose");
@@ -59,10 +62,12 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepStatusMessage> FootstepStatusMessage = topic("FootstepStatusMessage");
    public static final Topic<Pair<RobotSide, double[]>> RequestedArmJointAngles = topic("RequestedArmJointAngles");
 
-   // REA data
+   // Perception data
    public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
+   public static final Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
    public static final Topic<Boolean> AcceptNewPlanarRegions = topic("AcceptNewPlanarRegions");
    public static final Topic<OcTreeKeyListMessage> OcTreeData = topic("OcTreeData");
+   public static final Topic<Boolean> EnableHeightMap = topic("EnableHeightMap");
 
    // UI control
    public static final Topic<Boolean> IgnorePartialFootholds = topic("IgnorePartialFootholds");
@@ -178,10 +183,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<SpineTrajectoryMessage> SpineTrajectoryMessageTopic = topic("SpineTrajectoryMessageTopic");
    public static final Topic<HeadTrajectoryMessage> HeadTrajectoryMessageTopic = topic("HeadTrajectoryMessageTopic");
    public static final Topic<NeckTrajectoryMessage> NeckTrajectoryMessageTopic = topic("NeckTrajectoryMessageTopic");
-
-   // Height map
-   public static final Topic<Boolean> PlanWithHeightMap = topic("PlanWithHeightMap");
-   public static final Topic<HeightMapMessage> HeightMapMessage = topic("HeightMapMessage");
 
    // Logging
    public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");

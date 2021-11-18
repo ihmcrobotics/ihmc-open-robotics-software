@@ -1,27 +1,10 @@
 package us.ihmc.footstepPlanning.ui;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.DataSetSelected;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GlobalReset;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalMidFootOrientation;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalMidFootPosition;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionEditModeEnabled;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPosition;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.OcTreeData;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionData;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RobotConfigurationData;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.SelectedRegion;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowCoordinateSystem;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowGoal;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowOcTree;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowPlanarRegions;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowRobot;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowStart;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.application.Platform;
@@ -61,14 +44,7 @@ import us.ihmc.footstepPlanning.ui.controllers.RobotOperationTabController;
 import us.ihmc.footstepPlanning.ui.controllers.SwingPlannerParametersUIController;
 import us.ihmc.footstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
 import us.ihmc.footstepPlanning.ui.controllers.VisualizationController;
-import us.ihmc.footstepPlanning.ui.viewers.BodyPathMeshViewer;
-import us.ihmc.footstepPlanning.ui.viewers.FootstepPathMeshViewer;
-import us.ihmc.footstepPlanning.ui.viewers.FootstepPlannerLogRenderer;
-import us.ihmc.footstepPlanning.ui.viewers.GoalOrientationViewer;
-import us.ihmc.footstepPlanning.ui.viewers.RobotIKVisualizer;
-import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
-import us.ihmc.footstepPlanning.ui.viewers.SwingPlanMeshViewer;
-import us.ihmc.footstepPlanning.ui.viewers.VisibilityGraphsRenderer;
+import us.ihmc.footstepPlanning.ui.viewers.*;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
@@ -76,6 +52,7 @@ import us.ihmc.javafx.JavaFXRobotVisualizer;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
@@ -88,6 +65,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 /**
  * User interface for {@link us.ihmc.footstepPlanning.FootstepPlanningModule}. - Compute footstep
@@ -230,7 +209,7 @@ public class FootstepPlannerUI
       footstepPlannerLogVisualizerController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       robotOperationTabController.attachMessager(messager);
-      messager.registerTopicListener(HeightMapMessage, heightMapVisualizer::update);
+      messager.registerTopicListener(HeightMapData, heightMapVisualizer::update);
 
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
@@ -366,6 +345,9 @@ public class FootstepPlannerUI
       new FootstepCompletionListener(messager).start();
       heightMapVisualizer.start();
 
+      messager.registerTopicListener(HeightMapData, data -> planarRegionViewer.clear());
+      messager.registerTopicListener(PlanarRegionData, data -> heightMapVisualizer.clear());
+
       if (auxiliaryRobotData != null)
       {
          setupDataSetLoadBingings(auxiliaryRobotData);
@@ -419,7 +401,26 @@ public class FootstepPlannerUI
 
          messager.submitMessage(GlobalReset, true);
       };
+
+      Consumer<HeightMapDataSetName> heightMapDataSetLoader = dataSetName ->
+      {
+         HeightMapMessage message = dataSetName.getMessage();
+         messager.submitMessage(HeightMapData, message);
+
+         RigidBodyTransform robotRootJoint = new RigidBodyTransform();
+         robotRootJoint.getTranslation().set(dataSetName.getStart().getPosition());
+         robotRootJoint.getRotation().setYawPitchRoll(dataSetName.getStart().getYaw(), 0.0, 0.0);
+         robotRootJoint.getTranslation().sub(auxiliaryRobotData.getRootJointToMidFootOffset());
+         robotVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
+         robotIKVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
+
+         messager.submitMessage(GoalMidFootPosition, dataSetName.getGoal().getPosition());
+         messager.submitMessage(GoalMidFootOrientation, new Quaternion(dataSetName.getGoal().getYaw(), 0.0, 0.0));
+         messager.submitMessage(GlobalReset, true);
+      };
+
       messager.registerTopicListener(DataSetSelected, dataSetName -> Platform.runLater(() -> dataSetLoader.accept(dataSetName)));
+      messager.registerTopicListener(HeightMapDataSetSelected, dataSetName -> Platform.runLater(() -> heightMapDataSetLoader.accept(dataSetName)));
    }
 
    public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)

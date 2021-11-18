@@ -1,8 +1,5 @@
 package us.ihmc.atlas.jfxvisualizer;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.HeightMapMessage;
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -14,35 +11,21 @@ import us.ihmc.atlas.parameters.AtlasUIAuxiliaryData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerTerminationCondition;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
-import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 /**
  * This class provides a visualizer for the footstep planner module.
@@ -116,54 +99,6 @@ public class AtlasFootstepPlannerUI extends Application
 
          // Automatically send graph data over messager
          plannerModule.addStatusCallback(status -> handleMessagerCallbacks(plannerModule, status));
-
-         // Height map planner
-         AtomicReference<HeightMapMessage> heightMapMessage = messager.createInput(FootstepPlannerMessagerAPI.HeightMapMessage);
-         AtomicReference<FootstepPlannerParametersReadOnly> plannerParameters = messager.createInput(PlannerParameters);
-         ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
-         AtomicReference<Pose3DReadOnly> leftFootStartPose = messager.createInput(LeftFootPose);
-         AtomicReference<Pose3DReadOnly> rightFootStartPose = messager.createInput(RightFootPose);
-         AtomicReference<Pose3DReadOnly> leftFootGoalPose = messager.createInput(LeftFootGoalPose);
-         AtomicReference<Pose3DReadOnly> rightFootGoalPose = messager.createInput(RightFootGoalPose);
-
-         RobotContactPointParameters<RobotSide> contactPointParameters = drcRobotModel.getContactPointParameters();
-         SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>();
-         for (RobotSide side : RobotSide.values)
-         {
-            ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-            contactPointParameters.getControllerFootGroundContactPoints().get(side).forEach(footPolygon::addVertex);
-            footPolygon.update();
-            footPolygons.put(side, footPolygon);
-         }
-
-         new ROS2Callback<>(ros2Node, HeightMapMessage.class, ROS2Tools.HEIGHT_MAP_OUTPUT, message -> messager.submitMessage(HeightMapMessage, message));
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanWithHeightMap, p -> executorService.execute(() ->
-                                 {
-                                    Pose3D start = new Pose3D();
-                                    Pose3D goal = new Pose3D();
-                                    start.interpolate(leftFootStartPose.get(), rightFootStartPose.get(), 0.5);
-                                    goal.interpolate(leftFootGoalPose.get(), rightFootGoalPose.get(), 0.5);
-
-                                    HeightMapMessage heightMap = heightMapMessage.get();
-                                    if (heightMap == null)
-                                    {
-                                       LogTools.error("No height map available");
-                                       return;
-                                    }
-
-                                    HeightMapData heightMapData = new HeightMapData(heightMap);
-//                                    FootstepPlan footstepPlan = HeightMapFootstepPlanner.plan(start, goal, plannerParameters.get(), footPolygons, heightMapData);
-                                    FootstepPlan footstepPlan = HeightMapFootstepPlanner.debug(footPolygons, heightMapData);
-
-                                    if (!footstepPlan.isEmpty())
-                                    {
-                                       FootstepDataListMessage outputMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(
-                                             footstepPlan,
-                                             -1.0,
-                                             -1.0);
-                                       messager.submitMessage(FootstepPlanResponse, outputMessage);
-                                    }
-                                 }));
       }
    }
 

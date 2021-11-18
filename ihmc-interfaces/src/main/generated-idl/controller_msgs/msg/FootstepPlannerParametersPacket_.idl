@@ -548,6 +548,21 @@ module controller_msgs
          */
         @defaultValue(value=-11.1)
         double shin_height_offet;
+        /**
+         * When using a height map, maximum accepted rms error
+         */
+        @defaultValue(value=-11.1)
+        double rms_error_threshold;
+        /**
+         * When using a height map, cost of rms value
+         */
+        @defaultValue(value=-11.1)
+        double rms_error_cost;
+        /**
+         * When using a height map, minimum rms error to penalize
+         */
+        @defaultValue(value=-11.1)
+        double rms_min_error_to_penalize;
       };
     };
   };

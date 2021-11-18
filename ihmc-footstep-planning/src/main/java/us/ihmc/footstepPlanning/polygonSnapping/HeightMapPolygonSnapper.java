@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-import us.ihmc.robotics.geometry.PlaneFitter;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -25,8 +24,7 @@ public class HeightMapPolygonSnapper
    private final Plane3D bestFitPlane = new Plane3D();
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
-   private double rSquared;
-   private double rmsValue;
+   private double rootMeanSquaredError;
    private final double areaPerCell;
 
    public HeightMapPolygonSnapper()
@@ -46,7 +44,6 @@ public class HeightMapPolygonSnapper
       int maxIndexX = HeightMapTools.toIndex(polygonToSnap.getMaxX(), gridCenter.getX(), heightMap.getGridResolutionXY(), minMaxIndex);
       int minIndexY = HeightMapTools.toIndex(polygonToSnap.getMinY(), gridCenter.getY(), heightMap.getGridResolutionXY(), minMaxIndex);
       int maxIndexY = HeightMapTools.toIndex(polygonToSnap.getMaxY(), gridCenter.getY(), heightMap.getGridResolutionXY(), minMaxIndex);
-      double averageHeight = 0.0;
 
       for (int i = minIndexX; i <= maxIndexX; i++)
       {
@@ -62,7 +59,6 @@ public class HeightMapPolygonSnapper
             }
 
             pointsInsidePolyon.add(new Point3D(x, y, height));
-            averageHeight += height;
          }
       }
 
@@ -72,24 +68,14 @@ public class HeightMapPolygonSnapper
       }
 
       planeFitter.fitPlaneToPoints(pointsInsidePolyon, bestFitPlane);
-      averageHeight /= pointsInsidePolyon.size();
 
-      double residualSoS = 0.0;
-      double totalSoS = 0.0;
-      rmsValue = 0.0;
+      rootMeanSquaredError = 0.0;
 
       for (int i = 0; i < pointsInsidePolyon.size(); i++)
       {
          double predictedHeight = bestFitPlane.getZOnPlane(pointsInsidePolyon.get(i).getX(), pointsInsidePolyon.get(i).getY());
-         residualSoS += MathTools.square(predictedHeight - pointsInsidePolyon.get(i).getZ());
-         totalSoS += MathTools.square(averageHeight - pointsInsidePolyon.get(i).getZ());
-         rmsValue += MathTools.square(predictedHeight - pointsInsidePolyon.get(i).getZ());
+         rootMeanSquaredError += MathTools.square(predictedHeight - pointsInsidePolyon.get(i).getZ());
       }
-
-      rSquared = 1.0 - residualSoS / totalSoS;
-      rmsValue /= pointsInsidePolyon.size();
-
-      System.out.println("RMS: " + Math.sqrt(rmsValue));
 
       if (bestFitPlane.containsNaN())
       {
@@ -110,9 +96,9 @@ public class HeightMapPolygonSnapper
       return bestFitPlane;
    }
 
-   public double getRSquared()
+   public double getRMSError()
    {
-      return rSquared;
+      return rootMeanSquaredError;
    }
 
    public double getArea()

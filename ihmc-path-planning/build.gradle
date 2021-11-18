@@ -53,6 +53,7 @@ dataSetsDependencies {
    api("us.ihmc:ihmc-commons-testing:0.30.5")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:robot-environment-awareness:source")
+   api("us.ihmc:ihmc-sensor-processing:source")
 }
 
 task updateDataSetList {

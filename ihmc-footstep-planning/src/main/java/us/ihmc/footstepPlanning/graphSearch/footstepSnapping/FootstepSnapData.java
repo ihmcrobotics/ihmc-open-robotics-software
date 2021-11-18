@@ -16,7 +16,7 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
    private final ConvexPolygon2D croppedFoothold = new ConvexPolygon2D();
    private int regionIndex = -1;
    private double achievedInsideDelta = Double.NaN;
-   private double rSquaredHeightMap = Double.NaN;
+   private double rmsErrorHeightMap = Double.NaN;
    private double area = Double.NaN;
    private boolean snappedFootstepTransformIncludesWiggleTransform = false;
 
@@ -102,25 +102,25 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.achievedInsideDelta = achievedInsideDelta;
    }
 
-   public void setRSquaredHeightMap(double rSquaredHeightMap)
+   public void setRMSErrorHeightMap(double rSquaredHeightMap)
    {
-      this.rSquaredHeightMap = rSquaredHeightMap;
+      this.rmsErrorHeightMap = rSquaredHeightMap;
    }
 
-   public void setArea(double area)
+   public void setHeightMapArea(double area)
    {
       this.area = area;
    }
 
-   public double getArea()
+   public double getHeightMapArea()
    {
       return area;
    }
 
    @Override
-   public double getRSquaredHeightMap()
+   public double getRMSErrorHeightMap()
    {
-      return rSquaredHeightMap;
+      return rmsErrorHeightMap;
    }
 
    private void updateSnappedStepTransform(DiscreteFootstep footstep)
@@ -148,7 +148,7 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.snappedFootstepTransformIncludesWiggleTransform = other.snappedFootstepTransformIncludesWiggleTransform;
 
       this.area = other.area;
-      this.rSquaredHeightMap = other.rSquaredHeightMap;
+      this.rmsErrorHeightMap = other.rmsErrorHeightMap;
    }
 
    public void clear()
@@ -160,7 +160,7 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
       this.regionIndex = PlanarRegion.NO_REGION_ID;
       this.achievedInsideDelta = Double.NaN;
       this.snappedFootstepTransformIncludesWiggleTransform = false;
-      rSquaredHeightMap = Double.NaN;
+      rmsErrorHeightMap = Double.NaN;
    }
 
    private static final FootstepSnapData EMPTY_SNAP_DATA;
