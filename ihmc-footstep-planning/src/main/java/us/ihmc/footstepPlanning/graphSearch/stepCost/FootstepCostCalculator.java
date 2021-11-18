@@ -34,7 +34,6 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final YoDouble totalCost = new YoDouble("totalCost", registry);
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble idealStepHeuristicCost = new YoDouble("idealStepHeuristicCost", registry);
-   private final YoDouble rmsError = new YoDouble("rmsError", registry);
 
    private HeightMapData heightMapData;
 
@@ -86,10 +85,9 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
 
       if (heightMapData != null)
       {
-         rmsError.set(candidateSnapData.getRMSErrorHeightMap());
-
+         double rmsError = candidateSnapData.getRMSErrorHeightMap();
          double rmsAlpha = EuclidCoreTools.clamp(
-               (rmsError.getValue() - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold() - parameters.getRMSMinErrorToPenalize()),
+               (rmsError - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold() - parameters.getRMSMinErrorToPenalize()),
                0.0,
                1.0);
          edgeCost.add(rmsAlpha * parameters.getRMSErrorCost());

@@ -46,6 +46,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    private final YoDouble footAreaPercentage = new YoDouble("footAreaPercentage", registry);
    private final YoInteger footstepIndex = new YoInteger("footstepIndex", registry);
    private final YoDouble achievedDeltaInside = new YoDouble("achievedDeltaInside", registry);
+   private final YoDouble rmsError = new YoDouble("rmsError", registry);
 
    private final List<CustomFootstepChecker> customFootstepCheckers = new ArrayList<>();
 
@@ -121,9 +122,11 @@ public class FootstepChecker implements FootstepCheckerInterface
          }
 
          // Root-mean-squared error
+         rmsError.set(candidateStepSnapData.getRMSErrorHeightMap());
          if (candidateStepSnapData.getRMSErrorHeightMap() > parameters.getRMSErrorThreshold())
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.RMS_ERROR_TOO_HIGH);
+            return;
          }
 
          if (stanceStep == null)
