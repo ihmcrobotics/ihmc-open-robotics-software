@@ -23,10 +23,7 @@ import imgui.ImGuiIO;
 import imgui.ImGuiPlatformIO;
 import imgui.flag.ImGuiMouseButton;
 import imgui.gl3.ImGuiImplGl3;
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL41;
-import org.lwjgl.system.MemoryUtil;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -35,12 +32,10 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
-import static org.lwjgl.glfw.GLFW.*;
 
 public class GDX3DWith3DSituatedImGuiPanelDemo
 {
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
-   private long windowHandle;
 
    public GDX3DWith3DSituatedImGuiPanelDemo()
    {
@@ -61,24 +56,13 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
 
             sceneManager.addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
 
-            GLFWErrorCallback.createPrint(System.err).set();
-
-            if (!glfwInit())
-            {
-               throw new IllegalStateException("Unable to initialize GLFW");
-            }
-
             ImGui.createContext();
 
-            final ImGuiIO io = ImGui.getIO();
+            ImGuiIO io = ImGui.getIO();
             io.setIniFilename(null); // We don't want to save .ini file
             io.setMouseDrawCursor(true);
             ImGuiTools.setupFonts(io);
 //            ImGui.styleColorsLight();
-//            io.setDisplaySize(width, height);
-
-            GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
-            windowHandle = GLFW.glfwCreateWindow(width, height, "", MemoryUtil.NULL, MemoryUtil.NULL);
 
             imGuiGl3.init();
 
@@ -179,27 +163,20 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
             ImGui.setNextWindowSize(width, height);
             ImGui.begin("Window");
             ImGui.button("I'm a Button!");
-
             float[] values = new float[100];
             for (int i = 0; i < 100; i++)
             {
                values[i] = i;
             }
-
             ImGui.plotLines("Histogram", values, 100);
-
             ImGui.end();
 
             ImGui.render();
 
             frameBuffer.begin();
-            GDX3DSceneTools.glClearGray();
+            ImGuiTools.glClearDarkGray();
             imGuiGl3.renderDrawData(ImGui.getDrawData());
-
             frameBuffer.end();
-
-            glfwSwapBuffers(windowHandle);
-            glfwPollEvents();
          }
 
          @Override
@@ -207,7 +184,6 @@ public class GDX3DWith3DSituatedImGuiPanelDemo
          {
             sceneManager.dispose();
             imGuiGl3.dispose();
-//            imGuiGlfw.dispose();
 
             ImGui.destroyContext();
          }

@@ -11,7 +11,7 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources",
                                                               "3DSituatedPanelsDemo");
-   private final GDX3DSituatedImGuiPanelManager situatedImGuiPanelManager = new GDX3DSituatedImGuiPanelManager();
+   private final GDXMultiContext3DSituatedImGuiPanelManager situatedImGuiPanelManager = new GDXMultiContext3DSituatedImGuiPanelManager();
 
    public GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo()
    {
@@ -26,14 +26,13 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
 
             baseUI.getImGuiPanelManager().addPanel("Window 1", this::renderWindow1);
 
-            situatedImGuiPanelManager.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGlfw(),
-                                             baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(),
+            situatedImGuiPanelManager.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(),
                                              baseUI.getImGuiWindowAndDockSystem().getImFont());
             GDX3DSituatedImGuiPanel panel = new GDX3DSituatedImGuiPanel("Test Panel", this::renderWindow1);
             situatedImGuiPanelManager.addPanel(panel);
+            baseUI.addImGui3DViewInputProcessor(situatedImGuiPanelManager::processImGuiInput);
 
             baseUI.get3DSceneManager().addRenderableProvider(situatedImGuiPanelManager);
-
          }
 
          @Override
