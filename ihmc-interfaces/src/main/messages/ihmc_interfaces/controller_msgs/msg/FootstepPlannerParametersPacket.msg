@@ -395,3 +395,12 @@ float64 shin_length -11.1
 
 # Height offset of shin collidable cylinder
 float64 shin_height_offet -11.1
+
+# When using a height map, maximum accepted rms error
+float64 rms_error_threshold -11.1
+
+# When using a height map, cost of rms value
+float64 rms_error_cost -11.1
+
+# When using a height map, minimum rms error to penalize
+float64 rms_min_error_to_penalize -11.1

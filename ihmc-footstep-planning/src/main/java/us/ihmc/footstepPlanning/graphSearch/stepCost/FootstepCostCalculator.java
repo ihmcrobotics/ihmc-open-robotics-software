@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.stepCost;
 
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
@@ -33,7 +34,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final YoDouble totalCost = new YoDouble("totalCost", registry);
    private final YoDouble heuristicCost = new YoDouble("heuristicCost", registry);
    private final YoDouble idealStepHeuristicCost = new YoDouble("idealStepHeuristicCost", registry);
-   private final YoDouble rSquaredHeightMap = new YoDouble("rSquaredHeightMap", registry);
+   private final YoDouble rmsError = new YoDouble("rmsError", registry);
 
    private HeightMapData heightMapData;
 
@@ -85,11 +86,13 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
 
       if (heightMapData != null)
       {
-         rSquaredHeightMap.set(candidateSnapData.getRSquaredHeightMap());
+         rmsError.set(candidateSnapData.getRMSErrorHeightMap());
 
-         double rSquared0 = 0.6;
-         double scale = 2.0;
-         edgeCost.add(Math.max(0.0, scale * (1.0 - candidateSnapData.getRSquaredHeightMap() - rSquared0)));
+         double rmsAlpha = EuclidCoreTools.clamp(
+               (rmsError.getValue() - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold() - parameters.getRMSMinErrorToPenalize()),
+               0.0,
+               1.0);
+         edgeCost.add(rmsAlpha * parameters.getRMSErrorCost());
       }
 
       edgeCost.add(computeAreaCost(candidateStep));
@@ -132,7 +135,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
          }
          else
          {
-            area = snapData.getArea();
+            area = snapData.getHeightMapArea();
          }
 
          double footArea = footPolygons.get(footstep.getRobotSide()).getArea();

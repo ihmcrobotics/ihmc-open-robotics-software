@@ -176,6 +176,29 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
       return get(minClearanceFromStance);
    }
 
+   /**
+    * When using a height map, this returns the maximum accepted RMS error of the best-fit plane.
+    */
+   default double getRMSErrorThreshold()
+   {
+      return get(rmsErrorThreshold);
+   }
+
+   /**
+    * When using a height map, assigns a cost based on the RMS value, which maps (rmsMinErrorToPenalize, rmsErrorThreshold) to (0.0, rmsErrorCost)
+    */
+   default double getRMSErrorCost()
+   {
+      return get(rmsErrorCost);
+   }
+
+   /**
+    * See {@link #getRMSErrorCost()}
+    */
+   default double getRMSMinErrorToPenalize()
+   {
+      return get(rmsMinErrorToPenalize);
+   }
 
    /**
     * Maximum step width the planner will consider for candidate steps.

@@ -1,13 +1,12 @@
 package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -95,6 +94,11 @@ public class FootstepPlannerRequest
    private PlanarRegionsList planarRegionsList;
 
    /**
+    * Height map. May be null to enable flat ground mode.
+    */
+   private HeightMapMessage heightMapMessage;
+
+   /**
     * If true, will ignore planar regions and plan on flat ground.
     * Note that collision checks will still be performed if enabled, such as {@link FootstepPlannerParametersReadOnly#checkForBodyBoxCollisions}
     */
@@ -137,6 +141,7 @@ public class FootstepPlannerRequest
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
       planarRegionsList = null;
+      heightMapMessage = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
@@ -258,6 +263,11 @@ public class FootstepPlannerRequest
       this.planarRegionsList = planarRegionsList;
    }
 
+   public void setHeightMapMessage(HeightMapMessage heightMapMessage)
+   {
+      this.heightMapMessage = heightMapMessage;
+   }
+
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
@@ -348,6 +358,11 @@ public class FootstepPlannerRequest
       return planarRegionsList;
    }
 
+   public HeightMapMessage getHeightMapMessage()
+   {
+      return heightMapMessage;
+   }
+
    public boolean getAssumeFlatGround()
    {
       return assumeFlatGround;
@@ -405,6 +420,7 @@ public class FootstepPlannerRequest
 
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(requestPacket.getPlanarRegionsListMessage());
       setPlanarRegionsList(planarRegionsList);
+      setHeightMapMessage(requestPacket.getHeightMapMessage());
    }
 
    public void setPacket(FootstepPlanningRequestPacket requestPacket)
@@ -440,6 +456,11 @@ public class FootstepPlannerRequest
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
          requestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
+      }
+
+      if (getHeightMapMessage() != null)
+      {
+         requestPacket.getHeightMapMessage().set(getHeightMapMessage());
       }
    }
 
@@ -478,5 +499,7 @@ public class FootstepPlannerRequest
       {
          this.bodyPathWaypoints.add(new Pose3D(other.bodyPathWaypoints.get(i)));
       }
+
+      this.heightMapMessage = other.heightMapMessage;
    }
 }

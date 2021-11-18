@@ -43,10 +43,10 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    private final HashMap<DiscreteFootstep, FootstepSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
-   private HeightMapData heightMapData;
-   private HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
 
-   private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
+   private HeightMapData heightMapData;
+   private final HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
+
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    // Use this by default
@@ -185,8 +185,8 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          if (heightMapData != null)
          {
             snapData.getWiggleTransformInWorld().setIdentity();
-            snapData.setRSquaredHeightMap(heightMapSnapper.getRSquared());
-            snapData.setArea(heightMapSnapper.getArea());
+            snapData.setRMSErrorHeightMap(heightMapSnapper.getRMSError());
+            snapData.setHeightMapArea(heightMapSnapper.getArea());
          }
 
          return snapData;

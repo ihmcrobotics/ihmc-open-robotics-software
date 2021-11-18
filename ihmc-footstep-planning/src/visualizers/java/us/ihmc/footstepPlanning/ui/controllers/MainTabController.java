@@ -29,6 +29,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.Point3DProperty;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.properties.YawProperty;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -72,6 +73,8 @@ public class MainTabController
 
    @FXML
    private ComboBox<DataSetName> dataSetSelector;
+   @FXML
+   private ComboBox<HeightMapDataSetName> heightMapDataSetSelector;
    @FXML
    private TextField logGenerationStatus;
    @FXML
@@ -167,16 +170,6 @@ public class MainTabController
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, buildFlatGround());
    }
 
-   @FXML
-   public void planWithHeightMap()
-   {
-      if (bindStartToRobot.isSelected())
-         setStartFromRobot();
-      int newRequestID = currentPlannerRequestId.get() + 1;
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, newRequestID);
-      messager.submitMessage(PlanWithHeightMap, true);
-   }
-
    private PlanarRegionsList buildFlatGround()
    {
       humanoidReferenceFrames.updateFrames();
@@ -253,6 +246,9 @@ public class MainTabController
 
       dataSetSelector.setItems(FXCollections.observableArrayList(DataSetName.values()));
       dataSetSelector.valueProperty().addListener(((observable, oldValue, newValue) -> messager.submitMessage(DataSetSelected, dataSetSelector.getValue())));
+
+      heightMapDataSetSelector.setItems(FXCollections.observableArrayList(HeightMapDataSetName.values()));
+      heightMapDataSetSelector.valueProperty().addListener(((observable, oldValue, newValue) -> messager.submitMessage(HeightMapDataSetSelected, heightMapDataSetSelector.getValue())));
    }
 
    public void bindControls()

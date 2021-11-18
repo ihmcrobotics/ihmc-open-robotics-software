@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -21,7 +20,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class FootstepChecker implements FootstepCheckerInterface
 {
@@ -104,7 +102,7 @@ public class FootstepChecker implements FootstepCheckerInterface
 
          // Area
          double fullFootArea = footPolygons.get(candidateStep.getRobotSide()).getArea();
-         footAreaPercentage.set(candidateStepSnapData.getArea() / fullFootArea);
+         footAreaPercentage.set(candidateStepSnapData.getHeightMapArea() / fullFootArea);
 
          double epsilonAreaPercentage = 1e-4;
          if (footAreaPercentage.getValue() < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
@@ -120,6 +118,12 @@ public class FootstepChecker implements FootstepCheckerInterface
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
             return;
+         }
+
+         // Root-mean-squared error
+         if (candidateStepSnapData.getRMSErrorHeightMap() > parameters.getRMSErrorThreshold())
+         {
+            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.RMS_ERROR_TOO_HIGH);
          }
 
          if (stanceStep == null)
@@ -333,5 +337,10 @@ public class FootstepChecker implements FootstepCheckerInterface
    public void attachCustomFootstepChecker(CustomFootstepChecker customFootstepChecker)
    {
       customFootstepCheckers.add(customFootstepChecker);
+   }
+
+   public static void main(String[] args)
+   {
+
    }
 }

@@ -106,6 +106,9 @@ public class FootstepPlannerMessageTools
       packet.setShinHeelClearance(parameters.getShinHeelClearance());
       packet.setShinLength(parameters.getShinLength());
       packet.setShinHeightOffet(parameters.getShinHeightOffset());
+      packet.setRmsErrorThreshold(parameters.getRMSErrorThreshold());
+      packet.setRmsErrorCost(parameters.getRMSErrorCost());
+      packet.setRmsMinErrorToPenalize(parameters.getRMSMinErrorToPenalize());
 
       packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
       packet.setYawWeight(parameters.getYawWeight());
