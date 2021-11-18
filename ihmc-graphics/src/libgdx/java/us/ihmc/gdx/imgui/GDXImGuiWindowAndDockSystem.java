@@ -312,7 +312,8 @@ public class GDXImGuiWindowAndDockSystem
       imGuiGlfw.dispose();
 
       ImGui.destroyContext();
-      debugMessageCallback.free();
+      if (debugMessageCallback != null)
+         debugMessageCallback.free();
    }
 
    public ImGuiImplGl3 getImGuiGl3()

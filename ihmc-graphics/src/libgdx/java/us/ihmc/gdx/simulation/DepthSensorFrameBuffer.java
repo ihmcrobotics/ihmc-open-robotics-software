@@ -6,6 +6,9 @@ import com.badlogic.gdx.graphics.glutils.GLOnlyTextureData;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.lwjgl.opengl.GL41;
 
+/**
+ * TODO: Work in progress. Develop a general purpose shader for speeding up depth sensor simulation.
+ */
 public class DepthSensorFrameBuffer
 {
    private Texture colorTexture;
