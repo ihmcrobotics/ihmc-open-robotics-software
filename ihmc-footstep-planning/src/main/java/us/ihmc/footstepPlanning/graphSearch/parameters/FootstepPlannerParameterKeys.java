@@ -34,7 +34,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  minClearanceFromStance                       = keys.addDoubleKey ("Min clearance from stance", 0.0);
    public static final DoubleStoredPropertyKey  rmsErrorThreshold                            = keys.addDoubleKey ("RMS Error Threshold", 0.011);
    public static final DoubleStoredPropertyKey  rmsErrorCost                                 = keys.addDoubleKey ("RMS Error Cost", 1.5);
-   public static final DoubleStoredPropertyKey  rmsMinErrorToPenalize                        = keys.addDoubleKey ("RMS Min Error To Penalize", 0.07);
+   public static final DoubleStoredPropertyKey  rmsMinErrorToPenalize                        = keys.addDoubleKey ("RMS Min Error To Penalize", 0.007);
 
    public static final DoubleStoredPropertyKey  maxStepWidth                                 = keys.addDoubleKey ("Max step width", 0.4);
    public static final DoubleStoredPropertyKey  maxStepReach                                 = keys.addDoubleKey ("Max step reach", 0.45);

@@ -135,7 +135,8 @@ public class HeightMapData
          return Double.NaN;
       }
 
-      return heights[HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY)];
+      double height = heights[HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY)];
+      return Double.isNaN(height) ? estimatedGroundHeight : height;
    }
 
    public void setEstimatedGroundHeight(double estimatedGroundHeight)

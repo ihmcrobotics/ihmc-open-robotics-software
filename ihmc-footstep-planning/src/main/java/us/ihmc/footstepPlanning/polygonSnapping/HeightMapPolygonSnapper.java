@@ -82,6 +82,8 @@ public class HeightMapPolygonSnapper
          return null;
       }
 
+      rootMeanSquaredError = Math.sqrt(rootMeanSquaredError / pointsInsidePolyon.size());
+
       RigidBodyTransform transformToReturn = createTransformToMatchSurfaceNormalPreserveX(bestFitPlane.getNormal());
 
       Point2DReadOnly centroid = polygonToSnap.getCentroid();
