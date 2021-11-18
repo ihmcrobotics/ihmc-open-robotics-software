@@ -315,8 +315,15 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, footstepPlannerLog.getRequestPacket().getHorizonLength());
       messager.submitMessage(FootstepPlannerMessagerAPI.AssumeFlatGround, footstepPlannerLog.getRequestPacket().getAssumeFlatGround());
       messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, footstepPlannerLog.getRequestPacket().getSnapGoalSteps());
+
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(footstepPlannerLog.getRequestPacket().getPlanarRegionsListMessage());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+
+      if (!footstepPlannerLog.getRequestPacket().getHeightMapMessage().getHeights().isEmpty())
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, footstepPlannerLog.getRequestPacket().getHeightMapMessage());
+      }
+
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, footstepPlannerLog.getRequestPacket().getPlannerRequestId());
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, footstepPlannerLog.getRequestPacket().getStartLeftFootPose());
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, footstepPlannerLog.getRequestPacket().getStartRightFootPose());

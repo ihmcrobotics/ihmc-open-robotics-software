@@ -89,8 +89,6 @@ public class AStarBodyPathPlanner
 
          for (BodyPathLatticePoint neighbor : neighbors)
          {
-            System.out.println("\t Checking " + neighbor);
-
             double height = snap(neighbor);
             if (Double.isNaN(height))
                continue;
@@ -103,18 +101,15 @@ public class AStarBodyPathPlanner
             boolean containsCollision = collisionDetected(neighbor, height);
             if (containsCollision)
             {
-               System.out.println("\t\t Collision detected");
                continue;
             }
 
             double cost = computeCost(node, neighbor);
             graph.checkAndSetEdge(node, neighbor, cost);
             stack.add(neighbor);
-            System.out.println("\t\t Adding to stack");
 
             if (node.equals(goalNode))
             {
-               System.out.println("Found goal!");
                reachedGoal = true;
                break planningLoop;
             }
@@ -140,8 +135,6 @@ public class AStarBodyPathPlanner
       {
          return null;
       }
-
-//      return straightLine(startPose, goalPose);
    }
 
    public BodyPathLatticePoint getNextNode()
@@ -214,6 +207,9 @@ public class AStarBodyPathPlanner
       return Math.sqrt(MathTools.square(node.getX() - goalNode.getX()) + MathTools.square(node.getY() - goalNode.getY()));
    }
 
+   /**
+    * For debugging
+    */
    private static List<Pose3DReadOnly> straightLine(Pose3D startPose, Pose3D goalPose)
    {
       List<Pose3DReadOnly> poses = new ArrayList<>();
