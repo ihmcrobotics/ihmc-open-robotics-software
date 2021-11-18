@@ -24,17 +24,28 @@ import imgui.ImGuiPlatformIO;
 import imgui.flag.ImGuiMouseButton;
 import imgui.gl3.ImGuiImplGl3;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FrameLine3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
 
 public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
 {
+   private final AtomicLong INDEX = new AtomicLong(0);
    private ModelInstance modelInstance = null;
    private ImGuiImplGl3 imGuiGl3;
    private int panelWidth;
@@ -45,9 +56,22 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    private float mousePosY;
    private boolean leftMouseDown;
    private ImFont font;
-   private final int pixelsPerMeter = 10 * 100; // 10 pixels per centimeter
-   private final float metersPerPixel = 1.0f / (float) pixelsPerMeter;
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final int metersToPixels = 10 * 100; // 10 pixels per centimeter
+   private final float pixelsToMeters = 1.0f / (float) metersToPixels;
+   private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final RigidBodyTransform graphicsXRightYDownToCenterXThroughZUpTransform = new RigidBodyTransform();
+   private PlanarRegion planarRegion;
+   private ReferenceFrame centerXThroughZUpFrame
+         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("centerXThroughZUpFrame" + INDEX.getAndIncrement(),
+                                                                           ReferenceFrame.getWorldFrame(),
+                                                                           transform);
+   private ReferenceFrame graphicsXRightYDownFrame
+         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("graphicsXRightYDownFrame" + INDEX.getAndIncrement(),
+                                                                           centerXThroughZUpFrame,
+                                                                           transform);
+   private final FrameLine3D pickRay = new FrameLine3D();
+   private final FramePoint3D pickIntersection = new FramePoint3D();
+   private final Plane3D plane = new Plane3D();
 
    public void create(int panelWidth, int panelHeight, Runnable renderImGuiWidgets)
    {
@@ -76,10 +100,10 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       // Draw so thumb faces away and index right
       float halfWidth = (float) panelWidth / 2.0f;
       float halfHeight = (float) panelHeight / 2.0f;
-      Vector3 topLeftPosition = new Vector3(0.0f, halfWidth, halfHeight).scl(metersPerPixel);
-      Vector3 bottomLeftPosition = new Vector3(0.0f, halfWidth, -halfHeight).scl(metersPerPixel);
-      Vector3 bottomRightPosition = new Vector3(0.0f, -halfWidth, -halfHeight).scl(metersPerPixel);
-      Vector3 topRightPosition = new Vector3(0.0f, -halfWidth, halfHeight).scl(metersPerPixel);
+      Vector3 topLeftPosition = new Vector3(0.0f, halfWidth, halfHeight).scl(pixelsToMeters);
+      Vector3 bottomLeftPosition = new Vector3(0.0f, halfWidth, -halfHeight).scl(pixelsToMeters);
+      Vector3 bottomRightPosition = new Vector3(0.0f, -halfWidth, -halfHeight).scl(pixelsToMeters);
+      Vector3 topRightPosition = new Vector3(0.0f, -halfWidth, halfHeight).scl(pixelsToMeters);
       Vector3 topLeftNormal = new Vector3(0.0f, 0.0f, 1.0f);
       Vector3 bottomLeftNormal = new Vector3(0.0f, 0.0f, 1.0f);
       Vector3 bottomRightNormal = new Vector3(0.0f, 0.0f, 1.0f);
@@ -113,12 +137,53 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
 
       Model model = modelBuilder.end();
       modelInstance = new ModelInstance(model);
+
+      // set up graphicsXRightYDownToCenterXThroughZUpTransform
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendYawRotation(Math.toRadians(90.0));
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendPitchRotation(-Math.toRadians(90.0));
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendTranslation(0.0f, -halfWidth, -halfHeight);
+      graphicsXRightYDownFrame.update();
+
+      plane.getNormal().set(Axis3D.X);
+
+      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
+//      convexPolygon2D.addVertex(hal);
+      planarRegion = new PlanarRegion(transform, convexPolygon2D);
+
+      updatePose(transform ->
+      {
+         transform.getTranslation().set(1.0f, 0.0f, 1.0f);
+      });
    }
 
    public void processVRInput(GDXVRContext vrContext)
    {
-//      mousePosX = input.getMousePosX();
-//      mousePosY = input.getMousePosY();
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
+      {
+         pickRay.setToZero(controller.getXForwardZUpControllerFrame());
+         pickRay.getDirection().set(Axis3D.X);
+         pickRay.changeFrame(ReferenceFrame.getWorldFrame());
+
+         pickIntersection.setToZero(ReferenceFrame.getWorldFrame());
+         plane.intersectionWith(pickRay, pickIntersection);
+
+         pickIntersection.changeFrame(graphicsXRightYDownFrame);
+
+         float scaledX = Math.round((float) pickIntersection.getX() * metersToPixels);
+         float scaledY = Math.round((float) pickIntersection.getY() * metersToPixels);
+
+         if (scaledX > 0 && scaledX < panelWidth && scaledY > 0 && scaledY < panelHeight)
+         {
+            mousePosX = scaledX;
+            mousePosY = scaledY;
+            leftMouseDown = controller.getClickTriggerActionData().bState();
+         }
+         else
+         {
+            leftMouseDown = false;
+         }
+      });
+
 //      leftMouseDown = ImGui.isMouseDown(ImGuiMouseButton.Left);
    }
 
@@ -163,14 +228,17 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
 
    public void updatePose(Consumer<RigidBodyTransform> transformUpdater)
    {
-      tempTransform.setToZero();
-      transformUpdater.accept(tempTransform);
-      GDXTools.toGDX(tempTransform, modelInstance.transform);
+      transform.setToZero();
+      transformUpdater.accept(transform);
+      plane.setToZero();
+      plane.getNormal().set(Axis3D.X);
+      plane.applyTransform(transform);
+      GDXTools.toGDX(transform, modelInstance.transform);
    }
 
-   public ModelInstance getModelInstance()
+   public Plane3D getPlane()
    {
-      return modelInstance;
+      return plane;
    }
 
    public void dispose()
