@@ -16,7 +16,7 @@ public class GDX3DSituatedImGuiPanelsDemo
    private final GDX3DSceneManager sceneManager = new GDX3DSceneManager();
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
-   private final GDX3DSituatedImGuiPanelManager situatedImGuiPanelManager = new GDX3DSituatedImGuiPanelManager();
+   private final GDXMultiContext3DSituatedImGuiPanelManager situatedImGuiPanelManager = new GDXMultiContext3DSituatedImGuiPanelManager();
 
    public GDX3DSituatedImGuiPanelsDemo()
    {
@@ -31,7 +31,7 @@ public class GDX3DSituatedImGuiPanelsDemo
             imGuiGlfw.init(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), true);
             imGuiGl3.init();
 
-            situatedImGuiPanelManager.create(imGuiGlfw, imGuiGl3, ImGuiTools.setupFonts(ImGui.getIO()));
+            situatedImGuiPanelManager.create(imGuiGl3, ImGuiTools.setupFonts(ImGui.getIO()));
             GDX3DSituatedImGuiPanel panel = new GDX3DSituatedImGuiPanel("Test Panel", () ->
             {
                ImGui.text("This is a 3D situated panel.");
