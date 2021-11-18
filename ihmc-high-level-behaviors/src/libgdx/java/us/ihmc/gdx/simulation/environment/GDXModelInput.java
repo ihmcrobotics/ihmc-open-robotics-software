@@ -1,6 +1,5 @@
 package us.ihmc.gdx.simulation.environment;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -315,10 +314,10 @@ public class GDXModelInput
    {
       if (!selectedObjectIndexes.isEmpty())
       {
-         vrManager.getContext().getController(RobotSide.RIGHT, controller ->
+         vrManager.getContext().getController(RobotSide.RIGHT).runIfConnected(controller ->
          {
             Integer objectIndex = selectedObjectIndexes.stream().findFirst().get();
-            controller.getPose(ReferenceFrame.getWorldFrame(), environmentObjects.get(objectIndex).getRealisticModelInstance().transform);
+            controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), environmentObjects.get(objectIndex).getRealisticModelInstance().transform);
          });
       }
    }

@@ -72,8 +72,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final PoseReferenceFrame solePoseReferenceFrame = new PoseReferenceFrame("desiredPositionFrame", worldFrame);
    private final PoseReferenceFrame startOfSwingReferenceFrame = new PoseReferenceFrame("startOfSwingFrame", worldFrame);
    private final PoseReferenceFrame endOfSwingReferenceFrame = new PoseReferenceFrame("endOfSwingFrame", worldFrame);
-   private final ZUpFrame endOfSwingZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), endOfSwingReferenceFrame, "endOfSwingZUpFrame");
-   private final ZUpFrame startOfSwingZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), startOfSwingReferenceFrame, "startOfSwingZUpFrame");
+   private final ZUpFrame endOfSwingZUpFrame = new ZUpFrame(endOfSwingReferenceFrame, "endOfSwingZUpFrame");
+   private final ZUpFrame startOfSwingZUpFrame = new ZUpFrame(startOfSwingReferenceFrame, "startOfSwingZUpFrame");
 
    private static final int numberOfTrajectorySegmentsToCalculateLength = 10;
    private final YoDouble initialTrajectoryLength;

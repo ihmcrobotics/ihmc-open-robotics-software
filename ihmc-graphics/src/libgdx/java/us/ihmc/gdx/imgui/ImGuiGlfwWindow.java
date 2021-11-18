@@ -1,28 +1,74 @@
 package us.ihmc.gdx.imgui;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import imgui.internal.ImGui;
+import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.gdx.ui.GDXImGuiPerspectiveManager;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
+import us.ihmc.tools.io.HybridFile;
+import us.ihmc.tools.io.JSONFileTools;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
 public class ImGuiGlfwWindow
 {
+   private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
+   private String configurationExtraPath;
+   private final HybridDirectory configurationBaseDirectory;
+   private HybridFile windowSettingsFile;
+   private final Stopwatch runTime = new Stopwatch().start();
    private final GlfwWindowForImGui glfwWindowForImGui;
-   private final Class<? extends ImGuiGlfwWindow> classForLoading = getClass();
-   private final String directoryNameToAssumePresent = "ihmc-open-robotics-software";
-   private final String subsequentPathToResourceFolder = "ihmc-graphics/src/libgdx/resources";
-   private final HybridDirectory configurationDirectory = new HybridDirectory(Paths.get(System.getProperty("user.home"), ".ihmc"),
-                                                                              directoryNameToAssumePresent,
-                                                                              subsequentPathToResourceFolder,
-                                                                              classForLoading,
-                                                                              "GLFWDemo");
-   private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem();
+   private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
+   private final GDXImGuiPerspectiveManager perspectiveManager;
 
-   public ImGuiGlfwWindow(String windowTitle, int windowWidth, int windowHeight)
+   public ImGuiGlfwWindow(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
-      imGuiDockSystem.setDirectory(configurationDirectory);
-      glfwWindowForImGui = new GlfwWindowForImGui(windowTitle, windowWidth, windowHeight);
+      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, classForLoading.getSimpleName());
+   }
+
+   public ImGuiGlfwWindow(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
+   {
+      configurationExtraPath = "/configurations/" + windowTitle.replaceAll(" ", "");
+      configurationBaseDirectory = new HybridDirectory(dotIHMCDirectory,
+                                                       directoryNameToAssumePresent,
+                                                       subsequentPathToResourceFolder,
+                                                       classForLoading,
+                                                       configurationExtraPath);
+
+      imGuiWindowAndDockSystem = new GDXImGuiWindowAndDockSystem();
+      glfwWindowForImGui = new GlfwWindowForImGui(windowTitle);
+      perspectiveManager = new GDXImGuiPerspectiveManager(classForLoading,
+                                                          directoryNameToAssumePresent,
+                                                          subsequentPathToResourceFolder,
+                                                          configurationExtraPath,
+                                                          configurationBaseDirectory,
+      updatedPerspectiveDirectory ->
+      {
+         windowSettingsFile = new HybridFile(updatedPerspectiveDirectory, "WindowSettings.json");
+         imGuiWindowAndDockSystem.setDirectory(updatedPerspectiveDirectory);
+      },
+      loadWithDefaultMode ->
+      {
+         imGuiWindowAndDockSystem.loadConfiguration(loadWithDefaultMode);
+         Path libGDXFile = loadWithDefaultMode ? windowSettingsFile.getWorkspaceFile() : windowSettingsFile.getExternalFile();
+         JSONFileTools.load(libGDXFile, jsonNode ->
+         {
+            int width = jsonNode.get("windowWidth").asInt();
+            int height = jsonNode.get("windowHeight").asInt();
+            glfwWindowForImGui.setWindowSize(width, height);
+         });
+      },
+      saveWithDefaultMode ->
+      {
+         saveApplicationSettings(saveWithDefaultMode);
+      });
    }
 
    public void run(Runnable render, Runnable dispose)
@@ -32,11 +78,16 @@ public class ImGuiGlfwWindow
 
    public void run(Runnable configure, Runnable render, Runnable dispose)
    {
+      JSONFileTools.loadUserWithClasspathDefaultFallback(windowSettingsFile, jsonNode ->
+      {
+         glfwWindowForImGui.setWindowSize(jsonNode.get("windowWidth").asInt(), jsonNode.get("windowHeight").asInt());
+      });
+
       glfwWindowForImGui.create();
 
       long windowHandle = glfwWindowForImGui.getWindowHandle();
 
-      imGuiDockSystem.create(windowHandle);
+      imGuiWindowAndDockSystem.create(windowHandle);
 
       while (!glfwWindowShouldClose(windowHandle))
       {
@@ -47,27 +98,73 @@ public class ImGuiGlfwWindow
             configure.run();
          }
 
-         imGuiDockSystem.beforeWindowManagement();
+         imGuiWindowAndDockSystem.beforeWindowManagement();
+         renderMenuBar();
 
          render.run();
 
-         imGuiDockSystem.afterWindowManagement();
+         imGuiWindowAndDockSystem.afterWindowManagement();
       }
 
       dispose.run();
 
-      imGuiDockSystem.dispose();
+      imGuiWindowAndDockSystem.dispose();
 
       glfwWindowForImGui.dispose();
    }
 
+   private void renderMenuBar()
+   {
+      ImGui.beginMainMenuBar();
+      perspectiveManager.renderImGuiPerspectiveMenu();
+      if (ImGui.beginMenu("Panels"))
+      {
+         imGuiWindowAndDockSystem.renderMenuDockPanelItems();
+         ImGui.endMenu();
+      }
+      ImGui.sameLine(ImGui.getWindowSizeX() - 70.0f);
+      ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
+      ImGui.endMainMenuBar();
+   }
+
+   private void saveApplicationSettings(boolean saveDefault)
+   {
+      imGuiWindowAndDockSystem.saveConfiguration(saveDefault);
+      Consumer<ObjectNode> rootConsumer = root ->
+      {
+         root.put("windowWidth", glfwWindowForImGui.getWindowWidth());
+         root.put("windowHeight", glfwWindowForImGui.getWindowHeight());
+      };
+      if (saveDefault)
+      {
+         LogTools.info("Saving window settings to {}", windowSettingsFile.getWorkspaceFile().toString());
+         JSONFileTools.save(windowSettingsFile.getWorkspaceFile(), rootConsumer);
+      }
+      else
+      {
+         LogTools.info("Saving window settings to {}", windowSettingsFile.getExternalFile().toString());
+         JSONFileTools.save(windowSettingsFile.getExternalFile(), rootConsumer);
+      }
+   }
+
+   public void runWithSinglePanel(Runnable renderImGuiWidgets)
+   {
+      ImGuiPanel mainPanel = new ImGuiPanel("Main Panel", renderImGuiWidgets);
+      mainPanel.getIsShowing().set(true);
+      imGuiWindowAndDockSystem.getPanelManager().addPanel(mainPanel);
+      ThreadTools.startAThread(() ->
+      {
+         run(() -> { }, () -> System.exit(0));
+      }, glfwWindowForImGui.getWindowTitle());
+   }
+
    public ImGuiPanelManager getPanelManager()
    {
-      return imGuiDockSystem.getPanelManager();
+      return imGuiWindowAndDockSystem.getPanelManager();
    }
 
    public GDXImGuiWindowAndDockSystem getImGuiDockSystem()
    {
-      return imGuiDockSystem;
+      return imGuiWindowAndDockSystem;
    }
 }

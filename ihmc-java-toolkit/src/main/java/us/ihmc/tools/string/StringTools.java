@@ -33,6 +33,9 @@ public class StringTools
       return () -> ParameterizedMessageFactory.INSTANCE.newMessage(message, parameters).getFormattedMessage();
    }
 
+   /**
+    * Format number to 3 decimal places.
+    */
    public static Supplier<String> format3D(String message, Object... parameters)
    {
       Object[] formattedParameters = new Object[parameters.length];
@@ -40,7 +43,28 @@ public class StringTools
       {
          if (parameters[i] instanceof Double)
          {
-            formattedParameters[i] = new FormattedDouble((Double) parameters[i]);
+            formattedParameters[i] = new FormattedDouble3D((Double) parameters[i]);
+         }
+         else
+         {
+            formattedParameters[i] = parameters[i];
+         }
+      }
+
+      return format(message, formattedParameters);
+   }
+
+   /**
+    * Format numbers to 3 significant figures.
+    */
+   public static Supplier<String> format3SF(String message, Object... parameters)
+   {
+      Object[] formattedParameters = new Object[parameters.length];
+      for (int i = 0; i < parameters.length; i++)
+      {
+         if (parameters[i] instanceof Double)
+         {
+            formattedParameters[i] = new FormattedDouble3SF((Double) parameters[i]);
          }
          else
          {
@@ -67,11 +91,11 @@ public class StringTools
              + ")";
    }
 
-   public static class FormattedDouble
+   public static class FormattedDouble3D
    {
       private final Double number;
 
-      public FormattedDouble(Double number)
+      public FormattedDouble3D(Double number)
       {
          this.number = number;
       }
@@ -80,6 +104,22 @@ public class StringTools
       public String toString()
       {
          return FormattingTools.getFormattedDecimal3D(number);
+      }
+   }
+
+   public static class FormattedDouble3SF
+   {
+      private final Double number;
+
+      public FormattedDouble3SF(Double number)
+      {
+         this.number = number;
+      }
+
+      @Override
+      public String toString()
+      {
+         return FormattingTools.getFormattedToSignificantFigures(number, 3);
       }
    }
 }

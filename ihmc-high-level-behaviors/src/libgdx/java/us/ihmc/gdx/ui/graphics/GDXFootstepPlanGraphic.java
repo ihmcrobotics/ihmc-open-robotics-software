@@ -41,8 +41,8 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
    private final Function<Integer, Color> colorFunction = new GDXIDMappedColorFunction();
    private final SideDependentList<Color> footstepColors = new SideDependentList<>();
    {
-      footstepColors.set(RobotSide.LEFT, new Color(1.0f, 0.0f, 0.0f, 1.0f));
-      footstepColors.set(RobotSide.RIGHT, new Color(0.0f, 0.5019608f, 0.0f, 1.0f));
+      footstepColors.set(RobotSide.LEFT, new Color(GDXFootstepGraphic.LEFT_FOOT_RED_COLOR));
+      footstepColors.set(RobotSide.RIGHT, new Color(GDXFootstepGraphic.RIGHT_FOOT_GREEN_COLOR));
    }
    private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
    private volatile Runnable buildMeshAndCreateModelInstance = null;

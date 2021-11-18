@@ -21,8 +21,6 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.RejectedExecutionException;
 
-import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Touchpad;
-
 /** This class should manage VR as part of the ImGuiBasedUI. */
 public class GDXVRManager
 {
@@ -49,36 +47,36 @@ public class GDXVRManager
       context.addVRInputProcessor(context ->
       {
          // TODO: Implement VR teleport control here; extract teleportation manager
-         context.getController(RobotSide.RIGHT, controller ->
-         {
-            holdingTouchpadToMove = controller.isButtonPressed(SteamVR_Touchpad);
-         });
-         //               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
-         //               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
-         //               context.getToZUpXForward().transform(initialVRSpacePosition);
-         //               lastVRSpacePosition.set(initialVRSpacePosition);
-         if (context.isHeadsetConnected())
-         {
-            context.teleport(scenePoseGizmo.getTransform());
-
-            if (holdingTouchpadToMove)
-            {
-               //         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
-               //         resultVRSpacePosition.set(initialVRSpacePosition);
-               //         deltaVRControllerPosition.sub(currentVRControllerPosition, initialVRControllerPosition);
-               //         resultVRSpacePosition.sub(deltaVRControllerPosition);
-               //         resultVRSpacePosition.sub(lastVRSpacePosition);
-               //         GDXTools.toGDX(resultVRSpacePosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
-               //         lastVRSpacePosition.set(resultVRSpacePosition);
-               //         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
-               //         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
-               //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.1f, 0.0f, 0.0f);
-            }
-            else
-            {
-               //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
-            }
-         }
+//         context.getController(RobotSide.RIGHT, controller ->
+//         {
+//            holdingTouchpadToMove = controller.isButtonPressed(SteamVR_Touchpad);
+//         });
+//         //               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
+//         //               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
+//         //               context.getToZUpXForward().transform(initialVRSpacePosition);
+//         //               lastVRSpacePosition.set(initialVRSpacePosition);
+//         if (context.isHeadsetConnected())
+//         {
+//            context.teleport(scenePoseGizmo.getTransform());
+//
+//            if (holdingTouchpadToMove)
+//            {
+//               //         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
+//               //         resultVRSpacePosition.set(initialVRSpacePosition);
+//               //         deltaVRControllerPosition.sub(currentVRControllerPosition, initialVRControllerPosition);
+//               //         resultVRSpacePosition.sub(deltaVRControllerPosition);
+//               //         resultVRSpacePosition.sub(lastVRSpacePosition);
+//               //         GDXTools.toGDX(resultVRSpacePosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+//               //         lastVRSpacePosition.set(resultVRSpacePosition);
+//               //         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
+//               //         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+//               //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.1f, 0.0f, 0.0f);
+//            }
+//            else
+//            {
+//               //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
+//            }
+//         }
       });
    }
 
@@ -105,7 +103,7 @@ public class GDXVRManager
          if (!initializing && contextCreatedNotification == null) // should completely dispose and recreate?
          {
             initializing = true;
-            Notification contextCreatedNotification = new Notification();
+            contextCreatedNotification = new Notification();
             MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
             {
                context.initSystem();
@@ -154,7 +152,7 @@ public class GDXVRManager
 
             if (posesReadyThisFrame)
             {
-               context.pollEvents();
+               context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
             }
          }
       }
@@ -201,7 +199,7 @@ public class GDXVRManager
    public boolean isVRReady()
    {
       // Wait for VR setup to be ready. This is the primary indicator, called only when the headset is connected
-      return vrEnabled.get() && contextInitialized && context.isHeadsetConnected();
+      return vrEnabled.get() && contextInitialized && context.getHeadset().isConnected();
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -218,23 +216,14 @@ public class GDXVRManager
       {
          if (!skipHeadset)
          {
-            context.getHeadset(headset -> headset.getModelInstance().getRenderables(renderables, pool));
-            context.getHeadsetCoordinateFrame().getRenderables(renderables, pool);
+            context.getHeadset().runIfConnected(headset -> headset.getModelInstance().getRenderables(renderables, pool));
          }
+         context.getControllerRenderables(renderables, pool);
+         context.getBaseStationRenderables(renderables, pool);
          for (RobotSide side : RobotSide.values)
          {
-            context.getController(side, controller -> controller.getModelInstance().getRenderables(renderables, pool));
             context.getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
          }
-         context.getBaseStations(baseStation ->
-         {
-            baseStation.getModelInstance().getRenderables(renderables, pool);
-         });
-         context.getGenericDevices(genericDevice ->
-         {
-            genericDevice.getModelInstance().getRenderables(renderables, pool);
-         });
-
          scenePoseGizmo.getRenderables(renderables, pool);
       }
    }

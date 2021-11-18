@@ -9,6 +9,7 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImString;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -24,8 +25,6 @@ import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
-
-import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class GDXEnvironmentBuilderPanel implements RenderableProvider
 {
@@ -62,22 +61,24 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
    public void handleVREvents(GDXVRContext vrContext)
    {
-      vrContext.getController(RobotSide.LEFT, controller ->
+      vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
-         if (controller.isButtonNewlyPressed(SteamVR_Trigger))
+         InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
+         if (triggerClick.bChanged() && triggerClick.bState())
          {
             modelInput.clear();
          }
       });
-      vrContext.getController(RobotSide.RIGHT, controller ->
+      vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
       {
-         if (controller.isButtonNewlyPressed(SteamVR_Trigger))
+         InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
+         if (triggerClick.bChanged() && triggerClick.bState())
          {
             modelBeingPlaced = new GDXLargeCinderBlockRoughed();
             modelInput.addAndSelectInstance(modelBeingPlaced);
-            controller.getPose(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
+            controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
          }
-         if (controller.isButtonNewlyReleased(SteamVR_Trigger))
+         if (triggerClick.bChanged() && !triggerClick.bState())
          {
             modelBeingPlaced = null;
          }

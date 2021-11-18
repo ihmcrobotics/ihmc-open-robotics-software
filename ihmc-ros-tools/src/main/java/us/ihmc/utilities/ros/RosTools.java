@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import javax.imageio.ImageIO;
 
@@ -27,6 +28,8 @@ import geometry_msgs.Pose;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import sensor_msgs.CameraInfo;
+import sensor_msgs.PointCloud2;
+import sensor_msgs.PointField;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -38,6 +41,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.string.StringTools;
 
 public class RosTools
 {
@@ -55,6 +59,7 @@ public class RosTools
    public static final String L515_DEPTH = "/chest_l515/depth/image_rect_raw";
    public static final String L515_POINT_CLOUD = "/chest_l515/depth/color/points";
    public static final String OUSTER_POINT_CLOUD = "/os_cloud_node/points";
+   public static final String BLACKFLY_VIDEO = "/camera/image_color";
    public static final String SLAM_POSE = "/mapsense/slam/pose";
    public static final String SEMANTIC_TARGET_POSE = "/semantic/target/pose";
    public static final String SEMANTIC_TARGET_CLOUD = "/semantic/object/points";
@@ -241,6 +246,63 @@ public class RosTools
       catch (URISyntaxException e)
       {
          throw new RuntimeException("Invalid ROS Master URI", e);
+      }
+   }
+
+   public static ByteBuffer wrapPointCloud2Array(PointCloud2 pointCloud2)
+   {
+      int numberOfPoints = pointCloud2.getWidth() * pointCloud2.getHeight();
+      int offset = pointCloud2.getData().arrayOffset();
+      int pointStep = pointCloud2.getPointStep();
+
+      ByteBuffer byteBuffer = ByteBuffer.wrap(pointCloud2.getData().array(), offset, numberOfPoints * pointStep);
+
+      if (pointCloud2.getIsBigendian())
+         byteBuffer.order(ByteOrder.BIG_ENDIAN);
+      else
+         byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+
+      return byteBuffer;
+   }
+
+   public static void printPointCloud2Info(String name, PointCloud2 pointCloud2)
+   {
+      LogTools.info("PointCloud2 Name: {}", name);
+      LogTools.info(StringTools.format("Height: {} Width: {} (Total: {}) Bigendian: {} Point step: {} Row step: {}",
+                                       pointCloud2.getHeight(),
+                                       pointCloud2.getWidth(),
+                                       pointCloud2.getHeight() * pointCloud2.getWidth(),
+                                       pointCloud2.getIsBigendian(),
+                                       pointCloud2.getPointStep(),
+                                       pointCloud2.getRowStep()));
+      int i = 0;
+      for (PointField field : pointCloud2.getFields())
+      {
+         String datatype = "";
+         if (field.getDatatype() == PointField.INT8)
+            datatype = "INT8";
+         if (field.getDatatype() == PointField.UINT8)
+            datatype = "UINT8";
+         if (field.getDatatype() == PointField.INT16)
+            datatype = "INT16";
+         if (field.getDatatype() == PointField.UINT16)
+            datatype = "UINT16";
+         if (field.getDatatype() == PointField.INT32)
+            datatype = "INT32";
+         if (field.getDatatype() == PointField.UINT32)
+            datatype = "UINT32";
+         if (field.getDatatype() == PointField.FLOAT32)
+            datatype = "FLOAT32";
+         if (field.getDatatype() == PointField.FLOAT64)
+            datatype = "FLOAT64";
+
+         LogTools.info(StringTools.format("Field {} Name: {} Count: {} Offset: {} Type: {}",
+                                          i,
+                                          field.getName(),
+                                          field.getCount(),
+                                          field.getOffset(),
+                                          datatype));
+         i++;
       }
    }
 

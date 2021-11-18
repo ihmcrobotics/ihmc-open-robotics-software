@@ -22,15 +22,13 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.function.Supplier;
-
 public class GDXVREye extends Camera
 {
    private final GLFrameBuffer<Texture> frameBuffer;
    private final org.lwjgl.openvr.Texture openVRTexture;
 
    private final RobotSide side;
-   private final Supplier<GDXVRDevice> headsetSupplier;
+   private final GDXVRHeadset headset;
    private final Matrix4 eyeToHeadMatrix4 = new Matrix4();
    private final Matrix4 headToEyeMatrix4 = new Matrix4();
    private final HmdMatrix44 projectionHmdMatrix44 = HmdMatrix44.create();
@@ -54,12 +52,12 @@ public class GDXVREye extends Camera
    private final ModelInstance coordinateFrameInstance;
 
    public GDXVREye(RobotSide side,
-                   Supplier<GDXVRDevice> headsetSupplier,
+                   GDXVRHeadset headset,
                    ReferenceFrame openVRFrame,
                    int width,
                    int height)
    {
-      this.headsetSupplier = headsetSupplier;
+      this.headset = headset;
       this.side = side;
       this.openVRFrame = openVRFrame;
 
@@ -87,12 +85,11 @@ public class GDXVREye extends Camera
    @Override
    public void update(boolean updateFrustum)
    {
-      GDXVRDevice headset = headsetSupplier.get();
       headset.getPose().changeFrame(ReferenceFrame.getWorldFrame());
       headset.getPose().get(headsetToWorldTransform);
       headsetFrame.update();
 
-      VRSystem.VRSystem_GetEyeToHeadTransform(OpenVRTools.toOpenVRSide(side), eyeToHeadHmdMatrix34);
+      VRSystem.VRSystem_GetEyeToHeadTransform(side == RobotSide.LEFT ? VR.EVREye_Eye_Left : VR.EVREye_Eye_Right, eyeToHeadHmdMatrix34);
       GDXTools.toEuclid(eyeToHeadHmdMatrix34, eyeToHeadTransform);
       eyeFrame.update();
 

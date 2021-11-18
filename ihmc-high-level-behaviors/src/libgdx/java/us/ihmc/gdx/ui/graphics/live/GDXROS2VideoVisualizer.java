@@ -6,15 +6,12 @@ import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.VideoPacket;
 import imgui.internal.ImGui;
-import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.producers.JPEGDecompressor;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -25,7 +22,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
-import java.nio.ByteBuffer;
 
 public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
 {
@@ -37,8 +33,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
    private Texture texture;
    private final ImGuiVideoPanel videoPanel;
 
-   private long receivedCount = 0;
-   private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
 //   private Triple<ByteBuffer, Integer, Integer> decompressedImage;
    private BufferedImage decompressedImage;
    private DetectedFiducialPacket latestDetectedFiducial;
@@ -61,7 +56,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
 
    private void acceptMessage(VideoPacket videoPacket)
    {
-      ++receivedCount;
+      frequencyPlot.onRecievedMessage();
       if (isActive())
       {
          threadQueue.clearQueueAndExecute(() ->
@@ -77,7 +72,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
    {
       super.renderImGuiWidgets();
       ImGui.text(topic.getName());
-      receivedPlot.render(receivedCount);
+      frequencyPlot.renderImGuiWidgets();
    }
 
    int i = 0;

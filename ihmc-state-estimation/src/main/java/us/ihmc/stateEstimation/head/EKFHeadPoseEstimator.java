@@ -15,6 +15,7 @@ import us.ihmc.ekf.filter.state.implementations.PoseState;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -114,9 +115,11 @@ public class EKFHeadPoseEstimator implements StateEstimatorController
     * @param jointPositions a map from joint names to initial joint positions.
     */
    @Override
-   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
+   public void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
-      this.rootJointTransform = rootJointTransform;
+      if (this.rootJointTransform == null)
+         this.rootJointTransform = new RigidBodyTransform();
+      this.rootJointTransform.set(rootJointTransform);
       this.jointPositions = jointPositions;
    }
 
