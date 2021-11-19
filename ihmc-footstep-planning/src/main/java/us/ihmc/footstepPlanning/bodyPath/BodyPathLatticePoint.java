@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 public class BodyPathLatticePoint
 {
-   public static final double gridSizeXY = 0.12;
+   public static final double gridSizeXY = 0.15;
    private final int xIndex;
    private final int yIndex;
    private final int hashCode;
