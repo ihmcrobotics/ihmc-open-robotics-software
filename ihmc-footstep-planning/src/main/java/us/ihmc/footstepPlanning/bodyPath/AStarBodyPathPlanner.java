@@ -2,11 +2,14 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -22,6 +25,7 @@ public class AStarBodyPathPlanner
    private final PriorityQueue<BodyPathLatticePoint> stack;
    private BodyPathLatticePoint startNode, goalNode;
    private final HashMap<BodyPathLatticePoint, Double> gridHeightMap = new HashMap<>();
+   private BodyPathLatticePoint leastCostNode = null;
 
    private final TIntArrayList xCollisionOffsets = new TIntArrayList();
    private final TIntArrayList yCollisionOffsets = new TIntArrayList();
@@ -69,6 +73,7 @@ public class AStarBodyPathPlanner
       graph.initialize(startNode);
       expandedNodeSet.clear();
       snap(startNode);
+      leastCostNode = startNode;
 
       int maxIterations = 3000;
       int iterationCount = 0;
@@ -78,10 +83,10 @@ public class AStarBodyPathPlanner
       while (iterationCount++ < maxIterations)
       {
          BodyPathLatticePoint node = getNextNode();
-         System.out.println("Expanding " + node);
 
          if (node == null)
          {
+            LogTools.info("Stack is empty, no path exists...");
             break;
          }
 
@@ -104,7 +109,7 @@ public class AStarBodyPathPlanner
                continue;
             }
 
-            double cost = computeCost(node, neighbor);
+            double cost = xyDistance(node, neighbor);
             graph.checkAndSetEdge(node, neighbor, cost);
             stack.add(neighbor);
 
@@ -113,28 +118,25 @@ public class AStarBodyPathPlanner
                reachedGoal = true;
                break planningLoop;
             }
+            else if (heuristics(node) < heuristics(leastCostNode))
+            {
+               leastCostNode = node;
+            }
          }
 
          expandedNodeSet.add(node);
       }
 
-      if (reachedGoal)
+      List<BodyPathLatticePoint> path = graph.getPathFromStart(reachedGoal ? goalNode : leastCostNode);
+      List<Pose3DReadOnly> waypoints = new ArrayList<>();
+      for (int i = 0; i < path.size(); i++)
       {
-         List<BodyPathLatticePoint> path = graph.getPathFromStart(goalNode);
-         List<Pose3DReadOnly> waypoints = new ArrayList<>();
-         for (int i = 0; i < path.size(); i++)
-         {
-            Pose3D waypoint = new Pose3D();
-            waypoint.getPosition().set(path.get(i).getX(), path.get(i).getY(), gridHeightMap.get(path.get(i)));
-            waypoints.add(waypoint);
-         }
+         Pose3D waypoint = new Pose3D();
+         waypoint.getPosition().set(path.get(i).getX(), path.get(i).getY(), gridHeightMap.get(path.get(i)));
+         waypoints.add(waypoint);
+      }
 
-         return waypoints;
-      }
-      else
-      {
-         return null;
-      }
+      return waypoints;
    }
 
    public BodyPathLatticePoint getNextNode()
@@ -197,14 +199,14 @@ public class AStarBodyPathPlanner
       return false;
    }
 
-   private double computeCost(BodyPathLatticePoint startNode, BodyPathLatticePoint endNode)
+   static double xyDistance(BodyPathLatticePoint startNode, BodyPathLatticePoint endNode)
    {
-      return Math.sqrt(MathTools.square(startNode.getX() - endNode.getX()) + MathTools.square(startNode.getY() - endNode.getY()));
+      return EuclidCoreTools.norm(startNode.getX() - endNode.getX(), startNode.getY() - endNode.getY());
    }
 
    private double heuristics(BodyPathLatticePoint node)
    {
-      return Math.sqrt(MathTools.square(node.getX() - goalNode.getX()) + MathTools.square(node.getY() - goalNode.getY()));
+      return xyDistance(node, goalNode);
    }
 
    /**
