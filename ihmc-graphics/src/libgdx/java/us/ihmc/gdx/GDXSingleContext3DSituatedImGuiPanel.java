@@ -262,8 +262,8 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       modelInstance.getRenderables(renderables, pool);
-      centerFrameCoordinateFrame.getRenderables(renderables, pool);
-      graphicsFrameCoordinateFrame.getRenderables(renderables, pool);
+//      centerFrameCoordinateFrame.getRenderables(renderables, pool);
+//      graphicsFrameCoordinateFrame.getRenderables(renderables, pool);
    }
 
    public void updatePose(Consumer<RigidBodyTransform> transformUpdater)
