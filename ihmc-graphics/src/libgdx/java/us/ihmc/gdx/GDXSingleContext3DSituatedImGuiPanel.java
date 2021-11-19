@@ -93,7 +93,7 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       io.setIniFilename(null); // We don't want to save .ini file
       io.setMouseDrawCursor(true);
       font = ImGuiTools.setupFonts(io);
-      //            ImGui.styleColorsLight();
+      ImGui.styleColorsLight();
 
       imGuiGl3 = new ImGuiImplGl3();
       imGuiGl3.init();
