@@ -41,7 +41,7 @@ public class GDXImGuiBasedUIWith3DSituatedImGuiPanelsDemo
 //            situatedImGuiPanelManager.render();
 
             baseUI.renderBeforeOnScreenUI();
-            baseUI.renderEnd(situatedImGuiPanelManager::render);
+//            baseUI.renderEnd(situatedImGuiPanelManager::render);
          }
 
          @Override
