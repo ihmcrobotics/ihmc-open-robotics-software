@@ -357,4 +357,9 @@ public class GDXImGuiBasedUI
    {
       return vrManager;
    }
+
+   public GDXImGuiWindowAndDockSystem getImGuiWindowAndDockSystem()
+   {
+      return imGuiWindowAndDockSystem;
+   }
 }

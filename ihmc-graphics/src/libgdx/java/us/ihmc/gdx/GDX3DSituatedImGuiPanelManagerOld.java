@@ -1,38 +1,30 @@
 package us.ihmc.gdx;
 
-import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.*;
+import imgui.ImFont;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.ImGuiStyle;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiConfigFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGuiContext;
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.system.MemoryUtil;
 import us.ihmc.gdx.imgui.ImGuiTools;
 
 import java.util.ArrayList;
 
-import static org.lwjgl.glfw.GLFW.*;
-
-public class GDX3DSituatedImGuiPanelManager implements RenderableProvider
+public class GDX3DSituatedImGuiPanelManagerOld implements RenderableProvider
 {
-   private static GDX3DSituatedImGuiPanelManager instance = null;
-
-   public static GDX3DSituatedImGuiPanelManager getInstance()
-   {
-      if (instance == null)
-         instance = new GDX3DSituatedImGuiPanelManager();
-
-      return instance;
-   }
-
    private final ArrayList<GDX3DSituatedImGuiPanel> panels = new ArrayList<>();
    private ImFont font = null;
 
-   private final ModelBuilder BUILDER = new ModelBuilder();
    private ModelInstance modelInstance = null;
 
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
@@ -43,10 +35,51 @@ public class GDX3DSituatedImGuiPanelManager implements RenderableProvider
    private long savedGLFWContext = 0;
    private ImGuiContext savedImGuiContext = null;
 
+   public GDX3DSituatedImGuiPanelManagerOld()
+   {
+      this.savedGLFWContext = GLFW.glfwGetCurrentContext();
+
+      GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
+      this.virtualWindowContext = GLFW.glfwCreateWindow(3000, 2000, "", MemoryUtil.NULL, MemoryUtil.NULL);
+   }
+
+   public void create()
+   {
+      backupAndSwitchContext(); //This is also where the ImGuiContext is created
+
+      imGuiGlfw.init(virtualWindowContext, true);
+      imGuiGl3.init();
+
+      restoreSavedContext();
+   }
+
+   public void update()
+   {
+      backupAndSwitchContext();
+
+      ImGui.newFrame();
+      ImGui.pushFont(font);
+
+      for (GDX3DSituatedImGuiPanel panel : panels)
+      {
+         if (ImGui.begin(panel.getPanelName()))
+         {
+            panel.renderImGuiWidgets();
+            ImGui.end();
+         }
+      }
+
+      ImGui.popFont();
+      ImGui.render();
+      imGuiGl3.renderDrawData(ImGui.getDrawData());
+
+      restoreSavedContext();
+   }
+
    private void backupAndSwitchContext()
    {
-      savedGLFWContext = glfwGetCurrentContext();
-      glfwMakeContextCurrent(virtualWindowContext);
+      savedGLFWContext = GLFW.glfwGetCurrentContext();
+      GLFW.glfwMakeContextCurrent(virtualWindowContext);
 
       savedImGuiContext = ImGui.getCurrentContext();
       if (virtualImGuiContext == null)
@@ -70,14 +103,14 @@ public class GDX3DSituatedImGuiPanelManager implements RenderableProvider
 
          if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable))
          {
-            final ImGuiStyle style = imgui.ImGui.getStyle();
+            final ImGuiStyle style = ImGui.getStyle();
             style.setWindowRounding(0.0f);
-            style.setColor(ImGuiCol.WindowBg, imgui.ImGui.getColorU32(ImGuiCol.WindowBg, 1));
+            style.setColor(ImGuiCol.WindowBg, ImGui.getColorU32(ImGuiCol.WindowBg, 1));
          }
 
          int[] fbWidth = new int[1];
          int[] fbHeight = new int[1];
-         glfwGetFramebufferSize(virtualWindowContext, fbWidth, fbHeight);
+         GLFW.glfwGetFramebufferSize(virtualWindowContext, fbWidth, fbHeight);
 
          io.setDisplaySize(fbWidth[0], fbHeight[0]);
       }
@@ -89,56 +122,10 @@ public class GDX3DSituatedImGuiPanelManager implements RenderableProvider
 
    private void restoreSavedContext()
    {
-      glfwMakeContextCurrent(savedGLFWContext);
+      GLFW.glfwMakeContextCurrent(savedGLFWContext);
 
       if (savedImGuiContext != null && savedImGuiContext.ptr != 0)
          ImGui.setCurrentContext(savedImGuiContext);
-   }
-
-   private GDX3DSituatedImGuiPanelManager()
-   {
-      this.savedGLFWContext = glfwGetCurrentContext();
-
-      glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
-      this.virtualWindowContext = glfwCreateWindow(3000, 2000, "", MemoryUtil.NULL, MemoryUtil.NULL);
-   }
-
-   public void create()
-   {
-      backupAndSwitchContext(); //This is also where the ImGuiContext is created
-
-      if (!glfwInit()) //Probably already initialized by this point, which immediately returns true
-      {
-         throw new IllegalStateException("Unable to initialize GLFW");
-      }
-
-      imGuiGlfw.init(virtualWindowContext, true);
-      imGuiGl3.init();
-
-      restoreSavedContext();
-   }
-
-   public void update()
-   {
-      backupAndSwitchContext();
-
-      ImGui.newFrame();
-      ImGui.pushFont(font);
-
-      for (GDX3DSituatedImGuiPanel panel : panels)
-      {
-         if (ImGui.begin(panel.getName()))
-         {
-            panel.renderImGuiWidgets();
-            ImGui.end();
-         }
-      }
-
-      ImGui.popFont();
-      ImGui.render();
-      imGuiGl3.renderDrawData(ImGui.getDrawData());
-
-      restoreSavedContext();
    }
 
    public void addPanel(GDX3DSituatedImGuiPanel panel)
@@ -155,17 +142,7 @@ public class GDX3DSituatedImGuiPanelManager implements RenderableProvider
 
    public void dispose()
    {
-      for (GDX3DSituatedImGuiPanel panel : panels)
-         panel.dispose();
-
       imGuiGl3.dispose();
       imGuiGlfw.dispose();
-   }
-
-   @Override
-   protected void finalize() throws Throwable
-   {
-      this.dispose();
-      super.finalize();
    }
 }
