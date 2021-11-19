@@ -78,6 +78,8 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D centerFrameCoordinateFramePose = new FramePose3D();
    private final FramePose3D graphicsFrameCoordinateFramePose = new FramePose3D();
+   private final RigidBodyTransform gripOffsetTransform = new RigidBodyTransform();
+   private boolean grippedLastTime = false;
 
    public void create(int panelWidth, int panelHeight, Runnable renderImGuiWidgets)
    {
@@ -187,6 +189,29 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
          else
          {
             leftMouseDown = false;
+         }
+
+         if ((grippedLastTime || controller.getPose().getPosition().distance(centerFrameCoordinateFramePose.getPosition()) < 0.05)
+             && controller.getGripActionData().x() > 0.9)
+         {
+            if (!grippedLastTime) // set up offset
+            {
+               centerFrameCoordinateFramePose.changeFrame(controller.getXForwardZUpControllerFrame());
+               centerFrameCoordinateFramePose.get(gripOffsetTransform);
+               centerFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            }
+
+            updatePose(transform ->
+            {
+               transform.set(gripOffsetTransform);
+               controller.getXForwardZUpControllerFrame().getTransformToWorldFrame().transform(transform);
+            });
+
+            grippedLastTime = true;
+         }
+         else
+         {
+            grippedLastTime = false;
          }
       });
    }
