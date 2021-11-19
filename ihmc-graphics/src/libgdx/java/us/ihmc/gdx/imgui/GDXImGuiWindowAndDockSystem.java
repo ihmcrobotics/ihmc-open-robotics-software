@@ -269,11 +269,6 @@ public class GDXImGuiWindowAndDockSystem
 
    public void afterWindowManagement()
    {
-      afterWindowManagement(null);
-   }
-
-   public void afterWindowManagement(Runnable extraRender)
-   {
       if (isFirstRenderCall)
       {
          JSONFileTools.loadUserWithClasspathDefaultFallback(panelsFile, jsonNode ->
@@ -297,9 +292,6 @@ public class GDXImGuiWindowAndDockSystem
 
       ImGui.render();
       imGuiGl3.renderDrawData(ImGui.getDrawData());
-
-      if (extraRender != null)
-         extraRender.run();
 
       if (imgui.ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
          final long backupWindowPtr = glfwGetCurrentContext();
@@ -327,11 +319,6 @@ public class GDXImGuiWindowAndDockSystem
    public ImGuiImplGl3 getImGuiGl3()
    {
       return imGuiGl3;
-   }
-
-   public ImGuiImplGlfw getImGuiGlfw()
-   {
-      return imGuiGlfw;
    }
 
    public ImGuiPanelManager getPanelManager()

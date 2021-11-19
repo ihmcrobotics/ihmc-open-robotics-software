@@ -169,12 +169,7 @@ public class GDXImGuiBasedUI
 
    public void renderEnd()
    {
-      renderEnd(null);
-   }
-
-   public void renderEnd(Runnable extraRender)
-   {
-      imGuiWindowAndDockSystem.afterWindowManagement(extraRender);
+      imGuiWindowAndDockSystem.afterWindowManagement();
    }
 
    private void renderMenuBar()
