@@ -1,8 +1,0 @@
-{
-  "dockspacePanels" : { },
-  "windows" : {
-    "Point Cloud Settings" : true,
-    "Sensor Color###GlobalWidgetIndex:1:Sensor Color" : true,
-    "Sensor Depth###GlobalWidgetIndex:0:Sensor Depth" : true
-  }
-}
