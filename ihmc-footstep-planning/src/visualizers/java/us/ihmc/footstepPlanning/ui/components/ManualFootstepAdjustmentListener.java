@@ -115,6 +115,8 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
       previousTimestamp = timestamp;
 
       Pair<Integer, FootstepDataMessage> selectedStep;
+      selectedStepIndex = -1;
+
       if ((selectedStep = this.selectedStep.getAndSet(null)) != null)
       {
          int selectedStepIndex = selectedStep.getKey();

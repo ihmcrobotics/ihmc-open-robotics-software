@@ -45,7 +45,7 @@ public class HeightMapFootstepPlanner
          ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(RobotSide.LEFT));
          footPolygon.applyTransform(footstepTransform);
 
-         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMap);
+         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMap, 0.06);
 
          if (snapTransform != null)
          {
@@ -94,7 +94,7 @@ public class HeightMapFootstepPlanner
          ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(stepSide));
          footPolygon.applyTransform(footstepTransform);
 
-         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMap);
+         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon, heightMap, parameters.getHeightMapSnapThreshold());
          if (snapTransform != null)
          {
             snapTransform.transform(footstepTransform);

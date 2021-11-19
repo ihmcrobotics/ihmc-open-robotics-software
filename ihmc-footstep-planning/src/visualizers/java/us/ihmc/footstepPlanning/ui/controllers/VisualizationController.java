@@ -37,8 +37,6 @@ public class VisualizationController
    @FXML
    private CheckBox showClusterNonNavigableExtrusionsToggleButton;
    @FXML
-   private CheckBox showOccupancyMap;
-   @FXML
    private CheckBox showSolution;
    @FXML
    private CheckBox showLogGraphics;
@@ -76,7 +74,6 @@ public class VisualizationController
 
       // Footstep planner
       messager.bindBidirectional(ShowFootstepPlan, showSolution.selectedProperty(), true);
-      messager.bindBidirectional(ShowOccupancyMap, showOccupancyMap.selectedProperty(), true);
       messager.bindBidirectional(ShowLogGraphics, showLogGraphics.selectedProperty(), true);
       messager.bindBidirectional(ShowPostProcessingInfo, showPostProcessingInfo.selectedProperty(), true);
       messager.bindBidirectional(RenderShiftedWaypoints, renderAdjustedWaypoints.selectedProperty(), true);

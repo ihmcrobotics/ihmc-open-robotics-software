@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.heightMapSnapThreshold;
 
 public interface FootstepPlannerParametersBasics extends FootstepPlannerParametersReadOnly, StoredPropertySetBasics
 {
@@ -150,6 +151,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setRMSMinErrorToPenalize(double rmsMinErrorToPenalize)
    {
       set(FootstepPlannerParameterKeys.rmsMinErrorToPenalize, rmsMinErrorToPenalize);
+   }
+
+   default void setHeightMapSnapThreshold(double heightMapSnapThreshold)
+   {
+      set(FootstepPlannerParameterKeys.heightMapSnapThreshold, heightMapSnapThreshold);
    }
 
    default void setWiggleInsideDeltaTarget(double wiggleInsideDeltaTarget)
@@ -524,5 +530,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setRMSErrorCost(parametersPacket.getRmsErrorCost());
       if (parametersPacket.getRmsMinErrorToPenalize() != noValue)
          setRMSMinErrorToPenalize(parametersPacket.getRmsMinErrorToPenalize());
+      if (parametersPacket.getHeightMapSnapThreshold() != noValue)
+         setHeightMapSnapThreshold(parametersPacket.getHeightMapSnapThreshold());
    }
 }

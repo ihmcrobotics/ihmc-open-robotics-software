@@ -201,6 +201,15 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * When using a height map, snapping is done by taking all the points inside the polygon, then removing points below
+    * z_max - dz, where z_max is the highest point and dz is this value.
+    */
+   default double getHeightMapSnapThreshold()
+   {
+      return get(heightMapSnapThreshold);
+   }
+
+   /**
     * Maximum step width the planner will consider for candidate steps.
     * Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
     * where the parent is the last footstep taken on the other foot.

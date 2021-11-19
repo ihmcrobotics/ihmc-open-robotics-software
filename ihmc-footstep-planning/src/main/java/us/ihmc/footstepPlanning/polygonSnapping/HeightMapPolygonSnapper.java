@@ -33,7 +33,7 @@ public class HeightMapPolygonSnapper
       areaPerCell = MathTools.square(parameters.getGridResolutionXY());
    }
 
-   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap)
+   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap, double snapHeightThreshold)
    {
       pointsInsidePolyon.clear();
       bestFitPlane.setToNaN();
@@ -61,6 +61,10 @@ public class HeightMapPolygonSnapper
             pointsInsidePolyon.add(new Point3D(x, y, height));
          }
       }
+
+      double maxZ = pointsInsidePolyon.stream().mapToDouble(Point3D::getZ).max().getAsDouble();
+      double minZ = maxZ - snapHeightThreshold;
+      pointsInsidePolyon.removeIf(point -> point.getZ() < minZ);
 
       if (pointsInsidePolyon.size() < 3)
       {

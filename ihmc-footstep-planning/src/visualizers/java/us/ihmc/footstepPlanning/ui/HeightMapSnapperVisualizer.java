@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -145,6 +146,7 @@ public class HeightMapSnapperVisualizer
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
 
       for (int i = 0; i < poses.length; i++)
       {
@@ -161,7 +163,7 @@ public class HeightMapSnapperVisualizer
          graphics3DObject.translate(0.0, 0.0, 0.1);
          graphics3DObject.addExtrudedPolygon(polygon, 0.02, YoAppearance.Glass());
 
-         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData);
+         RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap, heightMapData, parameters.getHeightMapSnapThreshold());
          snapTransform.transform(stepTransform);
 
          graphics3DObject.identity();

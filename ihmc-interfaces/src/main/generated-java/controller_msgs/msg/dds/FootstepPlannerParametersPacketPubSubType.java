@@ -190,6 +190,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -428,6 +430,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -584,6 +589,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getRmsMinErrorToPenalize());
 
+      cdr.write_type_6(data.getHeightMapSnapThreshold());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -738,6 +745,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setRmsMinErrorToPenalize(cdr.read_type_6());
       	
+      data.setHeightMapSnapThreshold(cdr.read_type_6());
+      	
 
    }
 
@@ -819,6 +828,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("rms_error_threshold", data.getRmsErrorThreshold());
       ser.write_type_6("rms_error_cost", data.getRmsErrorCost());
       ser.write_type_6("rms_min_error_to_penalize", data.getRmsMinErrorToPenalize());
+      ser.write_type_6("height_map_snap_threshold", data.getHeightMapSnapThreshold());
    }
 
    @Override
@@ -899,6 +909,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setRmsErrorThreshold(ser.read_type_6("rms_error_threshold"));
       data.setRmsErrorCost(ser.read_type_6("rms_error_cost"));
       data.setRmsMinErrorToPenalize(ser.read_type_6("rms_min_error_to_penalize"));
+      data.setHeightMapSnapThreshold(ser.read_type_6("height_map_snap_threshold"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerParametersPacket src, controller_msgs.msg.dds.FootstepPlannerParametersPacket dest)

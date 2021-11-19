@@ -350,7 +350,6 @@ public class FootstepPlannerLogVisualizerController
       // set graphics
       messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowRobot, false);
-      messager.submitMessage(FootstepPlannerMessagerAPI.ShowOccupancyMap, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);

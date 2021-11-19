@@ -15,7 +15,6 @@ import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
@@ -115,7 +114,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowNavigableRegionVisibilityMaps = topic("ShowNavigableRegionVisibilityMaps");
 
    public static final Topic<Boolean> ShowFootstepPlan = topic("ShowFootstepPlan");
-   public static final Topic<Boolean> ShowOccupancyMap = topic("ShowOccupancyMap");
    public static final Topic<Boolean> ShowPostProcessingInfo = topic("ShowPostProcessingInfo");
    public static final Topic<Boolean> ShowLogGraphics = topic("ShowLogGraphics");
    public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");
@@ -165,7 +163,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepDataListMessage> FootstepPlanToRobot = topic("FootstepPlanToRobot"); // UI >> Robot (if operator adjusts path or overrides swing times, etc.)
    public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
    public static final Topic<Quaternion> LowLevelGoalOrientation = topic("LowLevelGoalOrientation");
-   public static final Topic<PlannerOccupancyMap> OccupancyMap = topic("OccupancyMap");
    public static final Topic<FootstepPlanningTimingsMessage> PlannerTimings = topic("PlannerTimings");
    public static final Topic<BodyPathPlanningResult> BodyPathPlanningResultTopic = topic("BodyPathPlanningResult");
    public static final Topic<FootstepPlanningResult> FootstepPlanningResultTopic = topic("FootstepPlanningResult");
