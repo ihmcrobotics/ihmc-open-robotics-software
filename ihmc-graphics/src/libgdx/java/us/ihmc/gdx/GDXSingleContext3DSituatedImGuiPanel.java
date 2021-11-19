@@ -25,14 +25,15 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.gl3.ImGuiImplGl3;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -68,10 +69,15 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    private ReferenceFrame graphicsXRightYDownFrame
          = ReferenceFrameTools.constructFrameWithChangingTransformToParent("graphicsXRightYDownFrame" + INDEX.getAndIncrement(),
                                                                            centerXThroughZUpFrame,
-                                                                           transform);
+                                                                           graphicsXRightYDownToCenterXThroughZUpTransform);
    private final FrameLine3D pickRay = new FrameLine3D();
    private final FramePoint3D pickIntersection = new FramePoint3D();
    private final Plane3D plane = new Plane3D();
+   private ModelInstance centerFrameCoordinateFrame;
+   private ModelInstance graphicsFrameCoordinateFrame;
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final FramePose3D centerFrameCoordinateFramePose = new FramePose3D();
+   private final FramePose3D graphicsFrameCoordinateFramePose = new FramePose3D();
 
    public void create(int panelWidth, int panelHeight, Runnable renderImGuiWidgets)
    {
@@ -89,6 +95,9 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
 
       imGuiGl3 = new ImGuiImplGl3();
       imGuiGl3.init();
+
+      centerFrameCoordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.3);
+      graphicsFrameCoordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.3);
 
       ModelBuilder modelBuilder = new ModelBuilder();
       modelBuilder.begin();
@@ -139,16 +148,13 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       modelInstance = new ModelInstance(model);
 
       // set up graphicsXRightYDownToCenterXThroughZUpTransform
-      graphicsXRightYDownToCenterXThroughZUpTransform.appendYawRotation(Math.toRadians(90.0));
-      graphicsXRightYDownToCenterXThroughZUpTransform.appendPitchRotation(-Math.toRadians(90.0));
-      graphicsXRightYDownToCenterXThroughZUpTransform.appendTranslation(0.0f, -halfWidth, -halfHeight);
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendYawRotation(-Math.toRadians(90.0));
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendPitchRotation(Math.toRadians(0.0));
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendRollRotation(-Math.toRadians(90.0));
+      graphicsXRightYDownToCenterXThroughZUpTransform.appendTranslation(-halfWidth * pixelsToMeters, -halfHeight * pixelsToMeters, 0.0f);
       graphicsXRightYDownFrame.update();
 
       plane.getNormal().set(Axis3D.X);
-
-      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D();
-//      convexPolygon2D.addVertex(hal);
-      planarRegion = new PlanarRegion(transform, convexPolygon2D);
 
       updatePose(transform ->
       {
@@ -183,8 +189,6 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
             leftMouseDown = false;
          }
       });
-
-//      leftMouseDown = ImGui.isMouseDown(ImGuiMouseButton.Left);
    }
 
    public void render()
@@ -218,12 +222,23 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       ImGuiTools.glClearDarkGray();
       imGuiGl3.renderDrawData(ImGui.getDrawData());
       frameBuffer.end();
+
+      centerFrameCoordinateFramePose.setToZero(centerXThroughZUpFrame);
+      centerFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      centerFrameCoordinateFramePose.get(tempTransform);
+      GDXTools.toGDX(tempTransform, centerFrameCoordinateFrame.transform);
+      graphicsFrameCoordinateFramePose.setToZero(graphicsXRightYDownFrame);
+      graphicsFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      graphicsFrameCoordinateFramePose.get(tempTransform);
+      GDXTools.toGDX(tempTransform, graphicsFrameCoordinateFrame.transform);
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       modelInstance.getRenderables(renderables, pool);
+      centerFrameCoordinateFrame.getRenderables(renderables, pool);
+      graphicsFrameCoordinateFrame.getRenderables(renderables, pool);
    }
 
    public void updatePose(Consumer<RigidBodyTransform> transformUpdater)
@@ -234,6 +249,7 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       plane.getNormal().set(Axis3D.X);
       plane.applyTransform(transform);
       GDXTools.toGDX(transform, modelInstance.transform);
+      centerXThroughZUpFrame.update();
    }
 
    public Plane3D getPlane()
