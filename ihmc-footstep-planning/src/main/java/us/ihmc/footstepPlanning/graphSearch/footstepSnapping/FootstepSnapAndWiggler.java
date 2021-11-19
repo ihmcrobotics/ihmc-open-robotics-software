@@ -166,7 +166,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       }
       else
       {
-         snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, heightMapData);
+         snapTransform = heightMapSnapper.snapPolygonToHeightMap(footPolygon, heightMapData, parameters.getHeightMapSnapThreshold());
       }
 
       if (snapTransform == null)

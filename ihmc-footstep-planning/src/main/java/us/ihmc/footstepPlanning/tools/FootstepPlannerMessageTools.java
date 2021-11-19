@@ -109,6 +109,7 @@ public class FootstepPlannerMessageTools
       packet.setRmsErrorThreshold(parameters.getRMSErrorThreshold());
       packet.setRmsErrorCost(parameters.getRMSErrorCost());
       packet.setRmsMinErrorToPenalize(parameters.getRMSMinErrorToPenalize());
+      packet.setHeightMapSnapThreshold(parameters.getHeightMapSnapThreshold());
 
       packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
       packet.setYawWeight(parameters.getYawWeight());

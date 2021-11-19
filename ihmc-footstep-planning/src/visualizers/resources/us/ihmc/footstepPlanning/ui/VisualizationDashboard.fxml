@@ -28,7 +28,6 @@
 
                 <Label text="Footstep Planner" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
                 <CheckBox fx:id="showSolution" mnemonicParsing="false" selected="true" text="Show solution" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                <CheckBox fx:id="showOccupancyMap" mnemonicParsing="false" selected="false" text="Show occupancy map" GridPane.columnIndex="3" GridPane.rowIndex="2" />
                 <CheckBox fx:id="showLogGraphics" mnemonicParsing="false" text="Show log graphics" GridPane.columnIndex="3" GridPane.rowIndex="3" />
                 <CheckBox fx:id="showPostProcessingInfo" mnemonicParsing="false" selected="true" text="Show post processing info" GridPane.columnIndex="3" GridPane.rowIndex="4" />
                 <CheckBox fx:id="renderAdjustedWaypoints" mnemonicParsing="false" selected="true" text="Render adjusted waypoints" GridPane.columnIndex="3" GridPane.rowIndex="5" />

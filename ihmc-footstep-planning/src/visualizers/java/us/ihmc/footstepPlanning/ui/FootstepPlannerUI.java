@@ -91,7 +91,6 @@ public class FootstepPlannerUI
    private final GoalOrientationEditor orientationEditor;
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
-   private final OccupancyMapRenderer occupancyMapRenderer;
    private final JavaFXRobotVisualizer robotVisualizer;
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
@@ -253,7 +252,6 @@ public class FootstepPlannerUI
       this.postProcessingViewer = new SwingPlanMeshViewer(messager);
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
-      this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
       new UIFootstepPlanManager(messager);
       this.manualFootstepAdjustmentListener = new ManualFootstepAdjustmentListener(messager, view3dFactory.getSubScene());
@@ -269,7 +267,6 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(postProcessingViewer.getRoot());
       view3dFactory.addNodeToView(bodyPathMeshViewer.getRoot());
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
-      view3dFactory.addNodeToView(occupancyMapRenderer.getRoot());
       view3dFactory.addNodeToView(footstepPlannerLogRenderer.getRoot());
       view3dFactory.addNodeToView(heightMapVisualizer.getRoot());
 
@@ -338,7 +335,6 @@ public class FootstepPlannerUI
       postProcessingViewer.start();
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
-      occupancyMapRenderer.start();
       footstepPlannerLogRenderer.start();
       manualFootstepAdjustmentListener.start();
       new FootPoseFromMidFootUpdater(messager).start();
@@ -462,7 +458,6 @@ public class FootstepPlannerUI
       postProcessingViewer.stop();
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
-      occupancyMapRenderer.stop();
       heightMapVisualizer.stop();
 
       if (robotVisualizer != null)
