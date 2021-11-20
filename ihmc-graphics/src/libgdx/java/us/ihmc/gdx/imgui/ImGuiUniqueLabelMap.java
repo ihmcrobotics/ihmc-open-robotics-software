@@ -14,38 +14,65 @@ public class ImGuiUniqueLabelMap
 
    private final HashMap<String, String> namesToLabels = new HashMap<>();
    private final int index;
-   private final String simpleName;
+   private final String classSimpleName;
 
    public ImGuiUniqueLabelMap(Class<?> clazz)
    {
-      simpleName = clazz.getSimpleName();
-      AtomicInteger classIndex = CLASS_TO_INDEX.get(simpleName);
+      classSimpleName = clazz.getSimpleName();
+      AtomicInteger classIndex = CLASS_TO_INDEX.get(classSimpleName);
       if (classIndex == null)
       {
          classIndex = new AtomicInteger();
-         CLASS_TO_INDEX.put(simpleName, classIndex);
+         CLASS_TO_INDEX.put(classSimpleName, classIndex);
       }
       index = classIndex.getAndIncrement();
    }
 
-   public String get(String name)
+   public String get(String visibleLabel)
    {
-      String label = namesToLabels.get(name);
+      String label = namesToLabels.get(visibleLabel);
       if (label == null)
       {
-         label = ImGuiTools.uniqueLabel(simpleName + index, name);
-         namesToLabels.put(name, label);
+         label = ImGuiTools.uniqueLabel(classSimpleName + index, visibleLabel);
+         namesToLabels.put(visibleLabel, label);
       }
       return label;
    }
 
-   public String get(String name, int moreSpecificIndex)
+   public String getHidden(String hiddenQualifier)
    {
-      String label = namesToLabels.get(name + moreSpecificIndex);
+      return get("###" + hiddenQualifier);
+   }
+
+   public String get(String visibleLabel, String hiddenQualifier)
+   {
+      String label = namesToLabels.get(visibleLabel + hiddenQualifier);
       if (label == null)
       {
-         label = ImGuiTools.uniqueLabel(simpleName + index + "_" + moreSpecificIndex, name);
-         namesToLabels.put(name + moreSpecificIndex, label);
+         label = ImGuiTools.uniqueLabel(classSimpleName + index + "_" + hiddenQualifier, visibleLabel);
+         namesToLabels.put(visibleLabel, label);
+      }
+      return label;
+   }
+
+   public String get(String visibleLabel, int moreSpecificIndex)
+   {
+      String label = namesToLabels.get(visibleLabel + moreSpecificIndex);
+      if (label == null)
+      {
+         label = ImGuiTools.uniqueLabel(classSimpleName + index + "_" + moreSpecificIndex, visibleLabel);
+         namesToLabels.put(visibleLabel + moreSpecificIndex, label);
+      }
+      return label;
+   }
+
+   public String get(String visibleLabel, String hiddenQualifier, int moreSpecificIndex)
+   {
+      String label = namesToLabels.get(visibleLabel + hiddenQualifier + moreSpecificIndex);
+      if (label == null)
+      {
+         label = ImGuiTools.uniqueLabel(classSimpleName + index + "_" + moreSpecificIndex + "_" + hiddenQualifier, visibleLabel);
+         namesToLabels.put(visibleLabel + moreSpecificIndex, label);
       }
       return label;
    }
