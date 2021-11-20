@@ -146,6 +146,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear graphics")))
          walkPathControlRing.clearGraphics();
+      ImGui.text("Walk path control ring:");
+      walkPathControlRing.renderImGuiWidgets();
       ImGui.checkbox("Show self collision meshes", showSelfCollisionMeshes);
       ImGui.checkbox("Show environment collision meshes", showEnvironmentCollisionMeshes);
       ImGui.text("TODO:");
@@ -182,6 +184,11 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
          walkPathControlRing.getVirtualRenderables(renderables, pool);
       }
+   }
+
+   public void destroy()
+   {
+      walkPathControlRing.destroy();
    }
 
    public void setInteractablesEnabled(boolean enabled)
