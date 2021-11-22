@@ -403,7 +403,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
                - bodyOrientationKd.getDoubleValue() * robot.getBodyAngularVelocity();
          robot.setHipTorque(supportSide, -supportHipTorque);
 
-         swingTrajectory.compute(timeInState);
+         swingTrajectory.compute(Math.min(timeInState, swingDuration.getValue()));
          desiredSwingThighAngle.set(swingTrajectory.getValue());
 
          double swingHipTorque = thighSwingKp.getDoubleValue() * (desiredSwingThighAngle.getDoubleValue() - thighAngles.get(swingSide).getDoubleValue())
@@ -472,7 +472,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       private RobotSide supportSide, swingSide;
       private final YoPolynomial retractTrajectory;
       private final YoDouble initialRetractThighAngle;
-      private final YoDouble desiredRetractThighAngle;
+      private final YoDouble desiredRetractThighAngle, desiredRetractThighVelocity;
 
       public DropRetractState(LeapOfFaithState stateEnum, LeapOfFaithState nextStateEnum, YoRegistry parentRegistry)
       {
@@ -486,6 +486,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          retractTrajectory = new YoPolynomial(swingSideName + "Retract", 4, parentRegistry);
 
          desiredRetractThighAngle = new YoDouble(swingSideName + "DesiredRetractThighAngle", parentRegistry);
+         desiredRetractThighVelocity = new YoDouble(swingSideName + "DesiredRetractThighVelocity", parentRegistry);
       }
 
       @Override
@@ -518,11 +519,12 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
                - bodyOrientationKd.getDoubleValue() * robot.getBodyAngularVelocity();
          robot.setHipTorque(supportSide, -supportHipTorque);
 
-         retractTrajectory.compute(timeInState);
+         retractTrajectory.compute(Math.min(timeInState, retractDuration.getValue()));
          desiredRetractThighAngle.set(retractTrajectory.getValue());
+         desiredRetractThighVelocity.set(retractTrajectory.getVelocity());
 
          double swingHipTorque = thighSwingKp.getDoubleValue() * (desiredRetractThighAngle.getDoubleValue() - thighAngles.get(swingSide).getDoubleValue())
-               - thighSwingKd.getDoubleValue() * thighVelocities.get(swingSide).getDoubleValue();
+               + thighSwingKd.getDoubleValue() * (desiredRetractThighVelocity.getValue() - thighVelocities.get(swingSide).getDoubleValue());
          robot.setHipTorque(swingSide, swingHipTorque);
 
          //         q_d_knees.get(swingSide).set(0.0);

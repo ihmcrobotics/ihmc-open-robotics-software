@@ -6,7 +6,6 @@ import java.util.Random;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -24,7 +23,6 @@ import us.ihmc.simulationconstructionset.ViewportConfiguration;
 import us.ihmc.simulationconstructionset.util.ControllerFailureException;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.simulationconstructionset.util.ground.SlopedPlaneGroundProfile;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationRunner.StateFileComparer;
@@ -37,39 +35,50 @@ public class SpringFlamingoSimulation
 
    private static final boolean SHOW_MULTIPLE_VIEWPORT_WINDOW = false;
 
-   private static final int BALLISTIC_WALKING_CONTROLLER = 0, FAST_WALKING_CONTROLLER = 1, LEAP_OF_FAITH_CONTROLLER = 2;
+   // Choose the controller here. Leap of faith will do step downs nicely. Ballistic is simple, exploiting natural dynamics. Fast can be faster and does speed control.
+   private enum FlamingoController
+   {
+      BALLISTIC_WALKING_CONTROLLER, FAST_WALKING_CONTROLLER, LEAP_OF_FAITH_CONTROLLER;
+   }
 
-   // private static int controllerToUse = FAST_WALKING_CONTROLLER;
-//   private static int controllerToUse = BALLISTIC_WALKING_CONTROLLER;
-   private static int controllerToUse = LEAP_OF_FAITH_CONTROLLER;
+   //   private static FlamingoController controllerToUse = FlamingoController.FAST_WALKING_CONTROLLER;
+      private static FlamingoController controllerToUse = FlamingoController.BALLISTIC_WALKING_CONTROLLER;
+//   private static FlamingoController controllerToUse = FlamingoController.LEAP_OF_FAITH_CONTROLLER;
 
+   
+   // Choose a Terrain here if the robot is doing the Leap of Faith controller. If not, it can only walk on flat.
+   private enum TerrainIfLeapOfFaithController
+   {
+      SLOPE, SLOPE_AND_STEPS, STEP_DOWNS_AND_FLATS;
+   }
+
+   private static TerrainIfLeapOfFaithController terrainIfLeapOfFaith = TerrainIfLeapOfFaithController.STEP_DOWNS_AND_FLATS;
+   
    public static double DT = 0.0001;
    public static int TICKS_PER_RECORD = 100;
    public static int TICKS_PER_CONTROL = 10;
 
    static
    {
-      if (controllerToUse == FAST_WALKING_CONTROLLER)
+      switch (controllerToUse)
       {
-         DT = 0.0001;
-         TICKS_PER_RECORD = 100;
-         TICKS_PER_CONTROL = 10;
-      }
-      else if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
-      {
-         DT = 0.0004;
-         TICKS_PER_RECORD = 25;
-         TICKS_PER_CONTROL = 4;
-      }
-      else if (controllerToUse == LEAP_OF_FAITH_CONTROLLER)
-      {
-         DT = 0.0001;
-         TICKS_PER_RECORD = 100;
-         TICKS_PER_CONTROL = 10;
+         case FAST_WALKING_CONTROLLER:
+            DT = 0.0001;
+            TICKS_PER_RECORD = 100;
+            TICKS_PER_CONTROL = 10;
+            break;
+         case BALLISTIC_WALKING_CONTROLLER:
+            DT = 0.0004;
+            TICKS_PER_RECORD = 25;
+            TICKS_PER_CONTROL = 4;
+            break;
+         case LEAP_OF_FAITH_CONTROLLER:
+            DT = 0.0001;
+            TICKS_PER_RECORD = 100;
+            TICKS_PER_CONTROL = 10;
+            break;
       }
    }
-
-   // Here's a change to test.
 
    public static final double EARTH_GRAVITY = 9.81;
    public static final double MOON_GRAVITY = EARTH_GRAVITY / 6.0;
@@ -90,20 +99,30 @@ public class SpringFlamingoSimulation
       double minGravity = MOON_GRAVITY; // 1.64; //4.0;
 
       int numberOfFlamingos = 1;
-      if (controllerToUse == FAST_WALKING_CONTROLLER)
+      if (controllerToUse == FlamingoController.FAST_WALKING_CONTROLLER)
       {
          numberOfFlamingos = 6;
       }
 
       Robot[] springFlamingos = new Robot[numberOfFlamingos];
 
-//      Vector3D surfaceNormal = new Vector3D(0.0, 0.0, 1.0);//-0.1, 0.0, 1.0);
-          Vector3D surfaceNormal = new Vector3D(-0.35, 0.0, 1.0);
-      Point3D intersectionPoint = new Point3D();
-      double maxXY = 10.0;
-//      SlopedPlaneGroundProfile profile3D = new SlopedPlaneGroundProfile(surfaceNormal, intersectionPoint, maxXY);
-                CombinedTerrainObject3D profile3D = createSlopeAndStepTerrainObject();
-      //          CombinedTerrainObject3D profile3D = createStepDownsAndFlatsTerrain();
+      CombinedTerrainObject3D profile3D = null;
+      if (controllerToUse == FlamingoController.LEAP_OF_FAITH_CONTROLLER)
+      {
+         switch (terrainIfLeapOfFaith)
+         {
+            case SLOPE:
+               profile3D = createSlope();
+               break;
+            case SLOPE_AND_STEPS:
+               profile3D = createSlopeAndStepTerrainObject();
+               break;
+            case STEP_DOWNS_AND_FLATS:
+               profile3D = createStepDownsAndFlatsTerrain();
+               break;
+         }
+
+      }
 
       for (int i = 0; i < numberOfFlamingos; i++)
       {
@@ -117,49 +136,33 @@ public class SpringFlamingoSimulation
          springFlamingo.setDynamicIntegrationMethod(DynamicIntegrationMethod.EULER_DOUBLE_STEPS);
          springFlamingos[i] = springFlamingo;
 
-         // springFlamingo.createControllerBase(System.out, "SpringFlamingo");
          double gravity = -baseGravity;
          if (numberOfFlamingos > 1)
             gravity = -(baseGravity - (((double) i) / ((double) (numberOfFlamingos - 1))) * (baseGravity - minGravity));
 
-         // System.out.println(springFlamingo);
          RobotController controller = null;
-         if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
+         LinearGroundContactModel gcModel = null;
+
+         switch (controllerToUse)
          {
-            controller = new SpringFlamingoController(springFlamingoConstructor, "springFlamingoController");
-            //            controller = new SpringFlamingoController(springFlamingo, "springFlamingoController", icpVisualizer); //TODO
-            //            System.out.println("I am using your controller");
-         }
-         else if (controllerToUse == FAST_WALKING_CONTROLLER)
-         {
-            controller = new SpringFlamingoFastWalkingController(springFlamingoConstructor, gravity, "springFlamingoFastWalkingController");
-         }
-         else if (controllerToUse == LEAP_OF_FAITH_CONTROLLER)
-         {
-            controller = new SpringFlamingoLeapOfFaithController(springFlamingoConstructor);
+            case BALLISTIC_WALKING_CONTROLLER:
+               controller = new SpringFlamingoController(springFlamingoConstructor, "springFlamingoController");
+               gcModel = new LinearGroundContactModel(springFlamingo, 14220, 150.6, 125.0, 300.0, springFlamingo.getRobotsYoRegistry());
+               break;
+            case FAST_WALKING_CONTROLLER:
+               controller = new SpringFlamingoFastWalkingController(springFlamingoConstructor, gravity, "springFlamingoFastWalkingController");
+               gcModel = new LinearGroundContactModel(springFlamingo, 50000.0, 2500.0, 100.0, 500.0, springFlamingo.getRobotsYoRegistry());
+               break;
+            case LEAP_OF_FAITH_CONTROLLER:
+               controller = new SpringFlamingoLeapOfFaithController(springFlamingoConstructor);
+               gcModel = new LinearGroundContactModel(springFlamingo, 14220, 150.6, 125.0, 300.0, springFlamingo.getRobotsYoRegistry());
+               break;
          }
 
          springFlamingo.setController(controller, TICKS_PER_CONTROL);
 
-         LinearGroundContactModel gcModel = null;
-
-         if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
-         {
-            gcModel = new LinearGroundContactModel(springFlamingo, 14220, 150.6, 125.0, 300.0, springFlamingo.getRobotsYoRegistry());
-         }
-         else if (controllerToUse == FAST_WALKING_CONTROLLER)
-         {
-            gcModel = new LinearGroundContactModel(springFlamingo, 50000.0, 2500.0, 100.0, 500.0, springFlamingo.getRobotsYoRegistry());
-
-            // springFlamingo.setGroundContactModel(new CollisionGroundContactModel(this, 0.1, 0.7));
-         }
-
-         else if (controllerToUse == LEAP_OF_FAITH_CONTROLLER)
-         {
-            gcModel = new LinearGroundContactModel(springFlamingo, 14220, 150.6, 125.0, 300.0, springFlamingo.getRobotsYoRegistry());
-         }
-
-         gcModel.setGroundProfile3D(profile3D);
+         if (profile3D != null)
+            gcModel.setGroundProfile3D(profile3D);
          springFlamingo.setGroundContactModel(gcModel);
 
          double xStart = 0.0 + 1.5 * ((double) i);
@@ -183,6 +186,12 @@ public class SpringFlamingoSimulation
          sim = new SimulationConstructionSet(springFlamingos, graphics3DAdapterToUse, new SimulationConstructionSetParameters(initialBufferSize));
       }
 
+      if (profile3D != null)
+      {
+         sim.setGroundVisible(false);
+         sim.addStaticLinkGraphics(profile3D.getLinkGraphics());
+      }
+
       setupCamerasAndViewports(sim);
 
       sim.setDT(DT, TICKS_PER_RECORD);
@@ -190,8 +199,8 @@ public class SpringFlamingoSimulation
       sim.setPlaybackDesiredFrameRate(0.033);
       sim.setGraphsUpdatedDuringPlayback(true);
 
-      sim.setSimulateDuration(10.0);
-      //      sim.setSimulateNoFasterThanRealTime(true)''
+      sim.setSimulateDuration(20.0);
+//      sim.setSimulateNoFasterThanRealTime(true);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();//TODO
       //      ICPVisualizer icpVisualizer = new ICPVisualizer(registry, yoGraphicsListRegistry);
@@ -221,15 +230,6 @@ public class SpringFlamingoSimulation
       //    sim.selectConfiguration("joint angles");
 
       sim.setFastSimulate(true);
-
-      //      if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
-      //      {
-      //         sim.readState("resources/initial_state.state");
-      //      }
-      //      else if (controllerToUse == FAST_WALKING_CONTROLLER)
-      //      {
-      ////       sim.readState("resources/initial_state.state");
-      //      }
 
       if (ENABLE_FREEZE_FRAME & SHOW_GUI)
       {
@@ -381,6 +381,28 @@ public class SpringFlamingoSimulation
       return sim;
    }
 
+   private CombinedTerrainObject3D createSlope()
+   {
+      Vector3D surfaceNormal = new Vector3D(-0.35, 0.0, 1.0);
+      double maxXY = 10.0;
+
+      surfaceNormal.normalize();
+
+      double yStart = -1.0;
+      double yEnd = 1.0;
+
+      double xStart = -maxXY;
+      double xEnd = 0.0;
+
+      double zStart = surfaceNormal.getX() / surfaceNormal.getZ() * maxXY;
+      double zEnd = 0.0;
+
+      CombinedTerrainObject3D terrainObject = new CombinedTerrainObject3D("Terrain");
+      terrainObject.addRamp(xStart, yStart, xEnd, yEnd, zStart, zEnd, YoAppearance.Green());
+
+      return terrainObject;
+   }
+
    private CombinedTerrainObject3D createSlopeAndStepTerrainObject()
    {
       double rampDownOneStartX = -5.0;
@@ -437,9 +459,9 @@ public class SpringFlamingoSimulation
 
    private CombinedTerrainObject3D createStepDownsAndFlatsTerrain()
    {
-      double stepDownOneX = -2.65;
+      double stepDownOneX = -2.50; //-2.65;
       double stepDownOneBottomZ = -0.25;
-      double stepDownTwoX = -4.7;
+      double stepDownTwoX = -4.55; //-4.7;
       double stepDownTwoBottomZ = -0.5;
       double stepDownTwoXEnd = -9.0;
 
