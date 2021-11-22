@@ -107,11 +107,11 @@ public class AtlasFootstepPlannerUI extends Application
       if (status.getFootstepPlanningResult() != null && status.getFootstepPlanningResult().terminalResult())
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
-                                Triple.of(planningModule.getEdgeDataMap(), planningModule.getIterationData(), planningModule.getVariableDescriptors()));
-         messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getStartMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getGoalMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getInterRegionVisibilityMap());
-         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, planningModule.getBodyPathPlanner().getSolution().getVisibilityMapsWithNavigableRegions());
+                                Triple.of(planningModule.getEdgeDataMap(), planningModule.getIterationData(), planningModule.getFootstepPlanVariableDescriptors()));
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getStartMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getGoalMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getVisibilityGraphPlanner().getSolution().getInterRegionVisibilityMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, planningModule.getVisibilityGraphPlanner().getSolution().getVisibilityMapsWithNavigableRegions());
       }
    }
 

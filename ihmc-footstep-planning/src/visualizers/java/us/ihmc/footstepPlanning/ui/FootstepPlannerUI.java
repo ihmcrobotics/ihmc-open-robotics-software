@@ -32,18 +32,8 @@ import us.ihmc.footstepPlanning.ui.components.FootPoseFromMidFootUpdater;
 import us.ihmc.footstepPlanning.ui.components.FootstepCompletionListener;
 import us.ihmc.footstepPlanning.ui.components.GoalOrientationEditor;
 import us.ihmc.footstepPlanning.ui.components.ManualFootstepAdjustmentListener;
-import us.ihmc.footstepPlanning.ui.components.OccupancyMapRenderer;
 import us.ihmc.footstepPlanning.ui.components.UIFootstepPlanManager;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerLogVisualizerController;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerMenuUIController;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerParametersUIController;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerStatusBarController;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerTestDashboardController;
-import us.ihmc.footstepPlanning.ui.controllers.MainTabController;
-import us.ihmc.footstepPlanning.ui.controllers.RobotOperationTabController;
-import us.ihmc.footstepPlanning.ui.controllers.SwingPlannerParametersUIController;
-import us.ihmc.footstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
-import us.ihmc.footstepPlanning.ui.controllers.VisualizationController;
+import us.ihmc.footstepPlanning.ui.controllers.*;
 import us.ihmc.footstepPlanning.ui.viewers.*;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -119,6 +109,8 @@ public class FootstepPlannerUI
    private SwingPlannerParametersUIController swingPlannerParametersUIController;
    @FXML
    private FootstepPlannerLogVisualizerController footstepPlannerLogVisualizerController;
+   @FXML
+   private BodyPathLogVisualizerController bodyPathLogVisualizerController;
    @FXML
    private RobotOperationTabController robotOperationTabController;
    @FXML
@@ -204,6 +196,7 @@ public class FootstepPlannerUI
       footstepPlannerMenuUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
+      bodyPathLogVisualizerController.attachMessager(messager);
       swingPlannerParametersUIController.attachMessager(messager);
       footstepPlannerLogVisualizerController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
@@ -214,6 +207,7 @@ public class FootstepPlannerUI
 
       mainTabController.bindControls();
       footstepPlannerStatusBarController.bindControls();
+      bodyPathLogVisualizerController.bindControls();
       footstepPlannerTestDashboardController.bindControls();
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
@@ -439,6 +433,7 @@ public class FootstepPlannerUI
       primaryStage.show();
 
       footstepPlannerLogVisualizerController.onPrimaryStageLoaded();
+      bodyPathLogVisualizerController.onPrimaryStageLoaded();
       footstepPlannerParametersUIController.onPrimaryStageLoaded();
       visibilityGraphsParametersUIController.onPrimaryStageLoaded();
       swingPlannerParametersUIController.onPrimaryStageLoaded();

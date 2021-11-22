@@ -72,7 +72,6 @@ public class HeightMapPolygonSnapper
       }
 
       planeFitter.fitPlaneToPoints(pointsInsidePolyon, bestFitPlane);
-
       rootMeanSquaredError = 0.0;
 
       for (int i = 0; i < pointsInsidePolyon.size(); i++)

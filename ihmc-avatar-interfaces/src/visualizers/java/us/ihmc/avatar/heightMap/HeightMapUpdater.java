@@ -263,6 +263,10 @@ public class HeightMapUpdater
             heightMap.resetAtHeight(i, resetHeight / numberOfNeighbors);
          }
       }
+
+      /* Fill in cells which are obviously holes */
+      double neighborHeightThresholdToFillHole = 0.4;
+      
    }
 
    private boolean firstTick = true;
