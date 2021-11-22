@@ -1,53 +1,34 @@
 package us.ihmc.gdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 
-public class GDXInteractableFoot
+public class GDXInteractableObject
 {
-   private final GDXRobotCollisionLink collisionLink;
-   private final RobotSide side;
-   private final ReferenceFrame syncedRobotFootFrame;
-   private final ROS2ControllerHelper ros2Helper;
-   private final Model footModel;
-   private final ModelInstance footModelInstance;
+   private GDXRobotCollisionLink collisionLink;
+   private ReferenceFrame objectFrame;
+   private ModelInstance highlightModelInstance;
    private boolean selected = false;
    private boolean modified = false;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private boolean mouseIntersects;
+   private Runnable onSpacePressed;
 
-   public GDXInteractableFoot(GDXRobotCollisionLink collisionLink, RobotSide side, ReferenceFrame syncedRobotFootFrame, ROS2ControllerHelper ros2Helper)
+   public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame objectFrame, String modelFileName, FocusBasedGDXCamera camera3D)
    {
       this.collisionLink = collisionLink;
-      this.side = side;
-      this.syncedRobotFootFrame = syncedRobotFootFrame;
-      this.ros2Helper = ros2Helper;
-
-      String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
-      String modelFileName = robotSidePrefix + "foot.g3dj";
-      footModel = GDXModelLoader.loadG3DModel(modelFileName);
-      footModelInstance = new ModelInstance(footModel);
-      footModelInstance.transform.scale(1.01f, 1.01f, 1.01f);
-
-      GDXTools.setTransparency(footModelInstance, 0.5f);
-   }
-
-   public void create(FocusBasedGDXCamera camera3D)
-   {
+      this.objectFrame = objectFrame;
+      highlightModelInstance = GDXInteractableTools.createHighlightEffectModel(modelFileName);
       poseGizmo.create(camera3D);
    }
 
@@ -58,14 +39,14 @@ public class GDXInteractableFoot
 
       if (!modified && mouseIntersects)
       {
-         GDXTools.toGDX(syncedRobotFootFrame.getTransformToWorldFrame(), footModelInstance.transform);
+         GDXTools.toGDX(objectFrame.getTransformToWorldFrame(), highlightModelInstance.transform);
 
          if (leftMouseReleasedWithoutDrag)
          {
             selected = true;
             modified = true;
             collisionLink.overrideTransform(true);
-            poseGizmo.getTransform().set(syncedRobotFootFrame.getTransformToWorldFrame());
+            poseGizmo.getTransform().set(objectFrame.getTransformToWorldFrame());
          }
       }
 
@@ -79,17 +60,17 @@ public class GDXInteractableFoot
       }
       if (modified && !selected && mouseIntersects)
       {
-         GDXTools.setTransparency(footModelInstance, 0.7f);
+         GDXTools.setTransparency(highlightModelInstance, 0.7f);
       }
       else
       {
-         GDXTools.setTransparency(footModelInstance, 0.5f);
+         GDXTools.setTransparency(highlightModelInstance, 0.5f);
       }
 
       if (modified)
       {
          collisionLink.overrideTransform(true).set(poseGizmo.getTransform());
-         GDXTools.toGDX(poseGizmo.getTransform(), footModelInstance.transform);
+         GDXTools.toGDX(poseGizmo.getTransform(), highlightModelInstance.transform);
       }
 
       if (selected)
@@ -98,8 +79,7 @@ public class GDXInteractableFoot
 
          if (ImGui.isKeyReleased(input.getSpaceKey()))
          {
-            // TODO: Trajectory time in ImGui panel
-            ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side, 1.2, poseGizmo.getPose()));
+            onSpacePressed.run();
          }
       }
 
@@ -120,7 +100,7 @@ public class GDXInteractableFoot
    {
       if (modified || mouseIntersects)
       {
-         footModelInstance.getRenderables(renderables, pool);
+         highlightModelInstance.getRenderables(renderables, pool);
       }
       if (selected)
       {
@@ -130,6 +110,16 @@ public class GDXInteractableFoot
 
    public void destroy()
    {
-      footModel.dispose();
+      highlightModelInstance.model.dispose();
+   }
+
+   public Pose3DReadOnly getPose()
+   {
+      return poseGizmo.getPose();
+   }
+
+   public void setOnSpacePressed(Runnable onSpacePressed)
+   {
+      this.onSpacePressed = onSpacePressed;
    }
 }
