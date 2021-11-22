@@ -310,6 +310,7 @@ public class AStarFootstepPlanner
          return;
       }
 
+      /* Check if this node has already been expanded, since a max branch factor can be imposed, if so append that log data */
       FootstepPlannerIterationData loggedData = null;
       for (int i = 0; i < this.iterationData.size(); i++)
       {

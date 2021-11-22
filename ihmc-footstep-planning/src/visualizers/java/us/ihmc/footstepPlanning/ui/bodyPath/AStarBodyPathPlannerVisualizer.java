@@ -23,6 +23,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -43,17 +44,17 @@ public class AStarBodyPathPlannerVisualizer
 //      Pose3D start = new Pose3D(new Point3D(0.5, 0.0, -0.91), new Quaternion());
 //      Pose3D goal = new Pose3D(new Point3D(3.3, 0.13, 0.2), new Quaternion());
 
-//      File file = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "stairs.json");
-//      Pose3D start = new Pose3D(new Point3D(2.0, -2.0, -0.91), new Quaternion());
-//      Pose3D goal = new Pose3D(new Point3D(3.3, 0.13, 0.2), new Quaternion());
+      File file = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "stairs.json");
+      Pose3D start = new Pose3D(new Point3D(2.0, -2.0, -0.91), new Quaternion());
+      Pose3D goal = new Pose3D(new Point3D(3.3, 0.13, 0.2), new Quaternion());
 
 //            File file = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "narrow_passage_1.json");
 //      Pose3D start = new Pose3D(new Point3D(0.5, 0.0, -0.91), new Quaternion());
 //      Pose3D goal = new Pose3D(new Point3D(3.3, 1.0, 0.2), new Quaternion());
 
-      File file = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "narrow_passage_2.json");
-      Pose3D start = new Pose3D(new Point3D(0.5, 0.0, -0.91), new Quaternion());
-      Pose3D goal = new Pose3D(new Point3D(3.3, 1.0, 0.2), new Quaternion());
+//      File file = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "narrow_passage_2.json");
+//      Pose3D start = new Pose3D(new Point3D(0.5, 0.0, -0.91), new Quaternion());
+//      Pose3D goal = new Pose3D(new Point3D(3.3, 1.0, 0.2), new Quaternion());
 
       if (file == null)
       {

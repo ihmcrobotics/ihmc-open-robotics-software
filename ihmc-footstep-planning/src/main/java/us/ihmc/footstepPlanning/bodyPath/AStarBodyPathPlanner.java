@@ -1,26 +1,38 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
+import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
+import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
+import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.*;
 
 public class AStarBodyPathPlanner
 {
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   private final AStarBodyPathEdgeData edgeData;
    private HeightMapData heightMapData;
    private final HashSet<BodyPathLatticePoint> expandedNodeSet = new HashSet<>();
    private final DirectedGraph<BodyPathLatticePoint> graph = new DirectedGraph<>();
    private final List<BodyPathLatticePoint> neighbors = new ArrayList<>();
+
+   private final YoBoolean containsCollision = new YoBoolean("containsCollision", registry);
+   private final YoDouble edgeCost = new YoDouble("edgeCost", registry);
+   private final YoDouble deltaHeight = new YoDouble("deltaHeight", registry);
 
    private final PriorityQueue<BodyPathLatticePoint> stack;
    private BodyPathLatticePoint startNode, goalNode;
@@ -29,7 +41,10 @@ public class AStarBodyPathPlanner
 
    private final TIntArrayList xCollisionOffsets = new TIntArrayList();
    private final TIntArrayList yCollisionOffsets = new TIntArrayList();
-   
+
+   private final List<AStarBodyPathIterationData> iterationData = new ArrayList<>();
+   private final HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> edgeDataMap = new HashMap<>();
+
    /* Parameters to extract */
    private static final double groundClearance = 0.25;
    private static final double collisionRadius = 0.3;
@@ -38,6 +53,27 @@ public class AStarBodyPathPlanner
    public AStarBodyPathPlanner()
    {
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
+
+      List<YoVariable> allVariables = registry.collectSubtreeVariables();
+      this.edgeData = new AStarBodyPathEdgeData(allVariables.size());
+      graph.setGraphExpansionCallback(edge ->
+                                      {
+                                         for (int i = 0; i < allVariables.size(); i++)
+                                         {
+                                            edgeData.setData(i, allVariables.get(i).getValueAsLongBits());
+                                         }
+
+                                         edgeData.setParentNode(edge.getStartNode());
+                                         edgeData.setChildNode(edge.getEndNode());
+                                         edgeData.setChildSnapHeight(gridHeightMap.get(edge.getEndNode()));
+
+                                         edgeDataMap.put(edge, edgeData.getCopyAndClear());
+
+                                         containsCollision.set(false);
+                                         deltaHeight.set(Double.NaN);
+                                         edgeCost.set(Double.NaN);
+                                         deltaHeight.set(Double.NaN);
+                                      });
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -64,8 +100,11 @@ public class AStarBodyPathPlanner
       this.heightMapData = heightMapData;
    }
 
-   public List<Pose3DReadOnly> planPath(Pose3D startPose, Pose3D goalPose)
+   public List<Pose3DReadOnly> planPath(Pose3DReadOnly startPose, Pose3DReadOnly goalPose)
    {
+      iterationData.clear();
+      edgeDataMap.clear();
+
       startNode = new BodyPathLatticePoint(startPose.getX(), startPose.getY());
       goalNode = new BodyPathLatticePoint(goalPose.getX(), goalPose.getY());
       stack.clear();
@@ -96,21 +135,27 @@ public class AStarBodyPathPlanner
          {
             double height = snap(neighbor);
             if (Double.isNaN(height))
-               continue;
-
-            if (Math.abs(height - gridHeightMap.get(node)) > maxStepUpDown)
             {
+               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
                continue;
             }
 
-            boolean containsCollision = collisionDetected(neighbor, height);
-            if (containsCollision)
+            deltaHeight.set(Math.abs(height - gridHeightMap.get(node)));
+            if (deltaHeight.getValue() > maxStepUpDown)
             {
+               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
                continue;
             }
 
-            double cost = xyDistance(node, neighbor);
-            graph.checkAndSetEdge(node, neighbor, cost);
+            this.containsCollision.set(collisionDetected(neighbor, height));
+            if (containsCollision.getValue())
+            {
+               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+               continue;
+            }
+
+            edgeCost.set(xyDistance(node, neighbor));
+            graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
             stack.add(neighbor);
 
             if (node.equals(goalNode))
@@ -125,9 +170,16 @@ public class AStarBodyPathPlanner
          }
 
          expandedNodeSet.add(node);
+
+         AStarBodyPathIterationData iterationData = new AStarBodyPathIterationData();
+         iterationData.setParentNode(node);
+         iterationData.getChildNodes().addAll(neighbors);
+         iterationData.setParentNodeHeight(gridHeightMap.get(node));
+         this.iterationData.add(iterationData);
       }
 
-      List<BodyPathLatticePoint> path = graph.getPathFromStart(reachedGoal ? goalNode : leastCostNode);
+      BodyPathLatticePoint terminalNode = reachedGoal ? goalNode : leastCostNode;
+      List<BodyPathLatticePoint> path = graph.getPathFromStart(terminalNode);
       List<Pose3DReadOnly> waypoints = new ArrayList<>();
       for (int i = 0; i < path.size(); i++)
       {
@@ -136,8 +188,20 @@ public class AStarBodyPathPlanner
          waypoints.add(waypoint);
       }
 
+      markSolutionEdges(terminalNode);
       return waypoints;
    }
+
+   private void markSolutionEdges(BodyPathLatticePoint terminalNode)
+   {
+      edgeDataMap.values().forEach(data -> data.setSolutionEdge(false));
+      List<BodyPathLatticePoint> path = graph.getPathFromStart(terminalNode);
+      for (int i = 1; i < path.size(); i++)
+      {
+         edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).setSolutionEdge(true);
+      }
+   }
+
 
    public BodyPathLatticePoint getNextNode()
    {
@@ -241,5 +305,20 @@ public class AStarBodyPathPlanner
 
       poses.add(goalPose);
       return poses;
+   }
+
+   public List<AStarBodyPathIterationData> getIterationData()
+   {
+      return iterationData;
+   }
+
+   public HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> getEdgeDataMap()
+   {
+      return edgeDataMap;
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
    }
 }

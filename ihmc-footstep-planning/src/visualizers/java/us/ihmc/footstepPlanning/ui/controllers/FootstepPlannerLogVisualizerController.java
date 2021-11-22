@@ -15,6 +15,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -357,8 +358,14 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
 
-      // set graph data
+      // set footstep graph data
       updateGraphData(planarRegionsList, footstepPlannerLog.getEdgeDataMap(), footstepPlannerLog.getIterationData(), footstepPlannerLog.getVariableDescriptors());
+
+      // set body path graph data
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathGraphData,
+                             Triple.of(footstepPlannerLog.getBodyPathEdgeDataMap(),
+                                       footstepPlannerLog.getBodyPathIterationData(),
+                                       footstepPlannerLog.getBodyPathVariableDescriptors()));
    }
 
    private static class VisibilityMapWrapper implements VisibilityMapHolder

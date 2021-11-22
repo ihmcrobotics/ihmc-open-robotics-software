@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.BodyPathLogVisualizerController">
+
+    <left>
+        <Region prefWidth="50" />
+    </left>
+
+    <right>
+        <Region prefWidth="50" />
+    </right>
+
+    <top>
+        <HBox>
+            <children>
+                <VBox alignment="TOP_CENTER" BorderPane.alignment="CENTER">
+                    <children>
+                        <TextField fx:id="searchTextField" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefHeight="25.0">
+                            <VBox.margin>
+                                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                            </VBox.margin>
+                        </TextField>
+
+                        <ListView fx:id="variableListView" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
+                    </children>
+                </VBox>
+
+                <Separator orientation="VERTICAL" prefWidth="20" />
+
+                <VBox alignment="TOP_CENTER" prefWidth="1500" BorderPane.alignment="CENTER">
+                    <TableView fx:id="parentTable" maxHeight="24" />
+                    <TableView fx:id="childTable" prefHeight="300" />
+                </VBox>
+
+                <VBox>
+                    <VBox alignment="CENTER" BorderPane.alignment="CENTER">
+                        <Region prefHeight="20"/>
+                        <Button fx:id="reset" prefWidth="150" text="Reset"/>
+                        <Region prefHeight="10"/>
+                        <Button fx:id="stepInto" onAction="#stepInto" prefWidth="150" text="Step Into"/>
+                        <Region prefHeight="10"/>
+                        <Button fx:id="stepBack" onAction="#stepBack" prefWidth="150" text="Step Back"/>
+                        <Region prefHeight="10"/>
+                    </VBox>
+                </VBox>
+
+            </children>
+        </HBox>
+    </top>
+
+</BorderPane>
