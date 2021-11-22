@@ -40,7 +40,8 @@ public class SpringFlamingoSimulation
    private static final int BALLISTIC_WALKING_CONTROLLER = 0, FAST_WALKING_CONTROLLER = 1, LEAP_OF_FAITH_CONTROLLER = 2;
 
    // private static int controllerToUse = FAST_WALKING_CONTROLLER;
-   private static int controllerToUse = BALLISTIC_WALKING_CONTROLLER;
+//   private static int controllerToUse = BALLISTIC_WALKING_CONTROLLER;
+   private static int controllerToUse = LEAP_OF_FAITH_CONTROLLER;
 
    public static double DT = 0.0001;
    public static int TICKS_PER_RECORD = 100;
@@ -48,7 +49,13 @@ public class SpringFlamingoSimulation
 
    static
    {
-      if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
+      if (controllerToUse == FAST_WALKING_CONTROLLER)
+      {
+         DT = 0.0001;
+         TICKS_PER_RECORD = 100;
+         TICKS_PER_CONTROL = 10;
+      }
+      else if (controllerToUse == BALLISTIC_WALKING_CONTROLLER)
       {
          DT = 0.0004;
          TICKS_PER_RECORD = 25;
@@ -90,13 +97,13 @@ public class SpringFlamingoSimulation
 
       Robot[] springFlamingos = new Robot[numberOfFlamingos];
 
-      Vector3D surfaceNormal = new Vector3D(0.0, 0.0, 1.0);//-0.1, 0.0, 1.0);
-      //    Vector3D surfaceNormal = new Vector3D(-0.05, 0.0, 1.0);
+//      Vector3D surfaceNormal = new Vector3D(0.0, 0.0, 1.0);//-0.1, 0.0, 1.0);
+          Vector3D surfaceNormal = new Vector3D(-0.35, 0.0, 1.0);
       Point3D intersectionPoint = new Point3D();
       double maxXY = 10.0;
-      SlopedPlaneGroundProfile profile3D = new SlopedPlaneGroundProfile(surfaceNormal, intersectionPoint, maxXY);
-//          CombinedTerrainObject3D profile3D = createSlopeAndStepTerrainObject();
-//          CombinedTerrainObject3D profile3D = createStepDownsAndFlatsTerrain();
+//      SlopedPlaneGroundProfile profile3D = new SlopedPlaneGroundProfile(surfaceNormal, intersectionPoint, maxXY);
+                CombinedTerrainObject3D profile3D = createSlopeAndStepTerrainObject();
+      //          CombinedTerrainObject3D profile3D = createStepDownsAndFlatsTerrain();
 
       for (int i = 0; i < numberOfFlamingos; i++)
       {
@@ -440,10 +447,10 @@ public class SpringFlamingoSimulation
       terrainObject.addBox(3.0, -1.0, stepDownOneX, 1.0, -0.03, 0.0);
       terrainObject.addBox(stepDownOneX, -1.0, stepDownTwoX, 1.0, stepDownOneBottomZ, stepDownOneBottomZ - 0.03, YoAppearance.Red());
       terrainObject.addBox(stepDownTwoX, -1.0, stepDownTwoXEnd, 1.0, stepDownTwoBottomZ, stepDownTwoBottomZ - 0.03, YoAppearance.Green());
-      
+
       return terrainObject;
    }
-   
+
    public static void main(String[] args) throws SimulationExceededMaximumTimeException, ControllerFailureException
    {
       new SpringFlamingoSimulation();

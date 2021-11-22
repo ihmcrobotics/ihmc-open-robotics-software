@@ -7,7 +7,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.SimpleState;
+import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -91,7 +91,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
    private final YoDouble minimumSupportKneeAngle = new YoDouble("minimumSupportKneeAngle", registry);
    private final YoDouble maximumSupportKneeAngle = new YoDouble("maximumSupportKneeAngle", registry);
 
-   private final StateMachine<LeapOfFaithState> stateMachine;
+   private final StateMachine<LeapOfFaithState, State> stateMachine;
 
    public SpringFlamingoLeapOfFaithController(SpringFlamingoRobot robot)
    {
@@ -167,36 +167,60 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       minimumKneeForce.set(-totalMass.getDoubleValue() * 9.81 * 0.2);
       maximumKneeForce.set(totalMass.getDoubleValue() * 9.81 * 1.1);
 
-      YoDouble timeProvider = robot.getYoTime();
-      stateMachine = new StateMachine<LeapOfFaithState>("state", "switchTime", LeapOfFaithState.class, timeProvider, registry);
-
-      LoadingToeOffState rightLoadingLeftToeOffState = new LoadingToeOffState(LeapOfFaithState.RightLoadingLeftToeOff, LeapOfFaithState.RightSupportLeftSwing);
-      stateMachine.addState(rightLoadingLeftToeOffState);
-
-      SupportSwingState rightSupportLeftSwingState = new SupportSwingState(LeapOfFaithState.RightSupportLeftSwing, LeapOfFaithState.RightDropLeftRetract,
-                                                                           registry);
-      stateMachine.addState(rightSupportLeftSwingState);
-
-      DropRetractState rightDropLeftRetractState = new DropRetractState(LeapOfFaithState.RightDropLeftRetract, LeapOfFaithState.LeftLoadingRightToeOff,
-                                                                        registry);
-      stateMachine.addState(rightDropLeftRetractState);
-
-      LoadingToeOffState leftLoadingRightToeOffState = new LoadingToeOffState(LeapOfFaithState.LeftLoadingRightToeOff, LeapOfFaithState.LeftSupportRightSwing);
-      stateMachine.addState(leftLoadingRightToeOffState);
-
-      SupportSwingState leftSupportRightSwingState = new SupportSwingState(LeapOfFaithState.LeftSupportRightSwing, LeapOfFaithState.LeftDropRightRetract,
-                                                                           registry);
-      stateMachine.addState(leftSupportRightSwingState);
-
-      DropRetractState leftDropRightRetractState = new DropRetractState(LeapOfFaithState.LeftDropRightRetract, LeapOfFaithState.RightLoadingLeftToeOff,
-                                                                        registry);
-      stateMachine.addState(leftDropRightRetractState);
+      stateMachine = setupStateMachine(robot);
 
       initControl();
       computeThighAngles();
       computeCapturePoint();
+   }
 
-      stateMachine.setCurrentState(LeapOfFaithState.RightDropLeftRetract);
+   private StateMachine<LeapOfFaithState, State> setupStateMachine(SpringFlamingoRobot robot)
+   {
+      // Create the factory:
+      StateMachineFactory<LeapOfFaithState, State> leftFactory = new StateMachineFactory<>(LeapOfFaithState.class);
+      leftFactory.setNamePrefix("state");
+      leftFactory.setRegistry(registry);
+      leftFactory.buildYoClock(robot.t);
+
+      // Create the states:
+      LoadingToeOffState rightLoadingLeftToeOffState = new LoadingToeOffState(LeapOfFaithState.RightLoadingLeftToeOff, LeapOfFaithState.RightSupportLeftSwing);
+
+      SupportSwingState rightSupportLeftSwingState = new SupportSwingState(LeapOfFaithState.RightSupportLeftSwing,
+                                                                           LeapOfFaithState.RightDropLeftRetract,
+                                                                           registry);
+
+      DropRetractState rightDropLeftRetractState = new DropRetractState(LeapOfFaithState.RightDropLeftRetract,
+                                                                        LeapOfFaithState.LeftLoadingRightToeOff,
+                                                                        registry);
+
+      LoadingToeOffState leftLoadingRightToeOffState = new LoadingToeOffState(LeapOfFaithState.LeftLoadingRightToeOff, LeapOfFaithState.LeftSupportRightSwing);
+
+      SupportSwingState leftSupportRightSwingState = new SupportSwingState(LeapOfFaithState.LeftSupportRightSwing,
+                                                                           LeapOfFaithState.LeftDropRightRetract,
+                                                                           registry);
+
+      DropRetractState leftDropRightRetractState = new DropRetractState(LeapOfFaithState.LeftDropRightRetract,
+                                                                        LeapOfFaithState.RightLoadingLeftToeOff,
+                                                                        registry);
+
+      // Add the states:
+      leftFactory.addState(LeapOfFaithState.RightLoadingLeftToeOff, rightLoadingLeftToeOffState);
+      leftFactory.addState(LeapOfFaithState.RightSupportLeftSwing, rightSupportLeftSwingState);
+      leftFactory.addState(LeapOfFaithState.RightDropLeftRetract, rightDropLeftRetractState);
+      leftFactory.addState(LeapOfFaithState.LeftLoadingRightToeOff, leftLoadingRightToeOffState);
+      leftFactory.addState(LeapOfFaithState.LeftSupportRightSwing, leftSupportRightSwingState);
+      leftFactory.addState(LeapOfFaithState.LeftDropRightRetract, leftDropRightRetractState);
+
+      // Add the transition conditions:
+      leftFactory.addDoneTransition(LeapOfFaithState.RightLoadingLeftToeOff, LeapOfFaithState.RightSupportLeftSwing);
+      leftFactory.addDoneTransition(LeapOfFaithState.RightSupportLeftSwing, LeapOfFaithState.RightDropLeftRetract);
+      leftFactory.addDoneTransition(LeapOfFaithState.RightDropLeftRetract, LeapOfFaithState.LeftLoadingRightToeOff);
+
+      leftFactory.addDoneTransition(LeapOfFaithState.LeftLoadingRightToeOff, LeapOfFaithState.LeftSupportRightSwing);
+      leftFactory.addDoneTransition(LeapOfFaithState.LeftSupportRightSwing, LeapOfFaithState.LeftDropRightRetract);
+      leftFactory.addDoneTransition(LeapOfFaithState.LeftDropRightRetract, LeapOfFaithState.RightLoadingLeftToeOff);
+
+      return leftFactory.build(LeapOfFaithState.RightDropLeftRetract);
    }
 
    private void initControl()
@@ -242,6 +266,20 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          q_d_ankles.get(loadingSide).set(0.0);
 
          toeOffAnkleVelocity.set(0.0);
+      }
+
+      @Override
+      public boolean isDone(double timeInState)
+      {
+         if (-capturePointHeelsX.get(loadingSide).getDoubleValue() > capturePointToStartSwing.getDoubleValue())
+         {
+            if (timeInState > minimumLoadingDuration.getValue())
+            {
+               return true;
+            }
+         }
+
+         return false;
       }
 
       @Override
@@ -310,18 +348,10 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          doBrakingOnSupportAnkleIfTooFast(loadingSide);
 
          robot.setAnkleTorque(loadingSide, 0.0);
-
-         if (-capturePointHeelsX.get(loadingSide).getDoubleValue() > capturePointToStartSwing.getDoubleValue())
-         {
-            if (stateMachine.timeInCurrentState() > minimumLoadingDuration.getValue())
-            {
-               super.transitionToDefaultNextState();
-            }
-         }
       }
    };
 
-   private class SupportSwingState extends SimpleState<LeapOfFaithState>
+   private class SupportSwingState implements State
    {
       private RobotSide supportSide, swingSide;
       private final YoPolynomial swingTrajectory;
@@ -330,8 +360,6 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
       public SupportSwingState(LeapOfFaithState stateEnum, LeapOfFaithState nextStateEnum, YoRegistry parentRegistry)
       {
-         super(stateEnum, nextStateEnum);
-
          supportSide = stateEnum.getSupportSide();
          swingSide = stateEnum.getSwingSide();
 
@@ -339,13 +367,13 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
          initialSwingThighAngle = new YoDouble(swingSideName + "InitialSwingThighAngle", parentRegistry);
 
-         swingTrajectory = new YoPolynomial(swingSideName + "Swing", 3, parentRegistry);
+         swingTrajectory = new YoPolynomial(swingSideName + "Swing", 4, parentRegistry);
 
          desiredSwingThighAngle = new YoDouble(swingSideName + "DesiredSwingThighAngle", parentRegistry);
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          initialSwingThighAngle.set(thighAngles.get(swingSide).getDoubleValue());
          swingTrajectory.setCubic(0.0, swingDuration.getValue(), initialSwingThighAngle.getValue(), finalSwingThighAngle.getValue());
@@ -355,18 +383,27 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          q_d_knees.get(supportSide).set(robot.getKneeAngle(supportSide));
          q_d_knees.get(swingSide).set(robot.getKneeAngle(swingSide));
          q_d_ankles.get(swingSide).set(robot.getAnkleAngle(swingSide));
-
-         super.doTransitionIntoAction();
       }
 
       @Override
-      public void doAction()
+      public boolean isDone(double timeInState)
+      {
+         if (timeInState > swingTime.getDoubleValue())
+         {
+            return true;
+         }
+
+         return false;
+      }
+
+      @Override
+      public void doAction(double timeInState)
       {
          double supportHipTorque = bodyOrientationKp.getDoubleValue() * (q_d_pitch.getDoubleValue() - robot.getBodyAngle())
                - bodyOrientationKd.getDoubleValue() * robot.getBodyAngularVelocity();
          robot.setHipTorque(supportSide, -supportHipTorque);
 
-         swingTrajectory.compute(getTimeInCurrentState());
+         swingTrajectory.compute(timeInState);
          desiredSwingThighAngle.set(swingTrajectory.getValue());
 
          double swingHipTorque = thighSwingKp.getDoubleValue() * (desiredSwingThighAngle.getDoubleValue() - thighAngles.get(swingSide).getDoubleValue())
@@ -409,11 +446,6 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          robot.setAnkleTorque(swingSide, swingAnkleTorque);
 
          doBrakingOnSupportAnkleIfTooFast(supportSide);
-
-         if (stateMachine.timeInCurrentState() > swingTime.getDoubleValue())
-         {
-            super.transitionToDefaultNextState();
-         }
       }
 
    };
@@ -435,7 +467,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       }
    }
 
-   private class DropRetractState extends SimpleState<LeapOfFaithState>
+   private class DropRetractState implements State
    {
       private RobotSide supportSide, swingSide;
       private final YoPolynomial retractTrajectory;
@@ -444,8 +476,6 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
       public DropRetractState(LeapOfFaithState stateEnum, LeapOfFaithState nextStateEnum, YoRegistry parentRegistry)
       {
-         super(stateEnum, nextStateEnum);
-
          supportSide = stateEnum.getSupportSide();
          swingSide = stateEnum.getSwingSide();
 
@@ -453,13 +483,13 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
          initialRetractThighAngle = new YoDouble(swingSideName + "InitialRetractThighAngle", parentRegistry);
 
-         retractTrajectory = new YoPolynomial(swingSideName + "Retract", 3, parentRegistry);         
+         retractTrajectory = new YoPolynomial(swingSideName + "Retract", 4, parentRegistry);
 
          desiredRetractThighAngle = new YoDouble(swingSideName + "DesiredRetractThighAngle", parentRegistry);
       }
 
       @Override
-      public void doTransitionIntoAction()
+      public void onEntry()
       {
          initialRetractThighAngle.set(thighAngles.get(swingSide).getDoubleValue());
          retractTrajectory.setCubic(0.0, retractDuration.getValue(), initialRetractThighAngle.getValue(), finalRetractThighAngle.getValue());
@@ -468,18 +498,27 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          q_d_knees.get(swingSide).set(robot.getKneeAngle(swingSide));
          //         q_d_knees.get(supportSide).set(0.0); Keep support desired knee angle the same as it was before.
          dropSupportKneeVelocity.set(0.0);
-
-         super.doTransitionIntoAction();
       }
 
       @Override
-      public void doAction()
+      public boolean isDone(double timeInState)
+      {
+         if (robot.hasFootMadeContact(swingSide))
+         {
+            return true;
+         }
+
+         return false;
+      }
+
+      @Override
+      public void doAction(double timeInState)
       {
          double supportHipTorque = bodyOrientationKp.getDoubleValue() * (q_d_pitch.getDoubleValue() - robot.getBodyAngle())
                - bodyOrientationKd.getDoubleValue() * robot.getBodyAngularVelocity();
          robot.setHipTorque(supportSide, -supportHipTorque);
 
-         retractTrajectory.compute(getTimeInCurrentState());
+         retractTrajectory.compute(timeInState);
          desiredRetractThighAngle.set(retractTrajectory.getValue());
 
          double swingHipTorque = thighSwingKp.getDoubleValue() * (desiredRetractThighAngle.getDoubleValue() - thighAngles.get(swingSide).getDoubleValue())
@@ -523,11 +562,6 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          robot.setAnkleTorque(swingSide, swingAnkleTorque);
 
          doBrakingOnSupportAnkleIfTooFast(supportSide);
-
-         if (robot.hasFootMadeContact(swingSide))
-         {
-            super.transitionToDefaultNextState();
-         }
       }
    };
 
@@ -568,7 +602,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       computeCapturePoint();
 
       stateMachine.doAction();
-      stateMachine.checkTransitionConditions();
+      stateMachine.doTransitions();
    }
 
    private void computeThighAngles()
