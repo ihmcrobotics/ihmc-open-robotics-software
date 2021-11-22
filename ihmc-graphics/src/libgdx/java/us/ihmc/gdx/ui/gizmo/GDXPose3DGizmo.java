@@ -1,5 +1,6 @@
 package us.ihmc.gdx.ui.gizmo;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -146,6 +147,76 @@ public class GDXPose3DGizmo implements RenderableProvider
             if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, axisRotations.get(closestCollisionSelection.toAxis3D()), transform))
             {
                clockFaceDragAlgorithm.getMotion().transform(transform.getRotation());
+            }
+         }
+      }
+
+      // keyboard based controls
+      boolean upArrowHeld = ImGui.isKeyDown(input.getUpArrowKey());
+      boolean downArrowHeld = ImGui.isKeyDown(input.getDownArrowKey());
+      boolean leftArrowHeld = ImGui.isKeyDown(input.getLeftArrowKey());
+      boolean rightArrowHeld = ImGui.isKeyDown(input.getRightArrowKey());
+      boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
+      if (anyArrowHeld) // only the arrow keys do the moving
+      {
+         boolean ctrlHeld = ImGui.getIO().getKeyCtrl();
+         boolean altHeld = ImGui.getIO().getKeyAlt();
+         boolean shiftHeld = ImGui.getIO().getKeyShift();
+         double deltaTime = Gdx.graphics.getDeltaTime();
+         if (altHeld) // orientation
+         {
+            double amount = deltaTime * (shiftHeld ? 0.2 : 1.0);
+            if (upArrowHeld) // pitch +
+            {
+               transform.getRotation().appendPitchRotation(amount);
+            }
+            if (downArrowHeld) // pitch -
+            {
+               transform.getRotation().appendPitchRotation(-amount);
+            }
+            if (rightArrowHeld && !ctrlHeld) // roll +
+            {
+               transform.getRotation().appendRollRotation(amount);
+            }
+            if (leftArrowHeld && !ctrlHeld) // roll -
+            {
+               transform.getRotation().appendRollRotation(-amount);
+            }
+            if (leftArrowHeld && ctrlHeld) // yaw +
+            {
+               transform.getRotation().appendYawRotation(amount);
+            }
+            if (rightArrowHeld && ctrlHeld) // yaw -
+            {
+               transform.getRotation().appendYawRotation(-amount);
+            }
+         }
+         else // translation
+         {
+            double amount = deltaTime * (shiftHeld ? 0.05 : 0.4);
+            if (upArrowHeld && !ctrlHeld) // x +
+            {
+               transform.getTranslation().addX(amount);
+            }
+            if (downArrowHeld && !ctrlHeld) // x -
+            {
+               transform.getTranslation().subX(amount);
+            }
+            if (leftArrowHeld) // y +
+            {
+               transform.getTranslation().addY(amount);
+            }
+            if (rightArrowHeld) // y -
+            {
+               transform.getTranslation().subY(amount);
+            }
+            if (upArrowHeld && ctrlHeld) // z +
+            {
+               transform.getTranslation().addZ(amount);
+            }
+            if (downArrowHeld && ctrlHeld) // z -
+            {
+               transform.getTranslation().subZ(amount);
             }
          }
       }
