@@ -38,7 +38,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
@@ -47,6 +49,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -397,7 +400,7 @@ public class AvatarSimulationFactory
       if (yoVariableServer != null)
       {
          yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
-                                          estimatorThread.getFullRobotModel().getElevator(),
+                                          createYoVariableServerJointList(estimatorThread.getFullRobotModel().getElevator()),
                                           estimatorThread.getYoGraphicsListRegistry());
          estimatorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              estimatorThread.getYoRegistry()));
@@ -423,6 +426,25 @@ public class AvatarSimulationFactory
          handControlTask.addRunnableOnSchedulerThread(() -> handControlVisualizer.update());
          addRegistryAndGraphics(handControlVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
       }
+   }
+
+   public static List<JointBasics> createYoVariableServerJointList(RigidBodyBasics rootBody)
+   {
+      List<JointBasics> joints = new ArrayList<>();
+
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
+      {
+         if (joint instanceof InvertedFourBarJoint)
+         {
+            joints.addAll(((InvertedFourBarJoint) joint).getFourBarFunction().getLoopJoints());
+         }
+         else
+         {
+            joints.add(joint);
+         }
+      }
+
+      return joints;
    }
 
    private static void addRegistryAndGraphics(SimulationRobotVisualizer visualizer, YoRegistry registry, SimulationConstructionSet scs)

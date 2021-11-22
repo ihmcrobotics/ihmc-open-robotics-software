@@ -76,8 +76,10 @@ public class QuadrupedControllerToolbox
 
    private final YoBoolean controllerFailed;
 
-   public QuadrupedControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment, QuadrupedPhysicalProperties physicalProperties,
-                                     YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public QuadrupedControllerToolbox(QuadrupedRuntimeEnvironment runtimeEnvironment,
+                                     QuadrupedPhysicalProperties physicalProperties,
+                                     YoRegistry registry,
+                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       double gravity = 9.81;
       double mass = runtimeEnvironment.getFullRobotModel().getTotalMass();
@@ -91,13 +93,15 @@ public class QuadrupedControllerToolbox
       footControlModuleParameters = new QuadrupedFootControlModuleParameters();
       registry.addChild(footControlModuleParameters.getYoVariableRegistry());
 
-
-
       // create controllers and estimators
       referenceFrames = new QuadrupedReferenceFrames(runtimeEnvironment.getFullRobotModel());
 
-      linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(), mass, gravity, physicalProperties.getNominalBodyHeight(), registry);
-//      upcomingGroundPlaneEstimator = new YoGroundPlaneEstimator("upcoming", registry, runtimeEnvironment.getGraphicsListRegistry(), YoAppearance.PlaneMaterial());
+      linearInvertedPendulumModel = new LinearInvertedPendulumModel(referenceFrames.getCenterOfMassFrame(),
+                                                                    mass,
+                                                                    gravity,
+                                                                    physicalProperties.getNominalBodyHeight(),
+                                                                    registry);
+      //      upcomingGroundPlaneEstimator = new YoGroundPlaneEstimator("upcoming", registry, runtimeEnvironment.getGraphicsListRegistry(), YoAppearance.PlaneMaterial());
       upcomingGroundPlaneEstimator = new GroundPlaneEstimator();
       groundPlaneEstimator = new YoGroundPlaneEstimator(registry, runtimeEnvironment.getGraphicsListRegistry());
       groundPlanePositions = new QuadrantDependentList<>();
@@ -105,14 +109,21 @@ public class QuadrupedControllerToolbox
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          groundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "GroundPlanePosition", worldFrame, registry));
-         upcomingGroundPlanePositions.set(robotQuadrant, new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "UpcomingGroundPlanePosition", worldFrame, registry));
+         upcomingGroundPlanePositions.set(robotQuadrant,
+                                          new YoFramePoint3D(robotQuadrant.getCamelCaseName() + "UpcomingGroundPlanePosition", worldFrame, registry));
       }
 
       comJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
-      dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassFrame(), linearInvertedPendulumModel, registry, yoGraphicsListRegistry);
+      dcmPositionEstimator = new DivergentComponentOfMotionEstimator(referenceFrames.getCenterOfMassFrame(),
+                                                                     linearInvertedPendulumModel,
+                                                                     registry,
+                                                                     yoGraphicsListRegistry);
 
-      fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(), referenceFrames.getSoleFrames(), dcmPositionEstimator,
-                                               runtimeEnvironment.getFallDetectionParameters(), registry);
+      fallDetector = new QuadrupedFallDetector(referenceFrames.getBodyFrame(),
+                                               referenceFrames.getSoleFrames(),
+                                               dcmPositionEstimator,
+                                               runtimeEnvironment.getFallDetectionParameters(),
+                                               registry);
 
       contactablePlaneBodies = runtimeEnvironment.getContactablePlaneBodies();
       centerOfMassDataHolder = runtimeEnvironment.getCenterOfMassDataHolder();
@@ -125,22 +136,25 @@ public class QuadrupedControllerToolbox
          ContactablePlaneBody contactableFoot = contactableFeet.get(robotQuadrant);
          RigidBodyBasics rigidBody = contactableFoot.getRigidBody();
          String name = contactableFoot.getSoleFrame().getName();
-         YoPlaneContactState planeContactState = new YoPlaneContactState(name, rigidBody, contactableFoot.getSoleFrame(),
-                                                                         contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
+         YoPlaneContactState planeContactState = new YoPlaneContactState(name,
+                                                                         rigidBody,
+                                                                         contactableFoot.getSoleFrame(),
+                                                                         contactableFoot.getContactPoints2d(),
+                                                                         coefficientOfFriction,
+                                                                         registry);
          YoEnum<ContactState> contactState = new YoEnum<>(name + "ContactState", registry, ContactState.class);
-
 
          footContactStates.put(robotQuadrant, planeContactState);
          contactStates.put(robotQuadrant, contactState);
          planeContactState.attachContactChangeListener(changed ->
-                                                       {
-                                                          if (((YoBoolean) changed).getBooleanValue())
-                                                             contactState.set(ContactState.IN_CONTACT);
-                                                          else
-                                                             contactState.set(ContactState.NO_CONTACT);
+         {
+            if (((YoBoolean) changed).getBooleanValue())
+               contactState.set(ContactState.IN_CONTACT);
+            else
+               contactState.set(ContactState.NO_CONTACT);
 
-                                                          updateFeetInContact();
-                                                       });
+            updateFeetInContact();
+         });
 
       }
 
@@ -149,9 +163,11 @@ public class QuadrupedControllerToolbox
       else
          referenceFramesVisualizer = null;
 
-
-      supportPolygon = new QuadrupedSupportPolygons(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(), footContactStates,
-                                                    referenceFrames.getSoleZUpFrames(), registry, yoGraphicsListRegistry);
+      supportPolygon = new QuadrupedSupportPolygons(referenceFrames.getCenterOfFeetZUpFrameAveragingLowestZHeightsAcrossEnds(),
+                                                    footContactStates,
+                                                    referenceFrames.getSoleZUpFrames(),
+                                                    registry,
+                                                    yoGraphicsListRegistry);
 
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
 
@@ -173,14 +189,14 @@ public class QuadrupedControllerToolbox
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
 
-      if(centerOfMassDataHolder == null)
+      if (centerOfMassDataHolder == null || !centerOfMassDataHolder.hasCenterOfMassVelocity())
       {
          comJacobian.reset();
          comVelocityEstimate.setIncludingFrame(comJacobian.getCenterOfMassVelocity());
       }
       else
       {
-         centerOfMassDataHolder.getCenterOfMassVelocity(comVelocityEstimate);
+         comVelocityEstimate.setIncludingFrame(centerOfMassDataHolder.getCenterOfMassVelocity());
       }
 
       yoCoMVelocityEstimate.setMatchingFrame(comVelocityEstimate);

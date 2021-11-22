@@ -1,32 +1,126 @@
 package us.ihmc.robotics.sensors;
 
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.screwTheory.GenericCRC32;
 
+/**
+ * Data holder used to pass center of mass position and velocity from the state estimator thread to
+ * the controller thread.
+ */
 public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
 {
-   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
-   
-   public void setCenterOfMassVelocity(FrameVector3DReadOnly centerOfMassVelocity)
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private boolean hasPosition = false;
+   private boolean hasVelocity = false;
+   private final FixedFramePoint3DBasics centerOfMassPosition = new FramePoint3D(worldFrame);
+   private final FixedFrameVector3DBasics centerOfMassVelocity = new FrameVector3D(worldFrame);
+
+   public CenterOfMassDataHolder()
    {
-      this.centerOfMassVelocity.setIncludingFrame(centerOfMassVelocity); 
+      clear();
    }
 
-   public void set(CenterOfMassDataHolder estimatorCenterOfMassDataHolder)
+   public void clear()
    {
-      this.centerOfMassVelocity.setIncludingFrame(estimatorCenterOfMassDataHolder.centerOfMassVelocity);
+      hasPosition = false;
+      hasVelocity = false;
+      centerOfMassPosition.setToNaN();
+      centerOfMassVelocity.setToNaN();
+   }
+
+   public void setCenterOfMassPosition(ReferenceFrame referenceFrame, Point3DReadOnly centerOfMassPosition)
+   {
+      hasPosition = true;
+      this.centerOfMassPosition.setMatchingFrame(referenceFrame, centerOfMassPosition);
+   }
+
+   public void setCenterOfMassPosition(FramePoint3DReadOnly centerOfMassPosition)
+   {
+      setCenterOfMassPosition(centerOfMassPosition.getReferenceFrame(), centerOfMassPosition);
+   }
+
+   public void setCenterOfMassVelocity(ReferenceFrame referenceFrame, Vector3DReadOnly centerOfMassVelocity)
+   {
+      hasVelocity = true;
+      this.centerOfMassVelocity.setMatchingFrame(referenceFrame, centerOfMassVelocity);
+   }
+
+   public void setCenterOfMassVelocity(FrameVector3DReadOnly centerOfMassVelocity)
+   {
+      setCenterOfMassVelocity(centerOfMassVelocity.getReferenceFrame(), centerOfMassVelocity);
+   }
+
+   public void set(CenterOfMassDataHolder other)
+   {
+      hasPosition = other.hasPosition;
+      hasVelocity = other.hasVelocity;
+      centerOfMassPosition.set(other.centerOfMassPosition);
+      centerOfMassVelocity.set(other.centerOfMassVelocity);
    }
 
    @Override
-   public void getCenterOfMassVelocity(FrameVector3D centerOfMassVelocityToPack)
+   public boolean hasCenterOfMassPosition()
    {
-      centerOfMassVelocityToPack.setIncludingFrame(centerOfMassVelocity);
+      return hasPosition;
+   }
+
+   @Override
+   public FixedFramePoint3DBasics getCenterOfMassPosition()
+   {
+      return centerOfMassPosition;
+   }
+
+   @Override
+   public boolean hasCenterOfMassVelocity()
+   {
+      return hasVelocity;
+   }
+
+   @Override
+   public FixedFrameVector3DBasics getCenterOfMassVelocity()
+   {
+      return centerOfMassVelocity;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof CenterOfMassDataHolder)
+      {
+         CenterOfMassDataHolder other = (CenterOfMassDataHolder) object;
+         if (hasPosition != other.hasPosition)
+            return false;
+         if (hasVelocity != other.hasVelocity)
+            return false;
+         if (!centerOfMassPosition.equals(other.centerOfMassPosition))
+            return false;
+         if (!centerOfMassVelocity.equals(other.centerOfMassVelocity))
+            return false;
+         return true;
+      }
+      else
+      {
+         return false;
+      }
    }
 
    public void calculateChecksum(GenericCRC32 checksum)
    {
+      checksum.update(hasPosition);
+      checksum.update(hasVelocity);
+      checksum.update(centerOfMassPosition);
       checksum.update(centerOfMassVelocity);
    }
-
 }

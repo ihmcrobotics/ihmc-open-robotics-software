@@ -17,15 +17,26 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -59,17 +70,18 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 
-public class HighLevelHumanoidControllerToolbox
+public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProvider
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
-   private final ReferenceFrame centerOfMassFrame;
    private final FullHumanoidRobotModel fullRobotModel;
+
+   private final ReferenceFrame centerOfMassFrame;
+   private final CenterOfMassStateProvider centerOfMassStateProvider;
    private final CapturePointCalculator capturePointCalculator;
 
    private final CommonHumanoidReferenceFrames referenceFrames;
@@ -150,13 +162,22 @@ public class HighLevelHumanoidControllerToolbox
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
-   public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel, CommonHumanoidReferenceFrames referenceFrames,
+   public HighLevelHumanoidControllerToolbox(FullHumanoidRobotModel fullRobotModel,
+                                             CenterOfMassStateProvider centerOfMassStateProvider,
+                                             CommonHumanoidReferenceFrames referenceFrames,
                                              SideDependentList<? extends FootSwitchInterface> footSwitches,
-                                             SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime, double gravityZ, double omega0,
-                                             SideDependentList<ContactableFoot> feet, double controlDT, List<Updatable> updatables,
-                                             List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                             SideDependentList<ForceSensorDataReadOnly> wristForceSensors,
+                                             YoDouble yoTime,
+                                             double gravityZ,
+                                             double omega0,
+                                             SideDependentList<ContactableFoot> feet,
+                                             double controlDT,
+                                             List<Updatable> updatables,
+                                             List<ContactablePlaneBody> contactableBodies,
+                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                              JointBasics... jointsToIgnore)
    {
+      this.centerOfMassStateProvider = centerOfMassStateProvider;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
@@ -168,7 +189,7 @@ public class HighLevelHumanoidControllerToolbox
 
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
 
-      capturePointCalculator = new CapturePointCalculator(centerOfMassFrame, fullRobotModel.getElevator());
+      capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
 
       MathTools.checkIntervalContains(gravityZ, 0.0, Double.POSITIVE_INFINITY);
 
@@ -181,9 +202,7 @@ public class HighLevelHumanoidControllerToolbox
 
       if (yoGraphicsListRegistry != null)
       {
-         referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames,
-                                                                                 yoGraphicsListRegistry,
-                                                                                 registry);
+         referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
       }
       else
       {
@@ -401,6 +420,7 @@ public class HighLevelHumanoidControllerToolbox
 
    public void update()
    {
+      centerOfMassStateProvider.updateState(); // Needs to be updated before the frames, as it is need to update the CoM frame.
       referenceFrames.updateFrames();
 
       if (referenceFramesVisualizer != null)
@@ -459,9 +479,16 @@ public class HighLevelHumanoidControllerToolbox
       yoCapturePoint.set(capturePoint2d, 0.0);
    }
 
-   public CenterOfMassJacobian getCenterOfMassJacobian()
+   @Override
+   public FramePoint3DReadOnly getCenterOfMassPosition()
    {
-      return capturePointCalculator.getCenterOfMassJacobian();
+      return centerOfMassStateProvider.getCenterOfMassPosition();
+   }
+
+   @Override
+   public FrameVector3DReadOnly getCenterOfMassVelocity()
+   {
+      return centerOfMassStateProvider.getCenterOfMassVelocity();
    }
 
    private final FrameVector3D angularMomentum = new FrameVector3D();
@@ -980,7 +1007,7 @@ public class HighLevelHumanoidControllerToolbox
    {
       return omega0.getDoubleValue();
    }
-   
+
    public YoDouble getOmega0Provider()
    {
       return omega0;

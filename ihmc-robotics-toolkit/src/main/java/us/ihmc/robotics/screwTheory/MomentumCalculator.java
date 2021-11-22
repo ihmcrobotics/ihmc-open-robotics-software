@@ -2,40 +2,35 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.stream.Stream;
 
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Momentum;
-import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameMomentumBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 
 public class MomentumCalculator
 {
-   private final Twist tempTwist = new Twist();
    private final Momentum tempMomentum = new Momentum();
-   private final Vector3D zero = new Vector3D();
-   private final RigidBodyBasics[] rigidBodiesInOrders;
+   private final RigidBodyReadOnly[] rigidBodiesInOrders;
 
-   public MomentumCalculator(RigidBodyBasics... rigidBodies)
+   public MomentumCalculator(RigidBodyReadOnly... rigidBodies)
    {
-      rigidBodiesInOrders = Stream.of(rigidBodies).filter(body -> body.getInertia() != null).toArray(RigidBodyBasics[]::new);
+      rigidBodiesInOrders = Stream.of(rigidBodies).filter(body -> body.getInertia() != null).toArray(RigidBodyReadOnly[]::new);
    }
 
-   public MomentumCalculator(RigidBodyBasics rootBody)
+   public MomentumCalculator(RigidBodyReadOnly rootBody)
    {
       this(rootBody.subtreeArray());
    }
 
-   public void computeAndPack(Momentum momentum)
+   public void computeAndPack(FixedFrameMomentumBasics momentum)
    {
-      momentum.getAngularPart().set(zero);
-      momentum.getLinearPart().set(zero);
+      momentum.setToZero();
 
-      for (RigidBodyBasics rigidBody : rigidBodiesInOrders)
+      for (RigidBodyReadOnly rigidBody : rigidBodiesInOrders)
       {
-         SpatialInertiaBasics inertia = rigidBody.getInertia();
-         rigidBody.getBodyFixedFrame().getTwistOfFrame(tempTwist);
+         SpatialInertiaReadOnly inertia = rigidBody.getInertia();
          tempMomentum.setReferenceFrame(inertia.getReferenceFrame());
-         tempMomentum.compute(inertia, tempTwist);
+         tempMomentum.compute(inertia, rigidBody.getBodyFixedFrame().getTwistOfFrame());
          tempMomentum.changeFrame(momentum.getReferenceFrame());
          momentum.add(tempMomentum);
       }

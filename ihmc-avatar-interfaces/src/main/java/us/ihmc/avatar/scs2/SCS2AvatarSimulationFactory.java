@@ -225,6 +225,10 @@ public class SCS2AvatarSimulationFactory
       simulationSession.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       simulationSession.addTerrainObject(terrainObjectDefinition.get());
       robot = simulationSession.addRobot(robotDefinition);
+      robot.getControllerManager()
+           .addController(new SCS2StateEstimatorDebugVariables(simulationSession.getInertialFrame(),
+                                                               gravity.get(),
+                                                               robot.getControllerManager().getControllerInput()));
 
       for (Robot secondaryRobot : secondaryRobots.get())
          simulationSession.addRobot(secondaryRobot);
