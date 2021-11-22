@@ -35,6 +35,8 @@ import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 
 public class RobotDefinitionLoader
 {
+   public static final String DEFAULT_ROOT_BODY_NAME = "elevator";
+
    public static RobotDefinition loadSDFModel(InputStream stream,
                                               Collection<String> resourceDirectories,
                                               ClassLoader classLoader,
@@ -47,6 +49,8 @@ public class RobotDefinitionLoader
       {
          SDFRoot sdfRoot = SDFTools.loadSDFRoot(stream, resourceDirectories, classLoader);
          RobotDefinition robotDefinition = SDFTools.toFloatingRobotDefinition(sdfRoot, modelName);
+         // By default SDFTools names the root body "rootBody", for backward compatibility it is renamed "elevator".
+         robotDefinition.getRootBodyDefinition().setName(DEFAULT_ROOT_BODY_NAME);
 
          if (contactPointDefinitionHolder != null)
             addGroundContactPoints(robotDefinition, contactPointDefinitionHolder);

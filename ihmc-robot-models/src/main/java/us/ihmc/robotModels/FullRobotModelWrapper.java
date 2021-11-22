@@ -25,7 +25,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.description.InvertedFourBarJointDescription;
 import us.ihmc.robotics.partNames.JointNameMap;
@@ -168,10 +167,35 @@ public class FullRobotModelWrapper implements FullRobotModel
 
       rootJoint = (FloatingJointBasics) elevator.getChildrenJoints().get(0);
       rootBody = rootJoint.getSuccessor();
-      oneDoFJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).toArray(OneDoFJointBasics[]::new);
+      oneDoFJoints = collectOneDoFJoints(elevator, null).toArray(new OneDoFJointBasics[0]);
       jointNameToOneDoFJointMap = Arrays.stream(oneDoFJoints).collect(Collectors.toMap(JointReadOnly::getName, Function.identity()));
 
       totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+   }
+
+   /**
+    * Similar to {@link MultiBodySystemTools#collectSubtreeJoints(RigidBodyBasics...)}, collects the
+    * 1-DoF joints in the subtree that starts at {@code start}.
+    * <p>
+    * However, this method collects the joints in a different order where joints of a limbs tend to be
+    * successive in the resulting list. Using this method for backward compatibility as changing the
+    * ordering of the joints notably changing the computed hash-code of the robot.
+    * </p>
+    */
+   private static List<OneDoFJointBasics> collectOneDoFJoints(RigidBodyBasics start, List<OneDoFJointBasics> jointsToPack)
+   {
+      if (start == null || !start.hasChildrenJoints())
+         return jointsToPack;
+      if (jointsToPack == null)
+         jointsToPack = new ArrayList<>();
+
+      for (JointBasics childJoint : start.getChildrenJoints())
+      {
+         if (childJoint instanceof OneDoFJointBasics)
+            jointsToPack.add((OneDoFJointBasics) childJoint);
+         collectOneDoFJoints(childJoint.getSuccessor(), jointsToPack);
+      }
+      return jointsToPack;
    }
 
    /**
@@ -237,7 +261,7 @@ public class FullRobotModelWrapper implements FullRobotModel
       List<IMUDefinition> imuDefinitionList = new ArrayList<>();
       List<ForceSensorDefinition> forceSensorDefinitionList = new ArrayList<>();
 
-      for (JointDescription jointDescription : collectAllJoints(robotDescription))
+      for (JointDescription jointDescription : collectAllJointDescriptions(robotDescription))
       {
          JointBasics joint = MultiBodySystemTools.findJoint(elevator, jointDescription.getName());
 
@@ -630,18 +654,18 @@ public class FullRobotModelWrapper implements FullRobotModel
                            new RigidBodyTransform(new Quaternion(), linkDescription.getCenterOfMassOffset()));
    }
 
-   public static List<JointDescription> collectAllJoints(RobotDescription robotDescription)
+   public static List<JointDescription> collectAllJointDescriptions(RobotDescription robotDescription)
    {
       List<JointDescription> joints = new ArrayList<>();
       for (JointDescription rootJoint : robotDescription.getRootJoints())
-         collectAllJointsRecursive(rootJoint, joints);
+         collectAllJointDescriptionsRecursive(rootJoint, joints);
       return joints;
    }
 
-   private static void collectAllJointsRecursive(JointDescription jointDescription, List<JointDescription> jointsToPack)
+   private static void collectAllJointDescriptionsRecursive(JointDescription jointDescription, List<JointDescription> jointsToPack)
    {
       jointsToPack.add(jointDescription);
       for (JointDescription child : jointDescription.getChildrenJoints())
-         collectAllJointsRecursive(child, jointsToPack);
+         collectAllJointDescriptionsRecursive(child, jointsToPack);
    }
 }
