@@ -1761,12 +1761,12 @@ public class CrossRobotCommandRandomTools
       if (random.nextBoolean())
          next.setCenterOfMassPosition(nextFramePoint3D(random, possibleFrames));
       else
-         next.getCenterOfMassPosition().setMatchingFrame(nextFramePoint3D(random, possibleFrames));
+         next.getCenterOfMassPosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
 
       if (random.nextBoolean())
          next.setCenterOfMassVelocity(nextFrameVector3D(random, possibleFrames));
       else
-         next.getCenterOfMassVelocity().setMatchingFrame(nextFrameVector3D(random, possibleFrames));
+         next.getCenterOfMassVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       return next;
    }
 
