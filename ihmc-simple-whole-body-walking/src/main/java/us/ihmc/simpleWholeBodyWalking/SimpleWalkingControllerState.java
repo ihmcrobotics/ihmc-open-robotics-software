@@ -1,6 +1,5 @@
 package us.ihmc.simpleWholeBodyWalking;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.capturePoint.SimpleLinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -55,17 +54,23 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
    private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
-   
-   public SimpleWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                       SimpleControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                       HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters) 
+
+   public SimpleWalkingControllerState(CommandInputManager commandInputManager,
+                                       StatusMessageOutputManager statusOutputManager,
+                                       SimpleControlManagerFactory managerFactory,
+                                       HighLevelHumanoidControllerToolbox controllerToolbox,
+                                       HighLevelControllerParameters highLevelControllerParameters,
+                                       WalkingControllerParameters walkingControllerParameters)
    {
       super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
       this.controllerToolbox = controllerToolbox;
 
       // create walking controller
-      walkingController = new SimpleWalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
-                                                                 controllerToolbox);
+      walkingController = new SimpleWalkingHighLevelHumanoidController(commandInputManager,
+                                                                       statusOutputManager,
+                                                                       managerFactory,
+                                                                       walkingControllerParameters,
+                                                                       controllerToolbox);
 
       // create controller core
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
@@ -73,14 +78,18 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
 
       FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
-                                                                            jointsToOptimizeFor, centerOfMassFrame,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(),
+                                                                            controllerToolbox.getGravityZ(),
+                                                                            rootJoint,
+                                                                            jointsToOptimizeFor,
+                                                                            centerOfMassFrame,
                                                                             walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                                            controllerToolbox.getYoGraphicsListRegistry(), registry);
+                                                                            controllerToolbox.getYoGraphicsListRegistry(),
+                                                                            registry);
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
       toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
-      
+
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
@@ -97,8 +106,16 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
-      linearMomentumRateControlModule = new SimpleLinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
-                                                                            gravityZ, controlDT, registry, yoGraphicsListRegistry, controllerToolbox.getOmega0());
+      linearMomentumRateControlModule = new SimpleLinearMomentumRateControlModule(referenceFrames,
+                                                                                  contactableFeet,
+                                                                                  elevator,
+                                                                                  walkingControllerParameters,
+                                                                                  yoTime,
+                                                                                  gravityZ,
+                                                                                  controlDT,
+                                                                                  registry,
+                                                                                  yoGraphicsListRegistry,
+                                                                                  controllerToolbox.getOmega0());
       linearMomentumRateControlModule.setPlanarRegionsListHandler(controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler());
       linearMomentumRateControlModule.setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
 
@@ -118,7 +135,8 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
    {
       walkingController.doAction();
 
-      linearMomentumRateControlModule.updateCurrentState(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass(), controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity());
+      linearMomentumRateControlModule.updateCurrentState(controllerToolbox.getCenterOfMassPosition(),
+                                                         controllerToolbox.getCenterOfMassVelocity());
       linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());
       if (!linearMomentumRateControlModule.computeControllerCoreCommands())
       {
