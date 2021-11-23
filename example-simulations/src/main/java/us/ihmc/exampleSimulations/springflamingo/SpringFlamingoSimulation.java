@@ -42,8 +42,8 @@ public class SpringFlamingoSimulation
    }
 
    //   private static FlamingoController controllerToUse = FlamingoController.FAST_WALKING_CONTROLLER;
-      private static FlamingoController controllerToUse = FlamingoController.BALLISTIC_WALKING_CONTROLLER;
-//   private static FlamingoController controllerToUse = FlamingoController.LEAP_OF_FAITH_CONTROLLER;
+//      private static FlamingoController controllerToUse = FlamingoController.BALLISTIC_WALKING_CONTROLLER;
+   private static FlamingoController controllerToUse = FlamingoController.LEAP_OF_FAITH_CONTROLLER;
 
    
    // Choose a Terrain here if the robot is doing the Leap of Faith controller. If not, it can only walk on flat.
@@ -53,6 +53,7 @@ public class SpringFlamingoSimulation
    }
 
    private static TerrainIfLeapOfFaithController terrainIfLeapOfFaith = TerrainIfLeapOfFaithController.STEP_DOWNS_AND_FLATS;
+//   private static TerrainIfLeapOfFaithController terrainIfLeapOfFaith = TerrainIfLeapOfFaithController.SLOPE_AND_STEPS;
    
    public static double DT = 0.0001;
    public static int TICKS_PER_RECORD = 100;
@@ -459,9 +460,9 @@ public class SpringFlamingoSimulation
 
    private CombinedTerrainObject3D createStepDownsAndFlatsTerrain()
    {
-      double stepDownOneX = -2.50; //-2.65;
+      double stepDownOneX = -2.85; //-2.65;
       double stepDownOneBottomZ = -0.25;
-      double stepDownTwoX = -4.55; //-4.7;
+      double stepDownTwoX = -4.85; //-4.7;
       double stepDownTwoBottomZ = -0.5;
       double stepDownTwoXEnd = -9.0;
 
