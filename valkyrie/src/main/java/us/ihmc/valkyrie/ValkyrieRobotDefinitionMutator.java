@@ -76,11 +76,11 @@ public class ValkyrieRobotDefinitionMutator implements Consumer<RobotDefinition>
          return;
 
       MomentOfInertiaDefinition inertia = hokuyoDefinition.getMomentOfInertia();
-      inertia.setM00(0.000401606); // i_xx
-      inertia.setM01(4.9927e-08); // i_xy
-      inertia.setM02(1.0997e-05); // i_xz
-      inertia.setM11(0.00208115); // i_yy
-      inertia.setM12(-9.8165e-09); // i_yz
-      inertia.setM22(0.00178402); // i_zz
+      inertia.setM00(4.223114008735548E-4); // i_xx
+      inertia.setM01(-5.064933200111187E-8); // i_xy
+      inertia.setM02(1.682757619662739E-4); // i_xz
+      inertia.setM11(0.002081150000050006); // i_yy
+      inertia.setM12(-2.437817069606712E-9); // i_yz
+      inertia.setM22(0.0017633145990764395); // i_zz
    }
 }

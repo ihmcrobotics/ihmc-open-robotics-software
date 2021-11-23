@@ -207,10 +207,14 @@ public class RobotDefinitionLoader
          groundContactPoint.setName("gc_" + jointName + "_" + count++);
          groundContactPoint.getTransformToParent().getTranslation().set(gcOffset);
          groundContactPoint.setGroupIdentifier(contactPointHolder.getGroupIdentifier(jointContactPoint));
+         ExternalWrenchPointDefinition externalWrenchPoint = new ExternalWrenchPointDefinition();
+         externalWrenchPoint.setName("ef_" + jointName + "_" + count++);
+         externalWrenchPoint.getTransformToParent().getTranslation().set(gcOffset);
 
          JointDefinition jointDefinition = robotDefinition.getJointDefinition(jointName);
 
          jointDefinition.addGroundContactPointDefinition(groundContactPoint);
+         jointDefinition.addExternalWrenchPointDefinition(externalWrenchPoint);
 
          counters.put(jointName, count);
 
