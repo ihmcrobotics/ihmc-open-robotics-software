@@ -86,7 +86,7 @@ public class AStarBodyPathPlanner
             for (int j = -minMaxOffsetXY; j <= minMaxOffsetXY; j++)
             {
                double x = i * heightMapData.getGridResolutionXY();
-               double y = i * heightMapData.getGridResolutionXY();
+               double y = j * heightMapData.getGridResolutionXY();
                if (EuclidCoreTools.norm(x, y) < collisionRadius && !(i == 0 && j == 0))
                {
                   xCollisionOffsets.add(i);
@@ -202,7 +202,6 @@ public class AStarBodyPathPlanner
       }
    }
 
-
    public BodyPathLatticePoint getNextNode()
    {
       while (!stack.isEmpty())
@@ -239,9 +238,9 @@ public class AStarBodyPathPlanner
 
    private boolean collisionDetected(BodyPathLatticePoint latticePoint, double height)
    {
-      int minMaxIndexXY = heightMapData.getMinMaxIndexXY();
-      int xIndex = HeightMapTools.toIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), minMaxIndexXY);
-      int yIndex = HeightMapTools.toIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), minMaxIndexXY);
+      int centerIndex = heightMapData.getCenterIndex();
+      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
       double heightThreshold = height + groundClearance;
 
       for (int i = 0; i < xCollisionOffsets.size(); i++)

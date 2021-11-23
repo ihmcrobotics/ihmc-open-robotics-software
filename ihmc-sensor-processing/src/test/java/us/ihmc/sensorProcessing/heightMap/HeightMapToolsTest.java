@@ -12,23 +12,28 @@ public class HeightMapToolsTest
    public void testIndexing()
    {
       Random random = new Random(328923);
-      int iterations = 200;
+      int iterations = 1000;
 
       for (int i = 0; i < iterations; i++)
       {
          double resolution = EuclidCoreRandomTools.nextDouble(random, 1e-4, 0.5);
-         double gridCenter = EuclidCoreRandomTools.nextDouble(random, 1.0);
-         int minMaxIndex = 1 + random.nextInt(50);
-         double gridSizeXY = 2.0 * minMaxIndex * resolution;
-         int computedMinMaxCoordinate = HeightMapTools.minMaxIndex(gridSizeXY, resolution);
-         Assertions.assertEquals(minMaxIndex, computedMinMaxCoordinate, "Min max coordinates in height map are not equal");
+         double gridCenterX = EuclidCoreRandomTools.nextDouble(random, 1.0);
+         double gridCenterY = EuclidCoreRandomTools.nextDouble(random, 1.0);
 
-         double coordinate = EuclidCoreRandomTools.nextDouble(random, gridSizeXY);
-         int index = HeightMapTools.toIndex(coordinate, gridCenter, resolution, minMaxIndex);
-         double roundedCoordinate = HeightMapTools.toCoordinate(index, gridCenter, resolution, minMaxIndex);
-         int recomputedIndex = HeightMapTools.toIndex(roundedCoordinate, gridCenter, resolution, minMaxIndex);
-         Assertions.assertEquals(index, recomputedIndex, "Height map indexing computes incorrect coordinate");
-         Assertions.assertTrue(Math.abs(coordinate - roundedCoordinate) < 0.5 * resolution + 1e-10, "Height map indexing computes incorrect coordinate");
+         int centerIndex = 1 + random.nextInt(50);
+         double gridSizeXY = 2.0 * centerIndex * resolution;
+
+         Assertions.assertEquals(centerIndex, HeightMapTools.computeCenterIndex(gridSizeXY, resolution), "Invalid cell per axis calculation");
+
+         double xCoordinate = gridCenterX + EuclidCoreRandomTools.nextDouble(random, 0.5 * gridSizeXY);
+         double yCoordinate = gridCenterY + EuclidCoreRandomTools.nextDouble(random, 0.5 * gridSizeXY);
+
+         int key = HeightMapTools.coordinateToKey(xCoordinate, yCoordinate, gridCenterX, gridCenterY, resolution, centerIndex);
+         double xCoordinateOnGrid = HeightMapTools.keyToXCoordinate(key, gridCenterX, resolution, centerIndex);
+         double yCoordinateOnGrid = HeightMapTools.keyToYCoordinate(key, gridCenterY, resolution, centerIndex);
+
+         Assertions.assertTrue(Math.abs(xCoordinate - xCoordinateOnGrid) < 0.5 * resolution + 1e-10, "Invalid key-coordinate conversion");
+         Assertions.assertTrue(Math.abs(yCoordinate - yCoordinateOnGrid) < 0.5 * resolution + 1e-10, "Invalid key-coordinate conversion");
       }
    }
 }

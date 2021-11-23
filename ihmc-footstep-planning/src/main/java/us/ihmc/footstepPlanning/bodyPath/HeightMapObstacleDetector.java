@@ -36,7 +36,7 @@ public class HeightMapObstacleDetector
 
    public void compute(HeightMapData heightMapData)
    {
-      int gridWidth = 2 * heightMapData.getMinMaxIndexXY() + 1;
+      int gridWidth = 2 * heightMapData.getCenterIndex() + 1;
       mapRaw.reshape(gridWidth, gridWidth);
       mapFiltered.reshape(gridWidth, gridWidth);
       gInt.reshape(gridWidth, gridWidth);
@@ -49,12 +49,12 @@ public class HeightMapObstacleDetector
 
       /* Populate raw map */
       double estimatedGroundHeight = heightMapData.getEstimatedGroundHeight();
-      for (int i = 0; i < gridWidth; i++)
+      for (int xIndex = 0; xIndex < gridWidth; xIndex++)
       {
-         for (int j = 0; j < gridWidth; j++)
+         for (int yIndex = 0; yIndex < gridWidth; yIndex++)
          {
-            double height = heightMapData.getHeightAt(i, j);
-            mapRaw.set(i, j, height - estimatedGroundHeight);
+            double height = heightMapData.getHeightAt(xIndex, yIndex);
+            mapRaw.set(xIndex, yIndex, height - estimatedGroundHeight);
          }
       }
 
@@ -115,7 +115,7 @@ public class HeightMapObstacleDetector
       HeightMapObstacleDetector obstacleDetector = new HeightMapObstacleDetector();
       obstacleDetector.compute(stairs.getHeightMapData());
 
-      int width = 2 * stairs.getHeightMapData().getMinMaxIndexXY() + 1;
+      int width = 2 * stairs.getHeightMapData().getCenterIndex() + 1;
       BufferedImage bufferedImage = new BufferedImage(width, width, BufferedImage.TYPE_INT_RGB);
       double maxEdgeIntensity = obstacleDetector.getMaxEdgeIntensity();
 

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.HeightMapMessagePubSubType;
+import gnu.trove.list.array.TFloatArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
@@ -13,7 +15,6 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,11 +28,13 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -41,6 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class HeightMapUpdater
 {
    private static final boolean printFrequency = false;
+   private static final boolean printQueueSize = false;
 
    static final boolean USE_OUSTER_FRAME = true;
    static final RigidBodyTransform APPROX_OUSTER_TRANSFORM = new RigidBodyTransform();
@@ -57,8 +61,6 @@ public class HeightMapUpdater
    private final Stage stage;
    private final Messager messager;
    private final HeightMapParameters parameters;
-   private final ExecutorService heightMapUpdater = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
-   private final AtomicBoolean heightMapLock = new AtomicBoolean();
 
    private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
    private final HeightMapManager heightMap;
@@ -66,8 +68,16 @@ public class HeightMapUpdater
    private final AtomicReference<Point2D> gridCenter = new AtomicReference<>(new Point2D());
    private final AtomicReference<HeightMapMessage> latestMessage = new AtomicReference<>();
 
+   private final TIntArrayList holeKeyList = new TIntArrayList();
+   private final TFloatArrayList holeHeights = new TFloatArrayList();
+
+   private final ConcurrentLinkedQueue<Pair<PointCloud2, FramePose3D>> pointCloudQueue = new ConcurrentLinkedQueue<>();
+   private final ExecutorService heightMapUpdater = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
+   private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean();
+
    private int publishFrequencyCounter = 0;
    private final AtomicInteger publishFrequency = new AtomicInteger();
+   private final AtomicInteger totalUpdateCount = new AtomicInteger();
 
    public HeightMapUpdater(Messager messager, ROS2Node ros2Node, Stage stage)
    {
@@ -81,14 +91,14 @@ public class HeightMapUpdater
 
       messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, pointCloudData ->
       {
-         if (!enableUpdates.get())
+         if (enableUpdates.get())
          {
-            return;
-         }
+            pointCloudQueue.add(pointCloudData);
 
-         if (!heightMapLock.getAndSet(true))
-         {
-            heightMapUpdater.execute(() -> update(pointCloudData));
+            if (!updateThreadIsRunning.getAndSet(true))
+            {
+               heightMapUpdater.execute(this::runUpdateThread);
+            }
          }
       });
 
@@ -98,6 +108,34 @@ public class HeightMapUpdater
       messager.registerTopicListener(HeightMapMessagerAPI.PublishFrequency, publishFrequency::set);
       messager.registerTopicListener(HeightMapMessagerAPI.Export, e -> ThreadTools.startAThread(this::export, "Height map exporter"));
       messager.registerTopicListener(HeightMapMessagerAPI.Import, i -> importHeightMap());
+   }
+
+   private void runUpdateThread()
+   {
+      int updatesWithoutDataCounter = 0;
+      long sleepTimeMillis = 20;
+      long maxIdleTimeMillis = 1000;
+
+      while (updatesWithoutDataCounter < maxIdleTimeMillis / sleepTimeMillis)
+      {
+         Pair<PointCloud2, FramePose3D> data = pointCloudQueue.poll();
+         if (data == null)
+         {
+            updatesWithoutDataCounter++;
+         }
+         else
+         {
+            updatesWithoutDataCounter = 0;
+            update(data);
+         }
+
+         if (pointCloudQueue.isEmpty())
+         {
+            ThreadTools.sleep(sleepTimeMillis);
+         }
+      }
+
+      updateThreadIsRunning.set(false);
    }
 
    private void update(Pair<PointCloud2, FramePose3D> pointCloudData)
@@ -136,6 +174,7 @@ public class HeightMapUpdater
 
       // Update height map
       heightMap.update(pointCloud.getPointCloud());
+      totalUpdateCount.incrementAndGet();
 
       if (--publishFrequencyCounter <= 0)
       {
@@ -145,8 +184,8 @@ public class HeightMapUpdater
          /* filter near and below ground height and outliers that seem too high */
          performFiltering(estimatedGroundHeight);
 
+         /* pack ROS message */
          HeightMapMessage message = buildMessage();
-
          message.setEstimatedGroundHeight(estimatedGroundHeight);
 
          messager.submitMessage(HeightMapMessagerAPI.HeightMapData, message);
@@ -156,7 +195,8 @@ public class HeightMapUpdater
          latestMessage.set(message);
       }
 
-      heightMapLock.set(false);
+      if (printQueueSize)
+         LogTools.info("Point cloud queue: " + pointCloudQueue.size());
    }
 
    private HeightMapMessage buildMessage()
@@ -168,11 +208,31 @@ public class HeightMapUpdater
       message.setGridCenterX(heightMap.getGridCenterXY().getX());
       message.setGridCenterY(heightMap.getGridCenterXY().getY());
 
-      message.getCells().addAll(heightMap.getOccupiedCells());
       for (int i = 0; i < heightMap.getNumberOfCells(); i++)
       {
-         message.getHeights().add((float) heightMap.getHeightAt(i));
+         if (!heightMap.isGroundCell(i))
+         {
+            int key = heightMap.getKey(i);
+            message.getKeys().add(key);
+            message.getHeights().add((float) heightMap.getHeightAt(i));
+         }
+         else
+         {
+            int key = heightMap.getKey(i);
+            message.getGroundKeys().add(key);
+            message.getGroundHeights().add((float) heightMap.getHeightAt(i));
+         }
       }
+
+      LogTools.info(holeKeyList.size() + " holes found");
+      message.getHoleKeys().addAll(holeKeyList);
+      message.getHoleHeights().addAll(holeHeights);
+
+//      while (message.getHeights().size() >= HeightMapManager.maxCellCount)
+//      {
+//         message.getHeights().removeAt(message.getHeights().size() - 1);
+//         message.getKeys().removeAt(message.getKeys().size() - 1);
+//      }
 
       return message;
    }
@@ -194,6 +254,9 @@ public class HeightMapUpdater
       return estimatedGroundHeight / (maxIndex - minIndex);
    }
 
+   private static final int[] xOffsetFourConnectedGrid = new int[]{-1, 0, 1, 0};
+   private static final int[] yOffsetFourConnectedGrid = new int[]{0, 1, 0, -1};
+
    private static final int[] xOffsetEightConnectedGrid = new int[]{-1, -1, 0, 1, 1,  1, 0,  -1};
    private static final int[] yOffsetEightConnectedGrid = new int[]{0,  1,  1, 1, 0, -1, -1 , -1};
 
@@ -206,7 +269,7 @@ public class HeightMapUpdater
       for (int i = heightMap.getNumberOfCells() - 1; i >= 0; i--)
       {
          if (heightMap.getHeightAt(i) < groundHeightThreshold)
-            heightMap.clearCell(i);
+            heightMap.setGroundCell(i, true);
       }
 
       /* Remove cells with no neighbors and reset height of cells which are higher than all neighbors */
@@ -225,37 +288,38 @@ public class HeightMapUpdater
             continue;
          }
 
-         boolean higherThanAllNeighbors = true;
+         boolean muchHigherThanAllNeighbors = true;
          double heightThreshold = heightMap.getHeightAt(i) - epsilonHeightReset;
          int numberOfNeighbors = 0;
          for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
          {
             int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
             int yNeighbor = yIndex + yOffsetEightConnectedGrid[j];
-            if (heightMap.isCellPresent(xNeighbor, yNeighbor))
+            if (heightMap.cellHasData(xNeighbor, yNeighbor))
             {
                numberOfNeighbors++;
-               higherThanAllNeighbors = higherThanAllNeighbors && heightMap.getHeightAt(xNeighbor, yNeighbor) < heightThreshold;
+               muchHigherThanAllNeighbors = muchHigherThanAllNeighbors && heightMap.getHeightAt(xNeighbor, yNeighbor) < heightThreshold;
             }
 
-            if (numberOfNeighbors >= minNumberOfNeighbors && !higherThanAllNeighbors)
+            if (numberOfNeighbors >= minNumberOfNeighbors && !muchHigherThanAllNeighbors)
             {
+               heightMap.setGroundCell(i, false);
                continue outerLoop;
             }
          }
 
          if (numberOfNeighbors < minNumberOfNeighbors)
          {
-            heightMap.clearCell(i);
+            heightMap.setGroundCell(i, true);
          }
-         else if (numberOfNeighbors >= minNumberOfNeighborsToResetHeight && higherThanAllNeighbors)
+         else if (numberOfNeighbors >= minNumberOfNeighborsToResetHeight && muchHigherThanAllNeighbors)
          {
             double resetHeight = 0.0;
             for (int j = 0; j < xOffsetEightConnectedGrid.length; j++)
             {
                int xNeighbor = xIndex + xOffsetEightConnectedGrid[j];
                int yNeighbor = yIndex + yOffsetEightConnectedGrid[j];
-               if (heightMap.isCellPresent(xNeighbor, yNeighbor))
+               if (heightMap.cellHasData(xNeighbor, yNeighbor))
                {
                   resetHeight += heightMap.getHeightAt(xNeighbor, yNeighbor);
                }
@@ -264,9 +328,73 @@ public class HeightMapUpdater
          }
       }
 
-      /* Fill in cells which are obviously holes */
-      double neighborHeightThresholdToFillHole = 0.4;
-      
+      /* Once the map has had a chance to initialize, fill in any holes */
+      if (totalUpdateCount.get() > 50)
+      {
+         holeKeyList.clear();
+         holeHeights.clear();
+
+         /* For any cell without data, populate with average of neighbors */
+         for (int xIndex = 1; xIndex < heightMap.getCellsPerAxis() - 1; xIndex++)
+         {
+            for (int yIndex = 1; yIndex < heightMap.getCellsPerAxis() - 1; yIndex++)
+            {
+               if (heightMap.cellHasData(xIndex, yIndex))
+                  continue;
+
+               double heightSum = 0.0;
+               int numberOfNeighbors = 0;
+
+               for (int j = 0; j < xOffsetFourConnectedGrid.length; j++)
+               {
+                  int neighborX = xIndex + xOffsetFourConnectedGrid[j];
+                  int neighborY = yIndex + yOffsetFourConnectedGrid[j];
+
+                  if (heightMap.cellHasData(neighborX, neighborY) && heightMap.getHeightAt(neighborX, neighborY) - estimatedGroundHeight > 0.5)
+                  {
+                     heightSum += heightMap.getHeightAt(neighborX, neighborY);
+                     numberOfNeighbors++;
+                  }
+               }
+
+               if (numberOfNeighbors > 0)
+               {
+                  holeKeyList.add(HeightMapTools.indicesToKey(xIndex, yIndex, heightMap.getCenterIndex()));
+                  holeHeights.add((float) (heightSum / numberOfNeighbors));
+               }
+            }
+         }
+
+//         for (int key = 0; key < totalGridSize; key++)
+//         {
+//            if (heightMap.isCellPresent(key))
+//               continue;
+//
+//            int xIndex = HeightMapTools.keyToXIndex(key, heightMap.getCenterIndex());
+//            int yIndex = HeightMapTools.keyToYIndex(key, heightMap.getCenterIndex());
+//
+//            float heightSum = 0.0f;
+//            int numberOfNeighbors = 0;
+//
+//            for (int j = 0; j < xOffsetFourConnectedGrid.length; j++)
+//            {
+//               int neighborX = xIndex + xOffsetFourConnectedGrid[j];
+//               int neighborY = yIndex + yOffsetFourConnectedGrid[j];
+//
+//               if (heightMap.isCellPresent(neighborX, neighborY) && heightMap.getHeightAt(neighborX, neighborY) - estimatedGroundHeight > 0.5)
+//               {
+//                  heightSum += heightMap.getHeightAt(neighborX, neighborY);
+//                  numberOfNeighbors++;
+//               }
+//            }
+//
+//            if (numberOfNeighbors > 0)
+//            {
+//               holeKeyList.add(key);
+//               holeHeights.add(heightSum / numberOfNeighbors);
+//            }
+//         }
+      }
    }
 
    private boolean firstTick = true;

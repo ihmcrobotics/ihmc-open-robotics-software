@@ -56,6 +56,14 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (30000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -88,11 +96,27 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getCells().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getKeys().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getHeights().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getHoleKeys().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getHoleHeights().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getGroundKeys().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getGroundHeights().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
 
@@ -113,13 +137,29 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getEstimatedGroundHeight());
 
-      if(data.getCells().size() <= 30000)
-      cdr.write_type_e(data.getCells());else
-          throw new RuntimeException("cells field exceeds the maximum length");
+      if(data.getKeys().size() <= 30000)
+      cdr.write_type_e(data.getKeys());else
+          throw new RuntimeException("keys field exceeds the maximum length");
 
       if(data.getHeights().size() <= 30000)
       cdr.write_type_e(data.getHeights());else
           throw new RuntimeException("heights field exceeds the maximum length");
+
+      if(data.getHoleKeys().size() <= 30000)
+      cdr.write_type_e(data.getHoleKeys());else
+          throw new RuntimeException("hole_keys field exceeds the maximum length");
+
+      if(data.getHoleHeights().size() <= 30000)
+      cdr.write_type_e(data.getHoleHeights());else
+          throw new RuntimeException("hole_heights field exceeds the maximum length");
+
+      if(data.getGroundKeys().size() <= 30000)
+      cdr.write_type_e(data.getGroundKeys());else
+          throw new RuntimeException("ground_keys field exceeds the maximum length");
+
+      if(data.getGroundHeights().size() <= 30000)
+      cdr.write_type_e(data.getGroundHeights());else
+          throw new RuntimeException("ground_heights field exceeds the maximum length");
 
    }
 
@@ -137,8 +177,12 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       data.setEstimatedGroundHeight(cdr.read_type_6());
       	
-      cdr.read_type_e(data.getCells());	
+      cdr.read_type_e(data.getKeys());	
       cdr.read_type_e(data.getHeights());	
+      cdr.read_type_e(data.getHoleKeys());	
+      cdr.read_type_e(data.getHoleHeights());	
+      cdr.read_type_e(data.getGroundKeys());	
+      cdr.read_type_e(data.getGroundHeights());	
 
    }
 
@@ -151,8 +195,12 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_6("grid_center_x", data.getGridCenterX());
       ser.write_type_6("grid_center_y", data.getGridCenterY());
       ser.write_type_6("estimated_ground_height", data.getEstimatedGroundHeight());
-      ser.write_type_e("cells", data.getCells());
+      ser.write_type_e("keys", data.getKeys());
       ser.write_type_e("heights", data.getHeights());
+      ser.write_type_e("hole_keys", data.getHoleKeys());
+      ser.write_type_e("hole_heights", data.getHoleHeights());
+      ser.write_type_e("ground_keys", data.getGroundKeys());
+      ser.write_type_e("ground_heights", data.getGroundHeights());
    }
 
    @Override
@@ -164,8 +212,12 @@ public class HeightMapMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       data.setGridCenterX(ser.read_type_6("grid_center_x"));
       data.setGridCenterY(ser.read_type_6("grid_center_y"));
       data.setEstimatedGroundHeight(ser.read_type_6("estimated_ground_height"));
-      ser.read_type_e("cells", data.getCells());
+      ser.read_type_e("keys", data.getKeys());
       ser.read_type_e("heights", data.getHeights());
+      ser.read_type_e("hole_keys", data.getHoleKeys());
+      ser.read_type_e("hole_heights", data.getHoleHeights());
+      ser.read_type_e("ground_keys", data.getGroundKeys());
+      ser.read_type_e("ground_heights", data.getGroundHeights());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.HeightMapMessage src, controller_msgs.msg.dds.HeightMapMessage dest)
