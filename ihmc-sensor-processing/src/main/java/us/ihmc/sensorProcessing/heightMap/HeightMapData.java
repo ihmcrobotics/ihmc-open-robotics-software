@@ -2,31 +2,42 @@ package us.ihmc.sensorProcessing.heightMap;
 
 import controller_msgs.msg.dds.HeightMapMessage;
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.log.LogTools;
 
 import java.util.Arrays;
 
 public class HeightMapData
 {
+   /* Unordered list of the keys of all occupied cells */
    private final TIntArrayList occupiedCells = new TIntArrayList();
+   /* List of heights indexed by key */
    private final double[] heights;
 
-   private final int minMaxIndexXY;
+   private final int centerIndex;
    private final int cellsPerAxis;
    private final double gridResolutionXY;
    private final double gridSizeXY;
    private final Point2D gridCenter = new Point2D();
    private double estimatedGroundHeight = Double.NaN;
 
+   private final double minX, maxX, minY, maxY;
+
    public HeightMapData(double gridResolutionXY, double gridSizeXY, double gridCenterX, double gridCenterY)
    {
       this.gridResolutionXY = gridResolutionXY;
       this.gridSizeXY = gridSizeXY;
-      this.minMaxIndexXY = HeightMapTools.minMaxIndex(gridSizeXY, gridResolutionXY);
-      this.cellsPerAxis = (2 * minMaxIndexXY + 1);
+      this.centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
+      this.cellsPerAxis = 2 * centerIndex + 1;
       this.heights = new double[cellsPerAxis * cellsPerAxis];
       this.gridCenter.set(gridCenterX, gridCenterY);
+
+      double epsilon = 1e-8;
+      double halfWidth = 0.5 * (gridSizeXY + gridResolutionXY) - epsilon;
+      minX = gridCenterX - halfWidth;
+      maxX = gridCenterX + halfWidth;
+      minY = gridCenterY - halfWidth;
+      maxY = gridCenterY + halfWidth;
 
       reset();
    }
@@ -38,9 +49,9 @@ public class HeightMapData
       for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
       {
          double height = heightMapMessage.getHeights().get(i);
-         int xyIndex = heightMapMessage.getCells().get(i);
-         heights[xyIndex] = height;
-         occupiedCells.add(xyIndex);
+         int key = heightMapMessage.getKeys().get(i);
+         heights[key] = height;
+         occupiedCells.add(key);
       }
 
       this.estimatedGroundHeight = heightMapMessage.getEstimatedGroundHeight();
@@ -75,11 +86,9 @@ public class HeightMapData
 
    public Point2D getCellPosition(int i)
    {
-      int cell = occupiedCells.get(i);
-      int indexX = HeightMapTools.xIndex(cell, minMaxIndexXY);
-      int indexY = HeightMapTools.yIndex(cell, minMaxIndexXY);
-      return new Point2D(HeightMapTools.toCoordinate(indexX, gridCenter.getX(), gridResolutionXY, minMaxIndexXY),
-                         HeightMapTools.toCoordinate(indexY, gridCenter.getY(), gridResolutionXY, minMaxIndexXY));
+      int key = occupiedCells.get(i);
+      return new Point2D(HeightMapTools.keyToXCoordinate(key, gridCenter.getX(), gridResolutionXY, centerIndex),
+                         HeightMapTools.keyToYCoordinate(key, gridCenter.getY(), gridResolutionXY, centerIndex));
    }
 
    /**
@@ -87,19 +96,15 @@ public class HeightMapData
     */
    public double getHeightAt(double x, double y)
    {
-      int xIndex = HeightMapTools.toIndex(x, gridCenter.getX(), gridResolutionXY, minMaxIndexXY);
-      int yIndex = HeightMapTools.toIndex(y, gridCenter.getY(), gridResolutionXY, minMaxIndexXY);
-
-      if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
+      if (!MathTools.intervalContains(x, minX, maxX) || !MathTools.intervalContains(y, minY, maxY))
       {
-         LogTools.error("Invalid index for point (" + x + ", " + y + "). Indices: (" + xIndex + ", " + yIndex + ")");
          return Double.NaN;
       }
 
-      int xyIndex = HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY);
-      if (occupiedCells.contains(xyIndex))
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolutionXY, centerIndex);
+      if (occupiedCells.contains(key))
       {
-         return heights[xyIndex];
+         return heights[key];
       }
       else
       {
@@ -109,33 +114,29 @@ public class HeightMapData
 
    public void setHeightAt(double x, double y, double z)
    {
-      int xIndex = HeightMapTools.toIndex(x, gridCenter.getX(), gridResolutionXY, minMaxIndexXY);
-      int yIndex = HeightMapTools.toIndex(y, gridCenter.getY(), gridResolutionXY, minMaxIndexXY);
-
-      if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
+      if (!MathTools.intervalContains(x, minX, maxX) || !MathTools.intervalContains(y, minY, maxY))
       {
-         LogTools.error("Invalid index for point (" + x + ", " + y + "). Indices: (" + xIndex + ", " + yIndex + ")");
          return;
       }
 
-      int xyIndex = HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY);
-      if (Double.isNaN(heights[xyIndex]))
+      int key = HeightMapTools.coordinateToKey(x, y, gridCenter.getX(), gridCenter.getY(), gridResolutionXY, centerIndex);
+      if (Double.isNaN(heights[key]))
       {
-         occupiedCells.add(xyIndex);
+         occupiedCells.add(key);
       }
 
-      heights[xyIndex] = z;
+      heights[key] = z;
    }
 
    public double getHeightAt(int xIndex, int yIndex)
    {
       if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
       {
-         LogTools.error("Invalid index (" + xIndex + ", " + yIndex + ")");
+//         LogTools.error("Invalid index (" + xIndex + ", " + yIndex + ")");
          return Double.NaN;
       }
 
-      double height = heights[HeightMapTools.toXYIndex(xIndex, yIndex, minMaxIndexXY)];
+      double height = heights[HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex)];
       return Double.isNaN(height) ? estimatedGroundHeight : height;
    }
 
@@ -149,9 +150,14 @@ public class HeightMapData
       return estimatedGroundHeight;
    }
 
-   public int getMinMaxIndexXY()
+   public int getCenterIndex()
    {
-      return minMaxIndexXY;
+      return centerIndex;
+   }
+
+   public int getCellsPerAxis()
+   {
+      return cellsPerAxis;
    }
 
    public Point2D getGridCenter()

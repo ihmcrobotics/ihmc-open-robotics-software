@@ -15,19 +15,64 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * Discretization of the height map grid
+            */
    public double xy_resolution_ = -1.0;
+   /**
+            * The height map covers a square of this width
+            */
    public double grid_size_xy_ = -1.0;
+   /**
+            * X coordinate of the center of the height map
+            */
    public double grid_center_x_;
+   /**
+            * Y coordinate of the center of the height map
+            */
    public double grid_center_y_;
+   /**
+            * Height of the ground plane, which is assumed to be flat
+            */
    public double estimated_ground_height_;
-   public us.ihmc.idl.IDLSequence.Integer  cells_;
+   /**
+            * List of height map keys. See HeightMapTools for converting keys to coordinates
+            */
+   public us.ihmc.idl.IDLSequence.Integer  keys_;
+   /**
+            * List of heights, which correspond to the list of keys
+            */
    public us.ihmc.idl.IDLSequence.Float  heights_;
+   /**
+            * List of height map keys. See HeightMapTools for converting keys to coordinates
+            */
+   public us.ihmc.idl.IDLSequence.Integer  hole_keys_;
+   /**
+            * List of heights, which correspond to the list of keys
+            */
+   public us.ihmc.idl.IDLSequence.Float  hole_heights_;
+   /**
+            * List of height map keys. See HeightMapTools for converting keys to coordinates
+            */
+   public us.ihmc.idl.IDLSequence.Integer  ground_keys_;
+   /**
+            * List of heights, which correspond to the list of keys
+            */
+   public us.ihmc.idl.IDLSequence.Float  ground_heights_;
 
    public HeightMapMessage()
    {
-      cells_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
+      keys_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
 
       heights_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
+
+      hole_keys_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
+
+      hole_heights_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
+
+      ground_keys_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
+
+      ground_heights_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
 
    }
 
@@ -51,8 +96,12 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       estimated_ground_height_ = other.estimated_ground_height_;
 
-      cells_.set(other.cells_);
+      keys_.set(other.keys_);
       heights_.set(other.heights_);
+      hole_keys_.set(other.hole_keys_);
+      hole_heights_.set(other.hole_heights_);
+      ground_keys_.set(other.ground_keys_);
+      ground_heights_.set(other.ground_heights_);
    }
 
    /**
@@ -70,61 +119,133 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       return sequence_id_;
    }
 
+   /**
+            * Discretization of the height map grid
+            */
    public void setXyResolution(double xy_resolution)
    {
       xy_resolution_ = xy_resolution;
    }
+   /**
+            * Discretization of the height map grid
+            */
    public double getXyResolution()
    {
       return xy_resolution_;
    }
 
+   /**
+            * The height map covers a square of this width
+            */
    public void setGridSizeXy(double grid_size_xy)
    {
       grid_size_xy_ = grid_size_xy;
    }
+   /**
+            * The height map covers a square of this width
+            */
    public double getGridSizeXy()
    {
       return grid_size_xy_;
    }
 
+   /**
+            * X coordinate of the center of the height map
+            */
    public void setGridCenterX(double grid_center_x)
    {
       grid_center_x_ = grid_center_x;
    }
+   /**
+            * X coordinate of the center of the height map
+            */
    public double getGridCenterX()
    {
       return grid_center_x_;
    }
 
+   /**
+            * Y coordinate of the center of the height map
+            */
    public void setGridCenterY(double grid_center_y)
    {
       grid_center_y_ = grid_center_y;
    }
+   /**
+            * Y coordinate of the center of the height map
+            */
    public double getGridCenterY()
    {
       return grid_center_y_;
    }
 
+   /**
+            * Height of the ground plane, which is assumed to be flat
+            */
    public void setEstimatedGroundHeight(double estimated_ground_height)
    {
       estimated_ground_height_ = estimated_ground_height;
    }
+   /**
+            * Height of the ground plane, which is assumed to be flat
+            */
    public double getEstimatedGroundHeight()
    {
       return estimated_ground_height_;
    }
 
 
-   public us.ihmc.idl.IDLSequence.Integer  getCells()
+   /**
+            * List of height map keys. See HeightMapTools for converting keys to coordinates
+            */
+   public us.ihmc.idl.IDLSequence.Integer  getKeys()
    {
-      return cells_;
+      return keys_;
    }
 
 
+   /**
+            * List of heights, which correspond to the list of keys
+            */
    public us.ihmc.idl.IDLSequence.Float  getHeights()
    {
       return heights_;
+   }
+
+
+   /**
+            * List of height map keys. See HeightMapTools for converting keys to coordinates
+            */
+   public us.ihmc.idl.IDLSequence.Integer  getHoleKeys()
+   {
+      return hole_keys_;
+   }
+
+
+   /**
+            * List of heights, which correspond to the list of keys
+            */
+   public us.ihmc.idl.IDLSequence.Float  getHoleHeights()
+   {
+      return hole_heights_;
+   }
+
+
+   /**
+            * List of height map keys. See HeightMapTools for converting keys to coordinates
+            */
+   public us.ihmc.idl.IDLSequence.Integer  getGroundKeys()
+   {
+      return ground_keys_;
+   }
+
+
+   /**
+            * List of heights, which correspond to the list of keys
+            */
+   public us.ihmc.idl.IDLSequence.Float  getGroundHeights()
+   {
+      return ground_heights_;
    }
 
 
@@ -157,9 +278,17 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.estimated_ground_height_, other.estimated_ground_height_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.cells_, other.cells_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.keys_, other.keys_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.hole_keys_, other.hole_keys_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.hole_heights_, other.hole_heights_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.ground_keys_, other.ground_keys_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.ground_heights_, other.ground_heights_, epsilon)) return false;
 
 
       return true;
@@ -186,8 +315,12 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if(this.estimated_ground_height_ != otherMyClass.estimated_ground_height_) return false;
 
-      if (!this.cells_.equals(otherMyClass.cells_)) return false;
+      if (!this.keys_.equals(otherMyClass.keys_)) return false;
       if (!this.heights_.equals(otherMyClass.heights_)) return false;
+      if (!this.hole_keys_.equals(otherMyClass.hole_keys_)) return false;
+      if (!this.hole_heights_.equals(otherMyClass.hole_heights_)) return false;
+      if (!this.ground_keys_.equals(otherMyClass.ground_keys_)) return false;
+      if (!this.ground_heights_.equals(otherMyClass.ground_heights_)) return false;
 
       return true;
    }
@@ -210,10 +343,18 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       builder.append(this.grid_center_y_);      builder.append(", ");
       builder.append("estimated_ground_height=");
       builder.append(this.estimated_ground_height_);      builder.append(", ");
-      builder.append("cells=");
-      builder.append(this.cells_);      builder.append(", ");
+      builder.append("keys=");
+      builder.append(this.keys_);      builder.append(", ");
       builder.append("heights=");
-      builder.append(this.heights_);
+      builder.append(this.heights_);      builder.append(", ");
+      builder.append("hole_keys=");
+      builder.append(this.hole_keys_);      builder.append(", ");
+      builder.append("hole_heights=");
+      builder.append(this.hole_heights_);      builder.append(", ");
+      builder.append("ground_keys=");
+      builder.append(this.ground_keys_);      builder.append(", ");
+      builder.append("ground_heights=");
+      builder.append(this.ground_heights_);
       builder.append("}");
       return builder.toString();
    }

@@ -39,21 +39,28 @@ public class HeightMapPolygonSnapper
       bestFitPlane.setToNaN();
       Point2D gridCenter = heightMap.getGridCenter();
 
-      int minMaxIndex = HeightMapTools.minMaxIndex(heightMap.getGridSizeXY(), heightMap.getGridResolutionXY());
-      int minIndexX = HeightMapTools.toIndex(polygonToSnap.getMinX(), gridCenter.getX(), heightMap.getGridResolutionXY(), minMaxIndex);
-      int maxIndexX = HeightMapTools.toIndex(polygonToSnap.getMaxX(), gridCenter.getX(), heightMap.getGridResolutionXY(), minMaxIndex);
-      int minIndexY = HeightMapTools.toIndex(polygonToSnap.getMinY(), gridCenter.getY(), heightMap.getGridResolutionXY(), minMaxIndex);
-      int maxIndexY = HeightMapTools.toIndex(polygonToSnap.getMaxY(), gridCenter.getY(), heightMap.getGridResolutionXY(), minMaxIndex);
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMap.getGridSizeXY(), heightMap.getGridResolutionXY());
+      int minIndexX = HeightMapTools.coordinateToIndex(polygonToSnap.getMinX(), gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
+      int maxIndexX = HeightMapTools.coordinateToIndex(polygonToSnap.getMaxX(), gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
+      int minIndexY = HeightMapTools.coordinateToIndex(polygonToSnap.getMinY(), gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
+      int maxIndexY = HeightMapTools.coordinateToIndex(polygonToSnap.getMaxY(), gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
+      double epsilonDistance = Math.sqrt(0.5) * heightMap.getGridResolutionXY();
 
-      for (int i = minIndexX; i <= maxIndexX; i++)
+      for (int xIndex = minIndexX; xIndex <= maxIndexX; xIndex++)
       {
-         for (int j = minIndexY; j <= maxIndexY; j++)
+         for (int yIndex = minIndexY; yIndex <= maxIndexY; yIndex++)
          {
-            double x = HeightMapTools.toCoordinate(i, gridCenter.getX(), heightMap.getGridResolutionXY(), minMaxIndex);
-            double y = HeightMapTools.toCoordinate(j, gridCenter.getY(), heightMap.getGridResolutionXY(), minMaxIndex);
-            double height = heightMap.getHeightAt(i, j);
+            double height = heightMap.getHeightAt(xIndex, yIndex);
 
-            if (Double.isNaN(height) || polygonToSnap.distance(new Point2D(x, y)) > 0.01)
+            if (Double.isNaN(height))
+            {
+               continue;
+            }
+
+            double x = HeightMapTools.indexToCoordinate(xIndex, gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
+            double y = HeightMapTools.indexToCoordinate(yIndex, gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
+
+            if (polygonToSnap.distance(new Point2D(x, y)) > epsilonDistance)
             {
                continue;
             }

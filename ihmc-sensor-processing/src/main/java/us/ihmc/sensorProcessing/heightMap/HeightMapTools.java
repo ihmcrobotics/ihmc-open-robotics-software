@@ -1,40 +1,66 @@
 package us.ihmc.sensorProcessing.heightMap;
 
 /**
- * Tools for indexing height map cells.
- * The height map grid is centered at (0, 0), the grid resolution (cell width) is r and the grid is a square of width w, such that w/2 is the maxXYCoordinate
+ * Height map indexing tools. The height map spans a square region and is parametrized by the following values:
+ * - A discretization value
+ * - The grid size, i.e. side length of the square region it covers
+ * - Grid center, an xy coordinate which is the middle of the grid
+ *
+ * Cells are indexing two ways:
+ * - A unique integer key, which is zero-indexed and starts at the corner of the grid which is the negative-most x and y coordinates.
+ * - An (x,y) integer index pair, which is zero at the negative-most cell along each axis
  */
 public class HeightMapTools
 {
-   public static int toIndex(double coordinate, double gridCenter, double resolution, int minMaxIndexXY)
+   /**
+    * The xy-indices of the center of the grid.
+    */
+   public static int computeCenterIndex(double gridSize, double resolution)
    {
-      return (int) Math.round((coordinate - gridCenter) / resolution) + minMaxIndexXY;
+      return (int) Math.round(0.5 * gridSize / resolution);
    }
 
-   public static double toCoordinate(int index, double gridCenter, double resolution, int minMaxIndexXY)
+   public static int coordinateToKey(double x, double y, double xCenter, double yCenter, double resolution, int centerIndex)
    {
-      return (index - minMaxIndexXY) * resolution + gridCenter;
+      int xIndex = coordinateToIndex(x, xCenter, resolution, centerIndex);
+      int yIndex = coordinateToIndex(y, yCenter, resolution, centerIndex);
+      return indicesToKey(xIndex, yIndex, centerIndex);
    }
 
-   public static int minMaxIndex(double gridSizeXY, double resolution)
+   public static double keyToXCoordinate(int key, double xCenter, double resolution, int centerIndex)
    {
-      return (int) Math.round(0.5 * gridSizeXY / resolution);
+      int xIndex = keyToXIndex(key, centerIndex);
+      return indexToCoordinate(xIndex, xCenter, resolution, centerIndex);
    }
 
-   /* Maps xy indices to single value */
-   public static int toXYIndex(int xIndex, int yIndex, int minMaxIndexXY)
+   public static double keyToYCoordinate(int key, double yCenter, double resolution, int centerIndex)
    {
-      return xIndex + (2 * minMaxIndexXY + 1) * yIndex;
+      int yIndex = keyToYIndex(key, centerIndex);
+      return indexToCoordinate(yIndex, yCenter, resolution, centerIndex);
    }
 
-   public static int xIndex(int xyIndex, int minMaxIndexXY)
+   public static int coordinateToIndex(double coordinate, double gridCenter, double resolution, int centerIndex)
    {
-      return xyIndex % (2 * minMaxIndexXY + 1);
+      return (int) Math.round((coordinate - gridCenter) / resolution) + centerIndex;
    }
 
-   public static  int yIndex(int xyIndex, int minMaxIndexXY)
+   public static double indexToCoordinate(int index, double gridCenter, double resolution, int centerIndex)
    {
-      return xyIndex / (2 * minMaxIndexXY + 1);
+      return (index - centerIndex) * resolution + gridCenter;
    }
 
+   public static int keyToXIndex(int key, int centerIndex)
+   {
+      return key % (2 * centerIndex + 1);
+   }
+
+   public static int keyToYIndex(int key, int centerIndex)
+   {
+      return key / (2 * centerIndex + 1);
+   }
+
+   public static int indicesToKey(int xIndex, int yIndex, int centerIndex)
+   {
+      return xIndex + yIndex * (2 * centerIndex + 1);
+   }
 }

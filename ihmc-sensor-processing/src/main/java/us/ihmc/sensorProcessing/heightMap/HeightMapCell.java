@@ -8,6 +8,8 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.providers.LongProvider;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Contains data for a given XY grid cell.
  */
@@ -22,6 +24,7 @@ class HeightMapCell
 
    private int oldestIndex;
    private final AtomicDouble estimatedHeight = new AtomicDouble();
+   private boolean isGroundCell = false;
 
    public HeightMapCell(HeightMapParameters parameters)
    {
@@ -120,5 +123,15 @@ class HeightMapCell
       }
 
       return sigma / heightMeasurements.size();
+   }
+
+   public void setGroundCell(boolean isGroundCell)
+   {
+      this.isGroundCell = isGroundCell;
+   }
+
+   public boolean isGroundCell()
+   {
+      return isGroundCell;
    }
 }
