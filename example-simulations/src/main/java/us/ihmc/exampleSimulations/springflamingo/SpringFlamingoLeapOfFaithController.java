@@ -29,6 +29,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
    public final YoDouble capturePointX = new YoDouble("capturePointX", registry);
    public final YoDouble capturePointLeftHeelX = new YoDouble("capturePointLeftHeelX", registry);
    public final YoDouble capturePointRightHeelX = new YoDouble("capturePointRightHeelX", registry);
+   public final YoDouble capturePointSupportHeelX = new YoDouble("capturePointSupportHeelX", registry);
 
    private final SideDependentList<YoDouble> capturePointHeelsX = new SideDependentList<>(capturePointLeftHeelX, capturePointRightHeelX);
 
@@ -80,6 +81,9 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
    private final YoDouble finalRetractThighAngle = new YoDouble("finalRetractThighAngle", registry);
    private final YoDouble retractDuration = new YoDouble("retractDuration", registry);
 
+   private final YoDouble collapseKneeForToeOffVelocity = new YoDouble("collapseKneeForToeOffVelocity", registry);
+   private final YoDouble collapseKneeForToeOffAngle = new YoDouble("collapseKneeForToeOffAngle", registry);
+   
    private final YoDouble swingTime = new YoDouble("swingTime", registry);
    private final YoDouble collapseKneeForSwingVelocity = new YoDouble("collapseKneeForSwingVelocity", registry);
    private final YoDouble collapseKneeForSwingAngle = new YoDouble("collapseKneeForSwingAngle", registry);
@@ -133,8 +137,11 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
       kneeEndSwingAngle.set(-0.2);
 
+      collapseKneeForToeOffVelocity.set(2.0);
+      collapseKneeForToeOffAngle.set(0.75);
+      
       toeOffAnkleAcceleration.set(4.0);
-      collapseKneeForSwingVelocity.set(5.0);
+      collapseKneeForSwingVelocity.set(4.0);
       collapseKneeForSwingAngle.set(1.5);
       straightenKneeForSwingVelocity.set(8.0);
       extendKneeDuringStanceVelocity.set(0.6);
@@ -285,6 +292,8 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       @Override
       public void doAction(double timeInState)
       {
+         capturePointSupportHeelX.set(-capturePointHeelsX.get(loadingSide).getValue());
+         
          double supportHipTorque = bodyOrientationKp.getDoubleValue() * (q_d_pitch.getDoubleValue() - robot.getBodyAngle())
                - bodyOrientationKd.getDoubleValue() * robot.getBodyAngularVelocity();
          Vector3D loadingGroundForce = robot.getFootForce(loadingSide);
@@ -327,6 +336,12 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
             loadingKneeTorque = minimumKneeForce.getDoubleValue();
          }
 
+         q_d_knees.get(toeOffSide).sub(deltaTime.getDoubleValue() * collapseKneeForToeOffVelocity.getDoubleValue());
+         if (q_d_knees.get(toeOffSide).getValue() < -collapseKneeForToeOffAngle.getValue())
+         {
+            q_d_knees.get(toeOffSide).set(-collapseKneeForToeOffAngle.getValue());
+         }
+         
          double toeOffKneeTorque = kneeSupportKp.getDoubleValue() * (q_d_knees.get(toeOffSide).getDoubleValue() - robot.getKneeAngle(toeOffSide))
                - kneeSupportKd.getDoubleValue() * robot.getKneeVelocity(toeOffSide);
 
@@ -399,6 +414,8 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       @Override
       public void doAction(double timeInState)
       {
+         capturePointSupportHeelX.set(-capturePointHeelsX.get(supportSide).getValue());
+
          double supportHipTorque = bodyOrientationKp.getDoubleValue() * (q_d_pitch.getDoubleValue() - robot.getBodyAngle())
                - bodyOrientationKd.getDoubleValue() * robot.getBodyAngularVelocity();
          robot.setHipTorque(supportSide, -supportHipTorque);
@@ -515,6 +532,8 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       @Override
       public void doAction(double timeInState)
       {
+         capturePointSupportHeelX.set(-capturePointHeelsX.get(supportSide).getValue());
+
          double supportHipTorque = bodyOrientationKp.getDoubleValue() * (q_d_pitch.getDoubleValue() - robot.getBodyAngle())
                - bodyOrientationKd.getDoubleValue() * robot.getBodyAngularVelocity();
          robot.setHipTorque(supportSide, -supportHipTorque);
