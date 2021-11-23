@@ -102,12 +102,12 @@ public class AtlasRobotDefinitionMutator implements Consumer<RobotDefinition>
 
    private void modifyHokuyoInertia(RigidBodyDefinition hokuyo)
    {
-      double ixx = 0.000401606;
+      double ixx = 4.01606E-4;
       double iyy = 0.00208115;
       double izz = 0.00178402;
-      double ixy = 4.9927e-08;
-      double ixz = 1.0997e-05;
-      double iyz = -9.8165e-09;
+      double ixy = 4.9927E-8;
+      double ixz = 1.0997E-5;
+      double iyz = -9.8165E-9;
       hokuyo.setMomentOfInertia(new MomentOfInertiaDefinition(ixx, iyy, izz, ixy, ixz, iyz));
    }
 }
