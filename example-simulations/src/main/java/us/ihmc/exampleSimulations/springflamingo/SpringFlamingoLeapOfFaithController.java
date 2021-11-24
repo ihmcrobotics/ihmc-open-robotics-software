@@ -21,11 +21,17 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
    private final SideDependentList<YoDouble> thighAngles = new SideDependentList<>();
    private final SideDependentList<YoDouble> thighVelocities = new SideDependentList<>();
+   private final SideDependentList<YoDouble> shinAngles = new SideDependentList<>();
+   private final SideDependentList<YoDouble> shinVelocities = new SideDependentList<>();
+   private final SideDependentList<YoDouble> footAngles = new SideDependentList<>();
+   private final SideDependentList<YoDouble> footVelocities = new SideDependentList<>();
 
    private final SideDependentList<YoDouble> q_d_hips = new SideDependentList<>();
    private final SideDependentList<YoDouble> q_d_knees = new SideDependentList<>();
    private final SideDependentList<YoDouble> q_d_ankles = new SideDependentList<>();
 
+   public final YoDouble centerOfMassPositionX = new YoDouble("centerOfMassPositionX", registry);
+   public final YoDouble centerOfMassVelocityX = new YoDouble("centerOfMassVelocityX", registry);
    public final YoDouble capturePointX = new YoDouble("capturePointX", registry);
    public final YoDouble capturePointLeftHeelX = new YoDouble("capturePointLeftHeelX", registry);
    public final YoDouble capturePointRightHeelX = new YoDouble("capturePointRightHeelX", registry);
@@ -41,6 +47,9 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
    private final YoDouble kneeSupportKp = new YoDouble("kneeSupportKp", registry);
    private final YoDouble kneeSupportKd = new YoDouble("kneeSupportKd", registry);
+
+   private final YoDouble footSupportKp = new YoDouble("footSupportKp", registry);
+   private final YoDouble footSupportKd = new YoDouble("footSupportKd", registry);
 
    private final YoDouble kneeSwingKp = new YoDouble("kneeSwingKp", registry);
    private final YoDouble kneeSwingKd = new YoDouble("kneeSwingKd", registry);
@@ -71,10 +80,18 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
    private final YoDouble toeOffAnkleTorque = new YoDouble("toeOffAnkleTorque", registry);
    private final YoDouble toeOffAnkleAcceleration = new YoDouble("toeOffAnkleAcceleration", registry);
    private final YoDouble toeOffAnkleVelocity = new YoDouble("toeOffAnkleVelocity", registry);
+//   private final YoDouble toeOffFootMaxAngle = new YoDouble("toeOffFootMaxAngle", registry);
 
    private final YoDouble dropSupportKneeAcceleration = new YoDouble("dropSupportKneeAcceleration", registry);
    private final YoDouble dropSupportKneeVelocity = new YoDouble("dropSupportKneeVelocity", registry);
 
+   private final YoDouble supportFootDesiredAngle = new YoDouble("supportFootDesiredAngle", registry);
+   private final YoDouble dropSupportFootMaxAngle = new YoDouble("dropSupportFootMaxAngle", registry);
+   private final YoDouble dropSupportFootVelocity = new YoDouble("dropSupportFootVelocity", registry);
+   private final YoDouble toeOffFootMaxAngle = new YoDouble("toeOffFootMaxAngle", registry);
+   private final YoDouble toeOffFootVelocity = new YoDouble("toeOffFootVelocity", registry);
+
+   
    private final YoDouble finalSwingThighAngle = new YoDouble("finalSwingThighAngle", registry);
    private final YoDouble swingDuration = new YoDouble("swingDuration", registry);
 
@@ -105,6 +122,10 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       {
          YoDouble thighAngle = new YoDouble(robotSide.getCamelCaseName() + "ThighAngle", registry);
          YoDouble thighVelocity = new YoDouble(robotSide.getCamelCaseName() + "ThighVelocity", registry);
+         YoDouble shinAngle = new YoDouble(robotSide.getCamelCaseName() + "ShinAngle", registry);
+         YoDouble shinVelocity = new YoDouble(robotSide.getCamelCaseName() + "ShinVelocity", registry);
+         YoDouble footAngle = new YoDouble(robotSide.getCamelCaseName() + "FootAngle", registry);
+         YoDouble footVelocity = new YoDouble(robotSide.getCamelCaseName() + "FootVelocity", registry);
 
          YoDouble q_d_hip = new YoDouble("q_d_" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Hip", registry);
          YoDouble q_d_knee = new YoDouble("q_d_" + robotSide.getCamelCaseNameForMiddleOfExpression() + "Knee", registry);
@@ -112,6 +133,10 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
          thighAngles.set(robotSide, thighAngle);
          thighVelocities.set(robotSide, thighVelocity);
+         shinAngles.set(robotSide, shinAngle);
+         shinVelocities.set(robotSide, shinVelocity);
+         footAngles.set(robotSide, footAngle);
+         footVelocities.set(robotSide, footVelocity);
 
          q_d_hips.set(robotSide, q_d_hip);
          q_d_knees.set(robotSide, q_d_knee);
@@ -146,6 +171,12 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       straightenKneeForSwingVelocity.set(8.0);
       extendKneeDuringStanceVelocity.set(0.6);
       dropSupportKneeAcceleration.set(12.0);
+      
+      dropSupportFootVelocity.set(0.8);
+      dropSupportFootMaxAngle.set(0.7);
+
+      toeOffFootVelocity.set(2.0);
+      toeOffFootMaxAngle.set(1.0);
 
       minimumSupportKneeAngle.set(0.0);
       maximumSupportKneeAngle.set(1.2);
@@ -154,8 +185,11 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       bodyOrientationKp.set(100.0);
       bodyOrientationKd.set(12.0);
 
-      kneeSupportKp.set(200.0);
+      kneeSupportKp.set(250.0);
       kneeSupportKd.set(5.0);
+
+      footSupportKp.set(125.0);
+      footSupportKd.set(5.0);
 
       kneeSwingKp.set(200.0);
       kneeSwingKd.set(4.0);
@@ -178,6 +212,8 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
       initControl();
       computeThighAngles();
+      computeShinAngles();
+      computeFootAngles();
       computeCapturePoint();
    }
 
@@ -266,11 +302,17 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       @Override
       public void onEntry()
       {
-         q_d_knees.get(loadingSide).set(robot.getKneeAngle(loadingSide));
-         q_d_knees.get(toeOffSide).set(robot.getKneeAngle(toeOffSide));
+//         q_d_knees.get(loadingSide).set(robot.getKneeAngle(loadingSide));
+//         q_d_knees.get(toeOffSide).set(robot.getKneeAngle(toeOffSide));
+         
+         q_d_knees.get(loadingSide).set(q_d_knees.get(loadingSide).getValue());
+         q_d_knees.get(toeOffSide).set(q_d_knees.get(toeOffSide).getValue());
 
          q_d_ankles.get(toeOffSide).set(0.0); //robot.getAnkleAngle(toeOffSide) - 0.1);
          q_d_ankles.get(loadingSide).set(0.0);
+
+//         supportFootDesiredAngle.set(footAngles.get(toeOffSide).getValue());
+         supportFootDesiredAngle.set(supportFootDesiredAngle.getValue());
 
          toeOffAnkleVelocity.set(0.0);
       }
@@ -290,7 +332,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       }
 
       @Override
-      public void doAction(double timeInState)
+      public void doAction(double timeInState) //LoadingToeOffState
       {
          capturePointSupportHeelX.set(-capturePointHeelsX.get(loadingSide).getValue());
          
@@ -322,9 +364,9 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          toeOffAnkleVelocity.add(deltaTime.getDoubleValue() * toeOffAnkleAcceleration.getDoubleValue());
          toeOffAnkleDesiredAngle.sub(deltaTime.getDoubleValue() * toeOffAnkleVelocity.getDoubleValue());
 
-         if (toeOffAnkleDesiredAngle.getDoubleValue() < -maxToeOffAnkleAngle.getDoubleValue())
+         if (toeOffAnkleDesiredAngle.getValue() < -maxToeOffAnkleAngle.getValue())
          {
-            toeOffAnkleDesiredAngle.set(-maxToeOffAnkleAngle.getDoubleValue());
+            toeOffAnkleDesiredAngle.set(-maxToeOffAnkleAngle.getValue());
          }
 
          double loadingKneeTorque = kneeSupportKp.getDoubleValue() * (q_d_knees.get(loadingSide).getDoubleValue() - robot.getKneeAngle(loadingSide))
@@ -336,11 +378,12 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
             loadingKneeTorque = minimumKneeForce.getDoubleValue();
          }
 
-         q_d_knees.get(toeOffSide).sub(deltaTime.getDoubleValue() * collapseKneeForToeOffVelocity.getDoubleValue());
-         if (q_d_knees.get(toeOffSide).getValue() < -collapseKneeForToeOffAngle.getValue())
-         {
-            q_d_knees.get(toeOffSide).set(-collapseKneeForToeOffAngle.getValue());
-         }
+         if (q_d_knees.get(toeOffSide).getValue() > -collapseKneeForToeOffAngle.getValue())
+            q_d_knees.get(toeOffSide).sub(deltaTime.getDoubleValue() * collapseKneeForToeOffVelocity.getDoubleValue());
+//         if (q_d_knees.get(toeOffSide).getValue() < -collapseKneeForToeOffAngle.getValue())
+//         {
+//            q_d_knees.get(toeOffSide).set(-collapseKneeForToeOffAngle.getValue());
+//         }
          
          double toeOffKneeTorque = kneeSupportKp.getDoubleValue() * (q_d_knees.get(toeOffSide).getDoubleValue() - robot.getKneeAngle(toeOffSide))
                - kneeSupportKd.getDoubleValue() * robot.getKneeVelocity(toeOffSide);
@@ -359,7 +402,27 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          //         toeOffAnkleTorque.set(ankleToeOffKp.getDoubleValue() * (q_d_ankles.get(toeOffSide).getDoubleValue() - robot.getAnkleAngle(toeOffSide))
          //               - ankleToeOffKd.getDoubleValue() * robot.getAnkleVelocity(toeOffSide));
 
-         robot.setAnkleTorque(toeOffSide, toeOffAnkleTorque.getDoubleValue());
+         double supportFootAngularVelocity = robot.getFootAngularVelocity(toeOffSide);
+         if (supportFootAngularVelocity > 10.0)
+            supportFootAngularVelocity = 10.0;
+         if (supportFootAngularVelocity < -10.0)
+            supportFootAngularVelocity = -10.0;
+         
+         supportFootDesiredAngle.sub(deltaTime.getValue() * toeOffFootVelocity.getValue());
+         if (supportFootDesiredAngle.getValue() < -toeOffFootMaxAngle.getValue())
+         {
+            supportFootDesiredAngle.set(-toeOffFootMaxAngle.getValue());
+         }
+         
+         double supportAnkleTorque = footSupportKp.getDoubleValue() * (supportFootDesiredAngle.getValue() - robot.getFootAngle(toeOffSide))
+               - footSupportKd.getDoubleValue() * supportFootAngularVelocity;
+         
+         if (supportAnkleTorque > toeOffAnkleTorque.getValue())
+            supportAnkleTorque = toeOffAnkleTorque.getValue();
+
+         robot.setAnkleTorque(toeOffSide, supportAnkleTorque);
+         
+//         robot.setAnkleTorque(toeOffSide, toeOffAnkleTorque.getDoubleValue());
          doBrakingOnSupportAnkleIfTooFast(loadingSide);
 
          robot.setAnkleTorque(loadingSide, 0.0);
@@ -411,7 +474,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          return false;
       }
 
-      @Override
+      @Override //SupportSwingState
       public void doAction(double timeInState)
       {
          capturePointSupportHeelX.set(-capturePointHeelsX.get(supportSide).getValue());
@@ -467,11 +530,13 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
    };
 
-   private void doBrakingOnSupportAnkleIfTooFast(RobotSide supportSide)
+   private double doBrakingOnSupportAnkleIfTooFast(RobotSide supportSide)
    {
+      double ankleBrakingTorque = 0.0;
+
       if (-capturePointHeelsX.get(supportSide).getValue() > capturePointXToStartBraking.getValue())
       {
-         double ankleBrakingTorque = ankleBrakingKd.getValue() * (capturePointXToStartBraking.getValue() + capturePointHeelsX.get(supportSide).getValue());
+         ankleBrakingTorque = ankleBrakingKd.getValue() * (capturePointXToStartBraking.getValue() + capturePointHeelsX.get(supportSide).getValue());
          if (ankleBrakingTorque < maxAnkleBrakingTorque.getValue())
          {
             ankleBrakingTorque = maxAnkleBrakingTorque.getValue();
@@ -482,6 +547,8 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       {
          robot.setAnkleTorque(supportSide, 0.0);
       }
+      
+      return ankleBrakingTorque;
    }
 
    private class DropRetractState implements State
@@ -516,6 +583,8 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          q_d_knees.get(swingSide).set(robot.getKneeAngle(swingSide));
          //         q_d_knees.get(supportSide).set(0.0); Keep support desired knee angle the same as it was before.
          dropSupportKneeVelocity.set(0.0);
+         
+         supportFootDesiredAngle.set(footAngles.get(supportSide).getValue());
       }
 
       @Override
@@ -530,7 +599,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       }
 
       @Override
-      public void doAction(double timeInState)
+      public void doAction(double timeInState) //DropRetractState
       {
          capturePointSupportHeelX.set(-capturePointHeelsX.get(supportSide).getValue());
 
@@ -573,6 +642,22 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          //         }
          robot.setKneeTorque(supportSide, supportKneeTorque);
 
+         supportFootDesiredAngle.sub(deltaTime.getValue() * dropSupportFootVelocity.getValue());
+         if (supportFootDesiredAngle.getValue() < -dropSupportFootMaxAngle.getValue())
+            supportFootDesiredAngle.set(-dropSupportFootMaxAngle.getValue());
+
+         double supportAnkleTorque = doBrakingOnSupportAnkleIfTooFast(supportSide);
+         double supportFootAngularVelocity = robot.getFootAngularVelocity(supportSide);
+         if (supportFootAngularVelocity > 10.0)
+            supportFootAngularVelocity = 10.0;
+         if (supportFootAngularVelocity < -10.0)
+            supportFootAngularVelocity = -10.0;
+         
+         supportAnkleTorque += footSupportKp.getDoubleValue() * (supportFootDesiredAngle.getValue() - robot.getFootAngle(supportSide))
+               - footSupportKd.getDoubleValue() * supportFootAngularVelocity;
+         
+         robot.setAnkleTorque(supportSide, supportAnkleTorque);
+         
          double swingKneeTorque = kneeSwingKp.getDoubleValue() * (q_d_knees.get(swingSide).getDoubleValue() - robot.getKneeAngle(swingSide))
                - kneeSwingKd.getDoubleValue() * robot.getKneeVelocity(swingSide);
          robot.setKneeTorque(swingSide, swingKneeTorque);
@@ -581,8 +666,6 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
                - ankleSwingKd.getDoubleValue() * robot.getAnkleVelocity(swingSide);
 
          robot.setAnkleTorque(swingSide, swingAnkleTorque);
-
-         doBrakingOnSupportAnkleIfTooFast(supportSide);
       }
    };
 
@@ -620,6 +703,8 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       previousTickTime.set(robot.getTime());
 
       computeThighAngles();
+      computeShinAngles();
+      computeFootAngles();
       computeCapturePoint();
 
       stateMachine.doAction();
@@ -634,9 +719,30 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          thighVelocities.get(robotSide).set(robot.getThighAngularVelocity(robotSide));
       }
    }
+   
+   private void computeShinAngles()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         shinAngles.get(robotSide).set(robot.getShinAngle(robotSide));
+         shinVelocities.get(robotSide).set(robot.getShinAngularVelocity(robotSide));
+      }
+   }
+   
+   private void computeFootAngles()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         footAngles.get(robotSide).set(robot.getFootAngle(robotSide));
+         footVelocities.get(robotSide).set(robot.getFootAngularVelocity(robotSide));
+      }
+   }
 
    private void computeCapturePoint()
    {
+      centerOfMassPositionX.set(-robot.getCenterOfMassPositionX());
+      centerOfMassVelocityX.set(-robot.getCenterOfMassVelocityX());
+
       capturePointX.set(robot.getCenterOfMassPositionX() + 0.3 * robot.getCenterOfMassVelocityX());
 
       capturePointLeftHeelX.set(capturePointX.getDoubleValue() - robot.getHeelXPosition(RobotSide.LEFT));

@@ -200,8 +200,9 @@ public class SpringFlamingoSimulation
       sim.setPlaybackDesiredFrameRate(0.033);
       sim.setGraphsUpdatedDuringPlayback(true);
 
-      sim.setSimulateDuration(20.0);
-//      sim.setSimulateNoFasterThanRealTime(true);
+      sim.setSimulateDuration(3.0);
+//      sim.setSimulateDuration(20.0);
+      sim.setSimulateNoFasterThanRealTime(true);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();//TODO
       //      ICPVisualizer icpVisualizer = new ICPVisualizer(registry, yoGraphicsListRegistry);
@@ -460,9 +461,9 @@ public class SpringFlamingoSimulation
 
    private CombinedTerrainObject3D createStepDownsAndFlatsTerrain()
    {
-      double stepDownOneX = -2.85; //-2.65;
+      double stepDownOneX = -2.68; //-2.65;
       double stepDownOneBottomZ = -0.25;
-      double stepDownTwoX = -4.85; //-4.7;
+      double stepDownTwoX = -4.92; //-4.7;
       double stepDownTwoBottomZ = -0.5;
       double stepDownTwoXEnd = -9.0;
 
