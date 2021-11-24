@@ -3,7 +3,7 @@ package us.ihmc.simulationToolkit.physicsEngine;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -41,7 +41,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameTwistBasics;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullRobotModelFactory;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.ExperimentalPhysicsEngine;
@@ -118,7 +117,9 @@ public class ExperimentalSimulation extends Simulation
       this.gravity = gravity;
    }
 
-   public void addEnvironmentCollidables(CollidableHelper helper, String robotCollisionMask, String environmentCollisionMask,
+   public void addEnvironmentCollidables(CollidableHelper helper,
+                                         String robotCollisionMask,
+                                         String environmentCollisionMask,
                                          CommonAvatarEnvironmentInterface environment)
    {
       addEnvironmentCollidables(toCollidables(helper.getCollisionMask(environmentCollisionMask), helper.createCollisionGroup(robotCollisionMask), environment));
@@ -163,7 +164,9 @@ public class ExperimentalSimulation extends Simulation
    /**
     * Adds and configures a new robot to the simulation.
     */
-   public void addRobot(RobotDescription robotDescription, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter,
+   public void addRobot(RobotDescription robotDescription,
+                        RobotCollisionModel robotCollisionModel,
+                        MultiBodySystemStateWriter robotInitialStateWriter,
                         MultiBodySystemStateWriter controllerOutputWriter)
    {
       RobotFromDescription scsRobot = new RobotFromDescription(robotDescription);
@@ -192,7 +195,7 @@ public class ExperimentalSimulation extends Simulation
     */
    public void configureRobot(FullRobotModelFactory robotFactory, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter)
    {
-      String robotName = robotFactory.getRobotDescription().getName();
+      String robotName = robotFactory.getRobotDefinition().getName();
       RigidBodyBasics rootBody = robotFactory.createFullRobotModel().getElevator();
       configureRobot(robotName, rootBody, robotCollisionModel, robotInitialStateWriter);
    }
@@ -201,7 +204,9 @@ public class ExperimentalSimulation extends Simulation
     * Configures the physics for a robot that was already added via the constructor or
     * {@link #addRobot(Robot)}.
     */
-   public void configureRobot(String robotName, RigidBodyBasics rootBody, RobotCollisionModel robotCollisionModel,
+   public void configureRobot(String robotName,
+                              RigidBodyBasics rootBody,
+                              RobotCollisionModel robotCollisionModel,
                               MultiBodySystemStateWriter robotInitialStateWriter)
    {
       Robot scsRobot = Stream.of(getRobots()).filter(candidate -> candidate.getName().toLowerCase().equals(robotName.toLowerCase())).findFirst().get();
@@ -517,16 +522,15 @@ public class ExperimentalSimulation extends Simulation
       return collidables;
    }
 
-   public static MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<HumanoidFloatingRootJointRobot, HumanoidJointNameMap> initialSetup,
-                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory, HumanoidJointNameMap jointMap)
+   public static MultiBodySystemStateWriter toRobotInitialStateWriter(Consumer<HumanoidFloatingRootJointRobot> initialSetup,
+                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory)
    {
-      return toRobotInitialStateWriter(initialSetup, robotFactory.createHumanoidFloatingRootJointRobot(false), jointMap);
+      return toRobotInitialStateWriter(initialSetup, robotFactory.createHumanoidFloatingRootJointRobot(false));
    }
 
-   public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<T, HumanoidJointNameMap> initialSetup, T robot,
-                                                                                        HumanoidJointNameMap jointMap)
+   public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(Consumer<T> initialSetup, T robot)
    {
-      initialSetup.accept(robot, jointMap);
+      initialSetup.accept(robot);
       return toMultiBodySystemStateWriter(robot);
    }
 

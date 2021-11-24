@@ -15,9 +15,10 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
@@ -41,7 +42,9 @@ public class JavaFXQuadrupedVisualizer
 
    public JavaFXQuadrupedVisualizer(FullQuadrupedRobotModelFactory fullRobotModelFactory)
    {
-      this(fullRobotModelFactory, graphics -> {});
+      this(fullRobotModelFactory, graphics ->
+      {
+      });
    }
 
    public JavaFXQuadrupedVisualizer(FullQuadrupedRobotModelFactory fullRobotModelFactory, Consumer<Graphics3DNode> graphicsMutator)
@@ -88,8 +91,10 @@ public class JavaFXQuadrupedVisualizer
 
    private void loadRobotModelAndGraphics(FullQuadrupedRobotModelFactory fullRobotModelFactory, Consumer<Graphics3DNode> graphicsMutator)
    {
-      RobotDescription robotDescription = fullRobotModelFactory.getRobotDescription();
-      graphicsRobot = new GraphicsIDRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription);
+      RobotDefinition robotDefinition = fullRobotModelFactory.getRobotDefinition();
+      graphicsRobot = new GraphicsIDRobot(robotDefinition.getName(),
+                                          fullRobotModel.getElevator(),
+                                          RobotDefinitionConverter.toGraphicsObjectsHolder(robotDefinition));
       robotRootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode());
       robotRootNode.setMouseTransparent(true);
       addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode, graphicsMutator);

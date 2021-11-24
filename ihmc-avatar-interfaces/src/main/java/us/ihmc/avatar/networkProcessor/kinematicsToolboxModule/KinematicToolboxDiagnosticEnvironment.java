@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
@@ -24,7 +24,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SDFPerfectSimulatedSensorReader
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.util.PeriodicNonRealtimeThreadScheduler;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class KinematicToolboxDiagnosticEnvironment
 {
@@ -34,10 +33,9 @@ public class KinematicToolboxDiagnosticEnvironment
    public KinematicToolboxDiagnosticEnvironment(DRCRobotModel drcRobotModel)
    {
       FullHumanoidRobotModel humanoidFullRobotModel = drcRobotModel.createFullRobotModel();
-      HumanoidJointNameMap jointMap = drcRobotModel.getJointMap();
       HumanoidFloatingRootJointRobot humanoidFloatingRobotModel = drcRobotModel.createHumanoidFloatingRootJointRobot(false);
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = drcRobotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      robotInitialSetup.initializeRobot(humanoidFloatingRobotModel, jointMap);
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = drcRobotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      robotInitialSetup.initializeRobot(humanoidFloatingRobotModel);
       SDFPerfectSimulatedSensorReader sdfPerfectReader = new SDFPerfectSimulatedSensorReader(humanoidFloatingRobotModel, humanoidFullRobotModel, null);
       sdfPerfectReader.read();
 
