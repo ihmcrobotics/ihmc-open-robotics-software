@@ -146,7 +146,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       Point3D comPoint = new Point3D();
       totalMass.set(robot.computeCenterOfMass(comPoint));
 
-      capturePointXToStartBraking.set(0.14);
+      capturePointXToStartBraking.set(0.25);
       ankleBrakingKd.set(60.0);
       maxAnkleBrakingTorque.set(-10.0);
       toeOffAnkleTorque.set(-14.0);
@@ -176,7 +176,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       dropSupportFootMaxAngle.set(0.7);
 
       toeOffFootVelocity.set(2.0);
-      toeOffFootMaxAngle.set(1.0);
+      toeOffFootMaxAngle.set(0.8);
 
       minimumSupportKneeAngle.set(0.0);
       maximumSupportKneeAngle.set(1.2);
