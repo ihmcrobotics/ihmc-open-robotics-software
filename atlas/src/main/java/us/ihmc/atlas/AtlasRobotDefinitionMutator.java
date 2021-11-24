@@ -47,6 +47,11 @@ public class AtlasRobotDefinitionMutator implements Consumer<RobotDefinition>
       List<IMUSensorDefinition> imus = robotDefinition.getRigidBodyDefinition(jointMap.getPelvisName()).getParentJoint()
                                                       .getSensorDefinitions(IMUSensorDefinition.class);
 
+      modifyLeftForearm(robotDefinition.getRigidBodyDefinition("l_lfarm"));
+      modifyRightForearm(robotDefinition.getRigidBodyDefinition("r_lfarm"));
+      modifyLeftHand(robotDefinition.getRigidBodyDefinition("l_hand"));
+      modifyRightHand(robotDefinition.getRigidBodyDefinition("r_hand"));
+
       for (IMUSensorDefinition imu : imus)
       {
          if (imu.getName().equals("imu_sensor"))
@@ -64,6 +69,42 @@ public class AtlasRobotDefinitionMutator implements Consumer<RobotDefinition>
                                                    jointMap.getModelScale(),
                                                    jointMap.getMassScalePower(),
                                                    j -> !j.getName().contains("hokuyo"));
+   }
+
+   private void modifyLeftHand(RigidBodyDefinition leftHand)
+   {
+      if (leftHand == null)
+         return;
+
+      leftHand.setMass(2.7);
+      leftHand.getInertiaPose().setToZero();
+      leftHand.getInertiaPose().getTranslation().set(0, 0.04, 0);
+   }
+
+   private void modifyRightHand(RigidBodyDefinition rightHand)
+   {
+      if (rightHand == null)
+         return;
+
+      rightHand.setMass(2.7);
+      rightHand.getInertiaPose().setToZero();
+      rightHand.getInertiaPose().getTranslation().set(0, -0.04, 0);
+   }
+
+   private void modifyLeftForearm(RigidBodyDefinition leftForearm)
+   {
+      if (leftForearm == null)
+         return;
+
+      leftForearm.setMass(1.6);
+   }
+
+   private void modifyRightForearm(RigidBodyDefinition rightForearm)
+   {
+      if (rightForearm == null)
+         return;
+
+      rightForearm.setMass(1.6);
    }
 
    private void mutateChest(RigidBodyDefinition chest)
