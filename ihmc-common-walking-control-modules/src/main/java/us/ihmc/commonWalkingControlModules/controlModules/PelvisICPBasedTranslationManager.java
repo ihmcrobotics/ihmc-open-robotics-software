@@ -585,11 +585,13 @@ public class PelvisICPBasedTranslationManager
       {
          desiredICPToModify.add(tempICPOffset);
          desiredCoPToModify.add(tempICPOffset);
-         desiredCoMToModify.add(tempICPOffset);
 
          convexPolygonShrinker.scaleConvexPolygon(supportPolygon, supportPolygonSafeMargin.getDoubleValue(), safeSupportPolygonToConstrainICPOffset);
          safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredICPToModify);
          safeSupportPolygonToConstrainICPOffset.orthogonalProjection(desiredCoPToModify);
+
+         tempICPOffset.sub(desiredICPToModify, originalICPToModify);
+         desiredCoMToModify.add(tempICPOffset);
 
          icpOffsetForFreezing.setIncludingFrame(desiredICPToModify);
          icpOffsetForFreezing.sub(originalICPToModify);
