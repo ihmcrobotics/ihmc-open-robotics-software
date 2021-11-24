@@ -461,9 +461,9 @@ public class SpringFlamingoSimulation
 
    private CombinedTerrainObject3D createStepDownsAndFlatsTerrain()
    {
-      double stepDownOneX = -2.68; //-2.65;
+      double stepDownOneX = -2.35;
       double stepDownOneBottomZ = -0.25;
-      double stepDownTwoX = -4.92; //-4.7;
+      double stepDownTwoX = -4.85;
       double stepDownTwoBottomZ = -0.5;
       double stepDownTwoXEnd = -9.0;
 
