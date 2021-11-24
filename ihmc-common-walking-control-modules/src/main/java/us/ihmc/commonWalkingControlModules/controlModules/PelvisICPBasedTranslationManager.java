@@ -32,9 +32,11 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoi
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.listener.YoParameterChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.YoParameter;
@@ -71,13 +73,13 @@ public class PelvisICPBasedTranslationManager
    private final YoDouble maximumIntegralError = new YoDouble("maximumPelvisPositionIntegralError", registry);
 
    private final YoFrameVector2D desiredICPOffset = new YoFrameVector2D("desiredICPOffset", worldFrame, registry);
-   private final Vector2DReadOnly userOffset = new ParameterVector2D("userDesiredICPOffset", new Vector2D(), registry);
+   private final YoVector2D userOffset = new YoVector2D("userDesiredICPOffset", registry);
 
    private final YoBoolean isEnabled = new YoBoolean("isPelvisTranslationManagerEnabled", registry);
    private final YoBoolean isRunning = new YoBoolean("isPelvisTranslationManagerRunning", registry);
    private final YoBoolean isFrozen = new YoBoolean("isPelvisTranslationManagerFrozen", registry);
 
-   private final BooleanParameter manualMode = new BooleanParameter("manualModeICPOffset", registry, false);
+   private final YoBoolean manualMode = new YoBoolean("manualModeICPOffset", registry);
 
    private final YoDouble yoTime;
    private final double controlDT;
@@ -140,14 +142,7 @@ public class PelvisICPBasedTranslationManager
       integralGain.set(1.5);
       maximumIntegralError.set(0.08);
 
-      manualMode.addListener(new YoParameterChangedListener()
-      {
-         @Override
-         public void changed(YoParameter v)
-         {
-            initialize();
-         }
-      });
+      manualMode.addListener(v -> initialize());
 
       String namePrefix = "PelvisXYTranslation";
       lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
@@ -621,6 +616,12 @@ public class PelvisICPBasedTranslationManager
       desiredICPOffset.setToZero();
       streamTimestampOffset.setToNaN();
       streamTimestampSource.setToNaN();
+   }
+
+   public void disableManualMode()
+   {
+      manualMode.set(false);
+      userOffset.setToZero();
    }
 
    public void enable()

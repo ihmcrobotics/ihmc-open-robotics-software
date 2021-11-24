@@ -822,6 +822,8 @@ public class BalanceManager
       currentStateDuration.set(Double.POSITIVE_INFINITY);
       totalStateDuration.set(Double.POSITIVE_INFINITY);
 
+      pelvisICPBasedTranslationManager.disableManualMode();
+
       inSingleSupport.set(false);
       initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
@@ -847,6 +849,8 @@ public class BalanceManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
       totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
+
+      pelvisICPBasedTranslationManager.disableManualMode();
 
       inSingleSupport.set(false);
       initializeOnStateChange = true;
