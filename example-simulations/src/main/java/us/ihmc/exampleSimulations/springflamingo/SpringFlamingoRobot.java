@@ -530,6 +530,54 @@ public class SpringFlamingoRobot
       }
    }
 
+   public double getShinAngle(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return q_pitch.getValue() + q_lh.getValue() + q_lk.getValue();
+      }
+      else
+      {
+         return q_pitch.getValue() + q_rh.getValue() + q_rk.getValue();
+      }
+   }
+
+   public double getShinAngularVelocity(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return qd_pitch.getValue() + qd_lh.getValue() + qd_lk.getValue();
+      }
+      else
+      {
+         return qd_pitch.getValue() + qd_rh.getValue() + qd_rk.getValue();
+      }
+   }
+
+   public double getFootAngle(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return q_pitch.getValue() + q_lh.getValue() + q_lk.getValue() + q_la.getValue();
+      }
+      else
+      {
+         return q_pitch.getValue() + q_rh.getValue() + q_rk.getValue() + q_ra.getValue();
+      }
+   }
+
+   public double getFootAngularVelocity(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return qd_pitch.getValue() + qd_lh.getValue() + qd_lk.getValue() + qd_la.getValue();
+      }
+      else
+      {
+         return qd_pitch.getValue() + qd_rh.getValue() + qd_rk.getValue() + qd_ra.getValue();
+      }
+   }
+
    public double getHeelXPosition(RobotSide robotSide)
    {
       if (robotSide == RobotSide.LEFT)
