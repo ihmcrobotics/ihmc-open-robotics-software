@@ -15,11 +15,14 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -89,7 +92,10 @@ public class AStarBodyPathPlannerVisualizer
 
       scs.addStaticLinkGraphics(heightMapGraphics(heightMapData));
 
-      AStarBodyPathPlanner bodyPathPlanner = new AStarBodyPathPlanner();
+      ConvexPolygon2D footPolygon = PlannerTools.createDefaultFootPolygon();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+
+      AStarBodyPathPlanner bodyPathPlanner = new AStarBodyPathPlanner(parameters, footPolygon);
       bodyPathPlanner.setHeightMapData(heightMapData);
       List<Pose3DReadOnly> path = bodyPathPlanner.planPath(start, goal);
 
