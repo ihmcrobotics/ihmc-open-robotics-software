@@ -246,12 +246,12 @@ public class RobotDefinitionLoader
 
       for (JointDefinition joint : definition.getChildrenJoints())
       {
-         scaleJointDefinition(joint, modelScale);
+         scaleJointDefinition(joint, modelScale, massScalePower);
          scaleRigidBodyDefinitionRecursive(joint.getSuccessor(), modelScale, massScalePower, jointFilter, scaleInertia);
       }
    }
 
-   public static void scaleJointDefinition(JointDefinition definition, double modelScale)
+   public static void scaleJointDefinition(JointDefinition definition, double modelScale, double massScalePower)
    {
       definition.getTransformToParent().getTranslation().scale(modelScale);
 
@@ -259,10 +259,21 @@ public class RobotDefinitionLoader
          sensor.getTransformToJoint().getTranslation().scale(modelScale);
       for (KinematicPointDefinition kp : definition.getKinematicPointDefinitions())
          kp.getTransformToParent().getTranslation().scale(modelScale);
-      for (ExternalWrenchPointDefinition efp : definition.getExternalWrenchPointDefinitions())
-         efp.getTransformToParent().getTranslation().scale(modelScale);
-      for (GroundContactPointDefinition gcp : definition.getGroundContactPointDefinitions())
-         gcp.getTransformToParent().getTranslation().scale(modelScale);
+      // TODO This seems inconsistent, but that's how we used to do it when using RobotDescription.
+//      for (ExternalWrenchPointDefinition efp : definition.getExternalWrenchPointDefinitions())
+//         efp.getTransformToParent().getTranslation().scale(modelScale);
+//      for (GroundContactPointDefinition gcp : definition.getGroundContactPointDefinitions())
+//         gcp.getTransformToParent().getTranslation().scale(modelScale);
+
+      if (definition instanceof OneDoFJointDefinition)
+      {
+         double massScale = Math.pow(modelScale, massScalePower);
+         OneDoFJointDefinition oneDoFJoint = (OneDoFJointDefinition) definition;
+         oneDoFJoint.setDamping(massScale * oneDoFJoint.getDamping());
+         oneDoFJoint.setKpSoftLimitStop(massScale * oneDoFJoint.getKpSoftLimitStop());
+         oneDoFJoint.setKdSoftLimitStop(massScale * oneDoFJoint.getKdSoftLimitStop());
+         oneDoFJoint.setDampingVelocitySoftLimit(massScale * oneDoFJoint.getDampingVelocitySoftLimit());
+      }
    }
 
    public static void scaleRigidBodyDefinition(RigidBodyDefinition definition, double modelScale, double massScalePower, boolean scaleInertia)

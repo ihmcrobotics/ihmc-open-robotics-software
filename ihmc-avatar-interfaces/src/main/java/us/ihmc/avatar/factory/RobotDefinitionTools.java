@@ -361,9 +361,9 @@ public class RobotDefinitionTools
       RobotDefinitionLoader.scaleRigidBodyDefinitionRecursive(definition, modelScale, massScalePower, jointFilter, scaleInertia);
    }
 
-   public static void scaleJointDefinition(JointDefinition definition, double modelScale)
+   public static void scaleJointDefinition(JointDefinition definition, double modelScale, double massScalePower)
    {
-      RobotDefinitionLoader.scaleJointDefinition(definition, modelScale);
+      RobotDefinitionLoader.scaleJointDefinition(definition, modelScale, massScalePower);
    }
 
    public static void scaleRigidBodyDefinition(RigidBodyDefinition definition, double modelScale, double massScalePower, boolean scaleInertia)
