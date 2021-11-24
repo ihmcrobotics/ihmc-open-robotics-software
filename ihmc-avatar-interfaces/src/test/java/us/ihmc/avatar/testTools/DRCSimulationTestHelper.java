@@ -22,7 +22,7 @@ import us.ihmc.avatar.DRCStartingLocation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
@@ -102,7 +102,7 @@ public class DRCSimulationTestHelper
    private boolean addFootstepMessageGenerator = false;
    private boolean useHeadingAndVelocityScript = false;
    private boolean cheatWithGroundHeightAtFootstep = false;
-   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
+   private RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = null;
    private HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters = null;
    private PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber = null;
    private final DRCGuiInitialSetup guiInitialSetup;
@@ -652,7 +652,7 @@ public class DRCSimulationTestHelper
       simulationStarter.registerControllerStateTransition(controllerStateTransitionFactory);
    }
 
-   public void setInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup)
+   public void setInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup)
    {
       this.initialSetup = initialSetup;
    }

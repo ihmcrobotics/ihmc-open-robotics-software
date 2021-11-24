@@ -22,8 +22,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -90,7 +90,7 @@ public class AvatarSimulationFactory
    private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
    private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
    private final RequiredFactoryField<CommonAvatarEnvironmentInterface> commonAvatarEnvironment = new RequiredFactoryField<>("commonAvatarEnvironmentInterface");
-   private final RequiredFactoryField<DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new RequiredFactoryField<>("robotInitialSetup");
+   private final RequiredFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new RequiredFactoryField<>("robotInitialSetup");
    private final RequiredFactoryField<DRCSCSInitialSetup> scsInitialSetup = new RequiredFactoryField<>("scsInitialSetup");
    private final RequiredFactoryField<DRCGuiInitialSetup> guiInitialSetup = new RequiredFactoryField<>("guiInitialSetup");
    private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
@@ -124,7 +124,7 @@ public class AvatarSimulationFactory
    private void createHumanoidFloatingRootJointRobot()
    {
       humanoidFloatingRootJointRobot = robotModel.get().createHumanoidFloatingRootJointRobot(createCollisionMeshes.get());
-      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot);
    }
 
    private void initializeCollisionManager()
@@ -190,8 +190,7 @@ public class AvatarSimulationFactory
          String environmentCollisionMask = "ground";
          String robotCollisionMask = robotModel.get().getSimpleRobotName();
          MultiBodySystemStateWriter robotInitialStateWriter = ExperimentalSimulation.toRobotInitialStateWriter(robotInitialSetup.get()::initializeRobot,
-                                                                                                               robotModel.get(),
-                                                                                                               robotModel.get().getJointMap());
+                                                                                                               robotModel.get());
          experimentalSimulation.addEnvironmentCollidables(helper, robotCollisionMask, environmentCollisionMask, commonAvatarEnvironment.get());
          RobotCollisionModel simulationRobotCollisionModel = robotModel.get()
                                                                        .getSimulationRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask);
@@ -469,7 +468,7 @@ public class AvatarSimulationFactory
           * need to move to where the robot itself determines coordinates, and the sensors are all in the
           * robot-determined world coordinates..
           */
-         robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+         robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot);
          try
          {
             humanoidFloatingRootJointRobot.update();
@@ -598,7 +597,7 @@ public class AvatarSimulationFactory
       }
 
       scsInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get(), null);
-      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot);
       humanoidFloatingRootJointRobot.update();
    }
 
@@ -667,7 +666,7 @@ public class AvatarSimulationFactory
       this.commonAvatarEnvironment.set(commonAvatarEnvironment);
    }
 
-   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   public void setRobotInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       this.robotInitialSetup.set(robotInitialSetup);
    }

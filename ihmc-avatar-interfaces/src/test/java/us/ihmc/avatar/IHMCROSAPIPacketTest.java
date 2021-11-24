@@ -20,7 +20,7 @@ import org.ros.internal.message.Message;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.modules.uiConnector.UiPacketToRosMsgRedirector;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
@@ -156,8 +156,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       packetRouter.attachPacketCommunicator(PacketDestination.CONTROLLER, controllerCommunicatorClient);
 
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      robotInitialSetup.initializeRobot(sdfRobot);
       DRCSimulationOutputWriterForControllerThread outputWriter = new DRCSimulationOutputWriterForControllerThread(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(controllerCommunicatorServer);
 
@@ -254,8 +254,8 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
       }
 
       HumanoidFloatingRootJointRobot sdfRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
-      robotInitialSetup.initializeRobot(sdfRobot, robotModel.getJointMap());
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      robotInitialSetup.initializeRobot(sdfRobot);
       DRCSimulationOutputWriterForControllerThread outputWriter = new DRCSimulationOutputWriterForControllerThread(sdfRobot);
       HumanoidGlobalDataProducer globalDataProducer = new HumanoidGlobalDataProducer(packetCommunicatorServer);
 

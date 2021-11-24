@@ -75,7 +75,7 @@ public class LidarScanPublisher
 
    public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node)
    {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), sensorFrameFactory, ros2Node);
+      this(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), sensorFrameFactory, ros2Node);
    }
    public LidarScanPublisher(String robotName,
                               FullRobotModel fullRobotModel,

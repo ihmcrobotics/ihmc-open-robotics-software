@@ -2,10 +2,11 @@ package us.ihmc.valkyrie.footstepPlanning;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.footstepPlanning.AvatarReachabilityMultiStepTest;
-import us.ihmc.avatar.initialSetup.HumanoidRobotMutableInitialSetup;
+import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.valkyrie.ValkyrieMutableInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -75,7 +76,7 @@ public class ValkyrieReachabilityMultiStepTest extends AvatarReachabilityMultiSt
    }
 
    @Override
-   protected HumanoidRobotMutableInitialSetup createInitialSetup(HumanoidJointNameMap jointNameMap)
+   protected HumanoidRobotInitialSetup createInitialSetup(HumanoidJointNameMap jointNameMap)
    {
       return new ValkyrieMutableInitialSetup(jointNameMap);
    }

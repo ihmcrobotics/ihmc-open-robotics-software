@@ -11,7 +11,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -49,7 +49,7 @@ public class DRCFlatGroundWalkingTrack
    private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
          && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
-   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
+   public DRCFlatGroundWalkingTrack(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
                                     boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
       this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model,
@@ -57,7 +57,7 @@ public class DRCFlatGroundWalkingTrack
    }
    
    // SimpleAtlas Simulation calls this helper constructor
-   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
+   public DRCFlatGroundWalkingTrack(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
                                     boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model,
                                     HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters, HighLevelControllerStateFactory customControllerState)
    {
@@ -65,7 +65,7 @@ public class DRCFlatGroundWalkingTrack
            WalkingProvider.VELOCITY_HEADING_COMPONENT, walkingScriptParameters, null, customControllerState); // should always be committed as VELOCITY_HEADING_COMPONENT
    }
 
-   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCFlatGroundWalkingTrack(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
                                     DRCRobotModel model, PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber)
    {
@@ -73,7 +73,7 @@ public class DRCFlatGroundWalkingTrack
            WalkingProvider.VELOCITY_HEADING_COMPONENT, new HeadingAndVelocityEvaluationScriptParameters(), externalPelvisCorrectorSubscriber, null);
    }
 
-   public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   public DRCFlatGroundWalkingTrack(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
                                     DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
@@ -82,7 +82,7 @@ public class DRCFlatGroundWalkingTrack
    }
 
 
-   private DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+   private DRCFlatGroundWalkingTrack(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
                                     DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters,
                                     PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber, HighLevelControllerStateFactory customControllerStateFactory)

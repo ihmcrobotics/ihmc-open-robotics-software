@@ -15,7 +15,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
@@ -36,8 +37,10 @@ public class ValkyrieJavaFXInverseKinematicsVisualizer
    public ValkyrieJavaFXInverseKinematicsVisualizer(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       fullRobotModel = fullRobotModelFactory.createFullRobotModel();
-      RobotDescription robotDescription = fullRobotModelFactory.getRobotDescription();
-      graphicsRobot = new GraphicsIDRobot(robotDescription.getName() + "aa", fullRobotModel.getElevator(), robotDescription);
+      RobotDefinition robotDefinition = fullRobotModelFactory.getRobotDefinition();
+      graphicsRobot = new GraphicsIDRobot(robotDefinition.getName() + "aa",
+                                          fullRobotModel.getElevator(),
+                                          RobotDefinitionConverter.toGraphicsObjectsHolder(robotDefinition));
       rootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode());
       rootNode.setMouseTransparent(true);
       addNodesRecursively(graphicsRobot.getRootNode(), rootNode);
