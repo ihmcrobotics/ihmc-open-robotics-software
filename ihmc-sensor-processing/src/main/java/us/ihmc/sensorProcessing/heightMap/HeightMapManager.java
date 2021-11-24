@@ -97,10 +97,10 @@ public class HeightMapManager
 //               continue;
 
             // stairs side
-            if (point.getX() < 0.5 && point.getZ() > 0.3)
-               continue;
-            if (point.getY() > 1.0 && point.getZ() > 0.3)
-               continue;
+//            if (point.getX() < 0.5 && point.getZ() > 0.3)
+//               continue;
+//            if (point.getY() > 1.0 && point.getZ() > 0.3)
+//               continue;
 
             // stairs
 //            if (point.getX() < 0.6 && point.getZ() > -0.2)
@@ -111,8 +111,8 @@ public class HeightMapManager
 //               continue;
 
             // stepping stones
-//            if (point.getZ() > 0.4)
-//               continue;
+            if (point.getZ() > 0.4)
+               continue;
 
             int xIndex = HeightMapTools.coordinateToIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, centerIndex);
             if (xIndex < 0 || xIndex >= cellsPerAxis)

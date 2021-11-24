@@ -98,6 +98,11 @@ public class HeightMapObstacleDetector
       }
    }
 
+   public DMatrixRMaj getEdgeDirectionMatrix()
+   {
+      return gYaw;
+   }
+
    public DMatrixRMaj getEdgeIntensityMatrix()
    {
       return gInt;
@@ -110,8 +115,14 @@ public class HeightMapObstacleDetector
 
    public static void main(String[] args) throws IOException
    {
-      HeightMapDataSetName dataset = HeightMapDataSetName.Stairs_1;
+      for (HeightMapDataSetName dataset : HeightMapDataSetName.values())
+      {
+         runObstacleDetector(dataset);
+      }
+   }
 
+   private static void runObstacleDetector(HeightMapDataSetName dataset) throws IOException
+   {
       HeightMapObstacleDetector obstacleDetector = new HeightMapObstacleDetector();
       obstacleDetector.compute(dataset.getHeightMapData());
 
@@ -119,16 +130,26 @@ public class HeightMapObstacleDetector
       BufferedImage bufferedImage = new BufferedImage(width, width, BufferedImage.TYPE_INT_RGB);
       double maxEdgeIntensity = obstacleDetector.getMaxEdgeIntensity();
 
+      System.out.println(dataset.name() + ": " + maxEdgeIntensity);
+
       for (int i = 0; i < width; i++)
       {
          for (int j = 0; j < width; j++)
          {
-            int grayValue = (int) (255 * obstacleDetector.getEdgeIntensityMatrix().get(i, j) / maxEdgeIntensity);
-            bufferedImage.setRGB(i, j, new Color(grayValue, grayValue, grayValue, 255).getRGB());
+            double intensityValue = obstacleDetector.getEdgeIntensityMatrix().get(i, j);
+            if (intensityValue > 2.0)
+            {
+               int grayValue = (int) (255 * intensityValue / maxEdgeIntensity);
+               bufferedImage.setRGB(i, j, new Color(grayValue, grayValue, grayValue, 255).getRGB());
+            }
+            else
+            {
+               bufferedImage.setRGB(i, j, new Color(0, 0, 0, 255).getRGB());
+            }
          }
       }
 
-      File outputfile = new File(dataset.name() + ".png");
+      File outputfile = new File(dataset.name() + "_Thresh.png");
       ImageIO.write(bufferedImage, "png", outputfile);
    }
 }
