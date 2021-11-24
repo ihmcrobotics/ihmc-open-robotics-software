@@ -110,12 +110,12 @@ public class HeightMapObstacleDetector
 
    public static void main(String[] args) throws IOException
    {
-      HeightMapDataSetName stairs = HeightMapDataSetName.Stepping_Stones_2;
+      HeightMapDataSetName dataset = HeightMapDataSetName.Stairs_1;
 
       HeightMapObstacleDetector obstacleDetector = new HeightMapObstacleDetector();
-      obstacleDetector.compute(stairs.getHeightMapData());
+      obstacleDetector.compute(dataset.getHeightMapData());
 
-      int width = 2 * stairs.getHeightMapData().getCenterIndex() + 1;
+      int width = 2 * dataset.getHeightMapData().getCenterIndex() + 1;
       BufferedImage bufferedImage = new BufferedImage(width, width, BufferedImage.TYPE_INT_RGB);
       double maxEdgeIntensity = obstacleDetector.getMaxEdgeIntensity();
 
@@ -128,7 +128,7 @@ public class HeightMapObstacleDetector
          }
       }
 
-      File outputfile = new File(stairs.name() + ".png");
+      File outputfile = new File(dataset.name() + ".png");
       ImageIO.write(bufferedImage, "png", outputfile);
    }
 }

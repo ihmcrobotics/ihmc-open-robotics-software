@@ -23,19 +23,3 @@ int32[<=30000] keys
 
 # List of heights, which correspond to the list of keys
 float32[<=30000] heights
-
-
-# List of height map keys. See HeightMapTools for converting keys to coordinates
-int32[<=30000] hole_keys
-
-# List of heights, which correspond to the list of keys
-float32[<=30000] hole_heights
-
-
-# List of height map keys. See HeightMapTools for converting keys to coordinates
-int32[<=30000] ground_keys
-
-# List of heights, which correspond to the list of keys
-float32[<=30000] ground_heights
-
-

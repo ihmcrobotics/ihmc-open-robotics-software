@@ -184,6 +184,11 @@ public class HeightMapManager
       heightMapCells[occupiedCells.get(i)].setGroundCell(isGroundCell);
    }
 
+   public void setHasSufficientNeighbors(int i, boolean hasSufficientNeighbors)
+   {
+      heightMapCells[occupiedCells.get(i)].setHasSufficientNeighbors(hasSufficientNeighbors);
+   }
+
    public void resetAtHeight(int i, double height)
    {
       heightMapCells[occupiedCells.get(i)].resetAtHeight(height);
@@ -214,9 +219,34 @@ public class HeightMapManager
       return occupiedCells.contains(HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex));
    }
 
+   public boolean cellHasUnfilteredData(int i)
+   {
+      HeightMapCell cell = heightMapCells[occupiedCells.get(i)];
+      return !cell.isGroundCell() && cell.hasSufficientNeighbors();
+   }
+
+   public boolean cellHasUnfilteredData(int xIndex, int yIndex)
+   {
+      int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+      HeightMapCell cell = heightMapCells[key];
+      if (cell == null)
+         return false;
+      return !cell.isGroundCell() && cell.hasSufficientNeighbors();
+   }
+
    public boolean isGroundCell(int i)
    {
       return heightMapCells[occupiedCells.get(i)].isGroundCell();
+   }
+
+   public boolean hasSufficientNeighbors(int i)
+   {
+      return heightMapCells[occupiedCells.get(i)].hasSufficientNeighbors();
+   }
+
+   public boolean hasSufficientNeighbors(int xIndex, int yIndex)
+   {
+      return heightMapCells[HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex)].hasSufficientNeighbors();
    }
 
    public int getCenterIndex()

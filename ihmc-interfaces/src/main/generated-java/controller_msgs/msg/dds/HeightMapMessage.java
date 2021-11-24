@@ -43,36 +43,12 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
             * List of heights, which correspond to the list of keys
             */
    public us.ihmc.idl.IDLSequence.Float  heights_;
-   /**
-            * List of height map keys. See HeightMapTools for converting keys to coordinates
-            */
-   public us.ihmc.idl.IDLSequence.Integer  hole_keys_;
-   /**
-            * List of heights, which correspond to the list of keys
-            */
-   public us.ihmc.idl.IDLSequence.Float  hole_heights_;
-   /**
-            * List of height map keys. See HeightMapTools for converting keys to coordinates
-            */
-   public us.ihmc.idl.IDLSequence.Integer  ground_keys_;
-   /**
-            * List of heights, which correspond to the list of keys
-            */
-   public us.ihmc.idl.IDLSequence.Float  ground_heights_;
 
    public HeightMapMessage()
    {
       keys_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
 
       heights_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
-
-      hole_keys_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
-
-      hole_heights_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
-
-      ground_keys_ = new us.ihmc.idl.IDLSequence.Integer (30000, "type_2");
-
-      ground_heights_ = new us.ihmc.idl.IDLSequence.Float (30000, "type_5");
 
    }
 
@@ -98,10 +74,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       keys_.set(other.keys_);
       heights_.set(other.heights_);
-      hole_keys_.set(other.hole_keys_);
-      hole_heights_.set(other.hole_heights_);
-      ground_keys_.set(other.ground_keys_);
-      ground_heights_.set(other.ground_heights_);
    }
 
    /**
@@ -213,42 +185,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
    }
 
 
-   /**
-            * List of height map keys. See HeightMapTools for converting keys to coordinates
-            */
-   public us.ihmc.idl.IDLSequence.Integer  getHoleKeys()
-   {
-      return hole_keys_;
-   }
-
-
-   /**
-            * List of heights, which correspond to the list of keys
-            */
-   public us.ihmc.idl.IDLSequence.Float  getHoleHeights()
-   {
-      return hole_heights_;
-   }
-
-
-   /**
-            * List of height map keys. See HeightMapTools for converting keys to coordinates
-            */
-   public us.ihmc.idl.IDLSequence.Integer  getGroundKeys()
-   {
-      return ground_keys_;
-   }
-
-
-   /**
-            * List of heights, which correspond to the list of keys
-            */
-   public us.ihmc.idl.IDLSequence.Float  getGroundHeights()
-   {
-      return ground_heights_;
-   }
-
-
    public static Supplier<HeightMapMessagePubSubType> getPubSubType()
    {
       return HeightMapMessagePubSubType::new;
@@ -282,14 +218,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.heights_, other.heights_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.hole_keys_, other.hole_keys_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.hole_heights_, other.hole_heights_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.ground_keys_, other.ground_keys_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.ground_heights_, other.ground_heights_, epsilon)) return false;
-
 
       return true;
    }
@@ -317,10 +245,6 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
 
       if (!this.keys_.equals(otherMyClass.keys_)) return false;
       if (!this.heights_.equals(otherMyClass.heights_)) return false;
-      if (!this.hole_keys_.equals(otherMyClass.hole_keys_)) return false;
-      if (!this.hole_heights_.equals(otherMyClass.hole_heights_)) return false;
-      if (!this.ground_keys_.equals(otherMyClass.ground_keys_)) return false;
-      if (!this.ground_heights_.equals(otherMyClass.ground_heights_)) return false;
 
       return true;
    }
@@ -346,15 +270,7 @@ public class HeightMapMessage extends Packet<HeightMapMessage> implements Settab
       builder.append("keys=");
       builder.append(this.keys_);      builder.append(", ");
       builder.append("heights=");
-      builder.append(this.heights_);      builder.append(", ");
-      builder.append("hole_keys=");
-      builder.append(this.hole_keys_);      builder.append(", ");
-      builder.append("hole_heights=");
-      builder.append(this.hole_heights_);      builder.append(", ");
-      builder.append("ground_keys=");
-      builder.append(this.ground_keys_);      builder.append(", ");
-      builder.append("ground_heights=");
-      builder.append(this.ground_heights_);
+      builder.append(this.heights_);
       builder.append("}");
       return builder.toString();
    }

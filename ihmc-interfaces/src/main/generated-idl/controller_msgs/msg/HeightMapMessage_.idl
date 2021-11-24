@@ -48,22 +48,6 @@ module controller_msgs
          * List of heights, which correspond to the list of keys
          */
         sequence<float, 30000> heights;
-        /**
-         * List of height map keys. See HeightMapTools for converting keys to coordinates
-         */
-        sequence<long, 30000> hole_keys;
-        /**
-         * List of heights, which correspond to the list of keys
-         */
-        sequence<float, 30000> hole_heights;
-        /**
-         * List of height map keys. See HeightMapTools for converting keys to coordinates
-         */
-        sequence<long, 30000> ground_keys;
-        /**
-         * List of heights, which correspond to the list of keys
-         */
-        sequence<float, 30000> ground_heights;
       };
     };
   };
