@@ -210,29 +210,16 @@ public class HeightMapUpdater
 
       for (int i = 0; i < heightMap.getNumberOfCells(); i++)
       {
-         if (!heightMap.isGroundCell(i))
+         if (heightMap.cellHasUnfilteredData(i))
          {
             int key = heightMap.getKey(i);
             message.getKeys().add(key);
             message.getHeights().add((float) heightMap.getHeightAt(i));
          }
-         else
-         {
-            int key = heightMap.getKey(i);
-            message.getGroundKeys().add(key);
-            message.getGroundHeights().add((float) heightMap.getHeightAt(i));
-         }
       }
 
-      LogTools.info(holeKeyList.size() + " holes found");
-      message.getHoleKeys().addAll(holeKeyList);
-      message.getHoleHeights().addAll(holeHeights);
-
-//      while (message.getHeights().size() >= HeightMapManager.maxCellCount)
-//      {
-//         message.getHeights().removeAt(message.getHeights().size() - 1);
-//         message.getKeys().removeAt(message.getKeys().size() - 1);
-//      }
+      message.getKeys().addAll(holeKeyList);
+      message.getHeights().addAll(holeHeights);
 
       return message;
    }
@@ -254,9 +241,6 @@ public class HeightMapUpdater
       return estimatedGroundHeight / (maxIndex - minIndex);
    }
 
-   private static final int[] xOffsetFourConnectedGrid = new int[]{-1, 0, 1, 0};
-   private static final int[] yOffsetFourConnectedGrid = new int[]{0, 1, 0, -1};
-
    private static final int[] xOffsetEightConnectedGrid = new int[]{-1, -1, 0, 1, 1,  1, 0,  -1};
    private static final int[] yOffsetEightConnectedGrid = new int[]{0,  1,  1, 1, 0, -1, -1 , -1};
 
@@ -268,8 +252,7 @@ public class HeightMapUpdater
 
       for (int i = heightMap.getNumberOfCells() - 1; i >= 0; i--)
       {
-         if (heightMap.getHeightAt(i) < groundHeightThreshold)
-            heightMap.setGroundCell(i, true);
+         heightMap.setGroundCell(i, heightMap.getHeightAt(i) < groundHeightThreshold);
       }
 
       /* Remove cells with no neighbors and reset height of cells which are higher than all neighbors */
@@ -303,14 +286,14 @@ public class HeightMapUpdater
 
             if (numberOfNeighbors >= minNumberOfNeighbors && !muchHigherThanAllNeighbors)
             {
-               heightMap.setGroundCell(i, false);
+               heightMap.setHasSufficientNeighbors(i, true);
                continue outerLoop;
             }
          }
 
          if (numberOfNeighbors < minNumberOfNeighbors)
          {
-            heightMap.setGroundCell(i, true);
+            heightMap.setHasSufficientNeighbors(i, false);
          }
          else if (numberOfNeighbors >= minNumberOfNeighborsToResetHeight && muchHigherThanAllNeighbors)
          {
@@ -328,72 +311,90 @@ public class HeightMapUpdater
          }
       }
 
-      /* Once the map has had a chance to initialize, fill in any holes */
+      /* Once the map has had a chance to initialize, fill in any holes. This is a very ad-hoc way to fill them in,
+      *  holes are detected as cells without data that does have data within both sides along either the x or y axis.
+      */
+      int holeProximityThreshold = 3;
+
       if (totalUpdateCount.get() > 50)
       {
          holeKeyList.clear();
          holeHeights.clear();
 
          /* For any cell without data, populate with average of neighbors */
-         for (int xIndex = 1; xIndex < heightMap.getCellsPerAxis() - 1; xIndex++)
+         for (int xIndex = holeProximityThreshold; xIndex < heightMap.getCellsPerAxis() - holeProximityThreshold; xIndex++)
          {
-            for (int yIndex = 1; yIndex < heightMap.getCellsPerAxis() - 1; yIndex++)
+            for (int yIndex = holeProximityThreshold; yIndex < heightMap.getCellsPerAxis() - holeProximityThreshold; yIndex++)
             {
                if (heightMap.cellHasData(xIndex, yIndex))
                   continue;
 
-               double heightSum = 0.0;
-               int numberOfNeighbors = 0;
+               double heightSearch;
 
-               for (int j = 0; j < xOffsetFourConnectedGrid.length; j++)
-               {
-                  int neighborX = xIndex + xOffsetFourConnectedGrid[j];
-                  int neighborY = yIndex + yOffsetFourConnectedGrid[j];
-
-                  if (heightMap.cellHasData(neighborX, neighborY) && heightMap.getHeightAt(neighborX, neighborY) - estimatedGroundHeight > 0.5)
-                  {
-                     heightSum += heightMap.getHeightAt(neighborX, neighborY);
-                     numberOfNeighbors++;
-                  }
-               }
-
-               if (numberOfNeighbors > 0)
+               if (!Double.isNaN(heightSearch = hasDataInDirection(xIndex, yIndex, true, holeProximityThreshold)))
                {
                   holeKeyList.add(HeightMapTools.indicesToKey(xIndex, yIndex, heightMap.getCenterIndex()));
-                  holeHeights.add((float) (heightSum / numberOfNeighbors));
+                  holeHeights.add((float) heightSearch);
+               }
+               else if (!Double.isNaN(heightSearch = hasDataInDirection(xIndex, yIndex, false, holeProximityThreshold)))
+               {
+                  holeKeyList.add(HeightMapTools.indicesToKey(xIndex, yIndex, heightMap.getCenterIndex()));
+                  holeHeights.add((float) heightSearch);
                }
             }
          }
+      }
+   }
 
-//         for (int key = 0; key < totalGridSize; key++)
-//         {
-//            if (heightMap.isCellPresent(key))
-//               continue;
-//
-//            int xIndex = HeightMapTools.keyToXIndex(key, heightMap.getCenterIndex());
-//            int yIndex = HeightMapTools.keyToYIndex(key, heightMap.getCenterIndex());
-//
-//            float heightSum = 0.0f;
-//            int numberOfNeighbors = 0;
-//
-//            for (int j = 0; j < xOffsetFourConnectedGrid.length; j++)
-//            {
-//               int neighborX = xIndex + xOffsetFourConnectedGrid[j];
-//               int neighborY = yIndex + yOffsetFourConnectedGrid[j];
-//
-//               if (heightMap.isCellPresent(neighborX, neighborY) && heightMap.getHeightAt(neighborX, neighborY) - estimatedGroundHeight > 0.5)
-//               {
-//                  heightSum += heightMap.getHeightAt(neighborX, neighborY);
-//                  numberOfNeighbors++;
-//               }
-//            }
-//
-//            if (numberOfNeighbors > 0)
-//            {
-//               holeKeyList.add(key);
-//               holeHeights.add(heightSum / numberOfNeighbors);
-//            }
-//         }
+   /**
+    * Searches along x or y axis for neighboring data. If data is found, returns average, otherwise returns Double.NaN
+    */
+   private double hasDataInDirection(int xIndex, int yIndex, boolean searchX, int maxDistanceToCheck)
+   {
+      double posHeight = Double.NaN;
+
+      for (int i = 1; i <= maxDistanceToCheck; i++)
+      {
+         int xQuery = xIndex + (searchX ? i : 0);
+         int yQuery = yIndex + (searchX ? 0 : i);
+         if (heightMap.cellHasUnfilteredData(xQuery, yQuery))
+         {
+            posHeight = heightMap.getHeightAt(xQuery, yQuery);
+            break;
+         }
+      }
+
+      if (Double.isNaN(posHeight))
+      {
+         return Double.NaN;
+      }
+
+      double negHeight = Double.NaN;
+
+      for (int i = 1; i <= maxDistanceToCheck; i++)
+      {
+         int xQuery = xIndex - (searchX ? i : 0);
+         int yQuery = yIndex - (searchX ? 0 : i);
+         if (heightMap.cellHasUnfilteredData(xQuery, yQuery))
+         {
+            negHeight = heightMap.getHeightAt(xQuery, yQuery);
+            break;
+         }
+      }
+
+      if (Double.isNaN(negHeight) || (Math.abs(posHeight - negHeight) > 0.2))
+      {
+         return Double.NaN;
+      }
+
+      double averageHeight = 0.5 * (posHeight + negHeight);
+      if (averageHeight < 0.07)
+      {
+         return Double.NaN;
+      }
+      else
+      {
+         return averageHeight;
       }
    }
 

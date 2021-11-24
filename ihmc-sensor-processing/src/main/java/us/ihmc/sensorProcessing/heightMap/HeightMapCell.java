@@ -24,7 +24,10 @@ class HeightMapCell
 
    private int oldestIndex;
    private final AtomicDouble estimatedHeight = new AtomicDouble();
+
+   /** Filtered parameters */
    private boolean isGroundCell = false;
+   private boolean hasSufficientNeighbors = false;
 
    public HeightMapCell(HeightMapParameters parameters)
    {
@@ -133,5 +136,15 @@ class HeightMapCell
    public boolean isGroundCell()
    {
       return isGroundCell;
+   }
+
+   public void setHasSufficientNeighbors(boolean hasSufficientNeighbors)
+   {
+      this.hasSufficientNeighbors = hasSufficientNeighbors;
+   }
+
+   public boolean hasSufficientNeighbors()
+   {
+      return hasSufficientNeighbors;
    }
 }

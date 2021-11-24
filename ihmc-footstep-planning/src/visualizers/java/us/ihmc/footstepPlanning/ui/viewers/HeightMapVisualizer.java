@@ -24,8 +24,6 @@ public class HeightMapVisualizer extends AnimationTimer
 {
    private final Color heightMapColor;
    private final Color groundPlaneColor;
-   private final Color holeColor;
-   private final Color groundCellColor;
    private final Group rootNode = new Group();
 
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
@@ -42,12 +40,8 @@ public class HeightMapVisualizer extends AnimationTimer
 
       Color olive = Color.OLIVE;
       Color blue = Color.BLUE;
-      Color red = Color.RED;
-      Color green = Color.GREEN;
       heightMapColor = Color.color(olive.getRed(), olive.getGreen(), olive.getBlue(), 0.95f);
       groundPlaneColor = Color.color(blue.getRed(), blue.getGreen(), blue.getBlue(), 0.8).brighter();
-      holeColor = Color.color(red.getRed(), red.getGreen(), red.getBlue(), 0.8).brighter();
-      groundCellColor = Color.color(green.getRed(), green.getGreen(), green.getBlue(), 0.8).brighter();
    }
 
    public void update(HeightMapMessage data)
@@ -87,30 +81,6 @@ public class HeightMapVisualizer extends AnimationTimer
          double renderedHeight = height - heightMapMessage.getEstimatedGroundHeight();
 
          meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight), heightMapColor);
-      }
-
-      for (int i = 0; i < heightMapMessage.getHoleHeights().size(); i++)
-      {
-         int xIndex = HeightMapTools.keyToXIndex(heightMapMessage.getHoleKeys().get(i), centerIndex);
-         int yIndex = HeightMapTools.keyToYIndex(heightMapMessage.getHoleKeys().get(i), centerIndex);
-         double x = HeightMapTools.indexToCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
-         double y = HeightMapTools.indexToCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
-         double height = heightMapMessage.getHoleHeights().get(i);
-         double renderedHeight = height - heightMapMessage.getEstimatedGroundHeight();
-
-         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight), holeColor);
-      }
-
-      for (int i = 0; i < heightMapMessage.getGroundHeights().size(); i++)
-      {
-         int xIndex = HeightMapTools.keyToXIndex(heightMapMessage.getGroundKeys().get(i), centerIndex);
-         int yIndex = HeightMapTools.keyToYIndex(heightMapMessage.getGroundKeys().get(i), centerIndex);
-         double x = HeightMapTools.indexToCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
-         double y = HeightMapTools.indexToCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
-         double height = heightMapMessage.getGroundHeights().get(i);
-         double renderedHeight = height - heightMapMessage.getEstimatedGroundHeight();
-
-         meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight), groundCellColor);
       }
 
       double renderedGroundPlaneHeight = 0.005;
