@@ -17,9 +17,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
@@ -104,8 +105,10 @@ public class JavaFXRobotVisualizer
 
    private void loadRobotModelAndGraphics(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
-      RobotDescription robotDescription = fullRobotModelFactory.getRobotDescription();
-      graphicsRobot = new GraphicsIDRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription);
+      RobotDefinition robotDefinition = fullRobotModelFactory.getRobotDefinition();
+      graphicsRobot = new GraphicsIDRobot(robotDefinition.getName(),
+                                          fullRobotModel.getElevator(),
+                                          RobotDefinitionConverter.toGraphicsObjectsHolder(robotDefinition));
       robotRootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode());
       robotRootNode.setMouseTransparent(true);
       addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode);

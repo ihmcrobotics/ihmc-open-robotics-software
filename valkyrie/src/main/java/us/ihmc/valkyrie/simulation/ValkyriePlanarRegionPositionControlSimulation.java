@@ -1,8 +1,16 @@
 package us.ihmc.valkyrie.simulation;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.util.EnumMap;
+
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 import controller_msgs.msg.dds.GroundPlaneMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
 import us.ihmc.avatar.multiContact.MultiContactScriptReader;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
@@ -25,12 +33,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.jMonkeyEngineToolkit.NullGraphics3DAdapter;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionJointLimitRemover;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.ros2.ROS2Node;
@@ -43,12 +47,6 @@ import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.File;
-import java.nio.file.Path;
-import java.util.EnumMap;
 
 public class ValkyriePlanarRegionPositionControlSimulation
 {
@@ -69,9 +67,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
 
    public enum InitialPose
    {
-      STANDING,
-      DOWN_ON_ALL_FOURS,
-      FROM_SCRIPT
+      STANDING, DOWN_ON_ALL_FOURS, FROM_SCRIPT
    }
 
    public static InitialPose initialPose = InitialPose.FROM_SCRIPT;
@@ -86,10 +82,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
       robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
       if (REMOVE_JOINT_LIMITS)
       {
-         SDFDescriptionMutatorList sdfDescriptionMutatorList = new SDFDescriptionMutatorList();
-         sdfDescriptionMutatorList.addMutator(robotModel.getSDFDescriptionMutator());
-         sdfDescriptionMutatorList.addMutator(new SDFDescriptionJointLimitRemover());
-         robotModel.setSDFDescriptionMutator(sdfDescriptionMutatorList);
+         robotModel.setRobotDefinitionMutator(robotModel.getRobotDefinitionMutator().andThen(RobotDefinitionTools.jointLimitRemover()));
       }
 
       ValkyrieJointMap jointMap = robotModel.getJointMap();
@@ -116,9 +109,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
       {
          MultiContactScriptReader scriptReader = new MultiContactScriptReader();
          Path currentDirectory = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software")
-                                                   .resolve("valkyrie/src/main/resources/multiContact/scripts")
-                                                   .toAbsolutePath()
-                                                   .normalize();
+                                                   .resolve("valkyrie/src/main/resources/multiContact/scripts").toAbsolutePath().normalize();
          System.out.println(currentDirectory);
          JFileChooser fileChooser = new JFileChooser(currentDirectory.toFile());
          fileChooser.setFileFilter(new FileNameExtensionFilter("JSON log", "json"));
@@ -147,7 +138,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
          for (int i = 0; i < oneDoFJoints.length; i++)
          {
             if (!oneDoFJoints[i].getName().contains("hokuyo"))
-               initialSetup.jointPositions.put(oneDoFJoints[i].getName(), (double) robotConfigurationData.getJointAngles().get(i));
+               initialSetup.setJoint(oneDoFJoints[i].getName(), (double) robotConfigurationData.getJointAngles().get(i));
          }
 
          simulationStarter.setRobotInitialSetup(initialSetup);
@@ -178,11 +169,11 @@ public class ValkyriePlanarRegionPositionControlSimulation
             JointDesiredOutputListReadOnly highLevelControllerOutput = controllerFactoryHelper.getLowLevelControllerOutput();
 
             controllerToolbox.addUpdatable(time ->
-                                           {
-                                              Point3DBasics rootJointPosition = controllerToolbox.getFullRobotModel().getRootJoint().getJointPose().getPosition();
-                                              groundPlaneMessage.getRegionOrigin().set(new Point2D(rootJointPosition));
-                                              groundPlanePublisher.publish(groundPlaneMessage);
-                                           });
+            {
+               Point3DBasics rootJointPosition = controllerToolbox.getFullRobotModel().getRootJoint().getJointPose().getPosition();
+               groundPlaneMessage.getRegionOrigin().set(new Point2D(rootJointPosition));
+               groundPlanePublisher.publish(groundPlaneMessage);
+            });
 
             return new JointspacePositionControllerState(getStateEnum(),
                                                          commandInputManager,
@@ -218,7 +209,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
       simulationStarter.getSimulationConstructionSet().skipLoadingDefaultConfiguration();
 
       // adds a new row each time. the method above looks like it's supposed to prevent that but it doesn't seem to work, at least on windows.
-//      simulationStarter.getSimulationConstructionSet().setupGraph("t");
+      //      simulationStarter.getSimulationConstructionSet().setupGraph("t");
 
       KinematicsToolboxModule kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false, 10, false, DomainFactory.PubSubImplementation.FAST_RTPS);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addYoRegistry(kinematicsToolboxModule.getRegistry());

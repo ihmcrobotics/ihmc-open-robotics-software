@@ -21,7 +21,7 @@ public class GenericQuadrupedSDFViewer
    public static void main(String[] args)
    {
       GenericQuadrupedModelFactory modelFactory = new GenericQuadrupedModelFactory();
-      FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.getRobotDescription());
+      FloatingRootJointRobot sdfRobot = new FloatingRootJointRobot(modelFactory.getRobotDefinition());
       sdfRobot.setPositionInWorld(new Vector3D(0.0, 0.0, 0.6));
       sdfRobot.setDynamic(false);
 

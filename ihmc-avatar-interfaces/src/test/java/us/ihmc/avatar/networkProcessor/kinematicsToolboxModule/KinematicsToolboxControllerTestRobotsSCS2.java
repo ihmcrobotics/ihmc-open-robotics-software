@@ -235,7 +235,7 @@ public class KinematicsToolboxControllerTestRobotsSCS2
 
    public static KinematicsToolboxTestRobot createInverseDynamicsRobot(RobotDefinition robotDefinition)
    {
-      RigidBodyBasics rootBody = robotDefinition.newIntance(ReferenceFrame.getWorldFrame());
+      RigidBodyBasics rootBody = robotDefinition.newInstance(ReferenceFrame.getWorldFrame());
       return new KinematicsToolboxTestRobot(rootBody);
    }
 

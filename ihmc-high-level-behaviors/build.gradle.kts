@@ -36,7 +36,7 @@ libgdxDependencies {
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-perception-javacv:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-simulation:0.0.4")
+   api("us.ihmc:scs2-simulation:0.1.1")
 }
 
 testDependencies {

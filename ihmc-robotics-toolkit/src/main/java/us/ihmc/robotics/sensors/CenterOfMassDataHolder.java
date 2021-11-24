@@ -3,8 +3,6 @@ package us.ihmc.robotics.sensors;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -17,11 +15,10 @@ import us.ihmc.robotics.screwTheory.GenericCRC32;
  */
 public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private boolean hasPosition = false;
    private boolean hasVelocity = false;
-   private final FixedFramePoint3DBasics centerOfMassPosition = new FramePoint3D(worldFrame);
-   private final FixedFrameVector3DBasics centerOfMassVelocity = new FrameVector3D(worldFrame);
+   private final FramePoint3D centerOfMassPosition = new FramePoint3D();
+   private final FrameVector3D centerOfMassVelocity = new FrameVector3D();
 
    public CenterOfMassDataHolder()
    {
@@ -39,7 +36,7 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    public void setCenterOfMassPosition(ReferenceFrame referenceFrame, Point3DReadOnly centerOfMassPosition)
    {
       hasPosition = true;
-      this.centerOfMassPosition.setMatchingFrame(referenceFrame, centerOfMassPosition);
+      this.centerOfMassPosition.setIncludingFrame(referenceFrame, centerOfMassPosition);
    }
 
    public void setCenterOfMassPosition(FramePoint3DReadOnly centerOfMassPosition)
@@ -50,7 +47,7 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    public void setCenterOfMassVelocity(ReferenceFrame referenceFrame, Vector3DReadOnly centerOfMassVelocity)
    {
       hasVelocity = true;
-      this.centerOfMassVelocity.setMatchingFrame(referenceFrame, centerOfMassVelocity);
+      this.centerOfMassVelocity.setIncludingFrame(referenceFrame, centerOfMassVelocity);
    }
 
    public void setCenterOfMassVelocity(FrameVector3DReadOnly centerOfMassVelocity)
@@ -62,8 +59,18 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    {
       hasPosition = other.hasPosition;
       hasVelocity = other.hasVelocity;
-      centerOfMassPosition.set(other.centerOfMassPosition);
-      centerOfMassVelocity.set(other.centerOfMassVelocity);
+      centerOfMassPosition.setIncludingFrame(other.centerOfMassPosition);
+      centerOfMassVelocity.setIncludingFrame(other.centerOfMassVelocity);
+   }
+
+   public void setHasCenterOfMassPosition(boolean hasPosition)
+   {
+      this.hasPosition = hasPosition;
+   }
+
+   public void setHasCenterOfMassVelocity(boolean hasVelocity)
+   {
+      this.hasVelocity = hasVelocity;
    }
 
    @Override
@@ -73,7 +80,7 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    }
 
    @Override
-   public FixedFramePoint3DBasics getCenterOfMassPosition()
+   public FramePoint3D getCenterOfMassPosition()
    {
       return centerOfMassPosition;
    }
@@ -85,7 +92,7 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
    }
 
    @Override
-   public FixedFrameVector3DBasics getCenterOfMassVelocity()
+   public FrameVector3D getCenterOfMassVelocity()
    {
       return centerOfMassVelocity;
    }
@@ -104,9 +111,9 @@ public class CenterOfMassDataHolder implements CenterOfMassDataHolderReadOnly
             return false;
          if (hasVelocity != other.hasVelocity)
             return false;
-         if (!centerOfMassPosition.equals(other.centerOfMassPosition))
+         if (hasCenterOfMassPosition() && !centerOfMassPosition.equals(other.centerOfMassPosition))
             return false;
-         if (!centerOfMassVelocity.equals(other.centerOfMassVelocity))
+         if (hasCenterOfMassVelocity() && !centerOfMassVelocity.equals(other.centerOfMassVelocity))
             return false;
          return true;
       }
