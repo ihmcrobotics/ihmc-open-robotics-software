@@ -9,15 +9,20 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -109,6 +114,32 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
                });
                footInteractables.put(side, interactableFoot);
             }
+            if (collidable.getRigidBody().getName().equals(side.getSideNameFirstLowerCaseLetter() + "_hand"))
+            {
+//               fullRobotModel.getEndEffectorFrame(robotSide, LimbName.ARM).getTransformToDesiredFrame(offsetTransform, fullRobotModel.getHandControlFrame(robotSide));
+//               JointBasics lastWristJoint = RobotCollisionModel.findJoint(robotModel.getJointMap().getArmJointName(side, ArmJointName.SECOND_WRIST_PITCH), syncedRobot.getFullRobotModel().);
+               ReferenceFrame handGraphicFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
+               ReferenceFrame collisionFrame = syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.SECOND_WRIST_PITCH).getFrameAfterJoint();
+//               MovingReferenceFrame wristFrame = lastWristJoint.getFrameAfterJoint();
+               GDXInteractableObject interactableHand = new GDXInteractableObject();
+               MovingReferenceFrame handFrame = syncedRobot.getFullRobotModel().getHand(side).getBodyFixedFrame();
+//               handSuccessorFrame.setToReferenceFrame(syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0).getSuccessor().getBodyFixedFrame());
+               ReferenceFrame handControlFrame = syncedRobot.getFullRobotModel().getHandControlFrame(side);
+               interactableHand.create(collisionLink,
+                                       collisionFrame,
+                                       collisionFrame,
+                                       handControlFrame,
+                                       (side == RobotSide.LEFT) ? "palm.g3dj" : "palmRight.g3dj",
+                                       baseUI.get3DSceneManager().getCamera3D());
+               interactableHand.setOnSpacePressed(() ->
+               {
+                  ros2Helper.publishToController(HumanoidMessageTools.createHandTrajectoryMessage(side,
+                                                                                                  1.2,
+                                                                                                  interactableHand.getPose(),
+                                                                                                  ReferenceFrame.getWorldFrame()));
+               });
+               handInteractables.put(side, interactableHand);
+            }
          }
       }
 
@@ -150,6 +181,10 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          for (GDXInteractableObject footInteractable : footInteractables)
          {
             footInteractable.process3DViewInput(input);
+         }
+         for (GDXInteractableObject handInteractable : handInteractables)
+         {
+            handInteractable.process3DViewInput(input);
          }
       }
    }
@@ -194,6 +229,10 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          for (GDXInteractableObject footInteractable : footInteractables)
          {
             footInteractable.getVirtualRenderables(renderables, pool);
+         }
+         for (GDXInteractableObject handInteractable : handInteractables)
+         {
+            handInteractable.getVirtualRenderables(renderables, pool);
          }
 
          walkPathControlRing.getVirtualRenderables(renderables, pool);
