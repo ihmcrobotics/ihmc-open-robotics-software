@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
@@ -81,7 +81,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    public AvatarControllerThread(String robotName,
                                  DRCRobotModel robotModel,
-                                 DRCRobotInitialSetup<?> robotInitialSetup,
+                                 RobotInitialSetup<?> robotInitialSetup,
                                  HumanoidRobotSensorInformation sensorInformation,
                                  HighLevelHumanoidControllerFactory controllerFactory,
                                  HumanoidRobotContextDataFactory contextDataFactory,

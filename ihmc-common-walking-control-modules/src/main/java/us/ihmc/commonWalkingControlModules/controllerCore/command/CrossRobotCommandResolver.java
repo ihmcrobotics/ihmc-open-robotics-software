@@ -197,7 +197,10 @@ public class CrossRobotCommandResolver
 
    public void resolveCenterOfMassDataHolder(CenterOfMassDataHolder in, CenterOfMassDataHolder out)
    {
-      out.set(in);
+      out.setHasCenterOfMassPosition(in.hasCenterOfMassPosition());
+      out.setHasCenterOfMassVelocity(in.hasCenterOfMassVelocity());
+      resolveFrameTuple3D(in.getCenterOfMassPosition(), out.getCenterOfMassPosition());
+      resolveFrameTuple3D(in.getCenterOfMassVelocity(), out.getCenterOfMassVelocity());
    }
 
    public void resolveHumanoidRobotContextData(HumanoidRobotContextData in, HumanoidRobotContextData out)

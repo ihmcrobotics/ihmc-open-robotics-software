@@ -1,7 +1,7 @@
 # 3ds Max Wavefront OBJ Exporter v0.97b - (c)2007 guruware
 # File Created: 13.05.2015 18:17:21
 
-mtllib calibration_cubE.mtl
+mtllib calibration_cube.mtl
 
 #
 # object Cube
