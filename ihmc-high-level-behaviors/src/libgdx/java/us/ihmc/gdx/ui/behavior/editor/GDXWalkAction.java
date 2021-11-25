@@ -4,14 +4,12 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -35,18 +33,21 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 public class GDXWalkAction
 {
    private GDXFootstepPlanGraphic footstepPlanGraphic;
+   private FootstepPlanningModule footstepPlanner;
    private final GDXFootstepPlannerGoalGizmo footstepPlannerGoalGizmo = new GDXFootstepPlannerGoalGizmo();
+   private FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   public void create(FocusBasedGDXCamera camera3D, DRCRobotModel robotModel)
+   public void create(FocusBasedGDXCamera camera3D, DRCRobotModel robotModel, FootstepPlanningModule footstepPlanner)
    {
+      this.footstepPlanner = footstepPlanner;
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       footstepPlannerGoalGizmo.create(camera3D);
+      footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -65,12 +66,12 @@ public class GDXWalkAction
       footstepPlanGraphic.destroy();
    }
 
-   private void walk(ReferenceFrame referenceFrame, double x, double y, BehaviorHelper helper, ROS2SyncedRobotModel syncedRobot)
+   public void walk(ReferenceFrame referenceFrame, ROS2ControllerHelper helper, ROS2SyncedRobotModel syncedRobot)
    {
       double proximityToGoalToMaintainOrientation = 1.5;
 
       FramePose3D approachPointA = new FramePose3D(referenceFrame);
-      approachPointA.getPosition().set(x, y, 0.0);
+      approachPointA.set(footstepPlannerGoalGizmo.getTransform());
       approachPointA.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose3DReadOnly midFeetUnderPelvisFramePose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
@@ -92,8 +93,6 @@ public class GDXWalkAction
       leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
-      FootstepPlanningModule footstepPlanner = helper.getOrCreateFootstepPlanner();
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
@@ -119,12 +118,10 @@ public class GDXWalkAction
       {
          FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
          rejectionReasonReport.update();
-         ArrayList<Pair<Integer, Double>> rejectionReasonsMessage = new ArrayList<>();
          for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
          {
             double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
             LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
-            rejectionReasonsMessage.add(MutablePair.of(reason.ordinal(), MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
          }
          LogTools.info("Footstep planning failure...");
       }
@@ -136,7 +133,9 @@ public class GDXWalkAction
          double swingDuration = 1.2;
          double transferDuration = 0.8;
          FootstepDataListMessage footstepDataListMessage
-               = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(), swingDuration, transferDuration);
+               = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(),
+                                                                             swingDuration,
+                                                                             transferDuration);
          footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
          helper.publishToController(footstepDataListMessage);
