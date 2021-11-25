@@ -209,17 +209,17 @@ public class AtlasRobotModel implements DRCRobotModel
          return createRobotDefinition(ColorDefinitions.Orange().derive(0, 1, 1, 1.0 - transparency));
    }
 
-   public RobotDefinition createRobotDefinition(ColorDefinition diffuseColor)
+   public RobotDefinition createRobotDefinition(ColorDefinition defaultDiffuseColor)
    {
-      return createRobotDefinition(new MaterialDefinition(diffuseColor));
+      return createRobotDefinition(new MaterialDefinition(defaultDiffuseColor));
    }
 
-   public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition)
+   public RobotDefinition createRobotDefinition(MaterialDefinition defaultMaterialDefinition)
    {
-      return createRobotDefinition(materialDefinition, true);
+      return createRobotDefinition(defaultMaterialDefinition, true);
    }
 
-   public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition, boolean removeCollisions)
+   public RobotDefinition createRobotDefinition(MaterialDefinition defaultMaterialDefinition, boolean removeCollisions)
    {
       InputStream stream = selectedVersion.getSdfFileAsStream();
       if (stream == null)
@@ -231,7 +231,9 @@ public class AtlasRobotModel implements DRCRobotModel
                                                                           getContactPointParameters(),
                                                                           jointMap,
                                                                           removeCollisions);
-      RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
+      RobotDefinitionTools.setDefaultMaterial(robotDefinition,
+                                              defaultMaterialDefinition != null ?
+                                                    defaultMaterialDefinition : new MaterialDefinition(ColorDefinitions.Black()));
 
       getRobotDefinitionMutator().accept(robotDefinition);
 
