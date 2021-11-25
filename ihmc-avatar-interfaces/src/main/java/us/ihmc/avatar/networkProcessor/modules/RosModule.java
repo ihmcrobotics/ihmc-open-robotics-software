@@ -60,14 +60,14 @@ public class RosModule implements CloseableAndDisposable
    {
       this(robotModel, robotModel.getROSClockCalculator(), robotModel.getSensorInformation(), robotModel.getSensorInformation(), robotModel.getJointMap(),
            rosCoreURI, simulatedSensorCommunicator,
-           ROS2Tools.getControllerOutputTopic(robotModel.getRobotDescription().getName()).withTypeName(RobotConfigurationData.class), realtimeROS2Node);
+           ROS2Tools.getControllerOutputTopic(robotModel.getRobotDefinition().getName()).withTypeName(RobotConfigurationData.class), realtimeROS2Node);
    }
 
    public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, PubSubImplementation pubSubImplementation)
    {
       this(robotModel, robotModel.getROSClockCalculator(), robotModel.getSensorInformation(), robotModel.getSensorInformation(), robotModel.getJointMap(),
            rosCoreURI, simulatedSensorCommunicator,
-           ROS2Tools.getControllerOutputTopic(robotModel.getRobotDescription().getName()).withTypeName(RobotConfigurationData.class), pubSubImplementation);
+           ROS2Tools.getControllerOutputTopic(robotModel.getRobotDefinition().getName()).withTypeName(RobotConfigurationData.class), pubSubImplementation);
    }
 
    public RosModule(FullRobotModelFactory robotModelFactory, RobotROSClockCalculator rosClockCalculator,
@@ -95,7 +95,7 @@ public class RosModule implements CloseableAndDisposable
    {
       LogTools.info("Starting ROS Module");
 
-      String simpleRobotName = robotModelFactory.getRobotDescription().getName();
+      String simpleRobotName = robotModelFactory.getRobotDefinition().getName();
       manageROS2Node = realtimeROS2Node == null;
       if (realtimeROS2Node == null)
          realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_ros_node");

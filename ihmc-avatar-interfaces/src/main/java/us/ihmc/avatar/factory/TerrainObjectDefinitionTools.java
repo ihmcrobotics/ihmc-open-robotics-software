@@ -2,6 +2,7 @@ package us.ihmc.avatar.factory;
 
 import java.util.List;
 
+import us.ihmc.robotModels.description.RobotDescriptionConverter;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
@@ -32,7 +33,7 @@ public class TerrainObjectDefinitionTools
          output.addCollisionShapeDefinition(RobotDefinitionTools.toCollisionShapeDefinition(collidable));
       }
 
-      List<VisualDefinition> visualDefinitions = RobotDefinitionTools.toVisualDefinitions(environment.getTerrainObject3D().getLinkGraphics());
+      List<VisualDefinition> visualDefinitions = RobotDescriptionConverter.toVisualDefinitions(environment.getTerrainObject3D().getLinkGraphics());
       visualDefinitions.forEach(output::addVisualDefinition);
 
       return output;

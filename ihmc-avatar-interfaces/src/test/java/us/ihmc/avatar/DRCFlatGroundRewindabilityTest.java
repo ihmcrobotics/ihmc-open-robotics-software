@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.thread.ThreadTools;
@@ -214,7 +214,7 @@ public abstract class DRCFlatGroundRewindabilityTest implements MultiRobotTestIn
       GroundProfile3D groundProfile = new FlatGroundProfile();
       DRCRobotModel robotModel = getRobotModel();
       DRCGuiInitialSetup guiInitialSetup = createGUIInitialSetup();
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(0, 0);
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, robotModel.getSimulateDT());
       scsInitialSetup.setRunMultiThreaded(false);
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,

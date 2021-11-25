@@ -2,15 +2,21 @@ package us.ihmc.avatar.initialSetup;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
-public class RobotConfigurationDataInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
+public class RobotConfigurationDataInitialSetup implements RobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    private final RobotConfigurationData robotConfigurationData;
    private final OneDoFJointBasics[] allJointsExcludingHands;
@@ -22,10 +28,10 @@ public class RobotConfigurationDataInitialSetup implements DRCRobotInitialSetup<
    }
 
    @Override
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot)
    {
       robot.getRootJoint().setPosition(robotConfigurationData.getRootTranslation());
-      robot.getRootJoint().setQuaternion(robotConfigurationData.getRootOrientation());
+      robot.getRootJoint().setOrientation(robotConfigurationData.getRootOrientation());
 
       TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
       TFloatArrayList jointVelocities = robotConfigurationData.getJointVelocities();
@@ -36,6 +42,60 @@ public class RobotConfigurationDataInitialSetup implements DRCRobotInitialSetup<
          OneDegreeOfFreedomJoint joint = robot.getOneDegreeOfFreedomJoint(jointName);
          joint.setQ(jointAngles.get(i));
          joint.setQd(jointVelocities.get(i));
+      }
+   }
+
+   @Override
+   public void initializeFullRobotModel(FullHumanoidRobotModel fullRobotModel)
+   {
+      Pose3DBasics rootJointPose = fullRobotModel.getRootJoint().getJointPose();
+      rootJointPose.getPosition().set(robotConfigurationData.getRootTranslation());
+      rootJointPose.getOrientation().set(robotConfigurationData.getRootOrientation());
+
+      TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
+      TFloatArrayList jointVelocities = robotConfigurationData.getJointVelocities();
+
+      for (int i = 0; i < allJointsExcludingHands.length; i++)
+      {
+         String jointName = allJointsExcludingHands[i].getName();
+         OneDoFJointBasics joint = fullRobotModel.getOneDoFJointByName(jointName);
+         joint.setQ(jointAngles.get(i));
+         joint.setQd(jointVelocities.get(i));
+      }
+   }
+
+   @Override
+   public void initializeRobot(RigidBodyBasics rootBody)
+   {
+      Pose3DBasics rootJointPose = ((FloatingJointBasics) rootBody.getChildrenJoints().get(0)).getJointPose();
+      rootJointPose.getPosition().set(robotConfigurationData.getRootTranslation());
+      rootJointPose.getOrientation().set(robotConfigurationData.getRootOrientation());
+
+      TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
+      TFloatArrayList jointVelocities = robotConfigurationData.getJointVelocities();
+
+      for (int i = 0; i < allJointsExcludingHands.length; i++)
+      {
+         String jointName = allJointsExcludingHands[i].getName();
+         OneDoFJointBasics joint = (OneDoFJointBasics) MultiBodySystemTools.findJoint(rootBody, jointName);
+         joint.setQ(jointAngles.get(i));
+         joint.setQd(jointVelocities.get(i));
+      }
+   }
+
+   @Override
+   public void initializeRobotDefinition(RobotDefinition robotDefinition)
+   {
+      SixDoFJointState initialRootJointState = new SixDoFJointState(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+      robotDefinition.getRootJointDefinitions().get(0).setInitialJointState(initialRootJointState);
+
+      TFloatArrayList jointAngles = robotConfigurationData.getJointAngles();
+      TFloatArrayList jointVelocities = robotConfigurationData.getJointVelocities();
+
+      for (int i = 0; i < allJointsExcludingHands.length; i++)
+      {
+         String jointName = allJointsExcludingHands[i].getName();
+         robotDefinition.getOneDoFJointDefinition(jointName).setInitialJointState(jointAngles.get(i), jointVelocities.get(i));
       }
    }
 
@@ -62,13 +122,13 @@ public class RobotConfigurationDataInitialSetup implements DRCRobotInitialSetup<
    }
 
    @Override
-   public void setOffset(Vector3D additionalOffset)
+   public void setOffset(Tuple3DReadOnly additionalOffset)
    {
    }
 
    @Override
-   public void getOffset(Vector3D offsetToPack)
+   public Vector3D getOffset()
    {
-      offsetToPack.set(robotConfigurationData.getRootTranslation());
+      return robotConfigurationData.getRootTranslation();
    }
 }

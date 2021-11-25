@@ -14,8 +14,7 @@ import org.junit.jupiter.api.TestInfo;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.RobotDefinitionTools;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
 import us.ihmc.avatar.multiContact.MultiContactScriptMatcher;
 import us.ihmc.avatar.multiContact.MultiContactScriptPostProcessor;
@@ -147,7 +146,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    }
 
    private void createSimulation(TestInfo testInfo,
-                                 DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+                                 RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                  CommonAvatarEnvironmentInterface environment)
    {
       createSimulation(testInfo, null, initialSetup, environment);
@@ -155,7 +154,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
 
    private void createSimulation(TestInfo testInfo,
                                  Robot ghostRobot,
-                                 DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+                                 RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                  CommonAvatarEnvironmentInterface environment)
    {
       simulationTestingParameters.setUsePefectSensors(true);
@@ -183,14 +182,14 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    }
 
    public void runRawScriptTest(TestInfo testInfo,
-                                DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+                                RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                 CommonAvatarEnvironmentInterface environment,
                                 InputStream... scriptInputStreams)
          throws Exception
    {
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
-      ghostRobotModel.getRobotDescription().setName("Ghost");
-      RobotDefinition ghostRobotDefinition = RobotDefinitionTools.toRobotDefinition(ghostRobotModel.getRobotDescription());
+      RobotDefinition ghostRobotDefinition = ghostRobotModel.getRobotDefinition();
+      ghostRobotDefinition.setName("Ghost");
       MaterialDefinition ghostMaterial = new MaterialDefinition(ghostApperance);
       ghostRobotDefinition.getAllRigidBodies()
                           .forEach(rigidBodyDefinition -> rigidBodyDefinition.getVisualDefinitions()
@@ -253,7 +252,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    }
 
    public void runProcessedScriptTest(TestInfo testInfo,
-                                      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+                                      RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                       CommonAvatarEnvironmentInterface environment,
                                       double durationPerKeyframe,
                                       InputStream... scriptInputStreams)

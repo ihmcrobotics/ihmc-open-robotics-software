@@ -1,5 +1,15 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.ToDoubleFunction;
+import java.util.zip.CRC32;
+
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
@@ -17,18 +27,13 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
-
-import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.ToDoubleFunction;
-import java.util.zip.CRC32;
 
 public class RobotIKVisualizer
 {
@@ -176,7 +181,7 @@ public class RobotIKVisualizer
 
    private void loadRobotModelAndGraphics(FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory, HumanoidJointNameMap jointMap)
    {
-      RobotDescription robotDescription = fullHumanoidRobotModelFactory.getRobotDescription();
+      RobotDefinition robotDefinition = fullHumanoidRobotModelFactory.getRobotDefinition();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -184,39 +189,38 @@ public class RobotIKVisualizer
          UserInterfaceIKMode armIKMode = robotSide == RobotSide.LEFT ? UserInterfaceIKMode.LEFT_ARM : UserInterfaceIKMode.RIGHT_ARM;
          String firstArmJointName = jointMap.getArmJointNamesAsStrings(robotSide).get(0);
          JointBasics firstArmJoint = fullRobotModel.getOneDoFJointByName(firstArmJointName);
-         setupGraphics(armIKMode, firstArmJoint, fullRobotModel.getHand(robotSide), robotDescription);
+         setupGraphics(armIKMode, firstArmJoint, fullRobotModel.getHand(robotSide), robotDefinition);
 
          // Leg graphics
          UserInterfaceIKMode legIKMode = robotSide == RobotSide.LEFT ? UserInterfaceIKMode.LEFT_LEG : UserInterfaceIKMode.RIGHT_LEG;
          String firstLegJointName = jointMap.getLegJointNamesAsStrings(robotSide).get(0);
          JointBasics firstLegJoint = fullRobotModel.getOneDoFJointByName(firstLegJointName);
-         setupGraphics(legIKMode, firstLegJoint, fullRobotModel.getFoot(robotSide), robotDescription);
+         setupGraphics(legIKMode, firstLegJoint, fullRobotModel.getFoot(robotSide), robotDefinition);
       }
 
       // Neck graphics
       UserInterfaceIKMode neckMode = UserInterfaceIKMode.NECK;
       String firstNeckJointName = jointMap.getNeckJointNamesAsStrings().get(0);
       JointBasics firstNeckJoint = fullRobotModel.getOneDoFJointByName(firstNeckJointName);
-      setupGraphics(neckMode, firstNeckJoint, fullRobotModel.getHead(), robotDescription);
+      setupGraphics(neckMode, firstNeckJoint, fullRobotModel.getHead(), robotDefinition);
 
       // Chest graphics
       UserInterfaceIKMode chestMode = UserInterfaceIKMode.CHEST;
       String firstSpineJointName = jointMap.getSpineJointNamesAsStrings().get(0);
       JointBasics firstSpineJoint = fullRobotModel.getOneDoFJointByName(firstSpineJointName);
-      setupGraphics(chestMode, firstSpineJoint, fullRobotModel.getChest(), robotDescription);
+      setupGraphics(chestMode, firstSpineJoint, fullRobotModel.getChest(), robotDefinition);
 
       isRobotLoaded = true;
    }
 
-   private void setupGraphics(UserInterfaceIKMode ikMode, JointBasics firstJoint, RigidBodyBasics terminalBody, RobotDescription robotDescription)
+   private void setupGraphics(UserInterfaceIKMode ikMode, JointBasics firstJoint, RigidBodyBasics terminalBody, RobotDefinition robotDefinition)
    {
       OneDoFJointBasics[] jointPathArray = MultiBodySystemTools.createOneDoFJointPath(firstJoint.getPredecessor(), terminalBody);
       ikJointPaths.put(ikMode, Arrays.asList(jointPathArray));
       limbGraphics.put(ikMode,
                        new GraphicsIDRobot(ikMode.name(),
                                            Collections.singletonList(firstJoint),
-                                           robotDescription,
-                                           false,
+                                           RobotDefinitionConverter.toGraphicsObjectsHolder(robotDefinition),
                                            Collections.singletonList(terminalBody)));
 
       JavaFXGraphics3DNode jfxArmGraphicsNode = new JavaFXGraphics3DNode(limbGraphics.get(ikMode).getRootNode());

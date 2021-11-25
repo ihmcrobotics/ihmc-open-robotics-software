@@ -1,12 +1,18 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -17,13 +23,19 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRec
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.PushRecoveryStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -48,11 +60,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 public class PushRecoveryBalanceManager
 {
@@ -442,7 +449,7 @@ public class PushRecoveryBalanceManager
       yoDesiredCapturePoint.set(controllerToolbox.getCapturePoint());
 
       yoDesiredCoMPosition.setFromReferenceFrame(controllerToolbox.getCenterOfMassFrame());
-      yoDesiredCoMVelocity.set(controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity());
+      yoDesiredCoMVelocity.set(controllerToolbox.getCenterOfMassVelocity());
 
       copTrajectoryState.setIcpAtStartOfState(controllerToolbox.getCapturePoint());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);

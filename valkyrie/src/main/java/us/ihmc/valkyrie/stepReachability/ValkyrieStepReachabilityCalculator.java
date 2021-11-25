@@ -6,20 +6,18 @@ import us.ihmc.avatar.reachabilityMap.footstep.HumanoidStepReachabilityCalculato
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.valkyrie.ValkyrieFootstepPlannerCollisionModel;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-
 
 public class ValkyrieStepReachabilityCalculator extends HumanoidStepReachabilityCalculator
 {
    /**
-    * Note on naming convention:
-    * {Joint}LimitReduction means reduce the range by that amount.
-    * So if jointA normally can be between 0 rad and 1 rad and has a reduction
-    * of 0.2, it now can only go 0.1 rad to 0.9 rad
+    * Note on naming convention: {Joint}LimitReduction means reduce the range by that amount. So if
+    * jointA normally can be between 0 rad and 1 rad and has a reduction of 0.2, it now can only go 0.1
+    * rad to 0.9 rad
     */
    private static final double kneePitchLimitReduction = 0.2;
    private static final double anklePitchLimitReduction = 0.2;
@@ -48,7 +46,7 @@ public class ValkyrieStepReachabilityCalculator extends HumanoidStepReachability
    protected void imposeJointLimitRestrictions(DRCRobotModel robotModel)
    {
       HumanoidJointNameMap jointMap = robotModel.getJointMap();
-      RobotDescription robotDescription = robotModel.getRobotDescription();
+      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -59,12 +57,12 @@ public class ValkyrieStepReachabilityCalculator extends HumanoidStepReachability
          String hipRollName = jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL);
          String hipYawName = jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW);
 
-         OneDoFJointDescription kneePitch = (OneDoFJointDescription) robotDescription.getJointDescription(kneePitchName);
-         OneDoFJointDescription anklePitch = (OneDoFJointDescription) robotDescription.getJointDescription(anklePitchName);
-         OneDoFJointDescription ankleRoll = (OneDoFJointDescription) robotDescription.getJointDescription(ankleRollName);
-         OneDoFJointDescription hipPitch = (OneDoFJointDescription) robotDescription.getJointDescription(hipPitchName);
-         OneDoFJointDescription hipRoll = (OneDoFJointDescription) robotDescription.getJointDescription(hipRollName);
-         OneDoFJointDescription hipYaw = (OneDoFJointDescription) robotDescription.getJointDescription(hipYawName);
+         OneDoFJointDefinition kneePitch  = (OneDoFJointDefinition) robotDefinition.getJointDefinition(kneePitchName);
+         OneDoFJointDefinition anklePitch = (OneDoFJointDefinition) robotDefinition.getJointDefinition(anklePitchName);
+         OneDoFJointDefinition ankleRoll  = (OneDoFJointDefinition) robotDefinition.getJointDefinition(ankleRollName);
+         OneDoFJointDefinition hipPitch   = (OneDoFJointDefinition) robotDefinition.getJointDefinition(hipPitchName);
+         OneDoFJointDefinition hipRoll    = (OneDoFJointDefinition) robotDefinition.getJointDefinition(hipRollName);
+         OneDoFJointDefinition hipYaw     = (OneDoFJointDefinition) robotDefinition.getJointDefinition(hipYawName);
 
          restrictJointLimits(kneePitch, kneePitchLimitReduction);
          restrictJointLimits(anklePitch, anklePitchLimitReduction);
@@ -75,15 +73,15 @@ public class ValkyrieStepReachabilityCalculator extends HumanoidStepReachability
       }
    }
 
-   private static void restrictJointLimits(OneDoFJointDescription jointDescription, double jointLimitReduction)
+   private static void restrictJointLimits(OneDoFJointDefinition jointDefinition, double jointLimitReduction)
    {
-      double nominalMin = jointDescription.getLowerLimit();
-      double nominalMax = jointDescription.getUpperLimit();
+      double nominalMin = jointDefinition.getPositionLowerLimit();
+      double nominalMax = jointDefinition.getPositionUpperLimit();
       double reductionAmount = (nominalMax - nominalMin) * jointLimitReduction;
 
       double modifiedMin = nominalMin + 0.5 * reductionAmount;
       double modifiedMax = nominalMax - 0.5 * reductionAmount;
-      jointDescription.setLimitStops(modifiedMin, modifiedMax, jointDescription.getLimitStopParameters()[2], jointDescription.getLimitStopParameters()[3]);
+      jointDefinition.setPositionLimits(modifiedMin, modifiedMax);
    }
 
    @Override
