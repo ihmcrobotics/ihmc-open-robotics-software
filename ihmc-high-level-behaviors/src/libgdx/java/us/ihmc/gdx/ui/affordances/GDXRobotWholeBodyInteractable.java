@@ -10,6 +10,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -99,10 +101,10 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
          for (RobotSide side : RobotSide.values)
          {
+            String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
             if (collidable.getRigidBody().getName().equals(side.getSideNameFirstLowerCaseLetter() + "_foot"))
             {
                GDXInteractableObject interactableFoot = new GDXInteractableObject();
-               String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
                String modelFileName = robotSidePrefix + "foot.g3dj";
                interactableFoot.create(collisionLink,
                                        syncedRobot.getFullRobotModel().getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
@@ -118,15 +120,23 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
             {
 //               fullRobotModel.getEndEffectorFrame(robotSide, LimbName.ARM).getTransformToDesiredFrame(offsetTransform, fullRobotModel.getHandControlFrame(robotSide));
 //               JointBasics lastWristJoint = RobotCollisionModel.findJoint(robotModel.getJointMap().getArmJointName(side, ArmJointName.SECOND_WRIST_PITCH), syncedRobot.getFullRobotModel().);
-               ReferenceFrame handGraphicFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
+               ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
                ReferenceFrame collisionFrame = syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.SECOND_WRIST_PITCH).getFrameAfterJoint();
 //               MovingReferenceFrame wristFrame = lastWristJoint.getFrameAfterJoint();
                GDXInteractableObject interactableHand = new GDXInteractableObject();
-               MovingReferenceFrame handFrame = syncedRobot.getFullRobotModel().getHand(side).getBodyFixedFrame();
+//               MovingReferenceFrame handFrame = syncedRobot.getFullRobotModel().getHand(side).getBodyFixedFrame();
 //               handSuccessorFrame.setToReferenceFrame(syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0).getSuccessor().getBodyFixedFrame());
                ReferenceFrame handControlFrame = syncedRobot.getFullRobotModel().getHandControlFrame(side);
+               RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
+               handGraphicToHandTransform.getRotation().setYawPitchRoll(side == RobotSide.LEFT ? 0.0 : Math.PI, -Math.PI / 2.0, 0.0);
+               // 0.168 from models/GFE/atlas_unplugged_v5_dual_robotiq_with_head.urdf
+               // 0.126 from debugger on GDXGraphicsObject
+               handGraphicToHandTransform.getTranslation().set(-0.00179, side.negateIfRightSide(0.126), 0.0);
+               ReferenceFrame handGraphicFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSidePrefix + "graphicFrame",
+                                                                                                                   handFrame,
+                                                                                                                   handGraphicToHandTransform);
                interactableHand.create(collisionLink,
-                                       collisionFrame,
+                                       handGraphicFrame,
                                        collisionFrame,
                                        handControlFrame,
                                        (side == RobotSide.LEFT) ? "palm.g3dj" : "palmRight.g3dj",
