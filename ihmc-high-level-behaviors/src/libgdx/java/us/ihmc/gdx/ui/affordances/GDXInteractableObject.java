@@ -16,6 +16,7 @@ import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 
 public class GDXInteractableObject
 {
+   private static final boolean SHOW_DEBUG_FRAMES = false;
    private GDXRobotCollisionLink collisionLink;
    private ReferenceFrame graphicFrame;
    private ReferenceFrame collisionFrame;
@@ -152,13 +153,16 @@ public class GDXInteractableObject
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-//      if (hasMultipleFrames)
-//      {
-//         graphicReferenceFrameGraphic.setToReferenceFrame(graphicFrame);
-//         graphicReferenceFrameGraphic.getRenderables(renderables, pool);
-//      }
-//      controlReferenceFrameGraphic.setToReferenceFrame(controlFrame);
-//      controlReferenceFrameGraphic.getRenderables(renderables, pool);
+      if (SHOW_DEBUG_FRAMES)
+      {
+         if (hasMultipleFrames)
+         {
+            graphicReferenceFrameGraphic.setToReferenceFrame(graphicFrame);
+            graphicReferenceFrameGraphic.getRenderables(renderables, pool);
+         }
+         controlReferenceFrameGraphic.setToReferenceFrame(controlFrame);
+         controlReferenceFrameGraphic.getRenderables(renderables, pool);
+      }
 
       if (modified || mouseIntersects)
       {

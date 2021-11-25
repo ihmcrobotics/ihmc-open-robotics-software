@@ -17,11 +17,9 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
@@ -118,19 +116,15 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
             }
             if (collidable.getRigidBody().getName().equals(side.getSideNameFirstLowerCaseLetter() + "_hand"))
             {
-//               fullRobotModel.getEndEffectorFrame(robotSide, LimbName.ARM).getTransformToDesiredFrame(offsetTransform, fullRobotModel.getHandControlFrame(robotSide));
-//               JointBasics lastWristJoint = RobotCollisionModel.findJoint(robotModel.getJointMap().getArmJointName(side, ArmJointName.SECOND_WRIST_PITCH), syncedRobot.getFullRobotModel().);
                ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
                ReferenceFrame collisionFrame = syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.SECOND_WRIST_PITCH).getFrameAfterJoint();
-//               MovingReferenceFrame wristFrame = lastWristJoint.getFrameAfterJoint();
                GDXInteractableObject interactableHand = new GDXInteractableObject();
-//               MovingReferenceFrame handFrame = syncedRobot.getFullRobotModel().getHand(side).getBodyFixedFrame();
-//               handSuccessorFrame.setToReferenceFrame(syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0).getSuccessor().getBodyFixedFrame());
                ReferenceFrame handControlFrame = syncedRobot.getFullRobotModel().getHandControlFrame(side);
                RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
                handGraphicToHandTransform.getRotation().setYawPitchRoll(side == RobotSide.LEFT ? 0.0 : Math.PI, -Math.PI / 2.0, 0.0);
                // 0.168 from models/GFE/atlas_unplugged_v5_dual_robotiq_with_head.urdf
                // 0.126 from debugger on GDXGraphicsObject
+               // Where does the 0.042 come from?
                handGraphicToHandTransform.getTranslation().set(-0.00179, side.negateIfRightSide(0.126), 0.0);
                ReferenceFrame handGraphicFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSidePrefix + "graphicFrame",
                                                                                                                    handFrame,
