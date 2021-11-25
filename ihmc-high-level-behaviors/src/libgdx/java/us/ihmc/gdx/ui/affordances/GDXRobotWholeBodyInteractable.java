@@ -147,7 +147,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
          }
       }
 
-      walkPathControlRing.create(baseUI, robotModel, syncedRobot, ros2Helper);
+      walkPathControlRing.create(baseUI.get3DSceneManager().getCamera3D(), robotModel, syncedRobot, ros2Helper);
    }
 
    public void update()
@@ -170,6 +170,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    // This happens after update.
    public void process3DViewInput(ImGui3DViewInput input)
    {
+      walkPathControlRing.process3DViewInput(input);
       for (GDXRobotCollisionLink collisionLink : selfCollisionLinks)
       {
          collisionLink.process3DViewInput(input);

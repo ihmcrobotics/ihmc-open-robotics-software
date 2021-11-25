@@ -23,9 +23,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
@@ -77,12 +77,11 @@ public class GDXWalkPathControlRing
    private TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final FootstepPlannerGoal turnWalkTurnGoal = new FootstepPlannerGoal();
 
-   public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2Helper)
+   public void create(FocusBasedGDXCamera camera3D, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2Helper)
    {
       this.syncedRobot = syncedRobot;
       this.ros2Helper = ros2Helper;
-      footstepPlannerGoalGizmo.create(baseUI.get3DSceneManager().getCamera3D());
-      baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
+      footstepPlannerGoalGizmo.create(camera3D);
       midFeetZUpFrame = syncedRobot.getReferenceFrames().getMidFeetZUpFrame();
       footFrames = syncedRobot.getReferenceFrames().getSoleFrames();
 
@@ -125,7 +124,8 @@ public class GDXWalkPathControlRing
 
       if (footstepPlanToGenerateMeshes != null)
       {
-         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes, "Walk Path Control Ring Plan"));
+         foostepPlanGraphic.generateMeshes(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlanToGenerateMeshes,
+                                                                                           "Walk Path Control Ring Plan"));
          footstepPlanToGenerateMeshes = null;
       }
       foostepPlanGraphic.update();
