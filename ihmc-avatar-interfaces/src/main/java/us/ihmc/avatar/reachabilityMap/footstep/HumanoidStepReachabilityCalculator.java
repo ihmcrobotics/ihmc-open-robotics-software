@@ -1,18 +1,40 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
-import controller_msgs.msg.dds.*;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyAtTargetFrame;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyFreeYaw;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
+import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
-import us.ihmc.avatar.multiContact.*;
+import us.ihmc.avatar.multiContact.CenterOfMassMotionControlAnchorDescription;
+import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
+import us.ihmc.avatar.multiContact.OneDoFMotionControlAnchorDescription;
+import us.ihmc.avatar.multiContact.SixDoFMotionControlAnchorDescription;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxOptimizationSettings;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.SolutionQualityConvergenceDetector;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -27,7 +49,11 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.primitives.interfaces.*;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.PointShape3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -37,7 +63,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -58,12 +83,14 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -74,22 +101,11 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.awt.*;
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.*;
 
 /**
  * Pattern matched off of HumanoidKinematicsToolboxControllerTest. Check there for reference if needed.
@@ -111,7 +127,7 @@ public abstract class HumanoidStepReachabilityCalculator
    private static final double SOLUTION_QUALITY_THRESHOLD = 2.2;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final YoAppearanceRGBColor ghostAppearance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
+   private static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
 
@@ -182,9 +198,9 @@ public abstract class HumanoidStepReachabilityCalculator
       addKinematicsCollisionGraphics(desiredFullRobotModel, robot, collisionModel);
 
       // Yellow initial body
-      RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
-      robotDescription.setName("Ghost");
-      recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostAppearance);
+      RobotDefinition robotDefinition = ghostRobotModel.getRobotDefinition();
+      robotDefinition.setName("Ghost");
+      RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, ghostMaterial);
       ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -670,7 +686,7 @@ public abstract class HumanoidStepReachabilityCalculator
    {
       FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotModel.getDefaultRobotInitialSetup(groundHeight, offsetYaw).initializeRobot(robot, robotModel.getJointMap());
+      robotModel.getDefaultRobotInitialSetup(groundHeight, offsetYaw).initializeRobot(robot);
       DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
       SensorDataContext sensorDataContext = new SensorDataContext();

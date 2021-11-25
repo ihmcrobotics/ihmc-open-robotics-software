@@ -1,16 +1,12 @@
 package us.ihmc.exampleSimulations.sphereICPControl.model;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -30,8 +26,7 @@ public class SphereRobotModel implements FullRobotModel
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final double mass = 1.0;
-   private static final double
-         Ixx1 = 0.1, Iyy1 = 0.1, Izz1 = 0.1;
+   private static final double Ixx1 = 0.1, Iyy1 = 0.1, Izz1 = 0.1;
 
    private final RigidBodyBasics elevator;
    private final RigidBodyBasics body;
@@ -89,12 +84,6 @@ public class SphereRobotModel implements FullRobotModel
    }
 
    @Override
-   public MovingReferenceFrame getElevatorFrame()
-   {
-      return null;
-   }
-
-   @Override
    public OneDoFJointBasics[] getOneDoFJoints()
    {
       return oneDoFJoints;
@@ -106,43 +95,14 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
-   @Override public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
-   {
-
-   }
-
-   @Override
-   public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-   {
-      List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
-
-      for (int i = 0; i < list.size(); i++)
-         oneDoFJointsToPack.set(i, list.get(i));
-   }
-
-   @Override public OneDoFJointBasics getOneDoFJointByName(String name)
-   {
-      return null;
-   }
-
-   @Override
-   public OneDoFJointBasics[] getControllableOneDoFJoints()
-   {
-      return null;
-   }
-
-   @Override
-   public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-   {
-   }
-
    @Override
    public OneDoFJointBasics getSpineJoint(SpineJointName spineJointName)
    {
       return null;
    }
 
-   @Override public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
+   @Override
+   public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
    {
       return null;
    }
@@ -159,17 +119,20 @@ public class SphereRobotModel implements FullRobotModel
       return null;
    }
 
-   @Override public ReferenceFrame getLidarBaseFrame(String name)
+   @Override
+   public ReferenceFrame getLidarBaseFrame(String name)
    {
       return null;
    }
 
-   @Override public RigidBodyTransform getLidarBaseToSensorTransform(String name)
+   @Override
+   public RigidBodyTransform getLidarBaseToSensorTransform(String name)
    {
       return null;
    }
 
-   @Override public ReferenceFrame getCameraFrame(String name)
+   @Override
+   public ReferenceFrame getCameraFrame(String name)
    {
       return null;
    }
@@ -182,12 +145,6 @@ public class SphereRobotModel implements FullRobotModel
 
    @Override
    public RigidBodyBasics getHead()
-   {
-      return null;
-   }
-
-   @Override
-   public ReferenceFrame getHeadBaseFrame()
    {
       return null;
    }
