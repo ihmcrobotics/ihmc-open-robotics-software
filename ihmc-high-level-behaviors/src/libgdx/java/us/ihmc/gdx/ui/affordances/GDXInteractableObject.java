@@ -1,6 +1,5 @@
 package us.ihmc.gdx.ui.affordances;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -12,7 +11,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 
@@ -27,7 +25,7 @@ public class GDXInteractableObject
    private RigidBodyTransform controlToCollisionTransform;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D tempFramePose = new FramePose3D();
-   private ModelInstance highlightModelInstance;
+   private GDXInteractableHighlightModel highlightModel;
    private boolean selected = false;
    private boolean modified = false;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
@@ -53,7 +51,7 @@ public class GDXInteractableObject
       this.collisionFrame = collisionFrame;
       this.controlFrame = controlFrame;
       hasMultipleFrames = !(graphicFrame == collisionFrame && collisionFrame == controlFrame);
-      highlightModelInstance = GDXInteractableTools.createHighlightEffectModel(modelFileName);
+      highlightModel = new GDXInteractableHighlightModel(modelFileName);
       poseGizmo.create(camera3D);
       graphicReferenceFrameGraphic = new GDXReferenceFrameGraphic();
       controlReferenceFrameGraphic = new GDXReferenceFrameGraphic();
@@ -80,13 +78,11 @@ public class GDXInteractableObject
 
          if (hasMultipleFrames)
          {
-            tempTransform.set(controlToGraphicTransform);
-            controlFrame.getTransformToWorldFrame().transform(tempTransform);
-            GDXTools.toGDX(tempTransform, highlightModelInstance.transform);
+            highlightModel.setPose(controlFrame.getTransformToWorldFrame(), controlToGraphicTransform);
          }
          else
          {
-            GDXTools.toGDX(controlFrame.getTransformToWorldFrame(), highlightModelInstance.transform);
+            highlightModel.setPose(controlFrame.getTransformToWorldFrame());
          }
 
          if (leftMouseReleasedWithoutDrag)
@@ -108,11 +104,11 @@ public class GDXInteractableObject
       }
       if (modified && !selected && mouseIntersects)
       {
-         GDXTools.setTransparency(highlightModelInstance, 0.7f);
+         highlightModel.setTransparency(0.7);
       }
       else
       {
-         GDXTools.setTransparency(highlightModelInstance, 0.5f);
+         highlightModel.setTransparency(0.5);
       }
 
       if (modified)
@@ -122,14 +118,12 @@ public class GDXInteractableObject
             tempTransform.set(controlToCollisionTransform);
             poseGizmo.getTransform().transform(tempTransform);
             collisionLink.setOverrideTransform(true).set(tempTransform);
-            tempTransform.set(controlToGraphicTransform);
-            poseGizmo.getTransform().transform(tempTransform);
-            GDXTools.toGDX(tempTransform, highlightModelInstance.transform);
+            highlightModel.setPose(poseGizmo.getTransform(), controlToGraphicTransform);
          }
          else
          {
             collisionLink.setOverrideTransform(true).set(poseGizmo.getTransform());
-            GDXTools.toGDX(poseGizmo.getTransform(), highlightModelInstance.transform);
+            highlightModel.setPose(poseGizmo.getTransform());
          }
       }
 
@@ -158,17 +152,17 @@ public class GDXInteractableObject
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (hasMultipleFrames)
-      {
-         graphicReferenceFrameGraphic.setToReferenceFrame(graphicFrame);
-         graphicReferenceFrameGraphic.getRenderables(renderables, pool);
-      }
-      controlReferenceFrameGraphic.setToReferenceFrame(controlFrame);
-      controlReferenceFrameGraphic.getRenderables(renderables, pool);
+//      if (hasMultipleFrames)
+//      {
+//         graphicReferenceFrameGraphic.setToReferenceFrame(graphicFrame);
+//         graphicReferenceFrameGraphic.getRenderables(renderables, pool);
+//      }
+//      controlReferenceFrameGraphic.setToReferenceFrame(controlFrame);
+//      controlReferenceFrameGraphic.getRenderables(renderables, pool);
 
       if (modified || mouseIntersects)
       {
-         highlightModelInstance.getRenderables(renderables, pool);
+         highlightModel.getRenderables(renderables, pool);
       }
       if (selected)
       {
@@ -178,7 +172,7 @@ public class GDXInteractableObject
 
    public void destroy()
    {
-      highlightModelInstance.model.dispose();
+      highlightModel.dispose();
       if (hasMultipleFrames)
       {
          graphicReferenceFrameGraphic.dispose();
