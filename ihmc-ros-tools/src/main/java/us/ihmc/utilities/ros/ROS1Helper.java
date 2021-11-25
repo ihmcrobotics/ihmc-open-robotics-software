@@ -5,7 +5,6 @@ import org.ros.internal.message.Message;
 import org.ros.message.Time;
 import org.ros.node.parameter.ParameterListener;
 import sensor_msgs.PointCloud2;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -29,6 +28,8 @@ import java.util.function.Consumer;
  */
 public class ROS1Helper implements RosNodeInterface
 {
+   private static final boolean ROS1_ENABLED = Boolean.parseBoolean(System.getProperty("ros1.enabled", "true"));
+
    private final String nodeName;
    private RosMainNode ros1Node;
 
@@ -73,22 +74,29 @@ public class ROS1Helper implements RosNodeInterface
 
    public void reconnectEverything()
    {
-      LogTools.info("Reconnecting {} ROS 1 node...", nodeName);
-      if (ros1Node != null)
-         ros1Node.shutdown();
-
-      ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), nodeName);
-
-      for (Map.Entry<RosTopicPublisher<? extends Message>, String> publisher : publishers.entrySet())
+      if (ROS1_ENABLED)
       {
-         ros1Node.attachPublisher(publisher.getValue(), publisher.getKey());
-      }
-      for (Map.Entry<RosTopicSubscriberInterface<? extends Message>, String> subscriber : subscribers.entrySet())
-      {
-         ros1Node.attachSubscriber(subscriber.getValue(), subscriber.getKey());
-      }
+         LogTools.info("Reconnecting {} ROS 1 node...", nodeName);
+         if (ros1Node != null)
+            ros1Node.shutdown();
 
-      ros1Node.execute();
+         ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), nodeName);
+
+         for (Map.Entry<RosTopicPublisher<? extends Message>, String> publisher : publishers.entrySet())
+         {
+            ros1Node.attachPublisher(publisher.getValue(), publisher.getKey());
+         }
+         for (Map.Entry<RosTopicSubscriberInterface<? extends Message>, String> subscriber : subscribers.entrySet())
+         {
+            ros1Node.attachSubscriber(subscriber.getValue(), subscriber.getKey());
+         }
+
+         ros1Node.execute();
+      }
+      else
+      {
+         LogTools.warn("ROS 1 is disabled. Not connecting ROS 1 node.", nodeName);
+      }
    }
 
    @Override
@@ -178,7 +186,8 @@ public class ROS1Helper implements RosNodeInterface
    public void destroy()
    {
       scheduler.shutdown();
-      ros1Node.shutdown();
+      if (ros1Node != null)
+         ros1Node.shutdown();
    }
 
    @Override

@@ -22,6 +22,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
@@ -70,6 +72,10 @@ public class GDXWalkPathControlRing
    private volatile FootstepPlan footstepPlan;
    private volatile FootstepPlan footstepPlanToGenerateMeshes;
    private final AxisAngle walkFacingDirection = new AxisAngle();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private boolean useAStarPlanner = false;
+   private TurnWalkTurnPlanner turnWalkTurnPlanner;
+   private final FootstepPlannerGoal turnWalkTurnGoal = new FootstepPlannerGoal();
 
    public void create(GDXImGuiBasedUI baseUI, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2Helper)
    {
@@ -93,6 +99,8 @@ public class GDXWalkPathControlRing
       goalFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("goalPose",
                                                                                          ReferenceFrame.getWorldFrame(),
                                                                                          footstepPlannerGoalGizmo.getTransform());
+
+      turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       foostepPlanGraphic = new GDXFootstepPlanGraphic(contactPoints);
@@ -211,10 +219,20 @@ public class GDXWalkPathControlRing
 
    private void queueFootstepPlan()
    {
-      footstepPlanningThread.clearQueueAndExecute(() -> planFoosteps(new Pose3D(leftStanceFootPose),
-                                                                     new Pose3D(rightStanceFootPose),
-                                                                     new Pose3D(leftGoalFootPose),
-                                                                     new Pose3D(rightGoalFootPose)));
+      footstepPlanningThread.clearQueueAndExecute(() ->
+      {
+         if (useAStarPlanner)
+         {
+            planFoostepsUsingAStarPlanner(new Pose3D(leftStanceFootPose),
+                                          new Pose3D(rightStanceFootPose),
+                                          new Pose3D(leftGoalFootPose),
+                                          new Pose3D(rightGoalFootPose));
+         }
+         else
+         {
+            planFootstepsUsingTurnWalkTurnPlanner();
+         }
+      });
    }
 
    private void updateStuff()
@@ -248,10 +266,19 @@ public class GDXWalkPathControlRing
       rightGoalFootstepGraphic.setPose(rightGoalFootPose);
    }
 
-   private void planFoosteps(Pose3DReadOnly leftStanceFootPose,
-                             Pose3DReadOnly rightStanceFootPose,
-                             Pose3DReadOnly leftGoalFootPose,
-                             Pose3DReadOnly rightGoalFootPose)
+   private void planFootstepsUsingTurnWalkTurnPlanner()
+   {
+      turnWalkTurnGoal.setGoalPoseBetweenFeet(goalPose);
+      turnWalkTurnPlanner.setGoal(turnWalkTurnGoal);
+      turnWalkTurnPlanner.setInitialStanceFoot(leftStanceFootPose, RobotSide.LEFT); // TODO: Furthest away
+      turnWalkTurnPlanner.plan();
+      footstepPlan = footstepPlanToGenerateMeshes = turnWalkTurnPlanner.getPlan();
+   }
+
+   private void planFoostepsUsingAStarPlanner(Pose3DReadOnly leftStanceFootPose,
+                                              Pose3DReadOnly rightStanceFootPose,
+                                              Pose3DReadOnly leftGoalFootPose,
+                                              Pose3DReadOnly rightGoalFootPose)
    {
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
@@ -264,6 +291,18 @@ public class GDXWalkPathControlRing
       footstepPlannerRequest.setRequestId(footstepPlannerId.getAndIncrement());
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
       footstepPlan = footstepPlanToGenerateMeshes = new FootstepPlan(footstepPlannerOutput.getFootstepPlan());
+   }
+
+   public void renderImGuiWidgets()
+   {
+      if (ImGui.radioButton(labels.get("Turn Walk Turn"), !useAStarPlanner))
+      {
+         useAStarPlanner = false;
+      }
+      if (ImGui.radioButton(labels.get("A* Planner"), useAStarPlanner))
+      {
+         useAStarPlanner = true;
+      }
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
