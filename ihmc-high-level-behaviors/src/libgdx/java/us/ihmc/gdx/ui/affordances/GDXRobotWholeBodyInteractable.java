@@ -117,7 +117,7 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
             if (collidable.getRigidBody().getName().equals(side.getSideNameFirstLowerCaseLetter() + "_hand"))
             {
                ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
-               ReferenceFrame collisionFrame = syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.SECOND_WRIST_PITCH).getFrameAfterJoint();
+               ReferenceFrame collisionFrame = handFrame;
                GDXInteractableObject interactableHand = new GDXInteractableObject();
                ReferenceFrame handControlFrame = syncedRobot.getFullRobotModel().getHandControlFrame(side);
                RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
