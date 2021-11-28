@@ -13,6 +13,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 
 import java.util.LinkedList;
@@ -20,7 +21,7 @@ import java.util.LinkedList;
 public class GDXBehaviorActionSequenceEditor
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final LinkedList<GDXWalkAction> actionSequence = new LinkedList<>();
+   private final LinkedList<GDXBehaviorAction> actionSequence = new LinkedList<>();
    private FocusBasedGDXCamera camera3D;
    private DRCRobotModel robotModel;
    private int playbackNextIndex = 0;
@@ -39,7 +40,7 @@ public class GDXBehaviorActionSequenceEditor
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      for (GDXWalkAction action : actionSequence)
+      for (GDXBehaviorAction action : actionSequence)
       {
          action.process3DViewInput(input);
       }
@@ -59,7 +60,15 @@ public class GDXBehaviorActionSequenceEditor
          ImGui.sameLine();
          if (ImGui.button(labels.get("Execute")))
          {
-            actionSequence.get(playbackNextIndex).walk(ReferenceFrame.getWorldFrame(), ros2ControllerHelper, syncedRobot);
+            GDXBehaviorAction action = actionSequence.get(playbackNextIndex);
+            if (action instanceof GDXWalkAction)
+            {
+               ((GDXWalkAction) action).walk(ReferenceFrame.getWorldFrame(), ros2ControllerHelper, syncedRobot);
+            }
+            else if (action instanceof GDXHandPoseAction)
+            {
+               ((GDXHandPoseAction) action).moveHand(4.0);
+            }
             playbackNextIndex++;
          }
       }
@@ -82,7 +91,7 @@ public class GDXBehaviorActionSequenceEditor
          ImGui.sameLine();
          if (ImGui.button(labels.get("X", i)))
          {
-            GDXWalkAction removedAction = actionSequence.remove(i);
+            GDXBehaviorAction removedAction = actionSequence.remove(i);
             removedAction.destroy();
          }
       }
@@ -93,11 +102,24 @@ public class GDXBehaviorActionSequenceEditor
          walkAction.create(camera3D, robotModel, footstepPlanner);
          actionSequence.addLast(walkAction);
       }
+      ImGui.text("Add Hand Pose");
+      ImGui.sameLine();
+      for (RobotSide side : RobotSide.values)
+      {
+         if (ImGui.button(labels.get(side.getPascalCaseName())))
+         {
+            GDXHandPoseAction handPoseAction = new GDXHandPoseAction();
+            handPoseAction.create(camera3D, robotModel, syncedRobot.getFullRobotModel(), side, ros2ControllerHelper);
+            actionSequence.addLast(handPoseAction);
+         }
+         if (side.ordinal() < 1)
+            ImGui.sameLine();
+      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (GDXWalkAction action : actionSequence)
+      for (GDXBehaviorAction action : actionSequence)
       {
          action.getRenderables(renderables, pool);
       }

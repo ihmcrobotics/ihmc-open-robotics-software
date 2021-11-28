@@ -7,7 +7,6 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -35,7 +34,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.UUID;
 
-public class GDXWalkAction
+public class GDXWalkAction implements GDXBehaviorAction
 {
    private GDXFootstepPlanGraphic footstepPlanGraphic;
    private FootstepPlanningModule footstepPlanner;
@@ -50,17 +49,20 @@ public class GDXWalkAction
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
    }
 
+   @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
       footstepPlannerGoalGizmo.process3DViewInput(input);
    }
 
+   @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       footstepPlanGraphic.getRenderables(renderables, pool);
       footstepPlannerGoalGizmo.getRenderables(renderables, pool);
    }
 
+   @Override
    public void destroy()
    {
       footstepPlanGraphic.destroy();
