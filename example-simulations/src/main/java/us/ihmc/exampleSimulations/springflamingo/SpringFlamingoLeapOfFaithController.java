@@ -150,15 +150,15 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       totalMass.set(robot.computeCenterOfMass(comPoint));
 
       capturePointXToStartBraking.set(0.25);
-      ankleBrakingKd.set(60.0);
-      maxAnkleBrakingTorque.set(-10.0);
+      ankleBrakingKd.set(40.0);
+      maxAnkleBrakingTorque.set(-16.0);
       toeOffAnkleTorque.set(-14.0);
-      capturePointToStartSwing.set(0.14);
+      capturePointToStartSwing.set(0.18);
 
       minimumLoadingDuration.set(0.04);
 
       finalSwingThighAngle.set(0.8);
-      swingDuration.set(0.4);
+      swingDuration.set(0.3);
       finalRetractThighAngle.set(0.38);
       retractDuration.set(0.3);
 
@@ -185,7 +185,7 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       toeOffFootMaxAngle.set(0.8);
 
       minimumSupportKneeAngle.set(0.0);
-      maximumSupportKneeAngle.set(1.2);
+      maximumSupportKneeAngle.set(1.1);
       maxToeOffAnkleAngle.set(1.1);
 
       bodyOrientationKp.set(100.0);
