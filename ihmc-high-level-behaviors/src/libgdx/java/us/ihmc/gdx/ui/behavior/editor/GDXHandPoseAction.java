@@ -22,12 +22,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class GDXHandPoseAction implements GDXBehaviorAction
 {
    private RigidBodyTransform controlToHandTranform;
-   private RigidBodyTransform handGraphicToControlTransform = new RigidBodyTransform();
+   private final RigidBodyTransform handGraphicToControlTransform = new RigidBodyTransform();
    private GDXInteractableHighlightModel highlightModel;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private RobotSide side;
    private ROS2ControllerHelper ros2ControllerHelper;
-   private RigidBodyTransform handGraphicToHandTransform;
 
    public void create(FocusBasedGDXCamera camera3D,
                       DRCRobotModel robotModel,
@@ -40,10 +39,10 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(side);
       controlToHandTranform = handControlFrame.getTransformToParent();
       handGraphicToControlTransform.setAndInvert(controlToHandTranform);
-      RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
-      handGraphicToHandTransform.getRotation().setYawPitchRoll(side == RobotSide.LEFT ? 0.0 : Math.PI, -Math.PI / 2.0, 0.0);
-      handGraphicToHandTransform.getTranslation().set(-0.00179, side.negateIfRightSide(0.126), 0.0);
-      handGraphicToHandTransform.transform(handGraphicToControlTransform);
+      handGraphicToControlTransform.getRotation().appendYawRotation(side == RobotSide.LEFT ? 0.0 : Math.PI);
+      handGraphicToControlTransform.getRotation().appendPitchRotation(-Math.PI / 2.0);
+      handGraphicToControlTransform.getRotation().appendRollRotation(0.0);
+      handGraphicToControlTransform.getTranslation().add(0.126, -0.00179, 0.0); // TODO: Fix and check
       highlightModel = new GDXInteractableHighlightModel((side == RobotSide.LEFT) ? "palm.g3dj" : "palmRight.g3dj");
       poseGizmo.create(camera3D);
    }
@@ -70,12 +69,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
 
    public void moveHand(double trajectoryTime)
    {
-//      RigidBodyTransform controlToWorldTransform = new RigidBodyTransform();
-//      controlToHandTranform.inverseTransform(controlToWorldTransform);
-//      poseGizmo.getTransform().transform(controlToWorldTransform);
-
       Pose3D endHandPose = new Pose3D(poseGizmo.getTransform());
-
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
       handTrajectoryMessage.setRobotSide(side.toByte());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
