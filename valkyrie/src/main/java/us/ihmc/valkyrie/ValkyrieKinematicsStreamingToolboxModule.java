@@ -5,7 +5,7 @@ import java.util.Map;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -36,10 +36,10 @@ public class ValkyrieKinematicsStreamingToolboxModule extends KinematicsStreamin
    {
       Map<String, Double> initialConfigurationMap = new HashMap<>();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       HumanoidJointNameMap jointMap = robotModel.getJointMap();
-      defaultRobotInitialSetup.initializeRobot(robot, jointMap);
+      defaultRobotInitialSetup.initializeRobot(robot);
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {

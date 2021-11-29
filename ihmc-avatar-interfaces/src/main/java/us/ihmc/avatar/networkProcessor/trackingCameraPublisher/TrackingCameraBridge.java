@@ -53,7 +53,7 @@ public class TrackingCameraBridge
 
    public TrackingCameraBridge(FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node)
    {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node);
+      this(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), ros2Node);
    }
 
    public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, ROS2NodeInterface ros2Node)

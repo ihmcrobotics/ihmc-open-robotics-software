@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -15,6 +16,7 @@ public class HumanoidRobotContextDataFactory
 {
    protected final RequiredFactoryField<HumanoidRobotContextJointData> processedJointData = new RequiredFactoryField<>("processedJointData");
    protected final RequiredFactoryField<ForceSensorDataHolder> forceSensorDataHolder = new RequiredFactoryField<>("forceSensorDataHolder");
+   protected final RequiredFactoryField<CenterOfMassDataHolder> centerOfMassDataHolder = new RequiredFactoryField<>("centerOfMassDataHolder");
    protected final RequiredFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolder = new RequiredFactoryField<>("centerOfPressureDataHolder");
    protected final RequiredFactoryField<RobotMotionStatusHolder> robotMotionStatusHolder = new RequiredFactoryField<>("robotMotionStatusHolder");
    protected final RequiredFactoryField<LowLevelOneDoFJointDesiredDataHolder> jointDesiredOutputList = new RequiredFactoryField<>("jointDesiredOutputList");
@@ -24,37 +26,47 @@ public class HumanoidRobotContextDataFactory
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
-      return new HumanoidRobotContextData(processedJointData.get(), forceSensorDataHolder.get(), centerOfPressureDataHolder.get(),
-                                          robotMotionStatusHolder.get(), jointDesiredOutputList.get(), sensorDataContext.get());
+      return new HumanoidRobotContextData(processedJointData.get(),
+                                          forceSensorDataHolder.get(),
+                                          centerOfMassDataHolder.get(),
+                                          centerOfPressureDataHolder.get(),
+                                          robotMotionStatusHolder.get(),
+                                          jointDesiredOutputList.get(),
+                                          sensorDataContext.get());
    }
 
    public void setProcessedJointData(HumanoidRobotContextJointData value)
    {
-      this.processedJointData.set(value);
+      processedJointData.set(value);
    }
 
    public void setForceSensorDataHolder(ForceSensorDataHolder value)
    {
-      this.forceSensorDataHolder.set(value);
+      forceSensorDataHolder.set(value);
+   }
+
+   public void setCenterOfMassDataHolder(CenterOfMassDataHolder value)
+   {
+      centerOfMassDataHolder.set(value);
    }
 
    public void setCenterOfPressureDataHolder(CenterOfPressureDataHolder value)
    {
-      this.centerOfPressureDataHolder.set(value);
+      centerOfPressureDataHolder.set(value);
    }
 
    public void setRobotMotionStatusHolder(RobotMotionStatusHolder value)
    {
-      this.robotMotionStatusHolder.set(value);
+      robotMotionStatusHolder.set(value);
    }
 
    public void setJointDesiredOutputList(LowLevelOneDoFJointDesiredDataHolder value)
    {
-      this.jointDesiredOutputList.set(value);
+      jointDesiredOutputList.set(value);
    }
 
    public void setSensorDataContext(SensorDataContext value)
    {
-      this.sensorDataContext.set(value);
+      sensorDataContext.set(value);
    }
 }

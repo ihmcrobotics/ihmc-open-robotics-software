@@ -325,4 +325,9 @@ public class GDXImGuiWindowAndDockSystem
    {
       return panelManager;
    }
+
+   public ImFont getImFont()
+   {
+      return imFont;
+   }
 }

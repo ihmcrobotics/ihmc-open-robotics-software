@@ -30,7 +30,7 @@ mainDependencies {
    api("us.ihmc:euclid-geometry:0.17.0")
    api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
-   api("us.ihmc:simulation-construction-set:0.21.10")
+   api("us.ihmc:simulation-construction-set:0.21.11")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
@@ -54,8 +54,8 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:simulation-construction-set-tools:source")
-   api("us.ihmc:scs2-simulation:0.0.4")
-   api("us.ihmc:scs2-session-visualizer-jfx:0.0.4")
+   api("us.ihmc:scs2-simulation:0.1.1")
+   api("us.ihmc:scs2-session-visualizer-jfx:0.1.1")
 }
 
 testDependencies {

@@ -35,6 +35,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -42,6 +43,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepData
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.walkingPreviewToolboxAPI.WalkingControllerPreviewInputCommand;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -77,6 +79,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
    private final FloatingJointBasics rootJoint;
    private final OneDoFJointBasics[] allOneDoFJointsExcludingHands;
    private final FullHumanoidRobotModel fullRobotModel;
+   private final CenterOfMassStateProvider centerOfMassStateProvider;
    private final CommonHumanoidReferenceFrames referenceFrames;
    private final SideDependentList<SettableFootSwitch> footSwitches = new SideDependentList<>();
 
@@ -105,8 +108,11 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
    private final List<Updatable> updatables = new ArrayList<>();
 
-   public WalkingControllerPreviewToolboxController(DRCRobotModel robotModel, double integrationDT, CommandInputManager toolboxInputManager,
-                                                    StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public WalkingControllerPreviewToolboxController(DRCRobotModel robotModel,
+                                                    double integrationDT,
+                                                    CommandInputManager toolboxInputManager,
+                                                    StatusMessageOutputManager statusOutputManager,
+                                                    YoGraphicsListRegistry yoGraphicsListRegistry,
                                                     YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -115,7 +121,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       this.toolboxInputManager = toolboxInputManager;
       fullRobotModel = robotModel.createFullRobotModel();
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
       previewTime = new YoDouble("timeInPreview", registry);
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
@@ -170,9 +177,9 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
 
       double controlDT = controllerToolbox.getControlDT();
       RigidBodyBasics elevator = fullRobotModel.getElevator();
-      YoDouble yoTime = controllerToolbox.getYoTime();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames,
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
+                                                                            referenceFrames,
                                                                             contactableFeet,
                                                                             elevator,
                                                                             walkingControllerParameters,
@@ -186,7 +193,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThread);
 
       YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
-                                                         PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
+                                                       PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
       if (Double.isNaN(defaultHeight.getValueAsDouble()))
       {
          throw new RuntimeException("Need to load a default height.");
@@ -217,6 +224,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
       JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
 
       return new HighLevelHumanoidControllerToolbox(fullRobotModel,
+                                                    centerOfMassStateProvider,
                                                     referenceFrames,
                                                     footSwitches,
                                                     null,
@@ -231,7 +239,8 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                     jointsToIgnore);
    }
 
-   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters, CoPTrajectoryParameters copTrajectoryParameters,
+   private void setupWalkingMessageHandler(WalkingControllerParameters walkingControllerParameters,
+                                           CoPTrajectoryParameters copTrajectoryParameters,
                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
