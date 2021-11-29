@@ -11,16 +11,16 @@ import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
 public class CrossFourBarJointDefinition extends OneDoFJointDefinition
 {
    private RevoluteJointDefinition[] fourBarJoints;
-   private int masterJointIndex;
+   private int actuatedJointIndex;
 
    public CrossFourBarJointDefinition(String name)
    {
       super(name);
    }
 
-   public void setMasterJointIndex(int masterJointIndex)
+   public void setActuatedJointIndex(int actuatedJointIndex)
    {
-      this.masterJointIndex = masterJointIndex;
+      this.actuatedJointIndex = actuatedJointIndex;
    }
 
    public void setFourBarJoints(RevoluteJointDefinition[] fourBarJoints)
@@ -28,9 +28,9 @@ public class CrossFourBarJointDefinition extends OneDoFJointDefinition
       this.fourBarJoints = fourBarJoints;
    }
 
-   public int getMasterJointIndex()
+   public int getActuatedJointIndex()
    {
-      return masterJointIndex;
+      return actuatedJointIndex;
    }
 
    public RevoluteJointDefinition[] getFourBarJoints()
@@ -44,7 +44,7 @@ public class CrossFourBarJointDefinition extends OneDoFJointDefinition
       RevoluteJointBasics jointA = null, jointB = null, jointC = null, jointD = null;
       RevoluteJointDefinition jointADefinition = null, jointBDefinition = null, jointCDefinition = null, jointDDefinition = null;
 
-      RevoluteJointDefinition masterJointDefinition = fourBarJoints[masterJointIndex];
+      RevoluteJointDefinition actuatedJointDefinition = fourBarJoints[actuatedJointIndex];
       RevoluteJointDefinition loopClosureJointDefinition = null;
 
       for (RevoluteJointDefinition revoluteJointDefinition : fourBarJoints)
@@ -124,16 +124,16 @@ public class CrossFourBarJointDefinition extends OneDoFJointDefinition
       }
 
       RevoluteJointBasics[] fourBarRevoluteJoints = new RevoluteJointBasics[] {jointA, jointB, jointC, jointD};
-      int masterJointIndex = -1;
-      if (masterJointDefinition == jointADefinition)
-         masterJointIndex = 0;
-      else if (masterJointDefinition == jointBDefinition)
-         masterJointIndex = 1;
-      else if (masterJointDefinition == jointCDefinition)
-         masterJointIndex = 2;
-      else if (masterJointDefinition == jointDDefinition)
-         masterJointIndex = 3;
-      return new CrossFourBarJoint(getName(), fourBarRevoluteJoints, masterJointIndex);
+      int actuatedJointIndex = -1;
+      if (actuatedJointDefinition == jointADefinition)
+         actuatedJointIndex = 0;
+      else if (actuatedJointDefinition == jointBDefinition)
+         actuatedJointIndex = 1;
+      else if (actuatedJointDefinition == jointCDefinition)
+         actuatedJointIndex = 2;
+      else if (actuatedJointDefinition == jointDDefinition)
+         actuatedJointIndex = 3;
+      return new CrossFourBarJoint(getName(), fourBarRevoluteJoints, actuatedJointIndex);
    }
 
    private RevoluteJointBasics createLoopClosureJoint(RigidBodyBasics predecessor, RigidBodyBasics successor, RevoluteJointDefinition jointDefinition)

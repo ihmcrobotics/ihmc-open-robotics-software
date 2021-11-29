@@ -74,7 +74,7 @@ public class CrossFourBarLinkageIDController implements RobotController
    private final SineGenerator fourBarFunctionGenerator;
    private final SineGenerator wristFunctionGenerator;
    private final RevoluteJointBasics shoulderJoint;
-   private final RevoluteJointBasics masterJoint;
+   private final RevoluteJointBasics actuatedJoint;
    private final RevoluteJointBasics jointA;
    private final RevoluteJointBasics jointB;
    private final RevoluteJointBasics jointC;
@@ -103,7 +103,7 @@ public class CrossFourBarLinkageIDController implements RobotController
       jointC = findJoint(robotDescription.getJointCName());
       jointD = findJoint(robotDescription.getJointDName());
       fourBarKinematicLoop = new FourBarKinematicLoopFunction("fourBar", new RevoluteJointBasics[] {jointA, jointB, jointC, jointD}, 0);
-      masterJoint = fourBarKinematicLoop.getMasterJoint();
+      actuatedJoint = fourBarKinematicLoop.getActuatedJoint();
       wristJoint = HAS_WRIST_JOINT ? findJoint(robotDescription.getWristJointName()) : null;
 
       inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody);
@@ -126,13 +126,13 @@ public class CrossFourBarLinkageIDController implements RobotController
       }
 
       fourBarFunctionGenerator = new SineGenerator("fourBarFunction", robot.getYoTime(), registry);
-      double masterJointMidRange = 0.5 * (masterJoint.getJointLimitUpper() + masterJoint.getJointLimitLower());
-      double masterJointMin = EuclidCoreRandomTools.nextDouble(random, masterJoint.getJointLimitLower(), masterJointMidRange);
-      double masterJointMax = EuclidCoreRandomTools.nextDouble(random, masterJointMidRange, masterJoint.getJointLimitUpper());
-      fourBarFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.5 * (masterJointMax - masterJointMin)));
+      double actuatedJointMidRange = 0.5 * (actuatedJoint.getJointLimitUpper() + actuatedJoint.getJointLimitLower());
+      double actuatedJointMin = EuclidCoreRandomTools.nextDouble(random, actuatedJoint.getJointLimitLower(), actuatedJointMidRange);
+      double actuatedJointMax = EuclidCoreRandomTools.nextDouble(random, actuatedJointMidRange, actuatedJoint.getJointLimitUpper());
+      fourBarFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.5 * (actuatedJointMax - actuatedJointMin)));
       fourBarFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
       fourBarFunctionGenerator.setPhase(EuclidCoreRandomTools.nextDouble(random, Math.PI));
-      fourBarFunctionGenerator.setOffset(masterJointMidRange);
+      fourBarFunctionGenerator.setOffset(actuatedJointMidRange);
 
       if (HAS_WRIST_JOINT)
       {
@@ -242,12 +242,12 @@ public class CrossFourBarLinkageIDController implements RobotController
          shoulderJoint.setQdd(qdd_d_shoulder);
       }
 
-      double q_d_master = fourBarFunctionGenerator.getPosition();
-      double q_master = masterJoint.getQ();
-      double qd_d_master = fourBarFunctionGenerator.getVelocity();
-      double qd_master = masterJoint.getQd();
-      double qdd_d_master = kp.getValue() * (q_d_master - q_master) + kd * (qd_d_master - qd_master) + fourBarFunctionGenerator.getAcceleration();
-      masterJoint.setQdd(qdd_d_master);
+      double q_d_actuated = fourBarFunctionGenerator.getPosition();
+      double q_actuated = actuatedJoint.getQ();
+      double qd_d_actuated = fourBarFunctionGenerator.getVelocity();
+      double qd_actuated = actuatedJoint.getQd();
+      double qdd_d_actuated = kp.getValue() * (q_d_actuated - q_actuated) + kd * (qd_d_actuated - qd_actuated) + fourBarFunctionGenerator.getAcceleration();
+      actuatedJoint.setQdd(qdd_d_actuated);
 
       if (HAS_WRIST_JOINT)
       {

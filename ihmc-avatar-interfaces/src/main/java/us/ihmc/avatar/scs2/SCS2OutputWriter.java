@@ -304,9 +304,9 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
 
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
-         double tau_master = localFourBarJoint.computeMasterJointTau(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue());
+         double tau_actuated = localFourBarJoint.computeActuatedJointTau(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue());
          /*
-          * Ideally we just want to set the torque of the master joint, but spreading the torque onto the
+          * Ideally we just want to set the torque of the actuated joint, but spreading the torque onto the
           * 2-joint chain that goes through the 4-bar w/o relying on the loop closure makes it a little nicer
           * on SCS's soft constraint.
           */
@@ -319,7 +319,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
 
          for (int torqueSourceIndex : torqueSourceIndices)
          {
-            double tau = 0.5 * tau_master / localFourBarJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
+            double tau = 0.5 * tau_actuated / localFourBarJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
             simInputs[torqueSourceIndex].setEffort(tau);
          }
 

@@ -435,9 +435,9 @@ public class SCS2SensorReader implements SensorReader
          DMatrixRMaj loopJacobian = localFourBarJoint.getFourBarFunction().getLoopJacobian();
          double tau = loopJacobian.get(activeJointIndices[0]) * simJoints[activeJointIndices[0]].getTau()
                + loopJacobian.get(activeJointIndices[1]) * simJoints[activeJointIndices[1]].getTau();
-         int masterJointIndex = localFourBarJoint.getFourBarFunction().getMasterJointIndex();
+         int actuatedJointIndex = localFourBarJoint.getFourBarFunction().getActuatedJointIndex();
 
-         if (masterJointIndex == 0 || masterJointIndex == 3)
+         if (actuatedJointIndex == 0 || actuatedJointIndex == 3)
             tau /= (loopJacobian.get(0) + loopJacobian.get(3));
          else
             tau /= (loopJacobian.get(1) + loopJacobian.get(2));
