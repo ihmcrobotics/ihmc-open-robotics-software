@@ -26,17 +26,21 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
+import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.UUID;
 
 public class GDXWalkAction implements GDXBehaviorAction
 {
    private GDXFootstepPlanGraphic footstepPlanGraphic;
+   private final SideDependentList<GDXFootstepGraphic> goalFeet = new SideDependentList<>();
+   private final SideDependentList<FramePose3D> goalFeetPoses = new SideDependentList<>();
    private FootstepPlanningModule footstepPlanner;
    private final GDXFootstepPlannerGoalGizmo footstepPlannerGoalGizmo = new GDXFootstepPlannerGoalGizmo();
    private FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -47,12 +51,28 @@ public class GDXWalkAction implements GDXBehaviorAction
       footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
       footstepPlannerGoalGizmo.create(camera3D);
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      for (RobotSide side : RobotSide.values)
+      {
+         GDXFootstepGraphic goalFootGraphic = new GDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints(),
+                                                                     side);
+         goalFootGraphic.create();
+         goalFeet.put(side, goalFootGraphic);
+         goalFeetPoses.put(side, new FramePose3D());
+      }
    }
 
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
       footstepPlannerGoalGizmo.process3DViewInput(input);
+      for (RobotSide side : RobotSide.values)
+      {
+         FramePose3D goalFootPose = goalFeetPoses.get(side);
+         goalFootPose.setToZero(footstepPlannerGoalGizmo.getReferenceFrame());
+         goalFootPose.getPosition().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
+         goalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+         goalFeet.get(side).setPose(goalFootPose);
+      }
    }
 
    @Override
@@ -60,6 +80,8 @@ public class GDXWalkAction implements GDXBehaviorAction
    {
       footstepPlanGraphic.getRenderables(renderables, pool);
       footstepPlannerGoalGizmo.getRenderables(renderables, pool);
+      for (RobotSide side : RobotSide.values)
+         goalFeet.get(side).getRenderables(renderables, pool);
    }
 
    @Override
