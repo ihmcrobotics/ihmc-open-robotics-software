@@ -14,7 +14,7 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 
-public class GDXInteractableObject
+public class GDXLiveRobotPartInteractable
 {
    private static final boolean SHOW_DEBUG_FRAMES = false;
    private GDXRobotCollisionLink collisionLink;
