@@ -522,7 +522,7 @@ public class FullRobotModelWrapper implements FullRobotModel
       PinJointDescription jointADescription = null, jointBDescription = null, jointCDescription = null, jointDDescription = null;
 
       PinJointDescription[] fourBarJoints = fourBarDescription.getFourBarJoints();
-      PinJointDescription masterJointDescription = fourBarDescription.getFourBarJoints()[fourBarDescription.getMasterJointIndex()];
+      PinJointDescription actuatedJointDescription = fourBarDescription.getFourBarJoints()[fourBarDescription.getActuatedJointIndex()];
 
       for (PinJointDescription pinJointDescription : fourBarJoints)
       {
@@ -587,16 +587,16 @@ public class FullRobotModelWrapper implements FullRobotModel
       }
 
       RevoluteJoint[] fourBarRevoluteJoints = new RevoluteJoint[] {jointA, jointB, jointC, jointD};
-      int masterJointIndex = -1;
-      if (masterJointDescription == jointADescription)
-         masterJointIndex = 0;
-      else if (masterJointDescription == jointBDescription)
-         masterJointIndex = 1;
-      else if (masterJointDescription == jointCDescription)
-         masterJointIndex = 2;
-      else if (masterJointDescription == jointDDescription)
-         masterJointIndex = 3;
-      return new CrossFourBarJoint(fourBarDescription.getName(), fourBarRevoluteJoints, masterJointIndex);
+      int actuatedJointIndex = -1;
+      if (actuatedJointDescription == jointADescription)
+         actuatedJointIndex = 0;
+      else if (actuatedJointDescription == jointBDescription)
+         actuatedJointIndex = 1;
+      else if (actuatedJointDescription == jointCDescription)
+         actuatedJointIndex = 2;
+      else if (actuatedJointDescription == jointDDescription)
+         actuatedJointIndex = 3;
+      return new CrossFourBarJoint(fourBarDescription.getName(), fourBarRevoluteJoints, actuatedJointIndex);
    }
 
    public static void addLoopClosureConstraintRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)

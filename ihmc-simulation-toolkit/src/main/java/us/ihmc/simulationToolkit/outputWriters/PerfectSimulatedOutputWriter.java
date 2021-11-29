@@ -231,21 +231,21 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
       @Override
       public void write()
       {
-         double tau_master;
+         double tau_actuated;
          if (jointDesiredOutput != null)
-            tau_master = idJoint.computeMasterJointTau(jointDesiredOutput.getDesiredTorque());
+            tau_actuated = idJoint.computeActuatedJointTau(jointDesiredOutput.getDesiredTorque());
          else
-            tau_master = idJoint.getMasterJoint().getTau();
+            tau_actuated = idJoint.getActuatedJoint().getTau();
          /*
-          * Ideally we just want to set the torque of the master joint, but spreading the torque onto the
+          * Ideally we just want to set the torque of the actuated joint, but spreading the torque onto the
           * 2-joint chain that goes through the 4-bar w/o relying on the loop closure makes it a little nicer
           * on SCS's soft constraint.
           */
-         // scsMasterJoint.setTau(tau_master);
+         // scsActuatedJoint.setTau(tau_actuated);
 
          for (int torqueSourceIndex : torqueSourceIndices)
          {
-            double tau = 0.5 * tau_master / idJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
+            double tau = 0.5 * tau_actuated / idJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
             scsJoints[torqueSourceIndex].setTau(tau);
          }
       }

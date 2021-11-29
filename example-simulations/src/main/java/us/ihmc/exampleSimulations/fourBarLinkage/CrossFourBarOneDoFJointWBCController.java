@@ -99,13 +99,13 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
       }
 
       fourBarFunctionGenerator = new SineGenerator("fourBarFunction", robot.getYoTime(), registry);
-      double masterJointMidRange = 0.5 * (fourBarJoint.getJointLimitUpper() + fourBarJoint.getJointLimitLower());
-      double masterJointMin = EuclidCoreRandomTools.nextDouble(random, fourBarJoint.getJointLimitLower(), masterJointMidRange);
-      double masterJointMax = EuclidCoreRandomTools.nextDouble(random, masterJointMidRange, fourBarJoint.getJointLimitUpper());
-      fourBarFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.5 * (masterJointMax - masterJointMin)));
+      double actuatedJointMidRange = 0.5 * (fourBarJoint.getJointLimitUpper() + fourBarJoint.getJointLimitLower());
+      double actuatedJointMin = EuclidCoreRandomTools.nextDouble(random, fourBarJoint.getJointLimitLower(), actuatedJointMidRange);
+      double actuatedJointMax = EuclidCoreRandomTools.nextDouble(random, actuatedJointMidRange, fourBarJoint.getJointLimitUpper());
+      fourBarFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.5 * (actuatedJointMax - actuatedJointMin)));
       fourBarFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
       fourBarFunctionGenerator.setPhase(EuclidCoreRandomTools.nextDouble(random, Math.PI));
-      fourBarFunctionGenerator.setOffset(masterJointMidRange);
+      fourBarFunctionGenerator.setOffset(actuatedJointMidRange);
 
       if (HAS_WRIST_JOINT)
       {
@@ -264,9 +264,9 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
       wrench.changeFrame(fourBarJoint.getFrameAfterJoint());
       wrench.setBodyFrame(fourBarJoint.getFrameAfterJoint());
       tau_check1.set(fourBarJoint.getUnitJointTwist().dot(wrench));
-      wrench.changeFrame(fourBarJoint.getMasterJoint().getFrameAfterJoint());
-      wrench.setBodyFrame(fourBarJoint.getMasterJoint().getFrameAfterJoint());
-      tau_check2.set(fourBarJoint.getMasterJoint().getUnitJointTwist().dot(wrench));
+      wrench.changeFrame(fourBarJoint.getActuatedJoint().getFrameAfterJoint());
+      wrench.setBodyFrame(fourBarJoint.getActuatedJoint().getFrameAfterJoint());
+      tau_check2.set(fourBarJoint.getActuatedJoint().getUnitJointTwist().dot(wrench));
 
       if (HAS_WRIST_JOINT)
       {
@@ -301,7 +301,7 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
          else if (oneDoFJoint == fourBarJoint)
          {
             fourBarJoint.setTau(jointDesiredOutput.getDesiredTorque());
-            jointMap.get(fourBarJoint.getMasterJoint()).setTau(fourBarJoint.getMasterJoint().getTau());
+            jointMap.get(fourBarJoint.getActuatedJoint()).setTau(fourBarJoint.getActuatedJoint().getTau());
          }
       }
    }

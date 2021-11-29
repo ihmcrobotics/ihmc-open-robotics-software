@@ -127,17 +127,17 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
                   localFourBarJoint.updateFrame();
                }
                DMatrixRMaj loopJacobian = localFourBarJoint.getFourBarFunction().getLoopJacobian();
-               double tau_master = loopJacobian.get(activeJointIndices[0]) * scsActiveJoints[0].getTau()
+               double tau_actuated = loopJacobian.get(activeJointIndices[0]) * scsActiveJoints[0].getTau()
                      + loopJacobian.get(activeJointIndices[1]) * scsActiveJoints[1].getTau();
 
-               int masterJointIndex = localFourBarJoint.getFourBarFunction().getMasterJointIndex();
+               int actuatedJointIndex = localFourBarJoint.getFourBarFunction().getActuatedJointIndex();
 
-               if (masterJointIndex == 0 || masterJointIndex == 3)
-                  tau_master /= (loopJacobian.get(0) + loopJacobian.get(3));
+               if (actuatedJointIndex == 0 || actuatedJointIndex == 3)
+                  tau_actuated /= (loopJacobian.get(0) + loopJacobian.get(3));
                else
-                  tau_master /= (loopJacobian.get(1) + loopJacobian.get(2));
+                  tau_actuated /= (loopJacobian.get(1) + loopJacobian.get(2));
 
-               return tau_master;
+               return tau_actuated;
             };
          }
          else

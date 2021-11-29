@@ -9,16 +9,16 @@ public class CrossFourBarJointDescription extends OneDoFJointDescription
 {
    private PinJointDescription[] fourBarJoints;
    private LoopClosurePinConstraintDescription fourBarClosure;
-   private int masterJointIndex;
+   private int actuatedJointIndex;
 
    public CrossFourBarJointDescription(String name)
    {
       super(name, new Vector3D(Double.NaN, Double.NaN, Double.NaN), new Vector3D(Double.NaN, Double.NaN, Double.NaN));
    }
 
-   public void setMasterJointIndex(int masterJointIndex)
+   public void setActuatedJointIndex(int actuatedJointIndex)
    {
-      this.masterJointIndex = masterJointIndex;
+      this.actuatedJointIndex = actuatedJointIndex;
    }
 
    public void setFourBarJoints(PinJointDescription[] fourBarJoints)
@@ -31,9 +31,9 @@ public class CrossFourBarJointDescription extends OneDoFJointDescription
       this.fourBarClosure = fourBarClosure;
    }
 
-   public int getMasterJointIndex()
+   public int getActuatedJointIndex()
    {
-      return masterJointIndex;
+      return actuatedJointIndex;
    }
 
    public PinJointDescription[] getFourBarJoints()
