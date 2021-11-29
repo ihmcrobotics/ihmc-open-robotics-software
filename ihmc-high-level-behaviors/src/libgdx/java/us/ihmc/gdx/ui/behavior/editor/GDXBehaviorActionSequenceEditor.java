@@ -91,7 +91,9 @@ public class GDXBehaviorActionSequenceEditor
       for (int i = 0; i < actionSequence.size(); i++)
       {
          GDXBehaviorAction action = actionSequence.get(i);
-         ImGui.text(i + ": " + action.getClass().getSimpleName());
+         ImGui.checkbox(labels.get("", "Selected", i), action.getSelected());
+         ImGui.sameLine();
+         ImGui.text(i + ": " + action.getNameForDisplay());
          ImGui.sameLine();
          if (i > 0)
          {
@@ -114,7 +116,7 @@ public class GDXBehaviorActionSequenceEditor
          if (ImGui.button(labels.get("X", i)))
          {
             GDXBehaviorAction removedAction = actionSequence.remove(i);
-            removedAction.destroy();
+//            removedAction.destroy();
          }
       }
 

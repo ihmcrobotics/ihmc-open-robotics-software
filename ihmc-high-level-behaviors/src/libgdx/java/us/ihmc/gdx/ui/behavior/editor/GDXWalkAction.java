@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -44,6 +45,7 @@ public class GDXWalkAction implements GDXBehaviorAction
    private FootstepPlanningModule footstepPlanner;
    private final GDXFootstepPlannerGoalGizmo footstepPlannerGoalGizmo = new GDXFootstepPlannerGoalGizmo();
    private FootstepPlannerParametersBasics footstepPlannerParameters;
+   private ImBoolean selected = new ImBoolean();
 
    public void create(FocusBasedGDXCamera camera3D, DRCRobotModel robotModel, FootstepPlanningModule footstepPlanner)
    {
@@ -64,14 +66,17 @@ public class GDXWalkAction implements GDXBehaviorAction
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      footstepPlannerGoalGizmo.process3DViewInput(input);
-      for (RobotSide side : RobotSide.values)
+      if (selected.get())
       {
-         FramePose3D goalFootPose = goalFeetPoses.get(side);
-         goalFootPose.setToZero(footstepPlannerGoalGizmo.getReferenceFrame());
-         goalFootPose.getPosition().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
-         goalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-         goalFeet.get(side).setPose(goalFootPose);
+         footstepPlannerGoalGizmo.process3DViewInput(input);
+         for (RobotSide side : RobotSide.values)
+         {
+            FramePose3D goalFootPose = goalFeetPoses.get(side);
+            goalFootPose.setToZero(footstepPlannerGoalGizmo.getReferenceFrame());
+            goalFootPose.getPosition().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
+            goalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            goalFeet.get(side).setPose(goalFootPose);
+         }
       }
    }
 
@@ -79,7 +84,8 @@ public class GDXWalkAction implements GDXBehaviorAction
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       footstepPlanGraphic.getRenderables(renderables, pool);
-      footstepPlannerGoalGizmo.getRenderables(renderables, pool);
+      if (selected.get())
+         footstepPlannerGoalGizmo.getRenderables(renderables, pool);
       for (RobotSide side : RobotSide.values)
          goalFeet.get(side).getRenderables(renderables, pool);
    }
@@ -164,5 +170,17 @@ public class GDXWalkAction implements GDXBehaviorAction
          footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
          helper.publishToController(footstepDataListMessage);
       }
+   }
+
+   @Override
+   public ImBoolean getSelected()
+   {
+      return selected;
+   }
+
+   @Override
+   public String getNameForDisplay()
+   {
+      return "Walk Goal";
    }
 }
