@@ -16,7 +16,7 @@ import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 
 public class GDXInteractableObject
 {
-   private static final boolean SHOW_DEBUG_FRAMES = true;
+   private static final boolean SHOW_DEBUG_FRAMES = false;
    private GDXRobotCollisionLink collisionLink;
    private ReferenceFrame graphicFrame;
    private ReferenceFrame collisionFrame;
