@@ -1,11 +1,15 @@
 package us.ihmc.robotics.referenceFrames;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 public class ReferenceFrameMissingTools
 {
+   public static ThreadLocal<MutableInt> INDEX = ThreadLocal.withInitial(MutableInt::new);
+
    /**
     * Creates a reference frame with the transform to it's parent maintained by the user.
     * <p>
@@ -39,5 +43,39 @@ public class ReferenceFrameMissingTools
             transformToParentToUpdate.set(transformToParent);
          }
       };
+   }
+
+   public static String getCallingClassName()
+   {
+      StackTraceElement callerStackElement = new Throwable().getStackTrace()[2];
+      return callerStackElement.getClassName();
+   }
+
+   public static ReferenceFrame constructFrameWithUnchangingTransformFromParent(ReferenceFrame parentFrame, RigidBodyTransform transformFromParent)
+   {
+      return ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent(getCallingClassName() + INDEX.get(),
+                                                                                 parentFrame,
+                                                                                 transformFromParent);
+   }
+
+   public static ReferenceFrame constructFrameWithUnchangingTransformToParent(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   {
+      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(getCallingClassName() + INDEX.get(),
+                                                                               parentFrame,
+                                                                               transformToParent);
+   }
+
+   public static ReferenceFrame constructFrameWithChangingTransformFromParent(ReferenceFrame parentFrame, RigidBodyTransform transformFromParent)
+   {
+      return ReferenceFrameTools.constructFrameWithChangingTransformFromParent(getCallingClassName() + INDEX.get(),
+                                                                               parentFrame,
+                                                                               transformFromParent);
+   }
+
+   public static ReferenceFrame constructFrameWithChangingTransformToParent(ReferenceFrame parentFrame, RigidBodyTransform transformToParent)
+   {
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent(getCallingClassName() + INDEX.get(),
+                                                                             parentFrame,
+                                                                             transformToParent);
    }
 }

@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -27,6 +28,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private RobotSide side;
    private ROS2ControllerHelper ros2ControllerHelper;
+   private ImBoolean selected = new ImBoolean();
 
    public void create(FocusBasedGDXCamera camera3D,
                       DRCRobotModel robotModel,
@@ -50,15 +52,19 @@ public class GDXHandPoseAction implements GDXBehaviorAction
    @Override
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      poseGizmo.process3DViewInput(input);
-      highlightModel.setPose(poseGizmo.getTransform(), handGraphicToControlTransform);
+      if (selected.get())
+      {
+         poseGizmo.process3DViewInput(input);
+         highlightModel.setPose(poseGizmo.getTransform(), handGraphicToControlTransform);
+      }
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       highlightModel.getRenderables(renderables, pool);
-      poseGizmo.getRenderables(renderables, pool);
+      if (selected.get())
+         poseGizmo.getRenderables(renderables, pool);
    }
 
    @Override
@@ -81,5 +87,17 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       trajectoryPoint.getLinearVelocity().set(EuclidCoreTools.zeroVector3D);
       trajectoryPoint.getAngularVelocity().set(EuclidCoreTools.zeroVector3D);
       ros2ControllerHelper.publishToController(handTrajectoryMessage);
+   }
+
+   @Override
+   public ImBoolean getSelected()
+   {
+      return selected;
+   }
+
+   @Override
+   public String getNameForDisplay()
+   {
+      return side.getPascalCaseName() + " Hand Pose";
    }
 }

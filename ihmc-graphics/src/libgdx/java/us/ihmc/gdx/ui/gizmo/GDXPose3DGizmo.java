@@ -18,6 +18,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -33,6 +34,7 @@ import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import static us.ihmc.gdx.ui.gizmo.GDXGizmoTools.AXIS_COLORS;
@@ -68,6 +70,8 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final Pose3D pose = new Pose3D();
    /** The main, source, true, base transform that this thing represents. */
    private final RigidBodyTransform transform = new RigidBodyTransform();
+   private final ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                                        transform);
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
@@ -247,6 +251,7 @@ public class GDXPose3DGizmo implements RenderableProvider
          GDXTools.toGDX(tempTransform, arrowModels[axis.ordinal()].getOrCreateModelInstance().transform);
          GDXTools.toGDX(tempTransform, torusModels[axis.ordinal()].getOrCreateModelInstance().transform);
       }
+      referenceFrame.update();
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
@@ -396,6 +401,11 @@ public class GDXPose3DGizmo implements RenderableProvider
    public RigidBodyTransform getTransform()
    {
       return transform;
+   }
+
+   public ReferenceFrame getReferenceFrame()
+   {
+      return referenceFrame;
    }
 
    public static Mesh angularHighlightMesh(double majorRadius, double minorRadius)
