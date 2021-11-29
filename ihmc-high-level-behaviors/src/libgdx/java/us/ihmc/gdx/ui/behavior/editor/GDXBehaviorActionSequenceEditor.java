@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -28,6 +29,7 @@ public class GDXBehaviorActionSequenceEditor
    private FootstepPlanningModule footstepPlanner;
    private ROS2SyncedRobotModel syncedRobot;
    private ROS2ControllerHelper ros2ControllerHelper;
+   private final MutablePair<Integer, Integer> reorderRequest = MutablePair.of(-1, 0);
 
    public void create(FocusBasedGDXCamera camera3D, DRCRobotModel robotModel, ROS2Node ros2Node, ROS2SyncedRobotModel syncedRobot)
    {
@@ -85,15 +87,42 @@ public class GDXBehaviorActionSequenceEditor
 
       ImGui.separator();
 
+      reorderRequest.setLeft(-1);
       for (int i = 0; i < actionSequence.size(); i++)
       {
-         ImGui.text("Action " + i);
+         GDXBehaviorAction action = actionSequence.get(i);
+         ImGui.text(i + ": " + action.getClass().getSimpleName());
          ImGui.sameLine();
+         if (i > 0)
+         {
+            if (ImGui.button(labels.get("^", i)))
+            {
+               reorderRequest.setLeft(i);
+               reorderRequest.setRight(0);
+            }
+            ImGui.sameLine();
+         }
+         if (i < actionSequence.size() - 1)
+         {
+            if (ImGui.button(labels.get("v", i)))
+            {
+               reorderRequest.setLeft(i);
+               reorderRequest.setRight(1);
+            }
+            ImGui.sameLine();
+         }
          if (ImGui.button(labels.get("X", i)))
          {
             GDXBehaviorAction removedAction = actionSequence.remove(i);
             removedAction.destroy();
          }
+      }
+
+      int indexToMove = reorderRequest.getLeft();
+      if (indexToMove > -1)
+      {
+         int destinationIndex = reorderRequest.getRight() == 0 ? indexToMove - 1 : indexToMove + 1;
+         actionSequence.add(destinationIndex, actionSequence.remove(indexToMove));
       }
 
       if (ImGui.button(labels.get("Add Walk")))
