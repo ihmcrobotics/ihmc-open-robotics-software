@@ -13,43 +13,34 @@ public class GDXSelectablePose3DGizmo
 {
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
    private boolean selected = false;
-   private boolean mouseIntersects;
 
    public void create(FocusBasedGDXCamera camera3D)
    {
       poseGizmo.create(camera3D);
    }
 
-   public void setMouseIntersects(boolean mouseIntersects)
+   public void process3DViewInput(ImGui3DViewInput input, boolean mouseIntersects)
    {
-      this.mouseIntersects = mouseIntersects;
-   }
-
-   public void process3DViewInput(ImGui3DViewInput input)
-   {
+      // Process input
       boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+      boolean isClickedOn = mouseIntersects && leftMouseReleasedWithoutDrag;
+      boolean somethingElseIsClickedOn = !mouseIntersects && leftMouseReleasedWithoutDrag;
+      boolean deselectionKeyPressed = ImGui.isKeyReleased(input.getDeleteKey()) || ImGui.isKeyReleased(input.getEscapeKey());
 
-      if (mouseIntersects)
+      // Determine selectedness
+      if (isClickedOn)
       {
-         if (leftMouseReleasedWithoutDrag)
-         {
-            selected = true;
-         }
+         selected = true;
       }
-
-      if (selected && !mouseIntersects && leftMouseReleasedWithoutDrag)
+      if (somethingElseIsClickedOn || deselectionKeyPressed)
       {
          selected = false;
       }
 
+      // Act
       if (selected)
       {
          poseGizmo.process3DViewInput(input);
-      }
-
-      if (selected && ImGui.isKeyReleased(input.getDeleteKey()) && ImGui.isKeyReleased(input.getEscapeKey()))
-      {
-         selected = false;
       }
    }
 
@@ -64,5 +55,10 @@ public class GDXSelectablePose3DGizmo
    public GDXPose3DGizmo getPoseGizmo()
    {
       return poseGizmo;
+   }
+
+   public boolean isSelected()
+   {
+      return selected;
    }
 }
