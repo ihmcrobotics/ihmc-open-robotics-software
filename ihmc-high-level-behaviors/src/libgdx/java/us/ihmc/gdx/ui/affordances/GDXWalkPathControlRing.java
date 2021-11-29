@@ -19,6 +19,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -30,7 +31,6 @@ import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -95,9 +95,9 @@ public class GDXWalkPathControlRing
       leftGoalFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.LEFT);
       rightGoalFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
 
-      goalFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("goalPose",
-                                                                                         ReferenceFrame.getWorldFrame(),
-                                                                                         footstepPlannerGoalGizmo.getTransform());
+      goalFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("goalPose",
+                                                                                  ReferenceFrame.getWorldFrame(),
+                                                                                  footstepPlannerGoalGizmo.getTransform());
 
       turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
 

@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.parameters;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 
 public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSensorInformation, HumanoidForceSensorInformation, IMUSensorInformation
@@ -19,9 +19,9 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
 
    public default ReferenceFrame getSteppingCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
-      return ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("steppingCamera",
-                                                                                    getSteppingCameraParentFrame(referenceFrames),
-                                                                                    getSteppingCameraTransform());
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("steppingCamera",
+                                                                             getSteppingCameraParentFrame(referenceFrames),
+                                                                             getSteppingCameraTransform());
    }
 
    public default RigidBodyTransform getObjectDetectionCameraTransform()
@@ -36,9 +36,9 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
 
    public default ReferenceFrame getObjectDetectionCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
-      return ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("objectDetectionCamera",
-                                                                                    getObjectDetectionCameraParentFrame(referenceFrames),
-                                                                                    getObjectDetectionCameraTransform());
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("objectDetectionCamera",
+                                                                             getObjectDetectionCameraParentFrame(referenceFrames),
+                                                                             getObjectDetectionCameraTransform());
    }
 
    public default RigidBodyTransform getHeadZED2CameraTransform()
@@ -53,9 +53,9 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
 
    public default ReferenceFrame getHeadZED2CameraFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
-      return ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("headZED2Camera",
-                                                                                    getHeadZED2CameraParentFrame(referenceFrames),
-                                                                                    getHeadZED2CameraTransform());
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("headZED2Camera",
+                                                                             getHeadZED2CameraParentFrame(referenceFrames),
+                                                                             getHeadZED2CameraTransform());
    }
 
    public default RigidBodyTransform getOusterLidarTransform()
@@ -70,9 +70,9 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
 
    public default ReferenceFrame getOusterLidarFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
-      return ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("ousterLidar",
-                                                                                    getOusterLidarParentFrame(referenceFrames),
-                                                                                    getOusterLidarTransform());
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("ousterLidar",
+                                                                             getOusterLidarParentFrame(referenceFrames),
+                                                                             getOusterLidarTransform());
    }
 
    public default String getHeadCameraName()

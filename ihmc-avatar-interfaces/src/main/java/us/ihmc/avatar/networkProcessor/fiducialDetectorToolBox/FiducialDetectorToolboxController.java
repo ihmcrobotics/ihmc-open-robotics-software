@@ -31,13 +31,13 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -89,9 +89,9 @@ public class FiducialDetectorToolboxController extends ToolboxController
                                               ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10),
                                               GrayF32.class);
 
-      cameraReferenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(prefix + "CameraReferenceFrame",
-                                                                                                    ReferenceFrame.getWorldFrame(),
-                                                                                                    cameraRigidTransform);
+      cameraReferenceFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(prefix + "CameraReferenceFrame",
+                                                                                             ReferenceFrame.getWorldFrame(),
+                                                                                             cameraRigidTransform);
 
       detectorReferenceFrame = new ReferenceFrame(prefix + "DetectorReferenceFrame", cameraReferenceFrame)
       {
