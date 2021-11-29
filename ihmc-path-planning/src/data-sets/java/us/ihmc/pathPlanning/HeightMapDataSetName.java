@@ -18,7 +18,9 @@ public enum HeightMapDataSetName
    Stairs_1(new Pose3D(1.6, -1.85, -0.915, 1.6, 0.0, 0.0), new Pose3D(3.5, 0.2, 0.15, 0.05, 0.0, 0.0)),
    Stairs_2(new Pose3D(0.0, 0.0, -0.16, 0.0, 0.0, 0.0), new Pose3D(3.6, 0.17, 0.86, 0.6, 0.0, 0.0)),
    Stepping_Stones_1(new Pose3D(0.5, 0.1, -0.12, 0.4, 0.0, 0.0), new Pose3D(3.8, -0.5, 0.03, -0.9, 0.0, 0.0)),
-   Stepping_Stones_2(new Pose3D(0.5, 0.1, -0.12, 0.4, 0.0, 0.0), new Pose3D(3.8, -0.5, 0.03, -0.9, 0.0, 0.0));
+   Stepping_Stones_2(new Pose3D(0.5, 0.1, -0.12, 0.4, 0.0, 0.0), new Pose3D(3.8, -0.5, 0.03, -0.9, 0.0, 0.0)),
+   Stepping_Stones_3(new Pose3D(0.56, 0.13, -0.12, 0.4, 0.0, 0.0), new Pose3D(3.8, -0.5, 0.03, -0.9, 0.0, 0.0)),
+   Stepping_Stones_4(new Pose3D(0.56, 0.13, -0.12, 0.4, 0.0, 0.0), new Pose3D(3.8, -0.5, 0.03, -0.9, 0.0, 0.0));
 
    private static final String DATA_SET_DIRECTORY_PATH = "us/ihmc/pathPlanning/heightMapDataSets";
 

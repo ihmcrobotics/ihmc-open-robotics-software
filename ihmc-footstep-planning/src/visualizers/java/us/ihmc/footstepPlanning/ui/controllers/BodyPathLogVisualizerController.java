@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
@@ -45,9 +46,7 @@ public class BodyPathLogVisualizerController
    private static final List<TableColumn> parentTableDefaultColumns = createDefaultColumns();
    private static final List<TableColumn> childTableDefaultColumns = createDefaultColumns();
 
-   private static final List<String> additionalDefaultColumnsIfPresent = Arrays.asList("containsCollision",
-                                                                                       "edgeCost",
-                                                                                       "deltaHeight");
+   private static final List<String> additionalDefaultColumnsIfPresent = Arrays.asList("containsCollision", "edgeCost", "deltaHeight", "rejectionReason", "snapHeight");
    private boolean additionalColumnsLoaded = false;
 
    @FXML
@@ -255,12 +254,11 @@ public class BodyPathLogVisualizerController
       childTable.getSortOrder().add(expandedColumn);
       childTable.sort();
 
-      // TODO visualize
-//      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathStartNode, ...);
-//      childTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());
-
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathStartNodeToVisualize, Pair.of(stepProperty.parentNode, stepProperty.height));
       childTable.getSelectionModel().select(0);
       childTable.getFocusModel().focus(0);
+
+      childTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());
    }
 
    private TableColumn<ChildStepProperty, ?> createTableColumn(VariableDescriptor variableDescriptor)
@@ -327,6 +325,18 @@ public class BodyPathLogVisualizerController
 
             return longColumn;
       }
+   }
+
+   private ChangeListener<ChildStepProperty> onStepSelected()
+   {
+      return (observer, oldValue, newValue) ->
+      {
+         if (newValue != null)
+         {
+            messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathCandidateNodeToVisualize, Pair.of(newValue.node, newValue.height));
+            selectedRow.set(newValue);
+         }
+      };
    }
 
    public void stepInto()
@@ -438,7 +448,7 @@ public class BodyPathLogVisualizerController
 
       public String getYIndex()
       {
-         return Integer.toString(node.getXIndex());
+         return Integer.toString(node.getYIndex());
       }
 
       public double getHeight()
