@@ -28,8 +28,8 @@ import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
 import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.factory.TerrainObjectDefinitionTools;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -96,7 +96,7 @@ public class SCS2AvatarSimulationFactory
    private final RequiredFactoryField<TerrainObjectDefinition> terrainObjectDefinition = new RequiredFactoryField<>("terrainObjectDefinition");
    private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
 
-   private final OptionalFactoryField<DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
+   private final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
    private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
    private final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
@@ -175,7 +175,7 @@ public class SCS2AvatarSimulationFactory
    {
       DRCRobotModel robotModel = this.robotModel.get();
 
-      robotDefinition = RobotDefinitionTools.toRobotDefinition(robotModel.getRobotDescription());
+      robotDefinition = robotModel.getRobotDefinition();
 
       if (!enableSimulatedRobotDamping.get())
       {
@@ -192,9 +192,7 @@ public class SCS2AvatarSimulationFactory
       if (collisionModel != null)
          RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                              robotDefinition);
-      HumanoidFloatingRootJointRobot tempRobotForInitialState = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotInitialSetup.get().initializeRobot(tempRobotForInitialState, robotModel.getJointMap());
-      RobotDefinitionTools.addInitialStateToRobotDefinition(tempRobotForInitialState, robotDefinition);
+      robotInitialSetup.get().initializeRobotDefinition(robotDefinition);
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(lastSimulatedJoint -> robotDefinition.addSubtreeJointsToIgnore(lastSimulatedJoint));
 
@@ -225,6 +223,10 @@ public class SCS2AvatarSimulationFactory
       simulationSession.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       simulationSession.addTerrainObject(terrainObjectDefinition.get());
       robot = simulationSession.addRobot(robotDefinition);
+      robot.getControllerManager()
+           .addController(new SCS2StateEstimatorDebugVariables(simulationSession.getInertialFrame(),
+                                                               gravity.get(),
+                                                               robot.getControllerManager().getControllerInput()));
 
       for (Robot secondaryRobot : secondaryRobots.get())
          simulationSession.addRobot(secondaryRobot);
@@ -464,7 +466,7 @@ public class SCS2AvatarSimulationFactory
           * robot-determined world coordinates..
           */
          HumanoidFloatingRootJointRobot tempRobot = robotModel.get().createHumanoidFloatingRootJointRobot(false);
-         robotInitialSetup.get().initializeRobot(tempRobot, robotModel.get().getJointMap());
+         robotInitialSetup.get().initializeRobot(tempRobot);
          try
          {
             tempRobot.update();
@@ -589,7 +591,7 @@ public class SCS2AvatarSimulationFactory
                                                                                         robotCollisionName));
    }
 
-   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   public void setRobotInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       this.robotInitialSetup.set(robotInitialSetup);
    }

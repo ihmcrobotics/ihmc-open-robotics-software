@@ -26,7 +26,7 @@ public class GDXSimulatedRobot
    {
       this.robotDefinition = robotDefinition;
       mirroredBoxRegistry = SharedMemoryTools.newRegistryFromNamespace(SimulationSession.ROOT_REGISTRY_NAME, robotDefinition.getName());
-      originalRigidBody = robotDefinition.newIntance(ReferenceFrameTools.constructARootFrame("dummy"));
+      originalRigidBody = robotDefinition.newInstance(ReferenceFrameTools.constructARootFrame("dummy"));
    }
 
    public void create(GDXYoManager yoManager)

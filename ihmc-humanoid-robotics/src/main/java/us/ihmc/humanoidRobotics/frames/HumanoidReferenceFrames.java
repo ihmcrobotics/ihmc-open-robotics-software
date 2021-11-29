@@ -6,6 +6,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -67,7 +68,27 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation)
    {
+      this(fullRobotModel, new CenterOfMassReferenceFrame("centerOfMass", worldFrame, fullRobotModel.getElevator()), sensorInformation);
+   }
+
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel,
+                                  CenterOfMassStateProvider centerOfMassStateProvider,
+                                  HumanoidRobotSensorInformation sensorInformation)
+   {
+      this(fullRobotModel, new ReferenceFrame("centerOfMassFrame", worldFrame)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.getTranslation().set(centerOfMassStateProvider.getCenterOfMassPosition());
+         }
+      }, sensorInformation);
+   }
+
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame, HumanoidRobotSensorInformation sensorInformation)
+   {
       this.fullRobotModel = fullRobotModel;
+      this.centerOfMassFrame = centerOfMassFrame;
 
       if (fullRobotModel.getPelvis() != null)
       {
@@ -97,16 +118,17 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          }
       }
 
-      if (!fullRobotModel.getLidarSensorNames().isEmpty()
-          && fullRobotModel.getLidarSensorNames().get(0) != null &&
-            !fullRobotModel.getLidarSensorNames().get(0).isEmpty())
+      if (!fullRobotModel.getLidarSensorNames().isEmpty() && fullRobotModel.getLidarSensorNames().get(0) != null
+            && !fullRobotModel.getLidarSensorNames().get(0).isEmpty())
       {
          String lidarSensorName = fullRobotModel.getLidarSensorNames().get(0);
          ReferenceFrame lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarSensorName);
          RigidBodyTransform lidarBaseToSensorTransform = fullRobotModel.getLidarBaseToSensorTransform(lidarSensorName);
          if (lidarBaseFrame != null && lidarBaseToSensorTransform != null)
          {
-            lidarSensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, lidarBaseToSensorTransform);
+            lidarSensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("lidarSensorFrame",
+                                                                                                 lidarBaseFrame,
+                                                                                                 lidarBaseToSensorTransform);
          }
          else
          {
@@ -178,13 +200,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       }
 
       midFeetZUpFrame = new MovingMidFrameZUpFrame("midFeetZUp", getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
-      midFootZUpGroundFrame = new MovingMidFootZUpGroundFrame("midFeetZUpAverageYaw", localSoleZUpFrames.get(RobotSide.LEFT),
+      midFootZUpGroundFrame = new MovingMidFootZUpGroundFrame("midFeetZUpAverageYaw",
+                                                              localSoleZUpFrames.get(RobotSide.LEFT),
                                                               localSoleZUpFrames.get(RobotSide.RIGHT));
 
       midFeetUnderPelvisWalkDirectionFrame = new MovingWalkingReferenceFrame("walkingFrame", pelvisFrame, midFootZUpGroundFrame);
-
-      RigidBodyBasics elevator = fullRobotModel.getElevator();
-      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
 
       // set default CommonHumanoidReferenceFrameIds for certain frames used commonly for control
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.MIDFEET_ZUP_FRAME, getMidFeetZUpFrame());

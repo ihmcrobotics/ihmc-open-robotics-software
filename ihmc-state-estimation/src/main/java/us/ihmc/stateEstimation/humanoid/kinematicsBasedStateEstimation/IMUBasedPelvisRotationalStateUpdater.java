@@ -176,7 +176,6 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    }
 
    private final Vector3D angularVelocityMeasurement = new Vector3D();
-   private final Vector3D angularVelocityMeasurementBias = new Vector3D();
 
    /** Angular velocity of the measurement link, with respect to world. */
    private final FrameVector3D angularVelocityMeasurementLinkRelativeToWorld = new FrameVector3D();
@@ -208,8 +207,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       angularVelocityMeasurement.set(imuProcessedOutput.getAngularVelocityMeasurement());
       if (imuBiasProvider != null)
       {
-         imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput, angularVelocityMeasurementBias);
-         angularVelocityMeasurement.sub(angularVelocityMeasurementBias);
+         angularVelocityMeasurement.sub(imuBiasProvider.getAngularVelocityBiasInIMUFrame(imuProcessedOutput));
       }
       angularVelocityMeasurementLinkRelativeToWorld.setIncludingFrame(measurementFrame, angularVelocityMeasurement);
 
