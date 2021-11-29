@@ -8,6 +8,7 @@ import javax.swing.JOptionPane;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
@@ -41,7 +42,7 @@ public class SpringFlamingoSimulation
       BALLISTIC_WALKING_CONTROLLER, FAST_WALKING_CONTROLLER, LEAP_OF_FAITH_CONTROLLER;
    }
 
-   //   private static FlamingoController controllerToUse = FlamingoController.FAST_WALKING_CONTROLLER;
+//      private static FlamingoController controllerToUse = FlamingoController.FAST_WALKING_CONTROLLER;
 //      private static FlamingoController controllerToUse = FlamingoController.BALLISTIC_WALKING_CONTROLLER;
    private static FlamingoController controllerToUse = FlamingoController.LEAP_OF_FAITH_CONTROLLER;
 
@@ -49,14 +50,16 @@ public class SpringFlamingoSimulation
    // Choose a Terrain here if the robot is doing the Leap of Faith controller. If not, it can only walk on flat.
    private enum TerrainIfLeapOfFaithController
    {
-      SLOPE, SLOPE_AND_STEPS, STEP_DOWNS_AND_FLATS;
+      FLAT, SLOPE, SLOPE_AND_STEPS, STEP_DOWNS_AND_FLATS;
    }
 
    private static TerrainIfLeapOfFaithController terrainIfLeapOfFaith = TerrainIfLeapOfFaithController.STEP_DOWNS_AND_FLATS;
 //   private static TerrainIfLeapOfFaithController terrainIfLeapOfFaith = TerrainIfLeapOfFaithController.SLOPE_AND_STEPS;
+//   private static TerrainIfLeapOfFaithController terrainIfLeapOfFaith = TerrainIfLeapOfFaithController.SLOPE;
+//   private static TerrainIfLeapOfFaithController terrainIfLeapOfFaith = TerrainIfLeapOfFaithController.FLAT;
    
    public static double DT = 0.0001;
-   public static int TICKS_PER_RECORD = 100;
+   public static int TICKS_PER_RECORD = 10;
    public static int TICKS_PER_CONTROL = 10;
 
    static
@@ -75,7 +78,7 @@ public class SpringFlamingoSimulation
             break;
          case LEAP_OF_FAITH_CONTROLLER:
             DT = 0.0001;
-            TICKS_PER_RECORD = 100;
+            TICKS_PER_RECORD = 10;
             TICKS_PER_CONTROL = 10;
             break;
       }
@@ -120,6 +123,8 @@ public class SpringFlamingoSimulation
                break;
             case STEP_DOWNS_AND_FLATS:
                profile3D = createStepDownsAndFlatsTerrain();
+               break;
+            case FLAT:
                break;
          }
 
@@ -183,7 +188,7 @@ public class SpringFlamingoSimulation
       }
       else
       {
-         int initialBufferSize = 4 * 8192;
+         int initialBufferSize = 2 * 8192;
          sim = new SimulationConstructionSet(springFlamingos, graphics3DAdapterToUse, new SimulationConstructionSetParameters(initialBufferSize));
       }
 
@@ -200,9 +205,9 @@ public class SpringFlamingoSimulation
       sim.setPlaybackDesiredFrameRate(0.033);
       sim.setGraphsUpdatedDuringPlayback(true);
 
-      sim.setSimulateDuration(3.0);
-//      sim.setSimulateDuration(20.0);
-      sim.setSimulateNoFasterThanRealTime(true);
+//      sim.setSimulateDuration(3.0);
+      sim.setSimulateDuration(12.5);
+      sim.setSimulateNoFasterThanRealTime(false);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();//TODO
       //      ICPVisualizer icpVisualizer = new ICPVisualizer(registry, yoGraphicsListRegistry);
@@ -461,16 +466,29 @@ public class SpringFlamingoSimulation
 
    private CombinedTerrainObject3D createStepDownsAndFlatsTerrain()
    {
-      double stepDownOneX = -2.35;
-      double stepDownOneBottomZ = -0.25;
-      double stepDownTwoX = -4.85;
-      double stepDownTwoBottomZ = -0.5;
-      double stepDownTwoXEnd = -9.0;
+//      double[] stepDownXs = new double[] {3.0, -2.40, -4.95, -9.0};
+//      double[] stepDownBottomZs = new double[] {0.0, -0.25, -0.5};
+//      double[] stepDownBottomZs = new double[] {0.0, -0.10, -0.2};
+      
+      double[] stepDownXs = new double[] {3.0, -0.75, -2, -3.1, -3.9, -4.6, -5.4, -10.0};
+      double[] stepDownBottomZs = new double[] {0.0, -0.05, -0.15, -0.30, -0.50, -0.75, -1.0};
+      
+      AppearanceDefinition[] appearance = new AppearanceDefinition[] 
+            {YoAppearance.Green(), YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Red(), YoAppearance.Green(), YoAppearance.Red()};
 
       CombinedTerrainObject3D terrainObject = new CombinedTerrainObject3D("Terrain");
-      terrainObject.addBox(3.0, -1.0, stepDownOneX, 1.0, -0.03, 0.0);
-      terrainObject.addBox(stepDownOneX, -1.0, stepDownTwoX, 1.0, stepDownOneBottomZ, stepDownOneBottomZ - 0.03, YoAppearance.Red());
-      terrainObject.addBox(stepDownTwoX, -1.0, stepDownTwoXEnd, 1.0, stepDownTwoBottomZ, stepDownTwoBottomZ - 0.03, YoAppearance.Green());
+      double yStart = -1.0;
+      double yEnd = 1.0;
+      
+      for (int i=0; i<stepDownXs.length - 1; i++)
+      {
+         double xStart = stepDownXs[i];
+         double stepDownX = stepDownXs[i+1];
+         double zHeight = stepDownBottomZs[i];
+         
+         terrainObject.addBox(xStart, yStart, stepDownX, yEnd, zHeight -0.03, zHeight, appearance[i]);
+         xStart = stepDownX;
+      }
 
       return terrainObject;
    }
