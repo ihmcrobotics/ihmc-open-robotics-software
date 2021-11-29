@@ -3,6 +3,7 @@ package us.ihmc.modelFileLoaders.SdfLoader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map.Entry;
@@ -62,6 +63,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
             }
          }
 
+         links.put(linkHolder.getName(), linkHolder);
          links.put(ModelFileLoaderConversionsHelper.sanitizeJointName(sdfLink.getName()), linkHolder);
       }
 
@@ -88,6 +90,7 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
                      this.descriptionMutator.mutateForceSensorForModel(this, sdfForceSensor);
                   }
                }
+               joints.put(jointHolder.getName(), jointHolder);
                joints.put(ModelFileLoaderConversionsHelper.sanitizeJointName(sdfJoint.getName()), jointHolder);
             }
             catch (IOException e)
@@ -121,14 +124,16 @@ public class GeneralizedSDFRobotModel implements GraphicsObjectsHolder
 
    private void findRootLinks(HashMap<String, SDFLinkHolder> links)
    {
+      HashSet<SDFLinkHolder> hashSet = new HashSet<>();
       for (Entry<String, SDFLinkHolder> linkEntry : links.entrySet())
       {
          SDFLinkHolder link = linkEntry.getValue();
          if (link.getJoint() == null)
          {
-            rootLinks.add(link);
+            hashSet.add(link);
          }
       }
+      rootLinks.addAll(hashSet);
    }
 
    public ArrayList<SDFLinkHolder> getRootLinks()
