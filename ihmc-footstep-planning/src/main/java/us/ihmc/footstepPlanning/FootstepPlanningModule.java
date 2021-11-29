@@ -240,6 +240,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       {
          bodyPathPlanner.setHeightMapData(heightMapData);
          List<Pose3DReadOnly> bodyPathWaypoints = bodyPathPlanner.planPath(startMidFootPose, goalMidFootPose);
+         setNominalOrientations(bodyPathWaypoints);
 
          bodyPathPlanHolder.setPoseWaypoints(bodyPathWaypoints);
          double pathLength = bodyPathPlanHolder.computePathLength(0.0);

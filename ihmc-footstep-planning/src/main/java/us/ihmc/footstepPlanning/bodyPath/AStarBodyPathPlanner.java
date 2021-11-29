@@ -105,6 +105,7 @@ public class AStarBodyPathPlanner
       }
 
       this.heightMapData = heightMapData;
+      costCalculator.setHeightMap(heightMapData);
    }
 
    public List<Pose3DReadOnly> planPath(Pose3DReadOnly startPose, Pose3DReadOnly goalPose)
@@ -161,7 +162,10 @@ public class AStarBodyPathPlanner
                continue;
             }
 
-            edgeCost.set(xyDistance(node, neighbor));
+            double distanceCost = xyDistance(node, neighbor);
+            double traversibilityCost = costCalculator.computeCost(node, neighbor);
+            edgeCost.set(distanceCost + traversibilityCost);
+
             graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
             stack.add(neighbor);
 
