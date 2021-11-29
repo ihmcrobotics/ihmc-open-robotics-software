@@ -4,10 +4,16 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class BodyPathCostCalculator
 {
@@ -16,6 +22,9 @@ public class BodyPathCostCalculator
    private final Pose2D stepPose = new Pose2D();
 
    private final HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
+   private final Map<BodyPathLatticePoint, Double> gridHeightMap;
+   private final YoDouble xBody, yBody, yawBody;
+
    private final ConvexPolygon2D footPolygon;
    private HeightMapData heightMapData;
 
@@ -26,10 +35,18 @@ public class BodyPathCostCalculator
    private final TDoubleArrayList rmsCosts = new TDoubleArrayList();
    private final TDoubleArrayList traversibilityCosts = new TDoubleArrayList();
 
-   public BodyPathCostCalculator(FootstepPlannerParametersReadOnly parameters, ConvexPolygon2D footPolygon)
+   public BodyPathCostCalculator(FootstepPlannerParametersReadOnly parameters,
+                                 ConvexPolygon2D footPolygon,
+                                 Map<BodyPathLatticePoint, Double> gridHeightMap,
+                                 YoRegistry registry)
    {
       this.parameters = parameters;
       this.footPolygon = footPolygon;
+      this.gridHeightMap = gridHeightMap;
+
+      xBody = new YoDouble("xBody", registry);
+      yBody = new YoDouble("yBody", registry);
+      yawBody = new YoDouble("yawBody", registry);
 
       xOffsets.add(0.0);
       xOffsets.add(0.05);
@@ -51,16 +68,21 @@ public class BodyPathCostCalculator
 
    public double computeCost(BodyPathLatticePoint node, BodyPathLatticePoint parentNode)
    {
-      double yaw = Math.atan2(node.getY() - parentNode.getYIndex(), node.getX() - parentNode.getX());
+      double yaw = Math.atan2(node.getY() - parentNode.getY(), node.getX() - parentNode.getX());
       bodyPose.set(node.getX(), node.getY(), yaw);
 
-      double leftStepCost = computeTraversibilityCost(RobotSide.LEFT);
-      double rightStepCost = computeTraversibilityCost(RobotSide.RIGHT);
+      xBody.set(bodyPose.getX());
+      yBody.set(bodyPose.getY());
+      yawBody.set(bodyPose.getYaw());
 
-      return 0.5 * (leftStepCost + rightStepCost);
+      double parentHeight = gridHeightMap.get(parentNode);
+      double leftStepCost = computeTraversibilityCost(RobotSide.LEFT, parentHeight);
+      double rightStepCost = computeTraversibilityCost(RobotSide.RIGHT, parentHeight);
+
+      return Math.min(leftStepCost, rightStepCost);
    }
 
-   private double computeTraversibilityCost(RobotSide side)
+   private double computeTraversibilityCost(RobotSide side, double parentHeight)
    {
       rmsCosts.clear();
 
@@ -75,14 +97,29 @@ public class BodyPathCostCalculator
                stepPose.appendTranslation(xOffsets.get(xi), yOffsets.get(yi));
                stepPose.appendRotation(yawOffsets.get(ti));
 
-               snapper.snapPolygonToHeightMap(footPolygon, heightMapData, parameters.getHeightMapSnapThreshold());
-               rmsCosts.add(snapper.getRMSError());
+               RigidBodyTransform transform = new RigidBodyTransform();
+               stepPose.get(transform);
+
+               ConvexPolygon2D footPolygon = new ConvexPolygon2D(this.footPolygon);
+               footPolygon.applyTransform(transform);
+
+               RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon,
+                                                                                 heightMapData,
+                                                                                 parameters.getHeightMapSnapThreshold(),
+                                                                                 parentHeight - AStarBodyPathPlanner.maxStepUpDown);
+               if (snapTransform == null)
+               {
+                  rmsCosts.add(Double.POSITIVE_INFINITY);
+               }
+               else
+               {
+                  rmsCosts.add(snapper.getRMSError());
+               }
             }
          }
       }
 
       rmsCosts.sort();
-
       traversibilityCosts.clear();
 
       int samples = 5;

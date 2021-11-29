@@ -98,7 +98,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
    {
       try
       {
-         handleInteral();
+         handleInternal();
       }
       catch (Exception e)
       {
@@ -107,7 +107,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       }
    }
 
-   private void handleInteral()
+   private void handleInternal()
    {
       Pair<DiscreteFootstep, FootstepSnapData> startOfSwingStepData = this.startOfSwingStepToVisualize.getAndSet(null);
       if (startOfSwingStepData != null)

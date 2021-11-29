@@ -84,6 +84,7 @@ public class FootstepPlannerUI
    private final JavaFXRobotVisualizer robotVisualizer;
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
+   private final BodyPathLogRenderer bodyPathLogRenderer;
    private final ManualFootstepAdjustmentListener manualFootstepAdjustmentListener;
    private final RobotIKVisualizer robotIKVisualizer;
    private final HeightMapVisualizer heightMapVisualizer = new HeightMapVisualizer();
@@ -247,6 +248,7 @@ public class FootstepPlannerUI
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
+      this.bodyPathLogRenderer = new BodyPathLogRenderer(messager);
       new UIFootstepPlanManager(messager);
       this.manualFootstepAdjustmentListener = new ManualFootstepAdjustmentListener(messager, view3dFactory.getSubScene());
       this.robotOperationTabController.setAuxiliaryRobotData(auxiliaryRobotData);
@@ -263,6 +265,7 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(visibilityGraphsRenderer.getRoot());
       view3dFactory.addNodeToView(footstepPlannerLogRenderer.getRoot());
       view3dFactory.addNodeToView(heightMapVisualizer.getRoot());
+      view3dFactory.addNodeToView(bodyPathLogRenderer.getRoot());
 
       if (fullHumanoidRobotModelFactory == null)
       {
@@ -330,6 +333,7 @@ public class FootstepPlannerUI
       bodyPathMeshViewer.start();
       visibilityGraphsRenderer.start();
       footstepPlannerLogRenderer.start();
+      bodyPathLogRenderer.start();
       manualFootstepAdjustmentListener.start();
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
@@ -337,6 +341,7 @@ public class FootstepPlannerUI
 
       messager.registerTopicListener(HeightMapData, data -> planarRegionViewer.clear());
       messager.registerTopicListener(PlanarRegionData, data -> heightMapVisualizer.clear());
+      messager.registerTopicListener(ShowHeightMap, show -> heightMapVisualizer.getRoot().setVisible(show));
 
       if (auxiliaryRobotData != null)
       {

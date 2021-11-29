@@ -42,9 +42,10 @@ public class BodyPathLatticePoint
    private static int computeHashCode(BodyPathLatticePoint cell)
    {
       int result = 1;
-      int prime = 31;
-      result += prime * cell.xIndex;
-      result += prime * cell.yIndex;
+      int primeX = 13;
+      int primeY = 31;
+      result += primeX * cell.xIndex;
+      result += primeY * cell.yIndex;
       return result;
    }
 

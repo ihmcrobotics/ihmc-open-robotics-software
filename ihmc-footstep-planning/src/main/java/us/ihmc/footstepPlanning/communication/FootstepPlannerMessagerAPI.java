@@ -114,6 +114,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowFootstepPlan = topic("ShowFootstepPlan");
    public static final Topic<Boolean> ShowPostProcessingInfo = topic("ShowPostProcessingInfo");
    public static final Topic<Boolean> ShowLogGraphics = topic("ShowLogGraphics");
+   public static final Topic<Boolean> ShowBodyPathLogGraphics = topic("ShowBodyPathLogGraphics");
    public static final Topic<Boolean> RenderShiftedWaypoints = topic("RenderShiftedWaypoints");
 
    // Goal editing
@@ -202,6 +203,9 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowLoggedIdealStep = topic("ShowLoggedIdealStep");
    public static final Topic<Boolean> ShowBodyBox = topic("ShowBodyBox");
    public static final Topic<Boolean> ShowHeightMap = topic("ShowHeightMap");
+
+   public static final Topic<Pair<BodyPathLatticePoint, Double>> BodyPathStartNodeToVisualize = topic("BodyPathStartNodeToVisualize");
+   public static final Topic<Pair<BodyPathLatticePoint, Double>> BodyPathCandidateNodeToVisualize = topic("BodyPathCandidateNodeToVisualize");
 
    // Test dashboard, only displayed if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");
