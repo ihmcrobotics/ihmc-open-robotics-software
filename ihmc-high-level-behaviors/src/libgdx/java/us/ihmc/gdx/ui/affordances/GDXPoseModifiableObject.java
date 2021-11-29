@@ -10,12 +10,8 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class GDXPoseModifiableObject
 {
-   private final static AtomicInteger INDEX = new AtomicInteger();
-
    private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo();
    private boolean isSelected = false;
    private boolean showCollisionMesh = false;
