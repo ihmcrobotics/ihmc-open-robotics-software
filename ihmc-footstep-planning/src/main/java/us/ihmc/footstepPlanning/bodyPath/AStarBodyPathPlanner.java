@@ -3,11 +3,9 @@ package us.ihmc.footstepPlanning.bodyPath;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
@@ -17,7 +15,6 @@ import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -28,6 +25,7 @@ import java.util.*;
 
 public class AStarBodyPathPlanner
 {
+   private static final double traversibilityCostScale = 0.5;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final AStarBodyPathEdgeData edgeData;
@@ -41,7 +39,7 @@ public class AStarBodyPathPlanner
    private final YoDouble deltaHeight = new YoDouble("deltaHeight", registry);
    private final YoDouble snapHeight = new YoDouble("snapHeight", registry);
 
-   private final BodyPathCostCalculator costCalculator;
+   private final BodyPathTraversibilityCalculator costCalculator;
 
    private final PriorityQueue<BodyPathLatticePoint> stack;
    private BodyPathLatticePoint startNode, goalNode;
@@ -66,7 +64,7 @@ public class AStarBodyPathPlanner
    public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, ConvexPolygon2D footPolygon)
    {
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
-      costCalculator = new BodyPathCostCalculator(parameters, footPolygon, gridHeightMap, registry);
+      costCalculator = new BodyPathTraversibilityCalculator(parameters, footPolygon, gridHeightMap, registry);
 
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
       this.edgeData = new AStarBodyPathEdgeData(allVariables.size());
@@ -193,7 +191,7 @@ public class AStarBodyPathPlanner
             }
 
             double distanceCost = xyDistance(node, neighbor);
-            double traversibilityCost = costCalculator.computeCost(neighbor, node);
+            double traversibilityCost = traversibilityCostScale * costCalculator.computeTraversibilityIndicator(neighbor, node);
             edgeCost.set(distanceCost + traversibilityCost);
             if (!Double.isFinite(edgeCost.getDoubleValue()) || Double.isNaN(edgeCost.getDoubleValue()))
             {
