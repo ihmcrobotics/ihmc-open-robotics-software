@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.interactable.GDXScaledModelInstance;
 
 /**
  * This class creates a model that's slightly larger and half transparent
@@ -18,13 +19,15 @@ public class GDXInteractableHighlightModel implements RenderableProvider
 {
    private final ModelInstance modelInstance;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final float scaleFactor = 1.01f;
+   private final GDXScaledModelInstance scaledModelInstance;
 
    public GDXInteractableHighlightModel(String modelFileName)
    {
       Model model = GDXModelLoader.loadG3DModel(modelFileName);
       modelInstance = new ModelInstance(model);
-      modelInstance.transform.scale(scaleFactor, scaleFactor, scaleFactor);
+      scaledModelInstance = new GDXScaledModelInstance(modelInstance);
+      double scaleFactor = 1.01;
+      scaledModelInstance.scale(scaleFactor);
       setTransparency(0.5);
    }
 
@@ -37,8 +40,7 @@ public class GDXInteractableHighlightModel implements RenderableProvider
 
    public void setPose(RigidBodyTransform transformToWorld)
    {
-      GDXTools.toGDX(transformToWorld, modelInstance.transform);
-      modelInstance.transform.scale(scaleFactor, scaleFactor, scaleFactor);
+      GDXTools.toGDX(transformToWorld, scaledModelInstance.getPoseTransform());
    }
 
    public void setTransparency(double transparency)
