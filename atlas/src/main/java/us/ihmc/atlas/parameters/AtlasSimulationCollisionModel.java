@@ -182,9 +182,9 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
             MovingReferenceFrame wristFrame = lastWristJoint.getFrameAfterJoint();
             RigidBodyBasics hand = lastWristJoint.getSuccessor();
 
-            FrameBox3D footFrontShape = new FrameBox3D(wristFrame, 0.125, 0.1, 0.125);
-            footFrontShape.getPosition().set(0.0, robotSide.negateIfRightSide(0.17), 0.0);
-            collidables.add(new Collidable(hand, collisionMask, collisionGroup, footFrontShape));
+            FrameBox3D handShape = new FrameBox3D(wristFrame, 0.125, 0.1, 0.125);
+            handShape.getPosition().set(0.0, robotSide.negateIfRightSide(0.17), 0.0);
+            collidables.add(new Collidable(hand, collisionMask, collisionGroup, handShape));
          }
       }
 

@@ -3,13 +3,14 @@ package us.ihmc.valkyrie;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
+import java.util.function.Consumer;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
-import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityIOHelper;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
@@ -20,16 +21,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
-import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.modelFileLoaders.SdfLoader.JaxbSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.RobotDescriptionFromSDFLoader;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.DefaultLogModelProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -37,14 +32,16 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphPa
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModelFromDescription;
+import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.sensors.ContactSensorType;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
@@ -82,14 +79,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private double modelSizeScale = 1.0;
    private double modelMassScale = 1.0;
-   private double transparency = Double.NaN;
-   private boolean useShapeCollision = false;
+   private MaterialDefinition robotMaterial = null;
    private boolean useOBJGraphics = true;
    private String customModel = null;
    private FootContactPoints<RobotSide> simulationContactPoints = null;
-   private GeneralizedSDFRobotModel generalizedRobotModel;
-   private RobotDescription robotDescription;
-   private SDFDescriptionMutator sdfDescriptionMutator;
+   private RobotDefinition robotDefinition;
+   private Consumer<RobotDefinition> robotDefinitionMutator;
 
    private ValkyriePhysicalProperties robotPhysicalProperties;
    private ValkyrieJointMap jointMap;
@@ -103,8 +98,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
-   private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
-   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
+   private RobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup;
    private StepReachabilityData stepReachabilityData;
 
    private SimulationLowLevelControllerFactory simulationLowLevelControllerFactory;
@@ -160,7 +154,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Sets the period of a controller tick in second.
-    * 
+    *
     * @param controllerDT the period of the controller thread in second.
     */
    public void setControllerDT(double controllerDT)
@@ -170,7 +164,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Sets the period of a estimator tick in second.
-    * 
+    *
     * @param estimatorDT the period of the estimator thread in second.
     */
    public void setEstimatorDT(double estimatorDT)
@@ -180,7 +174,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    /**
     * Sets the period of a simulation tick in second.
-    * 
+    *
     * @param simulateDT the period of the simulation thread in second.
     */
    public void setSimulateDT(double simulateDT)
@@ -191,13 +185,33 @@ public class ValkyrieRobotModel implements DRCRobotModel
    /**
     * Overrides the transparency of the robot visuals.
     *
-    * @param transparency the new transparency, default value {@link Double#NaN}.
+    * @param transparency the new transparency.
     */
    public void setTransparency(double transparency)
    {
-      if (robotDescription != null)
-         throw new IllegalArgumentException("Cannot set transparency once robotDescription has been created.");
-      this.transparency = transparency;
+      setDiffuseColor(ColorDefinitions.LightGreen().derive(0, 1.0, 1.0, 1.0 - transparency));
+   }
+
+   /**
+    * Overrides the robot visuals with a material that has the given diffuse color.
+    *
+    * @param diffuseColor the new diffuse color for the robot's meshes.
+    */
+   public void setDiffuseColor(ColorDefinition diffuseColor)
+   {
+      setMaterial(new MaterialDefinition(diffuseColor));
+   }
+
+   /**
+    * Overrides the robot visuals with the given material.
+    *
+    * @param robotMaterial the new material for the robot's meshes, default value {@link null}.
+    */
+   public void setMaterial(MaterialDefinition robotMaterial)
+   {
+      if (robotDefinition != null)
+         throw new IllegalArgumentException("Cannot set robotMaterial once robotDefinition has been created.");
+      this.robotMaterial = robotMaterial;
    }
 
    /**
@@ -208,24 +222,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
     */
    public void setUseOBJGraphics(boolean useOBJGraphics)
    {
-      if (generalizedRobotModel != null)
-         throw new IllegalArgumentException("Cannot change to use OBJ graphics once generalizedRobotModel has been created.");
+      if (robotDefinition != null)
+         throw new IllegalArgumentException("Cannot change to use OBJ graphics once robotDefinition has been created.");
       this.useOBJGraphics = useOBJGraphics;
-   }
-
-   /**
-    * Sets whether the simulation contact engine should use point-to-shape or shape-to-shape model.
-    *
-    * @param useShapeCollision switch to use shape-to-shape when {@code true}, use point-to-shape
-    *                          otherwise. Default value is {@code false}.
-    */
-   public void setUseShapeCollision(boolean useShapeCollision)
-   {
-      if (robotModelShapeCollisionSettings != null)
-         throw new IllegalArgumentException("Cannot change to use shape collision once robotModelShapeCollisionSettings has been created.");
-      if (robotDescription != null)
-         throw new IllegalArgumentException("Cannot change to use shape collision once robotDescription has been created.");
-      this.useShapeCollision = useShapeCollision;
    }
 
    /**
@@ -247,7 +246,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
     */
    public void setCustomModel(String customModel)
    {
-      if (generalizedRobotModel != null)
+      if (robotDefinition != null)
          throw new IllegalArgumentException("Cannot set customModel once generalizedRobotModel has been created.");
       this.customModel = customModel;
    }
@@ -276,87 +275,45 @@ public class ValkyrieRobotModel implements DRCRobotModel
       this.modelSizeScale = modelSizeScale;
    }
 
-   public void setSDFDescriptionMutator(SDFDescriptionMutator sdfDescriptionMutator)
+   public void setRobotDefinitionMutator(Consumer<RobotDefinition> robotDefinitionMutator)
    {
-      if (generalizedRobotModel != null)
-         throw new IllegalArgumentException("Cannot set customModel once generalizedRobotModel has been created.");
-      this.sdfDescriptionMutator = sdfDescriptionMutator;
+      if (robotDefinition != null)
+         throw new IllegalArgumentException("Cannot set customModel once robotDefinition has been created.");
+      this.robotDefinitionMutator = robotDefinitionMutator;
    }
 
-   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup)
+   public void setRobotInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> valkyrieInitialSetup)
    {
       if (this.valkyrieInitialSetup != null)
          throw new IllegalArgumentException("Cannot set valkyrieInitialSetup once it has been created.");
       this.valkyrieInitialSetup = valkyrieInitialSetup;
    }
 
-   public SDFDescriptionMutator getSDFDescriptionMutator()
+   public Consumer<RobotDefinition> getRobotDefinitionMutator()
    {
-      if (sdfDescriptionMutator == null)
-         sdfDescriptionMutator = new ValkyrieSDFDescriptionMutator(getJointMap(), useOBJGraphics);
-      return sdfDescriptionMutator;
-   }
-
-   public GeneralizedSDFRobotModel getGeneralizedRobotModel()
-   {
-      if (generalizedRobotModel == null)
-      {
-         JaxbSDFLoader loader = DRCRobotSDFLoader.loadDRCRobot(getResourceDirectories(), getSDFModelInputStream(), getSDFDescriptionMutator());
-
-         for (String forceSensorName : ValkyrieSensorInformation.forceSensorNames)
-         {
-            RigidBodyTransform transform = new RigidBodyTransform(ValkyrieSensorInformation.getForceSensorTransform(forceSensorName));
-            loader.addForceSensor(getJointMap(), forceSensorName, forceSensorName, transform);
-         }
-
-         for (RobotSide side : RobotSide.values)
-         {
-            LinkedHashMap<String, LinkedHashMap<String, ContactSensorType>> contactsensors = ValkyrieSensorInformation.contactSensors.get(side);
-
-            for (String parentJointName : contactsensors.keySet())
-            {
-               for (String sensorName : contactsensors.get(parentJointName).keySet())
-               {
-                  loader.addContactSensor(getJointMap(), sensorName, parentJointName, contactsensors.get(parentJointName).get(sensorName));
-               }
-            }
-         }
-
-         generalizedRobotModel = loader.getGeneralizedSDFRobotModel(getJointMap().getModelName());
-      }
-
-      return generalizedRobotModel;
+      if (robotDefinitionMutator == null)
+         robotDefinitionMutator = new ValkyrieRobotDefinitionMutator(getJointMap(), useOBJGraphics);
+      return robotDefinitionMutator;
    }
 
    @Override
-   public RobotDescription getRobotDescription()
+   public RobotDefinition getRobotDefinition()
    {
-      if (robotDescription == null)
+      if (robotDefinition == null)
       {
-         boolean useCollisionMeshes = false;
-
-         GeneralizedSDFRobotModel generalizedSDFRobotModel = getGeneralizedRobotModel();
-         RobotDescriptionFromSDFLoader descriptionLoader = new RobotDescriptionFromSDFLoader();
-
-         if (useShapeCollision)
-         {
-            robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel, getJointMap(), null, false, transparency);
-            ValkyrieCollisionMeshDefinitionDataHolder collisionMeshDefinitionDataHolder = new ValkyrieCollisionMeshDefinitionDataHolder(getJointMap(),
-                                                                                                                                        getRobotPhysicalProperties());
-            collisionMeshDefinitionDataHolder.setVisible(false);
-
-            robotDescription.addCollisionMeshDefinitionData(collisionMeshDefinitionDataHolder);
-         }
-         else
-         {
-            robotDescription = descriptionLoader.loadRobotDescriptionFromSDF(generalizedSDFRobotModel,
-                                                                             getJointMap(),
-                                                                             getContactPointParameters(),
-                                                                             useCollisionMeshes,
-                                                                             transparency);
-         }
+         robotDefinition = RobotDefinitionTools.loadSDFModel(getSDFModelInputStream(),
+                                                             Arrays.asList(getResourceDirectories()),
+                                                             getClass().getClassLoader(),
+                                                             getJointMap().getModelName(),
+                                                             getContactPointParameters(),
+                                                             getJointMap(),
+                                                             true);
+         if (robotMaterial != null)
+            RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
+         getRobotDefinitionMutator().accept(robotDefinition);
       }
-      return robotDescription;
+
+      return robotDefinition;
    }
 
    private String[] getResourceDirectories()
@@ -402,12 +359,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw)
+   public RobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup()
    {
       if (valkyrieInitialSetup == null)
-         valkyrieInitialSetup = new ValkyrieInitialSetup();
-      valkyrieInitialSetup.setInitialGroundHeight(groundHeight);
-      valkyrieInitialSetup.setInitialYaw(initialYaw);
+         valkyrieInitialSetup = new ValkyrieInitialSetup(getRobotDefinition(), getJointMap());
       return valkyrieInitialSetup;
    }
 
@@ -420,7 +375,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public FullHumanoidRobotModel createFullRobotModel()
    {
-      return new FullHumanoidRobotModelFromDescription(getRobotDescription(), getJointMap(), getSensorInformation().getSensorFramesToTrack());
+      return new FullHumanoidRobotModelWrapper(getRobotDefinition(), getJointMap());
    }
 
    @Override
@@ -428,24 +383,24 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       boolean enableTorqueVelocityLimits = false;
 
-      HumanoidFloatingRootJointRobot sdfRobot = new HumanoidFloatingRootJointRobot(getRobotDescription(),
-                                                                                   getJointMap(),
-                                                                                   enableJointDamping,
-                                                                                   enableTorqueVelocityLimits);
+      HumanoidFloatingRootJointRobot robot = new HumanoidFloatingRootJointRobot(getRobotDefinition(),
+                                                                                getJointMap(),
+                                                                                enableJointDamping,
+                                                                                enableTorqueVelocityLimits);
 
       if (PRINT_MODEL)
       {
          System.out.println("\nValkyrieRobotModel Link Masses:");
 
          StringBuffer stringBuffer = new StringBuffer();
-         sdfRobot.printRobotJointsAndMasses(stringBuffer);
+         robot.printRobotJointsAndMasses(stringBuffer);
          System.out.println(stringBuffer);
          System.out.println();
 
-         System.out.println("ValkyrieRobotModel: \n" + sdfRobot);
+         System.out.println("ValkyrieRobotModel: \n" + robot);
       }
 
-      return sdfRobot;
+      return robot;
    }
 
    @Override
@@ -532,14 +487,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public CollisionBoxProvider getCollisionBoxProvider()
    {
       return new ValkyrieCollisionBoxProvider(createFullRobotModel());
-   }
-
-   @Override
-   public DRCRobotModelShapeCollisionSettings getShapeCollisionSettings()
-   {
-      if (robotModelShapeCollisionSettings == null)
-         robotModelShapeCollisionSettings = new ValkyrieRobotModelShapeCollisionSettings(useShapeCollision);
-      return robotModelShapeCollisionSettings;
    }
 
    @Override

@@ -11,7 +11,7 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public interface FullQuadrupedRobotModel extends FullLeggedRobotModel<RobotQuadrant>
 {
-   /** Use {@link #getJointLimitData(OneDoFJointBasics joint)}*/
+   /** Use {@link #getJointLimitData(OneDoFJointBasics joint)} */
    @Deprecated
    JointLimit getJointLimit(QuadrupedJointName jointName);
 
@@ -22,11 +22,12 @@ public interface FullQuadrupedRobotModel extends FullLeggedRobotModel<RobotQuadr
    List<OneDoFJointBasics> getLegJointsList(RobotQuadrant robotQuadrant);
 
    /**
-    * Returns the {@link RigidBodyBasics} describing the body of this robot.
-    * In the current framework (on the day: 3/1/2014), the body is the the first successor of the root joint.
+    * Returns the {@link RigidBodyBasics} describing the body of this robot. In the current framework
+    * (on the day: 3/1/2014), the body is the the first successor of the root joint.
     */
    RigidBodyBasics getBody();
 
+   @Override
    default RobotQuadrant[] getRobotSegments()
    {
       return RobotQuadrant.values;

@@ -14,6 +14,11 @@ import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.scs2.definition.robot.JointDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 import java.awt.*;
 import java.util.List;
@@ -53,58 +58,49 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
    {
       super.create();
       cameraForTracking = cameraForTrackingSupplier.get();
-      RobotDescription robotDescription = robotModel.getRobotDescription();
-      overrideModelColors(robotDescription);
-      loadRobotModelAndGraphics(robotDescription, syncedRobot.getFullRobotModel().getElevator(), robotModel);
+      RobotDefinition robotDefinition = robotModel.getRobotDefinition();
+      overrideModelColors(robotDefinition);
+      loadRobotModelAndGraphics(robotDefinition, syncedRobot.getFullRobotModel().getElevator(), robotModel);
    }
 
-   private void overrideModelColors(RobotDescription robotDescription)
+   private void overrideModelColors(RobotDefinition robotDefinition)
    {
-      setModelsToBlack(robotDescription, "l_arm_wry2");
-      setModelsToBlack(robotDescription, "l_palm_finger_1_joint");
-      setModelsToBlack(robotDescription, "l_finger_1_joint_1");
-      setModelsToBlack(robotDescription, "l_finger_1_joint_2");
-      setModelsToBlack(robotDescription, "l_finger_1_joint_3");
-      setModelsToBlack(robotDescription, "l_palm_finger_2_joint");
-      setModelsToBlack(robotDescription, "l_finger_2_joint_1");
-      setModelsToBlack(robotDescription, "l_finger_2_joint_2");
-      setModelsToBlack(robotDescription, "l_finger_2_joint_3");
-      setModelsToBlack(robotDescription, "l_palm_finger_middle_joint");
-      setModelsToBlack(robotDescription, "l_finger_middle_joint_1");
-      setModelsToBlack(robotDescription, "l_finger_middle_joint_2");
-      setModelsToBlack(robotDescription, "l_finger_middle_joint_3");
-      setModelsToBlack(robotDescription, "r_arm_wry2");
-      setModelsToBlack(robotDescription, "r_palm_finger_1_joint");
-      setModelsToBlack(robotDescription, "r_finger_1_joint_1");
-      setModelsToBlack(robotDescription, "r_finger_1_joint_2");
-      setModelsToBlack(robotDescription, "r_finger_1_joint_3");
-      setModelsToBlack(robotDescription, "r_palm_finger_2_joint");
-      setModelsToBlack(robotDescription, "r_finger_2_joint_1");
-      setModelsToBlack(robotDescription, "r_finger_2_joint_2");
-      setModelsToBlack(robotDescription, "r_finger_2_joint_3");
-      setModelsToBlack(robotDescription, "r_palm_finger_middle_joint");
-      setModelsToBlack(robotDescription, "r_finger_middle_joint_1");
-      setModelsToBlack(robotDescription, "r_finger_middle_joint_2");
-      setModelsToBlack(robotDescription, "r_finger_middle_joint_3");
+      setModelsToBlack(robotDefinition, "l_arm_wry2");
+      setModelsToBlack(robotDefinition, "l_palm_finger_1_joint");
+      setModelsToBlack(robotDefinition, "l_finger_1_joint_1");
+      setModelsToBlack(robotDefinition, "l_finger_1_joint_2");
+      setModelsToBlack(robotDefinition, "l_finger_1_joint_3");
+      setModelsToBlack(robotDefinition, "l_palm_finger_2_joint");
+      setModelsToBlack(robotDefinition, "l_finger_2_joint_1");
+      setModelsToBlack(robotDefinition, "l_finger_2_joint_2");
+      setModelsToBlack(robotDefinition, "l_finger_2_joint_3");
+      setModelsToBlack(robotDefinition, "l_palm_finger_middle_joint");
+      setModelsToBlack(robotDefinition, "l_finger_middle_joint_1");
+      setModelsToBlack(robotDefinition, "l_finger_middle_joint_2");
+      setModelsToBlack(robotDefinition, "l_finger_middle_joint_3");
+      setModelsToBlack(robotDefinition, "r_arm_wry2");
+      setModelsToBlack(robotDefinition, "r_palm_finger_1_joint");
+      setModelsToBlack(robotDefinition, "r_finger_1_joint_1");
+      setModelsToBlack(robotDefinition, "r_finger_1_joint_2");
+      setModelsToBlack(robotDefinition, "r_finger_1_joint_3");
+      setModelsToBlack(robotDefinition, "r_palm_finger_2_joint");
+      setModelsToBlack(robotDefinition, "r_finger_2_joint_1");
+      setModelsToBlack(robotDefinition, "r_finger_2_joint_2");
+      setModelsToBlack(robotDefinition, "r_finger_2_joint_3");
+      setModelsToBlack(robotDefinition, "r_palm_finger_middle_joint");
+      setModelsToBlack(robotDefinition, "r_finger_middle_joint_1");
+      setModelsToBlack(robotDefinition, "r_finger_middle_joint_2");
+      setModelsToBlack(robotDefinition, "r_finger_middle_joint_3");
    }
 
-   private void setModelsToBlack(RobotDescription robotDescription, String jointName)
+   private void setModelsToBlack(RobotDefinition robotDefinition, String jointName)
    {
-      JointDescription handJoint = robotDescription.getJointDescription(jointName);
+      JointDefinition handJoint = robotDefinition.getJointDefinition(jointName);
       if (handJoint != null)
       {
-         List<Graphics3DPrimitiveInstruction> instructions = handJoint.getLink().getLinkGraphics().getGraphics3DInstructions();
-         for (Graphics3DPrimitiveInstruction instruction : instructions)
+         for (VisualDefinition visual : handJoint.getSuccessor().getVisualDefinitions())
          {
-            if (instruction instanceof Graphics3DAddModelFileInstruction)
-            {
-               Graphics3DAddModelFileInstruction addModelFileInstruction = (Graphics3DAddModelFileInstruction) instruction;
-               if (addModelFileInstruction.getAppearance() != null)
-               {
-                  addModelFileInstruction.getAppearance().setTransparency(0.0);
-                  addModelFileInstruction.getAppearance().getColor().set(new Color(40, 40, 40));
-               }
-            }
+            visual.setMaterialDefinition(new MaterialDefinition(ColorDefinitions.Black()));
          }
       }
    }

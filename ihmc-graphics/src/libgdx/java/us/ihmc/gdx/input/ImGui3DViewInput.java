@@ -38,6 +38,10 @@ public class ImGui3DViewInput
    private int spaceKey;
    private int deleteKey;
    private int escapeKey;
+   private int upArrowKey;
+   private int downArrowKey;
+   private int leftArrowKey;
+   private int rightArrowKey;
 
    public ImGui3DViewInput(FocusBasedGDXCamera camera, Supplier<Float> viewportSizeXSupplier, Supplier<Float> viewportSizeYSupplier)
    {
@@ -54,6 +58,10 @@ public class ImGui3DViewInput
          spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
          deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
          escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
+         upArrowKey = ImGui.getKeyIndex(ImGuiKey.UpArrow);
+         downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
+         leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
+         rightArrowKey = ImGui.getKeyIndex(ImGuiKey.RightArrow);
       }
 
       computedPickRay = false;
@@ -150,5 +158,25 @@ public class ImGui3DViewInput
    public int getEscapeKey()
    {
       return escapeKey;
+   }
+
+   public int getUpArrowKey()
+   {
+      return upArrowKey;
+   }
+
+   public int getDownArrowKey()
+   {
+      return downArrowKey;
+   }
+
+   public int getLeftArrowKey()
+   {
+      return leftArrowKey;
+   }
+
+   public int getRightArrowKey()
+   {
+      return rightArrowKey;
    }
 }

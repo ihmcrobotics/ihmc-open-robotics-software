@@ -1,5 +1,27 @@
 package us.ihmc.footstepPlanning.ui;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.DataSetSelected;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GlobalReset;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalMidFootOrientation;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalMidFootPosition;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalOrientationEditModeEnabled;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GoalPositionEditModeEnabled;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.LowLevelGoalPosition;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.OcTreeData;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanarRegionData;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.RobotConfigurationData;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.SelectedRegion;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowCoordinateSystem;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowGoal;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowOcTree;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowPlanarRegions;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowRobot;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowStart;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
+
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -21,13 +43,30 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.footstepPlanning.ui.components.*;
-import us.ihmc.footstepPlanning.ui.controllers.*;
-import us.ihmc.footstepPlanning.ui.viewers.*;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
+import us.ihmc.footstepPlanning.ui.components.FootPoseFromMidFootUpdater;
+import us.ihmc.footstepPlanning.ui.components.FootstepCompletionListener;
+import us.ihmc.footstepPlanning.ui.components.GoalOrientationEditor;
+import us.ihmc.footstepPlanning.ui.components.ManualFootstepAdjustmentListener;
+import us.ihmc.footstepPlanning.ui.components.OccupancyMapRenderer;
+import us.ihmc.footstepPlanning.ui.components.UIFootstepPlanManager;
+import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerLogVisualizerController;
+import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerMenuUIController;
+import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerParametersUIController;
+import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerStatusBarController;
+import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerTestDashboardController;
+import us.ihmc.footstepPlanning.ui.controllers.MainTabController;
+import us.ihmc.footstepPlanning.ui.controllers.RobotOperationTabController;
+import us.ihmc.footstepPlanning.ui.controllers.SwingPlannerParametersUIController;
+import us.ihmc.footstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
+import us.ihmc.footstepPlanning.ui.controllers.VisualizationController;
+import us.ihmc.footstepPlanning.ui.viewers.BodyPathMeshViewer;
+import us.ihmc.footstepPlanning.ui.viewers.FootstepPathMeshViewer;
+import us.ihmc.footstepPlanning.ui.viewers.FootstepPlannerLogRenderer;
+import us.ihmc.footstepPlanning.ui.viewers.GoalOrientationViewer;
+import us.ihmc.footstepPlanning.ui.viewers.RobotIKVisualizer;
+import us.ihmc.footstepPlanning.ui.viewers.StartGoalPositionViewer;
+import us.ihmc.footstepPlanning.ui.viewers.SwingPlanMeshViewer;
+import us.ihmc.footstepPlanning.ui.viewers.VisibilityGraphsRenderer;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
@@ -41,27 +80,19 @@ import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.OcTreeViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.robotDescription.JointDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
-
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
-
 /**
- * User interface for {@link us.ihmc.footstepPlanning.FootstepPlanningModule}.
- * - Compute footstep plans online given live robot and perception data, or offline given a {@link DataSetName} or {@link us.ihmc.footstepPlanning.log.FootstepPlannerLog}
- * - Tuning tabs for body path, footstep, and swing parameters
- * - Log visualization
- * - IK to set chest, arm and head poses
- * - Visualize REA data
+ * User interface for {@link us.ihmc.footstepPlanning.FootstepPlanningModule}. - Compute footstep
+ * plans online given live robot and perception data, or offline given a {@link DataSetName} or
+ * {@link us.ihmc.footstepPlanning.log.FootstepPlannerLog} - Tuning tabs for body path, footstep,
+ * and swing parameters - Log visualization - IK to set chest, arm and head poses - Visualize REA
+ * data
  */
 public class FootstepPlannerUI
 {
@@ -134,7 +165,8 @@ public class FootstepPlannerUI
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             WalkingControllerParameters walkingControllerParameters,
                             boolean showTestDashboard,
-                            SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
+                            SideDependentList<List<Point2D>> defaultContactPoints)
+         throws Exception
    {
       this(primaryStage,
            messager,
@@ -161,7 +193,8 @@ public class FootstepPlannerUI
                             WalkingControllerParameters walkingControllerParameters,
                             UIAuxiliaryRobotData auxiliaryRobotData,
                             boolean showTestDashboard,
-                            SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
+                            SideDependentList<List<Point2D>> defaultContactPoints)
+         throws Exception
    {
       this.primaryStage = primaryStage;
       this.messager = messager;
@@ -219,13 +252,19 @@ public class FootstepPlannerUI
 
       this.planarRegionViewer = new PlanarRegionViewer(messager, PlanarRegionData, ShowPlanarRegions);
       this.ocTreeViewer = new OcTreeViewer();
-      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, null, GoalPositionEditModeEnabled,
-                                                                 null, LowLevelGoalPosition, GoalMidFootPosition);
+      this.startGoalPositionViewer = new StartGoalPositionViewer(messager, null, GoalPositionEditModeEnabled, null, LowLevelGoalPosition, GoalMidFootPosition);
       this.goalOrientationViewer = new GoalOrientationViewer(messager);
       this.goalOrientationViewer.setPlannerParameters(plannerParameters);
-      this.startGoalEditor = new StartGoalPositionEditor(messager, subScene, null, GoalPositionEditModeEnabled,
-                                                         null, GoalMidFootPosition, PlanarRegionData, SelectedRegion,
-                                                         null, GoalOrientationEditModeEnabled);
+      this.startGoalEditor = new StartGoalPositionEditor(messager,
+                                                         subScene,
+                                                         null,
+                                                         GoalPositionEditModeEnabled,
+                                                         null,
+                                                         GoalMidFootPosition,
+                                                         PlanarRegionData,
+                                                         SelectedRegion,
+                                                         null,
+                                                         GoalOrientationEditModeEnabled);
       this.orientationEditor = new GoalOrientationEditor(messager, view3dFactory.getSubScene());
       this.pathViewer = new FootstepPathMeshViewer(messager);
       this.postProcessingViewer = new SwingPlanMeshViewer(messager);
@@ -250,7 +289,7 @@ public class FootstepPlannerUI
       view3dFactory.addNodeToView(occupancyMapRenderer.getRoot());
       view3dFactory.addNodeToView(footstepPlannerLogRenderer.getRoot());
 
-      if(fullHumanoidRobotModelFactory == null)
+      if (fullHumanoidRobotModelFactory == null)
       {
          robotVisualizer = null;
       }
@@ -265,14 +304,17 @@ public class FootstepPlannerUI
          messager.registerTopicListener(ShowRobot, show -> robotVisualizer.getRootNode().setVisible(show));
       }
 
-      if(previewModelFactory == null)
+      if (previewModelFactory == null)
       {
          walkingPreviewVisualizer = null;
          robotIKVisualizer = null;
       }
       else
       {
-         recursivelyModifyGraphics(previewModelFactory.getRobotDescription().getChildrenJoints().get(0), YoAppearance.AliceBlue());
+         MaterialDefinition previewRobotMaterial = new MaterialDefinition(ColorDefinitions.AliceBlue());
+         previewModelFactory.getRobotDefinition()
+                            .forEachRigidBodyDefinition(body -> body.getVisualDefinitions()
+                                                                    .forEach(visual -> visual.setMaterialDefinition(previewRobotMaterial)));
          walkingPreviewVisualizer = new JavaFXRobotVisualizer(previewModelFactory);
          walkingPreviewVisualizer.getRootNode().setMouseTransparent(true);
          view3dFactory.addNodeToView(walkingPreviewVisualizer.getRootNode());
@@ -285,12 +327,12 @@ public class FootstepPlannerUI
          view3dFactory.addNodeToView(robotIKVisualizer.getRootNode());
       }
 
-      if(walkingControllerParameters != null)
+      if (walkingControllerParameters != null)
       {
          mainTabController.setDefaultTiming(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
       }
 
-      if(defaultContactPoints != null)
+      if (defaultContactPoints != null)
       {
          mainTabController.setContactPointParameters(defaultContactPoints);
          pathViewer.setDefaultContactPoints(defaultContactPoints);
@@ -325,12 +367,14 @@ public class FootstepPlannerUI
       centerBorderPane.setCenter(subScene);
 
       primaryStage.setTitle(getClass().getSimpleName());
-//      primaryStage.setMaximized(true);
+      //      primaryStage.setMaximized(true);
 
-      primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
-            splitPane.setDividerPositions(0.7);
+      primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) ->
+      {
+         splitPane.setDividerPositions(0.7);
       });
-      splitPane.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
+      splitPane.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) ->
+      {
          if (newValue.doubleValue() > 0.75)
          {
             splitPane.getDividers().get(0).positionProperty().setValue(0.75);
@@ -369,41 +413,6 @@ public class FootstepPlannerUI
          messager.submitMessage(GlobalReset, true);
       };
       messager.registerTopicListener(DataSetSelected, dataSetName -> Platform.runLater(() -> dataSetLoader.accept(dataSetName)));
-   }
-
-   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
-   {
-      if (joint == null)
-         return;
-      LinkDescription link = joint.getLink();
-      if (link == null)
-         return;
-      LinkGraphicsDescription linkGraphics = link.getLinkGraphics();
-
-      if (linkGraphics != null)
-      {
-         List<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
-
-         if (graphics3dInstructions == null)
-            return;
-
-         for (Graphics3DPrimitiveInstruction primitive : graphics3dInstructions)
-         {
-            if (primitive instanceof Graphics3DInstruction)
-            {
-               Graphics3DInstruction modelInstruction = (Graphics3DInstruction) primitive;
-               modelInstruction.setAppearance(ghostApperance);
-            }
-         }
-      }
-
-      if (joint.getChildrenJoints() == null)
-         return;
-
-      for (JointDescription child : joint.getChildrenJoints())
-      {
-         recursivelyModifyGraphics(child, ghostApperance);
-      }
    }
 
    public void setRobotLowLevelMessenger(RobotLowLevelMessenger robotLowLevelMessenger)
@@ -447,7 +456,7 @@ public class FootstepPlannerUI
       visibilityGraphsRenderer.stop();
       occupancyMapRenderer.stop();
 
-      if(robotVisualizer != null)
+      if (robotVisualizer != null)
          robotVisualizer.stop();
    }
 
@@ -461,7 +470,11 @@ public class FootstepPlannerUI
       return createMessagerUI(primaryStage, messager, false, null);
    }
 
-   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, boolean showTestDashboard, SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
+   public static FootstepPlannerUI createMessagerUI(Stage primaryStage,
+                                                    JavaFXMessager messager,
+                                                    boolean showTestDashboard,
+                                                    SideDependentList<List<Point2D>> defaultContactPoints)
+         throws Exception
    {
       return new FootstepPlannerUI(primaryStage, messager, showTestDashboard, defaultContactPoints);
    }
@@ -476,7 +489,8 @@ public class FootstepPlannerUI
                                                     HumanoidJointNameMap jointMap,
                                                     RobotContactPointParameters<RobotSide> contactPointParameters,
                                                     WalkingControllerParameters walkingControllerParameters,
-                                                    UIAuxiliaryRobotData auxiliaryRobotData) throws Exception
+                                                    UIAuxiliaryRobotData auxiliaryRobotData)
+         throws Exception
    {
       SideDependentList<List<Point2D>> defaultContactPoints = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)

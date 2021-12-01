@@ -81,7 +81,7 @@ public class StereoVisionPointCloudPublisher
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, topic);
+      this(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), ros2Node, topic);
    }
 
    public StereoVisionPointCloudPublisher(String robotName,

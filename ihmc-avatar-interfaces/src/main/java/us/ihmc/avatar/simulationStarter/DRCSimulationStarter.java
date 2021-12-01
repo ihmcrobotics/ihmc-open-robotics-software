@@ -11,7 +11,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
@@ -71,7 +71,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final DRCSCSInitialSetup scsInitialSetup;
 
    private DRCGuiInitialSetup guiInitialSetup;
-   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
+   private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
 
    private HumanoidFloatingRootJointRobot sdfRobot;
    private HighLevelHumanoidControllerFactory controllerFactory;
@@ -306,7 +306,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     * 
     * @param robotInitialSetup
     */
-   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   public void setRobotInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       checkIfSimulationIsAlreadyCreated();
       this.robotInitialSetup = robotInitialSetup;

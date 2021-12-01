@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactW
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -30,15 +31,36 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
 
    private final YoFramePoint3D capturePointUpdatedFromSCS;
 
-   public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs, FullHumanoidRobotModel fullRobotModel,
-                                                      CommonHumanoidReferenceFrames referenceFrames, SideDependentList<FootSwitchInterface> footSwitches,
-                                                      SideDependentList<ForceSensorDataReadOnly> wristForceSensors, YoDouble yoTime, double gravityZ,
-                                                      double omega0, SideDependentList<ContactableFoot> feet, double controlDT, ArrayList<Updatable> updatables,
-                                                      List<ContactablePlaneBody> contactableBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public UpdatableHighLevelHumanoidControllerToolbox(SimulationConstructionSet scs,
+                                                      FullHumanoidRobotModel fullRobotModel,
+                                                      CenterOfMassStateProvider centerOfMassStateProvider,
+                                                      CommonHumanoidReferenceFrames referenceFrames,
+                                                      SideDependentList<FootSwitchInterface> footSwitches,
+                                                      SideDependentList<ForceSensorDataReadOnly> wristForceSensors,
+                                                      YoDouble yoTime,
+                                                      double gravityZ,
+                                                      double omega0,
+                                                      SideDependentList<ContactableFoot> feet,
+                                                      double controlDT,
+                                                      ArrayList<Updatable> updatables,
+                                                      List<ContactablePlaneBody> contactableBodies,
+                                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                                       JointBasics... jointsToIgnore)
    {
-      super(fullRobotModel, referenceFrames, footSwitches, wristForceSensors, yoTime, gravityZ, omega0, feet, controlDT, updatables, contactableBodies,
-            yoGraphicsListRegistry, jointsToIgnore);
+      super(fullRobotModel,
+            centerOfMassStateProvider,
+            referenceFrames,
+            footSwitches,
+            wristForceSensors,
+            yoTime,
+            gravityZ,
+            omega0,
+            feet,
+            controlDT,
+            updatables,
+            contactableBodies,
+            yoGraphicsListRegistry,
+            jointsToIgnore);
 
       if (UPDATE_CAPTURE_POINT_FROM_SCS)
       {

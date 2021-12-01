@@ -94,8 +94,9 @@ public class PhysicsEngineRobotData implements CollidableHolder
 
    public void setRobotInitialStateWriter(MultiBodySystemStateWriter robotInitialStateWriter)
    {
+      if (robotInitialStateWriter != null)
+         robotInitialStateWriter.setMultiBodySystem(multiBodySystem);
       this.robotInitialStateWriter = robotInitialStateWriter;
-      setControllerOutputWriter(robotInitialStateWriter);
    }
 
    public void addPhysicsInputStateWriter(MultiBodySystemStateWriter physicsInputStateWriter)
