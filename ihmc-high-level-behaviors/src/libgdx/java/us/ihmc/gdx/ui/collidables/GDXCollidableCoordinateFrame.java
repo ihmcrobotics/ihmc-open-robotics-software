@@ -2,6 +2,7 @@ package us.ihmc.gdx.ui.collidables;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.ui.gizmo.Axis3DRotations;
@@ -13,6 +14,8 @@ public class GDXCollidableCoordinateFrame
 {
    private final EnumMap<Axis3D, DiscreteArrowRayIntersection> arrows = new EnumMap<>(Axis3D.class);
    private final Axis3DRotations axis3DRotations = new Axis3DRotations();
+   private final FramePose3D tempFramePose = new FramePose3D();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final double length;
 
    public GDXCollidableCoordinateFrame(double length)
@@ -29,14 +32,18 @@ public class GDXCollidableCoordinateFrame
       double closestCollisionDistance = Double.NaN;
       for (Axis3D axis : Axis3D.values)
       {
-         RigidBodyTransform transform = new RigidBodyTransform();
+         tempFramePose.setToZero(coordinateFrame);
+         tempFramePose.getOrientation().set(axis3DRotations.get(axis));
+         tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         tempFramePose.get(tempTransform);
+
          double arrowBodyLength = length;
          double arrowBodyRadius = 0.02 * length;
          double arrowHeadRadius = 0.05 * length;
          double arrowHeadLength = 0.10 * length;
-         double zOffset = 0.0;
+         double zOffset = 0.5 * arrowBodyLength;
          DiscreteArrowRayIntersection arrowIntersection = arrows.get(axis);
-         arrowIntersection.setupShapes(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, transform);
+         arrowIntersection.setupShapes(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, tempTransform);
          double distance = arrowIntersection.intersect(pickRay, 100, true);
 
          if (!Double.isNaN(distance) && Double.isNaN(closestCollisionDistance))

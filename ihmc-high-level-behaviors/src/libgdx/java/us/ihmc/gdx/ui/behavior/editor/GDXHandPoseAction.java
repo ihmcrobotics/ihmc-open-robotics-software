@@ -55,7 +55,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
       if (selected.get())
       {
          poseGizmo.process3DViewInput(input);
-         highlightModel.setPose(poseGizmo.getTransform(), handGraphicToControlTransform);
+         highlightModel.setPose(poseGizmo.getTransformToParent(), handGraphicToControlTransform);
       }
    }
 
@@ -75,7 +75,7 @@ public class GDXHandPoseAction implements GDXBehaviorAction
 
    public void moveHand(double trajectoryTime)
    {
-      Pose3D endHandPose = new Pose3D(poseGizmo.getTransform());
+      Pose3D endHandPose = new Pose3D(poseGizmo.getTransformToParent());
       HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
       handTrajectoryMessage.setRobotSide(side.toByte());
       handTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);

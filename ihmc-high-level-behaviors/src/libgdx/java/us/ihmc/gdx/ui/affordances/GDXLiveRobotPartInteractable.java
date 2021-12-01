@@ -52,8 +52,8 @@ public class GDXLiveRobotPartInteractable
       hasMultipleFrames = !(graphicFrame == collisionFrame && collisionFrame == controlFrame);
       highlightModel = new GDXInteractableHighlightModel(modelFileName);
       selectablePose3DGizmo.create(camera3D);
-      graphicReferenceFrameGraphic = new GDXReferenceFrameGraphic();
-      controlReferenceFrameGraphic = new GDXReferenceFrameGraphic();
+      graphicReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+      controlReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -102,7 +102,7 @@ public class GDXLiveRobotPartInteractable
       {
          modified = true;
          collisionLink.setOverrideTransform(true);
-         selectablePose3DGizmo.getPoseGizmo().getTransform().set(controlFrame.getTransformToWorldFrame());
+         selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
       }
 
       if (modifiedButNotSelectedHovered)
@@ -119,14 +119,14 @@ public class GDXLiveRobotPartInteractable
          if (hasMultipleFrames)
          {
             tempTransform.set(controlToCollisionTransform);
-            selectablePose3DGizmo.getPoseGizmo().getTransform().transform(tempTransform);
+            selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
             collisionLink.setOverrideTransform(true).set(tempTransform);
-            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransform(), controlToGraphicTransform);
+            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), controlToGraphicTransform);
          }
          else
          {
-            collisionLink.setOverrideTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransform());
-            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransform());
+            collisionLink.setOverrideTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
          }
       }
 

@@ -50,7 +50,7 @@ public class GDXROS1DepthSensorDemo
             sensorTransform = new RigidBodyTransform();
             sensorTransform.appendTranslation(0.0, 0.0, 0.5);
             sensorTransform.appendPitchRotation(Math.PI / 6.0);
-            poseGizmo.getTransform().set(sensorTransform);
+            poseGizmo.getTransformToParent().set(sensorTransform);
             sensorFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("sensorFrame", ReferenceFrameTools.getWorldFrame(), sensorTransform);
 
             double publishRateHz = 5.0;
@@ -109,7 +109,7 @@ public class GDXROS1DepthSensorDemo
          @Override
          public void render()
          {
-            sensorTransform.set(poseGizmo.getTransform());
+            sensorTransform.set(poseGizmo.getTransformToParent());
             sensorFrame.update();
 
             globalVisualizersUI.update();
