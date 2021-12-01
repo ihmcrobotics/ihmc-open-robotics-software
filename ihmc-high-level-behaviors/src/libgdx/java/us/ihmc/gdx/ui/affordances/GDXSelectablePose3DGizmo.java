@@ -5,14 +5,25 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
 public class GDXSelectablePose3DGizmo
 {
-   private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
+   private final GDXPose3DGizmo poseGizmo;
    private boolean selected = false;
+
+   public GDXSelectablePose3DGizmo()
+   {
+      poseGizmo = new GDXPose3DGizmo();
+   }
+
+   public GDXSelectablePose3DGizmo(ReferenceFrame parentReferenceFrame)
+   {
+      poseGizmo = new GDXPose3DGizmo(parentReferenceFrame);
+   }
 
    public void create(FocusBasedGDXCamera camera3D)
    {
