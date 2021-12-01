@@ -6,18 +6,15 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXInteractableReferenceFrame;
-import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.robotics.referenceFrames.VolatileReferenceFrame;
 
 public class GDXFrameGizmoDemo
 {
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-   private GDXPose3DGizmo poseGizmo;
-   private final GDXFootstepPlannerGoalGizmo footstepRingGizmo = new GDXFootstepPlannerGoalGizmo();
-   private final GDXInteractableReferenceFrame interactableReferenceFrame = new GDXInteractableReferenceFrame();
 
    public GDXFrameGizmoDemo()
    {
@@ -30,21 +27,27 @@ public class GDXFrameGizmoDemo
 
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
 
-//            new Collidable()
-//            new GDXRobotCollisionLink()
-            RigidBodyTransform transform = new RigidBodyTransform();
-            transform.getTranslation().addX(0.5);
-            ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), transform);
-            referenceFrame.update();
-            interactableReferenceFrame.create(referenceFrame, 1.0, baseUI.get3DSceneManager().getCamera3D());
+            VolatileReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructVolatileReferenceFrame(ReferenceFrame.getWorldFrame());
+            referenceFrame.getTransformToParent().getTranslation().addX(0.5);
+            GDXInteractableReferenceFrame interactableReferenceFrame = new GDXInteractableReferenceFrame();
+            interactableReferenceFrame.create(referenceFrame, referenceFrame.getTransformToParent(), 1.0, baseUI.get3DSceneManager().getCamera3D());
             baseUI.addImGui3DViewInputProcessor(interactableReferenceFrame::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(interactableReferenceFrame::getVirtualRenderables);
 
-            poseGizmo = new GDXPose3DGizmo(interactableReferenceFrame.getSelectablePose3DGizmo().getPoseGizmo().getReferenceFrame());
+            RigidBodyTransform transform2 = new RigidBodyTransform();
+            transform2.getTranslation().add(0.5, 0.5, 0.5);
+            ReferenceFrame referenceFrame2 = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(referenceFrame, transform2);
+            GDXInteractableReferenceFrame interactableReferenceFrame2 = new GDXInteractableReferenceFrame();
+            interactableReferenceFrame2.create(referenceFrame2, transform2, 1.0, baseUI.get3DSceneManager().getCamera3D());
+            baseUI.addImGui3DViewInputProcessor(interactableReferenceFrame2::process3DViewInput);
+            baseUI.get3DSceneManager().addRenderableProvider(interactableReferenceFrame2::getVirtualRenderables);
+
+            GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo(interactableReferenceFrame2.getSelectablePose3DGizmo().getPoseGizmo().getGizmoFrame());
             poseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
             baseUI.addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(poseGizmo);
             baseUI.getImGuiPanelManager().addPanel(poseGizmo.createTunerPanel(GDXFrameGizmoDemo.class.getSimpleName()));
+            poseGizmo.getTransformToParent().getTranslation().add(0.5, 0.5, 0.5);
 
 //            footstepRingGizmo.create(baseUI.get3DSceneManager().getCamera3D());
 //            baseUI.addImGui3DViewInputProcessor(footstepRingGizmo::process3DViewInput);

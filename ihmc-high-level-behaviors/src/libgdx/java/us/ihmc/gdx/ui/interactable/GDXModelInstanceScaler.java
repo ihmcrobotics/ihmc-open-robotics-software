@@ -4,14 +4,14 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.math.Matrix4;
 
-public class GDXScaledModelInstance
+public class GDXModelInstanceScaler
 {
    private final Node originalNode;
    private final ModelInstance modelInstance;
    private Matrix4 scaleOnlyTransform;
    private Matrix4 poseTransform;
 
-   public GDXScaledModelInstance(ModelInstance modelInstance)
+   public GDXModelInstanceScaler(ModelInstance modelInstance)
    {
       originalNode = modelInstance.nodes.removeIndex(0);
       this.modelInstance = modelInstance;

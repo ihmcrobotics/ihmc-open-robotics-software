@@ -42,4 +42,10 @@ public class ReferenceFrameMissingTools
                                                                              parentFrame,
                                                                              transformToParent);
    }
+
+   public static VolatileReferenceFrame constructVolatileReferenceFrame(ReferenceFrame parentFrame)
+   {
+      RigidBodyTransform transformToParent = new RigidBodyTransform();
+      return new VolatileReferenceFrame(getCallingClassName() + INDEX.get(), parentFrame, transformToParent);
+   }
 }
