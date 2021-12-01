@@ -79,7 +79,7 @@ public class QuadrupedSupportPlanarRegionPublisher
       fullRobotModel = robotModel.createFullRobotModel();
       oneDoFJoints = fullRobotModel.getOneDoFJoints();
       referenceFrames = new QuadrupedReferenceFrames(fullRobotModel);
-      String robotName = robotModel.getRobotDescription().getName();
+      String robotName = robotModel.getRobotDefinition().getName();
 
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
 

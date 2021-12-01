@@ -6,10 +6,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemp
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -21,7 +21,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WholeBodyControllerCoreFactory
 {
@@ -100,10 +99,14 @@ public class WholeBodyControllerCoreFactory
 
       FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
-                                                                            jointsToOptimizeFor, centerOfMassFrame,
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(),
+                                                                            controllerToolbox.getGravityZ(),
+                                                                            rootJoint,
+                                                                            jointsToOptimizeFor,
+                                                                            centerOfMassFrame,
                                                                             walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                                            controllerToolbox.getYoGraphicsListRegistry(), registry);
+                                                                            controllerToolbox.getYoGraphicsListRegistry(),
+                                                                            registry);
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
       toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
@@ -127,6 +130,7 @@ public class WholeBodyControllerCoreFactory
       if (!hasWalkingControllerParameters(LinearMomentumRateControlModule.class))
          return null;
 
+      CenterOfMassStateProvider centerOfMassStateProvider = controllerToolbox;
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
@@ -135,8 +139,15 @@ public class WholeBodyControllerCoreFactory
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters,
-                                                                            gravityZ, controlDT, registry, yoGraphicsListRegistry);
+      linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
+                                                                            referenceFrames,
+                                                                            contactableFeet,
+                                                                            elevator,
+                                                                            walkingControllerParameters,
+                                                                            gravityZ,
+                                                                            controlDT,
+                                                                            registry,
+                                                                            yoGraphicsListRegistry);
 
       return linearMomentumRateControlModule;
    }

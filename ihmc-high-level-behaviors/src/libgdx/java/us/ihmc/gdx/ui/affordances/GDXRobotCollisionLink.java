@@ -199,7 +199,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
       coordinateFrame.getRenderables(renderables, pool);
    }
 
-   public RigidBodyTransform overrideTransform(boolean useOverrideTransform)
+   public RigidBodyTransform setOverrideTransform(boolean useOverrideTransform)
    {
       this.useOverrideTransform = useOverrideTransform;
       return overrideTransform;

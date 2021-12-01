@@ -22,9 +22,10 @@ mainDependencies {
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
    api("us.ihmc:euclid:0.17.0")
-   api("us.ihmc:ihmc-robot-description:0.21.2")
+   api("us.ihmc:ihmc-robot-description:0.21.3")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
+   api("us.ihmc:scs2-definition:0.1.1")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

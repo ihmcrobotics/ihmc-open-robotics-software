@@ -9,6 +9,9 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -16,7 +19,10 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -42,8 +48,9 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
    private final ImBoolean showEnvironmentCollisionMeshes = new ImBoolean();
    private final ImBoolean interactablesEnabled = new ImBoolean(false);
 
-   private final SideDependentList<GDXInteractableFoot> footInteractables = new SideDependentList<>();
-   private GDXInteractablePelvis pelvisInteractable;
+   private final SideDependentList<GDXInteractableObject> footInteractables = new SideDependentList<>();
+   private final SideDependentList<GDXInteractableObject> handInteractables = new SideDependentList<>();
+   private GDXInteractableObject pelvisInteractable;
    private final GDXWalkPathControlRing walkPathControlRing = new GDXWalkPathControlRing();
 
    public GDXRobotWholeBodyInteractable(RobotCollisionModel robotSelfCollisionModel,
@@ -80,20 +87,62 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
 
          if (collidable.getRigidBody().getName().equals("pelvis"))
          {
-            pelvisInteractable = new GDXInteractablePelvis(collisionLink, syncedRobot.getReferenceFrames().getPelvisFrame(), ros2Helper);
-            pelvisInteractable.create(baseUI.get3DSceneManager().getCamera3D());
+            pelvisInteractable = new GDXInteractableObject();
+            pelvisInteractable.create(collisionLink,
+                                      syncedRobot.getReferenceFrames().getPelvisFrame(),
+                                      "pelvis.g3dj",
+                                      baseUI.get3DSceneManager().getCamera3D());
+            pelvisInteractable.setOnSpacePressed(() ->
+            {
+               ros2Helper.publishToController(HumanoidMessageTools.createPelvisTrajectoryMessage(1.2, pelvisInteractable.getPose()));
+            });
          }
          for (RobotSide side : RobotSide.values)
          {
+            String robotSidePrefix = (side == RobotSide.LEFT) ? "l_" : "r_";
             if (collidable.getRigidBody().getName().equals(side.getSideNameFirstLowerCaseLetter() + "_foot"))
             {
-               GDXInteractableFoot interactableFoot = new GDXInteractableFoot(collisionLink,
-                                                                              side,
-                                                                              syncedRobot.getFullRobotModel()
-                                                                                         .getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
-                                                                              ros2Helper);
-               interactableFoot.create(baseUI.get3DSceneManager().getCamera3D());
+               GDXInteractableObject interactableFoot = new GDXInteractableObject();
+               String modelFileName = robotSidePrefix + "foot.g3dj";
+               interactableFoot.create(collisionLink,
+                                       syncedRobot.getFullRobotModel().getFrameAfterLegJoint(side, LegJointName.ANKLE_ROLL),
+                                       modelFileName,
+                                       baseUI.get3DSceneManager().getCamera3D());
+               interactableFoot.setOnSpacePressed(() ->
+               {
+                  ros2Helper.publishToController(HumanoidMessageTools.createFootTrajectoryMessage(side, 1.2, interactableFoot.getPose()));
+               });
                footInteractables.put(side, interactableFoot);
+            }
+            if (collidable.getRigidBody().getName().equals(side.getSideNameFirstLowerCaseLetter() + "_hand"))
+            {
+               ReferenceFrame handFrame = syncedRobot.getFullRobotModel().getEndEffectorFrame(side, LimbName.ARM);
+               ReferenceFrame collisionFrame = syncedRobot.getFullRobotModel().getArmJoint(side, ArmJointName.SECOND_WRIST_PITCH).getFrameAfterJoint();
+               GDXInteractableObject interactableHand = new GDXInteractableObject();
+               ReferenceFrame handControlFrame = syncedRobot.getFullRobotModel().getHandControlFrame(side);
+               RigidBodyTransform handGraphicToHandTransform = new RigidBodyTransform();
+               handGraphicToHandTransform.getRotation().setYawPitchRoll(side == RobotSide.LEFT ? 0.0 : Math.PI, -Math.PI / 2.0, 0.0);
+               // 0.168 from models/GFE/atlas_unplugged_v5_dual_robotiq_with_head.urdf
+               // 0.126 from debugger on GDXGraphicsObject
+               // Where does the 0.042 come from?
+               handGraphicToHandTransform.getTranslation().set(-0.00179, side.negateIfRightSide(0.126), 0.0);
+               ReferenceFrame handGraphicFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSidePrefix + "graphicFrame",
+                                                                                                                   handFrame,
+                                                                                                                   handGraphicToHandTransform);
+               interactableHand.create(collisionLink,
+                                       handGraphicFrame,
+                                       collisionFrame,
+                                       handControlFrame,
+                                       (side == RobotSide.LEFT) ? "palm.g3dj" : "palmRight.g3dj",
+                                       baseUI.get3DSceneManager().getCamera3D());
+               interactableHand.setOnSpacePressed(() ->
+               {
+                  ros2Helper.publishToController(HumanoidMessageTools.createHandTrajectoryMessage(side,
+                                                                                                  1.2,
+                                                                                                  interactableHand.getPose(),
+                                                                                                  ReferenceFrame.getWorldFrame()));
+               });
+               handInteractables.put(side, interactableHand);
             }
          }
       }
@@ -133,9 +182,13 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       if (interactablesEnabled.get())
       {
          pelvisInteractable.process3DViewInput(input);
-         for (GDXInteractableFoot footInteractable : footInteractables)
+         for (GDXInteractableObject footInteractable : footInteractables)
          {
             footInteractable.process3DViewInput(input);
+         }
+         for (GDXInteractableObject handInteractable : handInteractables)
+         {
+            handInteractable.process3DViewInput(input);
          }
       }
    }
@@ -146,6 +199,8 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       ImGui.sameLine();
       if (ImGui.button(labels.get("Clear graphics")))
          walkPathControlRing.clearGraphics();
+      ImGui.text("Walk path control ring:");
+      walkPathControlRing.renderImGuiWidgets();
       ImGui.checkbox("Show self collision meshes", showSelfCollisionMeshes);
       ImGui.checkbox("Show environment collision meshes", showEnvironmentCollisionMeshes);
       ImGui.text("TODO:");
@@ -175,13 +230,22 @@ public class GDXRobotWholeBodyInteractable implements RenderableProvider
       if (interactablesEnabled.get())
       {
          pelvisInteractable.getVirtualRenderables(renderables, pool);
-         for (GDXInteractableFoot footInteractable : footInteractables)
+         for (GDXInteractableObject footInteractable : footInteractables)
          {
             footInteractable.getVirtualRenderables(renderables, pool);
+         }
+         for (GDXInteractableObject handInteractable : handInteractables)
+         {
+            handInteractable.getVirtualRenderables(renderables, pool);
          }
 
          walkPathControlRing.getVirtualRenderables(renderables, pool);
       }
+   }
+
+   public void destroy()
+   {
+      walkPathControlRing.destroy();
    }
 
    public void setInteractablesEnabled(boolean enabled)

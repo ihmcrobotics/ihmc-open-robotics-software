@@ -1,12 +1,15 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import java.util.List;
+import java.util.function.Supplier;
+
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
@@ -19,9 +22,6 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.List;
-import java.util.function.Supplier;
-
 public class AngularMomentumHandler<T extends ContactStateBasics<T>>
 {
    private final ECMPTrajectoryCalculator<T> ecmpTrajectoryCalculator;
@@ -30,7 +30,7 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
 
    public AngularMomentumHandler(double totalMass,
                                  double gravity,
-                                 CenterOfMassJacobian centerOfMassJacobian,
+                                 CenterOfMassStateProvider centerOfMassStateProvider,
                                  SideDependentList<MovingReferenceFrame> soleFrames,
                                  Supplier<T> contactSupplier,
                                  YoRegistry parentRegistry,
@@ -45,7 +45,7 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
       angularMomentumCalculator = new ThreePotatoAngularMomentumCalculator(totalMass,
                                                                            potatoMassFraction,
                                                                            gravity,
-                                                                           centerOfMassJacobian,
+                                                                           centerOfMassStateProvider,
                                                                            soleFrames,
                                                                            registry,
                                                                            graphicsListRegistry);

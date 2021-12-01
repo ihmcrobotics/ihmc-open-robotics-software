@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.barrierScheduler.context;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
@@ -12,8 +13,7 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 public class AtlasHumanoidRobotContextData extends HumanoidRobotContextData
 {
    /**
-    * Raw joint measurements for the controller.
-    * Set by the estimator.
+    * Raw joint measurements for the controller. Set by the estimator.
     */
    private final RawJointSensorDataHolderMap rawJointSensorDataHolderMap;
 
@@ -29,12 +29,17 @@ public class AtlasHumanoidRobotContextData extends HumanoidRobotContextData
       rawJointSensorDataHolderMap = new RawJointSensorDataHolderMap(fullRobotModel);
    }
 
-   public AtlasHumanoidRobotContextData(HumanoidRobotContextJointData processedJointData, ForceSensorDataHolder forceSensorDataHolder,
-                                        CenterOfPressureDataHolder centerOfPressureDataHolder, RobotMotionStatusHolder robotMotionStatusHolder,
-                                        LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList, SensorDataContext sensorDataContext,
+   public AtlasHumanoidRobotContextData(HumanoidRobotContextJointData processedJointData,
+                                        ForceSensorDataHolder forceSensorDataHolder,
+                                        CenterOfMassDataHolder centerOfMassDataHolder,
+                                        CenterOfPressureDataHolder centerOfPressureDataHolder,
+                                        RobotMotionStatusHolder robotMotionStatusHolder,
+                                        LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList,
+                                        SensorDataContext sensorDataContext,
                                         RawJointSensorDataHolderMap rawJointSensorDataHolderMap)
    {
-      super(processedJointData, forceSensorDataHolder, centerOfPressureDataHolder, robotMotionStatusHolder, jointDesiredOutputList, sensorDataContext);
+      super(processedJointData, forceSensorDataHolder, centerOfMassDataHolder, centerOfPressureDataHolder, robotMotionStatusHolder, jointDesiredOutputList,
+            sensorDataContext);
       this.rawJointSensorDataHolderMap = rawJointSensorDataHolderMap;
    }
 

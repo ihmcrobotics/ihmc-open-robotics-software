@@ -1,8 +1,22 @@
 package us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning;
 
-import controller_msgs.msg.dds.*;
+import static us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor.continuousPlanningPort;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import controller_msgs.msg.dds.BodyPathPlanMessage;
+import controller_msgs.msg.dds.PawStepPlanningRequestPacket;
+import controller_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.QuadrupedContinuousPlanningRequestPacket;
+import controller_msgs.msg.dds.QuadrupedFootstepStatusMessage;
+import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import controller_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
+import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -14,15 +28,9 @@ import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
 import us.ihmc.robotModels.FullQuadrupedRobotModelFactory;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedNetworkProcessor.continuousPlanningPort;
 
 public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
 {
@@ -30,21 +38,27 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
 
    private final QuadrupedContinuousPlanningController continuousPlanningController;
 
-   public QuadrupedContinuousPlanningModule(FullQuadrupedRobotModelFactory modelFactory, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
-                                            LogModelProvider modelProvider, boolean startYoVariableServer,
-                                          boolean logYoVariables, DomainFactory.PubSubImplementation pubSubImplementation)
+   public QuadrupedContinuousPlanningModule(FullQuadrupedRobotModelFactory modelFactory,
+                                            QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+                                            LogModelProvider modelProvider,
+                                            boolean startYoVariableServer,
+                                            boolean logYoVariables,
+                                            DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), defaultXGaitSettings, modelProvider, startYoVariableServer,
+      this(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), defaultXGaitSettings, modelProvider, startYoVariableServer,
            logYoVariables, pubSubImplementation);
    }
 
-   public QuadrupedContinuousPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
-                                          LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
-                                          DomainFactory.PubSubImplementation pubSubImplementation)
+   public QuadrupedContinuousPlanningModule(String name,
+                                            FullQuadrupedRobotModel fulRobotModel,
+                                            QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+                                            LogModelProvider modelProvider,
+                                            boolean startYoVariableServer,
+                                            boolean logYoVariables,
+                                            DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(name, fulRobotModel, modelProvider, startYoVariableServer, new DataServerSettings(logYoVariables, true, continuousPlanningPort,
-                                                                                              "ContinuousPlanningModule"), updatePeriodMilliseconds,
-            pubSubImplementation);
+      super(name, fulRobotModel, modelProvider, startYoVariableServer,
+            new DataServerSettings(logYoVariables, true, continuousPlanningPort, "ContinuousPlanningModule"), updatePeriodMilliseconds, pubSubImplementation);
 
       continuousPlanningController = new QuadrupedContinuousPlanningController(defaultXGaitSettings, outputManager, robotDataReceiver, registry);
 
@@ -57,22 +71,31 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    {
       // status messages from the controller
       ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
-                                           s -> processFootstepStatusMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    QuadrupedFootstepStatusMessage.class,
+                                                    controllerOutputTopic,
+                                                    s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
-      ROS2Topic plannerOutputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                   .withOutput();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PawStepPlanningToolboxOutputStatus.class, plannerOutputTopic,
-                                           s -> processFootstepPlannerOutputMessage(s.takeNextData()));
+      ROS2Topic plannerOutputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    PawStepPlanningToolboxOutputStatus.class,
+                                                    plannerOutputTopic,
+                                                    s -> processFootstepPlannerOutputMessage(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedXGaitSettingsPacket.class, getInputTopic(),
-                                           s -> processQuadrupedXGaitSettings(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedContinuousPlanningRequestPacket.class, getInputTopic(),
-                                           s -> processContinuousPlanningRequest(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
-                                           s -> processPlanarRegionsListMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    QuadrupedXGaitSettingsPacket.class,
+                                                    getInputTopic(),
+                                                    s -> processQuadrupedXGaitSettings(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    QuadrupedContinuousPlanningRequestPacket.class,
+                                                    getInputTopic(),
+                                                    s -> processContinuousPlanningRequest(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    PlanarRegionsListMessage.class,
+                                                    REACommunicationProperties.outputTopic,
+                                                    s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 
    @Override
@@ -84,8 +107,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
       messages.put(BodyPathPlanMessage.class, getOutputTopic());
       messages.put(QuadrupedTimedStepListMessage.class, getOutputTopic());
 
-      ROS2Topic plannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                  .withInput();
+      ROS2Topic plannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
       messages.put(PawStepPlanningRequestPacket.class, plannerInputTopic);
       messages.put(ToolboxStateMessage.class, plannerInputTopic);
 
@@ -136,8 +158,6 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    {
       return new ArrayList<>();
    }
-
-
 
    @Override
    public ROS2Topic getOutputTopic()

@@ -1,9 +1,10 @@
 package us.ihmc.robotModels;
 
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 
 public interface FullRobotModelFactory
 {
-   public abstract RobotDescription getRobotDescription();
-   public abstract FullRobotModel createFullRobotModel();
+   RobotDefinition getRobotDefinition();
+
+   FullRobotModel createFullRobotModel();
 }

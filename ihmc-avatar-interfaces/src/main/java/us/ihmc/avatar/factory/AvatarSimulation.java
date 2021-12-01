@@ -7,7 +7,7 @@ import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -34,7 +34,7 @@ public class AvatarSimulation
    private HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
-   private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
+   private RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
    private DRCRobotModel robotModel;
 
    public void start()
@@ -96,7 +96,7 @@ public class AvatarSimulation
       humanoidFloatingRootJointRobot.getRootJoint().setAngularVelocityInBody(new Vector3D());
       humanoidFloatingRootJointRobot.getRootJoint().setVelocity(0, 0, 0);
 
-      robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot, robotModel.getJointMap());
+      robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot);
       AvatarSimulationFactory.initializeEstimator(humanoidFloatingRootJointRobot, stateEstimationThread);
       controllerThread.initialize();
 
@@ -210,7 +210,7 @@ public class AvatarSimulation
       stateEstimationThread.addRobotController(controller);
    }
 
-   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   public void setRobotInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       this.robotInitialSetup = robotInitialSetup;
    }

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +25,7 @@ import controller_msgs.msg.dds.WalkingControllerPreviewInputMessage;
 import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
@@ -45,7 +45,6 @@ import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
@@ -58,9 +57,11 @@ import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -85,7 +86,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double EPSILON = 1.0e-12;
-   private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
+   private static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
@@ -131,9 +132,9 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
                                                                         toolboxMainRegistry);
 
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
-      RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
-      robotDescription.setName("Ghost");
-      HumanoidKinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
+      RobotDefinition robotDefinition = ghostRobotModel.getRobotDefinition();
+      robotDefinition.setName("Ghost");
+      RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, ghostMaterial);
       ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -189,7 +190,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
          plotterFactory.createOverheadPlotter();
       }
 
-      getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot, getRobotModel().getJointMap());
+      getRobotModel().getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot);
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(2.0);
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(fullRobotModelAtInitialConfiguration);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
@@ -843,7 +844,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotModel.getDefaultRobotInitialSetup(0.0, initialYaw).initializeRobot(robot, robotModel.getJointMap());
+      robotModel.getDefaultRobotInitialSetup(0.0, initialYaw).initializeRobot(robot);
       DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
       SensorDataContext sensorDataContext = new SensorDataContext();
