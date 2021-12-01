@@ -8,7 +8,6 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
-import us.ihmc.robotics.referenceFrames.VolatileReferenceFrame;
 
 public class GDXFrameGizmoDemo
 {
@@ -27,10 +26,11 @@ public class GDXFrameGizmoDemo
 
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
 
-            VolatileReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructVolatileReferenceFrame(ReferenceFrame.getWorldFrame());
-            referenceFrame.getTransformToParent().getTranslation().addX(0.5);
+            RigidBodyTransform transform = new RigidBodyTransform();
+            ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), transform);
+            transform.getTranslation().addX(0.5);
             GDXInteractableReferenceFrame interactableReferenceFrame = new GDXInteractableReferenceFrame();
-            interactableReferenceFrame.create(referenceFrame, referenceFrame.getTransformToParent(), 1.0, baseUI.get3DSceneManager().getCamera3D());
+            interactableReferenceFrame.create(referenceFrame, transform, 1.0, baseUI.get3DSceneManager().getCamera3D());
             baseUI.addImGui3DViewInputProcessor(interactableReferenceFrame::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(interactableReferenceFrame::getVirtualRenderables);
 
