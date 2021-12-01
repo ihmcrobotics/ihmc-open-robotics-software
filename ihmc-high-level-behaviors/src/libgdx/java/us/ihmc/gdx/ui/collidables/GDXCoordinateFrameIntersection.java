@@ -10,7 +10,7 @@ import us.ihmc.gdx.ui.gizmo.DiscreteArrowRayIntersection;
 
 import java.util.EnumMap;
 
-public class GDXCollidableCoordinateFrame
+public class GDXCoordinateFrameIntersection
 {
    private final EnumMap<Axis3D, DiscreteArrowRayIntersection> arrows = new EnumMap<>(Axis3D.class);
    private final Axis3DRotations axis3DRotations = new Axis3DRotations();
@@ -18,7 +18,7 @@ public class GDXCollidableCoordinateFrame
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final double length;
 
-   public GDXCollidableCoordinateFrame(double length)
+   public GDXCoordinateFrameIntersection(double length)
    {
       this.length = length;
       for (Axis3D axis : Axis3D.values)
@@ -57,4 +57,6 @@ public class GDXCollidableCoordinateFrame
       }
       return closestCollisionDistance;
    }
+
+   // TODO: Add intersect(Point3D) for VR
 }

@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -23,6 +24,11 @@ public class GDXSelectablePose3DGizmo
    public GDXSelectablePose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
       poseGizmo = new GDXPose3DGizmo(parentReferenceFrame);
+   }
+
+   public GDXSelectablePose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
+   {
+      poseGizmo = new GDXPose3DGizmo(gizmoFrame, gizmoTransformToParentFrameToModify);
    }
 
    public void create(FocusBasedGDXCamera camera3D)
@@ -52,6 +58,10 @@ public class GDXSelectablePose3DGizmo
       if (selected)
       {
          poseGizmo.process3DViewInput(input);
+      }
+      else
+      {
+         poseGizmo.updateTransforms();
       }
    }
 

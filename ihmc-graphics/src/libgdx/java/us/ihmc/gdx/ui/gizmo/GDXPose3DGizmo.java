@@ -70,11 +70,11 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final FramePose3D framePose3D = new FramePose3D();
    private final FramePose3D tempFramePose3D = new FramePose3D();
    /** The main, source, true, base transform that this thing represents. */
-   private final RigidBodyTransform transformToParent = new RigidBodyTransform();
+   private final RigidBodyTransform transformToParent;
    private final ReferenceFrame parentReferenceFrame;
-   private final ReferenceFrame referenceFrame;
+   private final ReferenceFrame gizmoFrame;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final RigidBodyTransform tempTransformToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private final Line3DMouseDragAlgorithm lineDragAlgorithm = new Line3DMouseDragAlgorithm();
    private final ClockFaceRotation3DMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotation3DMouseDragAlgorithm();
@@ -90,7 +90,15 @@ public class GDXPose3DGizmo implements RenderableProvider
    public GDXPose3DGizmo(ReferenceFrame parentReferenceFrame)
    {
       this.parentReferenceFrame = parentReferenceFrame;
-      referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+      transformToParent = new RigidBodyTransform();
+      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentReferenceFrame, transformToParent);
+   }
+
+   public GDXPose3DGizmo(ReferenceFrame gizmoFrame, RigidBodyTransform gizmoTransformToParentFrameToModify)
+   {
+      this.parentReferenceFrame = gizmoFrame.getParent();
+      this.transformToParent = gizmoTransformToParentFrameToModify;
+      this.gizmoFrame = gizmoFrame;
    }
 
    public void create(FocusBasedGDXCamera camera3D)
@@ -125,7 +133,7 @@ public class GDXPose3DGizmo implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      updateFromSourceTransform();
+      updateTransforms();
 
       boolean rightMouseDragging = input.isDragging(ImGuiMouseButton.Right);
       boolean rightMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Right);
@@ -145,17 +153,13 @@ public class GDXPose3DGizmo implements RenderableProvider
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
-         tempFramePose3D.setToZero(referenceFrame);
-         tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
-         tempFramePose3D.get(tempTransformToWorld);
          if (closestCollisionSelection.isLinear())
          {
             Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
                                                                         closestCollision,
-                                                                        axisRotations.get(closestCollisionSelection.toAxis3D()),
-                                                                        tempTransformToWorld);
+                                                                        axisRotations.get(closestCollisionSelection.toAxis3D()), transformToWorld);
 
-            tempFramePose3D.setToZero(referenceFrame);
+            tempFramePose3D.setToZero(gizmoFrame);
             tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
             tempFramePose3D.getPosition().add(linearMotion);
             tempFramePose3D.changeFrame(parentReferenceFrame);
@@ -166,10 +170,9 @@ public class GDXPose3DGizmo implements RenderableProvider
          {
             if (clockFaceDragAlgorithm.calculate(pickRay,
                                                  closestCollision,
-                                                 axisRotations.get(closestCollisionSelection.toAxis3D()),
-                                                 tempTransformToWorld))
+                                                 axisRotations.get(closestCollisionSelection.toAxis3D()), transformToWorld))
             {
-               tempFramePose3D.setToZero(referenceFrame);
+               tempFramePose3D.setToZero(gizmoFrame);
                tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
                clockFaceDragAlgorithm.getMotion().transform(tempFramePose3D.getOrientation());
                tempFramePose3D.changeFrame(parentReferenceFrame);
@@ -249,7 +252,7 @@ public class GDXPose3DGizmo implements RenderableProvider
       }
 
       // after things have been modified, update the derivative stuff
-      updateFromSourceTransform();
+      updateTransforms();
 
       if (resizeAutomatically.get())
       {
@@ -259,23 +262,27 @@ public class GDXPose3DGizmo implements RenderableProvider
          {
             lastDistanceToCamera = distanceToCamera;
             recreateGraphics();
-            updateFromSourceTransform();
+            updateTransforms();
          }
       }
    }
 
-   private void updateFromSourceTransform()
+   /** Call this instead of process3DViewInput if the gizmo is deactivated. */
+   public void updateTransforms()
    {
-      referenceFrame.update();
+      gizmoFrame.update();
       for (Axis3D axis : Axis3D.values)
       {
-         framePose3D.setToZero(referenceFrame);
+         framePose3D.setToZero(gizmoFrame);
          framePose3D.getOrientation().set(axisRotations.get(axis));
          framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
          framePose3D.get(tempTransform);
          GDXTools.toGDX(tempTransform, arrowModels[axis.ordinal()].getOrCreateModelInstance().transform);
          GDXTools.toGDX(tempTransform, torusModels[axis.ordinal()].getOrCreateModelInstance().transform);
       }
+      tempFramePose3D.setToZero(gizmoFrame);
+      tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
+      tempFramePose3D.get(transformToWorld);
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
@@ -284,7 +291,7 @@ public class GDXPose3DGizmo implements RenderableProvider
       double closestCollisionDistance = Double.POSITIVE_INFINITY;
 
       // Optimization: Do one large sphere collision to avoid completely far off picks
-      boundingSphereIntersection.setup(1.5 * torusRadius.get(), tempTransformToWorld);
+      boundingSphereIntersection.setup(1.5 * torusRadius.get(), transformToWorld);
       if (boundingSphereIntersection.intersect(pickRay))
       {
          // collide tori
@@ -381,7 +388,7 @@ public class GDXPose3DGizmo implements RenderableProvider
       if (proportionsChanged)
          recreateGraphics();
 
-      updateFromSourceTransform();
+      updateTransforms();
    }
 
    private void recreateGraphics()
@@ -427,9 +434,9 @@ public class GDXPose3DGizmo implements RenderableProvider
       return transformToParent;
    }
 
-   public ReferenceFrame getReferenceFrame()
+   public ReferenceFrame getGizmoFrame()
    {
-      return referenceFrame;
+      return gizmoFrame;
    }
 
    public static Mesh angularHighlightMesh(double majorRadius, double minorRadius)
