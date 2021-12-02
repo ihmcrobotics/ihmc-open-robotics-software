@@ -11,10 +11,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.ImGui3DViewInput;
-import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 
-public class GDXInteractableObject
+public class GDXLiveRobotPartInteractable
 {
    private static final boolean SHOW_DEBUG_FRAMES = false;
    private GDXRobotCollisionLink collisionLink;
@@ -27,13 +26,12 @@ public class GDXInteractableObject
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final FramePose3D tempFramePose = new FramePose3D();
    private GDXInteractableHighlightModel highlightModel;
-   private boolean selected = false;
    private boolean modified = false;
-   private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
-   private boolean mouseIntersects;
+   private final GDXSelectablePose3DGizmo selectablePose3DGizmo = new GDXSelectablePose3DGizmo();
    private Runnable onSpacePressed;
    private GDXReferenceFrameGraphic graphicReferenceFrameGraphic;
    private GDXReferenceFrameGraphic controlReferenceFrameGraphic;
+   private boolean mouseIntersects;
 
    public void create(GDXRobotCollisionLink collisionLink, ReferenceFrame controlFrame, String graphicFileName, FocusBasedGDXCamera camera3D)
    {
@@ -53,17 +51,30 @@ public class GDXInteractableObject
       this.controlFrame = controlFrame;
       hasMultipleFrames = !(graphicFrame == collisionFrame && collisionFrame == controlFrame);
       highlightModel = new GDXInteractableHighlightModel(modelFileName);
-      poseGizmo.create(camera3D);
-      graphicReferenceFrameGraphic = new GDXReferenceFrameGraphic();
-      controlReferenceFrameGraphic = new GDXReferenceFrameGraphic();
+      selectablePose3DGizmo.create(camera3D);
+      graphicReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+      controlReferenceFrameGraphic = new GDXReferenceFrameGraphic(0.2);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
       mouseIntersects = collisionLink.getIntersects();
-      boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+      boolean isClickedOn = mouseIntersects && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+      boolean isDeletedThisFrame = modified && selectablePose3DGizmo.isSelected() && ImGui.isKeyReleased(input.getDeleteKey());
+      boolean unmodifiedButHovered = !modified && mouseIntersects;
+      boolean becomesModified = unmodifiedButHovered && isClickedOn;
+      boolean executeMotionKeyPressed = ImGui.isKeyReleased(input.getSpaceKey());
+      boolean modifiedButNotSelectedHovered = modified && !selectablePose3DGizmo.isSelected() && mouseIntersects;
 
-      if (!modified && mouseIntersects)
+      if (isDeletedThisFrame)
+      {
+         modified = false;
+         collisionLink.setOverrideTransform(false);
+      }
+
+      selectablePose3DGizmo.process3DViewInput(input, mouseIntersects);
+
+      if (unmodifiedButHovered)
       {
          if (hasMultipleFrames && controlToGraphicTransform == null) // we just need to do this once
          {
@@ -85,25 +96,16 @@ public class GDXInteractableObject
          {
             highlightModel.setPose(controlFrame.getTransformToWorldFrame());
          }
-
-         if (leftMouseReleasedWithoutDrag)
-         {
-            selected = true;
-            modified = true;
-            collisionLink.setOverrideTransform(true);
-            poseGizmo.getTransform().set(controlFrame.getTransformToWorldFrame());
-         }
       }
 
-      if (selected && !mouseIntersects && leftMouseReleasedWithoutDrag)
+      if (becomesModified)
       {
-         selected = false;
+         modified = true;
+         collisionLink.setOverrideTransform(true);
+         selectablePose3DGizmo.getPoseGizmo().getTransformToParent().set(controlFrame.getTransformToWorldFrame());
       }
-      if (modified && mouseIntersects && leftMouseReleasedWithoutDrag)
-      {
-         selected = true;
-      }
-      if (modified && !selected && mouseIntersects)
+
+      if (modifiedButNotSelectedHovered)
       {
          highlightModel.setTransparency(0.7);
       }
@@ -117,37 +119,20 @@ public class GDXInteractableObject
          if (hasMultipleFrames)
          {
             tempTransform.set(controlToCollisionTransform);
-            poseGizmo.getTransform().transform(tempTransform);
+            selectablePose3DGizmo.getPoseGizmo().getTransformToParent().transform(tempTransform);
             collisionLink.setOverrideTransform(true).set(tempTransform);
-            highlightModel.setPose(poseGizmo.getTransform(), controlToGraphicTransform);
+            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent(), controlToGraphicTransform);
          }
          else
          {
-            collisionLink.setOverrideTransform(true).set(poseGizmo.getTransform());
-            highlightModel.setPose(poseGizmo.getTransform());
+            collisionLink.setOverrideTransform(true).set(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
+            highlightModel.setPose(selectablePose3DGizmo.getPoseGizmo().getTransformToParent());
          }
       }
 
-      if (selected)
+      if (selectablePose3DGizmo.isSelected() && executeMotionKeyPressed)
       {
-         poseGizmo.process3DViewInput(input);
-
-         if (ImGui.isKeyReleased(input.getSpaceKey()))
-         {
-            onSpacePressed.run();
-         }
-      }
-
-      if (modified && selected && ImGui.isKeyReleased(input.getDeleteKey()))
-      {
-         selected = false;
-         modified = false;
-         collisionLink.setOverrideTransform(false);
-      }
-
-      if (selected && ImGui.isKeyReleased(input.getEscapeKey()))
-      {
-         selected = false;
+         onSpacePressed.run();
       }
    }
 
@@ -168,10 +153,7 @@ public class GDXInteractableObject
       {
          highlightModel.getRenderables(renderables, pool);
       }
-      if (selected)
-      {
-         poseGizmo.getRenderables(renderables, pool);
-      }
+      selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
    }
 
    public void destroy()
@@ -186,7 +168,7 @@ public class GDXInteractableObject
 
    public Pose3DReadOnly getPose()
    {
-      return poseGizmo.getPose();
+      return selectablePose3DGizmo.getPoseGizmo().getPose();
    }
 
    public void setOnSpacePressed(Runnable onSpacePressed)
