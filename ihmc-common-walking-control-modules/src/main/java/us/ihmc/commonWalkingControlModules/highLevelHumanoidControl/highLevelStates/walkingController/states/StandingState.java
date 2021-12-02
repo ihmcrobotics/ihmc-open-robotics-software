@@ -67,7 +67,13 @@ public class StandingState extends WalkingState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
-      chestManager = managerFactory.getRigidBodyManager(fullRobotModel.getChest());
+
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      if (chest != null)
+         chestManager = managerFactory.getRigidBodyManager(chest);
+      else
+         chestManager = null;
+
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
    }
