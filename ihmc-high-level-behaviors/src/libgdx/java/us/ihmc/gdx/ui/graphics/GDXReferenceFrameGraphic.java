@@ -17,9 +17,9 @@ public class GDXReferenceFrameGraphic implements RenderableProvider
    private final FramePose3D framePose3D = new FramePose3D();
    private final ModelInstance coordinateFrameInstance;
 
-   public GDXReferenceFrameGraphic()
+   public GDXReferenceFrameGraphic(double length)
    {
-      coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
+      coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(length);
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
@@ -39,5 +39,10 @@ public class GDXReferenceFrameGraphic implements RenderableProvider
    public void dispose()
    {
       coordinateFrameInstance.model.dispose();
+   }
+
+   public ModelInstance getModelInstance()
+   {
+      return coordinateFrameInstance;
    }
 }
