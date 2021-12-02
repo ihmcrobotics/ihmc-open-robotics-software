@@ -366,22 +366,26 @@ public class BodyPathLogVisualizerController
       TableColumn<ChildStepProperty, String> expandedColumn = new TableColumn<>("Expanded");
       TableColumn<ChildStepProperty, String> xIndexColumn = new TableColumn<>("X Index");
       TableColumn<ChildStepProperty, String> yIndexColumn = new TableColumn<>("Y Index");
+      TableColumn<ChildStepProperty, String> yawIndexColumn = new TableColumn<>("Yaw Index");
 
       solutionColumn.setCellValueFactory(new PropertyValueFactory<>("solution"));
       expandedColumn.setCellValueFactory(new PropertyValueFactory<>("expanded"));
       xIndexColumn.setCellValueFactory(new PropertyValueFactory<>("xIndex"));
       yIndexColumn.setCellValueFactory(new PropertyValueFactory<>("yIndex"));
+      yawIndexColumn.setCellValueFactory(new PropertyValueFactory<>("yawIndex"));
 
-      solutionColumn.setPrefWidth(90);
-      expandedColumn.setPrefWidth(90);
-      xIndexColumn.setPrefWidth(90);
-      yIndexColumn.setPrefWidth(90);
+      solutionColumn.setPrefWidth(80);
+      expandedColumn.setPrefWidth(80);
+      xIndexColumn.setPrefWidth(80);
+      yIndexColumn.setPrefWidth(80);
+      yawIndexColumn.setPrefWidth(80);
 
       List<TableColumn> defaultColumns = new ArrayList<>();
       defaultColumns.add(solutionColumn);
       defaultColumns.add(expandedColumn);
       defaultColumns.add(xIndexColumn);
       defaultColumns.add(yIndexColumn);
+      defaultColumns.add(yawIndexColumn);
 
       return defaultColumns;
    }
@@ -422,6 +426,11 @@ public class BodyPathLogVisualizerController
       {
          return Integer.toString(parentNode.getYIndex());
       }
+
+      public String getYawIndex()
+      {
+         return Integer.toString(parentNode.getYawIndex());
+      }
    }
 
    public class ChildStepProperty
@@ -449,6 +458,11 @@ public class BodyPathLogVisualizerController
       public String getYIndex()
       {
          return Integer.toString(node.getYIndex());
+      }
+
+      public String getYawIndex()
+      {
+         return Integer.toString(node.getYawIndex());
       }
 
       public double getHeight()
