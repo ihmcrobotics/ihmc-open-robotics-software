@@ -39,7 +39,8 @@ public class AStarBodyPathPlanner
    private final YoDouble deltaHeight = new YoDouble("deltaHeight", registry);
    private final YoDouble snapHeight = new YoDouble("snapHeight", registry);
 
-   private final BodyPathTraversibilityCalculator costCalculator;
+   private final BodyPathTraversibilityCalculator traversibilityCalculator;
+   private final HeightMapObstacleDetector obstacleDetector = new HeightMapObstacleDetector();
 
    private final PriorityQueue<BodyPathLatticePoint> stack;
    private BodyPathLatticePoint startNode, goalNode;
@@ -64,7 +65,7 @@ public class AStarBodyPathPlanner
    public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, ConvexPolygon2D footPolygon)
    {
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
-      costCalculator = new BodyPathTraversibilityCalculator(parameters, footPolygon, gridHeightMap, registry);
+      traversibilityCalculator = new BodyPathTraversibilityCalculator(parameters, footPolygon, gridHeightMap, registry);
 
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
       this.edgeData = new AStarBodyPathEdgeData(allVariables.size());
@@ -98,7 +99,7 @@ public class AStarBodyPathPlanner
       }
 
       this.heightMapData = heightMapData;
-      costCalculator.setHeightMap(heightMapData);
+      traversibilityCalculator.setHeightMap(heightMapData);
    }
 
    private static void packRadialOffsets(HeightMapData heightMapData, int minMaxOffsetXY, double radius, TIntArrayList xOffsets, TIntArrayList yOffsets)
@@ -146,6 +147,7 @@ public class AStarBodyPathPlanner
       expandedNodeSet.clear();
       gridHeightMap.put(startNode, startPose.getZ());
       leastCostNode = startNode;
+      obstacleDetector.compute(heightMapData);
 
       int maxIterations = 3000;
       int iterationCount = 0;
@@ -191,9 +193,16 @@ public class AStarBodyPathPlanner
             }
 
             double distanceCost = xyDistance(node, neighbor);
-            double traversibilityCost = traversibilityCostScale * costCalculator.computeTraversibilityIndicator(neighbor, node);
-            edgeCost.set(distanceCost + traversibilityCost);
-            if (!Double.isFinite(edgeCost.getDoubleValue()) || Double.isNaN(edgeCost.getDoubleValue()))
+            double traversibilityCost = traversibilityCostScale * traversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
+
+            int xIndex = HeightMapTools.coordinateToIndex(node.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+            int yIndex = HeightMapTools.coordinateToIndex(node.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+            double obstacleCost = obstacleDetector.getTerrainCost().get(xIndex, yIndex);
+
+//            edgeCost.set(distanceCost + traversibilityCost);
+            edgeCost.set(distanceCost + traversibilityCost + obstacleCost);
+
+            if (!traversibilityCalculator.isTraversible())
             {
                rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
                graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
