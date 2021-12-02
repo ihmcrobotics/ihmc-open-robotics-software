@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -33,6 +34,16 @@ public class AStarBodyPathPlanner
    private final HashSet<BodyPathLatticePoint> expandedNodeSet = new HashSet<>();
    private final DirectedGraph<BodyPathLatticePoint> graph = new DirectedGraph<>();
    private final List<BodyPathLatticePoint> neighbors = new ArrayList<>();
+
+   /* squared up offsets */
+   private final TIntArrayList xOffsetsSq = new TIntArrayList();
+   private final TIntArrayList yOffsetsSq = new TIntArrayList();
+   private final TIntArrayList yawOffsetsSq = new TIntArrayList();
+
+   /* diagonal offsets */
+   private final TIntArrayList xOffsetsDiag = new TIntArrayList();
+   private final TIntArrayList yOffsetsDiag = new TIntArrayList();
+   private final TIntArrayList yawOffsetsDiag = new TIntArrayList();
 
    private final YoBoolean containsCollision = new YoBoolean("containsCollision", registry);
    private final YoDouble edgeCost = new YoDouble("edgeCost", registry);
@@ -88,6 +99,51 @@ public class AStarBodyPathPlanner
                                          deltaHeight.set(Double.NaN);
                                          rejectionReason.set(null);
                                       });
+
+      int[] xOffsets = new int[]{-1, 0, 1, 2};
+      int[] yOffsets = new int[]{-1, 0, 1};
+      int[] yawOffsets = new int[]{-1, 0, 1};
+
+      for (int i = 0; i < xOffsets.length; i++)
+      {
+         for (int j = 0; j < yOffsets.length; j++)
+         {
+            for (int k = 0; k < yawOffsets.length; k++)
+            {
+               if (i == 0 && j == 0 && k == 0)
+                  continue;
+
+               xOffsetsSq.add(xOffsets[i]);
+               yOffsetsSq.add(yOffsets[j]);
+               yawOffsetsSq.add(yawOffsets[k]);
+            }
+         }
+      }
+
+      xOffsets = new int[] {-1, 0, 1};
+      for (int k = 0; k < yawOffsets.length; k++)
+      {
+         for (int i = 0; i < xOffsets.length; i++)
+         {
+            for (int j = 0; j < yOffsets.length; j++)
+            {
+               if (i == 0 && j == 0 && k == 0)
+                  continue;
+
+               xOffsetsDiag.add(xOffsets[i]);
+               yOffsetsDiag.add(yOffsets[j]);
+               yawOffsetsDiag.add(yawOffsets[k]);
+            }
+         }
+
+         xOffsetsDiag.add(2);
+         yOffsetsDiag.add(1);
+         yawOffsetsDiag.add(yawOffsets[k]);
+
+         xOffsetsDiag.add(1);
+         yOffsetsDiag.add(2);
+         yawOffsetsDiag.add(yawOffsets[k]);
+      }
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -139,8 +195,8 @@ public class AStarBodyPathPlanner
       int minMaxOffsetXY = (int) Math.round(snapRadius / heightMapData.getGridResolutionXY());
       packRadialOffsets(heightMapData, minMaxOffsetXY, snapRadius, xSnapOffsets, ySnapOffsets);
 
-      startNode = new BodyPathLatticePoint(startPose.getX(), startPose.getY());
-      goalNode = new BodyPathLatticePoint(goalPose.getX(), goalPose.getY());
+      startNode = new BodyPathLatticePoint(startPose.getX(), startPose.getY(), startPose.getYaw());
+      goalNode = new BodyPathLatticePoint(goalPose.getX(), goalPose.getY(), goalPose.getYaw());
       stack.clear();
       stack.add(startNode);
       graph.initialize(startNode);
@@ -273,14 +329,41 @@ public class AStarBodyPathPlanner
    private void populateNeighbors(BodyPathLatticePoint latticePoint)
    {
       neighbors.clear();
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex()));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex()));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
+
+      if (latticePoint.getYawIndex() % 2 == 0)
+      {
+         // squared up
+         for (int i = 0; i < xOffsetsSq.size(); i++)
+         {
+            Pair<Integer, Integer> offset = rotate(xOffsetsSq.get(i), yOffsetsSq.get(i), latticePoint.getYawIndex() / 2);
+            neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + offset.getLeft(),
+                                                   latticePoint.getYIndex() + offset.getRight(),
+                                                   latticePoint.getYawIndex() + yawOffsetsSq.get(i)));
+         }
+      }
+      else
+      {
+         // diagonal
+         for (int i = 0; i < xOffsetsDiag.size(); i++)
+         {
+            Pair<Integer, Integer> offset = rotate(xOffsetsDiag.get(i), yOffsetsDiag.get(i), latticePoint.getYawIndex() / 2);
+            neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + offset.getLeft(),
+                                                   latticePoint.getYIndex() + offset.getRight(),
+                                                   latticePoint.getYawIndex() + yawOffsetsDiag.get(i)));
+         }
+      }
+   }
+
+   private static Pair<Integer, Integer> rotate(int xOff, int yOff, int i)
+   {
+      if (i == 0)
+         return Pair.of(xOff, yOff);
+      else if (i == 1)
+         return Pair.of(-yOff, xOff);
+      else if (i == 2)
+         return Pair.of(-xOff, -yOff);
+      else
+         return Pair.of(yOff, -xOff);
    }
 
    private double snap(BodyPathLatticePoint latticePoint)
