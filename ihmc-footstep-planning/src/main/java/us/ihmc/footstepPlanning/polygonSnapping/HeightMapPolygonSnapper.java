@@ -25,13 +25,7 @@ public class HeightMapPolygonSnapper
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
    private double rootMeanSquaredError;
-   private final double areaPerCell;
-
-   public HeightMapPolygonSnapper()
-   {
-      HeightMapParameters parameters = new HeightMapParameters();
-      areaPerCell = MathTools.square(parameters.getGridResolutionXY());
-   }
+   private double area;
 
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap, double snapHeightThreshold)
    {
@@ -40,6 +34,9 @@ public class HeightMapPolygonSnapper
 
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap, double snapHeightThreshold, double minimumHeightToConsider)
    {
+      double areaPerCell = MathTools.square(heightMap.getGridResolutionXY());
+      double epsilonDistance = Math.sqrt(0.5) * heightMap.getGridResolutionXY();
+
       pointsInsidePolyon.clear();
       bestFitPlane.setToNaN();
       Point2D gridCenter = heightMap.getGridCenter();
@@ -49,7 +46,6 @@ public class HeightMapPolygonSnapper
       int maxIndexX = HeightMapTools.coordinateToIndex(polygonToSnap.getMaxX(), gridCenter.getX(), heightMap.getGridResolutionXY(), centerIndex);
       int minIndexY = HeightMapTools.coordinateToIndex(polygonToSnap.getMinY(), gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
       int maxIndexY = HeightMapTools.coordinateToIndex(polygonToSnap.getMaxY(), gridCenter.getY(), heightMap.getGridResolutionXY(), centerIndex);
-      double epsilonDistance = Math.sqrt(0.5) * heightMap.getGridResolutionXY();
 
       for (int xIndex = minIndexX; xIndex <= maxIndexX; xIndex++)
       {
@@ -82,6 +78,7 @@ public class HeightMapPolygonSnapper
       double maxZ = pointsInsidePolyon.stream().mapToDouble(Point3D::getZ).max().getAsDouble();
       double minZ = maxZ - snapHeightThreshold;
       pointsInsidePolyon.removeIf(point -> point.getZ() < minZ);
+      area = pointsInsidePolyon.size() * areaPerCell;
 
       if (pointsInsidePolyon.size() < 3)
       {
@@ -125,6 +122,6 @@ public class HeightMapPolygonSnapper
 
    public double getArea()
    {
-      return pointsInsidePolyon.size() * areaPerCell;
+      return area;
    }
 }

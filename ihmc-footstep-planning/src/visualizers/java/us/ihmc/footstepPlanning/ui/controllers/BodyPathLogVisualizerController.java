@@ -46,7 +46,7 @@ public class BodyPathLogVisualizerController
    private static final List<TableColumn> parentTableDefaultColumns = createDefaultColumns();
    private static final List<TableColumn> childTableDefaultColumns = createDefaultColumns();
 
-   private static final List<String> additionalDefaultColumnsIfPresent = Arrays.asList("containsCollision", "edgeCost", "deltaHeight", "rejectionReason", "snapHeight");
+   private static final List<String> additionalDefaultColumnsIfPresent = Arrays.asList("rejectionReason", "snapHeight", "leftTraversibility", "rightTraversibility", "traversibilitySide");
    private boolean additionalColumnsLoaded = false;
 
    @FXML
