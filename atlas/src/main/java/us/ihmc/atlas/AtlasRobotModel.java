@@ -209,17 +209,17 @@ public class AtlasRobotModel implements DRCRobotModel
          return createRobotDefinition(ColorDefinitions.Orange().derive(0, 1, 1, 1.0 - transparency));
    }
 
-   public RobotDefinition createRobotDefinition(ColorDefinition defaultDiffuseColor)
+   public RobotDefinition createRobotDefinition(ColorDefinition diffuseColor)
    {
-      return createRobotDefinition(new MaterialDefinition(defaultDiffuseColor));
+      return createRobotDefinition(new MaterialDefinition(diffuseColor));
    }
 
-   public RobotDefinition createRobotDefinition(MaterialDefinition defaultMaterialDefinition)
+   public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition)
    {
-      return createRobotDefinition(defaultMaterialDefinition, true);
+      return createRobotDefinition(materialDefinition, true);
    }
 
-   public RobotDefinition createRobotDefinition(MaterialDefinition defaultMaterialDefinition, boolean removeCollisions)
+   public RobotDefinition createRobotDefinition(MaterialDefinition materialDefinition, boolean removeCollisions)
    {
       InputStream stream = selectedVersion.getSdfFileAsStream();
       if (stream == null)
@@ -231,9 +231,10 @@ public class AtlasRobotModel implements DRCRobotModel
                                                                           getContactPointParameters(),
                                                                           jointMap,
                                                                           removeCollisions);
-      RobotDefinitionTools.setDefaultMaterial(robotDefinition,
-                                              defaultMaterialDefinition != null ?
-                                                    defaultMaterialDefinition : new MaterialDefinition(ColorDefinitions.Black()));
+      if (materialDefinition != null)
+         RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, materialDefinition);
+      else
+         RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
 
       getRobotDefinitionMutator().accept(robotDefinition);
 
