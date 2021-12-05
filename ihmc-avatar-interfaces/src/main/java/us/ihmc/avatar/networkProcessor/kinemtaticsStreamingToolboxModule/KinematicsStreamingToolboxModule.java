@@ -172,19 +172,19 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       return getInputTopic(robotName).withTypeName(ToolboxStateMessage.class);
    }
 
-   public static ROS2Topic<KinematicsStreamingToolboxInputCommand> getInputCommandTopic(String robotName)
+   public static ROS2Topic<KinematicsStreamingToolboxInputMessage> getInputCommandTopic(String robotName)
    {
-      return getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxInputCommand.class);
+      return getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxInputMessage.class);
    }
 
-   public static ROS2Topic<KinematicsStreamingToolboxConfigurationCommand> getInputStreamingConfigurationTopic(String robotName)
+   public static ROS2Topic<KinematicsStreamingToolboxConfigurationMessage> getInputStreamingConfigurationTopic(String robotName)
    {
-      return getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxConfigurationCommand.class);
+      return getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxConfigurationMessage.class);
    }
 
-   public static ROS2Topic<KinematicsToolboxConfigurationCommand> getInputToolboxConfigurationTopic(String robotName)
+   public static ROS2Topic<KinematicsToolboxConfigurationMessage> getInputToolboxConfigurationTopic(String robotName)
    {
-      return getInputTopic(robotName).withTypeName(KinematicsToolboxConfigurationCommand.class);
+      return getInputTopic(robotName).withTypeName(KinematicsToolboxConfigurationMessage.class);
    }
 
    public static ROS2Topic<KinematicsToolboxOutputStatus> getOutputStatusTopic(String robotName)
