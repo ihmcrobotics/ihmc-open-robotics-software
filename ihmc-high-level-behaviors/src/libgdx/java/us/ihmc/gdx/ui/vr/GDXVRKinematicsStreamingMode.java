@@ -116,10 +116,9 @@ public class GDXVRKinematicsStreamingMode
 
    public void update()
    {
-
-      KinematicsToolboxOutputStatus latestStatus = status.getLatest();
-      if (latestStatus != null)
+      if (status.getMessageNotification().poll())
       {
+         KinematicsToolboxOutputStatus latestStatus = status.getMessageNotification().read();
          if (latestStatus.getJointNameHash() == -1)
          {
             if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD)
@@ -127,13 +126,15 @@ public class GDXVRKinematicsStreamingMode
             else if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL)
                LogTools.info("Status update: Toolbox initialized successfully.");
          }
-
-         ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootTranslation());
-         ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
-         OneDoFJointBasics[] oneDoFJoints = ghostFullRobotModel.getOneDoFJoints();
-         for (int i = 0; i < oneDoFJoints.length; i++)
+         else
          {
-            oneDoFJoints[i].setQ(latestStatus.getDesiredJointAngles().get(i));
+            ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootTranslation());
+            ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
+            OneDoFJointBasics[] oneDoFJoints = ghostFullRobotModel.getOneDoFJoints();
+            for (int i = 0; i < oneDoFJoints.length; i++)
+            {
+               oneDoFJoints[i].setQ(latestStatus.getDesiredJointAngles().get(i));
+            }
          }
       }
       ghostRobotGraphic.update();
