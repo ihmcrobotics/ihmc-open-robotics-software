@@ -14,9 +14,11 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXRobotModelGraphic;
+import us.ihmc.gdx.ui.missionControl.processes.KinematicsStreamingToolboxProcess;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -33,6 +35,7 @@ public class GDXVRKinematicsStreamingMode
 {
    private final DRCRobotModel robotModel;
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private final KinematicsStreamingToolboxProcess kinematicsStreamingToolboxProcess;
    private GDXRobotModelGraphic ghostRobotGraphic;
    private FullHumanoidRobotModel ghostFullRobotModel;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -40,11 +43,13 @@ public class GDXVRKinematicsStreamingMode
    private ROS2Input<KinematicsToolboxOutputStatus> status;
    private final double streamPeriod = UnitConversions.hertzToSeconds(10.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
+   private final FramePose3D tempFramePose = new FramePose3D();
 
    public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel, ROS2ControllerHelper ros2ControllerHelper)
    {
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
+      kinematicsStreamingToolboxProcess = new KinematicsStreamingToolboxProcess(robotModel);
    }
 
    public void create()
@@ -72,7 +77,6 @@ public class GDXVRKinematicsStreamingMode
          });
       }
 
-
       if (toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
@@ -82,21 +86,24 @@ public class GDXVRKinematicsStreamingMode
             {
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
                message.setEndEffectorHashCode(ghostFullRobotModel.getHand(side).hashCode());
-               message.getDesiredPositionInWorld().set(controller.getPose().getPosition());
-               message.getDesiredOrientationInWorld().set(controller.getPose().getOrientation());
+               tempFramePose.setToZero(controller.getXForwardZUpControllerFrame());
+               tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+               message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+               message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
                message.getControlFrameOrientationInEndEffector().setYawPitchRoll(0.0,
                                                                                  side.negateIfLeftSide(Math.PI / 2.0),
                                                                                  side.negateIfLeftSide(Math.PI / 2.0));
                toolboxInputMessage.getInputs().add().set(message);
-
             });
          }
          vrContext.getHeadset().runIfConnected(headset ->
          {
             KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
             message.setEndEffectorHashCode(ghostFullRobotModel.getHead().hashCode());
-            message.getDesiredPositionInWorld().set(headset.getPose().getPosition());
-            message.getDesiredOrientationInWorld().set(headset.getPose().getOrientation());
+            tempFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
+            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
             message.getControlFramePositionInEndEffector().set(0.1, 0.0, 0.0);
             message.getControlFrameOrientationInEndEffector().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 2.0);
             boolean xSelected = false;
@@ -142,6 +149,7 @@ public class GDXVRKinematicsStreamingMode
 
    public void renderImGuiWidgets()
    {
+      kinematicsStreamingToolboxProcess.renderImGuiWidgets();
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
          ToolboxState requestedState = enabled.get() ? ToolboxState.WAKE_UP : ToolboxState.SLEEP;
@@ -159,5 +167,10 @@ public class GDXVRKinematicsStreamingMode
    public void destroy()
    {
       ghostRobotGraphic.destroy();
+   }
+
+   public KinematicsStreamingToolboxProcess getKinematicsStreamingToolboxProcess()
+   {
+      return kinematicsStreamingToolboxProcess;
    }
 }
