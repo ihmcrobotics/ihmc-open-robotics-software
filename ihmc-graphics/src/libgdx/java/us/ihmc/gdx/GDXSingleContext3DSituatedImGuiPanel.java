@@ -184,7 +184,7 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
          {
             mousePosX = scaledX;
             mousePosY = scaledY;
-            leftMouseDown = controller.getJoystickPressActionData().bState();
+            leftMouseDown = controller.getClickTriggerActionData().bState();
          }
          else
          {
