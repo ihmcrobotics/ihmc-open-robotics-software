@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.fourBarLinkage;
 
-import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDescription.HAS_SHOULDER_JOINT;
-import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDescription.HAS_WRIST_JOINT;
+import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDefinition.HAS_SHOULDER_JOINT;
+import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDefinition.HAS_WRIST_JOINT;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizationSettings;
 import us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageIDController.SineGenerator;
@@ -61,17 +62,17 @@ public class CrossFourBarLinkageWBCController implements RobotController
 
    private final OneDoFJointBasics[] oneDoFJoints;
 
-   public CrossFourBarLinkageWBCController(CrossFourBarLinkageRobotDescription robotDescription, Robot robot, double controlDT)
+   public CrossFourBarLinkageWBCController(CrossFourBarLinkageRobotDefinition robotDefinition, Robot robot, double controlDT)
    {
-      rootBody = CrossFourBarLinkageIDController.toInverseDynamicsRobot(robotDescription);
-      shoulderJoint = HAS_SHOULDER_JOINT ? findJoint(robotDescription.getShoulderJointName()) : null;
-      jointA = findJoint(robotDescription.getJointAName());
-      jointB = findJoint(robotDescription.getJointBName());
-      jointC = findJoint(robotDescription.getJointCName());
-      jointD = findJoint(robotDescription.getJointDName());
+      rootBody = robotDefinition.newInstance(ReferenceFrame.getWorldFrame());
+      shoulderJoint = HAS_SHOULDER_JOINT ? findJoint(robotDefinition.getShoulderJointName()) : null;
+      jointA = findJoint(robotDefinition.getJointAName());
+      jointB = findJoint(robotDefinition.getJointBName());
+      jointC = findJoint(robotDefinition.getJointCName());
+      jointD = findJoint(robotDefinition.getJointDName());
       fourBarKinematicLoop = new FourBarKinematicLoopFunction("fourBar", new RevoluteJointBasics[] {jointA, jointB, jointC, jointD}, 0);
       actuatedJoint = fourBarKinematicLoop.getActuatedJoint();
-      wristJoint = HAS_WRIST_JOINT ? findJoint(robotDescription.getWristJointName()) : null;
+      wristJoint = HAS_WRIST_JOINT ? findJoint(robotDefinition.getWristJointName()) : null;
 
       Random random = new Random(461);
 
