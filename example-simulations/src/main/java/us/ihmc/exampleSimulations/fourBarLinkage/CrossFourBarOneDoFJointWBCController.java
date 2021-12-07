@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.fourBarLinkage;
 
-import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDescription.HAS_SHOULDER_JOINT;
-import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDescription.HAS_WRIST_JOINT;
+import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDefinition.HAS_SHOULDER_JOINT;
+import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDefinition.HAS_WRIST_JOINT;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -24,7 +24,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizationSettings;
 import us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageIDController.SineGenerator;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
@@ -32,9 +32,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.robotics.robotDescription.JointDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.scs2.definition.robot.JointDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -66,7 +66,7 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
 
    private final OneDoFJointBasics[] oneDoFJoints;
 
-   public CrossFourBarOneDoFJointWBCController(CrossFourBarLinkageRobotDescription robotDescription, Robot robot, double controlDT)
+   public CrossFourBarOneDoFJointWBCController(CrossFourBarLinkageRobotDefinition robotDescription, Robot robot, double controlDT)
    {
       rootBody = toInverseDynamicsRobot("elbow",
                                         robotDescription,
@@ -154,24 +154,33 @@ public class CrossFourBarOneDoFJointWBCController implements RobotController
       controllerCore = new WholeBodyControllerCore(controllerCoreToolbox, template, registry);
    }
 
-   private static RigidBodyBasics toInverseDynamicsRobot(String fourBarJointName, RobotDescription robotDescription, String[] fourBarJointNames)
+   private static RigidBodyBasics toInverseDynamicsRobot(String fourBarJointName, RobotDefinition robotDefinition, String[] fourBarJointNames)
    {
-      RigidBodyBasics rootBody = CrossFourBarLinkageIDController.toInverseDynamicsRobot(robotDescription);
+      RigidBodyBasics rootBody = robotDefinition.newInstance(ReferenceFrame.getWorldFrame());
       RevoluteJointBasics[] fourBarJoints = SubtreeStreams.fromChildren(RevoluteJointBasics.class, rootBody)
                                                           .filter(joint -> Stream.of(fourBarJointNames).anyMatch(name -> name.equals(joint.getName())))
                                                           .toArray(RevoluteJointBasics[]::new);
       CrossFourBarJoint fourBarJoint = new CrossFourBarJoint(fourBarJointName, fourBarJoints, 0);
 
-      JointDescription jointDDescription = robotDescription.getJointDescription(fourBarJoint.getJointD().getName());
+      JointDefinition jointDDefinition = robotDefinition.getJointDefinition(fourBarJoint.getJointD().getName());
       fourBarJoint.getJointD().getSuccessor().getChildrenJoints().clear();
-      LinkDescription successorDescription = jointDDescription.getLink();
-      RigidBody successor = CrossFourBarLinkageIDController.createRigidBody(fourBarJoint, successorDescription);
-      if (CrossFourBarLinkageRobotDescription.HAS_WRIST_JOINT)
+      RigidBodyDefinition successorDefinition = jointDDefinition.getSuccessor();
+      RigidBodyBasics successor = successorDefinition.toRigidBody(fourBarJoint);
+      if (CrossFourBarLinkageRobotDefinition.HAS_WRIST_JOINT)
       {
-         JointDescription nextJointDescription = jointDDescription.getChildrenJoints().get(0);
-         CrossFourBarLinkageIDController.addJointRecursive(nextJointDescription, successor);
+         JointDefinition nextJointDefinition = jointDDefinition.getSuccessor().getChildrenJoints().get(0);
+         addJointRecursive(nextJointDefinition, successor);
       }
       return rootBody;
+   }
+
+   static void addJointRecursive(JointDefinition jointDefinition, RigidBodyBasics parentBody)
+   {
+      JointBasics joint = jointDefinition.toJoint(parentBody);
+      RigidBodyBasics successor = jointDefinition.getSuccessor().toRigidBody(joint);
+
+      for (JointDefinition childJoint : jointDefinition.getSuccessor().getChildrenJoints())
+         addJointRecursive(childJoint, successor);
    }
 
    private static Map<OneDoFJointBasics, OneDegreeOfFreedomJoint> jointCorrespondenceList(RigidBodyBasics rootBody, Robot robot)
