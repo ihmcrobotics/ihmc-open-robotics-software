@@ -23,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -48,6 +49,7 @@ public class LogDataProcessorHelper
 {
    private final FullHumanoidRobotModel fullRobotModel;
    private final FullInverseDynamicsStructure inverseDynamicsStructure;
+   private final CenterOfMassStateProvider centerOfMassStateProvider;
    private final HumanoidReferenceFrames referenceFrames;
    private final SDFPerfectSimulatedSensorReader sensorReader;
    private final LogDataRawSensorMap rawSensorMap;
@@ -72,6 +74,7 @@ public class LogDataProcessorHelper
    {
       this.scs = scs;
       fullRobotModel = model.createFullRobotModel();
+      centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       sensorReader = new SDFPerfectSimulatedSensorReader(sdfRobot, fullRobotModel, referenceFrames);
       rawSensorMap = new LogDataRawSensorMap(fullRobotModel, scs);
@@ -85,7 +88,8 @@ public class LogDataProcessorHelper
 
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
 
@@ -132,8 +136,20 @@ public class LogDataProcessorHelper
       String controllerTimeNamespace = DRCControllerThread.class.getSimpleName();
       yoTime = (YoDouble) scs.findVariable(controllerTimeNamespace, "controllerTime");
 
-      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs, fullRobotModel, referenceFrames, stateEstimatorFootSwitches, null, yoTime,
-                                                                          gravityZ, omega0, contactableFeet, controllerDT, updatables, null, null);
+      controllerToolbox = new UpdatableHighLevelHumanoidControllerToolbox(scs,
+                                                                          fullRobotModel,
+                                                                          centerOfMassStateProvider,
+                                                                          referenceFrames,
+                                                                          stateEstimatorFootSwitches,
+                                                                          null,
+                                                                          yoTime,
+                                                                          gravityZ,
+                                                                          omega0,
+                                                                          contactableFeet,
+                                                                          controllerDT,
+                                                                          updatables,
+                                                                          null,
+                                                                          null);
    }
 
    private SideDependentList<FootSwitchInterface> createStateEstimatorFootSwitches(YoVariableHolder yoVariableHolder)
@@ -145,7 +161,7 @@ public class LogDataProcessorHelper
          String namePrefix = contactableFeet.get(robotSide).getName() + "StateEstimator";
          String namespaceEnding = namePrefix + WrenchBasedFootSwitch.class.getSimpleName();
          final YoBoolean hasFootHitGround = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "FilteredFootHitGround");
-         final YoBoolean forceMagnitudePastThreshhold = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix +  "ForcePastThresh");
+         final YoBoolean forceMagnitudePastThreshhold = (YoBoolean) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "ForcePastThresh");
          final YoDouble footLoadPercentage = (YoDouble) yoVariableHolder.findVariable(namespaceEnding, namePrefix + "FootLoadPercentage");
 
          FootSwitchInterface footSwitch = new FootSwitchInterface()

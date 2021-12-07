@@ -12,7 +12,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -156,7 +156,7 @@ public class HumanoidRobotEKFWithSimpleJoints implements StateEstimatorControlle
    }
 
    @Override
-   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
+   public void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       leggedRobotEKF.initializeEstimator(rootJointTransform, jointPositions);
    }

@@ -10,11 +10,12 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.GDX3DSituatedText;
@@ -23,7 +24,6 @@ import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -41,8 +41,8 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
    private final Function<Integer, Color> colorFunction = new GDXIDMappedColorFunction();
    private final SideDependentList<Color> footstepColors = new SideDependentList<>();
    {
-      footstepColors.set(RobotSide.LEFT, new Color(1.0f, 0.0f, 0.0f, 1.0f));
-      footstepColors.set(RobotSide.RIGHT, new Color(0.0f, 0.5019608f, 0.0f, 1.0f));
+      footstepColors.set(RobotSide.LEFT, new Color(GDXFootstepGraphic.LEFT_FOOT_RED_COLOR));
+      footstepColors.set(RobotSide.RIGHT, new Color(GDXFootstepGraphic.RIGHT_FOOT_GREEN_COLOR));
    }
    private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
    private volatile Runnable buildMeshAndCreateModelInstance = null;
@@ -51,9 +51,9 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ArrayList<GDX3DSituatedText> textRenderables = new ArrayList<>();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final ReferenceFrame footstepFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("footstepFrame",
-                                                                                                                       ReferenceFrame.getWorldFrame(),
-                                                                                                                       tempTransform);
+   private final ReferenceFrame footstepFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("footstepFrame",
+                                                                                                                ReferenceFrame.getWorldFrame(),
+                                                                                                                tempTransform);
    private final FramePose3D textFramePose = new FramePose3D();
 
    public GDXFootstepPlanGraphic(SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints)
@@ -189,7 +189,7 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
 
          modelBuilder.begin();
          Mesh mesh = meshBuilder.generateMesh();
-         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
+         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
          Material material = new Material();
          Texture paletteTexture = GDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));

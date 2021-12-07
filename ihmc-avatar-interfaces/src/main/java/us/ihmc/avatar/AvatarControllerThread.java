@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
@@ -26,6 +26,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -79,7 +81,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    public AvatarControllerThread(String robotName,
                                  DRCRobotModel robotModel,
-                                 DRCRobotInitialSetup robotInitialSetup,
+                                 RobotInitialSetup<?> robotInitialSetup,
                                  HumanoidRobotSensorInformation sensorInformation,
                                  HighLevelHumanoidControllerFactory controllerFactory,
                                  HumanoidRobotContextDataFactory contextDataFactory,
@@ -96,10 +98,12 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
       HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(controllerFullRobotModel.getOneDoFJoints().length);
       ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(controllerFullRobotModel.getForceSensorDefinitions()));
+      CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
       CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(controllerFullRobotModel);
       LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controllerFullRobotModel.getControllableOneDoFJoints());
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
+      contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForController);
       contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
       contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
@@ -107,7 +111,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, ControllerCrashNotificationPacket.class,
+      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
+                                                                      ControllerCrashNotificationPacket.class,
                                                                       ROS2Tools.getControllerOutputTopic(robotName));
 
       if (ALLOW_MODEL_CORRUPTION)
@@ -119,12 +124,21 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
          fullRobotModelCorruptor = null;
       }
 
-
       JointBasics[] arrayOfJointsToIgnore = createListOfJointsToIgnore(controllerFullRobotModel, robotModel, sensorInformation);
 
-      robotController = createHighLevelController(controllerFullRobotModel, controllerFactory, controllerTime, robotModel.getControllerDT(), gravity,
-                                                  forceSensorDataHolderForController, centerOfPressureDataHolderForEstimator, sensorInformation,
-                                                  desiredJointDataHolder, yoGraphicsListRegistry, registry, arrayOfJointsToIgnore);
+      robotController = createHighLevelController(controllerFullRobotModel,
+                                                  controllerFactory,
+                                                  controllerTime,
+                                                  robotModel.getControllerDT(),
+                                                  gravity,
+                                                  forceSensorDataHolderForController,
+                                                  centerOfMassDataHolderForController,
+                                                  centerOfPressureDataHolderForEstimator,
+                                                  sensorInformation,
+                                                  desiredJointDataHolder,
+                                                  yoGraphicsListRegistry,
+                                                  registry,
+                                                  arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, robotMotionStatusHolder);
 
@@ -140,7 +154,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       ParameterLoaderHelper.loadParameters(this, robotModel, registry);
    }
 
-   public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel, WholeBodyControllerParameters<RobotSide> robotModel,
+   public static JointBasics[] createListOfJointsToIgnore(FullHumanoidRobotModel controllerFullRobotModel,
+                                                          WholeBodyControllerParameters<RobotSide> robotModel,
                                                           HumanoidRobotSensorInformation sensorInformation)
    {
       ArrayList<JointBasics> listOfJointsToIgnore = new ArrayList<>();
@@ -183,21 +198,28 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       return fullRobotModelCorruptor;
    }
 
-   private ModularRobotController createHighLevelController(FullHumanoidRobotModel controllerModel, HighLevelHumanoidControllerFactory controllerFactory,
-                                                            YoDouble yoTime, double controlDT, double gravity,
+   private ModularRobotController createHighLevelController(FullHumanoidRobotModel controllerModel,
+                                                            HighLevelHumanoidControllerFactory controllerFactory,
+                                                            YoDouble yoTime,
+                                                            double controlDT,
+                                                            double gravity,
                                                             ForceSensorDataHolderReadOnly forceSensorDataHolderForController,
+                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                             CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                                             HumanoidRobotSensorInformation sensorInformation,
                                                             JointDesiredOutputListBasics lowLevelControllerOutput,
-                                                            YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry,
+                                                            YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                            YoRegistry registry,
                                                             JointBasics... jointsToIgnore)
    {
       if (CREATE_COM_CALIBRATION_TOOL)
       {
          try
          {
-            CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel, forceSensorDataHolderForController,
-                                                                                                      yoGraphicsListRegistry, registry);
+            CenterOfMassCalibrationTool centerOfMassCalibrationTool = new CenterOfMassCalibrationTool(controllerModel,
+                                                                                                      forceSensorDataHolderForController,
+                                                                                                      yoGraphicsListRegistry,
+                                                                                                      registry);
             controllerFactory.addUpdatable(centerOfMassCalibrationTool);
          }
          catch (Exception e)
@@ -206,9 +228,17 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
          }
       }
 
-      RobotController robotController = controllerFactory.getController(controllerModel, controlDT, gravity, yoTime, yoGraphicsListRegistry, sensorInformation,
-                                                                        forceSensorDataHolderForController, centerOfPressureDataHolderForEstimator,
-                                                                        lowLevelControllerOutput, jointsToIgnore);
+      RobotController robotController = controllerFactory.getController(controllerModel,
+                                                                        controlDT,
+                                                                        gravity,
+                                                                        yoTime,
+                                                                        yoGraphicsListRegistry,
+                                                                        sensorInformation,
+                                                                        forceSensorDataHolderForController,
+                                                                        centerOfMassDataHolderForController,
+                                                                        centerOfPressureDataHolderForEstimator,
+                                                                        lowLevelControllerOutput,
+                                                                        jointsToIgnore);
 
       ModularRobotController modularRobotController = new ModularRobotController("DRCMomentumBasedController");
       modularRobotController.addRobotController(robotController);
@@ -253,6 +283,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       humanoidRobotContextData.setEstimatorRan(false);
    }
 
+   @Override
    public void run()
    {
       runController.set(humanoidRobotContextData.getEstimatorRan());
@@ -289,6 +320,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       }
    }
 
+   @Override
    public YoRegistry getYoVariableRegistry()
    {
       return registry;
@@ -309,11 +341,13 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       robotController.addRobotController(controller);
    }
 
+   @Override
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return controllerFullRobotModel;
    }
 
+   @Override
    public HumanoidRobotContextData getHumanoidRobotContextData()
    {
       return humanoidRobotContextData;

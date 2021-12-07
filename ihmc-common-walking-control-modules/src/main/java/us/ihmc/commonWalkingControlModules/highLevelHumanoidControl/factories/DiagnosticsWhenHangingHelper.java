@@ -95,7 +95,7 @@ public class DiagnosticsWhenHangingHelper
       }
       else
       {
-         jointZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), jointFrame, jointName + "ZUp");
+         jointZUpFrame = new ZUpFrame(jointFrame, jointName + "ZUp");
       }
 
       MultiBodySystemReadOnly subSystem;

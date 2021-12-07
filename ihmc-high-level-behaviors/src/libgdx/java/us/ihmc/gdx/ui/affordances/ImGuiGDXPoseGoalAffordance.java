@@ -12,6 +12,7 @@ import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImFloat;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -31,8 +32,6 @@ import us.ihmc.gdx.input.editor.GDXUITrigger;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.vr.GDXVRDevice;
-import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -40,8 +39,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.Consumer;
-
-import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
 {
@@ -87,35 +84,6 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
       {
          placingGoal = false;
       });
-
-      GDXVRManager vrManager = baseUI.getVRManager();
-      if (GDXVRManager.isVREnabled())
-      {
-         vrManager.getContext().addListener(new GDXVRDeviceAdapter() // TODO: Make this kind of thing less verbose
-         {
-            @Override
-            public void buttonPressed(GDXVRDevice device, int button)
-            {
-               if (device == vrManager.getControllers().get(RobotSide.LEFT))
-               {
-                  if (button == SteamVR_Trigger)
-                  {
-                     placingGoal = true;
-                  }
-               }
-            }
-
-            @Override
-            public void buttonReleased(GDXVRDevice device, int button)
-            {
-               if (device == vrManager.getControllers().get(RobotSide.LEFT) && button == SteamVR_Trigger)
-               {
-                  placingGoal = false;
-                  placedPoseConsumer.accept(goalPoseForReading);
-               }
-            }
-         });
-      }
 
       clear();
    }
@@ -204,11 +172,22 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
 
    public void handleVREvents(GDXVRManager vrManager)
    {
-      if (placingGoal)
+      vrManager.getContext().getController(RobotSide.LEFT).runIfConnected(controller ->
       {
-         vrManager.getControllers().get(RobotSide.LEFT).getPose(ReferenceFrame.getWorldFrame(), sphere.transform);
-         vrManager.getControllers().get(RobotSide.LEFT).getPose(ReferenceFrame.getWorldFrame(), arrow.transform);
-      }
+         InputDigitalActionData triggerClick = controller.getClickTriggerActionData();
+         if (triggerClick.bChanged() && triggerClick.bState())
+         {
+            placingGoal = true;
+         }
+         if (triggerClick.bChanged() && !triggerClick.bState())
+         {
+            placingGoal = false;
+            placedPoseConsumer.accept(goalPoseForReading);
+         }
+
+         controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), sphere.transform);
+         controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), arrow.transform);
+      });
    }
 
    public void renderPlaceGoalButton()

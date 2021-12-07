@@ -2,7 +2,6 @@ package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +18,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
 import us.ihmc.commons.thread.ThreadTools;
@@ -35,15 +35,16 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsPlanningToolboxAPI.KinematicsPlanningToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -61,7 +62,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public abstract class AvatarKinematicsPlanningToolboxControllerTest implements MultiRobotTestInterface
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
+   private static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
@@ -107,8 +108,12 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       StatusMessageOutputManager statusOutputManager = new StatusMessageOutputManager(KinematicsPlanningToolboxModule.supportedStatus());
 
-      toolboxController = new KinematicsPlanningToolboxController(robotModel, desiredFullRobotModel, commandInputManager, statusOutputManager,
-                                                                  yoGraphicsListRegistry, mainRegistry);
+      toolboxController = new KinematicsPlanningToolboxController(robotModel,
+                                                                  desiredFullRobotModel,
+                                                                  commandInputManager,
+                                                                  statusOutputManager,
+                                                                  yoGraphicsListRegistry,
+                                                                  mainRegistry);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       toolboxUpdater = createToolboxUpdater();
@@ -117,9 +122,9 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       robot.setGravity(0);
 
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
-      RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
-      robotDescription.setName("Ghost");
-      HumanoidKinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
+      RobotDefinition robotDefinition = ghostRobotModel.getRobotDefinition();
+      robotDefinition.setName("Ghost");
+      RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, ghostMaterial);
       ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -233,7 +238,10 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel,
+                                                                                                                              getRobotModel(),
+                                                                                                                              true,
+                                                                                                                              true));
 
       int numberOfIterations = 350;
 
@@ -294,7 +302,10 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel,
+                                                                                                                              getRobotModel(),
+                                                                                                                              true,
+                                                                                                                              true));
 
       int numberOfIterations = 350;
 
@@ -336,7 +347,10 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel,
+                                                                                                                              getRobotModel(),
+                                                                                                                              true,
+                                                                                                                              true));
 
       int numberOfIterations = 350;
 
@@ -389,7 +403,10 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel,
+                                                                                                                              getRobotModel(),
+                                                                                                                              true,
+                                                                                                                              true));
 
       int numberOfIterations = 350;
 
@@ -451,7 +468,10 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       RobotConfigurationData robotConfigurationData = HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData(initialFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
+      toolboxController.updateCapturabilityBasedStatus(HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus(initialFullRobotModel,
+                                                                                                                              getRobotModel(),
+                                                                                                                              true,
+                                                                                                                              true));
 
       int numberOfIterations = 350;
 
@@ -499,7 +519,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       DRCRobotModel robotModel = getRobotModel();
       FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotModel.getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot, robotModel.getJointMap());
+      robotModel.getDefaultRobotInitialSetup(0.0, 0.0).initializeRobot(robot);
       DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
       SensorDataContext sensorDataContext = new SensorDataContext();

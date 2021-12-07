@@ -283,6 +283,7 @@ public class WholeBodyControllerCore
       if (rootJointDesiredConfigurationData != null)
          rootJointDesiredConfigurationData.completeWith(inverseDynamicsOutputForRootJoint);
       controllerCoreOutput.setLinearMomentumRate(inverseDynamicsSolver.getAchievedMomentumRateLinear());
+      controllerCoreOutput.setAngularMomentumRate(inverseDynamicsSolver.getAchievedMomentumRateAngular());
    }
 
    private void doInverseKinematics()
@@ -312,6 +313,7 @@ public class WholeBodyControllerCore
       if (rootJointDesiredConfigurationData != null)
          rootJointDesiredConfigurationData.completeWith(virtualModelControlOutputForRootJoint);
       controllerCoreOutput.setLinearMomentumRate(virtualModelControlSolver.getAchievedMomentumRateLinear());
+      controllerCoreOutput.setAngularMomentumRate(virtualModelControlSolver.getAchievedMomentumRateAngular());
    }
 
    private void doNothing()

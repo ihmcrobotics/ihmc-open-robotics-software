@@ -2,7 +2,6 @@ package us.ihmc.gdx.lighting;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
@@ -12,6 +11,7 @@ import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader.Inputs;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader.Setters;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.log.LogTools;
 
 import java.util.function.Consumer;
@@ -78,23 +78,23 @@ public class GDXShadowMapShader extends BaseShader
    public void begin(Camera camera, RenderContext context)
    {
       super.begin(camera, context);
-      context.setDepthTest(GL20.GL_LEQUAL);
-      context.setCullFace(GL20.GL_BACK);
+      context.setDepthTest(GL41.GL_LEQUAL);
+      context.setCullFace(GL41.GL_BACK);
    }
 
    @Override
    public void render(final Renderable renderable, final Attributes combinedAttributes)
    {
       if (!combinedAttributes.has(BlendingAttribute.Type))
-         context.setBlending(false, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+         context.setBlending(false, GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA);
 
-      context.setDepthTest(GL20.GL_LEQUAL);
-      context.setBlending(false, GL20.GL_ONE, GL20.GL_ONE); // Deactivate blending on first pass
+      context.setDepthTest(GL41.GL_LEQUAL);
+      context.setBlending(false, GL41.GL_ONE, GL41.GL_ONE); // Deactivate blending on first pass
       super.render(renderable, combinedAttributes);
       for (GDXPointLight light : shadowManager.getPointLights())
       {
-         context.setDepthTest(GL20.GL_LEQUAL);
-         context.setBlending(true, GL20.GL_ONE, GL20.GL_ONE); // Activate additive blending
+         context.setDepthTest(GL41.GL_LEQUAL);
+         context.setBlending(true, GL41.GL_ONE, GL41.GL_ONE); // Activate additive blending
          renderLight(renderable, combinedAttributes, light::apply);
       }
    }
@@ -102,7 +102,7 @@ public class GDXShadowMapShader extends BaseShader
    private void renderLight(Renderable renderable, Attributes combinedAttributes, Consumer<ShaderProgram> light)
    {
       light.accept(program);
-      context.setBlending(true, GL20.GL_ONE, GL20.GL_ONE); // Activate additive blending
+      context.setBlending(true, GL41.GL_ONE, GL41.GL_ONE); // Activate additive blending
       renderable.meshPart.render(program);
    }
 }

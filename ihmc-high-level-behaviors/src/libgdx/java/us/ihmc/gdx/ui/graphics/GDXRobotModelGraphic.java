@@ -1,21 +1,23 @@
 package us.ihmc.gdx.ui.graphics;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.GDXGraphics3DNode;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements RenderableProvider
 {
@@ -28,14 +30,14 @@ public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements Renderab
       super(title);
    }
 
-   public void loadRobotModelAndGraphics(RobotDescription robotDescription, RigidBodyBasics rootBody)
+   public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics rootBody)
    {
-      loadRobotModelAndGraphics(robotDescription, rootBody, new Object());
+      loadRobotModelAndGraphics(robotDefinition, rootBody, new Object());
    }
 
    // syncObject is so that robots can be loaded in parallel but also with different default textures
    // This sucks and SDFGraphics3DObject.DEFAULT_APPEARANCE is a terrible design
-   public void loadRobotModelAndGraphics(RobotDescription robotDescription, RigidBodyBasics rootBody, Object syncObject)
+   public void loadRobotModelAndGraphics(RobotDefinition robotDefinition, RigidBodyBasics rootBody, Object syncObject)
    {
       if (robotRootNode != null)
          robotRootNode.destroy();
@@ -44,7 +46,7 @@ public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements Renderab
       {
          synchronized (syncObject)
          {
-            graphicsRobot = new GraphicsIDRobot(robotDescription.getName(), rootBody, robotDescription);
+            graphicsRobot = new GraphicsIDRobot(robotDefinition.getName(), rootBody, RobotDefinitionConverter.toGraphicsObjectsHolder(robotDefinition));
             robotRootNode = new GDXGraphics3DNode(graphicsRobot.getRootNode());
             //      robotRootNode.setMouseTransparent(true);
             addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode);
@@ -91,7 +93,7 @@ public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements Renderab
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (robotLoadedActivator.poll())
+      if (isActive() && robotLoadedActivator.poll())
       {
          robotRootNode.getRenderables(renderables, pool);
       }

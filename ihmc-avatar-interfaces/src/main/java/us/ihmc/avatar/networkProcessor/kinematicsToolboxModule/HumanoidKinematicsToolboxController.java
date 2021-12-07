@@ -21,7 +21,7 @@ import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
@@ -156,18 +156,26 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private boolean hasMultiContactBalanceStatus = false;
    private final MultiContactBalanceStatus multiContactBalanceStatusInternal = new MultiContactBalanceStatus();
 
-   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                              FullHumanoidRobotModel desiredFullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                              double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
+                                              StatusMessageOutputManager statusOutputManager,
+                                              FullHumanoidRobotModel desiredFullRobotModel,
+                                              FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                              double updateDT,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoRegistry parentRegistry)
    {
       this(commandInputManager, statusOutputManager, desiredFullRobotModel, createListOfControllableRigidBodies(desiredFullRobotModel), fullRobotModelFactory,
            updateDT, yoGraphicsListRegistry, parentRegistry);
    }
 
-   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                              FullHumanoidRobotModel desiredFullRobotModel, Collection<? extends RigidBodyBasics> controllableRigidBodyies,
-                                              FullHumanoidRobotModelFactory fullRobotModelFactory, double updateDT,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
+                                              StatusMessageOutputManager statusOutputManager,
+                                              FullHumanoidRobotModel desiredFullRobotModel,
+                                              Collection<? extends RigidBodyBasics> controllableRigidBodyies,
+                                              FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                              double updateDT,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoRegistry parentRegistry)
    {
       super(commandInputManager, statusOutputManager, desiredFullRobotModel.getRootJoint(), getAllJointsExcludingHands(desiredFullRobotModel),
             controllableRigidBodyies, updateDT, yoGraphicsListRegistry, parentRegistry);
@@ -256,9 +264,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void setInitialRobotConfiguration(DRCRobotModel robotModel)
    {
       Map<OneDoFJointBasics, Double> privilegedConfiguration = new HashMap<>();
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      defaultRobotInitialSetup.initializeRobot(robot, robotModel.getJointMap());
+      defaultRobotInitialSetup.initializeRobot(robot);
 
       for (OneDoFJointBasics joint : getDesiredOneDoFJoint())
       {
@@ -657,6 +665,21 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public FullHumanoidRobotModel getDesiredFullRobotModel()
    {
       return desiredFullRobotModel;
+   }
+
+   public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
+   {
+      return desiredReferenceFrames;
+   }
+
+   public FullHumanoidRobotModel getCurrentFullRobotModel()
+   {
+      return currentFullRobotModel;
+   }
+
+   public CommonHumanoidReferenceFrames getCurrentReferenceFrames()
+   {
+      return currentReferenceFrames;
    }
 
    private static class ContactingRigidBody

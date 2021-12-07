@@ -22,7 +22,11 @@ import us.ihmc.commonWalkingControlModules.momentumControlCore.CoMHeightControll
 import us.ihmc.commonWalkingControlModules.momentumControlCore.HeightController;
 import us.ihmc.commonWalkingControlModules.momentumControlCore.PelvisHeightController;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -31,6 +35,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
@@ -141,12 +146,12 @@ public class LinearMomentumRateControlModule
 
    private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
 
-
    public LinearMomentumRateControlModule(HighLevelHumanoidControllerToolbox controllerToolbox,
                                           WalkingControllerParameters walkingControllerParameters,
                                           YoRegistry parentRegistry)
    {
-      this(controllerToolbox.getReferenceFrames(),
+      this(controllerToolbox,
+           controllerToolbox.getReferenceFrames(),
            controllerToolbox.getContactableFeet(),
            controllerToolbox.getFullRobotModel().getElevator(),
            walkingControllerParameters,
@@ -156,7 +161,8 @@ public class LinearMomentumRateControlModule
            controllerToolbox.getYoGraphicsListRegistry());
    }
 
-   public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames,
+   public LinearMomentumRateControlModule(CenterOfMassStateProvider centerOfMassStateProvider,
+                                          CommonHumanoidReferenceFrames referenceFrames,
                                           SideDependentList<ContactableFoot> contactableFeet,
                                           RigidBodyBasics elevator,
                                           WalkingControllerParameters walkingControllerParameters,
@@ -192,10 +198,10 @@ public class LinearMomentumRateControlModule
       controlledCoMAcceleration = new YoFrameVector3D("ControlledCoMAcceleration", "", centerOfMassFrame, registry);
       desiredCoPInMidFeet = new FramePoint2D(midFootZUpFrame);
 
-      capturePointCalculator = new CapturePointCalculator(centerOfMassFrame, elevator);
+      capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
 
       pelvisHeightController = new PelvisHeightController(referenceFrames.getPelvisFrame(), elevator.getBodyFixedFrame(), registry);
-      comHeightController = new CoMHeightController(capturePointCalculator.getCenterOfMassJacobian(), registry);
+      comHeightController = new CoMHeightController(centerOfMassStateProvider, registry);
 
       DoubleProvider capturePointVelocityAlpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(capturePointVelocityBreakFrequency.getValue(),
                                                                                                                        controlDT);
@@ -228,7 +234,6 @@ public class LinearMomentumRateControlModule
                                         controlDT,
                                         registry,
                                         yoGraphicsListRegistry);
-
 
       parentRegistry.addChild(registry);
    }
@@ -286,8 +291,8 @@ public class LinearMomentumRateControlModule
    }
 
    /**
-    * Gets the output of this module that will be used by the walking state machine to adjust footsteps and check
-    * transition conditions.
+    * Gets the output of this module that will be used by the walking state machine to adjust footsteps
+    * and check transition conditions.
     *
     * @return output data of this module meant for the walking state machine.
     */
@@ -317,11 +322,12 @@ public class LinearMomentumRateControlModule
    }
 
    /**
-    * Computes the {@link MomentumRateCommand} and the {@link CenterOfPressureCommand} for the controller core.
+    * Computes the {@link MomentumRateCommand} and the {@link CenterOfPressureCommand} for the
+    * controller core.
     * <p>
     * This methods requires that the input to this module from the walking state machine is set via
-    * {@link #setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput)} which provides quantities such as
-    * the desired ICP.
+    * {@link #setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput)} which provides
+    * quantities such as the desired ICP.
     *
     * @return whether the computation was successful.
     */
@@ -368,7 +374,8 @@ public class LinearMomentumRateControlModule
     * Computes the achieved CMP location.
     * <p>
     * This method requires that the input to this module from the controller core is set via
-    * {@link #setInputFromControllerCore(ControllerCoreOutput)} to provide the achieved linear momentum rate.
+    * {@link #setInputFromControllerCore(ControllerCoreOutput)} to provide the achieved linear momentum
+    * rate.
     */
    public void computeAchievedCMP()
    {
@@ -417,7 +424,7 @@ public class LinearMomentumRateControlModule
       }
    }
 
-   private static <T extends FeedbackControlCommand<T>> double  handleHeightControlCommand(T command, HeightController<T> controller)
+   private static <T extends FeedbackControlCommand<T>> double handleHeightControlCommand(T command, HeightController<T> controller)
    {
       controller.compute(command);
       return controller.getHeightAcceleration();

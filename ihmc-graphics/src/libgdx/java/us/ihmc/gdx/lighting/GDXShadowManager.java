@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.Shader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
@@ -115,10 +116,10 @@ public class GDXShadowManager
       framebuffer.begin();
 
       if (useViewport)
-         Gdx.gl.glViewport(this.x, this.y, this.width, this.height);
+         GL41.glViewport(this.x, this.y, this.width, this.height);
 
-      Gdx.gl.glClearColor(0.4f, 0.4f, 0.4f, 0.4f);
-      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+      GL41.glClearColor(0.4f, 0.4f, 0.4f, 0.4f);
+      GL41.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
       // We must individually render every renderable here or everything breaks and things are bad.
       // It's annoying, but there is no performance hit, so it's okay.

@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.model.NodePart;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
@@ -99,7 +99,7 @@ public class DynamicGDXModel
             mesh = buildMesh.get();
          if (mesh != null)
          {
-            meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
+            meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
             node.parts.add(new NodePart(meshPart, material));
          }
       }

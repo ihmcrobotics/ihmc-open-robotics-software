@@ -2,20 +2,19 @@ package us.ihmc.avatar.multiContact;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.awt.Color;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -30,8 +29,8 @@ public abstract class HumanoidRobotTransformOptimizerTest
    private DRCRobotModel robotModelB;
    private DRCRobotModel robotModelBCorrected;
 
-   private static final YoAppearanceRGBColor robotBApperance = new YoAppearanceRGBColor(Color.decode("#9e8329"), 0.25); // Some darkish orangish
-   private static final YoAppearanceRGBColor robotBCorrectedApperance = new YoAppearanceRGBColor(Color.decode("#35824a"), 0.75); // Some darkish green
+   private static final MaterialDefinition robotBMaterial = new MaterialDefinition(ColorDefinitions.parse("#9e8329").derive(0, 1, 1, 0.75)); // Some darkish orangish
+   private static final MaterialDefinition robotBCorrectedMaterial = new MaterialDefinition(ColorDefinitions.parse("#35824a").derive(0, 1, 1, 0.25)); // Some darkish green
 
    @BeforeEach
    public void setup()
@@ -40,12 +39,11 @@ public abstract class HumanoidRobotTransformOptimizerTest
       robotModelB = createNewRobotModel();
       robotModelBCorrected = createNewRobotModel();
 
-      robotModelA.getRobotDescription().setName("RobotA");
-      robotModelB.getRobotDescription().setName("RobotB");
-      robotModelBCorrected.getRobotDescription().setName("RobotBCorrected");
-      HumanoidKinematicsToolboxControllerTest.recursivelyModifyGraphics(robotModelB.getRobotDescription().getChildrenJoints().get(0), robotBApperance);
-      HumanoidKinematicsToolboxControllerTest.recursivelyModifyGraphics(robotModelBCorrected.getRobotDescription().getChildrenJoints().get(0),
-                                                                robotBCorrectedApperance);
+      robotModelA.getRobotDefinition().setName("RobotA");
+      robotModelB.getRobotDefinition().setName("RobotB");
+      robotModelBCorrected.getRobotDefinition().setName("RobotBCorrected");
+      RobotDefinitionTools.setRobotDefinitionMaterial(robotModelB.getRobotDefinition(), robotBMaterial);
+      RobotDefinitionTools.setRobotDefinitionMaterial(robotModelBCorrected.getRobotDefinition(), robotBCorrectedMaterial);
    }
 
    @AfterEach
@@ -66,7 +64,7 @@ public abstract class HumanoidRobotTransformOptimizerTest
       ThreadTools.sleepForever();
    }
 
-   public void runTest(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupA, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupB,
+   public void runTest(RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupA, RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetupB,
                        double epsilon)
    {
       HumanoidFloatingRootJointRobot scsRobotA = robotModelA.createHumanoidFloatingRootJointRobot(false);
@@ -77,9 +75,9 @@ public abstract class HumanoidRobotTransformOptimizerTest
       FullHumanoidRobotModel idRobotB = robotModelB.createFullRobotModel();
       FullHumanoidRobotModel idRobotBCorrected = robotModelBCorrected.createFullRobotModel();
 
-      initialSetupA.initializeRobot(scsRobotA, robotModelA.getJointMap());
-      initialSetupB.initializeRobot(scsRobotB, robotModelB.getJointMap());
-      initialSetupB.initializeRobot(scsRobotBCorrected, robotModelBCorrected.getJointMap());
+      initialSetupA.initializeRobot(scsRobotA);
+      initialSetupB.initializeRobot(scsRobotB);
+      initialSetupB.initializeRobot(scsRobotBCorrected);
 
       copyRobotState(scsRobotA, idRobotA);
       copyRobotState(scsRobotB, idRobotB);

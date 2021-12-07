@@ -21,7 +21,7 @@ public class GDXMessagerRobotVisualizer extends GDXRobotModelGraphic
                                      MessagerAPIFactory.Topic<RobotConfigurationData> topic)
    {
       super(robotModel.getSimpleRobotName() + " Robot Visualizer (Messager)");
-      loadRobotModelAndGraphics(robotModel.getRobotDescription(), fullRobotModel.getElevator());
+      loadRobotModelAndGraphics(robotModel.getRobotDefinition(), fullRobotModel.getElevator());
       syncedRobot = new MessagerSyncedRobotModel(messager, topic, fullRobotModel, robotModel.getSensorInformation());
       scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, 1, true);
    }

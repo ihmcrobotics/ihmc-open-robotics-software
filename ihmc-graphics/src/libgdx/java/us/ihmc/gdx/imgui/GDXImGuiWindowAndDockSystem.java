@@ -11,8 +11,11 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
 import imgui.type.ImString;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import org.lwjgl.system.Callback;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
@@ -27,6 +30,7 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SEVERITY_HIGH;
 
 public class GDXImGuiWindowAndDockSystem
 {
@@ -42,6 +46,7 @@ public class GDXImGuiWindowAndDockSystem
    private HybridFile imGuiSettingsFile;
    private HybridFile panelsFile;
    private boolean isFirstRenderCall = true;
+   private Callback debugMessageCallback;
 
    public GDXImGuiWindowAndDockSystem()
    {
@@ -64,22 +69,29 @@ public class GDXImGuiWindowAndDockSystem
       {
          throw new IllegalStateException("Unable to initialize GLFW");
       }
-//               glfwDefaultWindowHints();
-//               if (SystemUtils.IS_OS_MAC) {
-//                  glslVersion = "#version 150";
-//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-//                  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-//                  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL20.GL_TRUE);            // Required on Mac
-//               } else {
-//                  glslVersion = "#version 130";
-//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-//               }
-//
-//               GL.createCapabilities();
+
+      if (GDXTools.ENABLE_OPENGL_DEBUGGER)
+         glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+
+      // TODO: Something needed here for Mac support?
+      // glfwDefaultWindowHints();
+      // if (SystemUtils.IS_OS_MAC) {
+      //    glslVersion = "#version 150";
+      //    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+      //    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+      //    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+      //    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL41.GL_TRUE);            // Required on Mac
+      // } else {
+      //    glslVersion = "#version 130";
+      //    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+      //    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+      // }
+      // GL.createCapabilities();
 
       ImGui.createContext();
+
+      if (GDXTools.ENABLE_OPENGL_DEBUGGER)
+         debugMessageCallback = GDXTools.setupDebugMessageCallback(GL_DEBUG_SEVERITY_HIGH);
 
       final ImGuiIO io = ImGui.getIO();
       io.setIniFilename(null); // We don't want to save .ini file
@@ -114,6 +126,7 @@ public class GDXImGuiWindowAndDockSystem
          loadUserConfigurationWithDefaultFallback();
       }
 
+      GDX3DSceneTools.glClearGray(0.3f);
       imGuiGlfw.newFrame();
       ImGui.newFrame();
 
@@ -299,6 +312,8 @@ public class GDXImGuiWindowAndDockSystem
       imGuiGlfw.dispose();
 
       ImGui.destroyContext();
+      if (debugMessageCallback != null)
+         debugMessageCallback.free();
    }
 
    public ImGuiImplGl3 getImGuiGl3()
@@ -309,5 +324,10 @@ public class GDXImGuiWindowAndDockSystem
    public ImGuiPanelManager getPanelManager()
    {
       return panelManager;
+   }
+
+   public ImFont getImFont()
+   {
+      return imFont;
    }
 }

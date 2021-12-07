@@ -2,7 +2,6 @@ package us.ihmc.gdx.lighting;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g3d.Attributes;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.Shader;
@@ -11,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.shaders.BaseShader;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.RenderContext;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.log.LogTools;
 
 public class GDXDepthMapShader extends BaseShader
@@ -70,15 +70,15 @@ public class GDXDepthMapShader extends BaseShader
    public void begin(Camera camera, RenderContext context)
    {
       super.begin(camera, context);
-      context.setDepthTest(GL20.GL_LEQUAL);
-      context.setCullFace(GL20.GL_BACK);
+      context.setDepthTest(GL41.GL_LEQUAL);
+      context.setCullFace(GL41.GL_BACK);
    }
 
    @Override
    public void render(final Renderable renderable, final Attributes combinedAttributes)
    {
       if (!combinedAttributes.has(BlendingAttribute.Type))
-         context.setBlending(false, GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+         context.setBlending(false, GL41.GL_SRC_ALPHA, GL41.GL_ONE_MINUS_SRC_ALPHA);
       super.render(renderable, combinedAttributes);
    }
 }

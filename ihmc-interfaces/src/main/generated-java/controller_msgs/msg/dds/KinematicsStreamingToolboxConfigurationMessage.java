@@ -66,6 +66,26 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
             * Default value is true.
             */
    public boolean enable_pelvis_taskspace_ = true;
+   /**
+            * Reference frame in which the controller should be tracking the pose for the left hand as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public long left_hand_trajectory_frame_id_ = 83766130;
+   /**
+            * Reference frame in which the controller should be tracking the pose for the right hand as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public long right_hand_trajectory_frame_id_ = 83766130;
+   /**
+            * Reference frame in which the controller should be tracking the pose for the chest as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public long chest_trajectory_frame_id_ = 83766130;
+   /**
+            * Reference frame in which the controller should be tracking the pose for the pelvis as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public long pelvis_trajectory_frame_id_ = 83766130;
 
    public KinematicsStreamingToolboxConfigurationMessage()
    {
@@ -98,6 +118,14 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       enable_chest_taskspace_ = other.enable_chest_taskspace_;
 
       enable_pelvis_taskspace_ = other.enable_pelvis_taskspace_;
+
+      left_hand_trajectory_frame_id_ = other.left_hand_trajectory_frame_id_;
+
+      right_hand_trajectory_frame_id_ = other.right_hand_trajectory_frame_id_;
+
+      chest_trajectory_frame_id_ = other.chest_trajectory_frame_id_;
+
+      pelvis_trajectory_frame_id_ = other.pelvis_trajectory_frame_id_;
 
    }
 
@@ -279,6 +307,74 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       return enable_pelvis_taskspace_;
    }
 
+   /**
+            * Reference frame in which the controller should be tracking the pose for the left hand as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public void setLeftHandTrajectoryFrameId(long left_hand_trajectory_frame_id)
+   {
+      left_hand_trajectory_frame_id_ = left_hand_trajectory_frame_id;
+   }
+   /**
+            * Reference frame in which the controller should be tracking the pose for the left hand as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public long getLeftHandTrajectoryFrameId()
+   {
+      return left_hand_trajectory_frame_id_;
+   }
+
+   /**
+            * Reference frame in which the controller should be tracking the pose for the right hand as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public void setRightHandTrajectoryFrameId(long right_hand_trajectory_frame_id)
+   {
+      right_hand_trajectory_frame_id_ = right_hand_trajectory_frame_id;
+   }
+   /**
+            * Reference frame in which the controller should be tracking the pose for the right hand as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public long getRightHandTrajectoryFrameId()
+   {
+      return right_hand_trajectory_frame_id_;
+   }
+
+   /**
+            * Reference frame in which the controller should be tracking the pose for the chest as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public void setChestTrajectoryFrameId(long chest_trajectory_frame_id)
+   {
+      chest_trajectory_frame_id_ = chest_trajectory_frame_id;
+   }
+   /**
+            * Reference frame in which the controller should be tracking the pose for the chest as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public long getChestTrajectoryFrameId()
+   {
+      return chest_trajectory_frame_id_;
+   }
+
+   /**
+            * Reference frame in which the controller should be tracking the pose for the pelvis as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public void setPelvisTrajectoryFrameId(long pelvis_trajectory_frame_id)
+   {
+      pelvis_trajectory_frame_id_ = pelvis_trajectory_frame_id;
+   }
+   /**
+            * Reference frame in which the controller should be tracking the pose for the pelvis as computed by the whole-body IK.
+            * Default value is WORLD_FRAME, see FrameInformation for useful frame ids.
+            */
+   public long getPelvisTrajectoryFrameId()
+   {
+      return pelvis_trajectory_frame_id_;
+   }
+
 
    public static Supplier<KinematicsStreamingToolboxConfigurationMessagePubSubType> getPubSubType()
    {
@@ -317,6 +413,14 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_pelvis_taskspace_, other.enable_pelvis_taskspace_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.left_hand_trajectory_frame_id_, other.left_hand_trajectory_frame_id_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.right_hand_trajectory_frame_id_, other.right_hand_trajectory_frame_id_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.chest_trajectory_frame_id_, other.chest_trajectory_frame_id_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.pelvis_trajectory_frame_id_, other.pelvis_trajectory_frame_id_, epsilon)) return false;
+
 
       return true;
    }
@@ -350,6 +454,14 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
 
       if(this.enable_pelvis_taskspace_ != otherMyClass.enable_pelvis_taskspace_) return false;
 
+      if(this.left_hand_trajectory_frame_id_ != otherMyClass.left_hand_trajectory_frame_id_) return false;
+
+      if(this.right_hand_trajectory_frame_id_ != otherMyClass.right_hand_trajectory_frame_id_) return false;
+
+      if(this.chest_trajectory_frame_id_ != otherMyClass.chest_trajectory_frame_id_) return false;
+
+      if(this.pelvis_trajectory_frame_id_ != otherMyClass.pelvis_trajectory_frame_id_) return false;
+
 
       return true;
    }
@@ -379,7 +491,15 @@ public class KinematicsStreamingToolboxConfigurationMessage extends Packet<Kinem
       builder.append("enable_chest_taskspace=");
       builder.append(this.enable_chest_taskspace_);      builder.append(", ");
       builder.append("enable_pelvis_taskspace=");
-      builder.append(this.enable_pelvis_taskspace_);
+      builder.append(this.enable_pelvis_taskspace_);      builder.append(", ");
+      builder.append("left_hand_trajectory_frame_id=");
+      builder.append(this.left_hand_trajectory_frame_id_);      builder.append(", ");
+      builder.append("right_hand_trajectory_frame_id=");
+      builder.append(this.right_hand_trajectory_frame_id_);      builder.append(", ");
+      builder.append("chest_trajectory_frame_id=");
+      builder.append(this.chest_trajectory_frame_id_);      builder.append(", ");
+      builder.append("pelvis_trajectory_frame_id=");
+      builder.append(this.pelvis_trajectory_frame_id_);
       builder.append("}");
       return builder.toString();
    }

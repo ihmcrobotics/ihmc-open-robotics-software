@@ -1,6 +1,5 @@
 package us.ihmc.gdx.simulation.environment;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes;
@@ -15,6 +14,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -78,7 +78,7 @@ public class GDXModelInput
 
    public void create()
    {
-      Gdx.gl.glLineWidth(8);
+      GL41.glLineWidth(8);
       ModelBuilder modelBuilder = new ModelBuilder();
 
       modelBuilder.begin();
@@ -312,11 +312,13 @@ public class GDXModelInput
 
    public void handleVREvents(GDXVRManager vrManager)
    {
-      if (GDXVRManager.isVREnabled() && !selectedObjectIndexes.isEmpty())
+      if (!selectedObjectIndexes.isEmpty())
       {
-         vrManager.getControllers().get(RobotSide.RIGHT).getPose(ReferenceFrame.getWorldFrame(),
-                                                                 environmentObjects.get(selectedObjectIndexes.stream().findFirst().get())
-                                                                                   .getRealisticModelInstance().transform);
+         vrManager.getContext().getController(RobotSide.RIGHT).runIfConnected(controller ->
+         {
+            Integer objectIndex = selectedObjectIndexes.stream().findFirst().get();
+            controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), environmentObjects.get(objectIndex).getRealisticModelInstance().transform);
+         });
       }
    }
 

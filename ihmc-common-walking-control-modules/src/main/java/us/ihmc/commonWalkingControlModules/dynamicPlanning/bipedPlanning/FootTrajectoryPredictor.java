@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingCoPTrajectoryGeneratorState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingGoalVariable;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -45,7 +43,7 @@ public class FootTrajectoryPredictor
    private final FramePose3D midFootPosition = new FramePose3D();
    private final FramePose3D midstancePose = new FramePose3D();
    private final PoseReferenceFrame midstanceFrame = new PoseReferenceFrame("midstanceFrame", ReferenceFrame.getWorldFrame());
-   private final ZUpFrame midstanceZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), midstanceFrame, "midstanceZUpFrame");
+   private final ZUpFrame midstanceZUpFrame = new ZUpFrame(midstanceFrame, "midstanceZUpFrame");
    private final FramePose3D goalPose = new FramePose3D();
    private final PoseReferenceFrame goalPoseFrame = new PoseReferenceFrame("goalPoseFrame", ReferenceFrame.getWorldFrame());
    private final FramePoint3D footGoalPosition = new FramePoint3D();
@@ -81,31 +79,9 @@ public class FootTrajectoryPredictor
          computeStanding(state);
    }
 
-   public void compute(JumpingCoPTrajectoryGeneratorState state)
-   {
-      if (Double.isNaN(state.getJumpingGoal().getGoalLength()))
-         computeJumpingStanding(state);
-      else
-         computeJumping(state);
-   }
-
    private final FrameVector3DReadOnly zeroVector = new FrameVector3D();
 
    private void computeStanding(CoPTrajectoryGeneratorState state)
-   {
-      clearSwingTrajectory();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         MultipleWaypointsPositionTrajectoryGenerator footTrajectory = footTrajectories.get(robotSide);
-         footTrajectory.clear();
-         footTrajectory.appendWaypoint(0.0, state.getFootPose(robotSide).getPosition(), zeroVector);
-         footTrajectory.appendWaypoint(sufficientlyLongTime, state.getFootPose(robotSide).getPosition(), zeroVector);
-         footTrajectory.initialize();
-      }
-   }
-
-   private void computeJumpingStanding(JumpingCoPTrajectoryGeneratorState state)
    {
       clearSwingTrajectory();
 
@@ -156,69 +132,6 @@ public class FootTrajectoryPredictor
       else
       {
          setSwingFootTrajectory(swingWaypointsToUse, footTrajectories.get(swingSide));
-      }
-
-      leftFootTrajectory.initialize();
-      rightFootTrajectory.initialize();
-   }
-
-   private void computeJumping(JumpingCoPTrajectoryGeneratorState state)
-   {
-      JumpingGoalVariable jumpingGoal = state.getJumpingGoal();
-
-      double supportDuration = Math.min(jumpingGoal.getSupportDuration(), sufficientlyLongTime);
-      double flightDuration = Math.min(jumpingGoal.getFlightDuration(), sufficientlyLongTime);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         MultipleWaypointsPositionTrajectoryGenerator footTrajectory = footTrajectories.get(robotSide);
-         footTrajectory.clear();
-         footTrajectory.appendWaypoint(0.0, state.getFootPose(robotSide).getPosition(), zeroVector);
-         footTrajectory.appendWaypoint(supportDuration, state.getFootPose(robotSide).getPosition(), zeroVector);
-      }
-
-      midstancePose.interpolate(state.getFootPose(RobotSide.LEFT), state.getFootPose(RobotSide.RIGHT), 0.5);
-      midstanceFrame.setPoseAndUpdate(midstancePose);
-      midstanceZUpFrame.update();
-
-      midFootPosition.setToZero(midstanceZUpFrame);
-      goalPose.setIncludingFrame(midFootPosition);
-      goalPose.setX(jumpingGoal.getGoalLength());
-      if (!Double.isNaN(state.getJumpingGoal().getGoalHeight()))
-         goalPose.setZ(state.getJumpingGoal().getGoalHeight());
-      if (!Double.isNaN(state.getJumpingGoal().getGoalRotation()))
-         goalPose.getOrientation().setToYawOrientation(state.getJumpingGoal().getGoalRotation());
-      goalPose.changeFrame(ReferenceFrame.getWorldFrame());
-      goalPoseFrame.setPoseAndUpdate(goalPose);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RecyclingArrayList<SE3TrajectoryPoint> swingWaypointsToUse = swingWaypoints.get(robotSide);
-
-         if (swingWaypointsToUse.isEmpty())
-         {
-            footGoalPosition.setToZero(goalPoseFrame);
-            double width;
-            if (!Double.isNaN(state.getJumpingGoal().getGoalFootWidth()))
-               width = 0.5 * state.getJumpingGoal().getGoalFootWidth();
-            else
-               width = 0.5 * 0.3;//regularParameters.getDefaultFootWidth();
-            width = robotSide.negateIfRightSide(width);
-
-            footGoalPosition.setY(width);
-            footGoalPosition.changeFrame(ReferenceFrame.getWorldFrame());
-
-            predictSwingFootTrajectory(supportDuration,
-                                       supportDuration + flightDuration,
-                                       predictorSwingHeight.getValue(),
-                                       state.getFootPose(robotSide).getPosition(),
-                                       footGoalPosition,
-                                       footTrajectories.get(robotSide));
-         }
-         else
-         {
-            setSwingFootTrajectory(swingWaypointsToUse, footTrajectories.get(robotSide));
-         }
       }
 
       leftFootTrajectory.initialize();
