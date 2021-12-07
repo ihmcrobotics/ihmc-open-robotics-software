@@ -59,7 +59,7 @@ public class GDXROS1OdometryVisualizer extends ImGuiGDXROS1Visualizer implements
          public void onNewMessage(PoseStamped pose)
          {
             GDXROS1OdometryVisualizer.this.pose = pose;
-            frequencyPlot.onRecievedMessage();
+            frequencyPlot.recordEvent();
             queueRenderPosesAsync(pose);
          }
       };
