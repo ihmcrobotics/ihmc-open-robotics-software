@@ -49,9 +49,9 @@ public class GDXVRController extends GDXVRTrackedDevice
    private final ReferenceFrame xRightZDownControllerFrame;
    private static final RigidBodyTransformReadOnly controllerXRightZDownToXForwardZUp = new RigidBodyTransform(
       new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
-         Math.toRadians(90.0),  // rotating around thumb, index goes forward to right
-         Math.toRadians(135.0),    // no rotation about middle finger
-         Math.toRadians(0.0)   // rotating about index finger, thumb goes up to toward you then down
+         Math.toRadians(90.0),   // rotating around thumb, index goes forward to left
+         Math.toRadians(135.0),  // rotating about middle finger, index goes down and a little to the right
+         Math.toRadians(0.0)     // no rotation about index finger
       ),
       new Point3D()
    );
