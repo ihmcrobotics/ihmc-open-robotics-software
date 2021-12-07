@@ -19,6 +19,7 @@ public class KinematicsStreamingToolboxProcess extends RestartableMissionControl
    protected void startInternal()
    {
       kinematicsStreamingToolboxModule = new KinematicsStreamingToolboxModule(robotModel, false, PubSubImplementation.FAST_RTPS);
+      kinematicsStreamingToolboxModule.wakeUp();
    }
 
    @Override
@@ -31,5 +32,10 @@ public class KinematicsStreamingToolboxProcess extends RestartableMissionControl
    public String getName()
    {
       return "Kinematics Streaming Toolbox";
+   }
+
+   public KinematicsStreamingToolboxModule getKinematicsStreamingToolboxModule()
+   {
+      return kinematicsStreamingToolboxModule;
    }
 }

@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXRobotModelGraphic;
 import us.ihmc.gdx.ui.missionControl.processes.KinematicsStreamingToolboxProcess;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -29,6 +30,7 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
 
 public class GDXVRKinematicsStreamingMode
@@ -44,6 +46,10 @@ public class GDXVRKinematicsStreamingMode
    private final double streamPeriod = UnitConversions.hertzToSeconds(10.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
    private final FramePose3D tempFramePose = new FramePose3D();
+   private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
+   private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
+   private PausablePeriodicThread wakeUpThread;
+   private ImBoolean wakeUpThreadRunning = new ImBoolean(false);
 
    public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel, ROS2ControllerHelper ros2ControllerHelper)
    {
@@ -62,9 +68,12 @@ public class GDXVRKinematicsStreamingMode
       ghostFullRobotModel = robotModel.createFullRobotModel();
       ghostRobotGraphic = new GDXRobotModelGraphic(robotModel.getSimpleRobotName());
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostFullRobotModel.getElevator(), robotModel);
+      ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()));
+
+      wakeUpThread = new PausablePeriodicThread(getClass().getSimpleName() + "WakeUpThread", 1.0, true, this::wakeUpToolbox);
    }
 
    public void processVRInput(GDXVRContext vrContext)
@@ -77,11 +86,12 @@ public class GDXVRKinematicsStreamingMode
          });
       }
 
-      if (toolboxInputStreamRateLimiter.run(streamPeriod))
+      if (enabled.get() && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
+            if (side == RobotSide.LEFT)
             vrContext.getController(side).runIfConnected(controller ->
             {
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
@@ -118,6 +128,7 @@ public class GDXVRKinematicsStreamingMode
          toolboxInputMessage.setStreamToController(false);
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
+         outputFrequencyPlot.recordEvent();
       }
    }
 
@@ -126,6 +137,7 @@ public class GDXVRKinematicsStreamingMode
       if (status.getMessageNotification().poll())
       {
          KinematicsToolboxOutputStatus latestStatus = status.getMessageNotification().read();
+         statusFrequencyPlot.recordEvent();
          if (latestStatus.getJointNameHash() == -1)
          {
             if (latestStatus.getCurrentToolboxState() == KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD)
@@ -138,10 +150,11 @@ public class GDXVRKinematicsStreamingMode
             ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootTranslation());
             ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
             OneDoFJointBasics[] oneDoFJoints = ghostFullRobotModel.getOneDoFJoints();
-            for (int i = 0; i < oneDoFJoints.length; i++)
+            for (int i = 0; i < oneDoFJoints.length && i < latestStatus.getDesiredJointAngles().size(); i++)
             {
                oneDoFJoints[i].setQ(latestStatus.getDesiredJointAngles().get(i));
             }
+            ghostFullRobotModel.getElevator().updateFramesRecursively();
          }
       }
       ghostRobotGraphic.update();
@@ -152,11 +165,64 @@ public class GDXVRKinematicsStreamingMode
       kinematicsStreamingToolboxProcess.renderImGuiWidgets();
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
-         ToolboxState requestedState = enabled.get() ? ToolboxState.WAKE_UP : ToolboxState.SLEEP;
-         ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
-         toolboxStateMessage.setRequestedToolboxState(requestedState.toByte());
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(robotModel.getSimpleRobotName()), toolboxStateMessage);
+//         setEnabled(enabled.get());
       }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Reinitialize")))
+      {
+         reinitializeToolbox();
+         //         kinematicsStreamingToolboxProcess.getKinematicsStreamingToolboxModule().wakeUp();
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Wake up")))
+      {
+         wakeUpToolbox();
+//         kinematicsStreamingToolboxProcess.getKinematicsStreamingToolboxModule().wakeUp();
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Sleep")))
+      {
+         sleepToolbox();
+//         kinematicsStreamingToolboxProcess.getKinematicsStreamingToolboxModule().sleep();
+      }
+      if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
+      {
+         wakeUpThread.setRunning(wakeUpThreadRunning.get());
+      }
+      ImGui.text("Output:");
+      ImGui.sameLine();
+      outputFrequencyPlot.renderImGuiWidgets();
+      ImGui.text("Status:");
+      ImGui.sameLine();
+      statusFrequencyPlot.renderImGuiWidgets();
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      this.enabled.set(enabled);
+//      wakeUpThread.setRunning(enabled);
+//      kinematicsStreamingToolboxProcess.getKinematicsStreamingToolboxModule().getToolboxController().requestInitialize();
+   }
+
+   private void reinitializeToolbox()
+   {
+      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+      toolboxStateMessage.setRequestedToolboxState(ToolboxState.REINITIALIZE.toByte());
+      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(robotModel.getSimpleRobotName()), toolboxStateMessage);
+   }
+
+   private void wakeUpToolbox()
+   {
+      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+      toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
+      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(robotModel.getSimpleRobotName()), toolboxStateMessage);
+   }
+
+   private void sleepToolbox()
+   {
+      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+      toolboxStateMessage.setRequestedToolboxState(ToolboxState.SLEEP.toByte());
+      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(robotModel.getSimpleRobotName()), toolboxStateMessage);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
