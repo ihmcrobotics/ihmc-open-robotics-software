@@ -17,6 +17,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.gdx.ui.graphics.GDXRobotModelGraphic;
 import us.ihmc.gdx.ui.missionControl.processes.KinematicsStreamingToolboxProcess;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
@@ -24,7 +25,9 @@ import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -33,6 +36,8 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.Throttler;
 
+import java.util.Map;
+
 public class GDXVRKinematicsStreamingMode
 {
    private final DRCRobotModel robotModel;
@@ -40,6 +45,7 @@ public class GDXVRKinematicsStreamingMode
    private final KinematicsStreamingToolboxProcess kinematicsStreamingToolboxProcess;
    private GDXRobotModelGraphic ghostRobotGraphic;
    private FullHumanoidRobotModel ghostFullRobotModel;
+   private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
    private ROS2Input<KinematicsToolboxOutputStatus> status;
@@ -50,12 +56,14 @@ public class GDXVRKinematicsStreamingMode
    private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
    private PausablePeriodicThread wakeUpThread;
    private ImBoolean wakeUpThreadRunning = new ImBoolean(false);
+   private GDXReferenceFrameGraphic headsetFrame;
+   private SideDependentList<GDXReferenceFrameGraphic> controllerFrames = new SideDependentList<>();
 
-   public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel, ROS2ControllerHelper ros2ControllerHelper)
+   public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel, Map<String, Double> initialConfiguration, ROS2ControllerHelper ros2ControllerHelper)
    {
       this.robotModel = robotModel;
       this.ros2ControllerHelper = ros2ControllerHelper;
-      kinematicsStreamingToolboxProcess = new KinematicsStreamingToolboxProcess(robotModel);
+      kinematicsStreamingToolboxProcess = new KinematicsStreamingToolboxProcess(robotModel, initialConfiguration);
    }
 
    public void create()
@@ -66,10 +74,13 @@ public class GDXVRKinematicsStreamingMode
                                                  body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
 
       ghostFullRobotModel = robotModel.createFullRobotModel();
+      ghostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(ghostFullRobotModel);
       ghostRobotGraphic = new GDXRobotModelGraphic(robotModel.getSimpleRobotName());
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostFullRobotModel.getElevator(), robotModel);
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
+
+      headsetFrame = new GDXReferenceFrameGraphic(0.2);
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(robotModel.getSimpleRobotName()));
 
@@ -91,7 +102,6 @@ public class GDXVRKinematicsStreamingMode
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          for (RobotSide side : RobotSide.values)
          {
-            if (side == RobotSide.LEFT)
             vrContext.getController(side).runIfConnected(controller ->
             {
                KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
@@ -149,10 +159,9 @@ public class GDXVRKinematicsStreamingMode
          {
             ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootTranslation());
             ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
-            OneDoFJointBasics[] oneDoFJoints = ghostFullRobotModel.getOneDoFJoints();
-            for (int i = 0; i < oneDoFJoints.length && i < latestStatus.getDesiredJointAngles().size(); i++)
+            for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
             {
-               oneDoFJoints[i].setQ(latestStatus.getDesiredJointAngles().get(i));
+               ghostOneDoFJointsExcludingHands[i].setQ(latestStatus.getDesiredJointAngles().get(i));
             }
             ghostFullRobotModel.getElevator().updateFramesRecursively();
          }
@@ -165,25 +174,22 @@ public class GDXVRKinematicsStreamingMode
       kinematicsStreamingToolboxProcess.renderImGuiWidgets();
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
-//         setEnabled(enabled.get());
+         setEnabled(enabled.get());
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Reinitialize")))
       {
          reinitializeToolbox();
-         //         kinematicsStreamingToolboxProcess.getKinematicsStreamingToolboxModule().wakeUp();
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Wake up")))
       {
          wakeUpToolbox();
-//         kinematicsStreamingToolboxProcess.getKinematicsStreamingToolboxModule().wakeUp();
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Sleep")))
       {
          sleepToolbox();
-//         kinematicsStreamingToolboxProcess.getKinematicsStreamingToolboxModule().sleep();
       }
       if (ImGui.checkbox(labels.get("Wake up thread"), wakeUpThreadRunning))
       {
@@ -199,9 +205,10 @@ public class GDXVRKinematicsStreamingMode
 
    public void setEnabled(boolean enabled)
    {
-      this.enabled.set(enabled);
-//      wakeUpThread.setRunning(enabled);
-//      kinematicsStreamingToolboxProcess.getKinematicsStreamingToolboxModule().getToolboxController().requestInitialize();
+      if (enabled != this.enabled.get())
+         this.enabled.set(enabled);
+      if (enabled)
+         wakeUpToolbox();
    }
 
    private void reinitializeToolbox()
