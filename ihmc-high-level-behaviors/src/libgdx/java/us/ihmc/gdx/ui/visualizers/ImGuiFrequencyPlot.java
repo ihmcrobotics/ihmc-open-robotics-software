@@ -12,7 +12,7 @@ public class ImGuiFrequencyPlot
    private final Stopwatch stopwatch = new Stopwatch().start();
    private volatile double elapsedSinceReceived = Double.NaN;
 
-   public void onRecievedMessage()
+   public void recordEvent()
    {
       ++receivedCount;
       elapsedSinceReceived = stopwatch.lap();

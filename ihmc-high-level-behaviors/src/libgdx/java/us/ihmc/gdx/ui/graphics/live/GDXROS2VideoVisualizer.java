@@ -56,7 +56,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
 
    private void acceptMessage(VideoPacket videoPacket)
    {
-      frequencyPlot.onRecievedMessage();
+      frequencyPlot.recordEvent();
       if (isActive())
       {
          threadQueue.clearQueueAndExecute(() ->
