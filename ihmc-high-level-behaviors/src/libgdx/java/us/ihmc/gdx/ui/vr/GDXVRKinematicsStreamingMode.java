@@ -145,26 +145,26 @@ public class GDXVRKinematicsStreamingMode
                toolboxInputMessage.getInputs().add().set(message);
             });
          }
-         vrContext.getHeadset().runIfConnected(headset ->
-         {
-            KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-            message.setEndEffectorHashCode(ghostFullRobotModel.getHead().hashCode());
-            tempFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
-            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            headsetFrameGraphic.setToReferenceFrame(headset.getXForwardZUpHeadsetFrame());
-            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
-            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-            message.getControlFramePositionInEndEffector().set(0.1, 0.0, 0.0);
-            message.getControlFrameOrientationInEndEffector().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 2.0);
-            boolean xSelected = false;
-            boolean ySelected = false;
-            boolean zSelected = true;
-            message.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(xSelected,
-                                                                                               ySelected,
-                                                                                               zSelected,
-                                                                                               ReferenceFrame.getWorldFrame()));
-            toolboxInputMessage.getInputs().add().set(message);
-         });
+//         vrContext.getHeadset().runIfConnected(headset ->
+//         {
+//            KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+//            message.setEndEffectorHashCode(ghostFullRobotModel.getHead().hashCode());
+//            tempFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
+//            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+//            headsetFrameGraphic.setToReferenceFrame(headset.getXForwardZUpHeadsetFrame());
+//            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+//            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+//            message.getControlFramePositionInEndEffector().set(0.1, 0.0, 0.0);
+//            message.getControlFrameOrientationInEndEffector().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 2.0);
+//            boolean xSelected = false;
+//            boolean ySelected = false;
+//            boolean zSelected = true;
+//            message.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(xSelected,
+//                                                                                               ySelected,
+//                                                                                               zSelected,
+//                                                                                               ReferenceFrame.getWorldFrame()));
+//            toolboxInputMessage.getInputs().add().set(message);
+//         });
          toolboxInputMessage.setStreamToController(false);
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
