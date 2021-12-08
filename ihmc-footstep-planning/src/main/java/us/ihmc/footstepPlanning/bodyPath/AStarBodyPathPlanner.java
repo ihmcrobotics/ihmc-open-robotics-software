@@ -14,6 +14,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -70,6 +71,7 @@ public class AStarBodyPathPlanner
    /* Parameters to extract */
    static final double groundClearance = 0.25;
    static final double collisionRadius = 0.3;
+   static final double obstacleTraversibilityRadius = 0.15;
    static final double snapRadius = 0.1;
    static final double maxStepUpDown = 0.2;
 
@@ -253,9 +255,9 @@ public class AStarBodyPathPlanner
 
             int xIndex = HeightMapTools.coordinateToIndex(node.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
             int yIndex = HeightMapTools.coordinateToIndex(node.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+
             double obstacleCost = obstacleDetector.getTerrainCost().get(xIndex, yIndex);
 
-//            edgeCost.set(distanceCost + traversibilityCost);
             edgeCost.set(distanceCost + traversibilityCost + obstacleCost);
 
             if (!traversibilityCalculator.isTraversible())
@@ -428,7 +430,8 @@ public class AStarBodyPathPlanner
 
    static double xyDistance(BodyPathLatticePoint startNode, BodyPathLatticePoint endNode)
    {
-      return EuclidCoreTools.norm(startNode.getX() - endNode.getX(), startNode.getY() - endNode.getY());
+      return EuclidCoreTools.norm(startNode.getX() - endNode.getX(), startNode.getY() - endNode.getY())
+             + Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw()));
    }
 
    private double heuristics(BodyPathLatticePoint node)
