@@ -41,20 +41,25 @@ public class RemoteControllerState extends HighLevelControllerState
    {
       super(controllerState, highLevelControllerParameters, controlledJoints);
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controlledJoints.length);
-      for (OneDoFJointBasics joint: controlledJoints) {
-         System.out.println(joint.getName()  + " Limit: " + joint.getJointLimitLower()  + " - " + joint.getJointLimitUpper()  + " Effort limit: " + joint.getEffortLimitLower()  + " - " + joint.getEffortLimitUpper());
+      for (OneDoFJointBasics joint : controlledJoints)
+      {
+         System.out.println(
+               joint.getName() + " Limit: " + joint.getJointLimitLower() + " - " + joint.getJointLimitUpper() + " Effort limit: " + joint.getEffortLimitLower()
+               + " - " + joint.getEffortLimitUpper());
       }
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
       controllers = new PDController[controlledJoints.length];
       desiredPositions = new YoDouble[controlledJoints.length];
-      for (int i = 0; i < desiredPositions.length; i++) {
-         desiredPositions[i] = new YoDouble("desiredPositions"+controlledJoints[i].getName(), this.getYoRegistry());
+      for (int i = 0; i < desiredPositions.length; i++)
+      {
+         desiredPositions[i] = new YoDouble("desiredPositions" + controlledJoints[i].getName(), this.getYoRegistry());
       }
       this.controllerToolbox = controllerToolbox;
 
-      jointGains = new HashMap<String, Double>() {{
-         put("l_leg_aky", 2000.0);
-         put("r_leg_aky", 2000.0);
+      jointGains = new HashMap<String, Double>()
+      {{
+         put("l_leg_aky", 100.0);
+         put("r_leg_aky", 100.0);
          put("l_leg_akx", 100.0);
          put("r_leg_akx", 100.0);
          put("l_leg_kny", 1000.0);
@@ -66,7 +71,7 @@ public class RemoteControllerState extends HighLevelControllerState
          put("l_leg_hpy", 1000.0);
          put("r_leg_hpy", 1000.0);
          put("back_bkz", 500.0);
-         put("back_bky", 1500.0);
+         put("back_bky", 500.0);
          put("back_bkx", 500.0);
          put("r_arm_shz", 100.0);
          put("l_arm_shx", 100.0);
@@ -85,11 +90,13 @@ public class RemoteControllerState extends HighLevelControllerState
          put("neck_ry", 10.0);
       }};
 
-      for (int i = 0; i < controlledJoints.length; i++) {
+      for (int i = 0; i < controlledJoints.length; i++)
+      {
          lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(controlledJoints[i], JointDesiredControlMode.EFFORT);
          YoDouble proportionalGain = new YoDouble("proportionalGain" + controlledJoints[i].getName(), getYoRegistry());
          YoDouble derivateGain = new YoDouble("derivateGain" + controlledJoints[i].getName(), getYoRegistry());
-         proportionalGain.set(1.0f);
+         //         proportionalGain.set(jointGains.get(controlledJoints[i].getName()));
+         proportionalGain.set(1.0);
          derivateGain.set(0.1 * proportionalGain.getValue());
          controllers[i] = new PDController(proportionalGain, derivateGain, "pdControllerJoint" + controlledJoints[i].getName(), getYoRegistry());
       }
@@ -106,14 +113,8 @@ public class RemoteControllerState extends HighLevelControllerState
          double desiredAngle = networker.getDesiredAngle(controlledJoints[i].getName());
          desiredPositions[i].set(desiredAngle);
          double torque = controllers[i].computeForAngles(controlledJoints[i].getQ(), desiredPositions[i].getDoubleValue(), controlledJoints[i].getQd(), 0);
-         String jointName = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(i).getName();
-         if (torque > 1.0) {
-            torque = 1.0;
-         }
-         if (torque < -1.0) {
-            torque = -1.0;
-         }
-         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(controlledJoints[i], jointGains.get(jointName) * torque);
+         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque(controlledJoints[i], torque);
+//         lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(controlledJoints[i], desiredAngle);
 
          networker.setCurrentAngle(controlledJoints[i].getName(), controlledJoints[i].getQ());
          networker.setJointSpeed(controlledJoints[i].getName(), controlledJoints[i].getQd());
@@ -141,7 +142,8 @@ public class RemoteControllerState extends HighLevelControllerState
    @Override
    public void onEntry()
    {
-      HashMap<String, Double> initialPoseCorrections = new HashMap<String, Double>() {{
+      HashMap<String, Double> initialPoseCorrections = new HashMap<String, Double>()
+      {{
          put("l_leg_aky", 0.3);
          put("r_leg_aky", 0.3);
          put("l_leg_akx", 0.0);
@@ -176,7 +178,7 @@ public class RemoteControllerState extends HighLevelControllerState
       // Do nothing
       for (int i = 0; i < controlledJoints.length; i++)
       {
-//         desiredPositions[i].set(initialPoseCorrections.get(controlledJoints[i].getName()));
+         //         desiredPositions[i].set(initialPoseCorrections.get(controlledJoints[i].getName()));
          desiredPositions[i].set(controlledJoints[i].getQ());
          networker.setDesiredAngle(controlledJoints[i].getName(), desiredPositions[i].getDoubleValue());
       }

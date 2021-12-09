@@ -414,7 +414,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
     * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
-    * 
+    *
     * @param currentControlStateEnum The state that is to be checked to see if it is finished.
     * @param nextControlStateEnum    The state to transition to.
     */
@@ -427,7 +427,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
     * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
     * trigger as soon as {@code currentControlStateEnum}'s
     * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
-    * 
+    *
     * @param currentControlStateEnum The state that is to be checked to see if it is finished.
     * @param nextControlStateEnum    The state to transition to.
     * @param performNextStateOnEntry indicates whether {@link HighLevelControllerState#onEntry()} of
@@ -746,5 +746,4 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       else
          isListeningToHighLevelStatePackets = isListening;
    }
-
 }
