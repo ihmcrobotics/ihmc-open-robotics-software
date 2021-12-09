@@ -240,6 +240,18 @@ public class GDXVRContext
       vrInputProcessors.add(processVRInput);
    }
 
+   public void getHeadsetRenderable(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if (headset.isConnected())
+      {
+         ModelInstance modelInstance = headset.getModelInstance();
+         if (modelInstance != null)
+         {
+            modelInstance.getRenderables(renderables, pool);
+         }
+      }
+   }
+
    public void getControllerRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       for (RobotSide side : RobotSide.values)

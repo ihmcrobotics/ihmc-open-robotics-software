@@ -29,55 +29,17 @@ public class GDXVRManager
    private boolean contextInitialized = false;
    private boolean initializing = false;
    private boolean skipHeadset = false;
-   private boolean holdingTouchpadToMove = false;
-   private final Point3D initialVRSpacePosition = new Point3D();
-   private final Point3D initialVRControllerPosition = new Point3D();
-   private final Point3D currentVRControllerPosition = new Point3D();
-   private final Vector3D deltaVRControllerPosition = new Vector3D();
-   private final Point3D resultVRSpacePosition = new Point3D();
-   private final Point3D lastVRSpacePosition = new Point3D();
    private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean vrEnabled = new ImBoolean(false);
    private final ResettableExceptionHandlingExecutorService waitGetPosesExecutor = MissingThreadTools.newSingleThreadExecutor("PoseWaiterOnner", true, 1);
    private final Notification posesReady = new Notification();
+   private final GDXVRTeleporter teleporter = new GDXVRTeleporter();
 
-   public GDXVRManager()
+   public void create()
    {
-      context.addVRInputProcessor(context ->
-      {
-         // TODO: Implement VR teleport control here; extract teleportation manager
-//         context.getController(RobotSide.RIGHT, controller ->
-//         {
-//            holdingTouchpadToMove = controller.isButtonPressed(SteamVR_Touchpad);
-//         });
-//         //               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
-//         //               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
-//         //               context.getToZUpXForward().transform(initialVRSpacePosition);
-//         //               lastVRSpacePosition.set(initialVRSpacePosition);
-//         if (context.isHeadsetConnected())
-//         {
-//            context.teleport(scenePoseGizmo.getTransform());
-//
-//            if (holdingTouchpadToMove)
-//            {
-//               //         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
-//               //         resultVRSpacePosition.set(initialVRSpacePosition);
-//               //         deltaVRControllerPosition.sub(currentVRControllerPosition, initialVRControllerPosition);
-//               //         resultVRSpacePosition.sub(deltaVRControllerPosition);
-//               //         resultVRSpacePosition.sub(lastVRSpacePosition);
-//               //         GDXTools.toGDX(resultVRSpacePosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
-//               //         lastVRSpacePosition.set(resultVRSpacePosition);
-//               //         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
-//               //         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
-//               //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.1f, 0.0f, 0.0f);
-//            }
-//            else
-//            {
-//               //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
-//            }
-//         }
-      });
+      teleporter.create();
+      context.addVRInputProcessor(teleporter::processVRInput);
    }
 
    /**
@@ -216,15 +178,16 @@ public class GDXVRManager
       {
          if (!skipHeadset)
          {
-            context.getHeadset().runIfConnected(headset -> headset.getModelInstance().getRenderables(renderables, pool));
+            context.getHeadsetRenderable(renderables, pool);
          }
          context.getControllerRenderables(renderables, pool);
          context.getBaseStationRenderables(renderables, pool);
-         for (RobotSide side : RobotSide.values)
-         {
-            context.getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
-         }
+//         for (RobotSide side : RobotSide.values)
+//         {
+//            context.getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
+//         }
          scenePoseGizmo.getRenderables(renderables, pool);
+         teleporter.getRenderables(renderables, pool);
       }
    }
 
