@@ -157,6 +157,7 @@ public class GDXImGuiBasedUI
       vrManager.create();
       sceneManager.addRenderableProvider(vrManager::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
       addImGui3DViewInputProcessor(vrManager::process3DViewInput);
+      imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
    }
 
    public void renderBeforeOnScreenUI()
