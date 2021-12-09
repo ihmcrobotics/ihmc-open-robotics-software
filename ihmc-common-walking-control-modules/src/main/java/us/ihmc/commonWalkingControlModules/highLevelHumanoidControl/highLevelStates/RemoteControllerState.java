@@ -41,6 +41,9 @@ public class RemoteControllerState extends HighLevelControllerState
    {
       super(controllerState, highLevelControllerParameters, controlledJoints);
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder(controlledJoints.length);
+      for (OneDoFJointBasics joint: controlledJoints) {
+         System.out.println(joint.getName()  + " Limit: " + joint.getJointLimitLower()  + " - " + joint.getJointLimitUpper()  + " Effort limit: " + joint.getEffortLimitLower()  + " - " + joint.getEffortLimitUpper());
+      }
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
       controllers = new PDController[controlledJoints.length];
       desiredPositions = new YoDouble[controlledJoints.length];
@@ -100,7 +103,8 @@ public class RemoteControllerState extends HighLevelControllerState
    {
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         desiredPositions[i].set(networker.getDesiredAngle(controlledJoints[i].getName()));
+         double desiredAngle = networker.getDesiredAngle(controlledJoints[i].getName());
+         desiredPositions[i].set(desiredAngle);
          double torque = controllers[i].computeForAngles(controlledJoints[i].getQ(), desiredPositions[i].getDoubleValue(), controlledJoints[i].getQd(), 0);
          String jointName = lowLevelOneDoFJointDesiredDataHolder.getOneDoFJoint(i).getName();
          if (torque > 1.0) {
@@ -172,7 +176,8 @@ public class RemoteControllerState extends HighLevelControllerState
       // Do nothing
       for (int i = 0; i < controlledJoints.length; i++)
       {
-         desiredPositions[i].set(initialPoseCorrections.get(controlledJoints[i].getName()));
+//         desiredPositions[i].set(initialPoseCorrections.get(controlledJoints[i].getName()));
+         desiredPositions[i].set(controlledJoints[i].getQ());
          networker.setDesiredAngle(controlledJoints[i].getName(), desiredPositions[i].getDoubleValue());
       }
       lastTime = 0;

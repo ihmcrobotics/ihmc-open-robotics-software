@@ -43,9 +43,14 @@ public class RemoteControllerStateNetworkingThread extends Thread {
     public void run(){
         try {
             serverSocket = new ServerSocket(15923);
-            System.out.println("Remote controller listening at " + serverSocket.getInetAddress() + ":" + serverSocket.getLocalPort() + " with " + desiredAngles.keySet().size() + " parameters.");
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Remote controller listening at " + serverSocket.getInetAddress() + ":" + serverSocket.getLocalPort() + " with " + desiredAngles.keySet().size() + " parameters.");
+        while (true) {
+            Socket clientSocket = null;
+            try {
+                clientSocket = serverSocket.accept();
                 System.out.println("Remote controller connected");
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -61,6 +66,8 @@ public class RemoteControllerStateNetworkingThread extends Thread {
                         }
                     } else {
                         System.out.println("Command was null");
+                        clientSocket.close();
+                        break;
                     }
                     step++;
                     long sleepTime = (long)(step * 1000. / 30. - this.time * 1000);
@@ -69,9 +76,17 @@ public class RemoteControllerStateNetworkingThread extends Thread {
                     }
                     printSensorReadings();
                 }
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+                if (clientSocket != null) {
+                    try {
+                        System.out.println("Closing connection");
+                        clientSocket.close();
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                }
             }
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
         }
     }
 
