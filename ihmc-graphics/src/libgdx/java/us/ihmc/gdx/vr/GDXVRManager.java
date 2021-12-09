@@ -7,6 +7,7 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
@@ -38,6 +39,9 @@ public class GDXVRManager
    private ImGuiPlot vrFPSPlot = new ImGuiPlot(labels.get("VR FPS Hz"), 1000, 300, 50);
    private FrequencyCalculator vrFPSCalculator = new FrequencyCalculator();
    private ImGuiPlot waitGetPosesPlot = new ImGuiPlot(labels.get("Wait Get Poses Hz"), 1000, 300, 50);
+   private ImGuiPlot waitGetToRenderDelayPlot = new ImGuiPlot(labels.get("WaitGetToRender Delay"), 1000, 300, 50);
+   private final Stopwatch waitGetToRenderStopwatch = new Stopwatch();
+   private volatile double waitGetToRenderDuration = Double.NaN;
    private FrequencyCalculator waitGetPosesFrequencyCalculator = new FrequencyCalculator();
    private ImGuiPlot pollEventsPlot = new ImGuiPlot(labels.get("Poll Events Hz"), 1000, 300, 50);
    private FrequencyCalculator pollEventsFrequencyCalculator = new FrequencyCalculator();
@@ -58,6 +62,9 @@ public class GDXVRManager
    /**
     * Doing poll and render close together makes VR performance the best it can be
     * and reduce dizziness.
+    *
+    * TODO: This thread has to be a multiple of the parent (240?)
+    * TODO: If the rest of the app is too slow, can we run this one faster?
     */
    public void pollEventsAndRender(GDXImGuiBasedUI baseUI, GDX3DSceneManager sceneManager)
    {
@@ -66,6 +73,7 @@ public class GDXVRManager
       {
          skipHeadset = true;
          vrFPSCalculator.ping();
+         waitGetToRenderDuration = waitGetToRenderStopwatch.totalElapsed();
          context.renderEyes(sceneManager.getSceneBasics());
          skipHeadset = false;
       }
@@ -95,7 +103,7 @@ public class GDXVRManager
 
             if (!Boolean.parseBoolean(System.getProperty("gdx.free.spin")))
             {
-               baseUI.setForegroundFPS(240); // TODO: Do something better with this
+               baseUI.setForegroundFPS(350); // TODO: Do something better with this
             }
             baseUI.setVsync(false); // important to disable vsync for VR
 
@@ -122,6 +130,7 @@ public class GDXVRManager
                   {
                      waitGetPosesFrequencyCalculator.ping();
                      context.waitGetPoses();
+                     waitGetToRenderStopwatch.reset();
                      posesReady.set();
                   });
                }
@@ -176,13 +185,14 @@ public class GDXVRManager
 
    public void renderImGuiDebugWidgets()
    {
-      vrFPSPlot.render(vrFPSCalculator.getFrequency());
       contextInitializedPlot.render(contextInitialized ? 1.0 : 0.0);
       initSystemCountPlot.render(initSystemCount);
       setupEyesCountPlot.render(setupEyesCount);
       waitGetPosesPlot.render(waitGetPosesFrequencyCalculator.getFrequency());
-      waitGetPosesInterruptedCountPlot.render(waitGetPosesInterruptedCount);
       pollEventsPlot.render(pollEventsFrequencyCalculator.getFrequency());
+      vrFPSPlot.render(vrFPSCalculator.getFrequency());
+      waitGetToRenderDelayPlot.render(waitGetToRenderDuration);
+      waitGetPosesInterruptedCountPlot.render(waitGetPosesInterruptedCount);
    }
 
    public void dispose()
