@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -96,6 +97,7 @@ public class RemoteControllerState extends HighLevelControllerState
          YoDouble proportionalGain = new YoDouble("proportionalGain" + controlledJoints[i].getName(), getYoRegistry());
          YoDouble derivateGain = new YoDouble("derivateGain" + controlledJoints[i].getName(), getYoRegistry());
          //         proportionalGain.set(jointGains.get(controlledJoints[i].getName()));
+//         this.controllerToolbox.reportControllerFailureToListeners(new FrameVector2D());
          proportionalGain.set(1.0);
          derivateGain.set(0.1 * proportionalGain.getValue());
          controllers[i] = new PDController(proportionalGain, derivateGain, "pdControllerJoint" + controlledJoints[i].getName(), getYoRegistry());
