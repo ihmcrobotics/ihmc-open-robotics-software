@@ -12,7 +12,6 @@ import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -84,7 +83,7 @@ public class GDXVRKinematicsStreamingMode
 
       ghostFullRobotModel = robotModel.createFullRobotModel();
       ghostOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(ghostFullRobotModel);
-      ghostRobotGraphic = new GDXRobotModelGraphic(robotModel.getSimpleRobotName());
+      ghostRobotGraphic = new GDXRobotModelGraphic(robotModel.getSimpleRobotName() + " (IK Preview Ghost)");
       ghostRobotGraphic.loadRobotModelAndGraphics(ghostRobotDefinition, ghostFullRobotModel.getElevator(), robotModel);
       ghostRobotGraphic.setActive(true);
       ghostRobotGraphic.create();
@@ -202,6 +201,7 @@ public class GDXVRKinematicsStreamingMode
    public void renderImGuiWidgets()
    {
       kinematicsStreamingToolboxProcess.renderImGuiWidgets();
+      ghostRobotGraphic.renderImGuiWidgets();
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
          setEnabled(enabled.get());
