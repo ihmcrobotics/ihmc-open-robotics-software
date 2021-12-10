@@ -52,6 +52,7 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    private int panelWidth;
    private int panelHeight;
    private Runnable renderImGuiWidgets;
+   private GDXVRContext vrContext;
    private FrameBuffer frameBuffer;
    private float mousePosX;
    private float mousePosY;
@@ -66,6 +67,8 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
          = ReferenceFrameTools.constructFrameWithChangingTransformToParent("centerXThroughZUpFrame" + INDEX.getAndIncrement(),
                                                                            ReferenceFrame.getWorldFrame(),
                                                                            transform);
+   private FramePose3D desiredPose = new FramePose3D();
+   private FramePose3D currentPose = new FramePose3D();
    private ReferenceFrame graphicsXRightYDownFrame
          = ReferenceFrameTools.constructFrameWithChangingTransformToParent("graphicsXRightYDownFrame" + INDEX.getAndIncrement(),
                                                                            centerXThroughZUpFrame,
@@ -81,11 +84,12 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    private final RigidBodyTransform gripOffsetTransform = new RigidBodyTransform();
    private boolean grippedLastTime = false;
 
-   public void create(int panelWidth, int panelHeight, Runnable renderImGuiWidgets)
+   public void create(int panelWidth, int panelHeight, Runnable renderImGuiWidgets, GDXVRContext vrContext)
    {
       this.panelWidth = panelWidth;
       this.panelHeight = panelHeight;
       this.renderImGuiWidgets = renderImGuiWidgets;
+      this.vrContext = vrContext;
 
       ImGui.createContext();
 
@@ -270,11 +274,15 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    {
       transform.setToZero();
       transformUpdater.accept(transform);
+
       plane.setToZero();
       plane.getNormal().set(Axis3D.X);
       plane.applyTransform(transform);
       GDXTools.toGDX(transform, modelInstance.transform);
       centerXThroughZUpFrame.update();
+
+      desiredPose.setToZero(centerXThroughZUpFrame);
+      desiredPose.changeFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
    }
 
    public Plane3D getPlane()

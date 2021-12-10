@@ -40,7 +40,7 @@ public class GDXVROnlyPointCloudWithImGuiPanelDemo
             fusedPointCloud.setActive(true);
 
             imGuiPanel = new GDXSingleContext3DSituatedImGuiPanel();
-            imGuiPanel.create(400, 500, this::renderImGuiWidgets);
+            imGuiPanel.create(400, 500, this::renderImGuiWidgets, vrApplication.getVRContext());
             imGuiPanel.updatePose(transform ->
             {
                transform.getTranslation().set(1.0f, 0.0f, 1.0f);
