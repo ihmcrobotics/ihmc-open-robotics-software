@@ -7,6 +7,7 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
@@ -15,24 +16,24 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.time.FrequencyCalculator;
-
-import java.util.concurrent.RejectedExecutionException;
 
 /** This class should manage VR as part of the ImGuiBasedUI. */
 public class GDXVRManager
 {
+   private static final boolean DEBUG_EYE_FRAMES = false;
    private final GDXVRContext context = new GDXVRContext();
    private Notification contextCreatedNotification;
    private boolean contextInitialized = false;
    private boolean initializing = false;
    private boolean skipHeadset = false;
+   private final Object syncObject = new Object();
    private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean vrEnabled = new ImBoolean(false);
-   private final ResettableExceptionHandlingExecutorService waitGetPosesExecutor = MissingThreadTools.newSingleThreadExecutor("PoseWaiterOnner", true, 1);
+//   private final ResettableExceptionHandlingExecutorService waitGetPosesExecutor = MissingThreadTools.newSingleThreadExecutor("PoseWaiterOnner", true, 1);
    private final Notification posesReady = new Notification();
    private volatile boolean waitingOnPoses = false;
    private final GDXVRTeleporter teleporter = new GDXVRTeleporter();
@@ -50,13 +51,16 @@ public class GDXVRManager
    private volatile int initSystemCount = 0;
    private ImGuiPlot setupEyesCountPlot = new ImGuiPlot(labels.get("setupEyesCount"), 1000, 300, 50);
    private volatile int setupEyesCount = 0;
-   private ImGuiPlot waitGetPosesInterruptedCountPlot = new ImGuiPlot(labels.get("waitGetPosesInterruptedCount"), 1000, 300, 50);
-   private volatile int waitGetPosesInterruptedCount = 0;
+   private ImGuiPlot waitGetPosesExceptionCountPlot = new ImGuiPlot(labels.get("waitGetPosesExceptionCount"), 1000, 300, 50);
+   private volatile int waitGetPosesExceptionCount = 0;
+   private final Notification waitOnPosesNotification = new Notification();
 
    public void create()
    {
       teleporter.create();
       context.addVRInputProcessor(teleporter::processVRInput);
+
+      ThreadTools.startAsDaemon(this::waitOnPoses, getClass().getSimpleName() + "WaitOnPosesThread");
    }
 
    /**
@@ -74,7 +78,10 @@ public class GDXVRManager
          skipHeadset = true;
          vrFPSCalculator.ping();
          waitGetToRenderDuration = waitGetToRenderStopwatch.totalElapsed();
-         context.renderEyes(sceneManager.getSceneBasics());
+         synchronized (syncObject)
+         {
+            context.renderEyes(sceneManager.getSceneBasics());
+         }
          skipHeadset = false;
       }
    }
@@ -91,7 +98,10 @@ public class GDXVRManager
             MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
             {
                initSystemCount++;
-               context.initSystem();
+               synchronized (syncObject)
+               {
+                  context.initSystem();
+               }
                contextCreatedNotification.set();
             });
          }
@@ -99,7 +109,10 @@ public class GDXVRManager
          {
             initializing = false;
             setupEyesCount++;
-            context.setupEyes();
+            synchronized (syncObject)
+            {
+               context.setupEyes();
+            }
 
             if (!Boolean.parseBoolean(System.getProperty("gdx.free.spin")))
             {
@@ -117,40 +130,42 @@ public class GDXVRManager
             // Waiting for the poses on a thread allows for the rest of the application to keep
             // cranking faster than VR can do stuff. This also makes the performance graph in Steam
             // show the correct value and the OpenVR stack work much better.
-            try
-            {
-               // TODO: This whole thing might have major issues because
-               // there's a delay waiting for the next time this method is called
-               posesReadyThisFrame = posesReady.poll();
+            // TODO: This whole thing might have major issues because
+            // there's a delay waiting for the next time this method is called
+            posesReadyThisFrame = posesReady.poll();
 
-               if (!posesReadyThisFrame && !waitingOnPoses)
-               {
-                  waitingOnPoses = true;
-                  waitGetPosesExecutor.clearQueueAndExecute(() ->
-                  {
-                     waitGetPosesFrequencyCalculator.ping();
-                     context.waitGetPoses();
-                     waitGetToRenderStopwatch.reset();
-                     posesReady.set();
-                  });
-               }
-               else
-               {
-                  waitingOnPoses = false;
-               }
-            }
-            catch (RejectedExecutionException rejectedExecutionException)
+            if (!posesReadyThisFrame && !waitingOnPoses)
             {
-               // TODO: If this happens a lot but is fine, maybe it should be built into ResettableExceptionHandlingExecutorService
-               LogTools.info("Resetting the WaitGetPoses executor.");
-               waitGetPosesInterruptedCount++;
-               waitGetPosesExecutor.interruptAndReset();
+               waitingOnPoses = true;
+               waitOnPosesNotification.set();
+//               MissingThreadTools.startAsDaemon("WaitGetPoses", exception ->
+//               {
+//                  waitGetPosesExceptionCount++;
+//                  LogTools.error(exception.getMessage());
+//                  exception.printStackTrace();
+//               }, () ->
+//               {
+//                  waitGetPosesFrequencyCalculator.ping();
+//                  synchronized (syncObject)
+//                  {
+//                     context.waitGetPoses();
+//                  }
+//                  waitGetToRenderStopwatch.reset();
+//                  posesReady.set();
+//               });
+            }
+            else
+            {
+               waitingOnPoses = false;
             }
 
             if (posesReadyThisFrame)
             {
                pollEventsFrequencyCalculator.ping();
-               context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
+               synchronized (syncObject)
+               {
+                  context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
+               }
             }
          }
       }
@@ -163,6 +178,31 @@ public class GDXVRManager
       }
 
       return posesReadyThisFrame;
+   }
+
+   private void waitOnPoses()
+   {
+      while (true)
+      {
+         waitOnPosesNotification.blockingPoll();
+
+         try
+         {
+            waitGetPosesFrequencyCalculator.ping();
+            synchronized (syncObject)
+            {
+               context.waitGetPoses();
+            }
+            waitGetToRenderStopwatch.reset();
+            posesReady.set();
+         }
+         catch (Exception exception)
+         {
+            waitGetPosesExceptionCount++;
+            LogTools.error(exception.getMessage());
+            exception.printStackTrace();
+         }
+      }
    }
 
    public void renderImGuiEnableWidget()
@@ -192,12 +232,11 @@ public class GDXVRManager
       pollEventsPlot.render(pollEventsFrequencyCalculator.getFrequency());
       vrFPSPlot.render(vrFPSCalculator.getFrequency());
       waitGetToRenderDelayPlot.render(waitGetToRenderDuration);
-      waitGetPosesInterruptedCountPlot.render(waitGetPosesInterruptedCount);
+      waitGetPosesExceptionCountPlot.render(waitGetPosesExceptionCount);
    }
 
    public void dispose()
    {
-      waitGetPosesExecutor.destroy();
       if (contextCreatedNotification != null && contextInitialized)
       {
          contextCreatedNotification = null;
@@ -230,10 +269,13 @@ public class GDXVRManager
          }
          context.getControllerRenderables(renderables, pool);
          context.getBaseStationRenderables(renderables, pool);
-//         for (RobotSide side : RobotSide.values)
-//         {
-//            context.getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
-//         }
+         if (DEBUG_EYE_FRAMES)
+         {
+            for (RobotSide side : RobotSide.values)
+            {
+               context.getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
+            }
+         }
          scenePoseGizmo.getRenderables(renderables, pool);
          teleporter.getRenderables(renderables, pool);
       }
