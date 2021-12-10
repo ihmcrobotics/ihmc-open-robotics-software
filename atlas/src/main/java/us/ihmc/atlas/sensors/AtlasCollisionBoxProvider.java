@@ -22,6 +22,7 @@ import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.Cylinder3DDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
+import us.ihmc.scs2.definition.robot.JointDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 
@@ -36,7 +37,8 @@ public class AtlasCollisionBoxProvider implements CollisionBoxProvider
    {
       for (RigidBodyDefinition rigidBodyDefinition : definitionWithCollisions.getAllRigidBodies())
       {
-         String jointName = rigidBodyDefinition.getParentJoint().getName();
+         JointDefinition parentJoint = rigidBodyDefinition.getParentJoint();
+         String jointName = parentJoint == null ? "root" : parentJoint.getName();
 
          for (CollisionShapeDefinition collisionShapeDefinition : rigidBodyDefinition.getCollisionShapeDefinitions())
          {
