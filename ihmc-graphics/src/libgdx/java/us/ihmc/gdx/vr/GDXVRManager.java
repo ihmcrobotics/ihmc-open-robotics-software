@@ -28,6 +28,7 @@ public class GDXVRManager
    private boolean initializing = false;
    private boolean skipHeadset = false;
    private final Object syncObject = new Object();
+   private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
    private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean vrEnabled = new ImBoolean(false);
@@ -198,6 +199,7 @@ public class GDXVRManager
 
    public void renderImGuiDebugWidgets()
    {
+      ImGui.checkbox(labels.get("Show scene pose gizmo"), showScenePoseGizmo);
       contextInitializedPlot.render(contextInitialized ? 1.0 : 0.0);
       initSystemCountPlot.render(initSystemCount);
       setupEyesCountPlot.render(setupEyesCount);
@@ -227,7 +229,7 @@ public class GDXVRManager
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      if (isVRReady())
+      if (isVRReady() && showScenePoseGizmo.get())
       {
          scenePoseGizmo.process3DViewInput(input);
       }
@@ -243,7 +245,8 @@ public class GDXVRManager
          }
          context.getControllerRenderables(renderables, pool);
          context.getBaseStationRenderables(renderables, pool);
-         scenePoseGizmo.getRenderables(renderables, pool);
+         if (showScenePoseGizmo.get())
+            scenePoseGizmo.getRenderables(renderables, pool);
          teleporter.getRenderables(renderables, pool);
       }
    }
