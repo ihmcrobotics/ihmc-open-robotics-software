@@ -285,6 +285,23 @@ public class RobotDefinitionTools
    // RobotDefinitionLoader redirections:
    // --------------------------------------------------------
 
+   public static RobotDefinition loadURDFModel(InputStream stream,
+                                               Collection<String> resourceDirectories,
+                                               ClassLoader classLoader,
+                                               String modelName,
+                                               ContactPointDefinitionHolder contactPointDefinitionHolder,
+                                               JointNameMap<?> jointNameMap,
+                                               boolean removeCollisionMeshes)
+   {
+      return RobotDefinitionLoader.loadURDFModel(stream,
+                                                 resourceDirectories,
+                                                 classLoader,
+                                                 modelName,
+                                                 contactPointDefinitionHolder,
+                                                 jointNameMap,
+                                                 removeCollisionMeshes);
+   }
+
    public static RobotDefinition loadSDFModel(InputStream stream,
                                               Collection<String> resourceDirectories,
                                               ClassLoader classLoader,
