@@ -1,11 +1,10 @@
 package us.ihmc.robotModels.description;
 
-import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 
 public class CrossFourBarJointDescription extends OneDoFJointDescription
@@ -14,24 +13,22 @@ public class CrossFourBarJointDescription extends OneDoFJointDescription
    private String jointNameB;
    private String jointNameC;
    private String jointNameD;
-   private String bodyNameDA;
-   private String bodyNameBC;
    private RigidBodyTransform transformAToPredecessor = new RigidBodyTransform();
    private RigidBodyTransform transformBToPredecessor = new RigidBodyTransform();
    private RigidBodyTransform transformCToB = new RigidBodyTransform();
    private RigidBodyTransform transformDToA = new RigidBodyTransform();
-   private double bodyMassDA;
-   private double bodyMassBC;
-   private Matrix3D bodyInertiaDA = new Matrix3D();
-   private Matrix3D bodyInertiaBC = new Matrix3D();
-   private RigidBodyTransform bodyInertiaPoseDA = new RigidBodyTransform();
-   private RigidBodyTransform bodyInertiaPoseBC = new RigidBodyTransform();
+
+   private LinkDescription bodyDA = new LinkDescription("bodyDA");
+   private LinkDescription bodyBC = new LinkDescription("bodyBC");
+
    private int actuatedJointIndex;
    private int loopClosureJointIndex;
 
    public CrossFourBarJointDescription(String name, Vector3DReadOnly jointAxis)
    {
       super(name, new Vector3D(Double.NaN, Double.NaN, Double.NaN), new Vector3D(Double.NaN, Double.NaN, Double.NaN));
+      bodyDA.setName(name + "_DA");
+      bodyBC.setName(name + "_BC");
    }
 
    public void setJointNameA(String jointNameA)
@@ -62,20 +59,14 @@ public class CrossFourBarJointDescription extends OneDoFJointDescription
       this.jointNameD = jointNameD;
    }
 
-   public void setBodyNameDA(String bodyNameDA)
+   public void setBodyDA(LinkDescription bodyDA)
    {
-      this.bodyNameDA = bodyNameDA;
+      this.bodyDA = bodyDA;
    }
 
-   public void setBodyNameBC(String bodyNameBC)
+   public void setBodyBC(LinkDescription bodyBC)
    {
-      this.bodyNameBC = bodyNameBC;
-   }
-
-   public void setBodyNames(String bodyNameDA, String bodyNameBC)
-   {
-      this.bodyNameDA = bodyNameDA;
-      this.bodyNameBC = bodyNameDA;
+      this.bodyBC = bodyBC;
    }
 
    public void setTransformAToPredecessor(RigidBodyTransformReadOnly transformAToPredecessor)
@@ -109,51 +100,6 @@ public class CrossFourBarJointDescription extends OneDoFJointDescription
       this.transformDToA.set(transformDToA);
    }
 
-   public void setBodyMassDA(double bodyMassDA)
-   {
-      this.bodyMassDA = bodyMassDA;
-   }
-
-   public void setBodyMassBC(double bodyMassBC)
-   {
-      this.bodyMassBC = bodyMassBC;
-   }
-
-   public void setBodyInertiaDA(Matrix3DReadOnly bodyInertiaDA)
-   {
-      this.bodyInertiaDA.set(bodyInertiaDA);
-   }
-
-   public void setBodyInertiaBC(Matrix3DReadOnly bodyInertiaBC)
-   {
-      this.bodyInertiaBC.set(bodyInertiaBC);
-   }
-
-   public void setBodyInertiaPoseDA(RigidBodyTransformReadOnly bodyInertiaPoseDA)
-   {
-      this.bodyInertiaPoseDA.set(bodyInertiaPoseDA);
-   }
-
-   public void setBodyInertiaPoseBC(RigidBodyTransformReadOnly bodyInertiaPoseBC)
-   {
-      this.bodyInertiaPoseBC.set(bodyInertiaPoseBC);
-   }
-
-   public void setBodyInertias(double bodyMassDA,
-                               double bodyMassBC,
-                               Matrix3DReadOnly bodyInertiaDA,
-                               Matrix3DReadOnly bodyInertiaBC,
-                               RigidBodyTransformReadOnly bodyInertiaPoseDA,
-                               RigidBodyTransformReadOnly bodyInertiaPoseBC)
-   {
-      this.bodyMassDA = bodyMassDA;
-      this.bodyMassBC = bodyMassBC;
-      this.bodyInertiaDA.set(bodyInertiaDA);
-      this.bodyInertiaBC.set(bodyInertiaBC);
-      this.bodyInertiaPoseDA.set(bodyInertiaPoseDA);
-      this.bodyInertiaPoseBC.set(bodyInertiaPoseBC);
-   }
-
    public void setActuatedJointIndex(int actuatedJointIndex)
    {
       this.actuatedJointIndex = actuatedJointIndex;
@@ -184,16 +130,6 @@ public class CrossFourBarJointDescription extends OneDoFJointDescription
       return jointNameD;
    }
 
-   public String getBodyNameDA()
-   {
-      return bodyNameDA;
-   }
-
-   public String getBodyNameBC()
-   {
-      return bodyNameBC;
-   }
-
    public RigidBodyTransform getTransformAToPredecessor()
    {
       return transformAToPredecessor;
@@ -214,34 +150,14 @@ public class CrossFourBarJointDescription extends OneDoFJointDescription
       return transformDToA;
    }
 
-   public double getBodyMassDA()
+   public LinkDescription getBodyDA()
    {
-      return bodyMassDA;
+      return bodyDA;
    }
 
-   public double getBodyMassBC()
+   public LinkDescription getBodyBC()
    {
-      return bodyMassBC;
-   }
-
-   public Matrix3D getBodyInertiaDA()
-   {
-      return bodyInertiaDA;
-   }
-
-   public Matrix3D getBodyInertiaBC()
-   {
-      return bodyInertiaBC;
-   }
-
-   public RigidBodyTransform getBodyInertiaPoseDA()
-   {
-      return bodyInertiaPoseDA;
-   }
-
-   public RigidBodyTransform getBodyInertiaPoseBC()
-   {
-      return bodyInertiaPoseBC;
+      return bodyBC;
    }
 
    public int getActuatedJointIndex()
@@ -262,18 +178,12 @@ public class CrossFourBarJointDescription extends OneDoFJointDescription
       clone.jointNameB = jointNameB;
       clone.jointNameC = jointNameC;
       clone.jointNameD = jointNameD;
-      clone.bodyNameDA = bodyNameDA;
-      clone.bodyNameBC = bodyNameBC;
       clone.transformAToPredecessor.set(transformAToPredecessor);
       clone.transformBToPredecessor.set(transformBToPredecessor);
       clone.transformCToB.set(transformCToB);
       clone.transformDToA.set(transformDToA);
-      clone.bodyInertiaDA.set(bodyInertiaDA);
-      clone.bodyInertiaBC.set(bodyInertiaBC);
-      clone.bodyMassDA = bodyMassDA;
-      clone.bodyMassBC = bodyMassBC;
-      clone.bodyInertiaPoseDA.set(bodyInertiaPoseDA);
-      clone.bodyInertiaPoseBC.set(bodyInertiaPoseBC);
+      clone.bodyDA = new LinkDescription(bodyDA);
+      clone.bodyBC = new LinkDescription(bodyBC);
       clone.actuatedJointIndex = actuatedJointIndex;
       clone.loopClosureJointIndex = loopClosureJointIndex;
       return clone;
