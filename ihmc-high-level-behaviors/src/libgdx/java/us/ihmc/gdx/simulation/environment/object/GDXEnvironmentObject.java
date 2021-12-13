@@ -19,7 +19,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -45,9 +44,9 @@ public class GDXEnvironmentObject
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform placementTransform = new RigidBodyTransform();
    private final ReferenceFrame placementFrame
-         = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("placementFrame" + INDEX.getAndIncrement(),
-                                                                                  ReferenceFrame.getWorldFrame(),
-                                                                                  placementTransform);
+         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("placementFrame" + INDEX.getAndIncrement(),
+                                                                           ReferenceFrame.getWorldFrame(),
+                                                                           placementTransform);
    private final FramePose3D placementFramePose = new FramePose3D();
    private ReferenceFrame realisticModelFrame;
    private ReferenceFrame collisionModelFrame;

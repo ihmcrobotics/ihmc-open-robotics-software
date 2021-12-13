@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -24,7 +25,6 @@ import us.ihmc.gdx.ui.gizmo.SphereRayIntersection;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.physics.Collidable;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXRobotCollisionLink implements RenderableProvider
 {
@@ -70,15 +70,13 @@ public class GDXRobotCollisionLink implements RenderableProvider
       this.shape = shape;
       // TODO update every frame
       transformToJoint = new RigidBodyTransform(shapeFrame.getTransformToDesiredFrame(frameAfterJoint));
-      collisionMeshFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("collisionMeshFrame" + rigidBodyName,
-                                                                                                  frameAfterJoint,
-                                                                                                  transformToJoint);
-      overrideFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("overrideFrame" + rigidBodyName,
-                                                                                             ReferenceFrame.getWorldFrame(),
-                                                                                             overrideTransform);
-      overrideMeshFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("overrideMeshFrame" + rigidBodyName,
-                                                                                                 overrideFrame,
-                                                                                                 transformToJoint);
+      collisionMeshFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("collisionMeshFrame" + rigidBodyName,
+                                                                                           frameAfterJoint,
+                                                                                           transformToJoint);
+      overrideFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("overrideFrame" + rigidBodyName,
+                                                                                      ReferenceFrame.getWorldFrame(),
+                                                                                      overrideTransform);
+      overrideMeshFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("overrideMeshFrame" + rigidBodyName, overrideFrame, transformToJoint);
 
       modelInstance = GDXModelPrimitives.buildModelInstance(meshBuilder ->
       {
@@ -199,7 +197,7 @@ public class GDXRobotCollisionLink implements RenderableProvider
       coordinateFrame.getRenderables(renderables, pool);
    }
 
-   public RigidBodyTransform overrideTransform(boolean useOverrideTransform)
+   public RigidBodyTransform setOverrideTransform(boolean useOverrideTransform)
    {
       this.useOverrideTransform = useOverrideTransform;
       return overrideTransform;

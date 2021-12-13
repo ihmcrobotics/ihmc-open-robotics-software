@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.gizmo;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -10,7 +11,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.geometry.shapes.FramePlane3d;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class DiscreteIsoscelesTriangularPrismRayIntersection
 {
@@ -22,9 +22,9 @@ public class DiscreteIsoscelesTriangularPrismRayIntersection
    private final FramePlane3d bottomPlane = new FramePlane3d();
    private final YawPitchRoll tempOrientation = new YawPitchRoll();
    private final RigidBodyTransform shapeTransformToWorld = new RigidBodyTransform();
-   private final ReferenceFrame shapeFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("shapeFrame",
-                                                                                                                    WORLD_FRAME,
-                                                                                                                    shapeTransformToWorld);
+   private final ReferenceFrame shapeFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("shapeFrame",
+                                                                                                             WORLD_FRAME,
+                                                                                                             shapeTransformToWorld);
 
    private final Point3D closestIntersection = new Point3D();
    private final Point3D candidatePlaneIntersection = new Point3D();

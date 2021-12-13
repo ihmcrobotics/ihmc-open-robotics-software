@@ -11,6 +11,7 @@ import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -22,7 +23,6 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
 import us.ihmc.gdx.ui.graphics.GDXFootstepGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 
@@ -57,7 +57,7 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
       leftGoalFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.LEFT);
       rightGoalFootstepGraphic = new GDXFootstepGraphic(contactPoints, RobotSide.RIGHT);
 
-      goalFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("goalPose", ReferenceFrame.getWorldFrame(), goalGizmo.getTransform());
+      goalFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("goalPose", ReferenceFrame.getWorldFrame(), goalGizmo.getTransform());
 
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
       foostepPlanGraphic = new GDXFootstepPlanGraphic(contactPoints);

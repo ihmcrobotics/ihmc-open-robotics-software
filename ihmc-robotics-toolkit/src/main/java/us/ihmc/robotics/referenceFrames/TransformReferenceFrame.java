@@ -6,7 +6,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 public class TransformReferenceFrame extends ReferenceFrame
 {
-   private final RigidBodyTransform transform3D = new RigidBodyTransform();
+   private final RigidBodyTransform transformToParent = new RigidBodyTransform();
 
    public TransformReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {
@@ -22,12 +22,12 @@ public class TransformReferenceFrame extends ReferenceFrame
    @Override
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
-      transformToParent.set(this.transform3D);
+      transformToParent.set(this.transformToParent);
    }
 
    public void setTransformAndUpdate(RigidBodyTransformReadOnly transform)
    {
-      this.transform3D.set(transform);
+      this.transformToParent.set(transform);
       this.update();
    }
 }
