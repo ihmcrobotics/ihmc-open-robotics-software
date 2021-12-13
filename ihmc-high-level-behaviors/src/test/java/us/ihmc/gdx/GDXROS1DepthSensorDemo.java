@@ -8,13 +8,11 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
-import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1VideoVisualizer;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 
@@ -52,10 +50,8 @@ public class GDXROS1DepthSensorDemo
             sensorTransform = new RigidBodyTransform();
             sensorTransform.appendTranslation(0.0, 0.0, 0.5);
             sensorTransform.appendPitchRotation(Math.PI / 6.0);
-            poseGizmo.getTransform().set(sensorTransform);
-            sensorFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("sensorFrame",
-                                                                                                 ReferenceFrameTools.getWorldFrame(),
-                                                                                                 sensorTransform);
+            poseGizmo.getTransformToParent().set(sensorTransform);
+            sensorFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("sensorFrame", ReferenceFrameTools.getWorldFrame(), sensorTransform);
 
             double publishRateHz = 5.0;
             double verticalFOV = 55.0;
@@ -113,7 +109,7 @@ public class GDXROS1DepthSensorDemo
          @Override
          public void render()
          {
-            sensorTransform.set(poseGizmo.getTransform());
+            sensorTransform.set(poseGizmo.getTransformToParent());
             sensorFrame.update();
 
             globalVisualizersUI.update();

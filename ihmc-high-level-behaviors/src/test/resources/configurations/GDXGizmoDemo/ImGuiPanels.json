@@ -1,7 +1,7 @@
 {
   "dockspacePanels" : { },
   "windows" : {
-    "Pose Gizmo Tuner" : true,
-    "Footstep Ring Gizmo Tuner" : true
+    "Footstep Ring Gizmo Tuner (GDXGizmoDemo)" : true,
+    "Pose3D Gizmo Tuner (GDXGizmoDemo)" : true
   }
 }

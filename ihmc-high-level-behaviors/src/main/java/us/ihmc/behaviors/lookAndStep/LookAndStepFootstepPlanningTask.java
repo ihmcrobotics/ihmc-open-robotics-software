@@ -20,17 +20,16 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -280,9 +279,9 @@ public class LookAndStepFootstepPlanningTask
    protected SwingPlannerType swingPlannerType;
 
    private final RigidBodyTransform regionTransform = new RigidBodyTransform();
-   private final ReferenceFrame regionFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("regionFrame",
-                                                                                                       ReferenceFrame.getWorldFrame(),
-                                                                                                       regionTransform);
+   private final ReferenceFrame regionFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("regionFrame",
+                                                                                                              ReferenceFrame.getWorldFrame(),
+                                                                                                              regionTransform);
    private final FramePoint3D vertex = new FramePoint3D();
 
    protected void performTask()

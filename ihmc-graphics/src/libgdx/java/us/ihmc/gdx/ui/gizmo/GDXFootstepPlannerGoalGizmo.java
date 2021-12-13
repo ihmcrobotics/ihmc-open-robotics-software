@@ -16,6 +16,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -26,6 +27,7 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 {
@@ -69,7 +71,8 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private final Pose3D pose = new Pose3D();
    /** The main, source, true, base transform that this thing represents. */
    private final RigidBodyTransform transform = new RigidBodyTransform();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                                        transform);
    private FocusBasedGDXCamera camera3D;
    private final Point3D cameraPosition = new Point3D();
    private double lastDistanceToCamera = -1.0;
@@ -216,6 +219,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       GDXTools.toGDX(transform, positiveYArrowModel.getOrCreateModelInstance().transform);
       GDXTools.toGDX(transform, negativeXArrowModel.getOrCreateModelInstance().transform);
       GDXTools.toGDX(transform, negativeYArrowModel.getOrCreateModelInstance().transform);
+      referenceFrame.update();
    }
 
    private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
@@ -371,6 +375,11 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    public RigidBodyTransform getTransform()
    {
       return transform;
+   }
+
+   public ReferenceFrame getReferenceFrame()
+   {
+      return referenceFrame;
    }
 
    public boolean getIntersectsAny()

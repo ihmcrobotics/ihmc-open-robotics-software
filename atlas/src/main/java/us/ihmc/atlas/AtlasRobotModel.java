@@ -231,7 +231,10 @@ public class AtlasRobotModel implements DRCRobotModel
                                                                           getContactPointParameters(),
                                                                           jointMap,
                                                                           removeCollisions);
-      RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
+      if (materialDefinition != null)
+         RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, materialDefinition);
+      else
+         RobotDefinitionTools.setDefaultMaterial(robotDefinition, new MaterialDefinition(ColorDefinitions.Black()));
 
       getRobotDefinitionMutator().accept(robotDefinition);
 

@@ -93,7 +93,7 @@ public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements Renderab
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (robotLoadedActivator.poll())
+      if (isActive() && robotLoadedActivator.poll())
       {
          robotRootNode.getRenderables(renderables, pool);
       }
