@@ -187,14 +187,9 @@ public class RobotDefinitionConverter
    {
       CrossFourBarJointDescription output = new CrossFourBarJointDescription(source.getName(), source.getAxis());
       output.setJointNames(source.getJointNameA(), source.getJointNameB(), source.getJointNameC(), source.getJointNameD());
-      output.setBodyNames(source.getBodyDA().getName(), source.getBodyDA().getName());
+      output.setBodyDA(toLinkDescription(source.getBodyDA()));
+      output.setBodyBC(toLinkDescription(source.getBodyBC()));
       output.setJointTransforms(source.getTransformAToPredecessor(), source.getTransformBToPredecessor(), source.getTransformCToB(), source.getTransformDToA());
-      output.setBodyInertias(source.getBodyDA().getMass(),
-                             source.getBodyBC().getMass(),
-                             source.getBodyDA().getMomentOfInertia(),
-                             source.getBodyBC().getMomentOfInertia(),
-                             source.getBodyDA().getInertiaPose(),
-                             source.getBodyBC().getInertiaPose());
       return output;
    }
 
