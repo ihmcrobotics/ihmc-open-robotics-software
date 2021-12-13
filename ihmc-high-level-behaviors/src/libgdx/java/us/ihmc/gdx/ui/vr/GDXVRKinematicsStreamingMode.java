@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -66,6 +67,7 @@ public class GDXVRKinematicsStreamingMode
    private SideDependentList<GDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private SideDependentList<GDXReferenceFrameGraphic> handControlFrameGraphics = new SideDependentList<>();
    private ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
+   private boolean streamToController;
 
    public GDXVRKinematicsStreamingMode(DRCRobotModel robotModel, Map<String, Double> initialConfiguration, ROS2ControllerHelper ros2ControllerHelper)
    {
@@ -119,7 +121,21 @@ public class GDXVRKinematicsStreamingMode
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
+            if (side == RobotSide.LEFT)
+            {
+               InputDigitalActionData aButton = controller.getAButtonActionData();
+               if (aButton.bChanged() && !aButton.bState())
+               {
+                  streamToController = !streamToController;
+               }
+            }
 
+            float currentGripX = controller.getGripActionData().x();
+//            if (currentGripX)
+            {
+
+            }
+//            lastGripX
          });
       }
 
@@ -164,7 +180,7 @@ public class GDXVRKinematicsStreamingMode
 //                                                                                               ReferenceFrame.getWorldFrame()));
 //            toolboxInputMessage.getInputs().add().set(message);
 //         });
-         toolboxInputMessage.setStreamToController(false);
+         toolboxInputMessage.setStreamToController(streamToController);
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(robotModel.getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
@@ -225,6 +241,7 @@ public class GDXVRKinematicsStreamingMode
       {
          wakeUpThread.setRunning(wakeUpThreadRunning.get());
       }
+      ImGui.text("Streaming to controller: " + streamToController);
       ImGui.text("Output:");
       ImGui.sameLine();
       outputFrequencyPlot.renderImGuiWidgets();
