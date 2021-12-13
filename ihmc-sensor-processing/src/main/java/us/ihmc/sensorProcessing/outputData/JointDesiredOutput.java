@@ -24,6 +24,8 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
 
    private double positionFeedbackMaxError = Double.NaN;
    private double velocityFeedbackMaxError = Double.NaN;
+   
+   private double maxTorque = Double.NaN;
 
    public JointDesiredOutput()
    {
@@ -54,6 +56,8 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
 
       positionFeedbackMaxError = Double.NaN;
       velocityFeedbackMaxError = Double.NaN;
+      
+      maxTorque = Double.NaN;
    }
 
    @Override
@@ -288,4 +292,17 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    {
       return getRepresentativeString();
    }
+
+   @Override
+   public double getMaxTorque()
+   {
+      return maxTorque;
+   }
+
+   public void setMaxTorque(double feedbackMaxTorque)
+   {
+      this.maxTorque = feedbackMaxTorque;
+   }
+   
+   
 }
