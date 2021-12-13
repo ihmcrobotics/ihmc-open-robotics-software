@@ -71,9 +71,9 @@ public class RemoteControllerState extends HighLevelControllerState
          put("r_leg_hpx", 300.0);
          put("l_leg_hpy", 1000.0);
          put("r_leg_hpy", 1000.0);
-         put("back_bkz", 500.0);
-         put("back_bky", 500.0);
-         put("back_bkx", 500.0);
+         put("back_bkz", 1000.0);
+         put("back_bky", 1000.0);
+         put("back_bkx", 1000.0);
          put("r_arm_shz", 100.0);
          put("l_arm_shx", 100.0);
          put("r_arm_shx", 100.0);
@@ -96,9 +96,9 @@ public class RemoteControllerState extends HighLevelControllerState
          lowLevelOneDoFJointDesiredDataHolder.setJointControlMode(controlledJoints[i], JointDesiredControlMode.EFFORT);
          YoDouble proportionalGain = new YoDouble("proportionalGain" + controlledJoints[i].getName(), getYoRegistry());
          YoDouble derivateGain = new YoDouble("derivateGain" + controlledJoints[i].getName(), getYoRegistry());
-         //         proportionalGain.set(jointGains.get(controlledJoints[i].getName()));
+         proportionalGain.set(jointGains.get(controlledJoints[i].getName()));
 //         this.controllerToolbox.reportControllerFailureToListeners(new FrameVector2D());
-         proportionalGain.set(1.0);
+//         proportionalGain.set(1.0);
          derivateGain.set(0.1 * proportionalGain.getValue());
          controllers[i] = new PDController(proportionalGain, derivateGain, "pdControllerJoint" + controlledJoints[i].getName(), getYoRegistry());
       }
