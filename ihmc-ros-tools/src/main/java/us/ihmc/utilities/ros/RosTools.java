@@ -59,7 +59,9 @@ public class RosTools
    public static final String L515_DEPTH = "/chest_l515/depth/image_rect_raw";
    public static final String L515_POINT_CLOUD = "/chest_l515/depth/color/points";
    public static final String OUSTER_POINT_CLOUD = "/os_cloud_node/points";
-   public static final String BLACKFLY_VIDEO = "/camera/image_color";
+   public static final String MAPSENSE_POINT_CLOUD = "/mapsense/color/points";
+   public static final String BLACKFLY_LEFT_VIDEO = "/blackfly/left/image_color";
+   public static final String BLACKFLY_RIGHT_VIDEO = "/blackfly/right/image_color";
    public static final String SLAM_POSE = "/mapsense/slam/pose";
    public static final String SEMANTIC_TARGET_POSE = "/semantic/target/pose";
    public static final String SEMANTIC_TARGET_CLOUD = "/semantic/object/points";
@@ -68,7 +70,7 @@ public class RosTools
    public static final String L515_DEPTH_CAMERA_INFO = "/chest_l515/depth/camera_info";
    public static final String MAPSENSE_DEPTH_IMAGE = L515_DEPTH;
    public static final String MAPSENSE_DEPTH_CAMERA_INFO = L515_DEPTH_CAMERA_INFO;
-   public static final String MAPSENSE_REGIONS = "/map/regions/test";
+   public static final String MAPSENSE_REGIONS = "/mapsense/planar_regions";
    public static final String MAPSENSE_CONFIGURATION = "/map/config";
    // See https://www.stereolabs.com/docs/ros/zed-node/
    public static final String ZED2_LEFT_EYE_VIDEO_COMPRESSED = "/zed/zed_node/left/image_rect_color/compressed";
