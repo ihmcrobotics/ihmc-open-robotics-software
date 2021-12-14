@@ -34,7 +34,6 @@ public class GDXVRManager
    private final ImBoolean vrEnabled = new ImBoolean(false);
    private final Notification posesReady = new Notification();
    private volatile boolean waitingOnPoses = false;
-   private final GDXVRTeleporter teleporter = new GDXVRTeleporter();
    private ImGuiPlot vrFPSPlot = new ImGuiPlot(labels.get("VR FPS Hz"), 1000, 300, 50);
    private FrequencyCalculator vrFPSCalculator = new FrequencyCalculator();
    private ImGuiPlot waitGetPosesPlot = new ImGuiPlot(labels.get("Wait Get Poses Hz"), 1000, 300, 50);
@@ -54,8 +53,7 @@ public class GDXVRManager
 
    public void create()
    {
-      teleporter.create();
-      context.addVRInputProcessor(teleporter::processVRInput);
+
    }
 
    /**
@@ -232,6 +230,10 @@ public class GDXVRManager
       if (isVRReady() && showScenePoseGizmo.get())
       {
          scenePoseGizmo.process3DViewInput(input);
+         context.teleport(teleportIHMCZUpToIHMCZUpWorldConsumer ->
+         {
+            teleportIHMCZUpToIHMCZUpWorldConsumer.set(scenePoseGizmo.getTransformToParent());
+         });
       }
    }
 
@@ -247,7 +249,6 @@ public class GDXVRManager
          context.getBaseStationRenderables(renderables, pool);
          if (showScenePoseGizmo.get())
             scenePoseGizmo.getRenderables(renderables, pool);
-         teleporter.getRenderables(renderables, pool);
       }
    }
 
