@@ -181,6 +181,11 @@ public class RobotDefinitionLoader
                revoluteJoint.setKpSoftLimitStop(0.0001 * revoluteJoint.getKpSoftLimitStop());
                revoluteJoint.setKdSoftLimitStop(0.1 * revoluteJoint.getKdSoftLimitStop());
             }
+
+            if (!isJointInNeedOfReducedGains(joint.getName()))
+            {
+               revoluteJoint.setDampingVelocitySoftLimit(jointNameMap.getDefaultVelocityLimitDamping());
+            }
          }
          else if (joint instanceof PrismaticJointDefinition)
          {
@@ -200,6 +205,11 @@ public class RobotDefinitionLoader
             {
                prismaticJoint.setKpSoftLimitStop(0.0001 * prismaticJoint.getKpSoftLimitStop());
                prismaticJoint.setKdSoftLimitStop(prismaticJoint.getKdSoftLimitStop());
+            }
+
+            if (!isJointInNeedOfReducedGains(joint.getName()))
+            {
+               prismaticJoint.setDampingVelocitySoftLimit(jointNameMap.getDefaultVelocityLimitDamping());
             }
          }
       }
