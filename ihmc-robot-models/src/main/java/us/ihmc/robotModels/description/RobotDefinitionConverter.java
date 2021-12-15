@@ -189,7 +189,7 @@ public class RobotDefinitionConverter
       output.setJointNames(source.getJointNameA(), source.getJointNameB(), source.getJointNameC(), source.getJointNameD());
       output.setBodyDA(toLinkDescription(source.getBodyDA()));
       output.setBodyBC(toLinkDescription(source.getBodyBC()));
-      output.setJointTransforms(source.getTransformAToPredecessor(), source.getTransformBToPredecessor(), source.getTransformCToB(), source.getTransformDToA());
+      output.setJointTransforms(source.getTransformAToPredecessor(), source.getTransformBToPredecessor(), source.getTransformDToA(), source.getTransformCToB());
       return output;
    }
 

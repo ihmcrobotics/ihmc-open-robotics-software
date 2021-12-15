@@ -91,8 +91,8 @@ public class CrossFourBarJointDescription extends OneDoFJointDescription
 
    public void setJointTransforms(RigidBodyTransformReadOnly transformAToPredecessor,
                                   RigidBodyTransformReadOnly transformBToPredecessor,
-                                  RigidBodyTransformReadOnly transformCToB,
-                                  RigidBodyTransformReadOnly transformDToA)
+                                  RigidBodyTransformReadOnly transformDToA,
+                                  RigidBodyTransformReadOnly transformCToB)
    {
       this.transformAToPredecessor.set(transformAToPredecessor);
       this.transformBToPredecessor.set(transformBToPredecessor);
@@ -100,6 +100,10 @@ public class CrossFourBarJointDescription extends OneDoFJointDescription
       this.transformDToA.set(transformDToA);
    }
 
+   /**
+    * @param actuatedJointIndex the index of the joint that is actuated, i.e. torque source. 0 is for
+    *                           joint A, 1 for B, 2 for C, and 3 for D.
+    */
    public void setActuatedJointIndex(int actuatedJointIndex)
    {
       this.actuatedJointIndex = actuatedJointIndex;
