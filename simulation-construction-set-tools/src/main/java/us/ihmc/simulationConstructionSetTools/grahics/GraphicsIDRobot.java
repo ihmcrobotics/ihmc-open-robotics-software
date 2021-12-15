@@ -69,8 +69,6 @@ public class GraphicsIDRobot extends GraphicsRobot
                graphicsJointB.addChild(graphicsJointC);
                GraphicsJoint graphicsJointD = createJoint(crossFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                graphicsJointC.addChild(graphicsJointD);
-               GraphicsJoint graphicsJointA = createJoint(crossFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
-               graphicsJointD.addChild(graphicsJointA);
                graphicsJoint = graphicsJointC;
             }
             else if (crossFourBar.getJointB().isLoopClosure())
@@ -81,8 +79,6 @@ public class GraphicsIDRobot extends GraphicsRobot
                graphicsJointA.addChild(graphicsJointD);
                GraphicsJoint graphicsJointC = createJoint(crossFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                graphicsJointD.addChild(graphicsJointC);
-               GraphicsJoint graphicsJointB = createJoint(crossFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
-               graphicsJointC.addChild(graphicsJointB);
                graphicsJoint = graphicsJointD;
             }
             else if (crossFourBar.getJointC().isLoopClosure())
@@ -93,8 +89,6 @@ public class GraphicsIDRobot extends GraphicsRobot
                parentJoint.addChild(graphicsJointB);
                GraphicsJoint graphicsJointD = createJoint(crossFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                graphicsJointA.addChild(graphicsJointD);
-               GraphicsJoint graphicsJointC = createJoint(crossFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
-               graphicsJointD.addChild(graphicsJointC);
                graphicsJoint = graphicsJointD;
             }
             else
@@ -105,8 +99,6 @@ public class GraphicsIDRobot extends GraphicsRobot
                parentJoint.addChild(graphicsJointB);
                GraphicsJoint graphicsJointC = createJoint(crossFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                graphicsJointB.addChild(graphicsJointC);
-               GraphicsJoint graphicsJointD = createJoint(crossFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
-               graphicsJointC.addChild(graphicsJointD);
                graphicsJoint = graphicsJointC;
             }
          }
