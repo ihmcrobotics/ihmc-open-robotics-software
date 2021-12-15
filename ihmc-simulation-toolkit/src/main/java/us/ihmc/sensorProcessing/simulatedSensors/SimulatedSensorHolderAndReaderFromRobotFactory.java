@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.Set;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -17,10 +17,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
@@ -93,12 +93,12 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
       {
          final DoubleProvider position, velocity, tau;
 
-         if (joint instanceof InvertedFourBarJoint)
+         if (joint instanceof CrossFourBarJoint)
          {
-            InvertedFourBarJoint fourBarJoint = (InvertedFourBarJoint) joint;
-            InvertedFourBarJoint localFourBarJoint = InvertedFourBarJoint.cloneInvertedFourBarJoint(fourBarJoint,
-                                                                                                    ReferenceFrameTools.constructARootFrame("dummy"),
-                                                                                                    "dummy");
+            CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) joint;
+            CrossFourBarJoint localFourBarJoint = CrossFourBarJoint.cloneCrossFourBarJoint(fourBarJoint,
+                                                                                           ReferenceFrameTools.constructARootFrame("dummy"),
+                                                                                           "dummy");
             OneDegreeOfFreedomJoint scsJointA = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointA().getName());
             OneDegreeOfFreedomJoint scsJointB = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointB().getName());
             OneDegreeOfFreedomJoint scsJointC = (OneDegreeOfFreedomJoint) robot.getJoint(fourBarJoint.getJointC().getName());
@@ -127,17 +127,17 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
                   localFourBarJoint.updateFrame();
                }
                DMatrixRMaj loopJacobian = localFourBarJoint.getFourBarFunction().getLoopJacobian();
-               double tau_master = loopJacobian.get(activeJointIndices[0]) * scsActiveJoints[0].getTau()
+               double tau_actuated = loopJacobian.get(activeJointIndices[0]) * scsActiveJoints[0].getTau()
                      + loopJacobian.get(activeJointIndices[1]) * scsActiveJoints[1].getTau();
 
-               int masterJointIndex = localFourBarJoint.getFourBarFunction().getMasterJointIndex();
+               int actuatedJointIndex = localFourBarJoint.getFourBarFunction().getActuatedJointIndex();
 
-               if (masterJointIndex == 0 || masterJointIndex == 3)
-                  tau_master /= (loopJacobian.get(0) + loopJacobian.get(3));
+               if (actuatedJointIndex == 0 || actuatedJointIndex == 3)
+                  tau_actuated /= (loopJacobian.get(0) + loopJacobian.get(3));
                else
-                  tau_master /= (loopJacobian.get(1) + loopJacobian.get(2));
+                  tau_actuated /= (loopJacobian.get(1) + loopJacobian.get(2));
 
-               return tau_master;
+               return tau_actuated;
             };
          }
          else

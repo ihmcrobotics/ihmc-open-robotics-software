@@ -16,6 +16,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -26,7 +27,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotModels.description.InvertedFourBarJointDescription;
+import us.ihmc.robotModels.description.CrossFourBarJointDescription;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -45,7 +46,6 @@ import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
@@ -479,8 +479,8 @@ public class FullRobotModelWrapper implements FullRobotModel
 
    public static OneDoFJointBasics createOneDoFJoint(OneDoFJointDescription jointDescription, RigidBodyBasics predecessor)
    {
-      if (jointDescription instanceof InvertedFourBarJointDescription)
-         return createInvertedFourBarJoint((InvertedFourBarJointDescription) jointDescription, predecessor);
+      if (jointDescription instanceof CrossFourBarJointDescription)
+         return createCrossFourBarJoint((CrossFourBarJointDescription) jointDescription, predecessor);
       if (jointDescription instanceof PinJointDescription)
          return createRevoluteJoint((PinJointDescription) jointDescription, predecessor);
       if (jointDescription instanceof SliderJointDescription)
@@ -514,89 +514,29 @@ public class FullRobotModelWrapper implements FullRobotModel
       return prismaticJoint;
    }
 
-   public static InvertedFourBarJoint createInvertedFourBarJoint(InvertedFourBarJointDescription jointDescription, RigidBodyBasics predecessor)
+   public static CrossFourBarJoint createCrossFourBarJoint(CrossFourBarJointDescription jointDescription, RigidBodyBasics predecessor)
    {
-      InvertedFourBarJointDescription fourBarDescription = (InvertedFourBarJointDescription) jointDescription;
-
-      RevoluteJoint jointA = null, jointB = null, jointC = null, jointD = null;
-      PinJointDescription jointADescription = null, jointBDescription = null, jointCDescription = null, jointDDescription = null;
-
-      PinJointDescription[] fourBarJoints = fourBarDescription.getFourBarJoints();
-      PinJointDescription masterJointDescription = fourBarDescription.getFourBarJoints()[fourBarDescription.getMasterJointIndex()];
-
-      for (PinJointDescription pinJointDescription : fourBarJoints)
-      {
-         if (pinJointDescription.getParentJoint().getLink().getName().equals(predecessor.getName()))
-         {
-            if (jointA == null)
-            {
-               jointADescription = pinJointDescription;
-               jointA = (RevoluteJoint) createOneDoFJoint(jointADescription, predecessor);
-            }
-            else
-            {
-               jointBDescription = pinJointDescription;
-               jointB = (RevoluteJoint) createOneDoFJoint(jointBDescription, predecessor);
-            }
-         }
-      }
-
-      for (PinJointDescription pinJointDescription : fourBarJoints)
-      {
-         if (pinJointDescription.getParentJoint() == jointADescription)
-            jointDDescription = pinJointDescription;
-         else if (pinJointDescription.getParentJoint() == jointBDescription)
-            jointCDescription = pinJointDescription;
-      }
-
-      RigidBodyBasics bodyAD = createRigidBody(jointADescription.getLink(), jointA);
-      RigidBodyBasics bodyCD = null;
-
-      if (jointDDescription != null)
-      {
-         jointD = (RevoluteJoint) createOneDoFJoint(jointDDescription, bodyAD);
-         bodyCD = createRigidBody(jointDDescription.getLink(), jointD);
-      }
-
-      RigidBodyBasics bodyBC = createRigidBody(jointBDescription.getLink(), jointB);
-
-      if (jointCDescription != null)
-      {
-         jointC = (RevoluteJoint) createOneDoFJoint(jointCDescription, bodyBC);
-         bodyCD = createRigidBody(jointCDescription.getLink(), jointC);
-      }
-
-      if ((jointC == null) == (jointD == null))
-         throw new IllegalStateException("Unexpected four-bar configuration");
-
-      if (jointC == null)
-      {
-         LoopClosurePinConstraintDescription jointCConstraint = fourBarDescription.getFourBarClosure();
-         if (jointCConstraint.getParentJoint() == jointDDescription)
-            jointC = createLoopClosureJoint(bodyCD, bodyBC, jointCConstraint);
-         else
-            jointC = createLoopClosureJoint(bodyBC, bodyCD, jointCConstraint);
-      }
-      else
-      {
-         LoopClosurePinConstraintDescription jointDConstraint = fourBarDescription.getFourBarClosure();
-         if (jointDConstraint.getParentJoint() == jointCDescription)
-            jointD = createLoopClosureJoint(bodyCD, bodyAD, jointDConstraint);
-         else
-            jointD = createLoopClosureJoint(bodyAD, bodyCD, jointDConstraint);
-      }
-
-      RevoluteJoint[] fourBarRevoluteJoints = new RevoluteJoint[] {jointA, jointB, jointC, jointD};
-      int masterJointIndex = -1;
-      if (masterJointDescription == jointADescription)
-         masterJointIndex = 0;
-      else if (masterJointDescription == jointBDescription)
-         masterJointIndex = 1;
-      else if (masterJointDescription == jointCDescription)
-         masterJointIndex = 2;
-      else if (masterJointDescription == jointDDescription)
-         masterJointIndex = 3;
-      return new InvertedFourBarJoint(fourBarDescription.getName(), fourBarRevoluteJoints, masterJointIndex);
+      return new CrossFourBarJoint(jointDescription.getName(),
+                                   predecessor,
+                                   jointDescription.getJointNameA(),
+                                   jointDescription.getJointNameB(),
+                                   jointDescription.getJointNameC(),
+                                   jointDescription.getJointNameD(),
+                                   jointDescription.getBodyDA().getName(),
+                                   jointDescription.getBodyBC().getName(),
+                                   jointDescription.getTransformAToPredecessor(),
+                                   jointDescription.getTransformBToPredecessor(),
+                                   jointDescription.getTransformDToA(),
+                                   jointDescription.getTransformCToB(),
+                                   jointDescription.getBodyDA().getMomentOfInertiaCopy(),
+                                   jointDescription.getBodyBC().getMomentOfInertiaCopy(),
+                                   jointDescription.getBodyDA().getMass(),
+                                   jointDescription.getBodyBC().getMass(),
+                                   new RigidBodyTransform(new Quaternion(), jointDescription.getBodyDA().getCenterOfMassOffset()),
+                                   new RigidBodyTransform(new Quaternion(), jointDescription.getBodyBC().getCenterOfMassOffset()),
+                                   jointDescription.getActuatedJointIndex(),
+                                   jointDescription.getLoopClosureJointIndex(),
+                                   jointDescription.getJointAxis());
    }
 
    public static void addLoopClosureConstraintRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)

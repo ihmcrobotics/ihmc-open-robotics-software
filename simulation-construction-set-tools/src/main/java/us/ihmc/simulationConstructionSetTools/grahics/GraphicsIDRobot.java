@@ -8,11 +8,11 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
 import us.ihmc.simulationconstructionset.util.CommonJoint;
@@ -57,47 +57,47 @@ public class GraphicsIDRobot extends GraphicsRobot
       {
          GraphicsJoint graphicsJoint;
 
-         if (joint instanceof InvertedFourBarJoint)
+         if (joint instanceof CrossFourBarJoint)
          {
-            InvertedFourBarJoint invertedFourBar = (InvertedFourBarJoint) joint;
+            CrossFourBarJoint crossFourBar = (CrossFourBarJoint) joint;
 
-            if (invertedFourBar.getJointA().isLoopClosure())
+            if (crossFourBar.getJointA().isLoopClosure())
             {
-               GraphicsJoint graphicsJointB = createJoint(invertedFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointB = createJoint(crossFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                parentJoint.addChild(graphicsJointB);
-               GraphicsJoint graphicsJointC = createJoint(invertedFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointC = createJoint(crossFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                graphicsJointB.addChild(graphicsJointC);
-               GraphicsJoint graphicsJointD = createJoint(invertedFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointD = createJoint(crossFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                graphicsJointC.addChild(graphicsJointD);
                graphicsJoint = graphicsJointC;
             }
-            else if (invertedFourBar.getJointB().isLoopClosure())
+            else if (crossFourBar.getJointB().isLoopClosure())
             {
-               GraphicsJoint graphicsJointA = createJoint(invertedFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointA = createJoint(crossFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                parentJoint.addChild(graphicsJointA);
-               GraphicsJoint graphicsJointD = createJoint(invertedFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointD = createJoint(crossFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                graphicsJointA.addChild(graphicsJointD);
-               GraphicsJoint graphicsJointC = createJoint(invertedFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointC = createJoint(crossFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                graphicsJointD.addChild(graphicsJointC);
                graphicsJoint = graphicsJointD;
             }
-            else if (invertedFourBar.getJointC().isLoopClosure())
+            else if (crossFourBar.getJointC().isLoopClosure())
             {
-               GraphicsJoint graphicsJointA = createJoint(invertedFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointA = createJoint(crossFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                parentJoint.addChild(graphicsJointA);
-               GraphicsJoint graphicsJointB = createJoint(invertedFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointB = createJoint(crossFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                parentJoint.addChild(graphicsJointB);
-               GraphicsJoint graphicsJointD = createJoint(invertedFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointD = createJoint(crossFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                graphicsJointA.addChild(graphicsJointD);
                graphicsJoint = graphicsJointD;
             }
             else
             {
-               GraphicsJoint graphicsJointA = createJoint(invertedFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointA = createJoint(crossFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                parentJoint.addChild(graphicsJointA);
-               GraphicsJoint graphicsJointB = createJoint(invertedFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointB = createJoint(crossFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                parentJoint.addChild(graphicsJointB);
-               GraphicsJoint graphicsJointC = createJoint(invertedFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               GraphicsJoint graphicsJointC = createJoint(crossFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder);
                graphicsJointB.addChild(graphicsJointC);
                graphicsJoint = graphicsJointC;
             }
