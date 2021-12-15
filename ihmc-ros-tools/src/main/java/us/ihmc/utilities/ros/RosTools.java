@@ -28,6 +28,7 @@ import geometry_msgs.Pose;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import sensor_msgs.CameraInfo;
+import sensor_msgs.Image;
 import sensor_msgs.PointCloud2;
 import sensor_msgs.PointField;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -306,6 +307,18 @@ public class RosTools
                                           datatype));
          i++;
       }
+   }
+
+   public static void printImageInfo(String name, Image image)
+   {
+      LogTools.info("Image Name: {}", name);
+      LogTools.info(StringTools.format("Height: {} Width: {} (Total: {}) Encoding: {} Bigendian: {} Step: {}",
+                                       image.getHeight(),
+                                       image.getWidth(),
+                                       image.getHeight() * image.getWidth(),
+                                       image.getEncoding(),
+                                       image.getIsBigendian(),
+                                       image.getStep()));
    }
 
    public static void toEuclid(Pose rosPose, Pose3DBasics euclidPose)

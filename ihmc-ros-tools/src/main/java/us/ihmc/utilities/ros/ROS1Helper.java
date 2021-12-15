@@ -4,6 +4,8 @@ import geometry_msgs.PoseStamped;
 import org.ros.internal.message.Message;
 import org.ros.message.Time;
 import org.ros.node.parameter.ParameterListener;
+import sensor_msgs.CompressedImage;
+import sensor_msgs.Image;
 import sensor_msgs.PointCloud2;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -148,6 +150,20 @@ public class ROS1Helper implements RosNodeInterface
          public void onNewMessage(PointCloud2 pointCloud2)
          {
             callback.accept(pointCloud2);
+         }
+      };
+      attachSubscriber(topicName, subscriber);
+      return subscriber;
+   }
+
+   public AbstractRosTopicSubscriber<Image> subscribeToImageViaCallback(String topicName, Consumer<Image> callback)
+   {
+      AbstractRosTopicSubscriber<Image> subscriber = new AbstractRosTopicSubscriber<Image>(sensor_msgs.Image._TYPE)
+      {
+         @Override
+         public void onNewMessage(Image image)
+         {
+            callback.accept(image);
          }
       };
       attachSubscriber(topicName, subscriber);
