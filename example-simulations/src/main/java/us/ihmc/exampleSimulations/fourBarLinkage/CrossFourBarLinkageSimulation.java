@@ -6,17 +6,17 @@ import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
-public class InvertedFourBarLinkageSimulation
+public class CrossFourBarLinkageSimulation
 {
-   public InvertedFourBarLinkageSimulation()
+   public CrossFourBarLinkageSimulation()
    {
-      InvertedFourBarLinkageRobotDescription robotDescription = new InvertedFourBarLinkageRobotDescription();
-      RobotFromDescription robot = new RobotFromDescription(robotDescription);
+      CrossFourBarLinkageRobotDefinition robotDefinition = new CrossFourBarLinkageRobotDefinition();
+      RobotFromDescription robot = new RobotFromDescription(robotDefinition);
 
       double dt = 1.0e-5;
-      robot.setController(new InvertedFourBarOneDoFJointWBCController(robotDescription, robot, dt));
-      //      robot.setController(new InvertedFourBarLinkageIDController(robotDescription, robot));
-//            robot.setController(new InvertedFourBarLinkageWBCController(robotDescription, robot, dt));
+      robot.setController(new CrossFourBarOneDoFJointWBCController(robotDefinition, robot, dt));
+//      robot.setController(new CrossFourBarLinkageIDController(robotDefinition, robot));
+//      robot.setController(new CrossFourBarLinkageWBCController(robotDefinition, robot, dt));
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, new SimulationConstructionSetParameters(1 << 17));
       Graphics3DObject graphics3dObject = new Graphics3DObject();
@@ -31,6 +31,6 @@ public class InvertedFourBarLinkageSimulation
 
    public static void main(String[] args)
    {
-      new InvertedFourBarLinkageSimulation();
+      new CrossFourBarLinkageSimulation();
    }
 }

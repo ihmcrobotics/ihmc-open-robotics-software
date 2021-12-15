@@ -5,12 +5,12 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.OutputWriter;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -62,14 +62,14 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
       {
          JointDesiredOutputReadOnly jointDesiredOutput = jointDesiredOutputList == null ? null : jointDesiredOutputList.getJointDesiredOutput(joint);
 
-         if (joint instanceof InvertedFourBarJoint)
+         if (joint instanceof CrossFourBarJoint)
          {
-            InvertedFourBarJoint fourBarJoint = (InvertedFourBarJoint) joint;
+            CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) joint;
             OneDegreeOfFreedomJoint scsJointA = robot.getOneDegreeOfFreedomJoint(fourBarJoint.getJointA().getName());
             OneDegreeOfFreedomJoint scsJointB = robot.getOneDegreeOfFreedomJoint(fourBarJoint.getJointB().getName());
             OneDegreeOfFreedomJoint scsJointC = robot.getOneDegreeOfFreedomJoint(fourBarJoint.getJointC().getName());
             OneDegreeOfFreedomJoint scsJointD = robot.getOneDegreeOfFreedomJoint(fourBarJoint.getJointD().getName());
-            jointOutputWriters.add(new InvertedFourBarJointOutputWriter(fourBarJoint, scsJointA, scsJointB, scsJointC, scsJointD, jointDesiredOutput));
+            jointOutputWriters.add(new CrossFourBarJointOutputWriter(fourBarJoint, scsJointA, scsJointB, scsJointC, scsJointD, jointDesiredOutput));
          }
          else
          {
@@ -199,17 +199,17 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
       }
    }
 
-   private static class InvertedFourBarJointOutputWriter implements JointOutputWriter
+   private static class CrossFourBarJointOutputWriter implements JointOutputWriter
    {
-      private final InvertedFourBarJoint idJoint;
+      private final CrossFourBarJoint idJoint;
       private final JointDesiredOutputReadOnly jointDesiredOutput;
 
       private final int[] torqueSourceIndices;
       private final OneDegreeOfFreedomJoint[] scsJoints;
 
-      private final InvertedFourBarJoint clonedIDJoint;
+      private final CrossFourBarJoint clonedIDJoint;
 
-      public InvertedFourBarJointOutputWriter(InvertedFourBarJoint idJoint,
+      public CrossFourBarJointOutputWriter(CrossFourBarJoint idJoint,
                                               OneDegreeOfFreedomJoint scsJointA,
                                               OneDegreeOfFreedomJoint scsJointB,
                                               OneDegreeOfFreedomJoint scsJointC,
@@ -225,27 +225,27 @@ public class PerfectSimulatedOutputWriter implements OutputWriter
          else
             torqueSourceIndices = new int[] {0, 3};
 
-         clonedIDJoint = InvertedFourBarJoint.cloneInvertedFourBarJoint(idJoint, ReferenceFrameTools.constructARootFrame("fourBarClone"), "clone");
+         clonedIDJoint = CrossFourBarJoint.cloneCrossFourBarJoint(idJoint, ReferenceFrameTools.constructARootFrame("fourBarClone"), "clone");
       }
 
       @Override
       public void write()
       {
-         double tau_master;
+         double tau_actuated;
          if (jointDesiredOutput != null)
-            tau_master = idJoint.computeMasterJointTau(jointDesiredOutput.getDesiredTorque());
+            tau_actuated = idJoint.computeActuatedJointTau(jointDesiredOutput.getDesiredTorque());
          else
-            tau_master = idJoint.getMasterJoint().getTau();
+            tau_actuated = idJoint.getActuatedJoint().getTau();
          /*
-          * Ideally we just want to set the torque of the master joint, but spreading the torque onto the
+          * Ideally we just want to set the torque of the actuated joint, but spreading the torque onto the
           * 2-joint chain that goes through the 4-bar w/o relying on the loop closure makes it a little nicer
           * on SCS's soft constraint.
           */
-         // scsMasterJoint.setTau(tau_master);
+         // scsActuatedJoint.setTau(tau_actuated);
 
          for (int torqueSourceIndex : torqueSourceIndices)
          {
-            double tau = 0.5 * tau_master / idJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
+            double tau = 0.5 * tau_actuated / idJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
             scsJoints[torqueSourceIndex].setTau(tau);
          }
       }

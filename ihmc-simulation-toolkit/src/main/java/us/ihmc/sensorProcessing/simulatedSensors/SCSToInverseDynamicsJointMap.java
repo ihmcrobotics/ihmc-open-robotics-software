@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -18,7 +18,6 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 /**
  * Convenient mapping between the joints of a simulated robot and a equivalent inverse dynamics
  * model using {@code InverseDynamicsJoint}s.
- * 
  */
 public class SCSToInverseDynamicsJointMap
 {
@@ -138,7 +137,7 @@ public class SCSToInverseDynamicsJointMap
     * simulated joints with inverse dynamics by name.
     * 
     * @param floatingRootJoint the simulated floating joint. Not modified.
-    * @param sixDoFRootJoint the inverse dynamics floating joint. Not modified.
+    * @param sixDoFRootJoint   the inverse dynamics floating joint. Not modified.
     * @return
     */
    public static SCSToInverseDynamicsJointMap createByName(FloatingJoint floatingRootJoint, FloatingJointBasics sixDoFRootJoint)
@@ -150,12 +149,12 @@ public class SCSToInverseDynamicsJointMap
 
       for (JointBasics inverseDynamicsJoint : inverseDynamicsJoints)
       {
-         if (inverseDynamicsJoint instanceof InvertedFourBarJoint)
+         if (inverseDynamicsJoint instanceof CrossFourBarJoint)
          {
-            RevoluteJointBasics jointA = ((InvertedFourBarJoint) inverseDynamicsJoint).getJointA();
-            RevoluteJointBasics jointB = ((InvertedFourBarJoint) inverseDynamicsJoint).getJointB();
-            RevoluteJointBasics jointC = ((InvertedFourBarJoint) inverseDynamicsJoint).getJointC();
-            RevoluteJointBasics jointD = ((InvertedFourBarJoint) inverseDynamicsJoint).getJointD();
+            RevoluteJointBasics jointA = ((CrossFourBarJoint) inverseDynamicsJoint).getJointA();
+            RevoluteJointBasics jointB = ((CrossFourBarJoint) inverseDynamicsJoint).getJointB();
+            RevoluteJointBasics jointC = ((CrossFourBarJoint) inverseDynamicsJoint).getJointC();
+            RevoluteJointBasics jointD = ((CrossFourBarJoint) inverseDynamicsJoint).getJointD();
             inverseDynamicsJointsByName.put(jointA.getName(), jointA);
             inverseDynamicsJointsByName.put(jointB.getName(), jointB);
             inverseDynamicsJointsByName.put(jointC.getName(), jointC);

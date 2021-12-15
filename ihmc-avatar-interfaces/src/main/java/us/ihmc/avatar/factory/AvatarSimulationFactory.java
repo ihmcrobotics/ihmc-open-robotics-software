@@ -38,6 +38,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -49,7 +50,6 @@ import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
@@ -433,9 +433,9 @@ public class AvatarSimulationFactory
 
       for (JointBasics joint : rootBody.childrenSubtreeIterable())
       {
-         if (joint instanceof InvertedFourBarJoint)
+         if (joint instanceof CrossFourBarJoint)
          {
-            joints.addAll(((InvertedFourBarJoint) joint).getFourBarFunction().getLoopJoints());
+            joints.addAll(((CrossFourBarJoint) joint).getFourBarFunction().getLoopJoints());
          }
          else
          {

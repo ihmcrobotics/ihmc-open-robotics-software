@@ -6,9 +6,9 @@ import java.util.List;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
 import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
@@ -55,15 +55,29 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
          OneDoFJointReadOnly controllerJoint = jointDesiredOutputList.getOneDoFJoint(i);
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(i);
 
-         if (controllerJoint instanceof InvertedFourBarJoint)
+         if (controllerJoint instanceof CrossFourBarJointBasics)
          {
-            InvertedFourBarJoint controllerFourBarJoint = (InvertedFourBarJoint) controllerJoint;
-            List<RevoluteJointBasics> loopJoints = controllerFourBarJoint.getFourBarFunction().getLoopJoints();
-            OneDoFJointStateBasics[] simInputs = loopJoints.stream().map(joint -> controllerOutput.getOneDoFJointOutput(joint))
-                                                           .toArray(OneDoFJointStateBasics[]::new);
-            OneDoFJointReadOnly[] simOutputs = loopJoints.stream().map(joint -> (OneDoFJointReadOnly) controllerInput.getInput().findJoint(joint.getName()))
-                                                         .toArray(OneDoFJointReadOnly[]::new);
-            jointControllers.add(new InvertedFourBarJointController(controllerFourBarJoint, simOutputs, simInputs, jointDesiredOutput, registry));
+            CrossFourBarJointBasics controllerFourBarJoint = (CrossFourBarJointBasics) controllerJoint;
+            if (controllerOutput.getInput().findJoint(controllerFourBarJoint.getName()) != null)
+            {
+               OneDoFJointStateBasics simJointInput = controllerOutput.getOneDoFJointOutput(controllerJoint);
+               OneDoFJointReadOnly simJointOutput = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerJoint.getName());
+               jointControllers.add(new OneDoFJointController(simJointOutput, simJointInput, jointDesiredOutput, registry));
+            }
+            else
+            {
+               OneDoFJointStateBasics[] simInputs = new OneDoFJointStateBasics[4];
+               simInputs[0] = controllerOutput.getOneDoFJointOutput(controllerFourBarJoint.getJointA());
+               simInputs[1] = controllerOutput.getOneDoFJointOutput(controllerFourBarJoint.getJointB());
+               simInputs[2] = controllerOutput.getOneDoFJointOutput(controllerFourBarJoint.getJointC());
+               simInputs[3] = controllerOutput.getOneDoFJointOutput(controllerFourBarJoint.getJointD());
+               OneDoFJointReadOnly[] simOutputs = new OneDoFJointReadOnly[4];
+               simOutputs[0] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerFourBarJoint.getJointA().getName());
+               simOutputs[1] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerFourBarJoint.getJointB().getName());
+               simOutputs[2] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerFourBarJoint.getJointC().getName());
+               simOutputs[3] = (OneDoFJointReadOnly) controllerInput.getInput().findJoint(controllerFourBarJoint.getJointD().getName());
+               jointControllers.add(new CrossFourBarJointController(controllerFourBarJoint, simOutputs, simInputs, jointDesiredOutput, registry));
+            }
          }
          else
          {
@@ -211,9 +225,9 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       }
    }
 
-   private class InvertedFourBarJointController implements JointController
+   private class CrossFourBarJointController implements JointController
    {
-      private final InvertedFourBarJoint localFourBarJoint;
+      private final CrossFourBarJoint localFourBarJoint;
       private final OneDoFJointReadOnly[] simOutputs;
       private final int[] torqueSourceIndices;
       private final OneDoFJointStateBasics[] simInputs;
@@ -227,16 +241,16 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
       private final YoDouble previousVelocity;
       private final YoDouble unstableVelocityStartTime;
 
-      public InvertedFourBarJointController(InvertedFourBarJoint controllerFourBarJoint,
-                                            OneDoFJointReadOnly[] simOutputs,
-                                            OneDoFJointStateBasics[] simInputs,
-                                            JointDesiredOutputReadOnly jointDesiredOutput,
-                                            YoRegistry registry)
+      public CrossFourBarJointController(CrossFourBarJointBasics controllerFourBarJoint,
+                                         OneDoFJointReadOnly[] simOutputs,
+                                         OneDoFJointStateBasics[] simInputs,
+                                         JointDesiredOutputReadOnly jointDesiredOutput,
+                                         YoRegistry registry)
       {
          this.simOutputs = simOutputs;
          this.simInputs = simInputs;
          this.jointDesiredOutput = jointDesiredOutput;
-         localFourBarJoint = InvertedFourBarJoint.cloneInvertedFourBarJoint(controllerFourBarJoint, ReferenceFrameTools.constructARootFrame("dummy"), "dummy");
+         localFourBarJoint = CrossFourBarJoint.cloneCrossFourBarJoint(controllerFourBarJoint, ReferenceFrameTools.constructARootFrame("dummy"), "dummy");
 
          if (controllerFourBarJoint.getJointA().isLoopClosure() || controllerFourBarJoint.getJointD().isLoopClosure())
             torqueSourceIndices = new int[] {1, 2};
@@ -304,9 +318,9 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
 
          yoPositionTau.set(kp.getValue() * yoPositionError.getValue());
          yoVelocityTau.set(kd.getValue() * yoVelocityError.getValue());
-         double tau_master = localFourBarJoint.computeMasterJointTau(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue());
+         double tau_actuated = localFourBarJoint.computeActuatedJointTau(yoControllerTau.getValue() + yoPositionTau.getValue() + yoVelocityTau.getValue());
          /*
-          * Ideally we just want to set the torque of the master joint, but spreading the torque onto the
+          * Ideally we just want to set the torque of the actuated joint, but spreading the torque onto the
           * 2-joint chain that goes through the 4-bar w/o relying on the loop closure makes it a little nicer
           * on SCS's soft constraint.
           */
@@ -319,7 +333,7 @@ public class SCS2OutputWriter implements JointDesiredOutputWriter
 
          for (int torqueSourceIndex : torqueSourceIndices)
          {
-            double tau = 0.5 * tau_master / localFourBarJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
+            double tau = 0.5 * tau_actuated / localFourBarJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
             simInputs[torqueSourceIndex].setEffort(tau);
          }
 

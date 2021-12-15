@@ -2,7 +2,7 @@ plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
    id("us.ihmc.ihmc-cd") version "1.21"
-   id("us.ihmc.log-tools-plugin") version "0.6.2"
+   id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
 ihmc {
@@ -36,7 +36,7 @@ libgdxDependencies {
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-perception-javacv:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-simulation:0.1.2")
+   api("us.ihmc:scs2-simulation:0.2.0")
 }
 
 testDependencies {
