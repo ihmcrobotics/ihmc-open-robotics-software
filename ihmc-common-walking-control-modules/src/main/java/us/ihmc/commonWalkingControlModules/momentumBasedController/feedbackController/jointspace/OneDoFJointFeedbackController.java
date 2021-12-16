@@ -43,6 +43,9 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    private final YoDouble qDError;
    private final AlphaFilteredYoVariable qDFilteredError;
 
+   private final YoDouble actionP;
+   private final YoDouble actionD;
+
    private final YoDouble maxFeedback;
    private final YoDouble maxFeedbackRate;
 
@@ -78,6 +81,9 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       qCurrent = new YoDouble("q_" + jointName, registry);
       qDesired = new YoDouble("q_d_" + jointName, registry);
       qError = new YoDouble("q_err_" + jointName, registry);
+
+      actionP = new YoDouble("action_P_" + jointName, registry);
+      actionD = new YoDouble("action_D_" + jointName, registry);
 
       qDDesired = new YoDouble("qd_d_" + jointName, registry);
 
@@ -224,7 +230,10 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDErrorToUse = qDFilteredError.getValue();
       }
 
-      double qdd_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDErrorToUse;
+      actionP.set(kp.getDoubleValue() * qError.getDoubleValue());
+      actionD.set(kd.getDoubleValue() * qDErrorToUse);
+
+      double qdd_fb = actionP.getDoubleValue() + actionD.getValue();
       qdd_fb = MathTools.clamp(qdd_fb, maxFeedback.getDoubleValue());
       qDDFeedback.set(qdd_fb);
       qDDFeedbackRateLimited.update();
@@ -246,6 +255,10 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       double qd_fb = kp.getDoubleValue() * qError.getDoubleValue();
       qd_fb = MathTools.clamp(qd_fb, maxFeedback.getDoubleValue());
+
+      actionP.set(qd_fb);
+      actionD.set(0.0);
+
       qDFeedback.set(qd_fb);
       qDFeedbackRateLimited.update();
 
@@ -272,7 +285,10 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDErrorToUse = qDFilteredError.getValue();
       }
 
-      double tau_fb = kp.getDoubleValue() * qError.getDoubleValue() + kd.getDoubleValue() * qDErrorToUse;
+      actionP.set(kp.getDoubleValue() * qError.getDoubleValue());
+      actionD.set(kd.getDoubleValue() * qDErrorToUse);
+      double tau_fb = actionP.getDoubleValue() + actionD.getDoubleValue();
+
       tau_fb = MathTools.clamp(tau_fb, maxFeedback.getDoubleValue());
       tauFeedback.set(tau_fb);
       tauFeedbackRateLimited.update();
