@@ -37,6 +37,8 @@ libgdxDependencies {
    api("us.ihmc:ihmc-perception-javacv:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:scs2-simulation:0.1.2")
+   api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
+   api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
 }
 
 testDependencies {
