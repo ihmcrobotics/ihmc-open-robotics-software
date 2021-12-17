@@ -84,10 +84,6 @@ public class GDXVROnlyPointCloudWithImGuiPanelDemo
             fusedPointCloud.getRenderables(renderables, pool);
             vrApplication.getVRContext().getControllerRenderables(renderables, pool);
             vrApplication.getVRContext().getBaseStationRenderables(renderables, pool);
-            for (RobotSide side : RobotSide.values)
-            {
-               vrApplication.getVRContext().getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
-            }
          }
 
          @Override

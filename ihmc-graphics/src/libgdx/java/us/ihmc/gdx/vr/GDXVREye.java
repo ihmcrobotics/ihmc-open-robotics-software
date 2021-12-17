@@ -3,7 +3,6 @@ package us.ihmc.gdx.vr;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
@@ -21,7 +20,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -47,11 +45,8 @@ public class GDXVREye extends Camera
    );
    private final ReferenceFrame eyeXForwardZUpFrame;
    private final FramePose3D eyeFramePose = new FramePose3D();
-
    private final Vector3D euclidDirection = new Vector3D();
    private final Vector3D euclidUp = new Vector3D();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final ModelInstance coordinateFrameInstance;
 
    public GDXVREye(RobotSide side, GDXVRHeadset headset, int width, int height)
    {
@@ -75,8 +70,6 @@ public class GDXVREye extends Camera
       viewportHeight = height;
       near = 0.1f;
       far = 1000.0f;
-
-      coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(0.3);
    }
 
    @Override
@@ -95,47 +88,17 @@ public class GDXVREye extends Camera
       eyeFramePose.setToZero(eyeXForwardZUpFrame);
       eyeFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
+      euclidDirection.set(Axis3D.X);
+      eyeFramePose.getOrientation().transform(euclidDirection);
+      euclidUp.set(Axis3D.Z);
+      eyeFramePose.getOrientation().transform(euclidUp);
 
-      //      GDXTools.toGDX(eyeToHeadHmdMatrix34, eyeToHeadMatrix4);
-      //      headToEyeMatrix4.set(eyeToHeadMatrix4).inv();
-
-      //      headset.getPose().changeFrame(ReferenceFrame.getWorldFrame());
-      //      euclidDirection.set(Axis3D.Z);
-      //      euclidDirection.negate(); // Z is forward in libGDX, contrary to OpenVR where it's backward
-      //      eyePose.getOrientation().transform(euclidDirection);
-      //      euclidUp.set(Axis3D.Y); // camera is rendered in Y up
-      //      eyePose.getOrientation().transform(euclidUp);
-      //
-      ////      position.set()
-      //      GDXTools.toGDX(eyePose.getPosition(), position);
-      ////      position.add(eyeToHeadMatrix4.val[M03], eyeToHeadMatrix4.val[M13], eyeToHeadMatrix4.val[M23]);
-      ////      position.add(eyeToHeadMatrix4.val[M03], eyeToHeadMatrix4.val[M13], eyeToHeadMatrix4.val[M23]);
-      //      direction.set(euclidDirection.getX32(), euclidDirection.getY32(), euclidDirection.getZ32());
-      //      up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
-
-      { // TODO: Copied from FocusBasedGDXCamera. What is going on here? Do we need an explicit libGDXFrame? or renderFrame?
-         euclidDirection.set(Axis3D.X);
-         eyeFramePose.getOrientation().transform(euclidDirection);
-         euclidUp.set(Axis3D.Z);
-         eyeFramePose.getOrientation().transform(euclidUp);
-
-         GDXTools.toGDX(eyeFramePose.getPosition(), position);
-         direction.set(euclidDirection.getX32(), euclidDirection.getY32(), euclidDirection.getZ32());
-         up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
-      }
-
-//      GDXTools.toGDX(eyePose.getPosition(), position);
-//      GDXTools.toGDX(eyePose.getPosition(), direction);
+      GDXTools.toGDX(eyeFramePose.getPosition(), position);
+      direction.set(euclidDirection.getX32(), euclidDirection.getY32(), euclidDirection.getZ32());
+      up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
 
       VRSystem.VRSystem_GetProjectionMatrix(side.ordinal(), Math.abs(near), Math.abs(far), projectionHmdMatrix44);
       GDXTools.toGDX(projectionHmdMatrix44, projection);
-
-      //      target.set(position).add(direction);
-      //      view.setToLookAt(position, target, up);
-      //
-      //      combined.set(projection);
-      //      Matrix4.mul(combined.val, headToEyeMatrix4.val);
-      //      Matrix4.mul(combined.val, view.val);
 
       view.setToLookAt(position, target.set(position).add(direction), up);
       combined.set(projection);
@@ -147,9 +110,6 @@ public class GDXVREye extends Camera
          Matrix4.inv(invProjectionView.val);
          frustum.update(invProjectionView);
       }
-
-      eyeFramePose.get(tempTransform);
-      GDXTools.toGDX(tempTransform, coordinateFrameInstance.transform);
    }
 
    public void render(GDX3DSceneBasics sceneBasics)
@@ -180,10 +140,5 @@ public class GDXVREye extends Camera
    public org.lwjgl.openvr.Texture getOpenVRTexture()
    {
       return openVRTexture;
-   }
-
-   public ModelInstance getCoordinateFrameInstance()
-   {
-      return coordinateFrameInstance;
    }
 }
