@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.fourBarLinkage;
 
-import static us.ihmc.exampleSimulations.fourBarLinkage.InvertedFourBarLinkageRobotDescription.HAS_SHOULDER_JOINT;
-import static us.ihmc.exampleSimulations.fourBarLinkage.InvertedFourBarLinkageRobotDescription.HAS_WRIST_JOINT;
+import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDefinition.HAS_SHOULDER_JOINT;
+import static us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageRobotDefinition.HAS_WRIST_JOINT;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -16,16 +16,17 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizationSettings;
-import us.ihmc.exampleSimulations.fourBarLinkage.InvertedFourBarLinkageIDController.SineGenerator;
+import us.ihmc.exampleSimulations.fourBarLinkage.CrossFourBarLinkageIDController.SineGenerator;
+import us.ihmc.mecano.fourBar.FourBarKinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunction;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -37,7 +38,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  * Controller demonstrating the usage of the {@link WholeBodyControllerCore} in the presence of a
  * four bar linkage.
  */
-public class InvertedFourBarLinkageWBCController implements RobotController
+public class CrossFourBarLinkageWBCController implements RobotController
 {
    private final YoRegistry registry = new YoRegistry(getName());
    private final RigidBodyBasics rootBody;
@@ -50,7 +51,7 @@ public class InvertedFourBarLinkageWBCController implements RobotController
    private final SineGenerator fourBarFunctionGenerator;
    private final SineGenerator wristFunctionGenerator;
    private final RevoluteJointBasics shoulderJoint;
-   private final RevoluteJointBasics masterJoint;
+   private final RevoluteJointBasics actuatedJoint;
    private final RevoluteJointBasics jointA;
    private final RevoluteJointBasics jointB;
    private final RevoluteJointBasics jointC;
@@ -61,17 +62,17 @@ public class InvertedFourBarLinkageWBCController implements RobotController
 
    private final OneDoFJointBasics[] oneDoFJoints;
 
-   public InvertedFourBarLinkageWBCController(InvertedFourBarLinkageRobotDescription robotDescription, Robot robot, double controlDT)
+   public CrossFourBarLinkageWBCController(CrossFourBarLinkageRobotDefinition robotDefinition, Robot robot, double controlDT)
    {
-      rootBody = InvertedFourBarLinkageIDController.toInverseDynamicsRobot(robotDescription);
-      shoulderJoint = HAS_SHOULDER_JOINT ? findJoint(robotDescription.getShoulderJointName()) : null;
-      jointA = findJoint(robotDescription.getJointAName());
-      jointB = findJoint(robotDescription.getJointBName());
-      jointC = findJoint(robotDescription.getJointCName());
-      jointD = findJoint(robotDescription.getJointDName());
+      rootBody = robotDefinition.newInstance(ReferenceFrame.getWorldFrame());
+      shoulderJoint = HAS_SHOULDER_JOINT ? findJoint(robotDefinition.getShoulderJointName()) : null;
+      jointA = findJoint(robotDefinition.getJointAName());
+      jointB = findJoint(robotDefinition.getJointBName());
+      jointC = findJoint(robotDefinition.getJointCName());
+      jointD = findJoint(robotDefinition.getJointDName());
       fourBarKinematicLoop = new FourBarKinematicLoopFunction("fourBar", new RevoluteJointBasics[] {jointA, jointB, jointC, jointD}, 0);
-      masterJoint = fourBarKinematicLoop.getMasterJoint();
-      wristJoint = HAS_WRIST_JOINT ? findJoint(robotDescription.getWristJointName()) : null;
+      actuatedJoint = fourBarKinematicLoop.getActuatedJoint();
+      wristJoint = HAS_WRIST_JOINT ? findJoint(robotDefinition.getWristJointName()) : null;
 
       Random random = new Random(461);
 
@@ -90,13 +91,13 @@ public class InvertedFourBarLinkageWBCController implements RobotController
       }
 
       fourBarFunctionGenerator = new SineGenerator("fourBarFunction", robot.getYoTime(), registry);
-      double masterJointMidRange = 0.5 * (masterJoint.getJointLimitUpper() + masterJoint.getJointLimitLower());
-      double masterJointMin = EuclidCoreRandomTools.nextDouble(random, masterJoint.getJointLimitLower(), masterJointMidRange);
-      double masterJointMax = EuclidCoreRandomTools.nextDouble(random, masterJointMidRange, masterJoint.getJointLimitUpper());
-      fourBarFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.5 * (masterJointMax - masterJointMin)));
+      double actuatedJointMidRange = 0.5 * (actuatedJoint.getJointLimitUpper() + actuatedJoint.getJointLimitLower());
+      double actuatedJointMin = EuclidCoreRandomTools.nextDouble(random, actuatedJoint.getJointLimitLower(), actuatedJointMidRange);
+      double actuatedJointMax = EuclidCoreRandomTools.nextDouble(random, actuatedJointMidRange, actuatedJoint.getJointLimitUpper());
+      fourBarFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.5 * (actuatedJointMax - actuatedJointMin)));
       fourBarFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
       fourBarFunctionGenerator.setPhase(EuclidCoreRandomTools.nextDouble(random, Math.PI));
-      fourBarFunctionGenerator.setOffset(masterJointMidRange);
+      fourBarFunctionGenerator.setOffset(actuatedJointMidRange);
 
       if (HAS_WRIST_JOINT)
       {
@@ -205,7 +206,7 @@ public class InvertedFourBarLinkageWBCController implements RobotController
       }
 
       OneDoFJointFeedbackControlCommand fourBarCommand = new OneDoFJointFeedbackControlCommand();
-      fourBarCommand.setJoint(masterJoint);
+      fourBarCommand.setJoint(actuatedJoint);
       fourBarCommand.setInverseDynamics(fourBarFunctionGenerator.getPosition(),
                                         fourBarFunctionGenerator.getVelocity(),
                                         fourBarFunctionGenerator.getAcceleration());
