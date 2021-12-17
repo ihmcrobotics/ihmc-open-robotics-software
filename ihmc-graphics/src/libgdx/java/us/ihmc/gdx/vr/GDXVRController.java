@@ -1,5 +1,6 @@
 package us.ihmc.gdx.vr;
 
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.BufferUtils;
 import org.lwjgl.openvr.*;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -10,6 +11,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.nio.LongBuffer;
@@ -57,6 +59,7 @@ public class GDXVRController extends GDXVRTrackedDevice
    );
    private final ReferenceFrame xForwardZUpControllerFrame;
    private final FramePose3D tempFramePose = new FramePose3D();
+   private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
    public GDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -186,6 +189,12 @@ public class GDXVRController extends GDXVRTrackedDevice
    public ReferenceFrame getXForwardZUpControllerFrame()
    {
       return xForwardZUpControllerFrame;
+   }
+
+   public void getTransformZUpToWorld(Matrix4 transform)
+   {
+      xForwardZUpControllerFrame.getTransformToDesiredFrame(tempRigidBodyTransform, ReferenceFrame.getWorldFrame());
+      GDXTools.toGDX(tempRigidBodyTransform, transform);
    }
 
    public Pose3DReadOnly getXForwardZUpPose()
