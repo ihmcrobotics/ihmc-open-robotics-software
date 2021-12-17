@@ -175,7 +175,7 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
             footstepIndexText.scale((float) textHeight);
             textRenderables.add(footstepIndexText);
 
-            if (!minimalFootstep.getDescription().isEmpty())
+            if (minimalFootstep.getDescription() != null && !minimalFootstep.getDescription().isEmpty())
             {
                GDX3DSituatedText footstepListDescriptionText = new GDX3DSituatedText(minimalFootstep.getDescription());
                textFramePose.changeFrame(footstepFrame);
