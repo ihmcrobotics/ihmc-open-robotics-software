@@ -87,7 +87,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
          @Override
          public void onNewMessage(PointCloud2 pointCloud2)
          {
-            frequencyPlot.onRecievedMessage();
+            frequencyPlot.recordEvent();
             queueRenderPointCloud(pointCloud2);
          }
       };

@@ -137,7 +137,7 @@ public class GDXVRContext
       LogTools.info("VR per eye render size: {} x {}", width, height);
       for (RobotSide side : RobotSide.values)
       {
-         eyes.set(side, new GDXVREye(side, headset, vrPlayAreaYUpZBackFrame, width, height));
+         eyes.set(side, new GDXVREye(side, headset, width, height));
       }
    }
 
@@ -238,6 +238,18 @@ public class GDXVRContext
    public void addVRInputProcessor(Consumer<GDXVRContext> processVRInput)
    {
       vrInputProcessors.add(processVRInput);
+   }
+
+   public void getHeadsetRenderable(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if (headset.isConnected())
+      {
+         ModelInstance modelInstance = headset.getModelInstance();
+         if (modelInstance != null)
+         {
+            modelInstance.getRenderables(renderables, pool);
+         }
+      }
    }
 
    public void getControllerRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

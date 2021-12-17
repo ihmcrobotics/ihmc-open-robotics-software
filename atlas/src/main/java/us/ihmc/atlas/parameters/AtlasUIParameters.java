@@ -75,9 +75,15 @@ public class AtlasUIParameters implements UIParameters
    }
 
    @Override
+   public RigidBodyTransform getTransformWristToHand(RobotSide side)
+   {
+      return selectedVersion.getOffsetFromAttachmentPlate(side);
+   }
+
+   @Override
    public Transform getJmeTransformWristToHand(RobotSide side)
    {
-      RigidBodyTransform attachmentPlateToPalm = selectedVersion.getOffsetFromAttachmentPlate(side);
+      RigidBodyTransform attachmentPlateToPalm = getTransformWristToHand(side);
       Transform jmeAttachmentPlateToPalm = JMEDataTypeUtils.j3dTransform3DToJMETransform(attachmentPlateToPalm);
       return jmeAttachmentPlateToPalm;
    }

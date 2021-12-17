@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -39,6 +40,12 @@ public class ROS2ControllerHelper extends ROS2Helper implements ROS2ControllerPu
    public <T> void publish(Function<String, ROS2Topic<T>> topic, T message)
    {
       publish(topic.apply(robotModel.getSimpleRobotName()), message);
+   }
+
+   @Override
+   public <T> ROS2Input<T> subscribeToController(Class<T> messageClass)
+   {
+      return subscribe(ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()));
    }
 
    @Override

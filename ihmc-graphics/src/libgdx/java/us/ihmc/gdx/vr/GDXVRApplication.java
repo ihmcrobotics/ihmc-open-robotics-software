@@ -25,6 +25,8 @@ public class GDXVRApplication
    private volatile boolean running = true;
    private GDX3DSceneBasics sceneBasics;
    private GDXVRContext vrContext;
+   private int renderNumber = 0;
+   private Runnable thingToRunAfter10Frames;
 
    public void launch(Lwjgl3ApplicationAdapter applicationAdapter)
    {
@@ -69,6 +71,17 @@ public class GDXVRApplication
          {
             app.getPostRunnables().pollFirst().run();
          }
+         if (renderNumber < 10)
+         {
+            renderNumber++;
+            if (renderNumber == 10)
+            {
+               if (thingToRunAfter10Frames != null)
+               {
+                  thingToRunAfter10Frames.run();
+               }
+            }
+         }
          applicationAdapter.render();
          vrContext.renderEyes(sceneBasics);
       }
@@ -79,6 +92,11 @@ public class GDXVRApplication
       errorCallback.free();
       errorCallback = null;
       GLFW.glfwTerminate();
+   }
+
+   public void runAfter10Frames(Runnable thingToRunAfter10Frames)
+   {
+      this.thingToRunAfter10Frames = thingToRunAfter10Frames;
    }
 
    public GDX3DSceneBasics getSceneBasics()

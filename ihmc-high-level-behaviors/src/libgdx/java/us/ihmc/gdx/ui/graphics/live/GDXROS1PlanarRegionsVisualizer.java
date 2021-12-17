@@ -59,7 +59,7 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
 
       delayFixedPlanarRegionsSubscription = MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros2Node, robotModel, topic, planarRegionsList ->
       {
-         frequencyPlot.onRecievedMessage();
+         frequencyPlot.recordEvent();
          planarRegionsGraphic.generateMeshes(planarRegionsList.getRight());
          loggingPanel.update(planarRegionsList.getLeft(), planarRegionsList.getRight());
       });

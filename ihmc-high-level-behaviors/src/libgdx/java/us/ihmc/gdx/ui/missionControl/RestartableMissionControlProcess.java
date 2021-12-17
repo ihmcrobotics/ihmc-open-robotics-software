@@ -31,7 +31,7 @@ public abstract class RestartableMissionControlProcess implements MissionControl
    public abstract String getName();
 
    @Override
-   public void render()
+   public void renderImGuiWidgets()
    {
       ImGui.text(getName() + ":");
       ImGui.sameLine();

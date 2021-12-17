@@ -146,24 +146,54 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic getOutputTopic()
+   public ROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic getOutputTopic(String robotName)
+   public static ROS2Topic<?> getOutputTopic(String robotName)
    {
       return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic getInputTopic()
+   public ROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic getInputTopic(String robotName)
+   public static ROS2Topic<?> getInputTopic(String robotName)
    {
       return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput();
+   }
+
+   public static ROS2Topic<ToolboxStateMessage> getInputStateTopic(String robotName)
+   {
+      return getInputTopic(robotName).withTypeName(ToolboxStateMessage.class);
+   }
+
+   public static ROS2Topic<KinematicsStreamingToolboxInputMessage> getInputCommandTopic(String robotName)
+   {
+      return getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxInputMessage.class);
+   }
+
+   public static ROS2Topic<KinematicsStreamingToolboxConfigurationMessage> getInputStreamingConfigurationTopic(String robotName)
+   {
+      return getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxConfigurationMessage.class);
+   }
+
+   public static ROS2Topic<KinematicsToolboxConfigurationMessage> getInputToolboxConfigurationTopic(String robotName)
+   {
+      return getInputTopic(robotName).withTypeName(KinematicsToolboxConfigurationMessage.class);
+   }
+
+   public static ROS2Topic<KinematicsToolboxOutputStatus> getOutputStatusTopic(String robotName)
+   {
+      return getOutputTopic(robotName).withTypeName(KinematicsToolboxOutputStatus.class);
+   }
+
+   public static ROS2Topic<ControllerCrashNotificationPacket> getOutputCrashNotificationTopic(String robotName)
+   {
+      return getOutputTopic(robotName).withTypeName(ControllerCrashNotificationPacket.class);
    }
 }
