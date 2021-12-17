@@ -23,12 +23,15 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.math.DeadbandTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -44,6 +47,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class GDXJoystickBasedStepping
 {
    private final SteppingParameters steppingParameters;
+   private final SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints;
    private Controller currentController;
    private boolean currentControllerConnected;
 
@@ -79,6 +83,7 @@ public class GDXJoystickBasedStepping
    public GDXJoystickBasedStepping(DRCRobotModel robotModel)
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      controllerFootGroundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
       steppingParameters = walkingControllerParameters.getSteppingParameters();
       swingHeight.set(steppingParameters.getMinSwingHeightFromStanceFoot());
       swingDuration.set(walkingControllerParameters.getDefaultSwingTime());
@@ -135,7 +140,7 @@ public class GDXJoystickBasedStepping
             hasSuccessfullyStoppedWalking.set(true);
       });
 
-      footstepPlanGraphic = new GDXFootstepPlanGraphic();
+      footstepPlanGraphic = new GDXFootstepPlanGraphic(controllerFootGroundContactPoints);
       footstepPlanGraphic.setColor(RobotSide.LEFT, new Color(0.8627451f, 0.078431375f, 0.23529412f, 1.0f)); // crimson
       footstepPlanGraphic.setColor(RobotSide.RIGHT, new Color(0.6039216f, 0.8039216f, 0.19607843f, 1.0f)); //yellowgreen
 
@@ -186,12 +191,16 @@ public class GDXJoystickBasedStepping
             boolean newWalkingRequest = currentController.getButton(currentController.getMapping().buttonR1);
             double stepTime = swingDuration.get() + transferDuration.get();
             double forwardJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftY);
+            double deadband = 0.1;
+            forwardJoystickValue = DeadbandTools.applyDeadband(deadband, forwardJoystickValue);
             forwardVelocity.set((maxStepLength.get() / stepTime) * MathTools.clamp(forwardJoystickValue, 1.0));
             double lateralJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftX);
+            lateralJoystickValue = DeadbandTools.applyDeadband(deadband, lateralJoystickValue);
             lateralVelocity.set((maxStepWidth.get() / stepTime) * MathTools.clamp(lateralJoystickValue, 1.0));
             double turningJoystickValue = -currentController.getAxis(currentController.getMapping().axisRightX);
-            if (forwardVelocity.get() < -1.0e-10)
-               turningJoystickValue = -turningJoystickValue;
+            turningJoystickValue = DeadbandTools.applyDeadband(deadband, turningJoystickValue);
+            // if (forwardVelocity.get() < -0.001) // kinda like it better without this
+            //    turningJoystickValue = -turningJoystickValue;
             turningVelocity.set(((turnMaxAngleOutward.get() - turnMaxAngleInward.get()) / stepTime) * MathTools.clamp(turningJoystickValue, 1.0));
 
             if (newWalkingRequest)
@@ -263,6 +272,17 @@ public class GDXJoystickBasedStepping
       ImGui.inputDouble(labels.get("Turn step width"), turnStepWidth);
       ImGui.inputDouble(labels.get("Turn max angle inward"), turnMaxAngleInward);
       ImGui.inputDouble(labels.get("Turn max angle outward"), turnMaxAngleOutward);
+      if (currentControllerConnected)
+      {
+         for (int i = currentController.getMinButtonIndex(); i < currentController.getMaxButtonIndex(); i++)
+         {
+            ImGui.text("Button " + i + ": " + currentController.getButton(i));
+         }
+         for (int i = 0; i < currentController.getAxisCount(); i++)
+         {
+            ImGui.text("Axis " + i + ": " + currentController.getAxis(i));
+         }
+      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
