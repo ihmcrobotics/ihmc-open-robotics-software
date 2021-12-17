@@ -46,4 +46,5 @@ testDependencies {
    api(ihmc.sourceSetProject("libgdx"))
    api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
+   api("org.cartesiantheatrics:bag-reader-java:0.0.1")
 }
