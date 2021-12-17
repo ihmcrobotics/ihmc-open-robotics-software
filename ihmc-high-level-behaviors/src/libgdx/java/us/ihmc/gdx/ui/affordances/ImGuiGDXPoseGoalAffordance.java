@@ -19,7 +19,6 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -185,8 +184,8 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
             placedPoseConsumer.accept(goalPoseForReading);
          }
 
-         controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), sphere.transform);
-         controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), arrow.transform);
+         controller.getTransformZUpToWorld(sphere.transform);
+         controller.getTransformZUpToWorld(arrow.transform);
       });
    }
 

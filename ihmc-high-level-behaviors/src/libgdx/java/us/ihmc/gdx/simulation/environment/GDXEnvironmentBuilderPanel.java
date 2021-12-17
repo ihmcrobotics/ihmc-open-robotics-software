@@ -76,7 +76,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
          {
             modelBeingPlaced = new GDXLargeCinderBlockRoughed();
             modelInput.addAndSelectInstance(modelBeingPlaced);
-            controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
+            controller.getTransformZUpToWorld(modelBeingPlaced.getRealisticModelInstance().transform);
          }
          if (triggerClick.bChanged() && !triggerClick.bState())
          {

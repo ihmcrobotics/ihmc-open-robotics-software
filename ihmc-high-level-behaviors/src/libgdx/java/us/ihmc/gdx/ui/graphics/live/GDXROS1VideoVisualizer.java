@@ -61,7 +61,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             public void onNewMessage(CompressedImage image)
             {
                GDXROS1VideoVisualizer.this.compressedImage = image;
-               frequencyPlot.onRecievedMessage();
+               frequencyPlot.recordEvent();
             }
          };
          ros1Node.attachSubscriber(topic, compressedSubscriber);
@@ -74,7 +74,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             public void onNewMessage(Image image)
             {
                GDXROS1VideoVisualizer.this.image = image;
-               frequencyPlot.onRecievedMessage();
+               frequencyPlot.recordEvent();
             }
          };
          ros1Node.attachSubscriber(topic, subscriber);

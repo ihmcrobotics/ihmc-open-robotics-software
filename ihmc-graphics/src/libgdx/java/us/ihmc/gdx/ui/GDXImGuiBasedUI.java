@@ -154,8 +154,10 @@ public class GDXImGuiBasedUI
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
+      vrManager.create();
       sceneManager.addRenderableProvider(vrManager::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
       addImGui3DViewInputProcessor(vrManager::process3DViewInput);
+      imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
    }
 
    public void renderBeforeOnScreenUI()

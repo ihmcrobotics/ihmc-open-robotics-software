@@ -1,13 +1,17 @@
 package us.ihmc.gdx.vr;
 
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.BufferUtils;
 import org.lwjgl.openvr.*;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.nio.LongBuffer;
@@ -45,31 +49,27 @@ public class GDXVRController extends GDXVRTrackedDevice
    private final LongBuffer gripActionHandle = BufferUtils.newLongBuffer(1);
    private InputAnalogActionData gripActionData;
 
-   private final RigidBodyTransform controllerToWorldTransform = new RigidBodyTransform();
-   private final ReferenceFrame xRightZDownControllerFrame;
-   private static final RigidBodyTransformReadOnly controllerXRightZDownToXForwardZUp = new RigidBodyTransform(
+   private static final RigidBodyTransformReadOnly controllerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(
       new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
-         Math.toRadians(90.0),  // rotating around thumb, index goes forward to right
-         Math.toRadians(135.0),    // no rotation about middle finger
-         Math.toRadians(0.0)   // rotating about index finger, thumb goes up to toward you then down
+         Math.toRadians(90.0),   // rotating around thumb, index goes forward to left
+         Math.toRadians(135.0),  // rotating about middle finger, index goes down and a little to the right
+         Math.toRadians(0.0)     // no rotation about index finger
       ),
       new Point3D()
    );
    private final ReferenceFrame xForwardZUpControllerFrame;
+   private final FramePose3D tempFramePose = new FramePose3D();
+   private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
    public GDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
       super(vrPlayAreaYUpZBackFrame);
       this.side = side;
 
-      xRightZDownControllerFrame
-            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(side.getLowerCaseName() + "_xRightZDownControllerFrame",
-                                                                              ReferenceFrame.getWorldFrame(),
-                                                                              controllerToWorldTransform);
       xForwardZUpControllerFrame
             = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(side.getLowerCaseName() + "_xForwardZUpControllerFrame",
-                                                                                xRightZDownControllerFrame,
-                                                                                controllerXRightZDownToXForwardZUp);
+                                                                                getDeviceYUpZBackFrame(),
+                                                                                controllerYBackZLeftXRightToXForwardZUp);
    }
 
    public void initSystem()
@@ -111,9 +111,6 @@ public class GDXVRController extends GDXVRTrackedDevice
       setConnected(getDeviceIndex() != VR.k_unTrackedDeviceIndexInvalid);
 
       super.update(trackedDevicePoses);
-
-      getPose().get(controllerToWorldTransform);
-      xRightZDownControllerFrame.update();
 
       VRInput.VRInput_GetDigitalActionData(clickTriggerActionHandle.get(0), clickTriggerActionData, VR.k_ulInvalidInputValueHandle);
       VRInput.VRInput_GetDigitalActionData(triggerTouchedActionHandle.get(0), triggerTouchedActionData, VR.k_ulInvalidInputValueHandle);
@@ -192,6 +189,19 @@ public class GDXVRController extends GDXVRTrackedDevice
    public ReferenceFrame getXForwardZUpControllerFrame()
    {
       return xForwardZUpControllerFrame;
+   }
+
+   public void getTransformZUpToWorld(Matrix4 transform)
+   {
+      xForwardZUpControllerFrame.getTransformToDesiredFrame(tempRigidBodyTransform, ReferenceFrame.getWorldFrame());
+      GDXTools.toGDX(tempRigidBodyTransform, transform);
+   }
+
+   public Pose3DReadOnly getXForwardZUpPose()
+   {
+      tempFramePose.setToZero(getXForwardZUpControllerFrame());
+      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      return tempFramePose;
    }
 
    public void runIfConnected(Consumer<GDXVRController> runIfConnected)
