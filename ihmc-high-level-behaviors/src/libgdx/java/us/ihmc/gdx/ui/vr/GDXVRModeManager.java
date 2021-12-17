@@ -46,10 +46,10 @@ public class GDXVRModeManager
       {
          imGuiPanel = new GDXSingleContext3DSituatedImGuiPanel();
          imGuiPanel.create(400, 500, this::renderImGuiWidgets, vrContext);
-         imGuiPanel.updatePose(transform ->
-                               {
-                                  transform.getTranslation().set(1.0f, 0.0f, 1.0f);
-                               });
+         imGuiPanel.updateDesiredPose(transform ->
+         {
+            transform.getTranslation().set(1.0f, 0.0f, 1.0f);
+         });
          sceneBasics.addRenderableProvider(imGuiPanel);
       }
    }
