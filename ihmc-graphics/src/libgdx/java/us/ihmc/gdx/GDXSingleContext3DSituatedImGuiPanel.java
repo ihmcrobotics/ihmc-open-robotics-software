@@ -24,6 +24,7 @@ import imgui.ImGuiPlatformIO;
 import imgui.flag.ImGuiMouseButton;
 import imgui.gl3.ImGuiImplGl3;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
@@ -63,13 +64,14 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform graphicsXRightYDownToCenterXThroughZUpTransform = new RigidBodyTransform();
    private PlanarRegion planarRegion;
-   private ReferenceFrame centerXThroughZUpFrame
+   private final ReferenceFrame centerXThroughZUpFrame
          = ReferenceFrameTools.constructFrameWithChangingTransformToParent("centerXThroughZUpFrame" + INDEX.getAndIncrement(),
                                                                            ReferenceFrame.getWorldFrame(),
                                                                            transform);
-   private FramePose3D desiredPose = new FramePose3D();
-   private FramePose3D currentPose = new FramePose3D();
-   private ReferenceFrame graphicsXRightYDownFrame
+   private final FramePose3D desiredPose = new FramePose3D();
+   private final RigidBodyTransform desiredTransformToHeadset = new RigidBodyTransform();
+   private final FramePose3D currentPose = new FramePose3D();
+   private final ReferenceFrame graphicsXRightYDownFrame
          = ReferenceFrameTools.constructFrameWithChangingTransformToParent("graphicsXRightYDownFrame" + INDEX.getAndIncrement(),
                                                                            centerXThroughZUpFrame,
                                                                            graphicsXRightYDownToCenterXThroughZUpTransform);
@@ -83,6 +85,7 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    private final FramePose3D graphicsFrameCoordinateFramePose = new FramePose3D();
    private final RigidBodyTransform gripOffsetTransform = new RigidBodyTransform();
    private boolean grippedLastTime = false;
+   private final Stopwatch timerForFollowSpeed = new Stopwatch().start();
 
    public void create(int panelWidth, int panelHeight, Runnable renderImGuiWidgets, GDXVRContext vrContext)
    {
@@ -162,7 +165,7 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
 
       plane.getNormal().set(Axis3D.X);
 
-      updatePose(transform ->
+      updateDesiredPose(transform ->
       {
          transform.getTranslation().set(1.0f, 0.0f, 1.0f);
       });
@@ -205,7 +208,7 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
                centerFrameCoordinateFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             }
 
-            updatePose(transform ->
+            updateDesiredPose(transform ->
             {
                transform.set(gripOffsetTransform);
                controller.getXForwardZUpControllerFrame().getTransformToWorldFrame().transform(transform);
@@ -216,6 +219,68 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
          else
          {
             grippedLastTime = false;
+         }
+
+
+         if (controller.getAButtonActionData().bChanged() && !controller.getAButtonActionData().bState())
+         {
+            updateDesiredPose(transform ->
+            {
+               desiredPose.setToZero(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
+               desiredPose.getPosition().set(1.0, 0.0, 0.0);
+               desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+               desiredPose.get(transform);
+            });
+         }
+      });
+
+      // current moves towards the desired
+      currentPose.setToZero(centerXThroughZUpFrame);
+      currentPose.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPose.setToZero(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
+      desiredPose.set(desiredTransformToHeadset);
+      desiredPose.changeFrame(ReferenceFrame.getWorldFrame());
+      updateCurrentPose(transform ->
+      {
+//         transform.getTranslation().set(desiredPose.getPosition());
+//         transform.getRotation().set(desiredPose.getOrientation());
+
+         if (currentPose.getPosition().distance(desiredPose.getPosition()) > 0.003
+          && currentPose.getOrientation().distance(desiredPose.getOrientation()) > Math.toRadians(0.5))
+         {
+
+         }
+
+         double maxLinearSpeed = 0.1;
+         double maxAngularSpeed = 1.0;
+         double delta = timerForFollowSpeed.lap();
+         double linearDistance = currentPose.getPosition().distance(desiredPose.getPosition());
+         double angularDistance = currentPose.getOrientation().distance(desiredPose.getOrientation());
+         double distanceToMove = linearDistance * maxLinearSpeed * delta;
+         double angleToMove = angularDistance * maxAngularSpeed * delta;
+         if (linearDistance > 1e-5)
+         {
+            if (linearDistance < distanceToMove)
+            {
+               transform.getTranslation().set(desiredPose.getPosition());
+            }
+            else
+            {
+               currentPose.getPosition().interpolate(desiredPose.getPosition(), distanceToMove / linearDistance);
+               transform.getTranslation().set(currentPose.getPosition());
+            }
+         }
+         if (angularDistance > 1e-5)
+         {
+            if (angularDistance < angleToMove)
+            {
+               transform.getRotation().set(desiredPose.getOrientation());
+            }
+            else
+            {
+               currentPose.getOrientation().interpolate(desiredPose.getOrientation(), angleToMove / angularDistance);
+               transform.getRotation().set(currentPose.getOrientation());
+            }
          }
       });
    }
@@ -270,7 +335,16 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
 //      graphicsFrameCoordinateFrame.getRenderables(renderables, pool);
    }
 
-   public void updatePose(Consumer<RigidBodyTransform> transformUpdater)
+   public void updateDesiredPose(Consumer<RigidBodyTransform> transformUpdater)
+   {
+      updateCurrentPose(transformUpdater);
+
+      desiredPose.setToZero(centerXThroughZUpFrame);
+      desiredPose.changeFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
+      desiredPose.get(desiredTransformToHeadset);
+   }
+
+   private void updateCurrentPose(Consumer<RigidBodyTransform> transformUpdater)
    {
       transform.setToZero();
       transformUpdater.accept(transform);
@@ -280,9 +354,6 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       plane.applyTransform(transform);
       GDXTools.toGDX(transform, modelInstance.transform);
       centerXThroughZUpFrame.update();
-
-      desiredPose.setToZero(centerXThroughZUpFrame);
-      desiredPose.changeFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
    }
 
    public Plane3D getPlane()
