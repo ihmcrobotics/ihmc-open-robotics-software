@@ -198,7 +198,7 @@ public class GDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
             leftMouseDown = false;
          }
 
-         if ((grippedLastTime || controller.getPose().getPosition().distance(centerFrameCoordinateFramePose.getPosition()) < 0.05)
+         if ((grippedLastTime || controller.getXForwardZUpPose().getPosition().distance(centerFrameCoordinateFramePose.getPosition()) < 0.05)
              && controller.getGripActionData().x() > 0.9)
          {
             if (!grippedLastTime) // set up offset

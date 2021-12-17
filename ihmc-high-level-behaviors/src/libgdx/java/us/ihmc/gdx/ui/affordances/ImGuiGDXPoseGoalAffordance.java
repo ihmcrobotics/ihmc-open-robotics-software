@@ -185,8 +185,8 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
             placedPoseConsumer.accept(goalPoseForReading);
          }
 
-         controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), sphere.transform);
-         controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), arrow.transform);
+         GDXTools.toGDX(controller.getXForwardZUpPose(), tempTransform, sphere.transform);
+         GDXTools.toGDX(controller.getXForwardZUpPose(), tempTransform, arrow.transform);
       });
    }
 

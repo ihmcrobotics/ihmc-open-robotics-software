@@ -1,7 +1,7 @@
 {
   "dockspacePanels" : { },
   "windows" : {
-    "VR Thread Debugger" : true,
-    "Window" : false
+    "VR Test" : true,
+    "VR Thread Debugger" : true
   }
 }

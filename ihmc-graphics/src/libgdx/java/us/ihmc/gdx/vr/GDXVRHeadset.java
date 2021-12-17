@@ -16,7 +16,6 @@ public class GDXVRHeadset extends GDXVRTrackedDevice
 {
    private final LongBuffer inputSourceHandle = BufferUtils.newLongBuffer(1);
    private final RigidBodyTransform headsetToWorldTransform = new RigidBodyTransform();
-   private final ReferenceFrame xRightZDownHeadsetFrame;
    private static final RigidBodyTransformReadOnly headsetXRightZDownToXForwardZUp = new RigidBodyTransform(
          new YawPitchRoll(         // For this transformation, we start with IHMC ZUp with index forward and thumb up
             Math.toRadians(90.0),  // rotating around thumb, index goes forward to left
@@ -32,13 +31,9 @@ public class GDXVRHeadset extends GDXVRTrackedDevice
       super(vrPlayAreaYUpZBackFrame);
       setDeviceIndex(VR.k_unTrackedDeviceIndex_Hmd);
 
-      xRightZDownHeadsetFrame
-            = ReferenceFrameTools.constructFrameWithChangingTransformToParent("xRightZDownHeadsetFrame",
-                                                                              ReferenceFrame.getWorldFrame(),
-                                                                              headsetToWorldTransform);
       xForwardZUpHeadsetFrame
             = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("xForwardZUpHeadsetFrame",
-                                                                                xRightZDownHeadsetFrame,
+                                                                                getDeviceYUpZBackFrame(),
                                                                                 headsetXRightZDownToXForwardZUp);
    }
 
@@ -52,9 +47,6 @@ public class GDXVRHeadset extends GDXVRTrackedDevice
       setConnected(VRSystem.VRSystem_IsTrackedDeviceConnected(VR.k_unTrackedDeviceIndex_Hmd));
 
       super.update(trackedDevicePoses);
-
-      getPose().get(headsetToWorldTransform);
-      xRightZDownHeadsetFrame.update();
    }
 
    public void runIfConnected(Consumer<GDXVRHeadset> runIfConnected)
