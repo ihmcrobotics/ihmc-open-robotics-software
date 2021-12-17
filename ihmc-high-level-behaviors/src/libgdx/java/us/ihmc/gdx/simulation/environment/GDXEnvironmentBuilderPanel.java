@@ -35,6 +35,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private GDXEnvironmentObject modelBeingPlaced;
    private final GDXModelInput modelInput = new GDXModelInput();
    private final ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
+   private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
 //   private final GDXPose3DGizmo pose3DWidget = new GDXPose3DGizmo();
 
@@ -76,7 +77,8 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
          {
             modelBeingPlaced = new GDXLargeCinderBlockRoughed();
             modelInput.addAndSelectInstance(modelBeingPlaced);
-            controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
+            controller.getXForwardZUpControllerFrame().getTransformToDesiredFrame(tempRigidBodyTransform, ReferenceFrame.getWorldFrame());
+            GDXTools.toGDX(tempRigidBodyTransform, modelBeingPlaced.getRealisticModelInstance().transform);
          }
          if (triggerClick.bChanged() && !triggerClick.bState())
          {

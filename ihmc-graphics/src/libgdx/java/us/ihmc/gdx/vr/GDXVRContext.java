@@ -137,7 +137,7 @@ public class GDXVRContext
       LogTools.info("VR per eye render size: {} x {}", width, height);
       for (RobotSide side : RobotSide.values)
       {
-         eyes.set(side, new GDXVREye(side, headset, vrPlayAreaYUpZBackFrame, width, height));
+         eyes.set(side, new GDXVREye(side, headset, width, height));
       }
    }
 
