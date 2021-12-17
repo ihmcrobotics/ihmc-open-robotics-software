@@ -317,7 +317,7 @@ public class GDXModelInput
          vrManager.getContext().getController(RobotSide.RIGHT).runIfConnected(controller ->
          {
             Integer objectIndex = selectedObjectIndexes.stream().findFirst().get();
-            GDXTools.toGDX(controller.getXForwardZUpPose(), tempRigidBodyTransform, environmentObjects.get(objectIndex).getRealisticModelInstance().transform);
+            controller.getTransformZUpToWorld(environmentObjects.get(objectIndex).getRealisticModelInstance().transform);
          });
       }
    }

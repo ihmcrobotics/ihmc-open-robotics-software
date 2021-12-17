@@ -12,7 +12,6 @@ import imgui.type.ImFloat;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
@@ -35,7 +34,6 @@ public class GDXVRDepthSensorDemo
    private ModelInstance cylinder;
    private boolean moveWithController = true;
    private final Matrix4 tempTransform = new Matrix4();
-   private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
    private final ImBoolean enablePointCloudRender = new ImBoolean(true);
    private final ImBoolean useSensorColor = new ImBoolean(false);
    private final ImBoolean useGizmoToPoseSensor = new ImBoolean(false);
@@ -104,15 +102,14 @@ public class GDXVRDepthSensorDemo
                }
                if (moveWithController)
                {
-                  controller.getXForwardZUpControllerFrame().getTransformToDesiredFrame(tempRigidBodyTransform, ReferenceFrame.getWorldFrame());
-                  GDXTools.toGDX(tempRigidBodyTransform, tempTransform);
+                  controller.getTransformZUpToWorld(tempTransform);
                   depthSensorSimulator.setCameraWorldTransform(tempTransform);
                   controllerCoordinateFrames.get(RobotSide.LEFT).transform.set(tempTransform); // TODO: Should be an option on the VR manager probably
                }
             });
             vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
             {
-               GDXTools.toGDX(controller.getXForwardZUpPose(), tempRigidBodyTransform, cylinder.nodes.get(0).globalTransform);
+               controller.getTransformZUpToWorld(cylinder.nodes.get(0).globalTransform);
             });
          }
 
