@@ -47,7 +47,10 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -79,8 +82,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
@@ -460,39 +461,15 @@ public class SCS2AvatarSimulationFactory
       {
          LogTools.info("Initializing estimator to actual");
 
-         /**
-          * The following is to get the initial CoM position from the robot. It is cheating for now, and we
-          * need to move to where the robot itself determines coordinates, and the sensors are all in the
-          * robot-determined world coordinates..
-          */
-         HumanoidFloatingRootJointRobot tempRobot = robotModel.get().createHumanoidFloatingRootJointRobot(false);
-         robotInitialSetup.get().initializeRobot(tempRobot);
-         try
-         {
-            tempRobot.update();
-            tempRobot.doDynamicsButDoNotIntegrate();
-            tempRobot.update();
-         }
-         catch (UnreasonableAccelerationException e)
-         {
-            throw new RuntimeException("UnreasonableAccelerationException");
-         }
+         robotInitialSetup.get().initializeRobot(robot.getRootBody());
+         robot.updateFrames();
+         FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
+         RigidBodyTransform rootJointTransform = new RigidBodyTransform(rootJoint.getJointPose().getOrientation(), rootJoint.getJointPose().getPosition());
 
-         initializeEstimator(tempRobot, estimatorThread);
+         TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
+         SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+         estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
       }
-   }
-
-   public static void initializeEstimator(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot, AvatarEstimatorThread estimatorThread)
-   {
-      RigidBodyTransform rootJointTransform = humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D();
-
-      TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
-      for (OneDegreeOfFreedomJoint joint : humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoints())
-      {
-         jointPositions.put(joint.getName(), joint.getQ());
-      }
-
-      estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
    }
 
    private void setupSimulatedRobotTimeProvider()

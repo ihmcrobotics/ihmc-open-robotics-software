@@ -585,6 +585,8 @@ public class CrossRobotCommandRandomTools
          next.setVelocityFeedbackMaxError(random.nextDouble());
       if (random.nextBoolean())
          next.setLoadMode(nextElementIn(random, JointDesiredLoadMode.values));
+      if (random.nextBoolean())
+         next.setMaxTorque(random.nextDouble());
       return next;
    }
 
