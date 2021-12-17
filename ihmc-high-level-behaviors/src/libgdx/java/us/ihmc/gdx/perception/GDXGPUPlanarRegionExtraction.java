@@ -1,11 +1,20 @@
 package us.ihmc.gdx.perception;
 
+import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencl._cl_mem;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.perception.OpenCLManager;
+
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 public class GDXGPUPlanarRegionExtraction
 {
@@ -20,35 +29,62 @@ public class GDXGPUPlanarRegionExtraction
    private final ImFloat depthFy = new ImFloat(0);
    private final ImFloat depthCx = new ImFloat(0);
    private final ImFloat depthCy = new ImFloat(0);
+   private final ImBoolean earlyGaussianBlur = new ImBoolean(true);
+   private final ImInt gaussianSize = new ImInt(6);
+   private final ImInt gaussianSigma = new ImInt(20);
    private final OpenCLManager openCLManager = new OpenCLManager();
    private int numberOfFloatParameters = 16;
    private _cl_mem parametersBufferObject;
    private long parametersBufferSizeInBytes;
    private FloatPointer parametersNativeCPUPointer;
+   private Mat inputDepthImageMat;
+//   private ByteBuffer depthImageBytePointer = new ByteBuffer();
+//   private BytePointer depthImageBytePointer = new BytePointer();
 
    public GDXGPUPlanarRegionExtraction()
    {
 
    }
 
-   public void create()
+   public void create(int imageWidth, int imageHeight)
    {
       openCLManager.create();
 
       parametersBufferSizeInBytes = numberOfFloatParameters * Loader.sizeof(FloatPointer.class);
       parametersBufferObject = openCLManager.createBufferObject(parametersBufferSizeInBytes);
       parametersNativeCPUPointer = new FloatPointer(numberOfFloatParameters);
+
+      inputDepthImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
    }
 
-   private void generateRegionsFromDepth()
+   private void generateRegionsFromDepth(FloatBuffer depthFloatBuffer)
    {
-      // depth image
       // timestamp
 
+      // put image into Mat?
 
+//      depthImageBytePointer.putPointerValue(depthFloatBuffer);
+//       inputDepthImageMat.
+
+
+      generatePatchGraph();
+
+      generateSegmentation();
    }
 
    private void generatePatchGraph()
+   {
+      uploadParametersToGPU();
+
+      // gaussian blur
+      Mat src = null;
+      Mat dst = null;
+      Size ksize = null;
+      double sigmaX = 0.0;
+      opencv_imgproc.GaussianBlur(src, dst, ksize, sigmaX);
+   }
+
+   private void generateSegmentation()
    {
 
    }
