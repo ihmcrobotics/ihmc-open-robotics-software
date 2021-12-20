@@ -2,7 +2,7 @@ plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
    id("us.ihmc.ihmc-cd") version "1.20"
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.log-tools-plugin") version "0.6.2"
 }
 
 ihmc {
@@ -21,7 +21,7 @@ mainDependencies {
    api("org.boofcv:boofcv-geo:0.36")
    api("org.reflections:reflections:0.9.10")
 
-   api("org.apache.logging.log4j:log4j-1.2-api:2.14.0") // required for rosjava to log stuff
+   api("org.apache.logging.log4j:log4j-1.2-api:2.15.0") // required for rosjava to log stuff
    api("org.ros.rosjava_core:rosjava:0.2.1") {
       exclude(group = "junit", module = "junit")
       exclude(group = "org.ros.rosjava_messages", module = "rosjava_test_msgs")
