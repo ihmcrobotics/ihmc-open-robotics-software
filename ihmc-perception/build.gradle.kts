@@ -87,7 +87,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.30.4")
+   api("us.ihmc:ihmc-commons-testing:0.30.5")
    api("us.ihmc:simulation-construction-set:0.21.9")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")

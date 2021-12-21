@@ -35,7 +35,7 @@ mainDependencies {
    api("us.ihmc:euclid-shape:0.16.2")
    api("us.ihmc:mecano:0.8.2")
    api("us.ihmc:mecano-yovariables:0.8.2")
-   api("us.ihmc:ihmc-commons:0.30.4")
+   api("us.ihmc:ihmc-commons:0.30.5")
    api("us.ihmc:ihmc-messager-kryo:0.1.7")
    api("us.ihmc:ihmc-yovariables:0.9.9")
    api("us.ihmc:ihmc-matrix-library:0.18.4")
@@ -50,5 +50,5 @@ testDependencies {
    api("org.jfree:jcommon:1.0.21")
 
    api("us.ihmc:ihmc-matrix-library-test:0.18.4")
-   api("us.ihmc:ihmc-commons-testing:0.30.4")
+   api("us.ihmc:ihmc-commons-testing:0.30.5")
 }
