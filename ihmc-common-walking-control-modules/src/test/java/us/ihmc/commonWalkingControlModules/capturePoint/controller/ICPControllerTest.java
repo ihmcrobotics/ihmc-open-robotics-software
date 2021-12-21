@@ -1,14 +1,31 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Beige;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.*;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -16,6 +33,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.Assert;
@@ -26,11 +49,16 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ICPControllerTest
 {
@@ -39,9 +67,6 @@ public class ICPControllerTest
 
    private static final double footLength = 0.25;
    private static final double stanceWidth = 0.35;
-
-   private final SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private final SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
 
    @AfterEach
    public void tearDown()
@@ -90,14 +115,125 @@ public class ICPControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
+      
+      
+      boolean visualize = true;
+
+      YoGraphicsListRegistry yoGraphicsListRegistry = null;
+
+      if (visualize)
+      {
+         yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      }
+
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
-                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+                                                                           bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
+//      YoFramePoint2D desiredICP = new YoFramePoint2D("desiredICP", worldFrame, registry);
+      YoFramePoint2D perfectCMP = new YoFramePoint2D("perfectCMP", worldFrame, registry);
+      YoFramePoint2D yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
+
+      
+      YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
+      YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
+      YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
+      YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
+
+      YoFramePoint2D desiredICP = new YoFramePoint2D("desiredICP", worldFrame, registry);
+      YoFramePoint2D yoAdjustedDesiredCapturePoint = new YoFramePoint2D("adjustedDesiredICP", worldFrame, registry);
+      YoFrameVector2D yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
+      YoFramePoint3D yoDesiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
+      YoFrameVector3D yoDesiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
+      YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
+      YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
+//      YoFrameVector3D yoFinalDesiredCoMVelocity = new YoFrameVector3D("finalDesiredCoMVelocity", worldFrame, registry);
+//      YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
+
+      
+      
+      
+      SimulationConstructionSet scs = null;
+      YoGraphicPosition desiredICPGraphic = null;
+      YoGraphicPosition perfectCMPGraphic = null;
+      SimulationOverheadPlotter plotter = null;
+      
+      if (visualize)
+      {
+         Robot nullRobot = new Robot("test");
+         scs = new SimulationConstructionSet(nullRobot);
+
+         ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+         
+//         desiredICPGraphic = new YoGraphicPosition("desiredICP", desiredICP, 0.03, YoAppearance.Yellow());
+//         yoGraphicsListRegistry.registerYoGraphic("yoGraphics", desiredICPGraphic);
+//         
+//         perfectCMPGraphic = new YoGraphicPosition("perfectCMP", perfectCMP, 0.01, YoAppearance.Orange());
+//         yoGraphicsListRegistry.registerYoGraphic("yoGraphics", perfectCMPGraphic);
+         
+         if (yoGraphicsListRegistry != null)
+         {
+            YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
+            YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
+            YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
+            YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), GraphicType.BALL_WITH_ROTATED_CROSS);
+            yoGraphicsListRegistry.registerArtifact("ICPControllerTest", desiredCMPViz.createArtifact());
+            yoGraphicsListRegistry.registerArtifact("ICPControllerTest", achievedCMPViz.createArtifact());
+            yoGraphicsListRegistry.registerArtifact("ICPControllerTest", centerOfMassViz.createArtifact());
+            yoGraphicsListRegistry.registerArtifact("ICPControllerTest", capturePointViz.createArtifact());
+        
+         
+         
+            YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", desiredICP, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
+            YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
+            YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM", yoFinalDesiredCoM, 0.01, Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
+            YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", perfectCMP, 0.002, BlueViolet());
+            YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
+
+            YoGraphicPosition adjustedDesiredCapturePointViz = new YoGraphicPosition("Adjusted Desired Capture Point", yoAdjustedDesiredCapturePoint, 0.005, Yellow(), GraphicType.DIAMOND);
+            yoGraphicsListRegistry.registerArtifact("ICPControllerTest", adjustedDesiredCapturePointViz.createArtifact());
+
+            yoGraphicsListRegistry.registerArtifact("ICPControllerTest", desiredCapturePointViz.createArtifact());
+            yoGraphicsListRegistry.registerArtifact("ICPControllerTest", finalDesiredCapturePointViz.createArtifact());
+            yoGraphicsListRegistry.registerArtifact("ICPControllerTest", finalDesiredCoMViz.createArtifact());
+            YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
+            perfectCMPArtifact.setVisible(false);
+            yoGraphicsListRegistry.registerArtifact("ICPControllerTest", perfectCMPArtifact);
+            YoArtifactPosition perfectCoPArtifact = perfectCoPViz.createArtifact();
+            perfectCoPArtifact.setVisible(false);
+            yoGraphicsListRegistry.registerArtifact("ICPControllerTest", perfectCoPArtifact);
+         
+         
+         }
+         
+         
+         scs.addYoGraphicsListRegistry(yoGraphicsListRegistry);
+         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
+         plotterFactory.setShowOnStart(true);
+         plotterFactory.addYoGraphicsListRegistries(yoGraphicsListRegistry);
+         plotter = plotterFactory.createOverheadPlotter();
+         
+        
+         scs.getRootRegistry().addChild(registry);
+         scs.startOnAThread();
+         
+         plotter.update();
+      }
+      
+      
       double omega = walkingControllerParameters.getOmega0();
 
-      FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
-      FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
+      desiredICP.set(0.03, 0.06);
+      perfectCMP.set(0.01, 0.04);
+      
+      if (visualize)
+      {
+         desiredICPGraphic.update();
+         perfectCMPGraphic.update();
+         plotter.update();
+      }
+      
+      
       FrameVector2D desiredICPVelocity = new FrameVector2D();
 
       desiredICPVelocity.set(desiredICP);
@@ -117,6 +253,18 @@ public class ICPControllerTest
       controller.getDesiredCMP(desiredCMP);
 
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
+      
+      if (visualize)
+      {
+         for (int i=0; i<10; i++)
+         {
+         scs.setTime(scs.getTime() + 1.0);
+         scs.tickAndUpdate();
+         }
+         ThreadTools.sleepForever();
+      }
+      
+      
    }
 
    @Test
@@ -439,6 +587,7 @@ public class ICPControllerTest
 
    private SideDependentList<FootSpoof> setupContactableFeet(double footLength, double footWidth, double totalWidth)
    {
+      SideDependentList<FramePose3D> footPosesAtTouchdown = new SideDependentList<>(new FramePose3D(), new FramePose3D());
       SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
@@ -468,6 +617,8 @@ public class ICPControllerTest
 
    private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoRegistry registry)
    {
+      SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
+      
       SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
