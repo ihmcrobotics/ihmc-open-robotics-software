@@ -2,7 +2,7 @@ plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
    id("us.ihmc.ihmc-cd") version "1.20"
-   id("us.ihmc.log-tools-plugin") version "0.6.2"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -28,7 +28,7 @@ mainDependencies {
    api("com.google.guava:guava:18.0")
    api("org.yaml:snakeyaml:1.17") //1.11
 
-   api("us.ihmc:log-tools:0.6.1")
+   api("us.ihmc:log-tools:0.6.3")
    api("us.ihmc:euclid:0.16.2")
    api("us.ihmc:euclid-frame:0.16.2")
    api("us.ihmc:euclid-frame-shape:0.16.2")

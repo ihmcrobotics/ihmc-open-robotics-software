@@ -9,6 +9,7 @@ buildscript {
    }
    dependencies {
       classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.19.4")
+      classpath("us.ihmc:log-tools:0.6.3")
    }
 }
 
@@ -16,7 +17,7 @@ plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
    id("us.ihmc.ihmc-cd") version "1.20"
-   id("us.ihmc.log-tools-plugin") version "0.6.2"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -34,7 +35,7 @@ mainDependencies {
    api("us.ihmc:euclid:0.16.2")
    api("us.ihmc:euclid-geometry:0.16.2")
    api("us.ihmc:ihmc-pub-sub:0.15.0")
-   api("us.ihmc:log-tools:0.6.2")
+   api("us.ihmc:log-tools:0.6.3")
    api("us.ihmc:ros2-common-interfaces:0.19.4") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
