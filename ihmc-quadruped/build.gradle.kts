@@ -65,7 +65,6 @@ footstepPlanningVisualizersDependencies {
 
 footstepPlanningTestDependencies {
    api(ihmc.sourceSetProject("footstep-planning-visualizers"))
-   api("us.ihmc:ihmc-quadruped-planning-test:source")
 }
 
 communicationDependencies {
