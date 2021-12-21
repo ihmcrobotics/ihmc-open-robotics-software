@@ -18,7 +18,7 @@ mainDependencies {
    api("org.georegression:georegression:0.22")
    api("org.ddogleg:ddogleg:0.18")
    api("gov.nist.math:jama:1.0.3")
-   api("org.apache.commons:commons-math3:3.3")
+   api("org.apache.commons:commons-math3:3.6.1")
    api("jgraph:jgraph:5.13.0.0")
    api("org.ejml:ejml-zdense:0.39")
    api("org.ejml:ejml-core:0.39")
