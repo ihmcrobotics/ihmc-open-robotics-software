@@ -16,7 +16,6 @@ mainDependencies {
    api("com.thoughtworks.xstream:xstream:1.4.7")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("org.georegression:georegression:0.22")
    api("org.boofcv:boofcv-geo:0.36")
    api("org.boofcv:boofcv-ip:0.36")

@@ -18,7 +18,6 @@ mainDependencies {
    api("org.ddogleg:ddogleg:0.18")
    api("org.apache.xmlgraphics:batik-dom:1.7")
    api("org.apache.ant:ant:1.9.0")
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("com.martiansoftware:jsap:2.1")
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")

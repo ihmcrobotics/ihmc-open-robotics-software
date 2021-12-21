@@ -17,7 +17,6 @@ ihmc {
 // }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 

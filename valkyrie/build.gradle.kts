@@ -19,7 +19,6 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-simple:0.39")
    api("org.ejml:ejml-ddense:0.39")
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc:jinput:2.0.6-ihmc2")
 
    api("us.ihmc:euclid:0.16.2")

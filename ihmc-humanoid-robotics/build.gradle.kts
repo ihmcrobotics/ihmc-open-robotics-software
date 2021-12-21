@@ -13,7 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("org.ejml:ejml-core:0.39")
    api("net.sf.trove4j:trove4j:3.0.3")
    api("org.georegression:georegression:0.22")
