@@ -20,7 +20,7 @@ mainDependencies {
    api("org.boofcv:boofcv-geo:0.36")
    api("org.reflections:reflections:0.9.10")
 
-   api("org.apache.logging.log4j:log4j-1.2-api:2.15.0") // required for rosjava to log stuff
+   api("org.apache.logging.log4j:log4j-1.2-api:2.17.0") // required for rosjava to log stuff
    api("org.ros.rosjava_core:rosjava:0.2.1") {
       exclude(group = "junit", module = "junit")
       exclude(group = "org.ros.rosjava_messages", module = "rosjava_test_msgs")
