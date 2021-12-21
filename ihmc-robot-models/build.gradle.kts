@@ -13,7 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("javax.vecmath:vecmath:1.5.2")
    api("com.google.guava:guava:18.0")
 

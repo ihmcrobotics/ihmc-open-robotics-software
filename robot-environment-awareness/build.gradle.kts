@@ -2,7 +2,7 @@ import org.apache.commons.lang3.SystemUtils
 
 buildscript {
    dependencies {
-      classpath("org.apache.commons:commons-lang3:3.9")
+      classpath("org.apache.commons:commons-lang3:3.12.0")
    }
 }
 
@@ -25,8 +25,7 @@ ihmc {
 
 mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
-   api("org.apache.commons:commons-lang3:3.8.1")
-   
+
    api("us.ihmc:euclid-shape:0.17.0")
    api("us.ihmc:joctomap:1.12.1")
    api("us.ihmc:ihmc-yovariables:0.9.11")

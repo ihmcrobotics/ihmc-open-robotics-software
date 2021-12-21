@@ -14,7 +14,6 @@ ihmc {
 
 mainDependencies {
    api("net.sf.trove4j:trove4j:3.0.3")
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("org.apache.commons:commons-math3:3.3")
    api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")

@@ -13,7 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-core:0.39")
    api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")

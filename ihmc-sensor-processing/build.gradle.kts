@@ -13,7 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("commons-collections:commons-collections:3.2.1")
    api("org.georegression:georegression:0.22")
    api("org.ddogleg:ddogleg:0.18")

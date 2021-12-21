@@ -15,7 +15,6 @@ ihmc {
 
 mainDependencies {
    api("gov.nist.math:jama:1.0.3")
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("com.google.guava:guava:18.0")
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-core:0.39")
