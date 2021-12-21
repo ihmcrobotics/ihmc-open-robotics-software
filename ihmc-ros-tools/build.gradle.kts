@@ -17,7 +17,6 @@ mainDependencies {
    api("io.netty:netty:3.5.8.Final")
    api("com.google.guava:guava:18.0")
    api("org.apache.commons:com.springsource.org.apache.commons.io:1.4.0")
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("org.boofcv:boofcv-geo:0.36")
    api("org.reflections:reflections:0.9.10")
 

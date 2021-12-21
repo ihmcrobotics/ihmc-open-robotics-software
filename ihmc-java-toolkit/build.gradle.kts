@@ -13,7 +13,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("commons-io:commons-io:2.6")
    api("org.apache.lucene:lucene-analyzers-common:4.3.0")
    api("org.apache.lucene:lucene-core:4.3.0")
