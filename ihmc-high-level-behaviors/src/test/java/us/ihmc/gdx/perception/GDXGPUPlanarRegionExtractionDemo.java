@@ -3,7 +3,7 @@ package us.ihmc.gdx.perception;
 import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.simulation.environment.GDXEnvironment;
+import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
@@ -16,7 +16,7 @@ public class GDXGPUPlanarRegionExtractionDemo
 
    private GDXHighLevelDepthSensorSimulator l515;
    private final GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
-   private GDXEnvironment environmentBuilder;
+   private GDXEnvironmentBuilder environmentBuilder;
 
    public GDXGPUPlanarRegionExtractionDemo()
    {
@@ -27,7 +27,7 @@ public class GDXGPUPlanarRegionExtractionDemo
          {
             baseUI.create();
 
-            environmentBuilder = new GDXEnvironment(baseUI.get3DSceneManager());
+            environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
             environmentBuilder.create(baseUI);
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
             baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
