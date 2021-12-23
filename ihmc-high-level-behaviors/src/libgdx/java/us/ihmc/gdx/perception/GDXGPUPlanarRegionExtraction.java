@@ -1,5 +1,9 @@
 package us.ihmc.gdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
@@ -11,6 +15,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
+import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.perception.OpenCLManager;
 
 import java.nio.ByteBuffer;
@@ -41,13 +46,23 @@ public class GDXGPUPlanarRegionExtraction
 //   private ByteBuffer depthImageBytePointer = new ByteBuffer();
 //   private BytePointer depthImageBytePointer = new BytePointer();
 
+   private final ImGuiVideoPanel blurredDepthPanel;
+   private Pixmap blurredDepthPanelPixmap;
+   private Texture blurredDepthPanelTexture;
+   private int imageWidth;
+   private int imageHeight;
+   private float lowestValueSeen = -1.0f;
+   private float highestValueSeen = -1.0f;
+
    public GDXGPUPlanarRegionExtraction()
    {
-
+      blurredDepthPanel = new ImGuiVideoPanel("Blurred Depth", false);
    }
 
    public void create(int imageWidth, int imageHeight)
    {
+      this.imageWidth = imageWidth;
+      this.imageHeight = imageHeight;
       openCLManager.create();
 
       parametersBufferSizeInBytes = numberOfFloatParameters * Loader.sizeof(FloatPointer.class);
@@ -55,6 +70,35 @@ public class GDXGPUPlanarRegionExtraction
       parametersNativeCPUPointer = new FloatPointer(numberOfFloatParameters);
 
       inputDepthImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+
+      blurredDepthPanelPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
+      blurredDepthPanelTexture = new Texture(new PixmapTextureData(blurredDepthPanelPixmap, null, false, false));
+
+      blurredDepthPanel.setTexture(blurredDepthPanelTexture);
+   }
+
+   public void blurDepthAndRender(FloatBuffer depthFloatBuffer)
+   {
+      depthFloatBuffer.rewind();
+      for (int y = 0; y < imageHeight; y++)
+      {
+         for (int x = 0; x < imageWidth; x++)
+         {
+            float eyeDepth = depthFloatBuffer.get();
+            if (highestValueSeen < 0 || eyeDepth > highestValueSeen)
+               highestValueSeen = eyeDepth;
+            if (lowestValueSeen < 0 || eyeDepth < lowestValueSeen)
+               lowestValueSeen = eyeDepth;
+
+            float colorRange = highestValueSeen - lowestValueSeen;
+            float grayscale = (eyeDepth - lowestValueSeen) / colorRange;
+            int flippedY = imageHeight - y;
+
+            blurredDepthPanelPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
+         }
+      }
+
+      blurredDepthPanelTexture.draw(blurredDepthPanelPixmap, 0, 0);
    }
 
    private void generateRegionsFromDepth(FloatBuffer depthFloatBuffer)
@@ -117,5 +161,10 @@ public class GDXGPUPlanarRegionExtraction
       parameters.put(15, inputWidth.get());
 
       openCLManager.enqueueWriteBuffer(parametersBufferObject, parametersBufferSizeInBytes, parameters);
+   }
+
+   public ImGuiVideoPanel getBlurredDepthPanel()
+   {
+      return blurredDepthPanel;
    }
 }

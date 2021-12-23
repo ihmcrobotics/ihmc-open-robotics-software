@@ -17,6 +17,7 @@ public class GDXGPUPlanarRegionExtractionDemo
    private GDXHighLevelDepthSensorSimulator l515;
    private final GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
+   private GDXGPUPlanarRegionExtraction gpuPlanarRegionExtraction;
 
    public GDXGPUPlanarRegionExtractionDemo()
    {
@@ -80,15 +81,19 @@ public class GDXGPUPlanarRegionExtractionDemo
             l515.setPublishColorImageROS1(false);
             l515.setPublishColorImageROS2(false);
             l515.create();
-
             baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
 
+            gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
+            gpuPlanarRegionExtraction.create(imageWidth, imageHeight);
+            baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getBlurredDepthPanel());
          }
 
          @Override
          public void render()
          {
             l515.render(baseUI.get3DSceneManager());
+            gpuPlanarRegionExtraction.blurDepthAndRender(l515.getLowLevelSimulator().getEyeDepthMetersBuffer());
+
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
