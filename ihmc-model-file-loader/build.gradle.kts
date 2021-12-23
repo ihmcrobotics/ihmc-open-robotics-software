@@ -1,8 +1,8 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.21"
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -17,7 +17,6 @@ ihmc {
 // }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
