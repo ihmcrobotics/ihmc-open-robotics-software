@@ -40,9 +40,9 @@ import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.*;
 
-public class GDXEnvironment extends ImGuiPanel
+public class GDXEnvironmentBuilder extends ImGuiPanel
 {
-   private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironment.class, "Environment");
+   private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironmentBuilder.class, "Environment");
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
    private final ArrayList<GDXEnvironmentObject> lightObjects = new ArrayList<>();
    private GDXEnvironmentObject selectedObject;
@@ -62,12 +62,12 @@ public class GDXEnvironment extends ImGuiPanel
    private final ImFloat ambientLight = new ImFloat(0.4f);
    private final GDX3DSceneManager sceneManager;
 
-   public GDXEnvironment(GDX3DSceneManager sceneManager)
+   public GDXEnvironmentBuilder(GDX3DSceneManager sceneManager)
    {
       this(sceneManager, null, null);
    }
 
-   public GDXEnvironment(GDX3DSceneManager sceneManager, ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
+   public GDXEnvironmentBuilder(GDX3DSceneManager sceneManager, ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
    {
       super(WINDOW_NAME);
       this.sceneManager = sceneManager;

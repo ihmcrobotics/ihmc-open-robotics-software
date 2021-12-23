@@ -10,12 +10,12 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/libgdx/resources",
                                                               "Environment Builder");
-   private final GDXEnvironment environment = new GDXEnvironment(baseUI.get3DSceneManager());
+   private final GDXEnvironmentBuilder environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
    private final ImGui3DViewInputDebugger inputDebugger = new ImGui3DViewInputDebugger();
 
    public GDXEnvironmentBuilderUI()
    {
-      baseUI.getImGuiPanelManager().addPanel(environment.getWindowName(), environment::renderImGuiWidgets);
+      baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getWindowName(), environmentBuilder::renderImGuiWidgets);
       baseUI.launchGDXApplication(this);
    }
 
@@ -27,7 +27,7 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
       inputDebugger.create(baseUI);
       baseUI.getImGuiPanelManager().addPanel(inputDebugger.getWindowName(), inputDebugger::render);
 
-      environment.create(baseUI);
+      environmentBuilder.create(baseUI);
    }
 
    @Override
@@ -40,7 +40,7 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
    @Override
    public void dispose()
    {
-      environment.destroy();
+      environmentBuilder.destroy();
       baseUI.dispose();
    }
 
