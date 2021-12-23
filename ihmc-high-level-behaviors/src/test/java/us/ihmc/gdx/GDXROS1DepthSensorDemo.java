@@ -3,9 +3,6 @@ package us.ihmc.gdx;
 import boofcv.struct.calib.CameraPinholeBrown;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
@@ -25,8 +22,6 @@ public class GDXROS1DepthSensorDemo
    private ImGuiGDXGlobalVisualizersPanel globalVisualizersUI;
    private GDXHighLevelDepthSensorSimulator l515;
    private final GDXPose3DGizmo poseGizmo = new GDXPose3DGizmo();
-   private RigidBodyTransform sensorTransform;
-   private ReferenceFrame sensorFrame;
 
    public GDXROS1DepthSensorDemo()
    {
@@ -39,19 +34,15 @@ public class GDXROS1DepthSensorDemo
          {
             baseUI.create();
 
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new DepthSensorDemoObjectsModel().newInstance());
+
             poseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
             poseGizmo.setResizeAutomatically(false);
             baseUI.addImGui3DViewInputProcessor(poseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(poseGizmo, GDXSceneLevel.VIRTUAL);
-
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
-            baseUI.get3DSceneManager().addModelInstance(new DepthSensorDemoObjectsModel().newInstance());
-
-            sensorTransform = new RigidBodyTransform();
-            sensorTransform.appendTranslation(0.0, 0.0, 0.5);
-            sensorTransform.appendPitchRotation(Math.PI / 6.0);
-            poseGizmo.getTransformToParent().set(sensorTransform);
-            sensorFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("sensorFrame", ReferenceFrameTools.getWorldFrame(), sensorTransform);
+            poseGizmo.getTransformToParent().appendTranslation(0.0, 0.0, 0.5);
+            poseGizmo.getTransformToParent().appendPitchRotation(Math.PI / 6.0);
 
             double publishRateHz = 5.0;
             double verticalFOV = 55.0;
@@ -72,7 +63,7 @@ public class GDXROS1DepthSensorDemo
                                                         null,
                                                         null,
                                                         null,
-                                                        sensorFrame,
+                                                        poseGizmo.getGizmoFrame(),
                                                         () -> 0L,
                                                         verticalFOV,
                                                         imageWidth,
@@ -109,9 +100,6 @@ public class GDXROS1DepthSensorDemo
          @Override
          public void render()
          {
-            sensorTransform.set(poseGizmo.getTransformToParent());
-            sensorFrame.update();
-
             globalVisualizersUI.update();
             l515.render(baseUI.get3DSceneManager());
             baseUI.renderBeforeOnScreenUI();
