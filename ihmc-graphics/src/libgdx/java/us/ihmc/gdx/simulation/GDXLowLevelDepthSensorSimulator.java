@@ -69,7 +69,8 @@ public class GDXLowLevelDepthSensorSimulator
    private FloatBuffer rawDepthFloatBuffer;
    private ByteBuffer processedDepthByteBuffer;
    private FloatBuffer processedDepthFloatBuffer;
-   private FloatBuffer eyeDepthMetersBuffer;
+   private ByteBuffer eyeDepthMetersByteBuffer;
+   private FloatBuffer eyeDepthMetersFloatBuffer;
    private ByteBuffer rawColorByteBuffer;
    private IntBuffer rawColorIntBuffer;
 
@@ -113,16 +114,17 @@ public class GDXLowLevelDepthSensorSimulator
 //      frameBufferBuilder.addDepthTextureAttachment(GL41.GL_DEPTH_COMPONENT32F, GL41.GL_FLOAT);
 //      frameBufferBuilder.addFloatAttachment(GL41.GL_R32F, GL41.GL_RED, GL41.GL_FLOAT, false);
 
-      rawDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
+      rawDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * Float.BYTES);
       rawDepthFloatBuffer = rawDepthByteBuffer.asFloatBuffer();
 
-      processedDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4 * 3);
+      processedDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * Float.BYTES * 3);
       processedDepthFloatBuffer = processedDepthByteBuffer.asFloatBuffer();
 
-      rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
+      rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * Integer.BYTES);
       rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
 
-      eyeDepthMetersBuffer = BufferUtils.newFloatBuffer(imageWidth * imageHeight);
+      eyeDepthMetersByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * Float.BYTES);
+      eyeDepthMetersFloatBuffer = eyeDepthMetersByteBuffer.asFloatBuffer();
 
       depthWindowPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
@@ -194,7 +196,7 @@ public class GDXLowLevelDepthSensorSimulator
       float farMinusNear = camera.far - camera.near;
       rawDepthFloatBuffer.rewind();
       processedDepthFloatBuffer.rewind();
-      eyeDepthMetersBuffer.rewind();
+      eyeDepthMetersFloatBuffer.rewind();
       rawColorIntBuffer.rewind();
       if (depthEnabled)
       {
@@ -216,7 +218,7 @@ public class GDXLowLevelDepthSensorSimulator
                float normalizedDeviceCoordinateZ = processedDepthZ; // -1.0 to 1.0
                float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear)); // in meters
                eyeDepth += imageY * depthPitchTuner.get();
-               eyeDepthMetersBuffer.put(eyeDepth);
+               eyeDepthMetersFloatBuffer.put(eyeDepth);
 
                if (depthPanelIsUsed)
                {
@@ -312,10 +314,16 @@ public class GDXLowLevelDepthSensorSimulator
       return camera;
    }
 
-   public FloatBuffer getEyeDepthMetersBuffer()
+   public FloatBuffer getEyeDepthMetersFloatBuffer()
    {
       eyeMetersIsUsed = true;
-      return eyeDepthMetersBuffer;
+      return eyeDepthMetersFloatBuffer;
+   }
+
+   public ByteBuffer getEyeDepthMetersByteBuffer()
+   {
+      eyeMetersIsUsed = true;
+      return eyeDepthMetersByteBuffer;
    }
 
    public ByteBuffer getColorRGBA8Buffer()
