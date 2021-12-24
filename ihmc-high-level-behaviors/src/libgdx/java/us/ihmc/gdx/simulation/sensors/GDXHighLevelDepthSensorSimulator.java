@@ -330,7 +330,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       if (ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected() && !depthExecutor.isExecuting())
       {
          PerspectiveCamera camera = depthSensorSimulator.getCamera();
-         FloatBuffer depthFloatBuffer = depthSensorSimulator.getEyeDepthMetersBuffer();
+         FloatBuffer depthFloatBuffer = depthSensorSimulator.getEyeDepthMetersFloatBuffer();
          depthFloatBuffer.rewind();
          ros1DepthChannelBuffer.clear();
          int size = 2 * imageWidth * imageHeight;

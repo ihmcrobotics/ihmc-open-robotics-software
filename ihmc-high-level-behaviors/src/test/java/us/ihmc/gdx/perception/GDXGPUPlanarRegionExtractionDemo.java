@@ -84,7 +84,7 @@ public class GDXGPUPlanarRegionExtractionDemo
             baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
 
             gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
-            gpuPlanarRegionExtraction.create(imageWidth, imageHeight);
+            gpuPlanarRegionExtraction.create(imageWidth, imageHeight, l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer());
             baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getBlurredDepthPanel());
          }
 
@@ -92,7 +92,7 @@ public class GDXGPUPlanarRegionExtractionDemo
          public void render()
          {
             l515.render(baseUI.get3DSceneManager());
-            gpuPlanarRegionExtraction.blurDepthAndRender(l515.getLowLevelSimulator().getEyeDepthMetersBuffer());
+            gpuPlanarRegionExtraction.blurDepthAndRender(l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer());
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
