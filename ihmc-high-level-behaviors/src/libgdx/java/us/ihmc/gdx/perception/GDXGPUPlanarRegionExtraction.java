@@ -14,9 +14,14 @@ import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
+import org.jboss.netty.buffer.ChannelBuffer;
+import sensor_msgs.Image;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
+import us.ihmc.perception.ImageEncodingTools;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.perception.ROSOpenCVTools;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -43,9 +48,11 @@ public class GDXGPUPlanarRegionExtraction
    private long parametersBufferSizeInBytes;
    private FloatPointer parametersNativeCPUPointer;
    private Mat inputDepthImageMat;
-//   private ByteBuffer depthImageBytePointer = new ByteBuffer();
-//   private BytePointer depthImageBytePointer = new BytePointer();
-
+   private Mat blurredDepthImageMat;
+   private Mat blurredDepthImageMatForDisplay;
+   private Mat blurredDepthImageMatForDisplayRGBA8888;
+   private Mat blurredDepthImageMatForDisplayConvertedRGBA8888;
+   private BytePointer blurredDepthForDisplayPixmapBytedecoPointer;
    private final ImGuiVideoPanel blurredDepthPanel;
    private Pixmap blurredDepthPanelPixmap;
    private Texture blurredDepthPanelTexture;
@@ -53,13 +60,15 @@ public class GDXGPUPlanarRegionExtraction
    private int imageHeight;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
+   private BytePointer eyeDepthMetersBytedecoPointer;
+   private Size gaussianKernelSize;
 
    public GDXGPUPlanarRegionExtraction()
    {
       blurredDepthPanel = new ImGuiVideoPanel("Blurred Depth", false);
    }
 
-   public void create(int imageWidth, int imageHeight)
+   public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats)
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
@@ -70,21 +79,76 @@ public class GDXGPUPlanarRegionExtraction
       parametersNativeCPUPointer = new FloatPointer(numberOfFloatParameters);
 
       inputDepthImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+      blurredDepthImageMat = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+      blurredDepthImageMatForDisplay = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
+//      ByteBuffer displayPixmap = ByteBuffer.allocateDirect(inputHeight * imageWidth * 4);
+      gaussianKernelSize = new Size();
 
       blurredDepthPanelPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
+      blurredDepthForDisplayPixmapBytedecoPointer = new BytePointer(blurredDepthPanelPixmap.getPixels());
+      blurredDepthImageMatForDisplayRGBA8888 = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4);
+      blurredDepthImageMatForDisplayConvertedRGBA8888 = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4);
+//      blurredDepthPanelPixmap.getPixels()
       blurredDepthPanelTexture = new Texture(new PixmapTextureData(blurredDepthPanelPixmap, null, false, false));
 
       blurredDepthPanel.setTexture(blurredDepthPanelTexture);
+
+      eyeDepthMetersBytedecoPointer = new BytePointer(sourceDepthByteBufferOfFloats);
+      inputDepthImageMat.data(eyeDepthMetersBytedecoPointer);
    }
 
-   public void blurDepthAndRender(FloatBuffer depthFloatBuffer)
+   public void processROS1DepthImage(Image image)
    {
-      depthFloatBuffer.rewind();
+      // See us.ihmc.gdx.ui.graphics.live.GDXROS1VideoVisualizer.decodeUsingOpenCV
+      if (inputDepthImageMat == null)
+      {
+         String encoding = image.getEncoding();
+         int cvType = ImageEncodingTools.getCvType(encoding);
+         inputDepthImageMat = new Mat(image.getHeight(), image.getWidth(), cvType);
+      }
+
+      ROSOpenCVTools.backMatWithNettyBuffer(inputDepthImageMat, image.getData());
+   }
+
+   public void blurDepthAndRender(ByteBuffer depthByteBufferOfFloats)
+   {
+//      depthByteBufferOfFloats.rewind(); // TODO: Necessary?
+//      eyeDepthMetersBytedecoPointer.position(depthByteBufferOfFloats.position()); // TODO: Necessary?
+//      inputDepthImageMat.data(new BytePointer(depthByteBufferOfFloats));
+
+      int size = gaussianSize.get() * 2 + 1;
+      gaussianKernelSize.width(size);
+      gaussianKernelSize.height(size);
+//      inputDepthImageMat.copyTo(blurredDepthImageMat);
+      opencv_imgproc.GaussianBlur(inputDepthImageMat, blurredDepthImageMat, gaussianKernelSize, gaussianSigma.get());
+
+//      blurredDepthImageMat.copyTo(blurredDepthImageMatForDisplay);
+      double min = 0.0;
+      double max = 65535.0;
+//      blurredDepthImageMatForDisplay.copyTo(blurredDepthImageMatForDisplay);
+      opencv_core.normalize(blurredDepthImageMat, blurredDepthImageMat, min, max, opencv_core.NORM_MINMAX, -1, opencv_core.noArray());
+      blurredDepthImageMatForDisplay.copyTo(blurredDepthImageMatForDisplayRGBA8888);
+//      opencv_imgproc.cvtColor(blurredDepthImageMatForDisplay, blurredDepthImageMatForDisplayRGBA8888, opencv_imgproc.COLOR_GRAY2RGBA);
+      double alpha = 255.0 / max;
+      double beta = 0.0;
+//      blurredDepthImageMatForDisplayRGBA8888.copyTo(blurredDepthImageMatForDisplayConvertedRGBA8888);
+//      blurredDepthImageMat.convertTo(blurredDepthImageMatForDisplayConvertedRGBA8888, opencv_core.CV_8UC4, alpha, beta);
+
+//      depthByteBufferOfFloats.rewind();
+//      inputDepthImageMat.data(eyeDepthMetersBytedecoPointer);
+      eyeDepthMetersBytedecoPointer.position(0);
       for (int y = 0; y < imageHeight; y++)
       {
          for (int x = 0; x < imageWidth; x++)
          {
-            float eyeDepth = depthFloatBuffer.get();
+//            float eyeDepth = depthByteBufferOfFloats.getFloat();
+//            float eyeDepth = blurredDepthImageMat.ptr(y, x).getFloat();
+            float eyeDepth = eyeDepthMetersBytedecoPointer.getFloat();
+            eyeDepthMetersBytedecoPointer.position(eyeDepthMetersBytedecoPointer.position() + 4);
+//            BytePointer ptr = inputDepthImageMat.ptr(y, x);
+//            float eyeDepth3 = ptr.getFloat();
+//            System.out.println(eyeDepth + eyeDepth2 + eyeDepth3);
+//            float eyeDepth = inputDepthImageMat.ptr(y, x).getFloat();
             if (highestValueSeen < 0 || eyeDepth > highestValueSeen)
                highestValueSeen = eyeDepth;
             if (lowestValueSeen < 0 || eyeDepth < lowestValueSeen)
@@ -98,6 +162,9 @@ public class GDXGPUPlanarRegionExtraction
          }
       }
 
+//      blurredDepthPanelPixmap.getPixels().rewind();
+//      blurredDepthForDisplayPixmapBytedecoPointer.position(blurredDepthPanelPixmap.getPixels().position());
+//      blurredDepthPanelPixmap.setPixels(blurredDepthImageMatForDisplayConvertedRGBA8888.createBuffer()); // FIXME maintain buffer
       blurredDepthPanelTexture.draw(blurredDepthPanelPixmap, 0, 0);
    }
 
