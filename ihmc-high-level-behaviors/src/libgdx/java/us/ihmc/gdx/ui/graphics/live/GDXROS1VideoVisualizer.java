@@ -138,14 +138,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
          resizedImageMat = new Mat(image.getHeight(), image.getWidth(), opencv_core.CV_8UC4);
       }
 
-      ChannelBuffer nettyImageData = image.getData();
-      ByteBuffer dataByteBuffer = nettyImageData.toByteBuffer();
-      int arrayOffset = nettyImageData.arrayOffset();
-      dataByteBuffer.position(arrayOffset);
-      ByteBuffer offsetByteBuffer = dataByteBuffer.slice();
-
-      BytePointer imageDataPointer = new BytePointer(offsetByteBuffer);
-      inputImageMat.data(imageDataPointer);
+      ROSOpenCVTools.backMatWithNettyBuffer(inputImageMat, image.getData());
 
       if (ImageEncodingTools.isMono(image.getEncoding()))
       {
@@ -158,11 +151,14 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
       opencv_imgproc.cvtColor(inputImageMat, decodedImageMat, conversionCode);
 
       int sourceDepth = ImageEncodingTools.bitDepth(image.getEncoding());
-      double beta = 0.0;
       if (sourceDepth == 16)
-         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4, 255. / 65535., beta);
+      {
+         double alpha = 255.0 / 65535.0;
+         double beta = 0.0;
+         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4, alpha, beta);
+      }
       else
-         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4);
+         decodedImageMat.convertTo(resizedImageMat, opencv_core.CV_8UC4); // TODO: Necessary?
 
       pixmap.setPixels((ByteBuffer) resizedImageMat.createBuffer());
    }
