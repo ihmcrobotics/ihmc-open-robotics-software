@@ -13,7 +13,7 @@ public class GDXBytedecoImage
    private BytePointer bytedecoByteBufferPointer;
    private Mat bytedecoOpenCVMat;
 
-   public GDXBytedecoImage(int width, int height, int cvMatType)
+   public GDXBytedecoImage(int imageWidth, int imageHeight, int cvMatType)
    {
       int bytesPerPixel = 0;
       if (cvMatType == opencv_core.CV_16UC1)
@@ -23,23 +23,23 @@ public class GDXBytedecoImage
       else if (cvMatType == opencv_core.CV_8UC4)
          bytesPerPixel = 4;
 
-      backingDirectByteBuffer = ByteBuffer.allocateDirect(width * height * bytesPerPixel);
+      backingDirectByteBuffer = ByteBuffer.allocateDirect(imageWidth * imageHeight * bytesPerPixel);
       backingDirectByteBuffer.order(ByteOrder.nativeOrder());
 
-      setup(width, height, cvMatType);
+      setup(imageWidth, imageHeight, cvMatType);
    }
 
-   public GDXBytedecoImage(int width, int height, int cvMatType, ByteBuffer backingDirectByteBuffer)
+   public GDXBytedecoImage(int imageWidth, int imageHeight, int cvMatType, ByteBuffer backingDirectByteBuffer)
    {
       this.backingDirectByteBuffer = backingDirectByteBuffer;
 
-      setup(width, height, cvMatType);
+      setup(imageWidth, imageHeight, cvMatType);
    }
 
-   private void setup(int width, int height, int cvMatType)
+   private void setup(int imageWidth, int imageHeight, int cvMatType)
    {
       bytedecoByteBufferPointer = new BytePointer(backingDirectByteBuffer);
-      bytedecoOpenCVMat = new Mat(height, width, cvMatType, bytedecoByteBufferPointer);
+      bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
    }
 
    public void rewind()
