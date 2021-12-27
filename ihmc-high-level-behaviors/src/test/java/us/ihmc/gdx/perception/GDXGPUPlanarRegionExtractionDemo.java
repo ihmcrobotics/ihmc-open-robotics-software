@@ -85,8 +85,7 @@ public class GDXGPUPlanarRegionExtractionDemo
 
             gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
             gpuPlanarRegionExtraction.create(imageWidth, imageHeight, l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer());
-            baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getBlurredDepthPanel());
-            baseUI.getImGuiPanelManager().addPanel("GPU Planar Region Extraction", gpuPlanarRegionExtraction::renderImGuiWidgets);
+            baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
          }
 
          @Override
