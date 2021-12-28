@@ -38,6 +38,7 @@ public class GDXGPUPlanarRegionExtraction
    private final OpenCLManager openCLManager = new OpenCLManager();
    private int numberOfFloatParameters = 16;
    private _cl_mem parametersBufferObject;
+   private _cl_mem clInputDepthImageObject;
    private long parametersBufferSizeInBytes;
    private FloatPointer parametersNativeCPUPointer;
    private GDXBytedecoImage inputDepthImage;
@@ -47,8 +48,6 @@ public class GDXGPUPlanarRegionExtraction
    private GDXCVImagePanel nextStepPanel;
    private int imageWidth;
    private int imageHeight;
-   private float lowestValueSeen = -1.0f;
-   private float highestValueSeen = -1.0f;
    private Size gaussianKernelSize;
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats)
@@ -62,6 +61,8 @@ public class GDXGPUPlanarRegionExtraction
       parametersBufferSizeInBytes = (long) numberOfFloatParameters * Loader.sizeof(FloatPointer.class);
       parametersBufferObject = openCLManager.createBufferObject(parametersBufferSizeInBytes);
       parametersNativeCPUPointer = new FloatPointer(numberOfFloatParameters);
+
+      clInputDepthImageObject = openCLManager.createBufferObject(imageWidth * imageHeight * 4);
 
       inputDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1, sourceDepthByteBufferOfFloats);
       blurredDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
@@ -103,6 +104,10 @@ public class GDXGPUPlanarRegionExtraction
                                   borderType);
 
       blurredDepthPanel.draw32FImage(blurredDepthImage.getBytedecoOpenCVMat());
+
+//      openCLManager.
+
+
       nextStepPanel.draw();
    }
 
