@@ -1,6 +1,5 @@
 package us.ihmc.gdx.perception;
 
-import com.badlogic.gdx.graphics.Color;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
@@ -15,6 +14,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 import sensor_msgs.Image;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLManager;
 
 import java.nio.ByteBuffer;
@@ -45,11 +45,10 @@ public class GDXGPUPlanarRegionExtraction
    private GDXBytedecoImage blurredDepthImage;
    private GDXBytedecoImage blurredNormalizedDepthImage;
    private GDXBytedecoImage blurredNormalizedScaledDepthImage;
-   private GDXBytedecoImage blurredNormalizedConvertedDepthImage;
+   private GDXBytedecoImage blurredNormalizedScaledFlippedDepthImage;
    private ImGuiPanel imguiPanel;
-   private GDXCVImagePanel blurredImagePanel;
-   private GDXCVImagePanel normalizedImagePanel;
-   private GDXCVImagePanel convertedImagePanel;
+   private GDXCVImagePanel blurredDepthPanel;
+   private GDXCVImagePanel nextStepPanel;
    private int imageWidth;
    private int imageHeight;
    private float lowestValueSeen = -1.0f;
@@ -72,16 +71,14 @@ public class GDXGPUPlanarRegionExtraction
       blurredDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       blurredNormalizedDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       blurredNormalizedScaledDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
-      blurredNormalizedConvertedDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
+      blurredNormalizedScaledFlippedDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
       gaussianKernelSize = new Size();
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
-      blurredImagePanel = new GDXCVImagePanel("Blurred Depth", imageWidth, imageHeight);
-      normalizedImagePanel = new GDXCVImagePanel("Normalized Depth", imageWidth, imageHeight);
-      convertedImagePanel = new GDXCVImagePanel("Converted Depth", imageWidth, imageHeight);
-      imguiPanel.addChild(blurredImagePanel.getVideoPanel());
-      imguiPanel.addChild(normalizedImagePanel.getVideoPanel());
-      imguiPanel.addChild(convertedImagePanel.getVideoPanel());
+      blurredDepthPanel = new GDXCVImagePanel("Blurred Depth", imageWidth, imageHeight);
+      nextStepPanel = new GDXCVImagePanel("Next Step", imageWidth, imageHeight);
+      imguiPanel.addChild(blurredDepthPanel.getVideoPanel());
+      imguiPanel.addChild(nextStepPanel.getVideoPanel());
    }
 
    public void processROS1DepthImage(Image image)
@@ -112,83 +109,19 @@ public class GDXGPUPlanarRegionExtraction
                                   sigmaY,
                                   borderType);
 
-      double min = 0.0;
-      double max = 1.0;
-      int normType = opencv_core.NORM_MINMAX;
-      int depthType = -1; // output array has the same type as src
-      Mat mask = opencv_core.noArray(); // no operations
-      opencv_core.normalize(blurredDepthImage.getBytedecoOpenCVMat(),
-                            blurredNormalizedDepthImage.getBytedecoOpenCVMat(),
-                            min,
-                            max,
-                            normType,
-                            depthType,
-                            mask);
+      BytedecoOpenCVTools.clamp(blurredDepthImage.getBytedecoOpenCVMat(), blurredNormalizedDepthImage.getBytedecoOpenCVMat(), 0.0, 1.0);
 
-      min = 0.0;
-      max = 255.0;
-      depthType = opencv_core.CV_8U; // converting 32 bit to 8 bit
-      opencv_core.normalize(blurredDepthImage.getBytedecoOpenCVMat(),
-                            blurredNormalizedScaledDepthImage.getBytedecoOpenCVMat(),
-                            min,
-                            max,
-                            normType,
-                            depthType,
-                            mask);
+      BytedecoOpenCVTools.clamp32BitFloatTo8BitUnsignedChar(blurredDepthImage.getBytedecoOpenCVMat(),
+                                                            blurredNormalizedScaledDepthImage.getBytedecoOpenCVMat(),
+                                                            0.0,
+                                                            255.0);
+      int flipCode = 0; // 0 flips X, 1 flips Y, -1 flips both
+      opencv_core.flip(blurredNormalizedScaledDepthImage.getBytedecoOpenCVMat(), blurredNormalizedScaledFlippedDepthImage.getBytedecoOpenCVMat(), flipCode);
+      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(blurredNormalizedScaledFlippedDepthImage.getBytedecoOpenCVMat(),
+                                                    blurredDepthPanel.getBytedecoImage().getBytedecoOpenCVMat());
 
-      int destinationChannels = 0; // automatic mode
-      opencv_imgproc.cvtColor(blurredNormalizedScaledDepthImage.getBytedecoOpenCVMat(),
-                              blurredNormalizedConvertedDepthImage.getBytedecoOpenCVMat(),
-                              opencv_imgproc.COLOR_GRAY2RGBA,
-                              destinationChannels);
-//      double scale = 255.0;
-//      double delta = 0.0; // no delta added
-//      int resultType = -1; // the output matrix will have the same type as the input
-//      blurredNormalizedConvertedDepthImage.getBytedecoOpenCVMat().convertTo(blurredNormalizedConvertedDepthImage.getBytedecoOpenCVMat(),
-//                                                                            resultType,
-//                                                                            scale,
-//                                                                            delta);
-
-      blurredDepthImage.rewind();
-      blurredNormalizedDepthImage.rewind();
-      blurredNormalizedConvertedDepthImage.rewind();
-      blurredNormalizedScaledDepthImage.rewind();
-      for (int y = 0; y < imageHeight; y++)
-      {
-         for (int x = 0; x < imageWidth; x++)
-         {
-            float eyeDepth = blurredDepthImage.getBackingDirectByteBuffer().getFloat();
-
-            if (highestValueSeen < 0 || eyeDepth > highestValueSeen)
-               highestValueSeen = eyeDepth;
-            if (lowestValueSeen < 0 || eyeDepth < lowestValueSeen)
-               lowestValueSeen = eyeDepth;
-
-            float colorRange = highestValueSeen - lowestValueSeen;
-            float grayscale = (eyeDepth - lowestValueSeen) / colorRange;
-            int flippedY = imageHeight - y;
-
-            blurredImagePanel.getPixmap().drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
-
-            float normalizedDepth = blurredNormalizedDepthImage.getBackingDirectByteBuffer().getFloat();
-            normalizedImagePanel.getPixmap().drawPixel(x, flippedY, Color.rgba8888(normalizedDepth, normalizedDepth, normalizedDepth, 1.0f));
-
-            int r = Byte.toUnsignedInt(blurredNormalizedConvertedDepthImage.getBackingDirectByteBuffer().get());
-            int g = Byte.toUnsignedInt(blurredNormalizedConvertedDepthImage.getBackingDirectByteBuffer().get());
-            int b = Byte.toUnsignedInt(blurredNormalizedConvertedDepthImage.getBackingDirectByteBuffer().get());
-            int a = Byte.toUnsignedInt(blurredNormalizedConvertedDepthImage.getBackingDirectByteBuffer().get());
-            convertedImagePanel.getPixmap().drawPixel(x, flippedY, r << 24 | g << 16 | b << 8 | a);
-
-//            int gray2 = Byte.toUnsignedInt(blurredNormalizedScaledDepthImage.getBackingDirectByteBuffer().get());
-//            convertedImagePanel.getPixmap().drawPixel(x, flippedY, gray2 << 24 | gray2 << 16 | gray2 << 8 | 255);
-         }
-      }
-
-//      blurredDepthPanelPixmap.getPixels().rewind();
-//      blurredDepthPanelPixmap.setPixels(blurredDepthImageMatForDisplayConvertedRGBA8888.createBuffer()); // FIXME maintain buffer
-      blurredImagePanel.draw();
-      normalizedImagePanel.draw();
-      convertedImagePanel.draw();
+      blurredDepthPanel.draw();
+      nextStepPanel.draw();
    }
 
    private void generateRegionsFromDepth(FloatBuffer depthFloatBuffer)
