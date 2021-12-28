@@ -4,7 +4,9 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
+import us.ihmc.perception.BytedecoOpenCVTools;
 
 public class GDXCVImagePanel
 {
@@ -13,14 +15,25 @@ public class GDXCVImagePanel
    private final Pixmap pixmap;
    private final Texture panelTexture;
 
+   private final GDXBytedecoImage normalizedScaledImage;
+
    public GDXCVImagePanel(String name, int imageWidth, int imageHeight)
    {
-      videoPanel = new ImGuiVideoPanel(name, false);
+      videoPanel = new ImGuiVideoPanel(name, true);
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       pixmap.getPixels().rewind();
       bytedecoImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       videoPanel.setTexture(panelTexture);
+
+      normalizedScaledImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+   }
+
+   public void draw32FImage(Mat float32Image)
+   {
+      BytedecoOpenCVTools.clamp32BitFloatTo8BitUnsignedChar(float32Image, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
+      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
+      draw();
    }
 
    /**

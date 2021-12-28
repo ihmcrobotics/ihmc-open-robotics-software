@@ -14,7 +14,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
 import sensor_msgs.Image;
 import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.perception.BytedecoOpenCVTools;
 import us.ihmc.perception.OpenCLManager;
 
 import java.nio.ByteBuffer;
@@ -43,9 +42,6 @@ public class GDXGPUPlanarRegionExtraction
    private FloatPointer parametersNativeCPUPointer;
    private GDXBytedecoImage inputDepthImage;
    private GDXBytedecoImage blurredDepthImage;
-   private GDXBytedecoImage blurredNormalizedDepthImage;
-   private GDXBytedecoImage blurredNormalizedScaledDepthImage;
-   private GDXBytedecoImage blurredNormalizedScaledFlippedDepthImage;
    private ImGuiPanel imguiPanel;
    private GDXCVImagePanel blurredDepthPanel;
    private GDXCVImagePanel nextStepPanel;
@@ -69,9 +65,6 @@ public class GDXGPUPlanarRegionExtraction
 
       inputDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1, sourceDepthByteBufferOfFloats);
       blurredDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
-      blurredNormalizedDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
-      blurredNormalizedScaledDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
-      blurredNormalizedScaledFlippedDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
       gaussianKernelSize = new Size();
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
@@ -109,18 +102,7 @@ public class GDXGPUPlanarRegionExtraction
                                   sigmaY,
                                   borderType);
 
-      BytedecoOpenCVTools.clamp(blurredDepthImage.getBytedecoOpenCVMat(), blurredNormalizedDepthImage.getBytedecoOpenCVMat(), 0.0, 1.0);
-
-      BytedecoOpenCVTools.clamp32BitFloatTo8BitUnsignedChar(blurredDepthImage.getBytedecoOpenCVMat(),
-                                                            blurredNormalizedScaledDepthImage.getBytedecoOpenCVMat(),
-                                                            0.0,
-                                                            255.0);
-      int flipCode = 0; // 0 flips X, 1 flips Y, -1 flips both
-      opencv_core.flip(blurredNormalizedScaledDepthImage.getBytedecoOpenCVMat(), blurredNormalizedScaledFlippedDepthImage.getBytedecoOpenCVMat(), flipCode);
-      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(blurredNormalizedScaledFlippedDepthImage.getBytedecoOpenCVMat(),
-                                                    blurredDepthPanel.getBytedecoImage().getBytedecoOpenCVMat());
-
-      blurredDepthPanel.draw();
+      blurredDepthPanel.draw32FImage(blurredDepthImage.getBytedecoOpenCVMat());
       nextStepPanel.draw();
    }
 

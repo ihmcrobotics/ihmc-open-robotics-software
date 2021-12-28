@@ -34,4 +34,10 @@ public class BytedecoOpenCVTools
       int resultType = -1; // the output matrix will have the same type as the input
       image.convertTo(image, resultType, scaleFactor, delta);
    }
+
+   public static void flipY(Mat source, Mat destination)
+   {
+      int flipCode = 0; // 0 flips X, 1 flips Y, -1 flips both
+      opencv_core.flip(source, destination, flipCode);
+   }
 }
