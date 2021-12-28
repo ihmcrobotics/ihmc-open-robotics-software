@@ -20,8 +20,12 @@ public class GDXBytedecoImage
          bytesPerPixel = 2;
       else if (cvMatType == opencv_core.CV_32FC1)
          bytesPerPixel = 4;
+      else if (cvMatType == opencv_core.CV_8UC1)
+         bytesPerPixel = 1;
       else if (cvMatType == opencv_core.CV_8UC4)
          bytesPerPixel = 4;
+      else
+         throw new RuntimeException("Implement bytesPerPixel for this type!");
 
       backingDirectByteBuffer = ByteBuffer.allocateDirect(imageWidth * imageHeight * bytesPerPixel);
       backingDirectByteBuffer.order(ByteOrder.nativeOrder());

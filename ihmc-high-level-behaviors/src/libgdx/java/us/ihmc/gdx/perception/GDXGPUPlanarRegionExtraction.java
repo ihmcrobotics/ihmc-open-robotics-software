@@ -44,9 +44,12 @@ public class GDXGPUPlanarRegionExtraction
    private GDXBytedecoImage inputDepthImage;
    private GDXBytedecoImage blurredDepthImage;
    private GDXBytedecoImage blurredNormalizedDepthImage;
+   private GDXBytedecoImage blurredNormalizedScaledDepthImage;
+   private GDXBytedecoImage blurredNormalizedConvertedDepthImage;
    private ImGuiPanel imguiPanel;
    private GDXCVImagePanel blurredImagePanel;
    private GDXCVImagePanel normalizedImagePanel;
+   private GDXCVImagePanel convertedImagePanel;
    private int imageWidth;
    private int imageHeight;
    private float lowestValueSeen = -1.0f;
@@ -57,6 +60,8 @@ public class GDXGPUPlanarRegionExtraction
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
+      inputWidth.set(imageWidth);
+      inputHeight.set(imageHeight);
       openCLManager.create();
 
       parametersBufferSizeInBytes = (long) numberOfFloatParameters * Loader.sizeof(FloatPointer.class);
@@ -66,13 +71,17 @@ public class GDXGPUPlanarRegionExtraction
       inputDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1, sourceDepthByteBufferOfFloats);
       blurredDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       blurredNormalizedDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
+      blurredNormalizedScaledDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+      blurredNormalizedConvertedDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
       gaussianKernelSize = new Size();
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
       blurredImagePanel = new GDXCVImagePanel("Blurred Depth", imageWidth, imageHeight);
       normalizedImagePanel = new GDXCVImagePanel("Normalized Depth", imageWidth, imageHeight);
+      convertedImagePanel = new GDXCVImagePanel("Converted Depth", imageWidth, imageHeight);
       imguiPanel.addChild(blurredImagePanel.getVideoPanel());
       imguiPanel.addChild(normalizedImagePanel.getVideoPanel());
+      imguiPanel.addChild(convertedImagePanel.getVideoPanel());
    }
 
    public void processROS1DepthImage(Image image)
@@ -93,25 +102,57 @@ public class GDXGPUPlanarRegionExtraction
       int size = gaussianSize.get() * 2 + 1;
       gaussianKernelSize.width(size);
       gaussianKernelSize.height(size);
-      opencv_imgproc.GaussianBlur(inputDepthImage.getBytedecoOpenCVMat(), blurredDepthImage.getBytedecoOpenCVMat(), gaussianKernelSize, gaussianSigma.get());
+      double sigmaX = gaussianSigma.get();
+      double sigmaY = sigmaX;
+      int borderType = opencv_core.BORDER_DEFAULT;
+      opencv_imgproc.GaussianBlur(inputDepthImage.getBytedecoOpenCVMat(),
+                                  blurredDepthImage.getBytedecoOpenCVMat(),
+                                  gaussianKernelSize,
+                                  sigmaX,
+                                  sigmaY,
+                                  borderType);
 
       double min = 0.0;
       double max = 1.0;
-      int depthType = -1;
+      int normType = opencv_core.NORM_MINMAX;
+      int depthType = -1; // output array has the same type as src
+      Mat mask = opencv_core.noArray(); // no operations
       opencv_core.normalize(blurredDepthImage.getBytedecoOpenCVMat(),
                             blurredNormalizedDepthImage.getBytedecoOpenCVMat(),
                             min,
                             max,
-                            opencv_core.NORM_MINMAX,
+                            normType,
                             depthType,
-                            opencv_core.noArray());
-      //      opencv_imgproc.cvtColor(blurredDepthImageMatForDisplay, blurredDepthImageMatForDisplayRGBA8888, opencv_imgproc.COLOR_GRAY2RGBA);
-      double alpha = 255.0 / max;
-      double beta = 0.0;
-//      blurredDepthImageMat.convertTo(blurredDepthImageMatForDisplayConvertedRGBA8888, opencv_core.CV_8UC4, alpha, beta);
+                            mask);
+
+      min = 0.0;
+      max = 255.0;
+      depthType = opencv_core.CV_8U; // converting 32 bit to 8 bit
+      opencv_core.normalize(blurredDepthImage.getBytedecoOpenCVMat(),
+                            blurredNormalizedScaledDepthImage.getBytedecoOpenCVMat(),
+                            min,
+                            max,
+                            normType,
+                            depthType,
+                            mask);
+
+      int destinationChannels = 0; // automatic mode
+      opencv_imgproc.cvtColor(blurredNormalizedScaledDepthImage.getBytedecoOpenCVMat(),
+                              blurredNormalizedConvertedDepthImage.getBytedecoOpenCVMat(),
+                              opencv_imgproc.COLOR_GRAY2RGBA,
+                              destinationChannels);
+//      double scale = 255.0;
+//      double delta = 0.0; // no delta added
+//      int resultType = -1; // the output matrix will have the same type as the input
+//      blurredNormalizedConvertedDepthImage.getBytedecoOpenCVMat().convertTo(blurredNormalizedConvertedDepthImage.getBytedecoOpenCVMat(),
+//                                                                            resultType,
+//                                                                            scale,
+//                                                                            delta);
 
       blurredDepthImage.rewind();
       blurredNormalizedDepthImage.rewind();
+      blurredNormalizedConvertedDepthImage.rewind();
+      blurredNormalizedScaledDepthImage.rewind();
       for (int y = 0; y < imageHeight; y++)
       {
          for (int x = 0; x < imageWidth; x++)
@@ -127,10 +168,19 @@ public class GDXGPUPlanarRegionExtraction
             float grayscale = (eyeDepth - lowestValueSeen) / colorRange;
             int flippedY = imageHeight - y;
 
-            blurredImagePanel.getPixmapImage().getPixmap().drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
+            blurredImagePanel.getPixmap().drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
 
             float normalizedDepth = blurredNormalizedDepthImage.getBackingDirectByteBuffer().getFloat();
-            normalizedImagePanel.getPixmapImage().getPixmap().drawPixel(x, flippedY, Color.rgba8888(normalizedDepth, normalizedDepth, normalizedDepth, 1.0f));
+            normalizedImagePanel.getPixmap().drawPixel(x, flippedY, Color.rgba8888(normalizedDepth, normalizedDepth, normalizedDepth, 1.0f));
+
+            int r = Byte.toUnsignedInt(blurredNormalizedConvertedDepthImage.getBackingDirectByteBuffer().get());
+            int g = Byte.toUnsignedInt(blurredNormalizedConvertedDepthImage.getBackingDirectByteBuffer().get());
+            int b = Byte.toUnsignedInt(blurredNormalizedConvertedDepthImage.getBackingDirectByteBuffer().get());
+            int a = Byte.toUnsignedInt(blurredNormalizedConvertedDepthImage.getBackingDirectByteBuffer().get());
+            convertedImagePanel.getPixmap().drawPixel(x, flippedY, r << 24 | g << 16 | b << 8 | a);
+
+//            int gray2 = Byte.toUnsignedInt(blurredNormalizedScaledDepthImage.getBackingDirectByteBuffer().get());
+//            convertedImagePanel.getPixmap().drawPixel(x, flippedY, gray2 << 24 | gray2 << 16 | gray2 << 8 | 255);
          }
       }
 
@@ -138,6 +188,7 @@ public class GDXGPUPlanarRegionExtraction
 //      blurredDepthPanelPixmap.setPixels(blurredDepthImageMatForDisplayConvertedRGBA8888.createBuffer()); // FIXME maintain buffer
       blurredImagePanel.draw();
       normalizedImagePanel.draw();
+      convertedImagePanel.draw();
    }
 
    private void generateRegionsFromDepth(FloatBuffer depthFloatBuffer)
