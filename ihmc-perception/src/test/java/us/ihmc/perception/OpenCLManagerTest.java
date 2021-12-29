@@ -15,7 +15,7 @@ public class OpenCLManagerTest
    {
       OpenCLManager openCLManager = new OpenCLManager();
       openCLManager.create();
-      _cl_kernel kernel = openCLManager.loadProgramAndCreateKernel("VectorAddition");
+      _cl_kernel kernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("VectorAddition");
       long numberOfFloats = 128;
       long sizeInBytes = numberOfFloats * Loader.sizeof(FloatPointer.class);
       FloatPointer hostMemoryPointer = new FloatPointer(numberOfFloats);
@@ -26,8 +26,9 @@ public class OpenCLManagerTest
       _cl_mem bufferObject = openCLManager.createBufferObject(sizeInBytes);
       openCLManager.enqueueWriteBuffer(bufferObject, sizeInBytes, hostMemoryPointer);
       openCLManager.setKernelArgument(kernel, 0, bufferObject);
-      openCLManager.execute(kernel, numberOfFloats);
+      openCLManager.execute1D(kernel, numberOfFloats);
       openCLManager.enqueueReadBuffer(bufferObject, sizeInBytes, hostMemoryPointer);
+      openCLManager.finish();
 
       /* Display result */
       for (int i = 0; i < numberOfFloats; i++)
