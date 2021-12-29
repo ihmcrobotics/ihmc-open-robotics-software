@@ -15,7 +15,7 @@ public class OpenCLManagerTest
    {
       OpenCLManager openCLManager = new OpenCLManager();
       openCLManager.create();
-      _cl_kernel kernel = openCLManager.loadProgramAndCreateKernel("vectorAddition");
+      _cl_kernel kernel = openCLManager.loadProgramAndCreateKernel("VectorAddition");
       long numberOfFloats = 128;
       long sizeInBytes = numberOfFloats * Loader.sizeof(FloatPointer.class);
       FloatPointer hostMemoryPointer = new FloatPointer(numberOfFloats);

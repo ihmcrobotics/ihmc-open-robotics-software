@@ -110,7 +110,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          ousterInGPUBuffer = openCLManager.createBufferObject(ousterInBytesLength);
          zed2InGPUBuffer = openCLManager.createBufferObject(zed2InBytesLength);
          fusedOutGPUBuffer = openCLManager.createBufferObject(fusedOutBytesLength);
-         projectZED2ToOusterPointsKernel = openCLManager.loadProgramAndCreateKernel("projectZED2ToOusterPoints");
+         projectZED2ToOusterPointsKernel = openCLManager.loadProgramAndCreateKernel("ProjectZED2ToOusterPoints");
          openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 0, ousterInGPUBuffer);
          openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 1, zed2InGPUBuffer);
          openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 2, fusedOutGPUBuffer);
