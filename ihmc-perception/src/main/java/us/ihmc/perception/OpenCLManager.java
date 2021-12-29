@@ -30,7 +30,7 @@ public class OpenCLManager
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
    private final ArrayList<_cl_mem> bufferObjects = new ArrayList<>();
    private final SizeTPointer globalWorkSize = new SizeTPointer(0, 0, 0);
-   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Rethink this
+//   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Rethink this
 
    public void create()
    {
@@ -46,7 +46,13 @@ public class OpenCLManager
       commandQueue = clCreateCommandQueueWithProperties(context, devices, properties, nativeReturnCode);
    }
 
-   public _cl_kernel loadProgramAndCreateKernel(String programName)
+   public _cl_kernel loadSingleFunctionProgramAndCreateKernel(String programName)
+   {
+      _cl_program program = loadProgram(programName);
+      return createKernel(program, programName);
+   }
+
+   public _cl_program loadProgram(String programName)
    {
       String sourceAsString = OpenCLTools.readFile(Paths.get("openCL", programName + ".cl"));
 
@@ -68,17 +74,15 @@ public class OpenCLManager
       byteBuffer.get(bytes, 0, logLength);
       System.out.println(new String(bytes, StandardCharsets.UTF_8));
 
-      /* Create OpenCL Kernel */
-      _cl_kernel kernel = clCreateKernel(program, programName, nativeReturnCode);
-      kernels.add(kernel);
-      return kernel;
+      return program;
    }
 
-   public void setupKernelArgument(_cl_kernel kernel, int argumentIndex, long sizeInBytes, Pointer hostMemoryPointer)
+   public _cl_kernel createKernel(_cl_program program, String kernelName)
    {
-      _cl_mem bufferObject = createBufferObject(sizeInBytes);
-      enqueueWriteBuffer(bufferObject, sizeInBytes, hostMemoryPointer);
-      setKernelArgument(kernel, argumentIndex, bufferObject);
+      /* Create OpenCL Kernel */
+      _cl_kernel kernel = clCreateKernel(program, kernelName, nativeReturnCode);
+      kernels.add(kernel);
+      return kernel;
    }
 
    public _cl_mem createBufferObject(long sizeInBytes)
@@ -86,6 +90,11 @@ public class OpenCLManager
       _cl_mem bufferObject = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeInBytes, null, nativeReturnCode);
       bufferObjects.add(bufferObject);
       return bufferObject;
+   }
+
+   public void enqueueWriteBuffer(_cl_mem bufferObject, Pointer hostMemoryPointer)
+   {
+      enqueueWriteBuffer(bufferObject, bufferObject.limit(), hostMemoryPointer);
    }
 
    public void enqueueWriteBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
@@ -101,12 +110,39 @@ public class OpenCLManager
       returnCode = clSetKernelArg(kernel, argumentIndex, Loader.sizeof(PointerPointer.class), new PointerPointer(1).put(bufferObject));
    }
 
-   public void execute(_cl_kernel kernel, long workSize)
+   public void execute1D(_cl_kernel kernel, long workSizeX)
    {
-      /* Execute OpenCL kernel */
-      globalWorkSize.put(workSize);
-//      localWorkSize.put(workSize);
-      returnCode = clEnqueueNDRangeKernel(commandQueue, kernel, 1, null, globalWorkSize, localWorkSize, 0, (PointerPointer) null, null);
+      execute(kernel, 1, workSizeX, 0, 0);
+   }
+
+   public void execute2D(_cl_kernel kernel, long workSizeX, long workSizeY)
+   {
+      execute(kernel, 2, workSizeX, workSizeY, 0);
+   }
+
+   /**
+    * See https://www.khronos.org/registry/OpenCL/sdk/2.2/docs/man/html/clEnqueueNDRangeKernel.html
+    */
+   public void execute(_cl_kernel kernel, int numberOfWorkDimensions, long workSizeX, long workSizeY, long workSizeZ)
+   {
+      /* Enqueue OpenCL kernel execution */
+      globalWorkSize.put(0, workSizeX);
+      globalWorkSize.put(1, workSizeY);
+      globalWorkSize.put(2, workSizeZ);
+      SizeTPointer globalWorkOffset = null; // starts at (0,0,0)
+      SizeTPointer localWorkSize = null; // auto mode?
+      int numberOfEventsInWaitList = 0; // no events
+      PointerPointer eventWaitList = null; // no events
+      PointerPointer event = null; // no events
+      returnCode = clEnqueueNDRangeKernel(commandQueue,
+                                          kernel,
+                                          numberOfWorkDimensions,
+                                          globalWorkOffset,
+                                          globalWorkSize,
+                                          localWorkSize,
+                                          numberOfEventsInWaitList,
+                                          eventWaitList,
+                                          event);
    }
 
    public void enqueueReadBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
@@ -114,6 +150,11 @@ public class OpenCLManager
       /* Transfer result from the memory buffer */
       bufferObject.position(0);
       returnCode = clEnqueueReadBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null);
+   }
+
+   public int finish()
+   {
+      return clFinish(commandQueue);
    }
 
    public void destroy()

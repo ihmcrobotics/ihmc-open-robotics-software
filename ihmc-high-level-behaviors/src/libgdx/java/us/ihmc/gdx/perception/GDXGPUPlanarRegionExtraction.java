@@ -6,8 +6,9 @@ import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.Loader;
+import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
+import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -33,14 +34,9 @@ public class GDXGPUPlanarRegionExtraction
    private final ImFloat depthCx = new ImFloat(0);
    private final ImFloat depthCy = new ImFloat(0);
    private final ImBoolean earlyGaussianBlur = new ImBoolean(true);
+   private final ImBoolean filterSelected = new ImBoolean(true);
    private final ImInt gaussianSize = new ImInt(6);
    private final ImDouble gaussianSigma = new ImDouble(20.0);
-   private final OpenCLManager openCLManager = new OpenCLManager();
-   private int numberOfFloatParameters = 16;
-   private _cl_mem parametersBufferObject;
-   private _cl_mem clInputDepthImageObject;
-   private long parametersBufferSizeInBytes;
-   private FloatPointer parametersNativeCPUPointer;
    private GDXBytedecoImage inputDepthImage;
    private GDXBytedecoImage blurredDepthImage;
    private ImGuiPanel imguiPanel;
@@ -49,6 +45,30 @@ public class GDXGPUPlanarRegionExtraction
    private int imageWidth;
    private int imageHeight;
    private Size gaussianKernelSize;
+   private final OpenCLManager openCLManager = new OpenCLManager();
+   private long numberOfFloatParameters = 16;
+   private _cl_mem parametersBufferObject;
+   private _cl_mem clInputDepthImageObject;
+   private _cl_mem clFilteredDepthImageObject;
+   private long parametersBufferSizeInBytes;
+   private FloatPointer parametersNativeCPUPointer;
+   private _cl_program planarRegionExtractionProgram;
+   private _cl_kernel filterKernel;
+   private _cl_kernel packKernel;
+   private _cl_kernel mergeKernel;
+   private int subHeight;
+   private int subWidth;
+   private int patchHeight;
+   private int patchWidth;
+   private int filterSubHeight;
+   private int filterSubWidth;
+   private _cl_mem nxBufferObject;
+   private _cl_mem nyBufferObject;
+   private _cl_mem nzBufferObject;
+   private _cl_mem gxBufferObject;
+   private _cl_mem gyBufferObject;
+   private _cl_mem gzBufferObject;
+   private _cl_mem graphBufferObject;
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats)
    {
@@ -56,13 +76,6 @@ public class GDXGPUPlanarRegionExtraction
       this.imageHeight = imageHeight;
       inputWidth.set(imageWidth);
       inputHeight.set(imageHeight);
-      openCLManager.create();
-
-      parametersBufferSizeInBytes = (long) numberOfFloatParameters * Loader.sizeof(FloatPointer.class);
-      parametersBufferObject = openCLManager.createBufferObject(parametersBufferSizeInBytes);
-      parametersNativeCPUPointer = new FloatPointer(numberOfFloatParameters);
-
-      clInputDepthImageObject = openCLManager.createBufferObject(imageWidth * imageHeight * 4);
 
       inputDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1, sourceDepthByteBufferOfFloats);
       blurredDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
@@ -73,6 +86,27 @@ public class GDXGPUPlanarRegionExtraction
       nextStepPanel = new GDXCVImagePanel("Next Step", imageWidth, imageHeight);
       imguiPanel.addChild(blurredDepthPanel.getVideoPanel());
       imguiPanel.addChild(nextStepPanel.getVideoPanel());
+
+      openCLManager.create();
+      planarRegionExtractionProgram = openCLManager.loadProgram("PlanarRegionExtraction");
+      filterKernel = openCLManager.createKernel(planarRegionExtractionProgram, "filterKernel");
+      packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
+      mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
+
+      parametersBufferObject = openCLManager.createBufferObject(numberOfFloatParameters * Float.BYTES);
+      parametersNativeCPUPointer = new FloatPointer(numberOfFloatParameters);
+
+      clInputDepthImageObject = openCLManager.createBufferObject((long) imageWidth * imageHeight * Float.BYTES);
+      clFilteredDepthImageObject = openCLManager.createBufferObject((long) imageWidth * imageHeight * Float.BYTES);
+      nxBufferObject = openCLManager.createBufferObject((long) subWidth * subHeight * Float.BYTES);
+      nyBufferObject = openCLManager.createBufferObject((long) subWidth * subHeight * Float.BYTES);
+      nzBufferObject = openCLManager.createBufferObject((long) subWidth * subHeight * Float.BYTES);
+      gxBufferObject = openCLManager.createBufferObject((long) subWidth * subHeight * Float.BYTES);
+      gyBufferObject = openCLManager.createBufferObject((long) subWidth * subHeight * Float.BYTES);
+      gzBufferObject = openCLManager.createBufferObject((long) subWidth * subHeight * Float.BYTES);
+      graphBufferObject = openCLManager.createBufferObject((long) subWidth * subHeight);
+
+
    }
 
    public void processROS1DepthImage(Image image)
@@ -105,7 +139,34 @@ public class GDXGPUPlanarRegionExtraction
 
       blurredDepthPanel.draw32FImage(blurredDepthImage.getBytedecoOpenCVMat());
 
-//      openCLManager.
+      uploadParametersToGPU();
+      openCLManager.enqueueWriteBuffer(clInputDepthImageObject, inputDepthImage.getBytedecoByteBufferPointer());
+
+      openCLManager.setKernelArgument(filterKernel, 0, clInputDepthImageObject);
+      openCLManager.setKernelArgument(filterKernel, 1, clFilteredDepthImageObject);
+      openCLManager.setKernelArgument(filterKernel, 2, nxBufferObject);
+      openCLManager.setKernelArgument(filterKernel, 3, parametersBufferObject);
+
+      _cl_mem packKernelInputObject = filterSelected.get() ? clFilteredDepthImageObject : clInputDepthImageObject;
+      openCLManager.setKernelArgument(packKernel, 0, packKernelInputObject);
+      openCLManager.setKernelArgument(packKernel, 1, nxBufferObject);
+      openCLManager.setKernelArgument(packKernel, 2, nyBufferObject);
+      openCLManager.setKernelArgument(packKernel, 3, nzBufferObject);
+      openCLManager.setKernelArgument(packKernel, 4, gxBufferObject);
+      openCLManager.setKernelArgument(packKernel, 5, gyBufferObject);
+      openCLManager.setKernelArgument(packKernel, 6, gzBufferObject);
+      openCLManager.setKernelArgument(packKernel, 7, parametersBufferObject);
+
+      openCLManager.setKernelArgument(mergeKernel, 0, nxBufferObject);
+      openCLManager.setKernelArgument(mergeKernel, 1, nyBufferObject);
+      openCLManager.setKernelArgument(mergeKernel, 2, nzBufferObject);
+      openCLManager.setKernelArgument(mergeKernel, 3, gxBufferObject);
+      openCLManager.setKernelArgument(mergeKernel, 4, gyBufferObject);
+      openCLManager.setKernelArgument(mergeKernel, 5, gzBufferObject);
+      openCLManager.setKernelArgument(mergeKernel, 6, graphBufferObject);
+      openCLManager.setKernelArgument(mergeKernel, 7, parametersBufferObject);
+
+      openCLManager.execute2D(filterKernel, subHeight, subWidth);
 
 
       nextStepPanel.draw();
@@ -145,12 +206,12 @@ public class GDXGPUPlanarRegionExtraction
 
    private void uploadParametersToGPU()
    {
-      int patchHeight = kernelSliderLevel.get();
-      int patchWidth = kernelSliderLevel.get();
-      int subHeight = inputHeight.get() / patchHeight;
-      int subWidth = inputWidth.get() / patchWidth;
-      int filterSubHeight = inputHeight.get() / filterKernelSize.get();
-      int filterSubWidth = inputWidth.get() / filterKernelSize.get();
+      patchHeight = kernelSliderLevel.get();
+      patchWidth = kernelSliderLevel.get();
+      subHeight = inputHeight.get() / patchHeight;
+      subWidth = inputWidth.get() / patchWidth;
+      filterSubHeight = inputHeight.get() / filterKernelSize.get();
+      filterSubWidth = inputWidth.get() / filterKernelSize.get();
 
       FloatPointer parameters = new FloatPointer(numberOfFloatParameters);
       parameters.put(0, filterDisparityThreshold.get());
@@ -170,7 +231,7 @@ public class GDXGPUPlanarRegionExtraction
       parameters.put(14, inputHeight.get());
       parameters.put(15, inputWidth.get());
 
-      openCLManager.enqueueWriteBuffer(parametersBufferObject, parametersBufferSizeInBytes, parameters);
+      openCLManager.enqueueWriteBuffer(parametersBufferObject, parameters);
    }
 
    public void renderImGuiWidgets()
