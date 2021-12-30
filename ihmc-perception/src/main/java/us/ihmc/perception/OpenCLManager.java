@@ -24,8 +24,7 @@ public class OpenCLManager
    private _cl_command_queue commandQueue = new _cl_command_queue(null);
    private final IntPointer numberOfDevices = new IntPointer(1);
    private final IntPointer numberOfPlatforms = new IntPointer(1);
-   private final IntPointer nativeReturnCode = new IntPointer(1);
-   private int returnCode = 0;
+   private final IntPointer returnCode = new IntPointer(1);
    private final ArrayList<_cl_program> programs = new ArrayList<>();
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
    private final ArrayList<_cl_mem> bufferObjects = new ArrayList<>();
@@ -35,15 +34,19 @@ public class OpenCLManager
    public void create()
    {
       /* Get platform/device information */
-      returnCode = clGetPlatformIDs(1, platforms, numberOfPlatforms);
-      returnCode = clGetDeviceIDs(platforms, CL_DEVICE_TYPE_GPU, 1, devices, numberOfDevices);
+      checkReturnCode(clGetPlatformIDs(1, platforms, numberOfPlatforms));
+      checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_GPU, 1, devices, numberOfDevices));
+
+      // TODO: Print info about the setup here. Looking for CL_DEVICE_IMAGE_SUPPORT
 
       /* Create OpenCL Context */
-      context = clCreateContext(null, 1, devices, null, null, nativeReturnCode);
+      context = clCreateContext(null, 1, devices, null, null, returnCode);
+      checkReturnCode();
 
       /* Create Command Queue */
       IntPointer properties = new IntPointer(new int[] {0});
-      commandQueue = clCreateCommandQueueWithProperties(context, devices, properties, nativeReturnCode);
+      commandQueue = clCreateCommandQueueWithProperties(context, devices, properties, returnCode);
+      checkReturnCode();
    }
 
    public _cl_kernel loadSingleFunctionProgramAndCreateKernel(String programName)
@@ -57,12 +60,17 @@ public class OpenCLManager
       String sourceAsString = OpenCLTools.readFile(Paths.get("openCL", programName + ".cl"));
 
       /* Create Kernel program from the read in source */
-      _cl_program program = clCreateProgramWithSource(context, 1, new PointerPointer(sourceAsString), new SizeTPointer(1).put(sourceAsString.length()), nativeReturnCode);
-      nativeReturnCode.get(returnCode);
+      int count = 1;
+      _cl_program program = clCreateProgramWithSource(context,
+                                                      count,
+                                                      new PointerPointer(sourceAsString),
+                                                      new SizeTPointer(1).put(sourceAsString.length()),
+                                                      returnCode);
+      checkReturnCode();
       programs.add(program);
 
       /* Build Kernel Program */
-      returnCode = clBuildProgram(program, 1, devices, null, null, null);
+      checkReturnCode(clBuildProgram(program, 1, devices, null, null, null));
       int preallocatedBytes = Conversions.megabytesToBytes(2);
       CharPointer charPointer = new CharPointer(preallocatedBytes);
       SizeTPointer length = new SizeTPointer(1);
@@ -80,16 +88,55 @@ public class OpenCLManager
    public _cl_kernel createKernel(_cl_program program, String kernelName)
    {
       /* Create OpenCL Kernel */
-      _cl_kernel kernel = clCreateKernel(program, kernelName, nativeReturnCode);
+      _cl_kernel kernel = clCreateKernel(program, kernelName, returnCode);
       kernels.add(kernel);
       return kernel;
    }
 
    public _cl_mem createBufferObject(long sizeInBytes)
    {
-      _cl_mem bufferObject = clCreateBuffer(context, CL_MEM_READ_WRITE, sizeInBytes, null, nativeReturnCode);
+      Pointer hostPointer = null;
+      return createBufferObject(sizeInBytes, hostPointer);
+   }
+
+   public _cl_mem createBufferObject(long sizeInBytes, Pointer hostPointer)
+   {
+      int flags = CL_MEM_READ_WRITE; // TODO: Provide more options
+      if (hostPointer != null)
+         flags |= CL_MEM_USE_HOST_PTR;
+      _cl_mem bufferObject = clCreateBuffer(context, flags, sizeInBytes, hostPointer, returnCode);
+      checkReturnCode();
       bufferObjects.add(bufferObject);
       return bufferObject;
+   }
+
+   public _cl_mem createImage(int flags, int width, int height, Pointer hostPointer)
+   {
+//      flags |= CL_MEM_COPY_HOST_PTR;
+      cl_image_format imageFormat = new cl_image_format(new IntPointer(CL_R, CL_UNSIGNED_INT16));
+      int rowPitch = 0;
+      cl_image_desc imageDescription = new cl_image_desc(new IntPointer(
+            CL_MEM_OBJECT_IMAGE2D,
+            width,
+            height,
+            0, 0,
+            rowPitch,
+            0, 0, 0, 0
+      ));
+//      imageDescription.position(0).put(new IntPointer(new int[] {CL_MEM_OBJECT_IMAGE2D}));
+//      imageDescription.position(1).put(new IntPointer(new int[] {width}));
+//      imageDescription.position(2).put(new IntPointer(new int[] {height}));
+//      imageDescription.position(3).put(new IntPointer(new int[] {0})); // depth
+//      imageDescription.position(4).put(new IntPointer(new int[] {0})); // arraySize
+//      imageDescription.position(5).put(new IntPointer(new int[] {rowPitch}));
+//      imageDescription.position(6).put(new IntPointer(new int[] {0})); // slicePitch
+//      imageDescription.position(7).put(new IntPointer(new int[] {0})); // number of mipmap levels
+//      imageDescription.position(8).put(new IntPointer(new int[] {0})); // number of samples
+//      imageDescription.position(9).put(new IntPointer(new int[] {0})); // mem_object
+      _cl_mem image = clCreateImage(context, flags, imageFormat, imageDescription, hostPointer, returnCode);
+      bufferObjects.add(image);
+      checkReturnCode();
+      return image;
    }
 
    public void enqueueWriteBuffer(_cl_mem bufferObject, Pointer hostMemoryPointer)
@@ -101,13 +148,14 @@ public class OpenCLManager
    {
       /* Transfer data to memory buffer */
       bufferObject.position(0);
-      returnCode = clEnqueueWriteBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null);
+      checkReturnCode(clEnqueueWriteBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null));
    }
 
    public void setKernelArgument(_cl_kernel kernel, int argumentIndex, _cl_mem bufferObject)
    {
       /* Set OpenCL kernel argument */
-      returnCode = clSetKernelArg(kernel, argumentIndex, Loader.sizeof(PointerPointer.class), new PointerPointer(1).put(bufferObject));
+      int argumentSize = Pointer.sizeof(_cl_mem.class);
+      checkReturnCode(clSetKernelArg(kernel, argumentIndex, argumentSize, bufferObject));
    }
 
    public void execute1D(_cl_kernel kernel, long workSizeX)
@@ -134,45 +182,69 @@ public class OpenCLManager
       int numberOfEventsInWaitList = 0; // no events
       PointerPointer eventWaitList = null; // no events
       PointerPointer event = null; // no events
-      returnCode = clEnqueueNDRangeKernel(commandQueue,
-                                          kernel,
-                                          numberOfWorkDimensions,
-                                          globalWorkOffset,
-                                          globalWorkSize,
-                                          localWorkSize,
-                                          numberOfEventsInWaitList,
-                                          eventWaitList,
-                                          event);
+      checkReturnCode(clEnqueueNDRangeKernel(commandQueue,
+                                             kernel,
+                                             numberOfWorkDimensions,
+                                             globalWorkOffset,
+                                             globalWorkSize,
+                                             localWorkSize,
+                                             numberOfEventsInWaitList,
+                                             eventWaitList,
+                                             event));
+   }
+
+   public void enqueueReadBuffer(_cl_mem bufferObject, Pointer hostMemoryPointer)
+   {
+      enqueueReadBuffer(bufferObject, bufferObject.limit(), hostMemoryPointer);
    }
 
    public void enqueueReadBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
    {
       /* Transfer result from the memory buffer */
       bufferObject.position(0);
-      returnCode = clEnqueueReadBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null);
+      checkReturnCode(clEnqueueReadBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null));
    }
 
    public int finish()
    {
-      return clFinish(commandQueue);
+      checkReturnCode(clFlush(commandQueue));
+      checkReturnCode(clFinish(commandQueue));
+      return returnCode.get();
+   }
+
+   private void checkReturnCode(int returnCode)
+   {
+      this.returnCode.put(returnCode);
+      if (returnCode != CL_SUCCESS) // yeah it's duplicated but reduces stack trace height
+      {
+         LogTools.error(1, "OpenCL error code: " + returnCode);
+      }
+   }
+
+   private void checkReturnCode()
+   {
+      if (returnCode.get() != CL_SUCCESS)
+      {
+         LogTools.error(1, "OpenCL error code: " + returnCode.get());
+      }
    }
 
    public void destroy()
    {
-      returnCode = clFlush(commandQueue);
-      returnCode = clFinish(commandQueue);
+      returnCode.put(clFlush(commandQueue));
+      returnCode.put(clFinish(commandQueue));
       for (_cl_program program : programs)
-         returnCode = clReleaseProgram(program);
+         returnCode.put(clReleaseProgram(program));
       for (_cl_kernel kernel : kernels)
-         returnCode = clReleaseKernel(kernel);
+         returnCode.put(clReleaseKernel(kernel));
       for (_cl_mem bufferObject : bufferObjects)
-         returnCode = clReleaseMemObject(bufferObject);
-      returnCode = clReleaseCommandQueue(commandQueue);
-      returnCode = clReleaseContext(context);
+         returnCode.put(clReleaseMemObject(bufferObject));
+      returnCode.put(clReleaseCommandQueue(commandQueue));
+      returnCode.put(clReleaseContext(context));
    }
 
-   public IntPointer getNativeReturnCode()
+   public int getReturnCode()
    {
-      return nativeReturnCode;
+      return returnCode.get();
    }
 }

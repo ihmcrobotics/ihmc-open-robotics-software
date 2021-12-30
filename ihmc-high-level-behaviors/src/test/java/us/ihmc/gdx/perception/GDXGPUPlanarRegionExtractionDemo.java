@@ -50,7 +50,9 @@ public class GDXGPUPlanarRegionExtractionDemo
             double fy = 500.0;
             double minRange = 0.105;
             double maxRange = 5.0;
-            CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
+            double cx = imageWidth / 2.0;
+            double cy = imageHeight / 2.0;
+            CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, cx, cy, imageWidth, imageHeight);
             l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
                                                         null,
                                                         null,
@@ -84,7 +86,7 @@ public class GDXGPUPlanarRegionExtractionDemo
             baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
 
             gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
-            gpuPlanarRegionExtraction.create(imageWidth, imageHeight, l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer());
+            gpuPlanarRegionExtraction.create(imageWidth, imageHeight, l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer(), fx, fy, cx, cy);
             baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
          }
 

@@ -29,9 +29,9 @@ public class GDXCVImagePanel
       normalizedScaledImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
    }
 
-   public void draw32FImage(Mat float32Image)
+   public void drawFloatImage(Mat floatImage)
    {
-      BytedecoOpenCVTools.clamp32BitFloatTo8BitUnsignedChar(float32Image, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
+      BytedecoOpenCVTools.clamp32BitFloatTo8BitUnsignedChar(floatImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
       BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
       draw();
    }
