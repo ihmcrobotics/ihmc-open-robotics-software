@@ -45,7 +45,7 @@ public class SimpleCombinedTerrainObjectsEnvironment extends CombinedTerrainObje
       this.addRotatableBox(configuration, 4.0, 2.0, 1.6, appearance);
 
       // Ramp 1
-      this.addRamp(-2.0, -4.0, 4.0, -2.0, 2.0);
+      this.addRamp(-2.0, -4.0, 4.0, -2.0, 0.0, 2.0);
 
       // Ramp 1
       this.addCone(6.0, 1.0, 2.0, 0.5, 1.0);
