@@ -6,18 +6,18 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class BoxRayIntersection
 {
 
    private final RigidBodyTransform boxToWorldTransform = new RigidBodyTransform();
-   private final ReferenceFrame boxFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("boxFrame",
-                                                                                                                  ReferenceFrame.getWorldFrame(),
-                                                                                                                  boxToWorldTransform);
+   private final ReferenceFrame boxFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("boxFrame",
+                                                                                                           ReferenceFrame.getWorldFrame(),
+                                                                                                           boxToWorldTransform);
    private final FramePoint3D rayOrigin = new FramePoint3D();
    private final FrameVector3D rayDirection = new FrameVector3D();
    private final Point3D boundingBoxMin = new Point3D();

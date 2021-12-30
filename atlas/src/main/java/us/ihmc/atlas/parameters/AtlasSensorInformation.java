@@ -221,8 +221,9 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    static
    {
       transformChestToRightBlackfly.setIdentity();
-      transformChestToRightBlackfly.getTranslation().set(0.300000, 0.020000, 0.580000);
-      transformChestToRightBlackfly.getRotation().setYawPitchRoll(0.010000, 1.151900, 0.045000);
+      transformChestToRightBlackfly.getTranslation().set(transformChestToOuster.getTranslation()); // measured relative to Ouster for convenience
+      transformChestToRightBlackfly.getTranslation().add(0.02, -0.12, -0.15);
+      transformChestToRightBlackfly.getRotation().setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(35.0), Math.toRadians(-5.0));
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)

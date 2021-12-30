@@ -12,7 +12,6 @@ import imgui.type.ImFloat;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
@@ -87,7 +86,7 @@ public class GDXVRDepthSensorDemo
             baseUI.getImGuiPanelManager().addPanel(depthSensorSimulator.getDepthPanel());
 
             gizmo.create(baseUI.get3DSceneManager().getCamera3D());
-            gizmo.getTransform().set(initialCameraTransform);
+            gizmo.getTransformToParent().set(initialCameraTransform);
             baseUI.addImGui3DViewInputProcessor(gizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
          }
@@ -103,14 +102,14 @@ public class GDXVRDepthSensorDemo
                }
                if (moveWithController)
                {
-                  controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), tempTransform);
+                  controller.getTransformZUpToWorld(tempTransform);
                   depthSensorSimulator.setCameraWorldTransform(tempTransform);
                   controllerCoordinateFrames.get(RobotSide.LEFT).transform.set(tempTransform); // TODO: Should be an option on the VR manager probably
                }
             });
             vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
             {
-               controller.getGDXPoseInFrame(ReferenceFrame.getWorldFrame(), cylinder.nodes.get(0).globalTransform);
+               controller.getTransformZUpToWorld(cylinder.nodes.get(0).globalTransform);
             });
          }
 
@@ -131,7 +130,7 @@ public class GDXVRDepthSensorDemo
          {
             if (useGizmoToPoseSensor.get())
             {
-               GDXTools.toGDX(gizmo.getTransform(), tempTransform);
+               GDXTools.toGDX(gizmo.getTransformToParent(), tempTransform);
                depthSensorSimulator.setCameraWorldTransform(tempTransform);
             }
 

@@ -42,7 +42,7 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
 
    private void acceptMessage(PlanarRegionsListMessage planarRegionsListMessage)
    {
-      frequencyPlot.onRecievedMessage();
+      frequencyPlot.recordEvent();
       if (isActive())
       {
          executorService.clearQueueAndExecute(() ->

@@ -98,7 +98,7 @@ public class GDXEnvironment extends ImGuiPanel
                                                                                         pickRay.getPoint(),
                                                                                         pickRay.getDirection());
             selectedObject.set(pickPoint);
-            pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
+            pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
 
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -108,7 +108,7 @@ public class GDXEnvironment extends ImGuiPanel
          else
          {
             pose3DGizmo.process3DViewInput(viewInput);
-            selectedObject.set(pose3DGizmo.getTransform());
+            selectedObject.set(pose3DGizmo.getTransformToParent());
 
             intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -118,7 +118,7 @@ public class GDXEnvironment extends ImGuiPanel
                   selectedObject = intersectedObject;
                   if (selectedObject != null)
                   {
-                     pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
+                     pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
                   }
                }
             }
@@ -133,7 +133,7 @@ public class GDXEnvironment extends ImGuiPanel
             if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                selectedObject = intersectedObject;
-               pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
+               pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
             }
          }
       }

@@ -246,6 +246,23 @@ public interface JointDesiredOutputReadOnly
     * @return the maximum position error for the joint feedback control.
     */
    double getPositionFeedbackMaxError();
+   
+   
+   /**
+    * Return true if a maximum torque was set for this joint.
+    * @return
+    */
+   default boolean hasMaxTorque()
+   {
+      return !Double.isNaN(getMaxTorque());
+   }
+   
+   /**
+    * Gets the maximum torque applied by the feedback controller plus the feedforward torque. 
+    * 
+    * @return the maximum torque applied by the feedback controller
+    */
+   double getMaxTorque();
 
    /**
     * Convenience for clamping the desired position with {@link #getPositionFeedbackMaxError()} if it
@@ -454,6 +471,8 @@ public interface JointDesiredOutputReadOnly
          if (Double.compare(getVelocityFeedbackMaxError(), other.getVelocityFeedbackMaxError()) != 0)
             return false;
          if (Double.compare(getPositionFeedbackMaxError(), other.getPositionFeedbackMaxError()) != 0)
+            return false;
+         if (Double.compare(getMaxTorque(), other.getMaxTorque()) != 0)
             return false;
          return true;
       }

@@ -40,9 +40,9 @@ public class GDXTransformTuner
    {
       if (showGizmo.get())
       {
-         poseGizmo.getTransform().set(transformToTune);
+         poseGizmo.getTransformToParent().set(transformToTune);
          poseGizmo.process3DViewInput(input);
-         transformToTune.set(poseGizmo.getTransform());
+         transformToTune.set(poseGizmo.getTransformToParent());
       }
    }
 
@@ -52,7 +52,7 @@ public class GDXTransformTuner
       {
          if (showGizmo.get())
          {
-            poseGizmo.getTransform().set(transformToTune);
+            poseGizmo.getTransformToParent().set(transformToTune);
          }
       }
 

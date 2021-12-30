@@ -21,23 +21,23 @@ import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 
 public abstract class RobotContactPointParameters<E extends Enum<E> & RobotSegment<E>> implements ContactPointDefinitionHolder
 {
-   private final LeggedJointNameMap<E> jointMap;
-   private final double footWidth, toeWidth, footLength;
+   protected final LeggedJointNameMap<E> jointMap;
+   protected final double footWidth, toeWidth, footLength;
 
-   private final SegmentDependentList<E, RigidBodyTransform> soleToAnkleFrameTransforms;
+   protected final SegmentDependentList<E, RigidBodyTransform> soleToAnkleFrameTransforms;
 
-   private final SegmentDependentList<E, ArrayList<Point2D>> controllerFootGroundContactPoints;;
-   private final SegmentDependentList<E, Point2D> controllerToeContactPoints;
-   private final SegmentDependentList<E, LineSegment2D> controllerToeContactLines;
+   protected final SegmentDependentList<E, ArrayList<Point2D>> controllerFootGroundContactPoints;;
+   protected final SegmentDependentList<E, Point2D> controllerToeContactPoints;
+   protected final SegmentDependentList<E, LineSegment2D> controllerToeContactLines;
 
-   private final List<ImmutablePair<String, Vector3D>> simulationGroundContactPoints = new ArrayList<>();
-   private final E[] robotSegments;
+   protected final List<ImmutablePair<String, Vector3D>> simulationGroundContactPoints = new ArrayList<>();
+   protected final E[] robotSegments;
 
    protected final ArrayList<String> additionalContactRigidBodyNames = new ArrayList<>();
    protected final ArrayList<String> additionalContactNames = new ArrayList<>();
    protected final ArrayList<RigidBodyTransform> additionalContactTransforms = new ArrayList<>();
 
-   private boolean useSoftGroundContactParameters;
+   protected boolean useSoftGroundContactParameters;
 
    public RobotContactPointParameters(LeggedJointNameMap<E> jointMap,
                                       double footWidth,

@@ -28,6 +28,8 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.SensorDefinition;
 import us.ihmc.scs2.definition.robot.sdf.SDFTools;
 import us.ihmc.scs2.definition.robot.sdf.items.SDFRoot;
+import us.ihmc.scs2.definition.robot.urdf.URDFTools;
+import us.ihmc.scs2.definition.robot.urdf.items.URDFModel;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
@@ -36,6 +38,43 @@ import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 public class RobotDefinitionLoader
 {
    public static final String DEFAULT_ROOT_BODY_NAME = "elevator";
+
+   public static RobotDefinition loadURDFModel(InputStream stream,
+                                               Collection<String> resourceDirectories,
+                                               ClassLoader classLoader,
+                                               String modelName,
+                                               ContactPointDefinitionHolder contactPointDefinitionHolder,
+                                               JointNameMap<?> jointNameMap,
+                                               boolean removeCollisionMeshes)
+   {
+      try
+      {
+         URDFModel urdfRoot = URDFTools.loadURDFModel(stream, resourceDirectories, classLoader);
+         RobotDefinition robotDefinition = URDFTools.toFloatingRobotDefinition(urdfRoot);
+         // By default SDFTools names the root body "rootBody", for backward compatibility it is renamed "elevator".
+         robotDefinition.getRootBodyDefinition().setName(DEFAULT_ROOT_BODY_NAME);
+
+         if (contactPointDefinitionHolder != null)
+            addGroundContactPoints(robotDefinition, contactPointDefinitionHolder);
+
+         if (jointNameMap != null)
+         {
+            for (String jointName : jointNameMap.getLastSimulatedJoints())
+               robotDefinition.addSubtreeJointsToIgnore(jointName);
+            adjustJointLimitStops(robotDefinition, jointNameMap);
+         }
+         adjustRigidBodyInterias(robotDefinition);
+
+         if (removeCollisionMeshes)
+            removeCollisionShapeDefinitions(robotDefinition);
+
+         return robotDefinition;
+      }
+      catch (JAXBException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
 
    public static RobotDefinition loadSDFModel(InputStream stream,
                                               Collection<String> resourceDirectories,
@@ -88,9 +127,13 @@ public class RobotDefinitionLoader
             if (visualDefinition.getMaterialDefinition() != null)
                continue;
             GeometryDefinition geometryDefinition = visualDefinition.getGeometryDefinition();
-            if (geometryDefinition instanceof ModelFileGeometryDefinition
-                  && !((ModelFileGeometryDefinition) geometryDefinition).getFileName().toLowerCase().endsWith(".stl"))
-               continue;
+            if (geometryDefinition instanceof ModelFileGeometryDefinition)
+            {
+               if (((ModelFileGeometryDefinition) geometryDefinition).getFileName() == null)
+                  System.out.println();
+               if (!((ModelFileGeometryDefinition) geometryDefinition).getFileName().toLowerCase().endsWith(".stl"))
+                  continue;
+            }
             visualDefinition.setMaterialDefinition(defaultMaterial);
          }
       }
@@ -138,6 +181,11 @@ public class RobotDefinitionLoader
                revoluteJoint.setKpSoftLimitStop(0.0001 * revoluteJoint.getKpSoftLimitStop());
                revoluteJoint.setKdSoftLimitStop(0.1 * revoluteJoint.getKdSoftLimitStop());
             }
+
+            if (!isJointInNeedOfReducedGains(joint.getName()))
+            {
+               revoluteJoint.setDampingVelocitySoftLimit(jointNameMap.getDefaultVelocityLimitDamping());
+            }
          }
          else if (joint instanceof PrismaticJointDefinition)
          {
@@ -157,6 +205,11 @@ public class RobotDefinitionLoader
             {
                prismaticJoint.setKpSoftLimitStop(0.0001 * prismaticJoint.getKpSoftLimitStop());
                prismaticJoint.setKdSoftLimitStop(prismaticJoint.getKdSoftLimitStop());
+            }
+
+            if (!isJointInNeedOfReducedGains(joint.getName()))
+            {
+               prismaticJoint.setDampingVelocitySoftLimit(jointNameMap.getDefaultVelocityLimitDamping());
             }
          }
       }
@@ -260,10 +313,10 @@ public class RobotDefinitionLoader
       for (KinematicPointDefinition kp : definition.getKinematicPointDefinitions())
          kp.getTransformToParent().getTranslation().scale(modelScale);
       // TODO This seems inconsistent, but that's how we used to do it when using RobotDescription.
-//      for (ExternalWrenchPointDefinition efp : definition.getExternalWrenchPointDefinitions())
-//         efp.getTransformToParent().getTranslation().scale(modelScale);
-//      for (GroundContactPointDefinition gcp : definition.getGroundContactPointDefinitions())
-//         gcp.getTransformToParent().getTranslation().scale(modelScale);
+      //      for (ExternalWrenchPointDefinition efp : definition.getExternalWrenchPointDefinitions())
+      //         efp.getTransformToParent().getTranslation().scale(modelScale);
+      //      for (GroundContactPointDefinition gcp : definition.getGroundContactPointDefinitions())
+      //         gcp.getTransformToParent().getTranslation().scale(modelScale);
 
       if (definition instanceof OneDoFJointDefinition)
       {

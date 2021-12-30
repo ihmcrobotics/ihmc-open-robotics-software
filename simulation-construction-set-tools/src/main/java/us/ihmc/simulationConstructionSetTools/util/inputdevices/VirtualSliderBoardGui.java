@@ -149,7 +149,8 @@ public class VirtualSliderBoardGui implements CloseableAndDisposable
       controlsLock.lock();
       virtualMidiControls.remove(midiControl);
 
-         midiControl.var.removeListener(listener);
+      midiControl.var.removeListener(listener);
+      controlsLock.unlock();
 
       setUpGui(closeableAndDisposableRegistry);
    }
