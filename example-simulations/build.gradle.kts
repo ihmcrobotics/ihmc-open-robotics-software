@@ -20,6 +20,8 @@ mainDependencies {
    api("us.ihmc:euclid-geometry:0.17.0")
    api("us.ihmc:euclid-frame:0.17.0")
    api("us.ihmc:euclid-shape:0.17.0")
+   api("us.ihmc:mecano:0.9.0")
+   api("us.ihmc:mecano-yovariables:0.9.0")
    api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("us.ihmc:ihmc-model-file-loader:source")
