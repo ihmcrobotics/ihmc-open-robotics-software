@@ -1,15 +1,20 @@
 package us.ihmc.exampleSimulations.springflamingo;
 
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
- * <p>Title: SpringFlamingoRobot</p>
- *
- * <p>Description: Simulation Model of SpringFlamingo.</p>
+ * <p>
+ * Title: SpringFlamingoRobot
+ * </p>
+ * <p>
+ * Description: Simulation Model of SpringFlamingo.
+ * </p>
  *
  * @author Jerry Pratt
  */
@@ -248,6 +253,30 @@ public class SpringFlamingoRobot
          return qd_ra.getDoubleValue();
    }
 
+   public void setHipTorque(RobotSide robotSide, double hipTorque)
+   {
+      if (robotSide == RobotSide.LEFT)
+         tau_lh.set(hipTorque);
+      else
+         tau_rh.set(hipTorque);
+   }
+
+   public void setKneeTorque(RobotSide robotSide, double kneeTorque)
+   {
+      if (robotSide == RobotSide.LEFT)
+         tau_lk.set(kneeTorque);
+      else
+         tau_rk.set(kneeTorque);
+   }
+
+   public void setAnkleTorque(RobotSide robotSide, double ankleTorque)
+   {
+      if (robotSide == RobotSide.LEFT)
+         tau_la.set(ankleTorque);
+      else
+         tau_ra.set(ankleTorque);
+   }
+
    public void initializeForFastWalking(RobotSide robotSide)
    {
       q_x.set(0.0);
@@ -417,4 +446,175 @@ public class SpringFlamingoRobot
    {
       return robot;
    }
+
+   public double computeCenterOfMass(Point3D comPoint)
+   {
+      return this.getRobot().computeCenterOfMass(comPoint);
+   }
+
+   public double computeCOMMomentum(Point3D comPoint, Vector3D linearMomentum, Vector3D angularMomentum)
+   {
+      return this.getRobot().computeCOMMomentum(comPoint, linearMomentum, angularMomentum);
+   }
+
+   public YoDouble getYoTime()
+   {
+      return getRobot().getYoTime();
+   }
+
+   public double getBodyAngle()
+   {
+      return q_pitch.getDoubleValue();
+   }
+
+   public double getBodyAngularVelocity()
+   {
+      return qd_pitch.getDoubleValue();
+   }
+
+   public Vector3D getFootForce(RobotSide robotSide)
+   {
+      Vector3D footForce = new Vector3D();
+
+      if (robotSide == RobotSide.LEFT)
+      {
+         footForce.set(gc_lheel_fx.getValue() + gc_ltoe_fx.getValue(), 0.0, gc_lheel_fz.getValue() + gc_ltoe_fz.getValue());
+      }
+      else
+      {
+         footForce.set(gc_rheel_fx.getValue() + gc_rtoe_fx.getValue(), 0.0, gc_rheel_fz.getValue() + gc_rtoe_fz.getValue());
+
+      }
+
+      return footForce;
+   }
+
+   public boolean hasFootMadeContact(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return ((gc_lheel_fs.getDoubleValue() > 0.0) || (gc_ltoe_fs.getDoubleValue() > 0.0));
+      }
+      else
+      {
+         return ((gc_rheel_fs.getDoubleValue() > 0.0) || (gc_rtoe_fs.getDoubleValue() > 0.0));
+      }
+   }
+
+   public double getTime()
+   {
+      return robot.getTime();
+   }
+
+   public double getThighAngle(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return q_pitch.getValue() + q_lh.getValue();
+      }
+      else
+      {
+         return q_pitch.getValue() + q_rh.getValue();
+      }
+   }
+
+   public double getThighAngularVelocity(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return qd_pitch.getValue() + qd_lh.getValue();
+      }
+      else
+      {
+         return qd_pitch.getValue() + qd_rh.getValue();
+      }
+   }
+
+   public double getShinAngle(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return q_pitch.getValue() + q_lh.getValue() + q_lk.getValue();
+      }
+      else
+      {
+         return q_pitch.getValue() + q_rh.getValue() + q_rk.getValue();
+      }
+   }
+
+   public double getShinAngularVelocity(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return qd_pitch.getValue() + qd_lh.getValue() + qd_lk.getValue();
+      }
+      else
+      {
+         return qd_pitch.getValue() + qd_rh.getValue() + qd_rk.getValue();
+      }
+   }
+
+   public double getFootAngle(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return q_pitch.getValue() + q_lh.getValue() + q_lk.getValue() + q_la.getValue();
+      }
+      else
+      {
+         return q_pitch.getValue() + q_rh.getValue() + q_rk.getValue() + q_ra.getValue();
+      }
+   }
+
+   public double getFootAngularVelocity(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return qd_pitch.getValue() + qd_lh.getValue() + qd_lk.getValue() + qd_la.getValue();
+      }
+      else
+      {
+         return qd_pitch.getValue() + qd_rh.getValue() + qd_rk.getValue() + qd_ra.getValue();
+      }
+   }
+
+   public double getHeelXPosition(RobotSide robotSide)
+   {
+      if (robotSide == RobotSide.LEFT)
+      {
+         return gc_lheel_x.getValue();
+      }
+      else
+      {
+         return gc_rheel_x.getValue();
+      }
+   }
+
+   public double getKneeLength(RobotSide supportSide)
+   {
+      throw new RuntimeException("Don't use this.");
+   }
+
+   public void setKneeForce(RobotSide loadingSide, double loadingKneeForce)
+   {
+      throw new RuntimeException("Don't use this.");
+   }
+
+   public double getCenterOfMassPositionX()
+   {
+      Point3D comPoint = new Point3D();
+      this.computeCenterOfMass(comPoint);
+      return comPoint.getX();
+   }
+
+   public double getCenterOfMassVelocityX()
+   {
+      Point3D comPoint = new Point3D();
+      Vector3D linearMomentum = new Vector3D();
+      Vector3D angularMomentum = new Vector3D();
+      double totalMass = this.computeCOMMomentum(comPoint, linearMomentum, angularMomentum);
+
+      return linearMomentum.getX() / totalMass;
+   }
+
 }

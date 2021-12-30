@@ -120,13 +120,25 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
 
    public void addRamp(double xStart, double yStart, double xEnd, double yEnd, double height, AppearanceDefinition appearance)
    {
-      RampTerrainObject ramp = new RampTerrainObject(xStart, yStart, xEnd, yEnd, height, appearance);
+      RampTerrainObject ramp = new RampTerrainObject(xStart, yStart, xEnd, yEnd, 0.0, height, appearance);
+      addTerrainObject(ramp);
+   }
+   
+   public void addRamp(double xStart, double yStart, double xEnd, double yEnd, double zStart, double zEnd, AppearanceDefinition appearance)
+   {
+      RampTerrainObject ramp = new RampTerrainObject(xStart, yStart, xEnd, yEnd, zStart, zEnd, appearance);
       addTerrainObject(ramp);
    }
 
    public void addRamp(double xStart, double yStart, double xEnd, double yEnd, double height)
    {
-      RampTerrainObject ramp = new RampTerrainObject(xStart, yStart, xEnd, yEnd, height);
+      RampTerrainObject ramp = new RampTerrainObject(xStart, yStart, xEnd, yEnd, 0.0, height);
+      addTerrainObject(ramp);
+   }
+   
+   public void addRamp(double xStart, double yStart, double xEnd, double yEnd, double zStart, double zEnd)
+   {
+      RampTerrainObject ramp = new RampTerrainObject(xStart, yStart, xEnd, yEnd, zStart, zEnd);
       addTerrainObject(ramp);
    }
 
