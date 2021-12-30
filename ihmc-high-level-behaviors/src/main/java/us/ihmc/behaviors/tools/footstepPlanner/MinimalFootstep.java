@@ -40,6 +40,16 @@ public class MinimalFootstep
       this(side, solePoseInWorld, null, description);
    }
 
+   public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld)
+   {
+      this(side, solePoseInWorld, null, null);
+   }
+
+   public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld, ConvexPolygon2DReadOnly foothold)
+   {
+      this(side, solePoseInWorld, foothold, null);
+   }
+
    public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld, ConvexPolygon2DReadOnly foothold, String description)
    {
       this.side = side;

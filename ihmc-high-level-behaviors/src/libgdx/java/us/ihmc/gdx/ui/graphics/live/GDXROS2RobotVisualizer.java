@@ -9,19 +9,12 @@ import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.graphics.GDXRobotModelGraphic;
 import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
-import us.ihmc.graphicsDescription.instructions.Graphics3DAddModelFileInstruction;
-import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.robotDescription.JointDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.scs2.definition.robot.JointDefinition;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinition;
 
-import java.awt.*;
-import java.util.List;
 import java.util.function.Supplier;
 
 public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
@@ -48,7 +41,7 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.cameraForTrackingSupplier = cameraForTrackingSupplier;
-      syncedRobot.addRobotConfigurationDataReceivedCallback(frequencyPlot::onRecievedMessage);
+      syncedRobot.addRobotConfigurationDataReceivedCallback(frequencyPlot::recordEvent);
 
       previousRobotMidFeetUnderPelvis.setToNaN();
    }
@@ -59,50 +52,14 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
       super.create();
       cameraForTracking = cameraForTrackingSupplier.get();
       RobotDefinition robotDefinition = robotModel.getRobotDefinition();
-      overrideModelColors(robotDefinition);
-      loadRobotModelAndGraphics(robotDefinition, syncedRobot.getFullRobotModel().getElevator(), robotModel);
-   }
-
-   private void overrideModelColors(RobotDefinition robotDefinition)
-   {
-      setModelsToBlack(robotDefinition, "l_arm_wry2");
-      setModelsToBlack(robotDefinition, "l_palm_finger_1_joint");
-      setModelsToBlack(robotDefinition, "l_finger_1_joint_1");
-      setModelsToBlack(robotDefinition, "l_finger_1_joint_2");
-      setModelsToBlack(robotDefinition, "l_finger_1_joint_3");
-      setModelsToBlack(robotDefinition, "l_palm_finger_2_joint");
-      setModelsToBlack(robotDefinition, "l_finger_2_joint_1");
-      setModelsToBlack(robotDefinition, "l_finger_2_joint_2");
-      setModelsToBlack(robotDefinition, "l_finger_2_joint_3");
-      setModelsToBlack(robotDefinition, "l_palm_finger_middle_joint");
-      setModelsToBlack(robotDefinition, "l_finger_middle_joint_1");
-      setModelsToBlack(robotDefinition, "l_finger_middle_joint_2");
-      setModelsToBlack(robotDefinition, "l_finger_middle_joint_3");
-      setModelsToBlack(robotDefinition, "r_arm_wry2");
-      setModelsToBlack(robotDefinition, "r_palm_finger_1_joint");
-      setModelsToBlack(robotDefinition, "r_finger_1_joint_1");
-      setModelsToBlack(robotDefinition, "r_finger_1_joint_2");
-      setModelsToBlack(robotDefinition, "r_finger_1_joint_3");
-      setModelsToBlack(robotDefinition, "r_palm_finger_2_joint");
-      setModelsToBlack(robotDefinition, "r_finger_2_joint_1");
-      setModelsToBlack(robotDefinition, "r_finger_2_joint_2");
-      setModelsToBlack(robotDefinition, "r_finger_2_joint_3");
-      setModelsToBlack(robotDefinition, "r_palm_finger_middle_joint");
-      setModelsToBlack(robotDefinition, "r_finger_middle_joint_1");
-      setModelsToBlack(robotDefinition, "r_finger_middle_joint_2");
-      setModelsToBlack(robotDefinition, "r_finger_middle_joint_3");
-   }
-
-   private void setModelsToBlack(RobotDefinition robotDefinition, String jointName)
-   {
-      JointDefinition handJoint = robotDefinition.getJointDefinition(jointName);
-      if (handJoint != null)
+      MaterialDefinition material = new MaterialDefinition(ColorDefinitions.Black());
+      for (RobotSide robotSide : RobotSide.values)
       {
-         for (VisualDefinition visual : handJoint.getSuccessor().getVisualDefinitions())
-         {
-            visual.setMaterialDefinition(new MaterialDefinition(ColorDefinitions.Black()));
-         }
+         String handName = robotModel.getJointMap().getHandName(robotSide);
+         RobotDefinition.forEachRigidBodyDefinition(robotDefinition.getRigidBodyDefinition(handName),
+                                                    body -> body.getVisualDefinitions().forEach(visual -> visual.setMaterialDefinition(material)));
       }
+      loadRobotModelAndGraphics(robotDefinition, syncedRobot.getFullRobotModel().getElevator(), robotModel);
    }
 
    @Override
@@ -114,7 +71,6 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
 
          if (cameraForTracking != null && trackRobot.get())
          {
-            syncedRobot.update();
             latestRobotMidFeetUnderPelvis.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getPosition());
             if (!previousRobotMidFeetUnderPelvis.containsNaN())
             {

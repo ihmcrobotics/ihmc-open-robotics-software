@@ -1,8 +1,8 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.21"
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
    id("us.ihmc.scs") version "0.4"
 }
 
@@ -19,7 +19,7 @@ mainDependencies {
    api("commons-collections:commons-collections:3.2.1")
 
    api("us.ihmc:ihmc-yovariables:0.9.11")
-   api("us.ihmc:simulation-construction-set:0.21.11")
+   api("us.ihmc:simulation-construction-set:0.21.13")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")

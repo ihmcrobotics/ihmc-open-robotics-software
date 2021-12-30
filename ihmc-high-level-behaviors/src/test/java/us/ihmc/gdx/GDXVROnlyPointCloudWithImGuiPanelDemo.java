@@ -40,8 +40,8 @@ public class GDXVROnlyPointCloudWithImGuiPanelDemo
             fusedPointCloud.setActive(true);
 
             imGuiPanel = new GDXSingleContext3DSituatedImGuiPanel();
-            imGuiPanel.create(400, 500, this::renderImGuiWidgets);
-            imGuiPanel.updatePose(transform ->
+            imGuiPanel.create(400, 500, this::renderImGuiWidgets, vrApplication.getVRContext());
+            imGuiPanel.updateDesiredPose(transform ->
             {
                transform.getTranslation().set(1.0f, 0.0f, 1.0f);
             });
@@ -84,10 +84,6 @@ public class GDXVROnlyPointCloudWithImGuiPanelDemo
             fusedPointCloud.getRenderables(renderables, pool);
             vrApplication.getVRContext().getControllerRenderables(renderables, pool);
             vrApplication.getVRContext().getBaseStationRenderables(renderables, pool);
-            for (RobotSide side : RobotSide.values)
-            {
-               vrApplication.getVRContext().getEyes().get(side).getCoordinateFrameInstance().getRenderables(renderables, pool);
-            }
          }
 
          @Override

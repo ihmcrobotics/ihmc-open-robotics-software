@@ -1,9 +1,9 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.21"
+   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-cd") version "1.23"
    id("us.ihmc.scs") version "0.4"
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -14,8 +14,6 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
-
    api("us.ihmc:euclid:0.17.0")
    api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
@@ -31,7 +29,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-state-estimation:source")
 
-   api("us.ihmc:scs2-simulation:0.1.1")
+   api("us.ihmc:scs2-simulation:0.2.0")
 }
 
 testDependencies {

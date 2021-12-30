@@ -86,7 +86,7 @@ public class AtlasKinematicSimulation
    {
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
       kinematicsSimulationParameters.setPubSubImplementation(PubSubImplementation.FAST_RTPS);
-      AtlasKinematicSimulation.create(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false),
+      AtlasKinematicSimulation.create(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false),
                                       kinematicsSimulationParameters);
    }
 }

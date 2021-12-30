@@ -36,9 +36,19 @@ public class ImGuiPlot
       Arrays.fill(values, Float.NaN);
    }
 
+   public void setValue(double newValue)
+   {
+      setValue((float) newValue);
+   }
+
    public void setValue(float newValue)
    {
       values[index] = newValue;
+   }
+
+   public void render(double newValue)
+   {
+      render((float) newValue);
    }
 
    public void render(float newValue)

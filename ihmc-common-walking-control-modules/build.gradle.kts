@@ -1,8 +1,8 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.21"
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -15,7 +15,6 @@ ihmc {
 
 mainDependencies {
    api("gov.nist.math:jama:1.0.3")
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("com.google.guava:guava:18.0")
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-core:0.39")
@@ -32,7 +31,7 @@ mainDependencies {
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-trajectory-optimization:source")
    api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-convex-optimization:0.17.9")
+   api("us.ihmc:ihmc-convex-optimization:0.17.10")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -40,14 +39,14 @@ mainDependencies {
 
 testDependencies {
    api(ihmc.sourceSetProject("visualizers"))
-   api("us.ihmc:ihmc-commons-testing:0.30.4")
+   api("us.ihmc:ihmc-commons-testing:0.30.5")
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
-   api("us.ihmc:ihmc-convex-optimization-test:0.17.9")
+   api("us.ihmc:ihmc-convex-optimization-test:0.17.10")
 }
 
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.21.11")
+   api("us.ihmc:simulation-construction-set:0.21.13")
 }

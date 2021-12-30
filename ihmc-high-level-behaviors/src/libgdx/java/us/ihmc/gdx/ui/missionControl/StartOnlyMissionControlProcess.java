@@ -22,7 +22,7 @@ public class StartOnlyMissionControlProcess implements MissionControlProcess
    }
 
    @Override
-   public void render()
+   public void renderImGuiWidgets()
    {
       ImGui.text(name + ":");
       ImGui.sameLine();

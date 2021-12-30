@@ -67,6 +67,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -91,6 +92,7 @@ public class HumanoidKinematicsSimulation
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+   private volatile RobotMotionStatus robotMotionStatus;
    private double yoVariableServerTime = 0.0;
    private final Stopwatch monotonicTimer = new Stopwatch();
    private final YoDouble yoTime;
@@ -213,6 +215,7 @@ public class HumanoidKinematicsSimulation
                                                                               yoGraphicsListRegistry,
                                                                               controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
+      controllerToolbox.attachRobotMotionStatusChangedListener((newStatus, time) -> robotMotionStatus = newStatus);
 
       // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
       RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = robotModel.getDefaultRobotInitialSetup(kinematicsSimulationParameters.getInitialGroundHeight(),
@@ -365,6 +368,7 @@ public class HumanoidKinematicsSimulation
 
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(fullRobotModel);
       robotConfigurationData.setMonotonicTime(Conversions.secondsToNanoseconds(monotonicTimer.totalElapsed()));
+      robotConfigurationData.setRobotMotionStatus(robotMotionStatus.toByte());
       robotConfigurationDataPublisher.publish(robotConfigurationData);
    }
 
