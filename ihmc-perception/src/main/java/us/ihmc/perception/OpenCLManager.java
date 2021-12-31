@@ -162,6 +162,8 @@ public class OpenCLManager
    public _cl_mem createImage(int flags, int width, int height, Pointer hostPointer)
    {
 //      flags |= CL_MEM_COPY_HOST_PTR;
+      if (hostPointer != null)
+         flags |= CL_MEM_USE_HOST_PTR;
       cl_image_format imageFormat = new cl_image_format(new IntPointer(CL_R, CL_UNSIGNED_INT16));
       int rowPitch = 0;
       cl_image_desc imageDescription = new cl_image_desc(new IntPointer(
