@@ -51,3 +51,7 @@ visualizersDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
 
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

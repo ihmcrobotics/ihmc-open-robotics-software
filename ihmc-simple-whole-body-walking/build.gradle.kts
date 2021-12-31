@@ -29,3 +29,7 @@ visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
    api("us.ihmc:simulation-construction-set:0.21.9")
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

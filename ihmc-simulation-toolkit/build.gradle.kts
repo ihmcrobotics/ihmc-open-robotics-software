@@ -34,3 +34,7 @@ testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-humanoid-robotics-test:source")
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

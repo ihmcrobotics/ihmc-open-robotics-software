@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 # Build the IHMC software for a standalone configuration. This should not be used on console since
 # it deploys build products only on the local machine.
 

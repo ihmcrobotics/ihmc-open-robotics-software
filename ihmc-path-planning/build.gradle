@@ -85,3 +85,7 @@ task updateDataSetList {
       fileWriter.close()
    }
 }
+configurations.all {
+   exclude group: "log4j", module: "log4j"
+}
+

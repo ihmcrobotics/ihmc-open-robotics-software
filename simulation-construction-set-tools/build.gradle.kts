@@ -28,3 +28,7 @@ testDependencies {
 
    api("us.ihmc:simulation-construction-set-test:0.21.8")
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

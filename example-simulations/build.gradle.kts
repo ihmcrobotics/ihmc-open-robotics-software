@@ -46,3 +46,7 @@ testDependencies {
    api("us.ihmc:ihmc-quadruped-planning-test:source")
 
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

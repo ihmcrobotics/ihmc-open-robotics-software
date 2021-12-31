@@ -51,3 +51,7 @@ testDependencies {
    api("org.ros.rosjava_messages:rosjava_test_msgs:0.2.1")
    api("org.ros.rosjava_messages:test_rosmaster:1.11.10")
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

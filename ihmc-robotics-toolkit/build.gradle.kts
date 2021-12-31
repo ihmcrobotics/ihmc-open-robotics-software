@@ -51,3 +51,7 @@ testDependencies {
    api("us.ihmc:ihmc-matrix-library-test:0.18.4")
    api("us.ihmc:ihmc-commons-testing:0.30.5")
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

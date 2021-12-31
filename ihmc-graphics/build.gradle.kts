@@ -72,3 +72,7 @@ libgdxDependencies {
 libgdxTestDependencies {
    api(ihmc.sourceSetProject("libgdx"))
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

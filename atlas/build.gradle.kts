@@ -57,6 +57,9 @@ mainDependencies {
    api("us.ihmc:robotiq-hand-drivers:source")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-sensor-processing:source")
+   api("net.sourceforge.jexcelapi:jxl:2.6.12") {
+       exclude(group="log4j", module="log4j")
+   }
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
@@ -78,6 +81,13 @@ testDependencies {
    api("us.ihmc:ihmc-humanoid-robotics-test:source")
    api("us.ihmc:ihmc-sensor-processing-test:source")
    api("us.ihmc:ihmc-simulation-toolkit-test:source")
+   api("net.sourceforge.jexcelapi:jxl:2.6.12") {
+       exclude(group="log4j", module="log4j")
+   }
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-messager-test:0.1.7")
+}
+
+configurations.all {
+   exclude("log4j", "log4j")
 }

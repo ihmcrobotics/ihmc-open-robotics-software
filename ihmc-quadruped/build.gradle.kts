@@ -105,3 +105,7 @@ uiDependencies {
 uiTestDependencies {
    api(ihmc.sourceSetProject("ui"))
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

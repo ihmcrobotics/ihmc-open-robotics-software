@@ -74,3 +74,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

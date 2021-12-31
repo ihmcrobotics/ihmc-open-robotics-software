@@ -6,6 +6,10 @@ plugins {
    id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
+configurations.all {
+   exclude("log4j", "log4j")
+}
+
 ihmc {
    loadProductProperties("../product.properties")
 
@@ -229,3 +233,4 @@ fun deployNetworkProcessor()
       }
    }
 }
+

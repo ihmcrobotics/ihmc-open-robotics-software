@@ -72,3 +72,7 @@ visualizersDependencies {
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

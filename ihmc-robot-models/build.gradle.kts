@@ -25,3 +25,7 @@ mainDependencies {
 testDependencies {
 
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

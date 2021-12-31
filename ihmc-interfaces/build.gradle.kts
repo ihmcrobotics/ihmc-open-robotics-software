@@ -114,3 +114,7 @@ tasks.create("generateMessages") {
       us.ihmc.ros2.rosidl.ROS2InterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/messages/ros1").toPath())
    }
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

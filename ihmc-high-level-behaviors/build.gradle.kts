@@ -43,3 +43,7 @@ testDependencies {
    api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

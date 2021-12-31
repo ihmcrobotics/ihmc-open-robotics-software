@@ -34,3 +34,7 @@ mainDependencies {
 testDependencies {
    api("us.ihmc:ihmc-communication-test:source")
 }
+configurations.all {
+   exclude("log4j", "log4j")
+}
+

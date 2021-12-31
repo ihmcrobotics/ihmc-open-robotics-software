@@ -34,3 +34,7 @@ testDependencies {
 }
 
 app.entrypoint("RobotiqControlThread", "us.ihmc.robotiq.control.RobotiqControlThread")
+configurations.all {
+   exclude("log4j", "log4j")
+}
+
