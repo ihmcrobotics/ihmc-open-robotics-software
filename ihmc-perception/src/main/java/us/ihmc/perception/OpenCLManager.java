@@ -1,12 +1,10 @@
 package us.ihmc.perception;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
-import us.ihmc.commons.Conversions;
 import us.ihmc.log.LogTools;
 
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
@@ -18,12 +16,13 @@ import static org.bytedeco.opencl.global.OpenCL.*;
  */
 public class OpenCLManager
 {
-   private _cl_platform_id platforms = new _cl_platform_id(null);
-   private _cl_device_id devices = new _cl_device_id(null);
-   private _cl_context context = new _cl_context(null);
-   private _cl_command_queue commandQueue = new _cl_command_queue(null);
+   private final int maxNumberOfEntries = 2; // More than 2 results in native crash TODO: Why?
+   private _cl_platform_id platforms = new _cl_platform_id();
+   private _cl_device_id devices = new _cl_device_id();
+   private _cl_context context = new _cl_context();
+   private _cl_command_queue commandQueue = new _cl_command_queue();
    private final IntPointer numberOfDevices = new IntPointer(1);
-   private final IntPointer numberOfPlatforms = new IntPointer(1);
+   private final IntPointer numberOfPlatforms = new IntPointer(3);
    private final IntPointer returnCode = new IntPointer(1);
    private final ArrayList<_cl_program> programs = new ArrayList<>();
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
@@ -34,10 +33,31 @@ public class OpenCLManager
    public void create()
    {
       /* Get platform/device information */
-      checkReturnCode(clGetPlatformIDs(1, platforms, numberOfPlatforms));
-      checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_GPU, 1, devices, numberOfDevices));
+      checkReturnCode(clGetPlatformIDs(maxNumberOfEntries, platforms, numberOfPlatforms));
+      checkReturnCode(clGetDeviceIDs(platforms, CL_DEVICE_TYPE_ALL, maxNumberOfEntries, devices, numberOfDevices));
 
-      // TODO: Print info about the setup here. Looking for CL_DEVICE_IMAGE_SUPPORT
+      int numberOfPlatforms = this.numberOfPlatforms.get();
+      LogTools.info("Number of platforms: {}", numberOfPlatforms);
+      int numberOfDevices = this.numberOfDevices.get();
+      LogTools.info("Number of devices: {}", numberOfDevices);
+
+      for (int i = 0; i < numberOfPlatforms; i++)
+      {
+         String message = "OpenCL Platform:";
+         message += " Name: " + readPlatformInfoParameter(i, CL_PLATFORM_NAME);
+         message += " Vendor: " + readPlatformInfoParameter(i, CL_PLATFORM_VENDOR);
+         message += " Version: " + readPlatformInfoParameter(i, CL_PLATFORM_VERSION);
+         LogTools.info(message);
+      }
+
+      for (int i = 0; i < numberOfDevices; i++)
+      {
+         String message = "OpenCL Device:";
+         message += " Name: " + readDeviceInfoParameter(i, CL_DEVICE_NAME);
+         message += " Vendor: " + readDeviceInfoParameter(i, CL_DEVICE_VENDOR);
+         message += " Driver Version: " + readDeviceInfoParameter(i, CL_DRIVER_VERSION);
+         LogTools.info(message);
+      }
 
       /* Create OpenCL Context */
       context = clCreateContext(null, 1, devices, null, null, returnCode);
@@ -49,10 +69,34 @@ public class OpenCLManager
       checkReturnCode();
    }
 
+   private String readPlatformInfoParameter(int i, int parameterName)
+   {
+      return OpenCLTools.readString((stringSizeByteLimit, stringPointer, resultingStringLengthPointer) ->
+      {
+         checkReturnCode(clGetPlatformInfo(platforms.position(i).getPointer(),
+                                           parameterName,
+                                           stringSizeByteLimit,
+                                           stringPointer,
+                                           resultingStringLengthPointer));
+      });
+   }
+
+   private String readDeviceInfoParameter(int i, int parameterName)
+   {
+      return OpenCLTools.readString((stringSizeByteLimit, stringPointer, resultingStringLengthPointer) ->
+      {
+         checkReturnCode(clGetDeviceInfo(devices.position(i).getPointer(),
+                                         parameterName,
+                                         stringSizeByteLimit,
+                                         stringPointer,
+                                         resultingStringLengthPointer));
+      });
+   }
+
    public _cl_kernel loadSingleFunctionProgramAndCreateKernel(String programName)
    {
       _cl_program program = loadProgram(programName);
-      return createKernel(program, programName);
+      return createKernel(program, StringUtils.uncapitalize(programName));
    }
 
    public _cl_program loadProgram(String programName)
@@ -70,17 +114,16 @@ public class OpenCLManager
       programs.add(program);
 
       /* Build Kernel Program */
-      checkReturnCode(clBuildProgram(program, 1, devices, null, null, null));
-      int preallocatedBytes = Conversions.megabytesToBytes(2);
-      CharPointer charPointer = new CharPointer(preallocatedBytes);
-      SizeTPointer length = new SizeTPointer(1);
-      clGetProgramBuildInfo(program, devices.getPointer(), CL_PROGRAM_BUILD_LOG, preallocatedBytes, charPointer, length);
+      int numberOfDevices = 1;
+      String options = null;
+      Pfn_notify__cl_program_Pointer notificationRoutine = null;
+      Pointer userData = null;
+      checkReturnCode(clBuildProgram(program, numberOfDevices, devices, options, notificationRoutine, userData));
       LogTools.info("OpenCL Build log: openCL/{}.cl", programName);
-      ByteBuffer byteBuffer = charPointer.asByteBuffer();
-      int logLength = (int) length.get();
-      byte[] bytes = new byte[logLength];
-      byteBuffer.get(bytes, 0, logLength);
-      System.out.println(new String(bytes, StandardCharsets.UTF_8));
+      System.out.println(OpenCLTools.readString((stringSizeByteLimit, stringPointer, resultingStringLengthPointer) ->
+      {
+         clGetProgramBuildInfo(program, devices.getPointer(), CL_PROGRAM_BUILD_LOG, stringSizeByteLimit, stringPointer, resultingStringLengthPointer);
+      }));
 
       return program;
    }
@@ -89,6 +132,7 @@ public class OpenCLManager
    {
       /* Create OpenCL Kernel */
       _cl_kernel kernel = clCreateKernel(program, kernelName, returnCode);
+      checkReturnCode();
       kernels.add(kernel);
       return kernel;
    }
@@ -101,7 +145,12 @@ public class OpenCLManager
 
    public _cl_mem createBufferObject(long sizeInBytes, Pointer hostPointer)
    {
-      int flags = CL_MEM_READ_WRITE; // TODO: Provide more options
+      int flags = CL_MEM_READ_WRITE;
+      return createBufferObject(flags, sizeInBytes, hostPointer);
+   }
+
+   public _cl_mem createBufferObject(int flags, long sizeInBytes, Pointer hostPointer)
+   {
       if (hostPointer != null)
          flags |= CL_MEM_USE_HOST_PTR;
       _cl_mem bufferObject = clCreateBuffer(context, flags, sizeInBytes, hostPointer, returnCode);
@@ -148,13 +197,31 @@ public class OpenCLManager
    {
       /* Transfer data to memory buffer */
       bufferObject.position(0);
-      checkReturnCode(clEnqueueWriteBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null));
+      int blockingWrite = CL_TRUE;
+      int offset = 0;
+      int numberOfEventsInWaitList = 0; // no events
+      PointerPointer eventWaitList = null; // no events
+      PointerPointer event = null; // no events
+      checkReturnCode(clEnqueueWriteBuffer(commandQueue,
+                                           bufferObject,
+                                           blockingWrite,
+                                           offset,
+                                           sizeInBytes,
+                                           hostMemoryPointer,
+                                           numberOfEventsInWaitList,
+                                           eventWaitList,
+                                           event));
    }
 
    public void setKernelArgument(_cl_kernel kernel, int argumentIndex, _cl_mem bufferObject)
    {
+      long argumentSize = Pointer.sizeof(PointerPointer.class);
+      setKernelArgument(kernel, argumentIndex, argumentSize, new PointerPointer(1).put(bufferObject));
+   }
+
+   public void setKernelArgument(_cl_kernel kernel, int argumentIndex, long argumentSize, Pointer bufferObject)
+   {
       /* Set OpenCL kernel argument */
-      int argumentSize = Pointer.sizeof(_cl_mem.class);
       checkReturnCode(clSetKernelArg(kernel, argumentIndex, argumentSize, bufferObject));
    }
 

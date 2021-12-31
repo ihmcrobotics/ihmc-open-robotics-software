@@ -1,7 +1,6 @@
 package us.ihmc.perception;
 
 import org.bytedeco.javacpp.FloatPointer;
-import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
 import org.junit.jupiter.api.Tag;
@@ -11,19 +10,28 @@ public class OpenCLManagerTest
 {
    @Tag("gui")
    @Test
+   public void testLoadingAndPrintingParameters()
+   {
+      OpenCLManager openCLManager = new OpenCLManager();
+      openCLManager.create();
+      openCLManager.destroy();
+   }
+
+   @Tag("gui")
+   @Test
    public void testOpenCLContext()
    {
       OpenCLManager openCLManager = new OpenCLManager();
       openCLManager.create();
       _cl_kernel kernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("VectorAddition");
       long numberOfFloats = 128;
-      long sizeInBytes = numberOfFloats * Loader.sizeof(FloatPointer.class);
+      long sizeInBytes = numberOfFloats * Float.BYTES;
       FloatPointer hostMemoryPointer = new FloatPointer(numberOfFloats);
       for (int i = 0; i < numberOfFloats; i++)
       {
          hostMemoryPointer.put(i, i);
       }
-      _cl_mem bufferObject = openCLManager.createBufferObject(sizeInBytes);
+      _cl_mem bufferObject = openCLManager.createBufferObject(sizeInBytes, hostMemoryPointer);
       openCLManager.enqueueWriteBuffer(bufferObject, sizeInBytes, hostMemoryPointer);
       openCLManager.setKernelArgument(kernel, 0, bufferObject);
       openCLManager.execute1D(kernel, numberOfFloats);
@@ -35,5 +43,6 @@ public class OpenCLManagerTest
       {
          System.out.println("hostMemoryPointer[" + i + "] : " + hostMemoryPointer.get(i));
       }
+      openCLManager.destroy();
    }
 }
