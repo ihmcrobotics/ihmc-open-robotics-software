@@ -84,7 +84,7 @@ public class OpenCLManagerTest
                                                 imageWidth,
                                                 imageHeight,
                                                 hostMemoryPointer);
-      openCLManager.enqueueWriteImage(image, imageWidth, imageHeight, hostMemoryPointer);
+//      openCLManager.enqueueWriteImage(image, imageWidth, imageHeight, hostMemoryPointer); // Not actually required
       openCLManager.setKernelArgument(kernel, 0, image);
       openCLManager.execute2D(kernel, imageWidth, imageHeight);
       openCLManager.flush();
