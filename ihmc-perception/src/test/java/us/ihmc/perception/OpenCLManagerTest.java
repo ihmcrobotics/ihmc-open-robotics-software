@@ -73,6 +73,11 @@ public class OpenCLManagerTest
       BytePointer hostMemoryPointer = new BytePointer(backingDirectByteBuffer);
       Mat openCVMat = new Mat(imageHeight, imageWidth, cvMatType, hostMemoryPointer);
 
+      for (int x = 0; x < imageWidth; x++)
+      {
+         openCVMat.ptr(2, x).putFloat(10.0f);
+      }
+
       _cl_mem image = openCLManager.createImage(OpenCL.CL_MEM_READ_WRITE,
                                                 OpenCL.CL_R,
                                                 OpenCL.CL_FLOAT,
