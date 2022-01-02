@@ -119,7 +119,7 @@ public class GDXGPUPlanarRegionExtraction
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
 
 //      clInputDepthImageObject = openCLManager.createImage(OpenCL.CL_MEM_READ_ONLY, imageWidth, imageHeight, inputDepthImage.getBytedecoByteBufferPointer());
-      clInputDepthImageObject = openCLManager.createImage(OpenCL.CL_MEM_READ_ONLY, imageWidth, imageHeight, null);
+      clInputDepthImageObject = openCLManager.createImage(OpenCL.CL_MEM_READ_ONLY, OpenCL.CL_DEPTH, OpenCL.CL_UNSIGNED_INT16, imageWidth, imageHeight, null);
       clFilteredDepthImageObject
             = openCLManager.createBufferObject((long) imageWidth * imageHeight * Short.BYTES, filteredDepthImage.getBytedecoByteBufferPointer());
       nxBufferObject = openCLManager.createBufferObject((long) subWidth * subHeight * Float.BYTES, nxImage.getBytedecoByteBufferPointer());

@@ -19,7 +19,7 @@ public class OpenCLManager
    private final int maxNumberOfEntries = 2; // More than 2 results in native crash TODO: Why?
    private _cl_platform_id platforms = new _cl_platform_id();
    private _cl_device_id devices = new _cl_device_id();
-   private _cl_context context = new _cl_context();
+   private _cl_context context;
    private _cl_command_queue commandQueue = new _cl_command_queue();
    private final IntPointer numberOfDevices = new IntPointer(1);
    private final IntPointer numberOfPlatforms = new IntPointer(3);
@@ -159,21 +159,28 @@ public class OpenCLManager
       return bufferObject;
    }
 
-   public _cl_mem createImage(int flags, int width, int height, Pointer hostPointer)
+   public _cl_mem createImage(int flags, int imageChannelOrder, int imageChannelDataType, int width, int height, Pointer hostPointer)
    {
 //      flags |= CL_MEM_COPY_HOST_PTR;
       if (hostPointer != null)
          flags |= CL_MEM_USE_HOST_PTR;
-      cl_image_format imageFormat = new cl_image_format(new IntPointer(CL_R, CL_UNSIGNED_INT16));
+//      cl_image_format imageFormat = new cl_image_format(new IntPointer(CL_R, CL_UNSIGNED_INT16));
+      cl_image_format imageFormat = new cl_image_format();
+      imageFormat.image_channel_order(imageChannelOrder);
+      imageFormat.image_channel_data_type(imageChannelDataType);
       int rowPitch = 0;
-      cl_image_desc imageDescription = new cl_image_desc(new IntPointer(
-            CL_MEM_OBJECT_IMAGE2D,
-            width,
-            height,
-            0, 0,
-            rowPitch,
-            0, 0, 0, 0
-      ));
+      cl_image_desc imageDescription = new cl_image_desc();
+//      cl_image_desc imageDescription = new cl_image_desc(new IntPointer(
+//            CL_MEM_OBJECT_IMAGE2D,
+//            width,
+//            height,
+//            0, 0,
+//            rowPitch,
+//            0, 0, 0, 0
+//      ));
+      imageDescription.image_type(CL_MEM_OBJECT_IMAGE2D);
+      imageDescription.image_width(width);
+      imageDescription.image_height(height);
 //      imageDescription.position(0).put(new IntPointer(new int[] {CL_MEM_OBJECT_IMAGE2D}));
 //      imageDescription.position(1).put(new IntPointer(new int[] {width}));
 //      imageDescription.position(2).put(new IntPointer(new int[] {height}));
@@ -198,7 +205,7 @@ public class OpenCLManager
    public void enqueueWriteBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
    {
       /* Transfer data to memory buffer */
-      bufferObject.position(0);
+//      bufferObject.position(0);
       int blockingWrite = CL_TRUE;
       int offset = 0;
       int numberOfEventsInWaitList = 0; // no events
@@ -213,6 +220,37 @@ public class OpenCLManager
                                            numberOfEventsInWaitList,
                                            eventWaitList,
                                            event));
+   }
+
+   public void enqueueWriteImage(_cl_mem image, long imageWidth, long imageHeight, Pointer hostMemoryPointer)
+   {
+      /* Transfer data to memory buffer */
+      image.position(0);
+      int blockingWrite = CL_TRUE;
+      SizeTPointer origin = new SizeTPointer(3);
+      origin.put(0, 0);
+      origin.put(1, 0);
+      origin.put(2, 0);
+      SizeTPointer region = new SizeTPointer(3);
+      region.put(0, imageWidth);
+      region.put(1, imageHeight);
+      region.put(2, 1);
+      long inputRowPitch = 0;
+      long inputSlicePitch = 0;
+      int numberOfEventsInWaitList = 0; // no events
+      PointerPointer eventWaitList = null; // no events
+      PointerPointer event = null; // no events
+      checkReturnCode(clEnqueueWriteImage(commandQueue,
+                                          image,
+                                          blockingWrite,
+                                          origin,
+                                          region,
+                                          inputRowPitch,
+                                          inputSlicePitch,
+                                          hostMemoryPointer,
+                                          numberOfEventsInWaitList,
+                                          eventWaitList,
+                                          event));
    }
 
    public void setKernelArgument(_cl_kernel kernel, int argumentIndex, _cl_mem bufferObject)
@@ -270,8 +308,45 @@ public class OpenCLManager
    public void enqueueReadBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
    {
       /* Transfer result from the memory buffer */
-      bufferObject.position(0);
+      bufferObject.position(0); // TODO: Need this?
       checkReturnCode(clEnqueueReadBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null));
+   }
+
+   public void enqueueReadImage(_cl_mem image, long imageWidth, long imageHeight, Pointer hostMemoryPointer)
+   {
+      /* Transfer result from the memory buffer */
+      image.position(0);
+      int blockingRead = CL_TRUE;
+      SizeTPointer origin = new SizeTPointer(3);
+      origin.put(0, 0);
+      origin.put(1, 0);
+      origin.put(2, 0);
+      SizeTPointer region = new SizeTPointer(3);
+      region.put(0, imageWidth);
+      region.put(1, imageHeight);
+      region.put(2, 1);
+      long inputRowPitch = 0;
+      long inputSlicePitch = 0;
+      int numberOfEventsInWaitList = 0; // no events
+      PointerPointer eventWaitList = null; // no events
+      PointerPointer event = null; // no events
+      checkReturnCode(clEnqueueReadImage(commandQueue,
+                                         image,
+                                         blockingRead,
+                                         origin,
+                                         region,
+                                         inputRowPitch,
+                                         inputSlicePitch,
+                                         hostMemoryPointer,
+                                         numberOfEventsInWaitList,
+                                         eventWaitList,
+                                         event));
+   }
+
+   public int flush()
+   {
+      checkReturnCode(clFlush(commandQueue));
+      return returnCode.get();
    }
 
    public int finish()
@@ -284,7 +359,7 @@ public class OpenCLManager
    private void checkReturnCode(int returnCode)
    {
       this.returnCode.put(returnCode);
-      if (returnCode != CL_SUCCESS) // yeah it's duplicated but reduces stack trace height
+      if (returnCode != CL_SUCCESS) // duplicated to reduce stack trace height
       {
          LogTools.error(1, "OpenCL error code: " + returnCode);
       }
