@@ -1,9 +1,7 @@
 kernel void manipulateImage(read_write image2d_t image)
 {
-   int y = get_global_id(0);
-   int x = get_global_id(1);
-   int2 coordinates = (int2) (x,y);
+   int x = get_global_id(0);
+   int y = get_global_id(1);
 
-   // make the pixel black
-   write_imageui(image, coordinates, 2.5);
+   write_imagef(image, (int2) (x, y), (float4) (x, 0.0, 0.0, 1.0));
 }
