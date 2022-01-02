@@ -161,36 +161,22 @@ public class OpenCLManager
 
    public _cl_mem createImage(int flags, int imageChannelOrder, int imageChannelDataType, int width, int height, Pointer hostPointer)
    {
-//      flags |= CL_MEM_COPY_HOST_PTR;
       if (hostPointer != null)
          flags |= CL_MEM_USE_HOST_PTR;
-//      cl_image_format imageFormat = new cl_image_format(new IntPointer(CL_R, CL_UNSIGNED_INT16));
       cl_image_format imageFormat = new cl_image_format();
       imageFormat.image_channel_order(imageChannelOrder);
       imageFormat.image_channel_data_type(imageChannelDataType);
-      int rowPitch = 0;
       cl_image_desc imageDescription = new cl_image_desc();
-//      cl_image_desc imageDescription = new cl_image_desc(new IntPointer(
-//            CL_MEM_OBJECT_IMAGE2D,
-//            width,
-//            height,
-//            0, 0,
-//            rowPitch,
-//            0, 0, 0, 0
-//      ));
       imageDescription.image_type(CL_MEM_OBJECT_IMAGE2D);
       imageDescription.image_width(width);
       imageDescription.image_height(height);
-//      imageDescription.position(0).put(new IntPointer(new int[] {CL_MEM_OBJECT_IMAGE2D}));
-//      imageDescription.position(1).put(new IntPointer(new int[] {width}));
-//      imageDescription.position(2).put(new IntPointer(new int[] {height}));
-//      imageDescription.position(3).put(new IntPointer(new int[] {0})); // depth
-//      imageDescription.position(4).put(new IntPointer(new int[] {0})); // arraySize
-//      imageDescription.position(5).put(new IntPointer(new int[] {rowPitch}));
-//      imageDescription.position(6).put(new IntPointer(new int[] {0})); // slicePitch
-//      imageDescription.position(7).put(new IntPointer(new int[] {0})); // number of mipmap levels
-//      imageDescription.position(8).put(new IntPointer(new int[] {0})); // number of samples
-//      imageDescription.position(9).put(new IntPointer(new int[] {0})); // mem_object
+      imageDescription.image_depth(0);
+      imageDescription.image_array_size(0);
+      imageDescription.image_row_pitch(0);
+      imageDescription.image_slice_pitch(0);
+      imageDescription.num_mip_levels(0);
+      imageDescription.num_samples(0);
+      imageDescription.mem_object(null);
       _cl_mem image = clCreateImage(context, flags, imageFormat, imageDescription, hostPointer, returnCode);
       bufferObjects.add(image);
       checkReturnCode();
@@ -205,7 +191,6 @@ public class OpenCLManager
    public void enqueueWriteBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
    {
       /* Transfer data to memory buffer */
-//      bufferObject.position(0);
       int blockingWrite = CL_TRUE;
       int offset = 0;
       int numberOfEventsInWaitList = 0; // no events
@@ -225,7 +210,6 @@ public class OpenCLManager
    public void enqueueWriteImage(_cl_mem image, long imageWidth, long imageHeight, Pointer hostMemoryPointer)
    {
       /* Transfer data to memory buffer */
-      image.position(0);
       int blockingWrite = CL_TRUE;
       SizeTPointer origin = new SizeTPointer(3);
       origin.put(0, 0);
@@ -308,14 +292,12 @@ public class OpenCLManager
    public void enqueueReadBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
    {
       /* Transfer result from the memory buffer */
-      bufferObject.position(0); // TODO: Need this?
       checkReturnCode(clEnqueueReadBuffer(commandQueue, bufferObject, CL_TRUE, 0, sizeInBytes, hostMemoryPointer, 0, (PointerPointer) null, null));
    }
 
    public void enqueueReadImage(_cl_mem image, long imageWidth, long imageHeight, Pointer hostMemoryPointer)
    {
       /* Transfer result from the memory buffer */
-      image.position(0);
       int blockingRead = CL_TRUE;
       SizeTPointer origin = new SizeTPointer(3);
       origin.put(0, 0);
