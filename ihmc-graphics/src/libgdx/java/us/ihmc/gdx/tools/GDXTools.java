@@ -5,12 +5,21 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
+import org.lwjgl.opengl.GL41;
+import org.lwjgl.opengl.GL43;
+import org.lwjgl.opengl.GLDebugMessageCallback;
+import org.lwjgl.opengl.KHRDebug;
 import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
+import org.lwjgl.system.Callback;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -26,8 +35,15 @@ import us.ihmc.log.LogTools;
 
 import java.nio.FloatBuffer;
 
+import static com.badlogic.gdx.graphics.profiling.GLInterceptor.resolveErrorNumber;
+import static org.lwjgl.glfw.GLFW.glfwGetVersionString;
+import static org.lwjgl.system.APIUtil.apiUnknownToken;
+import static org.lwjgl.system.MemoryUtil.NULL;
+
 public class GDXTools
 {
+   public static boolean ENABLE_OPENGL_DEBUGGER = Boolean.parseBoolean(System.getProperty("enable.opengl.debugger", "false"));
+
    public static void syncLogLevelWithLogTools()
    {
       Gdx.app.setLogLevel(toGDX(LogTools.getLevel()));
@@ -338,5 +354,211 @@ public class GDXTools
    public static void setTransparency(ModelInstance modelInstance, float transparency)
    {
       modelInstance.materials.get(0).set(new BlendingAttribute(true, transparency));
+   }
+
+   public static void setDiffuseColor(ModelInstance modelInstance, Color color)
+   {
+      modelInstance.materials.get(0).set(ColorAttribute.createDiffuse(color));
+   }
+
+   public static void printShaderLog(String shaderPath, ShaderProgram shaderProgram)
+   {
+      for (String line : shaderProgram.getLog().split("\n"))
+      {
+         if (line.isEmpty())
+            continue;
+
+         if (line.contains("error"))
+            LogTools.error(line);
+         else
+            LogTools.info(line);
+      }
+   }
+
+   public static void printGLVersion()
+   {
+      String glfwVersionString = glfwGetVersionString();
+      LogTools.info("Using GLFW {}", glfwVersionString);
+      String openGLVersion = GL41.glGetString(GL41.GL_VERSION);
+      String openGLVendor = GL41.glGetString(GL41.GL_VENDOR);
+      String openGLRenderer = GL41.glGetString(GL41.GL_RENDERER);
+      LogTools.info("Using OpenGL {} {} {}", openGLVersion, openGLRenderer, openGLVendor);
+   }
+
+   public static GLProfiler createGLProfiler()
+   {
+      GLProfiler glProfiler = new GLProfiler(Gdx.graphics);
+      glProfiler.enable();
+      glProfiler.setListener(error ->
+      {
+         int i = 0;
+         int checkIndex = 0;
+         int ihmcIndex = 0;
+         String glMethodName = null;
+         try
+         {
+            final StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            for (; i < stack.length; i++)
+            {
+               if (stack[i].getMethodName().equals("check"))
+               {
+                  if (i + 1 < stack.length)
+                  {
+                     final StackTraceElement glMethod = stack[i + 1];
+                     glMethodName = glMethod.getMethodName();
+                     checkIndex = i + 1;
+                  }
+               }
+               if (glMethodName != null && stack[i].getClassName().contains("us.ihmc."))
+               {
+                  ihmcIndex = i;
+                  break;
+               }
+            }
+         }
+         catch (Exception ignored)
+         {
+         }
+
+         if (glMethodName != null)
+         {
+            LogTools.error(ihmcIndex, "GLProfiler: Error " + resolveErrorNumber(error) + " from " + glMethodName);
+         }
+         else
+         {
+            LogTools.error(ihmcIndex, "GLProfiler: Error " + resolveErrorNumber(error) + " at: " + new Exception());
+            // This will capture current stack trace for logging, if possible
+         }
+         new Throwable().printStackTrace();
+      });
+      return glProfiler;
+   }
+
+   /**
+    * TODO: Add support for all of the drivers.
+    * See org.lwjgl.opengl.GLUtil#setupDebugMessageCallback(java.io.PrintStream)
+    */
+   public static Callback setupDebugMessageCallback(int minimumDebugLevel)
+   {
+      LogTools.info("Using KHR_debug for OpenGL debugging");
+      GLDebugMessageCallback callback = GLDebugMessageCallback.create((source, type, id, severity, length, message, userParam) ->
+      {
+         if (getDebugSeverityLevel(severity) >= getDebugSeverityLevel(minimumDebugLevel))
+         {
+            String messageString =
+                  "[" + getDebugSeverity(severity) + "] ID: " + String.format("0x%X", id) + " Source: " + getDebugSource(source) + " Type: " + getDebugType(type)
+                  + " " + GLDebugMessageCallback.getMessage(length, message);
+            switch (severity)
+            {
+               case GL43.GL_DEBUG_SEVERITY_HIGH:
+                  LogTools.fatal(messageString);
+                  break;
+               case GL43.GL_DEBUG_SEVERITY_MEDIUM:
+                  LogTools.error(messageString);
+                  break;
+               case GL43.GL_DEBUG_SEVERITY_LOW:
+                  LogTools.warn(messageString);
+                  break;
+               case GL43.GL_DEBUG_SEVERITY_NOTIFICATION:
+               default:
+                  LogTools.info(messageString);
+                  break;
+            }
+         }
+      });
+      KHRDebug.glDebugMessageCallback(callback, NULL);
+      GL41.glEnable(GL43.GL_DEBUG_OUTPUT);
+      return callback;
+   }
+
+   private static int getDebugSeverityLevel(int severity)
+   {
+      switch (severity)
+      {
+         case GL43.GL_DEBUG_SEVERITY_HIGH:
+            return 5;
+         case GL43.GL_DEBUG_SEVERITY_MEDIUM:
+            return 4;
+         case GL43.GL_DEBUG_SEVERITY_LOW:
+            return 3;
+         case GL43.GL_DEBUG_SEVERITY_NOTIFICATION:
+         default:
+            return 2;
+      }
+   }
+
+   private static String getDebugSeverity(int severity)
+   {
+      switch (severity)
+      {
+         case GL43.GL_DEBUG_SEVERITY_HIGH:
+            return "HIGH";
+         case GL43.GL_DEBUG_SEVERITY_MEDIUM:
+            return "MEDIUM";
+         case GL43.GL_DEBUG_SEVERITY_LOW:
+            return "LOW";
+         case GL43.GL_DEBUG_SEVERITY_NOTIFICATION:
+            return "NOTIFICATION";
+         default:
+            return apiUnknownToken(severity);
+      }
+   }
+
+   private static String getDebugSource(int source)
+   {
+      switch (source)
+      {
+         case GL43.GL_DEBUG_SOURCE_API:
+            return "API";
+         case GL43.GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+            return "WINDOW SYSTEM";
+         case GL43.GL_DEBUG_SOURCE_SHADER_COMPILER:
+            return "SHADER COMPILER";
+         case GL43.GL_DEBUG_SOURCE_THIRD_PARTY:
+            return "THIRD PARTY";
+         case GL43.GL_DEBUG_SOURCE_APPLICATION:
+            return "APPLICATION";
+         case GL43.GL_DEBUG_SOURCE_OTHER:
+            return "OTHER";
+         default:
+            return apiUnknownToken(source);
+      }
+   }
+
+   private static String getDebugType(int type)
+   {
+      switch (type)
+      {
+         case GL43.GL_DEBUG_TYPE_ERROR:
+            return "ERROR";
+         case GL43.GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+            return "DEPRECATED BEHAVIOR";
+         case GL43.GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+            return "UNDEFINED BEHAVIOR";
+         case GL43.GL_DEBUG_TYPE_PORTABILITY:
+            return "PORTABILITY";
+         case GL43.GL_DEBUG_TYPE_PERFORMANCE:
+            return "PERFORMANCE";
+         case GL43.GL_DEBUG_TYPE_OTHER:
+            return "OTHER";
+         case GL43.GL_DEBUG_TYPE_MARKER:
+            return "MARKER";
+         default:
+            return apiUnknownToken(type);
+      }
+   }
+
+   public static Pair<String, String> loadCombinedShader(String pathForLoadingFromClasspath)
+   {
+      String combinedString = Gdx.files.classpath(pathForLoadingFromClasspath).readString();
+
+      String vertexMacro = "#type vertex\n";
+      int vertexBegin = combinedString.indexOf(vertexMacro);
+      String fragmentMacro = "#type fragment\n";
+      int fragmentBegin = combinedString.indexOf(fragmentMacro);
+
+      String vertexShader = combinedString.substring(vertexBegin + vertexMacro.length() - 1, fragmentBegin).trim();
+      String fragmentShader = combinedString.substring(fragmentBegin + fragmentMacro.length() - 1).trim();
+      return Pair.of(vertexShader, fragmentShader);
    }
 }

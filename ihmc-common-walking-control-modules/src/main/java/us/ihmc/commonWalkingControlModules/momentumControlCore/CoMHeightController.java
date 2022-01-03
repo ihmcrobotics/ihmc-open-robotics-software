@@ -4,14 +4,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class CoMHeightController implements HeightController<CenterOfMassFeedbackControlCommand>
 {
-   private final CenterOfMassJacobian centerOfMassJacobian;
+   private final CenterOfMassStateProvider centerOfMassStateProvider;
    private final PDController comHeightController;
 
    private final YoDouble currentCoMHeightInWorld;
@@ -28,9 +28,9 @@ public class CoMHeightController implements HeightController<CenterOfMassFeedbac
    private final FrameVector3D feedForwardLinearAcceleration = new FrameVector3D();
    private final FrameVector3D currentLinearVelocity = new FrameVector3D();
 
-   public CoMHeightController(CenterOfMassJacobian centerOfMassJacobian, YoRegistry parentRegistry)
+   public CoMHeightController(CenterOfMassStateProvider centerOfMassStateProvider, YoRegistry parentRegistry)
    {
-      this.centerOfMassJacobian = centerOfMassJacobian;
+      this.centerOfMassStateProvider = centerOfMassStateProvider;
       comHeightController = new PDController("CoMHeight", registry);
 
       currentCoMHeightInWorld = new YoDouble("currentCoMHeightInWorld", registry);
@@ -46,8 +46,8 @@ public class CoMHeightController implements HeightController<CenterOfMassFeedbac
    @Override
    public void compute(CenterOfMassFeedbackControlCommand feedbackCommand)
    {
-      controlPosition.setIncludingFrame(centerOfMassJacobian.getCenterOfMass());
-      currentLinearVelocity.setIncludingFrame(centerOfMassJacobian.getCenterOfMassVelocity());
+      controlPosition.setIncludingFrame(centerOfMassStateProvider.getCenterOfMassPosition());
+      currentLinearVelocity.setIncludingFrame(centerOfMassStateProvider.getCenterOfMassVelocity());
 
       controlPosition.changeFrame(ReferenceFrame.getWorldFrame());
       currentLinearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
@@ -65,8 +65,10 @@ public class CoMHeightController implements HeightController<CenterOfMassFeedbac
       comHeightController.setPositionDeadband(0.0);
 
       feedForwardCoMAcceleration.set(feedForwardLinearAcceleration.getZ());
-      feedbackCoMAcceleration.set(comHeightController.compute(currentCoMHeightInWorld.getValue(), desiredCoMHeightInWorld.getValue(),
-                                                              currentCoMVelocityInWorld.getValue(), desiredCoMVelocityInWorld.getValue()));
+      feedbackCoMAcceleration.set(comHeightController.compute(currentCoMHeightInWorld.getValue(),
+                                                              desiredCoMHeightInWorld.getValue(),
+                                                              currentCoMVelocityInWorld.getValue(),
+                                                              desiredCoMVelocityInWorld.getValue()));
       feedbackCoMAcceleration.add(feedForwardLinearAcceleration.getZ());
    }
 

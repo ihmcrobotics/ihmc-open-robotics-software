@@ -1,13 +1,17 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import imgui.internal.ImGui;
-import us.ihmc.commons.time.Stopwatch;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.gdx.tools.BoxesDemoModel;
-import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.tools.string.StringTools;
+import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
+import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class GDXImGuiVRDemo
 {
@@ -15,59 +19,130 @@ public class GDXImGuiVRDemo
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources",
                                                               "VR Demo");
-
-   private final Stopwatch stopwatch = new Stopwatch().start();
+   private GDXReferenceFrameGraphic headsetZUpFrameGraphic;
+   private GDXReferenceFrameGraphic headsetZBackFrameGraphic;
+   private GDXReferenceFrameGraphic leftControllerZUpFrameGraphic;
+   private GDXReferenceFrameGraphic leftControllerZBackFrameGraphic;
+   private GDXReferenceFrameGraphic rightControllerZUpFrameGraphic;
+   private GDXReferenceFrameGraphic rightControllerZBackFrameGraphic;
+   private GDXReferenceFrameGraphic leftEyeZUpFrameGraphic;
+   private GDXReferenceFrameGraphic leftEyeZBackFrameGraphic;
+   private GDXReferenceFrameGraphic rightEyeZUpFrameGraphic;
+   private GDXReferenceFrameGraphic rightEyeZBackFrameGraphic;
+   private final ImBoolean showXForwardZUp = new ImBoolean(true);
+   private final ImBoolean showXRightZBack = new ImBoolean(true);
+   private final ImBoolean showLeftEyeZUpFrame = new ImBoolean(true);
+   private final ImBoolean showLeftEyeZBackFrame = new ImBoolean(true);
+   private final ImBoolean showRightEyeZUpFrame = new ImBoolean(true);
+   private final ImBoolean showRightEyeZBackFrame = new ImBoolean(true);
 
    public GDXImGuiVRDemo()
    {
-      GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
             baseUI.create();
+            baseUI.getVRManager().getContext().addVRInputProcessor(this::handleVREvents);
+
+            headsetZUpFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+            headsetZBackFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+            leftControllerZUpFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+            leftControllerZBackFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+            rightControllerZUpFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+            rightControllerZBackFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+            leftEyeZUpFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+            leftEyeZBackFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+            rightEyeZUpFrameGraphic = new GDXReferenceFrameGraphic(0.2);
+            rightEyeZBackFrameGraphic = new GDXReferenceFrameGraphic(0.2);
 
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
-            baseUI.getImGuiPanelManager().addPanel("Window", this::renderPanel);
+            baseUI.get3DSceneManager().addRenderableProvider(this::getRenderables);
+            baseUI.getImGuiPanelManager().addPanel("VR Test", this::renderImGuiWidgets);
+         }
+
+         private void handleVREvents(GDXVRContext vrContext)
+         {
+            headsetZUpFrameGraphic.setToReferenceFrame(vrContext.getHeadset().getXForwardZUpHeadsetFrame());
+            headsetZBackFrameGraphic.setToReferenceFrame(vrContext.getHeadset().getDeviceYUpZBackFrame());
+            leftControllerZUpFrameGraphic.setToReferenceFrame(vrContext.getController(RobotSide.LEFT).getXForwardZUpControllerFrame());
+            leftControllerZBackFrameGraphic.setToReferenceFrame(vrContext.getController(RobotSide.LEFT).getDeviceYUpZBackFrame());
+            rightControllerZUpFrameGraphic.setToReferenceFrame(vrContext.getController(RobotSide.RIGHT).getXForwardZUpControllerFrame());
+            rightControllerZBackFrameGraphic.setToReferenceFrame(vrContext.getController(RobotSide.RIGHT).getDeviceYUpZBackFrame());
+            leftEyeZUpFrameGraphic.setToReferenceFrame(vrContext.getEyes().get(RobotSide.LEFT).getEyeXForwardZUpFrame());
+            leftEyeZBackFrameGraphic.setToReferenceFrame(vrContext.getEyes().get(RobotSide.LEFT).getEyeXRightZBackFrame());
+            rightEyeZUpFrameGraphic.setToReferenceFrame(vrContext.getEyes().get(RobotSide.RIGHT).getEyeXForwardZUpFrame());
+            rightEyeZBackFrameGraphic.setToReferenceFrame(vrContext.getEyes().get(RobotSide.RIGHT).getEyeXRightZBackFrame());
          }
 
          @Override
          public void render()
          {
-            baseUI.pollVREvents();
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
          }
 
-         private void renderPanel()
+         private void renderImGuiWidgets()
          {
-            if (ImGui.beginTabBar("main"))
+            ImGui.checkbox("Show IHMC ZUp", showXForwardZUp);
+            ImGui.checkbox("Show OpenVR XRightZBack", showXRightZBack);
+            ImGui.checkbox("Show Left Eye ZUp Frame", showLeftEyeZUpFrame);
+            ImGui.checkbox("Show Left Eye ZBack Frame", showLeftEyeZBackFrame);
+            ImGui.checkbox("Show Right Eye ZUp Frame", showRightEyeZUpFrame);
+            ImGui.checkbox("Show Right Eye ZBack Frame", showRightEyeZBackFrame);
+         }
+
+         private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+         {
+            if (showXForwardZUp.get())
             {
-               if (ImGui.beginTabItem("Window"))
-               {
-                  ImGui.text("Tab bar detected!");
-                  ImGui.endTabItem();
-               }
-               ImGui.endTabBar();
+               headsetZUpFrameGraphic.getRenderables(renderables, pool);
+               leftControllerZUpFrameGraphic.getRenderables(renderables, pool);
+               rightControllerZUpFrameGraphic.getRenderables(renderables, pool);
             }
-            ImGui.text(StringTools.format3D("Time: {} s", stopwatch.totalElapsed()).get());
-            ImGui.button("I'm a Button!");
-            float[] values = new float[100];
-            for (int i = 0; i < 100; i++)
+            if (showXRightZBack.get())
             {
-               values[i] = i;
+               headsetZBackFrameGraphic.getRenderables(renderables, pool);
+               leftControllerZBackFrameGraphic.getRenderables(renderables, pool);
+               rightControllerZBackFrameGraphic.getRenderables(renderables, pool);
             }
-            ImGui.plotLines("Histogram", values, 100);
+            if (showLeftEyeZUpFrame.get())
+            {
+               leftEyeZUpFrameGraphic.getRenderables(renderables, pool);
+            }
+            if (showRightEyeZUpFrame.get())
+            {
+               rightEyeZUpFrameGraphic.getRenderables(renderables, pool);
+            }
+            if (showLeftEyeZBackFrame.get())
+            {
+               leftEyeZBackFrameGraphic.getRenderables(renderables, pool);
+            }
+            if (showRightEyeZBackFrame.get())
+            {
+               rightEyeZBackFrameGraphic.getRenderables(renderables, pool);
+            }
          }
 
          @Override
          public void dispose()
          {
             baseUI.dispose();
+            headsetZUpFrameGraphic.dispose();
+            leftControllerZUpFrameGraphic.dispose();
+            rightControllerZUpFrameGraphic.dispose();
+            headsetZBackFrameGraphic.dispose();
+            leftControllerZBackFrameGraphic.dispose();
+            rightControllerZBackFrameGraphic.dispose();
+            leftEyeZUpFrameGraphic.dispose();
+            rightEyeZUpFrameGraphic.dispose();
+            leftEyeZBackFrameGraphic.dispose();
+            rightEyeZBackFrameGraphic.dispose();
          }
-      }, getClass());
+      });
    }
 
    public static void main(String[] args)

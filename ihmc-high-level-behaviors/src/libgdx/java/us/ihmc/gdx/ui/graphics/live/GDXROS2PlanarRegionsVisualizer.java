@@ -9,6 +9,7 @@ import imgui.internal.ImGui;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.gdx.imgui.ImGuiPlot;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -24,8 +25,7 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
    private final ResettableExceptionHandlingExecutorService executorService;
    private final ROS2Topic<PlanarRegionsListMessage> topic;
 
-   private long receivedCount = 0;
-   private final ImGuiPlot receivedPlot = new ImGuiPlot("Received", 1000, 230, 20);
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiPlot numberOfRegionsPlot = new ImGuiPlot("# Regions", 1000, 230, 20);
    private int numberOfPlanarRegions = 0;
 
@@ -42,7 +42,7 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
 
    private void acceptMessage(PlanarRegionsListMessage planarRegionsListMessage)
    {
-      ++receivedCount;
+      frequencyPlot.recordEvent();
       if (isActive())
       {
          executorService.clearQueueAndExecute(() ->
@@ -73,7 +73,7 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
          executorService.interruptAndReset();
       }
       ImGui.text(topic.getName());
-      receivedPlot.render(receivedCount);
+      frequencyPlot.renderImGuiWidgets();
       numberOfRegionsPlot.render(numberOfPlanarRegions);
    }
 

@@ -11,10 +11,10 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
-import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.perception.ROSOpenCVImage;
 import us.ihmc.perception.ROSOpenCVTools;
@@ -36,9 +36,8 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    private final ImGuiVideoPanel videoPanel;
    private volatile Image image;
    private volatile CompressedImage compressedImage;
-   private long receivedCount = 0;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private Mat inputImageMat;
    private Mat decodedImageMat;
    private Mat resizedImageMat;
@@ -62,7 +61,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             public void onNewMessage(CompressedImage image)
             {
                GDXROS1VideoVisualizer.this.compressedImage = image;
-               ++receivedCount;
+               frequencyPlot.recordEvent();
             }
          };
          ros1Node.attachSubscriber(topic, compressedSubscriber);
@@ -75,7 +74,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
             public void onNewMessage(Image image)
             {
                GDXROS1VideoVisualizer.this.image = image;
-               ++receivedCount;
+               frequencyPlot.recordEvent();
             }
          };
          ros1Node.attachSubscriber(topic, subscriber);
@@ -100,7 +99,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       super.renderImGuiWidgets();
       ImGui.text(topic);
-      receivedPlot.render(receivedCount);
+      frequencyPlot.renderImGuiWidgets();
       ImGui.sameLine();
    }
 

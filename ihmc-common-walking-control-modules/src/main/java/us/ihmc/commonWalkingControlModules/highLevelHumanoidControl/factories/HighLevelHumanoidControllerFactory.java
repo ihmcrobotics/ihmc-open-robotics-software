@@ -32,6 +32,9 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -39,8 +42,10 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.ClearDelay
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -49,6 +54,7 @@ import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolderReadOnly;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
@@ -65,11 +71,14 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.tools.thread.CloseableAndDisposableRegistry;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HighLevelHumanoidControllerFactory implements CloseableAndDisposable
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final CloseableAndDisposableRegistry closeableAndDisposableRegistry = new CloseableAndDisposableRegistry();
 
@@ -96,14 +105,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final PushRecoveryControlManagerFactory pushRecoveryManagerFactory;
    private final WalkingControllerParameters walkingControllerParameters;
    private final PushRecoveryControllerParameters pushRecoveryControllerParameters;
-   private final CoPTrajectoryParameters copTrajectoryParameters;
-
    private final ArrayList<Updatable> updatables = new ArrayList<>();
    private final ArrayList<ControllerStateChangedListener> controllerStateChangedListenersToAttach = new ArrayList<>();
    private final ArrayList<ControllerFailureListener> controllerFailureListenersToAttach = new ArrayList<>();
 
    private final SideDependentList<String> footSensorNames;
-   private final SideDependentList<String> footContactSensorNames;
    private final SideDependentList<String> wristSensorNames;
 
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -154,12 +160,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       this.pushRecoveryControllerParameters = pushRecoveryControllerParameters;
-      this.copTrajectoryParameters = copTrajectoryParameters;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.footSensorNames = footForceSensorNames;
-      this.footContactSensorNames = footContactSensorNames;
       this.wristSensorNames = wristSensorNames;
-
 
       commandInputManager = new CommandInputManager(ControllerAPIDefinition.getControllerSupportedCommands());
       try
@@ -369,7 +372,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerFactoriesMap.put(HighLevelControllerName.PUSH_RECOVERY, controllerStateFactory);
    }
 
-
    public void useDefaultExitWalkingTransitionControlState(HighLevelControllerName targetState)
    {
       HighLevelControllerStateFactory controllerStateFactory = new ExitWalkingTransitionControllerStateFactory(targetState);
@@ -465,12 +467,48 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                         YoGraphicsListRegistry yoGraphicsListRegistry,
                                         HumanoidRobotSensorInformation sensorInformation,
                                         ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                        CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                         JointDesiredOutputListBasics lowLevelControllerOutput,
                                         JointBasics... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+
+      YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
+      YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
+
+      CenterOfMassStateProvider centerOfMassStateProvider = new CenterOfMassStateProvider()
+      {
+         CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
+
+         @Override
+         public void updateState()
+         {
+            centerOfMassJacobian.reset();
+         }
+
+         @Override
+         public FramePoint3DReadOnly getCenterOfMassPosition()
+         {
+            usingEstimatorCoMPosition.set(centerOfMassDataHolderForController.hasCenterOfMassPosition());
+            if (centerOfMassDataHolderForController.hasCenterOfMassPosition())
+               return centerOfMassDataHolderForController.getCenterOfMassPosition();
+            else
+               return centerOfMassJacobian.getCenterOfMass();
+         }
+
+         @Override
+         public FrameVector3DReadOnly getCenterOfMassVelocity()
+         {
+            usingEstimatorCoMVelocity.set(centerOfMassDataHolderForController.hasCenterOfMassVelocity());
+            if (centerOfMassDataHolderForController.hasCenterOfMassVelocity())
+               return centerOfMassDataHolderForController.getCenterOfMassVelocity();
+            else
+               return centerOfMassJacobian.getCenterOfMassVelocity();
+         }
+      };
+
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
 
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
@@ -494,6 +532,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       // Setup the HighLevelHumanoidControllerToolbox /////////////////////////////////////////////
       double omega0 = walkingControllerParameters.getOmega0();
       controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
+                                                                 centerOfMassStateProvider,
                                                                  referenceFrames,
                                                                  footSwitches,
                                                                  wristForceSensors,

@@ -1,246 +1,255 @@
 package us.ihmc.gdx.vr;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.gdx.imgui.ImGuiPlot;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
-import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.time.FrequencyCalculator;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Touchpad;
-
-public class GDXVRManager implements RenderableProvider
+/** This class should manage VR as part of the ImGuiBasedUI. */
+public class GDXVRManager
 {
-   private static boolean ENABLE_VR = Boolean.parseBoolean(System.getProperty("enable.vr"));
-
-   private GDXVRContext context;
-   private final HashSet<ModelInstance> modelInstances = new HashSet<>();
-   private ModelInstance headsetModelInstance;
-   private final SideDependentList<GDXVRDevice> controllers = new SideDependentList<>();
+   private final GDXVRContext context = new GDXVRContext();
+   private Notification contextCreatedNotification;
+   private boolean contextInitialized = false;
+   private boolean initializing = false;
    private boolean skipHeadset = false;
-   private boolean holdingTouchpadToMove = false;
-   private final Point3D initialVRSpacePosition = new Point3D();
-   private final Point3D initialVRControllerPosition = new Point3D();
-   private final Point3D currentVRControllerPosition = new Point3D();
-   private final Vector3D deltaVRControllerPosition = new Vector3D();
-   private final Point3D resultVRSpacePosition = new Point3D();
-   private final Point3D lastVRSpacePosition = new Point3D();
-   private final ArrayList<Runnable> thingsToCreateOnEnable = new ArrayList<>();
+   private final Object syncObject = new Object();
+   private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
    private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean vrEnabled = new ImBoolean(false);
+   private final Notification posesReady = new Notification();
+   private volatile boolean waitingOnPoses = false;
+   private ImGuiPlot vrFPSPlot = new ImGuiPlot(labels.get("VR FPS Hz"), 1000, 300, 50);
+   private FrequencyCalculator vrFPSCalculator = new FrequencyCalculator();
+   private ImGuiPlot waitGetPosesPlot = new ImGuiPlot(labels.get("Wait Get Poses Hz"), 1000, 300, 50);
+   private ImGuiPlot waitGetToRenderDelayPlot = new ImGuiPlot(labels.get("WaitGetToRender Delay"), 1000, 300, 50);
+   private final Stopwatch waitGetToRenderStopwatch = new Stopwatch();
+   private volatile double waitGetToRenderDuration = Double.NaN;
+   private FrequencyCalculator waitGetPosesFrequencyCalculator = new FrequencyCalculator();
+   private ImGuiPlot pollEventsPlot = new ImGuiPlot(labels.get("Poll Events Hz"), 1000, 300, 50);
+   private FrequencyCalculator pollEventsFrequencyCalculator = new FrequencyCalculator();
+   private ImGuiPlot contextInitializedPlot = new ImGuiPlot(labels.get("contextInitialized"), 1000, 300, 50);
+   private ImGuiPlot initSystemCountPlot = new ImGuiPlot(labels.get("initSystemCount"), 1000, 300, 50);
+   private volatile int initSystemCount = 0;
+   private ImGuiPlot setupEyesCountPlot = new ImGuiPlot(labels.get("setupEyesCount"), 1000, 300, 50);
+   private volatile int setupEyesCount = 0;
+   private final Notification waitOnPosesNotification = new Notification();
+   private volatile boolean waitGetPosesThreadRunning = false;
 
-   public void create(FocusBasedGDXCamera camera3D)
+   public void create()
    {
-      ENABLE_VR = true;
-      System.setProperty("enable.vr", "true");
 
-      context = new GDXVRContext();
+   }
 
-      scenePoseGizmo.create(camera3D);
-
-      context.getPerEyeData().get(RobotSide.LEFT).getCamera().far = 100f;
-      context.getPerEyeData().get(RobotSide.RIGHT).getCamera().far = 100f;
-
-      context.addListener(new GDXVRDeviceListener()
+   /**
+    * Doing poll and render close together makes VR performance the best it can be
+    * and reduce dizziness.
+    *
+    * TODO: This thread has to be a multiple of the parent (240?)
+    * TODO: If the rest of the app is too slow, can we run this one faster?
+    */
+   public void pollEventsAndRender(GDXImGuiBasedUI baseUI, GDX3DSceneManager sceneManager)
+   {
+      boolean posesReady = pollEvents(baseUI);
+      if (posesReady && isVRReady())
       {
-         @Override
-         public void connected(GDXVRDevice device)
+         skipHeadset = true;
+         vrFPSCalculator.ping();
+         waitGetToRenderDuration = waitGetToRenderStopwatch.totalElapsed();
+         synchronized (syncObject)
          {
-            LogTools.info("{} connected", device);
-            if (device.getModelInstance() != null)
-            {
-               modelInstances.add(device.getModelInstance());
-
-               if (device.getType() == GDXVRDeviceType.HeadMountedDisplay)
-               {
-                  headsetModelInstance = device.getModelInstance();
-               }
-               else if(device.getType() == GDXVRDeviceType.Controller)
-               {
-                  if (device.getControllerRole() == GDXVRControllerRole.LeftHand)
-                  {
-                     controllers.set(RobotSide.LEFT, device);
-                  }
-                  else if (device.getControllerRole() == GDXVRControllerRole.RightHand)
-                  {
-                     controllers.set(RobotSide.RIGHT, device);
-                  }
-                  else
-                  {
-                     if (!controllers.containsKey(RobotSide.LEFT))
-                     {
-                        controllers.set(RobotSide.LEFT, device);
-                     }
-                     else if (!controllers.containsKey(RobotSide.RIGHT))
-                     {
-                        controllers.set(RobotSide.RIGHT, device);
-                     }
-                  }
-               }
-
-               LogTools.info("{} controllers registered.", controllers.sides());
-            }
+            context.renderEyes(sceneManager.getSceneBasics());
          }
-
-         @Override
-         public void disconnected(GDXVRDevice device)
-         {
-            LogTools.info("{} disconnected", device);
-         }
-
-         @Override
-         public void buttonPressed(GDXVRDevice device, int button)
-         {
-            LogTools.info("{} button pressed: {}", device, button);
-         }
-
-         @Override
-         public void buttonReleased(GDXVRDevice device, int button)
-         {
-            LogTools.info("{} button released: {}", device, button);
-         }
-      });
-
-      context.addListener(new GDXVRDeviceAdapter()
-      {
-         @Override
-         public void buttonPressed(GDXVRDevice device, int button)
-         {
-            if (device == controllers.get(RobotSide.RIGHT) && button == SteamVR_Touchpad)
-            {
-//               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
-//               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
-//               context.getToZUpXForward().transform(initialVRSpacePosition);
-//               lastVRSpacePosition.set(initialVRSpacePosition);
-               holdingTouchpadToMove = true;
-            }
-         }
-
-         @Override
-         public void buttonReleased(GDXVRDevice device, int button)
-         {
-            if (device == controllers.get(RobotSide.RIGHT) && button == SteamVR_Touchpad)
-            {
-               holdingTouchpadToMove = false;
-            }
-         }
-      });
-
-      for (Runnable runnable : thingsToCreateOnEnable)
-      {
-         runnable.run();
+         skipHeadset = false;
       }
    }
 
-   public void pollEvents()
+   private boolean pollEvents(GDXImGuiBasedUI baseUI)
    {
-      context.pollEvents();
-   }
-
-   public void render(GDX3DSceneManager sceneManager)
-   {
-      // Wait for VR setup to be ready. This is the primary indicator.
-      if (context.getDeviceByType(GDXVRDeviceType.HeadMountedDisplay) == null)
-         return;
-
-      context.teleport(scenePoseGizmo.getTransform());
-
-      if (holdingTouchpadToMove)
+      boolean posesReadyThisFrame = false;
+      if (vrEnabled.get())
       {
-//         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
-//         resultVRSpacePosition.set(initialVRSpacePosition);
-//         deltaVRControllerPosition.sub(currentVRControllerPosition, initialVRControllerPosition);
-//         resultVRSpacePosition.sub(deltaVRControllerPosition);
-//         resultVRSpacePosition.sub(lastVRSpacePosition);
-//         GDXTools.toGDX(resultVRSpacePosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
-//         lastVRSpacePosition.set(resultVRSpacePosition);
-//         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
-//         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
-//         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.1f, 0.0f, 0.0f);
+         if (!initializing && contextCreatedNotification == null) // should completely dispose and recreate?
+         {
+            initializing = true;
+            contextCreatedNotification = new Notification();
+            MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+            {
+               initSystemCount++;
+               synchronized (syncObject)
+               {
+                  context.initSystem();
+               }
+               contextCreatedNotification.set();
+            });
+         }
+         if (contextCreatedNotification != null && contextCreatedNotification.poll())
+         {
+            initializing = false;
+            setupEyesCount++;
+            synchronized (syncObject)
+            {
+               context.setupEyes();
+            }
+
+            if (!Boolean.parseBoolean(System.getProperty("gdx.free.spin")))
+            {
+               baseUI.setForegroundFPS(350); // TODO: Do something better with this
+            }
+            baseUI.setVsync(false); // important to disable vsync for VR
+            scenePoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
+            contextInitialized = true;
+            waitGetPosesThreadRunning = true;
+            ThreadTools.startAsDaemon(this::waitOnPoses, getClass().getSimpleName() + "WaitOnPosesThread");
+         }
+
+         if (contextInitialized)
+         {
+            // Waiting for the poses on a thread allows for the rest of the application to keep
+            // cranking faster than VR can do stuff. This also makes the performance graph in Steam
+            // show the correct value and the OpenVR stack work much better.
+            // TODO: This whole thing might have major issues because
+            // there's a delay waiting for the next time this method is called
+            posesReadyThisFrame = posesReady.poll();
+
+            if (!posesReadyThisFrame && !waitingOnPoses)
+            {
+               waitingOnPoses = true;
+               waitOnPosesNotification.set();
+            }
+            else
+            {
+               waitingOnPoses = false;
+            }
+
+            if (posesReadyThisFrame)
+            {
+               pollEventsFrequencyCalculator.ping();
+               synchronized (syncObject)
+               {
+                  context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
+               }
+            }
+         }
       }
       else
       {
-//         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
+         if (contextCreatedNotification != null && contextInitialized)
+         {
+            dispose();
+         }
       }
 
-      context.begin();
-      renderScene(RobotSide.LEFT, sceneManager);
-      renderScene(RobotSide.RIGHT, sceneManager);
-      context.end();
+      return posesReadyThisFrame;
    }
 
-   private void renderScene(RobotSide eye, GDX3DSceneManager sceneManager)
+   private void waitOnPoses()
    {
-      GDXVRPerEyeData eyeData = context.getPerEyeData().get(eye);
-      GDXVRCamera camera = eyeData.getCamera();
+      while (waitGetPosesThreadRunning)
+      {
+         waitOnPosesNotification.blockingPoll();
 
-      context.beginEye(eye);
-
-      int width = eyeData.getFrameBuffer().getWidth();
-      int height = eyeData.getFrameBuffer().getHeight();
-      Gdx.gl.glViewport(0, 0, width, height);
-
-      GDX3DSceneTools.glClearGray();
-
-      skipHeadset = true;
-      sceneManager.renderToCamera(camera);
-      skipHeadset = false;
-
-      context.endEye();
+         if (waitGetPosesThreadRunning)
+         {
+            waitGetPosesFrequencyCalculator.ping();
+            synchronized (syncObject)
+            {
+               context.waitGetPoses();
+            }
+            waitGetToRenderStopwatch.reset();
+            posesReady.set();
+         }
+      }
    }
 
-   public SideDependentList<GDXVRDevice> getControllers()
+   public void renderImGuiEnableWidget()
    {
-      return controllers;
+      if (ImGui.checkbox(labels.get("VR Enabled"), vrEnabled))
+      {
+         if (vrEnabled.get())
+            LogTools.info("Enabling VR");
+         else
+            LogTools.info("Disabling VR");
+      }
+      if (ImGui.isItemHovered())
+      {
+         float right = ImGui.getWindowPosX() + ImGui.getWindowSizeX();
+         float y = ImGui.getItemRectMaxY();
+         ImGui.setNextWindowPos(right - 600, y); // prevent the tooltip from creating a new window
+         ImGui.setTooltip("It is recommended to start SteamVR and power on the VR controllers before clicking this button.");
+      }
+   }
+
+   public void renderImGuiDebugWidgets()
+   {
+      ImGui.checkbox(labels.get("Show scene pose gizmo"), showScenePoseGizmo);
+      contextInitializedPlot.render(contextInitialized ? 1.0 : 0.0);
+      initSystemCountPlot.render(initSystemCount);
+      setupEyesCountPlot.render(setupEyesCount);
+      waitGetPosesPlot.render(waitGetPosesFrequencyCalculator.getFrequency());
+      pollEventsPlot.render(pollEventsFrequencyCalculator.getFrequency());
+      vrFPSPlot.render(vrFPSCalculator.getFrequency());
+      waitGetToRenderDelayPlot.render(waitGetToRenderDuration);
    }
 
    public void dispose()
    {
-      if (context != null)
-         context.dispose();
-
-      for (ModelInstance modelInstance : modelInstances)
+      waitGetPosesThreadRunning = false;
+      waitOnPosesNotification.set();
+      if (contextCreatedNotification != null && contextInitialized)
       {
-         ExceptionTools.handle(modelInstance.model::dispose, DefaultExceptionHandler.PRINT_MESSAGE);
+         contextCreatedNotification = null;
+         contextInitialized = false;
+         context.dispose();
       }
    }
 
-   public void create(Runnable runnable)
+   public boolean isVRReady()
    {
-      thingsToCreateOnEnable.add(runnable);
+      // Wait for VR setup to be ready. This is the primary indicator, called only when the headset is connected
+      return vrEnabled.get() && contextInitialized && context.getHeadset().isConnected();
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      scenePoseGizmo.process3DViewInput(input);
+      if (isVRReady() && showScenePoseGizmo.get())
+      {
+         scenePoseGizmo.process3DViewInput(input);
+         context.teleport(teleportIHMCZUpToIHMCZUpWorldConsumer ->
+         {
+            teleportIHMCZUpToIHMCZUpWorldConsumer.set(scenePoseGizmo.getTransformToParent());
+         });
+      }
    }
 
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (ModelInstance modelInstance : modelInstances)
+      if (vrEnabled.get() && contextInitialized)
       {
-         if (!skipHeadset || !(modelInstance == headsetModelInstance))
+         if (!skipHeadset)
          {
-            modelInstance.getRenderables(renderables, pool);
+            context.getHeadsetRenderable(renderables, pool);
          }
+         context.getControllerRenderables(renderables, pool);
+         context.getBaseStationRenderables(renderables, pool);
+         if (showScenePoseGizmo.get())
+            scenePoseGizmo.getRenderables(renderables, pool);
       }
-
-      scenePoseGizmo.getRenderables(renderables, pool);
    }
 
    public GDXVRContext getContext()
@@ -248,8 +257,8 @@ public class GDXVRManager implements RenderableProvider
       return context;
    }
 
-   public static boolean isVREnabled()
+   public ImBoolean getVREnabled()
    {
-      return ENABLE_VR;
+      return vrEnabled;
    }
 }

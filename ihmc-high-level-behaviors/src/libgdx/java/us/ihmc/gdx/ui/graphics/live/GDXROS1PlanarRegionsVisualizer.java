@@ -12,6 +12,7 @@ import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.ui.ImGuiGDXPlanarRegionLoggingPanel;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
@@ -28,9 +29,8 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
    private DRCRobotModel robotModel = null;
    private final String topic;
 
-   private long receivedCount = 0;
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
-   private final ImGuiPlot receivedPlot = new ImGuiPlot("Received", 1000, 230, 20);
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiPlot delayPlot = new ImGuiPlot("Delay", 1000, 230, 20);
 
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
@@ -59,7 +59,7 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
 
       delayFixedPlanarRegionsSubscription = MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros2Node, robotModel, topic, planarRegionsList ->
       {
-         ++receivedCount;
+         frequencyPlot.recordEvent();
          planarRegionsGraphic.generateMeshes(planarRegionsList.getRight());
          loggingPanel.update(planarRegionsList.getLeft(), planarRegionsList.getRight());
       });
@@ -139,11 +139,10 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
    {
       super.renderImGuiWidgets();
       ImGui.text(topic);
-      receivedPlot.render(receivedCount);
+      frequencyPlot.renderImGuiWidgets();
       if (delayFixedPlanarRegionsSubscription != null)
       {
          delayFixedPlanarRegionsSubscription.setEnabled(isActive());
-         ImGui.text("Delay:");
          delayPlot.render((float) delayFixedPlanarRegionsSubscription.getDelay());
       }
       ImGui.checkbox(labels.get("Show logging panel"), loggingPanel.getIsShowing());

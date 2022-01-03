@@ -21,7 +21,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -58,6 +58,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -145,6 +146,7 @@ public class WalkingControllerTest
    private SimulationConstructionSet scs;
    private SideDependentList<TestFootSwitch> updatableFootSwitches;
    private FullHumanoidRobotModel fullRobotModel;
+   private CenterOfMassStateProvider centerOfMassStateProvider;
    private HumanoidReferenceFrames referenceFrames;
    private PerfectSimulatedOutputWriter writer;
    private OneDoFJointBasics[] oneDoFJoints;
@@ -478,6 +480,7 @@ public class WalkingControllerTest
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>(updatableFootSwitches);
 
       HighLevelHumanoidControllerToolbox controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
+                                                                                                    centerOfMassStateProvider,
                                                                                                     referenceFrames,
                                                                                                     footSwitches,
                                                                                                     null,
@@ -525,6 +528,7 @@ public class WalkingControllerTest
 
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       fullRobotModel = robotModel.createFullRobotModel();
+      centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
@@ -573,8 +577,8 @@ public class WalkingControllerTest
    private void setupRobotAndCopyConfiguration(HumanoidFloatingRootJointRobot robot)
    {
       robot.setDynamic(false);
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      initialSetup.initializeRobot(robot, robotModel.getJointMap());
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      initialSetup.initializeRobot(robot);
 
       writer = new PerfectSimulatedOutputWriter(robot, fullRobotModel);
 

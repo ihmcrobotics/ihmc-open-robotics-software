@@ -160,7 +160,7 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
 
       centerOfMassFrameWithRotation = new PoseReferenceFrame("centerOfMassFrameWithRotation", bodyFrame);
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
-      centerOfMassZUpFrame = new ZUpFrame(worldFrame, centerOfMassFrameWithRotation, "centerOfMassZUpFrame");
+      centerOfMassZUpFrame = new ZUpFrame(centerOfMassFrameWithRotation, "centerOfMassZUpFrame");
 
       centerOfFourHipsFramePose = new FramePose3D(bodyFrame);
       centerOfFourHipsFrame = new PoseReferenceFrame("centerOfFourHipsFrame", bodyFrame);
@@ -168,7 +168,7 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
       centerOfFourFeetFramePose = new FramePose3D(bodyFrame);
       centerOfFourFeetFrameWithBodyRotation = new PoseReferenceFrame("centerOfFourFeetFrame", bodyFrame);
       supportPolygonCentroidFrameWithNominalRotation = new PoseReferenceFrame("centerOfFourFeetWithSupportPolygonRotation", supportPolygonCentroidWithNominalRotation);
-      supportPolygonCentroidZUpFrame = new ZUpFrame(worldFrame, supportPolygonCentroidFrameWithNominalRotation, "centerFootPolygonZUp");
+      supportPolygonCentroidZUpFrame = new ZUpFrame(supportPolygonCentroidFrameWithNominalRotation, "centerFootPolygonZUp");
 
       updateHipsCentroid();
 

@@ -10,9 +10,9 @@ import imgui.internal.ImGui;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -37,8 +37,7 @@ public class GDXROS1OdometryVisualizer extends ImGuiGDXROS1Visualizer implements
 
    private ModelInstance modelInstance;
 
-   private long receivedCount = 0;
-   private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
 
    public GDXROS1OdometryVisualizer(String title, String topic)
    {
@@ -59,10 +58,8 @@ public class GDXROS1OdometryVisualizer extends ImGuiGDXROS1Visualizer implements
          @Override
          public void onNewMessage(PoseStamped pose)
          {
-
             GDXROS1OdometryVisualizer.this.pose = pose;
-            ++receivedCount;
-
+            frequencyPlot.recordEvent();
             queueRenderPosesAsync(pose);
          }
       };
@@ -104,7 +101,7 @@ public class GDXROS1OdometryVisualizer extends ImGuiGDXROS1Visualizer implements
    {
       super.renderImGuiWidgets();
       ImGui.text(topic);
-      receivedPlot.render(receivedCount);
+      frequencyPlot.renderImGuiWidgets();
    }
 
    @Override

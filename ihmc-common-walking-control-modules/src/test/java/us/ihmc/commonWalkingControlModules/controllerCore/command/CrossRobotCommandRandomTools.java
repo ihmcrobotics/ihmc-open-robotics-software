@@ -119,6 +119,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -392,8 +393,12 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static <T> RecyclingArrayList<T> nextRecyclingArrayList(Class<T> elementType, int size, Random random, boolean ensureNonEmptyCommand,
-                                                                  RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   public static <T> RecyclingArrayList<T> nextRecyclingArrayList(Class<T> elementType,
+                                                                  int size,
+                                                                  Random random,
+                                                                  boolean ensureNonEmptyCommand,
+                                                                  RigidBodyBasics rootBody,
+                                                                  ReferenceFrame... possibleFrames)
          throws Exception
    {
       RecyclingArrayList<T> next = new RecyclingArrayList<>(elementType);
@@ -580,6 +585,8 @@ public class CrossRobotCommandRandomTools
          next.setVelocityFeedbackMaxError(random.nextDouble());
       if (random.nextBoolean())
          next.setLoadMode(nextElementIn(random, JointDesiredLoadMode.values));
+      if (random.nextBoolean())
+         next.setMaxTorque(random.nextDouble());
       return next;
    }
 
@@ -615,7 +622,8 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static InverseDynamicsOptimizationSettingsCommand nextInverseDynamicsOptimizationSettingsCommand(Random random, RigidBodyBasics rootBody,
+   public static InverseDynamicsOptimizationSettingsCommand nextInverseDynamicsOptimizationSettingsCommand(Random random,
+                                                                                                           RigidBodyBasics rootBody,
                                                                                                            ReferenceFrame... possibleFrames)
    {
       InverseDynamicsOptimizationSettingsCommand next = new InverseDynamicsOptimizationSettingsCommand();
@@ -632,14 +640,17 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static JointAccelerationIntegrationCommand nextJointAccelerationIntegrationCommand(Random random, RigidBodyBasics rootBody,
+   public static JointAccelerationIntegrationCommand nextJointAccelerationIntegrationCommand(Random random,
+                                                                                             RigidBodyBasics rootBody,
                                                                                              ReferenceFrame... possibleFrames)
    {
       return nextJointAccelerationIntegrationCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static JointAccelerationIntegrationCommand nextJointAccelerationIntegrationCommand(Random random, boolean ensureNonEmptyCommand,
-                                                                                             RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   public static JointAccelerationIntegrationCommand nextJointAccelerationIntegrationCommand(Random random,
+                                                                                             boolean ensureNonEmptyCommand,
+                                                                                             RigidBodyBasics rootBody,
+                                                                                             ReferenceFrame... possibleFrames)
    {
       JointAccelerationIntegrationCommand next = new JointAccelerationIntegrationCommand();
       next.setCommandId(random.nextInt());
@@ -658,14 +669,17 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static JointLimitEnforcementMethodCommand nextJointLimitEnforcementMethodCommand(Random random, RigidBodyBasics rootBody,
+   public static JointLimitEnforcementMethodCommand nextJointLimitEnforcementMethodCommand(Random random,
+                                                                                           RigidBodyBasics rootBody,
                                                                                            ReferenceFrame... possibleFrames)
    {
       return nextJointLimitEnforcementMethodCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static JointLimitEnforcementMethodCommand nextJointLimitEnforcementMethodCommand(Random random, boolean ensureNonEmptyCommand,
-                                                                                           RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   public static JointLimitEnforcementMethodCommand nextJointLimitEnforcementMethodCommand(Random random,
+                                                                                           boolean ensureNonEmptyCommand,
+                                                                                           RigidBodyBasics rootBody,
+                                                                                           ReferenceFrame... possibleFrames)
    {
       JointLimitEnforcementMethodCommand next = new JointLimitEnforcementMethodCommand();
       next.setCommandId(random.nextInt());
@@ -690,7 +704,9 @@ public class CrossRobotCommandRandomTools
       return nextJointspaceAccelerationCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static JointspaceAccelerationCommand nextJointspaceAccelerationCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static JointspaceAccelerationCommand nextJointspaceAccelerationCommand(Random random,
+                                                                                 boolean ensureNonEmptyCommand,
+                                                                                 RigidBodyBasics rootBody,
                                                                                  ReferenceFrame... possibleFrames)
    {
       JointspaceAccelerationCommand next = new JointspaceAccelerationCommand();
@@ -726,7 +742,9 @@ public class CrossRobotCommandRandomTools
       return nextPlaneContactStateCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static PlaneContactStateCommand nextPlaneContactStateCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static PlaneContactStateCommand nextPlaneContactStateCommand(Random random,
+                                                                       boolean ensureNonEmptyCommand,
+                                                                       RigidBodyBasics rootBody,
                                                                        ReferenceFrame... possibleFrames)
    {
       PlaneContactStateCommand next = new PlaneContactStateCommand();
@@ -772,7 +790,8 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static InverseKinematicsOptimizationSettingsCommand nextInverseKinematicsOptimizationSettingsCommand(Random random, RigidBodyBasics rootBody,
+   public static InverseKinematicsOptimizationSettingsCommand nextInverseKinematicsOptimizationSettingsCommand(Random random,
+                                                                                                               RigidBodyBasics rootBody,
                                                                                                                ReferenceFrame... possibleFrames)
    {
       InverseKinematicsOptimizationSettingsCommand next = new InverseKinematicsOptimizationSettingsCommand();
@@ -788,7 +807,9 @@ public class CrossRobotCommandRandomTools
       return nextJointLimitReductionCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static JointLimitReductionCommand nextJointLimitReductionCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static JointLimitReductionCommand nextJointLimitReductionCommand(Random random,
+                                                                           boolean ensureNonEmptyCommand,
+                                                                           RigidBodyBasics rootBody,
                                                                            ReferenceFrame... possibleFrames)
    {
       JointLimitReductionCommand next = new JointLimitReductionCommand();
@@ -813,7 +834,9 @@ public class CrossRobotCommandRandomTools
       return nextJointspaceVelocityCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static JointspaceVelocityCommand nextJointspaceVelocityCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static JointspaceVelocityCommand nextJointspaceVelocityCommand(Random random,
+                                                                         boolean ensureNonEmptyCommand,
+                                                                         RigidBodyBasics rootBody,
                                                                          ReferenceFrame... possibleFrames)
    {
       JointspaceVelocityCommand next = new JointspaceVelocityCommand();
@@ -843,7 +866,8 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static LinearMomentumConvexConstraint2DCommand nextLinearMomentumConvexConstraint2DCommand(Random random, RigidBodyBasics rootBody,
+   public static LinearMomentumConvexConstraint2DCommand nextLinearMomentumConvexConstraint2DCommand(Random random,
+                                                                                                     RigidBodyBasics rootBody,
                                                                                                      ReferenceFrame... possibleFrames)
    {
       LinearMomentumConvexConstraint2DCommand next = new LinearMomentumConvexConstraint2DCommand();
@@ -859,7 +883,9 @@ public class CrossRobotCommandRandomTools
       return nextPrivilegedConfigurationCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static PrivilegedConfigurationCommand nextPrivilegedConfigurationCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static PrivilegedConfigurationCommand nextPrivilegedConfigurationCommand(Random random,
+                                                                                   boolean ensureNonEmptyCommand,
+                                                                                   RigidBodyBasics rootBody,
                                                                                    ReferenceFrame... possibleFrames)
    {
       PrivilegedConfigurationCommand next = new PrivilegedConfigurationCommand();
@@ -892,7 +918,9 @@ public class CrossRobotCommandRandomTools
       return nextPrivilegedJointSpaceCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static PrivilegedJointSpaceCommand nextPrivilegedJointSpaceCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static PrivilegedJointSpaceCommand nextPrivilegedJointSpaceCommand(Random random,
+                                                                             boolean ensureNonEmptyCommand,
+                                                                             RigidBodyBasics rootBody,
                                                                              ReferenceFrame... possibleFrames)
    {
       PrivilegedJointSpaceCommand next = new PrivilegedJointSpaceCommand();
@@ -963,7 +991,9 @@ public class CrossRobotCommandRandomTools
       return nextJointLimitEnforcementCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static JointLimitEnforcementCommand nextJointLimitEnforcementCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static JointLimitEnforcementCommand nextJointLimitEnforcementCommand(Random random,
+                                                                               boolean ensureNonEmptyCommand,
+                                                                               RigidBodyBasics rootBody,
                                                                                ReferenceFrame... possibleFrames)
    {
       JointLimitEnforcementCommand next = new JointLimitEnforcementCommand();
@@ -988,7 +1018,9 @@ public class CrossRobotCommandRandomTools
       return nextJointTorqueCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static JointTorqueCommand nextJointTorqueCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static JointTorqueCommand nextJointTorqueCommand(Random random,
+                                                           boolean ensureNonEmptyCommand,
+                                                           RigidBodyBasics rootBody,
                                                            ReferenceFrame... possibleFrames)
    {
       JointTorqueCommand next = new JointTorqueCommand();
@@ -1021,7 +1053,8 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static VirtualModelControlOptimizationSettingsCommand nextVirtualModelControlOptimizationSettingsCommand(Random random, RigidBodyBasics rootBody,
+   public static VirtualModelControlOptimizationSettingsCommand nextVirtualModelControlOptimizationSettingsCommand(Random random,
+                                                                                                                   RigidBodyBasics rootBody,
                                                                                                                    ReferenceFrame... possibleFrames)
    {
       VirtualModelControlOptimizationSettingsCommand next = new VirtualModelControlOptimizationSettingsCommand();
@@ -1063,7 +1096,8 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static CenterOfMassFeedbackControlCommand nextCenterOfMassFeedbackControlCommand(Random random, RigidBodyBasics rootBody,
+   public static CenterOfMassFeedbackControlCommand nextCenterOfMassFeedbackControlCommand(Random random,
+                                                                                           RigidBodyBasics rootBody,
                                                                                            ReferenceFrame... possibleFrames)
    {
       CenterOfMassFeedbackControlCommand next = new CenterOfMassFeedbackControlCommand();
@@ -1077,7 +1111,8 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static OneDoFJointFeedbackControlCommand nextOneDoFJointFeedbackControlCommand(Random random, RigidBodyBasics rootBody,
+   public static OneDoFJointFeedbackControlCommand nextOneDoFJointFeedbackControlCommand(Random random,
+                                                                                         RigidBodyBasics rootBody,
                                                                                          ReferenceFrame... possibleFrames)
    {
       List<OneDoFJointBasics> allJoints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).collect(Collectors.toList());
@@ -1100,13 +1135,16 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static JointspaceFeedbackControlCommand nextJointspaceFeedbackControlCommand(Random random, RigidBodyBasics rootBody,
+   public static JointspaceFeedbackControlCommand nextJointspaceFeedbackControlCommand(Random random,
+                                                                                       RigidBodyBasics rootBody,
                                                                                        ReferenceFrame... possibleFrames)
    {
       return nextJointspaceFeedbackControlCommand(random, false, rootBody, possibleFrames);
    }
 
-   public static JointspaceFeedbackControlCommand nextJointspaceFeedbackControlCommand(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static JointspaceFeedbackControlCommand nextJointspaceFeedbackControlCommand(Random random,
+                                                                                       boolean ensureNonEmptyCommand,
+                                                                                       RigidBodyBasics rootBody,
                                                                                        ReferenceFrame... possibleFrames)
    {
       JointspaceFeedbackControlCommand next = new JointspaceFeedbackControlCommand();
@@ -1126,7 +1164,8 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static OrientationFeedbackControlCommand nextOrientationFeedbackControlCommand(Random random, RigidBodyBasics rootBody,
+   public static OrientationFeedbackControlCommand nextOrientationFeedbackControlCommand(Random random,
+                                                                                         RigidBodyBasics rootBody,
                                                                                          ReferenceFrame... possibleFrames)
    {
       OrientationFeedbackControlCommand next = new OrientationFeedbackControlCommand();
@@ -1208,7 +1247,8 @@ public class CrossRobotCommandRandomTools
    @SuppressWarnings("rawtypes")
    public static InverseDynamicsCommandList nextInverseDynamicsCommandList(Random random,
                                                                            Collection<Class<? extends InverseDynamicsCommand>> commandsToGenerate,
-                                                                           RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+                                                                           RigidBodyBasics rootBody,
+                                                                           ReferenceFrame... possibleFrames)
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       InverseDynamicsCommandList next = new InverseDynamicsCommandList();
@@ -1251,7 +1291,8 @@ public class CrossRobotCommandRandomTools
    @SuppressWarnings("rawtypes")
    public static InverseKinematicsCommandList nextInverseKinematicsCommandList(Random random,
                                                                                Collection<Class<? extends InverseKinematicsCommand>> commandsToGenerate,
-                                                                               RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+                                                                               RigidBodyBasics rootBody,
+                                                                               ReferenceFrame... possibleFrames)
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       InverseKinematicsCommandList next = new InverseKinematicsCommandList();
@@ -1295,7 +1336,8 @@ public class CrossRobotCommandRandomTools
    @SuppressWarnings("rawtypes")
    public static VirtualModelControlCommandList nextVirtualModelControlCommandList(Random random,
                                                                                    Collection<Class<? extends VirtualModelControlCommand>> commandsToGenerate,
-                                                                                   RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+                                                                                   RigidBodyBasics rootBody,
+                                                                                   ReferenceFrame... possibleFrames)
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       VirtualModelControlCommandList next = new VirtualModelControlCommandList();
@@ -1338,7 +1380,8 @@ public class CrossRobotCommandRandomTools
    @SuppressWarnings("rawtypes")
    public static FeedbackControlCommandList nextFeedbackControlCommandList(Random random,
                                                                            Collection<Class<? extends FeedbackControlCommand>> commandsToGenerate,
-                                                                           RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+                                                                           RigidBodyBasics rootBody,
+                                                                           ReferenceFrame... possibleFrames)
          throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException
    {
       FeedbackControlCommandList next = new FeedbackControlCommandList();
@@ -1374,20 +1417,25 @@ public class CrossRobotCommandRandomTools
       return nextLowLevelOneDoFJointDesiredDataHolder(random, false, rootBody, possibleFrames);
    }
 
-   public static JointDesiredOutputListBasics nextJointDesiredOutputListBasics(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static JointDesiredOutputListBasics nextJointDesiredOutputListBasics(Random random,
+                                                                               boolean ensureNonEmptyCommand,
+                                                                               RigidBodyBasics rootBody,
                                                                                ReferenceFrame... possibleFrames)
    {
       return nextLowLevelOneDoFJointDesiredDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
    }
 
-   public static LowLevelOneDoFJointDesiredDataHolder nextLowLevelOneDoFJointDesiredDataHolder(Random random, RigidBodyBasics rootBody,
+   public static LowLevelOneDoFJointDesiredDataHolder nextLowLevelOneDoFJointDesiredDataHolder(Random random,
+                                                                                               RigidBodyBasics rootBody,
                                                                                                ReferenceFrame... possibleFrames)
    {
       return nextLowLevelOneDoFJointDesiredDataHolder(random, false, rootBody, possibleFrames);
    }
 
-   public static LowLevelOneDoFJointDesiredDataHolder nextLowLevelOneDoFJointDesiredDataHolder(Random random, boolean ensureNonEmptyCommand,
-                                                                                               RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   public static LowLevelOneDoFJointDesiredDataHolder nextLowLevelOneDoFJointDesiredDataHolder(Random random,
+                                                                                               boolean ensureNonEmptyCommand,
+                                                                                               RigidBodyBasics rootBody,
+                                                                                               ReferenceFrame... possibleFrames)
    {
       LowLevelOneDoFJointDesiredDataHolder next = new LowLevelOneDoFJointDesiredDataHolder();
 
@@ -1410,7 +1458,9 @@ public class CrossRobotCommandRandomTools
       return nextCenterOfPressureDataHolder(random, false, rootBody, possibleFrames);
    }
 
-   public static CenterOfPressureDataHolder nextCenterOfPressureDataHolder(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static CenterOfPressureDataHolder nextCenterOfPressureDataHolder(Random random,
+                                                                           boolean ensureNonEmptyCommand,
+                                                                           RigidBodyBasics rootBody,
                                                                            ReferenceFrame... possibleFrames)
    {
       CenterOfPressureDataHolder next = new CenterOfPressureDataHolder();
@@ -1434,7 +1484,9 @@ public class CrossRobotCommandRandomTools
       return nextDesiredExternalWrenchHolder(random, false, rootBody, possibleFrames);
    }
 
-   public static DesiredExternalWrenchHolder nextDesiredExternalWrenchHolder(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static DesiredExternalWrenchHolder nextDesiredExternalWrenchHolder(Random random,
+                                                                             boolean ensureNonEmptyCommand,
+                                                                             RigidBodyBasics rootBody,
                                                                              ReferenceFrame... possibleFrames)
    {
       DesiredExternalWrenchHolder next = new DesiredExternalWrenchHolder();
@@ -1540,11 +1592,14 @@ public class CrossRobotCommandRandomTools
       return nextHumanoidRobotContextData(random, false, rootBody, possibleFrames);
    }
 
-   public static HumanoidRobotContextData nextHumanoidRobotContextData(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static HumanoidRobotContextData nextHumanoidRobotContextData(Random random,
+                                                                       boolean ensureNonEmptyCommand,
+                                                                       RigidBodyBasics rootBody,
                                                                        ReferenceFrame... possibleFrames)
    {
       HumanoidRobotContextJointData processedJointData = nextHumanoidRobotContextJointData(random, ensureNonEmptyCommand);
       ForceSensorDataHolder forceSensorDataHolder = nextForceSensorDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
+      CenterOfMassDataHolder centerOfMassDataHolder = nextCenterOfMassDataHolder(random, possibleFrames);
       CenterOfPressureDataHolder centerOfPressureDataHolder = nextCenterOfPressureDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
       RobotMotionStatusHolder robotMotionStatusHolder = nextRobotMotionStatusHolder(random);
       LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = nextLowLevelOneDoFJointDesiredDataHolder(random,
@@ -1554,6 +1609,7 @@ public class CrossRobotCommandRandomTools
       SensorDataContext sensorDataContext = nextSensorDataContext(random, ensureNonEmptyCommand, rootBody);
       HumanoidRobotContextData next = new HumanoidRobotContextData(processedJointData,
                                                                    forceSensorDataHolder,
+                                                                   centerOfMassDataHolder,
                                                                    centerOfPressureDataHolder,
                                                                    robotMotionStatusHolder,
                                                                    jointDesiredOutputList,
@@ -1570,11 +1626,14 @@ public class CrossRobotCommandRandomTools
       return nextAtlasHumanoidRobotContextData(random, false, rootBody, possibleFrames);
    }
 
-   public static AtlasHumanoidRobotContextData nextAtlasHumanoidRobotContextData(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static AtlasHumanoidRobotContextData nextAtlasHumanoidRobotContextData(Random random,
+                                                                                 boolean ensureNonEmptyCommand,
+                                                                                 RigidBodyBasics rootBody,
                                                                                  ReferenceFrame... possibleFrames)
    {
       HumanoidRobotContextJointData processedJointData = nextHumanoidRobotContextJointData(random, ensureNonEmptyCommand);
       ForceSensorDataHolder forceSensorDataHolder = nextForceSensorDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
+      CenterOfMassDataHolder centerOfMassDataHolder = nextCenterOfMassDataHolder(random, possibleFrames);
       CenterOfPressureDataHolder centerOfPressureDataHolder = nextCenterOfPressureDataHolder(random, ensureNonEmptyCommand, rootBody, possibleFrames);
       RobotMotionStatusHolder robotMotionStatusHolder = nextRobotMotionStatusHolder(random);
       LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList = nextLowLevelOneDoFJointDesiredDataHolder(random,
@@ -1585,6 +1644,7 @@ public class CrossRobotCommandRandomTools
       RawJointSensorDataHolderMap rawJointSensorDataHolderMap = nextRawJointSensorDataHolderMap(random, ensureNonEmptyCommand, rootBody);
       AtlasHumanoidRobotContextData next = new AtlasHumanoidRobotContextData(processedJointData,
                                                                              forceSensorDataHolder,
+                                                                             centerOfMassDataHolder,
                                                                              centerOfPressureDataHolder,
                                                                              robotMotionStatusHolder,
                                                                              jointDesiredOutputList,
@@ -1663,7 +1723,9 @@ public class CrossRobotCommandRandomTools
       return nextForceSensorDataHolder(random, false, rootBody, possibleFrames);
    }
 
-   public static ForceSensorDataHolder nextForceSensorDataHolder(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static ForceSensorDataHolder nextForceSensorDataHolder(Random random,
+                                                                 boolean ensureNonEmptyCommand,
+                                                                 RigidBodyBasics rootBody,
                                                                  ReferenceFrame... possibleFrames)
    {
       ForceSensorDataHolder next = new ForceSensorDataHolder();
@@ -1692,6 +1754,21 @@ public class CrossRobotCommandRandomTools
       RigidBodyBasics rigidBody = nextElementIn(random, allBodies);
       next.setDefinition(rigidBody.getName(), nextElementIn(random, possibleFrames), rigidBody);
       next.setWrench(nextDMatrixRMaj(random, 6, 1));
+      return next;
+   }
+
+   public static CenterOfMassDataHolder nextCenterOfMassDataHolder(Random random, ReferenceFrame... possibleFrames)
+   {
+      CenterOfMassDataHolder next = new CenterOfMassDataHolder();
+      if (random.nextBoolean())
+         next.setCenterOfMassPosition(nextFramePoint3D(random, possibleFrames));
+      else
+         next.getCenterOfMassPosition().setIncludingFrame(nextFramePoint3D(random, possibleFrames));
+
+      if (random.nextBoolean())
+         next.setCenterOfMassVelocity(nextFrameVector3D(random, possibleFrames));
+      else
+         next.getCenterOfMassVelocity().setIncludingFrame(nextFrameVector3D(random, possibleFrames));
       return next;
    }
 
@@ -1736,7 +1813,8 @@ public class CrossRobotCommandRandomTools
                                                                  Collection<Class<? extends InverseKinematicsCommand>> inverseKinematicsCommandsToGenerate,
                                                                  Collection<Class<? extends VirtualModelControlCommand>> virtualModelControlCommandsToGenerate,
                                                                  Collection<Class<? extends FeedbackControlCommand>> feedbackControlCommandsToGenerate,
-                                                                 RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+                                                                 RigidBodyBasics rootBody,
+                                                                 ReferenceFrame... possibleFrames)
          throws NoSuchMethodException, IllegalAccessException, InvocationTargetException
    {
       ControllerCoreCommand next = new ControllerCoreCommand(nextElementIn(random, WholeBodyControllerCoreMode.values()));
@@ -1759,13 +1837,14 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static LinearMomentumRateControlModuleInput nextLinearMomentumRateControlModuleInput(Random random, RigidBodyBasics rootBody,
+   public static LinearMomentumRateControlModuleInput nextLinearMomentumRateControlModuleInput(Random random,
+                                                                                               RigidBodyBasics rootBody,
                                                                                                ReferenceFrame... possibleFrames)
          throws Exception
    {
       LinearMomentumRateControlModuleInput next = new LinearMomentumRateControlModuleInput();
-      next.setContactStateCommand(new SideDependentList<PlaneContactStateCommand>(nextPlaneContactStateCommand(random, rootBody, possibleFrames),
-                                                                                  nextPlaneContactStateCommand(random, rootBody, possibleFrames)));
+      next.setContactStateCommand(new SideDependentList<>(nextPlaneContactStateCommand(random, rootBody, possibleFrames),
+                                                          nextPlaneContactStateCommand(random, rootBody, possibleFrames)));
       next.setCenterOfMassHeightControlCommand(nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setPelvisHeightControlCommand(nextPointFeedbackControlCommand(random, rootBody, possibleFrames));
       next.setUsePelvisHeightCommand(random.nextBoolean());
@@ -1958,7 +2037,10 @@ public class CrossRobotCommandRandomTools
          throw new RuntimeException("Unhandled primitive: " + fieldType.getSimpleName());
    }
 
-   public static Object nextTypeInstance(Class<?> typeToInstantiateRandomly, Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+   public static Object nextTypeInstance(Class<?> typeToInstantiateRandomly,
+                                         Random random,
+                                         boolean ensureNonEmptyCommand,
+                                         RigidBodyBasics rootBody,
                                          ReferenceFrame... possibleFrames)
          throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException
    {

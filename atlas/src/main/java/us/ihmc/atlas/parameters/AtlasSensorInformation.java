@@ -217,6 +217,15 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformChestToZED2.appendOrientation(new YawPitchRoll(0.01, pitch, -0.045));
    }
 
+   private static final RigidBodyTransform transformChestToRightBlackfly = new RigidBodyTransform();
+   static
+   {
+      transformChestToRightBlackfly.setIdentity();
+      transformChestToRightBlackfly.getTranslation().set(transformChestToOuster.getTranslation()); // measured relative to Ouster for convenience
+      transformChestToRightBlackfly.getTranslation().add(0.02, -0.12, -0.15);
+      transformChestToRightBlackfly.getRotation().setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(35.0), Math.toRadians(-5.0));
+   }
+
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
    {
       this.target = target;
@@ -468,7 +477,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    @Override
    public RigidBodyTransform getObjectDetectionCameraTransform()
    {
-      return transformChestToD435DepthCamera;
+      return transformChestToRightBlackfly;
    }
 
    @Override

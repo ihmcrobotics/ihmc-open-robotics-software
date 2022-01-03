@@ -224,11 +224,13 @@ public class ImPlotYoGraphPanel
       }
    }
 
-   public void modifyVariable(String serverName, String yoVariableName)
+   public ImGuiModifiableYoDouble addVariableEditor(String serverName, String yoVariableName)
    {
       ArrayList<ImGuiModifiableYoDouble> modifiableVariablesForServer = modifiableVariables.computeIfAbsent(serverName, key -> new ArrayList<>());
       YoDoubleClientHelper yoDoubleHelper = yoClientHelper.subscribeToYoDouble(yoVariableName);
-      modifiableVariablesForServer.add(new ImGuiModifiableYoDouble(yoDoubleHelper));
+      ImGuiModifiableYoDouble modifiableYoDouble = new ImGuiModifiableYoDouble(yoDoubleHelper);
+      modifiableVariablesForServer.add(modifiableYoDouble);
+      return modifiableYoDouble;
    }
 
    public void destroy()

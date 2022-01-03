@@ -28,8 +28,8 @@ import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
 import us.ihmc.avatar.factory.SimulatedHandSensorReader;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.factory.TerrainObjectDefinitionTools;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -47,7 +47,10 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -79,8 +82,6 @@ import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
@@ -96,7 +97,7 @@ public class SCS2AvatarSimulationFactory
    private final RequiredFactoryField<TerrainObjectDefinition> terrainObjectDefinition = new RequiredFactoryField<>("terrainObjectDefinition");
    private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
 
-   private final OptionalFactoryField<DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
+   private final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
    private final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
    private final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
    private final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
@@ -175,7 +176,7 @@ public class SCS2AvatarSimulationFactory
    {
       DRCRobotModel robotModel = this.robotModel.get();
 
-      robotDefinition = RobotDefinitionTools.toRobotDefinition(robotModel.getRobotDescription());
+      robotDefinition = robotModel.getRobotDefinition();
 
       if (!enableSimulatedRobotDamping.get())
       {
@@ -192,9 +193,7 @@ public class SCS2AvatarSimulationFactory
       if (collisionModel != null)
          RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.createFullRobotModel().getElevator()),
                                                              robotDefinition);
-      HumanoidFloatingRootJointRobot tempRobotForInitialState = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotInitialSetup.get().initializeRobot(tempRobotForInitialState, robotModel.getJointMap());
-      RobotDefinitionTools.addInitialStateToRobotDefinition(tempRobotForInitialState, robotDefinition);
+      robotInitialSetup.get().initializeRobotDefinition(robotDefinition);
       Set<String> lastSimulatedJoints = robotModel.getJointMap().getLastSimulatedJoints();
       lastSimulatedJoints.forEach(lastSimulatedJoint -> robotDefinition.addSubtreeJointsToIgnore(lastSimulatedJoint));
 
@@ -225,6 +224,10 @@ public class SCS2AvatarSimulationFactory
       simulationSession.initializeBufferRecordTickPeriod(simulationDataRecordTickPeriod.get());
       simulationSession.addTerrainObject(terrainObjectDefinition.get());
       robot = simulationSession.addRobot(robotDefinition);
+      robot.getControllerManager()
+           .addController(new SCS2StateEstimatorDebugVariables(simulationSession.getInertialFrame(),
+                                                               gravity.get(),
+                                                               robot.getControllerManager().getControllerInput()));
 
       for (Robot secondaryRobot : secondaryRobots.get())
          simulationSession.addRobot(secondaryRobot);
@@ -458,39 +461,15 @@ public class SCS2AvatarSimulationFactory
       {
          LogTools.info("Initializing estimator to actual");
 
-         /**
-          * The following is to get the initial CoM position from the robot. It is cheating for now, and we
-          * need to move to where the robot itself determines coordinates, and the sensors are all in the
-          * robot-determined world coordinates..
-          */
-         HumanoidFloatingRootJointRobot tempRobot = robotModel.get().createHumanoidFloatingRootJointRobot(false);
-         robotInitialSetup.get().initializeRobot(tempRobot, robotModel.get().getJointMap());
-         try
-         {
-            tempRobot.update();
-            tempRobot.doDynamicsButDoNotIntegrate();
-            tempRobot.update();
-         }
-         catch (UnreasonableAccelerationException e)
-         {
-            throw new RuntimeException("UnreasonableAccelerationException");
-         }
+         robotInitialSetup.get().initializeRobot(robot.getRootBody());
+         robot.updateFrames();
+         FloatingJointBasics rootJoint = (FloatingJointBasics) robot.getRootBody().getChildrenJoints().get(0);
+         RigidBodyTransform rootJointTransform = new RigidBodyTransform(rootJoint.getJointPose().getOrientation(), rootJoint.getJointPose().getPosition());
 
-         initializeEstimator(tempRobot, estimatorThread);
+         TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
+         SubtreeStreams.fromChildren(OneDoFJointBasics.class, robot.getRootBody()).forEach(joint -> jointPositions.put(joint.getName(), joint.getQ()));
+         estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
       }
-   }
-
-   public static void initializeEstimator(HumanoidFloatingRootJointRobot humanoidFloatingRootJointRobot, AvatarEstimatorThread estimatorThread)
-   {
-      RigidBodyTransform rootJointTransform = humanoidFloatingRootJointRobot.getRootJoint().getJointTransform3D();
-
-      TObjectDoubleMap<String> jointPositions = new TObjectDoubleHashMap<>();
-      for (OneDegreeOfFreedomJoint joint : humanoidFloatingRootJointRobot.getOneDegreeOfFreedomJoints())
-      {
-         jointPositions.put(joint.getName(), joint.getQ());
-      }
-
-      estimatorThread.initializeStateEstimators(rootJointTransform, jointPositions);
    }
 
    private void setupSimulatedRobotTimeProvider()
@@ -589,7 +568,7 @@ public class SCS2AvatarSimulationFactory
                                                                                         robotCollisionName));
    }
 
-   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   public void setRobotInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       this.robotInitialSetup.set(robotInitialSetup);
    }

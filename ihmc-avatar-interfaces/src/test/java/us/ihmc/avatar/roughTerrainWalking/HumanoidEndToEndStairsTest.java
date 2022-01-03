@@ -48,6 +48,9 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
+      numberOfSteps = 6;
+      stepHeight = 9.25 * 0.0254;
+      stepLength = 0.32;
       useExperimentalPhysicsEngine = false;
    }
 
@@ -64,6 +67,21 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       }
 
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
+   }
+
+   public void setNumberOfSteps(int numberOfSteps)
+   {
+      this.numberOfSteps = numberOfSteps;
+   }
+
+   public void setStepHeight(double stepHeight)
+   {
+      this.stepHeight = stepHeight;
+   }
+
+   public void setStepLength(double stepLength)
+   {
+      this.stepLength = stepLength;
    }
 
    public void setUseExperimentalPhysicsEngine(boolean useExperimentalPhysicsEngine)
@@ -122,7 +140,9 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
 
       if (EXPORT_TORQUE_SPEED_DATA)
       {
-         EndToEndTestTools.exportTorqueSpeedCurves(scs, EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null), testInfo.getTestMethod().get().getName());
+         EndToEndTestTools.exportTorqueSpeedCurves(scs,
+                                                   EndToEndTestTools.getDataOutputFolder(robotModel.getSimpleRobotName(), null),
+                                                   testInfo.getTestMethod().get().getName());
       }
    }
 

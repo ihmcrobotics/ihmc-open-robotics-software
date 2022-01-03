@@ -33,7 +33,6 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
    @Override
    public void render()
    {
-      baseUI.pollVREvents();
       baseUI.renderBeforeOnScreenUI();
       baseUI.renderEnd();
    }

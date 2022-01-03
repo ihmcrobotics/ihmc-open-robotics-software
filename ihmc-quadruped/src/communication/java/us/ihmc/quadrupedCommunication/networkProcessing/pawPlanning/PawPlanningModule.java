@@ -42,28 +42,42 @@ public class PawPlanningModule extends QuadrupedToolboxModule
 
    private final PawPlanningController footstepPlanningController;
 
-   public PawPlanningModule(FullQuadrupedRobotModelFactory modelFactory, VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                            PawStepPlannerParametersBasics defaultPawPlannerParameters, QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
-                            PointFootSnapperParameters pointFootSnapperParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
-                            boolean logYoVariables, DomainFactory.PubSubImplementation pubSubImplementation)
+   public PawPlanningModule(FullQuadrupedRobotModelFactory modelFactory,
+                            VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                            PawStepPlannerParametersBasics defaultPawPlannerParameters,
+                            QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+                            PointFootSnapperParameters pointFootSnapperParameters,
+                            LogModelProvider modelProvider,
+                            boolean startYoVariableServer,
+                            boolean logYoVariables,
+                            DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), visibilityGraphsParameters, defaultPawPlannerParameters,
+      this(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), visibilityGraphsParameters, defaultPawPlannerParameters,
            defaultXGaitSettings, pointFootSnapperParameters, modelProvider, startYoVariableServer, logYoVariables, pubSubImplementation);
    }
 
-   public PawPlanningModule(String name, FullQuadrupedRobotModel fulRobotModel, VisibilityGraphsParametersBasics visibilityGraphsParameters,
+   public PawPlanningModule(String name,
+                            FullQuadrupedRobotModel fulRobotModel,
+                            VisibilityGraphsParametersBasics visibilityGraphsParameters,
                             PawStepPlannerParametersBasics defaultPawPlannerParameters,
-                            QuadrupedXGaitSettingsReadOnly defaultXGaitSettings, PointFootSnapperParameters pointFootSnapperParameters,
-                            LogModelProvider modelProvider, boolean startYoVariableServer, boolean logYoVariables,
+                            QuadrupedXGaitSettingsReadOnly defaultXGaitSettings,
+                            PointFootSnapperParameters pointFootSnapperParameters,
+                            LogModelProvider modelProvider,
+                            boolean startYoVariableServer,
+                            boolean logYoVariables,
                             DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(name, fulRobotModel, modelProvider, startYoVariableServer, new DataServerSettings(logYoVariables, true, footstepPlanningPort,
-                                                                                              "FootstepPlanningModule"), updatePeriodMilliseconds,
-            pubSubImplementation);
+      super(name, fulRobotModel, modelProvider, startYoVariableServer,
+            new DataServerSettings(logYoVariables, true, footstepPlanningPort, "FootstepPlanningModule"), updatePeriodMilliseconds, pubSubImplementation);
 
-
-      footstepPlanningController = new PawPlanningController(defaultXGaitSettings, visibilityGraphsParameters, defaultPawPlannerParameters,
-                                                             pointFootSnapperParameters, outputManager, robotDataReceiver, registry, yoGraphicsListRegistry,
+      footstepPlanningController = new PawPlanningController(defaultXGaitSettings,
+                                                             visibilityGraphsParameters,
+                                                             defaultPawPlannerParameters,
+                                                             pointFootSnapperParameters,
+                                                             outputManager,
+                                                             robotDataReceiver,
+                                                             registry,
+                                                             yoGraphicsListRegistry,
                                                              updatePeriodMilliseconds);
       new DefaultParameterReader().readParametersInRegistry(registry);
       startYoVariableServer(getClass());
@@ -74,26 +88,38 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    {
       // status messages from the controller
       ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic,
-                                           s -> processRobotTimestamp(s.takeNextData().getMonotonicTime()));
-//      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateMessage.class, controllerOutputTopic, s -> footstepPlanningController.setPaused(true));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, GroundPlaneMessage.class, controllerOutputTopic,
-                                           s -> processGroundPlaneMessage(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    RobotConfigurationData.class,
+                                                    controllerOutputTopic,
+                                                    s -> processRobotTimestamp(s.takeNextData().getMonotonicTime()));
+      //      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateMessage.class, controllerOutputTopic, s -> footstepPlanningController.setPaused(true));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    GroundPlaneMessage.class,
+                                                    controllerOutputTopic,
+                                                    s -> processGroundPlaneMessage(s.takeNextData()));
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedSupportPlanarRegionParametersMessage.class,
-                                                    ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                              .withInput(),
-                                           s -> processSupportRegionParameters(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    QuadrupedSupportPlanarRegionParametersMessage.class,
+                                                    ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput(),
+                                                    s -> processSupportRegionParameters(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PawStepPlanningRequestPacket.class, getInputTopic(),
-                                           s -> processPawPlanningRequest(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedXGaitSettingsPacket.class, getInputTopic(),
-                                           s -> processXGaitSettingsPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PawStepPlannerParametersPacket.class, getInputTopic(),
-                                           s -> processFootstepPlannerParametersPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, VisibilityGraphsParametersPacket.class, getInputTopic(),
-                                           s -> processVisibilityGraphParametersPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    PawStepPlanningRequestPacket.class,
+                                                    getInputTopic(),
+                                                    s -> processPawPlanningRequest(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    QuadrupedXGaitSettingsPacket.class,
+                                                    getInputTopic(),
+                                                    s -> processXGaitSettingsPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    PawStepPlannerParametersPacket.class,
+                                                    getInputTopic(),
+                                                    s -> processFootstepPlannerParametersPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                    VisibilityGraphsParametersPacket.class,
+                                                    getInputTopic(),
+                                                    s -> processVisibilityGraphParametersPacket(s.takeNextData()));
    }
 
    private void processRobotTimestamp(long timestamp)
@@ -180,10 +206,9 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    public void sleep()
    {
       footstepPlanningController.processPawPlanningRequest(null);
-//      footstepPlanningController.setPaused(true);
+      //      footstepPlanningController.setPaused(true);
 
       super.sleep();
    }
-
 
 }

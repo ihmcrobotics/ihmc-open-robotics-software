@@ -32,6 +32,8 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
 
    private final YoDouble positionFeedbackMaxError;
    private final YoDouble velocityFeedbackMaxError;
+   
+   private final YoDouble maxTorque;
 
    public YoJointDesiredOutput(String namePrefix, YoRegistry registry, String suffixString)
    {
@@ -58,6 +60,8 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
       positionFeedbackMaxError = new YoDouble(namePrefix + "PositionFeedbackMaxError" + suffixString, registry);
       velocityFeedbackMaxError = new YoDouble(namePrefix + "VelocityFeedbackMaxError" + suffixString, registry);
 
+      maxTorque = new YoDouble(namePrefix + "MaxTorque" + suffixString, registry);
+
       clear();
    }
 
@@ -80,6 +84,7 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
       velocityIntegrationMaxError.set(Double.NaN);
       positionFeedbackMaxError.set(Double.NaN);
       velocityFeedbackMaxError.set(Double.NaN);
+      maxTorque.set(Double.NaN);
       resetIntegrators.set(false);
    }
 
@@ -294,6 +299,18 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    {
       this.velocityFeedbackMaxError.set(velocityFeedbackMaxError);
    }
+   
+
+   @Override
+   public double getMaxTorque()
+   {
+      return maxTorque.getValue();
+   }
+
+   public void setMaxTorque(double feedbackMaxTorque)
+   {
+      this.maxTorque.set(feedbackMaxTorque);
+   }
 
    @Override
    public boolean equals(Object object)
@@ -309,4 +326,6 @@ public class YoJointDesiredOutput implements JointDesiredOutputBasics
    {
       return getRepresentativeString();
    }
+   
+
 }

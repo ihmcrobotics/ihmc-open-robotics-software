@@ -1,8 +1,8 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.21"
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -59,7 +59,7 @@ libgdxDependencies {
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-windows-x86")
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-macos")
 
-   val imguiVersion = "1.84.1.1"
+   val imguiVersion = "1.84.1.4"
    api("io.github.spair:imgui-java-binding:$imguiVersion")
    api("io.github.spair:imgui-java-lwjgl3:$imguiVersion")
    api("io.github.spair:imgui-java-natives-linux-ft:$imguiVersion")

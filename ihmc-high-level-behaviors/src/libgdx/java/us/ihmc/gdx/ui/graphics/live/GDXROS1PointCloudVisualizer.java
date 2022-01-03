@@ -9,13 +9,12 @@ import imgui.internal.ImGui;
 import sensor_msgs.PointCloud2;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
-import us.ihmc.gdx.imgui.ImGuiPlot;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -38,7 +37,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
 //   private final ImFloat tuneYaw = new ImFloat(0.01f);
 //   private final ImFloat tunePitch = new ImFloat(24.0f);
 //   private final ImFloat tuneRoll = new ImFloat(-0.045f);
-   private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
 
    private boolean packingA = true;
    private final RecyclingArrayList<Point3D32> pointsA = new RecyclingArrayList<>(MAX_POINTS, Point3D32::new);
@@ -88,7 +87,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
          @Override
          public void onNewMessage(PointCloud2 pointCloud2)
          {
-            ++receivedCount;
+            frequencyPlot.recordEvent();
             queueRenderPointCloud(pointCloud2);
          }
       };
@@ -189,7 +188,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
       super.renderImGuiWidgets();
 
       ImGui.text(ros1PointCloudTopic);
-      receivedPlot.render(receivedCount);
+      frequencyPlot.renderImGuiWidgets();
 
       // 0.25, 0.0, 0.11
 //      ImGui.dragFloat("TuneX", tuneX.getData(), 0.0001f, 0.21f, 0.32f);

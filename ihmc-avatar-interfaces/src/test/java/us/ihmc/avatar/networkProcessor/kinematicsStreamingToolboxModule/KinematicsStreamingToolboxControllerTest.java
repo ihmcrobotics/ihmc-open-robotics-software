@@ -7,7 +7,6 @@ import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKi
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData;
 import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.RelativeEndEffectorControlTest.circlePositionAt;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,9 +28,8 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -57,7 +55,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.mecano.tools.JointStateType;
@@ -68,12 +65,14 @@ import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -96,7 +95,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected static final double toolboxControllerPeriod = 5.0e-3;
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   protected static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
+   protected static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
    protected static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
    {
@@ -132,7 +131,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    {
       DRCRobotModel ghostRobotModel = newRobotModel();
       String robotName = ghostRobotModel.getSimpleRobotName();
-      ghost = createSCSRobot(ghostRobotModel, "ghost", ghostApperance);
+      ghost = createSCSRobot(ghostRobotModel, "ghost", ghostMaterial);
       hideRobot(ghost);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -215,15 +214,14 @@ public abstract class KinematicsStreamingToolboxControllerTest
       DRCRobotModel robotModel = newRobotModel();
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      RobotDescription robotDescription = robotModel.getRobotDescription();
-      robot = new HumanoidFloatingRootJointRobot(robotDescription, robotModel.getJointMap());
+      robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       createToolboxController(robotModel);
       setupCollisions(collisionModel, robot);
 
       robot.setDynamic(false);
       robot.setGravity(0);
 
-      ghost = createSCSRobot(newRobotModel(), "ghost", ghostApperance);
+      ghost = createSCSRobot(newRobotModel(), "ghost", ghostMaterial);
       hideRobot(ghost);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -571,11 +569,11 @@ public abstract class KinematicsStreamingToolboxControllerTest
       };
    }
 
-   protected static HumanoidFloatingRootJointRobot createSCSRobot(DRCRobotModel ghostRobotModel, String robotName, AppearanceDefinition robotAppearance)
+   protected static HumanoidFloatingRootJointRobot createSCSRobot(DRCRobotModel ghostRobotModel, String robotName, MaterialDefinition robotMaterial)
    {
-      RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
-      robotDescription.setName(robotName);
-      HumanoidKinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), robotAppearance);
+      RobotDefinition robotDefinition = ghostRobotModel.getRobotDefinition();
+      robotDefinition.setName(robotName);
+      RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, robotMaterial);
       HumanoidFloatingRootJointRobot scsRobot = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       scsRobot.getRootJoint().setPinned(true);
       scsRobot.setDynamic(false);

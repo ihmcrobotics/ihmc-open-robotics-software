@@ -123,7 +123,7 @@ public abstract class GDXProcessManagerPanel
 
       for (MissionControlProcess process : processes)
       {
-         process.render();
+         process.renderImGuiWidgets();
       }
    }
 

@@ -12,7 +12,7 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DIdentityIns
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
-import us.ihmc.robotModels.description.InvertedFourBarJointDescription;
+import us.ihmc.robotModels.description.CrossFourBarJointDescription;
 import us.ihmc.robotics.robotDescription.*;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.*;
@@ -54,7 +54,7 @@ public class SCS2Tools
       }
       else if (jointDescription instanceof OneDoFJointDescription)
       {
-         if (jointDescription instanceof InvertedFourBarJointDescription)
+         if (jointDescription instanceof CrossFourBarJointDescription)
          {
 
          }

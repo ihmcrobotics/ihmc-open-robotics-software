@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -31,7 +30,7 @@ public class AchievableCaptureRegionCalculatorWithDelay
    private final FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D(worldFrame);
 
    private final PoseReferenceFrame supportFrame = new PoseReferenceFrame("supportFrame", worldFrame);
-   private final ZUpFrame supportSoleZUp = new ZUpFrame(worldFrame, supportFrame, "supportZUpFrame");
+   private final ZUpFrame supportSoleZUp = new ZUpFrame(supportFrame, "supportZUpFrame");
 
    private final TDoubleArrayList candidateSwingTimes = new TDoubleArrayList();
 

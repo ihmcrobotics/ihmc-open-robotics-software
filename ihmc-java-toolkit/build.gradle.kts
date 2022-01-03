@@ -1,8 +1,8 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.21"
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -13,16 +13,14 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
-   api("commons-io:commons-io:2.6")
    api("org.apache.lucene:lucene-analyzers-common:4.3.0")
    api("org.apache.lucene:lucene-core:4.3.0")
    api("org.apache.lucene:lucene-queryparser:4.3.0")
    api("us.ihmc:jinput:2.0.6-ihmc2")
    api("com.google.guava:guava:18.0")
 
-   api("us.ihmc:ihmc-commons:0.30.4")
-   api("us.ihmc:log-tools:0.6.1")
+   api("us.ihmc:ihmc-commons:0.30.5")
+   api("us.ihmc:log-tools:0.6.3")
    api("us.ihmc:euclid:0.17.0")
    api("us.ihmc:euclid-frame:0.17.0")
    api("us.ihmc:euclid-shape:0.17.0")

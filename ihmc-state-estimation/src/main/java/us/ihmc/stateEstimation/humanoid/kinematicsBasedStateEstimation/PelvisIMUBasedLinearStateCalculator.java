@@ -123,7 +123,7 @@ public class PelvisIMUBasedLinearStateCalculator
       if (!isEstimationEnabled())
          return;
 
-      imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuProcessedOutput, accelerationBias);
+      accelerationBias.setIncludingFrame(imuBiasProvider.getLinearAccelerationBiasInIMUFrame(imuProcessedOutput));
 
       linearAccelerationMeasurement.setToZero(measurementFrame);
       linearAccelerationMeasurement.set(imuProcessedOutput.getLinearAccelerationMeasurement());

@@ -171,4 +171,10 @@ public class IMUSensor implements IMUSensorReadOnly
 
       return orientationCovarianceMatrix;
    }
+
+   @Override
+   public String toString()
+   {
+      return sensorName + ", body: " + measurementLink;
+   }
 }

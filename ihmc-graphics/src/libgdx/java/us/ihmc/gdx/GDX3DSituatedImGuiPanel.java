@@ -1,31 +1,23 @@
 package us.ihmc.gdx;
 
-public abstract class GDX3DSituatedImGuiPanel
+public class GDX3DSituatedImGuiPanel
 {
    private final String name;
+   private final Runnable render;
 
-   public GDX3DSituatedImGuiPanel(String name)
+   public GDX3DSituatedImGuiPanel(String name, Runnable render)
    {
       this.name = name;
-      GDX3DSituatedImGuiPanelManager.getInstance().addPanel(this);
+      this.render = render;
    }
 
-   public abstract void renderImGuiWidgets();
-
-   public void dispose()
+   public void renderImGuiWidgets()
    {
-
+      render.run();
    }
 
-   public final String getName()
+   public final String getPanelName()
    {
       return name;
-   }
-
-   @Override
-   protected final void finalize() throws Throwable
-   {
-      this.dispose();
-      super.finalize();
    }
 }

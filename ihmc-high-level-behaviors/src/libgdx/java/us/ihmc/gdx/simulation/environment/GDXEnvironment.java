@@ -98,7 +98,7 @@ public class GDXEnvironment extends ImGuiPanel
                                                                                         pickRay.getPoint(),
                                                                                         pickRay.getDirection());
             selectedObject.set(pickPoint);
-            pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
+            pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
 
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -108,7 +108,7 @@ public class GDXEnvironment extends ImGuiPanel
          else
          {
             pose3DGizmo.process3DViewInput(viewInput);
-            selectedObject.set(pose3DGizmo.getTransform());
+            selectedObject.set(pose3DGizmo.getTransformToParent());
 
             intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -118,7 +118,7 @@ public class GDXEnvironment extends ImGuiPanel
                   selectedObject = intersectedObject;
                   if (selectedObject != null)
                   {
-                     pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
+                     pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
                   }
                }
             }
@@ -133,7 +133,7 @@ public class GDXEnvironment extends ImGuiPanel
             if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                selectedObject = intersectedObject;
-               pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
+               pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
             }
          }
       }
@@ -192,19 +192,19 @@ public class GDXEnvironment extends ImGuiPanel
 
          if (ImGui.sliderFloat("Ambient light", ambientLight.getData(), 0.0f, 1.0f))
          {
-            sceneManager.setAmbientLight(ambientLight.get());
+            sceneManager.getSceneBasics().setAmbientLight(ambientLight.get());
          }
          if (ImGui.button("Place Point Light"))
          {
             GDXPointLightObject pointLight = new GDXPointLightObject();
             objectToPlace = pointLight;
-            sceneManager.addPointLight(pointLight.getLight());
+            sceneManager.getSceneBasics().addPointLight(pointLight.getLight());
          }
          if (ImGui.button("Place Directional Light"))
          {
             GDXDirectionalLightObject directionalLight = new GDXDirectionalLightObject();
             objectToPlace = directionalLight;
-            sceneManager.addDirectionalLight(directionalLight.getLight());
+            sceneManager.getSceneBasics().addDirectionalLight(directionalLight.getLight());
          }
 
          ImGui.separator();
@@ -230,12 +230,12 @@ public class GDXEnvironment extends ImGuiPanel
          if (selectedObject instanceof GDXPointLightObject)
          {
             GDXPointLightObject lightObject = (GDXPointLightObject) selectedObject;
-            sceneManager.removePointLight(lightObject.getLight());
+            sceneManager.getSceneBasics().removePointLight(lightObject.getLight());
          }
          else if (selectedObject instanceof GDXDirectionalLightObject)
          {
             GDXDirectionalLightObject lightObject = (GDXDirectionalLightObject) selectedObject;
-            sceneManager.removeDirectionalLight(lightObject.getLight());
+            sceneManager.getSceneBasics().removeDirectionalLight(lightObject.getLight());
          }
 
          selectedObject = null;
@@ -245,7 +245,6 @@ public class GDXEnvironment extends ImGuiPanel
       ImGui.text("Environments:");
       if (!loadedFilesOnce && selectedEnvironmentFile != null)
       {
-         loadedFilesOnce = true;
          loadEnvironment(selectedEnvironmentFile);
       }
       boolean reindexClicked = ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex scripts"));
@@ -314,10 +313,11 @@ public class GDXEnvironment extends ImGuiPanel
 
    private void loadEnvironment(Path environmentFile)
    {
+      loadedFilesOnce = true;
       selectedEnvironmentFile = environmentFile;
       objects.clear();
 
-      sceneManager.clearLights();
+      sceneManager.getSceneBasics().clearLights();
       lightObjects.clear();
 
       selectedObject = null;
@@ -325,55 +325,52 @@ public class GDXEnvironment extends ImGuiPanel
       if (doorSimulator != null)
          doorSimulator.setDoor(null);
 
-      if (loadedFilesOnce)
+      JSONFileTools.loadFromWorkspace("ihmc-open-robotics-software",
+                                      "ihmc-high-level-behaviors/src/libgdx/resources",
+                                      "environments/" + environmentFile.getFileName().toString(),
+      node ->
       {
-         JSONFileTools.loadFromWorkspace("ihmc-open-robotics-software",
-                                         "ihmc-high-level-behaviors/src/libgdx/resources",
-                                         "environments/" + environmentFile.getFileName().toString(),
-         node ->
+         JsonNode ambientLightNode = node.get("ambientLight");
+         if (ambientLightNode != null)
          {
-            JsonNode ambientLightNode = node.get("ambientLight");
-            if (ambientLightNode != null)
-            {
-               float ambientValue = (float) ambientLightNode.asDouble();
-               ambientLight.set(ambientValue);
-               sceneManager.setAmbientLight(ambientLight.get());
-            }
-            for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
-            {
-               JsonNode objectNode = it.next();
-               GDXEnvironmentObject object = GDXEnvironmentObject.loadByName(objectNode.get("type").asText());
+            float ambientValue = (float) ambientLightNode.asDouble();
+            ambientLight.set(ambientValue);
+            sceneManager.getSceneBasics().setAmbientLight(ambientLight.get());
+         }
+         for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
+         {
+            JsonNode objectNode = it.next();
+            GDXEnvironmentObject object = GDXEnvironmentObject.loadByName(objectNode.get("type").asText());
 
-               tempTranslation.setX(objectNode.get("x").asDouble());
-               tempTranslation.setY(objectNode.get("y").asDouble());
-               tempTranslation.setZ(objectNode.get("z").asDouble());
-               tempOrientation.set(objectNode.get("qx").asDouble(),
-                                   objectNode.get("qy").asDouble(),
-                                   objectNode.get("qz").asDouble(),
-                                   objectNode.get("qs").asDouble());
-               tempTransform.set(tempOrientation, tempTranslation);
-               object.set(tempTransform);
-               objects.add(object);
+            tempTranslation.setX(objectNode.get("x").asDouble());
+            tempTranslation.setY(objectNode.get("y").asDouble());
+            tempTranslation.setZ(objectNode.get("z").asDouble());
+            tempOrientation.set(objectNode.get("qx").asDouble(),
+                                objectNode.get("qy").asDouble(),
+                                objectNode.get("qz").asDouble(),
+                                objectNode.get("qs").asDouble());
+            tempTransform.set(tempOrientation, tempTranslation);
+            object.set(tempTransform);
+            objects.add(object);
 
-               if (object instanceof GDXPointLightObject)
-               {
-                  GDXPointLightObject pointLightObject = (GDXPointLightObject) object;
-                  sceneManager.addPointLight(pointLightObject.getLight());
-                  lightObjects.add(pointLightObject);
-               }
-               else if (object instanceof GDXDirectionalLightObject)
-               {
-                  GDXDirectionalLightObject directionalLightObject = (GDXDirectionalLightObject) object;
-                  sceneManager.addDirectionalLight(directionalLightObject.getLight());
-                  lightObjects.add(directionalLightObject);
-               }
-               else if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
-               {
-                  doorSimulator.setDoor((GDXPushHandleRightDoorObject) object);
-               }
+            if (object instanceof GDXPointLightObject)
+            {
+               GDXPointLightObject pointLightObject = (GDXPointLightObject) object;
+               sceneManager.getSceneBasics().addPointLight(pointLightObject.getLight());
+               lightObjects.add(pointLightObject);
             }
-         });
-      }
+            else if (object instanceof GDXDirectionalLightObject)
+            {
+               GDXDirectionalLightObject directionalLightObject = (GDXDirectionalLightObject) object;
+               sceneManager.getSceneBasics().addDirectionalLight(directionalLightObject.getLight());
+               lightObjects.add(directionalLightObject);
+            }
+            else if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
+            {
+               doorSimulator.setDoor((GDXPushHandleRightDoorObject) object);
+            }
+         }
+      });
    }
 
    public void loadEnvironment(String environmentFileName)
