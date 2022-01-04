@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.desiredFootStep;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -26,8 +27,9 @@ public class FootstepListVisualizer
 
    private final SideDependentList<List<FootstepVisualizer>> footstepVisualizers = new SideDependentList<>();
 
-   public FootstepListVisualizer(SideDependentList<? extends ContactablePlaneBody> contactableFeet, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoRegistry parentRegistry)
+   public FootstepListVisualizer(SideDependentList<? extends ContactablePlaneBody> contactableFeet,
+                                 YoGraphicsListRegistry yoGraphicsListRegistry,
+                                 YoRegistry parentRegistry)
    {
       String graphicListName = "FootstepVisualizer";
 
@@ -40,7 +42,13 @@ public class FootstepListVisualizer
          {
             String name = robotSide.getCamelCaseNameForStartOfExpression() + "Footstep" + i;
             AppearanceDefinition footstepColor = new YoAppearanceRGBColor(defaultFeetColors.get(robotSide).darker(), 0.0);
-            FootstepVisualizer footstepVisualizer = new FootstepVisualizer(name, graphicListName, robotSide, contactableFoot, footstepColor, yoGraphicsListRegistry, registry);
+            FootstepVisualizer footstepVisualizer = new FootstepVisualizer(name,
+                                                                           graphicListName,
+                                                                           robotSide,
+                                                                           contactableFoot,
+                                                                           footstepColor,
+                                                                           yoGraphicsListRegistry,
+                                                                           registry);
             footstepVisualizers.get(robotSide).add(footstepVisualizer);
          }
       }
@@ -61,12 +69,17 @@ public class FootstepListVisualizer
 
    public void update(List<Footstep> footsteps)
    {
+      update(footsteps, Function.identity());
+   }
+
+   public <T> void update(List<T> footstepHolderList, Function<T, Footstep> footstepExtractor)
+   {
       for (RobotSide robotSide : RobotSide.values)
          counters.get(robotSide).setValue(0);
 
-      for (int i = 0; i < footsteps.size(); i++)
+      for (int i = 0; i < footstepHolderList.size(); i++)
       {
-         Footstep footstep = footsteps.get(i);
+         Footstep footstep = footstepExtractor.apply(footstepHolderList.get(i));
          RobotSide robotSide = footstep.getRobotSide();
          MutableInt counter = counters.get(robotSide);
          if (counter.intValue() < maxNumberOfFootstepsToVisualizePerSide)

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.messageHandlers;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 
@@ -67,9 +68,7 @@ public class WalkingMessageHandler
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private static final int maxNumberOfFootsteps = 100;
-   private final RecyclingArrayList<Footstep> upcomingFootsteps = new RecyclingArrayList<>(maxNumberOfFootsteps, Footstep.class);
-   private final RecyclingArrayList<FootstepTiming> upcomingFootstepTimings = new RecyclingArrayList<>(maxNumberOfFootsteps, FootstepTiming.class);
-   private final RecyclingArrayList<MutableDouble> pauseDurationAfterStep = new RecyclingArrayList<>(maxNumberOfFootsteps, MutableDouble.class);
+   private final RecyclingArrayList<FootstepDataHolder> upcomingFootsteps = new RecyclingArrayList<>(maxNumberOfFootsteps, FootstepDataHolder::new);
 
    private final YoBoolean isPausedWithSteps = new YoBoolean("IsPausedWithSteps", registry);
    private final YoDouble timeToContinueWalking = new YoDouble("TimeToContinueWalking", registry);
@@ -127,9 +126,14 @@ public class WalkingMessageHandler
    private final DoubleProvider maxStepHeightChange = new DoubleParameter("MaxStepHeightChange", registry, Double.POSITIVE_INFINITY);
    private final DoubleProvider maxSwingDistance = new DoubleParameter("MaxSwingDistance", registry, Double.POSITIVE_INFINITY);
 
-   public WalkingMessageHandler(double defaultTransferTime, double defaultSwingTime, double defaultInitialTransferTime, double defaultFinalTransferTime,
+   public WalkingMessageHandler(double defaultTransferTime,
+                                double defaultSwingTime,
+                                double defaultInitialTransferTime,
+                                double defaultFinalTransferTime,
                                 SideDependentList<? extends ContactablePlaneBody> contactableFeet,
-                                StatusMessageOutputManager statusOutputManager, YoDouble yoTime, YoGraphicsListRegistry yoGraphicsListRegistry,
+                                StatusMessageOutputManager statusOutputManager,
+                                YoDouble yoTime,
+                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoRegistry parentRegistry)
    {
       this.statusOutputManager = statusOutputManager;
@@ -181,51 +185,51 @@ public class WalkingMessageHandler
       {
          switch (command.getExecutionMode())
          {
-         case OVERRIDE:
-            offsettingXYPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
-            offsettingHeightPlanWithFootstepError.set(command.isOffsetFootstepsHeightWithExecutionError());
-            planOffsetInWorld.setToZero();
-            clearFootsteps();
-            clearFootTrajectory();
-            break;
-         case QUEUE:
-            if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
-            {
-               LogTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with execution error!");
-            }
-            if (offsettingHeightPlanWithFootstepError.getValue() != command.isOffsetFootstepsHeightWithExecutionError())
-            {
-               LogTools.warn("Recieved a queued message that has a different setting for offsetting height of footsteps with execution error!");
-            }
-            if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
-            {
-               if (command.getExecutionTiming() == ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS)
+            case OVERRIDE:
+               offsettingXYPlanWithFootstepError.set(command.isOffsetFootstepsWithExecutionError());
+               offsettingHeightPlanWithFootstepError.set(command.isOffsetFootstepsHeightWithExecutionError());
+               planOffsetInWorld.setToZero();
+               clearFootsteps();
+               clearFootTrajectory();
+               break;
+            case QUEUE:
+               if (offsettingXYPlanWithFootstepError.getValue() != command.isOffsetFootstepsWithExecutionError())
                {
-                  LogTools.warn("Can not command a queued message with absolute timings if all footsteps were already exectuted. You gotta send faster!");
+                  LogTools.warn("Recieved a queued message that has a different setting for offsetting footsteps with execution error!");
+               }
+               if (offsettingHeightPlanWithFootstepError.getValue() != command.isOffsetFootstepsHeightWithExecutionError())
+               {
+                  LogTools.warn("Recieved a queued message that has a different setting for offsetting height of footsteps with execution error!");
+               }
+               if (currentNumberOfFootsteps.getIntegerValue() < 1 && !executingFootstep.getBooleanValue())
+               {
+                  if (command.getExecutionTiming() == ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS)
+                  {
+                     LogTools.warn("Can not command a queued message with absolute timings if all footsteps were already exectuted. You gotta send faster!");
+                     return;
+                  }
+
+                  if (command.getPreviousCommandId() == lastCommandID.getValue())
+                  {
+                     // If we queued a command and the previous already finished, just continue as if everything is normal
+                     break;
+                  }
+                  else if (lastCommandID.getValue() == 0L)
+                  {
+                     LogTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
+
+                  }
+                  else
+                  {
+                     LogTools.warn("Queued footstep previous command id {} != controller's previous command id {}."
+                           + " Send an override message instead. Command ignored.", command.getPreviousCommandId(), lastCommandID.getValue());
+                  }
                   return;
                }
-
-               if (command.getPreviousCommandId() == lastCommandID.getValue())
-               {
-                  // If we queued a command and the previous already finished, just continue as if everything is normal
-                  break;
-               }
-               else if (lastCommandID.getValue() == 0L)
-               {
-                  LogTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
-
-               }
-               else
-               {
-                  LogTools.warn("Queued footstep previous command id {} != controller's previous command id {}."
-                                + " Send an override message instead. Command ignored.", command.getPreviousCommandId(), lastCommandID.getValue());
-               }
+               break;
+            default:
+               LogTools.warn("Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
                return;
-            }
-            break;
-         default:
-            LogTools.warn("Unknown " + ExecutionMode.class.getSimpleName() + " value: " + command.getExecutionMode() + ". Command ignored.");
-            return;
          }
       }
 
@@ -241,9 +245,8 @@ public class WalkingMessageHandler
       if (isWalkingPaused.getValue())
       {
          /*
-          * The walking was paused, when paused isWalking remains true. We're
-          * receiving a new series of footsteps, let's reset isWalking so the
-          * controller reports that it starts walking.
+          * The walking was paused, when paused isWalking remains true. We're receiving a new series of
+          * footsteps, let's reset isWalking so the controller reports that it starts walking.
           */
          isWalking.set(false);
       }
@@ -270,18 +273,28 @@ public class WalkingMessageHandler
 
       for (int i = 0; i < command.getNumberOfFootsteps(); i++)
       {
-         setFootstepTiming(command.getFootstep(i), command.getExecutionTiming(), upcomingFootstepTimings.add(), pauseDurationAfterStep.add(),
+         FootstepDataHolder footstepData = upcomingFootsteps.add();
+         setFootstepTiming(command.getFootstep(i),
+                           command.getExecutionTiming(),
+                           footstepData.footstepTiming,
+                           footstepData.pauseDurationAfterStep,
                            command.getExecutionMode());
-         setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, upcomingFootsteps.add());
+         setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, footstepData.footstep);
          currentNumberOfFootsteps.increment();
       }
 
-      if (!checkTimings(upcomingFootstepTimings, yoTime))
+      if (!checkTimings(upcomingFootsteps, yoTime))
       {
          clearFootsteps();
       }
 
-      if (!checkFootsteps(upcomingFootsteps, soleFrames, maxStepDistance.getValue(), maxStepHeightChange.getValue(), maxSwingDistance.getValue(), tempStanceLocation, tempStepOrigin))
+      if (!checkFootsteps(upcomingFootsteps,
+                          soleFrames,
+                          maxStepDistance.getValue(),
+                          maxStepHeightChange.getValue(),
+                          maxSwingDistance.getValue(),
+                          tempStanceLocation,
+                          tempStepOrigin))
       {
          clearFootsteps();
       }
@@ -348,20 +361,24 @@ public class WalkingMessageHandler
    }
 
    /**
-    * This method will pack the angular momentum trajectory for planning the ICP trajectory. The parameters {@code startTime} and {@code endTime} refer
-    * to absolute controller time. To get the angular momentum trajectory from the current time to 1.0 seconds in the future the start time must
-    * be the value of yoTime and the end time must be the value of yoTime + 1.0. The {@code numberOfPoints} parameter defines in how many points the
-    * trajectory will be sampled. The packed trajectory will include the end points of the interval, therefore, the number of points must be equal
-    * or grater then two. If the interval of interest is not available the trajectory to pack will be empty. The times of the packed trajectory points
-    * will be relative to the start time of the interval.
+    * This method will pack the angular momentum trajectory for planning the ICP trajectory. The
+    * parameters {@code startTime} and {@code endTime} refer to absolute controller time. To get the
+    * angular momentum trajectory from the current time to 1.0 seconds in the future the start time
+    * must be the value of yoTime and the end time must be the value of yoTime + 1.0. The
+    * {@code numberOfPoints} parameter defines in how many points the trajectory will be sampled. The
+    * packed trajectory will include the end points of the interval, therefore, the number of points
+    * must be equal or grater then two. If the interval of interest is not available the trajectory to
+    * pack will be empty. The times of the packed trajectory points will be relative to the start time
+    * of the interval.
     *
-    * @param startTime is the controller time for the start of the interval for which the trajectory is packed
-    * @param endTime is the controller time for the end of the interval for which the trajectory is packed
-    * @param numberOfPoints the number of sampling points of the trajectory
+    * @param startTime        is the controller time for the start of the interval for which the
+    *                         trajectory is packed
+    * @param endTime          is the controller time for the end of the interval for which the
+    *                         trajectory is packed
+    * @param numberOfPoints   the number of sampling points of the trajectory
     * @param trajectoryToPack the trajectory will be packed in here
     */
-   public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints,
-                                            RecyclingArrayList<EuclideanTrajectoryPoint> trajectoryToPack)
+   public void getAngularMomentumTrajectory(double startTime, double endTime, int numberOfPoints, RecyclingArrayList<EuclideanTrajectoryPoint> trajectoryToPack)
    {
       momentumTrajectoryHandler.getAngularMomentumTrajectory(startTime, endTime, numberOfPoints, trajectoryToPack);
    }
@@ -383,37 +400,35 @@ public class WalkingMessageHandler
 
    public void setUpcomingFootstepTransferDuration(double duration)
    {
-      if (upcomingFootstepTimings.isEmpty())
+      if (upcomingFootsteps.isEmpty())
          throw new RuntimeException("Can not get timing, no upcoming footstep.");
 
-      upcomingFootstepTimings.get(0).setTransferTime(duration);
+      upcomingFootsteps.get(0).footstepTiming.setTransferTime(duration);
    }
 
    /**
-    * This method will set the provided timing to the timing of the {@code i}'th upcoming
-    * footstep. If there is less then {@code i} upcoming steps this method will throw a
-    * {@link RuntimeException}. To check how many footsteps are upcoming use
-    * {@link #getCurrentNumberOfFootsteps()}.
+    * This method will set the provided timing to the timing of the {@code i}'th upcoming footstep. If
+    * there is less then {@code i} upcoming steps this method will throw a {@link RuntimeException}. To
+    * check how many footsteps are upcoming use {@link #getCurrentNumberOfFootsteps()}.
     *
-    * @param i is the index of the upcoming footstep timing that will be packed.
+    * @param i            is the index of the upcoming footstep timing that will be packed.
     * @param timingToPack will be set to the timing of footstep i in the list of upcoming steps.
     */
    public void peekTiming(int i, FootstepTiming timingToPack)
    {
-      if (i >= upcomingFootstepTimings.size())
+      if (i >= upcomingFootsteps.size())
       {
-         throw new RuntimeException("Can not get timing " + i + " since there are only " + upcomingFootstepTimings.size() + " upcoming timings.");
+         throw new RuntimeException("Can not get timing " + i + " since there are only " + upcomingFootsteps.size() + " upcoming timings.");
       }
-      timingToPack.set(upcomingFootstepTimings.get(i));
+      timingToPack.set(upcomingFootsteps.get(i).footstepTiming);
    }
 
    /**
-    * This method will set the provided footstep to the {@code i}'th upcoming
-    * footstep. If there is less then {@code i} upcoming steps this method will throw a
-    * {@link RuntimeException}. To check how many footsteps are upcoming use
-    * {@link #getCurrentNumberOfFootsteps()}.
+    * This method will set the provided footstep to the {@code i}'th upcoming footstep. If there is
+    * less then {@code i} upcoming steps this method will throw a {@link RuntimeException}. To check
+    * how many footsteps are upcoming use {@link #getCurrentNumberOfFootsteps()}.
     *
-    * @param i is the index of the upcoming footstep that will be packed.
+    * @param i              is the index of the upcoming footstep that will be packed.
     * @param footstepToPack will be set to the footstep i in the list of upcoming steps.
     */
    public void peekFootstep(int i, Footstep footstepToPack)
@@ -422,17 +437,17 @@ public class WalkingMessageHandler
       {
          throw new RuntimeException("Can not get footstep " + i + " since there are only " + upcomingFootsteps.size() + " upcoming steps.");
       }
-      footstepToPack.set(upcomingFootsteps.get(i));
+      footstepToPack.set(upcomingFootsteps.get(i).footstep);
    }
 
    /**
-    * This method will pack the provided footstep and timing with the next upcoming
-    * step. It will then remove that footstep from the list of upcoming footsteps.
-    * Use this method if you wish to remove the next upcoming step because the execution
-    * has started. If there is no upcoming step this method will throw a {@link RuntimeException}.
+    * This method will pack the provided footstep and timing with the next upcoming step. It will then
+    * remove that footstep from the list of upcoming footsteps. Use this method if you wish to remove
+    * the next upcoming step because the execution has started. If there is no upcoming step this
+    * method will throw a {@link RuntimeException}.
     *
     * @param footstepToPack will be set to the next footstep in the list of upcoming steps.
-    * @param timingToPack will be set to the next footsteps timing in the list of upcoming steps.
+    * @param timingToPack   will be set to the next footsteps timing in the list of upcoming steps.
     */
    public void poll(Footstep footstepToPack, FootstepTiming timingToPack)
    {
@@ -441,33 +456,31 @@ public class WalkingMessageHandler
          throw new RuntimeException("Can not poll footstep since there are no upcoming steps.");
       }
 
-      footstepToPack.set(upcomingFootsteps.get(0));
-      timingToPack.set(upcomingFootstepTimings.get(0));
-      lastTimingExecuted.set(upcomingFootstepTimings.get(0));
+      footstepToPack.set(upcomingFootsteps.get(0).footstep);
+      timingToPack.set(upcomingFootsteps.get(0).footstepTiming);
+      lastTimingExecuted.set(upcomingFootsteps.get(0).footstepTiming);
 
       updateVisualization();
       currentNumberOfFootsteps.decrement();
       currentFootstepIndex.increment();
 
-      upcomingFootstepTimings.remove(0);
-      pauseDurationAfterStep.remove(0);
       upcomingFootsteps.remove(0);
    }
 
    /**
-    * This method can be used to adjust the timing of the upcoming footstep. It will throw a {@link RuntimeException} if
-    * there are no footsteps in the queue.
+    * This method can be used to adjust the timing of the upcoming footstep. It will throw a
+    * {@link RuntimeException} if there are no footsteps in the queue.
     *
-    * @param newSwingDuration is the new swing duration for the adjusted timing
+    * @param newSwingDuration    is the new swing duration for the adjusted timing
     * @param newTransferDuration is the new transfer duration for the adjusted timing.
     */
    public void adjustTiming(double newSwingDuration, double newTransferDuration)
    {
-      if (upcomingFootstepTimings.isEmpty())
+      if (upcomingFootsteps.isEmpty())
       {
          throw new RuntimeException("Can not adjust timing of upciming step - have no steps.");
       }
-      upcomingFootstepTimings.get(0).setTimings(newSwingDuration, newTransferDuration);
+      upcomingFootsteps.get(0).footstepTiming.setTimings(newSwingDuration, newTransferDuration);
    }
 
    public FootTrajectoryCommand pollFootTrajectoryForFlamingoStance(RobotSide swingSide)
@@ -514,12 +527,12 @@ public class WalkingMessageHandler
 
    private void checkForPause()
    {
-      if (!pauseDurationAfterStep.isEmpty() && Double.isFinite(pauseDurationAfterStep.get(0).doubleValue()))
+      if (!upcomingFootsteps.isEmpty() && Double.isFinite(upcomingFootsteps.get(0).pauseDurationAfterStep.doubleValue()))
       {
-         double pause = pauseDurationAfterStep.get(0).doubleValue();
+         double pause = upcomingFootsteps.get(0).pauseDurationAfterStep.doubleValue();
          timeToContinueWalking.set(yoTime.getValue() + pause);
          isPausedWithSteps.set(true);
-         pauseDurationAfterStep.get(0).setValue(Double.NaN);
+         upcomingFootsteps.get(0).pauseDurationAfterStep.setValue(Double.NaN);
       }
    }
 
@@ -539,7 +552,7 @@ public class WalkingMessageHandler
       int stepIndex = 0;
       while (stepIndex < upcomingFootsteps.size())
       {
-         if (Double.isFinite(pauseDurationAfterStep.get(stepIndex).doubleValue()))
+         if (Double.isFinite(upcomingFootsteps.get(stepIndex).pauseDurationAfterStep.doubleValue()))
          {
             return stepIndex;
          }
@@ -566,7 +579,7 @@ public class WalkingMessageHandler
          return false;
       }
 
-      return upcomingFootsteps.get(0).getRobotSide() == swingSide;
+      return upcomingFootsteps.get(0).footstep.getRobotSide() == swingSide;
    }
 
    public boolean hasFootTrajectoryForFlamingoStance()
@@ -598,8 +611,6 @@ public class WalkingMessageHandler
    public void clearFootsteps()
    {
       upcomingFootsteps.clear();
-      upcomingFootstepTimings.clear();
-      pauseDurationAfterStep.clear();
       currentNumberOfFootsteps.set(0);
       currentFootstepIndex.set(0);
       updateVisualization();
@@ -609,7 +620,9 @@ public class WalkingMessageHandler
    private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
    private final FootstepStatusMessage footstepStatus = new FootstepStatusMessage();
 
-   public void reportFootstepStarted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld,
+   public void reportFootstepStarted(RobotSide robotSide,
+                                     FramePose3DReadOnly desiredFootPoseInWorld,
+                                     FramePose3DReadOnly actualFootPoseInWorld,
                                      double swingDuration)
    {
       reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration);
@@ -619,15 +632,20 @@ public class WalkingMessageHandler
          timeElapsedWhenFootstepExecuted.set(yoTime.getDoubleValue() - footstepDataListReceivedTime.getDoubleValue());
    }
 
-   public void reportFootstepCompleted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld,
+   public void reportFootstepCompleted(RobotSide robotSide,
+                                       FramePose3DReadOnly desiredFootPoseInWorld,
+                                       FramePose3DReadOnly actualFootPoseInWorld,
                                        double swingDuration)
    {
       reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration);
       executingFootstep.set(false);
    }
 
-   private void reportFootstepStatus(RobotSide robotSide, FootstepStatus status, FramePose3DReadOnly desiredFootPoseInWorld,
-                                     FramePose3DReadOnly actualFootPoseInWorld, double swingDuration)
+   private void reportFootstepStatus(RobotSide robotSide,
+                                     FootstepStatus status,
+                                     FramePose3DReadOnly desiredFootPoseInWorld,
+                                     FramePose3DReadOnly actualFootPoseInWorld,
+                                     double swingDuration)
    {
       desiredFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
       actualFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
@@ -745,9 +763,9 @@ public class WalkingMessageHandler
 
    public double getNextTransferTime()
    {
-      if (upcomingFootstepTimings.isEmpty())
+      if (upcomingFootsteps.isEmpty())
          return getDefaultTransferTime();
-      return upcomingFootstepTimings.get(0).getTransferTime();
+      return upcomingFootsteps.get(0).footstepTiming.getTransferTime();
    }
 
    public double getDefaultSwingTime()
@@ -757,9 +775,9 @@ public class WalkingMessageHandler
 
    public double getNextSwingTime()
    {
-      if (upcomingFootstepTimings.isEmpty())
+      if (upcomingFootsteps.isEmpty())
          return getDefaultSwingTime();
-      return upcomingFootstepTimings.get(0).getSwingTime();
+      return upcomingFootsteps.get(0).footstepTiming.getSwingTime();
    }
 
    public double getInitialTransferTime()
@@ -779,9 +797,9 @@ public class WalkingMessageHandler
 
    public double getNextStepTime()
    {
-      if (upcomingFootstepTimings.isEmpty())
+      if (upcomingFootsteps.isEmpty())
          return getDefaultStepTime();
-      return upcomingFootstepTimings.get(0).getStepTime();
+      return upcomingFootsteps.get(0).footstepTiming.getStepTime();
    }
 
    public int getCurrentNumberOfFootsteps()
@@ -789,12 +807,14 @@ public class WalkingMessageHandler
       return getStepsBeforePause();
    }
 
+   private final Function<FootstepDataHolder, Footstep> footstepGetter = footstepData -> footstepData.footstep;
+
    private void updateVisualization()
    {
       for (int i = 0; i < upcomingFootsteps.size(); i++)
       {
          if (i < numberOfFootstepsToVisualize)
-            upcomingFoostepSide[i].set(upcomingFootsteps.get(i).getRobotSide());
+            upcomingFoostepSide[i].set(upcomingFootsteps.get(i).footstep.getRobotSide());
       }
 
       for (int i = upcomingFootsteps.size(); i < numberOfFootstepsToVisualize; i++)
@@ -803,7 +823,7 @@ public class WalkingMessageHandler
       }
 
       if (footstepListVisualizer != null)
-         footstepListVisualizer.update(upcomingFootsteps);
+         footstepListVisualizer.update(upcomingFootsteps, footstepGetter);
    }
 
    public void updateVisualizationAfterFootstepAdjustement(Footstep adjustedFootstep)
@@ -813,7 +833,6 @@ public class WalkingMessageHandler
    }
 
    private final TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
-
 
    public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
    {
@@ -837,7 +856,10 @@ public class WalkingMessageHandler
       footstepToSet.addOffset(planOffsetInWorld);
    }
 
-   private void setFootstepTiming(FootstepDataCommand footstep, ExecutionTiming executionTiming, FootstepTiming timingToSet, MutableDouble pauseDurationToSet,
+   private void setFootstepTiming(FootstepDataCommand footstep,
+                                  ExecutionTiming executionTiming,
+                                  FootstepTiming timingToSet,
+                                  MutableDouble pauseDurationToSet,
                                   ExecutionMode executionMode)
    {
       int stepsInQueue = upcomingFootsteps.size();
@@ -858,45 +880,44 @@ public class WalkingMessageHandler
             transferDuration = defaultTransferTime.getDoubleValue();
       }
 
-
       timingToSet.setTimings(swingDuration, transferDuration);
       timingToSet.setTouchdownDuration(footstep.getTouchdownDuration());
       timingToSet.setLiftoffDuration(footstep.getLiftoffDuration());
 
       switch (executionTiming)
       {
-      case CONTROL_DURATIONS:
-         timingToSet.removeAbsoluteTime();
-         break;
-      case CONTROL_ABSOLUTE_TIMINGS:
-         if (stepsInQueue == 0 && !executingFootstep.getBooleanValue() && executionMode == ExecutionMode.OVERRIDE)
-         {
-            // There are no upcoming steps, we are not executing a step, and this is an overwrite message:
-            footstepDataListReceivedTime.set(yoTime.getDoubleValue());
-            timingToSet.setAbsoluteTime(transferDuration, footstepDataListReceivedTime.getDoubleValue());
-         }
-         else if (stepsInQueue == 0 && !executingFootstep.getBooleanValue())
-         {
-            // This message should have been rejected above.
-            throw new RuntimeException("This should not happen. We are not executing a footstep and there is no steps in "
-                  + "queue so there is no way to compute absolute timings for the step as was requested.");
-         }
-         else if (stepsInQueue == 0)
-         {
-            // In this case the step we are executing right now is the last step we have. So compute the timings from that step.
-            double swingStartTime = lastTimingExecuted.getSwingStartTime() + lastTimingExecuted.getSwingTime() + transferDuration;
-            timingToSet.setAbsoluteTime(swingStartTime, footstepDataListReceivedTime.getDoubleValue());
-         }
-         else
-         {
-            // In this case we still have steps in queue so we compute the timings from the last step in the queue.
-            FootstepTiming previousTiming = upcomingFootstepTimings.get(stepsInQueue - 1);
-            double swingStartTime = previousTiming.getSwingStartTime() + previousTiming.getSwingTime() + transferDuration;
-            timingToSet.setAbsoluteTime(swingStartTime, footstepDataListReceivedTime.getDoubleValue());
-         }
-         break;
-      default:
-         throw new RuntimeException("Timing mode not implemented.");
+         case CONTROL_DURATIONS:
+            timingToSet.removeAbsoluteTime();
+            break;
+         case CONTROL_ABSOLUTE_TIMINGS:
+            if (stepsInQueue == 0 && !executingFootstep.getBooleanValue() && executionMode == ExecutionMode.OVERRIDE)
+            {
+               // There are no upcoming steps, we are not executing a step, and this is an overwrite message:
+               footstepDataListReceivedTime.set(yoTime.getDoubleValue());
+               timingToSet.setAbsoluteTime(transferDuration, footstepDataListReceivedTime.getDoubleValue());
+            }
+            else if (stepsInQueue == 0 && !executingFootstep.getBooleanValue())
+            {
+               // This message should have been rejected above.
+               throw new RuntimeException("This should not happen. We are not executing a footstep and there is no steps in "
+                     + "queue so there is no way to compute absolute timings for the step as was requested.");
+            }
+            else if (stepsInQueue == 0)
+            {
+               // In this case the step we are executing right now is the last step we have. So compute the timings from that step.
+               double swingStartTime = lastTimingExecuted.getSwingStartTime() + lastTimingExecuted.getSwingTime() + transferDuration;
+               timingToSet.setAbsoluteTime(swingStartTime, footstepDataListReceivedTime.getDoubleValue());
+            }
+            else
+            {
+               // In this case we still have steps in queue so we compute the timings from the last step in the queue.
+               FootstepTiming previousTiming = upcomingFootsteps.get(stepsInQueue - 1).footstepTiming;
+               double swingStartTime = previousTiming.getSwingStartTime() + previousTiming.getSwingTime() + transferDuration;
+               timingToSet.setAbsoluteTime(swingStartTime, footstepDataListReceivedTime.getDoubleValue());
+            }
+            break;
+         default:
+            throw new RuntimeException("Timing mode not implemented.");
       }
 
       // The transfer is long enough that we can go to standing, pause, and then keep walking:
@@ -913,24 +934,25 @@ public class WalkingMessageHandler
       }
    }
 
-   private static boolean checkTimings(List<FootstepTiming> upcomingFootstepTimings, YoDouble yoTime)
+   private static boolean checkTimings(List<FootstepDataHolder> upcomingFootsteps, YoDouble yoTime)
    {
       // TODO: This is somewhat duplicated in the PacketValidityChecker.
       // The reason it has to be here is that this also checks that the timings are monotonically increasing if messages
       // are queued. It also rejects the message if this class was not created with time in which case absolute footstep
       // timings can not be executed.
 
-      if (upcomingFootstepTimings.isEmpty())
+      if (upcomingFootsteps.isEmpty())
          return true;
 
-      boolean timingsValid = upcomingFootstepTimings.get(0).hasAbsoluteTime();
-      boolean atLeastOneFootstepHadTiming = upcomingFootstepTimings.get(0).hasAbsoluteTime();
+      FootstepTiming firstFootstepTimings = upcomingFootsteps.get(0).footstepTiming;
+      boolean timingsValid = firstFootstepTimings.hasAbsoluteTime();
+      boolean atLeastOneFootstepHadTiming = firstFootstepTimings.hasAbsoluteTime();
 
-      double lastTime = upcomingFootstepTimings.get(0).getSwingStartTime();
+      double lastTime = firstFootstepTimings.getSwingStartTime();
       timingsValid = timingsValid && lastTime > 0.0;
-      for (int footstepIdx = 1; footstepIdx < upcomingFootstepTimings.size(); footstepIdx++)
+      for (int footstepIdx = 1; footstepIdx < upcomingFootsteps.size(); footstepIdx++)
       {
-         FootstepTiming footstep = upcomingFootstepTimings.get(footstepIdx);
+         FootstepTiming footstep = upcomingFootsteps.get(footstepIdx).footstepTiming;
          boolean timeIncreasing = footstep.getSwingStartTime() > lastTime;
          timingsValid = timingsValid && footstep.hasAbsoluteTime() && timeIncreasing;
          atLeastOneFootstepHadTiming = atLeastOneFootstepHadTiming || footstep.hasAbsoluteTime();
@@ -962,14 +984,19 @@ public class WalkingMessageHandler
     * Does sanity checks on the provided footsteps:
     * <p>
     * Will return false if this method finds</br>
-    *  - a step that is too far from the stance foot in XY</br>
-    *  - a step that has a swing trajectory that is too far from a straight line swing in XY</br>
-    *  - a step that has a swing trajectory that is too far from the step origin or destination in Z</br>
+    * - a step that is too far from the stance foot in XY</br>
+    * - a step that has a swing trajectory that is too far from a straight line swing in XY</br>
+    * - a step that has a swing trajectory that is too far from the step origin or destination in
+    * Z</br>
     *
     * @return if the footsteps were found to be safe
     */
-   private static boolean checkFootsteps(List<Footstep> footsteps, SideDependentList<ReferenceFrame> soleFrames, double maxStepDistance,
-                                         double maxStepHeightChange, double maxSwingDistance, FramePoint3DBasics tempStanceLocation,
+   private static boolean checkFootsteps(List<FootstepDataHolder> footsteps,
+                                         SideDependentList<ReferenceFrame> soleFrames,
+                                         double maxStepDistance,
+                                         double maxStepHeightChange,
+                                         double maxSwingDistance,
+                                         FramePoint3DBasics tempStanceLocation,
                                          FramePoint3DBasics tempStepOrigin)
    {
       if (footsteps.isEmpty())
@@ -977,14 +1004,14 @@ public class WalkingMessageHandler
          return true;
       }
 
-      tempStanceLocation.setToZero(soleFrames.get(footsteps.get(0).getRobotSide().getOppositeSide()));
-      tempStepOrigin.setToZero(soleFrames.get(footsteps.get(0).getRobotSide()));
+      tempStanceLocation.setToZero(soleFrames.get(footsteps.get(0).footstep.getRobotSide().getOppositeSide()));
+      tempStepOrigin.setToZero(soleFrames.get(footsteps.get(0).footstep.getRobotSide()));
       tempStanceLocation.changeFrame(worldFrame);
       tempStepOrigin.changeFrame(worldFrame);
 
       for (int i = 0; i < footsteps.size(); i++)
       {
-         Footstep footstep = footsteps.get(i);
+         Footstep footstep = footsteps.get(i).footstep;
          FixedFramePoint3DBasics stepPosition = footstep.getFootstepPose().getPosition();
          double distance = stepPosition.distanceXY(tempStanceLocation);
          if (distance > maxStepDistance)
@@ -1032,7 +1059,7 @@ public class WalkingMessageHandler
 
          if (i < footsteps.size() - 1)
          {
-            if (footsteps.get(i + 1).getRobotSide() != footstep.getRobotSide())
+            if (footsteps.get(i + 1).footstep.getRobotSide() != footstep.getRobotSide())
             {
                // If the next step is with the other foot the step origin is the previous stance location.
                tempStepOrigin.set(tempStanceLocation);
@@ -1049,12 +1076,18 @@ public class WalkingMessageHandler
       return true;
    }
 
-   private static boolean checkPositionIsValid(FramePoint3DReadOnly positionToCheck, FramePoint3DReadOnly location1, FramePoint3DReadOnly location2,
+   private static boolean checkPositionIsValid(FramePoint3DReadOnly positionToCheck,
+                                               FramePoint3DReadOnly location1,
+                                               FramePoint3DReadOnly location2,
                                                double maxDistance)
    {
       // Check the distance to a straight line on the ground from location1 to location 2
-      double distanceXY = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(positionToCheck.getX(), positionToCheck.getY(), location1.getX(),
-                                                                                 location1.getY(), location2.getX(), location2.getY());
+      double distanceXY = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(positionToCheck.getX(),
+                                                                                 positionToCheck.getY(),
+                                                                                 location1.getX(),
+                                                                                 location1.getY(),
+                                                                                 location2.getX(),
+                                                                                 location2.getY());
       if (distanceXY > maxDistance)
       {
          LogTools.warn("Got a footstep with a trajectory that is far from the step origin and goal location. The XY distance from a straight line trajectory was "
@@ -1089,7 +1122,6 @@ public class WalkingMessageHandler
       actualFootstepPositions.put(robotSide, actualFootstepPosition);
    }
 
-
    private final FrameVector3D touchdownErrorVector = new FrameVector3D(ReferenceFrame.getWorldFrame());
 
    public void addOffsetVectorFromTouchdownError(RobotSide robotSide)
@@ -1120,7 +1152,7 @@ public class WalkingMessageHandler
 
       for (int stepIdx = 0; stepIdx < upcomingFootsteps.size(); stepIdx++)
       {
-         Footstep footstep = upcomingFootsteps.get(stepIdx);
+         Footstep footstep = upcomingFootsteps.get(stepIdx).footstep;
          footstep.addOffset(footstepOffsetVector);
       }
 
@@ -1146,6 +1178,16 @@ public class WalkingMessageHandler
       comTrajectoryHandler.setPositionOffset(planOffset);
       planOffsetStatus.getOffsetVector().set(planOffset);
       statusOutputManager.reportStatusMessage(planOffsetStatus);
+   }
 
+   private static class FootstepDataHolder
+   {
+      private final Footstep footstep = new Footstep();
+      private final FootstepTiming footstepTiming = new FootstepTiming();
+      private final MutableDouble pauseDurationAfterStep = new MutableDouble();
+
+      public FootstepDataHolder()
+      {
+      }
    }
 }
