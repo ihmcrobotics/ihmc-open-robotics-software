@@ -1198,6 +1198,10 @@ public class WalkingMessageHandler
       statusOutputManager.reportStatusMessage(planOffsetStatus);
    }
 
+   /**
+    * Internal class used to centralize the various data collected for each footstep. This class is
+    * meant only for internal use of the {@link WalkingMessageHandler}.
+    */
    private class FootstepDataHolder
    {
       private final Footstep footstep = new Footstep();
