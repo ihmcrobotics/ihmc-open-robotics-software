@@ -44,6 +44,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoLong;
 
 /**
  * Use this class to generate a stream of footsteps which path can be controlled given desired
@@ -124,6 +125,8 @@ public class ContinuousStepGenerator implements Updatable
    private final YoFramePose3D currentSupportFootPose = new YoFramePose3D("currentSupportFootPose" + variableNameSuffix, worldFrame, registry);
 
    private final YoInteger numberOfFootstepsToPlan = new YoInteger("numberOfFootstepsToPlan" + variableNameSuffix, registry);
+   private final YoLong currentFootstepListSequenceId = new YoLong("currentFootstepListSequenceId" + variableNameSuffix, registry);
+   private final YoLong currentFootstepSequenceId = new YoLong("currentFootstepSequenceId" + variableNameSuffix, registry);
 
    private final YoDouble inPlaceWidth = new YoDouble("inPlaceWidth" + variableNameSuffix, registry);
    private final YoDouble minStepWidth = new YoDouble("minStepWidth" + variableNameSuffix, registry);
@@ -241,6 +244,8 @@ public class ContinuousStepGenerator implements Updatable
       footstepDataListMessage.setFinalTransferDuration(transferTime.getValue());
 
       int startIndex = updateFirstFootstep ? 0 : 1;
+      long firstFootstepId = footsteps.isEmpty() ? currentFootstepSequenceId.getValue() : footsteps.get(0).getSequenceId();
+      currentFootstepSequenceId.set(firstFootstepId);
 
       RobotSide swingSide;
 
@@ -314,6 +319,7 @@ public class ContinuousStepGenerator implements Updatable
          footstep.setRobotSide(swingSide.toByte());
          footstep.getLocation().set(nextFootstepPose3D.getPosition());
          footstep.getOrientation().set(nextFootstepPose3D.getOrientation());
+         footstep.setSequenceId(firstFootstepId + i);
 
          footstepPose2D.set(nextFootstepPose2D);
          swingSide = swingSide.getOppositeSide();
@@ -330,6 +336,8 @@ public class ContinuousStepGenerator implements Updatable
       {
          if (counter >= numberOfTicksBeforeSubmittingFootsteps.getValue())
          {
+            footstepDataListMessage.setSequenceId(currentFootstepListSequenceId.getValue());
+            currentFootstepListSequenceId.increment();
             footstepMessenger.submitFootsteps(footstepDataListMessage);
             counter = 0;
          }

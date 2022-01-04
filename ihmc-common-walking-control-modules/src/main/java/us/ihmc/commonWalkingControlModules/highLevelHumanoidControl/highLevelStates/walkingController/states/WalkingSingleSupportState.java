@@ -33,6 +33,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class WalkingSingleSupportState extends SingleSupportState
 {
@@ -41,6 +42,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final int additionalFootstepsToConsider;
    private final Footstep nextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
+   private final YoLong footstepSequenceId;
    private double swingTime;
 
    private final Footstep[] footsteps;
@@ -116,6 +118,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       additionalFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
       footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
+      footstepSequenceId = new YoLong(stateEnum.getSupportSide().getOppositeSide().getCamelCaseName() + "FootstepSequenceId", registry);
 
       setYoVariablesToNaN();
    }
@@ -241,7 +244,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
       swingTime = walkingMessageHandler.getNextSwingTime();
-      walkingMessageHandler.poll(nextFootstep, footstepTiming);
+      footstepSequenceId.set(walkingMessageHandler.poll(nextFootstep, footstepTiming));
 
       /**
        * 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the
@@ -302,13 +305,13 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
-      walkingMessageHandler.reportFootstepStarted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepStarted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime, footstepSequenceId.getValue());
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      super.onExit();
+      super.onExit(timeInState);
 
       balanceManager.minimizeAngularMomentumRateZ(false);
 
@@ -317,7 +320,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       touchdownErrorCompensator.registerDesiredFootstepPosition(swingSide, desiredFootPoseInWorld.getPosition());
 
-      walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime, footstepSequenceId.getValue());
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
       MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(nextFootstep.getRobotSide());
@@ -386,7 +389,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
             feetManager.requestLineToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
 
-//         updateHeightManager();
+         //         updateHeightManager();
       }
    }
 

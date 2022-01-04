@@ -279,7 +279,7 @@ public class WalkingMessageHandler
                            footstepData.footstepTiming,
                            footstepData.pauseDurationAfterStep,
                            command.getExecutionMode());
-         setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable, footstepData.footstep);
+         footstepData.setFootstep(command.getFootstep(i), trustHeightOfFootsteps, areFootstepsAdjustable);
          currentNumberOfFootsteps.increment();
       }
 
@@ -449,22 +449,25 @@ public class WalkingMessageHandler
     * @param footstepToPack will be set to the next footstep in the list of upcoming steps.
     * @param timingToPack   will be set to the next footsteps timing in the list of upcoming steps.
     */
-   public void poll(Footstep footstepToPack, FootstepTiming timingToPack)
+   public long poll(Footstep footstepToPack, FootstepTiming timingToPack)
    {
       if (getStepsBeforePause() == 0)
       {
          throw new RuntimeException("Can not poll footstep since there are no upcoming steps.");
       }
 
-      footstepToPack.set(upcomingFootsteps.get(0).footstep);
-      timingToPack.set(upcomingFootsteps.get(0).footstepTiming);
-      lastTimingExecuted.set(upcomingFootsteps.get(0).footstepTiming);
+      FootstepDataHolder nextFootstep = upcomingFootsteps.get(0);
+      footstepToPack.set(nextFootstep.footstep);
+      timingToPack.set(nextFootstep.footstepTiming);
+      lastTimingExecuted.set(nextFootstep.footstepTiming);
 
       updateVisualization();
       currentNumberOfFootsteps.decrement();
       currentFootstepIndex.increment();
 
       upcomingFootsteps.remove(0);
+
+      return nextFootstep.footstepSequenceId;
    }
 
    /**
@@ -625,7 +628,16 @@ public class WalkingMessageHandler
                                      FramePose3DReadOnly actualFootPoseInWorld,
                                      double swingDuration)
    {
-      reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration);
+      reportFootstepStarted(robotSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration, 0);
+   }
+
+   public void reportFootstepStarted(RobotSide robotSide,
+                                     FramePose3DReadOnly desiredFootPoseInWorld,
+                                     FramePose3DReadOnly actualFootPoseInWorld,
+                                     double swingDuration,
+                                     long footstepSequenceId)
+   {
+      reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration, footstepSequenceId);
       executingFootstep.set(true);
 
       if (yoTime != null)
@@ -637,7 +649,16 @@ public class WalkingMessageHandler
                                        FramePose3DReadOnly actualFootPoseInWorld,
                                        double swingDuration)
    {
-      reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration);
+      reportFootstepCompleted(robotSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration, 0);
+   }
+
+   public void reportFootstepCompleted(RobotSide robotSide,
+                                       FramePose3DReadOnly desiredFootPoseInWorld,
+                                       FramePose3DReadOnly actualFootPoseInWorld,
+                                       double swingDuration,
+                                       long footstepSequenceId)
+   {
+      reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration, footstepSequenceId);
       executingFootstep.set(false);
    }
 
@@ -645,7 +666,8 @@ public class WalkingMessageHandler
                                      FootstepStatus status,
                                      FramePose3DReadOnly desiredFootPoseInWorld,
                                      FramePose3DReadOnly actualFootPoseInWorld,
-                                     double swingDuration)
+                                     double swingDuration,
+                                     long footstepSequenceId)
    {
       desiredFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
       actualFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
@@ -658,6 +680,8 @@ public class WalkingMessageHandler
       footstepStatus.getDesiredFootOrientationInWorld().set(desiredFootPoseInWorld.getOrientation());
       footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPoseInWorld.getPosition());
       footstepStatus.setSwingDuration(swingDuration);
+      footstepStatus.setFootstepSequenceId(footstepSequenceId);
+      footstepStatus.setFootstepListSequenceId(lastCommandID.getValue());
       statusOutputManager.reportStatusMessage(footstepStatus);
    }
 
@@ -848,12 +872,6 @@ public class WalkingMessageHandler
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
 
       return transferToAndNextFootstepsData;
-   }
-
-   private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, boolean isAdjustable, Footstep footstepToSet)
-   {
-      footstepToSet.set(footstepData, trustHeight, isAdjustable);
-      footstepToSet.addOffset(planOffsetInWorld);
    }
 
    private void setFootstepTiming(FootstepDataCommand footstep,
@@ -1180,14 +1198,22 @@ public class WalkingMessageHandler
       statusOutputManager.reportStatusMessage(planOffsetStatus);
    }
 
-   private static class FootstepDataHolder
+   private class FootstepDataHolder
    {
       private final Footstep footstep = new Footstep();
       private final FootstepTiming footstepTiming = new FootstepTiming();
       private final MutableDouble pauseDurationAfterStep = new MutableDouble();
+      private long footstepSequenceId = 0;
 
       public FootstepDataHolder()
       {
+      }
+
+      private void setFootstep(FootstepDataCommand footstepData, boolean trustHeight, boolean isAdjustable)
+      {
+         footstepSequenceId = footstepData.getSequenceId();
+         footstep.set(footstepData, trustHeight, isAdjustable);
+         footstep.addOffset(planOffsetInWorld);
       }
    }
 }
