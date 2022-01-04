@@ -46,6 +46,10 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -80,6 +84,12 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -104,6 +114,10 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       cdr.write_type_9(data.getFootstepStatus());
 
+      cdr.write_type_4(data.getFootstepSequenceId());
+
+      cdr.write_type_4(data.getFootstepListSequenceId());
+
       cdr.write_type_2(data.getFootstepIndex());
 
       cdr.write_type_9(data.getRobotSide());
@@ -121,6 +135,10 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setSequenceId(cdr.read_type_4());
       	
       data.setFootstepStatus(cdr.read_type_9());
+      	
+      data.setFootstepSequenceId(cdr.read_type_4());
+      	
+      data.setFootstepListSequenceId(cdr.read_type_4());
       	
       data.setFootstepIndex(cdr.read_type_2());
       	
@@ -140,6 +158,8 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("footstep_status", data.getFootstepStatus());
+      ser.write_type_4("footstep_sequence_id", data.getFootstepSequenceId());
+      ser.write_type_4("footstep_list_sequence_id", data.getFootstepListSequenceId());
       ser.write_type_2("footstep_index", data.getFootstepIndex());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_a("desired_foot_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredFootPositionInWorld());
@@ -158,6 +178,8 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setFootstepStatus(ser.read_type_9("footstep_status"));
+      data.setFootstepSequenceId(ser.read_type_4("footstep_sequence_id"));
+      data.setFootstepListSequenceId(ser.read_type_4("footstep_list_sequence_id"));
       data.setFootstepIndex(ser.read_type_2("footstep_index"));
       data.setRobotSide(ser.read_type_9("robot_side"));
       ser.read_type_a("desired_foot_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredFootPositionInWorld());

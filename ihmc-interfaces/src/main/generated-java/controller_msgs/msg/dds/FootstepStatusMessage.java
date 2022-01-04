@@ -25,6 +25,14 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
             */
    public byte footstep_status_ = (byte) 255;
    /**
+            * The sequence ID of the executed footstep this status corresponds to.
+            */
+   public long footstep_sequence_id_;
+   /**
+            * The sequence ID of the footstep list the footstep belongs to.
+            */
+   public long footstep_list_sequence_id_;
+   /**
             * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
             */
    public int footstep_index_;
@@ -73,6 +81,10 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
 
       footstep_status_ = other.footstep_status_;
 
+      footstep_sequence_id_ = other.footstep_sequence_id_;
+
+      footstep_list_sequence_id_ = other.footstep_list_sequence_id_;
+
       footstep_index_ = other.footstep_index_;
 
       robot_side_ = other.robot_side_;
@@ -113,6 +125,36 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
    public byte getFootstepStatus()
    {
       return footstep_status_;
+   }
+
+   /**
+            * The sequence ID of the executed footstep this status corresponds to.
+            */
+   public void setFootstepSequenceId(long footstep_sequence_id)
+   {
+      footstep_sequence_id_ = footstep_sequence_id;
+   }
+   /**
+            * The sequence ID of the executed footstep this status corresponds to.
+            */
+   public long getFootstepSequenceId()
+   {
+      return footstep_sequence_id_;
+   }
+
+   /**
+            * The sequence ID of the footstep list the footstep belongs to.
+            */
+   public void setFootstepListSequenceId(long footstep_list_sequence_id)
+   {
+      footstep_list_sequence_id_ = footstep_list_sequence_id;
+   }
+   /**
+            * The sequence ID of the footstep list the footstep belongs to.
+            */
+   public long getFootstepListSequenceId()
+   {
+      return footstep_list_sequence_id_;
    }
 
    /**
@@ -218,6 +260,10 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_status_, other.footstep_status_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_sequence_id_, other.footstep_sequence_id_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_list_sequence_id_, other.footstep_list_sequence_id_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_index_, other.footstep_index_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
@@ -245,6 +291,10 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
 
       if(this.footstep_status_ != otherMyClass.footstep_status_) return false;
 
+      if(this.footstep_sequence_id_ != otherMyClass.footstep_sequence_id_) return false;
+
+      if(this.footstep_list_sequence_id_ != otherMyClass.footstep_list_sequence_id_) return false;
+
       if(this.footstep_index_ != otherMyClass.footstep_index_) return false;
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
@@ -269,6 +319,10 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("footstep_status=");
       builder.append(this.footstep_status_);      builder.append(", ");
+      builder.append("footstep_sequence_id=");
+      builder.append(this.footstep_sequence_id_);      builder.append(", ");
+      builder.append("footstep_list_sequence_id=");
+      builder.append(this.footstep_list_sequence_id_);      builder.append(", ");
       builder.append("footstep_index=");
       builder.append(this.footstep_index_);      builder.append(", ");
       builder.append("robot_side=");

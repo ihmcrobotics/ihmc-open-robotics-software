@@ -12,6 +12,10 @@ uint32 sequence_id
 
 # The current footstep status enum value.
 byte footstep_status 255
+# The sequence ID of the executed footstep this status corresponds to.
+uint32 footstep_sequence_id
+# The sequence ID of the footstep list the footstep belongs to.
+uint32 footstep_list_sequence_id
 # footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
 int32 footstep_index
 # The robot side (left or right) that this footstep status correlates to.

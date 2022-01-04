@@ -39,6 +39,14 @@ module controller_msgs
         @defaultValue(value=255)
         octet footstep_status;
         /**
+         * The sequence ID of the executed footstep this status corresponds to.
+         */
+        unsigned long footstep_sequence_id;
+        /**
+         * The sequence ID of the footstep list the footstep belongs to.
+         */
+        unsigned long footstep_list_sequence_id;
+        /**
          * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
          */
         long footstep_index;
