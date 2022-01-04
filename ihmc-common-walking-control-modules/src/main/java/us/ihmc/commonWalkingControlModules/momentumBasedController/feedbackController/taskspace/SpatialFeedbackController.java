@@ -7,14 +7,7 @@ import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.FORCE;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.POSE;
 import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_CUMULATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.*;
 
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
@@ -81,6 +74,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
    protected final FBVector6D yoDesiredAcceleration;
    protected final FBVector6D yoFeedForwardAcceleration;
+   protected final FBVector6D yoProportionalFeedbackAcceleration;
+   protected final FBVector6D yoDerivativeFeedbackAcceleration;
+   protected final FBVector6D yoIntegralFeedbackAcceleration;
    protected final FBVector6D yoFeedbackAcceleration;
    protected final FBRateLimitedVector6D rateLimitedFeedbackAcceleration;
    protected final FBVector6D yoAchievedAcceleration;
@@ -149,14 +145,19 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final int controllerIndex;
    protected int currentCommandId;
 
-   public SpatialFeedbackController(RigidBodyBasics endEffector, WholeBodyControlCoreToolbox ccToolbox, FeedbackControllerToolbox fbToolbox,
+   public SpatialFeedbackController(RigidBodyBasics endEffector,
+                                    WholeBodyControlCoreToolbox ccToolbox,
+                                    FeedbackControllerToolbox fbToolbox,
                                     YoRegistry parentRegistry)
    {
       this(endEffector, 0, ccToolbox, fbToolbox, parentRegistry);
    }
 
-   public SpatialFeedbackController(RigidBodyBasics endEffector, int controllerIndex, WholeBodyControlCoreToolbox ccToolbox,
-                                    FeedbackControllerToolbox fbToolbox, YoRegistry parentRegistry)
+   public SpatialFeedbackController(RigidBodyBasics endEffector,
+                                    int controllerIndex,
+                                    WholeBodyControlCoreToolbox ccToolbox,
+                                    FeedbackControllerToolbox fbToolbox,
+                                    YoRegistry parentRegistry)
    {
       this.endEffector = endEffector;
       this.controllerIndex = controllerIndex;
@@ -243,6 +244,11 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          {
             yoDesiredAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, ACCELERATION, isEnabled);
             yoFeedForwardAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, ACCELERATION, isEnabled);
+            yoProportionalFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, P_FEEDBACK, ACCELERATION, isEnabled);
+            yoDerivativeFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, D_FEEDBACK, ACCELERATION, isEnabled);
+            yoIntegralFeedbackAcceleration = computeIntegralTerm
+                  ? fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, I_FEEDBACK, ACCELERATION, isEnabled)
+                  : null;
             yoFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, ACCELERATION, isEnabled);
             rateLimitedFeedbackAcceleration = fbToolbox.getOrCreateRateLimitedVectorData6D(endEffector,
                                                                                            controllerIndex,
@@ -258,6 +264,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          {
             yoDesiredAcceleration = null;
             yoFeedForwardAcceleration = null;
+            yoProportionalFeedbackAcceleration = null;
+            yoDerivativeFeedbackAcceleration = null;
+            yoIntegralFeedbackAcceleration = null;
             yoFeedbackAcceleration = null;
             rateLimitedFeedbackAcceleration = null;
             yoAchievedAcceleration = null;
@@ -293,6 +302,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
          yoDesiredAcceleration = null;
          yoFeedForwardAcceleration = null;
+         yoProportionalFeedbackAcceleration = null;
+         yoDerivativeFeedbackAcceleration = null;
+         yoIntegralFeedbackAcceleration = null;
          yoFeedbackAcceleration = null;
          rateLimitedFeedbackAcceleration = null;
          yoAchievedAcceleration = null;
@@ -419,7 +431,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       computeProportionalTerm(linearProportionalFeedback, angularProportionalFeedback);
       computeDerivativeTerm(linearDerivativeFeedback, angularDerivativeFeedback);
-      computeIntegralTerm(linearIntegralFeedback, angularIntegralFeedback);
+      if (computeIntegralTerm)
+         computeIntegralTerm(linearIntegralFeedback, angularIntegralFeedback);
       feedForwardLinearAction.setIncludingFrame(yoFeedForwardAcceleration.getLinearPart());
       feedForwardAngularAction.setIncludingFrame(yoFeedForwardAcceleration.getAngularPart());
       feedForwardLinearAction.changeFrame(controlFrame);
@@ -427,13 +440,25 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       desiredLinearAcceleration.setIncludingFrame(linearProportionalFeedback);
       desiredLinearAcceleration.add(linearDerivativeFeedback);
-      desiredLinearAcceleration.add(linearIntegralFeedback);
+      if (computeIntegralTerm)
+         desiredLinearAcceleration.add(linearIntegralFeedback);
       desiredLinearAcceleration.clipToMaxLength(positionGains.getMaximumFeedback());
 
       desiredAngularAcceleration.setIncludingFrame(angularProportionalFeedback);
       desiredAngularAcceleration.add(angularDerivativeFeedback);
-      desiredAngularAcceleration.add(angularIntegralFeedback);
+      if (computeIntegralTerm)
+         desiredAngularAcceleration.add(angularIntegralFeedback);
       desiredAngularAcceleration.clipToMaxLength(orientationGains.getMaximumFeedback());
+
+      yoProportionalFeedbackAcceleration.setIncludingFrame(angularProportionalFeedback, linearProportionalFeedback);
+      yoProportionalFeedbackAcceleration.setCommandId(currentCommandId);
+      yoDerivativeFeedbackAcceleration.setIncludingFrame(angularDerivativeFeedback, linearDerivativeFeedback);
+      yoDerivativeFeedbackAcceleration.setCommandId(currentCommandId);
+      if (computeIntegralTerm)
+      {
+         yoIntegralFeedbackAcceleration.setIncludingFrame(angularIntegralFeedback, linearIntegralFeedback);
+         yoIntegralFeedbackAcceleration.setCommandId(currentCommandId);
+      }
 
       yoFeedbackAcceleration.setIncludingFrame(desiredAngularAcceleration, desiredLinearAcceleration);
       yoFeedbackAcceleration.changeFrame(trajectoryFrame);
@@ -449,7 +474,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
       desiredAngularAcceleration.changeFrame(controlFrame);
       desiredAngularAcceleration.add(feedForwardAngularAction);
-      
+
       proccessInverseDynamicsDesiredAcceleration(controlFrame, desiredAngularAcceleration, desiredLinearAcceleration);
 
       yoDesiredAcceleration.setIncludingFrame(desiredAngularAcceleration, desiredLinearAcceleration);
@@ -905,17 +930,19 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       linearAccelerationToModify.sub(biasLinearAcceleration);
       linearAccelerationToModify.changeFrame(originalFrame);
    }
-   
+
    /**
-    * This function can add post-processing to the desired accelerations from the inverse dynamics calculator.
-    * 
-    * This is done before the coriolis acceleration is calculated. The default implementation is a no-op.
+    * This function can add post-processing to the desired accelerations from the inverse dynamics
+    * calculator. This is done before the coriolis acceleration is calculated. The default
+    * implementation is a no-op.
     * 
     * @param controlFrame
     * @param desiredAngularAcceleration
     * @param desiredLinearAcceleration
     */
-   protected void proccessInverseDynamicsDesiredAcceleration(MovingReferenceFrame controlFrame, FrameVector3D desiredAngularAcceleration, FrameVector3D desiredLinearAcceleration)
+   protected void proccessInverseDynamicsDesiredAcceleration(MovingReferenceFrame controlFrame,
+                                                             FrameVector3D desiredAngularAcceleration,
+                                                             FrameVector3D desiredLinearAcceleration)
    {
    }
 
