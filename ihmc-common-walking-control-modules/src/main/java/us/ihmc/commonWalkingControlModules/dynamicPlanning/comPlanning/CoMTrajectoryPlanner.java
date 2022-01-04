@@ -150,7 +150,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       this.omega = omega;
       this.gravityZ = Math.abs(gravityZ);
 
-      omega.addListener(v -> comHeight.set(gravityZ / MathTools.square(omega.getValue())));
+      omega.addListener(v -> comHeight.set(this.gravityZ / MathTools.square(omega.getValue())));
       omega.notifyListeners();
 
       maintainInitialCoMVelocityContinuity.set(false);
