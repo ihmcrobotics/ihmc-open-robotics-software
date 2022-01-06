@@ -209,8 +209,8 @@ public class ContinuousStepGenerator implements Updatable
 
       if (walk.getValue() != walkPreviousValue.getValue())
       {
-         currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
-         counter = numberOfTicksBeforeSubmittingFootsteps.getValue(); // To make footsteps being sent right away. 
+         currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getValue()));
+         counter = numberOfTicksBeforeSubmittingFootsteps.getValue(); // To make footsteps being sent right away.
       }
 
       { // Processing footstep status
@@ -229,7 +229,7 @@ public class ContinuousStepGenerator implements Updatable
             {
                updateFirstFootstep = true;
                currentSupportSide.set(footstepCompletionSide.getValue());
-               currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getEnumValue()));
+               currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getValue()));
             }
          }
 
