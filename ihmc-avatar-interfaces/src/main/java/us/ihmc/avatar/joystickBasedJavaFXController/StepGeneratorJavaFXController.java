@@ -82,7 +82,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -153,9 +153,14 @@ public class StepGeneratorJavaFXController
 
    private final AtomicReference<Boolean> walkingRequest = new AtomicReference<>(null);
 
-   public StepGeneratorJavaFXController(String robotName, JavaFXMessager messager, WalkingControllerParameters walkingControllerParameters, ROS2Node ros2Node,
-                                        JavaFXRobotVisualizer javaFXRobotVisualizer, HumanoidRobotKickMessenger kickMessenger,
-                                        HumanoidRobotPunchMessenger punchMessenger, RobotLowLevelMessenger lowLevelMessenger,
+   public StepGeneratorJavaFXController(String robotName,
+                                        JavaFXMessager messager,
+                                        WalkingControllerParameters walkingControllerParameters,
+                                        ROS2NodeInterface ros2Node,
+                                        JavaFXRobotVisualizer javaFXRobotVisualizer,
+                                        HumanoidRobotKickMessenger kickMessenger,
+                                        HumanoidRobotPunchMessenger punchMessenger,
+                                        RobotLowLevelMessenger lowLevelMessenger,
                                         SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
    {
       this.javaFXRobotVisualizer = javaFXRobotVisualizer;
@@ -256,6 +261,8 @@ public class StepGeneratorJavaFXController
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          CapturabilityBasedStatus status = s.takeNextData();
+         if (status == null)
+            return;
          queuedTasksToProcess.add(() ->
          {
             isLeftFootInSupport.set(!status.getLeftFootSupportPolygon3d().isEmpty());
@@ -646,7 +653,7 @@ public class StepGeneratorJavaFXController
    public void start()
    {
       animationTimer.start();
-      executorService.scheduleAtFixedRate(this::sendFootsteps, 0, 500, TimeUnit.MILLISECONDS);
+      executorService.scheduleAtFixedRate(this::sendFootsteps, 0, 50, TimeUnit.MILLISECONDS);
    }
 
    public void stop()
