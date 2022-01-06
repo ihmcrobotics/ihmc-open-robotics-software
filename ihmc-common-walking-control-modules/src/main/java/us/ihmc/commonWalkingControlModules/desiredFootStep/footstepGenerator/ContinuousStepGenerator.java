@@ -149,7 +149,6 @@ public class ContinuousStepGenerator implements Updatable
 
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RecyclingArrayList<FootstepDataMessage> footsteps = footstepDataListMessage.getFootstepDataList();
-   private final FootstepDataMessage firstFootstep = new FootstepDataMessage();
 
    private final SideDependentList<List<FootstepVisualizer>> footstepSideDependentVisualizers = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
@@ -222,8 +221,6 @@ public class ContinuousStepGenerator implements Updatable
             {
                if (!footsteps.isEmpty())
                   footsteps.remove(0);
-               if (!footsteps.isEmpty())
-                  firstFootstep.set(footsteps.get(0));
             }
             else if (statusToProcess == FootstepStatus.COMPLETED)
             {
@@ -254,14 +251,15 @@ public class ContinuousStepGenerator implements Updatable
       }
       else
       {
-         while (footsteps.size() > 1)
+         while (footsteps.size() > startIndex)
             footsteps.fastRemove(footsteps.size() - 1);
 
-         footstepPose2D.getPosition().set(firstFootstep.getLocation());
-         footstepPose2D.getOrientation().set(firstFootstep.getOrientation());
-         swingSide = RobotSide.fromByte(firstFootstep.getRobotSide()).getOppositeSide();
+         FootstepDataMessage previousFootstep = footsteps.get(footsteps.size() - 1);
+         footstepPose2D.getPosition().set(previousFootstep.getLocation());
+         footstepPose2D.getOrientation().set(previousFootstep.getOrientation());
+         swingSide = RobotSide.fromByte(previousFootstep.getRobotSide()).getOppositeSide();
 
-         previousFootstepPose.set(firstFootstep.getLocation(), firstFootstep.getOrientation());
+         previousFootstepPose.set(previousFootstep.getLocation(), previousFootstep.getOrientation());
       }
 
       for (int i = startIndex; i < numberOfFootstepsToPlan.getValue(); i++)
@@ -321,11 +319,7 @@ public class ContinuousStepGenerator implements Updatable
          previousFootstepPose.set(nextFootstepPose3D);
       }
 
-      if (updateFirstFootstep)
-      {
-         firstFootstep.set(footsteps.get(0));
-         updateFirstFootstep = false;
-      }
+      updateFirstFootstep = false;
 
       if (footstepMessenger != null)
       {
