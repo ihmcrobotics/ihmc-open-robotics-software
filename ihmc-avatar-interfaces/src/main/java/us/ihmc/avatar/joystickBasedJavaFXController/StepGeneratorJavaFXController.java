@@ -654,7 +654,7 @@ public class StepGeneratorJavaFXController
    public void start()
    {
       animationTimer.start();
-      executorService.scheduleAtFixedRate(this::sendFootsteps, 0, 50, TimeUnit.MILLISECONDS);
+      executorService.scheduleAtFixedRate(this::sendFootsteps, 0, 500, TimeUnit.MILLISECONDS);
    }
 
    public void stop()
