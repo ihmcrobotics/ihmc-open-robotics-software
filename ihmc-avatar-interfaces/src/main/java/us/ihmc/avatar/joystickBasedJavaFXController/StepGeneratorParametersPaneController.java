@@ -14,6 +14,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -32,6 +33,8 @@ public class StepGeneratorParametersPaneController
    @FXML
    private ListView<String> profileListView;
    @FXML
+   private ToggleButton enableTouchdownCorrectionButton;
+   @FXML
    private Slider trajectoryDurationSlider;
    @FXML
    private Slider swingHeightSlider;
@@ -48,7 +51,7 @@ public class StepGeneratorParametersPaneController
    @FXML
    private Spinner<Double> maxStepWidthSpinner;
    @FXML
-   private Spinner<Double> turnStepWidth;
+   private Spinner<Double> turnStepWidthSpinner;
    @FXML
    private Spinner<Double> turnMaxAngleInwardSpinner;
    @FXML
@@ -113,7 +116,7 @@ public class StepGeneratorParametersPaneController
       defaultStepWidthSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, initialParameters.getDefaultStepWidth(), 0.05));
       minStepWidthSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, initialParameters.getMinStepWidth(), 0.025));
       maxStepWidthSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, initialParameters.getMaxStepWidth(), 0.05));
-      turnStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, initialParameters.getTurnStepWidth(), 0.05));
+      turnStepWidthSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, initialParameters.getTurnStepWidth(), 0.05));
       turnMaxAngleInwardSpinner.setValueFactory(newAngleSpinnerValueFactory(-Math.PI / 4.0,
                                                                             Math.PI / 2.0,
                                                                             initialParameters.getTurnMaxAngleInward(),
@@ -123,6 +126,7 @@ public class StepGeneratorParametersPaneController
                                                                              initialParameters.getTurnMaxAngleOutward(),
                                                                              Math.toRadians(5.0)));
 
+      stepParametersProperty.bindBidirectionalEnableTouchdownCorrection(enableTouchdownCorrectionButton.selectedProperty());
       stepParametersProperty.bindBidirectionalSwingHeight(swingHeightSlider.valueProperty());
       stepParametersProperty.bindBidirectionalSwingDuration(swingDurationSlider.valueProperty());
       stepParametersProperty.bindBidirectionalTransferDuration(transferDurationSlider.valueProperty());
@@ -130,7 +134,7 @@ public class StepGeneratorParametersPaneController
       stepParametersProperty.bindBidirectionalDefaultStepWidth(defaultStepWidthSpinner.getValueFactory().valueProperty());
       stepParametersProperty.bindBidirectionalMinStepWidth(minStepWidthSpinner.getValueFactory().valueProperty());
       stepParametersProperty.bindBidirectionalMaxStepWidth(maxStepWidthSpinner.getValueFactory().valueProperty());
-      stepParametersProperty.bindBidirectionalTurnStepWidth(turnStepWidth.getValueFactory().valueProperty());
+      stepParametersProperty.bindBidirectionalTurnStepWidth(turnStepWidthSpinner.getValueFactory().valueProperty());
       stepParametersProperty.bindBidirectionalTurnMaxAngleInward(turnMaxAngleInwardSpinner.getValueFactory().valueProperty());
       stepParametersProperty.bindBidirectionalTurnMaxAngleOutward(turnMaxAngleOutwardSpinner.getValueFactory().valueProperty());
 
