@@ -11,8 +11,8 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2Node;
 
 public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, RobotLowLevelMessenger
 {
@@ -21,9 +21,9 @@ public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, Robo
    private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
-   public ValkyriePunchMessenger(String robotName, ROS2Node ros2Node)
+   public ValkyriePunchMessenger(String robotName, ROS2NodeInterface ros2Node)
    {
-      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotName);
       armTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ArmTrajectoryMessage.class, inputTopic);
       highLevelStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, inputTopic);
       abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, inputTopic);
