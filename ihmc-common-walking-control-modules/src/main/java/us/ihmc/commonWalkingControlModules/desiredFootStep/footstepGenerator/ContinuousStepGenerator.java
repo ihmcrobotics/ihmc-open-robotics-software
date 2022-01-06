@@ -123,6 +123,8 @@ public class ContinuousStepGenerator implements Updatable
 
    private final YoEnum<RobotSide> currentSupportSide = new YoEnum<>("currentSupportSide" + variableNameSuffix, registry, RobotSide.class);
    private final YoFramePose3D currentSupportFootPose = new YoFramePose3D("currentSupportFootPose" + variableNameSuffix, worldFrame, registry);
+   private final YoFramePose3D initialFootPose = new YoFramePose3D("initialFootPose" + variableNameSuffix, worldFrame, registry);
+   private final YoBoolean correctPlanAtTouchdown = new YoBoolean("correctPlanAtTouchdown" + variableNameSuffix, registry);
 
    private final YoInteger numberOfFootstepsToPlan = new YoInteger("numberOfFootstepsToPlan" + variableNameSuffix, registry);
 
@@ -181,6 +183,8 @@ public class ContinuousStepGenerator implements Updatable
       maxAngleTurnInwards.set(-Math.PI / 2.0);
       numberOfTicksBeforeSubmittingFootsteps.set(2);
 
+      correctPlanAtTouchdown.set(true);
+
       setSupportFootBasedFootstepAdjustment(true);
    }
 
@@ -193,6 +197,8 @@ public class ContinuousStepGenerator implements Updatable
    private boolean updateFirstFootstep = true;
    private int counter = 0;
 
+   private final FootstepDataMessage lastFootstepStarted = new FootstepDataMessage();
+
    /**
     * Process the current desired velocities to generate a new footstep plan.
     */
@@ -202,13 +208,16 @@ public class ContinuousStepGenerator implements Updatable
       if (!walk.getValue())
       {
          updateFirstFootstep = true;
+         footsteps.clear();
          walkPreviousValue.set(false);
+         lastFootstepStarted.setRobotSide((byte) -1);
          return;
       }
 
       if (walk.getValue() != walkPreviousValue.getValue())
       {
          currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getValue()));
+         initialFootPose.set(currentSupportFootPose);
          counter = numberOfTicksBeforeSubmittingFootsteps.getValue(); // To make footsteps being sent right away.
       }
 
@@ -220,13 +229,29 @@ public class ContinuousStepGenerator implements Updatable
             if (statusToProcess == FootstepStatus.STARTED)
             {
                if (!footsteps.isEmpty())
+               {
+                  lastFootstepStarted.set(footsteps.get(0));
                   footsteps.remove(0);
+               }
+               else
+               {
+                  lastFootstepStarted.setRobotSide((byte) -1);
+               }
             }
             else if (statusToProcess == FootstepStatus.COMPLETED)
             {
                updateFirstFootstep = true;
                currentSupportSide.set(footstepCompletionSide.getValue());
                currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getValue()));
+
+               if (!correctPlanAtTouchdown.getValue() && RobotSide.fromByte(lastFootstepStarted.getRobotSide()) == currentSupportSide.getValue())
+               {
+                  initialFootPose.set(lastFootstepStarted.getLocation(), lastFootstepStarted.getOrientation());
+               }
+               else
+               {
+                  initialFootPose.set(currentSupportFootPose);
+               }
             }
          }
 
@@ -245,9 +270,9 @@ public class ContinuousStepGenerator implements Updatable
       if (updateFirstFootstep)
       {
          footsteps.clear();
-         footstepPose2D.set(currentSupportFootPose);
+         footstepPose2D.set(initialFootPose);
          swingSide = currentSupportSide.getEnumValue().getOppositeSide();
-         previousFootstepPose.set(currentSupportFootPose);
+         previousFootstepPose.set(initialFootPose);
       }
       else
       {
@@ -335,6 +360,24 @@ public class ContinuousStepGenerator implements Updatable
       }
 
       walkPreviousValue.set(walk.getValue());
+   }
+
+   /**
+    * Configures the behavior when the footstep plan is updated at each touchdown.
+    * <ul>
+    * <li>if {@code true}: the actual foot pose, published from the controller at each touchdown, is
+    * used to update the subsequent footstep poses.
+    * <li>if {@code false}: the actual foot poses are not considered for planning the subsequent
+    * footsteps. This option provides higher robustness when the footstep status is received with high
+    * delay.
+    * </ul>
+    * 
+    * @param enable whether to enable/disable the footstep plan correction using actual foot pose at
+    *               each touchdown. Default value is {@code true}.
+    */
+   public void setCorrectPlanAtTouchdown(boolean enable)
+   {
+      correctPlanAtTouchdown.set(enable);
    }
 
    /**
