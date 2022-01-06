@@ -91,16 +91,17 @@ import us.ihmc.yoVariables.variable.YoInteger;
  * behavior, see {@link #setFootstepAdjustment(FootstepAdjustment)},
  * {@link #setHeightMapBasedFootstepAdjustment(HeightMap)}, and
  * {@link #setSupportFootBasedFootstepAdjustment(boolean)}.
- * <li><u>Method for indicating step validity and providing alternative steps for invalid ones:</u><br>
- * See {@link #addFootstepValidityIndicator(FootstepValidityIndicator)}} to set method for indicating invalid steps.
- * By default, no steps are deemed invalid. See {@link #setAlternateStepChooser(AlternateStepChooser)} to set
- * how an alternative step is chosen if a step is invalid. The default is to do a square-up step,
- * see {@link #calculateSquareUpStep}.
+ * <li><u>Method for indicating step validity and providing alternative steps for invalid
+ * ones:</u><br>
+ * See {@link #addFootstepValidityIndicator(FootstepValidityIndicator)}} to set method for
+ * indicating invalid steps. By default, no steps are deemed invalid. See
+ * {@link #setAlternateStepChooser(AlternateStepChooser)} to set how an alternative step is chosen
+ * if a step is invalid. The default is to do a square-up step, see {@link #calculateSquareUpStep}.
  * <li><u>Frequency at which footsteps are sent to the controller:</u><br>
  * See {@link #setNumberOfTicksBeforeSubmittingFootsteps(int)}.
  * </ul>
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class ContinuousStepGenerator implements Updatable
@@ -108,7 +109,7 @@ public class ContinuousStepGenerator implements Updatable
    private static final int MAX_NUMBER_OF_FOOTSTEP_TO_VISUALIZE_PER_SIDE = 3;
    public static final Color defaultLeftColor = new Color(28, 134, 238); // dodgerblue 2, from: http://cloford.com/resources/colours/500col.htm
    public static final Color defaultRightColor = new Color(205, 133, 0); // orange 3, from: http://cloford.com/resources/colours/500col.htm
-   public static final SideDependentList<Color> defaultFeetColors = new SideDependentList<Color>(defaultLeftColor, defaultRightColor);
+   public static final SideDependentList<Color> defaultFeetColors = new SideDependentList<>(defaultLeftColor, defaultRightColor);
    private final static Vector2DReadOnly zero2D = new Vector2D();
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -165,7 +166,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Creates a new step generator.
-    * 
+    *
     * @param parentRegistry the registry to attach this generator's registry.
     */
    public ContinuousStepGenerator(YoRegistry parentRegistry)
@@ -309,7 +310,7 @@ public class ContinuousStepGenerator implements Updatable
             nextFootstepPose3DViz.appendTranslation(0.0, 0.0, -0.005); // Sink the viz slightly so it is below the controller footstep viz.
             footstepVisualizer.update(nextFootstepPose3DViz);
          }
-         
+
          FootstepDataMessage footstep = footsteps.add();
          footstep.setRobotSide(swingSide.toByte());
          footstep.getLocation().set(nextFootstepPose3D.getPosition());
@@ -344,7 +345,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Sets the number of footsteps that are to be planned every tick.
-    * 
+    *
     * @param number the number of footsteps to plan.
     */
    public void setNumberOfFootstepsToPlan(int number)
@@ -354,9 +355,9 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Sets the number of ticks to regulate the rate at which footsteps are sent to the controller.
-    * 
-    * @param numberOfTicks number of ticks before sending footsteps to the controller, should be in
-    *           [0, &infin;[.
+    *
+    * @param numberOfTicks number of ticks before sending footsteps to the controller, should be in [0,
+    *                      &infin;[.
     */
    public void setNumberOfTicksBeforeSubmittingFootsteps(int numberOfTicks)
    {
@@ -365,8 +366,8 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Sets the desired durations for the swing and the transfer.
-    * 
-    * @param swingTime desired duration of the swing, should be strictly positive.
+    *
+    * @param swingTime    desired duration of the swing, should be strictly positive.
     * @param transferTime desired duration of the transfer, should be strictly positive.
     */
    public void setFootstepTiming(double swingTime, double transferTime)
@@ -377,7 +378,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Sets the provider to use for getting every tick the desired turning velocity.
-    * 
+    *
     * @param desiredTurningVelocityProvider provider for obtaining the desired turning velocity.
     */
    public void setDesiredTurningVelocityProvider(DesiredTurningVelocityProvider desiredTurningVelocityProvider)
@@ -387,7 +388,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Sets the provider to use for getting every tick the desired forward/lateral velocity.
-    * 
+    *
     * @param desiredVelocityProvider provider for obtaining the desired forward/lateral velocity.
     */
    public void setDesiredVelocityProvider(DesiredVelocityProvider desiredVelocityProvider)
@@ -396,8 +397,8 @@ public class ContinuousStepGenerator implements Updatable
    }
 
    /**
-    * Creates a {@code DesiredTurningVelocityProvider} and a {@code DesiredVelocityProvider} that
-    * are baked with {@code YoVariable}s.
+    * Creates a {@code DesiredTurningVelocityProvider} and a {@code DesiredVelocityProvider} that are
+    * baked with {@code YoVariable}s.
     */
    public void setYoComponentProviders()
    {
@@ -409,7 +410,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Sets the provider to use for getting the current pose of the support foot.
-    * 
+    *
     * @param footPoseProvider provider for obtaining the pose of the foot soles.
     */
    public void setFootPoseProvider(FootPoseProvider footPoseProvider)
@@ -419,7 +420,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Creates a {@code FootPoseProvider} that is baked by the given reference frames.
-    * 
+    *
     * @param soleFrames the sole frames that are assumed to be updated regularly.
     */
    public void setFrameBasedFootPoseProvider(SideDependentList<? extends ReferenceFrame> soleFrames)
@@ -440,10 +441,9 @@ public class ContinuousStepGenerator implements Updatable
    /**
     * Notifies this generator that a footstep has been completed.
     * <p>
-    * It is used internally to keep track of the support foot from which footsteps should be
-    * generated.
+    * It is used internally to keep track of the support foot from which footsteps should be generated.
     * </p>
-    * 
+    *
     * @param robotSide the side corresponding to the foot that just completed a footstep.
     */
    public void notifyFootstepCompleted(RobotSide robotSide)
@@ -455,8 +455,8 @@ public class ContinuousStepGenerator implements Updatable
    /**
     * Notifies this generator that a footstep has been started, i.e. the foot started swinging.
     * <p>
-    * It is used internally to mark the first generated footstep as unmodifiable so it does not
-    * change while the swing foot is targeting it.
+    * It is used internally to mark the first generated footstep as unmodifiable so it does not change
+    * while the swing foot is targeting it.
     * </p>
     */
    public void notifyFootstepStarted()
@@ -471,7 +471,7 @@ public class ContinuousStepGenerator implements Updatable
     * This listener will automatically call {@link #notifyFootstepStarted()} and
     * {@link #notifyFootstepCompleted(RobotSide)}.
     * </p>
-    * 
+    *
     * @param statusMessageOutputManager the output API of the controller.
     */
    public void setFootstepStatusListener(StatusMessageOutputManager statusMessageOutputManager)
@@ -482,7 +482,7 @@ public class ContinuousStepGenerator implements Updatable
    /**
     * Consumes a newly received message and calls {@link #notifyFootstepStarted()} or
     * {@link #notifyFootstepCompleted(RobotSide)} according to the status.
-    * 
+    *
     * @param statusMessage the newly received footstep status.
     */
    public void consumeFootstepStatus(FootstepStatusMessage statusMessage)
@@ -496,7 +496,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Configures internal parameters for the step durations and step reach.
-    * 
+    *
     * @param walkingControllerParameters the parameters to use.
     */
    public void configureWith(WalkingControllerParameters walkingControllerParameters)
@@ -511,10 +511,10 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Configure parameters related to the width of the footsteps.
-    * 
+    *
     * @param inPlace desired step width when stepping in-place, forward, or backward.
-    * @param min minimum step width.
-    * @param max maximum step width.
+    * @param min     minimum step width.
+    * @param max     maximum step width.
     */
    public void setStepWidths(double inPlace, double min, double max)
    {
@@ -525,7 +525,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Maximum step length for both stepping forward and backward.
-    * 
+    *
     * @param max maximum step length.
     */
    public void setMaxStepLength(double max)
@@ -538,9 +538,9 @@ public class ContinuousStepGenerator implements Updatable
     * <p>
     * These parameters are strongly related to the hip yaw range of motion.
     * </p>
-    * 
-    * @param maxInwards maximum reach when rotating the hip inwards. A positive angle is more
-    *           restrictive than a negative angle.
+    *
+    * @param maxInwards  maximum reach when rotating the hip inwards. A positive angle is more
+    *                    restrictive than a negative angle.
     * @param maxOutwards maximum reach when rotating the hip outwards. Should be positive.
     */
    public void setStepTurningLimits(double maxInwards, double maxOutwards)
@@ -551,7 +551,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Sets the protocol for sending footsteps to the controller.
-    * 
+    *
     * @param footstepMessenger the callback used to send footsteps.
     */
    public void setFootstepMessenger(FootstepMessenger footstepMessenger)
@@ -561,7 +561,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Sets the method for adjusting height, pitch, and roll of the generated footsteps.
-    * 
+    *
     * @param footstepAdjustment the adjustment method.
     */
    public void setFootstepAdjustment(FootstepAdjustment footstepAdjustment)
@@ -570,8 +570,8 @@ public class ContinuousStepGenerator implements Updatable
    }
 
    /**
-    * Adds a method of indicating step validity. If a step is not valid, the step generator
-    * calculates an alternate step using the {@link #alternateStepChooser}
+    * Adds a method of indicating step validity. If a step is not valid, the step generator calculates
+    * an alternate step using the {@link #alternateStepChooser}
     *
     * @param footstepValidityIndicator method for checking step validity
     */
@@ -581,8 +581,8 @@ public class ContinuousStepGenerator implements Updatable
    }
 
    /**
-    * Sets a method of calculating a new step pose if an element of {@link #footstepValidityIndicators} indicates
-    * an invalid step.
+    * Sets a method of calculating a new step pose if an element of {@link #footstepValidityIndicators}
+    * indicates an invalid step.
     *
     * @param alternateStepChooser method for calculating alternate step
     */
@@ -594,7 +594,7 @@ public class ContinuousStepGenerator implements Updatable
    /**
     * Sets a footstep adjustment that uses the current support foot pose to adjust the generated
     * footsteps.
-    * 
+    *
     * @param adjustPitchAndRoll whether the pitch and roll should be adjusted along with the height.
     */
    public void setSupportFootBasedFootstepAdjustment(boolean adjustPitchAndRoll)
@@ -627,7 +627,7 @@ public class ContinuousStepGenerator implements Updatable
    /**
     * Sets a footstep adjustment that uses the height map to adjust the footsteps height and the
     * current support foot pitch/roll to adjust the footsteps pitch/roll.
-    * 
+    *
     * @param heightMap the height map used to adjust footsteps height.
     */
    public void setHeightMapBasedFootstepAdjustment(HeightMap heightMap)
@@ -676,7 +676,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Whether this generator is currently generating footsteps.
-    * 
+    *
     * @return the walking state of this generator.
     */
    public boolean isWalking()
@@ -686,7 +686,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Creates a footstep visualization with a default size for the feet.
-    * 
+    *
     * @param yoGraphicsListRegistry the registry to attach the {@code YoGraphic}s to.
     */
    public void setupVisualization(YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -696,9 +696,9 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Creates a footstep visualization.
-    * 
-    * @param footPolygon the foot corner points (in clockwise order) to use for the visualization of
-    *           both feet.
+    *
+    * @param footPolygon            the foot corner points (in clockwise order) to use for the
+    *                               visualization of both feet.
     * @param yoGraphicsListRegistry the registry to attach the {@code YoGraphic}s to.
     */
    public void setupVisualization(List<? extends Point2DReadOnly> footPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -708,8 +708,8 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Creates a footstep visualization.
-    * 
-    * @param contactableFeet used to generate the foot polygons.
+    *
+    * @param contactableFeet        used to generate the foot polygons.
     * @param yoGraphicsListRegistry the registry to attach the {@code YoGraphic}s to.
     */
    public void setupVisualization(SideDependentList<? extends ContactableBody> contactableFeet, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -721,14 +721,15 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Creates a footstep visualization.
-    * 
-    * @param leftFootPolygon the foot corner points (in clockwise order) to use for the
-    *           visualization of the left foot.
-    * @param rightFootPolygon the foot corner points (in clockwise order) to use for the
-    *           visualization of the right foot.
+    *
+    * @param leftFootPolygon        the foot corner points (in clockwise order) to use for the
+    *                               visualization of the left foot.
+    * @param rightFootPolygon       the foot corner points (in clockwise order) to use for the
+    *                               visualization of the right foot.
     * @param yoGraphicsListRegistry the registry to attach the {@code YoGraphic}s to.
     */
-   public void setupVisualization(List<? extends Point2DReadOnly> leftFootPolygon, List<? extends Point2DReadOnly> rightFootPolygon,
+   public void setupVisualization(List<? extends Point2DReadOnly> leftFootPolygon,
+                                  List<? extends Point2DReadOnly> rightFootPolygon,
                                   YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       String graphicListName = "FootstepGenerator";
@@ -743,7 +744,12 @@ public class ContinuousStepGenerator implements Updatable
          {
             String name = robotSide.getCamelCaseNameForStartOfExpression() + "PlannedFootstep" + i;
             AppearanceDefinition footstepColor = new YoAppearanceRGBColor(defaultFeetColors.get(robotSide), 0.0);
-            visualizers.add(new FootstepVisualizer(name, graphicListName, robotSide, footPolygons.get(robotSide), footstepColor, yoGraphicsListRegistry,
+            visualizers.add(new FootstepVisualizer(name,
+                                                   graphicListName,
+                                                   robotSide,
+                                                   footPolygons.get(robotSide),
+                                                   footstepColor,
+                                                   yoGraphicsListRegistry,
                                                    registry));
          }
 
@@ -753,7 +759,7 @@ public class ContinuousStepGenerator implements Updatable
 
    /**
     * Gets the read-only reference to the pose of the current support foot.
-    * 
+    *
     * @return the current foot pose.
     */
    public FramePose3DReadOnly getCurrentSupportFootPose()
@@ -787,9 +793,13 @@ public class ContinuousStepGenerator implements Updatable
    private final FramePose2D alternateStepPose2D = new FramePose2D();
 
    /**
-    * Calculates a square-up step given a 2D stance foot pose, to be used as an implementation of {@link AlternateStepChooser}
+    * Calculates a square-up step given a 2D stance foot pose, to be used as an implementation of
+    * {@link AlternateStepChooser}
     */
-   private void calculateSquareUpStep(FramePose2DReadOnly stanceFootPose, FramePose2DReadOnly defaultTouchdownPose, RobotSide swingSide, FramePose3D touchdownPoseToPack)
+   private void calculateSquareUpStep(FramePose2DReadOnly stanceFootPose,
+                                      FramePose2DReadOnly defaultTouchdownPose,
+                                      RobotSide swingSide,
+                                      FramePose3D touchdownPoseToPack)
    {
       alternateStepPose2D.set(stanceFootPose);
       alternateStepPose2D.appendTranslation(0.0, swingSide.negateIfRightSide(inPlaceWidth.getValue()));
