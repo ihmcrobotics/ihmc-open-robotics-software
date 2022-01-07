@@ -11,6 +11,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.pubsub.attributes.SubscriberAttributes;
 import us.ihmc.pubsub.common.Guid;
+import us.ihmc.pubsub.common.MatchingInfo;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
@@ -166,6 +167,12 @@ public class DelayedROS2Node implements ROS2NodeInterface
       {
          DelayedSubscriber<T> delayedSubscriber = new DelayedSubscriber<>(topicDataType, subscriber);
          delayedExecutor.execute(() -> listener.onNewDataMessage(delayedSubscriber));
+      }
+
+      @Override
+      public void onSubscriptionMatched(Subscriber<T> subscriber, MatchingInfo info)
+      {
+         // do nothing
       }
    }
 
