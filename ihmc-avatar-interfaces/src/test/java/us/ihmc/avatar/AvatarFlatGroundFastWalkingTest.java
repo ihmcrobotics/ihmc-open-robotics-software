@@ -65,6 +65,11 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
 
    public abstract double getMaxForwardStepLength();
 
+   public double getFastStepWidth()
+   {
+      return 0.25;
+   }
+
    @Test
    public void testForwardWalking() throws Exception
    {
@@ -78,15 +83,16 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       FootstepDataListMessage footsteps = forwardSteps(RobotSide.LEFT,
                                                        30,
                                                        trapezoidFunction(0.2, getMaxForwardStepLength(), 0.15, 0.85),
-                                                       0.25,
+                                                       getFastStepWidth(),
                                                        getFastSwingTime(),
                                                        getFastTransferTime(),
                                                        startPose,
                                                        true);
       footsteps.setOffsetFootstepsHeightWithExecutionError(true);
       drcSimulationTestHelper.publishToController(footsteps);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1
-            * EndToEndTestTools.computeWalkingDuration(footsteps, getRobotModel().getWalkingControllerParameters())));
+
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, getRobotModel().getWalkingControllerParameters()));
+      assertTrue(success);
    }
 
    private void setupSim(DRCRobotModel robotModel, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
