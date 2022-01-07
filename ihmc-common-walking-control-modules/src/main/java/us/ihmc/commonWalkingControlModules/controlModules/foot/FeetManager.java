@@ -100,7 +100,7 @@ public class FeetManager
 
       toeOffCalculator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, registry);
 
-      toeOffManager = new ToeOffManager(controllerToolbox, toeOffCalculator, walkingControllerParameters, feet, registry);
+      toeOffManager = new ToeOffManager(controllerToolbox, toeOffCalculator, walkingControllerParameters, feet, registry, graphicsListRegistry);
 
       this.footSwitches = controllerToolbox.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -454,6 +454,7 @@ public class FeetManager
     * @param finalDesiredICP the desired ICP location at the end of the current state.
     */
    public void updateToeOffStatusSingleSupport(Footstep nextFootstep,
+                                               Footstep nextNextFootstep,
                                                FramePoint3DReadOnly exitCMP,
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly desiredCoP,
@@ -461,7 +462,7 @@ public class FeetManager
                                                FramePoint2DReadOnly currentICP,
                                                FramePoint2DReadOnly finalDesiredICP)
    {
-      toeOffManager.submitNextFootstep(nextFootstep);
+      toeOffManager.submitNextFootstep(nextFootstep, nextNextFootstep);
       toeOffManager.updateToeOffStatusSingleSupport(exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP);
    }
 
@@ -495,6 +496,7 @@ public class FeetManager
     */
    public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg,
                                                Footstep nextFootstep,
+                                               Footstep nextNextFootstep,
                                                FramePoint3DReadOnly exitCMP,
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly desiredCoP,
@@ -502,7 +504,7 @@ public class FeetManager
                                                FramePoint2DReadOnly currentICP,
                                                FramePoint2DReadOnly finalDesiredICP)
    {
-      toeOffManager.submitNextFootstep(nextFootstep);
+      toeOffManager.submitNextFootstep(nextFootstep, nextNextFootstep);
       toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP);
    }
 
