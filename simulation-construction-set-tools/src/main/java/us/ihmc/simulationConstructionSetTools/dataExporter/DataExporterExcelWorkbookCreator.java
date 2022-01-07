@@ -254,7 +254,7 @@ public class DataExporterExcelWorkbookCreator
    {
       double ret = 0.0;
       double[] mechanicalPower = computeTotalUnsignedMechanicalPower();
-      double simulationTime = dataBuffer.getEntry(robot.getYoTime()).getUpperBound();
+      double simulationTime = dataBuffer.getEntry(robot.getYoTime()).getUpperBound() - dataBuffer.getEntry(robot.getYoTime()).getLowerBound();
       double simulationDT = simulationTime / dataBuffer.getBufferSize();
 
       for (int i = 0; i < mechanicalPower.length; i++)
