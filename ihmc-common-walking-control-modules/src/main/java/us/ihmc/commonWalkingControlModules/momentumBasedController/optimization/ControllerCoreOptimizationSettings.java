@@ -113,6 +113,21 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
+    * Whether an objective should be added to minimize the resulting joint torques.
+    * <p>
+    * This parameter is used when running the {@link WholeBodyControllerCore} in the
+    * {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode.
+    * </p>
+    * 
+    * @return {@code true} to enable joint torque minimization, {@code false} otherwise. Default value
+    *         is {@code false}.
+    */
+   default boolean areJointTorquesMinimized()
+   {
+      return false;
+   }
+
+   /**
     * Whether the desired joint torques coming out of the controller core should be limited.
     * <p>
     * When enabled, {@link OneDoFJointReadOnly#getEffortLimitLower()} and
