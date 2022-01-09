@@ -44,6 +44,12 @@ public class GDXBytedecoImage
          openCLChannelOrder = OpenCL.CL_DEPTH;
          openCLChannelDataType = OpenCL.CL_FLOAT;
       }
+      else if (cvMatType == opencv_core.CV_32FC(6))
+      {
+         bytesPerPixel = 4 * 6;
+         openCLChannelOrder = OpenCL.CL_DEPTH;
+         openCLChannelDataType = OpenCL.CL_FLOAT;
+      }
       else if (cvMatType == opencv_core.CV_8UC1)
       {
          bytesPerPixel = 1;
