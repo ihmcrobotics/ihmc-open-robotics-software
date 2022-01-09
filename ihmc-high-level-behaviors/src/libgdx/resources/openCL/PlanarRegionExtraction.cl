@@ -324,6 +324,7 @@ void kernel mergeKernel( write_only image2d_t out0, write_only image2d_t out1, w
         int count = 0;
         for(int i = -m; i<m+1; i+=m){
             for(int j = -m; j<m+1; j+=m){
+                // printf("MergeKernel:(%d,%d)\n", i, j);
                 if (!(j==0 && i==0)){
 
                      float n1_b = read_imagef(out0, (int2)(x+i,y+j)).x;
