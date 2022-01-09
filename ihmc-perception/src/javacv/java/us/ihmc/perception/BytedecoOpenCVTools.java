@@ -40,4 +40,9 @@ public class BytedecoOpenCVTools
       int flipCode = 0; // 0 flips X, 1 flips Y, -1 flips both
       opencv_core.flip(source, destination, flipCode);
    }
+
+   public static void setRGBA8888ImageAlpha(Mat image, int alpha)
+   {
+      image.reshape(1, image.rows() * image.cols()).col(3).setTo(new Mat(new byte[] {(byte) alpha}));
+   }
 }
