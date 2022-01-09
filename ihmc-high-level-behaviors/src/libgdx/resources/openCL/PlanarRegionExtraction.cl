@@ -295,8 +295,8 @@ void kernel packKernel(  read_only image2d_t in,
 /* Merge Kernel: Creates the graph-based structure by adding connections between the neighboring
  * patches based on similarity.
  */
-void kernel mergeKernel( write_only image2d_t out0, write_only image2d_t out1, write_only image2d_t out2, /* float3 maps for normal*/
-                          write_only image2d_t out3, write_only image2d_t out4, write_only image2d_t out5, /* float3 maps for centroids */
+void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, read_only image2d_t out2, /* float3 maps for normal*/
+                          read_only image2d_t out3, read_only image2d_t out4, read_only image2d_t out5, /* float3 maps for centroids */
                           write_only image2d_t out6, /* uint8 map for patch metadata*/
                           global float* params /* All parameters */
                           // write_only image2d_t debug
@@ -307,6 +307,7 @@ void kernel mergeKernel( write_only image2d_t out0, write_only image2d_t out1, w
      int m = 2;
 
 //     if(x==0 && y==0) printf("MergeKernel:(%d,%d)\n", (int)params[SUB_H], (int)params[SUB_W]);
+//    printf("MergeKernel: subHeight: %d, subWidth: %d, x: %d, y: %d \n", (int) params[SUB_H], (int) params[SUB_W], x, y);
      if(y >= m && y < (int)params[SUB_H]-m && x >= m && x < (int)params[SUB_W]-m){
 
         float n1_a = read_imagef(out0, (int2)(x,y)).x;
@@ -315,6 +316,9 @@ void kernel mergeKernel( write_only image2d_t out0, write_only image2d_t out1, w
         float g1_a = read_imagef(out3, (int2)(x,y)).x;
         float g2_a = read_imagef(out4, (int2)(x,y)).x;
         float g3_a = read_imagef(out5, (int2)(x,y)).x;
+
+//        if (n1_a + n2_a + n3_a + g1_a + g2_a + g3_a > 0 || n1_a + n2_a + n3_a + g1_a + g2_a + g3_a < 0)
+//            printf("MergeKernel: n1_a: %f, n2_a: %f, n3_a: %f, g1_a: %f, g2_a: %f, g3_a: %f \n", n1_a, n2_a, n3_a, g1_a, g2_a, g3_a);
 
         float3 g_a = (float3)(g1_a,g2_a,g3_a);
         float3 n_a = (float3)(n1_a,n2_a,n3_a);
