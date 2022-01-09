@@ -21,8 +21,6 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -75,10 +73,10 @@ public class GDXGPUPlanarRegionExtraction
    private DMatrixRMaj regionMatrix;
    private GDXCVImagePanel debugExtractionPanel;
    private final Point cvCenterPoint = new Point();
-   private final Scalar cvColorScalar = new Scalar();
-   private int depth = 0;
-   private int[] adx = {-1, 0, 1, 1, 1, 0, -1, -1};
-   private int[] ady = {-1, -1, -1, 0, 1, 1, 1, 0};
+   private final Scalar cvBGRColorScalar = new Scalar();
+   private int depthOfSearch = 0;
+   private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
+   private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
    private final RecyclingArrayList<GDXGPUPlanarRegion> planarRegions = new RecyclingArrayList<>(GDXGPUPlanarRegion::new);
    private int imageWidth;
    private int imageHeight;
@@ -97,6 +95,7 @@ public class GDXGPUPlanarRegionExtraction
    private int patchWidth;
    private int filterSubHeight;
    private int filterSubWidth;
+   private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
@@ -141,7 +140,6 @@ public class GDXGPUPlanarRegionExtraction
       gxImagePanel = new GDXCVImagePanel("Gx Image", subWidth, subHeight);
       gyImagePanel = new GDXCVImagePanel("Gy Image", subWidth, subHeight);
       gzImagePanel = new GDXCVImagePanel("Gz Image", subWidth, subHeight);
-      filteredDepthPanel = new GDXCVImagePanel("Filtered Depth", imageWidth, imageHeight);
       debugExtractionPanel = new GDXCVImagePanel("Planar Region Extraction Image", imageWidth, imageHeight);
       imguiPanel.addChild(blurredDepthPanel.getVideoPanel());
       imguiPanel.addChild(filteredDepthPanel.getVideoPanel());
@@ -269,7 +267,9 @@ public class GDXGPUPlanarRegionExtraction
 
       opencv_core.merge(outputChannelVector, regionOutputImage.getBytedecoOpenCVMat());
 
-      int componentIndex = 0;
+      debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
+
+      int planarRegionIslandIndex = 0;
       planarRegions.clear();
       visitedMatrix.zero();
       boundaryMatrix.zero();
@@ -281,13 +281,13 @@ public class GDXGPUPlanarRegionExtraction
             int patch = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr(row, column).get());
             if (!visitedMatrix.get(row, column) && patch == 255)
             {
-               depth = 0;
+               depthOfSearch = 0; // also number of patches traversed
                GDXGPUPlanarRegion planarRegion = planarRegions.add();
-               planarRegion.reset(componentIndex);
-               depthFirstSearch(row, column, componentIndex, planarRegion);
-               if (depth > regionMinPatches.get() && depth - planarRegion.getBoundaryVertices().size() > regionBoundaryDiff.get())
+               planarRegion.reset(planarRegionIslandIndex);
+               depthFirstSearch(row, column, planarRegionIslandIndex, planarRegion);
+               if (depthOfSearch > regionMinPatches.get() && depthOfSearch - planarRegion.getBoundaryVertices().size() > regionBoundaryDiff.get())
                {
-                  ++componentIndex;
+                  ++planarRegionIslandIndex;
                }
                else
                {
@@ -299,7 +299,6 @@ public class GDXGPUPlanarRegionExtraction
 
       debugExtractionPanel.draw();
 
-
       visitedMatrix.zero();
 
       // TODO: find boundary and holes
@@ -307,11 +306,14 @@ public class GDXGPUPlanarRegionExtraction
       // TODO: Grow region boundary
    }
 
-   private void depthFirstSearch(int row, int column, int component, GDXGPUPlanarRegion planarRegion)
+   private void depthFirstSearch(int row, int column, int planarRegionIslandIndex, GDXGPUPlanarRegion planarRegion)
    {
-      ++depth;
+      if (visitedMatrix.get(row, column) || depthOfSearch > 10000)
+         return;
+
+      ++depthOfSearch;
       visitedMatrix.set(row, column, true);
-      regionMatrix.set(row, column, component);
+      regionMatrix.set(row, column, planarRegionIslandIndex);
       BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr(row, column);
       float nx = patchPointer.getFloat(0);
       float ny = patchPointer.getFloat(1);
@@ -321,22 +323,27 @@ public class GDXGPUPlanarRegionExtraction
       float cz = patchPointer.getFloat(5);
       planarRegion.addPatch(nx, ny, nz, cx, cy, cz);
 
-      cvCenterPoint.x(column * patchHeight);
-      cvCenterPoint.y(row * patchWidth);
+      int x = column * patchHeight;
+      int y = row * patchWidth;
+      cvCenterPoint.x(x);
+      cvCenterPoint.y(y);
       int radius = 2;
-      cvColorScalar.put((component + 1) * 231 % 255, (component + 1) * 123 % 255, (component + 1) * 312 % 255);
-      opencv_imgproc.circle(debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat(), cvCenterPoint, radius, cvColorScalar);
+      int r = (planarRegionIslandIndex + 1) * 312 % 255;
+      int g = (planarRegionIslandIndex + 1) * 123 % 255;
+      int b = (planarRegionIslandIndex + 1) * 231 % 255;
+      cvBGRColorScalar.put(b, g, r, 255);
+      opencv_imgproc.circle(debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat(), cvCenterPoint, radius, cvBGRColorScalar);
 
       int count = 0;
       for (int i = 0; i < 8; i++)
       {
-         if (row + adx[i] < subHeight - 1 && row + adx[i] > 1 && column + ady[i] < subWidth - 1 && column + ady[i] > 1)
+         if (row + adjacentY[i] < subHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < subWidth - 1 && column + adjacentX[i] > 1)
          {
-            int newPatch = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr((row + adx[i]), (column + ady[i])).get());
+            int newPatch = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr((row + adjacentY[i]), (column + adjacentX[i])).get());
             if (newPatch == 255)
             {
                ++count;
-               depthFirstSearch(row + adx[i], column + ady[i], component, planarRegion);
+               depthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionIslandIndex, planarRegion);
             }
          }
       }
@@ -429,26 +436,6 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
       ImGui.inputInt(labels.get("Region min patches"), regionMinPatches);
       ImGui.inputInt(labels.get("Region boundary diff"), regionBoundaryDiff);
-//      printFloatImageValues("Nx", nxImage);
-//      printFloatImageValues("Ny", nyImage);
-//      printFloatImageValues("Nz", nzImage);
-//      printFloatImageValues("Gx", gxImage);
-//      printFloatImageValues("Gx", gyImage);
-//      printFloatImageValues("Gx", gzImage);
-   }
-
-   private void printFloatImageValues(String name, GDXBytedecoImage image)
-   {
-      ImGui.text(name + ":");
-      for (int row = 0; row < image.getBytedecoOpenCVMat().rows(); row++)
-      {
-         String rowString = "";
-         for (int column = 0; column < image.getBytedecoOpenCVMat().cols(); column++)
-         {
-            rowString += image.getBytedecoOpenCVMat().ptr(row, column).getFloat() + " ";
-         }
-         ImGui.text(rowString);
-      }
    }
 
    public ImGuiPanel getPanel()

@@ -21,12 +21,13 @@ public class GDXCVImagePanel
    {
       videoPanel = new ImGuiVideoPanel(name, true);
       pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
-      pixmap.getPixels().rewind();
       bytedecoImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4, pixmap.getPixels());
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       videoPanel.setTexture(panelTexture);
 
       normalizedScaledImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC1);
+
+      BytedecoOpenCVTools.setRGBA8888ImageAlpha(bytedecoImage.getBytedecoOpenCVMat(), 255);
    }
 
    public void drawFloatImage(Mat floatImage)
