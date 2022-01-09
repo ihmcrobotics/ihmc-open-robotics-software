@@ -5,6 +5,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
@@ -13,11 +14,17 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Size;
+import org.ejml.data.BMatrixRMaj;
+import org.ejml.data.DMatrixRMaj;
 import sensor_msgs.Image;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -40,6 +47,8 @@ public class GDXGPUPlanarRegionExtraction
    private final ImBoolean useFilteredImage = new ImBoolean(true);
    private final ImInt gaussianSize = new ImInt(6);
    private final ImDouble gaussianSigma = new ImDouble(20.0);
+   private final ImInt regionMinPatches = new ImInt(20);
+   private final ImInt regionBoundaryDiff = new ImInt(20);
    private GDXBytedecoImage inputFloatDepthImage;
    private GDXBytedecoImage inputScaledFloatDepthImage;
    private GDXBytedecoImage inputU16DepthImage;
@@ -52,9 +61,19 @@ public class GDXGPUPlanarRegionExtraction
    private GDXBytedecoImage gyImage;
    private GDXBytedecoImage gzImage;
    private GDXBytedecoImage graphImage;
+   private MatVector outputChannelVector;
+   private GDXBytedecoImage regionOutputImage;
    private ImGuiPanel imguiPanel;
    private GDXCVImagePanel blurredDepthPanel;
    private GDXCVImagePanel filteredDepthPanel;
+   private BMatrixRMaj visitedMatrix;
+   private BMatrixRMaj boundaryMatrix;
+   private DMatrixRMaj regionMatrix;
+   private GDXCVImagePanel debugExtractionPanel;
+   private int depth = 0;
+   private int[] adx = {-1, 0, 1, 1, 1, 0, -1, -1};
+   private int[] ady = {-1, -1, -1, 0, 1, 1, 1, 0};
+   private final RecyclingArrayList<GDXGPUPlanarRegion> planarRegions = new RecyclingArrayList<>(GDXGPUPlanarRegion::new);
    private int imageWidth;
    private int imageHeight;
    private Size gaussianKernelSize;
@@ -97,14 +116,23 @@ public class GDXGPUPlanarRegionExtraction
       gxImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
       gyImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
       gzImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
+      outputChannelVector = new MatVector(nxImage.getBytedecoOpenCVMat(),
+                                          nyImage.getBytedecoOpenCVMat(),
+                                          nxImage.getBytedecoOpenCVMat(),
+                                          gxImage.getBytedecoOpenCVMat(),
+                                          gyImage.getBytedecoOpenCVMat(),
+                                          gzImage.getBytedecoOpenCVMat());
       graphImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_8UC1);
+      regionOutputImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC(6));
       gaussianKernelSize = new Size();
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
       blurredDepthPanel = new GDXCVImagePanel("Blurred Depth", imageWidth, imageHeight);
       filteredDepthPanel = new GDXCVImagePanel("Filtered Depth", imageWidth, imageHeight);
+      debugExtractionPanel = new GDXCVImagePanel("Planar Region Extraction Image", imageWidth, imageHeight);
       imguiPanel.addChild(blurredDepthPanel.getVideoPanel());
       imguiPanel.addChild(filteredDepthPanel.getVideoPanel());
+      imguiPanel.addChild(debugExtractionPanel.getVideoPanel());
 
       openCLManager.create();
       planarRegionExtractionProgram = openCLManager.loadProgram("PlanarRegionExtraction");
@@ -112,7 +140,9 @@ public class GDXGPUPlanarRegionExtraction
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
 
-
+      visitedMatrix = new BMatrixRMaj(subHeight, subWidth);
+      boundaryMatrix = new BMatrixRMaj(subHeight, subWidth);
+      regionMatrix = new DMatrixRMaj(subHeight, subWidth);
    }
 
    public void processROS1DepthImage(Image image)
@@ -204,6 +234,58 @@ public class GDXGPUPlanarRegionExtraction
       openCLManager.finish();
 
       filteredDepthPanel.drawFloatImage(filteredDepthImage.getBytedecoOpenCVMat());
+
+      opencv_core.merge(outputChannelVector, regionOutputImage.getBytedecoOpenCVMat());
+
+      int componentIndex = 0;
+      planarRegions.clear();
+      visitedMatrix.zero();
+      boundaryMatrix.zero();
+      regionMatrix.zero();
+      for (int row = 0; row < subHeight; row++)
+      {
+         for (int column = 0; column < subWidth; column++)
+         {
+            int patch = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr(row, column).get());
+            if (!visitedMatrix.get(row, column) && patch == 255)
+            {
+               depth = 0;
+               GDXGPUPlanarRegion planarRegion = planarRegions.add();
+               planarRegion.reset(componentIndex);
+               depthFirstSearch(row, column, componentIndex, planarRegion);
+               if (depth > regionMinPatches.get() && depth - planarRegion.getBoundaryVertices().size() > regionBoundaryDiff.get())
+               {
+                  ++componentIndex;
+               }
+               else
+               {
+                  planarRegions.remove(planarRegions.size() - 1);
+               }
+            }
+         }
+      }
+
+      visitedMatrix.zero();
+
+      // TODO: find boundary and holes
+
+      // TODO: Grow region boundary
+   }
+
+   private void depthFirstSearch(int row, int column, int component, GDXGPUPlanarRegion planarRegion)
+   {
+      ++depth;
+      visitedMatrix.set(row, column, true);
+      regionMatrix.set(row, column, component);
+      BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr(row, column);
+      float nx = patchPointer.getFloat(0);
+      float ny = patchPointer.getFloat(1);
+      float nz = patchPointer.getFloat(2);
+      float cx = patchPointer.getFloat(3);
+      float cy = patchPointer.getFloat(4);
+      float cz = patchPointer.getFloat(5);
+      planarRegion.addPatch(nx, ny, nz, cx, cy, cz);
+
    }
 
    private void generateRegionsFromDepth(FloatBuffer depthFloatBuffer)
@@ -286,7 +368,8 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.inputInt(labels.get("Kernel slider level"), kernelSliderLevel);
       ImGui.inputInt(labels.get("Filter kernel size"), filterKernelSize);
       ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
-
+      ImGui.inputInt(labels.get("Region min patches"), regionMinPatches);
+      ImGui.inputInt(labels.get("Region boundary diff"), regionBoundaryDiff);
    }
 
    public ImGuiPanel getPanel()
