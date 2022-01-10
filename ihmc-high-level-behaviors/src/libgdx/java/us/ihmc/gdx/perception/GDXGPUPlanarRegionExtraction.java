@@ -20,15 +20,12 @@ import sensor_msgs.Image;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLManager;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.util.Comparator;
 
 public class GDXGPUPlanarRegionExtraction
@@ -39,8 +36,8 @@ public class GDXGPUPlanarRegionExtraction
    private final ImFloat filterDisparityThreshold = new ImFloat(2000);
    private final ImInt inputHeight = new ImInt(0);
    private final ImInt inputWidth = new ImInt(0);
-   private final ImInt kernelSliderLevel = new ImInt(2);
-   private final ImInt filterKernelSize = new ImInt(4);
+   private final ImInt patchSize = new ImInt(4);
+   private final ImInt deadPixelFilterPatchSize = new ImInt(4);
    private final ImFloat depthFx = new ImFloat(0);
    private final ImFloat depthFy = new ImFloat(0);
    private final ImFloat depthCx = new ImFloat(0);
@@ -48,7 +45,7 @@ public class GDXGPUPlanarRegionExtraction
    private final ImBoolean earlyGaussianBlur = new ImBoolean(true);
    private final ImBoolean useFilteredImage = new ImBoolean(true);
    private final ImInt gaussianSize = new ImInt(6);
-   private final ImDouble gaussianSigma = new ImDouble(20.0);
+   private final ImInt gaussianSigma = new ImInt(20);
    private final ImInt regionMinPatches = new ImInt(20);
    private final ImInt regionBoundaryDiff = new ImInt(20);
    private final ImBoolean drawPatches = new ImBoolean(true);
@@ -312,7 +309,7 @@ public class GDXGPUPlanarRegionExtraction
 
       debugExtractionPanel.draw();
 
-      // TODO: Grow region boundary
+      // TODO: set regions id to -1?
    }
 
    private void depthFirstSearch(int row, int column, int planarRegionIslandIndex, GDXGPUPlanarRegion planarRegion)
@@ -464,7 +461,7 @@ public class GDXGPUPlanarRegionExtraction
       nativeParameterArray.put(8, depthFy.get());
       nativeParameterArray.put(9, depthCx.get());
       nativeParameterArray.put(10, depthCy.get());
-      nativeParameterArray.put(11, filterKernelSize.get());
+      nativeParameterArray.put(11, deadPixelFilterPatchSize.get());
       nativeParameterArray.put(12, filterSubHeight);
       nativeParameterArray.put(13, filterSubWidth);
       nativeParameterArray.put(14, inputHeight.get());
@@ -475,33 +472,35 @@ public class GDXGPUPlanarRegionExtraction
 
    private void calculateDetivativeParameters()
    {
-      patchHeight = kernelSliderLevel.get();
-      patchWidth = kernelSliderLevel.get();
+      patchHeight = patchSize.get();
+      patchWidth = patchSize.get();
       subHeight = inputHeight.get() / patchHeight;
       subWidth = inputWidth.get() / patchWidth;
-      filterSubHeight = inputHeight.get() / filterKernelSize.get();
-      filterSubWidth = inputWidth.get() / filterKernelSize.get();
+      filterSubHeight = inputHeight.get() / deadPixelFilterPatchSize.get();
+      filterSubWidth = inputWidth.get() / deadPixelFilterPatchSize.get();
    }
 
    public void renderImGuiWidgets()
    {
+      ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
+      ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 6);
+      ImGui.sliderInt(labels.get("Gaussian sigma"), gaussianSigma.getData(), 1, 30);
+      ImGui.sliderInt(labels.get("Patch size"), patchSize.getData(), 1, 20);
+      ImGui.sliderInt(labels.get("Dead pixel filter patch size"), deadPixelFilterPatchSize.getData(), 1, 20);
+      ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
+      ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
+      ImGui.sliderFloat(labels.get("Merge angular threshold"), mergeAngularThreshold.getData(), 0.0f, 1.0f);
+      ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 30);
+      ImGui.sliderInt(labels.get("Region boundary diff"), regionBoundaryDiff.getData(), 1, 30);
+      ImGui.checkbox(labels.get("Draw patches"), drawPatches);
+      ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
+      ImGui.inputDouble(labels.get("Region growth factor"), regionGrowthFactor);
       ImGui.inputInt(labels.get("Input height"), inputHeight);
       ImGui.inputInt(labels.get("Input width"), inputWidth);
       ImGui.inputFloat(labels.get("Depth Fx"), depthFx);
       ImGui.inputFloat(labels.get("Depth Fy"), depthFy);
       ImGui.inputFloat(labels.get("Depth Cx"), depthCx);
       ImGui.inputFloat(labels.get("Depth Cy"), depthCy);
-      ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
-      ImGui.inputInt(labels.get("Gaussian size"), gaussianSize);
-      ImGui.inputDouble(labels.get("Gaussian sigma"), gaussianSigma);
-      ImGui.inputInt(labels.get("Kernel slider level"), kernelSliderLevel);
-      ImGui.inputInt(labels.get("Filter kernel size"), filterKernelSize);
-      ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
-      ImGui.inputInt(labels.get("Region min patches"), regionMinPatches);
-      ImGui.inputInt(labels.get("Region boundary diff"), regionBoundaryDiff);
-      ImGui.checkbox(labels.get("Draw patches"), drawPatches);
-      ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
-      ImGui.inputDouble(labels.get("Region growth factor"), regionGrowthFactor);
    }
 
    public ImGuiPanel getPanel()
