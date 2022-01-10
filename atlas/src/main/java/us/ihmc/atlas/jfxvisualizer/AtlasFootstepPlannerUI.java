@@ -61,17 +61,17 @@ public class AtlasFootstepPlannerUI extends Application
       messager.startMessager();
       messager.submitMessage(FootstepPlannerMessagerAPI.GoalDistanceProximity, GOAL_DISTANCE_PROXIMITY);
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage,
-                                              messager,
-                                              drcRobotModel.getVisibilityGraphsParameters(),
-                                              drcRobotModel.getFootstepPlannerParameters(),
-                                              drcRobotModel.getSwingPlannerParameters(),
-                                              drcRobotModel,
-                                              previewModel,
-                                              drcRobotModel.getJointMap(),
-                                              drcRobotModel.getContactPointParameters(),
-                                              drcRobotModel.getWalkingControllerParameters(),
-                                              new AtlasUIAuxiliaryData());
+      ui = FootstepPlannerUI.createUI(primaryStage,
+                                      messager,
+                                      drcRobotModel.getVisibilityGraphsParameters(),
+                                      drcRobotModel.getFootstepPlannerParameters(),
+                                      drcRobotModel.getSwingPlannerParameters(),
+                                      drcRobotModel,
+                                      previewModel,
+                                      drcRobotModel.getJointMap(),
+                                      drcRobotModel.getContactPointParameters(),
+                                      drcRobotModel.getWalkingControllerParameters(),
+                                      new AtlasUIAuxiliaryData());
       ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
       ui.setREAStateRequestPublisher(reaStateRequestPublisher);
       ui.show();

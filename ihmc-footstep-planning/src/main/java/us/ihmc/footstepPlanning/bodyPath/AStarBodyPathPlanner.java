@@ -3,10 +3,15 @@ package us.ihmc.footstepPlanning.bodyPath;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.footstepPlanning.BodyPathPlanningResult;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
@@ -14,7 +19,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
-import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -24,6 +29,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 public class AStarBodyPathPlanner
 {
@@ -67,6 +74,14 @@ public class AStarBodyPathPlanner
 
    private final List<AStarBodyPathIterationData> iterationData = new ArrayList<>();
    private final HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> edgeDataMap = new HashMap<>();
+
+   private List<Consumer<FootstepPlannerOutput>> statusCallbacks = new ArrayList<>();
+   private final Stopwatch stopwatch = new Stopwatch();
+   private int iterations = 0;
+   private BodyPathPlanningResult result = null;
+   private boolean reachedGoal = false;
+   private final AtomicBoolean haltRequested = new AtomicBoolean();
+   private static final int maxIterations = 3000;
 
    /* Parameters to extract */
    static final double groundClearance = 0.25;
@@ -188,14 +203,26 @@ public class AStarBodyPathPlanner
       NON_TRAVERSIBLE
    }
 
-   public List<Pose3DReadOnly> planPath(Pose3DReadOnly startPose, Pose3DReadOnly goalPose)
+   public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
+      haltRequested.set(false);
+      iterations = 0;
+      reachedGoal = false;
+      stopwatch.start();
+      result = BodyPathPlanningResult.PLANNING;
+
       iterationData.clear();
       edgeDataMap.clear();
       gridHeightMap.clear();
 
       int minMaxOffsetXY = (int) Math.round(snapRadius / heightMapData.getGridResolutionXY());
       packRadialOffsets(heightMapData, minMaxOffsetXY, snapRadius, xSnapOffsets, ySnapOffsets);
+
+      Pose3D startPose = new Pose3D();
+      Pose3D goalPose = new Pose3D();
+
+      startPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
+      goalPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
 
       startNode = new BodyPathLatticePoint(startPose.getX(), startPose.getY(), startPose.getYaw());
       goalNode = new BodyPathLatticePoint(goalPose.getX(), goalPose.getY(), goalPose.getYaw());
@@ -207,17 +234,32 @@ public class AStarBodyPathPlanner
       leastCostNode = startNode;
       obstacleDetector.compute(heightMapData);
 
-      int maxIterations = 3000;
-      int iterationCount = 0;
-      boolean reachedGoal = false;
-
       planningLoop:
-      while (iterationCount++ < maxIterations)
+      while (true)
       {
-         BodyPathLatticePoint node = getNextNode();
+         iterations++;
+         outputToPack.getPlannerTimings().setStepPlanningIterations(iterations);
 
+         if (stopwatch.totalElapsed() >= request.getTimeout())
+         {
+            result = BodyPathPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
+            break;
+         }
+         if (haltRequested.get())
+         {
+            result = BodyPathPlanningResult.HALTED;
+            break;
+         }
+         if (iterations > maxIterations)
+         {
+            result = BodyPathPlanningResult.MAXIMUM_ITERATIONS_REACHED;
+            break;
+         }
+
+         BodyPathLatticePoint node = getNextNode();
          if (node == null)
          {
+            result = BodyPathPlanningResult.NO_PATH_EXISTS;
             LogTools.info("Stack is empty, no path exists...");
             break;
          }
@@ -273,6 +315,7 @@ public class AStarBodyPathPlanner
             if (node.equals(goalNode))
             {
                reachedGoal = true;
+               result = BodyPathPlanningResult.FOUND_SOLUTION;
                break planningLoop;
             }
             else if (heuristics(node) < heuristics(leastCostNode))
@@ -288,20 +331,47 @@ public class AStarBodyPathPlanner
          iterationData.getChildNodes().addAll(neighbors);
          iterationData.setParentNodeHeight(gridHeightMap.get(node));
          this.iterationData.add(iterationData);
+
+         if (publishStatus(request))
+         {
+            reportStatus(request, outputToPack);
+            stopwatch.lap();
+         }
       }
 
+      reportStatus(request, outputToPack);
+   }
+
+   private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
+   {
+      LogTools.info("reporting status");
+
+      outputToPack.setRequestId(request.getRequestId());
+      outputToPack.setBodyPathPlanningResult(result);
+
+      outputToPack.getBodyPath().clear();
       BodyPathLatticePoint terminalNode = reachedGoal ? goalNode : leastCostNode;
       List<BodyPathLatticePoint> path = graph.getPathFromStart(terminalNode);
-      List<Pose3DReadOnly> waypoints = new ArrayList<>();
       for (int i = 0; i < path.size(); i++)
       {
          Pose3D waypoint = new Pose3D();
          waypoint.getPosition().set(path.get(i).getX(), path.get(i).getY(), gridHeightMap.get(path.get(i)));
-         waypoints.add(waypoint);
+         outputToPack.getBodyPath().add(waypoint);
       }
 
       markSolutionEdges(terminalNode);
-      return waypoints;
+      statusCallbacks.forEach(callback -> callback.accept(outputToPack));
+   }
+
+   private boolean publishStatus(FootstepPlannerRequest request)
+   {
+      double statusPublishPeriod = request.getStatusPublishPeriod();
+      if (statusPublishPeriod <= 0.0)
+      {
+         return false;
+      }
+
+      return stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), request.getTimeout(), 0.8 * request.getStatusPublishPeriod());
    }
 
    private void markSolutionEdges(BodyPathLatticePoint terminalNode)
@@ -471,6 +541,17 @@ public class AStarBodyPathPlanner
 
       poses.add(goalPose);
       return poses;
+   }
+
+   public void setStatusCallbacks(List<Consumer<FootstepPlannerOutput>> statusCallbacks)
+   {
+      this.statusCallbacks.clear();
+      this.statusCallbacks.addAll(statusCallbacks);
+   }
+
+   public void halt()
+   {
+      haltRequested.set(true);
    }
 
    public List<AStarBodyPathIterationData> getIterationData()

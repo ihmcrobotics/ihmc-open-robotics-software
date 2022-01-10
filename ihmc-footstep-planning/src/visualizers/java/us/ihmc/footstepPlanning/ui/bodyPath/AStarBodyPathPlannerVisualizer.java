@@ -4,16 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.HeightMapMessagePubSubType;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -22,11 +21,10 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoRegistry;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -97,7 +95,20 @@ public class AStarBodyPathPlannerVisualizer
 
       AStarBodyPathPlanner bodyPathPlanner = new AStarBodyPathPlanner(parameters, footPolygon);
       bodyPathPlanner.setHeightMapData(heightMapData);
-      List<Pose3DReadOnly> path = bodyPathPlanner.planPath(start, goal);
+
+      FootstepPlannerRequest request = new FootstepPlannerRequest();
+      for(RobotSide robotSide : RobotSide.values())
+      {
+         request.getStartFootPoses().get(robotSide).set(start);
+         request.getGoalFootPoses().get(robotSide).set(goal);
+         request.getStartFootPoses().get(robotSide).appendTranslation(0.0, robotSide.negateIfRightSide(0.1), 0.0);
+         request.getGoalFootPoses().get(robotSide).appendTranslation(0.0, robotSide.negateIfRightSide(0.1), 0.0);
+      }
+
+      FootstepPlannerOutput output = new FootstepPlannerOutput();
+
+      bodyPathPlanner.handleRequest(request, output);
+      List<Pose3D> path = output.getBodyPath();
 
       if (path != null)
          scs.addStaticLinkGraphics(pathGraphics(path));
@@ -144,7 +155,7 @@ public class AStarBodyPathPlannerVisualizer
       return graphics3DObject;
    }
 
-   private static Graphics3DObject pathGraphics(List<Pose3DReadOnly> path)
+   private static Graphics3DObject pathGraphics(List<Pose3D> path)
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
       for (int i = 0; i < path.size(); i++)

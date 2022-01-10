@@ -239,7 +239,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       else if (request.getPlanBodyPath() && !flatGroundMode && heightMapAvailable)
       {
          bodyPathPlanner.setHeightMapData(heightMapData);
-         List<Pose3DReadOnly> bodyPathWaypoints = bodyPathPlanner.planPath(startMidFootPose, goalMidFootPose);
+         bodyPathPlanner.setStatusCallbacks(statusCallbacks);
+
+         bodyPathPlanner.handleRequest(request, output);
+         List<Pose3D> bodyPathWaypoints = output.getBodyPath();
+
          setNominalOrientations(bodyPathWaypoints);
 
          if (bodyPathWaypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails())
@@ -252,8 +256,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          else if (bodyPathWaypoints.size() < 2 && !request.getAbortIfBodyPathPlannerFails())
          {
             bodyPathWaypoints.clear();
-            bodyPathWaypoints.add(startMidFootPose);
-            bodyPathWaypoints.add(goalMidFootPose);
+            bodyPathWaypoints.add(new Pose3D(startMidFootPose));
+            bodyPathWaypoints.add(new Pose3D(goalMidFootPose));
          }
 
          bodyPathPlanHolder.setPoseWaypoints(bodyPathWaypoints);
@@ -263,8 +267,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
-
-         reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
       else if (visibilityGraphParameters.getOptimizeForNarrowPassage())
       {
@@ -330,7 +332,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
    }
 
-   private static void setNominalOrientations(List<Pose3DReadOnly> waypoints)
+   private static void setNominalOrientations(List<? extends Pose3DReadOnly> waypoints)
    {
       for (int i = 0; i < waypoints.size() - 1; i++)
       {

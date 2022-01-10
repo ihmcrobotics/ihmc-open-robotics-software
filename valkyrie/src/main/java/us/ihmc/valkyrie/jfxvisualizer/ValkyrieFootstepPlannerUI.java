@@ -45,17 +45,17 @@ public class ValkyrieFootstepPlannerUI extends Application
 
       messager.startMessager();
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage,
-                                              messager,
-                                              model.getVisibilityGraphsParameters(),
-                                              model.getFootstepPlannerParameters(),
-                                              model.getSwingPlannerParameters(),
-                                              model,
-                                              previewModel,
-                                              model.getJointMap(),
-                                              model.getContactPointParameters(),
-                                              model.getWalkingControllerParameters(),
-                                              new ValkyrieUIAuxiliaryData());
+      ui = FootstepPlannerUI.createUI(primaryStage,
+                                      messager,
+                                      model.getVisibilityGraphsParameters(),
+                                      model.getFootstepPlannerParameters(),
+                                      model.getSwingPlannerParameters(),
+                                      model,
+                                      previewModel,
+                                      model.getJointMap(),
+                                      model.getContactPointParameters(),
+                                      model.getWalkingControllerParameters(),
+                                      new ValkyrieUIAuxiliaryData());
       ui.show();
 
       if(!ValkyrieNetworkProcessor.isFootstepPlanningModuleStarted())

@@ -28,7 +28,7 @@ public class RemoteFootstepPlannerUI extends Application
 
       messager.startMessager();
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);
+      ui = FootstepPlannerUI.createUI(primaryStage, messager);
       ui.show();
    }
 
