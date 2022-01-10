@@ -26,7 +26,7 @@ public class MessagerStandaloneFootstepPlannerUI extends Application
       module = FootstepPathCalculatorModule.createMessagerModule(messager);
       module.start();
 
-      ui = FootstepPlannerUI.createMessagerUI(primaryStage, messager);
+      ui = FootstepPlannerUI.createUI(primaryStage, messager);
       ui.show();
 
    }

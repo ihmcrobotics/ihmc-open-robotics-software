@@ -128,7 +128,7 @@ public class RemoteFootstepPlannerUIMessagingTest
             @Override
             public void start(Stage stage) throws Exception
             {
-               ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
+               ui = FootstepPlannerUI.createUI(stage, (SharedMemoryJavaFXMessager) messager);
                ui.show();
             }
 

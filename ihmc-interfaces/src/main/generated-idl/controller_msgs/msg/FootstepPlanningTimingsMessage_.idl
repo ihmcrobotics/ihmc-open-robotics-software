@@ -31,6 +31,10 @@ module controller_msgs
          */
         double time_planning_steps_seconds;
         /**
+         * Number of iterations performed during path planning
+         */
+        long long path_planning_iterations;
+        /**
          * Number of iterations performed during step planning
          */
         long long step_planning_iterations;

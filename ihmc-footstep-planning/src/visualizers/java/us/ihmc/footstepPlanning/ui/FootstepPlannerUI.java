@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -23,7 +22,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
@@ -469,31 +467,31 @@ public class FootstepPlannerUI
       shutdownHooks.add(shutdownHook);
    }
 
-   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
+   public static FootstepPlannerUI createUI(Stage primaryStage, JavaFXMessager messager) throws Exception
    {
-      return createMessagerUI(primaryStage, messager, false, null);
+      return createUI(primaryStage, messager, false, null);
    }
 
-   public static FootstepPlannerUI createMessagerUI(Stage primaryStage,
-                                                    JavaFXMessager messager,
-                                                    boolean showTestDashboard,
-                                                    SideDependentList<List<Point2D>> defaultContactPoints)
+   public static FootstepPlannerUI createUI(Stage primaryStage,
+                                            JavaFXMessager messager,
+                                            boolean showTestDashboard,
+                                            SideDependentList<List<Point2D>> defaultContactPoints)
          throws Exception
    {
       return new FootstepPlannerUI(primaryStage, messager, showTestDashboard, defaultContactPoints);
    }
 
-   public static FootstepPlannerUI createMessagerUI(Stage primaryStage,
-                                                    JavaFXMessager messager,
-                                                    VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                                                    FootstepPlannerParametersBasics plannerParameters,
-                                                    SwingPlannerParametersBasics swingPlannerParameters,
-                                                    FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
-                                                    FullHumanoidRobotModelFactory previewModelFactory,
-                                                    HumanoidJointNameMap jointMap,
-                                                    RobotContactPointParameters<RobotSide> contactPointParameters,
-                                                    WalkingControllerParameters walkingControllerParameters,
-                                                    UIAuxiliaryRobotData auxiliaryRobotData)
+   public static FootstepPlannerUI createUI(Stage primaryStage,
+                                            JavaFXMessager messager,
+                                            VisibilityGraphsParametersBasics visibilityGraphsParameters,
+                                            FootstepPlannerParametersBasics plannerParameters,
+                                            SwingPlannerParametersBasics swingPlannerParameters,
+                                            FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
+                                            FullHumanoidRobotModelFactory previewModelFactory,
+                                            HumanoidJointNameMap jointMap,
+                                            RobotContactPointParameters<RobotSide> contactPointParameters,
+                                            WalkingControllerParameters walkingControllerParameters,
+                                            UIAuxiliaryRobotData auxiliaryRobotData)
          throws Exception
    {
       SideDependentList<List<Point2D>> defaultContactPoints = new SideDependentList<>();
