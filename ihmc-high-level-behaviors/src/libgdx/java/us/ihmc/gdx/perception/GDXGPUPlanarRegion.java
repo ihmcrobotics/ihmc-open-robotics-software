@@ -16,6 +16,7 @@ public class GDXGPUPlanarRegion
    private final RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
    private final RecyclingArrayList<Point2D> leafPatches = new RecyclingArrayList<>(Point2D::new);
    private final RecyclingArrayList<Point3D> boundaryVertices = new RecyclingArrayList<>(Point3D::new);
+   private final RecyclingArrayList<GDXGPURegionRing> regionRings = new RecyclingArrayList<>(GDXGPURegionRing::new);
    // TODO: kd tree
    private boolean normalCalculated;
    private boolean centroidCalculated;
@@ -23,7 +24,6 @@ public class GDXGPUPlanarRegion
    private int id;
    private int poseId;
    private int numberOfMeasurements;
-
 
    public void reset(int id)
    {
@@ -35,6 +35,8 @@ public class GDXGPUPlanarRegion
       center.setToZero();
 
       leafPatches.clear();
+      boundaryVertices.clear();
+      regionRings.clear();
       normalCalculated = false;
       centroidCalculated = false;
       numberOfPatches = 0;
@@ -61,5 +63,20 @@ public class GDXGPUPlanarRegion
    public RecyclingArrayList<Point3D> getBoundaryVertices()
    {
       return boundaryVertices;
+   }
+
+   public RecyclingArrayList<Point2D> getLeafPatches()
+   {
+      return leafPatches;
+   }
+
+   public RecyclingArrayList<GDXGPURegionRing> getRegionRings()
+   {
+      return regionRings;
+   }
+
+   public int getId()
+   {
+      return id;
    }
 }

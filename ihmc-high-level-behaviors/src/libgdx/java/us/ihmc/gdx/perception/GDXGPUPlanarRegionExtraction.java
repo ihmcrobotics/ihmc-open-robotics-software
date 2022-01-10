@@ -18,12 +18,15 @@ import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import sensor_msgs.Image;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.perception.OpenCLManager;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.Comparator;
 
 public class GDXGPUPlanarRegionExtraction
 {
@@ -45,6 +48,8 @@ public class GDXGPUPlanarRegionExtraction
    private final ImDouble gaussianSigma = new ImDouble(20.0);
    private final ImInt regionMinPatches = new ImInt(20);
    private final ImInt regionBoundaryDiff = new ImInt(20);
+   private final ImBoolean drawPatches = new ImBoolean(true);
+   private final ImBoolean drawBoundaries = new ImBoolean(true);
    private GDXBytedecoImage inputFloatDepthImage;
    private GDXBytedecoImage inputScaledFloatDepthImage;
    private GDXBytedecoImage inputU16DepthImage;
@@ -78,6 +83,7 @@ public class GDXGPUPlanarRegionExtraction
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
    private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
    private final RecyclingArrayList<GDXGPUPlanarRegion> planarRegions = new RecyclingArrayList<>(GDXGPUPlanarRegion::new);
+   private final Comparator<GDXGPURegionRing> boundaryVertexComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryVertices().size());
    private int imageWidth;
    private int imageHeight;
    private Size gaussianKernelSize;
@@ -297,11 +303,9 @@ public class GDXGPUPlanarRegionExtraction
          }
       }
 
+      findBoundaryAndHoles();
+
       debugExtractionPanel.draw();
-
-      visitedMatrix.zero();
-
-      // TODO: find boundary and holes
 
       // TODO: Grow region boundary
    }
@@ -354,36 +358,60 @@ public class GDXGPUPlanarRegionExtraction
       }
    }
 
-   private void generateRegionsFromDepth(FloatBuffer depthFloatBuffer)
+   private void findBoundaryAndHoles()
    {
-      // timestamp
-
-      // put image into Mat?
-
-//      depthImageBytePointer.putPointerValue(depthFloatBuffer);
-//       inputDepthImageMat.
-
-
-      generatePatchGraph();
-
-      generateSegmentation();
+      visitedMatrix.zero();
+      planarRegions.parallelStream().forEach(planarRegion ->
+      {
+         int regionRingIndex = 0;
+         for (Point2D leafPatch : planarRegion.getLeafPatches())
+         {
+            depthOfSearch = 0;
+            GDXGPURegionRing regionRing = planarRegion.getRegionRings().add();
+            boundaryDepthFirstSearch((int) leafPatch.getX(), (int) leafPatch.getY(), planarRegion.getId(), regionRingIndex, regionRing);
+            if (depthOfSearch > 3)
+            {
+               ++regionRingIndex;
+            }
+            else
+            {
+               planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
+            }
+         }
+         planarRegion.getRegionRings().sort(boundaryVertexComparator);
+      });
    }
 
-   private void generatePatchGraph()
+   private void boundaryDepthFirstSearch(int row, int column, int planarRegionId, int regionRingIndex, GDXGPURegionRing regionRing)
    {
-      enqueueWriteParameters();
+      if (visitedMatrix.get(row, column) || depthOfSearch > 10000)
+         return;
 
-      // gaussian blur
-      Mat src = null;
-      Mat dst = null;
-      Size ksize = null;
-      double sigmaX = 0.0;
-      opencv_imgproc.GaussianBlur(src, dst, ksize, sigmaX);
-   }
+      ++depthOfSearch;
+      visitedMatrix.set(row, column, true);
+      regionRing.getBoundaryIndices().add().set(row, column);
 
-   private void generateSegmentation()
-   {
+      int x = column * patchHeight;
+      int y = row * patchWidth;
+      cvCenterPoint.x(x);
+      cvCenterPoint.y(y);
+      int radius = 2;
+      int r = (regionRingIndex + 1) * 130 % 255;
+      int g = (regionRingIndex + 1) * 227 % 255;
+      int b = (regionRingIndex + 1) * 332 % 255;
+      cvBGRColorScalar.put(b, g, r, 255);
+      opencv_imgproc.circle(debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat(), cvCenterPoint, radius, cvBGRColorScalar);
 
+      for (int i = 0; i < 8; i++)
+      {
+         if (row + adjacentY[i] < subHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < subWidth - 1 && column + adjacentX[i] > 1)
+         {
+            if (boundaryMatrix.get(row + adjacentY[i], column + adjacentX[i]) && planarRegionId == regionMatrix.get(row + adjacentY[i], column + adjacentX[i]))
+            {
+               boundaryDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionId, regionRingIndex, regionRing);
+            }
+         }
+      }
    }
 
    private void enqueueWriteParameters()
@@ -436,6 +464,8 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
       ImGui.inputInt(labels.get("Region min patches"), regionMinPatches);
       ImGui.inputInt(labels.get("Region boundary diff"), regionBoundaryDiff);
+      ImGui.checkbox(labels.get("Draw patches"), drawPatches);
+      ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
    }
 
    public ImGuiPanel getPanel()
