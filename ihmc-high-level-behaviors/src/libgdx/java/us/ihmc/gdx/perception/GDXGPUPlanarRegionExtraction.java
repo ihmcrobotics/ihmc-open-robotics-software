@@ -20,8 +20,11 @@ import sensor_msgs.Image;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.OpenCLManager;
 
 import java.nio.ByteBuffer;
@@ -50,6 +53,7 @@ public class GDXGPUPlanarRegionExtraction
    private final ImInt regionBoundaryDiff = new ImInt(20);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
+   private final ImDouble regionGrowthFactor = new ImDouble(0.01);
    private GDXBytedecoImage inputFloatDepthImage;
    private GDXBytedecoImage inputScaledFloatDepthImage;
    private GDXBytedecoImage inputU16DepthImage;
@@ -304,6 +308,7 @@ public class GDXGPUPlanarRegionExtraction
       }
 
       findBoundaryAndHoles();
+      growRegionBoundary();
 
       debugExtractionPanel.draw();
 
@@ -327,16 +332,19 @@ public class GDXGPUPlanarRegionExtraction
       float cz = patchPointer.getFloat(5);
       planarRegion.addPatch(nx, ny, nz, cx, cy, cz);
 
-      int x = column * patchHeight;
-      int y = row * patchWidth;
-      cvCenterPoint.x(x);
-      cvCenterPoint.y(y);
-      int radius = 2;
-      int r = (planarRegionIslandIndex + 1) * 312 % 255;
-      int g = (planarRegionIslandIndex + 1) * 123 % 255;
-      int b = (planarRegionIslandIndex + 1) * 231 % 255;
-      cvBGRColorScalar.put(b, g, r, 255);
-      opencv_imgproc.circle(debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat(), cvCenterPoint, radius, cvBGRColorScalar);
+      if (drawPatches.get())
+      {
+         int x = column * patchHeight;
+         int y = row * patchWidth;
+         cvCenterPoint.x(x);
+         cvCenterPoint.y(y);
+         int radius = 2;
+         int r = (planarRegionIslandIndex + 1) * 312 % 255;
+         int g = (planarRegionIslandIndex + 1) * 123 % 255;
+         int b = (planarRegionIslandIndex + 1) * 231 % 255;
+         cvBGRColorScalar.put(b, g, r, 255);
+         opencv_imgproc.circle(debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat(), cvCenterPoint, radius, cvBGRColorScalar);
+      }
 
       int count = 0;
       for (int i = 0; i < 8; i++)
@@ -391,16 +399,19 @@ public class GDXGPUPlanarRegionExtraction
       visitedMatrix.set(row, column, true);
       regionRing.getBoundaryIndices().add().set(row, column);
 
-      int x = column * patchHeight;
-      int y = row * patchWidth;
-      cvCenterPoint.x(x);
-      cvCenterPoint.y(y);
-      int radius = 2;
-      int r = (regionRingIndex + 1) * 130 % 255;
-      int g = (regionRingIndex + 1) * 227 % 255;
-      int b = (regionRingIndex + 1) * 332 % 255;
-      cvBGRColorScalar.put(b, g, r, 255);
-      opencv_imgproc.circle(debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat(), cvCenterPoint, radius, cvBGRColorScalar);
+      if (drawBoundaries.get())
+      {
+         int x = column * patchHeight;
+         int y = row * patchWidth;
+         cvCenterPoint.x(x);
+         cvCenterPoint.y(y);
+         int radius = 2;
+         int r = (regionRingIndex + 1) * 130 % 255;
+         int g = (regionRingIndex + 1) * 227 % 255;
+         int b = (regionRingIndex + 1) * 332 % 255;
+         cvBGRColorScalar.put(b, g, r, 255);
+         opencv_imgproc.circle(debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat(), cvCenterPoint, radius, cvBGRColorScalar);
+      }
 
       for (int i = 0; i < 8; i++)
       {
@@ -412,6 +423,30 @@ public class GDXGPUPlanarRegionExtraction
             }
          }
       }
+   }
+
+   private void growRegionBoundary()
+   {
+      planarRegions.parallelStream().forEach(planarRegion ->
+      {
+         if (!planarRegion.getRegionRings().isEmpty())
+         {
+            GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
+            for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
+            {
+               BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY());
+               float vertexX = patchPointer.getFloat(3);
+               float vertexY = patchPointer.getFloat(4);
+               float vertexZ = patchPointer.getFloat(5);
+               Vector3D boundaryVertex = planarRegion.getBoundaryVertices().add();
+               boundaryVertex.set(vertexX, vertexY, vertexZ);
+               boundaryVertex.sub(planarRegion.getCenter());
+               boundaryVertex.normalize();
+               boundaryVertex.scale(regionGrowthFactor.get());
+               boundaryVertex.add(vertexX, vertexY, vertexZ);
+            }
+         }
+      });
    }
 
    private void enqueueWriteParameters()
@@ -466,6 +501,7 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.inputInt(labels.get("Region boundary diff"), regionBoundaryDiff);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
+      ImGui.inputDouble(labels.get("Region growth factor"), regionGrowthFactor);
    }
 
    public ImGuiPanel getPanel()

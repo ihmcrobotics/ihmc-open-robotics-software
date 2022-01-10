@@ -5,6 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 
 public class GDXGPUPlanarRegion
@@ -15,7 +16,7 @@ public class GDXGPUPlanarRegion
    private final RecyclingArrayList<Point2D> planarPatchCentroids = new RecyclingArrayList<>(Point2D::new);
    private final RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
    private final RecyclingArrayList<Point2D> leafPatches = new RecyclingArrayList<>(Point2D::new);
-   private final RecyclingArrayList<Point3D> boundaryVertices = new RecyclingArrayList<>(Point3D::new);
+   private final RecyclingArrayList<Vector3D> boundaryVertices = new RecyclingArrayList<>(Vector3D::new);
    private final RecyclingArrayList<GDXGPURegionRing> regionRings = new RecyclingArrayList<>(GDXGPURegionRing::new);
    // TODO: kd tree
    private boolean normalCalculated;
@@ -60,7 +61,7 @@ public class GDXGPUPlanarRegion
       point.setY(y);
    }
 
-   public RecyclingArrayList<Point3D> getBoundaryVertices()
+   public RecyclingArrayList<Vector3D> getBoundaryVertices()
    {
       return boundaryVertices;
    }
@@ -78,5 +79,10 @@ public class GDXGPUPlanarRegion
    public int getId()
    {
       return id;
+   }
+
+   public Point3D32 getCenter()
+   {
+      return center;
    }
 }

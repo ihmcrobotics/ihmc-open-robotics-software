@@ -5,7 +5,7 @@
   "windows" : {
     "Environment###java.lang.Class:Environment" : true,
     "GPU Planar Region Extraction" : true,
-    "Blurred Depth" : true,
+    "Blurred Depth" : false,
     "Filtered Depth" : true,
     "Gx Image" : true,
     "Gy Image" : true,
