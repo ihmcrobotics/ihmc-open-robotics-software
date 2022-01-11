@@ -34,6 +34,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
@@ -84,6 +85,10 @@ public class GDXGPUPlanarRegionExtraction
    private final ImFloat depthThresholdSlider = new ImFloat(0.10f);
    private final ImInt minNumberOfNodesSlider = new ImInt(10);
    private final ImBoolean cutNarrowPassageChecked = new ImBoolean(true);
+   private ImGuiPlot numberOfPlanarRegionsPlot;
+   private ImGuiPlot regionMaxSearchDepthPlot;
+   private ImGuiPlot numberOfBoundaryVerticesPlot;
+   private ImGuiPlot boundaryMaxSearchDepthPlot;
    private GDXBytedecoImage inputFloatDepthImage;
    private GDXBytedecoImage inputScaledFloatDepthImage;
    private GDXBytedecoImage inputU16DepthImage;
@@ -107,13 +112,18 @@ public class GDXGPUPlanarRegionExtraction
    private GDXCVImagePanel gxImagePanel;
    private GDXCVImagePanel gyImagePanel;
    private GDXCVImagePanel gzImagePanel;
-   private BMatrixRMaj visitedMatrix;
+   private BMatrixRMaj regionVisitedMatrix;
+   private BMatrixRMaj boundaryVisitedMatrix;
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
    private GDXCVImagePanel debugExtractionPanel;
    private final Point cvCenterPoint = new Point();
    private final Scalar cvBGRColorScalar = new Scalar();
-   private int depthOfSearch = 0;
+   private int depthOfRegionsSearch = 0;
+   private int regionMaxSearchDepth = 0;
+   private int depthOfBoundariesSearch = 0;
+   private int boundaryMaxSearchDepth = 0;
+   private int numberOfBoundaryIndices = 0;
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
    private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
    private final RecyclingArrayList<GDXGPUPlanarRegion> planarRegions = new RecyclingArrayList<>(GDXGPUPlanarRegion::new);
@@ -210,9 +220,15 @@ public class GDXGPUPlanarRegionExtraction
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
 
-      visitedMatrix = new BMatrixRMaj(subHeight, subWidth);
+      regionVisitedMatrix = new BMatrixRMaj(subHeight, subWidth);
+      boundaryVisitedMatrix = new BMatrixRMaj(subHeight, subWidth);
       boundaryMatrix = new BMatrixRMaj(subHeight, subWidth);
       regionMatrix = new DMatrixRMaj(subHeight, subWidth);
+
+      numberOfPlanarRegionsPlot = new ImGuiPlot(labels.get("Number of planar regions"), 1000, 300, 50);
+      regionMaxSearchDepthPlot = new ImGuiPlot(labels.get("Regions max search depth"), 1000, 300, 50);
+      numberOfBoundaryVerticesPlot = new ImGuiPlot(labels.get("Number of boundary vertices"), 1000, 300, 50);
+      boundaryMaxSearchDepthPlot = new ImGuiPlot(labels.get("Boundary max search depth"), 1000, 300, 50);
    }
 
    public void processROS1DepthImage(Image image)
@@ -332,8 +348,9 @@ public class GDXGPUPlanarRegionExtraction
    private void findRegions()
    {
       int planarRegionIslandIndex = 0;
+      regionMaxSearchDepth = 0;
       planarRegions.clear();
-      visitedMatrix.zero();
+      regionVisitedMatrix.zero();
       boundaryMatrix.zero();
       regionMatrix.zero();
       for (int row = 0; row < subHeight; row++)
@@ -341,13 +358,14 @@ public class GDXGPUPlanarRegionExtraction
          for (int column = 0; column < subWidth; column++)
          {
             int patch = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr(row, column).get());
-            if (!visitedMatrix.get(row, column) && patch == 255)
+            if (!regionVisitedMatrix.get(row, column) && patch == 255)
             {
-               depthOfSearch = 0; // also number of patches traversed
+               depthOfRegionsSearch = 0; // also number of patches traversed
                GDXGPUPlanarRegion planarRegion = planarRegions.add();
                planarRegion.reset(planarRegionIslandIndex);
                depthFirstSearch(row, column, planarRegionIslandIndex, planarRegion);
-               if (depthOfSearch > regionMinPatches.get() && depthOfSearch - planarRegion.getBoundaryVertices().size() > regionBoundaryDiff.get())
+               if (depthOfRegionsSearch > regionMinPatches.get()
+                && depthOfRegionsSearch - planarRegion.getBoundaryVertices().size() > regionBoundaryDiff.get())
                {
                   ++planarRegionIslandIndex;
                }
@@ -355,6 +373,8 @@ public class GDXGPUPlanarRegionExtraction
                {
                   planarRegions.remove(planarRegions.size() - 1);
                }
+               if (depthOfRegionsSearch > regionMaxSearchDepth)
+                  regionMaxSearchDepth = depthOfRegionsSearch;
             }
          }
       }
@@ -362,13 +382,13 @@ public class GDXGPUPlanarRegionExtraction
 
    private void depthFirstSearch(int row, int column, int planarRegionIslandIndex, GDXGPUPlanarRegion planarRegion)
    {
-      if (visitedMatrix.get(row, column) || depthOfSearch > searchDepthLimit.get())
+      if (regionVisitedMatrix.get(row, column) || depthOfRegionsSearch > searchDepthLimit.get())
          return;
 
-      ++depthOfSearch;
-      visitedMatrix.set(row, column, true);
+      ++depthOfRegionsSearch;
+      regionVisitedMatrix.set(row, column, true);
       regionMatrix.set(row, column, planarRegionIslandIndex);
-//      BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr(row, column);
+//      BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr(row, column); // TODO: Is this faster?
 //      float nx = patchPointer.getFloat(0);
 //      float ny = patchPointer.getFloat(1);
 //      float nz = patchPointer.getFloat(2);
@@ -419,16 +439,19 @@ public class GDXGPUPlanarRegionExtraction
 
    private void findBoundariesAndHoles()
    {
-      visitedMatrix.zero();
+      boundaryMaxSearchDepth = 0;
+      numberOfBoundaryIndices = 0;
+      boundaryVisitedMatrix.zero();
       planarRegions.parallelStream().forEach(planarRegion ->
       {
          int regionRingIndex = 0;
          for (Point2D leafPatch : planarRegion.getLeafPatches())
          {
-            depthOfSearch = 0;
+            depthOfBoundariesSearch = 0;
             GDXGPURegionRing regionRing = planarRegion.getRegionRings().add();
+            regionRing.reset(regionRingIndex);
             boundaryDepthFirstSearch((int) leafPatch.getX(), (int) leafPatch.getY(), planarRegion.getId(), regionRingIndex, regionRing);
-            if (depthOfSearch > 3)
+            if (depthOfBoundariesSearch > 3)
             {
                ++regionRingIndex;
             }
@@ -436,6 +459,8 @@ public class GDXGPUPlanarRegionExtraction
             {
                planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
             }
+            if (depthOfBoundariesSearch > boundaryMaxSearchDepth)
+               boundaryMaxSearchDepth = depthOfBoundariesSearch;
          }
          planarRegion.getRegionRings().sort(boundaryVertexComparator);
       });
@@ -443,12 +468,13 @@ public class GDXGPUPlanarRegionExtraction
 
    private void boundaryDepthFirstSearch(int row, int column, int planarRegionId, int regionRingIndex, GDXGPURegionRing regionRing)
    {
-      if (visitedMatrix.get(row, column) || depthOfSearch > searchDepthLimit.get())
+      if (boundaryVisitedMatrix.get(row, column) || depthOfBoundariesSearch > searchDepthLimit.get())
          return;
 
-      ++depthOfSearch;
-      visitedMatrix.set(row, column, true);
+      ++depthOfBoundariesSearch;
+      boundaryVisitedMatrix.set(row, column, true);
       regionRing.getBoundaryIndices().add().set(row, column);
+      ++numberOfBoundaryIndices;
 
       if (drawBoundaries.get())
       {
@@ -669,6 +695,11 @@ public class GDXGPUPlanarRegionExtraction
 
    public void renderImGuiWidgets()
    {
+      numberOfPlanarRegionsPlot.render((float) planarRegions.size());
+      regionMaxSearchDepthPlot.render((float) regionMaxSearchDepth);
+      numberOfBoundaryVerticesPlot.render((float) numberOfBoundaryIndices);
+      boundaryMaxSearchDepthPlot.render((float) boundaryMaxSearchDepth);
+
       ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
       ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 6);
       ImGui.sliderInt(labels.get("Gaussian sigma"), gaussianSigma.getData(), 1, 30);
