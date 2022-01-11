@@ -1,5 +1,7 @@
 package us.ihmc.gdx.perception;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -20,11 +22,13 @@ public class GDXGPUPlanarRegion
    private final RecyclingArrayList<GDXGPURegionRing> regionRings = new RecyclingArrayList<>(GDXGPURegionRing::new);
    // TODO: kd tree
    private boolean normalCalculated;
-   private boolean centroidCalculated;
+   private boolean centerCalculated;
    private int numberOfPatches;
    private int id;
    private int poseId;
    private int numberOfMeasurements;
+   private final SvdImplicitQrDecompose_DDRM svd = new SvdImplicitQrDecompose_DDRM(true, true, true, true);
+   private final DMatrixRMaj svdU = new DMatrixRMaj(1, 3);
 
    public void reset(int id)
    {
@@ -39,7 +43,7 @@ public class GDXGPUPlanarRegion
       boundaryVertices.clear();
       regionRings.clear();
       normalCalculated = false;
-      centroidCalculated = false;
+      centerCalculated = false;
       numberOfPatches = 0;
       poseId = 0;
       numberOfMeasurements = 1;
@@ -83,6 +87,34 @@ public class GDXGPUPlanarRegion
 
    public Point3D32 getCenter()
    {
+      if (!centerCalculated)
+      {
+         centerCalculated = true;
+         center.scale(1.0 / numberOfPatches);
+      }
       return center;
+   }
+
+   public Vector3D32 getNormal()
+   {
+      if (!normalCalculated)
+      {
+         normalCalculated = true;
+         getCenter();
+         DMatrixRMaj patchMatrix = new DMatrixRMaj(3, patchCentroids.size());
+         for (int i = 0; i < patchCentroids.size(); i++)
+         {
+            Point3D patchCentroid = patchCentroids.get(i);
+            patchMatrix.set(0, i, patchCentroid.getX() - center.getX());
+            patchMatrix.set(1, i, patchCentroid.getY() - center.getY());
+            patchMatrix.set(2, i, patchCentroid.getZ() - center.getZ());
+         }
+         svd.decompose(patchMatrix);
+         svd.getU(svdU, false);
+         normal.set(svdU.get(0, 0), svdU.get(1, 0), svdU.get(2, 0));
+         normal.normalize();
+         normal.scale(-normal.getZ() / Math.abs(normal.getZ()));
+      }
+      return normal;
    }
 }
