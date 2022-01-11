@@ -43,8 +43,8 @@ public class SpringFlamingoSimulation
    }
 
 //      private static FlamingoController controllerToUse = FlamingoController.FAST_WALKING_CONTROLLER;
-//      private static FlamingoController controllerToUse = FlamingoController.BALLISTIC_WALKING_CONTROLLER;
-   private static FlamingoController controllerToUse = FlamingoController.LEAP_OF_FAITH_CONTROLLER;
+      private static FlamingoController controllerToUse = FlamingoController.BALLISTIC_WALKING_CONTROLLER;
+//   private static FlamingoController controllerToUse = FlamingoController.LEAP_OF_FAITH_CONTROLLER;
 
    
    // Choose a Terrain here if the robot is doing the Leap of Faith controller. If not, it can only walk on flat.

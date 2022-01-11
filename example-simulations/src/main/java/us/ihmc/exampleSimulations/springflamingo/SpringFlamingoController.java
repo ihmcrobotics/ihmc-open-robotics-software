@@ -24,10 +24,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * <p>
  * Title: SpringFlamingoController
  * </p>
- *
  * <p>
- * Description: Simple ballistic walking controller for the SpringFlamingo simulation model. Controls
- * body pitch through hip torque, velocity through ankle torque.
+ * Description: Simple ballistic walking controller for the SpringFlamingo simulation model.
+ * Controls body pitch through hip torque, velocity through ankle torque.
  * </p>
  *
  * @author not attributable
@@ -49,7 +48,9 @@ public class SpringFlamingoController implements RobotController
    private final SideDependentList<StateMachine<States, State>> stateMachines;
 
    // Control Parameters:
-   private final DoubleParameter stand_gain = new DoubleParameter("stand_gain", "Gain for torquing the support ankle based on an error in desired x", registry,
+   private final DoubleParameter stand_gain = new DoubleParameter("stand_gain",
+                                                                  "Gain for torquing the support ankle based on an error in desired x",
+                                                                  registry,
                                                                   0.0);
    private final DoubleParameter x_d = new DoubleParameter("x_d", "Desired x location. Controlled with stand_gain", registry, 0.0);
 
@@ -330,15 +331,15 @@ public class SpringFlamingoController implements RobotController
          // Use hip to servo pitch
          if (force.get(robotSide).getDoubleValue() > 20.0)
             actHip.get(robotSide).set(-t_gain.getValue() * (desiredBodyPitch.getValue() - robot.q_pitch.getDoubleValue())
-                                      + t_damp.getValue() * robot.qd_pitch.getDoubleValue());
+                  + t_damp.getValue() * robot.qd_pitch.getDoubleValue());
 
          // Keep knee straight
          actKnee.get(robotSide).set(knee_gain.getValue() * (knee_d.getValue() - qKnee.get(robotSide).getDoubleValue())
-                                    - knee_damp.getValue() * qdKnee.get(robotSide).getValue());
+               - knee_damp.getValue() * qdKnee.get(robotSide).getValue());
 
          // Use ankle to servo speed, position
          actAnkle.get(robotSide).set(-stand_gain.getValue() * (x_d.getValue() - robot.q_x.getDoubleValue())
-                                     - vtp_gain.getValue() * (v_nom.getValue() - robot.qd_x.getDoubleValue()));
+               - vtp_gain.getValue() * (v_nom.getValue() - robot.qd_x.getDoubleValue()));
 
          // Ankle limit to go on toes and maintain cop
          pasAnkle.get(robotSide).set(passive_ankle_torques(qAnkle.get(robotSide).getDoubleValue(), qdAnkle.get(robotSide).getDoubleValue()));
@@ -370,7 +371,7 @@ public class SpringFlamingoController implements RobotController
       {
          // Use hip to servo pitch
          actHip.get(robotSide)
-         .set(-t_gain.getValue() * (desiredBodyPitch.getValue() - robot.q_pitch.getDoubleValue()) + t_damp.getValue() * robot.qd_pitch.getDoubleValue());
+               .set(-t_gain.getValue() * (desiredBodyPitch.getValue() - robot.q_pitch.getDoubleValue()) + t_damp.getValue() * robot.qd_pitch.getDoubleValue());
 
          // Keep knee straight
          double kneeToeOff = knee_d.getValue();
@@ -378,20 +379,20 @@ public class SpringFlamingoController implements RobotController
          {
             kneeToeOff = knee_d.getValue() + knee_toe_off_d.getValue();
          }
-         
+
          actKnee.get(robotSide).set(knee_gain.getValue() * (kneeToeOff - qKnee.get(robotSide).getDoubleValue())
                - knee_damp.getValue() * qdKnee.get(robotSide).getDoubleValue());
 
          // Use ankle to servo speed, position
          actAnkle.get(robotSide).set(-stand_gain.getValue() * (x_d.getValue() - robot.q_x.getDoubleValue())
-                                     - vtp_gain.getValue() * (v_nom.getValue() - robot.qd_x.getDoubleValue()));
+               - vtp_gain.getValue() * (v_nom.getValue() - robot.qd_x.getDoubleValue()));
 
          // Ankle limit to go on toes and maintain cop
          pasAnkle.get(robotSide).set(passive_ankle_torques(qAnkle.get(robotSide).getDoubleValue(), qdAnkle.get(robotSide).getDoubleValue()));
 
          // Ankle push off
          actAnkle.get(robotSide).set(actAnkle.get(robotSide).getDoubleValue()
-                                     + toe_off_ankle_torques(qAnkle.get(robotSide).getDoubleValue(), qdAnkle.get(robotSide).getDoubleValue()));
+               + toe_off_ankle_torques(qAnkle.get(robotSide).getDoubleValue(), qdAnkle.get(robotSide).getDoubleValue()));
 
       }
 
@@ -422,7 +423,7 @@ public class SpringFlamingoController implements RobotController
          // Servo hip up
          hipSet.get(robotSide).set(hip_d.getValue());
          actHip.get(robotSide).set(hip_gain.getValue() * (hipSet.get(robotSide).getDoubleValue() - qHip.get(robotSide).getDoubleValue())
-                                   - hip_damp.getValue() * qdHip.get(robotSide).getDoubleValue());
+               - hip_damp.getValue() * qdHip.get(robotSide).getDoubleValue());
 
          // Damp the knee
          actKnee.get(robotSide).set(-swing_damp_knee.getValue() * qdKnee.get(robotSide).getDoubleValue());
@@ -442,9 +443,9 @@ public class SpringFlamingoController implements RobotController
          {
             // Servo ankle level to the ground
             heel.get(robotSide).set(-robot.q_pitch.getDoubleValue() - qHip.get(robotSide).getDoubleValue() - qKnee.get(robotSide).getDoubleValue()
-                                    - qAnkle.get(robotSide).getDoubleValue());
+                  - qAnkle.get(robotSide).getDoubleValue());
             actAnkle.get(robotSide).set(-ankle_gain.getValue() * (ankle_d.getValue() - heel.get(robotSide).getDoubleValue())
-                                        - ankle_damp.getValue() * qdAnkle.get(robotSide).getDoubleValue());
+                  - ankle_damp.getValue() * qdAnkle.get(robotSide).getDoubleValue());
          }
       }
 
@@ -475,17 +476,17 @@ public class SpringFlamingoController implements RobotController
          // Servo hip to a more shallow angle
          hipSet.get(robotSide).set(hip_hold.getValue());
          actHip.get(robotSide).set(hip_gain.getValue() * (hipSet.get(robotSide).getDoubleValue() - qHip.get(robotSide).getDoubleValue())
-                                   - hip_damp.getValue() * qdHip.get(robotSide).getDoubleValue());
+               - hip_damp.getValue() * qdHip.get(robotSide).getDoubleValue());
 
          // Keep knee straight
          actKnee.get(robotSide).set(swing_gain_knee.getValue() * (knee_d.getValue() - qKnee.get(robotSide).getDoubleValue())
-                                    - swing_damp_knee.getValue() * qdKnee.get(robotSide).getDoubleValue());
+               - swing_damp_knee.getValue() * qdKnee.get(robotSide).getDoubleValue());
 
          // Servo ankle level to the ground
          heel.get(robotSide).set(-robot.q_pitch.getDoubleValue() - qHip.get(robotSide).getDoubleValue() - qKnee.get(robotSide).getDoubleValue()
-                                 - qAnkle.get(robotSide).getDoubleValue());
+               - qAnkle.get(robotSide).getDoubleValue());
          actAnkle.get(robotSide).set(-ankle_gain.getValue() * (ankle_d.getValue() - heel.get(robotSide).getDoubleValue())
-                                     - ankle_damp.getValue() * qdAnkle.get(robotSide).getDoubleValue());
+               - ankle_damp.getValue() * qdAnkle.get(robotSide).getDoubleValue());
       }
 
       @Override
@@ -505,10 +506,26 @@ public class SpringFlamingoController implements RobotController
       // Robot happens to walk in negative x direction.  Set vel positive just so it makes intuitive sense.
       vel.set(-robot.qd_x.getDoubleValue());
 
-      // Calculate forces on the feet
+      // Calculate forces on the feet  TODO jaehoon : replace this part with learned Neural Network (but how can I get the GRFz?)
       for (RobotSide robotSide : RobotSide.values())
       {
-         //System.out.println("gc heel force: " + gcHeel_fz.get(robotSide).getDoubleValue());
+         /**
+          * Jaehoon code start
+          */
+         if ((gcHeel_fz.get(robotSide).getDoubleValue() == 0.0) && (gcToe_fz.get(robotSide).getDoubleValue() == 0.0))
+         {
+            System.out.println("There is no ground contact at " + robotSide);
+         }
+         else
+         {
+            System.out.println("There is ground contact at " + robotSide);
+            System.out.println("gc heel force: " + gcHeel_fz.get(robotSide).getDoubleValue());
+            System.out.println("gc toe force: " + gcToe_fz.get(robotSide).getDoubleValue());
+         }
+         /**
+          * Jaehoon code end
+          */
+
          force.get(robotSide).set(gcHeel_fz.get(robotSide).getDoubleValue() + gcToe_fz.get(robotSide).getDoubleValue());
          if (force.get(robotSide).getDoubleValue() > 5.0)
             cops.get(robotSide).set(gcToe_fz.get(robotSide).getDoubleValue() / force.get(robotSide).getDoubleValue());
@@ -558,8 +575,8 @@ public class SpringFlamingoController implements RobotController
       {
          if (timeInState < min_support_time.getValue())
             return false;
-         return gcHeel_fz.get(robotSide).getDoubleValue() < force_thresh.getValue()
-               && robot.qd_x.getDoubleValue() < 0.0 && gcHeel_x.get(robotSide).getDoubleValue() > robot.q_x.getDoubleValue()
+         return gcHeel_fz.get(robotSide).getDoubleValue() < force_thresh.getValue() && robot.qd_x.getDoubleValue() < 0.0
+               && gcHeel_x.get(robotSide).getDoubleValue() > robot.q_x.getDoubleValue()
                && gcHeel_x.get(robotSide).getDoubleValue() > gcHeel_x.get(robotSide.getOppositeSide()).getDoubleValue();
       }
    }
