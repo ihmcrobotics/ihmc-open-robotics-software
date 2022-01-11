@@ -2,7 +2,6 @@ package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -13,6 +12,7 @@ import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProper
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepMessenger;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -28,8 +28,8 @@ import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetect
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -76,7 +76,7 @@ public class ContinuousStepController
    private final AtomicReference<Boolean> walkingRequest = new AtomicReference<>(null);
 
    private Consumer<PauseWalkingMessage> pauseWalkingPublisher;
-   private Function<RobotSide, FramePose3DReadOnly> footPoseProvider;
+   private FootPoseProvider footPoseProvider;
 
    public ContinuousStepController(WalkingControllerParameters walkingControllerParameters)
    {
@@ -85,6 +85,7 @@ public class ContinuousStepController
       snapAndWiggleParameters.setFootLength(walkingControllerParameters.getSteppingParameters().getFootLength());
       snapAndWiggleSingleStep = new SnapAndWiggleSingleStep(snapAndWiggleParameters);
 
+      continuousStepGenerator.setNumberOfTicksBeforeSubmittingFootsteps(0);
       continuousStepGenerator.setNumberOfFootstepsToPlan(10);
       continuousStepGenerator.setDesiredTurningVelocityProvider(() -> turningVelocity.getValue());
       continuousStepGenerator.setDesiredVelocityProvider(() -> new Vector2D(forwardVelocity.getValue(), lateralVelocity.getValue()));
@@ -124,7 +125,7 @@ public class ContinuousStepController
       this.pauseWalkingPublisher = pauseWalkingPublisher;
    }
 
-   public void setFootPoseProviders(Function<RobotSide, FramePose3DReadOnly> footPoseProvider)
+   public void setFootPoseProviders(FootPoseProvider footPoseProvider)
    {
       this.footPoseProvider = footPoseProvider;
    }
@@ -154,12 +155,8 @@ public class ContinuousStepController
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            if (footPoseProvider.apply(robotSide) == null)
+            if (footPoseProvider.getCurrentFootPose(robotSide) == null)
                return false;
-
-            FramePose3D footPose = new FramePose3D(footPoseProvider.apply(robotSide));
-            footPose.changeFrame(worldFrame);
-            lastSupportFootPoses.put(robotSide, footPose);
          }
 
          supportFootPosesInitialized = true;
@@ -177,7 +174,7 @@ public class ContinuousStepController
       {
          if (isFootInSupport.get(robotSide).getValue())
          { // Touchdown may not have been made with the foot properly settled, so we update the support foot pose if its current pose is lower.
-            FramePose3D footPose = new FramePose3D(footPoseProvider.apply(robotSide));
+            FramePose3D footPose = new FramePose3D(footPoseProvider.getCurrentFootPose(robotSide));
             footPose.changeFrame(worldFrame);
             if (footPose.getZ() < lastSupportFootPoses.get(robotSide).getZ())
                lastSupportFootPoses.put(robotSide, footPose);
@@ -194,7 +191,7 @@ public class ContinuousStepController
             stopWalking(true);
       }
 
-      continuousStepGenerator.setCorrectPlanAtTouchdown(joystickStepParameters.isEnableTouchdownCorrection());
+      continuousStepGenerator.setNumberOfFixedFootsteps(joystickStepParameters.getNumberOfFixedFootsteps());
       continuousStepGenerator.setFootstepTiming(joystickStepParameters.getSwingDuration(), joystickStepParameters.getTransferDuration());
       continuousStepGenerator.setStepTurningLimits(joystickStepParameters.getTurnMaxAngleInward(), joystickStepParameters.getTurnMaxAngleOutward());
       continuousStepGenerator.setStepWidths(joystickStepParameters.getDefaultStepWidth(),
@@ -276,14 +273,6 @@ public class ContinuousStepController
    public void consumeFootstepStatus(FootstepStatusMessage footstepStatus)
    {
       continuousStepGenerator.consumeFootstepStatus(footstepStatus);
-
-      if (footstepStatus.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
-      {
-         lastSupportFootPoses.put(RobotSide.fromByte(footstepStatus.getRobotSide()),
-                                  new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                  footstepStatus.getActualFootPositionInWorld(),
-                                                  footstepStatus.getActualFootOrientationInWorld()));
-      }
    }
 
    public void consumePlanarRegionsListMessage(PlanarRegionsListMessage message)
@@ -320,6 +309,13 @@ public class ContinuousStepController
    public boolean hasSuccessfullyStoppedWalking()
    {
       return hasSuccessfullyStoppedWalking.getValue();
+   }
+
+   public void setupVisualization(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      continuousStepGenerator.setupVisualization(footPolygons.get(RobotSide.LEFT).getPolygonVerticesView(),
+                                                 footPolygons.get(RobotSide.RIGHT).getPolygonVerticesView(),
+                                                 yoGraphicsListRegistry);
    }
 
    private FramePose3DReadOnly adjustFootstep(FramePose2DReadOnly footstepPose, RobotSide footSide)
@@ -397,5 +393,10 @@ public class ContinuousStepController
       PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
 
       return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, Double.POSITIVE_INFINITY, tempRegion) != null;
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
    }
 }

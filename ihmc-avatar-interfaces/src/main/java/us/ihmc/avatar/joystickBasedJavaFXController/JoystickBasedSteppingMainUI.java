@@ -27,6 +27,8 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.JavaFXRobotVisualizer;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -150,6 +152,11 @@ public class JoystickBasedSteppingMainUI
       primaryStage.setOnCloseRequest(event -> stop());
 
       start();
+   }
+
+   public void createYoVariableServer(DataServerSettings settings, LogModelProvider modelProvider)
+   {
+      stepGeneratorJavaFXController.createYoVariableServer(settings, modelProvider);
    }
 
    public FullHumanoidRobotModel getFullRobotModel()

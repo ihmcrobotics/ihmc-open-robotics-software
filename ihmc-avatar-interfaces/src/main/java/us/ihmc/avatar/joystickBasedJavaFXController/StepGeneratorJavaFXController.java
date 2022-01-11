@@ -18,9 +18,8 @@ import static us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXControll
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
@@ -41,7 +40,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -51,10 +50,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -64,7 +67,8 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 
 public class StepGeneratorJavaFXController
 {
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory("FootstepPublisher"));
+   private final long footstepPublishingPeriod = TimeUnit.MILLISECONDS.toNanos(100);
+   private final AtomicBoolean publishFootstepRequest = new AtomicBoolean(true);
    private final SideDependentList<Color> footColors = new SideDependentList<>(Color.CRIMSON, Color.YELLOWGREEN);
 
    private final ContinuousStepController continuousStepController;
@@ -195,6 +199,28 @@ public class StepGeneratorJavaFXController
       messager.registerTopicListener(ButtonStartState, state -> lowLevelMessenger.sendStandRequest());
    }
 
+   private YoVariableServer yoVariableServer = null;
+   private final double yoVariableServerDT = 1.0 / 60.0;
+
+   public void createYoVariableServer(DataServerSettings settings, LogModelProvider modelProvider)
+   {
+      if (yoVariableServer != null)
+         return;
+
+      String name = continuousStepController.getClass().getSimpleName();
+
+      LogTools.info("{}: Trying to start YoVariableServer using port: {}.", name, settings.getPort());
+      yoVariableServer = new YoVariableServer(getClass(), modelProvider, settings, yoVariableServerDT);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      continuousStepController.setupVisualization(yoGraphicsListRegistry);
+      yoVariableServer.setMainRegistry(continuousStepController.getRegistry(), javaFXRobotVisualizer.getFullRobotModel().getElevator(), yoGraphicsListRegistry);
+      yoVariableServer.start();
+   }
+
+   private long lastFootstepPublishTime = -1;
+   private long lastYoVariableServerUpdateTime = -1;
+   private long yoVariableServerStartTime = -1;
+
    public void update(long now)
    {
       try
@@ -215,6 +241,27 @@ public class StepGeneratorJavaFXController
          {
             children.clear();
             children.addAll(footstepsToVisualize);
+         }
+
+         if (yoVariableServer != null)
+         {
+            if (lastYoVariableServerUpdateTime == -1 || Conversions.nanosecondsToSeconds(now - lastYoVariableServerUpdateTime) >= yoVariableServerDT)
+            {
+               if (yoVariableServerStartTime == -1)
+                  yoVariableServerStartTime = now;
+
+               yoVariableServer.update(now - yoVariableServerStartTime);
+               lastYoVariableServerUpdateTime = now;
+            }
+         }
+
+         if (lastFootstepPublishTime == -1 || now - lastFootstepPublishTime >= footstepPublishingPeriod)
+            publishFootstepRequest.set(true);
+
+         if (publishFootstepRequest.getAndSet(false))
+         {
+            lastFootstepPublishTime = now;
+            sendFootsteps();
          }
       }
       catch (Throwable e)
@@ -375,16 +422,19 @@ public class StepGeneratorJavaFXController
    public void start()
    {
       animationTimer.start();
-      executorService.scheduleAtFixedRate(this::sendFootsteps, 0, 500, TimeUnit.MILLISECONDS);
    }
 
    public void stop()
    {
       animationTimer.stop();
-      executorService.shutdownNow();
       PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
       pauseWalkingMessage.setPause(true);
       pauseWalkingPublisher.publish(pauseWalkingMessage);
+      if (yoVariableServer != null)
+      {
+         yoVariableServer.close();
+         yoVariableServer = null;
+      }
    }
 
    public Node getRootNode()

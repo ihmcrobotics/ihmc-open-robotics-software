@@ -123,10 +123,9 @@ public class ContinuousStepGenerator implements Updatable
 
    private final YoEnum<RobotSide> currentSupportSide = new YoEnum<>("currentSupportSide" + variableNameSuffix, registry, RobotSide.class);
    private final YoFramePose3D currentSupportFootPose = new YoFramePose3D("currentSupportFootPose" + variableNameSuffix, worldFrame, registry);
-   private final YoFramePose3D initialFootPose = new YoFramePose3D("initialFootPose" + variableNameSuffix, worldFrame, registry);
-   private final YoBoolean correctPlanAtTouchdown = new YoBoolean("correctPlanAtTouchdown" + variableNameSuffix, registry);
 
    private final YoInteger numberOfFootstepsToPlan = new YoInteger("numberOfFootstepsToPlan" + variableNameSuffix, registry);
+   private final YoInteger numberOfFixedFootsteps = new YoInteger("numberOfFixedFootsteps" + variableNameSuffix, registry);
 
    private final YoDouble inPlaceWidth = new YoDouble("inPlaceWidth" + variableNameSuffix, registry);
    private final YoDouble minStepWidth = new YoDouble("minStepWidth" + variableNameSuffix, registry);
@@ -183,8 +182,6 @@ public class ContinuousStepGenerator implements Updatable
       maxAngleTurnInwards.set(-Math.PI / 2.0);
       numberOfTicksBeforeSubmittingFootsteps.set(2);
 
-      correctPlanAtTouchdown.set(true);
-
       setSupportFootBasedFootstepAdjustment(true);
    }
 
@@ -194,7 +191,6 @@ public class ContinuousStepGenerator implements Updatable
    private final FramePose3D previousFootstepPose = new FramePose3D();
    private final FramePose3D nextFootstepPose3DViz = new FramePose3D();
 
-   private boolean updateFirstFootstep = true;
    private int counter = 0;
 
    private final FootstepDataMessage lastFootstepStarted = new FootstepDataMessage();
@@ -207,7 +203,6 @@ public class ContinuousStepGenerator implements Updatable
    {
       if (!walk.getValue())
       {
-         updateFirstFootstep = true;
          footsteps.clear();
          walkPreviousValue.set(false);
          lastFootstepStarted.setRobotSide((byte) -1);
@@ -217,7 +212,6 @@ public class ContinuousStepGenerator implements Updatable
       if (walk.getValue() != walkPreviousValue.getValue())
       {
          currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getValue()));
-         initialFootPose.set(currentSupportFootPose);
          counter = numberOfTicksBeforeSubmittingFootsteps.getValue(); // To make footsteps being sent right away.
       }
 
@@ -240,18 +234,10 @@ public class ContinuousStepGenerator implements Updatable
             }
             else if (statusToProcess == FootstepStatus.COMPLETED)
             {
-               updateFirstFootstep = true;
                currentSupportSide.set(footstepCompletionSide.getValue());
                currentSupportFootPose.setMatchingFrame(footPoseProvider.getCurrentFootPose(currentSupportSide.getValue()));
-
-               if (!correctPlanAtTouchdown.getValue() && RobotSide.fromByte(lastFootstepStarted.getRobotSide()) == currentSupportSide.getValue())
-               {
-                  initialFootPose.set(lastFootstepStarted.getLocation(), lastFootstepStarted.getOrientation());
-               }
-               else
-               {
-                  initialFootPose.set(currentSupportFootPose);
-               }
+               if (numberOfFixedFootsteps.isZero())
+                  footsteps.clear();
             }
          }
 
@@ -263,20 +249,17 @@ public class ContinuousStepGenerator implements Updatable
       footstepDataListMessage.setDefaultTransferDuration(transferTime.getValue());
       footstepDataListMessage.setFinalTransferDuration(transferTime.getValue());
 
-      int startIndex = updateFirstFootstep ? 0 : 1;
-
       RobotSide swingSide;
 
-      if (updateFirstFootstep)
+      if (footsteps.isEmpty())
       {
-         footsteps.clear();
-         footstepPose2D.set(initialFootPose);
+         footstepPose2D.set(currentSupportFootPose);
          swingSide = currentSupportSide.getEnumValue().getOppositeSide();
-         previousFootstepPose.set(initialFootPose);
+         previousFootstepPose.set(currentSupportFootPose);
       }
       else
       {
-         while (footsteps.size() > startIndex)
+         while (footsteps.size() > Math.max(1, numberOfFixedFootsteps.getValue()))
             footsteps.fastRemove(footsteps.size() - 1);
 
          FootstepDataMessage previousFootstep = footsteps.get(footsteps.size() - 1);
@@ -287,7 +270,7 @@ public class ContinuousStepGenerator implements Updatable
          previousFootstepPose.set(previousFootstep.getLocation(), previousFootstep.getOrientation());
       }
 
-      for (int i = startIndex; i < numberOfFootstepsToPlan.getValue(); i++)
+      for (int i = footsteps.size(); i < numberOfFootstepsToPlan.getValue(); i++)
       {
          Vector2DReadOnly desiredVelocity = desiredVelocityProvider.getDesiredVelocity();
 
@@ -344,8 +327,6 @@ public class ContinuousStepGenerator implements Updatable
          previousFootstepPose.set(nextFootstepPose3D);
       }
 
-      updateFirstFootstep = false;
-
       if (footstepMessenger != null)
       {
          if (counter >= numberOfTicksBeforeSubmittingFootsteps.getValue())
@@ -363,24 +344,6 @@ public class ContinuousStepGenerator implements Updatable
    }
 
    /**
-    * Configures the behavior when the footstep plan is updated at each touchdown.
-    * <ul>
-    * <li>if {@code true}: the actual foot pose, published from the controller at each touchdown, is
-    * used to update the subsequent footstep poses.
-    * <li>if {@code false}: the actual foot poses are not considered for planning the subsequent
-    * footsteps. This option provides higher robustness when the footstep status is received with high
-    * delay.
-    * </ul>
-    * 
-    * @param enable whether to enable/disable the footstep plan correction using actual foot pose at
-    *               each touchdown. Default value is {@code true}.
-    */
-   public void setCorrectPlanAtTouchdown(boolean enable)
-   {
-      correctPlanAtTouchdown.set(enable);
-   }
-
-   /**
     * Sets the number of footsteps that are to be planned every tick.
     *
     * @param number the number of footsteps to plan.
@@ -388,6 +351,24 @@ public class ContinuousStepGenerator implements Updatable
    public void setNumberOfFootstepsToPlan(int number)
    {
       numberOfFootstepsToPlan.set(number);
+   }
+
+   /**
+    * Sets the number of footsteps which once planned cannot be modified.
+    * <p>
+    * A small value provides more responsive behavior to rapidly changing inputs, while a higher value
+    * improves robustness to delays in the communication with the controller.
+    * </p>
+    * <p>
+    * For walking gaits with short transfer duration and with the presence of communication delays with
+    * the controller, it is recommended to set this parameter to &geq; 1.
+    * </p>
+    * 
+    * @param number the number of unmodifiable footsteps. Default value {@code 0}.
+    */
+   public void setNumberOfFixedFootsteps(int number)
+   {
+      numberOfFixedFootsteps.set(MathTools.clamp(number, 0, numberOfFootstepsToPlan.getValue() - 1));
    }
 
    /**
