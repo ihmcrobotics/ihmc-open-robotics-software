@@ -7,6 +7,8 @@ import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
+import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class GDXGPUPlanarRegionExtractionDemo
 {
@@ -18,6 +20,8 @@ public class GDXGPUPlanarRegionExtractionDemo
    private final GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
    private GDXGPUPlanarRegionExtraction gpuPlanarRegionExtraction;
+   private GDXPlanarRegionsGraphic planarRegionsGraphic;
+   private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
 
    public GDXGPUPlanarRegionExtractionDemo()
    {
@@ -88,13 +92,19 @@ public class GDXGPUPlanarRegionExtractionDemo
             gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
             gpuPlanarRegionExtraction.create(imageWidth, imageHeight, l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer(), fx, fy, cx, cy);
             baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
+
+            planarRegionsGraphic = new GDXPlanarRegionsGraphic();
+            baseUI.get3DSceneManager().addRenderableProvider(planarRegionsGraphic, GDXSceneLevel.VIRTUAL);
          }
 
          @Override
          public void render()
          {
             l515.render(baseUI.get3DSceneManager());
-            gpuPlanarRegionExtraction.blurDepthAndRender(l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer());
+            gpuPlanarRegionExtraction.extractPlanarRegions();
+            gpuPlanarRegionExtraction.getPlanarRegions(planarRegionsList, l515PoseGizmo.getTransformToParent());
+            planarRegionsGraphic.generateMeshes(planarRegionsList);
+            planarRegionsGraphic.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

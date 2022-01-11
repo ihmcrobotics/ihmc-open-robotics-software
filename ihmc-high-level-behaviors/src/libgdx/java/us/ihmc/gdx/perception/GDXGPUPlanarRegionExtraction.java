@@ -18,15 +18,30 @@ import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import sensor_msgs.Image;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.perception.OpenCLManager;
+import us.ihmc.robotEnvironmentAwareness.geometry.*;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class GDXGPUPlanarRegionExtraction
 {
@@ -46,11 +61,24 @@ public class GDXGPUPlanarRegionExtraction
    private final ImBoolean useFilteredImage = new ImBoolean(true);
    private final ImInt gaussianSize = new ImInt(6);
    private final ImInt gaussianSigma = new ImInt(20);
+   private final ImInt searchDepthLimit = new ImInt(10000);
    private final ImInt regionMinPatches = new ImInt(20);
    private final ImInt regionBoundaryDiff = new ImInt(20);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImDouble regionGrowthFactor = new ImDouble(0.01);
+   private final ImFloat edgeLengthTresholdSlider = new ImFloat(0.224f);
+   private final ImFloat triangulationToleranceSlider = new ImFloat(0.0f);
+   private final ImInt maxNumberOfIterationsSlider = new ImInt(5000);
+   private final ImBoolean allowSplittingConcaveHullChecked = new ImBoolean(false);
+   private final ImBoolean removeAllTrianglesWithTwoBorderEdgesChecked = new ImBoolean(false);
+   private final ImFloat concaveHullThresholdSlider = new ImFloat(0.15f);
+   private final ImFloat shallowAngleThresholdSlider = new ImFloat((float) Math.toRadians(1.0));
+   private final ImFloat peakAngleThresholdSlider = new ImFloat((float) Math.toRadians(170.0));
+   private final ImFloat lengthThresholdSlider = new ImFloat(0.05f);
+   private final ImFloat depthThresholdSlider = new ImFloat(0.10f);
+   private final ImInt minNumberOfNodesSlider = new ImInt(10);
+   private final ImBoolean cutNarrowPassageChecked = new ImBoolean(true);
    private GDXBytedecoImage inputFloatDepthImage;
    private GDXBytedecoImage inputScaledFloatDepthImage;
    private GDXBytedecoImage inputU16DepthImage;
@@ -103,6 +131,8 @@ public class GDXGPUPlanarRegionExtraction
    private int filterSubHeight;
    private int filterSubWidth;
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
+   private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
+   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
@@ -182,7 +212,7 @@ public class GDXGPUPlanarRegionExtraction
 //      ROSOpenCVTools.backMatWithNettyBuffer(inputDepthImageMat, image.getData());
    }
 
-   public void blurDepthAndRender(ByteBuffer depthByteBufferOfFloats)
+   public void extractPlanarRegions()
    {
       // convert float to unint16
       // multiply by 1000 and cast to int
@@ -276,6 +306,17 @@ public class GDXGPUPlanarRegionExtraction
 
       debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
 
+      findRegions();
+      findBoundariesAndHoles();
+      growRegionBoundaries();
+
+      debugExtractionPanel.draw();
+
+      // TODO: set regions id to -1?
+   }
+
+   private void findRegions()
+   {
       int planarRegionIslandIndex = 0;
       planarRegions.clear();
       visitedMatrix.zero();
@@ -303,32 +344,31 @@ public class GDXGPUPlanarRegionExtraction
             }
          }
       }
-
-      findBoundaryAndHoles();
-      growRegionBoundary();
-
-      debugExtractionPanel.draw();
-
-      // TODO: set regions id to -1?
    }
 
    private void depthFirstSearch(int row, int column, int planarRegionIslandIndex, GDXGPUPlanarRegion planarRegion)
    {
-      if (visitedMatrix.get(row, column) || depthOfSearch > 10000)
+      if (visitedMatrix.get(row, column) || depthOfSearch > searchDepthLimit.get())
          return;
 
       ++depthOfSearch;
       visitedMatrix.set(row, column, true);
       regionMatrix.set(row, column, planarRegionIslandIndex);
-      BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr(row, column);
-      float nx = patchPointer.getFloat(0);
-      float ny = patchPointer.getFloat(1);
-      float nz = patchPointer.getFloat(2);
-      float cx = patchPointer.getFloat(3);
-      float cy = patchPointer.getFloat(4);
-      float cz = patchPointer.getFloat(5);
+//      BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr(row, column);
+//      float nx = patchPointer.getFloat(0);
+//      float ny = patchPointer.getFloat(1);
+//      float nz = patchPointer.getFloat(2);
+//      float cx = patchPointer.getFloat(3);
+//      float cy = patchPointer.getFloat(4);
+//      float cz = patchPointer.getFloat(5);
+      float nx = nxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float ny = nyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float nz = nzImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cx = gxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cy = gyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cz = gzImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
       planarRegion.addPatch(nx, ny, nz, cx, cy, cz);
-
+//
       if (drawPatches.get())
       {
          int x = column * patchHeight;
@@ -363,7 +403,7 @@ public class GDXGPUPlanarRegionExtraction
       }
    }
 
-   private void findBoundaryAndHoles()
+   private void findBoundariesAndHoles()
    {
       visitedMatrix.zero();
       planarRegions.parallelStream().forEach(planarRegion ->
@@ -389,7 +429,7 @@ public class GDXGPUPlanarRegionExtraction
 
    private void boundaryDepthFirstSearch(int row, int column, int planarRegionId, int regionRingIndex, GDXGPURegionRing regionRing)
    {
-      if (visitedMatrix.get(row, column) || depthOfSearch > 10000)
+      if (visitedMatrix.get(row, column) || depthOfSearch > searchDepthLimit.get())
          return;
 
       ++depthOfSearch;
@@ -422,7 +462,7 @@ public class GDXGPUPlanarRegionExtraction
       }
    }
 
-   private void growRegionBoundary()
+   private void growRegionBoundaries()
    {
       planarRegions.parallelStream().forEach(planarRegion ->
       {
@@ -431,10 +471,10 @@ public class GDXGPUPlanarRegionExtraction
             GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
             for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
             {
-               BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY());
-               float vertexX = patchPointer.getFloat(3);
-               float vertexY = patchPointer.getFloat(4);
-               float vertexZ = patchPointer.getFloat(5);
+//               BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY());
+               float vertexX = gxImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
+               float vertexY = gyImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
+               float vertexZ = gzImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
                Vector3D boundaryVertex = planarRegion.getBoundaryVertices().add();
                boundaryVertex.set(vertexX, vertexY, vertexZ);
                boundaryVertex.sub(planarRegion.getCenter());
@@ -444,6 +484,78 @@ public class GDXGPUPlanarRegionExtraction
             }
          }
       });
+   }
+
+   /** FIXME: This method filled with allocations. */
+   public void getPlanarRegions(PlanarRegionsList planarRegionsList, RigidBodyTransform transformToWorld)
+   {
+      List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.parallelStream()
+         .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
+         .map(gpuPlanarRegion ->
+         {
+            List<PlanarRegion> planarRegions = new ArrayList<>();
+            try
+            {
+               Vector3D32 normal = gpuPlanarRegion.getNormal();
+               Quaternion orientation = PolygonizerTools.getQuaternionFromZUpToVector(normal);
+               // First compute the set of concave hulls for this region
+               Point3D32 origin = gpuPlanarRegion.getCenter();
+               List<Point2D> pointCloudInPlane = gpuPlanarRegion.getBoundaryVertices().stream()
+                  .map(boundaryVertex -> PolygonizerTools.toPointInPlane(new Point3D(boundaryVertex), origin, orientation))
+                  .filter(point2D -> Double.isFinite(point2D.getX()) && Double.isFinite(point2D.getY()))
+                  .collect(Collectors.toList());
+               List<LineSegment2D> intersections = new ArrayList<>();
+//                     = intersections.stream()
+//                  .map(intersection -> PolygonizerTools.toLineSegmentInPlane(lineSegmentInWorld, origin, orientation))
+//                  .collect(Collectors.toList());
+               ConcaveHullCollection concaveHullCollection = SimpleConcaveHullFactory.createConcaveHullCollection(pointCloudInPlane,
+                                                                                                                  intersections,
+                                                                                                                  concaveHullFactoryParameters);
+
+               // Apply some simple filtering to reduce the number of vertices and hopefully the number of convex polygons.
+               double shallowAngleThreshold = polygonizerParameters.getShallowAngleThreshold();
+               double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
+               double lengthThreshold = polygonizerParameters.getLengthThreshold();
+
+//               ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
+//               ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
+//               if (polygonizerParameters.getCutNarrowPassage())
+//                  concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
+
+               int hullCounter = 0;
+               int regionId = gpuPlanarRegion.getId();
+
+               for (ConcaveHull concaveHull : concaveHullCollection)
+               {
+                  if (concaveHull.isEmpty())
+                     continue;
+
+                  // Decompose the concave hulls into convex polygons
+                  double depthThreshold = polygonizerParameters.getDepthThreshold();
+                  List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
+                  ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
+
+                  // Pack the data in PlanarRegion
+                  PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHull.getConcaveHullVertices(), decomposedPolygons);
+                  planarRegion.setRegionId(regionId);
+                  planarRegions.add(planarRegion);
+
+                  hullCounter++;
+                  regionId = 31 * regionId + hullCounter;
+               }
+            }
+            catch (RuntimeException e)
+            {
+//               e.printStackTrace();
+            }
+            return planarRegions;
+         })
+         .collect(Collectors.toList());
+      planarRegionsList.clear();
+      for (List<PlanarRegion> planarRegions : listOfListsOfRegions)
+      {
+         planarRegionsList.addPlanarRegions(planarRegions);
+      }
    }
 
    private void enqueueWriteParameters()
@@ -490,6 +602,7 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
       ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
       ImGui.sliderFloat(labels.get("Merge angular threshold"), mergeAngularThreshold.getData(), 0.0f, 1.0f);
+      ImGui.sliderInt(labels.get("Search depth limit"), searchDepthLimit.getData(), 1, 50000);
       ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 30);
       ImGui.sliderInt(labels.get("Region boundary diff"), regionBoundaryDiff.getData(), 1, 30);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
@@ -501,6 +614,32 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.inputFloat(labels.get("Depth Fy"), depthFy);
       ImGui.inputFloat(labels.get("Depth Cx"), depthCx);
       ImGui.inputFloat(labels.get("Depth Cy"), depthCy);
+
+      ImGui.sliderFloat("Edge Length Threshold", edgeLengthTresholdSlider.getData(), 0, 0.5f);
+      concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthTresholdSlider.get());
+      ImGui.sliderFloat("Triangulation Tolerance", triangulationToleranceSlider.getData(), 0, 1);
+      concaveHullFactoryParameters.setTriangulationTolerance(triangulationToleranceSlider.get());
+      ImGui.sliderInt("Max Number of Iterations", maxNumberOfIterationsSlider.getData(), 2000, 6000);
+      concaveHullFactoryParameters.setMaxNumberOfIterations(maxNumberOfIterationsSlider.get());
+      ImGui.checkbox("Remove Degenerate Triangles", removeAllTrianglesWithTwoBorderEdgesChecked);
+      concaveHullFactoryParameters.setRemoveAllTrianglesWithTwoBorderEdges(removeAllTrianglesWithTwoBorderEdgesChecked.get());
+      ImGui.checkbox("Split Concave Hull", allowSplittingConcaveHullChecked);
+      concaveHullFactoryParameters.setAllowSplittingConcaveHull(allowSplittingConcaveHullChecked.get());
+
+      ImGui.sliderFloat("Concave Hull Threshold", concaveHullThresholdSlider.getData(), 0, 1);
+      polygonizerParameters.setConcaveHullThreshold(concaveHullThresholdSlider.get());
+      ImGui.sliderFloat("Shallow Angle Threshold", shallowAngleThresholdSlider.getData(), 0, 2.0f * (float) Math.PI);
+      polygonizerParameters.setShallowAngleThreshold(shallowAngleThresholdSlider.get());
+      ImGui.sliderFloat("Peak Angle Threshold", peakAngleThresholdSlider.getData(), 0, 2.0f * (float) Math.PI);
+      polygonizerParameters.setPeakAngleThreshold(peakAngleThresholdSlider.get());
+      ImGui.sliderFloat("Length Threshold", lengthThresholdSlider.getData(), 0, 1);
+      polygonizerParameters.setLengthThreshold(lengthThresholdSlider.get());
+      ImGui.sliderFloat("Depth Threshold", depthThresholdSlider.getData(), 0, 1);
+      polygonizerParameters.setDepthThreshold(depthThresholdSlider.get());
+      ImGui.sliderInt("Min Number of Nodes", minNumberOfNodesSlider.getData(), 0, 100);
+      polygonizerParameters.setMinNumberOfNodes(minNumberOfNodesSlider.get());
+      ImGui.checkbox("Cut Narrow Passage", cutNarrowPassageChecked);
+      polygonizerParameters.setCutNarrowPassage(cutNarrowPassageChecked.get());
    }
 
    public ImGuiPanel getPanel()
