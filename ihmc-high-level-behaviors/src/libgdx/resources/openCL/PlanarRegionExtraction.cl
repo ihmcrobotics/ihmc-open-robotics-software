@@ -281,6 +281,8 @@ void kernel packKernel(  read_only image2d_t in,
         float3 centroid = estimate_centroid(in, x, y, params);
 
 //        if(x==24 && y==50) printf("PackKernel Normal:(%.4lf, %.4lf, %.4lf)\n", normal.x, normal.y, normal.z);
+//        if(x==26 && y==7) printf("PackKernel Centroid:(%.4lf, %.4lf, %.4lf)\n", centroid.x, centroid.y, centroid.z);
+//        printf("PackKernel Centroid:(%.4lf, %.4lf, %.4lf)\n", centroid.x, centroid.y, centroid.z);
 
         write_imagef(out0, (int2)(x,y), (float4)(normal.x,0,0,0));
         write_imagef(out1, (int2)(x,y), (float4)(normal.y,0,0,0));
