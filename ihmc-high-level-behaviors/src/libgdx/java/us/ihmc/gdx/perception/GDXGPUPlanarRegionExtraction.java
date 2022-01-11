@@ -607,8 +607,8 @@ public class GDXGPUPlanarRegionExtraction
             GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
             for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
             {
-               int row = (int) boundaryIndex.getX();
-               int column = (int) boundaryIndex.getY();
+               int row = (int) boundaryIndex.getX() * patchHeight;
+               int column = (int) boundaryIndex.getY() * patchWidth;
                float z = inputFloatDepthImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
                float imageY = (2.0f * row) / imageHeight - 1.0f;
                float normalizedDeviceCoordinateZ = z - imageY * -0.027f;
