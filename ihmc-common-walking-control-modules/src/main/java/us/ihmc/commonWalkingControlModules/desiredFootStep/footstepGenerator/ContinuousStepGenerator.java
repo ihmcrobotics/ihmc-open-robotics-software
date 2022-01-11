@@ -193,8 +193,6 @@ public class ContinuousStepGenerator implements Updatable
 
    private int counter = 0;
 
-   private final FootstepDataMessage lastFootstepStarted = new FootstepDataMessage();
-
    /**
     * Process the current desired velocities to generate a new footstep plan.
     */
@@ -205,7 +203,6 @@ public class ContinuousStepGenerator implements Updatable
       {
          footsteps.clear();
          walkPreviousValue.set(false);
-         lastFootstepStarted.setRobotSide((byte) -1);
          return;
       }
 
@@ -223,14 +220,7 @@ public class ContinuousStepGenerator implements Updatable
             if (statusToProcess == FootstepStatus.STARTED)
             {
                if (!footsteps.isEmpty())
-               {
-                  lastFootstepStarted.set(footsteps.get(0));
                   footsteps.remove(0);
-               }
-               else
-               {
-                  lastFootstepStarted.setRobotSide((byte) -1);
-               }
             }
             else if (statusToProcess == FootstepStatus.COMPLETED)
             {
