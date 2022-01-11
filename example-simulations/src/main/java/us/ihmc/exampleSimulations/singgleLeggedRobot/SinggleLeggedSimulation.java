@@ -1,4 +1,4 @@
-package us.ihmc.examplesSimulations.singgleLeggedRobot;
+package us.ihmc.exampleSimulations.singgleLeggedRobot;
 
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;

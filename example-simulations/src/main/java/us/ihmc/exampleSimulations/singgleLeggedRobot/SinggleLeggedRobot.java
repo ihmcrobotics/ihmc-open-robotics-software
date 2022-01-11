@@ -1,4 +1,4 @@
-package us.ihmc.examplesSimulations.singgleLeggedRobot;
+package us.ihmc.exampleSimulations.singgleLeggedRobot;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -250,4 +250,15 @@ public class SinggleLeggedRobot extends Robot
       }
       this.tau_knee.set(kneeTau);
    }
+   
+   public void setHipAngVelocity(double hipAngVel)
+   {
+      this.qd_hip_rev.set(hipAngVel);
+   }
+   
+   public void setKneeAngVelocity(double kneeAngVel)
+   {
+      this.qd_knee_rev.set(kneeAngVel);
+   }
+   
 }

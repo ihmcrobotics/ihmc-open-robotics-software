@@ -1,4 +1,4 @@
-package us.ihmc.examplesSimulations.singgleLeggedRobot;
+package us.ihmc.exampleSimulations.singgleLeggedRobot;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -25,7 +25,7 @@ public class SinggleLeggedPIDController implements RobotController
    private YoDouble desiredKneeAngVelocity;
 
    // Controller parameter variables
-   private double p_gain_hip, p_gain_knee, d_gain_hip, d_gain_knee, i_gain;
+   private double p_gain_hip, p_gain_knee, d_gain_hip, d_gain_knee, i_gain_hip, i_gain_knee;
 
    // This is the desired torque that we apply to each joints.
    private double torqueHip, torqueKnee;
@@ -33,12 +33,12 @@ public class SinggleLeggedPIDController implements RobotController
    // Initial Error
    private double positionError_z = 0.0;
    private double differentialError_z = 0.0;
-   private double positionError_hip_theta = 0.0;
+   private double positionError_hip_theta = 0.0;    //TODO : Replace 'theta' to 'pitch'
    private double positionError_knee_theta = 0.0;
    private double differentialError_hip_theta = 0.0;
    private double differentialError_knee_theta = 0.0;
-
-   private double integralError = 0.0;
+   private double integralError_hip_theta = 0.0;
+   private double integralError_knee_theta = 0.0;
 
    /*
     * Constructor: where we instantiate and initialize control variables
@@ -65,10 +65,11 @@ public class SinggleLeggedPIDController implements RobotController
       desiredKneeAngVelocity.set(-2 * desiredHipAngVelocity.getDoubleValue());
 
       p_gain_hip = 100.0;
-      p_gain_knee = 2 * p_gain_hip;
+      p_gain_knee = 2.0 * p_gain_hip;
       d_gain_hip = 1.0;
-      d_gain_knee = 2 * d_gain_hip;
-      i_gain = 0.0;
+      d_gain_knee = 2.0 * d_gain_hip;
+      i_gain_hip = 0.0;
+      i_gain_knee = 2.0 * i_gain_hip;
    }
 
    @Override
@@ -102,17 +103,25 @@ public class SinggleLeggedPIDController implements RobotController
       differentialError_hip_theta = desiredHipAngVelocity.getDoubleValue() - robot.getHipAngularVelocity();
       differentialError_knee_theta = desiredKneeAngVelocity.getDoubleValue() - robot.getKneeAngularVelocity();
 
+      // Integral Error term in Pitch.Axis
+      integralError_hip_theta += positionError_hip_theta * SinggleLeggedSimulation.DT;
+      integralError_knee_theta += positionError_knee_theta * SinggleLeggedSimulation.DT;
+
       System.out.println("Hip_pos_err : " + positionError_hip_theta);
       System.out.println("Hip_diff_err : " + differentialError_hip_theta);
       System.out.println("Knee_pos_err : " + positionError_knee_theta);
       System.out.println("Knee_diff_err : " + differentialError_knee_theta);
 
-      torqueHip = p_gain_hip * positionError_hip_theta + d_gain_hip * differentialError_hip_theta;
-      torqueKnee = p_gain_knee * positionError_knee_theta + d_gain_knee * differentialError_knee_theta;
+      torqueHip = p_gain_hip * positionError_hip_theta + d_gain_hip * differentialError_hip_theta + i_gain_hip * integralError_hip_theta;
+      torqueKnee = p_gain_knee * positionError_knee_theta + d_gain_knee * differentialError_knee_theta + i_gain_knee * integralError_knee_theta;
 
       // Torque set
       robot.setHipTorque(torqueHip);
       robot.setKneeTorque(torqueKnee);
+
+      // Angular velocity set
+      // robot.setHipAngVelocity(torqueHip * SinggleLeggedSimulation.DT);
+      // robot.setKneeAngVelocity(torqueKnee * SinggleLeggedSimulation.DT);
    }
 
    @Override
