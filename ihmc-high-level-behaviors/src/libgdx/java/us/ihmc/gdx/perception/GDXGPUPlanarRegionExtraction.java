@@ -1,11 +1,12 @@
 package us.ihmc.gdx.perception;
 
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
@@ -20,6 +21,11 @@ import sensor_msgs.Image;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -27,7 +33,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.perception.OpenCLManager;
@@ -87,9 +92,9 @@ public class GDXGPUPlanarRegionExtraction
    private GDXBytedecoImage nxImage;
    private GDXBytedecoImage nyImage;
    private GDXBytedecoImage nzImage;
-   private GDXBytedecoImage gxImage;
-   private GDXBytedecoImage gyImage;
-   private GDXBytedecoImage gzImage;
+   private GDXBytedecoImage cxImage;
+   private GDXBytedecoImage cyImage;
+   private GDXBytedecoImage czImage;
    private GDXBytedecoImage graphImage;
    private MatVector outputChannelVector;
    private GDXBytedecoImage regionOutputImage;
@@ -133,6 +138,17 @@ public class GDXGPUPlanarRegionExtraction
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+   private final FramePose3D regionPose = new FramePose3D();
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private static final RigidBodyTransform ZForwardXRightToZUpXForward = new RigidBodyTransform();
+   static
+   {
+      ZForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
+      ZForwardXRightToZUpXForward.appendRollRotation(-Math.PI / 2.0);
+   }
+   private ReferenceFrame cmosFrame;
+   private final FrameQuaternion orientation = new FrameQuaternion();
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
@@ -155,15 +171,15 @@ public class GDXGPUPlanarRegionExtraction
       nxImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
       nyImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
       nzImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
-      gxImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
-      gyImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
-      gzImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
+      cxImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
+      cyImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
+      czImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
       outputChannelVector = new MatVector(nxImage.getBytedecoOpenCVMat(),
                                           nyImage.getBytedecoOpenCVMat(),
                                           nxImage.getBytedecoOpenCVMat(),
-                                          gxImage.getBytedecoOpenCVMat(),
-                                          gyImage.getBytedecoOpenCVMat(),
-                                          gzImage.getBytedecoOpenCVMat());
+                                          cxImage.getBytedecoOpenCVMat(),
+                                          cyImage.getBytedecoOpenCVMat(),
+                                          czImage.getBytedecoOpenCVMat());
       graphImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_8UC1);
       regionOutputImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC(6));
       gaussianKernelSize = new Size();
@@ -245,9 +261,9 @@ public class GDXGPUPlanarRegionExtraction
       nxImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       nyImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       nzImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      gxImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      gyImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      gzImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      cxImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      cyImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      czImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       graphImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
 
       parametersBufferObject = openCLManager.createBufferObject(numberOfFloatParameters * Float.BYTES, nativeParameterArray);
@@ -265,17 +281,17 @@ public class GDXGPUPlanarRegionExtraction
       openCLManager.setKernelArgument(packKernel, 1, nxImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(packKernel, 2, nyImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(packKernel, 3, nzImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(packKernel, 4, gxImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(packKernel, 5, gyImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(packKernel, 6, gzImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 4, cxImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 5, cyImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(packKernel, 6, czImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(packKernel, 7, parametersBufferObject);
 
       openCLManager.setKernelArgument(mergeKernel, 0, nxImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 1, nyImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 2, nzImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 3, gxImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 4, gyImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 5, gzImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 3, cxImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 4, cyImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(mergeKernel, 5, czImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 6, graphImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 7, parametersBufferObject);
 
@@ -287,9 +303,9 @@ public class GDXGPUPlanarRegionExtraction
       openCLManager.enqueueReadImage(nxImage.getOpenCLImageObject(), subWidth, subHeight, nxImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(nyImage.getOpenCLImageObject(), subWidth, subHeight, nyImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(nzImage.getOpenCLImageObject(), subWidth, subHeight, nzImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(gxImage.getOpenCLImageObject(), subWidth, subHeight, gxImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(gyImage.getOpenCLImageObject(), subWidth, subHeight, gyImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(gzImage.getOpenCLImageObject(), subWidth, subHeight, gzImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(cxImage.getOpenCLImageObject(), subWidth, subHeight, cxImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(cyImage.getOpenCLImageObject(), subWidth, subHeight, cyImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(czImage.getOpenCLImageObject(), subWidth, subHeight, czImage.getBytedecoByteBufferPointer());
       openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), subWidth, subHeight, graphImage.getBytedecoByteBufferPointer());
 
       openCLManager.finish();
@@ -298,9 +314,9 @@ public class GDXGPUPlanarRegionExtraction
       nxImagePanel.drawFloatImage(nxImage.getBytedecoOpenCVMat());
       nyImagePanel.drawFloatImage(nyImage.getBytedecoOpenCVMat());
       nzImagePanel.drawFloatImage(nzImage.getBytedecoOpenCVMat());
-      gxImagePanel.drawFloatImage(gxImage.getBytedecoOpenCVMat());
-      gyImagePanel.drawFloatImage(gyImage.getBytedecoOpenCVMat());
-      gzImagePanel.drawFloatImage(gzImage.getBytedecoOpenCVMat());
+      gxImagePanel.drawFloatImage(cxImage.getBytedecoOpenCVMat());
+      gyImagePanel.drawFloatImage(cyImage.getBytedecoOpenCVMat());
+      gzImagePanel.drawFloatImage(czImage.getBytedecoOpenCVMat());
 
       opencv_core.merge(outputChannelVector, regionOutputImage.getBytedecoOpenCVMat());
 
@@ -308,11 +324,9 @@ public class GDXGPUPlanarRegionExtraction
 
       findRegions();
       findBoundariesAndHoles();
-      growRegionBoundaries();
+//      growRegionBoundaries();
 
       debugExtractionPanel.draw();
-
-      // TODO: set regions id to -1?
    }
 
    private void findRegions()
@@ -364,9 +378,9 @@ public class GDXGPUPlanarRegionExtraction
       float nx = nxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
       float ny = nyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
       float nz = nzImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cx = gxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cy = gyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cz = gzImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cx = cxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cy = cyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cz = czImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
       planarRegion.addPatch(nx, ny, nz, cx, cy, cz);
 //
       if (drawPatches.get())
@@ -472,23 +486,28 @@ public class GDXGPUPlanarRegionExtraction
             for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
             {
 //               BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY());
-               float vertexX = gxImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
-               float vertexY = gyImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
-               float vertexZ = gzImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
+               float vertexX = cxImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
+               float vertexY = cyImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
+               float vertexZ = czImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
                Vector3D boundaryVertex = planarRegion.getBoundaryVertices().add();
                boundaryVertex.set(vertexX, vertexY, vertexZ);
-               boundaryVertex.sub(planarRegion.getCenter());
-               boundaryVertex.normalize();
-               boundaryVertex.scale(regionGrowthFactor.get());
-               boundaryVertex.add(vertexX, vertexY, vertexZ);
+//               boundaryVertex.sub(planarRegion.getCenter());
+//               boundaryVertex.normalize();
+//               boundaryVertex.scale(regionGrowthFactor.get());
+//               boundaryVertex.add(vertexX, vertexY, vertexZ);
             }
          }
       });
    }
 
    /** FIXME: This method filled with allocations. */
-   public void getPlanarRegions(PlanarRegionsList planarRegionsList, RigidBodyTransform transformToWorld)
+   public void getPlanarRegions(PlanarRegionsList planarRegionsList, ReferenceFrame cameraFrame)
    {
+      if (cmosFrame == null)
+      {
+         cmosFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cmosFrame", cameraFrame, ZForwardXRightToZUpXForward);
+      }
+
       List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.parallelStream()
          .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
          .map(gpuPlanarRegion ->
@@ -496,8 +515,11 @@ public class GDXGPUPlanarRegionExtraction
             List<PlanarRegion> planarRegions = new ArrayList<>();
             try
             {
+               orientation.setYawPitchRollIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
+               orientation.changeFrame(cmosFrame);
                Vector3D32 normal = gpuPlanarRegion.getNormal();
-               Quaternion orientation = PolygonizerTools.getQuaternionFromZUpToVector(normal);
+//               orientation.set(EuclidGeometryTools.axisAngleFromZUpToVector3D(normal));
+
                // First compute the set of concave hulls for this region
                Point3D32 origin = gpuPlanarRegion.getCenter();
                List<Point2D> pointCloudInPlane = gpuPlanarRegion.getBoundaryVertices().stream()
@@ -536,7 +558,15 @@ public class GDXGPUPlanarRegionExtraction
                   ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
 
                   // Pack the data in PlanarRegion
-                  PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHull.getConcaveHullVertices(), decomposedPolygons);
+//                  tempTransform.set(orientation, origin);
+//                  regionPose.setIncludingFrame(cmosFrame, origin, orientation);
+                  regionPose.setIncludingFrame(cmosFrame, origin, orientation);
+                  regionPose.changeFrame(ReferenceFrame.getWorldFrame());
+                  regionPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
+                  regionPose.get(tempTransform);
+                  PlanarRegion planarRegion = new PlanarRegion(tempTransform,
+                                                               concaveHull.getConcaveHullVertices(),
+                                                               decomposedPolygons);
                   planarRegion.setRegionId(regionId);
                   planarRegions.add(planarRegion);
 
@@ -555,6 +585,51 @@ public class GDXGPUPlanarRegionExtraction
       for (List<PlanarRegion> planarRegions : listOfListsOfRegions)
       {
          planarRegionsList.addPlanarRegions(planarRegions);
+      }
+//      tempTransform.setIdentity();
+//      tempTransform.appendPitchRotation(Math.PI / 2.0);
+//      tempTransform.appendYawRotation(-Math.PI / 2.0);
+//      planarRegionsList.applyTransform(tempTransform);
+//      planarRegionsList.applyTransform(cameraFrame.getTransformToWorldFrame());
+   }
+
+   public void getBoundaryPoints(RecyclingArrayList<Point3D32> pointsToRender, ReferenceFrame cameraFrame, Matrix4 invProjectionView)
+   {
+      if (cmosFrame == null)
+      {
+         cmosFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cmosFrame", cameraFrame, ZForwardXRightToZUpXForward);
+      }
+      pointsToRender.clear();
+      for (GDXGPUPlanarRegion planarRegion : planarRegions)
+      {
+         if (!planarRegion.getRegionRings().isEmpty())
+         {
+            GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
+            for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
+            {
+               int row = (int) boundaryIndex.getX();
+               int column = (int) boundaryIndex.getY();
+               float z = inputFloatDepthImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+               float imageY = (2.0f * row) / imageHeight - 1.0f;
+               float normalizedDeviceCoordinateZ = z - imageY * -0.027f;
+//               normalizedDeviceCoordinateZ /= 2.1;
+//               normalizedDeviceCoordinateZ = - normalizedDeviceCoordinateZ - 10.105f;
+//               normalizedDeviceCoordinateZ /= 10.105f;
+               normalizedDeviceCoordinateZ = (-(2.1f / normalizedDeviceCoordinateZ) + 10.105f) / 9.895f;
+               Vector3 gdxPoint = new Vector3((2.0f * column) / imageWidth - 1.0f, imageY, normalizedDeviceCoordinateZ);
+               gdxPoint.prj(invProjectionView);
+//               tempFramePoint.setIncludingFrame(cmosFrame, gdxPoint.x, gdxPoint.y, gdxPoint.z);
+//               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+               pointsToRender.add().set(gdxPoint.x, gdxPoint.y, gdxPoint.z);
+            }
+         }
+
+         for (Vector3D boundaryVertex : planarRegion.getBoundaryVertices())
+         {
+            tempFramePoint.setIncludingFrame(cmosFrame, boundaryVertex);
+            tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+            pointsToRender.add().set(tempFramePoint);
+         }
       }
    }
 

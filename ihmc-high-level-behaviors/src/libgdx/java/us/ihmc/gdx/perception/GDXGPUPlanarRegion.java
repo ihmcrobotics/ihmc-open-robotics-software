@@ -3,6 +3,7 @@ package us.ihmc.gdx.perception;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -12,6 +13,7 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 
 public class GDXGPUPlanarRegion
 {
+   private static final boolean USE_SVD = false;
    private final Vector3D32 normal = new Vector3D32();
    private final Point3D32 center = new Point3D32();
    private final RecyclingArrayList<Point3D> patchCentroids = new RecyclingArrayList<>(Point3D::new);
@@ -27,8 +29,8 @@ public class GDXGPUPlanarRegion
    private int id;
    private int poseId;
    private int numberOfMeasurements;
-   private final SvdImplicitQrDecompose_DDRM svd = new SvdImplicitQrDecompose_DDRM(true, true, true, true);
-   private final DMatrixRMaj svdU = new DMatrixRMaj(1, 3);
+   private final SvdImplicitQrDecompose_DDRM svd = new SvdImplicitQrDecompose_DDRM(false, true, true, true);
+   private final DMatrixRMaj svdU = new DMatrixRMaj(3, 3);
 
    public void reset(int id)
    {
@@ -111,7 +113,7 @@ public class GDXGPUPlanarRegion
          }
          svd.decompose(patchMatrix);
          svd.getU(svdU, false);
-         normal.set(svdU.get(0, 0), svdU.get(1, 0), svdU.get(2, 0));
+         normal.set(svdU.get(6), svdU.get(7), svdU.get(8));
          normal.normalize();
          normal.scale(-normal.getZ() / Math.abs(normal.getZ()));
       }

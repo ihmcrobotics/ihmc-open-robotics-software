@@ -1,6 +1,10 @@
 package us.ihmc.gdx.perception;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import com.badlogic.gdx.graphics.Color;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
@@ -22,6 +26,8 @@ public class GDXGPUPlanarRegionExtractionDemo
    private GDXGPUPlanarRegionExtraction gpuPlanarRegionExtraction;
    private GDXPlanarRegionsGraphic planarRegionsGraphic;
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+   private GDXPointCloudRenderer boundaryPointCloud;
+   private RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
 
    public GDXGPUPlanarRegionExtractionDemo()
    {
@@ -40,7 +46,7 @@ public class GDXGPUPlanarRegionExtractionDemo
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
             l515PoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
-            l515PoseGizmo.setResizeAutomatically(false);
+            l515PoseGizmo.setResizeAutomatically(true);
             baseUI.addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendTranslation(2.2, 0.0, 1.0);
@@ -95,6 +101,10 @@ public class GDXGPUPlanarRegionExtractionDemo
 
             planarRegionsGraphic = new GDXPlanarRegionsGraphic();
             baseUI.get3DSceneManager().addRenderableProvider(planarRegionsGraphic, GDXSceneLevel.VIRTUAL);
+
+            boundaryPointCloud = new GDXPointCloudRenderer();
+            boundaryPointCloud.create(2000000);
+            baseUI.get3DSceneManager().addRenderableProvider(boundaryPointCloud, GDXSceneLevel.VIRTUAL);
          }
 
          @Override
@@ -102,9 +112,13 @@ public class GDXGPUPlanarRegionExtractionDemo
          {
             l515.render(baseUI.get3DSceneManager());
             gpuPlanarRegionExtraction.extractPlanarRegions();
-            gpuPlanarRegionExtraction.getPlanarRegions(planarRegionsList, l515PoseGizmo.getTransformToParent());
-            planarRegionsGraphic.generateMeshes(planarRegionsList);
-            planarRegionsGraphic.update();
+//            gpuPlanarRegionExtraction.getPlanarRegions(planarRegionsList, l515PoseGizmo.getGizmoFrame());
+//            planarRegionsGraphic.generateMeshes(planarRegionsList);
+//            planarRegionsGraphic.update();
+
+            gpuPlanarRegionExtraction.getBoundaryPoints(pointsToRender, l515PoseGizmo.getGizmoFrame(), l515.getLowLevelSimulator().getCamera().invProjectionView);
+            boundaryPointCloud.setPointsToRender(pointsToRender, Color.WHITE);
+            boundaryPointCloud.updateMesh();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
