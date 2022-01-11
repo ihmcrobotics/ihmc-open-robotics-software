@@ -94,6 +94,10 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
                                                                 hands.get(robotSide).getParentJoint().getFrameAfterJoint(),
                                                                 handControlFrameTransform));
          }
+         else if (hands.get(robotSide) != null)
+         {
+            handControlFrames.put(robotSide, hands.get(robotSide).getParentJoint().getFrameAfterJoint());
+         }
       }
 
       legJointMaps = SideDependentList.createListOfEnumMaps(LegJointName.class);
