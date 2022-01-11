@@ -7,14 +7,15 @@ buildscript {
    }
    dependencies {
       classpath("us.ihmc:ros2-msg-to-pubsub-generator:0.20.5")
+      classpath("us.ihmc:log-tools:0.6.3") // removes vulnerable log4j versions from plugin classpath; can be removed later
    }
 }
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.21"
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -38,7 +39,7 @@ mainDependencies {
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
       exclude(group = "org.junit.platform", module = "junit-platform-launcher")
    }
-   api("us.ihmc:ihmc-commons:0.30.4")
+   api("us.ihmc:ihmc-commons:0.30.5")
 }
 
 testDependencies {
@@ -47,7 +48,7 @@ testDependencies {
 
 generatorDependencies {
    api("us.ihmc:euclid:0.17.0")
-   api("us.ihmc:ihmc-commons:0.30.4")
+   api("us.ihmc:ihmc-commons:0.30.5")
    api("us.ihmc:ros2-msg-to-pubsub-generator:0.20.5")
 }
 

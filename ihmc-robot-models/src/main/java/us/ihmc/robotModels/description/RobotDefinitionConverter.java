@@ -1,15 +1,11 @@
 package us.ihmc.robotModels.description;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.mutable.MutableObject;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -39,6 +35,7 @@ import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.robot.CameraSensorDefinition;
+import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
 import us.ihmc.scs2.definition.robot.GroundContactPointDefinition;
 import us.ihmc.scs2.definition.robot.IMUSensorDefinition;
@@ -79,29 +76,6 @@ public class RobotDefinitionConverter
          createAndAddJointsRecursive(robotDescription, rootJointDefinition);
 
       createAndAddLoopClosureJoints(robotDescription, robotDefinition);
-
-      // Fixed the inner joints of four bar joints: The 2 first inner joints needs to be connected to the four-bar parent joint.
-      for (JointDefinition jointDefinition : robotDefinition.getAllJoints())
-      {
-         if (!(jointDefinition instanceof InvertedFourBarJointDefinition))
-            continue;
-
-         InvertedFourBarJointDefinition fourBarDefinition = (InvertedFourBarJointDefinition) jointDefinition;
-         InvertedFourBarJointDescription fourBarDescription = (InvertedFourBarJointDescription) robotDescription.getJointDescription(fourBarDefinition.getName());
-
-         for (JointDefinition loopJointDefinition : fourBarDefinition.getFourBarJoints())
-         {
-            if (loopJointDefinition.isLoopClosure())
-               continue;
-
-            if (loopJointDefinition.getParentJoint() == fourBarDefinition.getParentJoint())
-            {
-               PinJointDescription loopJointDescription = Arrays.stream(fourBarDescription.getFourBarJoints())
-                                                                .filter(j -> j.getName().equals(loopJointDefinition.getName())).findFirst().get();
-               loopJointDescription.setParentJoint(fourBarDescription.getParentJoint());
-            }
-         }
-      }
 
       for (String jointName : robotDefinition.getNameOfJointsToIgnore())
          robotDescription.getJointDescription(jointName).setIsDynamic(false);
@@ -183,8 +157,8 @@ public class RobotDefinitionConverter
          return RobotDefinitionConverter.toPinJointDescription((RevoluteJointDefinition) source);
       if (source instanceof PrismaticJointDefinition)
          return RobotDefinitionConverter.toSliderJointDescription((PrismaticJointDefinition) source);
-      if (source instanceof InvertedFourBarJointDefinition)
-         return RobotDefinitionConverter.toInvertedFourBarJointDescription((InvertedFourBarJointDefinition) source);
+      if (source instanceof CrossFourBarJointDefinition)
+         return RobotDefinitionConverter.toCrossFourBarJointDescription((CrossFourBarJointDefinition) source);
       return null;
    }
 
@@ -209,55 +183,13 @@ public class RobotDefinitionConverter
       return output;
    }
 
-   public static InvertedFourBarJointDescription toInvertedFourBarJointDescription(InvertedFourBarJointDefinition source)
+   public static CrossFourBarJointDescription toCrossFourBarJointDescription(CrossFourBarJointDefinition source)
    {
-      Map<String, JointDefinition> nameToJointDefinitionMap = Arrays.stream(source.getFourBarJoints())
-                                                                    .collect(Collectors.toMap(JointDefinition::getName, Function.identity()));
-
-      InvertedFourBarJointDescription output = new InvertedFourBarJointDescription(source.getName());
-
-      RevoluteJointDefinition loopClosureJointDefinition = Arrays.stream(source.getFourBarJoints()).filter(j -> j.isLoopClosure()).findFirst().get();
-      LoopClosureDefinition loopClosureInfo = loopClosureJointDefinition.getLoopClosureDefinition();
-      MutableObject<LinkDescription> loopClosureLink = new MutableObject<>();
-
-      output.setFourBarJoints(Arrays.stream(source.getFourBarJoints()).filter(j -> !j.isLoopClosure()).map(j ->
-      {
-         PinJointDescription jointDescription = toPinJointDescription(j);
-         LinkDescription linkDescription = toLinkDescription(j.getSuccessor());
-         if (linkDescription.getName().equals(loopClosureJointDefinition.getSuccessor().getName()))
-            loopClosureLink.setValue(linkDescription);
-         jointDescription.setLink(linkDescription);
-         return jointDescription;
-      }).toArray(PinJointDescription[]::new));
-
-      String name = loopClosureJointDefinition.getName();
-      Vector3D offsetFromParentJoint = loopClosureJointDefinition.getTransformToParent().getTranslation();
-      Vector3D offsetFromLinkParentJoint = loopClosureInfo.getTransformToSuccessorParent().getTranslation();
-      Vector3D axis = loopClosureJointDefinition.getAxis();
-      LoopClosurePinConstraintDescription fourBarClosure = new LoopClosurePinConstraintDescription(name,
-                                                                                                   offsetFromParentJoint,
-                                                                                                   offsetFromLinkParentJoint,
-                                                                                                   axis);
-      fourBarClosure.setGains(loopClosureInfo.getKpSoftConstraint(), loopClosureInfo.getKdSoftConstraint());
-      fourBarClosure.setLink(loopClosureLink.getValue());
-      output.setFourBarClosure(fourBarClosure);
-
-      Map<String, JointDescription> nameToJointDescriptionMap = Arrays.stream(output.getFourBarJoints())
-                                                                      .collect(Collectors.toMap(JointDescription::getName, Function.identity()));
-
-      // Connect joints
-      for (JointDescription jointDescription : output.getFourBarJoints())
-      {
-         String parentJointName = nameToJointDefinitionMap.get(jointDescription.getName()).getParentJoint().getName();
-         if (!parentJointName.equals(source.getParentJoint().getName())) // Can't connect these yet
-            nameToJointDescriptionMap.get(parentJointName).addJoint(jointDescription);
-      }
-
-      { // Loop closure
-         String parentJointName = loopClosureJointDefinition.getParentJoint().getName();
-         nameToJointDescriptionMap.get(parentJointName).addConstraint(fourBarClosure);
-      }
-
+      CrossFourBarJointDescription output = new CrossFourBarJointDescription(source.getName(), source.getAxis());
+      output.setJointNames(source.getJointNameA(), source.getJointNameB(), source.getJointNameC(), source.getJointNameD());
+      output.setBodyDA(toLinkDescription(source.getBodyDA()));
+      output.setBodyBC(toLinkDescription(source.getBodyBC()));
+      output.setJointTransforms(source.getTransformAToPredecessor(), source.getTransformBToPredecessor(), source.getTransformDToA(), source.getTransformCToB());
       return output;
    }
 

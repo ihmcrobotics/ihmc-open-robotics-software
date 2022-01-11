@@ -83,7 +83,7 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)
    {
-      frequencyPlot.onRecievedMessage();
+      frequencyPlot.recordEvent();
       if (isActive())
       {
          threadQueue.clearQueueAndExecute(() ->
@@ -96,13 +96,13 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
 
    private void queueRenderLidarScan(LidarScanMessage message)
    {
-      frequencyPlot.onRecievedMessage();
+      frequencyPlot.recordEvent();
       latestLidarScanMessageReference.set(message);
    }
 
    private void queueRenderFusedSensorHeadPointCloud(FusedSensorHeadPointCloudMessage message)
    {
-      frequencyPlot.onRecievedMessage();
+      frequencyPlot.recordEvent();
       latestFusedSensorHeadPointCloudMessageReference.set(message);
    }
 

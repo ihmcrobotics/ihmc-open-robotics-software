@@ -39,6 +39,7 @@ public class GDXVRTeleporter
    private final Point3D planeRayIntesection = new Point3D();
    private final Vector3D orientationDeterminationVector = new Vector3D();
    private final FramePose3D proposedTeleportPose = new FramePose3D();
+   private final RigidBodyTransform xyYawHeadsetToTeleportTransform = new RigidBodyTransform();
    private double lineLength = 1.0;
    private final Color color = Color.WHITE;
    private double lastTouchpadY = Double.NaN;
@@ -124,11 +125,17 @@ public class GDXVRTeleporter
          {
             vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
             {
-               proposedTeleportPose.get(teleportIHMCZUpToIHMCZUpWorld);
-//               vrContext.getHeadset().runIfConnected(headset ->
-//               {
-//                  headset.getPose()
-//               });
+               xyYawHeadsetToTeleportTransform.setIdentity();
+               vrContext.getHeadset().runIfConnected(headset -> // teleport such that your headset ends up where you're trying to go
+               {
+                  headset.getXForwardZUpHeadsetFrame().getTransformToDesiredFrame(xyYawHeadsetToTeleportTransform, vrContext.getTeleportFrameIHMCZUp());
+                  xyYawHeadsetToTeleportTransform.getTranslation().setZ(0.0);
+                  xyYawHeadsetToTeleportTransform.getRotation().setYawPitchRoll(xyYawHeadsetToTeleportTransform.getRotation().getYaw(), 0.0, 0.0);
+               });
+               teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
+               teleportIHMCZUpToIHMCZUpWorld.invert();
+               proposedTeleportPose.get(tempTransform);
+               tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
             });
          }
 

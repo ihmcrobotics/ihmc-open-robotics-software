@@ -1,8 +1,8 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.21"
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -13,11 +13,10 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.apache.commons:commons-lang3:3.8.1")
    api("commons-collections:commons-collections:3.2.1")
    api("org.georegression:georegression:0.22")
    api("org.ddogleg:ddogleg:0.18")
-   api("org.apache.commons:commons-math3:3.3")
+   api("org.apache.commons:commons-math3:3.6.1")
    api("com.thoughtworks.xstream:xstream:1.4.7")
    api("org.jgrapht:jgrapht-core:0.9.0")
    api("org.jgrapht:jgrapht-ext:0.9.0")

@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  * </p>
  *
  * <p>
- * Description: Simple balistic walking controller for the SpringFlamingo simulation model. Controls
+ * Description: Simple ballistic walking controller for the SpringFlamingo simulation model. Controls
  * body pitch through hip torque, velocity through ankle torque.
  * </p>
  *
@@ -35,10 +35,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class SpringFlamingoController implements RobotController
 {
-   /**
-    * Initialization
-    */
-
    private final YoRegistry registry = new YoRegistry("SpringFlamingoController");
 
    private double comPosX, comPosZ, comVelX, icpPos; //TODO modified
@@ -64,6 +60,9 @@ public class SpringFlamingoController implements RobotController
    private final DoubleParameter t_damp = new DoubleParameter("t_damp", "Hip damping", registry, 20.0);
 
    private final DoubleParameter knee_d = new DoubleParameter("knee_d", registry, 0.0);
+   private final DoubleParameter knee_toe_off_d = new DoubleParameter("knee_toe_off_d", registry, -0.1);
+   private final DoubleParameter timeToStartKneeCollapse = new DoubleParameter("timeToStartKneeCollapse", registry, 0.3);
+
    private final DoubleParameter knee_gain = new DoubleParameter("knee_gain", registry, 30.0);
    private final DoubleParameter knee_damp = new DoubleParameter("knee_damp", registry, 10.0);
    private final DoubleParameter hip_d = new DoubleParameter("hip_d", registry, 0.587059);
@@ -153,10 +152,6 @@ public class SpringFlamingoController implements RobotController
 
    private final SimpleMovingAverageFilteredYoVariable average_qd_x; //TODO what is this?
 
-   /**
-    * Constructor
-    */
-
    public SpringFlamingoController(SpringFlamingoRobot robot, String name) // TODO SpringFlamingoController(SpringFlamingoRobot robot, String name, ICPVisualizer icpVisualizer)
    {
       this.name = name;
@@ -185,7 +180,6 @@ public class SpringFlamingoController implements RobotController
 
       createStateMachineWindow();
       initControl();
-
    }
 
    //////////////////////////////////////////////////////
@@ -260,14 +254,14 @@ public class SpringFlamingoController implements RobotController
    @Override
    public void doControl()
    {
-      balistic_walking_state_machine();
+      ballistic_walking_state_machine();
       average_qd_x.update();
    }
 
    //   private double passive_ankle_torques(double pos, double vel)
    //   {
-   //      if (pos > ankle_limit_set.getDoubleValue())
-   //         return (-ankle_limit_gain.getDoubleValue() * (ankle_limit_set.getDoubleValue() - pos) * (ankle_limit_set.getDoubleValue() - pos));
+   //      if (pos > ankle_limit_set.getValue())
+   //         return (-ankle_limit_gain.getValue() * (ankle_limit_set.getValue() - pos) * (ankle_limit_set.getValue() - pos));
    //      else
    //         return (0.0);
    //   }
@@ -379,8 +373,14 @@ public class SpringFlamingoController implements RobotController
          .set(-t_gain.getValue() * (desiredBodyPitch.getValue() - robot.q_pitch.getDoubleValue()) + t_damp.getValue() * robot.qd_pitch.getDoubleValue());
 
          // Keep knee straight
-         actKnee.get(robotSide).set(knee_gain.getValue() * (knee_d.getValue() - qKnee.get(robotSide).getDoubleValue())
-                                    - knee_damp.getValue() * qdKnee.get(robotSide).getDoubleValue());
+         double kneeToeOff = knee_d.getValue();
+         if (timeInState > timeToStartKneeCollapse.getValue())
+         {
+            kneeToeOff = knee_d.getValue() + knee_toe_off_d.getValue();
+         }
+         
+         actKnee.get(robotSide).set(knee_gain.getValue() * (kneeToeOff - qKnee.get(robotSide).getDoubleValue())
+               - knee_damp.getValue() * qdKnee.get(robotSide).getDoubleValue());
 
          // Use ankle to servo speed, position
          actAnkle.get(robotSide).set(-stand_gain.getValue() * (x_d.getValue() - robot.q_x.getDoubleValue())
@@ -500,7 +500,7 @@ public class SpringFlamingoController implements RobotController
    }
 
    ////////////////////////////////////////////////////  STATE MACHINE
-   private void balistic_walking_state_machine()
+   private void ballistic_walking_state_machine()
    {
       // Robot happens to walk in negative x direction.  Set vel positive just so it makes intuitive sense.
       vel.set(-robot.qd_x.getDoubleValue());

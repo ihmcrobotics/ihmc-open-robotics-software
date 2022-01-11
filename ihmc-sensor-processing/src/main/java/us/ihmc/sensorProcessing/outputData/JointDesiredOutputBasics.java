@@ -23,6 +23,7 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
       setVelocityIntegrationMaxError(other.getVelocityIntegrationMaxError());
       setPositionFeedbackMaxError(other.getPositionFeedbackMaxError());
       setVelocityFeedbackMaxError(other.getVelocityFeedbackMaxError());
+      setMaxTorque(other.getMaxTorque());
    }
 
    /**
@@ -65,6 +66,8 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
          setPositionFeedbackMaxError(other.getPositionFeedbackMaxError());
       if (!hasVelocityFeedbackMaxError())
          setVelocityFeedbackMaxError(other.getVelocityFeedbackMaxError());
+      if(!hasMaxTorque())
+         setMaxTorque(other.getMaxTorque());
    }
 
    void setControlMode(JointDesiredControlMode controlMode);
@@ -100,4 +103,6 @@ public interface JointDesiredOutputBasics extends JointDesiredOutputReadOnly
    void setPositionFeedbackMaxError(double positionFeedbackMaxError);
 
    void setVelocityFeedbackMaxError(double velocityFeedbackMaxError);
+   
+   void setMaxTorque(double maxTorque);
 }

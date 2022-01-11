@@ -41,7 +41,7 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.cameraForTrackingSupplier = cameraForTrackingSupplier;
-      syncedRobot.addRobotConfigurationDataReceivedCallback(frequencyPlot::onRecievedMessage);
+      syncedRobot.addRobotConfigurationDataReceivedCallback(frequencyPlot::recordEvent);
 
       previousRobotMidFeetUnderPelvis.setToNaN();
    }
@@ -71,7 +71,6 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
 
          if (cameraForTracking != null && trackRobot.get())
          {
-            syncedRobot.update();
             latestRobotMidFeetUnderPelvis.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getPosition());
             if (!previousRobotMidFeetUnderPelvis.containsNaN())
             {

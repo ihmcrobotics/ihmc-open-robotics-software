@@ -22,14 +22,16 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public class AtlasKinematicsStreamingToolboxModule extends KinematicsStreamingToolboxModule
 {
-   public AtlasKinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
+   public AtlasKinematicsStreamingToolboxModule(DRCRobotModel robotModel,
+                                                boolean startYoVariableServer,
+                                                PubSubImplementation pubSubImplementation)
    {
       super(robotModel, startYoVariableServer, pubSubImplementation);
       controller.setInitialRobotConfigurationNamedMap(initialConfiguration(robotModel));
       controller.getTools().getIKController().getCenterOfMassSafeMargin().set(0.10);
    }
 
-   private static Map<String, Double> initialConfiguration(DRCRobotModel robotModel)
+   public static Map<String, Double> initialConfiguration(DRCRobotModel robotModel)
    {
       Map<String, Double> initialConfigurationMap = new HashMap<>();
       HumanoidJointNameMap jointMap = robotModel.getJointMap();
