@@ -157,6 +157,10 @@ public class ContinuousStepController
          {
             if (footPoseProvider.getCurrentFootPose(robotSide) == null)
                return false;
+
+            FramePose3D footPose = new FramePose3D(footPoseProvider.getCurrentFootPose(robotSide));
+            footPose.changeFrame(worldFrame);
+            lastSupportFootPoses.put(robotSide, footPose);
          }
 
          supportFootPosesInitialized = true;
