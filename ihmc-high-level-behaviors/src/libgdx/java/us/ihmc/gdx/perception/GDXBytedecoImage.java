@@ -35,25 +35,25 @@ public class GDXBytedecoImage
       if (cvMatType == opencv_core.CV_16UC1)
       {
          bytesPerPixel = 2;
-         openCLChannelOrder = OpenCL.CL_DEPTH;
+         openCLChannelOrder = OpenCL.CL_R;
          openCLChannelDataType = OpenCL.CL_UNSIGNED_INT16;
       }
       else if (cvMatType == opencv_core.CV_32FC1)
       {
          bytesPerPixel = 4;
-         openCLChannelOrder = OpenCL.CL_DEPTH;
+         openCLChannelOrder = OpenCL.CL_R;
          openCLChannelDataType = OpenCL.CL_FLOAT;
       }
       else if (cvMatType == opencv_core.CV_32FC(6))
       {
          bytesPerPixel = 4 * 6;
-         openCLChannelOrder = OpenCL.CL_DEPTH;
+         openCLChannelOrder = OpenCL.CL_R;
          openCLChannelDataType = OpenCL.CL_FLOAT;
       }
       else if (cvMatType == opencv_core.CV_8UC1)
       {
          bytesPerPixel = 1;
-         openCLChannelOrder = OpenCL.CL_DEPTH;
+         openCLChannelOrder = OpenCL.CL_R;
          openCLChannelDataType = OpenCL.CL_UNSIGNED_INT8;
       }
       else if (cvMatType == opencv_core.CV_8UC4)
