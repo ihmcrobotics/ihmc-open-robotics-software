@@ -160,11 +160,11 @@ public class GDXGPUPlanarRegionExtraction
    private final FramePose3D regionPose = new FramePose3D();
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private static final RigidBodyTransform ZForwardXRightToZUpXForward = new RigidBodyTransform();
+   private static final RigidBodyTransform ZForwardYRightToZUpXForward = new RigidBodyTransform();
    static
    {
-      ZForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
-      ZForwardXRightToZUpXForward.appendRollRotation(-Math.PI / 2.0);
+      ZForwardYRightToZUpXForward.appendYawRotation(Math.toRadians(180.0));
+      ZForwardYRightToZUpXForward.appendPitchRotation(Math.toRadians(-90.0));
    }
    private ReferenceFrame cmosFrame;
    private final FrameQuaternion orientation = new FrameQuaternion();
@@ -551,7 +551,7 @@ public class GDXGPUPlanarRegionExtraction
 
       if (cmosFrame == null)
       {
-         cmosFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cmosFrame", cameraFrame, ZForwardXRightToZUpXForward);
+         cmosFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cmosFrame", cameraFrame, ZForwardYRightToZUpXForward);
       }
 
       List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.parallelStream()
@@ -646,7 +646,7 @@ public class GDXGPUPlanarRegionExtraction
    {
       if (cmosFrame == null)
       {
-         cmosFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cmosFrame", cameraFrame, ZForwardXRightToZUpXForward);
+         cmosFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cmosFrame", cameraFrame, ZForwardYRightToZUpXForward);
       }
       pointsToRender.clear();
       for (GDXGPUPlanarRegion planarRegion : planarRegions)
@@ -661,17 +661,33 @@ public class GDXGPUPlanarRegionExtraction
                   int row = (int) boundaryIndex.getX() * patchHeight;
                   int column = (int) boundaryIndex.getY() * patchWidth;
                   float z = inputFloatDepthImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-                  float imageY = (2.0f * row) / imageHeight - 1.0f;
-                  float normalizedDeviceCoordinateZ = z - imageY * -0.027f;
-                  //               normalizedDeviceCoordinateZ /= 2.1;
-                  //               normalizedDeviceCoordinateZ = - normalizedDeviceCoordinateZ - 10.105f;
-                  //               normalizedDeviceCoordinateZ /= 10.105f;
-                  normalizedDeviceCoordinateZ = (-(2.1f / normalizedDeviceCoordinateZ) + 10.105f) / 9.895f;
-                  Vector3 gdxPoint = new Vector3((2.0f * column) / imageWidth - 1.0f, imageY, normalizedDeviceCoordinateZ);
-                  gdxPoint.prj(invProjectionView);
-                  //               tempFramePoint.setIncludingFrame(cmosFrame, gdxPoint.x, gdxPoint.y, gdxPoint.z);
-                  //               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-                  pointsToRender.add().set(gdxPoint.x, gdxPoint.y, gdxPoint.z);
+                  boolean useGDX = false;
+                  if (useGDX)
+                  {
+                     float imageY = (2.0f * row) / imageHeight - 1.0f;
+                     float normalizedDeviceCoordinateZ = z - imageY * -0.027f;
+                     //               normalizedDeviceCoordinateZ /= 2.1;
+                     //               normalizedDeviceCoordinateZ = - normalizedDeviceCoordinateZ - 10.105f;
+                     //               normalizedDeviceCoordinateZ /= 10.105f;
+                     normalizedDeviceCoordinateZ = (-(2.1f / normalizedDeviceCoordinateZ) + 10.105f) / 9.895f;
+                     Vector3 gdxPoint = new Vector3((2.0f * column) / imageWidth - 1.0f, imageY, normalizedDeviceCoordinateZ);
+                     gdxPoint.prj(invProjectionView);
+                     //               tempFramePoint.setIncludingFrame(cmosFrame, gdxPoint.x, gdxPoint.y, gdxPoint.z);
+                     //               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+                     pointsToRender.add().set(gdxPoint.x, gdxPoint.y, gdxPoint.z);
+                  }
+                  else
+                  {
+                     float x = (row - depthCx.get()) / depthFx.get() * z;
+                     float y = (column - depthCy.get()) / depthFy.get() * z;
+//                     ZForwardYRightToZUpXForward.setIdentity();
+////                     ZForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
+////                     ZForwardXRightToZUpXForward.appendRollRotation(-Math.PI / 2.0);
+//                     cmosFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cmosFrame", cameraFrame, ZForwardYRightToZUpXForward);
+                     tempFramePoint.setIncludingFrame(cmosFrame, x, y, z);
+                     tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+                     pointsToRender.add().set(tempFramePoint);
+                  }
                }
             }
          }
