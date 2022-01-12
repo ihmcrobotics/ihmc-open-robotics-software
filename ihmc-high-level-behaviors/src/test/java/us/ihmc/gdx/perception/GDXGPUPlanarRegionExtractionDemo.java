@@ -1,18 +1,12 @@
 package us.ihmc.gdx.perception;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import com.badlogic.gdx.graphics.Color;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
-import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class GDXGPUPlanarRegionExtractionDemo
 {
@@ -24,10 +18,6 @@ public class GDXGPUPlanarRegionExtractionDemo
    private final GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
    private GDXGPUPlanarRegionExtraction gpuPlanarRegionExtraction;
-   private GDXPlanarRegionsGraphic planarRegionsGraphic;
-   private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
-   private GDXPointCloudRenderer boundaryPointCloud;
-   private RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
 
    public GDXGPUPlanarRegionExtractionDemo()
    {
@@ -98,13 +88,7 @@ public class GDXGPUPlanarRegionExtractionDemo
             gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
             gpuPlanarRegionExtraction.create(imageWidth, imageHeight, l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer(), fx, fy, cx, cy);
             baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
-
-            planarRegionsGraphic = new GDXPlanarRegionsGraphic();
-            baseUI.get3DSceneManager().addRenderableProvider(planarRegionsGraphic, GDXSceneLevel.VIRTUAL);
-
-            boundaryPointCloud = new GDXPointCloudRenderer();
-            boundaryPointCloud.create(2000000);
-            baseUI.get3DSceneManager().addRenderableProvider(boundaryPointCloud, GDXSceneLevel.VIRTUAL);
+            baseUI.get3DSceneManager().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
          }
 
          @Override
@@ -112,13 +96,8 @@ public class GDXGPUPlanarRegionExtractionDemo
          {
             l515.render(baseUI.get3DSceneManager());
             gpuPlanarRegionExtraction.extractPlanarRegions();
-//            gpuPlanarRegionExtraction.getPlanarRegions(planarRegionsList, l515PoseGizmo.getGizmoFrame());
-//            planarRegionsGraphic.generateMeshes(planarRegionsList);
-//            planarRegionsGraphic.update();
-
-            gpuPlanarRegionExtraction.getBoundaryPoints(pointsToRender, l515PoseGizmo.getGizmoFrame(), l515.getLowLevelSimulator().getCamera().invProjectionView);
-            boundaryPointCloud.setPointsToRender(pointsToRender, Color.WHITE);
-            boundaryPointCloud.updateMesh();
+            gpuPlanarRegionExtraction.renderPlanarRegions(l515PoseGizmo.getGizmoFrame());
+            gpuPlanarRegionExtraction.renderBoundaryPoints(l515PoseGizmo.getGizmoFrame(), l515.getLowLevelSimulator().getCamera().invProjectionView);
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
