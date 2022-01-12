@@ -49,7 +49,10 @@ public class SinggleLeggedRobot extends Robot
    private YoDouble qd_hip_slide, qd_hip_rev, qd_knee_rev;
    private YoDouble qdd_hip_slide, qdd_hip_rev, qdd_knee_rev;
    private YoDouble tau_hip, tau_knee;
-
+   
+   private GroundContactPoint gc_base;
+   private GroundContactPoint gc_foot;
+   
    public SinggleLeggedRobot()
    {
       super("singgleLeggedRobot");
@@ -88,9 +91,9 @@ public class SinggleLeggedRobot extends Robot
       tau_knee = kneePinJoint.getTauYoVariable();
 
       // add ground contact point
-      GroundContactPoint gc_base = new GroundContactPoint("gc_base", new Vector3D(0.0, 0.0, 0.0), this);
+      gc_base = new GroundContactPoint("gc_base", new Vector3D(0.0, 0.0, 0.0), this);
       plane.addGroundContactPoint(gc_base);
-      GroundContactPoint gc_foot = new GroundContactPoint("gc_foot", new Vector3D(0.0, 0.0, -(LOWER_LEG_H + FOOT_R)), this);
+      gc_foot = new GroundContactPoint("gc_foot", new Vector3D(0.0, 0.0, -(LOWER_LEG_H + FOOT_R)), this);
       kneePinJoint.addGroundContactPoint(gc_foot);
 
       // instantiate ground contact model
@@ -100,7 +103,10 @@ public class SinggleLeggedRobot extends Robot
 
       initRobot();
    }
-
+   public double getGRFz()
+   {
+      return gc_foot.getYoForce().getZ();
+   }
    private Link baseLink()
    {
       Link baseLink = new Link("BaseLink");
@@ -227,26 +233,26 @@ public class SinggleLeggedRobot extends Robot
    
    public void setHipTorque(double hipTau)
    {
-      if(hipTau < -20)        // Hip joint torque limits
+      if(hipTau < -50)        // Hip joint torque limits
       {
-         hipTau = -20.0;
+         hipTau = -50.0;
       }
-      else if(hipTau > 20)
+      else if(hipTau > 50)
       {
-         hipTau = 20.0;
+         hipTau = 50.0;
       }
       this.tau_hip.set(hipTau);
    }
    
    public void setKneeTorque(double kneeTau)
    {
-      if(kneeTau < -20)       // Knee joint torque limits
+      if(kneeTau < -50)       // Knee joint torque limits
       {
-         kneeTau = -20.0;
+         kneeTau = -50.0;
       }
-      else if(kneeTau > 20)
+      else if(kneeTau > 50)
       {
-         kneeTau = 20.0;
+         kneeTau = 50.0;
       }
       this.tau_knee.set(kneeTau);
    }

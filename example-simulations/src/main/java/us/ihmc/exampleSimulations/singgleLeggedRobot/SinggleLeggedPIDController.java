@@ -33,12 +33,18 @@ public class SinggleLeggedPIDController implements RobotController
    // Initial Error
    private double positionError_z = 0.0;
    private double differentialError_z = 0.0;
-   private double positionError_hip_theta = 0.0;    //TODO : Replace 'theta' to 'pitch'
+   private double positionError_hip_theta = 0.0; //TODO : Replace 'theta' to 'pitch'
    private double positionError_knee_theta = 0.0;
    private double differentialError_hip_theta = 0.0;
    private double differentialError_knee_theta = 0.0;
    private double integralError_hip_theta = 0.0;
    private double integralError_knee_theta = 0.0;
+
+   // First Set point
+   private double setPoint;
+
+   // Other variables
+   private double position_z = 0.0;
 
    /*
     * Constructor: where we instantiate and initialize control variables
@@ -53,34 +59,72 @@ public class SinggleLeggedPIDController implements RobotController
       desiredKneeAngPosition = new YoDouble("DesiredKneeAngPosition", registry);
       desiredKneeAngVelocity = new YoDouble("DesiredKneeAngVelocity", registry);
 
-      desiredHipPosition.set(0.50);
+      initialize();
+
+   }
+
+   private void updateDesiredSetPoint(double hipPosition)
+   {
+      desiredHipPosition.set(hipPosition);
       desiredHipVelocity.set(0.0);
 
       desiredHipAngPosition.set(Math.acos(desiredHipPosition.getDoubleValue() / (robot.UPPER_LEG_H + robot.LOWER_LEG_H)));
-      desiredHipAngVelocity.set(desiredHipVelocity.getDoubleValue() / (robot.UPPER_LEG_H + robot.LOWER_LEG_H) * -1
-            / Math.sqrt(1 - Math.pow(desiredHipPosition.getDoubleValue() / (robot.UPPER_LEG_H + robot.LOWER_LEG_H), 2.0)));
-      System.out.println(desiredHipAngPosition.getDoubleValue());
-      System.out.println(desiredHipAngVelocity.getDoubleValue());
-      desiredKneeAngPosition.set(-2 * desiredHipAngPosition.getDoubleValue());
-      desiredKneeAngVelocity.set(-2 * desiredHipAngVelocity.getDoubleValue());
+      desiredHipAngVelocity.set(0.0);
 
-      p_gain_hip = 100.0;
-      p_gain_knee = 2.0 * p_gain_hip;
-      d_gain_hip = 1.0;
-      d_gain_knee = 2.0 * d_gain_hip;
-      i_gain_hip = 0.0;
-      i_gain_knee = 2.0 * i_gain_hip;
+      desiredKneeAngPosition.set(-2 * desiredHipAngPosition.getDoubleValue());
+      desiredKneeAngVelocity.set(0.0);
+   }
+
+   private void updateTrajectory(YoDouble desiredHipPosition, YoDouble desiredHipVelocity)
+   {
+      double qHipTrajectory;
+      double qdHipTrajectory;
+      double qKneeTrajectory;
+      double qdKneeTrajectory;
+
+      qHipTrajectory = Math.acos(desiredHipPosition.getDoubleValue() / (robot.UPPER_LEG_H + robot.LOWER_LEG_H));
+      qdHipTrajectory = (qHipTrajectory - desiredHipAngPosition.getDoubleValue()) / SinggleLeggedSimulation.DT;
+      desiredHipAngPosition.set(qHipTrajectory);
+      desiredHipAngVelocity.set(qdHipTrajectory);
+      // Closed form
+      //      desiredHipAngVelocity.set(desiredHipVelocity.getDoubleValue() / (robot.UPPER_LEG_H + robot.LOWER_LEG_H) * -1
+      //            / Math.sqrt(1 - Math.pow(desiredHipPosition.getDoubleValue() / (robot.UPPER_LEG_H + robot.LOWER_LEG_H), 2.0)));
+
+      qKneeTrajectory = -2 * desiredHipAngPosition.getDoubleValue();
+      qdKneeTrajectory = -2 * desiredHipAngVelocity.getDoubleValue();
+      desiredKneeAngPosition.set(qKneeTrajectory);
+      desiredKneeAngVelocity.set(qdKneeTrajectory);
+   }
+
+   private void sinwaveTrajectory(double Amplitude, double frequency)
+   {
+      double simTime = robot.getTime();
+      double trajectory;
+      double dtrajectory;
+
+      trajectory = Amplitude * Math.sin(2 * Math.PI * frequency * simTime) + 0.4;
+      dtrajectory = (trajectory - desiredHipPosition.getDoubleValue()) / SinggleLeggedSimulation.DT;
+      desiredHipPosition.set(trajectory);
+      desiredHipVelocity.set(dtrajectory);
+      updateTrajectory(desiredHipPosition, desiredHipVelocity);
    }
 
    @Override
    public void doControl()
    {
+      if (robot.getTime() > 10.0)
+      {
+         sinwaveTrajectory(0.1, 0.2);
+      }
+      
       /*
-       * Just for knowing the errors in Hip_z
+       * Just for calculate the errors in Hip_z
        */
       // Position Error Term in Z.Axis
-      positionError_z = desiredHipPosition.getDoubleValue() - (robot.UPPER_LEG_H * Math.cos(robot.getHipAngularPosition())
+      position_z = (robot.UPPER_LEG_H * Math.cos(robot.getHipAngularPosition())
             + robot.LOWER_LEG_H * Math.cos(robot.getHipAngularPosition() + robot.getKneeAngularPosition()));
+      positionError_z = desiredHipPosition.getDoubleValue() - position_z;
+
       System.out.println("position_z error : " + positionError_z);
 
       // Differential Error Term in Z.Axis
@@ -107,10 +151,10 @@ public class SinggleLeggedPIDController implements RobotController
       integralError_hip_theta += positionError_hip_theta * SinggleLeggedSimulation.DT;
       integralError_knee_theta += positionError_knee_theta * SinggleLeggedSimulation.DT;
 
-      System.out.println("Hip_pos_err : " + positionError_hip_theta);
-      System.out.println("Hip_diff_err : " + differentialError_hip_theta);
-      System.out.println("Knee_pos_err : " + positionError_knee_theta);
-      System.out.println("Knee_diff_err : " + differentialError_knee_theta);
+      //      System.out.println("Hip_pos_err : " + positionError_hip_theta);
+      //      System.out.println("Hip_diff_err : " + differentialError_hip_theta);
+      //      System.out.println("Knee_pos_err : " + positionError_knee_theta);
+      //      System.out.println("Knee_diff_err : " + differentialError_knee_theta);
 
       torqueHip = p_gain_hip * positionError_hip_theta + d_gain_hip * differentialError_hip_theta + i_gain_hip * integralError_hip_theta;
       torqueKnee = p_gain_knee * positionError_knee_theta + d_gain_knee * differentialError_knee_theta + i_gain_knee * integralError_knee_theta;
@@ -127,7 +171,18 @@ public class SinggleLeggedPIDController implements RobotController
    @Override
    public void initialize()
    {
+      setPoint = 0.4;
+      updateDesiredSetPoint(setPoint);
 
+      System.out.println(desiredHipAngPosition.getDoubleValue());
+      System.out.println(desiredHipAngVelocity.getDoubleValue());
+
+      p_gain_hip = 100.0;
+      p_gain_knee = 2.0 * p_gain_hip;
+      d_gain_hip = 0.5;
+      d_gain_knee = 2.0 * d_gain_hip;
+      i_gain_hip = 0.0;
+      i_gain_knee = 2.0 * i_gain_hip;
    }
 
    @Override

@@ -11,9 +11,9 @@ public class SinggleLeggedSimulation
    public SinggleLeggedSimulation()
    {
       SinggleLeggedRobot robot = new SinggleLeggedRobot();
-      robot.setController(new SinggleLeggedPIDController(robot)); //TODO: Making PID Controller
-//      robot.setController(new SinggleLeggedIDController(robot)); //TODO: Making ID Controller
-//      robot.setController(new SinggleLeggedMPCController(robot)); //TODO: Making Model Predictive Controller
+//      robot.setController(new SinggleLeggedPIDController(robot)); //TODO: Making PID Controller
+      robot.setController(new SinggleLeggedIDController(robot)); //TODO: Making ID Controller
+      //      robot.setController(new SinggleLeggedMPCController(robot)); //TODO: Making Model Predictive Controller
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(32000);
@@ -25,7 +25,7 @@ public class SinggleLeggedSimulation
       sim.setCameraFix(0.0, 0.0, 0.70);
       sim.setSimulateDuration(10);
       sim.setFastSimulate(false);
-      
+
       Thread myThread = new Thread(sim);
       myThread.start();
    }
@@ -34,6 +34,10 @@ public class SinggleLeggedSimulation
    {
       new SinggleLeggedSimulation();
    }
-   
+
    // TODO: Make ground and Fix the base to the ground 
+   public double getSimTime()
+   {
+      return sim.getTime();
+   }
 }
