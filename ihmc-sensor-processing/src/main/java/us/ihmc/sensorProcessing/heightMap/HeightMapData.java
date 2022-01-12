@@ -132,7 +132,6 @@ public class HeightMapData
    {
       if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
       {
-//         LogTools.error("Invalid index (" + xIndex + ", " + yIndex + ")");
          return Double.NaN;
       }
 

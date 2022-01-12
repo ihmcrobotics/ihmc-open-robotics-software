@@ -476,8 +476,7 @@ public class FootstepPlannerLogger
       {
          writeLine(numTabs, name + ":" +
                             node.getXIndex() + "," +
-                            node.getYIndex() + "," +
-                            node.getYawIndex());
+                            node.getYIndex());
       }
    }
 
