@@ -35,6 +35,8 @@ import java.util.function.Consumer;
 public class AStarBodyPathPlanner
 {
    private static final double traversibilityCostScale = 0.5;
+   private static final boolean useEdgeDetectorCost = false;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final AStarBodyPathEdgeData edgeData;
@@ -42,16 +44,6 @@ public class AStarBodyPathPlanner
    private final HashSet<BodyPathLatticePoint> expandedNodeSet = new HashSet<>();
    private final DirectedGraph<BodyPathLatticePoint> graph = new DirectedGraph<>();
    private final List<BodyPathLatticePoint> neighbors = new ArrayList<>();
-
-   /* squared up offsets */
-   private final TIntArrayList xOffsetsSq = new TIntArrayList();
-   private final TIntArrayList yOffsetsSq = new TIntArrayList();
-   private final TIntArrayList yawOffsetsSq = new TIntArrayList();
-
-   /* diagonal offsets */
-   private final TIntArrayList xOffsetsDiag = new TIntArrayList();
-   private final TIntArrayList yOffsetsDiag = new TIntArrayList();
-   private final TIntArrayList yawOffsetsDiag = new TIntArrayList();
 
    private final YoBoolean containsCollision = new YoBoolean("containsCollision", registry);
    private final YoDouble edgeCost = new YoDouble("edgeCost", registry);
@@ -66,16 +58,15 @@ public class AStarBodyPathPlanner
    private final HashMap<BodyPathLatticePoint, Double> gridHeightMap = new HashMap<>();
    private BodyPathLatticePoint leastCostNode = null;
    private YoEnum<RejectionReason> rejectionReason = new YoEnum<>("rejectionReason", registry, RejectionReason.class, true);
+   private final BodyPathCollisionDetector collisionDetector = new BodyPathCollisionDetector();
 
-   private final TIntArrayList xCollisionOffsets = new TIntArrayList();
-   private final TIntArrayList yCollisionOffsets = new TIntArrayList();
    private final TIntArrayList xSnapOffsets = new TIntArrayList();
    private final TIntArrayList ySnapOffsets = new TIntArrayList();
 
    private final List<AStarBodyPathIterationData> iterationData = new ArrayList<>();
    private final HashMap<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData> edgeDataMap = new HashMap<>();
 
-   private List<Consumer<FootstepPlannerOutput>> statusCallbacks = new ArrayList<>();
+   private final List<Consumer<FootstepPlannerOutput>> statusCallbacks = new ArrayList<>();
    private final Stopwatch stopwatch = new Stopwatch();
    private int iterations = 0;
    private BodyPathPlanningResult result = null;
@@ -84,11 +75,11 @@ public class AStarBodyPathPlanner
    private static final int maxIterations = 3000;
 
    /* Parameters to extract */
-   static final double groundClearance = 0.25;
-   static final double collisionRadius = 0.3;
-   static final double obstacleTraversibilityRadius = 0.15;
-   static final double snapRadius = 0.1;
+   static final double groundClearance = 0.2;
    static final double maxStepUpDown = 0.2;
+   static final double snapRadius = 0.1;
+   static final double boxSizeY = 0.6;
+   static final double boxSizeX = 0.25;
 
    public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, ConvexPolygon2D footPolygon)
    {
@@ -116,59 +107,13 @@ public class AStarBodyPathPlanner
                                          deltaHeight.set(Double.NaN);
                                          rejectionReason.set(null);
                                       });
-
-      int[] xOffsets = new int[]{-1, 0, 1, 2};
-      int[] yOffsets = new int[]{-1, 0, 1};
-      int[] yawOffsets = new int[]{-1, 0, 1};
-
-      for (int i = 0; i < xOffsets.length; i++)
-      {
-         for (int j = 0; j < yOffsets.length; j++)
-         {
-            for (int k = 0; k < yawOffsets.length; k++)
-            {
-               if (i == 0 && j == 0 && k == 0)
-                  continue;
-
-               xOffsetsSq.add(xOffsets[i]);
-               yOffsetsSq.add(yOffsets[j]);
-               yawOffsetsSq.add(yawOffsets[k]);
-            }
-         }
-      }
-
-      xOffsets = new int[] {-1, 0, 1};
-      for (int k = 0; k < yawOffsets.length; k++)
-      {
-         for (int i = 0; i < xOffsets.length; i++)
-         {
-            for (int j = 0; j < yOffsets.length; j++)
-            {
-               if (i == 0 && j == 0 && k == 0)
-                  continue;
-
-               xOffsetsDiag.add(xOffsets[i]);
-               yOffsetsDiag.add(yOffsets[j]);
-               yawOffsetsDiag.add(yawOffsets[k]);
-            }
-         }
-
-         xOffsetsDiag.add(2);
-         yOffsetsDiag.add(1);
-         yawOffsetsDiag.add(yawOffsets[k]);
-
-         xOffsetsDiag.add(1);
-         yOffsetsDiag.add(2);
-         yawOffsetsDiag.add(yawOffsets[k]);
-      }
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
    {
       if (this.heightMapData == null || !EuclidCoreTools.epsilonEquals(this.heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), 1e-3))
       {
-         int minMaxOffsetXY = (int) Math.round(collisionRadius / heightMapData.getGridResolutionXY());
-         packRadialOffsets(heightMapData, minMaxOffsetXY, collisionRadius, xCollisionOffsets, yCollisionOffsets);
+         collisionDetector.initialize(heightMapData.getGridResolutionXY(), boxSizeX, boxSizeY);
       }
 
       this.heightMapData = heightMapData;
@@ -224,15 +169,19 @@ public class AStarBodyPathPlanner
       startPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
 
-      startNode = new BodyPathLatticePoint(startPose.getX(), startPose.getY(), startPose.getYaw());
-      goalNode = new BodyPathLatticePoint(goalPose.getX(), goalPose.getY(), goalPose.getYaw());
+      startNode = new BodyPathLatticePoint(startPose.getX(), startPose.getY());
+      goalNode = new BodyPathLatticePoint(goalPose.getX(), goalPose.getY());
       stack.clear();
       stack.add(startNode);
       graph.initialize(startNode);
       expandedNodeSet.clear();
       gridHeightMap.put(startNode, startPose.getZ());
       leastCostNode = startNode;
-      obstacleDetector.compute(heightMapData);
+
+      if (useEdgeDetectorCost)
+      {
+         obstacleDetector.compute(heightMapData);
+      }
 
       planningLoop:
       while (true)
@@ -266,8 +215,10 @@ public class AStarBodyPathPlanner
 
          populateNeighbors(node);
 
-         for (BodyPathLatticePoint neighbor : neighbors)
+         for (int i = 0; i < neighbors.size(); i++)
          {
+            BodyPathLatticePoint neighbor = neighbors.get(i);
+
             this.snapHeight.set(snap(neighbor));
             if (Double.isNaN(snapHeight.getDoubleValue()))
             {
@@ -284,7 +235,7 @@ public class AStarBodyPathPlanner
                continue;
             }
 
-            this.containsCollision.set(collisionDetected(neighbor, snapHeight.getDoubleValue()));
+            this.containsCollision.set(collisionDetector.collisionDetected(heightMapData, neighbor, i, snapHeight.getDoubleValue(), groundClearance));
             if (containsCollision.getValue())
             {
                rejectionReason.set(RejectionReason.COLLISION);
@@ -294,13 +245,15 @@ public class AStarBodyPathPlanner
 
             double distanceCost = xyDistance(node, neighbor);
             double traversibilityCost = traversibilityCostScale * traversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
+            edgeCost.set(distanceCost + traversibilityCost);
 
-            int xIndex = HeightMapTools.coordinateToIndex(node.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-            int yIndex = HeightMapTools.coordinateToIndex(node.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-
-            double obstacleCost = obstacleDetector.getTerrainCost().get(xIndex, yIndex);
-
-            edgeCost.set(distanceCost + traversibilityCost + obstacleCost);
+            if (useEdgeDetectorCost)
+            {
+               int xIndex = HeightMapTools.coordinateToIndex(node.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+               int yIndex = HeightMapTools.coordinateToIndex(node.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+               double obstacleCost = obstacleDetector.getTerrainCost().get(xIndex, yIndex);
+               edgeCost.add(obstacleCost);
+            }
 
             if (!traversibilityCalculator.isTraversible())
             {
@@ -398,32 +351,21 @@ public class AStarBodyPathPlanner
       return null;
    }
 
+   /**
+    * Populates an 8-connected grid starting along +x and moving clockwise
+    */
    private void populateNeighbors(BodyPathLatticePoint latticePoint)
    {
       neighbors.clear();
 
-      if (latticePoint.getYawIndex() % 2 == 0)
-      {
-         // squared up
-         for (int i = 0; i < xOffsetsSq.size(); i++)
-         {
-            Pair<Integer, Integer> offset = rotate(xOffsetsSq.get(i), yOffsetsSq.get(i), latticePoint.getYawIndex() / 2);
-            neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + offset.getLeft(),
-                                                   latticePoint.getYIndex() + offset.getRight(),
-                                                   latticePoint.getYawIndex() + yawOffsetsSq.get(i)));
-         }
-      }
-      else
-      {
-         // diagonal
-         for (int i = 0; i < xOffsetsDiag.size(); i++)
-         {
-            Pair<Integer, Integer> offset = rotate(xOffsetsDiag.get(i), yOffsetsDiag.get(i), latticePoint.getYawIndex() / 2);
-            neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + offset.getLeft(),
-                                                   latticePoint.getYIndex() + offset.getRight(),
-                                                   latticePoint.getYawIndex() + yawOffsetsDiag.get(i)));
-         }
-      }
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex()));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() + 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex()));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
    }
 
    private static Pair<Integer, Integer> rotate(int xOff, int yOff, int i)
@@ -472,36 +414,9 @@ public class AStarBodyPathPlanner
       return maxHeight;
    }
 
-   private boolean collisionDetected(BodyPathLatticePoint latticePoint, double height)
-   {
-      int centerIndex = heightMapData.getCenterIndex();
-      int xIndex = HeightMapTools.coordinateToIndex(latticePoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex);
-      int yIndex = HeightMapTools.coordinateToIndex(latticePoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
-      double heightThreshold = height + groundClearance;
-
-      for (int i = 0; i < xCollisionOffsets.size(); i++)
-      {
-         int xQuery = xIndex + xCollisionOffsets.get(i);
-         int yQuery = yIndex + yCollisionOffsets.get(i);
-         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
-         if (Double.isNaN(heightQuery))
-         {
-            continue;
-         }
-
-         if (heightQuery >= heightThreshold)
-         {
-            return true;
-         }
-      }
-
-      return false;
-   }
-
    static double xyDistance(BodyPathLatticePoint startNode, BodyPathLatticePoint endNode)
    {
-      return EuclidCoreTools.norm(startNode.getX() - endNode.getX(), startNode.getY() - endNode.getY())
-             + Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(startNode.getYaw(), endNode.getYaw()));
+      return EuclidCoreTools.norm(startNode.getX() - endNode.getX(), startNode.getY() - endNode.getY());
    }
 
    private double heuristics(BodyPathLatticePoint node)

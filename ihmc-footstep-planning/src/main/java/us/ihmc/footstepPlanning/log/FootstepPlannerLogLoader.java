@@ -489,7 +489,7 @@ public class FootstepPlannerLogLoader
    private static BodyPathLatticePoint readBodyPathNode(String dataFileString)
    {
       int[] csv = getIntCSV(true, dataFileString);
-      return new BodyPathLatticePoint(csv[0], csv[1], csv[2]);
+      return new BodyPathLatticePoint(csv[0], csv[1]);
    }
 
    private static FootstepGraphNode readNode(String dataFileString)
