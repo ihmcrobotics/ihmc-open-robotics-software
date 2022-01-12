@@ -1,7 +1,11 @@
 package us.ihmc.gdx.perception;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
@@ -33,9 +37,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -72,6 +78,9 @@ public class GDXGPUPlanarRegionExtraction
    private final ImInt regionBoundaryDiff = new ImInt(20);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
+   private final ImBoolean render3DPlanarRegions = new ImBoolean(false);
+   private final ImBoolean render3DBoundaries = new ImBoolean(true);
+   private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
    private final ImDouble regionGrowthFactor = new ImDouble(0.01);
    private final ImFloat edgeLengthTresholdSlider = new ImFloat(0.224f);
    private final ImFloat triangulationToleranceSlider = new ImFloat(0.0f);
@@ -159,6 +168,10 @@ public class GDXGPUPlanarRegionExtraction
    }
    private ReferenceFrame cmosFrame;
    private final FrameQuaternion orientation = new FrameQuaternion();
+   private GDXPlanarRegionsGraphic planarRegionsGraphic;
+   private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+   private GDXPointCloudRenderer boundaryPointCloud;
+   private RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
@@ -229,6 +242,10 @@ public class GDXGPUPlanarRegionExtraction
       regionMaxSearchDepthPlot = new ImGuiPlot(labels.get("Regions max search depth"), 1000, 300, 50);
       numberOfBoundaryVerticesPlot = new ImGuiPlot(labels.get("Number of boundary vertices"), 1000, 300, 50);
       boundaryMaxSearchDepthPlot = new ImGuiPlot(labels.get("Boundary max search depth"), 1000, 300, 50);
+
+      planarRegionsGraphic = new GDXPlanarRegionsGraphic();
+      boundaryPointCloud = new GDXPointCloudRenderer();
+      boundaryPointCloud.create(2000000);
    }
 
    public void processROS1DepthImage(Image image)
@@ -340,7 +357,7 @@ public class GDXGPUPlanarRegionExtraction
 
       findRegions();
       findBoundariesAndHoles();
-//      growRegionBoundaries();
+      growRegionBoundaries();
 
       debugExtractionPanel.draw();
    }
@@ -527,8 +544,11 @@ public class GDXGPUPlanarRegionExtraction
    }
 
    /** FIXME: This method filled with allocations. */
-   public void getPlanarRegions(PlanarRegionsList planarRegionsList, ReferenceFrame cameraFrame)
+   public void renderPlanarRegions(ReferenceFrame cameraFrame)
    {
+      if (!render3DPlanarRegions.get())
+         return;
+
       if (cmosFrame == null)
       {
          cmosFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cmosFrame", cameraFrame, ZForwardXRightToZUpXForward);
@@ -617,9 +637,12 @@ public class GDXGPUPlanarRegionExtraction
 //      tempTransform.appendYawRotation(-Math.PI / 2.0);
 //      planarRegionsList.applyTransform(tempTransform);
 //      planarRegionsList.applyTransform(cameraFrame.getTransformToWorldFrame());
+
+      planarRegionsGraphic.generateMeshes(planarRegionsList);
+      planarRegionsGraphic.update();
    }
 
-   public void getBoundaryPoints(RecyclingArrayList<Point3D32> pointsToRender, ReferenceFrame cameraFrame, Matrix4 invProjectionView)
+   public void renderBoundaryPoints(ReferenceFrame cameraFrame, Matrix4 invProjectionView)
    {
       if (cmosFrame == null)
       {
@@ -628,35 +651,44 @@ public class GDXGPUPlanarRegionExtraction
       pointsToRender.clear();
       for (GDXGPUPlanarRegion planarRegion : planarRegions)
       {
-         if (!planarRegion.getRegionRings().isEmpty())
+         if (render3DBoundaries.get())
          {
-            GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
-            for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
+            if (!planarRegion.getRegionRings().isEmpty())
             {
-               int row = (int) boundaryIndex.getX() * patchHeight;
-               int column = (int) boundaryIndex.getY() * patchWidth;
-               float z = inputFloatDepthImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-               float imageY = (2.0f * row) / imageHeight - 1.0f;
-               float normalizedDeviceCoordinateZ = z - imageY * -0.027f;
-//               normalizedDeviceCoordinateZ /= 2.1;
-//               normalizedDeviceCoordinateZ = - normalizedDeviceCoordinateZ - 10.105f;
-//               normalizedDeviceCoordinateZ /= 10.105f;
-               normalizedDeviceCoordinateZ = (-(2.1f / normalizedDeviceCoordinateZ) + 10.105f) / 9.895f;
-               Vector3 gdxPoint = new Vector3((2.0f * column) / imageWidth - 1.0f, imageY, normalizedDeviceCoordinateZ);
-               gdxPoint.prj(invProjectionView);
-//               tempFramePoint.setIncludingFrame(cmosFrame, gdxPoint.x, gdxPoint.y, gdxPoint.z);
-//               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-               pointsToRender.add().set(gdxPoint.x, gdxPoint.y, gdxPoint.z);
+               GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
+               for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
+               {
+                  int row = (int) boundaryIndex.getX() * patchHeight;
+                  int column = (int) boundaryIndex.getY() * patchWidth;
+                  float z = inputFloatDepthImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+                  float imageY = (2.0f * row) / imageHeight - 1.0f;
+                  float normalizedDeviceCoordinateZ = z - imageY * -0.027f;
+                  //               normalizedDeviceCoordinateZ /= 2.1;
+                  //               normalizedDeviceCoordinateZ = - normalizedDeviceCoordinateZ - 10.105f;
+                  //               normalizedDeviceCoordinateZ /= 10.105f;
+                  normalizedDeviceCoordinateZ = (-(2.1f / normalizedDeviceCoordinateZ) + 10.105f) / 9.895f;
+                  Vector3 gdxPoint = new Vector3((2.0f * column) / imageWidth - 1.0f, imageY, normalizedDeviceCoordinateZ);
+                  gdxPoint.prj(invProjectionView);
+                  //               tempFramePoint.setIncludingFrame(cmosFrame, gdxPoint.x, gdxPoint.y, gdxPoint.z);
+                  //               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+                  pointsToRender.add().set(gdxPoint.x, gdxPoint.y, gdxPoint.z);
+               }
             }
          }
 
-         for (Vector3D boundaryVertex : planarRegion.getBoundaryVertices())
+         if (render3DGrownBoundaries.get())
          {
-            tempFramePoint.setIncludingFrame(cmosFrame, boundaryVertex);
-            tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-            pointsToRender.add().set(tempFramePoint);
+            for (Vector3D boundaryVertex : planarRegion.getBoundaryVertices())
+            {
+               tempFramePoint.setIncludingFrame(cmosFrame, boundaryVertex);
+               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+               pointsToRender.add().set(tempFramePoint);
+            }
          }
       }
+
+      boundaryPointCloud.setPointsToRender(pointsToRender, Color.WHITE);
+      boundaryPointCloud.updateMesh();
    }
 
    private void enqueueWriteParameters()
@@ -713,6 +745,9 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.sliderInt(labels.get("Region boundary diff"), regionBoundaryDiff.getData(), 1, 30);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
+      ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
+      ImGui.checkbox(labels.get("Render 3D boundaries"), render3DBoundaries);
+      ImGui.checkbox(labels.get("Render 3D grown boundaries"), render3DGrownBoundaries);
       ImGui.inputDouble(labels.get("Region growth factor"), regionGrowthFactor);
       ImGui.inputInt(labels.get("Input height"), inputHeight);
       ImGui.inputInt(labels.get("Input width"), inputWidth);
@@ -746,6 +781,12 @@ public class GDXGPUPlanarRegionExtraction
       polygonizerParameters.setMinNumberOfNodes(minNumberOfNodesSlider.get());
       ImGui.checkbox("Cut Narrow Passage", cutNarrowPassageChecked);
       polygonizerParameters.setCutNarrowPassage(cutNarrowPassageChecked.get());
+   }
+
+   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      planarRegionsGraphic.getRenderables(renderables, pool);
+      boundaryPointCloud.getRenderables(renderables, pool);
    }
 
    public ImGuiPanel getPanel()
