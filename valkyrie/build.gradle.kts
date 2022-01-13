@@ -99,11 +99,13 @@ tasks.create("deployOCUApplications") {
    }
 }
 
+val directory = "/home/val/valkyrie"
+
 tasks.create("deployLocal") {
    dependsOn("installDist")
 
    doLast {
-      val libFolder = File(System.getProperty("user.home"), "valkyrie/lib")
+      val libFolder = File(directory, "lib")
       libFolder.delete()
       libFolder.mkdirs()
 
@@ -112,7 +114,7 @@ tasks.create("deployLocal") {
          into(libFolder)
       }
 
-      val binFolder = File(System.getProperty("user.home"), "valkyrie/bin")
+      val binFolder = File(directory, "bin")
       binFolder.delete()
       binFolder.mkdirs()
       
@@ -122,11 +124,20 @@ tasks.create("deployLocal") {
       }
 
       copy {
-         from("build/libs/valkyrie-$version.jar")
-         into(File(System.getProperty("user.home"), "valkyrie"))
+         from("launchScripts")
+         into(directory)
+      }
+      
+      exec {
+          commandLine("/bin/bash", "-c", "chmod 0755 $directory/*.sh")
       }
 
-      File(System.getProperty("user.home"), "valkyrie/valkyrie-$version.jar").renameTo(File(System.getProperty("user.home"), "valkyrie/ValkyrieController.jar"))
+      copy {
+         from("build/libs/valkyrie-$version.jar")
+         into(directory)
+      }
+
+      File(directory, "valkyrie-$version.jar").renameTo(File(System.getProperty("user.home"), "valkyrie/ValkyrieController.jar"))
 
       val configurationDir = File(System.getProperty("user.home"), ".ihmc/Configurations")
       configurationDir.delete()
@@ -138,8 +149,6 @@ tasks.create("deployLocal") {
       }
    }
 }
-
-val directory = "/home/val/valkyrie"
 
 tasks.create("deploy") {
    dependsOn("installDist")
@@ -160,6 +169,7 @@ tasks.create("deploy") {
          put(file("build/libs/valkyrie-$version.jar").toString(), "$directory/ValkyrieController.jar")
          put(file("launchScripts").toString(), directory)
          exec("chmod +x $directory/runNetworkProcessor.sh")
+         exec("chmod +x $directory/runRos1ToRos2Bridge.sh")
          exec("ls -halp $directory")
          // For some reason, this jar needs to be removed to get the JAXB to work.
          exec("rm ~/valkyrie/lib/jaxb-runtime-2.3.2.jar")
@@ -177,60 +187,44 @@ tasks.create("deployNetworkProcessor") {
    }
 }
 
+fun deployNetworkProcessorToMachine(host: String, user: String, password: String)
+{
+   remote.session(host, user, password)
+   {
+		exec("mkdir -p $directory")
+		
+		exec("rm -rf $directory/bin")
+		exec("rm -rf $directory/lib")
+		
+		put(file("build/install/valkyrie/bin").toString(), "$directory/bin")
+		exec("chmod +x $directory/bin/valkyrie-network-processor")
+		put(file("build/install/valkyrie/lib").toString(), "$directory/lib")
+		exec("ls -halp $directory/lib")
+		
+		put(file("build/libs/valkyrie-$version.jar").toString(), "$directory/ValkyrieController.jar")
+		put(file("launchScripts").toString(), directory)
+		exec("chmod +x $directory/runNetworkProcessor.sh")
+		exec("ls -halp $directory")
+		
+		exec("rm -rf /home/val/.ihmc/Configurations")
+		exec("mkdir -p /home/val/.ihmc/Configurations")
+		put(file("saved-configurations/defaultREAModuleConfiguration.txt").toString(), ".ihmc/Configurations")
+		exec("ls -halp /home/val/.ihmc/Configurations")
+   }
+}
+
 fun deployNetworkProcessor()
 {
    val valkyrie_zelda_ip: String by project
    val valkyrie_bronn_ip: String? by project
-   val valkyrie_realtime_username: String by project
+   val valkyrie_realtime_username: String by project   
    val valkyrie_realtime_password: String by project
    val local_bronn_ip = valkyrie_bronn_ip
 
-   remote.session(valkyrie_zelda_ip, valkyrie_realtime_username, valkyrie_realtime_password) // perception
-   {
-      exec("mkdir -p $directory")
-
-      exec("rm -rf $directory/bin")
-      exec("rm -rf $directory/lib")
-
-      put(file("build/install/valkyrie/bin").toString(), "$directory/bin")
-      exec("chmod +x $directory/bin/valkyrie-network-processor")
-      put(file("build/install/valkyrie/lib").toString(), "$directory/lib")
-      exec("ls -halp $directory/lib")
-
-      put(file("build/libs/valkyrie-$version.jar").toString(), "$directory/ValkyrieController.jar")
-      put(file("launchScripts").toString(), directory)
-      exec("chmod +x $directory/runNetworkProcessor.sh")
-      exec("ls -halp $directory")
-
-      exec("rm -rf /home/val/.ihmc/Configurations")
-      exec("mkdir -p /home/val/.ihmc/Configurations")
-      put(file("saved-configurations/defaultREAModuleConfiguration.txt").toString(), ".ihmc/Configurations")
-      exec("ls -halp /home/val/.ihmc/Configurations")
-   }
+   deployNetworkProcessorToMachine( valkyrie_zelda_ip, valkyrie_realtime_username, valkyrie_realtime_password)
 
    if (local_bronn_ip != null) {
-       remote.session(local_bronn_ip, valkyrie_realtime_username, valkyrie_realtime_password) // perception
-      {
-         exec("mkdir -p $directory")
-   
-         exec("rm -rf $directory/bin")
-         exec("rm -rf $directory/lib")
-   
-         put(file("build/install/valkyrie/bin").toString(), "$directory/bin")
-         exec("chmod +x $directory/bin/valkyrie-network-processor")
-         put(file("build/install/valkyrie/lib").toString(), "$directory/lib")
-         exec("ls -halp $directory/lib")
-   
-         put(file("build/libs/valkyrie-$version.jar").toString(), "$directory/ValkyrieController.jar")
-         put(file("launchScripts").toString(), directory)
-         exec("chmod +x $directory/runNetworkProcessor.sh")
-         exec("ls -halp $directory")
-   
-         exec("rm -rf /home/val/.ihmc/Configurations")
-         exec("mkdir -p /home/val/.ihmc/Configurations")
-         put(file("saved-configurations/defaultREAModuleConfiguration.txt").toString(), ".ihmc/Configurations")
-         exec("ls -halp /home/val/.ihmc/Configurations")
-      }
+       deployNetworkProcessorToMachine( local_bronn_ip, valkyrie_realtime_username, valkyrie_realtime_password)
    }
 }
 
