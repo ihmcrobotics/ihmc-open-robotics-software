@@ -400,6 +400,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          ImGui.sameLine();
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 2)"), publishColorImageROS2);
       }
+      depthSensorSimulator.renderTuningSliders();
    }
 
    private void publishPointCloudROS2()
