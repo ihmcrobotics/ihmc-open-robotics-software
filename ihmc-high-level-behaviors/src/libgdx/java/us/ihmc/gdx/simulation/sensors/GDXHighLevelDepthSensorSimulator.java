@@ -485,6 +485,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
             coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
          coordinateFrame.getRenderables(renderables, pool);
       }
+      depthSensorSimulator.getVirtualRenderables(renderables, pool);
    }
 
    public void setSensorEnabled(boolean sensorEnabled)
