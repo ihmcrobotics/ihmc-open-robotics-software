@@ -19,6 +19,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -45,10 +46,13 @@ public class GDXLowLevelDepthSensorSimulator
 
    private final int imageWidth;
    private final int imageHeight;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat fieldOfViewY = new ImFloat();
    private final ImFloat focalLength = new ImFloat();
    private final ImFloat nearPlaneDistance = new ImFloat();
    private final ImFloat farPlaneDistance = new ImFloat();
+   private final ImFloat cx = new ImFloat();
+   private final ImFloat cy = new ImFloat();
    private final double updatePeriod;
    private final Timer throttleTimer = new Timer();
    private final Vector3 depthPoint = new Vector3();
@@ -92,6 +96,8 @@ public class GDXLowLevelDepthSensorSimulator
       this.fieldOfViewY.set((float) fieldOfViewY);
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
+      cx.set(imageWidth / 2.0f);
+      cy.set(imageHeight / 2.0f);
       nearPlaneDistance.set((float) minRange);
       farPlaneDistance.set((float) maxRange);
       calculateFocalLength();
@@ -270,9 +276,9 @@ public class GDXLowLevelDepthSensorSimulator
                   depthPoint.z = processedDepthZ;
                   depthPoint.prj(camera.invProjectionView);
 
-//                  depthPoint.z = (y - 320) / focalLength.get() * eyeDepth;
-//                  depthPoint.y = -(x - 240) / focalLength.get() * eyeDepth;
-//                  depthPoint.x = eyeDepth;
+                  depthPoint.z = (y - cy.get()) / focalLength.get() * eyeDepth;
+                  depthPoint.y = -(x - cx.get()) / focalLength.get() * eyeDepth;
+                  depthPoint.x = eyeDepth;
 
                   Point3D32 point = points.add();
                   GDXTools.toEuclid(depthPoint, point);
@@ -321,22 +327,24 @@ public class GDXLowLevelDepthSensorSimulator
 
    public void renderTuningSliders()
    {
-      if (ImGui.sliderFloat("Field of view Y (deg)", fieldOfViewY.getData(), 1.0f, 180.0f))
+      if (ImGui.sliderFloat(labels.get("Field of view Y (deg)"), fieldOfViewY.getData(), 1.0f, 180.0f))
       {
          camera.fieldOfView = fieldOfViewY.get();
          calculateFocalLength();
       }
-      if (ImGui.sliderFloat("Near plane distance (m)", nearPlaneDistance.getData(), 0.01f, 0.2f))
+      if (ImGui.sliderFloat(labels.get("Near plane distance (m)"), nearPlaneDistance.getData(), 0.01f, 0.2f))
          camera.near = nearPlaneDistance.get();
-      if (ImGui.sliderFloat("Far plane distance (m)", farPlaneDistance.getData(), 0.21f, 5.0f))
+      if (ImGui.sliderFloat(labels.get("Far plane distance (m)"), farPlaneDistance.getData(), 0.21f, 5.0f))
          camera.far = farPlaneDistance.get();
-      if (ImGui.sliderFloat("Focal length (px)", focalLength.getData(), -1000.0f, 1000.0f))
+      if (ImGui.sliderFloat(labels.get("Focal length (px)"), focalLength.getData(), -1000.0f, 1000.0f))
       {
          calculateFieldOfView();
          camera.fieldOfView = fieldOfViewY.get();
       }
-      ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Depth Pitch Tuner"), depthPitchTuner.getData(), 0.0001f, -0.05f, 0.05f);
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Render frustum"), renderFrustum);
+      ImGui.dragFloat(labels.get("Depth Pitch Tuner"), depthPitchTuner.getData(), 0.0001f, -0.05f, 0.05f);
+      ImGui.checkbox(labels.get("Render frustum"), renderFrustum);
+      ImGui.sliderFloat(labels.get("Principal Offset X (px)"), cx.getData(), -imageWidth, imageWidth);
+      ImGui.sliderFloat(labels.get("Principal Offset Y (px)"), cy.getData(), -imageHeight, imageHeight);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
