@@ -3,7 +3,7 @@
 # it deploys build products only on the local machine.
 
 IHMC_HOME=$HOME/git/ihmc-open-robotics-software
-GRADLE_VERSION=5.6.4
+GRADLE_VERSION=7.3
 GRADLE=/usr/lib/gradle/${GRADLE_VERSION}/bin/gradle
 
 if [[ ! -x $GRADLE ]]; then
@@ -17,6 +17,8 @@ if [[ ! -d $IHMC_HOME ]]; then
     echo "Unable to find the IHMC source at $IHMC_HOME"
     exit 2
 fi
+
+trap "rm -rf $HOME/.gradle/caches/modules*/files*/log4j" EXIT
 
 cd $IHMC_HOME
 $GRADLE --no-build-cache clean

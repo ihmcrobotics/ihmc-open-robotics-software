@@ -29,6 +29,11 @@ fi
 
 echo "Starting Network Processor"
 
+# Must be in the script directory to start or java libs will not be found
+full_script_path=$(readlink -f $0)
+start_dir=$(dirname $full_script_path)
+cd $start_dir
+
 IHMC_LOGS_DIR=$HOME/.ihmc/logs
 OLDEST_LOG_AGE_HOURS=3
 if [[ ! -d $IHMC_LOGS_DIR ]]; then
