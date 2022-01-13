@@ -170,18 +170,13 @@ public class GDXPerceptionVisualizerUI
         double verticalFOV = 55.0;
         int imageWidth = 640;
         int imageHeight = 480;
-        double fx = 500.0;
-        double fy = 500.0;
         if (LOW_RESOLUTION_SENSORS)
         {
             imageWidth /= 2;
             imageHeight /= 2;
-            fx /= 2;
-            fy /= 2;
         }
         double minRange = 0.105;
         double maxRange = 5.0;
-        CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
         ROS2NodeInterface ros2Node = null;
         ROS2Topic<?> ros2Topic = null;
         ReferenceFrame sensorFrame = null;
@@ -190,7 +185,6 @@ public class GDXPerceptionVisualizerUI
                                                     ros1Node,
                                                     RosTools.MAPSENSE_DEPTH_IMAGE,
                                                     RosTools.MAPSENSE_DEPTH_CAMERA_INFO,
-                                                    depthCameraIntrinsics,
                                                     RosTools.L515_VIDEO,
                                                     RosTools.L515_COLOR_CAMERA_INFO,
                                                     ros2Node,

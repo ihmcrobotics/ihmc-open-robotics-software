@@ -49,25 +49,14 @@ public class GDXHighLevelDepthSensorDemo
             double focalLength = (imageHeight / 2.0) * Math.tan(Math.toRadians(verticalFOV));
             double focalLengthInPixelsX = focalLength;
             double focalLengthInPixelsY = focalLength;
-            double skew = 0.0;
             // range should be as small as possible because depth precision is nonlinear
             // it gets drastically less precise father away
             double minRange = 0.105;
             double maxRange = 5.0;
-            double principalPointOffsetInPixelsX = imageWidth / 2.0; // Also called cx
-            double principalPointOffsetInPixelsY = imageHeight / 2.0; // Also called cy
-            CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(focalLengthInPixelsX,
-                                                                              focalLengthInPixelsY,
-                                                                              skew,
-                                                                              principalPointOffsetInPixelsX,
-                                                                              principalPointOffsetInPixelsY,
-                                                                              imageWidth,
-                                                                              imageHeight);
             highLevelDepthSensorSimulator = new GDXHighLevelDepthSensorSimulator("Stepping L515",
                                                                                  null,
                                                                                  null,
                                                                                  null,
-                                                                                 depthCameraIntrinsics,
                                                                                  null,
                                                                                  null,
                                                                                  null,

@@ -48,11 +48,11 @@ public class GDXLowLevelDepthSensorSimulator
    private final int imageHeight;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat fieldOfViewY = new ImFloat();
-   private final ImFloat focalLength = new ImFloat();
+   private final ImFloat focalLengthPixels = new ImFloat();
    private final ImFloat nearPlaneDistance = new ImFloat();
    private final ImFloat farPlaneDistance = new ImFloat();
-   private final ImFloat cx = new ImFloat();
-   private final ImFloat cy = new ImFloat();
+   private final ImFloat principalOffsetXPixels = new ImFloat();
+   private final ImFloat principalOffsetYPixels = new ImFloat();
    private final double updatePeriod;
    private final Timer throttleTimer = new Timer();
    private final Vector3 depthPoint = new Vector3();
@@ -96,8 +96,8 @@ public class GDXLowLevelDepthSensorSimulator
       this.fieldOfViewY.set((float) fieldOfViewY);
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
-      cx.set(imageWidth / 2.0f);
-      cy.set(imageHeight / 2.0f);
+      principalOffsetXPixels.set(imageWidth / 2.0f);
+      principalOffsetYPixels.set(imageHeight / 2.0f);
       nearPlaneDistance.set((float) minRange);
       farPlaneDistance.set((float) maxRange);
       calculateFocalLength();
@@ -155,12 +155,12 @@ public class GDXLowLevelDepthSensorSimulator
 
    private void calculateFocalLength()
    {
-      focalLength.set((float) ((imageHeight / 2.0) / Math.tan(Math.toRadians((fieldOfViewY.get() / 2.0)))));
+      focalLengthPixels.set((float) ((imageHeight / 2.0) / Math.tan(Math.toRadians((fieldOfViewY.get() / 2.0)))));
    }
 
    private void calculateFieldOfView()
    {
-      fieldOfViewY.set(2.0f * (float) Math.toDegrees(Math.atan((imageHeight / 2.0) / focalLength.get())));
+      fieldOfViewY.set(2.0f * (float) Math.toDegrees(Math.atan((imageHeight / 2.0) / focalLengthPixels.get())));
    }
 
    public void render(GDX3DSceneManager sceneManager)
@@ -276,8 +276,8 @@ public class GDXLowLevelDepthSensorSimulator
                   depthPoint.z = processedDepthZ;
                   depthPoint.prj(camera.invProjectionView);
 
-                  depthPoint.z = (y - cy.get()) / focalLength.get() * eyeDepth;
-                  depthPoint.y = -(x - cx.get()) / focalLength.get() * eyeDepth;
+                  depthPoint.z = (y - principalOffsetYPixels.get()) / focalLengthPixels.get() * eyeDepth;
+                  depthPoint.y = -(x - principalOffsetXPixels.get()) / focalLengthPixels.get() * eyeDepth;
                   depthPoint.x = eyeDepth;
 
                   Point3D32 point = points.add();
@@ -336,15 +336,15 @@ public class GDXLowLevelDepthSensorSimulator
          camera.near = nearPlaneDistance.get();
       if (ImGui.sliderFloat(labels.get("Far plane distance (m)"), farPlaneDistance.getData(), 0.21f, 5.0f))
          camera.far = farPlaneDistance.get();
-      if (ImGui.sliderFloat(labels.get("Focal length (px)"), focalLength.getData(), -1000.0f, 1000.0f))
+      if (ImGui.sliderFloat(labels.get("Focal length (px)"), focalLengthPixels.getData(), -1000.0f, 1000.0f))
       {
          calculateFieldOfView();
          camera.fieldOfView = fieldOfViewY.get();
       }
       ImGui.dragFloat(labels.get("Depth Pitch Tuner"), depthPitchTuner.getData(), 0.0001f, -0.05f, 0.05f);
       ImGui.checkbox(labels.get("Render frustum"), renderFrustum);
-      ImGui.sliderFloat(labels.get("Principal Offset X (px)"), cx.getData(), -imageWidth, imageWidth);
-      ImGui.sliderFloat(labels.get("Principal Offset Y (px)"), cy.getData(), -imageHeight, imageHeight);
+      ImGui.sliderFloat(labels.get("Principal Offset X (px)"), principalOffsetXPixels.getData(), -imageWidth, imageWidth);
+      ImGui.sliderFloat(labels.get("Principal Offset Y (px)"), principalOffsetYPixels.getData(), -imageHeight, imageHeight);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
@@ -424,5 +424,25 @@ public class GDXLowLevelDepthSensorSimulator
    public void setDepthEnabled(boolean depthEnabled)
    {
       this.depthEnabled = depthEnabled;
+   }
+
+   public ImFloat getPrincipalOffsetXPixels()
+   {
+      return principalOffsetXPixels;
+   }
+
+   public ImFloat getPrincipalOffsetYPixels()
+   {
+      return principalOffsetYPixels;
+   }
+
+   public ImFloat getCyPixels()
+   {
+      return principalOffsetYPixels;
+   }
+
+   public ImFloat getFocalLengthPixels()
+   {
+      return focalLengthPixels;
    }
 }

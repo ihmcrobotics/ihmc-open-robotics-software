@@ -46,18 +46,12 @@ public class GDXGPUPlanarRegionExtractionDemo
             double verticalFOV = 55.0;
             int imageWidth = 640;
             int imageHeight = 480;
-            double fx = 500.0;
-            double fy = 500.0;
             double minRange = 0.105;
             double maxRange = 5.0;
-            double cx = imageWidth / 2.0;
-            double cy = imageHeight / 2.0;
-            CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, cx, cy, imageWidth, imageHeight);
             l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
                                                         null,
                                                         null,
                                                         null,
-                                                        depthCameraIntrinsics,
                                                         null,
                                                         null,
                                                         null,
@@ -83,10 +77,17 @@ public class GDXGPUPlanarRegionExtractionDemo
             l515.setPublishColorImageROS1(false);
             l515.setPublishColorImageROS2(false);
             l515.create();
+            CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
             baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
 
             gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
-            gpuPlanarRegionExtraction.create(imageWidth, imageHeight, l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer(), fx, fy, cx, cy);
+            gpuPlanarRegionExtraction.create(imageWidth,
+                                             imageHeight,
+                                             l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer(),
+                                             cameraIntrinsics.getFx(),
+                                             cameraIntrinsics.getFy(),
+                                             cameraIntrinsics.getCx(),
+                                             cameraIntrinsics.getCy());
             baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
             baseUI.get3DSceneManager().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
          }
