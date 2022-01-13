@@ -124,7 +124,13 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.bodyPathVariableDescriptors = collectVariableDescriptors(bodyPathPlanner.getRegistry());
       this.footstepPlanVariableDescriptors = collectVariableDescriptors(aStarFootstepPlanner.getRegistry());
 
-      addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
+      addStatusCallback(output ->
+                        {
+                           if (output.getFootstepPlanningResult() == null)
+                              output.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.lapElapsed());
+                           else
+                              output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed());
+                        });
       addStatusCallback(output -> output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed()));
    }
 
@@ -267,6 +273,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             double alphaIntermediateGoal = request.getHorizonLength() / pathLength;
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
+
+         stopwatch.lap();
       }
       else if (visibilityGraphParameters.getOptimizeForNarrowPassage())
       {
