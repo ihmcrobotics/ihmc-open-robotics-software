@@ -1,6 +1,5 @@
 package us.ihmc.gdx;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -48,16 +47,12 @@ public class GDXROS1DepthSensorDemo
             double verticalFOV = 55.0;
             int imageWidth = 640;
             int imageHeight = 480;
-            double fx = 500.0;
-            double fy = 500.0;
             double minRange = 0.105;
             double maxRange = 5.0;
-            CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
             l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
                                                         ros1Node,
                                                         RosTools.MAPSENSE_DEPTH_IMAGE,
                                                         RosTools.MAPSENSE_DEPTH_CAMERA_INFO,
-                                                        depthCameraIntrinsics,
                                                         RosTools.L515_VIDEO,
                                                         RosTools.L515_COLOR_CAMERA_INFO,
                                                         null,
