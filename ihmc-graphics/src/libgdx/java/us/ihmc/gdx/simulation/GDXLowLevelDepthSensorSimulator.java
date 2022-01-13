@@ -16,6 +16,7 @@ import imgui.type.ImFloat;
 import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiTools;
@@ -59,6 +60,7 @@ public class GDXLowLevelDepthSensorSimulator
    private final Vector3D32 noiseVector = new Vector3D32();
 
    private PerspectiveCamera camera;
+   private RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
    private ModelBatch modelBatch;
    private ScreenViewport viewport;
    private SensorFrameBuffer frameBuffer;
@@ -282,6 +284,7 @@ public class GDXLowLevelDepthSensorSimulator
 
                   Point3D32 point = points.add();
                   GDXTools.toEuclid(depthPoint, point);
+                  transformToWorldFrame.transform(point);
 
                   GDXTools.toEuclid(camera.position, noiseVector);
                   noiseVector.sub(point);
@@ -366,6 +369,7 @@ public class GDXLowLevelDepthSensorSimulator
       camera.up.set(0.0f, 0.0f, 1.0f);
       camera.direction.set(1.0f, 0.0f, 0.0f);
       camera.transform(worldTransform);
+      GDXTools.toEuclid(worldTransform, transformToWorldFrame);
    }
 
    public PerspectiveCamera getCamera()
