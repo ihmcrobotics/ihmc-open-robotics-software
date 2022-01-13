@@ -6,7 +6,7 @@ package us.ihmc.sensorProcessing.heightMap;
  * - The grid size, i.e. side length of the square region it covers
  * - Grid center, an xy coordinate which is the middle of the grid
  *
- * Cells are indexing two ways:
+ * Cells are indexed two ways:
  * - A unique integer key, which is zero-indexed and starts at the corner of the grid which is the negative-most x and y coordinates.
  * - An (x,y) integer index pair, which is zero at the negative-most cell along each axis
  */

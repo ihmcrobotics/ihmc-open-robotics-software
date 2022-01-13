@@ -7,17 +7,25 @@ import controller_msgs.msg.dds.HeightMapMessagePubSubType;
 import javafx.stage.FileChooser;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.footstepPlanning.bodyPath.HeightMapSurfaceNormalCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
+import us.ihmc.pathPlanning.HeightMapDataSetName;
+import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -33,8 +41,8 @@ public class HeightMapSnapperVisualizer
 {
    public HeightMapSnapperVisualizer()
    {
-//      File file = loadThroughChooser();
-      File file = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "stepping_stones.json");
+      File file = loadThroughChooser();
+//      File file = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "stepping_stones.json");
 
       if (file == null)
          return;
@@ -64,24 +72,30 @@ public class HeightMapSnapperVisualizer
       polygon.addVertex(-0.11, -0.055);
       polygon.update();
 
+      long start = System.nanoTime();
+      HeightMapSurfaceNormalCalculator surfaceNormalCalculator = new HeightMapSurfaceNormalCalculator();
+      surfaceNormalCalculator.computeSurfaceNormals(heightMapData, 0.3);
+      long stop = System.nanoTime();
+      System.out.println((stop - start));
+
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(buildHeightMapGraphics(heightMapData));
+      scs.addStaticLinkGraphics(buildHeightMapGraphics(heightMapData, surfaceNormalCalculator));
 
       // good values
-      scs.addStaticLinkGraphics(buildSnapGraphics(heightMapData,
-                                                  polygon,
-                                                  new Pose2D(1.35, 0.25, -0.9),
-                                                  new Pose2D(1.7, 0.7, 0.4),
-                                                  new Pose2D(2.0, 0.3, -0.8),
-                                                  new Pose2D(2.5, 0.7, 1.5),
-                                                  new Pose2D(2.65, 0.15, 0.0),
-                                                  new Pose2D(1.28, 0.25, 0.8),
-                                                  new Pose2D(1.68, 0.7, -1.2),
-                                                  new Pose2D(2.05, 0.36, 0.8),
-                                                  new Pose2D(2.38, 0.7, 1.5),
-                                                  new Pose2D(2.7, 0.26, 0.0)
-                                                              ));
+//      scs.addStaticLinkGraphics(buildSnapGraphics(heightMapData,
+//                                                  polygon,
+//                                                  new Pose2D(1.35, 0.25, -0.9),
+//                                                  new Pose2D(1.7, 0.7, 0.4),
+//                                                  new Pose2D(2.0, 0.3, -0.8),
+//                                                  new Pose2D(2.5, 0.7, 1.5),
+//                                                  new Pose2D(2.65, 0.15, 0.0),
+//                                                  new Pose2D(1.28, 0.25, 0.8),
+//                                                  new Pose2D(1.68, 0.7, -1.2),
+//                                                  new Pose2D(2.05, 0.36, 0.8),
+//                                                  new Pose2D(2.38, 0.7, 1.5),
+//                                                  new Pose2D(2.7, 0.26, 0.0)
+//                                                              ));
 
       // bad values
 //      scs.addStaticLinkGraphics(buildSnapGraphics(heightMapData,
@@ -114,13 +128,16 @@ public class HeightMapSnapperVisualizer
       return fileChooser.getSelectedFile();
    }
 
-   private static Graphics3DObject buildHeightMapGraphics(HeightMapData heightMapData)
+   private static Graphics3DObject buildHeightMapGraphics(HeightMapData heightMapData, HeightMapSurfaceNormalCalculator surfaceNormalCalculator)
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
+
+      graphics3DObject.translate(heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getEstimatedGroundHeight());
+      graphics3DObject.addCube(heightMapData.getGridSizeXY(), heightMapData.getGridSizeXY(), 0.01, YoAppearance.Blue());
       graphics3DObject.addCoordinateSystem(0.3);
 
       double minHeight = heightMapData.minHeight();
-      double zeroHeight = minHeight - 0.2;
+      double zeroHeight = heightMapData.getEstimatedGroundHeight();
       AppearanceDefinition low = YoAppearance.Black();
       AppearanceDefinition high = YoAppearance.Olive();
 
@@ -137,6 +154,21 @@ public class HeightMapSnapperVisualizer
                                                                         EuclidCoreTools.interpolate(low.getColor().getY(), high.getColor().getY(), alpha),
                                                                         EuclidCoreTools.interpolate(low.getColor().getZ(), high.getColor().getZ(), alpha));
          graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, interpolatedColor);
+
+         graphics3DObject.translate(0.0, 0.0, 0.5 * renderedHeight + 0.01);
+         UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(heightMapData.getKey(i));
+
+         if (!surfaceNormal.epsilonEquals(Axis3D.Z, 1e-4))
+         {
+            Vector3D rotationAxis = new Vector3D();
+            rotationAxis.cross(surfaceNormal, Axis3D.Z);
+            rotationAxis.normalize();
+
+            double angle = -Math.acos(surfaceNormal.getZ());
+            graphics3DObject.rotate(angle, rotationAxis);
+         }
+
+         graphics3DObject.addCylinder(0.08, 0.006, YoAppearance.Orange());
       }
 
       return graphics3DObject;

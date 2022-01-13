@@ -6,9 +6,12 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -20,6 +23,7 @@ import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -34,11 +38,13 @@ import java.util.function.Consumer;
 
 public class AStarBodyPathPlanner
 {
-   private static final double traversibilityCostScale = 0.5;
+   private static final double traversibilityCostScale = 0.25;
+   private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useEdgeDetectorCost = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
+   private final FootstepPlannerParametersReadOnly parameters;
    private final AStarBodyPathEdgeData edgeData;
    private HeightMapData heightMapData;
    private final HashSet<BodyPathLatticePoint> expandedNodeSet = new HashSet<>();
@@ -49,16 +55,22 @@ public class AStarBodyPathPlanner
    private final YoDouble edgeCost = new YoDouble("edgeCost", registry);
    private final YoDouble deltaHeight = new YoDouble("deltaHeight", registry);
    private final YoDouble snapHeight = new YoDouble("snapHeight", registry);
-
-   private final BodyPathTraversibilityCalculator traversibilityCalculator;
-   private final HeightMapObstacleDetector obstacleDetector = new HeightMapObstacleDetector();
+   private final SideDependentList<YoDouble> inclineCost = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "InclineCost", registry));
 
    private final PriorityQueue<BodyPathLatticePoint> stack;
    private BodyPathLatticePoint startNode, goalNode;
    private final HashMap<BodyPathLatticePoint, Double> gridHeightMap = new HashMap<>();
    private BodyPathLatticePoint leastCostNode = null;
-   private YoEnum<RejectionReason> rejectionReason = new YoEnum<>("rejectionReason", registry, RejectionReason.class, true);
+   private final YoEnum<RejectionReason> rejectionReason = new YoEnum<>("rejectionReason", registry, RejectionReason.class, true);
+
+   /* Indicator of how flat and planar and available footholds are */
+   private final BodyPathTraversibilityCalculator traversibilityCalculator;
+   /* Uses edge detection as a heuristic for good areas to walk */
+   private final HeightMapObstacleDetector obstacleDetector = new HeightMapObstacleDetector();
+   /* Performs box collision check */
    private final BodyPathCollisionDetector collisionDetector = new BodyPathCollisionDetector();
+   /* Computes surface normals and penalizes pitch and roll */
+   private final HeightMapSurfaceNormalCalculator surfaceNormalCalculator = new HeightMapSurfaceNormalCalculator();
 
    private final TIntArrayList xSnapOffsets = new TIntArrayList();
    private final TIntArrayList ySnapOffsets = new TIntArrayList();
@@ -83,6 +95,7 @@ public class AStarBodyPathPlanner
 
    public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, ConvexPolygon2D footPolygon)
    {
+      this.parameters = parameters;
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
       traversibilityCalculator = new BodyPathTraversibilityCalculator(parameters, footPolygon, gridHeightMap, registry);
 
@@ -182,6 +195,11 @@ public class AStarBodyPathPlanner
       {
          obstacleDetector.compute(heightMapData);
       }
+      if (computeSurfaceNormalCost)
+      {
+         double patchWidth = 0.25;
+         surfaceNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
+      }
 
       planningLoop:
       while (true)
@@ -253,6 +271,36 @@ public class AStarBodyPathPlanner
                int yIndex = HeightMapTools.coordinateToIndex(node.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
                double obstacleCost = obstacleDetector.getTerrainCost().get(xIndex, yIndex);
                edgeCost.add(obstacleCost);
+            }
+            if (computeSurfaceNormalCost)
+            {
+               double yaw = Math.atan2(neighbor.getY() - node.getY(), neighbor.getX() - node.getX());
+               Pose2D bodyPose = new Pose2D();
+               bodyPose.set(node.getX(), node.getY(), yaw);
+
+               for (RobotSide side : RobotSide.values)
+               {
+                  Pose2D stepPose = new Pose2D();
+                  stepPose.set(bodyPose);
+                  stepPose.appendTranslation(0.0, side.negateIfRightSide(0.5 * parameters.getIdealFootstepWidth()));
+                  UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(HeightMapTools.coordinateToKey(stepPose.getX(),
+                                                                                                                             stepPose.getY(),
+                                                                                                                             heightMapData.getGridCenter().getX(),
+                                                                                                                             heightMapData.getGridCenter().getY(),
+                                                                                                                             heightMapData.getGridResolutionXY(),
+                                                                                                                             heightMapData.getCenterIndex()));
+
+                  if (surfaceNormal == null)
+                     continue;
+
+                  Vector2D edge = new Vector2D(neighbor.getX() - node.getX(), neighbor.getY() - node.getY());
+                  edge.normalize();
+
+                  /* Roll is the amount of incline orthogonal to the direction of motion */
+                  double roll = Math.asin(Math.abs(edge.getY() * surfaceNormal.getX() - edge.getX() * surfaceNormal.getY()));
+                  inclineCost.get(side).set(0.8 * Math.max(0.0, roll - Math.toRadians(5.0)));
+                  edgeCost.add(inclineCost.get(side));
+               }
             }
 
             if (!traversibilityCalculator.isTraversible())

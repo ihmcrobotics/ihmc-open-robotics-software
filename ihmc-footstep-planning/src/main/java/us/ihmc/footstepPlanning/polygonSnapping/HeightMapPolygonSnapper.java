@@ -27,11 +27,22 @@ public class HeightMapPolygonSnapper
    private double rootMeanSquaredError;
    private double area;
 
-   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap, double snapHeightThreshold)
+   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap)
    {
-      return snapPolygonToHeightMap(polygonToSnap, heightMap, snapHeightThreshold, Double.NaN);
+      return snapPolygonToHeightMap(polygonToSnap, heightMap, Double.MAX_VALUE, -Double.MAX_VALUE);
    }
 
+   public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap, double snapHeightThreshold)
+   {
+      return snapPolygonToHeightMap(polygonToSnap, heightMap, snapHeightThreshold, -Double.MAX_VALUE);
+   }
+
+   /**
+    * Snaps the given polygon to the height map by a least-squares plane fit.
+    *
+    * - Any cells with heights below minimumHeightToConsider are ignored.
+    * - Any cells with heights below maxZ - snapHeightThreshold are ignored, where maxZ is the max height within the polygon
+    */
    public RigidBodyTransform snapPolygonToHeightMap(ConvexPolygon2DReadOnly polygonToSnap, HeightMapData heightMap, double snapHeightThreshold, double minimumHeightToConsider)
    {
       double areaPerCell = MathTools.square(heightMap.getGridResolutionXY());
@@ -102,6 +113,8 @@ public class HeightMapPolygonSnapper
       rootMeanSquaredError = Math.sqrt(rootMeanSquaredError / pointsInsidePolyon.size());
 
       RigidBodyTransform transformToReturn = createTransformToMatchSurfaceNormalPreserveX(bestFitPlane.getNormal());
+
+//      System.out.println("RMS = " + rootMeanSquaredError + ", \t" + bestFitPlane.getNormal());
 
       Point2DReadOnly centroid = polygonToSnap.getCentroid();
       double height = bestFitPlane.getZOnPlane(centroid.getX(), centroid.getY());
