@@ -175,4 +175,9 @@ public class HeightMapData
 
       return minValue;
    }
+
+   public int getKey(int i)
+   {
+      return occupiedCells.get(i);
+   }
 }
