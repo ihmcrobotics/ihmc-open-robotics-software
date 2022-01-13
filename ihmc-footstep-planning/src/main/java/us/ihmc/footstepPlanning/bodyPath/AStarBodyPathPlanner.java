@@ -205,7 +205,7 @@ public class AStarBodyPathPlanner
       while (true)
       {
          iterations++;
-         outputToPack.getPlannerTimings().setStepPlanningIterations(iterations);
+         outputToPack.getPlannerTimings().setPathPlanningIterations(iterations);
 
          if (stopwatch.totalElapsed() >= request.getTimeout())
          {
