@@ -83,7 +83,7 @@ public class GDXGPUPlanarRegionExtractionDemo
             gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
             gpuPlanarRegionExtraction.create(imageWidth,
                                              imageHeight,
-                                             l515.getLowLevelSimulator().getEyeDepthMetersByteBuffer(),
+                                             l515.getLowLevelSimulator().getMetersDepthFloatBuffer(),
                                              cameraIntrinsics.getFx(),
                                              cameraIntrinsics.getFy(),
                                              cameraIntrinsics.getCx(),

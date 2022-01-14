@@ -55,7 +55,6 @@ import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.function.LongSupplier;
 
@@ -320,7 +319,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       if (ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected() && !depthExecutor.isExecuting())
       {
          PerspectiveCamera camera = depthSensorSimulator.getCamera();
-         FloatBuffer depthFloatBuffer = depthSensorSimulator.getEyeDepthMetersFloatBuffer();
+         ByteBuffer depthFloatBuffer = depthSensorSimulator.getMetersDepthFloatBuffer();
          depthFloatBuffer.rewind();
          ros1DepthChannelBuffer.clear();
          int size = 2 * imageWidth * imageHeight;
@@ -328,7 +327,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          {
             for (int x = 0; x < imageWidth; x++)
             {
-               float eyeDepthMeters = depthFloatBuffer.get();
+               float eyeDepthMeters = depthFloatBuffer.getFloat();
 
                int row = y + 1;
                int backForY = row * imageWidth * 2;

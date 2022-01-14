@@ -6,13 +6,17 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.*;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.apache.commons.lang3.tuple.Pair;
+import org.bytedeco.javacpp.FloatPointer;
+import org.bytedeco.opencl._cl_kernel;
+import org.bytedeco.opencl._cl_mem;
+import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.global.opencv_core;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -27,13 +31,13 @@ import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.visualizers.GDXFrustumVisualizer;
+import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotics.perception.ProjectionTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -76,16 +80,18 @@ public class GDXLowLevelDepthSensorSimulator
    private final ImGuiVideoPanel colorPanel;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
-
-   private GDXBytedecoImage processedDepthImage;
-   private ByteBuffer processedDepthByteBuffer;
-   private FloatBuffer processedDepthFloatBuffer;
-   private ByteBuffer eyeDepthMetersByteBuffer;
-   private FloatBuffer eyeDepthMetersFloatBuffer;
-   private ByteBuffer rawColorByteBuffer;
-   private IntBuffer rawColorIntBuffer;
-
    private GDXFrustumVisualizer frustumVisualizer;
+
+   private OpenCLManager openCLManager;
+   private _cl_kernel openCLKernel;
+   private GDXBytedecoImage normalizedDeviceCoordinateDepthImage;
+   // https://stackoverflow.com/questions/14435632/impulse-gaussian-and-salt-and-pepper-noise-with-opencv
+   private GDXBytedecoImage randomImage; // TODO: Add noise. Salt and pepper?
+   private GDXBytedecoImage metersDepthImage;
+   private GDXBytedecoImage rgba8888ColorImage;
+   private long numberOfFloatParameters;
+   private FloatPointer floatParameters;
+   private _cl_mem floatParametersBufferObject;
 
    public GDXLowLevelDepthSensorSimulator(String sensorName, double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
@@ -125,14 +131,15 @@ public class GDXLowLevelDepthSensorSimulator
       frameBufferBuilder.addColorTextureAttachment(GL41.GL_R32F, GL41.GL_RED, GL41.GL_FLOAT);
       frameBuffer = frameBufferBuilder.build();
 
-      processedDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * Float.BYTES * 3);
-      processedDepthFloatBuffer = processedDepthByteBuffer.asFloatBuffer();
+      openCLManager = new OpenCLManager();
+      openCLManager.create();
+      openCLKernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("LowLevelDepthSensorSimulator");
 
-      rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * Integer.BYTES);
-      rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
-
-      eyeDepthMetersByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * Float.BYTES);
-      eyeDepthMetersFloatBuffer = eyeDepthMetersByteBuffer.asFloatBuffer();
+      normalizedDeviceCoordinateDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
+      metersDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
+      rgba8888ColorImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
+      numberOfFloatParameters = 5;
+      floatParameters = new FloatPointer(numberOfFloatParameters);
 
       depthWindowPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
@@ -190,16 +197,16 @@ public class GDXLowLevelDepthSensorSimulator
 
       GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT0);
       GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read ints
-      rawColorIntBuffer.rewind();
-      GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RGBA, GL41.GL_UNSIGNED_INT_8_8_8_8, rawColorIntBuffer);
+      rgba8888ColorImage.getBackingDirectByteBuffer().rewind();
+      GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RGBA, GL41.GL_UNSIGNED_INT_8_8_8_8, rgba8888ColorImage.getBackingDirectByteBuffer());
       GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
 
       if (depthEnabled)
       {
-         processedDepthByteBuffer.rewind();
+         normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer().rewind(); // SIGSEV otherwise
          GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT1);
          GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read floats
-         GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RED, GL41.GL_FLOAT, processedDepthByteBuffer);
+         GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RED, GL41.GL_FLOAT, normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer());
          GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 1); // undo what we did
       }
 
@@ -211,25 +218,45 @@ public class GDXLowLevelDepthSensorSimulator
       float twoXCameraFarNear = 2.0f * camera.near * camera.far;
       float farPlusNear = camera.far + camera.near;
       float farMinusNear = camera.far - camera.near;
-      processedDepthFloatBuffer.rewind();
-      eyeDepthMetersFloatBuffer.rewind();
-      rawColorIntBuffer.rewind();
+
+      normalizedDeviceCoordinateDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+      rgba8888ColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+      metersDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+      floatParameters.put(0, camera.near);
+      floatParameters.put(1, camera.far);
+      floatParameters.put(2, principalOffsetXPixels.get());
+      floatParameters.put(3, principalOffsetYPixels.get());
+      floatParameters.put(4, focalLengthPixels.get());
+      floatParametersBufferObject = openCLManager.createBufferObject(numberOfFloatParameters * Float.BYTES, floatParameters);
+      openCLManager.setKernelArgument(openCLKernel, 0, normalizedDeviceCoordinateDepthImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(openCLKernel, 1, rgba8888ColorImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(openCLKernel, 2, metersDepthImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(openCLKernel, 3, floatParametersBufferObject);
+      openCLManager.execute2D(openCLKernel, imageWidth, imageHeight);
+      openCLManager.enqueueReadImage(metersDepthImage.getOpenCLImageObject(), imageWidth, imageHeight, metersDepthImage.getBytedecoByteBufferPointer());
+      openCLManager.finish();
+
+      normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer().rewind();
+      rgba8888ColorImage.getBackingDirectByteBuffer().rewind();
+      metersDepthImage.getBackingDirectByteBuffer().rewind();
       if (depthEnabled)
       {
          for (int y = 0; y < imageHeight; y++)
          {
             for (int x = 0; x < imageWidth; x++)
             {
-               float processedDepthZ = processedDepthFloatBuffer.get();
-               int rawColorReading = rawColorIntBuffer.get();
+//               float processedDepthZ = normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer().getFloat();
+               int rgba8888Color = rgba8888ColorImage.getBackingDirectByteBuffer().getInt();
 
                boolean depthPanelIsUsed = depthPanel.getIsShowing().get();
                // From "How to render depth linearly in modern OpenGL with gl_FragCoord.z in fragment shader?"
                // https://stackoverflow.com/a/45710371/1070333
 //               float normalizedDeviceCoordinateZ = 2.0f * rawDepthReading - 1.0f; // -1.0 to 1.0
-               float normalizedDeviceCoordinateZ = processedDepthZ; // -1.0 to 1.0
-               float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear)); // in meters
-               eyeDepthMetersFloatBuffer.put(eyeDepth);
+//               float normalizedDeviceCoordinateZ = processedDepthZ; // -1.0 to 1.0
+//               float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear)); // in meters
+//               metersDepthImage.getBackingDirectByteBuffer().putFloat(eyeDepth);
+
+               float eyeDepth = metersDepthImage.getBackingDirectByteBuffer().getFloat();
 
                if (depthPanelIsUsed)
                {
@@ -245,7 +272,7 @@ public class GDXLowLevelDepthSensorSimulator
                   depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
                }
 
-               if (eyeDepth > camera.near && eyeDepth < farPlaneDistance.get())
+               if (eyeDepth > camera.near && eyeDepth < camera.far)
                {
                   Point3D32 point = points.add();
                   point.set(x, y, eyeDepth);
@@ -277,15 +304,15 @@ public class GDXLowLevelDepthSensorSimulator
                      }
                      else
                      {
-                        pointCloudBufferToPack.put(((rawColorReading & 0xff000000) >>> 24) / 255f);
-                        pointCloudBufferToPack.put(((rawColorReading & 0x00ff0000) >>> 16) / 255f);
-                        pointCloudBufferToPack.put(((rawColorReading & 0x0000ff00) >>> 8) / 255f);
-                        pointCloudBufferToPack.put(((rawColorReading & 0x000000ff)) / 255f);
+                        pointCloudBufferToPack.put(((rgba8888Color & 0xff000000) >>> 24) / 255f);
+                        pointCloudBufferToPack.put(((rgba8888Color & 0x00ff0000) >>> 16) / 255f);
+                        pointCloudBufferToPack.put(((rgba8888Color & 0x0000ff00) >>> 8) / 255f);
+                        pointCloudBufferToPack.put(((rgba8888Color & 0x000000ff)) / 255f);
                      }
                      pointCloudBufferToPack.put(pointSize);
                   }
 
-                  colors.add(rawColorReading);
+                  colors.add(rgba8888Color);
                }
             }
          }
@@ -343,19 +370,14 @@ public class GDXLowLevelDepthSensorSimulator
       return camera;
    }
 
-   public FloatBuffer getEyeDepthMetersFloatBuffer()
+   public ByteBuffer getMetersDepthFloatBuffer()
    {
-      return eyeDepthMetersFloatBuffer;
-   }
-
-   public ByteBuffer getEyeDepthMetersByteBuffer()
-   {
-      return eyeDepthMetersByteBuffer;
+      return metersDepthImage.getBackingDirectByteBuffer();
    }
 
    public ByteBuffer getColorRGBA8Buffer()
    {
-      return rawColorByteBuffer;
+      return rgba8888ColorImage.getBackingDirectByteBuffer();
    }
 
    public Pixmap getColorPixmap()
