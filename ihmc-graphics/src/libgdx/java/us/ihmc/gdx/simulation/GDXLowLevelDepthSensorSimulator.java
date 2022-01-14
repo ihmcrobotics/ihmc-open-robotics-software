@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.glutils.*;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
@@ -26,6 +25,7 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.visualizers.GDXFrustumVisualizer;
+import us.ihmc.robotics.perception.ProjectionTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
 
@@ -56,7 +56,6 @@ public class GDXLowLevelDepthSensorSimulator
    private final ImFloat principalOffsetYPixels = new ImFloat();
    private final double updatePeriod;
    private final Timer throttleTimer = new Timer();
-   private final Vector3 depthPoint = new Vector3();
    private final Vector3D32 noiseVector = new Vector3D32();
 
    private PerspectiveCamera camera;
@@ -66,8 +65,6 @@ public class GDXLowLevelDepthSensorSimulator
    private SensorFrameBuffer frameBuffer;
    private RecyclingArrayList<Point3D32> points;
    private ArrayList<Integer> colors;
-   private boolean colorsAreBeingUsed = true;
-   private boolean eyeMetersIsUsed = true;
    private boolean depthEnabled = true;
    private final ImBoolean renderFrustum = new ImBoolean(false);
 
@@ -87,8 +84,6 @@ public class GDXLowLevelDepthSensorSimulator
    private ByteBuffer rawColorByteBuffer;
    private IntBuffer rawColorIntBuffer;
 
-   private final ImFloat depthPitchTuner = new ImFloat(-0.027f);
-   private int pointCloudBufferId;
    private GDXFrustumVisualizer frustumVisualizer;
 
    public GDXLowLevelDepthSensorSimulator(String sensorName, double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
@@ -270,20 +265,13 @@ public class GDXLowLevelDepthSensorSimulator
 
                if (eyeDepth > camera.near && eyeDepth < farPlaneDistance.get())
                {
-                  depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
-                  depthPoint.y = imageY;
-//                  depthPoint.z = 2.0f * rawDepthReading - 1.0f;
-//                  depthPoint.z = 2.0f * processedDepthZ - 1.0f;
-//                  depthPoint.z = rawDepthReading;
-                  depthPoint.z = processedDepthZ;
-                  depthPoint.prj(camera.invProjectionView);
-
-                  depthPoint.z = (y - principalOffsetYPixels.get()) / focalLengthPixels.get() * eyeDepth;
-                  depthPoint.y = -(x - principalOffsetXPixels.get()) / focalLengthPixels.get() * eyeDepth;
-                  depthPoint.x = eyeDepth;
-
                   Point3D32 point = points.add();
-                  GDXTools.toEuclid(depthPoint, point);
+                  point.set(x, y, eyeDepth);
+                  ProjectionTools.projectDepthPixelToIHMCZUp3D(point,
+                                                               principalOffsetXPixels.get(),
+                                                               principalOffsetYPixels.get(),
+                                                               focalLengthPixels.get(),
+                                                               focalLengthPixels.get());
                   transformToWorldFrame.transform(point);
 
                   GDXTools.toEuclid(camera.position, noiseVector);
@@ -323,9 +311,6 @@ public class GDXLowLevelDepthSensorSimulator
          if (depthPanel.getIsShowing().get())
             depthWindowTexture.draw(depthWindowPixmap, 0, 0);
       }
-
-      colorsAreBeingUsed = false;
-      eyeMetersIsUsed = false;
    }
 
    public void renderTuningSliders()
@@ -344,7 +329,6 @@ public class GDXLowLevelDepthSensorSimulator
          calculateFieldOfView();
          camera.fieldOfView = fieldOfViewY.get();
       }
-      ImGui.dragFloat(labels.get("Depth Pitch Tuner"), depthPitchTuner.getData(), 0.0001f, -0.05f, 0.05f);
       ImGui.checkbox(labels.get("Render frustum"), renderFrustum);
       ImGui.sliderFloat(labels.get("Principal Offset X (px)"), principalOffsetXPixels.getData(), -imageWidth, imageWidth);
       ImGui.sliderFloat(labels.get("Principal Offset Y (px)"), principalOffsetYPixels.getData(), -imageHeight, imageHeight);
@@ -379,13 +363,11 @@ public class GDXLowLevelDepthSensorSimulator
 
    public FloatBuffer getEyeDepthMetersFloatBuffer()
    {
-      eyeMetersIsUsed = true;
       return eyeDepthMetersFloatBuffer;
    }
 
    public ByteBuffer getEyeDepthMetersByteBuffer()
    {
-      eyeMetersIsUsed = true;
       return eyeDepthMetersByteBuffer;
    }
 
@@ -411,7 +393,6 @@ public class GDXLowLevelDepthSensorSimulator
 
    public ArrayList<Integer> getColors()
    {
-      colorsAreBeingUsed = true;
       return colors;
    }
 
