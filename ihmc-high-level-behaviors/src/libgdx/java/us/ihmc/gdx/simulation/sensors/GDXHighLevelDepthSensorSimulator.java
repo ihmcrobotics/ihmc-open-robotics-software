@@ -1,6 +1,7 @@
 package us.ihmc.gdx.simulation.sensors;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -14,6 +15,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.VideoPacket;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
@@ -109,6 +111,11 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final ImBoolean publishColorImageROS1 = new ImBoolean(false);
    private final ImBoolean publishColorImageROS2 = new ImBoolean(false);
    private final ImBoolean publishPointCloudROS2 = new ImBoolean(false);
+
+   private final ImBoolean useSensorColor = new ImBoolean(false);
+   private final Color pointColorFromPicker = new Color();
+   private final ImFloat pointSize = new ImFloat(0.01f);
+   private final float[] color = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
 
    private volatile boolean buffersCreated = false;
    private Mat rgba8Mat;
@@ -214,15 +221,20 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
             GDXTools.toGDX(sensorFrameToWorldTransform, gdxTransform);
 
          depthSensorSimulator.setCameraWorldTransform(gdxTransform);
-         depthSensorSimulator.render(sceneManager);
 
          if (coordinateFrame != null)
             coordinateFrame.transform.set(gdxTransform);
 
          if (renderPointCloudDirectly.get())
          {
-            pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints());
-            pointCloudRenderer.updateMesh();
+            pointColorFromPicker.set(color[0], color[1], color[2], color[3]);
+            Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
+            depthSensorSimulator.render(sceneManager, pointCloudRenderer.getVertexBuffer(), pointColor, pointSize.get());
+            pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
+         }
+         else
+         {
+            depthSensorSimulator.render(sceneManager);
          }
          if (throttleTimer.isExpired(UnitConversions.hertzToSeconds(publishRateHz)))
          {
@@ -386,6 +398,9 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth video"), getLowLevelSimulator().getDepthPanel().getIsShowing());
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), getLowLevelSimulator().getColorPanel().getIsShowing());
+      ImGui.checkbox("Use Sensor Color", useSensorColor);
+      ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.02f);
+      ImGui.colorPicker4("Color", color);
       ImGui.text("Publish:");
       if (ros1DepthImageTopic != null)
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Depth image (" + ros1DepthImageTopic + ")"), publishDepthImageROS1);
