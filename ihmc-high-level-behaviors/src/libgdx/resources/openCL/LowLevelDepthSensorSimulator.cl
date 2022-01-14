@@ -1,6 +1,7 @@
 kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoordinateDepthImage,
                                          read_only image2d_t rgba8888ColorImage,
                                          write_only image2d_t metersDepthImage,
+                                         write_only image2d_t pointCloudRenderingImage,
                                          global float* parameters)
 {
    int x = get_global_id(0);

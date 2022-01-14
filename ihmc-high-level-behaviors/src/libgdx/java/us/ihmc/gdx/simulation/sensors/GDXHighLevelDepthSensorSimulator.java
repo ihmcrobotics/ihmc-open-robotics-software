@@ -192,10 +192,12 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
 
    public void create()
    {
-      depthSensorSimulator.create();
+      pointCloudRenderer.create(imageWidth * imageHeight);
+
+      depthSensorSimulator.create(pointCloudRenderer.getVertexBuffer());
       addChild(depthSensorSimulator.getDepthPanel());
       addChild(depthSensorSimulator.getColorPanel());
-      pointCloudRenderer.create(imageWidth * imageHeight);
+
       if (debugCoordinateFrame.get())
          coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
 
