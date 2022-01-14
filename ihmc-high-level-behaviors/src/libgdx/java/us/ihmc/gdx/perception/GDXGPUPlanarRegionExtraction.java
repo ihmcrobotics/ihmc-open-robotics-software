@@ -10,6 +10,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
@@ -28,7 +29,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -344,7 +344,7 @@ public class GDXGPUPlanarRegionExtraction
       gyImagePanel.drawFloatImage(cyImage.getBytedecoOpenCVMat());
       gzImagePanel.drawFloatImage(czImage.getBytedecoOpenCVMat());
 
-      opencv_core.merge(outputChannelVector, regionOutputImage.getBytedecoOpenCVMat());
+      opencv_core.merge(outputChannelVector, regionOutputImage.getBytedecoOpenCVMat()); // TODO: Is this faster?
 
       debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
 
@@ -373,7 +373,7 @@ public class GDXGPUPlanarRegionExtraction
                depthOfRegionsSearch = 0; // also number of patches traversed
                GDXGPUPlanarRegion planarRegion = planarRegions.add();
                planarRegion.reset(planarRegionIslandIndex);
-               depthFirstSearch(row, column, planarRegionIslandIndex, planarRegion);
+               regionsDepthFirstSearch(row, column, planarRegionIslandIndex, planarRegion);
                if (depthOfRegionsSearch > regionMinPatches.get()
                 && depthOfRegionsSearch - planarRegion.getBoundaryVertices().size() > regionBoundaryDiff.get())
                {
@@ -390,7 +390,7 @@ public class GDXGPUPlanarRegionExtraction
       }
    }
 
-   private void depthFirstSearch(int row, int column, int planarRegionIslandIndex, GDXGPUPlanarRegion planarRegion)
+   private void regionsDepthFirstSearch(int row, int column, int planarRegionIslandIndex, GDXGPUPlanarRegion planarRegion)
    {
       if (regionVisitedMatrix.get(row, column) || depthOfRegionsSearch > searchDepthLimit.get())
          return;
@@ -398,19 +398,13 @@ public class GDXGPUPlanarRegionExtraction
       ++depthOfRegionsSearch;
       regionVisitedMatrix.set(row, column, true);
       regionMatrix.set(row, column, planarRegionIslandIndex);
-//      BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr(row, column); // TODO: Is this faster?
-//      float nx = patchPointer.getFloat(0);
-//      float ny = patchPointer.getFloat(1);
-//      float nz = patchPointer.getFloat(2);
-//      float cx = patchPointer.getFloat(3);
-//      float cy = patchPointer.getFloat(4);
-//      float cz = patchPointer.getFloat(5);
-      float nx = nxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float ny = nyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float nz = nzImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cx = cxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cy = cyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cz = czImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr(row, column);
+      float nx = patchPointer.getFloat(0);
+      float ny = patchPointer.getFloat(1);
+      float nz = patchPointer.getFloat(2);
+      float cx = patchPointer.getFloat(3);
+      float cy = patchPointer.getFloat(4);
+      float cz = patchPointer.getFloat(5);
       planarRegion.addPatch(nx, ny, nz, cx, cy, cz);
 //
       if (drawPatches.get())
@@ -436,7 +430,7 @@ public class GDXGPUPlanarRegionExtraction
             if (newPatch == 255)
             {
                ++count;
-               depthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionIslandIndex, planarRegion);
+               regionsDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionIslandIndex, planarRegion);
             }
          }
       }
