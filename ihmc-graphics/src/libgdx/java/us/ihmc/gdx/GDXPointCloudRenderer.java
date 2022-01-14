@@ -163,6 +163,11 @@ public class GDXPointCloudRenderer implements RenderableProvider
       }
    }
 
+   public FloatBuffer getVertexBuffer()
+   {
+      return renderable.meshPart.mesh.getVerticesBuffer();
+   }
+
    public void updateMeshFastest(Function<FloatBuffer, Integer> bufferConsumer)
    {
       updateMeshFastest(bufferConsumer, currentSegmentIndex);
@@ -177,7 +182,17 @@ public class GDXPointCloudRenderer implements RenderableProvider
       floatBuffer.position(segmentToUpdate * pointsPerSegment * floatsPerVertex);
       floatBuffer.limit(floatBuffer.position() + pointsPerSegment * floatsPerVertex);
       int numberOfPoints = bufferConsumer.apply(floatBuffer);
+      updateMeshFastest(numberOfPoints, segmentToUpdate);
+   }
 
+   public void updateMeshFastest(int numberOfPoints)
+   {
+      updateMeshFastest(numberOfPoints, currentSegmentIndex);
+   }
+
+   public void updateMeshFastest(int numberOfPoints, int segmentToUpdate)
+   {
+      FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
       if (numberOfPoints < pointsPerSegment) // special use case here
       {
          if (numberOfPoints == 0) // prevents errors when no point are there

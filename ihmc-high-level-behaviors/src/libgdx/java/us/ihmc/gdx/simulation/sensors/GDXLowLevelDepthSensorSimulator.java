@@ -247,6 +247,8 @@ public class GDXLowLevelDepthSensorSimulator
       normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer().rewind();
       rgba8888ColorImage.getBackingDirectByteBuffer().rewind();
       metersDepthImage.getBackingDirectByteBuffer().rewind();
+      pointCloudBufferToPack.limit(pointCloudBufferToPack.capacity());
+      pointCloudBufferToPack.rewind();
       if (depthEnabled)
       {
          for (int y = 0; y < imageHeight; y++)
