@@ -3,7 +3,7 @@ package us.ihmc.gdx;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
+import us.ihmc.gdx.simulation.sensors.GDXLowLevelDepthSensorSimulator;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 
 public class GDXDepthSensorDemo
