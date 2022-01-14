@@ -691,8 +691,6 @@ public class GDXGPUPlanarRegionExtraction
       nativeParameterArray.put(13, filterSubWidth);
       nativeParameterArray.put(14, inputHeight.get());
       nativeParameterArray.put(15, inputWidth.get());
-
-      openCLManager.enqueueWriteBuffer(parametersBufferObject, nativeParameterArray); // TODO: Necessary?
    }
 
    private void calculateDetivativeParameters()
