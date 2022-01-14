@@ -28,7 +28,11 @@ public class OpenCLManager
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
    private final ArrayList<_cl_mem> bufferObjects = new ArrayList<>();
    private final SizeTPointer globalWorkSize = new SizeTPointer(0, 0, 0);
-//   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Rethink this
+   private PointerPointer tempPointerPointerForSetKernelArgument = new PointerPointer(1);
+   private long pointerPointerSize = Pointer.sizeof(PointerPointer.class);
+   private SizeTPointer origin = new SizeTPointer(3);
+   private final SizeTPointer region = new SizeTPointer(3);
+   //   private final SizeTPointer localWorkSize = new SizeTPointer(1024, 0, 0); // TODO: Rethink this
 
    public void create()
    {
@@ -183,11 +187,6 @@ public class OpenCLManager
       return image;
    }
 
-   public void enqueueWriteBuffer(_cl_mem bufferObject, Pointer hostMemoryPointer)
-   {
-      enqueueWriteBuffer(bufferObject, bufferObject.limit(), hostMemoryPointer);
-   }
-
    public void enqueueWriteBuffer(_cl_mem bufferObject, long sizeInBytes, Pointer hostMemoryPointer)
    {
       /* Transfer data to memory buffer */
@@ -211,11 +210,9 @@ public class OpenCLManager
    {
       /* Transfer data to memory buffer */
       int blockingWrite = CL_TRUE;
-      SizeTPointer origin = new SizeTPointer(3);
       origin.put(0, 0);
       origin.put(1, 0);
       origin.put(2, 0);
-      SizeTPointer region = new SizeTPointer(3);
       region.put(0, imageWidth);
       region.put(1, imageHeight);
       region.put(2, 1);
@@ -239,8 +236,8 @@ public class OpenCLManager
 
    public void setKernelArgument(_cl_kernel kernel, int argumentIndex, _cl_mem bufferObject)
    {
-      long argumentSize = Pointer.sizeof(PointerPointer.class);
-      setKernelArgument(kernel, argumentIndex, argumentSize, new PointerPointer(1).put(bufferObject));
+      tempPointerPointerForSetKernelArgument.put(bufferObject);
+      setKernelArgument(kernel, argumentIndex, pointerPointerSize, tempPointerPointerForSetKernelArgument);
    }
 
    public void setKernelArgument(_cl_kernel kernel, int argumentIndex, long argumentSize, Pointer bufferObject)
@@ -299,11 +296,9 @@ public class OpenCLManager
    {
       /* Transfer result from the memory buffer */
       int blockingRead = CL_TRUE;
-      SizeTPointer origin = new SizeTPointer(3);
       origin.put(0, 0);
       origin.put(1, 0);
       origin.put(2, 0);
-      SizeTPointer region = new SizeTPointer(3);
       region.put(0, imageWidth);
       region.put(1, imageHeight);
       region.put(2, 1);
