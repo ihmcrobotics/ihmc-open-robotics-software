@@ -231,7 +231,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          {
             pointColorFromPicker.set(color[0], color[1], color[2], color[3]);
             Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
-            depthSensorSimulator.render(sceneManager, pointCloudRenderer.getVertexBuffer(), pointColor, pointSize.get());
+            depthSensorSimulator.render(sceneManager, pointColor, pointSize.get());
             pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
          }
          else
