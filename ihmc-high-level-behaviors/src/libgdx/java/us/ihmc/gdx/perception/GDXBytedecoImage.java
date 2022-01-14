@@ -91,6 +91,11 @@ public class GDXBytedecoImage
       openCLManager.enqueueWriteImage(openCLImageObject, imageWidth, imageHeight, bytedecoByteBufferPointer);
    }
 
+   public void readOpenCLImage(OpenCLManager openCLManager)
+   {
+      openCLManager.enqueueReadImage(openCLImageObject, imageWidth, imageHeight, bytedecoByteBufferPointer);
+   }
+
    public void rewind()
    {
       backingDirectByteBuffer.rewind();
