@@ -145,7 +145,7 @@ public class GDXLowLevelDepthSensorSimulator
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(imageWidth * imageHeight * 8, pointCloudRenderingBufferToPack);
       else
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
-      parametersBuffer = new OpenCLFloatBuffer(13);
+      parametersBuffer = new OpenCLFloatBuffer(25);
 
       colorPanel.setTexture(frameBuffer.getColorTexture());
 
@@ -236,6 +236,18 @@ public class GDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(10, userPointColor == null ? -1.0f : userPointColor.g);
       parametersBuffer.getBytedecoFloatBufferPointer().put(11, userPointColor == null ? -1.0f : userPointColor.b);
       parametersBuffer.getBytedecoFloatBufferPointer().put(12, userPointColor == null ? -1.0f : userPointColor.a);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(13, transformToWorldFrame.getTranslation().getX32());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(14, transformToWorldFrame.getTranslation().getY32());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(15, transformToWorldFrame.getTranslation().getZ32());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(16, (float) transformToWorldFrame.getRotation().getM00());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(17, (float) transformToWorldFrame.getRotation().getM01());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(18, (float) transformToWorldFrame.getRotation().getM02());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(19, (float) transformToWorldFrame.getRotation().getM10());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(20, (float) transformToWorldFrame.getRotation().getM11());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(21, (float) transformToWorldFrame.getRotation().getM12());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(22, (float) transformToWorldFrame.getRotation().getM20());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(23, (float) transformToWorldFrame.getRotation().getM21());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(24, (float) transformToWorldFrame.getRotation().getM22());
       if (firstRender)
       {
          firstRender = false;
