@@ -1,6 +1,5 @@
 package us.ihmc.gdx.perception;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
@@ -46,9 +45,6 @@ public class GDXHighLevelDepthSensorDemo
             double verticalFOV = 55.0;
             int imageWidth = 640;
             int imageHeight = 480;
-            double focalLength = (imageHeight / 2.0) * Math.tan(Math.toRadians(verticalFOV));
-            double focalLengthInPixelsX = focalLength;
-            double focalLengthInPixelsY = focalLength;
             // range should be as small as possible because depth precision is nonlinear
             // it gets drastically less precise father away
             double minRange = 0.105;
