@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation;
+package us.ihmc.gdx.simulation.sensors;
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -21,8 +21,10 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
+import us.ihmc.gdx.perception.GDXBytedecoImage;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.visualizers.GDXFrustumVisualizer;
 import us.ihmc.robotics.perception.ProjectionTools;
@@ -75,6 +77,7 @@ public class GDXLowLevelDepthSensorSimulator
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
 
+   private GDXBytedecoImage rawDepthImage;
    private ByteBuffer rawDepthByteBuffer;
    private FloatBuffer rawDepthFloatBuffer;
    private ByteBuffer processedDepthByteBuffer;
