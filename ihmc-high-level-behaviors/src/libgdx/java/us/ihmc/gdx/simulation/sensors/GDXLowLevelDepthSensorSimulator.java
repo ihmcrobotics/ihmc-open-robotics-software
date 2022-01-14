@@ -92,6 +92,7 @@ public class GDXLowLevelDepthSensorSimulator
    private long numberOfFloatParameters;
    private FloatPointer floatParameters;
    private _cl_mem floatParametersBufferObject;
+   private boolean firstRender = true;
 
    public GDXLowLevelDepthSensorSimulator(String sensorName, double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
@@ -215,19 +216,26 @@ public class GDXLowLevelDepthSensorSimulator
       points.clear();
       colors.clear();
 
-      float twoXCameraFarNear = 2.0f * camera.near * camera.far;
-      float farPlusNear = camera.far + camera.near;
-      float farMinusNear = camera.far - camera.near;
-
-      normalizedDeviceCoordinateDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-      rgba8888ColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-      metersDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
-      floatParameters.put(0, camera.near);
-      floatParameters.put(1, camera.far);
-      floatParameters.put(2, principalOffsetXPixels.get());
-      floatParameters.put(3, principalOffsetYPixels.get());
-      floatParameters.put(4, focalLengthPixels.get());
-      floatParametersBufferObject = openCLManager.createBufferObject(numberOfFloatParameters * Float.BYTES, floatParameters);
+      if (firstRender)
+      {
+         firstRender = false;
+         normalizedDeviceCoordinateDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         rgba8888ColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         metersDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
+         floatParameters.put(0, camera.near);
+         floatParameters.put(1, camera.far);
+         floatParameters.put(2, principalOffsetXPixels.get());
+         floatParameters.put(3, principalOffsetYPixels.get());
+         floatParameters.put(4, focalLengthPixels.get());
+         floatParametersBufferObject = openCLManager.createBufferObject(numberOfFloatParameters * Float.BYTES, floatParameters);
+      }
+      else
+      {
+         normalizedDeviceCoordinateDepthImage.writeOpenCLImage(openCLManager);
+         rgba8888ColorImage.writeOpenCLImage(openCLManager);
+         metersDepthImage.writeOpenCLImage(openCLManager);
+         openCLManager.enqueueWriteBuffer(floatParametersBufferObject, numberOfFloatParameters * Float.BYTES, floatParameters);
+      }
       openCLManager.setKernelArgument(openCLKernel, 0, normalizedDeviceCoordinateDepthImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(openCLKernel, 1, rgba8888ColorImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(openCLKernel, 2, metersDepthImage.getOpenCLImageObject());
