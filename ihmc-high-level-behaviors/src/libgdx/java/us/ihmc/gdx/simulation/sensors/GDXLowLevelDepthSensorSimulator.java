@@ -77,9 +77,7 @@ public class GDXLowLevelDepthSensorSimulator
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
 
-   private GDXBytedecoImage rawDepthImage;
-   private ByteBuffer rawDepthByteBuffer;
-   private FloatBuffer rawDepthFloatBuffer;
+   private GDXBytedecoImage processedDepthImage;
    private ByteBuffer processedDepthByteBuffer;
    private FloatBuffer processedDepthFloatBuffer;
    private ByteBuffer eyeDepthMetersByteBuffer;
@@ -126,11 +124,6 @@ public class GDXLowLevelDepthSensorSimulator
       frameBufferBuilder.addDepthTextureAttachment(GL41.GL_DEPTH_COMPONENT32F, GL41.GL_FLOAT);
       frameBufferBuilder.addColorTextureAttachment(GL41.GL_R32F, GL41.GL_RED, GL41.GL_FLOAT);
       frameBuffer = frameBufferBuilder.build();
-//      frameBufferBuilder.addDepthTextureAttachment(GL41.GL_DEPTH_COMPONENT32F, GL41.GL_FLOAT);
-//      frameBufferBuilder.addFloatAttachment(GL41.GL_R32F, GL41.GL_RED, GL41.GL_FLOAT, false);
-
-      rawDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * Float.BYTES);
-      rawDepthFloatBuffer = rawDepthByteBuffer.asFloatBuffer();
 
       processedDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * Float.BYTES * 3);
       processedDepthFloatBuffer = processedDepthByteBuffer.asFloatBuffer();
@@ -196,14 +189,6 @@ public class GDXLowLevelDepthSensorSimulator
       modelBatch.end();
 
       GL41.glReadBuffer(GL41.GL_COLOR_ATTACHMENT0);
-      if (depthEnabled)
-      {
-         GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read floats
-         rawDepthByteBuffer.rewind();
-//         GL41.glReadBuffer(GL41.GL_DEPTH_ATTACHMENT);
-         // Apparently, reading from the depth attachment does not require a glReadBuffer command
-//         GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_DEPTH_COMPONENT, GL41.GL_FLOAT, rawDepthByteBuffer);
-      }
       GL41.glPixelStorei(GL41.GL_UNPACK_ALIGNMENT, 4); // to read ints
       rawColorIntBuffer.rewind();
       GL41.glReadPixels(0, 0, imageWidth, imageHeight, GL41.GL_RGBA, GL41.GL_UNSIGNED_INT_8_8_8_8, rawColorIntBuffer);
@@ -226,7 +211,6 @@ public class GDXLowLevelDepthSensorSimulator
       float twoXCameraFarNear = 2.0f * camera.near * camera.far;
       float farPlusNear = camera.far + camera.near;
       float farMinusNear = camera.far - camera.near;
-      rawDepthFloatBuffer.rewind();
       processedDepthFloatBuffer.rewind();
       eyeDepthMetersFloatBuffer.rewind();
       rawColorIntBuffer.rewind();
@@ -236,12 +220,8 @@ public class GDXLowLevelDepthSensorSimulator
          {
             for (int x = 0; x < imageWidth; x++)
             {
-//               float rawDepthReading = rawDepthFloatBuffer.get(); // 0.0 to 1.0
-//               float processedDepthX = processedDepthFloatBuffer.get();
-//               float processedDepthY = processedDepthFloatBuffer.get();
                float processedDepthZ = processedDepthFloatBuffer.get();
                int rawColorReading = rawColorIntBuffer.get();
-               float imageY = (2.0f * y) / imageHeight - 1.0f;
 
                boolean depthPanelIsUsed = depthPanel.getIsShowing().get();
                // From "How to render depth linearly in modern OpenGL with gl_FragCoord.z in fragment shader?"
@@ -249,7 +229,6 @@ public class GDXLowLevelDepthSensorSimulator
 //               float normalizedDeviceCoordinateZ = 2.0f * rawDepthReading - 1.0f; // -1.0 to 1.0
                float normalizedDeviceCoordinateZ = processedDepthZ; // -1.0 to 1.0
                float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear)); // in meters
-//               eyeDepth += imageY * depthPitchTuner.get();
                eyeDepthMetersFloatBuffer.put(eyeDepth);
 
                if (depthPanelIsUsed)
