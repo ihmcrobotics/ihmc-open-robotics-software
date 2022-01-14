@@ -12,9 +12,7 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.apache.commons.lang3.tuple.Pair;
-import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_kernel;
-import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.lwjgl.opengl.GL41;
@@ -25,13 +23,13 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
-import us.ihmc.gdx.perception.GDXBytedecoFloatImage;
 import us.ihmc.gdx.perception.GDXBytedecoImage;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.DepthSensorShaderProvider;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.visualizers.GDXFrustumVisualizer;
+import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotics.perception.ProjectionTools;
 import us.ihmc.tools.Timer;
@@ -90,10 +88,8 @@ public class GDXLowLevelDepthSensorSimulator
    private GDXBytedecoImage randomImage; // TODO: Add noise. Salt and pepper?
    private GDXBytedecoImage metersDepthImage;
    private GDXBytedecoImage rgba8888ColorImage;
-   private GDXBytedecoFloatImage pointCloudRenderingImage;
-   private long numberOfFloatParameters;
-   private FloatPointer floatParameters;
-   private _cl_mem floatParametersBufferObject;
+   private OpenCLFloatBuffer pointCloudRenderingBuffer;
+   private OpenCLFloatBuffer parametersBuffer;
    private boolean firstRender = true;
 
    public GDXLowLevelDepthSensorSimulator(String sensorName, double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
@@ -119,7 +115,7 @@ public class GDXLowLevelDepthSensorSimulator
       create(null);
    }
 
-   public void create(FloatBuffer pointCloudRenderingBuffer)
+   public void create(FloatBuffer pointCloudRenderingBufferToPack)
    {
       throttleTimer.reset();
 
@@ -146,12 +142,11 @@ public class GDXLowLevelDepthSensorSimulator
       normalizedDeviceCoordinateDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       metersDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       rgba8888ColorImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
-      if (pointCloudRenderingBuffer != null)
-         pointCloudRenderingImage = new GDXBytedecoFloatImage(imageWidth, imageHeight, opencv_core.CV_32FC(8), pointCloudRenderingBuffer);
+      if (pointCloudRenderingBufferToPack != null)
+         pointCloudRenderingBuffer = new OpenCLFloatBuffer(imageWidth * imageHeight * 8, pointCloudRenderingBufferToPack);
       else
-         pointCloudRenderingImage = new GDXBytedecoFloatImage(1, 1, opencv_core.CV_32FC1, FloatBuffer.allocate(1));
-      numberOfFloatParameters = 5;
-      floatParameters = new FloatPointer(numberOfFloatParameters);
+         pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
+      parametersBuffer = new OpenCLFloatBuffer(13);
 
       depthWindowPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
@@ -177,7 +172,12 @@ public class GDXLowLevelDepthSensorSimulator
 
    public void render(GDX3DSceneManager sceneManager)
    {
-      render(sceneManager, null, null, 0.01f);
+      render(sceneManager, null, 0.01f);
+   }
+
+   public void render(GDX3DSceneManager sceneManager, Color userPointColor, float pointSize)
+   {
+      render(sceneManager, null, userPointColor, pointSize);
    }
 
    public void render(GDX3DSceneManager sceneManager, FloatBuffer pointCloudBufferToPack, Color userPointColor, float pointSize)
@@ -227,46 +227,58 @@ public class GDXLowLevelDepthSensorSimulator
       points.clear();
       colors.clear();
 
+      parametersBuffer.getBytedecoFloatBufferPointer().put(0, camera.near);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(1, camera.far);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(2, principalOffsetXPixels.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(3, principalOffsetYPixels.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(4, focalLengthPixels.get());
+      float calculatePointCloud = pointCloudRenderingBuffer.getNumberOfFloats() > 1 ? 1.0f : 0.0f;
+      parametersBuffer.getBytedecoFloatBufferPointer().put(5, calculatePointCloud);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(6, imageWidth);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(7, imageHeight);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(8, pointSize);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(9, userPointColor == null ? -1.0f : userPointColor.r);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(10, userPointColor == null ? -1.0f : userPointColor.g);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(11, userPointColor == null ? -1.0f : userPointColor.b);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(12, userPointColor == null ? -1.0f : userPointColor.a);
       if (firstRender)
       {
          firstRender = false;
          normalizedDeviceCoordinateDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          rgba8888ColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          metersDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
-         pointCloudRenderingImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
-         floatParameters.put(0, camera.near);
-         floatParameters.put(1, camera.far);
-         floatParameters.put(2, principalOffsetXPixels.get());
-         floatParameters.put(3, principalOffsetYPixels.get());
-         floatParameters.put(4, focalLengthPixels.get());
-         floatParametersBufferObject = openCLManager.createBufferObject(numberOfFloatParameters * Float.BYTES, floatParameters);
+         pointCloudRenderingBuffer.createOpenCLBufferObject(openCLManager);
+         parametersBuffer.createOpenCLBufferObject(openCLManager);
       }
       else
       {
          normalizedDeviceCoordinateDepthImage.writeOpenCLImage(openCLManager);
          rgba8888ColorImage.writeOpenCLImage(openCLManager);
-         openCLManager.enqueueWriteBuffer(floatParametersBufferObject, numberOfFloatParameters * Float.BYTES, floatParameters);
+         parametersBuffer.writeOpenCLBufferObject(openCLManager);
       }
       openCLManager.setKernelArgument(openCLKernel, 0, normalizedDeviceCoordinateDepthImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(openCLKernel, 1, rgba8888ColorImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(openCLKernel, 2, metersDepthImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(openCLKernel, 3, pointCloudRenderingImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(openCLKernel, 4, floatParametersBufferObject);
+      openCLManager.setKernelArgument(openCLKernel, 3, pointCloudRenderingBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(openCLKernel, 4, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(openCLKernel, imageWidth, imageHeight);
       metersDepthImage.readOpenCLImage(openCLManager);
-      pointCloudRenderingImage.readOpenCLImage(openCLManager);
+      pointCloudRenderingBuffer.readOpenCLBufferObject(openCLManager);
       openCLManager.finish();
 
       normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer().rewind();
       rgba8888ColorImage.getBackingDirectByteBuffer().rewind();
       metersDepthImage.getBackingDirectByteBuffer().rewind();
-      pointCloudBufferToPack.limit(pointCloudBufferToPack.capacity());
-      pointCloudBufferToPack.rewind();
+      if (pointCloudBufferToPack != null)
+      {
+         pointCloudBufferToPack.limit(pointCloudBufferToPack.capacity());
+         pointCloudBufferToPack.rewind();
+      }
       if (depthEnabled)
       {
-         for (int y = 0; y < imageHeight; y++)
+         for (int y = 0; y < 1; y++)
          {
-            for (int x = 0; x < imageWidth; x++)
+            for (int x = 0; x < 1; x++)
             {
 //               float processedDepthZ = normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer().getFloat();
                int rgba8888Color = rgba8888ColorImage.getBackingDirectByteBuffer().getInt();
