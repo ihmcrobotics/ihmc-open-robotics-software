@@ -144,12 +144,12 @@ public class GDXGPUPlanarRegionExtraction
    private _cl_kernel filterKernel;
    private _cl_kernel packKernel;
    private _cl_kernel mergeKernel;
-   private int subHeight;
-   private int subWidth;
+   private int patchImageHeight;
+   private int patchImageWidth;
    private int patchHeight;
    private int patchWidth;
-   private int filterSubHeight;
-   private int filterSubWidth;
+   private int filterPatchImageHeight;
+   private int filterPatchImageWidth;
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
@@ -181,32 +181,32 @@ public class GDXGPUPlanarRegionExtraction
       inputU16DepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
       blurredDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
       filteredDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
-      nxImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
-      nyImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
-      nzImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
-      cxImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
-      cyImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
-      czImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC1);
+      nxImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      nyImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      nzImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      cxImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      cyImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
+      czImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
       outputChannelVector = new MatVector(nxImage.getBytedecoOpenCVMat(),
                                           nyImage.getBytedecoOpenCVMat(),
                                           nxImage.getBytedecoOpenCVMat(),
                                           cxImage.getBytedecoOpenCVMat(),
                                           cyImage.getBytedecoOpenCVMat(),
                                           czImage.getBytedecoOpenCVMat());
-      graphImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_8UC1);
-      regionOutputImage = new GDXBytedecoImage(subWidth, subHeight, opencv_core.CV_32FC(6));
+      graphImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
+      regionOutputImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC(6));
       gaussianKernelSize = new Size();
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
       blurredDepthPanel = new GDXCVImagePanel("Blurred Depth", imageWidth, imageHeight);
       filteredDepthPanel = new GDXCVImagePanel("Filtered Depth", imageWidth, imageHeight);
-      nxImagePanel = new GDXCVImagePanel("Nx Image", subWidth, subHeight);
-      nyImagePanel = new GDXCVImagePanel("Ny Image", subWidth, subHeight);
-      nzImagePanel = new GDXCVImagePanel("Nz Image", subWidth, subHeight);
-      gxImagePanel = new GDXCVImagePanel("Gx Image", subWidth, subHeight);
-      gyImagePanel = new GDXCVImagePanel("Gy Image", subWidth, subHeight);
-      gzImagePanel = new GDXCVImagePanel("Gz Image", subWidth, subHeight);
-      debugExtractionPanel = new GDXCVImagePanel("Planar Region Extraction Image", subWidth, subHeight);
+      nxImagePanel = new GDXCVImagePanel("Nx Image", patchImageWidth, patchImageHeight);
+      nyImagePanel = new GDXCVImagePanel("Ny Image", patchImageWidth, patchImageHeight);
+      nzImagePanel = new GDXCVImagePanel("Nz Image", patchImageWidth, patchImageHeight);
+      gxImagePanel = new GDXCVImagePanel("Gx Image", patchImageWidth, patchImageHeight);
+      gyImagePanel = new GDXCVImagePanel("Gy Image", patchImageWidth, patchImageHeight);
+      gzImagePanel = new GDXCVImagePanel("Gz Image", patchImageWidth, patchImageHeight);
+      debugExtractionPanel = new GDXCVImagePanel("Planar Region Extraction Image", patchImageWidth, patchImageHeight);
       imguiPanel.addChild(blurredDepthPanel.getVideoPanel());
       imguiPanel.addChild(filteredDepthPanel.getVideoPanel());
       imguiPanel.addChild(nxImagePanel.getVideoPanel());
@@ -223,10 +223,10 @@ public class GDXGPUPlanarRegionExtraction
       packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
       mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
 
-      regionVisitedMatrix = new BMatrixRMaj(subHeight, subWidth);
-      boundaryVisitedMatrix = new BMatrixRMaj(subHeight, subWidth);
-      boundaryMatrix = new BMatrixRMaj(subHeight, subWidth);
-      regionMatrix = new DMatrixRMaj(subHeight, subWidth);
+      regionVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
+      boundaryVisitedMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
+      boundaryMatrix = new BMatrixRMaj(patchImageHeight, patchImageWidth);
+      regionMatrix = new DMatrixRMaj(patchImageHeight, patchImageWidth);
 
       numberOfPlanarRegionsPlot = new ImGuiPlot(labels.get("Number of planar regions"), 1000, 300, 50);
       regionMaxSearchDepthPlot = new ImGuiPlot(labels.get("Regions max search depth"), 1000, 300, 50);
@@ -284,15 +284,15 @@ public class GDXGPUPlanarRegionExtraction
       parametersBuffer.getBytedecoFloatBufferPointer().put(2, mergeDistanceThreshold.get());
       parametersBuffer.getBytedecoFloatBufferPointer().put(3, patchHeight);
       parametersBuffer.getBytedecoFloatBufferPointer().put(4, patchWidth);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(5, subHeight);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(6, subWidth);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(5, patchImageHeight);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(6, patchImageWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(7, focalLengthXPixels.get());
       parametersBuffer.getBytedecoFloatBufferPointer().put(8, focalLengthYPixels.get());
       parametersBuffer.getBytedecoFloatBufferPointer().put(9, principalOffsetXPixels.get());
       parametersBuffer.getBytedecoFloatBufferPointer().put(10, principalOffsetYPixels.get());
       parametersBuffer.getBytedecoFloatBufferPointer().put(11, deadPixelFilterPatchSize.get());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(12, filterSubHeight);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(13, filterSubWidth);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(12, filterPatchImageHeight);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(13, filterPatchImageWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(14, inputHeight.get());
       parametersBuffer.getBytedecoFloatBufferPointer().put(15, inputWidth.get());
       if (firstRun)
@@ -343,18 +343,18 @@ public class GDXGPUPlanarRegionExtraction
       openCLManager.setKernelArgument(mergeKernel, 6, graphImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 7, parametersBuffer.getOpenCLBufferObject());
 
-      openCLManager.execute2D(filterKernel, filterSubHeight, filterSubWidth); // TODO: Check X & Y vs height and width
-      openCLManager.execute2D(packKernel, subHeight, subWidth);
-      openCLManager.execute2D(mergeKernel, subHeight, subWidth);
+      openCLManager.execute2D(filterKernel, filterPatchImageHeight, filterPatchImageWidth); // TODO: Check X & Y vs height and width
+      openCLManager.execute2D(packKernel, patchImageHeight, patchImageWidth);
+      openCLManager.execute2D(mergeKernel, patchImageHeight, patchImageWidth);
 
       openCLManager.enqueueReadImage(filteredDepthImage.getOpenCLImageObject(), imageWidth, imageHeight, filteredDepthImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(nxImage.getOpenCLImageObject(), subWidth, subHeight, nxImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(nyImage.getOpenCLImageObject(), subWidth, subHeight, nyImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(nzImage.getOpenCLImageObject(), subWidth, subHeight, nzImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(cxImage.getOpenCLImageObject(), subWidth, subHeight, cxImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(cyImage.getOpenCLImageObject(), subWidth, subHeight, cyImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(czImage.getOpenCLImageObject(), subWidth, subHeight, czImage.getBytedecoByteBufferPointer());
-      openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), subWidth, subHeight, graphImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(nxImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nxImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(nyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nyImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(nzImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, nzImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(cxImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, cxImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(cyImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, cyImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(czImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, czImage.getBytedecoByteBufferPointer());
+      openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, graphImage.getBytedecoByteBufferPointer());
 
       openCLManager.finish();
 
@@ -385,9 +385,9 @@ public class GDXGPUPlanarRegionExtraction
       regionVisitedMatrix.zero();
       boundaryMatrix.zero();
       regionMatrix.zero();
-      for (int row = 0; row < subHeight; row++)
+      for (int row = 0; row < patchImageHeight; row++)
       {
-         for (int column = 0; column < subWidth; column++)
+         for (int column = 0; column < patchImageWidth; column++)
          {
             int boundaryConnectionsEncodedAsOnes = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr(row, column).get());
             if (!regionVisitedMatrix.get(row, column) && boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
@@ -447,7 +447,7 @@ public class GDXGPUPlanarRegionExtraction
       int count = 0;
       for (int i = 0; i < 8; i++)
       {
-         if (row + adjacentY[i] < subHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < subWidth - 1 && column + adjacentX[i] > 1)
+         if (row + adjacentY[i] < patchImageHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < patchImageWidth - 1 && column + adjacentX[i] > 1)
          {
             int boundaryConnectionsEncodedAsOnes
                   = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr((row + adjacentY[i]), (column + adjacentX[i])).get());
@@ -532,9 +532,9 @@ public class GDXGPUPlanarRegionExtraction
 
       for (int i = 0; i < 8; i++)
       {
-         if (row + adjacentY[i] < subHeight - 1
+         if (row + adjacentY[i] < patchImageHeight - 1
           && row + adjacentY[i] > 1
-          && column + adjacentX[i] < subWidth - 1
+          && column + adjacentX[i] < patchImageWidth - 1
           && column + adjacentX[i] > 1
           && boundaryMatrix.get(row + adjacentY[i], column + adjacentX[i])
           && planarRegionId == regionMatrix.get(row + adjacentY[i], column + adjacentX[i]))
@@ -715,10 +715,10 @@ public class GDXGPUPlanarRegionExtraction
    {
       patchHeight = patchSize.get();
       patchWidth = patchSize.get();
-      subHeight = inputHeight.get() / patchHeight;
-      subWidth = inputWidth.get() / patchWidth;
-      filterSubHeight = inputHeight.get() / deadPixelFilterPatchSize.get();
-      filterSubWidth = inputWidth.get() / deadPixelFilterPatchSize.get();
+      patchImageHeight = inputHeight.get() / patchHeight;
+      patchImageWidth = inputWidth.get() / patchWidth;
+      filterPatchImageHeight = inputHeight.get() / deadPixelFilterPatchSize.get();
+      filterPatchImageWidth = inputWidth.get() / deadPixelFilterPatchSize.get();
    }
 
    public void renderImGuiWidgets()
