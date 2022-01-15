@@ -16,7 +16,6 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Scalar;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -40,7 +39,6 @@ import us.ihmc.tools.UnitConversions;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -55,6 +53,7 @@ public class GDXLowLevelDepthSensorSimulator
 
    private final int imageWidth;
    private final int imageHeight;
+   private final int numberOfPoints;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImFloat fieldOfViewY = new ImFloat();
    private final ImFloat focalLengthPixels = new ImFloat();
@@ -71,15 +70,11 @@ public class GDXLowLevelDepthSensorSimulator
    private ModelBatch modelBatch;
    private ScreenViewport viewport;
    private SensorFrameBuffer frameBuffer;
-   private RecyclingArrayList<Point3D32> points;
-   private ArrayList<Integer> colors;
    private boolean depthEnabled = true;
    private final ImBoolean renderFrustum = new ImBoolean(false);
 
-   private final GDXCVImagePanel depthPanel;
-   private final ImGuiVideoPanel colorPanel;
-   private float lowestValueSeen = -1.0f;
-   private float highestValueSeen = -1.0f;
+   private GDXCVImagePanel depthPanel;
+   private ImGuiVideoPanel colorPanel;
    private GDXFrustumVisualizer frustumVisualizer;
 
    private OpenCLManager openCLManager;
@@ -102,15 +97,13 @@ public class GDXLowLevelDepthSensorSimulator
       this.fieldOfViewY.set((float) fieldOfViewY);
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
+      numberOfPoints = imageWidth * imageHeight;
       principalOffsetXPixels.set(imageWidth / 2.0f);
       principalOffsetYPixels.set(imageHeight / 2.0f);
       nearPlaneDistance.set((float) minRange);
       farPlaneDistance.set((float) maxRange);
       calculateFocalLength();
       this.updatePeriod = UnitConversions.hertzToSeconds(30.0);
-
-      depthPanel = new GDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
-      colorPanel = new ImGuiVideoPanel(colorWindowName, true);
    }
 
    public void create()
@@ -151,15 +144,14 @@ public class GDXLowLevelDepthSensorSimulator
       metersDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       rgba8888ColorImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
       if (pointCloudRenderingBufferToPack != null)
-         pointCloudRenderingBuffer = new OpenCLFloatBuffer(imageWidth * imageHeight * 8, pointCloudRenderingBufferToPack);
+         pointCloudRenderingBuffer = new OpenCLFloatBuffer(numberOfPoints * 8, pointCloudRenderingBufferToPack);
       else
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
       parametersBuffer = new OpenCLFloatBuffer(28);
 
+      depthPanel = new GDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
+      colorPanel = new ImGuiVideoPanel(colorWindowName, true);
       colorPanel.setTexture(frameBuffer.getColorTexture());
-
-      points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
-      colors = new ArrayList<>(imageWidth * imageHeight);
 
       frustumVisualizer = new GDXFrustumVisualizer();
    }
@@ -180,11 +172,6 @@ public class GDXLowLevelDepthSensorSimulator
    }
 
    public void render(GDX3DSceneManager sceneManager, Color userPointColor, float pointSize)
-   {
-      render(sceneManager, null, userPointColor, pointSize);
-   }
-
-   public void render(GDX3DSceneManager sceneManager, FloatBuffer pointCloudBufferToPack, Color userPointColor, float pointSize)
    {
       boolean updateThisTick = throttleTimer.isExpired(updatePeriod);
       if (updateThisTick)
@@ -227,9 +214,6 @@ public class GDXLowLevelDepthSensorSimulator
       }
 
       frameBuffer.end();
-
-      points.clear();
-      colors.clear();
 
       opencv_core.randu(noiseImage.getBytedecoOpenCVMat(), noiseLow, noiseHigh);
 
@@ -292,95 +276,6 @@ public class GDXLowLevelDepthSensorSimulator
 
       if (depthPanel.getVideoPanel().getIsShowing().get())
          depthPanel.drawFloatImage(metersDepthImage.getBytedecoOpenCVMat());
-
-      normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer().rewind();
-      rgba8888ColorImage.getBackingDirectByteBuffer().rewind();
-      metersDepthImage.getBackingDirectByteBuffer().rewind();
-      if (pointCloudBufferToPack != null)
-      {
-         pointCloudBufferToPack.limit(pointCloudBufferToPack.capacity());
-         pointCloudBufferToPack.rewind();
-      }
-      if (depthEnabled)
-      {
-         for (int y = 0; y < 1; y++)
-         {
-            for (int x = 0; x < 1; x++)
-            {
-//               float processedDepthZ = normalizedDeviceCoordinateDepthImage.getBackingDirectByteBuffer().getFloat();
-               int rgba8888Color = rgba8888ColorImage.getBackingDirectByteBuffer().getInt();
-
-//               boolean depthPanelIsUsed = depthPanel.getIsShowing().get();
-               // From "How to render depth linearly in modern OpenGL with gl_FragCoord.z in fragment shader?"
-               // https://stackoverflow.com/a/45710371/1070333
-//               float normalizedDeviceCoordinateZ = 2.0f * rawDepthReading - 1.0f; // -1.0 to 1.0
-//               float normalizedDeviceCoordinateZ = processedDepthZ; // -1.0 to 1.0
-//               float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear)); // in meters
-//               metersDepthImage.getBackingDirectByteBuffer().putFloat(eyeDepth);
-
-               float eyeDepth = metersDepthImage.getBackingDirectByteBuffer().getFloat();
-
-//               if (depthPanelIsUsed)
-//               {
-//                  if (highestValueSeen < 0 || eyeDepth > highestValueSeen)
-//                     highestValueSeen = eyeDepth;
-//                  if (lowestValueSeen < 0 || eyeDepth < lowestValueSeen)
-//                     lowestValueSeen = eyeDepth;
-//
-//                  float colorRange = highestValueSeen - lowestValueSeen;
-//                  float grayscale = (eyeDepth - lowestValueSeen) / colorRange;
-//                  int flippedY = imageHeight - y;
-//
-//                  depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
-//               }
-
-               if (eyeDepth > camera.near && eyeDepth < camera.far)
-               {
-                  Point3D32 point = points.add();
-                  point.set(x, y, eyeDepth);
-                  ProjectionTools.projectDepthPixelToIHMCZUp3D(point,
-                                                               principalOffsetXPixels.get(),
-                                                               principalOffsetYPixels.get(),
-                                                               focalLengthPixels.get(),
-                                                               focalLengthPixels.get());
-                  transformToWorldFrame.transform(point);
-
-                  GDXTools.toEuclid(camera.position, noiseVector);
-                  noiseVector.sub(point);
-                  noiseVector.normalize();
-                  noiseVector.scale((random.nextDouble() - 0.5) * 0.007);
-                  point.add(noiseVector);
-
-                  if (pointCloudBufferToPack != null)
-                  {
-                     pointCloudBufferToPack.put(point.getX32());
-                     pointCloudBufferToPack.put(point.getY32());
-                     pointCloudBufferToPack.put(point.getZ32());
-
-                     if (userPointColor != null)
-                     {
-                        pointCloudBufferToPack.put(userPointColor.r);
-                        pointCloudBufferToPack.put(userPointColor.g);
-                        pointCloudBufferToPack.put(userPointColor.b);
-                        pointCloudBufferToPack.put(userPointColor.a);
-                     }
-                     else
-                     {
-                        pointCloudBufferToPack.put(((rgba8888Color & 0xff000000) >>> 24) / 255f);
-                        pointCloudBufferToPack.put(((rgba8888Color & 0x00ff0000) >>> 16) / 255f);
-                        pointCloudBufferToPack.put(((rgba8888Color & 0x0000ff00) >>> 8) / 255f);
-                        pointCloudBufferToPack.put(((rgba8888Color & 0x000000ff)) / 255f);
-                     }
-                     pointCloudBufferToPack.put(pointSize);
-                  }
-
-                  colors.add(rgba8888Color);
-               }
-            }
-         }
-
-
-      }
    }
 
    public void renderTuningSliders()
@@ -442,24 +337,14 @@ public class GDXLowLevelDepthSensorSimulator
       return rgba8888ColorImage.getBackingDirectByteBuffer();
    }
 
-   public Pixmap getColorPixmap()
+   public FloatBuffer getPointCloudBuffer()
    {
-      return frameBuffer.getColorPixmap();
+      return pointCloudRenderingBuffer.getBackingDirectFloatBuffer();
    }
 
    public float getMaxRange()
    {
       return farPlaneDistance.get();
-   }
-
-   public RecyclingArrayList<Point3D32> getPoints()
-   {
-      return points;
-   }
-
-   public ArrayList<Integer> getColors()
-   {
-      return colors;
    }
 
    public ImGuiVideoPanel getDepthPanel()
@@ -487,13 +372,23 @@ public class GDXLowLevelDepthSensorSimulator
       return principalOffsetYPixels;
    }
 
-   public ImFloat getCyPixels()
-   {
-      return principalOffsetYPixels;
-   }
-
    public ImFloat getFocalLengthPixels()
    {
       return focalLengthPixels;
+   }
+
+   public int getImageWidth()
+   {
+      return imageWidth;
+   }
+
+   public int getImageHeight()
+   {
+      return imageHeight;
+   }
+
+   public int getNumberOfPoints()
+   {
+      return numberOfPoints;
    }
 }

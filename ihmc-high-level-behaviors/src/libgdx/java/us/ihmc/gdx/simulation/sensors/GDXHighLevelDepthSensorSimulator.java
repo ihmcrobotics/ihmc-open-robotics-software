@@ -423,11 +423,14 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       if (!pointCloudExecutor.isExecuting())
       {
          ros2PointsToPublish.clear();
-         for (int i = 0; i < depthSensorSimulator.getPoints().size(); i++)
+         for (int i = 0; i < depthSensorSimulator.getNumberOfPoints(); i++)
          {
-            ros2PointsToPublish.add().set(depthSensorSimulator.getPoints().get(i));
+            float x = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i);
+            float y = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 1);
+            float z = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 2);
+            ros2PointsToPublish.add().set(x, y, z);
             if (ros2ColorsToPublish != null)
-               ros2ColorsToPublish[i] = depthSensorSimulator.getColors().get(i);
+               ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
          }
 
          if (!ros2PointsToPublish.isEmpty())
@@ -537,11 +540,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    public void setSensorFrameToWorldTransform(RigidBodyTransform sensorFrameToWorldTransform)
    {
       this.sensorFrameToWorldTransform = sensorFrameToWorldTransform;
-   }
-
-   public RecyclingArrayList<Point3D32> getPoints()
-   {
-      return depthSensorSimulator.getPoints();
    }
 
    public GDXLowLevelDepthSensorSimulator getLowLevelSimulator()
