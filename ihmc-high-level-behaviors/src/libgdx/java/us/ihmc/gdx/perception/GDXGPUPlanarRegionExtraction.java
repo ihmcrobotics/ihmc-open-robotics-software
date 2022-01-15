@@ -20,7 +20,6 @@ import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import sensor_msgs.Image;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -31,10 +30,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiPlot;
@@ -71,6 +67,7 @@ public class GDXGPUPlanarRegionExtraction
    private final ImFloat principalOffsetYPixels = new ImFloat(0);
    private final ImBoolean earlyGaussianBlur = new ImBoolean(true);
    private final ImBoolean useFilteredImage = new ImBoolean(true);
+   private final ImBoolean useSVDNormals = new ImBoolean(true);
    private final ImInt gaussianSize = new ImInt(6);
    private final ImInt gaussianSigma = new ImInt(20);
    private final ImInt searchDepthLimit = new ImInt(10000);
@@ -386,6 +383,7 @@ public class GDXGPUPlanarRegionExtraction
                if (numberOfRegionPatches >= regionMinPatches.get())
                {
                   ++planarRegionIslandIndex;
+                  planarRegion.update(useSVDNormals.get());
 
                   if (drawPatches.get())
                   {
@@ -589,9 +587,9 @@ public class GDXGPUPlanarRegionExtraction
             try
             {
                FrameQuaternion orientation = new FrameQuaternion();
-//               orientation.setIncludingFrame(cameraFrame, EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
-//               orientation.changeFrame(ReferenceFrame.getWorldFrame());
-               orientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), EuclidGeometryTools.axisAngleFromZUpToVector3D(Axis3D.Z));
+               orientation.setIncludingFrame(cameraFrame, EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
+               orientation.changeFrame(ReferenceFrame.getWorldFrame());
+//               orientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), EuclidGeometryTools.axisAngleFromZUpToVector3D(Axis3D.Z));
 
                // First compute the set of concave hulls for this region
                FramePoint3D origin = new FramePoint3D(cameraFrame, gpuPlanarRegion.getCenter());
@@ -746,6 +744,7 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 1000);
       ImGui.sliderInt(labels.get("Boundary min patches"), boundaryMinPatches.getData(), 1, 1000);
       ImGui.sliderFloat(labels.get("Region growth factor"), regionGrowthFactor.getData(), 0.005f, 0.1f);
+      ImGui.checkbox(labels.get("Use SVD normals"), useSVDNormals);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
       ImGui.checkbox(labels.get("Draw grown boundaries"), drawGrownBoundaries);
