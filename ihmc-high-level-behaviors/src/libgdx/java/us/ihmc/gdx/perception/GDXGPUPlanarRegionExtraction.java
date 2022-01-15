@@ -619,10 +619,10 @@ public class GDXGPUPlanarRegionExtraction
                double peakAngleThreshold = polygonizerParameters.getPeakAngleThreshold();
                double lengthThreshold = polygonizerParameters.getLengthThreshold();
 
-//               ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
-//               ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
-//               if (polygonizerParameters.getCutNarrowPassage())
-//                  concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
+               ConcaveHullPruningFilteringTools.filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullCollection);
+               ConcaveHullPruningFilteringTools.filterOutShortEdges(lengthThreshold, concaveHullCollection);
+               if (polygonizerParameters.getCutNarrowPassage())
+                  concaveHullCollection = ConcaveHullPruningFilteringTools.concaveHullNarrowPassageCutter(lengthThreshold, concaveHullCollection);
 
                int hullCounter = 0;
                int regionId = gpuPlanarRegion.getId();
