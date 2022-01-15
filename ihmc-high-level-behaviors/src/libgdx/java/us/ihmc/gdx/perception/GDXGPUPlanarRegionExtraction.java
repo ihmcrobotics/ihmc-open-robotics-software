@@ -73,7 +73,7 @@ public class GDXGPUPlanarRegionExtraction
    private final ImInt gaussianSize = new ImInt(6);
    private final ImInt gaussianSigma = new ImInt(20);
    private final ImInt searchDepthLimit = new ImInt(10000);
-   private final ImInt regionMinPatches = new ImInt(100);
+   private final ImInt regionMinPatches = new ImInt(200);
    private final ImInt boundaryMinPatches = new ImInt(20);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
@@ -81,7 +81,7 @@ public class GDXGPUPlanarRegionExtraction
    private final ImBoolean render3DPlanarRegions = new ImBoolean(false);
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
-   private final ImDouble regionGrowthFactor = new ImDouble(0.01);
+   private final ImFloat regionGrowthFactor = new ImFloat(0.027f);
    private final ImFloat edgeLengthTresholdSlider = new ImFloat(0.224f);
    private final ImFloat triangulationToleranceSlider = new ImFloat(0.0f);
    private final ImInt maxNumberOfIterationsSlider = new ImInt(5000);
@@ -699,11 +699,8 @@ public class GDXGPUPlanarRegionExtraction
             for (Vector3D boundaryVertex : planarRegion.getBoundaryVertices())
             {
                tempFramePoint.setIncludingFrame(cameraFrame, boundaryVertex);
-               ProjectionTools.projectDepthPixelToIHMCZUp3D(tempFramePoint,
-                                                            principalOffsetXPixels.get(),
-                                                            principalOffsetYPixels.get(),
-                                                            focalLengthXPixels.get(),
-                                                            focalLengthYPixels.get());
+               // boundaryVertex is projected into 3D in the OpenCL kernel, but still in left-handed frame
+               ProjectionTools.transformFromXRightYUpZForwardToIHMCZUp(tempFramePoint);
                tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
                boundaryPointCloud.putVertex(tempFramePoint);
             }
@@ -741,13 +738,13 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.sliderInt(labels.get("Search depth limit"), searchDepthLimit.getData(), 1, 50000);
       ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 1000);
       ImGui.sliderInt(labels.get("Boundary min patches"), boundaryMinPatches.getData(), 1, 1000);
+      ImGui.sliderFloat(labels.get("Region growth factor"), regionGrowthFactor.getData(), 0.005f, 0.1f);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
       ImGui.checkbox(labels.get("Draw grown boundaries"), drawGrownBoundaries);
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
       ImGui.checkbox(labels.get("Render 3D boundaries"), render3DBoundaries);
       ImGui.checkbox(labels.get("Render 3D grown boundaries"), render3DGrownBoundaries);
-      ImGui.inputDouble(labels.get("Region growth factor"), regionGrowthFactor);
       ImGui.text("Input height: " + inputHeight);
       ImGui.text("Input width: " + inputWidth);
       ImGui.sliderFloat(labels.get("Focal length X (px)"), focalLengthXPixels.getData(), -1000.0f, 1000.0f);
