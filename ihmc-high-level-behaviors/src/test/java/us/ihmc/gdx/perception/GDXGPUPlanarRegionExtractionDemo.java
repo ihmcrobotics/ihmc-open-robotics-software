@@ -40,7 +40,7 @@ public class GDXGPUPlanarRegionExtractionDemo
             baseUI.addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendTranslation(2.2, 0.0, 1.0);
-            l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.PI / 4.0);
+            l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
 
             double publishRateHz = 5.0;
             double verticalFOV = 55.0;
