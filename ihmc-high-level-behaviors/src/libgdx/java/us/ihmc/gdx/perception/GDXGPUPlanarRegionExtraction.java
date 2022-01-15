@@ -1,6 +1,5 @@
 package us.ihmc.gdx.perception;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
@@ -78,6 +77,7 @@ public class GDXGPUPlanarRegionExtraction
    private final ImInt boundaryMinPatches = new ImInt(20);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
+   private final ImBoolean drawGrownBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(false);
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
@@ -159,7 +159,6 @@ public class GDXGPUPlanarRegionExtraction
    private GDXPlanarRegionsGraphic planarRegionsGraphic;
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private GDXPointCloudRenderer boundaryPointCloud;
-   private RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
    private boolean firstRun = true;
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
@@ -568,6 +567,18 @@ public class GDXGPUPlanarRegionExtraction
                boundaryVertex.scale(regionGrowthFactor.get());
                boundaryVertex.add(vertexX, vertexY, vertexZ);
 
+//               if (drawGrownBoundaries.get())
+//               {
+//                     int x = (int) boundaryIndex.getX();
+//                     int y = (int) boundaryIndex.getY();
+//                     int r = (regionRingIndex + 1) * 130 % 255;
+//                     int g = (regionRingIndex + 1) * 227 % 255;
+//                     int b = (regionRingIndex + 1) * 332 % 255;
+//                     BytePointer pixel = debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(y, x);
+//                     pixel.put(0, (byte) r);
+//                     pixel.put(1, (byte) g);
+//                     pixel.put(2, (byte) b);
+//               }
                // TODO: Draw grown boundary in 2D
             }
          }
@@ -670,7 +681,7 @@ public class GDXGPUPlanarRegionExtraction
 
    public void renderBoundaryPoints(ReferenceFrame cameraFrame, Matrix4 invProjectionView)
    {
-      pointsToRender.clear();
+      boundaryPointCloud.prepareVertexBufferForAddingPoints();
       for (GDXGPUPlanarRegion planarRegion : planarRegions)
       {
          if (render3DBoundaries.get())
@@ -690,7 +701,7 @@ public class GDXGPUPlanarRegionExtraction
                                                                focalLengthXPixels.get(),
                                                                focalLengthYPixels.get());
                   tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-                  pointsToRender.add().set(tempFramePoint);
+                  boundaryPointCloud.putVertex(tempFramePoint);
                }
             }
          }
@@ -706,13 +717,12 @@ public class GDXGPUPlanarRegionExtraction
                                                             focalLengthXPixels.get(),
                                                             focalLengthYPixels.get());
                tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-               pointsToRender.add().set(tempFramePoint);
+               boundaryPointCloud.putVertex(tempFramePoint);
             }
          }
       }
 
-      boundaryPointCloud.setPointsToRender(pointsToRender, Color.WHITE);
-      boundaryPointCloud.updateMesh();
+      boundaryPointCloud.updateMeshFastest();
    }
 
    private void calculateDetivativeParameters()
@@ -745,6 +755,7 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.sliderInt(labels.get("Boundary min patches"), boundaryMinPatches.getData(), 1, 1000);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
+      ImGui.checkbox(labels.get("Draw grown boundaries"), drawGrownBoundaries);
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
       ImGui.checkbox(labels.get("Render 3D boundaries"), render3DBoundaries);
       ImGui.checkbox(labels.get("Render 3D grown boundaries"), render3DGrownBoundaries);
