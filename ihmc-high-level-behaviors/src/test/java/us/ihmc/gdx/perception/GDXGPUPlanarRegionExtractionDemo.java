@@ -1,11 +1,13 @@
 package us.ihmc.gdx.perception;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
 public class GDXGPUPlanarRegionExtractionDemo
@@ -13,9 +15,9 @@ public class GDXGPUPlanarRegionExtractionDemo
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-
    private GDXHighLevelDepthSensorSimulator l515;
-   private final GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
+   private GDXInteractableReferenceFrame robotInteractableReferenceFrame;
+   private GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
    private GDXEnvironmentBuilder environmentBuilder;
    private GDXGPUPlanarRegionExtraction gpuPlanarRegionExtraction;
 
@@ -35,11 +37,16 @@ public class GDXGPUPlanarRegionExtractionDemo
             baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
             environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
+            robotInteractableReferenceFrame = new GDXInteractableReferenceFrame();
+            robotInteractableReferenceFrame.create(ReferenceFrame.getWorldFrame(), 0.15, baseUI.get3DSceneManager().getCamera3D());
+            robotInteractableReferenceFrame.getTransformToParent().getTranslation().add(2.2, 0.0, 1.0);
+            baseUI.addImGui3DViewInputProcessor(robotInteractableReferenceFrame::process3DViewInput);
+            baseUI.get3DSceneManager().addRenderableProvider(robotInteractableReferenceFrame::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            l515PoseGizmo = new GDXPose3DGizmo(robotInteractableReferenceFrame.getRepresentativeReferenceFrame());
             l515PoseGizmo.create(baseUI.get3DSceneManager().getCamera3D());
-            l515PoseGizmo.setResizeAutomatically(true);
+            l515PoseGizmo.setResizeAutomatically(false);
             baseUI.addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
-            l515PoseGizmo.getTransformToParent().appendTranslation(2.2, 0.0, 1.0);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
 
             double publishRateHz = 5.0;
