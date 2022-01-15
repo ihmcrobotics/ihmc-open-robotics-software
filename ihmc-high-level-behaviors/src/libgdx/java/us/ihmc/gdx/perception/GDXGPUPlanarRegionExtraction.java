@@ -110,8 +110,6 @@ public class GDXGPUPlanarRegionExtraction
    private GDXBytedecoImage cyImage;
    private GDXBytedecoImage czImage;
    private GDXBytedecoImage graphImage;
-   private MatVector outputChannelVector;
-   private GDXBytedecoImage regionOutputImage;
    private ImGuiPanel imguiPanel;
    private GDXCVImagePanel blurredDepthPanel;
    private GDXCVImagePanel filteredDepthPanel;
@@ -185,14 +183,7 @@ public class GDXGPUPlanarRegionExtraction
       cxImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
       cyImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
       czImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC1);
-      outputChannelVector = new MatVector(nxImage.getBytedecoOpenCVMat(),
-                                          nyImage.getBytedecoOpenCVMat(),
-                                          nxImage.getBytedecoOpenCVMat(),
-                                          cxImage.getBytedecoOpenCVMat(),
-                                          cyImage.getBytedecoOpenCVMat(),
-                                          czImage.getBytedecoOpenCVMat());
       graphImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_8UC1);
-      regionOutputImage = new GDXBytedecoImage(patchImageWidth, patchImageHeight, opencv_core.CV_32FC(6));
       gaussianKernelSize = new Size();
 
       imguiPanel = new ImGuiPanel("GPU Planar Region Extraction", this::renderImGuiWidgets);
@@ -364,8 +355,6 @@ public class GDXGPUPlanarRegionExtraction
       gyImagePanel.drawFloatImage(cyImage.getBytedecoOpenCVMat());
       gzImagePanel.drawFloatImage(czImage.getBytedecoOpenCVMat());
 
-      opencv_core.merge(outputChannelVector, regionOutputImage.getBytedecoOpenCVMat()); // TODO: Is this faster?
-
       debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
 
       findRegions();
@@ -436,13 +425,12 @@ public class GDXGPUPlanarRegionExtraction
       ++numberOfRegionPatches;
       regionVisitedMatrix.set(row, column, true);
       regionMatrix.set(row, column, planarRegionIslandIndex);
-      BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr(row, column);
-      float nx = patchPointer.getFloat(0);
-      float ny = patchPointer.getFloat(1);
-      float nz = patchPointer.getFloat(2);
-      float cx = patchPointer.getFloat(3);
-      float cy = patchPointer.getFloat(4);
-      float cz = patchPointer.getFloat(5);
+      float nx = nxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float ny = nyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float nz = nzImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cx = cxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cy = cyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cz = czImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
       planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
 
       int count = 0;
