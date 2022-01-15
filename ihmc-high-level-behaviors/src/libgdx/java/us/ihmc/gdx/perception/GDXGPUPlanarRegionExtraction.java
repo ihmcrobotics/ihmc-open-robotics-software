@@ -128,7 +128,7 @@ public class GDXGPUPlanarRegionExtraction
    private GDXCVImagePanel debugExtractionPanel;
    private int depthOfRegionsSearch = 0;
    private int regionMaxSearchDepth = 0;
-   private int depthOfBoundariesSearch = 0;
+   private int boundariesFoundInRing = 0;
    private int boundaryMaxSearchDepth = 0;
    private int numberOfBoundaryIndices = 0;
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
@@ -475,14 +475,12 @@ public class GDXGPUPlanarRegionExtraction
          int regionRingIndex = 0;
          for (Point2D leafPatch : planarRegion.getBorderIndices())
          {
-            depthOfBoundariesSearch = 0;
+            boundariesFoundInRing = 0;
             GDXGPURegionRing regionRing = planarRegion.getRegionRings().add();
             regionRing.reset();
-            boundaryDepthFirstSearch((int) leafPatch.getY(), (int) leafPatch.getX(), planarRegion.getId(), regionRingIndex, regionRing);
-            if (depthOfBoundariesSearch > boundaryMinPatches.get())
+            boundaryDepthFirstSearch((int) leafPatch.getY(), (int) leafPatch.getX(), planarRegion.getId(), regionRing);
+            if (boundariesFoundInRing > boundaryMinPatches.get())
             {
-               ++regionRingIndex;
-
                if (drawBoundaries.get())
                {
                   for (Vector2D boundaryIndex : regionRing.getBoundaryIndices())
@@ -498,36 +496,50 @@ public class GDXGPUPlanarRegionExtraction
                      pixel.put(2, (byte) b);
                   }
                }
+               ++regionRingIndex;
             }
             else
             {
                planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
             }
-            if (depthOfBoundariesSearch > boundaryMaxSearchDepth)
-               boundaryMaxSearchDepth = depthOfBoundariesSearch;
          }
          planarRegion.getRegionRings().sort(boundaryIndexComparator);
       });
+      if (numberOfBoundaryIndices > boundaryMaxSearchDepth)
+         boundaryMaxSearchDepth = numberOfBoundaryIndices;
    }
 
-   private void boundaryDepthFirstSearch(int row, int column, int planarRegionId, int regionRingIndex, GDXGPURegionRing regionRing)
+   private void boundaryDepthFirstSearch(int row, int column, int planarRegionId, GDXGPURegionRing regionRing)
    {
-      if (boundaryVisitedMatrix.get(row, column) || depthOfBoundariesSearch > searchDepthLimit.get())
+      if (boundaryVisitedMatrix.get(row, column) || boundariesFoundInRing > searchDepthLimit.get())
          return;
 
-      ++depthOfBoundariesSearch;
+      ++boundariesFoundInRing;
       boundaryVisitedMatrix.set(row, column, true);
       regionRing.getBoundaryIndices().add().set(column, row);
       ++numberOfBoundaryIndices;
 
+//      if (drawBoundaries.get())
+      {
+         int r = 5 * 130 % 255;
+         int g = 5 * 227 % 255;
+         int b = 5 * 332 % 255;
+         BytePointer pixel = debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(row, column);
+         pixel.put(0, (byte) r);
+         pixel.put(1, (byte) g);
+         pixel.put(2, (byte) b);
+      }
+
       for (int i = 0; i < 8; i++)
       {
-         if (row + adjacentY[i] < subHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < subWidth - 1 && column + adjacentX[i] > 1)
+         if (row + adjacentY[i] < subHeight - 1
+          && row + adjacentY[i] > 1
+          && column + adjacentX[i] < subWidth - 1
+          && column + adjacentX[i] > 1
+          && boundaryMatrix.get(row + adjacentY[i], column + adjacentX[i])
+          && planarRegionId == regionMatrix.get(row + adjacentY[i], column + adjacentX[i]))
          {
-            if (boundaryMatrix.get(row + adjacentY[i], column + adjacentX[i]) && planarRegionId == regionMatrix.get(row + adjacentY[i], column + adjacentX[i]))
-            {
-               boundaryDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionId, regionRingIndex, regionRing);
-            }
+            boundaryDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionId, regionRing);
          }
       }
    }
@@ -551,6 +563,8 @@ public class GDXGPUPlanarRegionExtraction
                boundaryVertex.normalize();
                boundaryVertex.scale(regionGrowthFactor.get());
                boundaryVertex.add(vertexX, vertexY, vertexZ);
+
+               // TODO: Draw grown boundary in 2D
             }
          }
       });
