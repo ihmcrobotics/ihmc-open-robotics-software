@@ -60,13 +60,6 @@ public class GDXGPUPlanarRegion
       ++numberOfPatches;
    }
 
-   public void insertLeafPatch(int x, int y)
-   {
-      Point2D point = leafPatches.add();
-      point.setX(x);
-      point.setY(y);
-   }
-
    public RecyclingArrayList<Vector3D> getBoundaryVertices()
    {
       return boundaryVertices;

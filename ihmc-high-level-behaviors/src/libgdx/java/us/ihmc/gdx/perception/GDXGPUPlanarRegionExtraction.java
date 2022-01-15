@@ -11,7 +11,6 @@ import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_mem;
 import org.bytedeco.opencl._cl_program;
@@ -137,7 +136,7 @@ public class GDXGPUPlanarRegionExtraction
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
    private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
    private final RecyclingArrayList<GDXGPUPlanarRegion> planarRegions = new RecyclingArrayList<>(GDXGPUPlanarRegion::new);
-   private final Comparator<GDXGPURegionRing> boundaryVertexComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryVertices().size());
+   private final Comparator<GDXGPURegionRing> boundaryIndexComparator = Comparator.comparingInt(regionRing -> regionRing.getBoundaryIndices().size());
    private int imageWidth;
    private int imageHeight;
    private Size gaussianKernelSize;
@@ -462,7 +461,7 @@ public class GDXGPUPlanarRegionExtraction
       if (count != 8)
       {
          boundaryMatrix.set(row, column, true);
-         planarRegion.insertLeafPatch(row, column);
+         planarRegion.getLeafPatches().add().set(row, column);
       }
    }
 
@@ -478,7 +477,7 @@ public class GDXGPUPlanarRegionExtraction
          {
             depthOfBoundariesSearch = 0;
             GDXGPURegionRing regionRing = planarRegion.getRegionRings().add();
-            regionRing.reset(regionRingIndex);
+            regionRing.reset();
             boundaryDepthFirstSearch((int) leafPatch.getX(), (int) leafPatch.getY(), planarRegion.getId(), regionRingIndex, regionRing);
             if (depthOfBoundariesSearch > 3)
             {
@@ -491,7 +490,7 @@ public class GDXGPUPlanarRegionExtraction
             if (depthOfBoundariesSearch > boundaryMaxSearchDepth)
                boundaryMaxSearchDepth = depthOfBoundariesSearch;
          }
-         planarRegion.getRegionRings().sort(boundaryVertexComparator);
+         planarRegion.getRegionRings().sort(boundaryIndexComparator);
       });
    }
 
