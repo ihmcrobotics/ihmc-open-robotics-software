@@ -25,6 +25,7 @@ float4 transform(float x,
 }
 
 kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoordinateDepthImage,
+                                         read_only image2d_t noiseImage,
                                          read_only image2d_t rgba8888ColorImage,
                                          write_only image2d_t metersDepthImage,
                                          global float* pointCloudRenderingBuffer,
@@ -70,6 +71,9 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
       float rotationMatrixM20 = parameters[22];
       float rotationMatrixM21 = parameters[23];
       float rotationMatrixM22 = parameters[24];
+      float cameraPositionX = parameters[25];
+      float cameraPositionY = parameters[26];
+      float cameraPositionZ = parameters[27];
 
       if (pointColorR < 0.0f)
       {
@@ -98,6 +102,20 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
                                          rotationMatrixM20,
                                          rotationMatrixM21,
                                          rotationMatrixM22);
+      // add noise
+      float noiseAmount = read_imagef(noiseImage, (int2) (x, y)).x;
+      float4 noiseVector = (float4) (cameraPositionX - worldFramePoint.x,
+                                     cameraPositionY - worldFramePoint.y,
+                                     cameraPositionZ - worldFramePoint.z,
+                                     0.0f);
+      normalize(noiseVector);
+      noiseVector.x *= noiseAmount;
+      noiseVector.y *= noiseAmount;
+      noiseVector.z *= noiseAmount;
+      worldFramePoint.x += noiseVector.x;
+      worldFramePoint.y += noiseVector.y;
+      worldFramePoint.z += noiseVector.z;
+
       int pointStartIndex = (imageWidth * y + x) * 8;
       pointCloudRenderingBuffer[pointStartIndex]     = worldFramePoint.x;
       pointCloudRenderingBuffer[pointStartIndex + 1] = worldFramePoint.y;

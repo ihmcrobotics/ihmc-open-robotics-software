@@ -15,6 +15,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -84,7 +86,9 @@ public class GDXLowLevelDepthSensorSimulator
    private _cl_kernel openCLKernel;
    private GDXBytedecoImage normalizedDeviceCoordinateDepthImage;
    // https://stackoverflow.com/questions/14435632/impulse-gaussian-and-salt-and-pepper-noise-with-opencv
-   private GDXBytedecoImage randomImage; // TODO: Add noise. Salt and pepper?
+   private Mat noiseLow;
+   private Mat noiseHigh;
+   private GDXBytedecoImage noiseImage; // TODO: Salt and pepper?
    private GDXBytedecoImage metersDepthImage;
    private GDXBytedecoImage rgba8888ColorImage;
    private OpenCLFloatBuffer pointCloudRenderingBuffer;
@@ -139,13 +143,18 @@ public class GDXLowLevelDepthSensorSimulator
       openCLKernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("LowLevelDepthSensorSimulator");
 
       normalizedDeviceCoordinateDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
+      noiseImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
+      noiseLow = new Mat(1, 1, opencv_core.CV_32FC1);
+      noiseLow.ptr().putFloat(0.0035f);
+      noiseHigh = new Mat(1, 1, opencv_core.CV_32FC1);
+      noiseHigh.ptr().putFloat(-0.0035f);
       metersDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       rgba8888ColorImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
       if (pointCloudRenderingBufferToPack != null)
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(imageWidth * imageHeight * 8, pointCloudRenderingBufferToPack);
       else
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
-      parametersBuffer = new OpenCLFloatBuffer(25);
+      parametersBuffer = new OpenCLFloatBuffer(28);
 
       colorPanel.setTexture(frameBuffer.getColorTexture());
 
@@ -222,6 +231,8 @@ public class GDXLowLevelDepthSensorSimulator
       points.clear();
       colors.clear();
 
+      opencv_core.randu(noiseImage.getBytedecoOpenCVMat(), noiseLow, noiseHigh);
+
       parametersBuffer.getBytedecoFloatBufferPointer().put(0, camera.near);
       parametersBuffer.getBytedecoFloatBufferPointer().put(1, camera.far);
       parametersBuffer.getBytedecoFloatBufferPointer().put(2, principalOffsetXPixels.get());
@@ -248,10 +259,14 @@ public class GDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(22, (float) transformToWorldFrame.getRotation().getM20());
       parametersBuffer.getBytedecoFloatBufferPointer().put(23, (float) transformToWorldFrame.getRotation().getM21());
       parametersBuffer.getBytedecoFloatBufferPointer().put(24, (float) transformToWorldFrame.getRotation().getM22());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(25, camera.position.x);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(26, camera.position.y);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(27, camera.position.z);
       if (firstRender)
       {
          firstRender = false;
          normalizedDeviceCoordinateDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         noiseImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          rgba8888ColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          metersDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
          pointCloudRenderingBuffer.createOpenCLBufferObject(openCLManager);
@@ -260,14 +275,16 @@ public class GDXLowLevelDepthSensorSimulator
       else
       {
          normalizedDeviceCoordinateDepthImage.writeOpenCLImage(openCLManager);
+         noiseImage.writeOpenCLImage(openCLManager);
          rgba8888ColorImage.writeOpenCLImage(openCLManager);
          parametersBuffer.writeOpenCLBufferObject(openCLManager);
       }
       openCLManager.setKernelArgument(openCLKernel, 0, normalizedDeviceCoordinateDepthImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(openCLKernel, 1, rgba8888ColorImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(openCLKernel, 2, metersDepthImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(openCLKernel, 3, pointCloudRenderingBuffer.getOpenCLBufferObject());
-      openCLManager.setKernelArgument(openCLKernel, 4, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(openCLKernel, 1, noiseImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(openCLKernel, 2, rgba8888ColorImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(openCLKernel, 3, metersDepthImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(openCLKernel, 4, pointCloudRenderingBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(openCLKernel, 5, parametersBuffer.getOpenCLBufferObject());
       openCLManager.execute2D(openCLKernel, imageWidth, imageHeight);
       metersDepthImage.readOpenCLImage(openCLManager);
       pointCloudRenderingBuffer.readOpenCLBufferObject(openCLManager);
