@@ -40,6 +40,7 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
    float principalOffsetYPixels = parameters[3];
    float focalLengthPixels = parameters[4];
    bool calculatePointCloud = (bool) parameters[5];
+   float noiseAmount = read_imagef(noiseImage, (int2) (x, y)).x;
 
    // From "How to render depth linearly in modern OpenGL with gl_FragCoord.z in fragment shader?"
    // https://stackoverflow.com/a/45710371/1070333
@@ -48,6 +49,7 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
    float farMinusNear = cameraFar - cameraNear;
    float normalizedDeviceCoordinateZ = read_imagef(normalizedDeviceCoordinateDepthImage, (int2) (x,y)).x;
    float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear));
+   eyeDepth += noiseAmount;
    write_imagef(metersDepthImage, (int2) (x, y), eyeDepth);
 
    if (calculatePointCloud)
@@ -102,19 +104,6 @@ kernel void lowLevelDepthSensorSimulator(read_only image2d_t normalizedDeviceCoo
                                          rotationMatrixM20,
                                          rotationMatrixM21,
                                          rotationMatrixM22);
-      // add noise
-      float noiseAmount = read_imagef(noiseImage, (int2) (x, y)).x;
-      float4 noiseVector = (float4) (cameraPositionX - worldFramePoint.x,
-                                     cameraPositionY - worldFramePoint.y,
-                                     cameraPositionZ - worldFramePoint.z,
-                                     0.0f);
-      normalize(noiseVector);
-      noiseVector.x *= noiseAmount;
-      noiseVector.y *= noiseAmount;
-      noiseVector.z *= noiseAmount;
-      worldFramePoint.x += noiseVector.x;
-      worldFramePoint.y += noiseVector.y;
-      worldFramePoint.z += noiseVector.z;
 
       int pointStartIndex = (imageWidth * y + x) * 8;
       pointCloudRenderingBuffer[pointStartIndex]     = worldFramePoint.x;
