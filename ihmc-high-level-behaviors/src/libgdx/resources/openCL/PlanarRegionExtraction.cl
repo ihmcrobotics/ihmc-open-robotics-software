@@ -352,7 +352,7 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
         float3 g_a = (float3)(g1_a,g2_a,g3_a);
         float3 n_a = (float3)(n1_a,n2_a,n3_a);
 
-        uint patch = (uint)(0);
+        uint boundaryConnectionsEncodedAsOnes = (uint)(0);
 
         int count = 0;
         for(int i = -m; i<m+1; i+=m)
@@ -375,13 +375,13 @@ void kernel mergeKernel( read_only image2d_t out0, read_only image2d_t out1, rea
                      if(isConnected(g_a, normalize(n_a), g_b, normalize(n_b), params))
                      {
                          // printf("Connected: (%d,%d)\n",x+i, y+j);
-                         patch = (1 << count) | patch;
+                         boundaryConnectionsEncodedAsOnes = (1 << count) | boundaryConnectionsEncodedAsOnes;
                      }
                      count++;
                 }
             }
         }
-        write_imageui(out6, (int2)(x,y), (uint4)(patch, 0, 0, 0));
+        write_imageui(out6, (int2)(x,y), (uint4)(boundaryConnectionsEncodedAsOnes, 0, 0, 0));
     }
 }
 

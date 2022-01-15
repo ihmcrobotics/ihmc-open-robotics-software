@@ -74,8 +74,8 @@ public class GDXGPUPlanarRegionExtraction
    private final ImInt gaussianSize = new ImInt(6);
    private final ImInt gaussianSigma = new ImInt(20);
    private final ImInt searchDepthLimit = new ImInt(10000);
-   private final ImInt regionMinPatches = new ImInt(20);
-   private final ImInt regionBoundaryDiff = new ImInt(20);
+   private final ImInt regionMinPatches = new ImInt(100);
+   private final ImInt boundaryMinPatches = new ImInt(20);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(false);
@@ -126,8 +126,6 @@ public class GDXGPUPlanarRegionExtraction
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
    private GDXCVImagePanel debugExtractionPanel;
-   private final Point cvCenterPoint = new Point();
-   private final Scalar cvBGRColorScalar = new Scalar();
    private int depthOfRegionsSearch = 0;
    private int regionMaxSearchDepth = 0;
    private int depthOfBoundariesSearch = 0;
@@ -208,7 +206,7 @@ public class GDXGPUPlanarRegionExtraction
       gxImagePanel = new GDXCVImagePanel("Gx Image", subWidth, subHeight);
       gyImagePanel = new GDXCVImagePanel("Gy Image", subWidth, subHeight);
       gzImagePanel = new GDXCVImagePanel("Gz Image", subWidth, subHeight);
-      debugExtractionPanel = new GDXCVImagePanel("Planar Region Extraction Image", imageWidth, imageHeight);
+      debugExtractionPanel = new GDXCVImagePanel("Planar Region Extraction Image", subWidth, subHeight);
       imguiPanel.addChild(blurredDepthPanel.getVideoPanel());
       imguiPanel.addChild(filteredDepthPanel.getVideoPanel());
       imguiPanel.addChild(nxImagePanel.getVideoPanel());
@@ -391,17 +389,32 @@ public class GDXGPUPlanarRegionExtraction
       {
          for (int column = 0; column < subWidth; column++)
          {
-            int patch = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr(row, column).get());
-            if (!regionVisitedMatrix.get(row, column) && patch == 255)
+            int boundaryConnectionsEncodedAsOnes = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr(row, column).get());
+            if (!regionVisitedMatrix.get(row, column) && boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
             {
                depthOfRegionsSearch = 0; // also number of patches traversed
                GDXGPUPlanarRegion planarRegion = planarRegions.add();
                planarRegion.reset(planarRegionIslandIndex);
                regionsDepthFirstSearch(row, column, planarRegionIslandIndex, planarRegion);
-               if (depthOfRegionsSearch > regionMinPatches.get()
-                && depthOfRegionsSearch - planarRegion.getBoundaryVertices().size() > regionBoundaryDiff.get())
+               if (depthOfRegionsSearch > regionMinPatches.get())
                {
                   ++planarRegionIslandIndex;
+
+                  if (drawPatches.get())
+                  {
+                     for (Point2D regionIndex : planarRegion.getRegionIndices())
+                     {
+                        int x = (int) regionIndex.getX();
+                        int y = (int) regionIndex.getY();
+                        int r = (planarRegionIslandIndex + 1) * 312 % 255;
+                        int g = (planarRegionIslandIndex + 1) * 123 % 255;
+                        int b = (planarRegionIslandIndex + 1) * 231 % 255;
+                        BytePointer pixel = debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(y, x);
+                        pixel.put(0, (byte) r);
+                        pixel.put(1, (byte) g);
+                        pixel.put(2, (byte) b);
+                     }
+                  }
                }
                else
                {
@@ -429,29 +442,16 @@ public class GDXGPUPlanarRegionExtraction
       float cx = patchPointer.getFloat(3);
       float cy = patchPointer.getFloat(4);
       float cz = patchPointer.getFloat(5);
-      planarRegion.addPatch(nx, ny, nz, cx, cy, cz);
-//
-      if (drawPatches.get())
-      {
-         int x = column * patchHeight;
-         int y = row * patchWidth;
-         cvCenterPoint.x(x);
-         cvCenterPoint.y(y);
-         int radius = 2;
-         int r = (planarRegionIslandIndex + 1) * 312 % 255;
-         int g = (planarRegionIslandIndex + 1) * 123 % 255;
-         int b = (planarRegionIslandIndex + 1) * 231 % 255;
-         cvBGRColorScalar.put(b, g, r, 255);
-         opencv_imgproc.circle(debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat(), cvCenterPoint, radius, cvBGRColorScalar);
-      }
+      planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
 
       int count = 0;
       for (int i = 0; i < 8; i++)
       {
          if (row + adjacentY[i] < subHeight - 1 && row + adjacentY[i] > 1 && column + adjacentX[i] < subWidth - 1 && column + adjacentX[i] > 1)
          {
-            int newPatch = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr((row + adjacentY[i]), (column + adjacentX[i])).get());
-            if (newPatch == 255)
+            int boundaryConnectionsEncodedAsOnes
+                  = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr((row + adjacentY[i]), (column + adjacentX[i])).get());
+            if (boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
             {
                ++count;
                regionsDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionIslandIndex, planarRegion);
@@ -461,7 +461,7 @@ public class GDXGPUPlanarRegionExtraction
       if (count != 8)
       {
          boundaryMatrix.set(row, column, true);
-         planarRegion.getLeafPatches().add().set(row, column);
+         planarRegion.getBorderIndices().add().set(column, row);
       }
    }
 
@@ -473,15 +473,31 @@ public class GDXGPUPlanarRegionExtraction
       planarRegions.parallelStream().forEach(planarRegion ->
       {
          int regionRingIndex = 0;
-         for (Point2D leafPatch : planarRegion.getLeafPatches())
+         for (Point2D leafPatch : planarRegion.getBorderIndices())
          {
             depthOfBoundariesSearch = 0;
             GDXGPURegionRing regionRing = planarRegion.getRegionRings().add();
             regionRing.reset();
-            boundaryDepthFirstSearch((int) leafPatch.getX(), (int) leafPatch.getY(), planarRegion.getId(), regionRingIndex, regionRing);
-            if (depthOfBoundariesSearch > 3)
+            boundaryDepthFirstSearch((int) leafPatch.getY(), (int) leafPatch.getX(), planarRegion.getId(), regionRingIndex, regionRing);
+            if (depthOfBoundariesSearch > boundaryMinPatches.get())
             {
                ++regionRingIndex;
+
+               if (drawBoundaries.get())
+               {
+                  for (Vector2D boundaryIndex : regionRing.getBoundaryIndices())
+                  {
+                     int x = (int) boundaryIndex.getX();
+                     int y = (int) boundaryIndex.getY();
+                     int r = (regionRingIndex + 1) * 130 % 255;
+                     int g = (regionRingIndex + 1) * 227 % 255;
+                     int b = (regionRingIndex + 1) * 332 % 255;
+                     BytePointer pixel = debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(y, x);
+                     pixel.put(0, (byte) r);
+                     pixel.put(1, (byte) g);
+                     pixel.put(2, (byte) b);
+                  }
+               }
             }
             else
             {
@@ -501,22 +517,8 @@ public class GDXGPUPlanarRegionExtraction
 
       ++depthOfBoundariesSearch;
       boundaryVisitedMatrix.set(row, column, true);
-      regionRing.getBoundaryIndices().add().set(row, column);
+      regionRing.getBoundaryIndices().add().set(column, row);
       ++numberOfBoundaryIndices;
-
-      if (drawBoundaries.get())
-      {
-         int x = column * patchHeight;
-         int y = row * patchWidth;
-         cvCenterPoint.x(x);
-         cvCenterPoint.y(y);
-         int radius = 2;
-         int r = (regionRingIndex + 1) * 130 % 255;
-         int g = (regionRingIndex + 1) * 227 % 255;
-         int b = (regionRingIndex + 1) * 332 % 255;
-         cvBGRColorScalar.put(b, g, r, 255);
-         opencv_imgproc.circle(debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat(), cvCenterPoint, radius, cvBGRColorScalar);
-      }
 
       for (int i = 0; i < 8; i++)
       {
@@ -540,9 +542,9 @@ public class GDXGPUPlanarRegionExtraction
             for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
             {
 //               BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY());
-               float vertexX = cxImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
-               float vertexY = cyImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
-               float vertexZ = czImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY()).getFloat();
+               float vertexX = cxImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
+               float vertexY = cyImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
+               float vertexZ = czImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
                Vector3D boundaryVertex = planarRegion.getBoundaryVertices().add();
                boundaryVertex.set(vertexX, vertexY, vertexZ);
                boundaryVertex.sub(planarRegion.getCenter());
@@ -660,8 +662,8 @@ public class GDXGPUPlanarRegionExtraction
                GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
                for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
                {
-                  int column = (int) boundaryIndex.getY() * patchWidth;
-                  int row = (int) boundaryIndex.getX() * patchHeight;
+                  int column = (int) boundaryIndex.getX() * patchWidth;
+                  int row = (int) boundaryIndex.getY() * patchHeight;
                   float z = inputFloatDepthImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
                   tempFramePoint.setIncludingFrame(cameraFrame, column, row, z);
                   ProjectionTools.projectDepthPixelToIHMCZUp3D(tempFramePoint,
@@ -721,8 +723,8 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
       ImGui.sliderFloat(labels.get("Merge angular threshold"), mergeAngularThreshold.getData(), 0.0f, 1.0f);
       ImGui.sliderInt(labels.get("Search depth limit"), searchDepthLimit.getData(), 1, 50000);
-      ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 30);
-      ImGui.sliderInt(labels.get("Region boundary diff"), regionBoundaryDiff.getData(), 1, 30);
+      ImGui.sliderInt(labels.get("Region min patches"), regionMinPatches.getData(), 1, 1000);
+      ImGui.sliderInt(labels.get("Boundary min patches"), boundaryMinPatches.getData(), 1, 1000);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
