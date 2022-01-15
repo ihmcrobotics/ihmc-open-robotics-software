@@ -68,6 +68,7 @@ public class GDXHighLevelDepthSensorDemo
                                                                                  publishRateHz,
                                                                                  false);
             baseUI.getImGuiPanelManager().addPanel(highLevelDepthSensorSimulator);
+            highLevelDepthSensorSimulator.create();
             highLevelDepthSensorSimulator.setSensorEnabled(true);
             highLevelDepthSensorSimulator.setPublishPointCloudROS2(false);
             highLevelDepthSensorSimulator.setRenderPointCloudDirectly(true);
@@ -77,7 +78,6 @@ public class GDXHighLevelDepthSensorDemo
             highLevelDepthSensorSimulator.setRenderDepthVideoDirectly(true);
             highLevelDepthSensorSimulator.setPublishColorImageROS1(false);
             highLevelDepthSensorSimulator.setPublishColorImageROS2(false);
-            highLevelDepthSensorSimulator.create();
             baseUI.get3DSceneManager().addRenderableProvider(highLevelDepthSensorSimulator, GDXSceneLevel.VIRTUAL);
          }
 
