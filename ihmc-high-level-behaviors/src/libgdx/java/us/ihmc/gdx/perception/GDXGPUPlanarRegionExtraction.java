@@ -41,6 +41,7 @@ import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
+import us.ihmc.perception.OpenCLFloatBuffer;
 import us.ihmc.perception.OpenCLManager;
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
@@ -141,9 +142,7 @@ public class GDXGPUPlanarRegionExtraction
    private int imageHeight;
    private Size gaussianKernelSize;
    private final OpenCLManager openCLManager = new OpenCLManager();
-   private final long numberOfFloatParameters = 16;
-   private final FloatPointer nativeParameterArray = new FloatPointer(numberOfFloatParameters);
-   private _cl_mem parametersBufferObject;
+   private OpenCLFloatBuffer parametersBuffer;
    private _cl_program planarRegionExtractionProgram;
    private _cl_kernel filterKernel;
    private _cl_kernel packKernel;
@@ -165,6 +164,7 @@ public class GDXGPUPlanarRegionExtraction
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private GDXPointCloudRenderer boundaryPointCloud;
    private RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
+   private boolean firstRun = true;
 
    public void create(int imageWidth, int imageHeight, ByteBuffer sourceDepthByteBufferOfFloats, double fx, double fy, double cx, double cy)
    {
@@ -177,8 +177,8 @@ public class GDXGPUPlanarRegionExtraction
       principalOffsetXPixels.set((float) cx);
       principalOffsetYPixels.set((float) cy);
 
+      parametersBuffer = new OpenCLFloatBuffer(16);
       calculateDetivativeParameters();
-
       inputFloatDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1, sourceDepthByteBufferOfFloats);
       inputScaledFloatDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       inputU16DepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
@@ -281,26 +281,51 @@ public class GDXGPUPlanarRegionExtraction
 
       blurredDepthPanel.drawFloatImage(blurredDepthImage.getBytedecoOpenCVMat());
 
-      inputU16DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-      blurredDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-      filteredDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      nxImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      nyImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      nzImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      cxImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      cyImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      czImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-      graphImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      calculateDetivativeParameters();
+      parametersBuffer.getBytedecoFloatBufferPointer().put(0, filterDisparityThreshold.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(1, mergeAngularThreshold.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(2, mergeDistanceThreshold.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(3, patchHeight);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(4, patchWidth);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(5, subHeight);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(6, subWidth);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(7, focalLengthXPixels.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(8, focalLengthYPixels.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(9, principalOffsetXPixels.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(10, principalOffsetYPixels.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(11, deadPixelFilterPatchSize.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(12, filterSubHeight);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(13, filterSubWidth);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(14, inputHeight.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(15, inputWidth.get());
+      if (firstRun)
+      {
+         firstRun = false;
+         inputU16DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         blurredDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         filteredDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         nxImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         nyImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         nzImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         cxImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         cyImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         czImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         graphImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         parametersBuffer.createOpenCLBufferObject(openCLManager);
+      }
+      else
+      {
+         inputU16DepthImage.writeOpenCLImage(openCLManager);
+         blurredDepthImage.writeOpenCLImage(openCLManager);
+         parametersBuffer.writeOpenCLBufferObject(openCLManager);
+      }
 
-      parametersBufferObject = openCLManager.createBufferObject(numberOfFloatParameters * Float.BYTES, nativeParameterArray);
-
-      enqueueWriteParameters();
       _cl_mem inputImage = earlyGaussianBlur.get() ? blurredDepthImage.getOpenCLImageObject() : inputU16DepthImage.getOpenCLImageObject();
 
       openCLManager.setKernelArgument(filterKernel, 0, inputImage);
       openCLManager.setKernelArgument(filterKernel, 1, filteredDepthImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(filterKernel, 2, nxImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(filterKernel, 3, parametersBufferObject);
+      openCLManager.setKernelArgument(filterKernel, 3, parametersBuffer.getOpenCLBufferObject());
 
       _cl_mem packKernelInputObject = useFilteredImage.get() ? filteredDepthImage.getOpenCLImageObject() : inputU16DepthImage.getOpenCLImageObject();
       openCLManager.setKernelArgument(packKernel, 0, packKernelInputObject);
@@ -310,7 +335,7 @@ public class GDXGPUPlanarRegionExtraction
       openCLManager.setKernelArgument(packKernel, 4, cxImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(packKernel, 5, cyImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(packKernel, 6, czImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(packKernel, 7, parametersBufferObject);
+      openCLManager.setKernelArgument(packKernel, 7, parametersBuffer.getOpenCLBufferObject());
 
       openCLManager.setKernelArgument(mergeKernel, 0, nxImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 1, nyImage.getOpenCLImageObject());
@@ -319,7 +344,7 @@ public class GDXGPUPlanarRegionExtraction
       openCLManager.setKernelArgument(mergeKernel, 4, cyImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 5, czImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 6, graphImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(mergeKernel, 7, parametersBufferObject);
+      openCLManager.setKernelArgument(mergeKernel, 7, parametersBuffer.getOpenCLBufferObject());
 
       openCLManager.execute2D(filterKernel, filterSubHeight, filterSubWidth); // TODO: Check X & Y vs height and width
       openCLManager.execute2D(packKernel, subHeight, subWidth);
@@ -669,28 +694,6 @@ public class GDXGPUPlanarRegionExtraction
 
       boundaryPointCloud.setPointsToRender(pointsToRender, Color.WHITE);
       boundaryPointCloud.updateMesh();
-   }
-
-   private void enqueueWriteParameters()
-   {
-      calculateDetivativeParameters();
-
-      nativeParameterArray.put(0, filterDisparityThreshold.get());
-      nativeParameterArray.put(1, mergeAngularThreshold.get());
-      nativeParameterArray.put(2, mergeDistanceThreshold.get());
-      nativeParameterArray.put(3, patchHeight);
-      nativeParameterArray.put(4, patchWidth);
-      nativeParameterArray.put(5, subHeight);
-      nativeParameterArray.put(6, subWidth);
-      nativeParameterArray.put(7, focalLengthXPixels.get());
-      nativeParameterArray.put(8, focalLengthYPixels.get());
-      nativeParameterArray.put(9, principalOffsetXPixels.get());
-      nativeParameterArray.put(10, principalOffsetYPixels.get());
-      nativeParameterArray.put(11, deadPixelFilterPatchSize.get());
-      nativeParameterArray.put(12, filterSubHeight);
-      nativeParameterArray.put(13, filterSubWidth);
-      nativeParameterArray.put(14, inputHeight.get());
-      nativeParameterArray.put(15, inputWidth.get());
    }
 
    private void calculateDetivativeParameters()
