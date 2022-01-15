@@ -3,7 +3,6 @@ package us.ihmc.gdx.perception;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -16,10 +15,11 @@ public class GDXGPUPlanarRegion
    private static final boolean USE_SVD = false;
    private final Vector3D32 normal = new Vector3D32();
    private final Point3D32 center = new Point3D32();
+   private final RecyclingArrayList<Point2D> regionIndices = new RecyclingArrayList<>(Point2D::new);
    private final RecyclingArrayList<Point3D> patchCentroids = new RecyclingArrayList<>(Point3D::new);
    private final RecyclingArrayList<Point2D> planarPatchCentroids = new RecyclingArrayList<>(Point2D::new);
    private final RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
-   private final RecyclingArrayList<Point2D> leafPatches = new RecyclingArrayList<>(Point2D::new);
+   private final RecyclingArrayList<Point2D> borderIndices = new RecyclingArrayList<>(Point2D::new);
    private final RecyclingArrayList<Vector3D> boundaryVertices = new RecyclingArrayList<>(Vector3D::new);
    private final RecyclingArrayList<GDXGPURegionRing> regionRings = new RecyclingArrayList<>(GDXGPURegionRing::new);
    // TODO: kd tree
@@ -41,7 +41,8 @@ public class GDXGPUPlanarRegion
       normal.setToZero();
       center.setToZero();
 
-      leafPatches.clear();
+      regionIndices.clear();
+      borderIndices.clear();
       boundaryVertices.clear();
       regionRings.clear();
       normalCalculated = false;
@@ -51,8 +52,9 @@ public class GDXGPUPlanarRegion
       numberOfMeasurements = 1;
    }
 
-   public void addPatch(double nx, double ny, double nz, double cx, double cy, double cz)
+   public void addRegionPatch(int row, int column, double nx, double ny, double nz, double cx, double cy, double cz)
    {
+      regionIndices.add().set(column, row);
       normal.add(nx, ny, nz);
       center.add(cx, cy, cz);
       Point3D patchCentroid = patchCentroids.add();
@@ -65,9 +67,9 @@ public class GDXGPUPlanarRegion
       return boundaryVertices;
    }
 
-   public RecyclingArrayList<Point2D> getLeafPatches()
+   public RecyclingArrayList<Point2D> getBorderIndices()
    {
-      return leafPatches;
+      return borderIndices;
    }
 
    public RecyclingArrayList<GDXGPURegionRing> getRegionRings()
@@ -111,5 +113,10 @@ public class GDXGPUPlanarRegion
          normal.scale(-normal.getZ() / Math.abs(normal.getZ()));
       }
       return normal;
+   }
+
+   public RecyclingArrayList<Point2D> getRegionIndices()
+   {
+      return regionIndices;
    }
 }
