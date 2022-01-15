@@ -126,9 +126,9 @@ public class GDXGPUPlanarRegionExtraction
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
    private GDXCVImagePanel debugExtractionPanel;
-   private int depthOfRegionsSearch = 0;
+   private int numberOfRegionPatches = 0;
    private int regionMaxSearchDepth = 0;
-   private int boundariesFoundInRing = 0;
+   private int numberOfBoundaryPatches = 0;
    private int boundaryMaxSearchDepth = 0;
    private int numberOfBoundaryIndices = 0;
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
@@ -392,11 +392,11 @@ public class GDXGPUPlanarRegionExtraction
             int boundaryConnectionsEncodedAsOnes = Byte.toUnsignedInt(graphImage.getBytedecoOpenCVMat().ptr(row, column).get());
             if (!regionVisitedMatrix.get(row, column) && boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
             {
-               depthOfRegionsSearch = 0; // also number of patches traversed
+               numberOfRegionPatches = 0; // also number of patches traversed
                GDXGPUPlanarRegion planarRegion = planarRegions.add();
                planarRegion.reset(planarRegionIslandIndex);
-               regionsDepthFirstSearch(row, column, planarRegionIslandIndex, planarRegion);
-               if (depthOfRegionsSearch > regionMinPatches.get())
+               regionsDepthFirstSearch(row, column, planarRegionIslandIndex, planarRegion, 1);
+               if (numberOfRegionPatches >= regionMinPatches.get())
                {
                   ++planarRegionIslandIndex;
 
@@ -420,19 +420,19 @@ public class GDXGPUPlanarRegionExtraction
                {
                   planarRegions.remove(planarRegions.size() - 1);
                }
-               if (depthOfRegionsSearch > regionMaxSearchDepth)
-                  regionMaxSearchDepth = depthOfRegionsSearch;
+               if (numberOfRegionPatches > regionMaxSearchDepth)
+                  regionMaxSearchDepth = numberOfRegionPatches;
             }
          }
       }
    }
 
-   private void regionsDepthFirstSearch(int row, int column, int planarRegionIslandIndex, GDXGPUPlanarRegion planarRegion)
+   private void regionsDepthFirstSearch(int row, int column, int planarRegionIslandIndex, GDXGPUPlanarRegion planarRegion, int searchDepth)
    {
-      if (regionVisitedMatrix.get(row, column) || depthOfRegionsSearch > searchDepthLimit.get())
+      if (regionVisitedMatrix.get(row, column) || searchDepth > searchDepthLimit.get())
          return;
 
-      ++depthOfRegionsSearch;
+      ++numberOfRegionPatches;
       regionVisitedMatrix.set(row, column, true);
       regionMatrix.set(row, column, planarRegionIslandIndex);
       BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr(row, column);
@@ -454,7 +454,7 @@ public class GDXGPUPlanarRegionExtraction
             if (boundaryConnectionsEncodedAsOnes == 255) // all ones; fully connected
             {
                ++count;
-               regionsDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionIslandIndex, planarRegion);
+               regionsDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionIslandIndex, planarRegion, searchDepth + 1);
             }
          }
       }
@@ -475,11 +475,11 @@ public class GDXGPUPlanarRegionExtraction
          int regionRingIndex = 0;
          for (Point2D leafPatch : planarRegion.getBorderIndices())
          {
-            boundariesFoundInRing = 0;
+            numberOfBoundaryPatches = 0;
             GDXGPURegionRing regionRing = planarRegion.getRegionRings().add();
             regionRing.reset();
-            boundaryDepthFirstSearch((int) leafPatch.getY(), (int) leafPatch.getX(), planarRegion.getId(), regionRing);
-            if (boundariesFoundInRing > boundaryMinPatches.get())
+            boundaryDepthFirstSearch((int) leafPatch.getY(), (int) leafPatch.getX(), planarRegion.getId(), regionRing, 1);
+            if (numberOfBoundaryPatches >= boundaryMinPatches.get())
             {
                if (drawBoundaries.get())
                {
@@ -509,12 +509,12 @@ public class GDXGPUPlanarRegionExtraction
          boundaryMaxSearchDepth = numberOfBoundaryIndices;
    }
 
-   private void boundaryDepthFirstSearch(int row, int column, int planarRegionId, GDXGPURegionRing regionRing)
+   private void boundaryDepthFirstSearch(int row, int column, int planarRegionId, GDXGPURegionRing regionRing, int searchDepth)
    {
-      if (boundaryVisitedMatrix.get(row, column) || boundariesFoundInRing > searchDepthLimit.get())
+      if (boundaryVisitedMatrix.get(row, column) || searchDepth > searchDepthLimit.get())
          return;
 
-      ++boundariesFoundInRing;
+      ++numberOfBoundaryPatches;
       boundaryVisitedMatrix.set(row, column, true);
       regionRing.getBoundaryIndices().add().set(column, row);
       ++numberOfBoundaryIndices;
@@ -539,7 +539,7 @@ public class GDXGPUPlanarRegionExtraction
           && boundaryMatrix.get(row + adjacentY[i], column + adjacentX[i])
           && planarRegionId == regionMatrix.get(row + adjacentY[i], column + adjacentX[i]))
          {
-            boundaryDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionId, regionRing);
+            boundaryDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionId, regionRing, searchDepth + 1);
          }
       }
    }
