@@ -67,6 +67,7 @@ public class GDXGPUPlanarRegionExtractionDemo
                                                         publishRateHz,
                                                         false);
             baseUI.getImGuiPanelManager().addPanel(l515);
+            l515.create();
             l515.setSensorEnabled(true);
             l515.setPublishPointCloudROS2(false);
             l515.setRenderPointCloudDirectly(false);
@@ -76,7 +77,6 @@ public class GDXGPUPlanarRegionExtractionDemo
             l515.setRenderDepthVideoDirectly(true);
             l515.setPublishColorImageROS1(false);
             l515.setPublishColorImageROS2(false);
-            l515.create();
             CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
             baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
 
