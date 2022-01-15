@@ -128,9 +128,8 @@ public class GDXGPUPlanarRegionExtraction
    private GDXCVImagePanel debugExtractionPanel;
    private int numberOfRegionPatches = 0;
    private int regionMaxSearchDepth = 0;
-   private int numberOfBoundaryPatches = 0;
    private int boundaryMaxSearchDepth = 0;
-   private int numberOfBoundaryIndices = 0;
+   private int numberOfBoundaryPatchesInWholeImage = 0;
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
    private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
    private final RecyclingArrayList<GDXGPUPlanarRegion> planarRegions = new RecyclingArrayList<>(GDXGPUPlanarRegion::new);
@@ -432,6 +431,9 @@ public class GDXGPUPlanarRegionExtraction
       if (regionVisitedMatrix.get(row, column) || searchDepth > searchDepthLimit.get())
          return;
 
+      if (searchDepth > regionMaxSearchDepth)
+         regionMaxSearchDepth = searchDepth;
+
       ++numberOfRegionPatches;
       regionVisitedMatrix.set(row, column, true);
       regionMatrix.set(row, column, planarRegionIslandIndex);
@@ -467,18 +469,23 @@ public class GDXGPUPlanarRegionExtraction
 
    private void findBoundariesAndHoles()
    {
-      boundaryMaxSearchDepth = 0;
-      numberOfBoundaryIndices = 0;
       boundaryVisitedMatrix.zero();
+      numberOfBoundaryPatchesInWholeImage = 0;
+      boundaryMaxSearchDepth = 0;
       planarRegions.parallelStream().forEach(planarRegion ->
       {
+         int leafPatchIndex = 0;
          int regionRingIndex = 0;
          for (Point2D leafPatch : planarRegion.getBorderIndices())
          {
-            numberOfBoundaryPatches = 0;
             GDXGPURegionRing regionRing = planarRegion.getRegionRings().add();
             regionRing.reset();
-            boundaryDepthFirstSearch((int) leafPatch.getY(), (int) leafPatch.getX(), planarRegion.getId(), regionRing, 1);
+            int numberOfBoundaryPatches = boundaryDepthFirstSearch((int) leafPatch.getY(),
+                                                                   (int) leafPatch.getX(),
+                                                                   planarRegion.getId(),
+                                                                   regionRing,
+                                                                   leafPatchIndex,
+                                                                   1);
             if (numberOfBoundaryPatches >= boundaryMinPatches.get())
             {
                if (drawBoundaries.get())
@@ -502,34 +509,25 @@ public class GDXGPUPlanarRegionExtraction
             {
                planarRegion.getRegionRings().remove(planarRegion.getRegionRings().size() - 1);
             }
+            ++leafPatchIndex;
          }
          planarRegion.getRegionRings().sort(boundaryIndexComparator);
       });
-      if (numberOfBoundaryIndices > boundaryMaxSearchDepth)
-         boundaryMaxSearchDepth = numberOfBoundaryIndices;
    }
 
-   private void boundaryDepthFirstSearch(int row, int column, int planarRegionId, GDXGPURegionRing regionRing, int searchDepth)
+   private int boundaryDepthFirstSearch(int row, int column, int planarRegionId, GDXGPURegionRing regionRing, int leafPatchIndex, int searchDepth)
    {
       if (boundaryVisitedMatrix.get(row, column) || searchDepth > searchDepthLimit.get())
-         return;
+         return 0;
 
-      ++numberOfBoundaryPatches;
+      if (searchDepth > boundaryMaxSearchDepth)
+         boundaryMaxSearchDepth = searchDepth;
+
+      ++numberOfBoundaryPatchesInWholeImage;
       boundaryVisitedMatrix.set(row, column, true);
       regionRing.getBoundaryIndices().add().set(column, row);
-      ++numberOfBoundaryIndices;
 
-//      if (drawBoundaries.get())
-      {
-         int r = 5 * 130 % 255;
-         int g = 5 * 227 % 255;
-         int b = 5 * 332 % 255;
-         BytePointer pixel = debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(row, column);
-         pixel.put(0, (byte) r);
-         pixel.put(1, (byte) g);
-         pixel.put(2, (byte) b);
-      }
-
+      int numberOfBoundaryPatches = 1;
       for (int i = 0; i < 8; i++)
       {
          if (row + adjacentY[i] < patchImageHeight - 1
@@ -539,14 +537,20 @@ public class GDXGPUPlanarRegionExtraction
           && boundaryMatrix.get(row + adjacentY[i], column + adjacentX[i])
           && planarRegionId == regionMatrix.get(row + adjacentY[i], column + adjacentX[i]))
          {
-            boundaryDepthFirstSearch(row + adjacentY[i], column + adjacentX[i], planarRegionId, regionRing, searchDepth + 1);
+            numberOfBoundaryPatches += boundaryDepthFirstSearch(row + adjacentY[i],
+                                                                column + adjacentX[i],
+                                                                planarRegionId,
+                                                                regionRing,
+                                                                leafPatchIndex,
+                                                                searchDepth + 1);
          }
       }
+      return numberOfBoundaryPatches;
    }
 
    private void growRegionBoundaries()
    {
-      planarRegions.parallelStream().forEach(planarRegion ->
+      planarRegions.forEach(planarRegion ->
       {
          if (!planarRegion.getRegionRings().isEmpty())
          {
@@ -725,12 +729,12 @@ public class GDXGPUPlanarRegionExtraction
    {
       numberOfPlanarRegionsPlot.render((float) planarRegions.size());
       regionMaxSearchDepthPlot.render((float) regionMaxSearchDepth);
-      numberOfBoundaryVerticesPlot.render((float) numberOfBoundaryIndices);
+      numberOfBoundaryVerticesPlot.render((float) numberOfBoundaryPatchesInWholeImage);
       boundaryMaxSearchDepthPlot.render((float) boundaryMaxSearchDepth);
 
       ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
-      ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 6);
-      ImGui.sliderInt(labels.get("Gaussian sigma"), gaussianSigma.getData(), 1, 30);
+      ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 20);
+      ImGui.sliderInt(labels.get("Gaussian sigma"), gaussianSigma.getData(), 1, 100);
       ImGui.sliderInt(labels.get("Patch size"), patchSize.getData(), 1, 20);
       ImGui.sliderInt(labels.get("Dead pixel filter patch size"), deadPixelFilterPatchSize.getData(), 1, 20);
       ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
