@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.bytedeco.javacpp.BytePointer;
@@ -21,8 +20,10 @@ import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import sensor_msgs.Image;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -153,7 +154,6 @@ public class GDXGPUPlanarRegionExtraction
    private final FramePose3D regionPose = new FramePose3D();
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final FrameQuaternion orientation = new FrameQuaternion();
    private GDXPlanarRegionsGraphic planarRegionsGraphic;
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private GDXPointCloudRenderer boundaryPointCloud;
@@ -425,12 +425,13 @@ public class GDXGPUPlanarRegionExtraction
       ++numberOfRegionPatches;
       regionVisitedMatrix.set(row, column, true);
       regionMatrix.set(row, column, planarRegionIslandIndex);
-      float nx = nxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float ny = nyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float nz = nzImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cx = cxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cy = cyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-      float cz = czImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
+      float ny = -nxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float nz = nyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float nx = nzImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cy = -cxImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cz = cyImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+      float cx = czImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
       planarRegion.addRegionPatch(row, column, nx, ny, nz, cx, cy, cz);
 
       int count = 0;
@@ -544,10 +545,10 @@ public class GDXGPUPlanarRegionExtraction
             GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
             for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
             {
-//               BytePointer patchPointer = regionOutputImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getX(), (int) boundaryIndex.getY());
-               float vertexX = cxImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
-               float vertexY = cyImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
-               float vertexZ = czImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
+               // kernel coordinates is in left-handed frame, so lets flip it to IHMC Z up
+               float vertexX = czImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
+               float vertexY = -cxImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
+               float vertexZ = cyImage.getBytedecoOpenCVMat().ptr((int) boundaryIndex.getY(), (int) boundaryIndex.getX()).getFloat();
                Vector3D boundaryVertex = planarRegion.getBoundaryVertices().add();
                boundaryVertex.set(vertexX, vertexY, vertexZ);
                boundaryVertex.sub(planarRegion.getCenter());
@@ -579,22 +580,30 @@ public class GDXGPUPlanarRegionExtraction
       if (!render3DPlanarRegions.get())
          return;
 
-      List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.parallelStream()
+//      List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.parallelStream()
+      List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.stream()
          .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
          .map(gpuPlanarRegion ->
          {
             List<PlanarRegion> planarRegions = new ArrayList<>();
             try
             {
-               orientation.setYawPitchRollIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
-//               orientation.changeFrame(cmosFrame);
-               Vector3D32 normal = gpuPlanarRegion.getNormal();
-//               orientation.set(EuclidGeometryTools.axisAngleFromZUpToVector3D(normal));
+               FrameQuaternion orientation = new FrameQuaternion();
+//               orientation.setIncludingFrame(cameraFrame, EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
+//               orientation.changeFrame(ReferenceFrame.getWorldFrame());
+               orientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), EuclidGeometryTools.axisAngleFromZUpToVector3D(Axis3D.Z));
 
                // First compute the set of concave hulls for this region
-               Point3D32 origin = gpuPlanarRegion.getCenter();
+               FramePoint3D origin = new FramePoint3D(cameraFrame, gpuPlanarRegion.getCenter());
+               origin.changeFrame(ReferenceFrame.getWorldFrame());
+
                List<Point2D> pointCloudInPlane = gpuPlanarRegion.getBoundaryVertices().stream()
-                  .map(boundaryVertex -> PolygonizerTools.toPointInPlane(new Point3D(boundaryVertex), origin, orientation))
+                  .map(boundaryVertex ->
+                  {
+                     FramePoint3D framePoint3D = new FramePoint3D(cameraFrame, boundaryVertex);
+                     framePoint3D.changeFrame(ReferenceFrame.getWorldFrame());
+                     return PolygonizerTools.toPointInPlane(framePoint3D, origin, orientation);
+                  })
                   .filter(point2D -> Double.isFinite(point2D.getX()) && Double.isFinite(point2D.getY()))
                   .collect(Collectors.toList());
                List<LineSegment2D> intersections = new ArrayList<>();
@@ -633,7 +642,7 @@ public class GDXGPUPlanarRegionExtraction
 //                  regionPose.setIncludingFrame(cmosFrame, origin, orientation);
                   regionPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), origin, orientation);
 //                  regionPose.changeFrame(ReferenceFrame.getWorldFrame());
-                  regionPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
+//                  regionPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
                   regionPose.get(tempTransform);
                   PlanarRegion planarRegion = new PlanarRegion(tempTransform,
                                                                concaveHull.getConcaveHullVertices(),
@@ -699,8 +708,6 @@ public class GDXGPUPlanarRegionExtraction
             for (Vector3D boundaryVertex : planarRegion.getBoundaryVertices())
             {
                tempFramePoint.setIncludingFrame(cameraFrame, boundaryVertex);
-               // boundaryVertex is projected into 3D in the OpenCL kernel, but still in left-handed frame
-               ProjectionTools.transformFromXRightYUpZForwardToIHMCZUp(tempFramePoint);
                tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
                boundaryPointCloud.putVertex(tempFramePoint);
             }
