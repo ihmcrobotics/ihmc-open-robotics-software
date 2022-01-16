@@ -340,6 +340,11 @@ public class GDXImGuiBasedUI
       return imGuiWindowAndDockSystem.getPanelManager();
    }
 
+   public GDXImGuiPerspectiveManager getPerspectiveManager()
+   {
+      return perspectiveManager;
+   }
+
    public GDX3DSceneManager get3DSceneManager()
    {
       return sceneManager;

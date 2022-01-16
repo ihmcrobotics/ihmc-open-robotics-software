@@ -123,8 +123,9 @@ public class OpenCLManager
       Pfn_notify__cl_program_Pointer notificationRoutine = null;
       Pointer userData = null;
       checkReturnCode(clBuildProgram(program, numberOfDevices, devices, options, notificationRoutine, userData));
-      LogTools.info("OpenCL Build log: openCL/{}.cl", programName);
-      System.out.println(OpenCLTools.readString((stringSizeByteLimit, stringPointer, resultingStringLengthPointer) ->
+      LogTools.info("OpenCL build info for openCL/{}.cl: \n{}",
+                    programName,
+                    OpenCLTools.readString((stringSizeByteLimit, stringPointer, resultingStringLengthPointer) ->
       {
          clGetProgramBuildInfo(program, devices.getPointer(), CL_PROGRAM_BUILD_LOG, stringSizeByteLimit, stringPointer, resultingStringLengthPointer);
       }));

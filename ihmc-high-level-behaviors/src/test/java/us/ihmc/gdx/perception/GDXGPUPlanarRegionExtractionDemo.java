@@ -1,6 +1,10 @@
 package us.ihmc.gdx.perception;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.global.opencv_core;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -9,12 +13,15 @@ import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
+import us.ihmc.log.LogTools;
 
 public class GDXGPUPlanarRegionExtractionDemo
 {
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
+   private boolean nativesLoaded = false;
+   private boolean shouldInitializeGPUAcceleratedStuff = true;
    private GDXHighLevelDepthSensorSimulator l515;
    private GDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
@@ -49,63 +56,84 @@ public class GDXGPUPlanarRegionExtractionDemo
             baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
 
-            double publishRateHz = 5.0;
-            double verticalFOV = 55.0;
-            int imageWidth = 640;
-            int imageHeight = 480;
-            double minRange = 0.105;
-            double maxRange = 5.0;
-            l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
-                                                        null,
-                                                        null,
-                                                        null,
-                                                        null,
-                                                        null,
-                                                        null,
-                                                        null,
-                                                        null,
-                                                        l515PoseGizmo.getGizmoFrame(),
-                                                        () -> 0L,
-                                                        verticalFOV,
-                                                        imageWidth,
-                                                        imageHeight,
-                                                        minRange,
-                                                        maxRange,
-                                                        publishRateHz,
-                                                        false);
-            baseUI.getImGuiPanelManager().addPanel(l515);
-            l515.create();
-            l515.setSensorEnabled(true);
-            l515.setPublishPointCloudROS2(false);
-            l515.setRenderPointCloudDirectly(false);
-            l515.setPublishDepthImageROS1(false);
-            l515.setDebugCoordinateFrame(false);
-            l515.setRenderColorVideoDirectly(true);
-            l515.setRenderDepthVideoDirectly(true);
-            l515.setPublishColorImageROS1(false);
-            l515.setPublishColorImageROS2(false);
-            CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
-            baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
-
-            gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
-            gpuPlanarRegionExtraction.create(imageWidth,
-                                             imageHeight,
-                                             l515.getLowLevelSimulator().getMetersDepthFloatBuffer(),
-                                             cameraIntrinsics.getFx(),
-                                             cameraIntrinsics.getFy(),
-                                             cameraIntrinsics.getCx(),
-                                             cameraIntrinsics.getCy());
-            baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
-            baseUI.get3DSceneManager().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+            ThreadTools.startAThread(() ->
+            {
+               LogTools.info("Loading Bytedeco OpenCL...");
+               Loader.load(OpenCL.class);
+               LogTools.info("Bytedeco OpenCL loaded.");
+               LogTools.info("Loading Bytedeco OpenCV...");
+               Loader.load(opencv_core.class);
+               LogTools.info("Bytedeco OpenCV loaded.");
+               nativesLoaded = true;
+            }, "Bytedeco loader");
          }
 
          @Override
          public void render()
          {
-            l515.render(baseUI.get3DSceneManager());
-            gpuPlanarRegionExtraction.extractPlanarRegions();
-            gpuPlanarRegionExtraction.renderPlanarRegions(l515PoseGizmo.getGizmoFrame());
-            gpuPlanarRegionExtraction.renderBoundaryPoints(l515PoseGizmo.getGizmoFrame(), l515.getLowLevelSimulator().getCamera().invProjectionView);
+            if (nativesLoaded)
+            {
+               if (shouldInitializeGPUAcceleratedStuff)
+               {
+                  shouldInitializeGPUAcceleratedStuff = false;
+
+                  double publishRateHz = 5.0;
+                  double verticalFOV = 55.0;
+                  int imageWidth = 640;
+                  int imageHeight = 480;
+                  double minRange = 0.105;
+                  double maxRange = 5.0;
+                  l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
+                                                              null,
+                                                              null,
+                                                              null,
+                                                              null,
+                                                              null,
+                                                              null,
+                                                              null,
+                                                              null,
+                                                              l515PoseGizmo.getGizmoFrame(),
+                                                              () -> 0L,
+                                                              verticalFOV,
+                                                              imageWidth,
+                                                              imageHeight,
+                                                              minRange,
+                                                              maxRange,
+                                                              publishRateHz,
+                                                              false);
+                  baseUI.getImGuiPanelManager().addPanel(l515);
+                  l515.create();
+                  l515.setSensorEnabled(true);
+                  l515.setPublishPointCloudROS2(false);
+                  l515.setRenderPointCloudDirectly(false);
+                  l515.setPublishDepthImageROS1(false);
+                  l515.setDebugCoordinateFrame(false);
+                  l515.setRenderColorVideoDirectly(true);
+                  l515.setRenderDepthVideoDirectly(true);
+                  l515.setPublishColorImageROS1(false);
+                  l515.setPublishColorImageROS2(false);
+                  CameraPinholeBrown cameraIntrinsics = l515.getDepthCameraIntrinsics();
+                  baseUI.get3DSceneManager().addRenderableProvider(l515, GDXSceneLevel.VIRTUAL);
+
+                  gpuPlanarRegionExtraction = new GDXGPUPlanarRegionExtraction();
+                  gpuPlanarRegionExtraction.create(imageWidth,
+                                                   imageHeight,
+                                                   l515.getLowLevelSimulator().getMetersDepthFloatBuffer(),
+                                                   cameraIntrinsics.getFx(),
+                                                   cameraIntrinsics.getFy(),
+                                                   cameraIntrinsics.getCx(),
+                                                   cameraIntrinsics.getCy());
+                  baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
+                  baseUI.get3DSceneManager().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+
+                  baseUI.getPerspectiveManager().reloadPerspective();
+               }
+
+               l515.render(baseUI.get3DSceneManager());
+               gpuPlanarRegionExtraction.extractPlanarRegions();
+               gpuPlanarRegionExtraction.renderPlanarRegions(l515PoseGizmo.getGizmoFrame());
+               gpuPlanarRegionExtraction.renderBoundaryPoints(l515PoseGizmo.getGizmoFrame(), l515.getLowLevelSimulator().getCamera().invProjectionView);
+            }
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
