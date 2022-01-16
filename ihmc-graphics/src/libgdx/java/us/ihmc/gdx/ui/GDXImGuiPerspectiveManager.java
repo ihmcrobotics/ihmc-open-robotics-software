@@ -159,4 +159,19 @@ public class GDXImGuiPerspectiveManager
                                                                                                                         + "Perspective"));
       perspectiveDirectoryUpdated.accept(perspectiveDirectory);
    }
+
+   public void reloadPerspective()
+   {
+      boolean currentPerspectiveMode = false;
+      for (String versionControlPerspective : versionControlPerspectives)
+      {
+         if (versionControlPerspective.equals(currentPerspectiveName))
+         {
+            currentPerspectiveMode = true;
+            break;
+         }
+      }
+      applyPerspectiveDirectory();
+      load.accept(currentPerspectiveMode);
+   }
 }
