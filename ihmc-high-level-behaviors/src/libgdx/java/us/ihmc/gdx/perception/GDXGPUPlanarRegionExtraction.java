@@ -57,7 +57,7 @@ public class GDXGPUPlanarRegionExtraction
    private final ImFloat mergeDistanceThreshold = new ImFloat(0.016f);
    private final ImFloat mergeAngularThreshold = new ImFloat(0.82f);
    private final ImFloat filterDisparityThreshold = new ImFloat(2000);
-   private final ImInt desiredPatchSize = new ImInt(4);
+   private final ImInt desiredPatchSize = new ImInt(16);
    private final ImInt patchSize = new ImInt(desiredPatchSize.get());
    private final ImInt deadPixelFilterPatchSize = new ImInt(4);
    private final ImFloat focalLengthXPixels = new ImFloat(0);
@@ -69,9 +69,9 @@ public class GDXGPUPlanarRegionExtraction
    private final ImBoolean useSVDNormals = new ImBoolean(true);
    private final ImInt svdReductionFactor = new ImInt(20);
    private final ImInt gaussianSize = new ImInt(6);
-   private final ImInt gaussianSigma = new ImInt(20);
-   private final ImInt searchDepthLimit = new ImInt(10000);
-   private final ImInt regionMinPatches = new ImInt(200);
+   private final ImFloat gaussianSigma = new ImFloat(4.74f);
+   private final ImInt searchDepthLimit = new ImInt(37000);
+   private final ImInt regionMinPatches = new ImInt(37);
    private final ImInt boundaryMinPatches = new ImInt(20);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
@@ -79,7 +79,7 @@ public class GDXGPUPlanarRegionExtraction
    private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
-   private final ImFloat regionGrowthFactor = new ImFloat(0.027f);
+   private final ImFloat regionGrowthFactor = new ImFloat(0.051f);
    private final ImFloat edgeLengthTresholdSlider = new ImFloat(0.224f);
    private final ImFloat triangulationToleranceSlider = new ImFloat(0.0f);
    private final ImInt maxNumberOfIterationsSlider = new ImInt(5000);
@@ -764,7 +764,7 @@ public class GDXGPUPlanarRegionExtraction
 
       ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
       ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 20);
-      ImGui.sliderInt(labels.get("Gaussian sigma"), gaussianSigma.getData(), 1, 100);
+      ImGui.sliderFloat(labels.get("Gaussian sigma"), gaussianSigma.getData(), 0.23f, 10.0f);
       if (ImGui.sliderInt(labels.get("Patch size"), desiredPatchSize.getData(), 2, 20))
       {
          if (desiredPatchSize.get() != patchSize.get()
