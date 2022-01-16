@@ -57,9 +57,8 @@ public class GDXGPUPlanarRegionExtraction
    private final ImFloat mergeDistanceThreshold = new ImFloat(0.016f);
    private final ImFloat mergeAngularThreshold = new ImFloat(0.82f);
    private final ImFloat filterDisparityThreshold = new ImFloat(2000);
-   private final ImInt inputHeight = new ImInt(0);
-   private final ImInt inputWidth = new ImInt(0);
-   private final ImInt patchSize = new ImInt(4);
+   private final ImInt desiredPatchSize = new ImInt(4);
+   private final ImInt patchSize = new ImInt(desiredPatchSize.get());
    private final ImInt deadPixelFilterPatchSize = new ImInt(4);
    private final ImFloat focalLengthXPixels = new ImFloat(0);
    private final ImFloat focalLengthYPixels = new ImFloat(0);
@@ -124,6 +123,7 @@ public class GDXGPUPlanarRegionExtraction
    private BMatrixRMaj boundaryMatrix;
    private DMatrixRMaj regionMatrix;
    private GDXCVImagePanel debugExtractionPanel;
+   private boolean patchSizeChanged = false;
    private int numberOfRegionPatches = 0;
    private int regionMaxSearchDepth = 0;
    private int boundaryMaxSearchDepth = 0;
@@ -163,8 +163,6 @@ public class GDXGPUPlanarRegionExtraction
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
-      inputWidth.set(imageWidth);
-      inputHeight.set(imageHeight);
       focalLengthXPixels.set((float) fx);
       focalLengthYPixels.set((float) fy);
       principalOffsetXPixels.set((float) cx);
@@ -243,6 +241,45 @@ public class GDXGPUPlanarRegionExtraction
 
    public void extractPlanarRegions()
    {
+      calculateDetivativeParameters();
+
+      if (firstRun || patchSizeChanged)
+      {
+//         if (patchSizeChanged)
+//         {
+//            openCLManager.destroy();
+//         }
+//
+//         openCLManager.create();
+//         planarRegionExtractionProgram = openCLManager.loadProgram("PlanarRegionExtraction");
+//         filterKernel = openCLManager.createKernel(planarRegionExtractionProgram, "filterKernel");
+//         packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
+//         mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
+      }
+
+      if (patchSizeChanged)
+      {
+         patchSizeChanged = false;
+         nxImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         nyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         nzImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         cxImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         cyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         czImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         graphImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         nxImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         nyImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         nzImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         gxImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         gyImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         gzImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         debugExtractionPanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         regionVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
+         boundaryVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
+         boundaryMatrix.reshape(patchImageHeight, patchImageWidth);
+         regionMatrix.reshape(patchImageHeight, patchImageWidth);
+      }
+
       // convert float to unint16
       // multiply by 1000 and cast to int
       double scaleFactor = 1000.0; // convert meters to millimeters
@@ -268,7 +305,6 @@ public class GDXGPUPlanarRegionExtraction
 
       blurredDepthPanel.drawFloatImage(blurredDepthImage.getBytedecoOpenCVMat());
 
-      calculateDetivativeParameters();
       parametersBuffer.getBytedecoFloatBufferPointer().put(0, filterDisparityThreshold.get());
       parametersBuffer.getBytedecoFloatBufferPointer().put(1, mergeAngularThreshold.get());
       parametersBuffer.getBytedecoFloatBufferPointer().put(2, mergeDistanceThreshold.get());
@@ -283,8 +319,8 @@ public class GDXGPUPlanarRegionExtraction
       parametersBuffer.getBytedecoFloatBufferPointer().put(11, deadPixelFilterPatchSize.get());
       parametersBuffer.getBytedecoFloatBufferPointer().put(12, filterPatchImageHeight);
       parametersBuffer.getBytedecoFloatBufferPointer().put(13, filterPatchImageWidth);
-      parametersBuffer.getBytedecoFloatBufferPointer().put(14, inputHeight.get());
-      parametersBuffer.getBytedecoFloatBufferPointer().put(15, inputWidth.get());
+      parametersBuffer.getBytedecoFloatBufferPointer().put(14, imageHeight);
+      parametersBuffer.getBytedecoFloatBufferPointer().put(15, imageWidth);
       if (firstRun)
       {
          firstRun = false;
@@ -333,7 +369,7 @@ public class GDXGPUPlanarRegionExtraction
       openCLManager.setKernelArgument(mergeKernel, 6, graphImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(mergeKernel, 7, parametersBuffer.getOpenCLBufferObject());
 
-      openCLManager.execute2D(filterKernel, filterPatchImageHeight, filterPatchImageWidth); // TODO: Check X & Y vs height and width
+      openCLManager.execute2D(filterKernel, filterPatchImageHeight, filterPatchImageWidth); // X & Y vs height and width are flipped in this kernel code
       openCLManager.execute2D(packKernel, patchImageHeight, patchImageWidth);
       openCLManager.execute2D(mergeKernel, patchImageHeight, patchImageWidth);
 
@@ -726,14 +762,15 @@ public class GDXGPUPlanarRegionExtraction
    {
       patchHeight = patchSize.get();
       patchWidth = patchSize.get();
-      patchImageHeight = inputHeight.get() / patchHeight;
-      patchImageWidth = inputWidth.get() / patchWidth;
-      filterPatchImageHeight = inputHeight.get() / deadPixelFilterPatchSize.get();
-      filterPatchImageWidth = inputWidth.get() / deadPixelFilterPatchSize.get();
+      patchImageHeight = imageHeight / patchHeight;
+      patchImageWidth = imageWidth / patchWidth;
+      filterPatchImageHeight = imageHeight / deadPixelFilterPatchSize.get();
+      filterPatchImageWidth = imageWidth / deadPixelFilterPatchSize.get();
    }
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("Input image dimensions: " + imageWidth + " x " + imageHeight);
       numberOfPlanarRegionsPlot.render((float) planarRegions.size());
       regionMaxSearchDepthPlot.render((float) regionMaxSearchDepth);
       numberOfBoundaryVerticesPlot.render((float) numberOfBoundaryPatchesInWholeImage);
@@ -742,7 +779,14 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.checkbox(labels.get("Early gaussian blur"), earlyGaussianBlur);
       ImGui.sliderInt(labels.get("Gaussian size"), gaussianSize.getData(), 1, 20);
       ImGui.sliderInt(labels.get("Gaussian sigma"), gaussianSigma.getData(), 1, 100);
-      ImGui.sliderInt(labels.get("Patch size"), patchSize.getData(), 1, 20);
+      if (ImGui.sliderInt(labels.get("Patch size"), desiredPatchSize.getData(), 1, 20))
+      {
+         if (imageWidth % desiredPatchSize.get() == 0 && imageHeight % desiredPatchSize.get() == 0)
+         {
+            patchSize.set(desiredPatchSize.get());
+            patchSizeChanged = true;
+         }
+      }
       ImGui.sliderInt(labels.get("Dead pixel filter patch size"), deadPixelFilterPatchSize.getData(), 1, 20);
       ImGui.checkbox(labels.get("Use filtered image"), useFilteredImage);
       ImGui.sliderFloat(labels.get("Merge distance threshold"), mergeDistanceThreshold.getData(), 0.0f, 0.1f);
@@ -760,8 +804,6 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
       ImGui.checkbox(labels.get("Render 3D boundaries"), render3DBoundaries);
       ImGui.checkbox(labels.get("Render 3D grown boundaries"), render3DGrownBoundaries);
-      ImGui.text("Input height: " + inputHeight);
-      ImGui.text("Input width: " + inputWidth);
       ImGui.sliderFloat(labels.get("Focal length X (px)"), focalLengthXPixels.getData(), -1000.0f, 1000.0f);
       ImGui.sliderFloat(labels.get("Focal length Y (px)"), focalLengthYPixels.getData(), -1000.0f, 1000.0f);
       ImGui.sliderFloat(labels.get("Principal offset X (px)"), principalOffsetXPixels.getData(), -imageWidth, imageWidth);
