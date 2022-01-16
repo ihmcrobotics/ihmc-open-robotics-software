@@ -1,10 +1,6 @@
 package us.ihmc.gdx.perception;
 
 import boofcv.struct.calib.CameraPinholeBrown;
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencl.global.OpenCL;
-import org.bytedeco.opencv.global.opencv_core;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -13,15 +9,15 @@ import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXInteractableReferenceFrame;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
-import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoTools;
+import us.ihmc.tools.thread.Activator;
 
 public class GDXGPUPlanarRegionExtractionDemo
 {
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-   private boolean nativesLoaded = false;
-   private boolean shouldInitializeGPUAcceleratedStuff = true;
+   private Activator nativesLoadedActivator;
    private GDXHighLevelDepthSensorSimulator l515;
    private GDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private GDXPose3DGizmo l515PoseGizmo = new GDXPose3DGizmo();
@@ -35,6 +31,8 @@ public class GDXGPUPlanarRegionExtractionDemo
          @Override
          public void create()
          {
+            nativesLoadedActivator = BytedecoTools.loadNativesOnAThread();
+
             baseUI.create();
 
             environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
@@ -55,28 +53,15 @@ public class GDXGPUPlanarRegionExtractionDemo
             baseUI.addImGui3DViewInputProcessor(l515PoseGizmo::process3DViewInput);
             baseUI.get3DSceneManager().addRenderableProvider(l515PoseGizmo, GDXSceneLevel.VIRTUAL);
             l515PoseGizmo.getTransformToParent().appendPitchRotation(Math.toRadians(60.0));
-
-            ThreadTools.startAThread(() ->
-            {
-               LogTools.info("Loading Bytedeco OpenCL...");
-               Loader.load(OpenCL.class);
-               LogTools.info("Bytedeco OpenCL loaded.");
-               LogTools.info("Loading Bytedeco OpenCV...");
-               Loader.load(opencv_core.class);
-               LogTools.info("Bytedeco OpenCV loaded.");
-               nativesLoaded = true;
-            }, "Bytedeco loader");
          }
 
          @Override
          public void render()
          {
-            if (nativesLoaded)
+            if (nativesLoadedActivator.poll())
             {
-               if (shouldInitializeGPUAcceleratedStuff)
+               if (nativesLoadedActivator.isNewlyActivated())
                {
-                  shouldInitializeGPUAcceleratedStuff = false;
-
                   double publishRateHz = 5.0;
                   double verticalFOV = 55.0;
                   int imageWidth = 1024;
