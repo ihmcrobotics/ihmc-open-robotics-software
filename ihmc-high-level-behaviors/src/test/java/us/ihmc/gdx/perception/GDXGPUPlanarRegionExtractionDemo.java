@@ -130,8 +130,8 @@ public class GDXGPUPlanarRegionExtractionDemo
                }
 
                l515.render(baseUI.get3DSceneManager());
-               gpuPlanarRegionExtraction.extractPlanarRegions();
-               gpuPlanarRegionExtraction.renderPlanarRegions(l515PoseGizmo.getGizmoFrame());
+               gpuPlanarRegionExtraction.extractPlanarRegions(l515PoseGizmo.getGizmoFrame());
+               gpuPlanarRegionExtraction.renderPlanarRegions();
                gpuPlanarRegionExtraction.renderBoundaryPoints(l515PoseGizmo.getGizmoFrame(), l515.getLowLevelSimulator().getCamera().invProjectionView);
             }
 
