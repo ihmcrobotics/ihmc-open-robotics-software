@@ -769,7 +769,7 @@ public class GDXGPUPlanarRegionExtraction
 
       ImGui.sliderFloat("Edge Length Threshold", edgeLengthTresholdSlider.getData(), 0, 0.5f);
       concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthTresholdSlider.get());
-      ImGui.sliderFloat("Triangulation Tolerance", triangulationToleranceSlider.getData(), 0, 1);
+      ImGui.sliderFloat("Triangulation Tolerance", triangulationToleranceSlider.getData(), 0, 0.3f);
       concaveHullFactoryParameters.setTriangulationTolerance(triangulationToleranceSlider.get());
       ImGui.sliderInt("Max Number of Iterations", maxNumberOfIterationsSlider.getData(), 2000, 6000);
       concaveHullFactoryParameters.setMaxNumberOfIterations(maxNumberOfIterationsSlider.get());
