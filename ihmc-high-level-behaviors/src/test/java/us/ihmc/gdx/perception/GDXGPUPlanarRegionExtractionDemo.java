@@ -79,8 +79,8 @@ public class GDXGPUPlanarRegionExtractionDemo
 
                   double publishRateHz = 5.0;
                   double verticalFOV = 55.0;
-                  int imageWidth = 640;
-                  int imageHeight = 480;
+                  int imageWidth = 1024;
+                  int imageHeight = 768;
                   double minRange = 0.105;
                   double maxRange = 5.0;
                   l515 = new GDXHighLevelDepthSensorSimulator("Stepping L515",
