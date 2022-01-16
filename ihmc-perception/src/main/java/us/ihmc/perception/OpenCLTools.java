@@ -6,11 +6,14 @@ import org.bytedeco.javacpp.SizeTPointer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+
+import static org.bytedeco.opencl.global.OpenCL.CL_SUCCESS;
 
 public class OpenCLTools
 {
@@ -32,5 +35,13 @@ public class OpenCLTools
       byte[] bytes = new byte[infoStringLength];
       byteBuffer.get(bytes, 0, infoStringLength);
       return new String(bytes, StandardCharsets.UTF_8).trim();
+   }
+
+   public static void checkReturnCode(int returnCode)
+   {
+      if (returnCode != CL_SUCCESS) // duplicated to reduce stack trace height
+      {
+         LogTools.error(1, "OpenCL error code: " + returnCode);
+      }
    }
 }
