@@ -19,8 +19,8 @@ public class OpenCLManager
    private final int maxNumberOfEntries = 2; // More than 2 results in native crash TODO: Why?
    private _cl_platform_id platforms = new _cl_platform_id();
    private _cl_device_id devices = new _cl_device_id();
-   private _cl_context context;
-   private _cl_command_queue commandQueue = new _cl_command_queue();
+   private _cl_context context = null;
+   private _cl_command_queue commandQueue = null;
    private final IntPointer numberOfDevices = new IntPointer(1);
    private final IntPointer numberOfPlatforms = new IntPointer(3);
    private final IntPointer returnCode = new IntPointer(1);
@@ -357,12 +357,17 @@ public class OpenCLManager
       returnCode.put(clFinish(commandQueue));
       for (_cl_program program : programs)
          returnCode.put(clReleaseProgram(program));
+      programs.clear();
       for (_cl_kernel kernel : kernels)
          returnCode.put(clReleaseKernel(kernel));
+      kernels.clear();
       for (_cl_mem bufferObject : bufferObjects)
          returnCode.put(clReleaseMemObject(bufferObject));
+      bufferObjects.clear();
       returnCode.put(clReleaseCommandQueue(commandQueue));
+      commandQueue = null;
       returnCode.put(clReleaseContext(context));
+      context = null;
    }
 
    public int getReturnCode()
