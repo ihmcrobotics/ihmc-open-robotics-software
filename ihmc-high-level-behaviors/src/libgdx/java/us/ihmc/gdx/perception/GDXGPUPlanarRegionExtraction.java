@@ -20,6 +20,7 @@ import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import sensor_msgs.Image;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -97,6 +98,14 @@ public class GDXGPUPlanarRegionExtraction
    private ImGuiPlot numberOfBoundaryVerticesPlot;
    private ImGuiPlot boundaryMaxSearchDepthPlot;
    private ImGuiPlot svdDurationPlot;
+   private ImGuiPlot wholeAlgorithmDurationPlot;
+   private ImGuiPlot gpuDurationPlot;
+   private ImGuiPlot depthFirstSearchDurationPlot;
+   private ImGuiPlot planarRegionsSegmentationDurationPlot;
+   private final Stopwatch wholeAlgorithmDurationStopwatch = new Stopwatch();
+   private final Stopwatch gpuDurationStopwatch = new Stopwatch();
+   private final Stopwatch depthFirstSearchDurationStopwatch = new Stopwatch();
+   private final Stopwatch planarRegionsSegmentationDurationStopwatch = new Stopwatch();
    private GDXBytedecoImage inputFloatDepthImage;
    private GDXBytedecoImage inputScaledFloatDepthImage;
    private GDXBytedecoImage inputU16DepthImage;
@@ -218,6 +227,10 @@ public class GDXGPUPlanarRegionExtraction
       numberOfBoundaryVerticesPlot = new ImGuiPlot(labels.get("Number of boundary vertices"), 1000, 300, 50);
       boundaryMaxSearchDepthPlot = new ImGuiPlot(labels.get("Boundary max search depth"), 1000, 300, 50);
       svdDurationPlot = new ImGuiPlot(labels.get("SVD duration"), 1000, 300, 50);
+      wholeAlgorithmDurationPlot = new ImGuiPlot(labels.get("Whole algorithm duration"), 1000, 300, 50);
+      gpuDurationPlot = new ImGuiPlot(labels.get("GPU processing duration"), 1000, 300, 50);
+      depthFirstSearchDurationPlot = new ImGuiPlot(labels.get("Depth first searching duration"), 1000, 300, 50);
+      planarRegionsSegmentationDurationPlot = new ImGuiPlot(labels.get("Planar region segmentation duration"), 1000, 300, 50);
 
       planarRegionsGraphic = new GDXPlanarRegionsGraphic();
       boundaryPointCloud = new GDXPointCloudRenderer();
@@ -237,8 +250,11 @@ public class GDXGPUPlanarRegionExtraction
 //      ROSOpenCVTools.backMatWithNettyBuffer(inputDepthImageMat, image.getData());
    }
 
-   public void extractPlanarRegions()
+   public void extractPlanarRegions(ReferenceFrame cameraFrame)
    {
+      wholeAlgorithmDurationStopwatch.start();
+      gpuDurationStopwatch.start();
+
       calculateDetivativeParameters();
 
       // convert float to unint16
@@ -367,6 +383,21 @@ public class GDXGPUPlanarRegionExtraction
       openCLManager.enqueueReadImage(graphImage.getOpenCLImageObject(), patchImageWidth, patchImageHeight, graphImage.getBytedecoByteBufferPointer());
 
       openCLManager.finish();
+      gpuDurationStopwatch.suspend();
+
+      if (drawPatches.get() || drawBoundaries.get())
+         debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
+
+      depthFirstSearchDurationStopwatch.start();
+      findRegions();
+      findBoundariesAndHoles();
+      growRegionBoundaries();
+      depthFirstSearchDurationStopwatch.suspend();
+
+      planarRegionsSegmentationDurationStopwatch.start();
+      computePlanarRegions(cameraFrame);
+      planarRegionsSegmentationDurationStopwatch.suspend();
+      wholeAlgorithmDurationStopwatch.suspend();
 
       filteredDepthPanel.drawFloatImage(filteredDepthImage.getBytedecoOpenCVMat());
       nxImagePanel.drawFloatImage(nxImage.getBytedecoOpenCVMat());
@@ -375,12 +406,6 @@ public class GDXGPUPlanarRegionExtraction
       gxImagePanel.drawFloatImage(cxImage.getBytedecoOpenCVMat());
       gyImagePanel.drawFloatImage(cyImage.getBytedecoOpenCVMat());
       gzImagePanel.drawFloatImage(czImage.getBytedecoOpenCVMat());
-
-      debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
-
-      findRegions();
-      findBoundariesAndHoles();
-      growRegionBoundaries();
 
       debugExtractionPanel.draw();
    }
@@ -585,12 +610,8 @@ public class GDXGPUPlanarRegionExtraction
       });
    }
 
-   /** FIXME: This method filled with allocations. */
-   public void renderPlanarRegions(ReferenceFrame cameraFrame)
+   private void computePlanarRegions(ReferenceFrame cameraFrame)
    {
-      if (!render3DPlanarRegions.get())
-         return;
-
       List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.parallelStream()
          .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
          .map(gpuPlanarRegion ->
@@ -673,6 +694,13 @@ public class GDXGPUPlanarRegionExtraction
       {
          planarRegionsList.addPlanarRegions(planarRegions);
       }
+   }
+
+   /** FIXME: This method filled with allocations. */
+   public void renderPlanarRegions()
+   {
+      if (!render3DPlanarRegions.get())
+         return;
 
       planarRegionsGraphic.generateMeshes(planarRegionsList);
       planarRegionsGraphic.update();
@@ -732,6 +760,10 @@ public class GDXGPUPlanarRegionExtraction
    public void renderImGuiWidgets()
    {
       ImGui.text("Input image dimensions: " + imageWidth + " x " + imageHeight);
+      wholeAlgorithmDurationPlot.render(wholeAlgorithmDurationStopwatch.totalElapsed());
+      gpuDurationPlot.render(gpuDurationStopwatch.totalElapsed());
+      depthFirstSearchDurationPlot.render(depthFirstSearchDurationStopwatch.totalElapsed());
+      planarRegionsSegmentationDurationPlot.render(planarRegionsSegmentationDurationStopwatch.totalElapsed());
       numberOfPlanarRegionsPlot.render((float) planarRegions.size());
       regionMaxSearchDepthPlot.render((float) regionMaxSearchDepth);
       numberOfBoundaryVerticesPlot.render((float) numberOfBoundaryPatchesInWholeImage);
