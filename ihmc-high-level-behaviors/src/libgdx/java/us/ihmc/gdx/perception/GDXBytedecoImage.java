@@ -6,7 +6,6 @@ import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.perception.OpenCLManager;
-import us.ihmc.perception.OpenCLTools;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -15,15 +14,15 @@ public class GDXBytedecoImage
 {
    private ByteBuffer backingDirectByteBuffer;
    private BytePointer bytedecoByteBufferPointer;
-   private final Mat bytedecoOpenCVMat;
+   private Mat bytedecoOpenCVMat;
    private final int openCLChannelOrder;
    private final int openCLChannelDataType;
    private int imageWidth;
    private int imageHeight;
+   private final int cvMatType;
    private int bytesPerPixel;
    private _cl_mem openCLImageObject;
-   private int openCLImageObjectFlags;
-   private boolean isBackedByExternalByteBuffer;
+   private final boolean isBackedByExternalByteBuffer;
 
    public GDXBytedecoImage(int imageWidth, int imageHeight, int cvMatType)
    {
@@ -34,6 +33,7 @@ public class GDXBytedecoImage
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
+      this.cvMatType = cvMatType;
 
       bytesPerPixel = 0;
       if (cvMatType == opencv_core.CV_16UC1)
@@ -88,7 +88,6 @@ public class GDXBytedecoImage
 
    public void createOpenCLImage(OpenCLManager openCLManager, int flags)
    {
-      this.openCLImageObjectFlags = flags;
       openCLImageObject = openCLManager.createImage(flags, openCLChannelOrder, openCLChannelDataType, imageWidth, imageHeight, bytedecoByteBufferPointer);
    }
 
@@ -102,16 +101,12 @@ public class GDXBytedecoImage
       openCLManager.enqueueReadImage(openCLImageObject, imageWidth, imageHeight, bytedecoByteBufferPointer);
    }
 
-   public void resize(int imageWidth, int imageHeight, OpenCLManager openCLManager, ByteBuffer externalByteBuffer)
+   public void resize(int imageWidth, int imageHeight, ByteBuffer externalByteBuffer)
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
-      boolean openCLObjectCreated = openCLImageObject != null;
-      if (openCLObjectCreated)
-      {
-         OpenCLTools.checkReturnCode(OpenCL.clReleaseMemObject(openCLImageObject));
-      }
+      openCLImageObject = null;
 
       if (isBackedByExternalByteBuffer)
       {
@@ -124,15 +119,7 @@ public class GDXBytedecoImage
          backingDirectByteBuffer.order(ByteOrder.nativeOrder());
       }
       bytedecoByteBufferPointer = new BytePointer(backingDirectByteBuffer);
-
-      bytedecoOpenCVMat.rows(imageHeight);
-      bytedecoOpenCVMat.cols(imageWidth);
-      bytedecoOpenCVMat.data(bytedecoByteBufferPointer);
-
-      if (openCLObjectCreated)
-      {
-         createOpenCLImage(openCLManager, openCLImageObjectFlags);
-      }
+      bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
    }
 
    public void rewind()
