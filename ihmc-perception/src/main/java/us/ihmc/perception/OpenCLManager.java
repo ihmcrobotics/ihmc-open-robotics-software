@@ -7,6 +7,8 @@ import us.ihmc.log.LogTools;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.TreeSet;
 
 import static org.bytedeco.opencl.global.OpenCL.*;
 
@@ -26,7 +28,7 @@ public class OpenCLManager
    private final IntPointer returnCode = new IntPointer(1);
    private final ArrayList<_cl_program> programs = new ArrayList<>();
    private final ArrayList<_cl_kernel> kernels = new ArrayList<>();
-   private final ArrayList<_cl_mem> bufferObjects = new ArrayList<>();
+   private final TreeSet<_cl_mem> bufferObjects = new TreeSet<>(Comparator.comparing(Pointer::address));
    private final SizeTPointer globalWorkSize = new SizeTPointer(0, 0, 0);
    private PointerPointer tempPointerPointerForSetKernelArgument = new PointerPointer(1);
    private long pointerPointerSize = Pointer.sizeof(PointerPointer.class);
@@ -351,22 +353,28 @@ public class OpenCLManager
       }
    }
 
+   public void releaseBufferObject(_cl_mem bufferObject)
+   {
+      checkReturnCode(clReleaseMemObject(bufferObject));
+      bufferObjects.remove(bufferObject);
+   }
+
    public void destroy()
    {
-      returnCode.put(clFlush(commandQueue));
-      returnCode.put(clFinish(commandQueue));
+      checkReturnCode(clFlush(commandQueue));
+      checkReturnCode(clFinish(commandQueue));
       for (_cl_program program : programs)
-         returnCode.put(clReleaseProgram(program));
+         checkReturnCode(clReleaseProgram(program));
       programs.clear();
       for (_cl_kernel kernel : kernels)
-         returnCode.put(clReleaseKernel(kernel));
+         checkReturnCode(clReleaseKernel(kernel));
       kernels.clear();
       for (_cl_mem bufferObject : bufferObjects)
-         returnCode.put(clReleaseMemObject(bufferObject));
+         checkReturnCode(clReleaseMemObject(bufferObject));
       bufferObjects.clear();
-      returnCode.put(clReleaseCommandQueue(commandQueue));
+      checkReturnCode(clReleaseCommandQueue(commandQueue));
       commandQueue = null;
-      returnCode.put(clReleaseContext(context));
+      checkReturnCode(clReleaseContext(context));
       context = null;
    }
 
