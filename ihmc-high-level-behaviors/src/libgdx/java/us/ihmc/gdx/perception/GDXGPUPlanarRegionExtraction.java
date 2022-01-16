@@ -243,42 +243,6 @@ public class GDXGPUPlanarRegionExtraction
    {
       calculateDetivativeParameters();
 
-      if (firstRun || patchSizeChanged)
-      {
-//         if (patchSizeChanged)
-//         {
-//            openCLManager.destroy();
-//         }
-//
-//         openCLManager.create();
-//         planarRegionExtractionProgram = openCLManager.loadProgram("PlanarRegionExtraction");
-//         filterKernel = openCLManager.createKernel(planarRegionExtractionProgram, "filterKernel");
-//         packKernel = openCLManager.createKernel(planarRegionExtractionProgram, "packKernel");
-//         mergeKernel = openCLManager.createKernel(planarRegionExtractionProgram, "mergeKernel");
-      }
-
-      if (patchSizeChanged)
-      {
-         nxImage.resize(patchImageWidth, patchImageHeight, null);
-         nyImage.resize(patchImageWidth, patchImageHeight, null);
-         nzImage.resize(patchImageWidth, patchImageHeight, null);
-         cxImage.resize(patchImageWidth, patchImageHeight, null);
-         cyImage.resize(patchImageWidth, patchImageHeight, null);
-         czImage.resize(patchImageWidth, patchImageHeight, null);
-         graphImage.resize(patchImageWidth, patchImageHeight, null);
-         nxImagePanel.resize(patchImageWidth, patchImageHeight);
-         nyImagePanel.resize(patchImageWidth, patchImageHeight);
-         nzImagePanel.resize(patchImageWidth, patchImageHeight);
-         gxImagePanel.resize(patchImageWidth, patchImageHeight);
-         gyImagePanel.resize(patchImageWidth, patchImageHeight);
-         gzImagePanel.resize(patchImageWidth, patchImageHeight);
-         debugExtractionPanel.resize(patchImageWidth, patchImageHeight);
-         regionVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
-         boundaryVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
-         boundaryMatrix.reshape(patchImageHeight, patchImageWidth);
-         regionMatrix.reshape(patchImageHeight, patchImageWidth);
-      }
-
       // convert float to unint16
       // multiply by 1000 and cast to int
       double scaleFactor = 1000.0; // convert meters to millimeters
@@ -320,10 +284,32 @@ public class GDXGPUPlanarRegionExtraction
       parametersBuffer.getBytedecoFloatBufferPointer().put(13, filterPatchImageWidth);
       parametersBuffer.getBytedecoFloatBufferPointer().put(14, imageHeight);
       parametersBuffer.getBytedecoFloatBufferPointer().put(15, imageWidth);
-      if (firstRun || patchSizeChanged)
+
+      if (patchSizeChanged)
+      {
+         patchSizeChanged = false;
+         nxImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         nyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         nzImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         cxImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         cyImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         czImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         graphImage.resize(patchImageWidth, patchImageHeight, openCLManager, null);
+         nxImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         nyImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         nzImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         gxImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         gyImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         gzImagePanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         debugExtractionPanel.resize(patchImageWidth, patchImageHeight, openCLManager);
+         regionVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
+         boundaryVisitedMatrix.reshape(patchImageHeight, patchImageWidth);
+         boundaryMatrix.reshape(patchImageHeight, patchImageWidth);
+         regionMatrix.reshape(patchImageHeight, patchImageWidth);
+      }
+      if (firstRun)
       {
          firstRun = false;
-         patchSizeChanged = false;
          inputU16DepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          blurredDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          filteredDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);

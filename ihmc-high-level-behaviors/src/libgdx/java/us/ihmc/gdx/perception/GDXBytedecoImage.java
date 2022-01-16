@@ -22,6 +22,7 @@ public class GDXBytedecoImage
    private final int cvMatType;
    private int bytesPerPixel;
    private _cl_mem openCLImageObject;
+   private int openCLImageObjectFlags;
    private final boolean isBackedByExternalByteBuffer;
 
    public GDXBytedecoImage(int imageWidth, int imageHeight, int cvMatType)
@@ -88,6 +89,7 @@ public class GDXBytedecoImage
 
    public void createOpenCLImage(OpenCLManager openCLManager, int flags)
    {
+      openCLImageObjectFlags = flags;
       openCLImageObject = openCLManager.createImage(flags, openCLChannelOrder, openCLChannelDataType, imageWidth, imageHeight, bytedecoByteBufferPointer);
    }
 
@@ -101,12 +103,16 @@ public class GDXBytedecoImage
       openCLManager.enqueueReadImage(openCLImageObject, imageWidth, imageHeight, bytedecoByteBufferPointer);
    }
 
-   public void resize(int imageWidth, int imageHeight, ByteBuffer externalByteBuffer)
+   public void resize(int imageWidth, int imageHeight, OpenCLManager openCLManager, ByteBuffer externalByteBuffer)
    {
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
-      openCLImageObject = null;
+      boolean openCLObjectCreated = openCLImageObject != null;
+      if (openCLObjectCreated)
+      {
+         openCLManager.releaseBufferObject(openCLImageObject);
+      }
 
       if (isBackedByExternalByteBuffer)
       {
@@ -120,6 +126,11 @@ public class GDXBytedecoImage
       }
       bytedecoByteBufferPointer = new BytePointer(backingDirectByteBuffer);
       bytedecoOpenCVMat = new Mat(imageHeight, imageWidth, cvMatType, bytedecoByteBufferPointer);
+
+      if (openCLObjectCreated)
+      {
+         createOpenCLImage(openCLManager, openCLImageObjectFlags);
+      }
    }
 
    public void rewind()
