@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.OpenCLManager;
 
 public class GDXCVImagePanel
 {
@@ -46,7 +47,7 @@ public class GDXCVImagePanel
       panelTexture.draw(pixmap, 0, 0);
    }
 
-   public void resize(int imageWidth, int imageHeight)
+   public void resize(int imageWidth, int imageHeight, OpenCLManager openCLManager)
    {
       panelTexture.dispose();
       pixmap.dispose();
@@ -55,8 +56,8 @@ public class GDXCVImagePanel
       panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
       videoPanel.setTexture(panelTexture);
 
-      bytedecoImage.resize(imageWidth, imageHeight, pixmap.getPixels());
-      normalizedScaledImage.resize(imageWidth, imageHeight, null);
+      bytedecoImage.resize(imageWidth, imageHeight, openCLManager, pixmap.getPixels());
+      normalizedScaledImage.resize(imageWidth, imageHeight, openCLManager, null);
 
       BytedecoOpenCVTools.setRGBA8888ImageAlpha(bytedecoImage.getBytedecoOpenCVMat(), 255);
    }
