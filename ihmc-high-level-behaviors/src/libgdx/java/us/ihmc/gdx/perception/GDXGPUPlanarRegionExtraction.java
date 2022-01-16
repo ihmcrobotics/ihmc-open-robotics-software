@@ -151,9 +151,7 @@ public class GDXGPUPlanarRegionExtraction
    private final Mat BLACK_OPAQUE_RGBA8888 = new Mat((byte) 0, (byte) 0, (byte) 0, (byte) 255);
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-   private final FramePose3D regionPose = new FramePose3D();
    private final FramePoint3D tempFramePoint = new FramePoint3D();
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private GDXPlanarRegionsGraphic planarRegionsGraphic;
    private final PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private GDXPointCloudRenderer boundaryPointCloud;
@@ -593,8 +591,7 @@ public class GDXGPUPlanarRegionExtraction
       if (!render3DPlanarRegions.get())
          return;
 
-//      List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.parallelStream()
-      List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.stream()
+      List<List<PlanarRegion>> listOfListsOfRegions = planarRegions.parallelStream()
          .filter(gpuPlanarRegion -> gpuPlanarRegion.getBoundaryVertices().size() >= polygonizerParameters.getMinNumberOfNodes())
          .map(gpuPlanarRegion ->
          {
@@ -604,7 +601,6 @@ public class GDXGPUPlanarRegionExtraction
                FrameQuaternion orientation = new FrameQuaternion();
                orientation.setIncludingFrame(cameraFrame, EuclidGeometryTools.axisAngleFromZUpToVector3D(gpuPlanarRegion.getNormal()));
                orientation.changeFrame(ReferenceFrame.getWorldFrame());
-//               orientation.setIncludingFrame(ReferenceFrame.getWorldFrame(), EuclidGeometryTools.axisAngleFromZUpToVector3D(Axis3D.Z));
 
                // First compute the set of concave hulls for this region
                FramePoint3D origin = new FramePoint3D(cameraFrame, gpuPlanarRegion.getCenter());
@@ -651,11 +647,9 @@ public class GDXGPUPlanarRegionExtraction
                   ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, depthThreshold, decomposedPolygons);
 
                   // Pack the data in PlanarRegion
-//                  tempTransform.set(orientation, origin);
-//                  regionPose.setIncludingFrame(cmosFrame, origin, orientation);
+                  FramePose3D regionPose = new FramePose3D();
                   regionPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), origin, orientation);
-//                  regionPose.changeFrame(ReferenceFrame.getWorldFrame());
-//                  regionPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
+                  RigidBodyTransform tempTransform = new RigidBodyTransform();
                   regionPose.get(tempTransform);
                   PlanarRegion planarRegion = new PlanarRegion(tempTransform,
                                                                concaveHull.getConcaveHullVertices(),
@@ -669,7 +663,7 @@ public class GDXGPUPlanarRegionExtraction
             }
             catch (RuntimeException e)
             {
-//               e.printStackTrace();
+               e.printStackTrace();
             }
             return planarRegions;
          })
@@ -679,11 +673,6 @@ public class GDXGPUPlanarRegionExtraction
       {
          planarRegionsList.addPlanarRegions(planarRegions);
       }
-//      tempTransform.setIdentity();
-//      tempTransform.appendPitchRotation(Math.PI / 2.0);
-//      tempTransform.appendYawRotation(-Math.PI / 2.0);
-//      planarRegionsList.applyTransform(tempTransform);
-//      planarRegionsList.applyTransform(cameraFrame.getTransformToWorldFrame());
 
       planarRegionsGraphic.generateMeshes(planarRegionsList);
       planarRegionsGraphic.update();
