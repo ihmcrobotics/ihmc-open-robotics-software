@@ -100,11 +100,14 @@ public class GDXGPUPlanarRegion
             patchMatrix.set(1, i, patchCentroid.getY() - centroidAverage.getY());
             patchMatrix.set(2, i, patchCentroid.getZ() - centroidAverage.getZ());
          }
-         svd.decompose(patchMatrix);
-         svd.getU(svdU, true);
-         normalSVD.set(svdU.get(6), svdU.get(7), svdU.get(8));
-         //         normalSVD.normalize();
-         //         normalSVD.scale(-normalSVD.getZ() / Math.abs(normalSVD.getZ()));
+         if (svd.decompose(patchMatrix))
+         {
+            svd.getU(svdU, true);
+            normalSVD.set(svdU.get(6), svdU.get(7), svdU.get(8));
+            // normalSVD.normalize();
+            // normalSVD.scale(-normalSVD.getZ() / Math.abs(normalSVD.getZ()));
+         }
+
          svdDuration = svdStopwatch.totalElapsed();
       }
 
