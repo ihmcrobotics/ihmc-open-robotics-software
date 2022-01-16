@@ -7,13 +7,14 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.perception.BytedecoOpenCVTools;
+import us.ihmc.perception.OpenCLManager;
 
 public class GDXCVImagePanel
 {
    private final ImGuiVideoPanel videoPanel;
    private final GDXBytedecoImage bytedecoImage;
-   private final Pixmap pixmap;
-   private final Texture panelTexture;
+   private Pixmap pixmap;
+   private Texture panelTexture;
 
    private final GDXBytedecoImage normalizedScaledImage;
 
@@ -44,6 +45,26 @@ public class GDXCVImagePanel
    public void draw()
    {
       panelTexture.draw(pixmap, 0, 0);
+   }
+
+   public void resize(int imageWidth, int imageHeight)
+   {
+      resize(imageWidth, imageHeight, null);
+   }
+
+   public void resize(int imageWidth, int imageHeight, OpenCLManager openCLManager)
+   {
+      panelTexture.dispose();
+      pixmap.dispose();
+
+      pixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
+      panelTexture = new Texture(new PixmapTextureData(pixmap, null, false, false));
+      videoPanel.setTexture(panelTexture);
+
+      bytedecoImage.resize(imageWidth, imageHeight, openCLManager, pixmap.getPixels());
+      normalizedScaledImage.resize(imageWidth, imageHeight, openCLManager, null);
+
+      BytedecoOpenCVTools.setRGBA8888ImageAlpha(bytedecoImage.getBytedecoOpenCVMat(), 255);
    }
 
    public ImGuiVideoPanel getVideoPanel()
