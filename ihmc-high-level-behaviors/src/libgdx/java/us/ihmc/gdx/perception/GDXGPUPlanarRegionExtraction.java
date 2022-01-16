@@ -68,6 +68,7 @@ public class GDXGPUPlanarRegionExtraction
    private final ImBoolean earlyGaussianBlur = new ImBoolean(true);
    private final ImBoolean useFilteredImage = new ImBoolean(true);
    private final ImBoolean useSVDNormals = new ImBoolean(true);
+   private final ImInt svdReductionFactor = new ImInt(20);
    private final ImInt gaussianSize = new ImInt(6);
    private final ImInt gaussianSigma = new ImInt(20);
    private final ImInt searchDepthLimit = new ImInt(10000);
@@ -76,7 +77,7 @@ public class GDXGPUPlanarRegionExtraction
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
    private final ImBoolean drawGrownBoundaries = new ImBoolean(true);
-   private final ImBoolean render3DPlanarRegions = new ImBoolean(false);
+   private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
    private final ImFloat regionGrowthFactor = new ImFloat(0.027f);
@@ -96,6 +97,7 @@ public class GDXGPUPlanarRegionExtraction
    private ImGuiPlot regionMaxSearchDepthPlot;
    private ImGuiPlot numberOfBoundaryVerticesPlot;
    private ImGuiPlot boundaryMaxSearchDepthPlot;
+   private ImGuiPlot svdDurationPlot;
    private GDXBytedecoImage inputFloatDepthImage;
    private GDXBytedecoImage inputScaledFloatDepthImage;
    private GDXBytedecoImage inputU16DepthImage;
@@ -126,6 +128,7 @@ public class GDXGPUPlanarRegionExtraction
    private int regionMaxSearchDepth = 0;
    private int boundaryMaxSearchDepth = 0;
    private int numberOfBoundaryPatchesInWholeImage = 0;
+   private double maxSVDSolveTime = Double.NaN;
    private final int[] adjacentY = {-1, 0, 1, 1, 1, 0, -1, -1};
    private final int[] adjacentX = {-1, -1, -1, 0, 1, 1, 1, 0};
    private final RecyclingArrayList<GDXGPUPlanarRegion> planarRegions = new RecyclingArrayList<>(GDXGPUPlanarRegion::new);
@@ -218,6 +221,7 @@ public class GDXGPUPlanarRegionExtraction
       regionMaxSearchDepthPlot = new ImGuiPlot(labels.get("Regions max search depth"), 1000, 300, 50);
       numberOfBoundaryVerticesPlot = new ImGuiPlot(labels.get("Number of boundary vertices"), 1000, 300, 50);
       boundaryMaxSearchDepthPlot = new ImGuiPlot(labels.get("Boundary max search depth"), 1000, 300, 50);
+      svdDurationPlot = new ImGuiPlot(labels.get("SVD duration"), 1000, 300, 50);
 
       planarRegionsGraphic = new GDXPlanarRegionsGraphic();
       boundaryPointCloud = new GDXPointCloudRenderer();
@@ -369,6 +373,7 @@ public class GDXGPUPlanarRegionExtraction
       regionVisitedMatrix.zero();
       boundaryMatrix.zero();
       regionMatrix.zero();
+      maxSVDSolveTime = 0.0;
       for (int row = 0; row < patchImageHeight; row++)
       {
          for (int column = 0; column < patchImageWidth; column++)
@@ -383,7 +388,9 @@ public class GDXGPUPlanarRegionExtraction
                if (numberOfRegionPatches >= regionMinPatches.get())
                {
                   ++planarRegionIslandIndex;
-                  planarRegion.update(useSVDNormals.get());
+                  planarRegion.update(useSVDNormals.get(), svdReductionFactor.get());
+                  if (planarRegion.getSVDDuration() > maxSVDSolveTime)
+                     maxSVDSolveTime = planarRegion.getSVDDuration();
 
                   if (drawPatches.get())
                   {
@@ -745,6 +752,8 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.sliderInt(labels.get("Boundary min patches"), boundaryMinPatches.getData(), 1, 1000);
       ImGui.sliderFloat(labels.get("Region growth factor"), regionGrowthFactor.getData(), 0.005f, 0.1f);
       ImGui.checkbox(labels.get("Use SVD normals"), useSVDNormals);
+      ImGui.sliderInt(labels.get("SVD reduction factor"), svdReductionFactor.getData(), 1, 100);
+      svdDurationPlot.render((float) maxSVDSolveTime);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
       ImGui.checkbox(labels.get("Draw grown boundaries"), drawGrownBoundaries);
