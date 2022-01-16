@@ -582,20 +582,6 @@ public class GDXGPUPlanarRegionExtraction
                boundaryVertex.normalize();
                boundaryVertex.scale(regionGrowthFactor.get());
                boundaryVertex.add(vertexX, vertexY, vertexZ);
-
-//               if (drawGrownBoundaries.get())
-//               {
-//                     int x = (int) boundaryIndex.getX();
-//                     int y = (int) boundaryIndex.getY();
-//                     int r = (regionRingIndex + 1) * 130 % 255;
-//                     int g = (regionRingIndex + 1) * 227 % 255;
-//                     int b = (regionRingIndex + 1) * 332 % 255;
-//                     BytePointer pixel = debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().ptr(y, x);
-//                     pixel.put(0, (byte) r);
-//                     pixel.put(1, (byte) g);
-//                     pixel.put(2, (byte) b);
-//               }
-               // TODO: Draw grown boundary in 2D
             }
          }
       });
