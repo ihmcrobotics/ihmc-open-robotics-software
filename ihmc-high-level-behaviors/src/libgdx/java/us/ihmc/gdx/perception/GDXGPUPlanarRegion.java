@@ -3,6 +3,7 @@ package us.ihmc.gdx.perception;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -27,7 +28,10 @@ public class GDXGPUPlanarRegion
    private int numberOfPatches;
    private int id;
    private final SvdImplicitQrDecompose_DDRM svd = new SvdImplicitQrDecompose_DDRM(false, true, true, true);
+   private final DMatrixRMaj patchMatrix = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj svdU = new DMatrixRMaj(3, 3);
+   private final Stopwatch svdStopwatch = new Stopwatch();
+   private double svdDuration = Double.NaN;
 
    public void reset(int id)
    {
@@ -77,24 +81,32 @@ public class GDXGPUPlanarRegion
       return id;
    }
 
-   public void update(boolean useCentroidSVD)
+   public void update(boolean useCentroidSVD, int reductionFactor)
    {
       centroidAverage.scale(1.0 / numberOfPatches);
       normalAverage.scale(1.0 / numberOfPatches);
 
-      DMatrixRMaj patchMatrix = new DMatrixRMaj(3, patchCentroids.size());
-      for (int i = 0; i < patchCentroids.size(); i++)
+      if (useCentroidSVD)
       {
-         Point3D patchCentroid = patchCentroids.get(i);
-         patchMatrix.set(0, i, patchCentroid.getX() - centroidAverage.getX());
-         patchMatrix.set(1, i, patchCentroid.getY() - centroidAverage.getY());
-         patchMatrix.set(2, i, patchCentroid.getZ() - centroidAverage.getZ());
+         svdStopwatch.start();
+         int leftOver = patchCentroids.size() % reductionFactor;
+         int reducedSize = patchCentroids.size() - leftOver;
+         int numCols = reducedSize / reductionFactor;
+         patchMatrix.reshape(3, numCols);
+         for (int i = 0; i < numCols; i++)
+         {
+            Point3D patchCentroid = patchCentroids.get(i * reductionFactor);
+            patchMatrix.set(0, i, patchCentroid.getX() - centroidAverage.getX());
+            patchMatrix.set(1, i, patchCentroid.getY() - centroidAverage.getY());
+            patchMatrix.set(2, i, patchCentroid.getZ() - centroidAverage.getZ());
+         }
+         svd.decompose(patchMatrix);
+         svd.getU(svdU, true);
+         normalSVD.set(svdU.get(6), svdU.get(7), svdU.get(8));
+         //         normalSVD.normalize();
+         //         normalSVD.scale(-normalSVD.getZ() / Math.abs(normalSVD.getZ()));
+         svdDuration = svdStopwatch.totalElapsed();
       }
-      svd.decompose(patchMatrix);
-      svd.getU(svdU, true);
-      normalSVD.set(svdU.get(6), svdU.get(7), svdU.get(8));
-      //         normalSVD.normalize();
-      //         normalSVD.scale(-normalSVD.getZ() / Math.abs(normalSVD.getZ()));
 
       normal.set(useCentroidSVD ? normalSVD : normalAverage);
    }
@@ -112,5 +124,10 @@ public class GDXGPUPlanarRegion
    public RecyclingArrayList<Point2D> getRegionIndices()
    {
       return regionIndices;
+   }
+
+   public double getSVDDuration()
+   {
+      return svdDuration;
    }
 }
