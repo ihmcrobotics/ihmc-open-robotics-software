@@ -12,6 +12,8 @@ import us.ihmc.robotEnvironmentAwareness.ui.properties.ParametersProperty;
 
 public class JoystickStepParametersProperty extends ParametersProperty<JoystickStepParameters>
 {
+   private final IntegerField numberOfFixedFootsteps = new IntegerField(JoystickStepParameters::getNumberOfFixedFootsteps,
+                                                                        JoystickStepParameters::setNumberOfFixedFootsteps);
    private final DoubleField swingHeight = new DoubleField(JoystickStepParameters::getSwingHeight, JoystickStepParameters::setSwingHeight);
    private final DoubleField swingDuration = new DoubleField(JoystickStepParameters::getSwingDuration, JoystickStepParameters::setSwingDuration);
    private final DoubleField transferDuration = new DoubleField(JoystickStepParameters::getTransferDuration, JoystickStepParameters::setTransferDuration);
@@ -27,6 +29,11 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
    public JoystickStepParametersProperty(Object bean, String name)
    {
       super(bean, name, new JoystickStepParameters());
+   }
+
+   public void bindBidirectionalNumberOfFixedFootsteps(Property<? extends Number> property)
+   {
+      bindFieldBidirectionalToNumberProperty(property, numberOfFixedFootsteps);
    }
 
    public void bindBidirectionalSwingHeight(Property<? extends Number> property)
@@ -93,6 +100,7 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
 
    public static class JoystickStepParameters implements Settable<JoystickStepParameters>
    {
+      private int numberOfFixedFootsteps = 0;
       private double swingHeight;
       private double swingDuration, transferDuration;
       private double maxStepLength;
@@ -115,6 +123,7 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
 
       public void set(WalkingControllerParameters walkingControllerParameters)
       {
+         numberOfFixedFootsteps = 0;
          swingDuration = walkingControllerParameters.getDefaultSwingTime();
          transferDuration = walkingControllerParameters.getDefaultTransferTime();
 
@@ -132,6 +141,7 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       @Override
       public void set(JoystickStepParameters other)
       {
+         numberOfFixedFootsteps = other.numberOfFixedFootsteps;
          swingHeight = other.swingHeight;
          swingDuration = other.swingDuration;
          transferDuration = other.transferDuration;
@@ -142,6 +152,11 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          turnStepWidth = other.turnStepWidth;
          turnMaxAngleInward = other.turnMaxAngleInward;
          turnMaxAngleOutward = other.turnMaxAngleOutward;
+      }
+
+      public void setNumberOfFixedFootsteps(int numberOfFixedFootsteps)
+      {
+         this.numberOfFixedFootsteps = numberOfFixedFootsteps;
       }
 
       public void setSwingHeight(double swingHeight)
@@ -192,6 +207,11 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       public void setTurnMaxAngleOutward(double turnMaxAngleOutward)
       {
          this.turnMaxAngleOutward = turnMaxAngleOutward;
+      }
+
+      public int getNumberOfFixedFootsteps()
+      {
+         return numberOfFixedFootsteps;
       }
 
       public double getSwingHeight()
@@ -247,6 +267,7 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       public static JoystickStepParameters parseFromPropertyMap(Map<String, String> properties, JoystickStepParameters defaultParameters)
       {
          JoystickStepParameters parsed = new JoystickStepParameters();
+         parsed.setNumberOfFixedFootsteps(extractIntegerProperty(properties, "NumberOfFixedFootsteps", defaultParameters.getNumberOfFixedFootsteps()));
          parsed.setSwingHeight(extractDoubleProperty(properties, "SwingHeight", defaultParameters.getSwingHeight()));
          parsed.setSwingDuration(extractDoubleProperty(properties, "SwingDuration", defaultParameters.getSwingDuration()));
          parsed.setTransferDuration(extractDoubleProperty(properties, "TransferDuration", defaultParameters.getTransferDuration()));
@@ -260,6 +281,11 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
          return parsed;
       }
 
+      private static int extractIntegerProperty(Map<String, String> properties, String propertyName, int defaultValue)
+      {
+         return Integer.parseInt(properties.getOrDefault(propertyName, Integer.toString(defaultValue)));
+      }
+
       private static double extractDoubleProperty(Map<String, String> properties, String propertyName, double defaultValue)
       {
          return Double.parseDouble(properties.getOrDefault(propertyName, Double.toString(defaultValue)));
@@ -268,6 +294,7 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       public static Map<String, String> exportToPropertyMap(JoystickStepParameters parametersToExport)
       {
          Map<String, String> properties = new HashMap<>();
+         properties.put("NumberOfFixedFootsteps", Integer.toString(parametersToExport.getNumberOfFixedFootsteps()));
          properties.put("SwingHeight", Double.toString(parametersToExport.getSwingHeight()));
          properties.put("SwingDuration", Double.toString(parametersToExport.getSwingDuration()));
          properties.put("TransferDuration", Double.toString(parametersToExport.getTransferDuration()));
@@ -284,9 +311,10 @@ public class JoystickStepParametersProperty extends ParametersProperty<JoystickS
       @Override
       public String toString()
       {
-         return "swing height: " + swingHeight + ", swing duration: " + swingDuration + ", transfer duration: " + transferDuration + ", max step length: "
-               + maxStepLength + ", default step width: " + defaultStepWidth + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth
-               + ", turn step width: " + turnStepWidth + ", turn max angle inward: " + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;
+         return "number of fixed footsteps: " + numberOfFixedFootsteps + ", swing height: " + swingHeight + ", swing duration: " + swingDuration
+               + ", transfer duration: " + transferDuration + ", max step length: " + maxStepLength + ", default step width: " + defaultStepWidth
+               + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth + ", turn step width: " + turnStepWidth + ", turn max angle inward: "
+               + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;
       }
    }
 }
