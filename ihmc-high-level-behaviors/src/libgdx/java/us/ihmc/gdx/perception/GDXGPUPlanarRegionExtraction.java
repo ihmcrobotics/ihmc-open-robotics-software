@@ -55,6 +55,7 @@ import java.util.stream.Collectors;
 public class GDXGPUPlanarRegionExtraction
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImBoolean enabled = new ImBoolean(false);
    private final ImFloat mergeDistanceThreshold = new ImFloat(0.016f);
    private final ImFloat mergeAngularThreshold = new ImFloat(0.82f);
    private final ImFloat filterDisparityThreshold = new ImFloat(2000);
@@ -76,7 +77,6 @@ public class GDXGPUPlanarRegionExtraction
    private final ImInt boundaryMinPatches = new ImInt(20);
    private final ImBoolean drawPatches = new ImBoolean(true);
    private final ImBoolean drawBoundaries = new ImBoolean(true);
-   private final ImBoolean drawGrownBoundaries = new ImBoolean(true);
    private final ImBoolean render3DPlanarRegions = new ImBoolean(true);
    private final ImBoolean render3DBoundaries = new ImBoolean(true);
    private final ImBoolean render3DGrownBoundaries = new ImBoolean(true);
@@ -252,6 +252,9 @@ public class GDXGPUPlanarRegionExtraction
 
    public void extractPlanarRegions(ReferenceFrame cameraFrame)
    {
+      if (!enabled.get())
+         return;
+
       wholeAlgorithmDurationStopwatch.start();
       gpuDurationStopwatch.start();
 
@@ -279,8 +282,6 @@ public class GDXGPUPlanarRegionExtraction
                                   sigmaX,
                                   sigmaY,
                                   borderType);
-
-      blurredDepthPanel.drawFloatImage(blurredDepthImage.getBytedecoOpenCVMat());
 
       parametersBuffer.getBytedecoFloatBufferPointer().put(0, filterDisparityThreshold.get());
       parametersBuffer.getBytedecoFloatBufferPointer().put(1, mergeAngularThreshold.get());
@@ -385,7 +386,7 @@ public class GDXGPUPlanarRegionExtraction
       openCLManager.finish();
       gpuDurationStopwatch.suspend();
 
-      if (drawPatches.get() || drawBoundaries.get())
+      if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && (drawPatches.get() || drawBoundaries.get()))
          debugExtractionPanel.getBytedecoImage().getBytedecoOpenCVMat().setTo(BLACK_OPAQUE_RGBA8888);
 
       depthFirstSearchDurationStopwatch.start();
@@ -399,15 +400,9 @@ public class GDXGPUPlanarRegionExtraction
       planarRegionsSegmentationDurationStopwatch.suspend();
       wholeAlgorithmDurationStopwatch.suspend();
 
-      filteredDepthPanel.drawFloatImage(filteredDepthImage.getBytedecoOpenCVMat());
-      nxImagePanel.drawFloatImage(nxImage.getBytedecoOpenCVMat());
-      nyImagePanel.drawFloatImage(nyImage.getBytedecoOpenCVMat());
-      nzImagePanel.drawFloatImage(nzImage.getBytedecoOpenCVMat());
-      gxImagePanel.drawFloatImage(cxImage.getBytedecoOpenCVMat());
-      gyImagePanel.drawFloatImage(cyImage.getBytedecoOpenCVMat());
-      gzImagePanel.drawFloatImage(czImage.getBytedecoOpenCVMat());
-
-      debugExtractionPanel.draw();
+      render2DPanels();
+      renderPlanarRegions();
+      renderBoundaryPoints(cameraFrame);
    }
 
    private void findRegions()
@@ -437,7 +432,7 @@ public class GDXGPUPlanarRegionExtraction
                   if (planarRegion.getSVDDuration() > maxSVDSolveTime)
                      maxSVDSolveTime = planarRegion.getSVDDuration();
 
-                  if (drawPatches.get())
+                  if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && drawPatches.get())
                   {
                      for (Point2D regionIndex : planarRegion.getRegionIndices())
                      {
@@ -526,7 +521,7 @@ public class GDXGPUPlanarRegionExtraction
                                                                    1);
             if (numberOfBoundaryPatches >= boundaryMinPatches.get())
             {
-               if (drawBoundaries.get())
+               if (debugExtractionPanel.getVideoPanel().getIsShowing().get() && drawBoundaries.get())
                {
                   for (Vector2D boundaryIndex : regionRing.getBoundaryIndices())
                   {
@@ -696,8 +691,21 @@ public class GDXGPUPlanarRegionExtraction
       }
    }
 
+   private void render2DPanels()
+   {
+      blurredDepthPanel.drawFloatImage(blurredDepthImage.getBytedecoOpenCVMat());
+      filteredDepthPanel.drawFloatImage(filteredDepthImage.getBytedecoOpenCVMat());
+      nxImagePanel.drawFloatImage(nxImage.getBytedecoOpenCVMat());
+      nyImagePanel.drawFloatImage(nyImage.getBytedecoOpenCVMat());
+      nzImagePanel.drawFloatImage(nzImage.getBytedecoOpenCVMat());
+      gxImagePanel.drawFloatImage(cxImage.getBytedecoOpenCVMat());
+      gyImagePanel.drawFloatImage(cyImage.getBytedecoOpenCVMat());
+      gzImagePanel.drawFloatImage(czImage.getBytedecoOpenCVMat());
+      debugExtractionPanel.draw();
+   }
+
    /** FIXME: This method filled with allocations. */
-   public void renderPlanarRegions()
+   private void renderPlanarRegions()
    {
       if (!render3DPlanarRegions.get())
          return;
@@ -706,45 +714,48 @@ public class GDXGPUPlanarRegionExtraction
       planarRegionsGraphic.update();
    }
 
-   public void renderBoundaryPoints(ReferenceFrame cameraFrame, Matrix4 invProjectionView)
+   private void renderBoundaryPoints(ReferenceFrame cameraFrame)
    {
-      boundaryPointCloud.prepareVertexBufferForAddingPoints();
-      for (GDXGPUPlanarRegion planarRegion : planarRegions)
+      if (render3DBoundaries.get() || render3DGrownBoundaries.get())
       {
-         if (render3DBoundaries.get())
+         boundaryPointCloud.prepareVertexBufferForAddingPoints();
+         for (GDXGPUPlanarRegion planarRegion : planarRegions)
          {
-            if (!planarRegion.getRegionRings().isEmpty())
+            if (render3DBoundaries.get())
             {
-               GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
-               for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
+               if (!planarRegion.getRegionRings().isEmpty())
                {
-                  int column = (int) boundaryIndex.getX() * patchWidth;
-                  int row = (int) boundaryIndex.getY() * patchHeight;
-                  float z = inputFloatDepthImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
-                  tempFramePoint.setIncludingFrame(cameraFrame, column, row, z);
-                  ProjectionTools.projectDepthPixelToIHMCZUp3D(tempFramePoint,
-                                                               principalOffsetXPixels.get(),
-                                                               principalOffsetYPixels.get(),
-                                                               focalLengthXPixels.get(),
-                                                               focalLengthYPixels.get());
+                  GDXGPURegionRing firstRing = planarRegion.getRegionRings().get(0);
+                  for (Vector2D boundaryIndex : firstRing.getBoundaryIndices())
+                  {
+                     int column = (int) boundaryIndex.getX() * patchWidth;
+                     int row = (int) boundaryIndex.getY() * patchHeight;
+                     float z = inputFloatDepthImage.getBytedecoOpenCVMat().ptr(row, column).getFloat();
+                     tempFramePoint.setIncludingFrame(cameraFrame, column, row, z);
+                     ProjectionTools.projectDepthPixelToIHMCZUp3D(tempFramePoint,
+                                                                  principalOffsetXPixels.get(),
+                                                                  principalOffsetYPixels.get(),
+                                                                  focalLengthXPixels.get(),
+                                                                  focalLengthYPixels.get());
+                     tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
+                     boundaryPointCloud.putVertex(tempFramePoint);
+                  }
+               }
+            }
+
+            if (render3DGrownBoundaries.get())
+            {
+               for (Vector3D boundaryVertex : planarRegion.getBoundaryVertices())
+               {
+                  tempFramePoint.setIncludingFrame(cameraFrame, boundaryVertex);
                   tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
                   boundaryPointCloud.putVertex(tempFramePoint);
                }
             }
          }
 
-         if (render3DGrownBoundaries.get())
-         {
-            for (Vector3D boundaryVertex : planarRegion.getBoundaryVertices())
-            {
-               tempFramePoint.setIncludingFrame(cameraFrame, boundaryVertex);
-               tempFramePoint.changeFrame(ReferenceFrame.getWorldFrame());
-               boundaryPointCloud.putVertex(tempFramePoint);
-            }
-         }
+         boundaryPointCloud.updateMeshFastest();
       }
-
-      boundaryPointCloud.updateMeshFastest();
    }
 
    private void calculateDetivativeParameters()
@@ -760,6 +771,7 @@ public class GDXGPUPlanarRegionExtraction
    public void renderImGuiWidgets()
    {
       ImGui.text("Input image dimensions: " + imageWidth + " x " + imageHeight);
+      ImGui.checkbox(labels.get("Enabled"), enabled);
       wholeAlgorithmDurationPlot.render(wholeAlgorithmDurationStopwatch.totalElapsed());
       gpuDurationPlot.render(gpuDurationStopwatch.totalElapsed());
       depthFirstSearchDurationPlot.render(depthFirstSearchDurationStopwatch.totalElapsed());
@@ -795,7 +807,6 @@ public class GDXGPUPlanarRegionExtraction
       svdDurationPlot.render((float) maxSVDSolveTime);
       ImGui.checkbox(labels.get("Draw patches"), drawPatches);
       ImGui.checkbox(labels.get("Draw boundaries"), drawBoundaries);
-      ImGui.checkbox(labels.get("Draw grown boundaries"), drawGrownBoundaries);
       ImGui.checkbox(labels.get("Render 3D planar regions"), render3DPlanarRegions);
       ImGui.checkbox(labels.get("Render 3D boundaries"), render3DBoundaries);
       ImGui.checkbox(labels.get("Render 3D grown boundaries"), render3DGrownBoundaries);
@@ -833,12 +844,55 @@ public class GDXGPUPlanarRegionExtraction
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      planarRegionsGraphic.getRenderables(renderables, pool);
-      boundaryPointCloud.getRenderables(renderables, pool);
+      if (render3DPlanarRegions.get())
+         planarRegionsGraphic.getRenderables(renderables, pool);
+      if (render3DGrownBoundaries.get() || render3DBoundaries.get())
+         boundaryPointCloud.getRenderables(renderables, pool);
+   }
+
+   public void destroy()
+   {
+      openCLManager.destroy();
+      // TODO: Destroy the rest
    }
 
    public ImGuiPanel getPanel()
    {
       return imguiPanel;
+   }
+
+   public PlanarRegionsList getPlanarRegionsList()
+   {
+      return planarRegionsList;
+   }
+
+   public ImBoolean getEnabled()
+   {
+      return enabled;
+   }
+
+   public ImBoolean getDrawBoundaries()
+   {
+      return drawBoundaries;
+   }
+
+   public ImBoolean getDrawPatches()
+   {
+      return drawPatches;
+   }
+
+   public ImBoolean getRender3DPlanarRegions()
+   {
+      return render3DPlanarRegions;
+   }
+
+   public ImBoolean getRender3DBoundaries()
+   {
+      return render3DBoundaries;
+   }
+
+   public ImBoolean getRender3DGrownBoundaries()
+   {
+      return render3DGrownBoundaries;
    }
 }

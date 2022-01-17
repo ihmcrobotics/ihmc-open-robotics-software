@@ -108,6 +108,7 @@ public class GDXGPUPlanarRegionExtractionDemo
                                                    cameraIntrinsics.getFy(),
                                                    cameraIntrinsics.getCx(),
                                                    cameraIntrinsics.getCy());
+                  gpuPlanarRegionExtraction.getEnabled().set(true);
                   baseUI.getImGuiPanelManager().addPanel(gpuPlanarRegionExtraction.getPanel());
                   baseUI.get3DSceneManager().addRenderableProvider(gpuPlanarRegionExtraction::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
@@ -116,8 +117,6 @@ public class GDXGPUPlanarRegionExtractionDemo
 
                l515.render(baseUI.get3DSceneManager());
                gpuPlanarRegionExtraction.extractPlanarRegions(l515PoseGizmo.getGizmoFrame());
-               gpuPlanarRegionExtraction.renderPlanarRegions();
-               gpuPlanarRegionExtraction.renderBoundaryPoints(l515PoseGizmo.getGizmoFrame(), l515.getLowLevelSimulator().getCamera().invProjectionView);
             }
 
             baseUI.renderBeforeOnScreenUI();

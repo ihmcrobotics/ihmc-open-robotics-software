@@ -33,9 +33,12 @@ public class GDXCVImagePanel
 
    public void drawFloatImage(Mat floatImage)
    {
-      BytedecoOpenCVTools.clamp32BitFloatTo8BitUnsignedChar(floatImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
-      BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
-      draw();
+      if (videoPanel.getIsShowing().get())
+      {
+         BytedecoOpenCVTools.clamp32BitFloatTo8BitUnsignedChar(floatImage, normalizedScaledImage.getBytedecoOpenCVMat(), 0.0, 255.0);
+         BytedecoOpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage.getBytedecoOpenCVMat(), bytedecoImage.getBytedecoOpenCVMat());
+         draw();
+      }
    }
 
    /**
@@ -44,7 +47,8 @@ public class GDXCVImagePanel
     */
    public void draw()
    {
-      panelTexture.draw(pixmap, 0, 0);
+      if (videoPanel.getIsShowing().get())
+         panelTexture.draw(pixmap, 0, 0);
    }
 
    public void resize(int imageWidth, int imageHeight, OpenCLManager openCLManager)
