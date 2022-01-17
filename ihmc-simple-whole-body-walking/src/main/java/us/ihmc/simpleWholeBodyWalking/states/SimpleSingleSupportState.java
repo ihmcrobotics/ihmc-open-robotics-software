@@ -205,7 +205,7 @@ public class SimpleSingleSupportState extends SimpleWalkingState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       feetManager.setFlatFootContactState(swingSide);
 

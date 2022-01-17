@@ -186,7 +186,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       // Do nothing
    }

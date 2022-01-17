@@ -253,7 +253,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
 
@@ -304,7 +304,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          sendFootstepPlan();
          sendTextToSpeechPacket("transitioning from planning to walking");
@@ -374,7 +374,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          footstepStatus.set(null);
       }

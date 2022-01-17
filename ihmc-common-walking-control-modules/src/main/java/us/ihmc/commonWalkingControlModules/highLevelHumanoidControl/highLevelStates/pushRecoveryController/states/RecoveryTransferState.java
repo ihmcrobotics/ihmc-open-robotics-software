@@ -147,7 +147,7 @@ public class RecoveryTransferState extends PushRecoveryState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       feetManager.reset();
    }

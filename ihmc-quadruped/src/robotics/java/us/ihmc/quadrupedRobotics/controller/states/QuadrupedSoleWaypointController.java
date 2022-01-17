@@ -151,7 +151,7 @@ public class QuadrupedSoleWaypointController implements EventState, QuadrupedWay
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       feetManager.registerWaypointCallback(null);
    }

@@ -291,9 +291,9 @@ public class OnToesState extends AbstractFootControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      super.onExit();
+      super.onExit(timeInState);
 
       toeOffDesiredPitchAngle.set(Double.NaN);
       toeOffDesiredPitchVelocity.set(Double.NaN);

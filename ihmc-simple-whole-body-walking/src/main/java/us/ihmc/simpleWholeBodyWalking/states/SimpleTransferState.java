@@ -111,6 +111,11 @@ public abstract class SimpleTransferState extends SimpleWalkingState
       transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
    }
 
+   @Override
+   public void onExit(double timeInState)
+   {
+   }
+
    protected void updateICPPlan()
    {
       balanceManager.clearICPPlan();

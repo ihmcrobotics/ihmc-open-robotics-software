@@ -242,9 +242,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      super.onExit();
+      super.onExit(timeInState);
 
       balanceManager.minimizeAngularMomentumRateZ(false);
    }

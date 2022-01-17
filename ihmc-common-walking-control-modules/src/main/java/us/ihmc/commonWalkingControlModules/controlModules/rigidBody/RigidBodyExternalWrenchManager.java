@@ -104,7 +104,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
    }
 
