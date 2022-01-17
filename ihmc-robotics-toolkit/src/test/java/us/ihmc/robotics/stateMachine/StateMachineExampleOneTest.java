@@ -303,7 +303,7 @@ public class StateMachineExampleOneTest
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          didTransitionOutOfAction = true;
       }

@@ -28,7 +28,7 @@ public class CountActionsTask implements State
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       numberOfTimesTransitionOutOfActionWasCalled++;
    }

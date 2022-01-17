@@ -552,7 +552,7 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
 
@@ -659,7 +659,7 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
 
@@ -765,7 +765,7 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
 
@@ -851,7 +851,7 @@ public class M2ProcessedSensorsControllerWithStateTransitions implements Simulat
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
 

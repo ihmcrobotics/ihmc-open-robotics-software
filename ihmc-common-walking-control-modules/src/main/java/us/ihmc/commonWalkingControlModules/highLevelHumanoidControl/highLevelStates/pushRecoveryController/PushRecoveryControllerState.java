@@ -128,7 +128,7 @@ public class PushRecoveryControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       pushRecoveryController.reset();
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.UNKNOWN);

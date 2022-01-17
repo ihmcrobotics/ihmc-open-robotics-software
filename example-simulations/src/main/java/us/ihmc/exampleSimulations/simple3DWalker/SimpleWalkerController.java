@@ -405,7 +405,7 @@ public class SimpleWalkerController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -660,7 +660,7 @@ public class SimpleWalkerController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          lastStepHipPitchAngle.set(desiredSwingLegHipPitchAngle.getDoubleValue());
          lastStepHipRollAngle.set(desiredSwingLegHipRollAngle.getDoubleValue());

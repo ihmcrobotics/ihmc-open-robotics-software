@@ -400,9 +400,9 @@ public class SimpleSwingState extends SimpleFootControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      super.onExit();
+      super.onExit(timeInState);
       currentTime.set(0.0);
       swingTimeSpeedUpFactor.set(Double.NaN);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
