@@ -118,8 +118,8 @@ public class GDXSimulatedSensorFactory
    {
       double publishRateHz = 5.0;
       double verticalFOV = 55.0;
-      int imageWidth = 640;
-      int imageHeight = 480;
+      int imageWidth = 1024;
+      int imageHeight = 768;
 //      if (LOW_RESOLUTION_SENSORS)
 //      {
 //         imageWidth /= 2;

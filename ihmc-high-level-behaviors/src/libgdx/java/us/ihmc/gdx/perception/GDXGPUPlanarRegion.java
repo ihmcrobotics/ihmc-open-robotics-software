@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -104,8 +105,10 @@ public class GDXGPUPlanarRegion
          {
             svd.getU(svdU, true);
             normalSVD.set(svdU.get(6), svdU.get(7), svdU.get(8));
-            // normalSVD.normalize();
-            // normalSVD.scale(-normalSVD.getZ() / Math.abs(normalSVD.getZ()));
+//            normalSVD.normalize();
+            if (normalSVD.dot(Axis3D.Z) < 0.0)
+               normalSVD.negate();
+//            normalSVD.scale(normalSVD.getZ() / Math.abs(normalSVD.getZ()));
          }
 
          svdDuration = svdStopwatch.totalElapsed();
