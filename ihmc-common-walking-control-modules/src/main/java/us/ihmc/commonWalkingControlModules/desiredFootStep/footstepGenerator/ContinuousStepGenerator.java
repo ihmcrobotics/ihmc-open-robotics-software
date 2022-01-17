@@ -785,6 +785,11 @@ public class ContinuousStepGenerator implements Updatable
       return currentSupportSide.getEnumValue();
    }
 
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
+
    private boolean isStepValid(FramePose3DReadOnly touchdownPose, FramePose3DReadOnly stancePose, RobotSide swingSide)
    {
       for (int i = 0; i < footstepValidityIndicators.size(); i++)
