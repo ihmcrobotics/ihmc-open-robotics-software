@@ -4,7 +4,8 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 
 public class ContinuousStepGeneratorParameters implements ContinuousStepGeneratorParametersBasics
 {
-   private int numberOfFixedFootsteps = 0;
+   private int numberOfFootstepsToPlan = DEFAULT_NUMBER_OF_FOOTSTEPS_TO_PLAN;
+   private int numberOfFixedFootsteps = DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS;
    private double swingHeight;
    private double swingDuration, transferDuration;
    private double maxStepLength;
@@ -23,6 +24,12 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public ContinuousStepGeneratorParameters(ContinuousStepGeneratorParametersBasics other)
    {
       set(other);
+   }
+
+   @Override
+   public void setNumberOfFootstepsToPlan(int numberOfFootstepsToPlan)
+   {
+      this.numberOfFootstepsToPlan = numberOfFootstepsToPlan;
    }
 
    @Override
@@ -83,6 +90,12 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    public void setTurnMaxAngleOutward(double turnMaxAngleOutward)
    {
       this.turnMaxAngleOutward = turnMaxAngleOutward;
+   }
+
+   @Override
+   public int getNumberOfFootstepsToPlan()
+   {
+      return numberOfFootstepsToPlan;
    }
 
    @Override
@@ -148,9 +161,9 @@ public class ContinuousStepGeneratorParameters implements ContinuousStepGenerato
    @Override
    public String toString()
    {
-      return "number of fixed footsteps: " + numberOfFixedFootsteps + ", swing height: " + swingHeight + ", swing duration: " + swingDuration
-            + ", transfer duration: " + transferDuration + ", max step length: " + maxStepLength + ", default step width: " + defaultStepWidth
-            + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth + ", turn max angle inward: " + turnMaxAngleInward
-            + ", turn max angle outward: " + turnMaxAngleOutward;
+      return "number of footsteps to plan: " + numberOfFootstepsToPlan + ", number of fixed footsteps: " + numberOfFixedFootsteps + ", swing height: "
+            + swingHeight + ", swing duration: " + swingDuration + ", transfer duration: " + transferDuration + ", max step length: " + maxStepLength
+            + ", default step width: " + defaultStepWidth + ", min step width: " + minStepWidth + ", max step width: " + maxStepWidth
+            + ", turn max angle inward: " + turnMaxAngleInward + ", turn max angle outward: " + turnMaxAngleOutward;
    }
 }
