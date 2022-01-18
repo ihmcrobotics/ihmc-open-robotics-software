@@ -10,6 +10,7 @@ import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.shader.GDXShader;
 import us.ihmc.gdx.shader.GDXUniform;
 
@@ -177,7 +178,22 @@ public class GDXPointCloudRenderer implements RenderableProvider
       floatBuffer.position(segmentToUpdate * pointsPerSegment * floatsPerVertex);
       floatBuffer.limit(floatBuffer.position() + pointsPerSegment * floatsPerVertex);
       int numberOfPoints = bufferConsumer.apply(floatBuffer);
+      updateMeshFastest(numberOfPoints, segmentToUpdate);
+   }
 
+   public void updateMeshFastest()
+   {
+      updateMeshFastest(getVertexBuffer().position() / 8);
+   }
+
+   public void updateMeshFastest(int numberOfPoints)
+   {
+      updateMeshFastest(numberOfPoints, currentSegmentIndex);
+   }
+
+   public void updateMeshFastest(int numberOfPoints, int segmentToUpdate)
+   {
+      FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
       if (numberOfPoints < pointsPerSegment) // special use case here
       {
          if (numberOfPoints == 0) // prevents errors when no point are there
@@ -215,6 +231,60 @@ public class GDXPointCloudRenderer implements RenderableProvider
       }
    }
 
+   public void setVertex(int vertexIndex, Tuple3DReadOnly point)
+   {
+      setVertex(vertexIndex, point.getX32(), point.getY32(), point.getZ32(), 1.0f, 1.0f, 1.0f, 1.0f, 0.01f);
+   }
+
+   public void setVertex(int vertexIndex, float x, float y, float z, float r, float g, float b, float a, float pointSize)
+   {
+      int offset = vertexIndex * 8;
+      getVertexBuffer().put(offset++, x);
+      getVertexBuffer().put(offset++, y);
+      getVertexBuffer().put(offset++, z);
+      getVertexBuffer().put(offset++, r);
+      getVertexBuffer().put(offset++, g);
+      getVertexBuffer().put(offset++, b);
+      getVertexBuffer().put(offset++, a);
+      getVertexBuffer().put(offset, pointSize);
+   }
+
+   public void putVertex(Tuple3DReadOnly point)
+   {
+      putVertex(point.getX32(), point.getY32(), point.getZ32(), 1.0f, 1.0f, 1.0f, 1.0f, 0.01f);
+   }
+
+   public void putVertex(float x, float y, float z, float r, float g, float b, float a, float pointSize)
+   {
+      getVertexBuffer().put(x);
+      getVertexBuffer().put(y);
+      getVertexBuffer().put(z);
+      getVertexBuffer().put(r);
+      getVertexBuffer().put(g);
+      getVertexBuffer().put(b);
+      getVertexBuffer().put(a);
+      getVertexBuffer().put(pointSize);
+   }
+
+   public void prepareVertexBufferForAddingPoints()
+   {
+      FloatBuffer vertexBuffer = getVertexBuffer();
+      vertexBuffer.limit(vertexBuffer.capacity());
+      vertexBuffer.rewind();
+   }
+
+   public FloatBuffer getAndPrepareVertexBuffer()
+   {
+      prepareVertexBufferForAddingPoints();
+      return getVertexBuffer();
+   }
+
+   public FloatBuffer getVertexBuffer()
+   {
+      return renderable.meshPart.mesh.getVerticesBuffer();
+   }
+
+   @Deprecated
    public float[] getVerticesArray()
    {
       return vertices;

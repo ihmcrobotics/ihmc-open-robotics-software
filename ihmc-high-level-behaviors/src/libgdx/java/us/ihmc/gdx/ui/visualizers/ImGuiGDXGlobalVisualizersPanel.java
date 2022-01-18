@@ -18,6 +18,7 @@ public class ImGuiGDXGlobalVisualizersPanel extends ImGuiPanel implements Render
    private final ArrayList<ImGuiGDXVisualizer> visualizers = new ArrayList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ROS1Helper ros1Helper;
+   private boolean created = false;
 
    public ImGuiGDXGlobalVisualizersPanel()
    {
@@ -37,10 +38,13 @@ public class ImGuiGDXGlobalVisualizersPanel extends ImGuiPanel implements Render
       ImGuiPanel panel = visualizer.getPanel();
       if (panel != null)
          addChild(panel);
+      if (created)
+         visualizer.create();
    }
 
    public void create()
    {
+      created = true;
       for (ImGuiGDXVisualizer visualizer : visualizers)
       {
          visualizer.create();
