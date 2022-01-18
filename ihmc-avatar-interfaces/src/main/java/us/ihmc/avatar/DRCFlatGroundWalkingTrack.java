@@ -11,8 +11,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.factory.AvatarSimulation;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -126,7 +126,6 @@ public class DRCFlatGroundWalkingTrack
                                                                                                     copTrajectoryParameters,
                                                                                                     splitFractionParameters);
       setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());
-      controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
       controllerFactory.createControllerNetworkSubscriber(model.getSimpleRobotName(), realtimeROS2Node);
       if (customControllerStateFactory != null)
          controllerFactory.addCustomControlState(customControllerStateFactory);
@@ -137,7 +136,7 @@ public class DRCFlatGroundWalkingTrack
          heightMapForFootstepZ = scsInitialSetup.getHeightMap();
       }
 
-      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, heightMapForFootstepZ);
+      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, heightMapForFootstepZ, walkingScriptParameters);
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(model);

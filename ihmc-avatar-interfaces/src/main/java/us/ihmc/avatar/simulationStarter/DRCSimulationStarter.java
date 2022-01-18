@@ -511,14 +511,12 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 
-      controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
-
       controllerFactory.createUserDesiredControllerCommandGenerator();
 
       if (addFootstepMessageGenerator && cheatWithGroundHeightAtForFootstep)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, scsInitialSetup.getHeightMap());
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, scsInitialSetup.getHeightMap(), walkingScriptParameters);
       else if (addFootstepMessageGenerator)
-         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript);
+         controllerFactory.createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, walkingScriptParameters);
 
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(robotModel);

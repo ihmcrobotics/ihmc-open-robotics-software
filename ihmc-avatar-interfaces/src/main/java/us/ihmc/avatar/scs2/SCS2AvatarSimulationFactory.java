@@ -540,8 +540,7 @@ public class SCS2AvatarSimulationFactory
                                                                                           HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       HighLevelHumanoidControllerFactory controllerFactory = setDefaultHighLevelHumanoidControllerFactory();
-      controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
-      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript);
+      controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, walkingScriptParameters);
       return controllerFactory;
    }
 
