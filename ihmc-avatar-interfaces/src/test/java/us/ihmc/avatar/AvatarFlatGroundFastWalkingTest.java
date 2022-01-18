@@ -70,6 +70,11 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       return 0.25;
    }
 
+   public int getNumberOfSteps()
+   {
+      return 30;
+   }
+
    @Test
    public void testForwardWalking() throws Exception
    {
@@ -81,7 +86,7 @@ public abstract class AvatarFlatGroundFastWalkingTest implements MultiRobotTestI
       FramePose3D startPose = new FramePose3D(midFootZUpGroundFrame);
       startPose.changeFrame(ReferenceFrame.getWorldFrame());
       FootstepDataListMessage footsteps = forwardSteps(RobotSide.LEFT,
-                                                       30,
+                                                       getNumberOfSteps(),
                                                        trapezoidFunction(0.2, getMaxForwardStepLength(), 0.15, 0.85),
                                                        getFastStepWidth(),
                                                        getFastSwingTime(),
