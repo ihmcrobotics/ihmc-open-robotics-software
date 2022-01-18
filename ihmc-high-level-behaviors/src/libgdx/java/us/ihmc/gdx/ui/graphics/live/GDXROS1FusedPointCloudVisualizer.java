@@ -110,7 +110,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
          ousterInGPUBuffer = openCLManager.createBufferObject(ousterInBytesLength);
          zed2InGPUBuffer = openCLManager.createBufferObject(zed2InBytesLength);
          fusedOutGPUBuffer = openCLManager.createBufferObject(fusedOutBytesLength);
-         projectZED2ToOusterPointsKernel = openCLManager.loadProgramAndCreateKernel("projectZED2ToOusterPoints");
+         projectZED2ToOusterPointsKernel = openCLManager.loadSingleFunctionProgramAndCreateKernel("ProjectZED2ToOusterPoints");
          openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 0, ousterInGPUBuffer);
          openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 1, zed2InGPUBuffer);
          openCLManager.setKernelArgument(projectZED2ToOusterPointsKernel, 2, fusedOutGPUBuffer);
@@ -159,7 +159,7 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
             zed2InHostBuffer.rewind();
             openCLManager.enqueueWriteBuffer(zed2InGPUBuffer, zed2InBytesLength, new BytePointer(zed2InHostBuffer));
 
-            openCLManager.execute(projectZED2ToOusterPointsKernel, numberOfOusterPoints);
+            openCLManager.execute1D(projectZED2ToOusterPointsKernel, numberOfOusterPoints);
 
             // l515 points, make into XYZRGBA and stick at the end
             // should be 1024 * 128 jobs?
@@ -245,6 +245,6 @@ public class GDXROS1FusedPointCloudVisualizer extends ImGuiGDXROS1Visualizer
    {
       OpenCLManager openCLManager = new OpenCLManager();
       openCLManager.create();
-      openCLManager.loadProgramAndCreateKernel("projectZED2ToOusterPoints");
+      openCLManager.loadSingleFunctionProgramAndCreateKernel("projectZED2ToOusterPoints");
    }
 }
