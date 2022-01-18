@@ -6,6 +6,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class YoContinuousStepGeneratorParameters implements ContinuousStepGeneratorParametersBasics
 {
+   private final YoInteger numberOfFootstepsToPlan;
    private final YoInteger numberOfFixedFootsteps;
    private final YoDouble swingHeight;
    private final YoDouble swingDuration, transferDuration;
@@ -15,6 +16,7 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
 
    public YoContinuousStepGeneratorParameters(String nameSuffix, YoRegistry registry)
    {
+      numberOfFootstepsToPlan = new YoInteger("numberOfFootstepsToPlan" + nameSuffix, registry);
       numberOfFixedFootsteps = new YoInteger("numberOfFixedFootsteps" + nameSuffix, registry);
       swingHeight = new YoDouble("swingHeight" + nameSuffix, registry);
       swingDuration = new YoDouble("swingTime" + nameSuffix, registry);
@@ -25,6 +27,12 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
       maxStepLength = new YoDouble("maxStepLength" + nameSuffix, registry);
       turnMaxAngleOutward = new YoDouble("maxAngleTurnOutwards" + nameSuffix, registry);
       turnMaxAngleInward = new YoDouble("maxAngleTurnInwards" + nameSuffix, registry);
+   }
+
+   @Override
+   public void setNumberOfFootstepsToPlan(int numberOfFootstepsToPlan)
+   {
+      this.numberOfFootstepsToPlan.set(numberOfFootstepsToPlan);
    }
 
    @Override
@@ -85,6 +93,12 @@ public class YoContinuousStepGeneratorParameters implements ContinuousStepGenera
    public void setTurnMaxAngleOutward(double turnMaxAngleOutward)
    {
       this.turnMaxAngleOutward.set(turnMaxAngleOutward);
+   }
+
+   @Override
+   public int getNumberOfFootstepsToPlan()
+   {
+      return numberOfFootstepsToPlan.getValue();
    }
 
    @Override

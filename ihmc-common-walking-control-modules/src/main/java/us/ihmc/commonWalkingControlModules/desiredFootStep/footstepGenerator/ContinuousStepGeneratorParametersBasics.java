@@ -5,8 +5,23 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 
 public interface ContinuousStepGeneratorParametersBasics
 {
+   public static final int DEFAULT_NUMBER_OF_FOOTSTEPS_TO_PLAN = 4;
+   public static final int DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS = 0;
+
+   default void clear()
+   {
+      setNumberOfFootstepsToPlan(DEFAULT_NUMBER_OF_FOOTSTEPS_TO_PLAN);
+      setNumberOfFixedFootsteps(DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS);
+      setMinStepWidth(0.0);
+      setMaxStepWidth(Double.POSITIVE_INFINITY);
+      setMaxStepLength(Double.POSITIVE_INFINITY);
+      setTurnMaxAngleOutward(Math.PI / 2.0);
+      setTurnMaxAngleInward(-Math.PI / 2.0);
+   }
+
    default void set(ContinuousStepGeneratorParametersBasics other)
    {
+      setNumberOfFootstepsToPlan(other.getNumberOfFootstepsToPlan());
       setNumberOfFixedFootsteps(other.getNumberOfFixedFootsteps());
       setSwingHeight(other.getSwingHeight());
       setSwingDuration(other.getSwingDuration());
@@ -21,7 +36,8 @@ public interface ContinuousStepGeneratorParametersBasics
 
    default void set(WalkingControllerParameters walkingControllerParameters)
    {
-      setNumberOfFixedFootsteps(0);
+      setNumberOfFootstepsToPlan(DEFAULT_NUMBER_OF_FOOTSTEPS_TO_PLAN);
+      setNumberOfFixedFootsteps(DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS);
       setSwingDuration(walkingControllerParameters.getDefaultSwingTime());
       setTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
@@ -34,6 +50,8 @@ public interface ContinuousStepGeneratorParametersBasics
       setTurnMaxAngleInward(steppingParameters.getMaxAngleTurnInwards());
       setTurnMaxAngleOutward(steppingParameters.getMaxAngleTurnOutwards());
    }
+
+   void setNumberOfFootstepsToPlan(int numberOfFootstepsToPlan);
 
    void setNumberOfFixedFootsteps(int numberOfFixedFootsteps);
 
@@ -55,6 +73,8 @@ public interface ContinuousStepGeneratorParametersBasics
 
    void setTurnMaxAngleOutward(double turnMaxAngleOutward);
 
+   int getNumberOfFootstepsToPlan();
+
    int getNumberOfFixedFootsteps();
 
    double getSwingHeight();
@@ -74,4 +94,12 @@ public interface ContinuousStepGeneratorParametersBasics
    double getTurnMaxAngleInward();
 
    double getTurnMaxAngleOutward();
+
+   default String getString()
+   {
+      return "number of footsteps to plan: " + getNumberOfFootstepsToPlan() + ", number of fixed footsteps: " + getNumberOfFixedFootsteps() + ", swing height: "
+            + getSwingHeight() + ", swing duration: " + getSwingDuration() + ", transfer duration: " + getTransferDuration() + ", max step length: "
+            + getMaxStepLength() + ", default step width: " + getDefaultStepWidth() + ", min step width: " + getMinStepWidth() + ", max step width: "
+            + getMaxStepWidth() + ", turn max angle inward: " + getTurnMaxAngleInward() + ", turn max angle outward: " + getTurnMaxAngleOutward();
+   }
 }
