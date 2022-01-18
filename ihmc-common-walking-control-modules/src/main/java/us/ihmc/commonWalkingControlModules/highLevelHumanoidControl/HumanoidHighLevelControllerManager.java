@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.List;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
@@ -13,9 +14,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLow
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPlugin;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -68,6 +72,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private final HighLevelControllerFactoryHelper controllerFactoryHelper;
 
    private final EnumMap<HighLevelControllerName, HighLevelControllerState> highLevelControllerStates = new EnumMap<>(HighLevelControllerName.class);
+   private final List<HighLevelHumanoidControllerPlugin> controllerPlugins = new ArrayList<>();
 
    private final HighLevelStateChangeStatusMessage highLevelStateChangeStatusMessage = new HighLevelStateChangeStatusMessage();
 
@@ -76,18 +81,22 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private final RobotDesiredConfigurationData robotDesiredConfigurationData = new RobotDesiredConfigurationData();
    private final IntegerParameter jointDesiredOutputBroadcastFrequency = new IntegerParameter("jointDesiredOutputBroadcastFrequency", registry, 10);
 
-   public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
-                                             HighLevelControllerName initialControllerState, HighLevelControllerParameters highLevelControllerParameters,
+   public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager,
+                                             StatusMessageOutputManager statusMessageOutputManager,
+                                             HighLevelControllerName initialControllerState,
+                                             HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
                                              PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              YoEnum<HighLevelControllerName> requestedHighLevelControllerState,
                                              EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
                                              ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
+                                             List<HighLevelHumanoidControllerPluginFactory> pluginFactories,
                                              HighLevelControlManagerFactory managerFactory,
                                              WholeBodyControllerCoreFactory controllerCoreFactory,
                                              HighLevelHumanoidControllerToolbox controllerToolbox,
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                             ForceSensorDataHolderReadOnly forceSensorDataHolder, JointDesiredOutputListBasics lowLevelControllerOutput)
+                                             ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                             JointDesiredOutputListBasics lowLevelControllerOutput)
    {
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
@@ -108,9 +117,13 @@ public class HumanoidHighLevelControllerManager implements RobotController
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
       controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
 
-      stateMachine = setUpStateMachine(initialControllerState, controllerStateFactories, controllerTransitionFactories, managerFactory,
+      stateMachine = setUpStateMachine(initialControllerState,
+                                       controllerStateFactories,
+                                       controllerTransitionFactories,
+                                       managerFactory,
                                        controllerCoreFactory,
-                                       controllerToolbox.getYoTime(), registry);
+                                       controllerToolbox.getYoTime(),
+                                       registry);
       isListeningToHighLevelStateMessage.set(true);
       for (HighLevelControllerState highLevelControllerState : highLevelControllerStates.values())
       {
@@ -119,6 +132,39 @@ public class HumanoidHighLevelControllerManager implements RobotController
 
       OneDoFJointBasics[] controlledOneDoFJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
       yoLowLevelOneDoFJointDesiredDataHolder = new YoLowLevelOneDoFJointDesiredDataHolder(controlledOneDoFJoints, registry);
+
+      pluginFactories.forEach(this::addControllerPluginFactory);
+   }
+
+   /**
+    * Creates and registers a new plugin given its factory.
+    * <p>
+    * IMPORTANT: This should not be called when the controller is running, should only be used for
+    * setup. Ideally, the plugin can be registered before creating the controller via the
+    * {@link HighLevelHumanoidControllerFactory}.
+    * </p>
+    * 
+    * @param pluginFactory the factory used to create the new plugin to be registered.
+    */
+   public void addControllerPluginFactory(HighLevelHumanoidControllerPluginFactory pluginFactory)
+   {
+      addControllerPlugin(pluginFactory.buildPlugin(controllerFactoryHelper));
+   }
+
+   /**
+    * Registers a new plugin to be run alongside with the active controller.
+    * <p>
+    * IMPORTANT: This should not be called when the controller is running, should only be used for
+    * setup. Ideally, the plugin can be registered before creating the controller via the
+    * {@link HighLevelHumanoidControllerFactory}.
+    * </p>
+    * 
+    * @param plugin the plugin to be registered.
+    */
+   public void addControllerPlugin(HighLevelHumanoidControllerPlugin plugin)
+   {
+      addYoVariableRegistry(plugin.getRegistry());
+      controllerPlugins.add(plugin);
    }
 
    public void addYoVariableRegistry(YoRegistry registryToAdd)
@@ -159,6 +205,14 @@ public class HumanoidHighLevelControllerManager implements RobotController
       try
       {
          controllerToolbox.update();
+
+         double time = controllerToolbox.getYoTime().getValue();
+
+         for (int i = 0; i < controllerPlugins.size(); i++)
+         {
+            controllerPlugins.get(i).update(time);
+         }
+
          stateMachine.doActionAndTransition();
       }
       catch (Exception e)
@@ -281,7 +335,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
       lowLevelControllerOutput.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 
       RootJointDesiredConfigurationDataReadOnly rootJointDesiredConfiguration = stateMachine.getCurrentState().getOutputForRootJoint();
-      if(rootJointDesiredConfiguration != null)
+      if (rootJointDesiredConfiguration != null)
       {
          this.rootJointDesiredConfiguration.set(rootJointDesiredConfiguration);
       }

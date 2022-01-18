@@ -24,15 +24,15 @@ public class ComponentBasedFootstepDataMessageGenerator implements HighLevelHuma
 
    public ComponentBasedFootstepDataMessageGenerator(CommonHumanoidReferenceFrames referenceFrames,
                                                      double controlDT,
+                                                     DoubleProvider timeProvider,
                                                      WalkingControllerParameters walkingControllerParameters,
                                                      StatusMessageOutputManager statusMessageOutputManager,
                                                      CommandInputManager commandInputManager,
-                                                     YoGraphicsListRegistry yoGraphicsListRegistry,
                                                      SideDependentList<? extends ContactableBody> contactableFeet,
                                                      boolean useHeadingAndVelocityScript,
                                                      HeightMap heightMapForFootstepZ,
-                                                     DoubleProvider timeProvider,
-                                                     HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters)
+                                                     HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters,
+                                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       continuousStepGenerator = new ContinuousStepGenerator(registry);
       continuousStepGenerator.setFootstepStatusListener(statusMessageOutputManager);
@@ -101,15 +101,15 @@ public class ComponentBasedFootstepDataMessageGenerator implements HighLevelHuma
             DoubleProvider timeProvider = controllerToolbox.getYoTime();
             return new ComponentBasedFootstepDataMessageGenerator(referenceFrames,
                                                                   controlDT,
+                                                                  timeProvider,
                                                                   walkingControllerParameters,
                                                                   statusMessageOutputManager,
                                                                   commandInputManager,
-                                                                  yoGraphicsListRegistry,
                                                                   contactableFeet,
                                                                   useHeadingAndVelocityScript,
                                                                   heightMapForFootstepZ,
-                                                                  timeProvider,
-                                                                  headingAndVelocityEvaluationScriptParameters);
+                                                                  headingAndVelocityEvaluationScriptParameters,
+                                                                  yoGraphicsListRegistry);
          }
       };
    }
