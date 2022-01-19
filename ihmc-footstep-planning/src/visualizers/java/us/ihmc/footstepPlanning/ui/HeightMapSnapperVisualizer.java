@@ -14,7 +14,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
-import us.ihmc.footstepPlanning.bodyPath.HeightMapSurfaceNormalCalculator;
+import us.ihmc.footstepPlanning.bodyPath.HeightMapLeastSquaresNormalCalculator;
+import us.ihmc.footstepPlanning.bodyPath.HeightMapRANSACNoralCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -32,6 +33,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.IntFunction;
 
 public class HeightMapSnapperVisualizer
 {
@@ -69,14 +71,19 @@ public class HeightMapSnapperVisualizer
       polygon.update();
 
       long start = System.nanoTime();
-      HeightMapSurfaceNormalCalculator surfaceNormalCalculator = new HeightMapSurfaceNormalCalculator();
-      surfaceNormalCalculator.computeSurfaceNormals(heightMapData, 0.3);
+
+//      HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
+//      surfaceNormalCalculator.computeSurfaceNormals(heightMapData, 0.3);
+
+      HeightMapRANSACNoralCalculator surfaceNormalCalculator = new HeightMapRANSACNoralCalculator();
+      surfaceNormalCalculator.computeSurfaceNormals(heightMapData);
+
       long stop = System.nanoTime();
       System.out.println((stop - start));
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(buildHeightMapGraphics(heightMapData, surfaceNormalCalculator));
+      scs.addStaticLinkGraphics(buildHeightMapGraphics(heightMapData, surfaceNormalCalculator::getSurfaceNormal));
 
       // good values
 //      scs.addStaticLinkGraphics(buildSnapGraphics(heightMapData,
@@ -124,7 +131,7 @@ public class HeightMapSnapperVisualizer
       return fileChooser.getSelectedFile();
    }
 
-   private static Graphics3DObject buildHeightMapGraphics(HeightMapData heightMapData, HeightMapSurfaceNormalCalculator surfaceNormalCalculator)
+   private static Graphics3DObject buildHeightMapGraphics(HeightMapData heightMapData, IntFunction<UnitVector3DBasics> surfaceNormalCalculator)
    {
       Graphics3DObject graphics3DObject = new Graphics3DObject();
 
@@ -164,7 +171,7 @@ public class HeightMapSnapperVisualizer
          }
 
          graphics3DObject.translate(0.0, 0.0, 0.5 * renderedHeight + 0.01);
-         UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(key);
+         UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.apply(key);
 
          if (!surfaceNormal.epsilonEquals(Axis3D.Z, 1e-4))
          {
