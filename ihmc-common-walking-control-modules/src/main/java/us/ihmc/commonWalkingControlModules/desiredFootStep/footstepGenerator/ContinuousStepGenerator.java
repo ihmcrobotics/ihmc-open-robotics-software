@@ -242,26 +242,51 @@ public class ContinuousStepGenerator implements Updatable
          previousFootstepPose.set(previousFootstep.getLocation(), previousFootstep.getOrientation());
       }
 
+      double maxStepLength = parameters.getMaxStepLength();
+      double maxStepWidth = parameters.getMaxStepWidth();
+      double minStepWidth = parameters.getMinStepWidth();
+      double defaultStepWidth = parameters.getDefaultStepWidth();
+      double turnMaxAngleInward = parameters.getTurnMaxAngleInward();
+      double turnMaxAngleOutward = parameters.getTurnMaxAngleOutward();
+
+      Vector2DReadOnly desiredVelocity = desiredVelocityProvider.getDesiredVelocity();
+      double desiredVelocityX = desiredVelocity.getX();
+      double desiredVelocityY = desiredVelocity.getY();
+      double turningVelocity = desiredTurningVelocityProvider.getTurningVelocity();
+
+      if (desiredVelocityProvider.isUnitVelocity())
+      {
+         double minMaxVelocityX = maxStepLength / stepTime.getValue();
+         double minMaxVelocityY = maxStepWidth / stepTime.getValue();
+         desiredVelocityX = minMaxVelocityX * MathTools.clamp(desiredVelocityX, 1.0);
+         desiredVelocityY = minMaxVelocityY * MathTools.clamp(desiredVelocityY, 1.0);
+      }
+
+      if (desiredTurningVelocityProvider.isUnitVelocity())
+      {
+         double minMaxVelocityTurn = (turnMaxAngleOutward - turnMaxAngleInward) / stepTime.getValue();
+         turningVelocity = minMaxVelocityTurn * MathTools.clamp(turningVelocity, 1.0);
+      }
+
       for (int i = footsteps.size(); i < parameters.getNumberOfFootstepsToPlan(); i++)
       {
-         Vector2DReadOnly desiredVelocity = desiredVelocityProvider.getDesiredVelocity();
 
-         double xDisplacement = MathTools.clamp(stepTime.getValue() * desiredVelocity.getX(), parameters.getMaxStepLength());
-         double yDisplacement = stepTime.getValue() * desiredVelocity.getY() + swingSide.negateIfRightSide(parameters.getDefaultStepWidth());
-         double headingDisplacement = stepTime.getValue() * desiredTurningVelocityProvider.getTurningVelocity();
+         double xDisplacement = MathTools.clamp(stepTime.getValue() * desiredVelocityX, maxStepLength);
+         double yDisplacement = stepTime.getValue() * desiredVelocityY + swingSide.negateIfRightSide(defaultStepWidth);
+         double headingDisplacement = stepTime.getValue() * turningVelocity;
 
          if (swingSide == RobotSide.LEFT)
          {
-            yDisplacement = MathTools.clamp(yDisplacement, parameters.getMinStepWidth(), parameters.getMaxStepWidth());
-            headingDisplacement = MathTools.clamp(headingDisplacement, parameters.getTurnMaxAngleInward(), parameters.getTurnMaxAngleOutward());
+            yDisplacement = MathTools.clamp(yDisplacement, minStepWidth, maxStepWidth);
+            headingDisplacement = MathTools.clamp(headingDisplacement, turnMaxAngleInward, turnMaxAngleOutward);
          }
          else
          {
-            yDisplacement = MathTools.clamp(yDisplacement, -parameters.getMaxStepWidth(), -parameters.getMinStepWidth());
-            headingDisplacement = MathTools.clamp(headingDisplacement, -parameters.getTurnMaxAngleOutward(), -parameters.getTurnMaxAngleInward());
+            yDisplacement = MathTools.clamp(yDisplacement, -maxStepWidth, -minStepWidth);
+            headingDisplacement = MathTools.clamp(headingDisplacement, -turnMaxAngleOutward, -turnMaxAngleInward);
          }
 
-         double halfInPlaceWidth = 0.5 * swingSide.negateIfRightSide(parameters.getDefaultStepWidth());
+         double halfInPlaceWidth = 0.5 * swingSide.negateIfRightSide(defaultStepWidth);
          nextFootstepPose2D.set(footstepPose2D);
          // Applying the translation before the rotation allows the rotation to be centered in between the feet.
          // This ordering seems to provide the most natural footsteps.
