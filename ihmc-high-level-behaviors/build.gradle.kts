@@ -46,4 +46,7 @@ testDependencies {
    api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
+   api("com.badlogicgames.gdx:gdx-bullet:1.10.0")
+   api("com.badlogicgames.gdx:gdx-bullet-platform:1.10.0:natives-desktop")
+   api("com.github.stephengold:Libbulletjme:12.6.0")
 }
