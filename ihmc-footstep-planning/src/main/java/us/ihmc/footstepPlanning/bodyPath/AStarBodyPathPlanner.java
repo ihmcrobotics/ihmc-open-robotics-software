@@ -72,7 +72,7 @@ public class AStarBodyPathPlanner
    /* Performs box collision check */
    private final BodyPathCollisionDetector collisionDetector = new BodyPathCollisionDetector();
    /* Computes surface normals and penalizes pitch and roll */
-   private final HeightMapSurfaceNormalCalculator surfaceNormalCalculator = new HeightMapSurfaceNormalCalculator();
+   private final HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
 
    private final TIntArrayList xSnapOffsets = new TIntArrayList();
    private final TIntArrayList ySnapOffsets = new TIntArrayList();

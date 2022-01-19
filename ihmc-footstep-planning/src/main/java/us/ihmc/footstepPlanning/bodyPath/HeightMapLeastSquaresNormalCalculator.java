@@ -10,7 +10,7 @@ import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
-public class HeightMapSurfaceNormalCalculator
+public class HeightMapLeastSquaresNormalCalculator
 {
    private final HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
    private UnitVector3DBasics[] surfaceNormals;
