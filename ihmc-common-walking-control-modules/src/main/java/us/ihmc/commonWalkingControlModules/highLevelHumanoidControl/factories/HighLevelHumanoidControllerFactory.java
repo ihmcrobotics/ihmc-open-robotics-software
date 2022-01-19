@@ -23,7 +23,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHigh
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGenerator;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -132,15 +132,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                              PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              CoPTrajectoryParameters copTrajectoryParameters)
    {
-      this(contactableBodiesFactory,
-           footForceSensorNames,
-           footContactSensorNames,
-           wristSensorNames,
-           highLevelControllerParameters,
-           walkingControllerParameters,
-           pushRecoveryControllerParameters,
-           copTrajectoryParameters,
-           new DefaultSplitFractionCalculatorParameters());
+      this(contactableBodiesFactory, footForceSensorNames, footContactSensorNames, wristSensorNames, highLevelControllerParameters, walkingControllerParameters,
+           pushRecoveryControllerParameters, copTrajectoryParameters, new DefaultSplitFractionCalculatorParameters());
    }
 
    public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
@@ -186,7 +179,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
    }
 
-   private HighLevelHumanoidControllerPluginFactory componentBasedFootstepDataMessageGeneratorFactory;
+   private ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory;
 
    public void createComponentBasedFootstepDataMessageGenerator()
    {
@@ -206,9 +199,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       if (componentBasedFootstepDataMessageGeneratorFactory != null)
          return;
 
-      componentBasedFootstepDataMessageGeneratorFactory = ComponentBasedFootstepDataMessageGenerator.newFactory(useHeadingAndVelocityScript,
-                                                                                                                heightMapForFootstepZ,
-                                                                                                                headingAndVelocityEvaluationScriptParameters);
+      componentBasedFootstepDataMessageGeneratorFactory = new ComponentBasedFootstepDataMessageGeneratorFactory();
+      componentBasedFootstepDataMessageGeneratorFactory.setRegistry();
+      componentBasedFootstepDataMessageGeneratorFactory.setUseHeadingAndVelocityScript(useHeadingAndVelocityScript);
+      componentBasedFootstepDataMessageGeneratorFactory.setHeadingAndVelocityEvaluationScriptParameters(headingAndVelocityEvaluationScriptParameters);
+      componentBasedFootstepDataMessageGeneratorFactory.setHeightMap(heightMapForFootstepZ);
 
       if (humanoidHighLevelControllerManager != null)
          humanoidHighLevelControllerManager.addControllerPluginFactory(componentBasedFootstepDataMessageGeneratorFactory);

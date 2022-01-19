@@ -12,6 +12,7 @@ public interface ContinuousStepGeneratorParametersBasics
    {
       setNumberOfFootstepsToPlan(DEFAULT_NUMBER_OF_FOOTSTEPS_TO_PLAN);
       setNumberOfFixedFootsteps(DEFAULT_NUMBER_OF_FIXED_FOOTSTEPS);
+      setSwingHeight(0.0);
       setMinStepWidth(0.0);
       setMaxStepWidth(Double.POSITIVE_INFINITY);
       setMaxStepLength(Double.POSITIVE_INFINITY);
@@ -42,7 +43,7 @@ public interface ContinuousStepGeneratorParametersBasics
       setTransferDuration(walkingControllerParameters.getDefaultTransferTime());
 
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      setSwingHeight(steppingParameters.getMinSwingHeightFromStanceFoot());
+      setSwingHeight(steppingParameters.getDefaultSwingHeightFromStanceFoot());
       setMaxStepLength(steppingParameters.getMaxStepLength());
       setDefaultStepWidth(steppingParameters.getInPlaceWidth());
       setMinStepWidth(steppingParameters.getMinStepWidth());
