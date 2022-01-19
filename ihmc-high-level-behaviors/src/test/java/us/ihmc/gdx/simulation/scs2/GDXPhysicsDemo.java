@@ -37,7 +37,6 @@ public class GDXPhysicsDemo
 
    public GDXPhysicsDemo()
    {
-
       ContactParameters contactParameters = new ContactParameters();
       contactParameters.setMinimumPenetration(5.0e-5);
       contactParameters.setCoefficientOfFriction(0.7);
@@ -105,7 +104,6 @@ public class GDXPhysicsDemo
          public void create()
          {
             baseUI.create();
-            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
 
             physicsSimulator.create(baseUI);
             baseUI.getImGuiPanelManager().addPanel(physicsSimulator.getControlPanel());
