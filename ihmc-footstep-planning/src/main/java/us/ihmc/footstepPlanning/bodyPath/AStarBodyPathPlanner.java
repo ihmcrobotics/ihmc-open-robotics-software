@@ -38,7 +38,9 @@ import java.util.function.Consumer;
 
 public class AStarBodyPathPlanner
 {
-   private static final double traversibilityCostScale = 0.25;
+   private static final double traversibilityCostScale = 0.7;
+
+   private static final boolean checkForCollisions = false;
    private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useEdgeDetectorCost = false;
 
@@ -190,6 +192,7 @@ public class AStarBodyPathPlanner
       expandedNodeSet.clear();
       gridHeightMap.put(startNode, startPose.getZ());
       leastCostNode = startNode;
+      traversibilityCalculator.initialize(startNode);
 
       if (useEdgeDetectorCost)
       {
@@ -253,17 +256,31 @@ public class AStarBodyPathPlanner
                continue;
             }
 
-            this.containsCollision.set(collisionDetector.collisionDetected(heightMapData, neighbor, i, snapHeight.getDoubleValue(), groundClearance));
-            if (containsCollision.getValue())
+            if (checkForCollisions)
             {
-               rejectionReason.set(RejectionReason.COLLISION);
+               this.containsCollision.set(collisionDetector.collisionDetected(heightMapData, neighbor, i, snapHeight.getDoubleValue(), groundClearance));
+               if (containsCollision.getValue())
+               {
+                  rejectionReason.set(RejectionReason.COLLISION);
+                  graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+                  continue;
+               }
+            }
+
+            double edgeDistance = xyDistance(node, neighbor);
+            edgeCost.set(edgeDistance);
+
+            double traversibilityIndicator = traversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
+            if (traversibilityCalculator.isTraversible())
+            {
+               edgeCost.add(traversibilityIndicator);
+            }
+            else
+            {
+               rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
                graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
                continue;
             }
-
-            double distanceCost = xyDistance(node, neighbor);
-            double traversibilityCost = traversibilityCostScale * traversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
-            edgeCost.set(distanceCost + traversibilityCost);
 
             if (useEdgeDetectorCost)
             {
@@ -298,16 +315,9 @@ public class AStarBodyPathPlanner
 
                   /* Roll is the amount of incline orthogonal to the direction of motion */
                   double roll = Math.asin(Math.abs(edge.getY() * surfaceNormal.getX() - edge.getX() * surfaceNormal.getY()));
-                  inclineCost.get(side).set(0.8 * Math.max(0.0, roll - Math.toRadians(5.0)));
+                  inclineCost.get(side).set(3.0 * Math.max(0.0, roll - Math.toRadians(5.0)));
                   edgeCost.add(inclineCost.get(side));
                }
-            }
-
-            if (!traversibilityCalculator.isTraversible())
-            {
-               rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
-               graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
-               continue;
             }
 
             graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
@@ -414,6 +424,15 @@ public class AStarBodyPathPlanner
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
+
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
    }
 
    private static Pair<Integer, Integer> rotate(int xOff, int yOff, int i)

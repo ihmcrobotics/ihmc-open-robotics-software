@@ -4,17 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.HeightMapMessagePubSubType;
-import javafx.stage.FileChooser;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.footstepPlanning.bodyPath.HeightMapSurfaceNormalCalculator;
@@ -24,9 +21,8 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.pathPlanning.HeightMapDataSetName;
-import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -136,27 +132,39 @@ public class HeightMapSnapperVisualizer
       graphics3DObject.addCube(heightMapData.getGridSizeXY(), heightMapData.getGridSizeXY(), 0.01, YoAppearance.Blue());
       graphics3DObject.addCoordinateSystem(0.3);
 
-      double minHeight = heightMapData.minHeight();
-      double zeroHeight = heightMapData.getEstimatedGroundHeight();
+      double minHeight = heightMapData.getMinHeight();
+      double groundPlaneHeight = heightMapData.getEstimatedGroundHeight();
       AppearanceDefinition low = YoAppearance.Black();
       AppearanceDefinition high = YoAppearance.Olive();
 
-      for (int i = 0; i < heightMapData.getNumberOfCells(); i++)
+      int gridWidth = 2 * heightMapData.getCenterIndex() + 1;
+      for (int key = 0; key < gridWidth * gridWidth; key++)
       {
-         Point2D cellPosition = heightMapData.getCellPosition(i);
-         double height = heightMapData.getHeight(i);
-         double renderedHeight = (height - zeroHeight);
+         Point2D cellPosition = new Point2D(HeightMapTools.keyToXCoordinate(key,
+                                                                            heightMapData.getGridCenter().getX(),
+                                                                            heightMapData.getGridResolutionXY(),
+                                                                            heightMapData.getCenterIndex()),
+                                            HeightMapTools.keyToYCoordinate(key,
+                                                                            heightMapData.getGridCenter().getY(),
+                                                                            heightMapData.getGridResolutionXY(),
+                                                                            heightMapData.getCenterIndex()));
+         double height = heightMapData.getHeightAt(HeightMapTools.keyToXIndex(key, heightMapData.getCenterIndex()), HeightMapTools.keyToYIndex(key, heightMapData.getCenterIndex()));
 
+         double renderedHeight = height - groundPlaneHeight;
          graphics3DObject.identity();
-         graphics3DObject.translate(cellPosition.getX(), cellPosition.getY(), zeroHeight + 0.5 * renderedHeight);
-         double alpha = MathTools.clamp((height - minHeight) / 0.2, 0.0, 1.0);
-         AppearanceDefinition interpolatedColor = YoAppearance.RGBColor(EuclidCoreTools.interpolate(low.getColor().getX(), high.getColor().getX(), alpha),
-                                                                        EuclidCoreTools.interpolate(low.getColor().getY(), high.getColor().getY(), alpha),
-                                                                        EuclidCoreTools.interpolate(low.getColor().getZ(), high.getColor().getZ(), alpha));
-         graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, interpolatedColor);
+         graphics3DObject.translate(cellPosition.getX(), cellPosition.getY(), groundPlaneHeight + 0.5 * renderedHeight);
+
+         if (height > groundPlaneHeight + 1e-5)
+         {
+            double alpha = MathTools.clamp((height - minHeight) / 0.2, 0.0, 1.0);
+            AppearanceDefinition interpolatedColor = YoAppearance.RGBColor(EuclidCoreTools.interpolate(low.getColor().getX(), high.getColor().getX(), alpha),
+                                                                           EuclidCoreTools.interpolate(low.getColor().getY(), high.getColor().getY(), alpha),
+                                                                           EuclidCoreTools.interpolate(low.getColor().getZ(), high.getColor().getZ(), alpha));
+            graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, interpolatedColor);
+         }
 
          graphics3DObject.translate(0.0, 0.0, 0.5 * renderedHeight + 0.01);
-         UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(heightMapData.getKey(i));
+         UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(key);
 
          if (!surfaceNormal.epsilonEquals(Axis3D.Z, 1e-4))
          {

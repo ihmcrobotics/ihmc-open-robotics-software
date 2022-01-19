@@ -19,8 +19,7 @@ import java.util.Map;
 
 public class BodyPathTraversibilityCalculator
 {
-   private static final double similarityThreshold = 0.2;
-   private static final double traversibilityThreshold = 0.7;
+   private static final int minTraversibleSteps = 3;
 
    private final FootstepPlannerParametersReadOnly parameters;
    private final Pose2D bodyPose = new Pose2D();
@@ -41,8 +40,9 @@ public class BodyPathTraversibilityCalculator
    private final SideDependentList<YoDouble> inclineAlpha;
 
    private final YoDouble leftTraversibility, rightTraversibility;
-   private final YoEnum<TraversibilitySide> traversibilitySide;
-   private final HashMap<BodyPathLatticePoint, TraversibilitySide> traversibilitySideMap = new HashMap<>();
+
+   private final HashMap<BodyPathLatticePoint, Double> leftTraversibilityMap = new HashMap<>();
+   private final HashMap<BodyPathLatticePoint, Double> rightTraversibilityMap = new HashMap<>();
 
    private final ConvexPolygon2D footPolygon;
    private final TDoubleArrayList xOffsets = new TDoubleArrayList();
@@ -75,15 +75,15 @@ public class BodyPathTraversibilityCalculator
 
       leftTraversibility = new YoDouble("leftTraversibility", registry);
       rightTraversibility = new YoDouble("rightTraversibility", registry);
-      traversibilitySide = new YoEnum<>("traversibilitySide", registry, TraversibilitySide.class);
 
       xOffsets.add(0.0);
-      xOffsets.add(0.05);
-      xOffsets.add(-0.05);
+      xOffsets.add(0.06);
+      xOffsets.add(-0.06);
+      xOffsets.add(0.12);
+      xOffsets.add(-0.12);
 
       yOffsets.add(0.0);
-      yOffsets.add(0.05);
-      yOffsets.add(0.1);
+      yOffsets.add(0.08);
 
       yawOffsets.add(0.0);
       yawOffsets.add(Math.toRadians(20.0));
@@ -93,12 +93,14 @@ public class BodyPathTraversibilityCalculator
    public void setHeightMap(HeightMapData heightMapData)
    {
       this.heightMapData = heightMapData;
+      leftTraversibilityMap.clear();
+      rightTraversibilityMap.clear();
    }
 
    public void initialize(BodyPathLatticePoint startNode)
    {
-      traversibilitySideMap.clear();
-      traversibilitySideMap.put(startNode, TraversibilitySide.BOTH);
+      leftTraversibilityMap.put(startNode, 0.0);
+      rightTraversibilityMap.put(startNode, 0.0);
    }
 
    public double computeTraversibilityIndicator(BodyPathLatticePoint node, BodyPathLatticePoint parentNode)
@@ -114,37 +116,26 @@ public class BodyPathTraversibilityCalculator
       leftTraversibility.set(compute(RobotSide.LEFT, parentHeight));
       rightTraversibility.set(compute(RobotSide.RIGHT, parentHeight));
 
-      if (Math.min(leftTraversibility.getDoubleValue(), rightTraversibility.getDoubleValue()) > traversibilityThreshold)
-      {
-         traversibilitySide.set(TraversibilitySide.NONE);
-         return Double.MAX_VALUE;
-      }
-      else if (Math.abs(leftTraversibility.getValue() - rightTraversibility.getValue()) < similarityThreshold)
-      {
-         traversibilitySide.set(TraversibilitySide.BOTH);
-      }
-      else if (leftTraversibility.getValue() < rightTraversibility.getValue())
-      {
-         traversibilitySide.set(TraversibilitySide.LEFT);
-      }
-      else
-      {
-         traversibilitySide.set(TraversibilitySide.RIGHT);
-      }
+      leftTraversibilityMap.put(node, leftTraversibility.getValue());
+      rightTraversibilityMap.put(node, rightTraversibility.getValue());
 
-      TraversibilitySide parentTraversibility = traversibilitySideMap.get(parentNode);
-      if (parentTraversibility == TraversibilitySide.BOTH)
-      {
-         return Math.min(leftTraversibility.getDoubleValue(), rightTraversibility.getDoubleValue());
-      }
-      else if (parentTraversibility == TraversibilitySide.LEFT)
-      {
-         return rightTraversibility.getDoubleValue();
-      }
-      else
-      {
-         return leftTraversibility.getDoubleValue();
-      }
+      double alphaNode0 = 0.2;
+      double alphaNode1 = 0.05;
+      double alphaEdge = 0.5;
+
+      double previousLeftTraversibility = leftTraversibilityMap.get(parentNode);
+      double previousRightTraversibility = rightTraversibilityMap.get(parentNode);
+
+               // Node cost is scored by having one side that has good footholds
+      return alphaNode0 * Math.min(leftTraversibility.getValue(), rightTraversibility.getValue()) +
+//             alphaNode1 * Math.max(leftTraversibility.getValue(), rightTraversibility.getValue()) +
+             // Edge cost is scored by making sure not all good footholds are on the same side
+             alphaEdge * Math.min(leftTraversibility.getValue() * previousRightTraversibility, rightTraversibility.getValue() * previousLeftTraversibility);
+   }
+
+   public boolean isTraversible()
+   {
+      return validSteps.get(RobotSide.LEFT).getValue() >= minTraversibleSteps || validSteps.get(RobotSide.RIGHT).getValue() >= minTraversibleSteps;
    }
 
    /**
@@ -153,6 +144,7 @@ public class BodyPathTraversibilityCalculator
    private double compute(RobotSide side, double parentHeight)
    {
       traversibilityCosts.clear();
+      validSteps.get(side).set(0);
 
       double fullFootholdArea = footPolygon.getArea();
       double maxAreaToPenalize = 0.9;
@@ -168,13 +160,18 @@ public class BodyPathTraversibilityCalculator
       TDoubleArrayList areaAlphas = new TDoubleArrayList();
       TDoubleArrayList inclineAlphas = new TDoubleArrayList();
 
-      for (int xi = 0; xi < xOffsets.size(); xi++)
+      Pose2D rotatedBodyPose = new Pose2D();
+
+      for (int ti = 0; ti < yawOffsets.size(); ti++)
       {
-         for (int yi = 0; yi < yOffsets.size(); yi++)
+         rotatedBodyPose.set(bodyPose);
+         rotatedBodyPose.appendRotation(yawOffsets.get(ti));
+
+         for (int xi = 0; xi < xOffsets.size(); xi++)
          {
-            for (int ti = 0; ti < yawOffsets.size(); ti++)
+            for (int yi = 0; yi < yOffsets.size(); yi++)
             {
-               stepPose.set(bodyPose);
+               stepPose.set(rotatedBodyPose);
                stepPose.appendTranslation(0.0, side.negateIfRightSide(0.5 * parameters.getIdealFootstepWidth()));
                stepPose.appendTranslation(xOffsets.get(xi), side.negateIfRightSide(yOffsets.get(yi)));
                stepPose.appendRotation(side.negateIfRightSide(yawOffsets.get(ti)));
@@ -205,9 +202,13 @@ public class BodyPathTraversibilityCalculator
                }
                else
                {
-                  double rmsAlpha = Math.max(0.0, (snapper.getRMSError() - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold() - parameters.getRMSMinErrorToPenalize()));
+                  double rmsAlpha = Math.max(0.0,
+                                             (snapper.getRMSError() - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold()
+                                                                                                                - parameters.getRMSMinErrorToPenalize()));
                   double areaAlpha = Math.max(0.0, 1.0 - (snapper.getArea() / fullFootholdArea - minAreaThreshold) / (maxAreaToPenalize - minAreaThreshold));
-                  double inclineAlpha = Math.max(0.0, (Math.acos(snapTransform.getM22()) - minSurfaceInclineToPenalize) / (maxSurfaceIncline - minSurfaceInclineToPenalize));
+                  double inclineAlpha = Math.max(0.0,
+                                                 (Math.acos(snapTransform.getM22()) - minSurfaceInclineToPenalize) / (maxSurfaceIncline
+                                                                                                                      - minSurfaceInclineToPenalize));
 
                   if (xi == 0 && yi == 0 && ti == 0)
                   {
@@ -219,9 +220,9 @@ public class BodyPathTraversibilityCalculator
                      this.inclineAlpha.get(side).set(inclineAlpha);
                   }
 
-                  if (rmsAlpha > 1.0 || areaAlpha > 1.0 || inclineAlpha > 1.0)
+                  if (rmsAlpha < 1.0 && areaAlpha < 1.0 && inclineAlpha < 1.0)
                   {
-                     continue;
+                     validSteps.get(side).increment();
                   }
 
                   xSteps.add(stepPose.getX());
@@ -237,45 +238,29 @@ public class BodyPathTraversibilityCalculator
          }
       }
 
-      int samples = 5;
       validSteps.get(side).set(traversibilityCosts.size());
-
-      if (traversibilityCosts.size() < samples)
+      if (traversibilityCosts.isEmpty())
       {
-         return Double.MAX_VALUE;
+         return 3.0;
       }
-      else
+
+      int minIndex = traversibilityCosts.indexOf(traversibilityCosts.min());
+      xStep.get(side).set(xSteps.get(minIndex));
+      yStep.get(side).set(ySteps.get(minIndex));
+      yawStep.get(side).set(yawSteps.get(minIndex));
+      rmsAlpha.get(side).set(rmsAlphas.get(minIndex));
+      areaAlpha.get(side).set(areaAlphas.get(minIndex));
+      inclineAlpha.get(side).set(inclineAlphas.get(minIndex));
+
+      traversibilityCosts.sort();
+      double sampledTraversibility = 0.0;
+
+      int samples = Math.min(minTraversibleSteps, traversibilityCosts.size());
+      for (int i = 0; i < samples; i++)
       {
-         int minIndex = traversibilityCosts.indexOf(traversibilityCosts.min());
-         xStep.get(side).set(xSteps.get(minIndex));
-         yStep.get(side).set(ySteps.get(minIndex));
-         yawStep.get(side).set(yawSteps.get(minIndex));
-         rmsAlpha.get(side).set(rmsAlphas.get(minIndex));
-         areaAlpha.get(side).set(areaAlphas.get(minIndex));
-         inclineAlpha.get(side).set(inclineAlphas.get(minIndex));
-
-         traversibilityCosts.sort();
-         double sampledTraversibility = 0.0;
-
-         for (int i = 0; i < samples; i++)
-         {
-            sampledTraversibility += traversibilityCosts.get(i);
-         }
-
-         return sampledTraversibility / samples;
+         sampledTraversibility += traversibilityCosts.get(i);
       }
-   }
 
-   public boolean isTraversible()
-   {
-      return traversibilitySide.getValue() != TraversibilitySide.NONE;
-   }
-
-   private enum TraversibilitySide
-   {
-      NONE,
-      LEFT,
-      RIGHT,
-      BOTH
+      return sampledTraversibility / samples;
    }
 }

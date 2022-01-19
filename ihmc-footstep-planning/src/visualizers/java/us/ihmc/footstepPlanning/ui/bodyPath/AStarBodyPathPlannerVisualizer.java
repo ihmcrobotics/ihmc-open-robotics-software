@@ -137,7 +137,7 @@ public class AStarBodyPathPlannerVisualizer
       double groundHeight = heightMapData.getEstimatedGroundHeight();
       AppearanceDefinition cellColor = YoAppearance.Olive();
 
-      for (int i = 0; i < heightMapData.getNumberOfCells(); i++)
+      for (int i = 0; i < heightMapData.getNumberOfOccupiedCells(); i++)
       {
          Point2D cellPosition = heightMapData.getCellPosition(i);
          double height = heightMapData.getHeight(i);
