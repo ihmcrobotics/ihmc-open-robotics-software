@@ -55,6 +55,31 @@ public class ContinuousStepGeneratorInputCommand implements Command<ContinuousSt
    {
       return true;
    }
+   
+   public void setWalk(boolean walk)
+   {
+      this.walk = walk;
+   }
+
+   public void setForwardVelocity(double forwardVelocity)
+   {
+      this.forwardVelocity = forwardVelocity;
+   }
+
+   public void setLateralVelocity(double lateralVelocity)
+   {
+      this.lateralVelocity = lateralVelocity;
+   }
+
+   public void setTurnVelocity(double turnVelocity)
+   {
+      this.turnVelocity = turnVelocity;
+   }
+
+   public void setUnitVelocities(boolean unitVelocities)
+   {
+      this.unitVelocities = unitVelocities;
+   }
 
    @Override
    public long getSequenceId()

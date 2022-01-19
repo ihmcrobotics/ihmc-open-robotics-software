@@ -3,48 +3,54 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredTurningVelocityProvider;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StopWalkingMessenger;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
-import us.ihmc.tools.factories.RequiredFactoryField;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLevelHumanoidControllerPluginFactory
 {
-   private final RequiredFactoryField<YoRegistry> registryField = new RequiredFactoryField<>("registry");
-
+   private final OptionalFactoryField<YoRegistry> registryField = new OptionalFactoryField<>("registry");
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScriptField = new OptionalFactoryField<>("useHeadingAndVelocityScript", false);
    private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParametersField = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
    private final OptionalFactoryField<HeightMap> heightMapField = new OptionalFactoryField<>("heightMap");
+   private final OptionalFactoryField<CSGCommandInputManager> csgCommandInputManagerField = new OptionalFactoryField<>("csgCommandInputManagerField");
 
    public ComponentBasedFootstepDataMessageGeneratorFactory()
    {
    }
 
-   public ComponentBasedFootstepDataMessageGeneratorFactory setRegistry()
+   public void setRegistry()
    {
-      return setRegistry(ComponentBasedFootstepDataMessageGenerator.class.getSimpleName());
+      setRegistry(ComponentBasedFootstepDataMessageGenerator.class.getSimpleName());
    }
 
-   public ComponentBasedFootstepDataMessageGeneratorFactory setRegistry(String name)
+   public void setRegistry(String name)
    {
       registryField.set(new YoRegistry(name));
-      return this;
    }
 
    public void setHeightMap(HeightMap heightMap)
@@ -62,9 +68,19 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       this.headingAndVelocityEvaluationScriptParametersField.set(headingAndVelocityEvaluationScriptParameters);
    }
 
+   public CSGCommandInputManager setCSGCommandInputManager()
+   {
+      CSGCommandInputManager csgCommandInputManager = new CSGCommandInputManager();
+      this.csgCommandInputManagerField.set(csgCommandInputManager);
+      return csgCommandInputManager;
+   }
+
    @Override
    public ComponentBasedFootstepDataMessageGenerator buildPlugin(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
+      if (!registryField.hasValue())
+         setRegistry();
+
       FactoryTools.checkAllFactoryFieldsAreSet(this);
 
       HighLevelHumanoidControllerToolbox controllerToolbox = controllerFactoryHelper.getHighLevelHumanoidControllerToolbox();
@@ -82,6 +98,16 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       continuousStepGenerator.setFootstepStatusListener(statusMessageOutputManager);
       continuousStepGenerator.setFrameBasedFootPoseProvider(referenceFrames.getSoleZUpFrames());
       continuousStepGenerator.configureWith(walkingControllerParameters);
+      continuousStepGenerator.setStopWalkingMessenger(new StopWalkingMessenger()
+      {
+         PauseWalkingMessage message = HumanoidMessageTools.createPauseWalkingMessage(true);
+
+         @Override
+         public void submitStopWalkingRequest()
+         {
+            commandInputManager.submitMessage(message);
+         }
+      });
       continuousStepGenerator.setFootstepMessenger(commandInputManager::submitMessage);
 
       List<Updatable> updatables = new ArrayList<>();
@@ -91,7 +117,14 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       if (heightMapField.hasValue() && heightMapField.get() != null)
          continuousStepGenerator.setHeightMapBasedFootstepAdjustment(heightMapField.get());
 
-      if (useHeadingAndVelocityScriptField.get())
+      if (csgCommandInputManagerField.hasValue())
+      {
+         continuousStepGenerator.setDesiredVelocityProvider(csgCommandInputManagerField.get().createDesiredVelocityProvider());
+         continuousStepGenerator.setDesiredTurningVelocityProvider(csgCommandInputManagerField.get().createDesiredTurningVelocityProvider());
+         continuousStepGenerator.setWalkInputProvider(csgCommandInputManagerField.get().createWalkInputProvider());
+         updatables.add(csgCommandInputManagerField.get());
+      }
+      else if (useHeadingAndVelocityScriptField.get())
       {
          HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(controlDT,
                                                                                             timeProvider,
@@ -117,8 +150,19 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
    {
       private final CommandInputManager commandInputManager = new CommandInputManager(supportedCommands());
 
+      private boolean isOpen = false;
+      private boolean walk = false;
+      private boolean isUnitVelocities = false;
+      private final Vector2D desiredVelocity = new Vector2D();
+      private double turningVelocity = 0.0;
+
       public CSGCommandInputManager()
       {
+      }
+
+      public CommandInputManager getCommandInputManager()
+      {
+         return commandInputManager;
       }
 
       public List<Class<? extends Command<?, ?>>> supportedCommands()
@@ -132,6 +176,63 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       @Override
       public void update(double time)
       {
+         isOpen = true;
+
+         if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
+         {
+            ContinuousStepGeneratorInputCommand command = commandInputManager.pollNewestCommand(ContinuousStepGeneratorInputCommand.class);
+            desiredVelocity.setX(command.getForwardVelocity());
+            desiredVelocity.setY(command.getLateralVelocity());
+            turningVelocity = command.getTurnVelocity();
+            isUnitVelocities = command.isUnitVelocities();
+            walk = command.isWalk();
+         }
+      }
+
+      public boolean isOpen()
+      {
+         return isOpen;
+      }
+
+      public DesiredVelocityProvider createDesiredVelocityProvider()
+      {
+         return new DesiredVelocityProvider()
+         {
+            @Override
+            public Vector2DReadOnly getDesiredVelocity()
+            {
+               return desiredVelocity;
+            }
+
+            @Override
+            public boolean isUnitVelocity()
+            {
+               return isUnitVelocities;
+            }
+         };
+      }
+
+      public DesiredTurningVelocityProvider createDesiredTurningVelocityProvider()
+      {
+         return new DesiredTurningVelocityProvider()
+         {
+            @Override
+            public double getTurningVelocity()
+            {
+               return turningVelocity;
+            }
+
+            @Override
+            public boolean isUnitVelocity()
+            {
+               return isUnitVelocities;
+            }
+         };
+      }
+
+      public BooleanProvider createWalkInputProvider()
+      {
+         return () -> walk;
       }
    }
 }

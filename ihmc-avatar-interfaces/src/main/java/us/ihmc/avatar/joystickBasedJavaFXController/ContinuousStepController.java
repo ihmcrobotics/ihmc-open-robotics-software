@@ -1,12 +1,10 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
@@ -16,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Des
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.DesiredVelocityProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootPoseProvider;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepMessenger;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.StopWalkingMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -76,7 +75,7 @@ public class ContinuousStepController
 
    private final AtomicReference<Boolean> walkingRequest = new AtomicReference<>(null);
 
-   private Consumer<PauseWalkingMessage> pauseWalkingPublisher;
+   private StopWalkingMessenger stopWalkingMessenger;
    private FootPoseProvider footPoseProvider;
 
    public ContinuousStepController(WalkingControllerParameters walkingControllerParameters)
@@ -88,6 +87,7 @@ public class ContinuousStepController
 
       continuousStepGenerator.setNumberOfTicksBeforeSubmittingFootsteps(0);
       continuousStepGenerator.setNumberOfFootstepsToPlan(10);
+      continuousStepGenerator.setWalkInputProvider(isWalking);
       continuousStepGenerator.setDesiredTurningVelocityProvider(new DesiredTurningVelocityProvider()
       {
          @Override
@@ -147,9 +147,10 @@ public class ContinuousStepController
       continuousStepGenerator.setFootstepMessenger(footstepMessenger);
    }
 
-   public void setPauseWalkingPublisher(Consumer<PauseWalkingMessage> pauseWalkingPublisher)
+   public void setPauseWalkingPublisher(StopWalkingMessenger stopWalkingMessenger)
    {
-      this.pauseWalkingPublisher = pauseWalkingPublisher;
+      this.stopWalkingMessenger = stopWalkingMessenger;
+      continuousStepGenerator.setStopWalkingMessenger(stopWalkingMessenger);
    }
 
    public void setFootPoseProviders(FootPoseProvider footPoseProvider)
@@ -234,7 +235,7 @@ public class ContinuousStepController
       if (!isWalking.getValue() && !hasSuccessfullyStoppedWalking.getValue())
       {
          // Only send pause request if we think the command has not been executed yet. This is to be more robust in case packets are dropped.
-         sendPauseMessage();
+         stopWalkingMessenger.submitStopWalkingRequest();
       }
    }
 
@@ -273,7 +274,6 @@ public class ContinuousStepController
       if (confirm)
       {
          isWalking.set(true);
-         continuousStepGenerator.startWalking();
          hasSuccessfullyStoppedWalking.set(false);
       }
    }
@@ -284,16 +284,7 @@ public class ContinuousStepController
       {
          isWalking.set(false);
          footstepsToSendReference.set(null);
-         continuousStepGenerator.stopWalking();
-         sendPauseMessage();
       }
-   }
-
-   private void sendPauseMessage()
-   {
-      PauseWalkingMessage pauseWalkingMessage = new PauseWalkingMessage();
-      pauseWalkingMessage.setPause(true);
-      pauseWalkingPublisher.accept(pauseWalkingMessage);
    }
 
    public void consumeFootstepStatus(FootstepStatusMessage footstepStatus)

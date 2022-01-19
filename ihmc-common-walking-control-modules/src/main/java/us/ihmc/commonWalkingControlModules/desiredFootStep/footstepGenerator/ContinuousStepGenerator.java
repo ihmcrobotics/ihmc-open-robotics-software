@@ -37,6 +37,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -116,6 +117,7 @@ public class ContinuousStepGenerator implements Updatable
 
    private final String variableNameSuffix = "CSG";
 
+   private BooleanProvider walkInputProvider;
    private final YoBoolean walk = new YoBoolean("walk" + variableNameSuffix, registry);
    private final YoBoolean walkPreviousValue = new YoBoolean("walkPreviousValue" + variableNameSuffix, registry);
 
@@ -131,6 +133,7 @@ public class ContinuousStepGenerator implements Updatable
    private DesiredVelocityProvider desiredVelocityProvider = () -> zero2D;
    private DesiredTurningVelocityProvider desiredTurningVelocityProvider = () -> 0.0;
    private FootstepMessenger footstepMessenger;
+   private StopWalkingMessenger stopWalkingMessenger;
    private FootstepAdjustment footstepAdjustment;
    private List<FootstepValidityIndicator> footstepValidityIndicators = new ArrayList<>();
    private AlternateStepChooser alternateStepChooser = this::calculateSquareUpStep;
@@ -181,9 +184,22 @@ public class ContinuousStepGenerator implements Updatable
    @Override
    public void update(double time)
    {
+      footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
+      footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
+      footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
+
+      if (walkInputProvider != null)
+         walk.set(walkInputProvider.getValue());
+
       if (!walk.getValue())
       {
          footsteps.clear();
+
+         if (stopWalkingMessenger != null && walk.getValue() != walkPreviousValue.getValue())
+         {
+            stopWalkingMessenger.submitStopWalkingRequest();
+         }
+
          walkPreviousValue.set(false);
          return;
       }
@@ -216,10 +232,6 @@ public class ContinuousStepGenerator implements Updatable
          latestStatusReceived.setValue(null);
          footstepCompletionSide.setValue(null);
       }
-
-      footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingDuration());
-      footstepDataListMessage.setDefaultTransferDuration(parameters.getTransferDuration());
-      footstepDataListMessage.setFinalTransferDuration(parameters.getTransferDuration());
 
       RobotSide swingSide;
 
@@ -571,6 +583,16 @@ public class ContinuousStepGenerator implements Updatable
    }
 
    /**
+    * Sets the protocol for stop walking requests to the controller.
+    *
+    * @param stopWalkingMessenger the callback used to send requests.
+    */
+   public void setStopWalkingMessenger(StopWalkingMessenger stopWalkingMessenger)
+   {
+      this.stopWalkingMessenger = stopWalkingMessenger;
+   }
+
+   /**
     * Sets the method for adjusting height, pitch, and roll of the generated footsteps.
     *
     * @param footstepAdjustment the adjustment method.
@@ -659,6 +681,17 @@ public class ContinuousStepGenerator implements Updatable
             return adjustedPose;
          }
       });
+   }
+
+   /**
+    * Sets a provider that is to be used to update the state of {@link #walk} internally on each call
+    * to {@link #update(double)}.
+    * 
+    * @param walkInputProvider the provider used to determine whether to walk or not walk.
+    */
+   public void setWalkInputProvider(BooleanProvider walkInputProvider)
+   {
+      this.walkInputProvider = walkInputProvider;
    }
 
    /**
