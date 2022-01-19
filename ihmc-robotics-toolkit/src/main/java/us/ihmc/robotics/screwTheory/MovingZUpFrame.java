@@ -43,13 +43,13 @@ public class MovingZUpFrame extends MovingReferenceFrame
       {
          cosRoll = transformToParent.getM22() / cosPitch;
          sinRoll = transformToParent.getM21() / cosPitch;
-         double invNormRoll = 1.0 / EuclidCoreTools.fastNorm(cosRoll, sinRoll);
+         double invNormRoll = 1.0 / EuclidCoreTools.norm(cosRoll, sinRoll);
          cosRoll *= invNormRoll;
          sinRoll *= invNormRoll;
 
          double cosYaw = transformToParent.getM00() / cosPitch;
          double sinYaw = transformToParent.getM10() / cosPitch;
-         double invNormYaw = 1.0 / EuclidCoreTools.fastNorm(cosYaw, sinYaw);
+         double invNormYaw = 1.0 / EuclidCoreTools.norm(cosYaw, sinYaw);
          cosYaw *= invNormYaw;
          sinYaw *= invNormYaw;
 
