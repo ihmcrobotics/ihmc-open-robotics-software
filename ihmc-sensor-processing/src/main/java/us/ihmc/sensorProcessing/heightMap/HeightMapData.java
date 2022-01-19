@@ -74,7 +74,7 @@ public class HeightMapData
       return gridSizeXY;
    }
 
-   public int getNumberOfCells()
+   public int getNumberOfOccupiedCells()
    {
       return occupiedCells.size();
    }
@@ -164,7 +164,7 @@ public class HeightMapData
       return gridCenter;
    }
 
-   public double minHeight()
+   public double getMinHeight()
    {
       double minValue = Double.POSITIVE_INFINITY;
       for (int i = 0; i < heights.length; i++)
