@@ -1,6 +1,5 @@
-package us.ihmc.gdx.simulation.scs2;
+package us.ihmc.gdx.simulation.impulseBased;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -10,7 +9,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.simulation.BoxRobotDefinition;
 import us.ihmc.gdx.simulation.SlopeGroundDefinition;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.simulation.scs2.GDXPhysicsSimulator;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
@@ -28,14 +27,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class GDXPhysicsDemo
+public class GDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo
 {
    private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
    private final GDXPhysicsSimulator physicsSimulator = new GDXPhysicsSimulator();
 
-   public GDXPhysicsDemo()
+   public GDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo()
    {
       ContactParameters contactParameters = new ContactParameters();
       contactParameters.setMinimumPenetration(5.0e-5);
@@ -167,6 +166,6 @@ public class GDXPhysicsDemo
 
    public static void main(String[] args)
    {
-      new GDXPhysicsDemo();
+      new GDXSCS2ImpulseBasedPhysicsTumblingBlocksDemo();
    }
 }
