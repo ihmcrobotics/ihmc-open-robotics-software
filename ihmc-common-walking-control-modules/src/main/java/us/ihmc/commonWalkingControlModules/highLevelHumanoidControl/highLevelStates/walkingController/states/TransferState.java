@@ -193,6 +193,7 @@ public abstract class TransferState extends WalkingState
    @Override
    public void onEntry()
    {
+      balanceManager.clearWalkingPath();
       updateICPPlan();
 
       if (walkingMessageHandler.hasUpcomingFootsteps())
