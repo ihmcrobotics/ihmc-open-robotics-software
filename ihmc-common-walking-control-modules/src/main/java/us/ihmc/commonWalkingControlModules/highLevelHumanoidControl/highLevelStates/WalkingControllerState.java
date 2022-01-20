@@ -200,7 +200,7 @@ public class WalkingControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.UNKNOWN);
    }

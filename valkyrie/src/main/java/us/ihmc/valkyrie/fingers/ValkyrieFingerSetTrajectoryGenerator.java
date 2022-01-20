@@ -175,7 +175,7 @@ public class ValkyrieFingerSetTrajectoryGenerator<T extends Enum<T>> implements 
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
 
       }

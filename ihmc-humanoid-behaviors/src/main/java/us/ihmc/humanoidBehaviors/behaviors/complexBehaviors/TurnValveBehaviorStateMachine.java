@@ -109,9 +109,9 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       BehaviorAction searchForValveFar = new BehaviorAction(searchForValveBehavior)
       {
          @Override
-         public void onExit()
+         public void onExit(double timeInState)
          {
-            super.onExit();
+            super.onExit(timeInState);
             //found the valve location, inform the UI of its location
             publisher.publish(HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius()));
 
@@ -121,9 +121,9 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       BehaviorAction searchForValveNear = new BehaviorAction(searchForValveBehavior)
       {
          @Override
-         public void onExit()
+         public void onExit(double timeInState)
          {
-            super.onExit();
+            super.onExit(timeInState);
             //found the valve location, inform the UI of its location
             publisher.publish(HumanoidMessageTools.createValveLocationPacket(searchForValveBehavior.getLocation(), searchForValveBehavior.getValveRadius()));
 

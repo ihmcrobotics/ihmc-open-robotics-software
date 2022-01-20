@@ -1236,7 +1236,7 @@ public class SkippyController implements RobotController
          qd_hip.set(0.6);
       }
 
-      public void onExit()
+      public void onExit(double timeInState)
       {
 
       }
@@ -1265,7 +1265,7 @@ public class SkippyController implements RobotController
          }
       }
 
-      public void onExit()
+      public void onExit(double timeInState)
       {
 
       }
@@ -1296,7 +1296,7 @@ public class SkippyController implements RobotController
          }
       }
 
-      public void onExit()
+      public void onExit(double timeInState)
       {
 
       }
@@ -1322,7 +1322,7 @@ public class SkippyController implements RobotController
          q_d_hip.set(0.45);
       }
 
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -1346,7 +1346,7 @@ public class SkippyController implements RobotController
          qd_hip.set(-1.3);
       }
 
-      public void onExit()
+      public void onExit(double timeInState)
       {
 
       }
@@ -1377,7 +1377,7 @@ public class SkippyController implements RobotController
          //robot.glueDownToGroundPoint.setForce(0.0, 0.0, -1450.0);
       }
 
-      public void onExit()
+      public void onExit(double timeInState)
       {
 
       }

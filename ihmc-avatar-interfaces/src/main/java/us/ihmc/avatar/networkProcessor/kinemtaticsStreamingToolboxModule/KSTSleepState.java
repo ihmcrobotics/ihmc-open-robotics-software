@@ -32,7 +32,7 @@ public class KSTSleepState implements State
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
    }
 

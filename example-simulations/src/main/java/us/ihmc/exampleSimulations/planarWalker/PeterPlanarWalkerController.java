@@ -135,7 +135,7 @@ public class PeterPlanarWalkerController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -225,7 +225,7 @@ public class PeterPlanarWalkerController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          lastStepHipAngle.set(desiredSwingLegHipAngle.getDoubleValue());
       }

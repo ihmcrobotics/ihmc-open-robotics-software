@@ -514,7 +514,7 @@ public class QuadrupedWalkingControllerState extends HighLevelControllerState im
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
 
    }
