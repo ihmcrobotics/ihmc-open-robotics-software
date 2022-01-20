@@ -2,10 +2,10 @@ package us.ihmc.robotics.math.trajectories.generators;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
-import gnu.trove.list.array.TDoubleArrayList;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
+
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
@@ -180,7 +180,7 @@ public class MultiCubicSpline1DSolver
    {
       xi.reset();
       ti.reset();
-      wi.clear();
+      wi.reset();
    }
 
    /**
@@ -450,6 +450,13 @@ public class MultiCubicSpline1DSolver
          addPositionObjective(1.0, x1, w1, offset, offset, H, f);
       if (wd1 != Double.POSITIVE_INFINITY)
          addVelocityObjective(1.0, xd1, wd1, offset, offset, H, f);
+   }
+
+   public double computeWaypointVelocityFromSolution(int waypointIndex, DMatrixRMaj solution)
+   {
+      double t = ti.get(waypointIndex);
+      int index = waypointIndex * coefficients;
+      return 3.0 * t * t * solution.get(index++) + 2.0 * t * solution.get(index++) + solution.get(index);
    }
 
    /**
