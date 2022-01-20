@@ -85,7 +85,8 @@ public class TrajectoryPointOptimizer
    private final DMatrixRMaj tempCoeffs = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj tempLine = new DMatrixRMaj(1, 1);
 
-   public TrajectoryPointOptimizer(int dimensions, YoRegistry parentRegistry) {
+   public TrajectoryPointOptimizer(int dimensions, YoRegistry parentRegistry)
+   {
       this(dimensions, parentRegistry, true);
    }
 
@@ -94,7 +95,8 @@ public class TrajectoryPointOptimizer
       this("", dimensions, parentRegistry, useNativeCommonOps);
    }
 
-   public TrajectoryPointOptimizer(String namePrefix, int dimensions, YoRegistry parentRegistry) {
+   public TrajectoryPointOptimizer(String namePrefix, int dimensions, YoRegistry parentRegistry)
+   {
       this(namePrefix, dimensions, parentRegistry, true);
    }
 
@@ -104,7 +106,8 @@ public class TrajectoryPointOptimizer
       parentRegistry.addChild(registry);
    }
 
-   public TrajectoryPointOptimizer(int dimensions) {
+   public TrajectoryPointOptimizer(int dimensions)
+   {
       this("", dimensions, true);
    }
 
@@ -113,7 +116,8 @@ public class TrajectoryPointOptimizer
       this("", dimensions, useNativeCommonOps);
    }
 
-   public TrajectoryPointOptimizer(String namePrefix, int dimensions) {
+   public TrajectoryPointOptimizer(String namePrefix, int dimensions)
+   {
       this(namePrefix, dimensions, true);
    }
 
