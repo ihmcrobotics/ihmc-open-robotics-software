@@ -209,7 +209,7 @@ public class RigidBodyOrientationController extends RigidBodyTaskspaceControlSta
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       orientationHelper.onExit();
       hideGraphics();

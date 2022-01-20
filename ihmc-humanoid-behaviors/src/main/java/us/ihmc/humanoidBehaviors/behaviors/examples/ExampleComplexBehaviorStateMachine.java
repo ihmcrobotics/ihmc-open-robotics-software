@@ -80,10 +80,10 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
             sleepBehavior.setSleepTime(3);
          }
          @Override
-         public void onExit()
+         public void onExit(double timeInState)
          {
             publishTextToSpeech("sleeping for 3 seconds complete");
-            super.onExit();
+            super.onExit(timeInState);
          }
       };
 
@@ -96,10 +96,10 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
             super.setBehaviorInput();
          }
          @Override
-         public void onExit()
+         public void onExit(double timeInState)
          {
             publishTextToSpeech("reset robot complete");
-            super.onExit();
+            super.onExit(timeInState);
          }
       };
 
