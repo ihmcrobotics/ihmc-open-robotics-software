@@ -143,6 +143,7 @@ public class TransferToStandingState extends WalkingState
    @Override
    public void onEntry()
    {
+      balanceManager.clearWalkingPath();
       balanceManager.clearICPPlan();
       balanceManager.clearSwingFootTrajectory();
 
