@@ -58,12 +58,25 @@ public class RobotDefinitionConverter
    public static GraphicsObjectsHolder toGraphicsObjectsHolder(RobotDefinition robotDefinition)
    {
       Map<String, Graphics3DObject> cache = new HashMap<>();
+      robotDefinition.forEachJointDefinition(jointDefinition ->
+      {
+         if (jointDefinition instanceof CrossFourBarJointDefinition)
+         {
+            CrossFourBarJointDefinition crossFourBarJointDefinition = (CrossFourBarJointDefinition) jointDefinition;
+            cache.put(crossFourBarJointDefinition.getJointNameA(), toLinkGraphicsDescription(crossFourBarJointDefinition.getBodyDA().getVisualDefinitions()));
+            cache.put(crossFourBarJointDefinition.getJointNameB(), toLinkGraphicsDescription(crossFourBarJointDefinition.getBodyBC().getVisualDefinitions()));
+         }
+      });
+
       return jointName ->
       {
          return cache.computeIfAbsent(jointName, name ->
          {
             JointDefinition jointDefinition = robotDefinition.getJointDefinition(jointName);
-            return RobotDefinitionConverter.toLinkGraphicsDescription(jointDefinition.getSuccessor().getVisualDefinitions());
+            if (jointDefinition == null)
+               return null;
+            else
+               return toLinkGraphicsDescription(jointDefinition.getSuccessor().getVisualDefinitions());
          });
       };
    }
@@ -92,7 +105,7 @@ public class RobotDefinitionConverter
       rootJointDescription.setLink(linkDescription);
 
       for (JointDefinition childJointToCopy : rootJointToCopy.getSuccessor().getChildrenJoints())
-         RobotDefinitionConverter.createAndAddJointsRecursive(rootJointDescription, childJointToCopy);
+         createAndAddJointsRecursive(rootJointDescription, childJointToCopy);
    }
 
    public static void createAndAddJointsRecursive(JointDescription parentJoint, JointDefinition jointToCopy)
@@ -144,42 +157,42 @@ public class RobotDefinitionConverter
       output.setMass(source.getMass());
       output.setCenterOfMassOffset(source.getCenterOfMassOffset());
       output.setMomentOfInertia(source.getMomentOfInertia());
-      output.setLinkGraphics(RobotDefinitionConverter.toLinkGraphicsDescription(source.getVisualDefinitions()));
-      output.getCollisionMeshes().addAll(RobotDefinitionConverter.toCollisionMeshDescriptions(source.getCollisionShapeDefinitions()));
+      output.setLinkGraphics(toLinkGraphicsDescription(source.getVisualDefinitions()));
+      output.getCollisionMeshes().addAll(toCollisionMeshDescriptions(source.getCollisionShapeDefinitions()));
       return output;
    }
 
    public static JointDescription toJointDescription(JointDefinition source)
    {
       if (source instanceof SixDoFJointDefinition)
-         return RobotDefinitionConverter.toFloatingJointDescription((SixDoFJointDefinition) source);
+         return toFloatingJointDescription((SixDoFJointDefinition) source);
       if (source instanceof RevoluteJointDefinition)
-         return RobotDefinitionConverter.toPinJointDescription((RevoluteJointDefinition) source);
+         return toPinJointDescription((RevoluteJointDefinition) source);
       if (source instanceof PrismaticJointDefinition)
-         return RobotDefinitionConverter.toSliderJointDescription((PrismaticJointDefinition) source);
+         return toSliderJointDescription((PrismaticJointDefinition) source);
       if (source instanceof CrossFourBarJointDefinition)
-         return RobotDefinitionConverter.toCrossFourBarJointDescription((CrossFourBarJointDefinition) source);
+         return toCrossFourBarJointDescription((CrossFourBarJointDefinition) source);
       return null;
    }
 
    public static FloatingJointDescription toFloatingJointDescription(SixDoFJointDefinition source)
    {
       FloatingJointDescription output = new FloatingJointDescription(source.getName());
-      RobotDefinitionConverter.copyJointProperties(source, output);
+      copyJointProperties(source, output);
       return output;
    }
 
    public static PinJointDescription toPinJointDescription(RevoluteJointDefinition source)
    {
       PinJointDescription output = new PinJointDescription(source.getName(), source.getTransformToParent().getTranslation(), source.getAxis());
-      RobotDefinitionConverter.copyOneDoFJointProperties(source, output);
+      copyOneDoFJointProperties(source, output);
       return output;
    }
 
    public static SliderJointDescription toSliderJointDescription(PrismaticJointDefinition source)
    {
       SliderJointDescription output = new SliderJointDescription(source.getName(), source.getTransformToParent().getTranslation(), source.getAxis());
-      RobotDefinitionConverter.copyOneDoFJointProperties(source, output);
+      copyOneDoFJointProperties(source, output);
       return output;
    }
 
@@ -195,7 +208,7 @@ public class RobotDefinitionConverter
 
    private static void copyOneDoFJointProperties(OneDoFJointDefinition source, OneDoFJointDescription destination)
    {
-      RobotDefinitionConverter.copyJointProperties(source, destination);
+      copyJointProperties(source, destination);
       destination.setLimitStops(source.getPositionLowerLimit(), source.getPositionUpperLimit(), source.getKpSoftLimitStop(), source.getKdSoftLimitStop());
       destination.setVelocityLimits(source.getVelocityUpperLimit(), Double.NaN); // TODO Should maybe add this parameter to the definition
       destination.setEffortLimit(source.getEffortUpperLimit());
@@ -208,19 +221,14 @@ public class RobotDefinitionConverter
       if (!source.getTransformToParent().getRotation().isZeroOrientation())
          LogTools.warn("Ignoring non-zero rotation for transform of joint: {}.", source.getName());
       destination.setOffsetFromParentJoint(source.getTransformToParent().getTranslation());
-      source.getSensorDefinitions(IMUSensorDefinition.class).forEach(imu -> destination.addIMUSensor(RobotDefinitionConverter.toIMUSensorDescription(imu)));
-      source.getSensorDefinitions(WrenchSensorDefinition.class)
-            .forEach(forceSensor -> destination.addForceSensor(RobotDefinitionConverter.toForceSensorDescription(forceSensor)));
-      source.getSensorDefinitions(LidarSensorDefinition.class)
-            .forEach(lidar -> destination.addLidarSensor(RobotDefinitionConverter.toLidarSensorDescription(lidar)));
-      source.getSensorDefinitions(CameraSensorDefinition.class)
-            .forEach(camera -> destination.addCameraSensor(RobotDefinitionConverter.toCameraSensorDescription(camera)));
+      source.getSensorDefinitions(IMUSensorDefinition.class).forEach(imu -> destination.addIMUSensor(toIMUSensorDescription(imu)));
+      source.getSensorDefinitions(WrenchSensorDefinition.class).forEach(forceSensor -> destination.addForceSensor(toForceSensorDescription(forceSensor)));
+      source.getSensorDefinitions(LidarSensorDefinition.class).forEach(lidar -> destination.addLidarSensor(toLidarSensorDescription(lidar)));
+      source.getSensorDefinitions(CameraSensorDefinition.class).forEach(camera -> destination.addCameraSensor(toCameraSensorDescription(camera)));
 
-      source.getKinematicPointDefinitions().forEach(kp -> destination.addKinematicPoint(RobotDefinitionConverter.toKinematicPointDescription(kp)));
-      source.getExternalWrenchPointDefinitions()
-            .forEach(efp -> destination.addExternalForcePoint(RobotDefinitionConverter.toExternalForcePointDescription(efp)));
-      source.getGroundContactPointDefinitions()
-            .forEach(gcp -> destination.addGroundContactPoint(RobotDefinitionConverter.toGroundContactPointDescription(gcp)));
+      source.getKinematicPointDefinitions().forEach(kp -> destination.addKinematicPoint(toKinematicPointDescription(kp)));
+      source.getExternalWrenchPointDefinitions().forEach(efp -> destination.addExternalForcePoint(toExternalForcePointDescription(efp)));
+      source.getGroundContactPointDefinitions().forEach(gcp -> destination.addGroundContactPoint(toGroundContactPointDescription(gcp)));
 
       // TODO This should probably also live in the definition
       destination.setIsDynamic(true);
