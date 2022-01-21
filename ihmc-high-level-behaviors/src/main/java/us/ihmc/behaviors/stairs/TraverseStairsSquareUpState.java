@@ -70,6 +70,11 @@ public class TraverseStairsSquareUpState extends TraverseStairsState
    }
 
    @Override
+   public void onExit(double timeInState)
+   {
+   }
+
+   @Override
    public boolean isDone(double timeInState)
    {
       if (!SEND_PELVIS_AND_CHEST_TRAJECTORIES)

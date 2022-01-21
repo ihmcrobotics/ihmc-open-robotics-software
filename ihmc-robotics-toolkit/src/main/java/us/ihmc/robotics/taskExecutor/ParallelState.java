@@ -67,7 +67,7 @@ public class ParallelState<T> implements State
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       // empty
    }

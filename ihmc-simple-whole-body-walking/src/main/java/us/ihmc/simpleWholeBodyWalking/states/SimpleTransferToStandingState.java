@@ -92,4 +92,9 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForTransferToStanding(finalTransferTime);
    }
+
+   @Override
+   public void onExit(double timeInState)
+   {
+   }
 }

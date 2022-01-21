@@ -121,6 +121,11 @@ public class TraverseStairsPlanStepsState extends TraverseStairsState
       }
    }
 
+   @Override
+   public void onExit(double timeInState)
+   {
+   }
+
    public void reset()
    {
       output = null;
