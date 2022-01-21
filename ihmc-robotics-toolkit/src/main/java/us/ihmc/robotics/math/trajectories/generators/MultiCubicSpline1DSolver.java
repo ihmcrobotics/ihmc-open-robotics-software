@@ -7,7 +7,6 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
@@ -461,20 +460,29 @@ public class MultiCubicSpline1DSolver
       if (time >= 1.0)
          return x1;
 
+      int index = findSolutionOffsetIndex(time, solution);
+      return MathTools.cube(time) * solution.get(index++) + MathTools.square(time) * solution.get(index++) + time * solution.get(index++) + solution.get(index);
+   }
+
+   public double computeVelocity(double time, DMatrixRMaj solution)
+   {
+      if (time <= 0.0)
+         return xd0;
+      if (time >= 1.0)
+         return xd1;
+
+      int index = findSolutionOffsetIndex(time, solution);
+      return 3.0 * MathTools.square(time) * solution.get(index++) + 2.0 * time * solution.get(index++) + solution.get(index);
+   }
+
+   private int findSolutionOffsetIndex(double time, DMatrixRMaj solution)
+   {
       int index = 0;
-      while (time >= ti.get(index))
+
+      while (index < ti.size() && time > ti.get(index))
          index++;
 
-      index *= coefficients;
-      return MathTools.cube(time) * solution.get(index++) + MathTools.square(time) * solution.get(index++) + time * solution.get(index++) + solution.get(index);
-      //      double tpow = time;
-      //      double position = solution.get(index--);
-      //      position += tpow * solution.get(index--);
-      //      tpow *= time;
-      //      position += tpow * solution.get(index--);
-      //      tpow *= time;
-      //      position += tpow * solution.get(index--);
-      //      return position;
+      return index * coefficients;
    }
 
    public double computeWaypointVelocityFromSolution(int waypointIndex, DMatrixRMaj solution)
