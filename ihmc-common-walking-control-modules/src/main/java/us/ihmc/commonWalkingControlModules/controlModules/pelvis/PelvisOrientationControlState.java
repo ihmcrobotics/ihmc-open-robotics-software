@@ -23,7 +23,7 @@ public interface PelvisOrientationControlState extends State
    }
 
    @Override
-   default void onExit()
+   default void onExit(double timeInState)
    {
    }
 

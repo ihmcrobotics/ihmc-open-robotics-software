@@ -324,6 +324,11 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
 
 //         toeOffAnkleVelocity.set(0.0);
       }
+      
+      @Override
+      public void onExit(double timeInState)
+      {
+      }
 
       @Override
       public boolean isDone(double timeInState)
@@ -477,6 +482,11 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
       }
 
       @Override
+      public void onExit(double timeInState)
+      {
+      }
+
+      @Override
       public boolean isDone(double timeInState)
       {
          if (timeInState > swingDuration.getDoubleValue())
@@ -598,6 +608,11 @@ public class SpringFlamingoLeapOfFaithController implements RobotController
          dropSupportKneeVelocity.set(0.0);
          
          supportFootDesiredAngle.set(footAngles.get(supportSide).getValue());
+      }
+
+      @Override
+      public void onExit(double timeInState)
+      {
       }
 
       @Override

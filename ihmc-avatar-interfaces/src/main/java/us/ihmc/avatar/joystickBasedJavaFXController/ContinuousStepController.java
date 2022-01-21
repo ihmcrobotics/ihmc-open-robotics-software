@@ -30,6 +30,7 @@ import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -277,6 +278,14 @@ public class ContinuousStepController
    public void consumeFootstepStatus(FootstepStatusMessage footstepStatus)
    {
       continuousStepGenerator.consumeFootstepStatus(footstepStatus);
+
+      if (footstepStatus.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
+      {
+         lastSupportFootPoses.put(RobotSide.fromByte(footstepStatus.getRobotSide()),
+                                  new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                  footstepStatus.getActualFootPositionInWorld(),
+                                                  footstepStatus.getActualFootOrientationInWorld()));
+      }
    }
 
    public void consumePlanarRegionsListMessage(PlanarRegionsListMessage message)

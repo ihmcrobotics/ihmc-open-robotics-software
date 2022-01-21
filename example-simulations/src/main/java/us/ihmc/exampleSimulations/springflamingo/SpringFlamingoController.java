@@ -350,7 +350,7 @@ public class SpringFlamingoController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -401,7 +401,7 @@ public class SpringFlamingoController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -454,7 +454,7 @@ public class SpringFlamingoController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -494,7 +494,7 @@ public class SpringFlamingoController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
