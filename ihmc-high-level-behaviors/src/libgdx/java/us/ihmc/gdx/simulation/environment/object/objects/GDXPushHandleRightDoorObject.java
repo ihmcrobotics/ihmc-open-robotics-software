@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
 {
+   public static final String NAME = "Push Handle Right Door";
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXPushHandleRightDoorObject()
@@ -26,6 +27,7 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
 
    public GDXPushHandleRightDoorObject(AppearanceDefinition collisionMeshColor)
    {
+      super(NAME);
       Model realisticModel = GDXModelLoader.loadG3DModel("fiducialDoor/FiducialDoor.g3dj");
 
       double heightZ = 2.0447; // these were measured in blender

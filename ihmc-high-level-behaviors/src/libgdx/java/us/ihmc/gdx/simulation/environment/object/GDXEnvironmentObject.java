@@ -17,7 +17,6 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
-import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,8 +25,9 @@ import java.util.function.Function;
 public class GDXEnvironmentObject
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
-   protected Model realisticModel;
 
+   private String name;
+   private Model realisticModel;
    private GDXModelInstance realisticModelInstance;
    private GDXModelInstance collisionModelInstance;
    private RigidBodyTransform collisionShapeOffset;
@@ -50,6 +50,11 @@ public class GDXEnvironmentObject
    private final FramePose3D placementFramePose = new FramePose3D();
    private ReferenceFrame realisticModelFrame;
    private ReferenceFrame collisionModelFrame;
+
+   public GDXEnvironmentObject(String name)
+   {
+      this.name = name;
+   }
 
    public void create(Model realisticModel)
    {
@@ -192,56 +197,13 @@ public class GDXEnvironmentObject
 
    public GDXEnvironmentObject duplicate()
    {
-      GDXEnvironmentObject duplicate = new GDXEnvironmentObject();
+      GDXEnvironmentObject duplicate = new GDXEnvironmentObject(name);
       duplicate.create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionGeometryObject, isPointInside, collisionMesh);
       return duplicate;
    }
 
-   public static GDXEnvironmentObject loadByName(String objectClassName)
+   public String getName()
    {
-      if (objectClassName.equals(GDXSmallCinderBlockRoughed.class.getSimpleName()))
-      {
-         return new GDXSmallCinderBlockRoughed();
-      }
-      else if (objectClassName.equals(GDXMediumCinderBlockRoughed.class.getSimpleName()))
-      {
-         return new GDXMediumCinderBlockRoughed();
-      }
-      else if (objectClassName.equals(GDXLargeCinderBlockRoughed.class.getSimpleName()))
-      {
-         return new GDXLargeCinderBlockRoughed();
-      }
-      else if (objectClassName.equals(GDXLabFloorObject.class.getSimpleName()))
-      {
-         return new GDXLabFloorObject();
-      }
-      else if (objectClassName.equals(GDXPalletObject.class.getSimpleName()))
-      {
-         return new GDXPalletObject();
-      }
-      else if (objectClassName.equals(GDXStairsObject.class.getSimpleName()))
-      {
-         return new GDXStairsObject();
-      }
-      else if (objectClassName.equals(GDXPushHandleRightDoorObject.class.getSimpleName()))
-      {
-         return new GDXPushHandleRightDoorObject();
-      }
-      else if (objectClassName.equals(GDXDoorFrameObject.class.getSimpleName()))
-      {
-         return new GDXDoorFrameObject();
-      }
-      else if (objectClassName.equals(GDXPointLightObject.class.getSimpleName()))
-      {
-         return new GDXPointLightObject();
-      }
-      else if (objectClassName.equals(GDXDirectionalLightObject.class.getSimpleName()))
-      {
-         return new GDXDirectionalLightObject();
-      }
-      else
-      {
-         throw new RuntimeException("There is no object of that name!");
-      }
+      return name;
    }
 }

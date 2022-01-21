@@ -5,8 +5,11 @@ import us.ihmc.gdx.tools.GDXModelLoader;
 
 public class GDXLargeCinderBlockRoughed extends GDXEnvironmentObject
 {
+   public static final String NAME = "Large Cinder Block Roughed";
+
    public GDXLargeCinderBlockRoughed()
    {
+      super(NAME);
       create(GDXModelLoader.loadG3DModel("LargeCinderBlockRough.g3dj"));
    }
 

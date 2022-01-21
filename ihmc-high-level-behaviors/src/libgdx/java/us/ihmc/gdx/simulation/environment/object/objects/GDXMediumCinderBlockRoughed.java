@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
@@ -17,10 +16,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
 {
+   public static final String NAME = "Medium Cinder Block Roughed";
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXMediumCinderBlockRoughed()
    {
+      super(NAME);
       Model realisticModel = GDXModelLoader.loadG3DModel("mediumCinderBlockRoughed/MediumCinderBlockRoughed.g3dj");
 
       double height = 0.141535; // these were measured in blender
