@@ -9,16 +9,16 @@ public class GDXEnvironmentObjectLibrary
    private static final ArrayList<GDXEnvironmentObjectFactory> objectFactories = new ArrayList<>();
    static
    {
-      objectFactories.add(new GDXEnvironmentObjectFactory(GDXSmallCinderBlockRoughed.NAME, GDXSmallCinderBlockRoughed.class));
-      objectFactories.add(new GDXEnvironmentObjectFactory(GDXMediumCinderBlockRoughed.NAME, GDXMediumCinderBlockRoughed.class));
-      objectFactories.add(new GDXEnvironmentObjectFactory(GDXLargeCinderBlockRoughed.NAME, GDXLargeCinderBlockRoughed.class));
-      objectFactories.add(new GDXEnvironmentObjectFactory(GDXLabFloorObject.NAME, GDXLabFloorObject.class));
-      objectFactories.add(new GDXEnvironmentObjectFactory(GDXPalletObject.NAME, GDXPalletObject.class));
-      objectFactories.add(new GDXEnvironmentObjectFactory(GDXStairsObject.NAME, GDXStairsObject.class));
-      objectFactories.add(new GDXEnvironmentObjectFactory(GDXPushHandleRightDoorObject.NAME, GDXPushHandleRightDoorObject.class));
-      objectFactories.add(new GDXEnvironmentObjectFactory(GDXDoorFrameObject.NAME, GDXDoorFrameObject.class));
-      objectFactories.add(new GDXEnvironmentObjectFactory(GDXPointLightObject.NAME, GDXPointLightObject.class));
-      objectFactories.add(new GDXEnvironmentObjectFactory(GDXDirectionalLightObject.NAME, GDXDirectionalLightObject.class));
+      objectFactories.add(GDXSmallCinderBlockRoughed.FACTORY);
+      objectFactories.add(GDXMediumCinderBlockRoughed.FACTORY);
+      objectFactories.add(GDXLargeCinderBlockRoughed.FACTORY);
+      objectFactories.add(GDXLabFloorObject.FACTORY);
+      objectFactories.add(GDXPalletObject.FACTORY);
+      objectFactories.add(GDXStairsObject.FACTORY);
+      objectFactories.add(GDXPushHandleRightDoorObject.FACTORY);
+      objectFactories.add(GDXDoorFrameObject.FACTORY);
+      objectFactories.add(GDXPointLightObject.FACTORY);
+      objectFactories.add(GDXDirectionalLightObject.FACTORY);
    }
 
    public static ArrayList<GDXEnvironmentObjectFactory> getObjectFactories()

@@ -7,6 +7,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
@@ -17,11 +18,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GDXStairsObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Stairs";
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXStairsObject.class);
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXStairsObject()
    {
-      super(NAME);
+      super(NAME, FACTORY);
       Model realisticModel = GDXModelLoader.loadG3DModel("stairs/Stairs.g3dj");
 
       double sizeX = 0.3;
@@ -39,11 +41,5 @@ public class GDXStairsObject extends GDXEnvironmentObject
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
-   }
-
-   @Override
-   public GDXStairsObject duplicate()
-   {
-      return new GDXStairsObject();
    }
 }

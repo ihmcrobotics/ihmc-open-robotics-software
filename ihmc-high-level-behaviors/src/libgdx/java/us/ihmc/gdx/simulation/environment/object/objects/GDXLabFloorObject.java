@@ -7,6 +7,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
@@ -17,11 +18,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GDXLabFloorObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Lab Floor";
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXLabFloorObject.class);
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXLabFloorObject()
    {
-      super(NAME);
+      super(NAME, FACTORY);
       Model realisticModel = GDXModelLoader.loadG3DModel("labFloor/LabFloor.g3dj");
 
       RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
@@ -40,11 +42,5 @@ public class GDXLabFloorObject extends GDXEnvironmentObject
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
-   }
-
-   @Override
-   public GDXLabFloorObject duplicate()
-   {
-      return new GDXLabFloorObject();
    }
 }

@@ -7,6 +7,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
@@ -17,11 +18,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
 {
    public static final String NAME = "Medium Cinder Block Roughed";
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXMediumCinderBlockRoughed.class);
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXMediumCinderBlockRoughed()
    {
-      super(NAME);
+      super(NAME, FACTORY);
       Model realisticModel = GDXModelLoader.loadG3DModel("mediumCinderBlockRoughed/MediumCinderBlockRoughed.g3dj");
 
       double height = 0.141535; // these were measured in blender
@@ -41,11 +43,5 @@ public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
-   }
-
-   @Override
-   public GDXMediumCinderBlockRoughed duplicate()
-   {
-      return new GDXMediumCinderBlockRoughed();
    }
 }
