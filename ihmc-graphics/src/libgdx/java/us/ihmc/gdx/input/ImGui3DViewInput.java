@@ -1,7 +1,6 @@
 package us.ihmc.gdx.input;
 
 import com.badlogic.gdx.math.Vector3;
-import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.euclid.geometry.Line3D;
@@ -35,13 +34,6 @@ public class ImGui3DViewInput
    private final Line3D pickRayInWorld = new Line3D();
    private boolean computedPickRay = false;
    private boolean initialized = false;
-   private int spaceKey;
-   private int deleteKey;
-   private int escapeKey;
-   private int upArrowKey;
-   private int downArrowKey;
-   private int leftArrowKey;
-   private int rightArrowKey;
 
    public ImGui3DViewInput(FocusBasedGDXCamera camera, Supplier<Float> viewportSizeXSupplier, Supplier<Float> viewportSizeYSupplier)
    {
@@ -55,13 +47,6 @@ public class ImGui3DViewInput
       if (!initialized)
       {
          initialized = true;
-         spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
-         deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
-         escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
-         upArrowKey = ImGui.getKeyIndex(ImGuiKey.UpArrow);
-         downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
-         leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
-         rightArrowKey = ImGui.getKeyIndex(ImGuiKey.RightArrow);
       }
 
       computedPickRay = false;
@@ -143,40 +128,5 @@ public class ImGui3DViewInput
    public float getMouseWheelDelta()
    {
       return mouseWheelDelta;
-   }
-
-   public int getSpaceKey()
-   {
-      return spaceKey;
-   }
-
-   public int getDeleteKey()
-   {
-      return deleteKey;
-   }
-
-   public int getEscapeKey()
-   {
-      return escapeKey;
-   }
-
-   public int getUpArrowKey()
-   {
-      return upArrowKey;
-   }
-
-   public int getDownArrowKey()
-   {
-      return downArrowKey;
-   }
-
-   public int getLeftArrowKey()
-   {
-      return leftArrowKey;
-   }
-
-   public int getRightArrowKey()
-   {
-      return rightArrowKey;
    }
 }
