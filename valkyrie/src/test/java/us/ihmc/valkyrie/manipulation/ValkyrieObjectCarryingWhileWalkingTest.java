@@ -166,8 +166,8 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
                                                                             8,
                                                                             a -> steppingParameters.getDefaultStepLength(),
                                                                             steppingParameters.getInPlaceWidth(),
-                                                                            walkingControllerParameters.getDefaultSwingTime(),
-                                                                            walkingControllerParameters.getDefaultTransferTime(),
+                                                                            0.75,
+                                                                            0.25,
                                                                             startPose,
                                                                             true);
       simulationTestHelper.publishToController(stepsInPlace);
@@ -177,7 +177,7 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
 
    private void prepareHand(FreeFloatingPendulumRobotDefinition pendulumRobotDefinition)
    {
-      assertTrue(simulationTestHelper.simulateAndWait(2.0));
+      assertTrue(simulationTestHelper.simulateAndWait(0.5));
 
       simulationTestHelper.findVariable("leftPalmTaskspaceUseBaseFrameForControl").setValueFromDouble(1.0);
 
@@ -190,24 +190,24 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
       MovingReferenceFrame trajectoryFrame = referenceFrames.getMidFeetUnderPelvisFrame();
       FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
       FramePose3D handPose = new FramePose3D(controllerFullRobotModel.getChest().getBodyFixedFrame());
-      handPose.appendTranslation(0.55, 0.25, -0.25);
+      handPose.appendTranslation(0.55, 0.35, -0.25);
       handPose.changeFrame(trajectoryFrame);
-      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.LEFT, 1.0, handPose, trajectoryFrame);
+      HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(RobotSide.LEFT, 4.0, handPose, trajectoryFrame);
       simulationTestHelper.publishToController(handTrajectoryMessage);
 
-      assertTrue(simulationTestHelper.simulateAndWait(5.0));
+      assertTrue(simulationTestHelper.simulateAndWait(0.5));
 
-      HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
-      handWrenchTrajectoryMessage.setRobotSide(RobotSide.LEFT.toByte());
-      Vector3D gravityComp = new Vector3D(0.0, 0.0, pendulumRobotDefinition.mass * 9.81);
-      handWrenchTrajectoryMessage.getWrenchTrajectory().getWrenchTrajectoryPoints().add()
-                                 .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(0.0, null, gravityComp));
-      handWrenchTrajectoryMessage.getWrenchTrajectory().getWrenchTrajectoryPoints().add()
-                                 .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1000.0, null, gravityComp));
-      handWrenchTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
-      simulationTestHelper.publishToController(handWrenchTrajectoryMessage);
+//      HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
+//      handWrenchTrajectoryMessage.setRobotSide(RobotSide.LEFT.toByte());
+//      Vector3D gravityComp = new Vector3D(0.0, 0.0, pendulumRobotDefinition.mass * 9.81);
+//      handWrenchTrajectoryMessage.getWrenchTrajectory().getWrenchTrajectoryPoints().add()
+//                                 .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(0.0, null, gravityComp));
+//      handWrenchTrajectoryMessage.getWrenchTrajectory().getWrenchTrajectoryPoints().add()
+//                                 .set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(1000.0, null, gravityComp));
+//      handWrenchTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
+//      simulationTestHelper.publishToController(handWrenchTrajectoryMessage);
 
-      assertTrue(simulationTestHelper.simulateAndWait(8.0));
+      assertTrue(simulationTestHelper.simulateAndWait(0.5));
    }
 
    private final Controller createAttachmentController(ExternalWrenchPoint robotAttachmentPoint, Robot pendulumRobot)
@@ -260,9 +260,9 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
             gravityCompensation.setAndScale(-9.81 * pendulumBody.getInertia().getMass(), Axis3D.Z);
             force.add(gravityCompensation);
 
-            robotAttachmentPoint.getWrench().getLinearPart().setMatchingFrame(force);
-            pendulumAttachmentPoint.getWrench().getLinearPart().setMatchingFrame(force);
-            pendulumAttachmentPoint.getWrench().getLinearPart().negate();
+//            robotAttachmentPoint.getWrench().getLinearPart().setMatchingFrame(force);
+//            pendulumAttachmentPoint.getWrench().getLinearPart().setMatchingFrame(force);
+//            pendulumAttachmentPoint.getWrench().getLinearPart().negate();
          }
 
          @Override
