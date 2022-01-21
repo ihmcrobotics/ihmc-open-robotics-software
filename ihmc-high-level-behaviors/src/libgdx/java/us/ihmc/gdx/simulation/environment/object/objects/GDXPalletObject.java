@@ -16,10 +16,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GDXPalletObject extends GDXEnvironmentObject
 {
+   public static final String NAME = "Pallet";
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXPalletObject()
    {
+      super(NAME);
       Model realisticModel = GDXModelLoader.loadG3DModel("pallet/Pallet.g3dj");
 
       double sizeX = 0.3;

@@ -16,10 +16,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GDXDoorFrameObject extends GDXEnvironmentObject
 {
+   public static final String NAME = "Door Frame";
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXDoorFrameObject()
    {
+      super(NAME);
       Model realisticModel = GDXModelLoader.loadG3DModel("DoorFrame.g3dj");
 
       double sizeX = 0.3;

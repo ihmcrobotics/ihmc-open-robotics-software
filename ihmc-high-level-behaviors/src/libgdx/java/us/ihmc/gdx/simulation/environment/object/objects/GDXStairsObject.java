@@ -16,10 +16,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GDXStairsObject extends GDXEnvironmentObject
 {
+   public static final String NAME = "Stairs";
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXStairsObject()
    {
+      super(NAME);
       Model realisticModel = GDXModelLoader.loadG3DModel("stairs/Stairs.g3dj");
 
       double sizeX = 0.3;

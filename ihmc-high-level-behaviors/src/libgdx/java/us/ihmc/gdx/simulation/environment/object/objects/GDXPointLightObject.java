@@ -16,11 +16,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GDXPointLightObject extends GDXEnvironmentObject
 {
+   public static final String NAME = "Point Light";
    private static final AtomicInteger INDEX = new AtomicInteger();
    private final GDXPointLight light;
 
    public GDXPointLightObject()
    {
+      super(NAME);
       light = new GDXPointLight();
 
       Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addSphere(0.1f, Color.YELLOW), "pointModel");

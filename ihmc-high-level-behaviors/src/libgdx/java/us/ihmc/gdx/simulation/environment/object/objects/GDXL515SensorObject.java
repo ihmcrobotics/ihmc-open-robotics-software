@@ -7,6 +7,7 @@ public class GDXL515SensorObject extends GDXEnvironmentObject
 {
    public GDXL515SensorObject()
    {
+      super("L515 Sensor");
       create(GDXModelLoader.loadG3DModel("sensor_l515.g3dj"));
    }
 

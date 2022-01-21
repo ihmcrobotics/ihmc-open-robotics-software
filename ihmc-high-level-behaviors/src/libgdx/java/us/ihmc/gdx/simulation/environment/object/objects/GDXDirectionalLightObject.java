@@ -18,12 +18,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class GDXDirectionalLightObject extends GDXEnvironmentObject
 {
+   public static final String NAME = "Directional Light";
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    private final GDXDirectionalLight light;
 
    public GDXDirectionalLightObject()
    {
+      super(NAME);
       this.light = new GDXDirectionalLight();
 
       Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addBox(0.2f, 0.2f, 0.05f, Color.YELLOW), "directionalModel");

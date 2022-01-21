@@ -10,6 +10,7 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
 import imgui.type.ImString;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,9 +18,12 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectLibrary;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.log.LogTools;
@@ -29,6 +33,7 @@ import us.ihmc.tools.io.WorkspacePathTools;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Supplier;
 
 public class GDXEnvironmentBuilder extends ImGuiPanel
 {
@@ -38,6 +43,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    private boolean loadedFilesOnce = false;
    private Path selectedEnvironmentFile = null;
    private final TreeSet<Path> environmentFiles = new TreeSet<>(Comparator.comparing(path -> path.getFileName().toString()));
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString saveString = new ImString("", 100);
    private final Point3D tempTranslation = new Point3D();
    private final Quaternion tempOrientation = new Quaternion();
@@ -72,44 +78,30 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       GDXEnvironmentObject objectToPlace = null;
       if (!objectInteraction.isPlacing())
       {
-//         if (ImGui.button("Place Small Cinder Block Roughed"))
-//            objectToPlace = new GDXSmallCinderBlockRoughed();
-         if (ImGui.button("Place Medium Cinder Block Roughed"))
-            objectToPlace = new GDXMediumCinderBlockRoughed();
-//         if (ImGui.button("Place Large Cinder Block Roughed"))
-//            objectToPlace = new GDXLargeCinderBlockRoughed();
-         if (ImGui.button("Place Lab Floor"))
-            objectToPlace = new GDXLabFloorObject();
-         if (ImGui.button("Place Pallet"))
-            objectToPlace = new GDXPalletObject();
-         if (ImGui.button("Place Stairs"))
-            objectToPlace = new GDXStairsObject();
-         if (ImGui.button("Place Door Frame"))
-            objectToPlace = new GDXDoorFrameObject();
-         if (ImGui.button("Place Push Door Only"))
+         for (GDXEnvironmentObjectFactory objectFactory : GDXEnvironmentObjectLibrary.getObjectFactories())
          {
-            objectToPlace = new GDXPushHandleRightDoorObject();
+            if (ImGui.button(labels.get("Place " + objectFactory.getName())))
+            {
+               objectToPlace = objectFactory.getSupplier().get();
+
+               if (objectFactory.getClazz().equals(GDXPointLightObject.class))
+               {
+                  GDXPointLightObject pointLight = (GDXPointLightObject) objectToPlace;
+                  sceneManager.getSceneBasics().addPointLight(pointLight.getLight());
+               }
+               else if (objectFactory.getClazz().equals(GDXDirectionalLightObject.class))
+               {
+                  GDXDirectionalLightObject directionalLight = (GDXDirectionalLightObject) objectToPlace;
+                  sceneManager.getSceneBasics().addDirectionalLight(directionalLight.getLight());
+               }
+            }
          }
-//         if (ImGui.button("Place Door Frame"))
-//            objectToPlace = new GDXDoorFrameObject();
 
          ImGui.separator();
 
          if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
          {
             sceneManager.getSceneBasics().setAmbientLight(ambientLightAmount.get());
-         }
-         if (ImGui.button("Place Point Light"))
-         {
-            GDXPointLightObject pointLight = new GDXPointLightObject();
-            objectToPlace = pointLight;
-            sceneManager.getSceneBasics().addPointLight(pointLight.getLight());
-         }
-         if (ImGui.button("Place Directional Light"))
-         {
-            GDXDirectionalLightObject directionalLight = new GDXDirectionalLightObject();
-            objectToPlace = directionalLight;
-            sceneManager.getSceneBasics().addDirectionalLight(directionalLight.getLight());
          }
 
          ImGui.separator();
@@ -208,7 +200,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
          for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
          {
             JsonNode objectNode = it.next();
-            GDXEnvironmentObject object = GDXEnvironmentObject.loadByName(objectNode.get("type").asText());
+            GDXEnvironmentObject object = GDXEnvironmentObjectLibrary.loadBySimpleClassName(objectNode.get("type").asText());
 
             tempTranslation.setX(objectNode.get("x").asDouble());
             tempTranslation.setY(objectNode.get("y").asDouble());
