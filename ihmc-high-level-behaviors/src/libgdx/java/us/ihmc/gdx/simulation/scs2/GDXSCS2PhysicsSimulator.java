@@ -16,7 +16,7 @@ import us.ihmc.scs2.simulation.SimulationSession;
 
 import java.util.ArrayList;
 
-public class GDXPhysicsSimulator
+public class GDXSCS2PhysicsSimulator
 {
    private final SimulationSession simulationSession;
    private final ImBoolean runAtRealtimeRate;
@@ -26,7 +26,7 @@ public class GDXPhysicsSimulator
    private final ArrayList<GDXSimulatedRobot> robots = new ArrayList<>();
    private final ArrayList<GDXSimulatedTerrainObject> terrainObjects = new ArrayList<>();
 
-   public GDXPhysicsSimulator()
+   public GDXSCS2PhysicsSimulator()
    {
       simulationSession = new SimulationSession();
       runAtRealtimeRate = new ImBoolean(simulationSession.getRunAtRealTimeRate());
