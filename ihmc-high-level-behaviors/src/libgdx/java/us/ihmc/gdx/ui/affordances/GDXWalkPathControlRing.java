@@ -25,6 +25,7 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.simplePlanners.TurnWalkTurnPlanner;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
@@ -189,7 +190,7 @@ public class GDXWalkPathControlRing
       {
          queueFootstepPlan();
       }
-      if (selected && ImGui.isKeyReleased(input.getSpaceKey()))
+      if (selected && ImGui.isKeyReleased(ImGuiTools.getSpaceKey()))
       {
          // Send footsteps to robot
          double swingDuration = 1.2;
@@ -202,13 +203,13 @@ public class GDXWalkPathControlRing
          ros2Helper.publishToController(footstepDataListMessage);
       }
 
-      if (modified && selected && ImGui.isKeyReleased(input.getDeleteKey()))
+      if (modified && selected && ImGui.isKeyReleased(ImGuiTools.getDeleteKey()))
       {
          selected = false;
          modified = false;
          foostepPlanGraphic.clear();
       }
-      if (selected && ImGui.isKeyReleased(input.getEscapeKey()))
+      if (selected && ImGui.isKeyReleased(ImGuiTools.getEscapeKey()))
       {
          selected = false;
       }
