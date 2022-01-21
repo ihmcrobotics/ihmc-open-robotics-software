@@ -7,6 +7,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
@@ -17,11 +18,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GDXDoorFrameObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Door Frame";
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDoorFrameObject.class);
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXDoorFrameObject()
    {
-      super(NAME);
+      super(NAME, FACTORY);
       Model realisticModel = GDXModelLoader.loadG3DModel("DoorFrame.g3dj");
 
       double sizeX = 0.3;
@@ -39,11 +41,5 @@ public class GDXDoorFrameObject extends GDXEnvironmentObject
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
-   }
-
-   @Override
-   public GDXDoorFrameObject duplicate()
-   {
-      return new GDXDoorFrameObject();
    }
 }

@@ -8,6 +8,7 @@ import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.lighting.GDXPointLight;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -17,12 +18,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GDXPointLightObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Point Light";
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXPointLightObject.class);
    private static final AtomicInteger INDEX = new AtomicInteger();
    private final GDXPointLight light;
 
    public GDXPointLightObject()
    {
-      super(NAME);
+      super(NAME, FACTORY);
       light = new GDXPointLight();
 
       Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addSphere(0.1f, Color.YELLOW), "pointModel");
@@ -49,12 +51,6 @@ public class GDXPointLightObject extends GDXEnvironmentObject
 
       light.getPosition().set(getObjectTransform().getTranslation());
       light.update();
-   }
-
-   @Override
-   public GDXPointLightObject duplicate()
-   {
-      return new GDXPointLightObject();
    }
 
    public GDXPointLight getLight()

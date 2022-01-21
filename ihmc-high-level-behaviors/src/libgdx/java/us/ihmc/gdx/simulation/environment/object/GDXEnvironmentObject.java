@@ -27,6 +27,7 @@ public class GDXEnvironmentObject
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    private String name;
+   private final GDXEnvironmentObjectFactory factory;
    private Model realisticModel;
    private GDXModelInstance realisticModelInstance;
    private GDXModelInstance collisionModelInstance;
@@ -51,9 +52,10 @@ public class GDXEnvironmentObject
    private ReferenceFrame realisticModelFrame;
    private ReferenceFrame collisionModelFrame;
 
-   public GDXEnvironmentObject(String name)
+   public GDXEnvironmentObject(String name, GDXEnvironmentObjectFactory factory)
    {
       this.name = name;
+      this.factory = factory;
    }
 
    public void create(Model realisticModel)
@@ -197,13 +199,16 @@ public class GDXEnvironmentObject
 
    public GDXEnvironmentObject duplicate()
    {
-      GDXEnvironmentObject duplicate = new GDXEnvironmentObject(name);
-      duplicate.create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionGeometryObject, isPointInside, collisionMesh);
-      return duplicate;
+      return factory.getSupplier().get();
    }
 
    public String getName()
    {
       return name;
+   }
+
+   public GDXEnvironmentObjectFactory getFactory()
+   {
+      return factory;
    }
 }

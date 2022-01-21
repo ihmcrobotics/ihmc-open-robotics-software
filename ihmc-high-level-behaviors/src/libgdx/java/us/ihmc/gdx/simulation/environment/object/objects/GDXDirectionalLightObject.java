@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.lighting.GDXDirectionalLight;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -19,13 +20,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GDXDirectionalLightObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Directional Light";
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDirectionalLightObject.class);
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    private final GDXDirectionalLight light;
 
    public GDXDirectionalLightObject()
    {
-      super(NAME);
+      super(NAME, FACTORY);
       this.light = new GDXDirectionalLight();
 
       Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addBox(0.2f, 0.2f, 0.05f, Color.YELLOW), "directionalModel");
@@ -57,12 +59,6 @@ public class GDXDirectionalLightObject extends GDXEnvironmentObject
       light.getPosition().set(position.getX32(), position.getY32(), position.getZ32());
       light.getDirection().set(rotation.getX32(), rotation.getY32(), rotation.getZ32());
       light.update();
-   }
-
-   @Override
-   public GDXDirectionalLightObject duplicate()
-   {
-      return new GDXDirectionalLightObject();
    }
 
    public GDXDirectionalLight getLight()

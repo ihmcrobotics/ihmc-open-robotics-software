@@ -7,6 +7,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
@@ -18,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Push Handle Right Door";
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXPushHandleRightDoorObject.class);
    private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXPushHandleRightDoorObject()
@@ -27,7 +29,7 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
 
    public GDXPushHandleRightDoorObject(AppearanceDefinition collisionMeshColor)
    {
-      super(NAME);
+      super(NAME, FACTORY);
       Model realisticModel = GDXModelLoader.loadG3DModel("fiducialDoor/FiducialDoor.g3dj");
 
       double heightZ = 2.0447; // these were measured in blender
@@ -55,11 +57,5 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
       wholeThingOffset.appendYawRotation(-Math.PI / 2.0);
 
       create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
-   }
-
-   @Override
-   public GDXPushHandleRightDoorObject duplicate()
-   {
-      return new GDXPushHandleRightDoorObject();
    }
 }
