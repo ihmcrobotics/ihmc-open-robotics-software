@@ -39,7 +39,7 @@ public class WalkingTrajectoryPath
    private final String namePrefix = "walkingTrajectoryPath";
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final MultiCubicSpline1DSolver solver = new MultiCubicSpline1DSolver();
+   private final MultiCubicSpline1DSolver solvers[] = {new MultiCubicSpline1DSolver(), new MultiCubicSpline1DSolver(), new MultiCubicSpline1DSolver()};
 
    private final YoPreallocatedList<WaypointData> waypoints;
 
@@ -168,20 +168,21 @@ public class WalkingTrajectoryPath
          {
             WaypointData firstWaypoint = waypoints.getFirst();
             WaypointData lastWaypoint = waypoints.getLast();
-            
+
             lastWaypoint.linearVelocity.setToZero();
+            MultiCubicSpline1DSolver solver = solvers[axis.ordinal()];
             solver.clearWaypoints();
             solver.clearWeights();
             solver.setEndpoints(firstWaypoint.getPosition(axis), firstWaypoint.getLinearVelocity(axis), lastWaypoint.getPosition(axis), 0.0);
-            
+
             for (int i = 1; i < waypoints.size() - 1; i++)
             {
                WaypointData waypoint = waypoints.get(i);
                solver.addWaypoint(waypoint.getPosition(axis), waypoint.time.getValue() / totalDuration.getValue());
             }
-            
+
             solver.solve(solution);
-            
+
             for (int i = 1; i < waypoints.size() - 1; i++)
             {
                WaypointData waypoint = waypoints.get(i);
@@ -189,7 +190,6 @@ public class WalkingTrajectoryPath
             }
          }
       }
-
 
       positionTrajectory.clear();
 
