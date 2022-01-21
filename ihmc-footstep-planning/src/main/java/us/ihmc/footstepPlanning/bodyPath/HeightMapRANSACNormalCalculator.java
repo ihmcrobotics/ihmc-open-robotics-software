@@ -11,7 +11,7 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.util.Random;
 
-public class HeightMapRANSACNoralCalculator
+public class HeightMapRANSACNormalCalculator
 {
    private static final int iterations = 40;
    private static final double ransacRadius = 0.2;
