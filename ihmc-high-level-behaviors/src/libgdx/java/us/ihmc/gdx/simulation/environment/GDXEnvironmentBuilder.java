@@ -11,8 +11,6 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
 import imgui.type.ImString;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.Axis3D;
@@ -27,7 +25,6 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.simulation.GDXDoorSimulator;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -58,21 +55,13 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    private final Quaternion tempOrientation = new Quaternion();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Point3D tempIntersection = new Point3D();
-   private GDXDoorSimulator doorSimulator;
    private final ImFloat ambientLight = new ImFloat(0.4f);
    private final GDX3DSceneManager sceneManager;
 
    public GDXEnvironmentBuilder(GDX3DSceneManager sceneManager)
    {
-      this(sceneManager, null, null);
-   }
-
-   public GDXEnvironmentBuilder(GDX3DSceneManager sceneManager, ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
-   {
       super(WINDOW_NAME);
       this.sceneManager = sceneManager;
-      if (syncedRobot != null)
-         doorSimulator = new GDXDoorSimulator(syncedRobot, helper);
       setRenderMethod(this::renderImGuiWidgets);
       addChild(poseGizmoTunerPanel);
    }
@@ -182,8 +171,6 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
          if (ImGui.button("Place Push Door Only"))
          {
             objectToPlace = new GDXPushHandleRightDoorObject();
-            if (doorSimulator != null)
-               doorSimulator.setDoor((GDXPushHandleRightDoorObject) objectToPlace);
          }
 //         if (ImGui.button("Place Door Frame"))
 //            objectToPlace = new GDXDoorFrameObject();
@@ -306,9 +293,6 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       }
 
       ImGui.checkbox("Show 3D Widget Tuner", poseGizmoTunerPanel.getIsShowing());
-
-      if (doorSimulator != null)
-         doorSimulator.renderImGuiWidgets();
    }
 
    private void loadEnvironment(Path environmentFile)
@@ -322,8 +306,6 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
       selectedObject = null;
       intersectedObject = null;
-      if (doorSimulator != null)
-         doorSimulator.setDoor(null);
 
       JSONFileTools.loadFromWorkspace("ihmc-open-robotics-software",
                                       "ihmc-high-level-behaviors/src/libgdx/resources",
@@ -364,10 +346,6 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
                GDXDirectionalLightObject directionalLightObject = (GDXDirectionalLightObject) object;
                sceneManager.getSceneBasics().addDirectionalLight(directionalLightObject.getLight());
                lightObjects.add(directionalLightObject);
-            }
-            else if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
-            {
-               doorSimulator.setDoor((GDXPushHandleRightDoorObject) object);
             }
          }
       });
@@ -432,17 +410,11 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
    public void destroy()
    {
-      if (doorSimulator != null)
-         doorSimulator.destroy();
+
    }
 
    public String getWindowName()
    {
       return WINDOW_NAME;
-   }
-
-   public GDXDoorSimulator getDoorSimulator()
-   {
-      return doorSimulator;
    }
 }
