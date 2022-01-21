@@ -171,7 +171,7 @@ public class PeterPlanarWalkerStateMachine
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -245,7 +245,7 @@ public class PeterPlanarWalkerStateMachine
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          lastStepHipAngle.set(desiredSwingLegHipAngle.getDoubleValue());
       }

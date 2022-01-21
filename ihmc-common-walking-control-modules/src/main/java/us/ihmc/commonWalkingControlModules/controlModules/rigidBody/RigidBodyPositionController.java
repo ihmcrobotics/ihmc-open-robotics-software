@@ -172,7 +172,7 @@ public class RigidBodyPositionController extends RigidBodyTaskspaceControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       positionHelper.onExit();
       hideGraphics();

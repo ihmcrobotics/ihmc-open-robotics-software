@@ -238,7 +238,7 @@ public abstract class TransferState extends WalkingState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       if (isUnloading != null)
       {

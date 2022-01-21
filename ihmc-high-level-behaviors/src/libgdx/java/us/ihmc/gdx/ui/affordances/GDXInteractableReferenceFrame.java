@@ -13,12 +13,14 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.collidables.GDXCoordinateFrameIntersection;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 import us.ihmc.gdx.ui.interactable.GDXModelInstanceScaler;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 public class GDXInteractableReferenceFrame
 {
-   private ReferenceFrame referenceFrameToRepresent;
+   private ReferenceFrame representativeReferenceFrame;
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private RigidBodyTransform transformToParent;
    private GDXReferenceFrameGraphic referenceFrameGraphic;
    private GDXReferenceFrameGraphic highlightReferenceFrameGraphic;
    private GDXCoordinateFrameIntersection coordinateFrameIntersection;
@@ -26,26 +28,34 @@ public class GDXInteractableReferenceFrame
    private boolean mouseCollidesWithFrame;
    private GDXSelectablePose3DGizmo selectablePose3DGizmo;
 
+   public void create(ReferenceFrame parentFrame, double length, FocusBasedGDXCamera camera3D)
+   {
+      RigidBodyTransform transform = new RigidBodyTransform();
+      ReferenceFrame referenceFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(parentFrame, transform);
+      create(referenceFrame, transform, length, camera3D);
+   }
+
    public void create(ReferenceFrame referenceFrameToRepresent, RigidBodyTransform transformToParentToModify, double length, FocusBasedGDXCamera camera3D)
    {
-      this.referenceFrameToRepresent = referenceFrameToRepresent;
+      representativeReferenceFrame = referenceFrameToRepresent;
+      transformToParent = transformToParentToModify;
       referenceFrameGraphic = new GDXReferenceFrameGraphic(length);
       highlightReferenceFrameGraphic = new GDXReferenceFrameGraphic(length);
       coordinateFrameIntersection = new GDXCoordinateFrameIntersection(length);
       highlightReferenceFrameGraphicScaler = new GDXModelInstanceScaler(highlightReferenceFrameGraphic.getModelInstance());
       highlightReferenceFrameGraphicScaler.scale(1.01);
       GDXTools.setTransparency(highlightReferenceFrameGraphic.getModelInstance(), 0.5f);
-      selectablePose3DGizmo = new GDXSelectablePose3DGizmo(referenceFrameToRepresent, transformToParentToModify);
+      selectablePose3DGizmo = new GDXSelectablePose3DGizmo(representativeReferenceFrame, transformToParent);
       selectablePose3DGizmo.create(camera3D);
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
       Line3DReadOnly pickRay = input.getPickRayInWorld();
-      mouseCollidesWithFrame = !Double.isNaN(coordinateFrameIntersection.intersect(referenceFrameToRepresent, pickRay));
+      mouseCollidesWithFrame = !Double.isNaN(coordinateFrameIntersection.intersect(representativeReferenceFrame, pickRay));
 
       selectablePose3DGizmo.process3DViewInput(input, mouseCollidesWithFrame);
-      tempFramePose.setToZero(referenceFrameToRepresent);
+      tempFramePose.setToZero(representativeReferenceFrame);
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
       tempFramePose.get(tempTransform);
 
@@ -66,5 +76,15 @@ public class GDXInteractableReferenceFrame
    public GDXSelectablePose3DGizmo getSelectablePose3DGizmo()
    {
       return selectablePose3DGizmo;
+   }
+
+   public ReferenceFrame getRepresentativeReferenceFrame()
+   {
+      return representativeReferenceFrame;
+   }
+
+   public RigidBodyTransform getTransformToParent()
+   {
+      return transformToParent;
    }
 }

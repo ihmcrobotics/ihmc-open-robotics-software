@@ -151,9 +151,9 @@ public class SimpleSupportState extends SimpleFootControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      super.onExit();
+      super.onExit(timeInState);
       if (frameViz != null)
          frameViz.hide();
       desiredAngularVelocity.setToZero(worldFrame);

@@ -961,7 +961,7 @@ public class KSTStreamingState implements State
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       tools.flushInputCommands();
    }

@@ -12,12 +12,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.simulation.environment.GDXEnvironment;
+import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXL515SensorObject;
 import us.ihmc.gdx.simulation.sensors.GDXHighLevelDepthSensorSimulator;
 import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.behaviors.tools.perception.PeriodicPlanarRegionPublisher;
-import us.ihmc.gdx.simulation.sensors.GDXSimulatedSensorFactory;
 import us.ihmc.gdx.ui.graphics.live.*;
 import us.ihmc.gdx.ui.tools.GDXTransformTuner;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXGlobalVisualizersPanel;
@@ -41,7 +40,7 @@ public class GDXPerceptionVisualizerUI
     private final GDXImGuiBasedUI baseUI;
     private final ImGuiMapSenseConfigurationPanel mapsenseConfigurationUI;
     private final ImGuiGDXGlobalVisualizersPanel globalVisualizersUI;
-    private final GDXEnvironment environmentUI;
+    private final GDXEnvironmentBuilder environmentBuilder;
 
     private final RigidBodyTransform depthSensorTransform = new RigidBodyTransform();
     private final Matrix4 gdxSensorTransform = new Matrix4();
@@ -92,13 +91,13 @@ public class GDXPerceptionVisualizerUI
 //        simulatedDepthSensor.setRenderPointCloudDirectly(true);
 //        simulatedDepthSensor.setDebugCoordinateFrame(true);
 
-        environmentUI = new GDXEnvironment(baseUI.get3DSceneManager());
+        environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
 
         baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
         baseUI.getImGuiPanelManager().addPanel(mapsenseRegionsVisualizer.getLoggingPanel());
 //        baseUI.getImGuiDockingSetup().addWindow(simulatedDepthSensor.getWindowName(), simulatedDepthSensor::renderImGuiWindow);
         baseUI.getImGuiPanelManager().addPanel(mapsenseConfigurationUI.getWindowName(), mapsenseConfigurationUI::render);
-        baseUI.getImGuiPanelManager().addPanel(environmentUI.getPanelName(), environmentUI::renderImGuiWidgets);
+        baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
 
 //        steppingL515Simulator = GDXSimulatedSensorFactory.createChestL515ForMapSense(syncedRobot, ros1Helper);
 
@@ -117,10 +116,10 @@ public class GDXPerceptionVisualizerUI
 //                simulatedDepthSensor.create();
 //                baseUI.getSceneManager().addRenderableProvider(simulatedDepthSensor, GDXSceneLevel.VIRTUAL);
 
-                environmentUI.create(baseUI);
-                baseUI.get3DSceneManager().addRenderableProvider(environmentUI::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
-                baseUI.get3DSceneManager().addRenderableProvider(environmentUI::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
-                environmentUI.loadEnvironment("DemoPullDoor.json");
+                environmentBuilder.create(baseUI);
+                baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
+                baseUI.get3DSceneManager().addRenderableProvider(environmentBuilder::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
+                environmentBuilder.loadEnvironment("DemoPullDoor.json");
 
                 globalVisualizersUI.create();
 //                l515Model = new GDXL515SensorObject();
@@ -145,7 +144,7 @@ public class GDXPerceptionVisualizerUI
             public void dispose()
             {
 //                simulatedDepthSensor.dispose();
-                environmentUI.destroy();
+                environmentBuilder.destroy();
                 globalVisualizersUI.destroy();
                 baseUI.dispose();
                 ros2Node.destroy();
@@ -171,18 +170,13 @@ public class GDXPerceptionVisualizerUI
         double verticalFOV = 55.0;
         int imageWidth = 640;
         int imageHeight = 480;
-        double fx = 500.0;
-        double fy = 500.0;
         if (LOW_RESOLUTION_SENSORS)
         {
             imageWidth /= 2;
             imageHeight /= 2;
-            fx /= 2;
-            fy /= 2;
         }
         double minRange = 0.105;
         double maxRange = 5.0;
-        CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
         ROS2NodeInterface ros2Node = null;
         ROS2Topic<?> ros2Topic = null;
         ReferenceFrame sensorFrame = null;
@@ -191,7 +185,6 @@ public class GDXPerceptionVisualizerUI
                                                     ros1Node,
                                                     RosTools.MAPSENSE_DEPTH_IMAGE,
                                                     RosTools.MAPSENSE_DEPTH_CAMERA_INFO,
-                                                    depthCameraIntrinsics,
                                                     RosTools.L515_VIDEO,
                                                     RosTools.L515_COLOR_CAMERA_INFO,
                                                     ros2Node,

@@ -285,12 +285,12 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
 
          @Override
-         public void onExit()
+         public void onExit(double timeInState)
          {
 
             System.out.println("SETTING OPEN DOOR ACTION INPUT " + searchForDoorBehavior.getLocation());
 
-            super.onExit();
+            super.onExit(timeInState);
          }
       };
 

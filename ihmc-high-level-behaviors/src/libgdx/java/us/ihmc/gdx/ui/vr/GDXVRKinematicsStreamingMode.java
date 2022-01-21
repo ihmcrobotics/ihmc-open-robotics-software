@@ -287,7 +287,8 @@ public class GDXVRKinematicsStreamingMode
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      ghostRobotGraphic.getRenderables(renderables, pool);
+      if (status.hasReceivedFirstMessage())
+         ghostRobotGraphic.getRenderables(renderables, pool);
       if (showReferenceFrameGraphics.get())
       {
 //         headsetFrameGraphic.getRenderables(renderables, pool);

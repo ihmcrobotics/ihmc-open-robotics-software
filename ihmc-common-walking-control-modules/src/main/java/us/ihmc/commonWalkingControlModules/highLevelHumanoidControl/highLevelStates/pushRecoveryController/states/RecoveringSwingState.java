@@ -177,7 +177,7 @@ public class RecoveringSwingState extends PushRecoveryState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 

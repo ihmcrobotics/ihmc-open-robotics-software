@@ -23,33 +23,21 @@ public interface State
     * processing.
     * 
     * @param timeInState represents the time spent in this state, or {@link Double#NaN} if the clock of
-    *           the state machine was not setup.
+    *                    the state machine was not setup.
     */
    void doAction(double timeInState);
 
    /**
     * Called when the state machine is transitioning out of this state.
+    * <p>
+    * Override this method to finalize this state after the last invokation of
+    * {@link #doAction(double)}.
+    * </p>
     * 
     * @param timeInState represents the time spent in this state, or {@link Double#NaN} if the clock of
-    *           the state machine was not setup.
+    *                    the state machine was not setup.
     */
-   default void onExit(double timeInState)
-   {
-      onExit();
-   }
-   
-   
-   /**
-    * Deprecated, kept for backwards compatibility.
-    * 
-    * Use onExit(timeInState) instead.
-    */
-   @Deprecated
-   default void onExit()
-   {
-      
-   }
-   
+   void onExit(double timeInState);
 
    /**
     * Invoked frequently by a state machine to identify when the active state is done. It will then

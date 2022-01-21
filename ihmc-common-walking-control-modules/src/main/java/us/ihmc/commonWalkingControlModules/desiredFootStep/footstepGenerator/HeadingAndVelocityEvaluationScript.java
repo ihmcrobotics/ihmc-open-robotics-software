@@ -159,7 +159,7 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
 

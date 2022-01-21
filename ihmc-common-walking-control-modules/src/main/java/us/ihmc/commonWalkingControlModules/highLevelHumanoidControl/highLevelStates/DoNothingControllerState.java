@@ -41,7 +41,7 @@ public class DoNothingControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       // Do nothing
 

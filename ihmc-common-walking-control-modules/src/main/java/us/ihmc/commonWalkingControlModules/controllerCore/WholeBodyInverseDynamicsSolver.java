@@ -145,7 +145,7 @@ public class WholeBodyInverseDynamicsSolver
       yoResidualRootJointTorque = toolbox.getYoResidualRootJointTorque();
 
       minimizeJointTorques = new YoBoolean("minimizeJointTorques", registry);
-      minimizeJointTorques.set(false);
+      minimizeJointTorques.set(toolbox.getOptimizationSettings().areJointTorquesMinimized());
       areJointTorqueLimitsConsidered = new YoBoolean("areJointTorqueLimitsConsidered", registry);
       areJointTorqueLimitsConsidered.set(toolbox.getOptimizationSettings().areJointTorqueLimitsConsidered());
 

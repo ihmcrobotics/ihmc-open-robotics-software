@@ -306,9 +306,9 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      super.onExit();
+      super.onExit(timeInState);
 
       balanceManager.minimizeAngularMomentumRateZ(false);
 
