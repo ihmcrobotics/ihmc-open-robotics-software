@@ -31,6 +31,11 @@ public class GDXModelPrimitives
       return new ModelInstance(buildModel(buildModel, nodeName));
    }
 
+   public static Model buildModel(Consumer<GDXMultiColorMeshBuilder> buildModel)
+   {
+      return buildModel(buildModel, null);
+   }
+
    public static Model buildModel(Consumer<GDXMultiColorMeshBuilder> buildModel, String nodeName)
    {
       ModelBuilder modelBuilder = new ModelBuilder();

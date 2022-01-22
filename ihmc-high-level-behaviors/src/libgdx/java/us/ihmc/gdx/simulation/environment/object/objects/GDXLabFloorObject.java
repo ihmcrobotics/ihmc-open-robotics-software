@@ -13,18 +13,15 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class GDXLabFloorObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Lab Floor";
    public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXLabFloorObject.class);
-   private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXLabFloorObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("labFloor/LabFloor.g3dj");
+      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/labFloor/LabFloor.g3dj");
 
       RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
 
@@ -38,7 +35,7 @@ public class GDXLabFloorObject extends GDXEnvironmentObject
          Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
          meshBuilder.addBox((float) sizeX, (float) sizeY, (float) sizeZ, color);
          meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
-      }, "collisionModel" + INDEX.getAndIncrement());
+      }, getPascalCasedName() + "CollisionModel" + getObjectIndex());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);

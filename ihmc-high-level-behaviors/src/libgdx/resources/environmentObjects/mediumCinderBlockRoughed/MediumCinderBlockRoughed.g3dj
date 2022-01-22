@@ -2186,7 +2186,7 @@
 			"textures": [
 				{
 					"id": "base_color_texture", 
-					"filename": "../CinderBlock2Texture.jpg",
+					"filename": "MediumCinderBlockRoughed.jpg", 
 					"type": "DIFFUSE"
 				}
 			]
@@ -2197,7 +2197,7 @@
 			"id": "Box004", 
 			"rotation": [ 0.500000,  0.500000, -0.500000,  0.500000], 
 			"scale": [ 0.737161,  1.000000,  1.000000], 
-			"translation": [-0.000100,  0.094097, -0.000250], 
+			"translation": [ 0.196831,  0.190206,  0.071494], 
 			"parts": [
 				{
 					"meshpartid": "Mesh_part1", 
