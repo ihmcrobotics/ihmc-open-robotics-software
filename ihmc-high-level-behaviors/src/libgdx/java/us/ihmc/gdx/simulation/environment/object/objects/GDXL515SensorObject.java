@@ -39,12 +39,10 @@ public class GDXL515SensorObject extends GDXEnvironmentObject
       }, getPascalCasedName() + "CollisionModel" + getObjectIndex());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
 
-      create(realisticModel,
-             collisionShapeOffset,
+      create(realisticModel, collisionGraphic, collisionShapeOffset,
              wholeThingOffset,
              boundingSphere,
              collisionBox,
-             collisionBox::isPointInside,
-             collisionGraphic);
+             collisionBox::isPointInside);
    }
 }

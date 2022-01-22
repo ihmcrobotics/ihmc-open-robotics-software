@@ -72,12 +72,12 @@ public class GDXEnvironmentObject
    }
 
    public void create(Model realisticModel,
+                      Model collisionGraphic,
                       RigidBodyTransform collisionShapeOffset,
                       RigidBodyTransform wholeThingOffset,
                       Sphere3D boundingSphere,
                       Shape3DBasics collisionGeometryObject,
-                      Function<Point3DReadOnly, Boolean> isPointInside,
-                      Model collisionGraphic)
+                      Function<Point3DReadOnly, Boolean> isPointInside)
    {
       this.realisticModel = realisticModel;
       this.collisionShapeOffset = collisionShapeOffset;
@@ -195,7 +195,7 @@ public class GDXEnvironmentObject
 
       placementFramePose.setFromReferenceFrame(collisionModelFrame);
       GDXTools.toGDX(placementFramePose, tempTransform, getCollisionModelInstance().transform);
-      getCollisionGeometryObject().getPose().set(placementFramePose);
+      collisionGeometryObject.getPose().set(placementFramePose);
       boundingSphere.getPosition().set(placementFramePose.getPosition());
    }
 
