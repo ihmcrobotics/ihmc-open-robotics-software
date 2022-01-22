@@ -92,3 +92,4 @@
 **/rebel.xml
 **/generatedTestSuites/*TestSuite.java
 **/.attach_pid*
+**/*.blend1

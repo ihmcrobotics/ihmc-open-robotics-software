@@ -15,13 +15,10 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class GDXDirectionalLightObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Directional Light";
    public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDirectionalLightObject.class);
-   private static final AtomicInteger INDEX = new AtomicInteger();
 
    private final GDXDirectionalLight light;
 
@@ -40,7 +37,7 @@ public class GDXDirectionalLightObject extends GDXEnvironmentObject
       {
          Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
          meshBuilder.addBox(0.21f, 0.21f, 0.06f, color);
-      }, "collisionModel" + INDEX.getAndIncrement());
+      }, getPascalCasedName() + "CollisionModel" + getObjectIndex());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       create(model, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);

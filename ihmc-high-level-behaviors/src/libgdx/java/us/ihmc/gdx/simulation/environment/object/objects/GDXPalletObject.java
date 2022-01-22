@@ -13,18 +13,15 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class GDXPalletObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Pallet";
    public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXPalletObject.class);
-   private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXPalletObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("pallet/Pallet.g3dj");
+      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/pallet/Pallet.g3dj");
 
       double sizeX = 0.3;
       double sizeY = 0.3;
@@ -37,7 +34,7 @@ public class GDXPalletObject extends GDXEnvironmentObject
          Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
          meshBuilder.addBox((float) sizeX, (float) sizeY, (float) sizeZ, color);
          meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
-      }, "collisionModel" + INDEX.getAndIncrement());
+      }, getPascalCasedName() + "CollisionModel" + getObjectIndex());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);

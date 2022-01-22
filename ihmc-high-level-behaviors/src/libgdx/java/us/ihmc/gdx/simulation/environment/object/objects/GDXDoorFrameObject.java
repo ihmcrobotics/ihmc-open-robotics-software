@@ -13,18 +13,15 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class GDXDoorFrameObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Door Frame";
    public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDoorFrameObject.class);
-   private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXDoorFrameObject()
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("DoorFrame.g3dj");
+      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/door/DoorFrame.g3dj");
 
       double sizeX = 0.3;
       double sizeY = 0.3;
@@ -33,11 +30,11 @@ public class GDXDoorFrameObject extends GDXEnvironmentObject
       Sphere3D boundingSphere = new Sphere3D(0.7);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
-                                                             {
-                                                                Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
-                                                                meshBuilder.addBox((float) sizeX, (float) sizeY, (float) sizeZ, color);
-                                                                meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
-                                                             }, "collisionModel" + INDEX.getAndIncrement());
+      {
+         Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
+         meshBuilder.addBox((float) sizeX, (float) sizeY, (float) sizeZ, color);
+         meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
+      }, getPascalCasedName() + "CollisionModel" + getObjectIndex());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);

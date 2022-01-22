@@ -14,13 +14,10 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Push Handle Right Door";
    public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXPushHandleRightDoorObject.class);
-   private static final AtomicInteger INDEX = new AtomicInteger();
 
    public GDXPushHandleRightDoorObject()
    {
@@ -30,7 +27,7 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
    public GDXPushHandleRightDoorObject(AppearanceDefinition collisionMeshColor)
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("fiducialDoor/FiducialDoor.g3dj");
+      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/fiducialDoor/FiducialDoor.g3dj");
 
       double heightZ = 2.0447; // these were measured in blender
       double widthY = 0.9144;
@@ -48,7 +45,7 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
          Color color = GDXTools.toGDX(collisionMeshColor);
          meshBuilder.addBox((float) lengthX + 0.001, (float) widthY + 0.001, (float) heightZ + 0.001, color);
          meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
-      }, "collisionModel" + INDEX.getAndIncrement());
+      }, getPascalCasedName() + "CollisionModel" + getObjectIndex());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
 
       collisionBox.getPose().getTranslation().set(collisionShapeOffset.getTranslation());

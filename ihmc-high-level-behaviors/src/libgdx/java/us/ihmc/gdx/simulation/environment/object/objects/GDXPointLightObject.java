@@ -13,13 +13,10 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class GDXPointLightObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Point Light";
    public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXPointLightObject.class);
-   private static final AtomicInteger INDEX = new AtomicInteger();
    private final GDXPointLight light;
 
    public GDXPointLightObject()
@@ -38,7 +35,7 @@ public class GDXPointLightObject extends GDXEnvironmentObject
       {
          Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
          meshBuilder.addSphere(0.11f, color);
-      }, "collisionModel" + INDEX.getAndIncrement());
+      }, getPascalCasedName() + "CollisionModel" + getObjectIndex());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       create(model, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);

@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -19,14 +20,17 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXTools;
 
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class GDXEnvironmentObject
 {
-   private static final AtomicInteger INDEX = new AtomicInteger();
+   private static final HashMap<String, AtomicInteger> OBJECT_INDEXES = new HashMap<>();
 
-   private String name;
+   private String titleCasedName;
+   private final String pascalCasedName;
+   private final int objectIndex;
    private final GDXEnvironmentObjectFactory factory;
    private Model realisticModel;
    private GDXModelInstance realisticModelInstance;
@@ -44,24 +48,27 @@ public class GDXEnvironmentObject
    private final Point3D secondSphereIntersection = new Point3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform placementTransform = new RigidBodyTransform();
-   private final ReferenceFrame placementFrame
-         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("placementFrame" + INDEX.getAndIncrement(),
-                                                                           ReferenceFrame.getWorldFrame(),
-                                                                           placementTransform);
+   private final ReferenceFrame placementFrame;
    private final FramePose3D placementFramePose = new FramePose3D();
    private ReferenceFrame realisticModelFrame;
    private ReferenceFrame collisionModelFrame;
 
-   public GDXEnvironmentObject(String name, GDXEnvironmentObjectFactory factory)
+   public GDXEnvironmentObject(String titleCasedName, GDXEnvironmentObjectFactory factory)
    {
-      this.name = name;
+      this.titleCasedName = titleCasedName;
       this.factory = factory;
-   }
+      pascalCasedName = FormattingTools.titleToKebabCase(titleCasedName);
 
-   public void create(Model realisticModel)
-   {
-      this.realisticModel = realisticModel;
-      realisticModelInstance = new GDXModelInstance(realisticModel);
+      AtomicInteger atomicIndex = OBJECT_INDEXES.get(pascalCasedName);
+      if (atomicIndex == null)
+      {
+         atomicIndex = new AtomicInteger(0);
+         OBJECT_INDEXES.put(pascalCasedName, atomicIndex);
+      }
+      objectIndex = atomicIndex.getAndIncrement();
+      placementFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "PlacementFrame" + objectIndex,
+                                                                                       ReferenceFrame.getWorldFrame(),
+                                                                                       placementTransform);
    }
 
    public void create(Model realisticModel,
@@ -82,12 +89,12 @@ public class GDXEnvironmentObject
       realisticModelInstance = new GDXModelInstance(realisticModel);
       collisionModelInstance = new GDXModelInstance(collisionGraphic);
       originalMaterial = new Material(realisticModelInstance.materials.get(0));
-      realisticModelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("realisticModelFrame" + INDEX.getAndIncrement(),
-                                                                                                placementFrame,
-                                                                                                wholeThingOffset);
-      collisionModelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("collisionModelFrame" + INDEX.getAndIncrement(),
-                                                                                                realisticModelFrame,
-                                                                                                collisionShapeOffset);
+      realisticModelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(pascalCasedName + "RealisticModelFrame" + objectIndex,
+                                                                                              placementFrame,
+                                                                                              wholeThingOffset);
+      collisionModelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
+                                                                                              realisticModelFrame,
+                                                                                              collisionShapeOffset);
    }
 
    /**
@@ -202,9 +209,19 @@ public class GDXEnvironmentObject
       return factory.getSupplier().get();
    }
 
-   public String getName()
+   public String getTitleCasedName()
    {
-      return name;
+      return titleCasedName;
+   }
+
+   public String getPascalCasedName()
+   {
+      return pascalCasedName;
+   }
+
+   public int getObjectIndex()
+   {
+      return objectIndex;
    }
 
    public GDXEnvironmentObjectFactory getFactory()

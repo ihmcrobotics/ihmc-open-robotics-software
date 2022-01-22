@@ -19,6 +19,7 @@ public class GDXEnvironmentObjectLibrary
       objectFactories.add(GDXDoorFrameObject.FACTORY);
       objectFactories.add(GDXPointLightObject.FACTORY);
       objectFactories.add(GDXDirectionalLightObject.FACTORY);
+      objectFactories.add(GDXL515SensorObject.FACTORY);
    }
 
    public static ArrayList<GDXEnvironmentObjectFactory> getObjectFactories()
