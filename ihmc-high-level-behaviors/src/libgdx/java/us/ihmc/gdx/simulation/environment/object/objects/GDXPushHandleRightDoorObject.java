@@ -53,6 +53,6 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       wholeThingOffset.appendYawRotation(-Math.PI / 2.0);
 
-      create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
+      create(realisticModel, collisionGraphic, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside);
    }
 }
