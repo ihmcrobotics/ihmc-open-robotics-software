@@ -167,7 +167,7 @@ public class QuadrupedMoveViaWaypointsState extends QuadrupedFootState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
    }
 

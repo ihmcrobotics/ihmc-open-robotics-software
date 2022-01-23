@@ -87,7 +87,7 @@ public class SimpleStandingState extends SimpleWalkingState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

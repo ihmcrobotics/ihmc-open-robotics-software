@@ -434,7 +434,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          //       startDiagnostics.set(false);
       }
@@ -481,7 +481,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          humanoidJointPoseList.next();
       }
@@ -511,7 +511,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
 
@@ -536,7 +536,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
 
@@ -838,7 +838,7 @@ public class DiagnosticsWhenHangingControllerState extends HighLevelControllerSt
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
    }
 

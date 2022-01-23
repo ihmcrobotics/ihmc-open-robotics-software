@@ -220,7 +220,7 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
    }
 }

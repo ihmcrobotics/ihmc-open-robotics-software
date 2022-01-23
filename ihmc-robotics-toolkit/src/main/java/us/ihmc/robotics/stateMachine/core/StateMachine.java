@@ -126,7 +126,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
    /**
     * Resets this state machine back to its initial state.
     * <p>
-    * The active state is exited immediately, calling first {@link State#onExit()}, and enters the
+    * The active state is exited immediately, calling first {@link State#onExit(double)}, and enters the
     * initial state of this state machine, i.e. the state mapped to the key
     * {@link #getInitialStateKey()}. This method will call {@link State#onEntry()} on the initial state
     * before activating it.
@@ -142,7 +142,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
    /**
     * Resets this state machine back to its initial state.
     * <p>
-    * The active state is exited immediately, calling first {@link State#onExit()}, and enters the
+    * The active state is exited immediately, calling first {@link State#onExit(double)}, and enters the
     * initial state of this state machine, i.e. the state mapped to the key
     * {@link #getInitialStateKey()}. This method will call {@link State#onEntry()} on the initial state
     * before activating it.
@@ -158,7 +158,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
    /**
     * Resets the active state.
     * <p>
-    * More precisely, this method calls in order the active state's methods {@link State#onExit()} and
+    * More precisely, this method calls in order the active state's methods {@link State#onExit(double)} and
     * then {@link State#onEntry()}. The {@link StateChangedListener}s registered are also notified.
     * </p>
     */
@@ -256,7 +256,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * way of using a state machine.
     * </p>
     * <p>
-    * In order, this method calls {@link State#onExit()} on the state being exited, notifies the
+    * In order, this method calls {@link State#onExit(double)} on the state being exited, notifies the
     * {@link StateChangedListener}s registered, and then calls {@link State#onEntry()} on the new
     * active state.
     * </p>
@@ -279,7 +279,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * way of using a state machine.
     * </p>
     * <p>
-    * In order, this method calls {@link State#onExit()} on the state being exited, notifies the
+    * In order, this method calls {@link State#onExit(double)} on the state being exited, notifies the
     * {@link StateChangedListener}s registered, and then calls {@link State#onEntry()} on the new
     * active state.
     * </p>
@@ -299,7 +299,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * way of using a state machine.
     * </p>
     * <p>
-    * In order, this method calls {@link State#onExit()} on the state being exited, notifies the
+    * In order, this method calls {@link State#onExit(double)} on the state being exited, notifies the
     * {@link StateChangedListener}s registered, and then calls {@link State#onEntry()} on the new
     * active state.
     * </p>
@@ -320,13 +320,13 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * way of using a state machine.
     * </p>
     * <p>
-    * In order, this method calls {@link State#onExit()} on the state being exited, notifies the
+    * In order, this method calls {@link State#onExit(double)} on the state being exited, notifies the
     * {@link StateChangedListener}s registered, and then calls {@link State#onEntry()} on the new
     * active state.
     * </p>
     * 
     * @param nextStateKey   the key of the state to transition into.
-    * @param performOnExit  whether to perform {@link State#onExit()} or the state being exited.
+    * @param performOnExit  whether to perform {@link State#onExit(double)} or the state being exited.
     * @param performOnEntry whether to perform {@link State#onEntry()} or the state being entered.
     * @throws RuntimeException if there is no state mapped to {@code nextStateKey}.
     */
@@ -342,13 +342,13 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * way of using a state machine.
     * </p>
     * <p>
-    * In order, this method calls {@link State#onExit()} on the state being exited, notifies the
+    * In order, this method calls {@link State#onExit(double)} on the state being exited, notifies the
     * {@link StateChangedListener}s registered, and then calls {@link State#onEntry()} on the new
     * active state.
     * </p>
     *
     * @param nextStateKey   the key of the state to transition into.
-    * @param performOnExit  whether to perform {@link State#onExit()} or the state being exited.
+    * @param performOnExit  whether to perform {@link State#onExit(double)} or the state being exited.
     * @param performOnEntry whether to perform {@link State#onEntry()} or the state being entered.
     * @param notifyStateChangeListeners whether to notify the state change listeners.
     * @throws RuntimeException if there is no state mapped to {@code nextStateKey}.

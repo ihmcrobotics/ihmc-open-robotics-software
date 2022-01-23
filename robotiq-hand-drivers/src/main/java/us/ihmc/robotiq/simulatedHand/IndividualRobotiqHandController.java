@@ -370,7 +370,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -401,7 +401,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -423,7 +423,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -454,7 +454,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -476,7 +476,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -507,7 +507,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -529,7 +529,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -560,7 +560,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -582,7 +582,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -613,7 +613,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -635,7 +635,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -666,7 +666,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -691,7 +691,7 @@ public class IndividualRobotiqHandController implements RobotController
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }

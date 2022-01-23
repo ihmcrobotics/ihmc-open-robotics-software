@@ -1,6 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -32,22 +31,25 @@ public class MovingZUpFrame extends MovingReferenceFrame
 
       // Compute the yaw rotation matrix while avoiding the computation of the actual yaw-pitch-roll angles.
       double sinPitch = -transformToParent.getM20();
-      if (MathTools.epsilonEquals(1.0, Math.abs(sinPitch), 1.0e-12))
+      cosPitch = Math.sqrt(1.0 - sinPitch * sinPitch);
+
+      if (EuclidCoreTools.isZero(cosPitch, 1.0e-12))
       { // pitch = Pi/2 best thing to do is to set the rotation to identity.
+         cosRoll = 1.0;
+         sinRoll = 0.0;
          transformToParent.getRotation().setIdentity();
       }
       else
       {
-         cosPitch = Math.sqrt(1.0 - sinPitch * sinPitch);
          cosRoll = transformToParent.getM22() / cosPitch;
          sinRoll = transformToParent.getM21() / cosPitch;
-         double invNormRoll = 1.0 / EuclidCoreTools.fastNorm(cosRoll, sinRoll);
+         double invNormRoll = 1.0 / EuclidCoreTools.norm(cosRoll, sinRoll);
          cosRoll *= invNormRoll;
          sinRoll *= invNormRoll;
 
          double cosYaw = transformToParent.getM00() / cosPitch;
          double sinYaw = transformToParent.getM10() / cosPitch;
-         double invNormYaw = 1.0 / EuclidCoreTools.fastNorm(cosYaw, sinYaw);
+         double invNormYaw = 1.0 / EuclidCoreTools.norm(cosYaw, sinYaw);
          cosYaw *= invNormYaw;
          sinYaw *= invNormYaw;
 
@@ -86,9 +88,17 @@ public class MovingZUpFrame extends MovingReferenceFrame
       nonZUpFrame.getTwistOfFrame(twistRelativeToParentToPack);
 
       // We avoid computing yaw-pitch-roll to reduce computation cost.
-      double wy = twistRelativeToParentToPack.getAngularPartY();
-      double wz = twistRelativeToParentToPack.getAngularPartZ();
-      double yawDot = (sinRoll * wy + cosRoll * wz) / cosPitch;
+      double yawDot;
+      if (EuclidCoreTools.isZero(cosPitch, 1.0e-12))
+      {
+         yawDot = 0.0;
+      }
+      else
+      {
+         double wy = twistRelativeToParentToPack.getAngularPartY();
+         double wz = twistRelativeToParentToPack.getAngularPartZ();
+         yawDot = (sinRoll * wy + cosRoll * wz) / cosPitch;
+      }
 
       twistRelativeToParentToPack.changeFrame(this);
       twistRelativeToParentToPack.setBodyFrame(this);

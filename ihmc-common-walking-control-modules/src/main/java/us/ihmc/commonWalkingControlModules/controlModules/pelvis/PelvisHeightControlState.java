@@ -255,7 +255,7 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
    @Override
    public void onExit(double timeInState)
    {
-      positionController.onExit();
+      positionController.onExit(timeInState);
    }
 
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)

@@ -158,9 +158,9 @@ public class FlamingoStanceState extends SingleSupportState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      super.onExit();
+      super.onExit(timeInState);
 
       feetManager.initializeContactStatesForDoubleSupport(swingSide);
 

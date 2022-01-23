@@ -883,7 +883,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
       {
       }
 
-      public void onExit()
+      public void onExit(double timeInState)
       {
 //       robot.qd_x.val = -0.2;
 
@@ -965,7 +965,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
          }
       }
 
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -1048,7 +1048,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
          }
       }
 
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -1215,7 +1215,7 @@ public class SpringFlamingoFastWalkingController implements RobotController
             swingExtraTime.set(0.0);
       }
 
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
