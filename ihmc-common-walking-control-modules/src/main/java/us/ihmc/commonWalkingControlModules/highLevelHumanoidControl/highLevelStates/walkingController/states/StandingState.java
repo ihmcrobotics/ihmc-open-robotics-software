@@ -127,7 +127,7 @@ public class StandingState extends WalkingState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       feetManager.saveCurrentPositionsAsLastFootstepPositions();
       for (RobotSide robotSide : RobotSide.values)

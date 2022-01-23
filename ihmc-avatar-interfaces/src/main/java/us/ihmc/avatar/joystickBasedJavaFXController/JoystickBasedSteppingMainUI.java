@@ -27,12 +27,15 @@ import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.JavaFXRobotVisualizer;
+import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.ui.JavaFXPlanarRegionsViewer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 public class JoystickBasedSteppingMainUI
 {
@@ -49,20 +52,39 @@ public class JoystickBasedSteppingMainUI
    @FXML
    private StepGeneratorParametersPaneController stepGeneratorParametersPaneController;
 
-   public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, ROS2Node ros2Node, FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                      WalkingControllerParameters walkingControllerParameters, HumanoidRobotKickMessenger kickMessenger,
-                                      HumanoidRobotPunchMessenger punchMessenger, RobotLowLevelMessenger lowLevelMessenger,
+   public JoystickBasedSteppingMainUI(String robotName,
+                                      Stage primaryStage,
+                                      ROS2Node ros2Node,
+                                      FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                      WalkingControllerParameters walkingControllerParameters,
+                                      HumanoidRobotKickMessenger kickMessenger,
+                                      HumanoidRobotPunchMessenger punchMessenger,
+                                      RobotLowLevelMessenger lowLevelMessenger,
                                       SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
          throws Exception
    {
-      this(robotName, primaryStage, ros2Node, null, fullRobotModelFactory, walkingControllerParameters, kickMessenger, punchMessenger, lowLevelMessenger,
+      this(robotName,
+           primaryStage,
+           ros2Node,
+           null,
+           fullRobotModelFactory,
+           walkingControllerParameters,
+           kickMessenger,
+           punchMessenger,
+           lowLevelMessenger,
            footPolygons);
    }
 
-   public JoystickBasedSteppingMainUI(String robotName, Stage primaryStage, ROS2Node ros2Node, String workingDirectoryPath,
-                                      FullHumanoidRobotModelFactory fullRobotModelFactory, WalkingControllerParameters walkingControllerParameters,
-                                      HumanoidRobotKickMessenger kickMessenger, HumanoidRobotPunchMessenger punchMessenger,
-                                      RobotLowLevelMessenger lowLevelMessenger, SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
+   public JoystickBasedSteppingMainUI(String robotName,
+                                      Stage primaryStage,
+                                      ROS2NodeInterface ros2Node,
+                                      String workingDirectoryPath,
+                                      FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                      WalkingControllerParameters walkingControllerParameters,
+                                      HumanoidRobotKickMessenger kickMessenger,
+                                      HumanoidRobotPunchMessenger punchMessenger,
+                                      RobotLowLevelMessenger lowLevelMessenger,
+                                      SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
          throws Exception
    {
       this.primaryStage = primaryStage;
@@ -83,15 +105,16 @@ public class JoystickBasedSteppingMainUI
 
       robotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                           s -> robotVisualizer.submitNewConfiguration(s.takeNextData()));
+                                                    RobotConfigurationData.class,
+                                                    ROS2Tools.getControllerOutputTopic(robotName),
+                                                    s -> robotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
 
       planarRegionsViewer = new JavaFXPlanarRegionsViewer();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PlanarRegionsListMessage.class,
                                                     REACommunicationProperties.outputTopic,
-                                           s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
+                                                    s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
       view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
 
       Translate rootJointOffset = new Translate();
@@ -130,7 +153,12 @@ public class JoystickBasedSteppingMainUI
 
       start();
    }
-   
+
+   public void createYoVariableServer(DataServerSettings settings, LogModelProvider modelProvider)
+   {
+      stepGeneratorJavaFXController.createYoVariableServer(settings, modelProvider);
+   }
+
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return robotVisualizer.getFullRobotModel();

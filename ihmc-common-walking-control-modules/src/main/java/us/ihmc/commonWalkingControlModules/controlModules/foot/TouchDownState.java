@@ -233,9 +233,9 @@ public class TouchDownState extends AbstractFootControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      super.onExit();
+      super.onExit(timeInState);
       footContactRhoRamper.resetContactState();
    }
 

@@ -182,4 +182,9 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransferToStanding();
    }
+
+   @Override
+   public void onExit(double timeInState)
+   {
+   }
 }

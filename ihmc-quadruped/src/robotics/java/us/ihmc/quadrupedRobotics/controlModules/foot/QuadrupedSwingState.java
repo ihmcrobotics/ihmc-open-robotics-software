@@ -549,11 +549,11 @@ public class QuadrupedSwingState extends QuadrupedFootState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       stepCommandIsValid.set(false);
       swingDuration.setToNaN();
-      timeInState.setToNaN();
+      this.timeInState.setToNaN();
       swingTimeSpeedUpFactor.setToNaN();
       limitedSwingTimeSpeedUpFactor.setToNaN();
       timeRemainingInState.setToNaN();

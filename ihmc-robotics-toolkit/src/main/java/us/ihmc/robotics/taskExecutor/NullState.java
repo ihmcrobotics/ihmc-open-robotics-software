@@ -15,7 +15,7 @@ public class NullState implements State
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
    }
 

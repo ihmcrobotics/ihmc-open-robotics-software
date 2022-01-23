@@ -31,7 +31,7 @@ public class MutableState implements State
 
    /** @inherit-doc */
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       if (onExit != null) onExit.run();
    }
