@@ -6,6 +6,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.ui.GDXImGuiPerspectiveManager;
+import us.ihmc.gdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
@@ -54,10 +55,11 @@ public class ImGuiGlfwWindow
          windowSettingsFile = new HybridFile(updatedPerspectiveDirectory, "WindowSettings.json");
          imGuiWindowAndDockSystem.setDirectory(updatedPerspectiveDirectory);
       },
-      loadWithDefaultMode ->
+      loadConfigurationLocation ->
       {
-         imGuiWindowAndDockSystem.loadConfiguration(loadWithDefaultMode);
-         Path libGDXFile = loadWithDefaultMode ? windowSettingsFile.getWorkspaceFile() : windowSettingsFile.getExternalFile();
+         imGuiWindowAndDockSystem.loadConfiguration(loadConfigurationLocation);
+         Path libGDXFile = loadConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
+               ? windowSettingsFile.getWorkspaceFile() : windowSettingsFile.getExternalFile();
          JSONFileTools.load(libGDXFile, jsonNode ->
          {
             int width = jsonNode.get("windowWidth").asInt();
@@ -65,9 +67,9 @@ public class ImGuiGlfwWindow
             glfwWindowForImGui.setWindowSize(width, height);
          });
       },
-      saveWithDefaultMode ->
+      saveConfigurationLocation ->
       {
-         saveApplicationSettings(saveWithDefaultMode);
+         saveApplicationSettings(saveConfigurationLocation);
       });
    }
 
@@ -127,15 +129,15 @@ public class ImGuiGlfwWindow
       ImGui.endMainMenuBar();
    }
 
-   private void saveApplicationSettings(boolean saveDefault)
+   private void saveApplicationSettings(ImGuiConfigurationLocation saveConfigurationLocation)
    {
-      imGuiWindowAndDockSystem.saveConfiguration(saveDefault);
+      imGuiWindowAndDockSystem.saveConfiguration(saveConfigurationLocation);
       Consumer<ObjectNode> rootConsumer = root ->
       {
          root.put("windowWidth", glfwWindowForImGui.getWindowWidth());
          root.put("windowHeight", glfwWindowForImGui.getWindowHeight());
       };
-      if (saveDefault)
+      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
       {
          LogTools.info("Saving window settings to {}", windowSettingsFile.getWorkspaceFile().toString());
          JSONFileTools.save(windowSettingsFile.getWorkspaceFile(), rootConsumer);

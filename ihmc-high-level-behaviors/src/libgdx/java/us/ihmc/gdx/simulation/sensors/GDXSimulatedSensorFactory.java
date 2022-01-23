@@ -1,6 +1,5 @@
 package us.ihmc.gdx.simulation.sensors;
 
-import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -19,14 +18,10 @@ public class GDXSimulatedSensorFactory
       double fovY = (fovX * (double) height) / (double) pointsPerSweep;
       double minRange = 0.1;
       double maxRange = 30.0f;
-      double fx = 500.0;
-      double fy = 500.0;
-      CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, pointsPerSweep / 2.0, height / 2.0, pointsPerSweep, height);
       return new GDXHighLevelDepthSensorSimulator("MultiSense Lidar",
                                                   null,
                                                   null,
                                                   null,
-                                                  depthCameraIntrinsics,
                                                   null,
                                                   null,
                                                   ros2Node,
@@ -66,14 +61,10 @@ public class GDXSimulatedSensorFactory
 //                                                  minRange,
 //                                                  maxRange,
 //                                                  publishRateHz);
-      double fx = 500.0;
-      double fy = 500.0;
-      CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
       return new GDXHighLevelDepthSensorSimulator("MultiSense Left Eye",
                                                   null,
                                                   null,
                                                   null,
-                                                  depthCameraIntrinsics,
                                                   null,
                                                   null,
                                                   ros2Node,
@@ -96,23 +87,17 @@ public class GDXSimulatedSensorFactory
       double verticalFOV = 57.0;
       int imageWidth = 640;//320;
       int imageHeight = 360; //180;
-      double fx = 500.0;
-      double fy = 500.0;
       if (LOW_RESOLUTION_SENSORS)
       {
          imageWidth /= 2;
          imageHeight /= 2;
-         fx /= 2;
-         fy /= 2;
       }
       double minRange = 0.105;
       double maxRange = 5.0;
-      CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
       return new GDXHighLevelDepthSensorSimulator("Detection D435",
                                                   ros1Node,
                                                   RosTools.D435_DEPTH,
                                                   RosTools.D435_DEPTH_CAMERA_INFO,
-                                                  depthCameraIntrinsics,
                                                   RosTools.D435_VIDEO,
                                                   RosTools.D435_CAMERA_INFO,
                                                   null,
@@ -133,25 +118,19 @@ public class GDXSimulatedSensorFactory
    {
       double publishRateHz = 5.0;
       double verticalFOV = 55.0;
-      int imageWidth = 640;
-      int imageHeight = 480;
-      double fx = 500.0;
-      double fy = 500.0;
+      int imageWidth = 1024;
+      int imageHeight = 768;
 //      if (LOW_RESOLUTION_SENSORS)
 //      {
 //         imageWidth /= 2;
 //         imageHeight /= 2;
-//         fx /= 2;
-//         fy /= 2;
 //      }
       double minRange = 0.105;
       double maxRange = 5.0;
-      CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
       return new GDXHighLevelDepthSensorSimulator("Stepping L515",
                                                   ros1Node,
                                                   RosTools.MAPSENSE_DEPTH_IMAGE,
                                                   RosTools.MAPSENSE_DEPTH_CAMERA_INFO,
-                                                  depthCameraIntrinsics,
                                                   RosTools.L515_VIDEO,
                                                   RosTools.L515_COLOR_CAMERA_INFO,
                                                   null,
@@ -174,23 +153,17 @@ public class GDXSimulatedSensorFactory
       double verticalFOV = 90.0;
       int imageWidth = 1024;
       int imageHeight = 128;
-      double fx = 500.0;
-      double fy = 500.0;
       if (LOW_RESOLUTION_SENSORS)
       {
          imageWidth /= 2;
          imageHeight /= 2;
-         fx /= 2;
-         fy /= 2;
       }
       double minRange = 0.105;
       double maxRange = 15.0;
-      CameraPinholeBrown depthCameraIntrinsics = new CameraPinholeBrown(fx, fy, 0, imageWidth / 2.0, imageHeight / 2.0, imageWidth, imageHeight);
       return new GDXHighLevelDepthSensorSimulator("Ouster Lidar",
                                                   null,
                                                   null,
                                                   null,
-                                                  depthCameraIntrinsics,
                                                   null,
                                                   null,
                                                   ros2Node,

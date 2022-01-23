@@ -149,7 +149,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       positionHelper.onExit();
       orienationHelper.onExit();

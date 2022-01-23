@@ -156,7 +156,7 @@ public class StateMachineTest
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          double actionID = stateID + OUT_OF;
          listOfActions.add(actionID);

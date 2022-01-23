@@ -146,7 +146,7 @@ public class QuadrupedStepController implements EventState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
    }
 

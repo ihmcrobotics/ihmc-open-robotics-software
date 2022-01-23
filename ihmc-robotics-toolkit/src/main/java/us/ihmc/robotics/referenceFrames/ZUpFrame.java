@@ -1,6 +1,5 @@
 package us.ihmc.robotics.referenceFrames;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -31,13 +30,14 @@ public class ZUpFrame extends ReferenceFrame
 
       // Compute the yaw rotation matrix while avoiding the computation of the actual yaw-pitch-roll angles.
       double sinPitch = -transformToParent.getM20();
-      if (MathTools.epsilonEquals(1.0, Math.abs(sinPitch), 1.0e-12))
+      double cosPitch = Math.sqrt(1.0 - sinPitch * sinPitch);
+
+      if (EuclidCoreTools.isZero(cosPitch, 1.0e-12))
       { // pitch = Pi/2 best thing to do is to set the rotation to identity.
          transformToParent.getRotation().setIdentity();
       }
       else
       {
-         double cosPitch = Math.sqrt(1.0 - sinPitch * sinPitch);
          double cosYaw = transformToParent.getM00() / cosPitch;
          double sinYaw = transformToParent.getM10() / cosPitch;
          double invNorm = 1.0 / EuclidCoreTools.norm(cosYaw, sinYaw);

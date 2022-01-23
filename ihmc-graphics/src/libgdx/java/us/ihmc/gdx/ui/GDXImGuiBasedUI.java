@@ -92,10 +92,11 @@ public class GDXImGuiBasedUI
          libGDXSettingsFile = new HybridFile(updatedPerspectiveDirectory, "GDXSettings.json");
          imGuiWindowAndDockSystem.setDirectory(updatedPerspectiveDirectory);
       },
-      loadWithDefaultMode ->
+      loadConfigurationLocation ->
       {
-         imGuiWindowAndDockSystem.loadConfiguration(loadWithDefaultMode);
-         Path libGDXFile = loadWithDefaultMode ? libGDXSettingsFile.getWorkspaceFile() : libGDXSettingsFile.getExternalFile();
+         imGuiWindowAndDockSystem.loadConfiguration(loadConfigurationLocation);
+         Path libGDXFile = loadConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
+               ? libGDXSettingsFile.getWorkspaceFile() : libGDXSettingsFile.getExternalFile();
          JSONFileTools.load(libGDXFile, jsonNode ->
          {
             int width = jsonNode.get("windowWidth").asInt();
@@ -103,9 +104,9 @@ public class GDXImGuiBasedUI
             Gdx.graphics.setWindowedMode(width, height);
          });
       },
-      saveWithDefaultMode ->
+      saveConfigurationLocation ->
       {
-         saveApplicationSettings(saveWithDefaultMode);
+         saveApplicationSettings(saveConfigurationLocation);
       });
 
 //      guiRecorder = new GDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
@@ -280,15 +281,15 @@ public class GDXImGuiBasedUI
       ImGui.popStyleVar();
    }
 
-   private void saveApplicationSettings(boolean saveDefault)
+   private void saveApplicationSettings(ImGuiConfigurationLocation saveConfigurationLocation)
    {
-      imGuiWindowAndDockSystem.saveConfiguration(saveDefault);
+      imGuiWindowAndDockSystem.saveConfiguration(saveConfigurationLocation);
       Consumer<ObjectNode> rootConsumer = root ->
       {
          root.put("windowWidth", Gdx.graphics.getWidth());
          root.put("windowHeight", Gdx.graphics.getHeight());
       };
-      if (saveDefault)
+      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
       {
          LogTools.info("Saving libGDX settings to {}", libGDXSettingsFile.getWorkspaceFile().toString());
          JSONFileTools.save(libGDXSettingsFile.getWorkspaceFile(), rootConsumer);
@@ -338,6 +339,11 @@ public class GDXImGuiBasedUI
    public ImGuiPanelManager getImGuiPanelManager()
    {
       return imGuiWindowAndDockSystem.getPanelManager();
+   }
+
+   public GDXImGuiPerspectiveManager getPerspectiveManager()
+   {
+      return perspectiveManager;
    }
 
    public GDX3DSceneManager get3DSceneManager()

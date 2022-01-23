@@ -117,7 +117,7 @@ public class RigidBodyUserControlState extends RigidBodyControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       abortUserControlMode.set(false);
    }
