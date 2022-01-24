@@ -3,9 +3,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DMatrixRMaj;
-
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -21,8 +21,7 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.lists.YoPreallocatedList;
-import us.ihmc.robotics.math.trajectories.generators.MultiCubicSpline1DSolver;
-import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -39,7 +38,7 @@ public class WalkingTrajectoryPath
    private final String namePrefix = "walkingTrajectoryPath";
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final MultiCubicSpline1DSolver solvers[] = {new MultiCubicSpline1DSolver(), new MultiCubicSpline1DSolver(), new MultiCubicSpline1DSolver()};
+   private final Polynomial[] polynomials = {new Polynomial(12), new Polynomial(12), new Polynomial(12)};
 
    private final YoPreallocatedList<WaypointData> waypoints;
 
@@ -51,17 +50,19 @@ public class WalkingTrajectoryPath
    private final YoDouble totalDuration = new YoDouble(namePrefix + "TotalDuration", registry);
    private final SideDependentList<MovingReferenceFrame> soleFrames;
 
-   private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectory = new MultipleWaypointsPositionTrajectoryGenerator(namePrefix,
-                                                                                                                                    10,
-                                                                                                                                    worldFrame,
-                                                                                                                                    registry);
    private final YoBoolean reset = new YoBoolean(namePrefix + "Reset", registry);
+   private final YoFramePose3D currentPose = new YoFramePose3D(namePrefix + "CurrentPose", worldFrame, registry);
+   private final YoFrameVector3D currentLinearVelocity = new YoFrameVector3D(namePrefix + "CurrentLinearVelocity", worldFrame, registry);
+   private final YoDouble currentYawRate = new YoDouble(namePrefix + "CurrentYawRate", registry);
    private final YoFramePose3D lastPose = new YoFramePose3D(namePrefix + "LastPose", worldFrame, registry);
    private final YoFrameVector3D lastLinearVelocity = new YoFrameVector3D(namePrefix + "LastLinearVelocity", worldFrame, registry);
    private final YoDouble lastYawRate = new YoDouble(namePrefix + "LastYawRate", registry);
 
-   public WalkingTrajectoryPath(HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
+   private final FeetManager feetManager;
+
+   public WalkingTrajectoryPath(FeetManager feetManager, HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
+      this.feetManager = feetManager;
       time = controllerToolbox.getYoTime();
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
 
@@ -108,7 +109,6 @@ public class WalkingTrajectoryPath
    }
 
    private final SideDependentList<Pose3D> footPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
-   private final DMatrixRMaj solution = new DMatrixRMaj(10, 1);
 
    public void initialize()
    {
@@ -131,7 +131,6 @@ public class WalkingTrajectoryPath
          waypoint.pose.set(lastPose);
          waypoint.linearVelocity.set(lastLinearVelocity);
       }
-      computeAverage(footPoses, waypoint.pose);
 
       if (!footsteps.isEmpty())
       {
@@ -150,6 +149,11 @@ public class WalkingTrajectoryPath
          waypoints.getLast().linearVelocity.setToZero();
          totalDuration.set(previousWaypoint.time.getValue());
       }
+      else
+      {
+         waypoints.getFirst().linearVelocity.setToZero();
+         totalDuration.set(0.0);
+      }
    }
 
    private static void computeAverage(SideDependentList<? extends Pose3DReadOnly> input, Pose3DBasics output)
@@ -162,50 +166,65 @@ public class WalkingTrajectoryPath
 
    public void computeTrajectory()
    {
-      if (!footsteps.isEmpty())
+      updateFirstWaypoint();
+      updatePolynomials();
+
+      double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
+
+      for (Axis3D axis : Axis3D.values)
+      {
+         polynomials[axis.ordinal()].compute(currentTime);
+         currentPose.getPosition().setElement(axis, polynomials[axis.ordinal()].getValue());
+         currentLinearVelocity.setElement(axis, polynomials[axis.ordinal()].getVelocity());
+      }
+
+      lastPose.getPosition().set(currentPose.getPosition());
+      lastLinearVelocity.set(currentLinearVelocity);
+   }
+
+   private void updateFirstWaypoint()
+   {
+      
+   }
+
+   private void updatePolynomials()
+   {
+      if (footsteps.isEmpty())
       {
          for (Axis3D axis : Axis3D.values)
          {
-            WaypointData firstWaypoint = waypoints.getFirst();
-            WaypointData lastWaypoint = waypoints.getLast();
+            Polynomial polynomial = polynomials[axis.ordinal()];
+            polynomial.setConstant(waypoints.getFirst().getPosition(axis));
+         }
+      }
+      else
+      {
+         for (Axis3D axis : Axis3D.values)
+         {
+            // With Polynomial
+            Polynomial polynomial = polynomials[axis.ordinal()];
+            polynomial.setTime(0, totalDuration.getValue());
+            polynomial.reshape(waypoints.size() + 2);
+            int row = 0;
+            polynomial.setPositionRow(row++, 0.0, waypoints.getFirst().getPosition(axis));
+            polynomial.setVelocityRow(row++, 0.0, waypoints.getFirst().getLinearVelocity(axis));
 
-            lastWaypoint.linearVelocity.setToZero();
-            MultiCubicSpline1DSolver solver = solvers[axis.ordinal()];
-            solver.clearWaypoints();
-            solver.clearWeights();
-            solver.setEndpoints(firstWaypoint.getPosition(axis), firstWaypoint.getLinearVelocity(axis), lastWaypoint.getPosition(axis), 0.0);
-
-            for (int i = 1; i < waypoints.size() - 1; i++)
+            for (int i = 1; i < waypoints.size(); i++)
             {
-               WaypointData waypoint = waypoints.get(i);
-               solver.addWaypoint(waypoint.getPosition(axis), waypoint.time.getValue() / totalDuration.getValue());
+               polynomial.setPositionRow(row++, waypoints.get(i).time.getValue(), waypoints.get(i).getPosition(axis));
             }
-
-            solver.solve(solution);
+            polynomial.setVelocityRow(row++, totalDuration.getValue(), 0.0);
+            polynomial.setIsConstraintMatrixUpToDate(true);
+            polynomial.initialize();
 
             for (int i = 1; i < waypoints.size() - 1; i++)
             {
                WaypointData waypoint = waypoints.get(i);
-               waypoint.setLinearVelocity(axis, solver.computeWaypointVelocityFromSolution(i - 1, solution) / totalDuration.getValue());
+               polynomial.compute(waypoint.time.getValue());
+               waypoint.setLinearVelocity(axis, polynomial.getVelocity());
             }
          }
       }
-
-      positionTrajectory.clear();
-
-      for (int i = 0; i < waypoints.size(); i++)
-      {
-         WaypointData waypoint = waypoints.get(i);
-         positionTrajectory.appendWaypoint(waypoint.time.getValue(), waypoint.pose.getPosition(), waypoint.linearVelocity);
-      }
-
-      positionTrajectory.initialize();
-
-      double currentTime = time.getValue() - startTime.getValue();
-      positionTrajectory.compute(currentTime);
-
-      lastPose.getPosition().set(positionTrajectory.getPosition());
-      lastLinearVelocity.set(positionTrajectory.getVelocity());
    }
 
    public static class WaypointData

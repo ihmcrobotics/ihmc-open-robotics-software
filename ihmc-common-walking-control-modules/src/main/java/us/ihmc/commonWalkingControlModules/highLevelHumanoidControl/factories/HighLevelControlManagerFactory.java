@@ -7,6 +7,7 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.WalkingTrajectoryPath;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
@@ -164,7 +165,12 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, copTrajectoryParameters, splitFractionParameters, registry);
+      balanceManager = new BalanceManager(controllerToolbox,
+                                          walkingControllerParameters,
+                                          copTrajectoryParameters,
+                                          splitFractionParameters,
+                                          new WalkingTrajectoryPath(getOrCreateFeetManager(), controllerToolbox, registry),
+                                          registry);
       return balanceManager;
    }
 
