@@ -7,6 +7,7 @@ import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class JointControlBlender
@@ -15,9 +16,11 @@ public class JointControlBlender
    private static final boolean ENABLE_TAU_SCALE = false;
 
    private final YoDouble tauScale;
+   private final YoDouble yoBlendingFactor;
    private final DeltaLimitedYoVariable positionStepSizeLimiter;
    private final DeltaLimitedYoVariable velocityStepSizeLimiter;
-
+   private final YoBoolean tryFix;
+   
    private final OneDoFJointBasics oneDoFJoint;
 
    public JointControlBlender(String nameSuffix, OneDoFJointBasics oneDoFJoint, YoRegistry parentRegistry)
@@ -29,6 +32,10 @@ public class JointControlBlender
 
       this.positionStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + "PositionStepSizeLimiter", registry, 0.15);
       this.velocityStepSizeLimiter = new DeltaLimitedYoVariable(namePrefix + "VelocityStepSizeLimiter", registry, 1.5);
+
+      yoBlendingFactor = new YoDouble("blendingFactor_" + namePrefix + nameSuffix, registry);
+      tryFix = new YoBoolean("tryFix_" + namePrefix + nameSuffix, registry);
+      tryFix.set(false);
 
       if (ENABLE_TAU_SCALE)
       {
@@ -67,6 +74,7 @@ public class JointControlBlender
                                             double blendingFactor)
    {
       blendingFactor = MathTools.clamp(blendingFactor, 0.0, 1.0);
+      yoBlendingFactor.set(blendingFactor);
 
       if (ENABLE_TAU_SCALE)
          blendingFactor *= tauScale.getDoubleValue();
@@ -84,9 +92,17 @@ public class JointControlBlender
       }
 
       outputDataToPack.clear();
-      outputDataToPack.setControlMode(outputData0.getControlMode());
-      outputDataToPack.setLoadMode(outputData0.getLoadMode());
-
+      if(tryFix.getValue())
+      {
+         outputDataToPack.setControlMode(outputData1.getControlMode());
+         outputDataToPack.setLoadMode(outputData1.getLoadMode());
+      }
+      else
+      {
+         outputDataToPack.setControlMode(outputData0.getControlMode());
+         outputDataToPack.setLoadMode(outputData0.getLoadMode());
+      }
+      
       double currentJointAngle = oneDoFJoint.getQ();
       double currentJointVelocity = oneDoFJoint.getQd();
 
