@@ -673,6 +673,12 @@ public class ICPControllerTest
    private class TestICPOptimizationParameters extends ICPControllerParameters
    {
       @Override
+      public double getFeedbackDirectionWeight()
+      {
+         return 1000000.0;
+      }
+
+      @Override
       public double getFeedbackForwardWeight()
       {
          return 0.5;
