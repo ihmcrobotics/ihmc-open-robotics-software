@@ -101,6 +101,12 @@ public class GraphicsIDRobot extends GraphicsRobot
                graphicsJointB.addChild(graphicsJointC);
                graphicsJoint = graphicsJointC;
             }
+
+            if (graphicsObjectsHolder.getGraphicsObject(crossFourBar.getName()) != null)
+            {
+               graphicsJoint = createJoint(joint, Graphics3DNodeType.JOINT, graphicsObjectsHolder);
+               parentJoint.addChild(graphicsJoint);
+            }
          }
          else
          {
@@ -145,7 +151,7 @@ public class GraphicsIDRobot extends GraphicsRobot
          @Override
          public RigidBodyTransform getJointTransform3D()
          {
-            return new RigidBodyTransform(jointToWrap.getFrameAfterJoint().getTransformToParent());
+            return jointToWrap.getFrameAfterJoint().getTransformToDesiredFrame(jointToWrap.getFrameBeforeJoint());
          }
       };
    }

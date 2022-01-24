@@ -147,7 +147,7 @@ public class RecoveryTransferState extends PushRecoveryState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       feetManager.reset();
    }
@@ -169,6 +169,7 @@ public class RecoveryTransferState extends PushRecoveryState
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
          feetManager.updateToeOffStatusDoubleSupport(trailingLeg,
                                                      nextFootstep,
+                                                     null,
                                                      trailingFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
                                                      desiredCoP,

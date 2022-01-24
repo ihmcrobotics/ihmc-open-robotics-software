@@ -1,12 +1,11 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.interfaces.SpatialForceBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 
 /**
@@ -71,8 +70,8 @@ public class CenterOfPressureResolver
       return normalTorqueAtCenterOfPressure;
    }
 
-   public double resolveCenterOfPressureAndNormalTorque(FramePoint3D centerOfPressureToPack,
-                                                        SpatialForceBasics spatialForceVector,
+   public double resolveCenterOfPressureAndNormalTorque(FramePoint3DBasics centerOfPressureToPack,
+                                                        SpatialForceReadOnly spatialForceVector,
                                                         ReferenceFrame centerOfPressurePlaneFrame)
    {
       // First resolve the wrench at the plane origin:

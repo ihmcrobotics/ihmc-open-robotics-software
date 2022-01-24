@@ -16,6 +16,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.ImGuiConfigurationLocation;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
@@ -34,6 +35,7 @@ import static org.lwjgl.opengl.KHRDebug.GL_DEBUG_SEVERITY_HIGH;
 
 public class GDXImGuiWindowAndDockSystem
 {
+   public static final String IMGUI_SETTINGS_INI_FILE_NAME = "ImGuiSettings.ini";
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
    private String glslVersion; // TODO: ?
@@ -55,7 +57,7 @@ public class GDXImGuiWindowAndDockSystem
 
    public void setDirectory(HybridDirectory configurationDirectory)
    {
-      imGuiSettingsFile = new HybridFile(configurationDirectory, "ImGuiSettings.ini");
+      imGuiSettingsFile = new HybridFile(configurationDirectory, IMGUI_SETTINGS_INI_FILE_NAME);
       panelsFile = new HybridFile(configurationDirectory, "ImGuiPanels.json");
    }
 
@@ -186,26 +188,28 @@ public class GDXImGuiWindowAndDockSystem
 
    private void loadUserConfigurationWithDefaultFallback()
    {
-      boolean loaded = loadConfiguration(false);
+      boolean loaded = loadConfiguration(ImGuiConfigurationLocation.USER_HOME);
       if (!loaded)
       {
          LogTools.info("{} not found", imGuiSettingsFile.getExternalFile().toString());
-         if (!loadConfiguration(true))
+         if (!loadConfiguration(ImGuiConfigurationLocation.VERSION_CONTROL))
             LogTools.warn("No saved settings found");
       }
    }
 
-   public boolean loadConfiguration(boolean loadDefault)
+   public boolean loadConfiguration(ImGuiConfigurationLocation configurationLocation)
    {
       boolean success = false;
-      Path file = loadDefault ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
+      Path file = configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
+            ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
       if (Files.exists(file))
       {
          LogTools.info("Loading ImGui settings from {}", file.toString());
          ImGui.loadIniSettingsFromDisk(file.toString());
          success = true;
 
-         Path fileForDockspacePanels = loadDefault ? panelsFile.getWorkspaceFile() : panelsFile.getExternalFile();
+         Path fileForDockspacePanels = configurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
+               ? panelsFile.getWorkspaceFile() : panelsFile.getExternalFile();
          JSONFileTools.load(fileForDockspacePanels, jsonNode ->
          {
             JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
@@ -238,9 +242,10 @@ public class GDXImGuiWindowAndDockSystem
       return success;
    }
 
-   public void saveConfiguration(boolean saveDefault)
+   public void saveConfiguration(ImGuiConfigurationLocation saveConfigurationLocation)
    {
-      Path saveFile = saveDefault ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
+      Path saveFile = saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
+            ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
       String settingsPathString = saveFile.toString();
       LogTools.info("Saving ImGui settings to {}", settingsPathString);
       FileTools.ensureDirectoryExists(saveFile.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
@@ -256,7 +261,7 @@ public class GDXImGuiWindowAndDockSystem
 
          panelManager.saveConfiguration(root);
       };
-      if (saveDefault)
+      if (saveConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL)
       {
          JSONFileTools.save(panelsFile.getWorkspaceFile(), rootConsumer);
       }

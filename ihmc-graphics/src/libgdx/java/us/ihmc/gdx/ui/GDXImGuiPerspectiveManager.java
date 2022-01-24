@@ -5,6 +5,7 @@ import imgui.internal.ImGui;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
+import us.ihmc.gdx.imgui.GDXImGuiWindowAndDockSystem;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
@@ -25,16 +26,18 @@ public class GDXImGuiPerspectiveManager
    private final String configurationExtraPath;
    private final HybridDirectory configurationBaseDirectory;
    private final Consumer<HybridDirectory> perspectiveDirectoryUpdated;
-   private final Consumer<Boolean> load;
-   private final Consumer<Boolean> save;
+   private final Consumer<ImGuiConfigurationLocation> load;
+   private final Consumer<ImGuiConfigurationLocation> save;
    private HybridDirectory perspectiveDirectory;
    private boolean needToReindexPerspectives = true;
+   private boolean firstReindex = true;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString userHomePerspectiveNameToSave = new ImString("", 100);
    private final ImString versionControlPerspectiveNameToSave = new ImString("", 100);
    private final TreeSet<String> userHomePerspectives = new TreeSet<>(Comparator.comparing(String::toString));
    private final TreeSet<String> versionControlPerspectives = new TreeSet<>(Comparator.comparing(String::toString));
    private String currentPerspectiveName = "Main";
+   private ImGuiConfigurationLocation currentConfigurationLocation;
 
    public GDXImGuiPerspectiveManager(Class<?> classForLoading,
                                      String directoryNameToAssumePresent,
@@ -42,8 +45,8 @@ public class GDXImGuiPerspectiveManager
                                      String configurationExtraPath,
                                      HybridDirectory configurationBaseDirectory,
                                      Consumer<HybridDirectory> perspectiveDirectoryUpdated,
-                                     Consumer<Boolean> load,
-                                     Consumer<Boolean> save)
+                                     Consumer<ImGuiConfigurationLocation> load,
+                                     Consumer<ImGuiConfigurationLocation> save)
    {
       this.classForLoading = classForLoading;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
@@ -64,16 +67,24 @@ public class GDXImGuiPerspectiveManager
          needToReindexPerspectives = false;
          reindexPerspectives(versionControlPerspectives, configurationBaseDirectory.getWorkspaceDirectory(), true);
          reindexPerspectives(userHomePerspectives, configurationBaseDirectory.getExternalDirectory(), false);
+         if (firstReindex)
+         {
+            firstReindex = false;
+            if (versionControlPerspectives.contains("Main"))
+               currentConfigurationLocation = ImGuiConfigurationLocation.VERSION_CONTROL;
+            if (userHomePerspectives.contains("Main"))
+               currentConfigurationLocation = ImGuiConfigurationLocation.USER_HOME;
+         }
       }
 
       if (ImGui.beginMenu(labels.get("Perspective")))
       {
          ImGui.text("Version control:");
-         renderPerspectiveManager(versionControlPerspectives, true, versionControlPerspectiveNameToSave);
+         renderPerspectiveManager(versionControlPerspectives, ImGuiConfigurationLocation.VERSION_CONTROL, versionControlPerspectiveNameToSave);
 
          ImGui.separator();
          ImGui.text("User home:");
-         renderPerspectiveManager(userHomePerspectives, false, userHomePerspectiveNameToSave);
+         renderPerspectiveManager(userHomePerspectives, ImGuiConfigurationLocation.USER_HOME, userHomePerspectiveNameToSave);
 
          ImGui.separator();
          if (ImGui.button(labels.get("Reindex directories")))
@@ -94,6 +105,14 @@ public class GDXImGuiPerspectiveManager
          @Override
          public FileVisitResult visitPath(Path path, PathType pathType)
          {
+            if (pathType == PathType.FILE)
+            {
+               String fileName = path.getFileName().toString();
+               if (fileName.equals(GDXImGuiWindowAndDockSystem.IMGUI_SETTINGS_INI_FILE_NAME))
+               {
+                  perspectives.add("Main");
+               }
+            }
             if (pathType == PathType.DIRECTORY)
             {
                String directoryName = path.getFileName().toString();
@@ -110,41 +129,43 @@ public class GDXImGuiPerspectiveManager
       });
    }
 
-   private void renderPerspectiveManager(TreeSet<String> perspectives, boolean perspectiveDefaultMode, ImString perspectiveNameToSave)
+   private void renderPerspectiveManager(TreeSet<String> perspectives, ImGuiConfigurationLocation configurationLocation, ImString perspectiveNameToSave)
    {
       for (String perspective : perspectives)
       {
-         if (ImGui.radioButton(labels.get(perspective, Boolean.toString(perspectiveDefaultMode)), currentPerspectiveName.equals(perspective)))
+         if (ImGui.radioButton(labels.get(perspective, configurationLocation.name()),
+                               currentPerspectiveName.equals(perspective) && currentConfigurationLocation == configurationLocation))
          {
             currentPerspectiveName = perspective;
+            currentConfigurationLocation = configurationLocation;
             applyPerspectiveDirectory();
-            load.accept(perspectiveDefaultMode);
+            load.accept(configurationLocation);
          }
          if (currentPerspectiveName.equals(perspective))
          {
             ImGui.sameLine();
-            if (ImGui.button(labels.get("Save", Boolean.toString(perspectiveDefaultMode), 0)))
+            if (ImGui.button(labels.get("Save", configurationLocation.name(), 0)))
             {
-               save.accept(perspectiveDefaultMode);
+               save.accept(configurationLocation);
             }
          }
       }
 
       ImGui.text("Save as:");
       ImGui.sameLine();
-      ImGui.inputText(labels.getHidden("NewSaveName" + perspectiveDefaultMode), perspectiveNameToSave, ImGuiInputTextFlags.CallbackResize);
+      ImGui.inputText(labels.getHidden("NewSaveName" + configurationLocation.name()), perspectiveNameToSave, ImGuiInputTextFlags.CallbackResize);
       String perpectiveNameToCreateString = perspectiveNameToSave.get();
       if (!perpectiveNameToCreateString.isEmpty())
       {
          ImGui.sameLine();
-         if (ImGui.button(labels.get("Save", Boolean.toString(perspectiveDefaultMode), 1)))
+         if (ImGui.button(labels.get("Save", configurationLocation.name(), 1)))
          {
             String sanitizedName = perpectiveNameToCreateString.replaceAll(" ", "");
             perspectives.add(sanitizedName);
             currentPerspectiveName = sanitizedName;
             applyPerspectiveDirectory();
             perspectiveNameToSave.clear();
-            save.accept(perspectiveDefaultMode);
+            save.accept(configurationLocation);
          }
       }
    }
@@ -158,5 +179,11 @@ public class GDXImGuiPerspectiveManager
                                                  configurationExtraPath + (currentPerspectiveName.equals("Main") ? "" : "/" + currentPerspectiveName
                                                                                                                         + "Perspective"));
       perspectiveDirectoryUpdated.accept(perspectiveDirectory);
+   }
+
+   public void reloadPerspective()
+   {
+      applyPerspectiveDirectory();
+      load.accept(currentConfigurationLocation);
    }
 }

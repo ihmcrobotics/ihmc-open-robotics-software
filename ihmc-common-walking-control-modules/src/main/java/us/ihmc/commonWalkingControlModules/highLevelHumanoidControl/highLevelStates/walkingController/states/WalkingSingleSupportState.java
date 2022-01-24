@@ -40,6 +40,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final int additionalFootstepsToConsider;
    private final Footstep nextFootstep = new Footstep();
+   private final Footstep nextNextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private double swingTime;
 
@@ -242,6 +243,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       swingTime = walkingMessageHandler.getNextSwingTime();
       walkingMessageHandler.poll(nextFootstep, footstepTiming);
+      if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
+         walkingMessageHandler.peekFootstep(0, nextNextFootstep);
 
       /**
        * 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the
@@ -306,9 +309,9 @@ public class WalkingSingleSupportState extends SingleSupportState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      super.onExit();
+      super.onExit(timeInState);
 
       balanceManager.minimizeAngularMomentumRateZ(false);
 
@@ -373,7 +376,11 @@ public class WalkingSingleSupportState extends SingleSupportState
 
          FramePoint3DReadOnly supportFootExitCMP = balanceManager.getFirstExitCMPForToeOff(false);
 
+         Footstep nextNextFootstep = null;
+         if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
+            nextNextFootstep = this.nextNextFootstep;
          feetManager.updateToeOffStatusSingleSupport(nextFootstep,
+                                                     nextNextFootstep,
                                                      supportFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
                                                      desiredCoP,

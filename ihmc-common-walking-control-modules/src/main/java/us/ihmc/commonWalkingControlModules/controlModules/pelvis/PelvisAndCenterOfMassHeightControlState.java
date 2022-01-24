@@ -27,7 +27,7 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
    }
 
    @Override
-   default void onExit()
+   default void onExit(double timeInState)
    {
    }
 

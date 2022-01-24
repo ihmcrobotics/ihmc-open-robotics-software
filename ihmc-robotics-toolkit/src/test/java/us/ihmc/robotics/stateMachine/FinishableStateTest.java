@@ -1,11 +1,11 @@
 package us.ihmc.robotics.stateMachine;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -107,7 +107,7 @@ public class FinishableStateTest
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          didTransitionOutOfAction = true;
          inState = false;

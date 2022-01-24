@@ -136,7 +136,7 @@ public class FootstepListPreviewTask implements WalkingPreviewTask
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       destroyListeners();
    }

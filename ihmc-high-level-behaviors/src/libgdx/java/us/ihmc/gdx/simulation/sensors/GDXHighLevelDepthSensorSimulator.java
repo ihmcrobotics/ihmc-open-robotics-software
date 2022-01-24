@@ -1,6 +1,7 @@
 package us.ihmc.gdx.simulation.sensors;
 
 import boofcv.struct.calib.CameraPinholeBrown;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -33,12 +34,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
-import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -57,7 +56,6 @@ import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.util.Arrays;
 import java.util.function.LongSupplier;
 
@@ -68,7 +66,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final Matrix4 gdxTransform = new Matrix4();
    private final GDXLowLevelDepthSensorSimulator depthSensorSimulator;
    private final LongSupplier timestampSupplier;
-   private final CameraPinholeBrown depthCameraIntrinsics;
+   private CameraPinholeBrown depthCameraIntrinsics;
    private final int imageWidth;
    private final int imageHeight;
    private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
@@ -112,11 +110,11 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
    private final ImBoolean publishColorImageROS1 = new ImBoolean(false);
    private final ImBoolean publishColorImageROS2 = new ImBoolean(false);
    private final ImBoolean publishPointCloudROS2 = new ImBoolean(false);
-   private final ImFloat fx;
-   private final ImFloat fy;
-   private final ImFloat skew;
-   private final ImFloat cx;
-   private final ImFloat cy;
+
+   private final ImBoolean useSensorColor = new ImBoolean(false);
+   private final Color pointColorFromPicker = new Color();
+   private final ImFloat pointSize = new ImFloat(0.01f);
+   private final float[] color = new float[] {0.0f, 0.0f, 0.0f, 1.0f};
 
    private volatile boolean buffersCreated = false;
    private Mat rgba8Mat;
@@ -127,7 +125,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
                                            RosNodeInterface ros1Node,
                                            String ros1DepthImageTopic,
                                            String ros1DepthCameraInfoTopic,
-                                           CameraPinholeBrown depthCameraIntrinsics,
                                            String ros1ColorImageTopic,
                                            String ros1ColorCameraInfoTopic,
                                            ROS2NodeInterface ros2Node,
@@ -147,7 +144,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       setRenderMethod(this::renderImGuiWidgets);
       this.ros1Node = ros1Node;
       this.ros1DepthImageTopic = ros1DepthImageTopic;
-      this.depthCameraIntrinsics = depthCameraIntrinsics;
       this.ros1ColorImageTopic = ros1ColorImageTopic;
       this.ros2Node = ros2Node;
       this.ros2PointCloudTopic = ros2PointCloudTopic;
@@ -157,12 +153,6 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       this.imageHeight = imageHeight;
       this.publishRateHz = publishRateHz;
       this.renderPointCloudDirectly.set(renderPointCloudDirectly);
-
-      fx = new ImFloat((float) depthCameraIntrinsics.getFx());
-      fy = new ImFloat((float) depthCameraIntrinsics.getFy());
-      skew = new ImFloat((float) depthCameraIntrinsics.getSkew());
-      cx = new ImFloat((float) depthCameraIntrinsics.getCx());
-      cy = new ImFloat((float) depthCameraIntrinsics.getCy());
 
       depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(sensorName, verticalFOV, imageWidth, imageHeight, minRange, maxRange);
 
@@ -201,12 +191,17 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
 
    public void create()
    {
-      depthSensorSimulator.create();
+      pointCloudRenderer.create(imageWidth * imageHeight);
+
+      depthSensorSimulator.create(pointCloudRenderer.getVertexBuffer());
       addChild(depthSensorSimulator.getDepthPanel());
       addChild(depthSensorSimulator.getColorPanel());
-      pointCloudRenderer.create(imageWidth * imageHeight);
+
       if (debugCoordinateFrame.get())
          coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
+
+      depthCameraIntrinsics = new CameraPinholeBrown();
+      updateCameraPinholeBrown();
 
       ThreadTools.startAThread(() ->
       {
@@ -227,15 +222,20 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
             GDXTools.toGDX(sensorFrameToWorldTransform, gdxTransform);
 
          depthSensorSimulator.setCameraWorldTransform(gdxTransform);
-         depthSensorSimulator.render(sceneManager);
 
          if (coordinateFrame != null)
             coordinateFrame.transform.set(gdxTransform);
 
          if (renderPointCloudDirectly.get())
          {
-            pointCloudRenderer.setPointsToRender(depthSensorSimulator.getPoints());
-            pointCloudRenderer.updateMesh();
+            pointColorFromPicker.set(color[0], color[1], color[2], color[3]);
+            Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
+            depthSensorSimulator.render(sceneManager, pointColor, pointSize.get());
+            pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
+         }
+         else
+         {
+            depthSensorSimulator.render(sceneManager);
          }
          if (throttleTimer.isExpired(UnitConversions.hertzToSeconds(publishRateHz)))
          {
@@ -318,6 +318,8 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
             tempSensorFramePose2.changeFrame(ReferenceFrame.getWorldFrame());
             videoPacket.getPosition().set(tempSensorFramePose2.getPosition());
             videoPacket.getOrientation().set(tempSensorFramePose2.getOrientation());
+            if (tuning)
+               updateCameraPinholeBrown();
             videoPacket.getIntrinsicParameters().set(HumanoidMessageTools.toIntrinsicParametersMessage(depthCameraIntrinsics));
             videoPacket.getData().add(data);
             ros2VideoPublisher.publish(videoPacket);
@@ -330,7 +332,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       if (ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected() && !depthExecutor.isExecuting())
       {
          PerspectiveCamera camera = depthSensorSimulator.getCamera();
-         FloatBuffer depthFloatBuffer = depthSensorSimulator.getEyeDepthMetersBuffer();
+         ByteBuffer depthFloatBuffer = depthSensorSimulator.getMetersDepthFloatBuffer();
          depthFloatBuffer.rewind();
          ros1DepthChannelBuffer.clear();
          int size = 2 * imageWidth * imageHeight;
@@ -338,7 +340,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          {
             for (int x = 0; x < imageWidth; x++)
             {
-               float eyeDepthMeters = depthFloatBuffer.get();
+               float eyeDepthMeters = depthFloatBuffer.getFloat();
 
                int row = y + 1;
                int backForY = row * imageWidth * 2;
@@ -362,13 +364,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          depthExecutor.execute(() ->
          {
             if (tuning)
-            {
-               depthCameraIntrinsics.setFx(fx.get());
-               depthCameraIntrinsics.setFy(fy.get());
-               depthCameraIntrinsics.setSkew(skew.get());
-               depthCameraIntrinsics.setCx(cx.get());
-               depthCameraIntrinsics.setCx(cx.get());
-            }
+               updateCameraPinholeBrown();
             ros1DepthCameraInfoPublisher.publish("camera_depth_optical_frame", depthCameraIntrinsics, new Time());
             Image message = ros1DepthPublisher.createMessage(imageWidth, imageHeight, 2, "16UC1", ros1DepthChannelBuffer); // maybe need to copy here if there are errors
 
@@ -380,10 +376,19 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       }
    }
 
+   private void updateCameraPinholeBrown()
+   {
+      depthCameraIntrinsics.setFx(depthSensorSimulator.getFocalLengthPixels().get());
+      depthCameraIntrinsics.setFy(depthSensorSimulator.getFocalLengthPixels().get());
+      depthCameraIntrinsics.setSkew(0.0);
+      depthCameraIntrinsics.setCx(depthSensorSimulator.getPrincipalOffsetXPixels().get());
+      depthCameraIntrinsics.setCy(depthSensorSimulator.getPrincipalOffsetYPixels().get());
+   }
+
    public void renderImGuiWidgets()
    {
       tuning = true;
-      ImGui.text("Resolution: " + imageWidth + " x " + imageWidth);
+      ImGui.text("Resolution: " + imageWidth + " x " + imageHeight);
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Sensor Enabled"), sensorEnabled);
       ImGui.sameLine();
       ImGui.checkbox("Show frame graphic", debugCoordinateFrame);
@@ -394,6 +399,9 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth video"), getLowLevelSimulator().getDepthPanel().getIsShowing());
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), getLowLevelSimulator().getColorPanel().getIsShowing());
+      ImGui.checkbox("Use Sensor Color", useSensorColor);
+      ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.02f);
+      ImGui.colorPicker4("Color", color);
       ImGui.text("Publish:");
       if (ros1DepthImageTopic != null)
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "ROS 1 Depth image (" + ros1DepthImageTopic + ")"), publishDepthImageROS1);
@@ -406,15 +414,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          ImGui.sameLine();
          ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 2)"), publishColorImageROS2);
       }
-      if (ImGui.collapsingHeader("Tuning sliders"))
-      {
-         getLowLevelSimulator().renderTuningSliders();
-         ImGui.sliderFloat("Fx", fx.getData(), -1000.0f, 1000.0f);
-         ImGui.sliderFloat("Fy", fy.getData(), -1000.0f, 1000.0f);
-         ImGui.sliderFloat("Skew", skew.getData(), -1000.0f, 1000.0f);
-         ImGui.sliderFloat("Cx", cx.getData(), -1000.0f, 1000.0f);
-         ImGui.sliderFloat("Cy", cy.getData(), -1000.0f, 1000.0f);
-      }
+      depthSensorSimulator.renderTuningSliders();
    }
 
    private void publishPointCloudROS2()
@@ -422,11 +422,14 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       if (!pointCloudExecutor.isExecuting())
       {
          ros2PointsToPublish.clear();
-         for (int i = 0; i < depthSensorSimulator.getPoints().size(); i++)
+         for (int i = 0; i < depthSensorSimulator.getNumberOfPoints(); i++)
          {
-            ros2PointsToPublish.add().set(depthSensorSimulator.getPoints().get(i));
+            float x = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i);
+            float y = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 1);
+            float z = depthSensorSimulator.getPointCloudBuffer().get(Float.BYTES * 8 * i + 2);
+            ros2PointsToPublish.add().set(x, y, z);
             if (ros2ColorsToPublish != null)
-               ros2ColorsToPublish[i] = depthSensorSimulator.getColors().get(i);
+               ros2ColorsToPublish[i] = depthSensorSimulator.getColorRGBA8Buffer().getInt(Integer.BYTES * i);
          }
 
          if (!ros2PointsToPublish.isEmpty())
@@ -485,6 +488,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
             coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
          coordinateFrame.getRenderables(renderables, pool);
       }
+      depthSensorSimulator.getVirtualRenderables(renderables, pool);
    }
 
    public void setSensorEnabled(boolean sensorEnabled)
@@ -537,13 +541,13 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       this.sensorFrameToWorldTransform = sensorFrameToWorldTransform;
    }
 
-   public RecyclingArrayList<Point3D32> getPoints()
-   {
-      return depthSensorSimulator.getPoints();
-   }
-
    public GDXLowLevelDepthSensorSimulator getLowLevelSimulator()
    {
       return depthSensorSimulator;
+   }
+
+   public CameraPinholeBrown getDepthCameraIntrinsics()
+   {
+      return depthCameraIntrinsics;
    }
 }

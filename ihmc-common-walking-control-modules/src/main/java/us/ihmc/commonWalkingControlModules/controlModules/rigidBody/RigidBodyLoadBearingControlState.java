@@ -300,7 +300,7 @@ public class RigidBodyLoadBearingControlState extends RigidBodyControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       hideGraphics();
       hybridModeActive.set(false);

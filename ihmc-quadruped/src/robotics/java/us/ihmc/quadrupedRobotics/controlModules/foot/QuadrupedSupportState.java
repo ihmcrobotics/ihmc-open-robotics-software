@@ -318,7 +318,7 @@ public class QuadrupedSupportState extends QuadrupedFootState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       footBarelyLoaded.set(false);
       isFootSlipping.set(false);
