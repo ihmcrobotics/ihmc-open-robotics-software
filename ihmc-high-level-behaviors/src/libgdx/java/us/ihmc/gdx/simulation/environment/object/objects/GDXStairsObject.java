@@ -26,6 +26,7 @@ public class GDXStairsObject extends GDXEnvironmentObject
       double sizeX = 0.3;
       double sizeY = 0.3;
       double sizeZ = 0.01;
+      double mass = 500.0;
       RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
       Sphere3D boundingSphere = new Sphere3D(0.7);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
@@ -37,6 +38,6 @@ public class GDXStairsObject extends GDXEnvironmentObject
       }, getPascalCasedName() + "CollisionModel" + getObjectIndex());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
-      create(realisticModel, collisionGraphic, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside);
+      create(realisticModel, collisionGraphic, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, mass);
    }
 }

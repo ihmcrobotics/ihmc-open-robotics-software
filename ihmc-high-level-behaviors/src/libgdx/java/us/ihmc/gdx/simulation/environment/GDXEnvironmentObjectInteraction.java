@@ -3,7 +3,6 @@ package us.ihmc.gdx.simulation.environment;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.euclid.Axis3D;
@@ -21,6 +20,7 @@ import us.ihmc.gdx.simulation.environment.object.objects.GDXPointLightObject;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class GDXEnvironmentObjectInteraction
 {
@@ -33,12 +33,20 @@ public class GDXEnvironmentObjectInteraction
    private GDX3DSceneManager sceneManager;
    private ArrayList<GDXEnvironmentObject> allObjects;
    private ArrayList<GDXEnvironmentObject> lightObjects;
+   private Consumer<GDXEnvironmentObject> addObject;
+   private Consumer<GDXEnvironmentObject> removeObject;
 
-   public void create(GDX3DSceneManager sceneManager, ArrayList<GDXEnvironmentObject> allObjects, ArrayList<GDXEnvironmentObject> lightObjects)
+   public void create(GDX3DSceneManager sceneManager,
+                      ArrayList<GDXEnvironmentObject> allObjects,
+                      ArrayList<GDXEnvironmentObject> lightObjects,
+                      Consumer<GDXEnvironmentObject> addObject,
+                      Consumer<GDXEnvironmentObject> removeObject)
    {
       this.sceneManager = sceneManager;
       this.allObjects = allObjects;
       this.lightObjects = lightObjects;
+      this.addObject = addObject;
+      this.removeObject = removeObject;
       pose3DGizmo.create(sceneManager.getCamera3D());
    }
 
@@ -53,7 +61,7 @@ public class GDXEnvironmentObjectInteraction
                                                                                         Axis3D.Z,
                                                                                         pickRay.getPoint(),
                                                                                         pickRay.getDirection());
-            selectedObject.set(pickPoint);
+            selectedObject.setPositionInWorld(pickPoint);
             pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
 
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -64,7 +72,7 @@ public class GDXEnvironmentObjectInteraction
          else
          {
             pose3DGizmo.process3DViewInput(viewInput);
-            selectedObject.set(pose3DGizmo.getTransformToParent());
+            selectedObject.setTransformToWorld(pose3DGizmo.getTransformToParent());
 
             intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -117,33 +125,14 @@ public class GDXEnvironmentObjectInteraction
    {
       if (objectToPlace != null)
       {
-         if (objectToPlace instanceof GDXDirectionalLightObject)
-            lightObjects.add(objectToPlace);
-         else if (objectToPlace instanceof GDXPointLightObject)
-            lightObjects.add(objectToPlace);
-
-         allObjects.add(objectToPlace);
-
+         addObject.accept(objectToPlace);
          selectedObject = objectToPlace;
          placing = true;
       }
 
       if (selectedObject != null && (ImGui.button("Delete selected") || ImGui.isKeyReleased(ImGuiTools.getDeleteKey())))
       {
-         allObjects.remove(selectedObject);
-         lightObjects.remove(selectedObject);
-
-         if (selectedObject instanceof GDXPointLightObject)
-         {
-            GDXPointLightObject lightObject = (GDXPointLightObject) selectedObject;
-            sceneManager.getSceneBasics().removePointLight(lightObject.getLight());
-         }
-         else if (selectedObject instanceof GDXDirectionalLightObject)
-         {
-            GDXDirectionalLightObject lightObject = (GDXDirectionalLightObject) selectedObject;
-            sceneManager.getSceneBasics().removeDirectionalLight(lightObject.getLight());
-         }
-
+         removeObject.accept(selectedObject);
          resetSelection();
       }
    }

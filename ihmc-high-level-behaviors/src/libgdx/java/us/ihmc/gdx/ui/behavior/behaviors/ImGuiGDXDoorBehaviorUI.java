@@ -66,7 +66,7 @@ public class ImGuiGDXDoorBehaviorUI extends ImGuiGDXBehaviorUIInterface
       {
          this.detectedDoorPose.set(detectedDoorPose);
          doorDetectionMessageReceivedStopwatch.reset();
-         door.set(detectedDoorPose.getRight());
+         door.setPoseInWorld(detectedDoorPose.getRight());
       });
       helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
       {

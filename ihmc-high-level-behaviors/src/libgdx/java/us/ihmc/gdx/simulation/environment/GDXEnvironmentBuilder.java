@@ -1,5 +1,6 @@
 package us.ihmc.gdx.simulation.environment;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -8,9 +9,9 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImString;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -33,7 +34,6 @@ import us.ihmc.tools.io.WorkspacePathTools;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.Supplier;
 
 public class GDXEnvironmentBuilder extends ImGuiPanel
 {
@@ -51,6 +51,8 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    private final ImFloat ambientLightAmount = new ImFloat(0.4f);
    private final GDX3DSceneManager sceneManager;
    private final GDXEnvironmentObjectInteraction objectInteraction = new GDXEnvironmentObjectInteraction();
+   private final GDXBulletPhysicsManager bulletPhysicsManager = new GDXBulletPhysicsManager();
+   private final ImBoolean simulate = new ImBoolean(false);
 
    public GDXEnvironmentBuilder(GDX3DSceneManager sceneManager)
    {
@@ -62,19 +64,31 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
    public void create(GDXImGuiBasedUI baseUI)
    {
+      bulletPhysicsManager.create();
+
       // TODO: Implement hiding the real environment to emulate real world operation
       sceneManager.addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
       sceneManager.addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
-      objectInteraction.create(baseUI.get3DSceneManager(), allObjects, lightObjects);
+      objectInteraction.create(baseUI.get3DSceneManager(), allObjects, lightObjects, this::addObject, this::removeObject);
       baseUI.addImGui3DViewInputProcessor(objectInteraction::process3DViewInput);
+   }
+
+   public void update()
+   {
+      if (simulate.get())
+      {
+         bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
+      }
    }
 
    public void renderImGuiWidgets()
    {
+      ImGui.checkbox(labels.get("Simulate with Bullet"), simulate);
       ImGui.text("Selected: " + objectInteraction.getSelectedObject());
       ImGui.text("Intersected: " + objectInteraction.getIntersectedObject());
 
+      // TODO: Place robots
       GDXEnvironmentObject objectToPlace = null;
       if (!objectInteraction.isPlacing())
       {
@@ -83,17 +97,6 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             if (ImGui.button(labels.get("Place " + objectFactory.getName())))
             {
                objectToPlace = objectFactory.getSupplier().get();
-
-               if (objectFactory.getClazz().equals(GDXPointLightObject.class))
-               {
-                  GDXPointLightObject pointLight = (GDXPointLightObject) objectToPlace;
-                  sceneManager.getSceneBasics().addPointLight(pointLight.getLight());
-               }
-               else if (objectFactory.getClazz().equals(GDXDirectionalLightObject.class))
-               {
-                  GDXDirectionalLightObject directionalLight = (GDXDirectionalLightObject) objectToPlace;
-                  sceneManager.getSceneBasics().addDirectionalLight(directionalLight.getLight());
-               }
             }
          }
 
@@ -152,7 +155,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
          {
             rootNode.put("ambientLight", ambientLightAmount.get());
             ArrayNode objectsArrayNode = rootNode.putArray("objects");
-            for (GDXEnvironmentObject object : this.allObjects)
+            for (GDXEnvironmentObject object : allObjects)
             {
                ObjectNode objectNode = objectsArrayNode.addObject();
                objectNode.put("type", object.getClass().getSimpleName());
@@ -178,10 +181,10 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    {
       loadedFilesOnce = true;
       selectedEnvironmentFile = environmentFile;
-      allObjects.clear();
-
-      sceneManager.getSceneBasics().clearLights();
-      lightObjects.clear();
+      for (GDXEnvironmentObject object : allObjects.toArray(new GDXEnvironmentObject[0]))
+      {
+         removeObject(object);
+      }
 
       objectInteraction.resetSelection();
 
@@ -210,21 +213,8 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
                                 objectNode.get("qz").asDouble(),
                                 objectNode.get("qs").asDouble());
             tempTransform.set(tempOrientation, tempTranslation);
-            object.set(tempTransform);
-            allObjects.add(object);
-
-            if (object instanceof GDXPointLightObject)
-            {
-               GDXPointLightObject pointLightObject = (GDXPointLightObject) object;
-               sceneManager.getSceneBasics().addPointLight(pointLightObject.getLight());
-               lightObjects.add(pointLightObject);
-            }
-            else if (object instanceof GDXDirectionalLightObject)
-            {
-               GDXDirectionalLightObject directionalLightObject = (GDXDirectionalLightObject) object;
-               sceneManager.getSceneBasics().addDirectionalLight(directionalLightObject.getLight());
-               lightObjects.add(directionalLightObject);
-            }
+            object.setTransformToWorld(tempTransform);
+            addObject(object);
          }
       });
    }
@@ -240,6 +230,44 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       else
       {
          LogTools.error("Could not find environment file: {}", environmentFileName);
+      }
+   }
+
+   public void addObject(GDXEnvironmentObject environmentObject)
+   {
+      allObjects.add(environmentObject);
+      environmentObject.addToBullet(bulletPhysicsManager);
+
+      if (environmentObject instanceof GDXPointLightObject)
+      {
+         GDXPointLightObject pointLightObject = (GDXPointLightObject) environmentObject;
+         sceneManager.getSceneBasics().addPointLight(pointLightObject.getLight());
+         lightObjects.add(pointLightObject);
+      }
+      else if (environmentObject instanceof GDXDirectionalLightObject)
+      {
+         GDXDirectionalLightObject directionalLightObject = (GDXDirectionalLightObject) environmentObject;
+         sceneManager.getSceneBasics().addDirectionalLight(directionalLightObject.getLight());
+         lightObjects.add(directionalLightObject);
+      }
+   }
+
+   public void removeObject(GDXEnvironmentObject environmentObject)
+   {
+      allObjects.remove(environmentObject);
+      environmentObject.removeFromBullet(bulletPhysicsManager);
+
+      if (environmentObject instanceof GDXPointLightObject)
+      {
+         GDXPointLightObject lightObject = (GDXPointLightObject) environmentObject;
+         sceneManager.getSceneBasics().removePointLight(lightObject.getLight());
+         lightObjects.remove(environmentObject);
+      }
+      else if (environmentObject instanceof GDXDirectionalLightObject)
+      {
+         GDXDirectionalLightObject lightObject = (GDXDirectionalLightObject) environmentObject;
+         sceneManager.getSceneBasics().removeDirectionalLight(lightObject.getLight());
+         lightObjects.remove(environmentObject);
       }
    }
 
@@ -280,7 +308,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
    public void destroy()
    {
-
+      bulletPhysicsManager.destroy();
    }
 
    public String getWindowName()
