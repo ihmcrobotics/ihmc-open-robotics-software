@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.capturePoint.WalkingTrajectoryPath;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -93,6 +94,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final SideDependentList<FrameConvexPolygon2D> defaultFootPolygons = new SideDependentList<>();
 
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
+   private final WalkingTrajectoryPath walkingTrajectoryPath;
 
    protected final LinkedHashMap<ContactablePlaneBody, YoFramePoint2D> footDesiredCenterOfPressures = new LinkedHashMap<>();
    private final YoDouble desiredCoPAlpha;
@@ -187,7 +189,9 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.footSwitches = new SideDependentList<>(footSwitches);
       this.wristForceSensors = wristForceSensors;
 
+      walkingTrajectoryPath = new WalkingTrajectoryPath(yoTime, fullRobotModel.getSoleFrames(), yoGraphicsListRegistry, registry);
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
+      referenceFrameHashCodeResolver.put(walkingTrajectoryPath.getWalkingTrajectoryPathFrame());
 
       capturePointCalculator = new CapturePointCalculator(centerOfMassStateProvider);
 
@@ -1026,6 +1030,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public void getAngularMomentum(FrameVector3D upperBodyAngularMomentumToPack)
    {
       upperBodyAngularMomentumToPack.setIncludingFrame(angularMomentum);
+   }
+
+   public WalkingTrajectoryPath getWalkingTrajectoryPath()
+   {
+      return walkingTrajectoryPath;
    }
 
    public ReferenceFrameHashCodeResolver getReferenceFrameHashCodeResolver()

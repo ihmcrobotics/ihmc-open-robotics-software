@@ -230,10 +230,9 @@ public class BalanceManager
                          WalkingControllerParameters walkingControllerParameters,
                          CoPTrajectoryParameters copTrajectoryParameters,
                          SplitFractionCalculatorParametersReadOnly splitFractionParameters,
-                         WalkingTrajectoryPath walkingTrajectoryPath,
                          YoRegistry parentRegistry)
    {
-      this.walkingTrajectoryPath = walkingTrajectoryPath;
+      this.walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
 
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
