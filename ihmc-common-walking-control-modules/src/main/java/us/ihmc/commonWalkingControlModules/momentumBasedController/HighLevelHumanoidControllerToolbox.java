@@ -202,7 +202,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       if (yoGraphicsListRegistry != null)
       {
-         referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
+         referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry, referenceFrames.getMidFeetUnderPelvisFrame());
       }
       else
       {
