@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -18,12 +19,10 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -50,6 +49,13 @@ public class ICPControllerTest
    private static final double footLength = 0.25;
    private static final double stanceWidth = 0.35;
 
+   private static boolean visualize = true;
+
+   @BeforeEach
+   public void setup()
+   {
+      visualize &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
    @AfterEach
    public void tearDown()
    {
@@ -74,11 +80,8 @@ public class ICPControllerTest
       double controlDT = 0.001;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
-
-      boolean visualize = true;
 
       ICPControllerTestVisualizer visualizer = null;
       if (visualize)
@@ -148,8 +151,6 @@ public class ICPControllerTest
 
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
-
-      boolean visualize = false;
 
       ICPControllerTestVisualizer visualizer = null;
       if (visualize)
@@ -225,8 +226,6 @@ public class ICPControllerTest
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      boolean visualize = false;
-
       ICPControllerTestVisualizer visualizer = null;
       if (visualize)
       {
@@ -298,8 +297,6 @@ public class ICPControllerTest
 
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
-
-      boolean visualize = false;
 
       ICPControllerTestVisualizer visualizer = null;
       if (visualize)
@@ -399,19 +396,12 @@ public class ICPControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, footWidth, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, graphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       boolean visualize = false;
-
-      ICPControllerTestVisualizer visualizer = null;
-      if (visualize)
-      {
-         visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
-      }
       
       double omega = walkingControllerParameters.getOmega0();
 
@@ -429,9 +419,6 @@ public class ICPControllerTest
       currentICP.add(icpError);
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
-      if (visualize)
-         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
-      
       controller.initialize();
       controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
@@ -440,26 +427,35 @@ public class ICPControllerTest
       controller.getDesiredCMP(desiredCMP);
       controller.getDesiredCoP(desiredCoP);
 
-      if (visualize)
-         visualizer.updateOutputs(desiredCoP, desiredCMP);
-      
       FramePoint2D desiredCMPExpected = new FramePoint2D();
       desiredCMPExpected.set(icpError);
       desiredCMPExpected.scale(feedbackGain + 1.0);
       desiredCMPExpected.add(perfectCMP);
 
-      double maxY = stanceWidth / 2.0;// + footWidth / 2.0;
-      double maxX = footLength / 2.0;
 
-      desiredCMPExpected.setX(Math.min(maxX, desiredCMPExpected.getX()));
-      desiredCMPExpected.setY(Math.min(maxY, desiredCMPExpected.getY()));
+      FramePoint2DReadOnly cmpToTest;
+      if (bipedSupportPolygons.getSupportPolygonInWorld().isPointInside(desiredCMPExpected))
+      {
+         cmpToTest = desiredCMPExpected;
+      }
+      else
+      {
+         FrameLineSegment2D lineSegment2D = new FrameLineSegment2D();
+         lineSegment2D.set(perfectCMP, desiredCMPExpected);
+         cmpToTest = lineSegment2D.intersectionWith(bipedSupportPolygons.getSupportPolygonInWorld())[0];
+      }
 
+
+      ICPControllerTestVisualizer visualizer;
       if (visualize)
       {
+         visualizer = new ICPControllerTestVisualizer(registry, graphicsListRegistry);
+         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
+         visualizer.updateOutputs(desiredCMP, desiredCMP);
          ThreadTools.sleepForever();
       }
-      
-      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
+
+      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(cmpToTest, desiredCMP, epsilon);
    }
 
    @Test
