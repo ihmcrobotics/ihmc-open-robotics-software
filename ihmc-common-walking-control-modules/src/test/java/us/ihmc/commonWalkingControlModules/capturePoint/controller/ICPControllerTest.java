@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -62,7 +63,7 @@ public class ICPControllerTest
    
    public void visualizeRandom() throws Exception
    {
-      YoRegistry registry = new YoRegistry("robert");
+      YoRegistry registry = new YoRegistry("ICPControllerTest");
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = createTestICPOptimizationParameters(feedbackGain);
 
@@ -126,11 +127,164 @@ public class ICPControllerTest
          ThreadTools.sleepForever();
       }
    }
+   
+   
+   @Test
+   public void testKeepAwayFromEdgeIfNotNecessaryInSingleSupport() throws Exception
+   {
+      YoRegistry registry = new YoRegistry("ICPControllerTest");
+      double feedbackGain = 2.0;
+      TestICPOptimizationParameters optimizationParameters = createTestICPOptimizationParameters(feedbackGain);
+
+      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
+      
+      double stanceWidth = 0.4;
+      SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, RobotSide.RIGHT, registry);
+    
+      double controlDT = 0.001;
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      boolean visualize = false;
+
+      ICPControllerTestVisualizer visualizer = null;
+      if (visualize)
+      {
+         visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
+      }
+
+      double omega = walkingControllerParameters.getOmega0();
+
+      FrameVector2D desiredICPVelocity = new FrameVector2D(worldFrame);
+      FramePoint2D desiredICP = new FramePoint2D(worldFrame);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame);
+
+      desiredICP.set(0.0, 0.12);
+      perfectCMP.set(0.0, -0.15);
+
+      desiredICPVelocity.set(desiredICP);
+      desiredICPVelocity.sub(perfectCMP);
+      desiredICPVelocity.scale(omega);
+
+      FramePoint2D currentICP = new FramePoint2D(worldFrame, 0.0, 0.10);
+     
+      FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
+
+      if (visualize)
+         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
+
+      controller.initialize();
+      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+
+      FramePoint2D desiredCMP = new FramePoint2D();
+      FramePoint2D desiredCoP = new FramePoint2D();
+      controller.getDesiredCMP(desiredCMP);
+      controller.getDesiredCoP(desiredCoP);
+
+      if (visualize)
+         visualizer.updateOutputs(desiredCoP, desiredCMP);
+
+      FrameLine2D lineFromICPTODesired = new FrameLine2D(desiredICP, currentICP);
+      double distanceFromLineToProjection = lineFromICPTODesired.distance(desiredCMP);
+      System.out.println("distanceFromLineToProjection = " + distanceFromLineToProjection);
+      
+      double distanceFromMiddleOfFootToCMP = desiredCMP.distance(perfectCMP);
+      System.out.println("distanceFromMiddleOfFootToCMP = " + distanceFromMiddleOfFootToCMP);
+
+      if (visualize)
+      {
+         ThreadTools.sleepForever();
+      }
+      
+      Assert.assertTrue("distanceFromMiddleOfFootToCMP = " + distanceFromMiddleOfFootToCMP + ". It should be near zero.", distanceFromMiddleOfFootToCMP < 0.005);
+      Assert.assertTrue("distanceFromLineToProjection = " + distanceFromLineToProjection + ". It should be near zero.", distanceFromLineToProjection < 0.005);
+   }
+   
+   
+   @Test
+   public void testProjectOnLineFromICPToDesired() throws Exception
+   {
+      YoRegistry registry = new YoRegistry("ICPControllerTest");
+      double feedbackGain = 2.0;
+      TestICPOptimizationParameters optimizationParameters = createTestICPOptimizationParameters(feedbackGain);
+
+      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
+      
+      double footLength = 0.25;
+      double stanceWidth = 0.3;
+      SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      double controlDT = 0.001;
+
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      boolean visualize = false;
+
+      ICPControllerTestVisualizer visualizer = null;
+      if (visualize)
+      {
+         visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
+      }
+
+      double omega = walkingControllerParameters.getOmega0();
+
+      FrameVector2D desiredICPVelocity = new FrameVector2D(worldFrame);
+      FramePoint2D desiredICP = new FramePoint2D(worldFrame);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame);
+
+      desiredICP.set(0.03, 0.06);
+      perfectCMP.set(0.01, 0.05);
+
+      desiredICPVelocity.set(desiredICP);
+      desiredICPVelocity.sub(perfectCMP);
+      desiredICPVelocity.scale(omega);
+
+      FrameVector2D icpError = new FrameVector2D(desiredICPVelocity);
+      icpError.normalize();
+      icpError.scale(-0.1);
+      
+      FramePoint2D currentICP = new FramePoint2D();
+      currentICP.set(desiredICP);
+      currentICP.add(icpError);
+      FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
+
+      if (visualize)
+         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
+
+      controller.initialize();
+      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+
+      FramePoint2D desiredCMP = new FramePoint2D();
+      FramePoint2D desiredCoP = new FramePoint2D();
+      controller.getDesiredCMP(desiredCMP);
+      controller.getDesiredCoP(desiredCoP);
+
+      if (visualize)
+         visualizer.updateOutputs(desiredCoP, desiredCMP);
+
+      FrameLine2D lineFromICPTODesired = new FrameLine2D(desiredICP, currentICP);
+      double distanceFromLineToProjection = lineFromICPTODesired.distance(desiredCMP);
+      System.out.println("distanceFromLineToProjection = " + distanceFromLineToProjection);
+      
+
+      if (visualize)
+      {
+         ThreadTools.sleepForever();
+      }
+      
+      Assert.assertTrue("distanceFromLineToProjection = " + distanceFromLineToProjection + ". It should be near zero.", distanceFromLineToProjection < 0.005);
+   }
 
    @Test
    public void testStandingWithPerfectTracking() throws Exception
    {
-      YoRegistry registry = new YoRegistry("robert");
+      YoRegistry registry = new YoRegistry("ICPControllerTest");
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = createTestICPOptimizationParameters(feedbackGain);
 
@@ -196,7 +350,7 @@ public class ICPControllerTest
    @Test
    public void testTransferWithPerfectTracking() throws Exception
    {
-      YoRegistry registry = new YoRegistry("robert");
+      YoRegistry registry = new YoRegistry("ICPControllerTest");
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = createTestICPOptimizationParameters(feedbackGain);
 
@@ -235,7 +389,7 @@ public class ICPControllerTest
    @Test
    public void testStandingConstrained() throws Exception
    {
-      YoRegistry registry = new YoRegistry("robert");
+      YoRegistry registry = new YoRegistry("ICPControllerTest");
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = createTestICPOptimizationParameters(feedbackGain);
 
@@ -286,7 +440,7 @@ public class ICPControllerTest
    @Test
    public void testStandingUnconstrained() throws Exception
    {
-      YoRegistry registry = new YoRegistry("robert");
+      YoRegistry registry = new YoRegistry("ICPControllerTest");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = createTestICPOptimizationParameters(feedbackGain);
@@ -341,7 +495,7 @@ public class ICPControllerTest
    @Test
    public void testStandingConstrainedWithAngularMomentum() throws Exception
    {
-      YoRegistry registry = new YoRegistry("robert");
+      YoRegistry registry = new YoRegistry("ICPControllerTest");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
@@ -449,6 +603,11 @@ public class ICPControllerTest
 
    private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoRegistry registry)
    {
+      return setupBipedSupportPolygons(contactableFeet, null, registry);
+   }
+   
+   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, RobotSide supportFoot, YoRegistry registry)
+   {
       SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>();
 
       SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -457,17 +616,24 @@ public class ICPControllerTest
       for (RobotSide robotSide : RobotSide.values)
       {
          FootSpoof contactableFoot = contactableFeet.get(robotSide);
-         soleZUpFrames.put(robotSide, new ZUpFrame(contactableFoot.getSoleFrame(), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
+         if (contactableFoot != null)
+         {
+            soleZUpFrames.put(robotSide, new ZUpFrame(contactableFoot.getSoleFrame(), robotSide.getCamelCaseNameForStartOfExpression() + "ZUp"));
 
-         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         RigidBodyBasics foot = contactableFoot.getRigidBody();
-         ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
-         soleFrames.put(robotSide, soleFrame);
-         List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
-         double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
-         YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
-         yoPlaneContactState.setFullyConstrained();
-         contactStates.put(robotSide, yoPlaneContactState);
+            String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+            RigidBodyBasics foot = contactableFoot.getRigidBody();
+            ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
+            soleFrames.put(robotSide, soleFrame);
+            List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
+            double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
+            YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
+            
+            if ((supportFoot == null) || (supportFoot == robotSide))
+               yoPlaneContactState.setFullyConstrained();
+            else
+               yoPlaneContactState.clear();
+            contactStates.put(robotSide, yoPlaneContactState);
+         }
       }
 
       ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
