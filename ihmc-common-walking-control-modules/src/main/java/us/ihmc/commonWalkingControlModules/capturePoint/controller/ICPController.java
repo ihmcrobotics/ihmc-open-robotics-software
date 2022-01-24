@@ -45,7 +45,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
-public class ICPController
+public class ICPController implements ICPControllerInterface
 {
    private static final boolean VISUALIZE = true;
 
@@ -59,7 +59,7 @@ public class ICPController
 
    private final BooleanProvider scaleFeedbackWeightWithGain;
 
-   final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
+   private final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
    private final YoFrameVector2D unconstrainedFeedback = new YoFrameVector2D(yoNamePrefix + "UnconstrainedFeedback", worldFrame, registry);
@@ -67,8 +67,8 @@ public class ICPController
    final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
    final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
 
-   final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
-   final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
+   private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
+   private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
    private final DMatrixRMaj feedbackCMPDeltaMatrix = new DMatrixRMaj(2, 1);
 
    private final YoFrameVector2D residualDynamicsError = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsError", worldFrame, registry);
@@ -228,24 +228,28 @@ public class ICPController
    }
 
    /** {@inheritDoc} */
+   @Override
    public void initialize()
    {
       integrator.reset();
    }
 
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCMP(FixedFramePoint2DBasics desiredCMPToPack)
    {
       desiredCMPToPack.set(feedbackCMP);
    }
 
    /** {@inheritDoc} */
+   @Override
    public void getDesiredCoP(FixedFramePoint2DBasics desiredCoPToPack)
    {
       desiredCoPToPack.set(feedbackCoP);
    }
 
    /** {@inheritDoc} */
+   @Override
    public boolean useAngularMomentum()
    {
       return useAngularMomentum.getValue();
@@ -254,6 +258,7 @@ public class ICPController
    private final FrameVector2D desiredCMPOffsetToThrowAway = new FrameVector2D();
 
    /** {@inheritDoc} */
+   @Override
    public void compute(FramePoint2DReadOnly desiredICP,
                        FrameVector2DReadOnly desiredICPVelocity,
                        FramePoint2DReadOnly perfectCoP,
@@ -266,6 +271,7 @@ public class ICPController
    }
 
    /** {@inheritDoc} */
+   @Override
    public void compute(FramePoint2DReadOnly desiredICP,
                        FrameVector2DReadOnly desiredICPVelocity,
                        FramePoint2DReadOnly perfectCoP,
@@ -406,11 +412,13 @@ public class ICPController
    }
 
    /** {@inheritDoc} */
+   @Override
    public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
    {
       this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }
 
+   @Override
    public FrameVector2DReadOnly getResidualError()
    {
       return residualDynamicsErrorConservative;
