@@ -7,6 +7,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
@@ -118,7 +119,7 @@ public class LinearMomentumRateControlModule
    private boolean desiredCMPcontainedNaN = false;
    private boolean desiredCoPcontainedNaN = false;
 
-   private final ICPController icpController;
+   private final ICPControllerInterface icpController;
 
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
