@@ -27,7 +27,7 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
    public GDXPushHandleRightDoorObject(AppearanceDefinition collisionMeshColor)
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/fiducialDoor/FiducialDoor.g3dj");
+      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/door/fiducialDoor/FiducialDoor.g3dj");
 
       double heightZ = 2.0447; // these were measured in blender
       double widthY = 0.9144;
