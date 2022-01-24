@@ -398,9 +398,20 @@ public class ICPControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, footWidth, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
+      boolean visualize = false;
+
+      ICPControllerTestVisualizer visualizer = null;
+      if (visualize)
+      {
+         visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
+      }
+      
       double omega = walkingControllerParameters.getOmega0();
 
       FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
@@ -417,12 +428,20 @@ public class ICPControllerTest
       currentICP.add(icpError);
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
+      if (visualize)
+         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
+      
       controller.initialize();
       controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
       FramePoint2D desiredCMP = new FramePoint2D();
+      FramePoint2D desiredCoP = new FramePoint2D();
       controller.getDesiredCMP(desiredCMP);
+      controller.getDesiredCoP(desiredCoP);
 
+      if (visualize)
+         visualizer.updateOutputs(desiredCoP, desiredCMP);
+      
       FramePoint2D desiredCMPExpected = new FramePoint2D();
       desiredCMPExpected.set(icpError);
       desiredCMPExpected.scale(feedbackGain + 1.0);
@@ -434,6 +453,11 @@ public class ICPControllerTest
       desiredCMPExpected.setX(Math.min(maxX, desiredCMPExpected.getX()));
       desiredCMPExpected.setY(Math.min(maxY, desiredCMPExpected.getY()));
 
+      if (visualize)
+      {
+         ThreadTools.sleepForever();
+      }
+      
       EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
    }
 
