@@ -53,11 +53,16 @@ public abstract class DRCObstacleCourseRocksTest implements MultiRobotTestInterf
    }
 
 
+   public void setupTestingParameters(SimulationTestingParameters parameters)
+   {
+      
+   }
+   
    @Test
    public void testWalkingOntoRocks() throws SimulationExceededMaximumTimeException
    {
+      setupTestingParameters(simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ROCKS;
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
