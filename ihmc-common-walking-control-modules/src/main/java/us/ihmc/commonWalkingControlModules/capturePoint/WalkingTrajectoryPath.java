@@ -7,24 +7,26 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -52,10 +54,12 @@ public class WalkingTrajectoryPath
    private final SideDependentList<MovingReferenceFrame> soleFrames;
 
    private final YoBoolean reset = new YoBoolean(namePrefix + "Reset", registry);
-   private final YoFramePose3D currentPose = new YoFramePose3D(namePrefix + "CurrentPose", worldFrame, registry);
+   private final YoFramePoint3D currentPosition = new YoFramePoint3D(namePrefix + "CurrentPosition", worldFrame, registry);
+   private final YoDouble currentYaw = new YoDouble(namePrefix + "CurrentYaw", registry);
    private final YoFrameVector3D currentLinearVelocity = new YoFrameVector3D(namePrefix + "CurrentLinearVelocity", worldFrame, registry);
    private final YoDouble currentYawRate = new YoDouble(namePrefix + "CurrentYawRate", registry);
-   private final YoFramePose3D lastPose = new YoFramePose3D(namePrefix + "LastPose", worldFrame, registry);
+   private final YoFramePoint3D lastPosition = new YoFramePoint3D(namePrefix + "LastPosition", worldFrame, registry);
+   private final YoDouble lastYaw = new YoDouble(namePrefix + "LastYaw", registry);
    private final YoFrameVector3D lastLinearVelocity = new YoFrameVector3D(namePrefix + "LastLinearVelocity", worldFrame, registry);
    private final YoDouble lastYawRate = new YoDouble(namePrefix + "LastYawRate", registry);
 
@@ -64,9 +68,8 @@ public class WalkingTrajectoryPath
       @Override
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {
-         transformToParent.getTranslation().set(currentPose.getPosition());
-         double yaw = currentPose.getOrientation().getYaw();
-         transformToParent.getRotation().setToYawOrientation(yaw);
+         transformToParent.getTranslation().set(currentPosition);
+         transformToParent.getRotation().setToYawOrientation(currentYaw.getValue());
       }
 
       @Override
@@ -142,16 +145,19 @@ public class WalkingTrajectoryPath
       if (reset.getValue())
       {
          reset.set(false);
-         computeAverage(footPoses, waypoint.pose);
+         waypoint.yaw.set(computeAverage(footPoses, waypoint.position));
          waypoint.linearVelocity.setToZero();
          waypoint.yawRate.set(0.0);
       }
       else
       {
-         waypoint.pose.set(lastPose);
+         waypoint.position.set(lastPosition);
+         waypoint.yaw.set(lastYaw.getValue());
          waypoint.linearVelocity.set(lastLinearVelocity);
          waypoint.yawRate.set(lastYawRate.getValue());
       }
+
+      waypoint.updateViz();
 
       if (!footsteps.isEmpty())
       {
@@ -162,8 +168,10 @@ public class WalkingTrajectoryPath
             waypoint = waypoints.add();
             Footstep footstep = footsteps.get(i);
             footPoses.get(footstep.getRobotSide()).set(footstep.getFootstepPose());
-            computeAverage(footPoses, waypoint.pose);
+            double yaw = computeAverage(footPoses, waypoint.position);
+            waypoint.yaw.set(previousWaypoint.yaw.getValue() + AngleTools.computeAngleDifferenceMinusPiToPi(yaw, previousWaypoint.yaw.getValue()));
             waypoint.time.set(previousWaypoint.time.getValue() + footstepTimings.get(i).getStepTime());
+            waypoint.updateViz();
             previousWaypoint = waypoint;
          }
 
@@ -178,12 +186,12 @@ public class WalkingTrajectoryPath
       }
    }
 
-   private static void computeAverage(SideDependentList<? extends Pose3DReadOnly> input, Pose3DBasics output)
+   private static double computeAverage(SideDependentList<? extends Pose3DReadOnly> input, Point3DBasics output)
    {
       Pose3DReadOnly leftPose = input.get(RobotSide.LEFT);
       Pose3DReadOnly rightPose = input.get(RobotSide.RIGHT);
-      output.getPosition().interpolate(leftPose.getPosition(), rightPose.getPosition(), 0.5);
-      output.getOrientation().setToYawOrientation(0.5 * (leftPose.getYaw() + rightPose.getYaw()));
+      output.interpolate(leftPose.getPosition(), rightPose.getPosition(), 0.5);
+      return AngleTools.computeAngleAverage(leftPose.getYaw(), rightPose.getYaw());
    }
 
    public void computeTrajectory()
@@ -196,15 +204,16 @@ public class WalkingTrajectoryPath
       for (Axis3D axis : Axis3D.values)
       {
          linearPolynomials[axis.ordinal()].compute(currentTime);
-         currentPose.getPosition().setElement(axis, linearPolynomials[axis.ordinal()].getValue());
+         currentPosition.setElement(axis, linearPolynomials[axis.ordinal()].getValue());
          currentLinearVelocity.setElement(axis, linearPolynomials[axis.ordinal()].getVelocity());
       }
 
       yawPolynomial.compute(currentTime);
-      currentPose.getOrientation().setToYawOrientation(yawPolynomial.getValue());
+      currentYaw.set(AngleTools.trimAngleMinusPiToPi(yawPolynomial.getValue()));
       currentYawRate.set(yawPolynomial.getVelocity());
 
-      lastPose.set(currentPose);
+      lastPosition.set(currentPosition);
+      lastYaw.set(currentYaw.getValue());
       lastLinearVelocity.set(currentLinearVelocity);
       lastYawRate.set(currentYawRate.getValue());
 
@@ -227,7 +236,7 @@ public class WalkingTrajectoryPath
          }
 
          // Yaw part
-         yawPolynomial.setConstant(waypoints.getFirst().pose.getYaw());
+         yawPolynomial.setConstant(waypoints.getFirst().yaw.getValue());
       }
       else
       {
@@ -260,12 +269,12 @@ public class WalkingTrajectoryPath
          yawPolynomial.setTime(0, totalDuration.getValue());
          yawPolynomial.reshape(waypoints.size() + 2);
          int row = 0;
-         yawPolynomial.setPositionRow(row++, 0.0, waypoints.getFirst().pose.getYaw());
+         yawPolynomial.setPositionRow(row++, 0.0, waypoints.getFirst().yaw.getValue());
          yawPolynomial.setVelocityRow(row++, 0.0, waypoints.getFirst().yawRate.getValue());
 
          for (int i = 1; i < waypoints.size(); i++)
          {
-            yawPolynomial.setPositionRow(row++, waypoints.get(i).time.getValue(), waypoints.get(i).pose.getYaw());
+            yawPolynomial.setPositionRow(row++, waypoints.get(i).time.getValue(), waypoints.get(i).yaw.getValue());
          }
          yawPolynomial.setVelocityRow(row++, totalDuration.getValue(), 0.0);
          yawPolynomial.setIsConstraintMatrixUpToDate(true);
@@ -289,28 +298,33 @@ public class WalkingTrajectoryPath
    {
       private final String name;
       private final YoDouble time;
-      private final YoFramePose3D pose;
+      private final YoFramePoint3D position;
+      private final YoDouble yaw;
       private final YoFrameVector3D linearVelocity;
       private final YoDouble yawRate;
 
-      private final YoGraphicCoordinateSystem poseViz;
+      private final YoFrameVector3D headingViz;
+      private final YoGraphicVector waypointViz;
 
       private WaypointData(String namePrefix, String nameSuffix, YoRegistry registry, YoGraphicsList yoGraphicsList)
       {
          name = namePrefix + nameSuffix;
          time = new YoDouble(namePrefix + "Time" + nameSuffix, registry);
-         pose = new YoFramePose3D(namePrefix + "Pose" + nameSuffix, worldFrame, registry);
+         position = new YoFramePoint3D(namePrefix + "Position" + nameSuffix, worldFrame, registry);
+         yaw = new YoDouble(namePrefix + "Yaw" + nameSuffix, registry);
          linearVelocity = new YoFrameVector3D(namePrefix + "LinearVelocity" + nameSuffix, worldFrame, registry);
          yawRate = new YoDouble(namePrefix + "YawRate" + nameSuffix, registry);
 
          if (yoGraphicsList != null)
          {
-            poseViz = new YoGraphicCoordinateSystem(namePrefix + "PoseViz" + nameSuffix, pose, 0.3, YoAppearance.Orange());
-            yoGraphicsList.add(poseViz);
+            headingViz = new YoFrameVector3D(namePrefix + "HeadingViz" + nameSuffix, worldFrame, registry);
+            waypointViz = new YoGraphicVector(namePrefix + "WaypointViz" + nameSuffix, position, headingViz, 0.3, YoAppearance.Orange());
+            yoGraphicsList.add(waypointViz);
          }
          else
          {
-            poseViz = null;
+            headingViz = null;
+            waypointViz = null;
          }
 
          clear();
@@ -319,14 +333,20 @@ public class WalkingTrajectoryPath
       public void clear()
       {
          time.setToNaN();
-         pose.setToNaN();
+         position.setToNaN();
          linearVelocity.setToNaN();
          yawRate.setToNaN();
       }
 
+      public void updateViz()
+      {
+         if (headingViz != null)
+            RotationMatrixTools.applyYawRotation(yaw.getValue(), Axis3D.X, headingViz);
+      }
+
       public double getPosition(Axis3D axis)
       {
-         return pose.getPosition().getElement(axis);
+         return position.getElement(axis);
       }
 
       public double getLinearVelocity(Axis3D axis)
@@ -342,8 +362,8 @@ public class WalkingTrajectoryPath
       @Override
       public String toString()
       {
-         return name + ", time: " + time.getValue() + ", pos: " + EuclidCoreIOTools.getTuple3DString(pose.getPosition()) + ", lin. vel.: "
-               + EuclidCoreIOTools.getTuple3DString(linearVelocity);
+         return name + ", time: " + time.getValue() + ", pos: " + EuclidCoreIOTools.getTuple3DString(position) + ", yaw: " + yaw.getValue() + ", lin. vel.: "
+               + EuclidCoreIOTools.getTuple3DString(linearVelocity) + ", yaw rate: " + yawRate.getValue();
       }
    }
 }
