@@ -26,9 +26,9 @@ public class GDXSmallCinderBlockRoughed extends GDXEnvironmentObject
       RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       Sphere3D boundingSphere = new Sphere3D(0.7);
-      double sizeX = 0.3;
-      double sizeY = 0.3;
-      double sizeZ = 0.01;
+      double sizeX = 0.393;
+      double sizeY = 0.192;
+      double sizeZ = 0.0884;
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
 
       Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
