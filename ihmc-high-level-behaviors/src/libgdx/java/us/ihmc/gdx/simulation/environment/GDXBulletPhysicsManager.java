@@ -2,17 +2,25 @@ package us.ihmc.gdx.simulation.environment;
 
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.physics.bullet.collision.*;
 import com.badlogic.gdx.physics.bullet.dynamics.btConstraintSolver;
 import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btSequentialImpulseConstraintSolver;
+import com.badlogic.gdx.physics.bullet.linearmath.LinearMath;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 
 public class GDXBulletPhysicsManager
 {
+   static
+   {
+      Bullet.init();
+      LogTools.info("Loaded Bullet version {}", LinearMath.btGetVersion());
+   }
    private btCollisionConfiguration collisionConfiguration;
    private btCollisionDispatcher collisionDispatcher;
    private btBroadphaseInterface broadphase;
@@ -32,19 +40,18 @@ public class GDXBulletPhysicsManager
       discreteDynamicsWorld.setGravity(gravity);
    }
 
-   public void addStaticObject(btCollisionShape collisionShape, Matrix4 transformToWorld)
+   public btCollisionObject addStaticObject(btCollisionShape collisionShape, Matrix4 transformToWorld)
    {
       btCollisionObject staticObject = new btCollisionObject();
       staticObject.setCollisionShape(collisionShape);
       staticObject.setWorldTransform(transformToWorld);
       discreteDynamicsWorld.addCollisionObject(staticObject);
       collisionObjects.add(staticObject);
+      return staticObject;
    }
 
-   public void addRigidBody(btCollisionShape collisionShape, float mass, Matrix4 transformToWorld)
+   public btRigidBody addRigidBody(btCollisionShape collisionShape, float mass, Matrix4 transformToWorld)
    {
-      Vector3 localInertia = new Vector3();
-      collisionShape.calculateLocalInertia(mass, localInertia);
       btMotionState motionState = new btMotionState()
       {
          @Override
@@ -59,9 +66,17 @@ public class GDXBulletPhysicsManager
             transformToWorld.set(worldTrans);
          }
       };
+      return addRigidBody(collisionShape, mass, motionState);
+   }
+
+   public btRigidBody addRigidBody(btCollisionShape collisionShape, float mass, btMotionState motionState)
+   {
+      Vector3 localInertia = new Vector3();
+      collisionShape.calculateLocalInertia(mass, localInertia);
       btRigidBody rigidBody = new btRigidBody(mass, motionState, collisionShape, localInertia);
       discreteDynamicsWorld.addRigidBody(rigidBody);
       rigidBodies.add(rigidBody);
+      return rigidBody;
    }
 
    public void simulate(float timeStep)
@@ -69,6 +84,11 @@ public class GDXBulletPhysicsManager
       int maxSubSteps = 0; // 0 means use variable time step
       float fixedTimeStep = 0.0f; // value not used for variable time step
       discreteDynamicsWorld.stepSimulation(timeStep, maxSubSteps, fixedTimeStep);
+   }
+
+   public void removeCollisionObject(btCollisionObject collisionObject)
+   {
+      discreteDynamicsWorld.removeCollisionObject(collisionObject);
    }
 
    public void destroy()
@@ -79,6 +99,7 @@ public class GDXBulletPhysicsManager
       }
       for (btRigidBody rigidBody : rigidBodies)
       {
+         // Can probably just call removeCollisionObject
          discreteDynamicsWorld.removeRigidBody(rigidBody);
       }
    }

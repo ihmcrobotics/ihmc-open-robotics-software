@@ -23,7 +23,7 @@ public class GDXPoseModifiableObject
       this.object = object;
       pose3DGizmo.create(baseUI.get3DSceneManager().getCamera3D());
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
-      object.set(pose3DGizmo.getTransformToParent());
+      object.setTransformToWorld(pose3DGizmo.getTransformToParent());
    }
 
    private void process3DViewInput(ImGui3DViewInput viewInput)
@@ -32,7 +32,7 @@ public class GDXPoseModifiableObject
       if (isSelected)
       {
          pose3DGizmo.process3DViewInput(viewInput);
-         object.set(pose3DGizmo.getTransformToParent());
+         object.setTransformToWorld(pose3DGizmo.getTransformToParent());
 
          if (viewInput.isWindowHovered()
           && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left)

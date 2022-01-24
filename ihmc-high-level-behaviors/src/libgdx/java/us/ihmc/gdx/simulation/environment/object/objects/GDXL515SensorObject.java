@@ -29,6 +29,7 @@ public class GDXL515SensorObject extends GDXEnvironmentObject
       double sizeX = 0.3;
       double sizeY = 0.3;
       double sizeZ = 0.01;
+      double mass = 0.3;
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
 
       Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
@@ -43,6 +44,6 @@ public class GDXL515SensorObject extends GDXEnvironmentObject
              wholeThingOffset,
              boundingSphere,
              collisionBox,
-             collisionBox::isPointInside);
+             collisionBox::isPointInside, mass);
    }
 }

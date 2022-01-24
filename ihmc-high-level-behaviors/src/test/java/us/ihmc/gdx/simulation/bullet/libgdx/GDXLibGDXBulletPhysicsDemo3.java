@@ -4,9 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.physics.bullet.collision.*;
-import com.badlogic.gdx.physics.bullet.linearmath.LinearMath;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.RandomNumbers;
@@ -18,7 +16,6 @@ import us.ihmc.gdx.simulation.environment.GDXBulletPhysicsManager;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.log.LogTools;
 
 import java.util.Random;
 
@@ -33,9 +30,6 @@ public class GDXLibGDXBulletPhysicsDemo3
 
    public GDXLibGDXBulletPhysicsDemo3()
    {
-      Bullet.init();
-      LogTools.info("Loaded Bullet version {}", LinearMath.btGetVersion());
-
       baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override

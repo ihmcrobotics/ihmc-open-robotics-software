@@ -33,6 +33,8 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
    @Override
    public void render()
    {
+      environmentBuilder.update();
+
       baseUI.renderBeforeOnScreenUI();
       baseUI.renderEnd();
    }

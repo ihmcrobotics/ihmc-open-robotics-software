@@ -32,6 +32,7 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
       double heightZ = 2.0447; // these were measured in blender
       double widthY = 0.9144;
       double lengthX = 0.0508;
+      double mass = 100.0;
       RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
       collisionShapeOffset.getTranslation().set(0.0, widthY / 2.0 + 0.003, heightZ / 2.0);
 
@@ -53,6 +54,6 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       wholeThingOffset.appendYawRotation(-Math.PI / 2.0);
 
-      create(realisticModel, collisionGraphic, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside);
+      create(realisticModel, collisionGraphic, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, mass);
    }
 }

@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -17,6 +19,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.gdx.simulation.environment.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXTools;
 
@@ -35,6 +38,7 @@ public class GDXEnvironmentObject
    private Model realisticModel;
    private GDXModelInstance realisticModelInstance;
    private GDXModelInstance collisionModelInstance;
+   private double mass;
    private RigidBodyTransform collisionShapeOffset;
    private RigidBodyTransform wholeThingOffset;
    private Sphere3D boundingSphere;
@@ -52,6 +56,21 @@ public class GDXEnvironmentObject
    private final FramePose3D placementFramePose = new FramePose3D();
    private ReferenceFrame realisticModelFrame;
    private ReferenceFrame collisionModelFrame;
+   private Matrix4 bulletTransform = new Matrix4();
+   private btMotionState bulletMotionState = new btMotionState()
+   {
+      @Override
+      public void setWorldTransform(Matrix4 transformToWorld)
+      {
+         setTransformToWorld(transformToWorld);
+      }
+
+      @Override
+      public void getWorldTransform(Matrix4 transformToWorld)
+      {
+         GDXTools.toGDX(collisionModelFrame.getTransformToWorldFrame(), transformToWorld);
+      }
+   };
 
    public GDXEnvironmentObject(String titleCasedName, GDXEnvironmentObjectFactory factory)
    {
@@ -77,7 +96,8 @@ public class GDXEnvironmentObject
                       RigidBodyTransform wholeThingOffset,
                       Sphere3D boundingSphere,
                       Shape3DBasics collisionGeometryObject,
-                      Function<Point3DReadOnly, Boolean> isPointInside)
+                      Function<Point3DReadOnly, Boolean> isPointInside,
+                      double mass)
    {
       this.realisticModel = realisticModel;
       this.collisionShapeOffset = collisionShapeOffset;
@@ -86,6 +106,7 @@ public class GDXEnvironmentObject
       this.collisionGeometryObject = collisionGeometryObject;
       this.isPointInside = isPointInside;
       this.collisionMesh = collisionGraphic;
+      this.mass = mass;
       realisticModelInstance = new GDXModelInstance(realisticModel);
       collisionModelInstance = new GDXModelInstance(collisionGraphic);
       originalMaterial = new Material(realisticModelInstance.materials.get(0));
@@ -95,6 +116,16 @@ public class GDXEnvironmentObject
       collisionModelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
                                                                                               realisticModelFrame,
                                                                                               collisionShapeOffset);
+   }
+
+   public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
+   {
+
+   }
+
+   public void removeFromBullet(GDXBulletPhysicsManager bulletPhysicsManager)
+   {
+
    }
 
    /**
@@ -168,21 +199,27 @@ public class GDXEnvironmentObject
       return collisionGeometryObject;
    }
 
-   public void set(Point3DReadOnly translation)
+   public void setPositionInWorld(Point3DReadOnly positionInWorld)
    {
-      placementTransform.getTranslation().set(translation);
+      placementTransform.getTranslation().set(positionInWorld);
       updateRenderablesPoses();
    }
 
-   public void set(Pose3D pose)
+   public void setPoseInWorld(Pose3D poseInWorld)
    {
-      pose.get(placementTransform);
+      poseInWorld.get(placementTransform);
       updateRenderablesPoses();
    }
 
-   public void set(RigidBodyTransform transform)
+   public void setTransformToWorld(RigidBodyTransform transformToWorld)
    {
-      placementTransform.set(transform);
+      placementTransform.set(transformToWorld);
+      updateRenderablesPoses();
+   }
+
+   public void setTransformToWorld(Matrix4 transformToWorld)
+   {
+      GDXTools.toEuclid(transformToWorld, placementTransform);
       updateRenderablesPoses();
    }
 
@@ -227,5 +264,10 @@ public class GDXEnvironmentObject
    public GDXEnvironmentObjectFactory getFactory()
    {
       return factory;
+   }
+
+   public btMotionState getBulletMotionState()
+   {
+      return bulletMotionState;
    }
 }
