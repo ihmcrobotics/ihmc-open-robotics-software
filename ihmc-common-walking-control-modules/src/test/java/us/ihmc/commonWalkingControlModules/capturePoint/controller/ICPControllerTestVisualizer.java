@@ -124,7 +124,7 @@ public class ICPControllerTestVisualizer
       //      yoGraphicsListRegistry.registerArtifact("ICPControllerTest", finalDesiredCapturePointViz.createArtifact());
       //      yoGraphicsListRegistry.registerArtifact("ICPControllerTest", finalDesiredCoMViz.createArtifact());
       YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
-      perfectCMPArtifact.setVisible(false);
+//      perfectCMPArtifact.setVisible(false);
       yoGraphicsListRegistry.registerArtifact("ICPControllerTest", perfectCMPArtifact);
       //      YoArtifactPosition perfectCoPArtifact = perfectCoPViz.createArtifact();
       //      perfectCoPArtifact.setVisible(false);
