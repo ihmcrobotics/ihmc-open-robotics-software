@@ -254,7 +254,7 @@ public class DataExporterExcelWorkbookCreator
    {
       double ret = 0.0;
       double[] mechanicalPower = computeTotalUnsignedMechanicalPower();
-      double simulationTime = dataBuffer.getEntry(robot.getYoTime()).getUpperBound();
+      double simulationTime = dataBuffer.getEntry(robot.getYoTime()).getUpperBound() - dataBuffer.getEntry(robot.getYoTime()).getLowerBound();
       double simulationDT = simulationTime / dataBuffer.getBufferSize();
 
       for (int i = 0; i < mechanicalPower.length; i++)
@@ -403,12 +403,15 @@ public class DataExporterExcelWorkbookCreator
          YoBufferVariableEntry position = dataBuffer.getEntry(joint.getQYoVariable());
          YoBufferVariableEntry speed = dataBuffer.getEntry(joint.getQDYoVariable());
          YoBufferVariableEntry torque = dataBuffer.getEntry(joint.getTauYoVariable());
+         YoBufferVariableEntry acceleration = dataBuffer.getEntry(joint.getQDDYoVariable());
 
          writeJointDataColumn(jointDataSheet, column++, position, false);
          writeJointDataColumn(jointDataSheet, column++, speed, false);
          writeJointDataColumn(jointDataSheet, column++, speed, true);
          writeJointDataColumn(jointDataSheet, column++, torque, false);
          writeJointDataColumn(jointDataSheet, column++, torque, true);
+         writeJointDataColumn(jointDataSheet, column++, acceleration, false);
+         writeJointDataColumn(jointDataSheet, column++, acceleration, true);
          writeMechanicalPowerJointDataColumn(jointDataSheet, column++, speed, torque, joint.getName());
       }
    }
