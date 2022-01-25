@@ -14,7 +14,9 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.CaptureRegionStepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ErrorBasedStepAdjustmentController;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
@@ -83,6 +85,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BalanceManager
 {
+   private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
 
@@ -98,7 +101,7 @@ public class BalanceManager
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
-   private final ErrorBasedStepAdjustmentController stepAdjustmentController;
+   private final StepAdjustmentController stepAdjustmentController;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
@@ -294,14 +297,25 @@ public class BalanceManager
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
 
-      stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
-                                                                        controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
-                                                                        bipedSupportPolygons,
-                                                                        icpControlPolygons,
-                                                                        controllerToolbox.getContactableFeet(),
-                                                                        controllerToolbox.getControlDT(),
-                                                                        registry,
-                                                                        yoGraphicsListRegistry);
+      if (USE_ERROR_BASED_STEP_ADJUSTMENT)
+      {
+         stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
+                                                                           controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+                                                                           bipedSupportPolygons,
+                                                                           icpControlPolygons,
+                                                                           controllerToolbox.getContactableFeet(),
+                                                                           controllerToolbox.getControlDT(),
+                                                                           registry,
+                                                                           yoGraphicsListRegistry);
+      }
+      else
+      {
+         stepAdjustmentController = new CaptureRegionStepAdjustmentController(walkingControllerParameters,
+                                                                              controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+                                                                              bipedSupportPolygons,
+                                                                              registry,
+                                                                              yoGraphicsListRegistry);
+      }
 
       String graphicListName = getClass().getSimpleName();
 
