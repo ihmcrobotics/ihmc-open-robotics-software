@@ -12,4 +12,9 @@ public class LIPMWalkerRobot
       RobotDefinitionFixedFrame definition = new RobotDefinitionFixedFrame();
       robot = new Robot(definition, "LIPMWalker");
    }
+
+   public Robot getRobot()
+   {
+      return robot;
+   }
 }
