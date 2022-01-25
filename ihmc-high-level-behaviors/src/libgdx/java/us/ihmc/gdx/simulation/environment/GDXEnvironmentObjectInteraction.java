@@ -157,7 +157,6 @@ public class GDXEnvironmentObjectInteraction
 
    public void resetSelection()
    {
-
       selectedObject = null;
       intersectedObject = null;
    }
