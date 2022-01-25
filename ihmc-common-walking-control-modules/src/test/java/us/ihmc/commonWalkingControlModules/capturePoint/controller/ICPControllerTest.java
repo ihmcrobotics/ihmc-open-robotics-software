@@ -48,19 +48,37 @@ public class ICPControllerTest
    private static final double footLength = 0.25;
    private static final double stanceWidth = 0.35;
 
-   private static boolean visualize = true;
+   private static boolean visualize = false;
+   private static boolean testHeuristicController = false;
 
    @BeforeEach
    public void setup()
    {
       visualize &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    }
+
    @AfterEach
    public void tearDown()
    {
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
+   private ICPControllerInterface createICPController(TestWalkingControllerParameters walkingControllerParameters,
+                                                      TestICPOptimizationParameters optimizationParameters,
+                                                      BipedSupportPolygons bipedSupportPolygons,
+                                                      Object object,
+                                                      SideDependentList<FootSpoof> contactableFeet,
+                                                      double controlDT,
+                                                      YoRegistry registry,
+                                                      YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      if (testHeuristicController)
+         return new HeuristicICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         
+      else         
+      return new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+   }
+   
    public static void main(String[] args) throws Exception
    {
       ICPControllerTest test = new ICPControllerTest();
@@ -79,7 +97,7 @@ public class ICPControllerTest
       double controlDT = 0.001;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      ICPControllerInterface controller = createICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       ICPControllerTestVisualizer visualizer = null;
@@ -130,8 +148,7 @@ public class ICPControllerTest
          ThreadTools.sleepForever();
       }
    }
-   
-   
+
    @Test
    public void testKeepAwayFromEdgeIfNotNecessaryInSingleSupport() throws Exception
    {
@@ -148,7 +165,7 @@ public class ICPControllerTest
       double controlDT = 0.001;
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      ICPControllerInterface controller = createICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       ICPControllerTestVisualizer visualizer = null;
@@ -222,7 +239,7 @@ public class ICPControllerTest
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      ICPControllerInterface controller = createICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       ICPControllerTestVisualizer visualizer = null;
@@ -293,15 +310,8 @@ public class ICPControllerTest
       double controlDT = 0.001;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      ICPControllerInterface controller = createICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
-
-      ICPControllerTestVisualizer visualizer = null;
-      if (visualize)
-      {
-         visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
-      }
 
       double omega = walkingControllerParameters.getOmega0();
 
@@ -321,10 +331,7 @@ public class ICPControllerTest
       currentICP.set(desiredICP);
       currentICP.add(icpError);
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
-
-      if (visualize)
-         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
-
+      
       controller.initialize();
       controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
 
@@ -333,8 +340,13 @@ public class ICPControllerTest
       controller.getDesiredCMP(desiredCMP);
       controller.getDesiredCoP(desiredCoP);
 
+      ICPControllerTestVisualizer visualizer = null;
       if (visualize)
+      {
+         visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
+         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
          visualizer.updateOutputs(desiredCoP, desiredCMP);
+      }
 
       Assert.assertTrue(desiredCMP.epsilonEquals(perfectCMP, epsilon));
 
@@ -355,7 +367,9 @@ public class ICPControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      ICPControllerInterface controller = createICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -396,11 +410,11 @@ public class ICPControllerTest
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
 
-      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, graphicsListRegistry);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      ICPControllerInterface controller = createICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
-      boolean visualize = false;
+      boolean visualize = true;
       
       double omega = walkingControllerParameters.getOmega0();
 
@@ -448,7 +462,7 @@ public class ICPControllerTest
       ICPControllerTestVisualizer visualizer;
       if (visualize)
       {
-         visualizer = new ICPControllerTestVisualizer(registry, graphicsListRegistry);
+         visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
          visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
          visualizer.updateOutputs(desiredCMP, desiredCMP);
          ThreadTools.sleepForever();
@@ -558,7 +572,8 @@ public class ICPControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      ICPControllerInterface controller = createICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
