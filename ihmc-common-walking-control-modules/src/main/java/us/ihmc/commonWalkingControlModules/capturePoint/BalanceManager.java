@@ -202,6 +202,7 @@ public class BalanceManager
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final SimpleFootstep currentFootstep = new SimpleFootstep();
    private final SimpleFootstep nextFootstep = new SimpleFootstep();
+   private final FootstepTiming nextFootstepTiming = new FootstepTiming();
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
@@ -806,8 +807,9 @@ public class BalanceManager
       currentTiming.set(footstepTimings.get(0));
       currentFootstep.set(footsteps.get(0));
       nextFootstep.set(footsteps.get(1));
+      nextFootstepTiming.set(footstepTimings.get(1));
       stepAdjustmentController.reset();
-      stepAdjustmentController.setNextFootstep(nextFootstep);
+      stepAdjustmentController.setNextFootstep(nextFootstep, nextFootstepTiming);
       stepAdjustmentController.setFootstepToAdjust(currentFootstep, currentTiming.getSwingTime(), currentTiming.getTransferTime());
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
 

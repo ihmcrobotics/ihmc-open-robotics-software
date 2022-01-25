@@ -18,6 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
@@ -147,6 +148,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    public void reset()
    {
       nextFootstep = null;
+      nextFootstepTiming = null;
       reachabilityConstraintHandler.reset();
       isInSwing.set(false);
       upcomingFootstep.setToNaN();
@@ -157,10 +159,12 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    }
 
    private SimpleFootstep nextFootstep;
+   private FootstepTiming nextFootstepTiming;
 
-   public void setNextFootstep(SimpleFootstep nextFootstep)
+   public void setNextFootstep(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming)
    {
       this.nextFootstep = nextFootstep;
+      this.nextFootstepTiming = nextFootstepTiming;
    }
 
    @Override
@@ -248,7 +252,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                      allowableAreaForCoP);
 
       if (nextFootstep != null)
-         twoStepCaptureRegionCalculator.computeFromStepGoal(0.6, nextFootstep, omega0, captureRegionCalculator.getCaptureRegion());
+         twoStepCaptureRegionCalculator.computeFromStepGoal(nextFootstepTiming.getStepTime(), nextFootstep, omega0, captureRegionCalculator.getCaptureRegion());
       //      else
       //         inverseCaptureRegionCalculator.reset();
 
