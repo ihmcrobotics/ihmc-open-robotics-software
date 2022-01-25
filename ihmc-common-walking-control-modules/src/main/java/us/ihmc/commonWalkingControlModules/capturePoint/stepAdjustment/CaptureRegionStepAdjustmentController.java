@@ -1,16 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -24,17 +20,13 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -87,7 +79,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
 
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   private final InverseCaptureRegionCalculator inverseCaptureRegionCalculator;
+   private final TwoStepCaptureRegionCalculator twoStepCaptureRegionCalculator;
 
    public CaptureRegionStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                                 SideDependentList<? extends ReferenceFrame> soleZUpFrames,
@@ -123,7 +115,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                                                yoGraphicsListRegistry);
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
-      inverseCaptureRegionCalculator = new InverseCaptureRegionCalculator(walkingControllerParameters, icpOptimizationParameters, soleZUpFrames, registry, yoGraphicsListRegistry);
+      twoStepCaptureRegionCalculator = new TwoStepCaptureRegionCalculator(registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -161,7 +153,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       footstepSolution.setToNaN();
       footstepWasAdjusted.set(false);
       captureRegionCalculator.hideCaptureRegion();
-      inverseCaptureRegionCalculator.reset();
+      twoStepCaptureRegionCalculator.reset();
    }
 
    private SimpleFootstep nextFootstep;
@@ -247,16 +239,18 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
 
       computeLimitedAreaForCoP();
 
-      if (nextFootstep != null)
-         inverseCaptureRegionCalculator.computeFromStepGoal(0.6, nextFootstep, omega0);
-//      else
-//         inverseCaptureRegionCalculator.reset();
+
 
       captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(),
                                                      timeRemainingInState.getDoubleValue(),
                                                      currentICP,
                                                      omega0,
                                                      allowableAreaForCoP);
+
+      if (nextFootstep != null)
+         twoStepCaptureRegionCalculator.computeFromStepGoal(0.6, nextFootstep, omega0, captureRegionCalculator.getCaptureRegion());
+      //      else
+      //         inverseCaptureRegionCalculator.reset();
 
       if (!useStepAdjustment.getBooleanValue())
          return;
@@ -274,7 +268,10 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       adjustedSolutionInControlPlane.set(upcomingFootstep.getPosition());
 //      adjustedSolutionInControlPlane.add(deadbandedAdjustment);
 
-      captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
+      if (twoStepCaptureRegionCalculator.hasTwoStepRegion())
+         captureRegionInWorld.setIncludingFrame(twoStepCaptureRegionCalculator.getCaptureRegion());
+      else
+         captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
       captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       boolean adjusted = captureRegionInWorld.orthogonalProjection(adjustedSolutionInControlPlane);
