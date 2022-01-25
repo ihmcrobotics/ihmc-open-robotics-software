@@ -49,6 +49,11 @@ public class HeightMapPlanarRegionCalculator
             int centerIndex = heightMapData.getCenterIndex();
             int key = HeightMapTools.indicesToKey(xi, yi, centerIndex);
 
+            /* Don't calculate if ground plane */
+            if (heightMapData.isCellAtGroundPlane(xi, yi))
+            {
+               continue;
+            }
             /* Check if already assigned */
             if (regionIds[key] >= 0)
             {
