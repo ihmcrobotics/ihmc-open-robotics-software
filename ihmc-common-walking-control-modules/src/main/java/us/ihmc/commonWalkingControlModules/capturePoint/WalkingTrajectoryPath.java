@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.Axis3D;
@@ -14,6 +16,7 @@ import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -25,7 +28,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.lists.YoPreallocatedList;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
+import us.ihmc.robotics.math.trajectories.generators.MultiCubicSpline1DSolver;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -42,8 +45,7 @@ public class WalkingTrajectoryPath
    private final String namePrefix = "walkingTrajectoryPath";
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final Polynomial[] linearPolynomials = {new Polynomial(12), new Polynomial(12), new Polynomial(12)};
-   private final Polynomial yawPolynomial = new Polynomial(12);
+   private final TrajectoryManager trajectoryManager = new TrajectoryManager();
 
    private final YoPreallocatedList<WaypointData> waypoints;
 
@@ -212,16 +214,21 @@ public class WalkingTrajectoryPath
 
       double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
 
-      for (Axis3D axis : Axis3D.values)
+      if (footsteps.isEmpty())
       {
-         linearPolynomials[axis.ordinal()].compute(currentTime);
-         currentPosition.setElement(axis, linearPolynomials[axis.ordinal()].getValue());
-         currentLinearVelocity.setElement(axis, linearPolynomials[axis.ordinal()].getVelocity());
+         WaypointData firstWaypoint = waypoints.getFirst();
+         currentPosition.set(firstWaypoint.position);
+         currentLinearVelocity.set(firstWaypoint.linearVelocity);
+         currentYaw.set(AngleTools.trimAngleMinusPiToPi(firstWaypoint.yaw.getValue()));
+         currentYawRate.set(firstWaypoint.yawRate.getValue());
       }
-
-      yawPolynomial.compute(currentTime);
-      currentYaw.set(AngleTools.trimAngleMinusPiToPi(yawPolynomial.getValue()));
-      currentYawRate.set(yawPolynomial.getVelocity());
+      else
+      {
+         trajectoryManager.computePosition(currentTime, currentPosition);
+         trajectoryManager.computeLinearVelocity(currentTime, currentLinearVelocity);
+         currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
+         currentYawRate.set(trajectoryManager.computeYawRate(currentTime));
+      }
 
       lastPosition.set(currentPosition);
       lastYaw.set(currentYaw.getValue());
@@ -241,11 +248,7 @@ public class WalkingTrajectoryPath
       {
          double t = ((double) i) / (trajectoryPositionViz.getNumberOfBalls() - 1.0) * totalDuration.getValue();
 
-         for (Axis3D axis : Axis3D.values)
-         {
-            linearPolynomials[axis.ordinal()].compute(t);
-            tempBallPosition.setElement(axis, linearPolynomials[axis.ordinal()].getValue());
-         }
+         trajectoryManager.computePosition(t, tempBallPosition);
          trajectoryPositionViz.setBall(tempBallPosition, i);
       }
    }
@@ -257,65 +260,14 @@ public class WalkingTrajectoryPath
 
    private void updatePolynomials()
    {
-      if (footsteps.isEmpty())
+      if (!footsteps.isEmpty())
       {
-         for (Axis3D axis : Axis3D.values)
-         {
-            Polynomial polynomial = linearPolynomials[axis.ordinal()];
-            polynomial.setConstant(waypoints.getFirst().getPosition(axis));
-         }
-
-         // Yaw part
-         yawPolynomial.setConstant(waypoints.getFirst().yaw.getValue());
-      }
-      else
-      {
-         for (Axis3D axis : Axis3D.values)
-         {
-            Polynomial polynomial = linearPolynomials[axis.ordinal()];
-            polynomial.setTime(0, totalDuration.getValue());
-            polynomial.reshape(waypoints.size() + 0);
-            int row = 0;
-            polynomial.setPositionRow(row++, waypoints.getFirst().time.getValue(), waypoints.getFirst().getPosition(axis));
-//            polynomial.setVelocityRow(row++, waypoints.getFirst().time.getValue(), waypoints.getFirst().getLinearVelocity(axis));
-
-            for (int i = 1; i < waypoints.size(); i++)
-            {
-               WaypointData waypoint = waypoints.get(i);
-               polynomial.setPositionRow(row++, waypoint.time.getValue(), waypoint.getPosition(axis));
-            }
-//            polynomial.setVelocityRow(row++, totalDuration.getValue(), 0.0);
-            polynomial.setIsConstraintMatrixUpToDate(true);
-            polynomial.initialize();
-
-            for (int i = 1; i < waypoints.size() - 1; i++)
-            {
-               WaypointData waypoint = waypoints.get(i);
-               polynomial.compute(waypoint.time.getValue());
-               waypoint.setLinearVelocity(axis, polynomial.getVelocity());
-            }
-         }
-
-         // Yaw part
-         yawPolynomial.setTime(0, totalDuration.getValue());
-         yawPolynomial.reshape(waypoints.size() + 2);
-         int row = 0;
-         yawPolynomial.setPositionRow(row++, 0.0, waypoints.getFirst().yaw.getValue());
-         yawPolynomial.setVelocityRow(row++, 0.0, waypoints.getFirst().yawRate.getValue());
-
-         for (int i = 1; i < waypoints.size(); i++)
-         {
-            yawPolynomial.setPositionRow(row++, waypoints.get(i).time.getValue(), waypoints.get(i).yaw.getValue());
-         }
-         yawPolynomial.setVelocityRow(row++, totalDuration.getValue(), 0.0);
-         yawPolynomial.setIsConstraintMatrixUpToDate(true);
-         yawPolynomial.initialize();
-
+         trajectoryManager.initialize(waypoints);
          for (int i = 1; i < waypoints.size() - 1; i++)
          {
             WaypointData waypoint = waypoints.get(i);
-            yawPolynomial.compute(waypoint.time.getValue());
-            waypoint.yawRate.set(yawPolynomial.getVelocity());
+            trajectoryManager.computeLinearVelocity(waypoint.time.getValue(), waypoint.linearVelocity);
+            waypoint.yawRate.set(trajectoryManager.computeYawRate(waypoint.time.getValue()));
          }
       }
    }
@@ -395,6 +347,77 @@ public class WalkingTrajectoryPath
       {
          return name + ", time: " + time.getValue() + ", pos: " + EuclidCoreIOTools.getTuple3DString(position) + ", yaw: " + yaw.getValue() + ", lin. vel.: "
                + EuclidCoreIOTools.getTuple3DString(linearVelocity) + ", yaw rate: " + yawRate.getValue();
+      }
+   }
+
+   private static class TrajectoryManager
+   {
+      private final DMatrixRMaj[] linearSolutions = {new DMatrixRMaj(1, 1), new DMatrixRMaj(1, 1), new DMatrixRMaj(1, 1)};
+      private final DMatrixRMaj yawSolution = new DMatrixRMaj(1, 1);
+      private final MultiCubicSpline1DSolver solver = new MultiCubicSpline1DSolver();
+      private double totalDuration;
+
+      public void initialize(YoPreallocatedList<WaypointData> waypoints)
+      {
+         totalDuration = waypoints.getLast().time.getValue();
+
+         for (Axis3D axis : Axis3D.values)
+         {
+            solver.clearWaypoints();
+            solver.clearWeights();
+            solver.setEndpoints(waypoints.getFirst().getPosition(axis),
+                                waypoints.getFirst().getLinearVelocity(axis),
+                                waypoints.getLast().getPosition(axis),
+                                waypoints.getLast().getLinearVelocity(axis));
+
+            for (int i = 1; i < waypoints.size() - 1; i++)
+            {
+               WaypointData waypoint = waypoints.get(i);
+               solver.addWaypoint(waypoint.getPosition(axis), waypoint.time.getValue() / totalDuration);
+            }
+
+            solver.solve(linearSolutions[axis.ordinal()]);
+         }
+
+         solver.clearWaypoints();
+         solver.clearWeights();
+         solver.setEndpoints(waypoints.getFirst().yaw.getValue(),
+                             waypoints.getFirst().yawRate.getValue(),
+                             waypoints.getLast().yaw.getValue(),
+                             waypoints.getLast().yawRate.getValue());
+
+         for (int i = 1; i < waypoints.size() - 1; i++)
+         {
+            WaypointData waypoint = waypoints.get(i);
+            solver.addWaypoint(waypoint.yaw.getValue(), waypoint.time.getValue() / totalDuration);
+         }
+
+         solver.solve(yawSolution);
+      }
+
+      public void computePosition(double time, Tuple3DBasics positionToPack)
+      {
+         positionToPack.setX(solver.computePosition(time / totalDuration, linearSolutions[0]));
+         positionToPack.setY(solver.computePosition(time / totalDuration, linearSolutions[1]));
+         positionToPack.setZ(solver.computePosition(time / totalDuration, linearSolutions[2]));
+      }
+
+      public double computeYaw(double time)
+      {
+         return solver.computePosition(time / totalDuration, yawSolution);
+      }
+
+      public void computeLinearVelocity(double time, Tuple3DBasics velocityToPack)
+      {
+         velocityToPack.setX(solver.computeVelocity(time / totalDuration, linearSolutions[0]));
+         velocityToPack.setY(solver.computeVelocity(time / totalDuration, linearSolutions[1]));
+         velocityToPack.setZ(solver.computeVelocity(time / totalDuration, linearSolutions[2]));
+         velocityToPack.scale(1.0 / totalDuration);
+      }
+
+      public double computeYawRate(double time)
+      {
+         return solver.computeVelocity(time / totalDuration, yawSolution) / totalDuration;
       }
    }
 }
