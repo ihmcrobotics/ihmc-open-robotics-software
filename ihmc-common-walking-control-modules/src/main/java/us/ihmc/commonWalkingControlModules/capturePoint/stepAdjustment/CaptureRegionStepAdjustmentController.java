@@ -62,9 +62,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    private final YoEnum<RobotSide> upcomingFootstepSide = new YoEnum<>(yoNamePrefix + "UpcomingFootstepSide", registry, RobotSide.class);
    private final RecyclingArrayList<Point2D> upcomingFootstepContactPoints = new RecyclingArrayList<>(Point2D.class);
 
-   private final FramePoint3D referencePositionInControlPlane = new FramePoint3D();
-   private final FramePoint3D tempPoint = new FramePoint3D();
-
    private final YoFramePose3D footstepSolution = new YoFramePose3D(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
    private final YoFramePoint2D adjustedSolutionInControlPlane = new YoFramePoint2D(yoNamePrefix + "adjustedSolutionInControlPlane", worldFrame, registry);
 
@@ -89,6 +86,8 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
 
    private final BipedSupportPolygons bipedSupportPolygons;
+
+   private final InverseCaptureRegionCalculator inverseCaptureRegionCalculator;
 
    public CaptureRegionStepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                                 SideDependentList<? extends ReferenceFrame> soleZUpFrames,
@@ -124,6 +123,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
                                                                                yoGraphicsListRegistry);
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
+      inverseCaptureRegionCalculator = new InverseCaptureRegionCalculator(walkingControllerParameters, icpOptimizationParameters, soleZUpFrames, registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -154,12 +154,21 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    @Override
    public void reset()
    {
+      nextFootstep = null;
       reachabilityConstraintHandler.reset();
       isInSwing.set(false);
       upcomingFootstep.setToNaN();
       footstepSolution.setToNaN();
       footstepWasAdjusted.set(false);
       captureRegionCalculator.hideCaptureRegion();
+      inverseCaptureRegionCalculator.reset();
+   }
+
+   private SimpleFootstep nextFootstep;
+
+   public void setNextFootstep(SimpleFootstep nextFootstep)
+   {
+      this.nextFootstep = nextFootstep;
    }
 
    @Override
@@ -237,6 +246,11 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
       computeTimeRemainingInState();
 
       computeLimitedAreaForCoP();
+
+      if (nextFootstep != null)
+         inverseCaptureRegionCalculator.computeFromStepGoal(0.6, nextFootstep, omega0);
+//      else
+//         inverseCaptureRegionCalculator.reset();
 
       captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(),
                                                      timeRemainingInState.getDoubleValue(),

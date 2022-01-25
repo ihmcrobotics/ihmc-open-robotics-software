@@ -101,7 +101,7 @@ public class BalanceManager
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
-   private final StepAdjustmentController stepAdjustmentController;
+   private final CaptureRegionStepAdjustmentController stepAdjustmentController;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
@@ -201,6 +201,7 @@ public class BalanceManager
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final SimpleFootstep currentFootstep = new SimpleFootstep();
+   private final SimpleFootstep nextFootstep = new SimpleFootstep();
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
@@ -299,14 +300,15 @@ public class BalanceManager
 
       if (USE_ERROR_BASED_STEP_ADJUSTMENT)
       {
-         stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
-                                                                           controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
-                                                                           bipedSupportPolygons,
-                                                                           icpControlPolygons,
-                                                                           controllerToolbox.getContactableFeet(),
-                                                                           controllerToolbox.getControlDT(),
-                                                                           registry,
-                                                                           yoGraphicsListRegistry);
+         stepAdjustmentController = null;
+//         stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
+//                                                                           controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+//                                                                           bipedSupportPolygons,
+//                                                                           icpControlPolygons,
+//                                                                           controllerToolbox.getContactableFeet(),
+//                                                                           controllerToolbox.getControlDT(),
+//                                                                           registry,
+//                                                                           yoGraphicsListRegistry);
       }
       else
       {
@@ -803,7 +805,9 @@ public class BalanceManager
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
       currentTiming.set(footstepTimings.get(0));
       currentFootstep.set(footsteps.get(0));
+      nextFootstep.set(footsteps.get(1));
       stepAdjustmentController.reset();
+      stepAdjustmentController.setNextFootstep(nextFootstep);
       stepAdjustmentController.setFootstepToAdjust(currentFootstep, currentTiming.getSwingTime(), currentTiming.getTransferTime());
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
 
