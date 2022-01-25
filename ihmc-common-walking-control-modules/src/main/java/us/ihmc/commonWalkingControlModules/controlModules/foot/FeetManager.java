@@ -100,7 +100,7 @@ public class FeetManager
 
       toeOffCalculator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, registry);
 
-      toeOffManager = new ToeOffManager(controllerToolbox, toeOffCalculator, walkingControllerParameters, feet, registry, graphicsListRegistry);
+      toeOffManager = new ToeOffManager(controllerToolbox, toeOffCalculator, walkingControllerParameters, feet, registry, null);
 
       this.footSwitches = controllerToolbox.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
