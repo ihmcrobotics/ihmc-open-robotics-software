@@ -50,6 +50,7 @@ public class TwoStepCaptureRegionCalculator
 
    public void computeFromStepGoal(double minSwingAndTransferTime, SimpleFootstep stepGoal, double omega, FrameConvexPolygon2DReadOnly oneStepCaptureRegion)
    {
+      hasTwoStepRegion.set(true);
       twoStepRegion.clear();
       twoStepRegion.setMatchingFrame(oneStepCaptureRegion, false);
       twoStepRegion.changeFrame(ReferenceFrame.getWorldFrame());
