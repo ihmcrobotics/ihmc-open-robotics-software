@@ -6,6 +6,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class LIPMWalkerController implements RobotController
 {
 
+   private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
    @Override
    public void initialize()
    {
@@ -17,7 +19,7 @@ public class LIPMWalkerController implements RobotController
    public YoRegistry getYoRegistry()
    {
       // TODO Auto-generated method stub
-      return null;
+      return registry;
    }
 
    @Override
