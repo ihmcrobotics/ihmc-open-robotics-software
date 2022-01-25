@@ -29,6 +29,12 @@ public class GDXEnvironmentObjectFactory
             {
                e.printStackTrace();
             }
+
+            if (environmentObject == null)
+            {
+               throw new RuntimeException("Why is this null?");
+            }
+
             return environmentObject;
          };
       }

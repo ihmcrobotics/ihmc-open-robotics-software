@@ -181,6 +181,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    {
       loadedFilesOnce = true;
       selectedEnvironmentFile = environmentFile;
+      simulate.set(false);
       for (GDXEnvironmentObject object : allObjects.toArray(new GDXEnvironmentObject[0]))
       {
          removeObject(object);

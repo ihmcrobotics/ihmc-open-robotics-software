@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation.environment.object.objects;
+package us.ihmc.gdx.simulation.environment.object.objects.door;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -14,20 +14,20 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
-public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
+public class GDXDoorPushHandleRightFiducialStaticHandleObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Push Handle Right Door";
-   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXPushHandleRightDoorObject.class);
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDoorPushHandleRightFiducialStaticHandleObject.class);
 
-   public GDXPushHandleRightDoorObject()
+   public GDXDoorPushHandleRightFiducialStaticHandleObject()
    {
       this(YoAppearance.LightSkyBlue());
    }
 
-   public GDXPushHandleRightDoorObject(AppearanceDefinition collisionMeshColor)
+   public GDXDoorPushHandleRightFiducialStaticHandleObject(AppearanceDefinition collisionMeshColor)
    {
       super(NAME, FACTORY);
-      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/door/fiducialDoor/FiducialDoor.g3dj");
+      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/door/doorPushHandleRightFiducialStaticHandle/FiducialDoor.g3dj");
 
       double heightZ = 2.0447; // these were measured in blender
       double widthY = 0.9144;

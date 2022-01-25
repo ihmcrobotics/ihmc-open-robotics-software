@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation.environment.object.objects;
+package us.ihmc.gdx.simulation.environment.object.objects.door;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -13,12 +13,12 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
-public class GDXDoorFrameObject extends GDXEnvironmentObject
+public class GDXDoorCombinedObject extends GDXEnvironmentObject
 {
-   public static final String NAME = "Door Frame";
-   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDoorFrameObject.class);
+   public static final String NAME = "Door Combined";
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDoorCombinedObject.class);
 
-   public GDXDoorFrameObject()
+   public GDXDoorCombinedObject()
    {
       super(NAME, FACTORY);
       Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/door/DoorFrame.g3dj");

@@ -83,7 +83,7 @@ public class GDXBulletPhysicsManager
    {
       int maxSubSteps = 0; // 0 means use variable time step
       float fixedTimeStep = 0.0f; // value not used for variable time step
-      discreteDynamicsWorld.stepSimulation(timeStep, maxSubSteps, fixedTimeStep);
+      discreteDynamicsWorld.stepSimulation(timeStep, maxSubSteps, fixedTimeStep); // FIXME: Sometimes EXCEPTION_ACCESS_VIOLATION
    }
 
    public void removeCollisionObject(btCollisionObject collisionObject)
@@ -102,5 +102,10 @@ public class GDXBulletPhysicsManager
          // Can probably just call removeCollisionObject
          discreteDynamicsWorld.removeRigidBody(rigidBody);
       }
+   }
+
+   public btDiscreteDynamicsWorld getDiscreteDynamicsWorld()
+   {
+      return discreteDynamicsWorld;
    }
 }
