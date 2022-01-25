@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.HeightMapMessagePubSubType;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -38,8 +39,8 @@ public class HeightMapSnapperVisualizer
    public HeightMapSnapperVisualizer()
    {
 //      File file = loadThroughChooser();
-//      File file = new File(System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + "stepping_stones.json");
-      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stairs_1.json");
+      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stepping_stones_4.json");
+//      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stairs_1.json");
 //      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "cinders.json");
 
       if (file == null)
@@ -70,7 +71,7 @@ public class HeightMapSnapperVisualizer
       polygon.addVertex(-0.11, -0.055);
       polygon.update();
 
-      long start = System.nanoTime();
+      long t0 = System.nanoTime();
 
 //      HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
 //      surfaceNormalCalculator.computeSurfaceNormals(heightMapData, 0.3);
@@ -78,11 +79,14 @@ public class HeightMapSnapperVisualizer
       HeightMapRANSACNormalCalculator surfaceNormalCalculator = new HeightMapRANSACNormalCalculator();
       surfaceNormalCalculator.computeSurfaceNormals(heightMapData);
 
+      long t1 = System.nanoTime();
+      System.out.println("Surface normal calculation: " + Conversions.nanosecondsToSeconds(t1 - t0) + " sec");
+
       HeightMapPlanarRegionCalculator planarRegionCalculator = new HeightMapPlanarRegionCalculator();
       planarRegionCalculator.computeRegions(heightMapData, surfaceNormalCalculator::getSurfaceNormal);
 
-      long stop = System.nanoTime();
-      System.out.println((stop - start));
+      long t2 = System.nanoTime();
+      System.out.println("Planar region calculation:  " + Conversions.nanosecondsToSeconds(t2 - t1) + " sec");
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       scs.setGroundVisible(false);

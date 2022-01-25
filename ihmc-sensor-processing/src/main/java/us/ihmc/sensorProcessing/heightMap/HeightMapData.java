@@ -139,6 +139,11 @@ public class HeightMapData
       return Double.isNaN(height) ? estimatedGroundHeight : height;
    }
 
+   public boolean isCellAtGroundPlane(int xIndex, int yIndex)
+   {
+      return Double.isNaN(heights[HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex)]);
+   }
+
    public void setEstimatedGroundHeight(double estimatedGroundHeight)
    {
       this.estimatedGroundHeight = estimatedGroundHeight;

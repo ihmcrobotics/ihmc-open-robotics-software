@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -9,6 +10,8 @@ import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class HeightMapRANSACNormalCalculator
@@ -33,6 +36,8 @@ public class HeightMapRANSACNormalCalculator
    private final Point3D point0 = new Point3D();
    private final Point3D point1 = new Point3D();
    private final TIntArrayList samples = new TIntArrayList();
+
+   private final List<TIntArrayList> parallelIndices = new ArrayList<>();
 
    private final Random random = new Random(3290);
 
@@ -76,6 +81,12 @@ public class HeightMapRANSACNormalCalculator
       {
          for (int yIndex = 0; yIndex < gridWidth; yIndex++)
          {
+            if (heightMapData.isCellAtGroundPlane(xIndex, yIndex))
+            {
+               surfaceNormals[HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex)] = new UnitVector3D(Axis3D.Z);
+               continue;
+            }
+
             int xOffset0, yOffset0, xOffset1, yOffset1;
             int xIndex0, yIndex0, xIndex1, yIndex1;
 
@@ -117,7 +128,6 @@ public class HeightMapRANSACNormalCalculator
                      continue;
                   }
 
-                  // TODO precompute which indices are parallel
                   double dotProduct = (xOffset0 * xOffset1 + yOffset0 * yOffset1) / (EuclidCoreTools.norm(xOffset0, yOffset0) * EuclidCoreTools.norm(xOffset1, yOffset1));
                   if (EuclidCoreTools.epsilonEquals(Math.abs(dotProduct), 1.0, 1e-5))
                   {
