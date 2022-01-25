@@ -12,8 +12,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -63,6 +65,8 @@ public class WalkingTrajectoryPath
    private final YoFrameVector3D lastLinearVelocity = new YoFrameVector3D(namePrefix + "LastLinearVelocity", worldFrame, registry);
    private final YoDouble lastYawRate = new YoDouble(namePrefix + "LastYawRate", registry);
 
+   private final BagOfBalls trajectoryPositionViz;
+
    private final MovingReferenceFrame walkingTrajectoryPathFrame = new MovingReferenceFrame("walkingTrajectoryPathFrame", worldFrame, true)
    {
       @Override
@@ -100,7 +104,14 @@ public class WalkingTrajectoryPath
                                            registry,
                                            10);
       if (yoGraphicList != null)
+      {
+         trajectoryPositionViz = new BagOfBalls(100, 0.005, "walkingPathViz", YoAppearance.Red(), registry, yoGraphicsListRegistry);
          yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
+      }
+      else
+      {
+         trajectoryPositionViz = null;
+      }
 
       reset();
       clearFootsteps();
@@ -218,6 +229,25 @@ public class WalkingTrajectoryPath
       lastYawRate.set(currentYawRate.getValue());
 
       walkingTrajectoryPathFrame.update();
+
+      updateViz();
+   }
+
+   private final Point3D tempBallPosition = new Point3D();
+
+   private void updateViz()
+   {
+      for (int i = 0; i < trajectoryPositionViz.getNumberOfBalls(); i++)
+      {
+         double t = ((double) i) / (trajectoryPositionViz.getNumberOfBalls() - 1.0) * totalDuration.getValue();
+
+         for (Axis3D axis : Axis3D.values)
+         {
+            linearPolynomials[axis.ordinal()].compute(t);
+            tempBallPosition.setElement(axis, linearPolynomials[axis.ordinal()].getValue());
+         }
+         trajectoryPositionViz.setBall(tempBallPosition, i);
+      }
    }
 
    private void updateFirstWaypoint()
@@ -244,16 +274,17 @@ public class WalkingTrajectoryPath
          {
             Polynomial polynomial = linearPolynomials[axis.ordinal()];
             polynomial.setTime(0, totalDuration.getValue());
-            polynomial.reshape(waypoints.size() + 2);
+            polynomial.reshape(waypoints.size() + 0);
             int row = 0;
-            polynomial.setPositionRow(row++, 0.0, waypoints.getFirst().getPosition(axis));
-            polynomial.setVelocityRow(row++, 0.0, waypoints.getFirst().getLinearVelocity(axis));
+            polynomial.setPositionRow(row++, waypoints.getFirst().time.getValue(), waypoints.getFirst().getPosition(axis));
+//            polynomial.setVelocityRow(row++, waypoints.getFirst().time.getValue(), waypoints.getFirst().getLinearVelocity(axis));
 
             for (int i = 1; i < waypoints.size(); i++)
             {
-               polynomial.setPositionRow(row++, waypoints.get(i).time.getValue(), waypoints.get(i).getPosition(axis));
+               WaypointData waypoint = waypoints.get(i);
+               polynomial.setPositionRow(row++, waypoint.time.getValue(), waypoint.getPosition(axis));
             }
-            polynomial.setVelocityRow(row++, totalDuration.getValue(), 0.0);
+//            polynomial.setVelocityRow(row++, totalDuration.getValue(), 0.0);
             polynomial.setIsConstraintMatrixUpToDate(true);
             polynomial.initialize();
 
