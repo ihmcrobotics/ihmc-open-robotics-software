@@ -413,8 +413,6 @@ public class ICPControllerTest
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       ICPControllerInterface controller = createICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
       new DefaultParameterReader().readParametersInRegistry(registry);
-
-      boolean visualize = true;
       
       double omega = walkingControllerParameters.getOmega0();
 
