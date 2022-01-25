@@ -475,6 +475,17 @@ public class MultiCubicSpline1DSolver
       return 3.0 * MathTools.square(time) * solution.get(index++) + 2.0 * time * solution.get(index++) + solution.get(index);
    }
 
+   public double computeAcceleration(double time, DMatrixRMaj solution)
+   {
+      if (time <= 0.0)
+         return xd0;
+      if (time >= 1.0)
+         return xd1;
+
+      int index = findSolutionOffsetIndex(time, solution);
+      return 6.0 * time * solution.get(index++) + 2.0 * solution.get(index);
+   }
+
    private int findSolutionOffsetIndex(double time, DMatrixRMaj solution)
    {
       int index = 0;

@@ -245,7 +245,7 @@ public class ValkyrieObjectCarryingWhileWalkingTest extends HumanoidObjectCarryi
       simulationTestHelper.publishToController(prepareForLocomotionMessage);
 
       CommonHumanoidReferenceFrames referenceFrames = simulationTestHelper.getReferenceFrames();
-      //      MovingReferenceFrame trajectoryFrame = referenceFrames.getMidFeetUnderPelvisFrame();
+//            MovingReferenceFrame trajectoryFrame = referenceFrames.getMidFeetUnderPelvisFrame();
       MovingReferenceFrame trajectoryFrame = simulationTestHelper.getHighLevelHumanoidControllerFactory().getHighLevelHumanoidControllerToolbox()
                                                                  .getWalkingTrajectoryPath().getWalkingTrajectoryPathFrame();
       FullHumanoidRobotModel controllerFullRobotModel = simulationTestHelper.getControllerFullRobotModel();
