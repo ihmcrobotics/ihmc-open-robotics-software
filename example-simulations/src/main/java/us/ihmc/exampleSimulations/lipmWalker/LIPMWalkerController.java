@@ -7,8 +7,6 @@ public class LIPMWalkerController implements RobotController
 {
    private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-
    @Override
    public void initialize()
    {
