@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
+
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
@@ -7,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ParameterizedICPControlGains;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -15,7 +18,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -29,6 +36,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class HeuristicICPController implements ICPControllerInterface
 {
+   private static final boolean VISUALIZE = true;
+
    private final String yoNamePrefix = "controller";
    private final YoRegistry registry = new YoRegistry("ICPController");
    
@@ -50,6 +59,8 @@ public class HeuristicICPController implements ICPControllerInterface
 
    
    private final ICPControlGainsReadOnly feedbackGains;
+   private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
+
 
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
 
@@ -61,7 +72,9 @@ public class HeuristicICPController implements ICPControllerInterface
    private final FramePoint2D currentCoMPosition = new FramePoint2D();
    private final FrameVector2D currentCoMVelocity = new FrameVector2D();
    
-   
+   private final YoFrameVector2D unconstrainedFeedback = new YoFrameVector2D(yoNamePrefix + "UnconstrainedFeedback", worldFrame, registry);
+   private final YoFramePoint2D unconstrainedFeedbackCMP = new YoFramePoint2D(yoNamePrefix + "UnconstrainedFeedbackCMP", worldFrame, registry);
+
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
 
@@ -75,6 +88,8 @@ public class HeuristicICPController implements ICPControllerInterface
    private final double controlDT;
    private final double controlDTSquare;
    
+   private final ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
+
    public HeuristicICPController(WalkingControllerParameters walkingControllerParameters,
                                  BipedSupportPolygons bipedSupportPolygons,
                                  ICPControlPolygons icpControlPolygons,
@@ -117,8 +132,10 @@ public class HeuristicICPController implements ICPControllerInterface
 
       feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
       
+      if (yoGraphicsListRegistry != null)
+         setupVisualizers(yoGraphicsListRegistry);
+      
       parentRegistry.addChild(registry);
-
    }
 
    public ICPControlGainsReadOnly getFeedbackGains()
@@ -166,18 +183,73 @@ public class HeuristicICPController implements ICPControllerInterface
 
       this.icpError.sub(currentICP, desiredICP);
 
+      System.out.println("currentICP = " + currentICP);
+      System.out.println("desiredICP = " + desiredICP);
+      System.out.println("perfectCMP = " + perfectCMP);
+
       
       double kpOrthogonalToMotion = feedbackGains.getKpOrthogonalToMotion();
+      System.out.println("kpOrthogonalToMotion = " + kpOrthogonalToMotion);
       
+      
+      System.out.println("icpError = " + icpError);
       feedbackCMP.set(icpError);
-      feedbackCMP.scale(kpOrthogonalToMotion);
-      feedbackCMP.add(perfectCMP);
+
       
-      feedbackCoP.set(feedbackCMP);
+      
+      helper.transformGainsFromDynamicsFrame(transformedGains,
+                                             desiredICPVelocity,
+                                             feedbackGains.getKpParallelToMotion(),
+                                             feedbackGains.getKpOrthogonalToMotion());
+      
+      
+      
+      computeUnconstrainedFeedback();
+
+//      // There needs to be a +1.0 here to match the other Optimization based ICP Controller. Not sure why? 
+//      feedbackCMP.scale(1.0 + kpOrthogonalToMotion);
+//      feedbackCMP.add(perfectCMP);
+//      
+//      System.out.println("feedbackCMP = " + feedbackCMP);
+
+      feedbackCMP.set(unconstrainedFeedbackCMP);
+      feedbackCoP.set(unconstrainedFeedbackCMP);
       
       controllerTimer.stopMeasurement();
    }
+   
+   private void computeUnconstrainedFeedback()
+   {
+      unconstrainedFeedback.setX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
+      unconstrainedFeedback.setY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
+      unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
+      unconstrainedFeedbackCMP.add(unconstrainedFeedback);
+   }
 
+   private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
+
+      YoGraphicPosition feedbackCoP = new YoGraphicPosition(yoNamePrefix + "FeedbackCoP",
+                                                            this.feedbackCoP,
+                                                            0.005,
+                                                            YoAppearance.Darkorange(),
+                                                            YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+
+      YoGraphicPosition unconstrainedFeedbackCMP = new YoGraphicPosition(yoNamePrefix + "UnconstrainedFeedbackCoP",
+                                                                         this.unconstrainedFeedbackCMP,
+                                                                         0.006,
+                                                                         Purple(),
+                                                                         GraphicType.BALL_WITH_CROSS);
+
+      artifactList.add(feedbackCoP.createArtifact());
+      artifactList.add(unconstrainedFeedbackCMP.createArtifact());
+
+      artifactList.setVisible(VISUALIZE);
+
+      yoGraphicsListRegistry.registerArtifactList(artifactList);
+   }
+   
    @Override
    public void initialize()
    {
