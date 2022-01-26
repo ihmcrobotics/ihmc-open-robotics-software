@@ -9,7 +9,6 @@ import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -22,6 +21,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,6 +42,7 @@ public class GDXEnvironmentObject
    private Model realisticModel;
    private GDXModelInstance realisticModelInstance;
    private GDXModelInstance collisionModelInstance;
+   private final StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
    private double mass;
    private RigidBodyTransform collisionShapeOffset;
    private RigidBodyTransform wholeThingOffset;
@@ -51,9 +52,6 @@ public class GDXEnvironmentObject
    private Model collisionMesh;
    private Material originalMaterial;
    private Material highlightedMaterial;
-   private final Point3D tempRayOrigin = new Point3D();
-   private final Point3D firstSphereIntersection = new Point3D();
-   private final Point3D secondSphereIntersection = new Point3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform placementTransform = new RigidBodyTransform();
    private final ReferenceFrame placementFrame;
@@ -62,11 +60,10 @@ public class GDXEnvironmentObject
    private ReferenceFrame collisionModelFrame;
    private ReferenceFrame bulletCollisionFrame;
    private ReferenceFrame bulletCollisionSpecificationFrame;
-   private Matrix4 bulletTransform = new Matrix4();
-   private RigidBodyTransform bulletCollisionOffset = new RigidBodyTransform();
-   private RigidBodyTransform bulletCollisionFrameTransformToWorld = new RigidBodyTransform();
-   private FramePose3D bulletPose = new FramePose3D();
-   private btMotionState bulletMotionState = new btMotionState()
+   private final RigidBodyTransform bulletCollisionOffset = new RigidBodyTransform();
+   private final RigidBodyTransform bulletCollisionFrameTransformToWorld = new RigidBodyTransform();
+   private final FramePose3D bulletPose = new FramePose3D();
+   private final btMotionState bulletMotionState = new btMotionState()
    {
       @Override
       public void setWorldTransform(Matrix4 transformToWorld)
@@ -156,31 +153,8 @@ public class GDXEnvironmentObject
     */
    public boolean intersect(Line3DReadOnly pickRay, Point3D intersectionToPack)
    {
-      tempRayOrigin.setX(pickRay.getPoint().getX() - boundingSphere.getPosition().getX());
-      tempRayOrigin.setY(pickRay.getPoint().getY() - boundingSphere.getPosition().getY());
-      tempRayOrigin.setZ(pickRay.getPoint().getZ() - boundingSphere.getPosition().getZ());
-      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndEllipsoid3D(boundingSphere.getRadius(),
-                                                                                             boundingSphere.getRadius(),
-                                                                                             boundingSphere.getRadius(),
-                                                                                             tempRayOrigin,
-                                                                                             pickRay.getDirection(),
-                                                                                             firstSphereIntersection,
-                                                                                             secondSphereIntersection);
-      if (numberOfIntersections == 2)
-      {
-         firstSphereIntersection.add(boundingSphere.getPosition());
-         secondSphereIntersection.add(boundingSphere.getPosition());
-         for (int i = 0; i < 100; i++)
-         {
-            intersectionToPack.interpolate(firstSphereIntersection, secondSphereIntersection, i / 100.0);
-            if (isPointInside.apply(intersectionToPack))
-            {
-               return true;
-            }
-         }
-      }
-
-      return false;
+      stepCheckIsPointInsideAlgorithm.setup(boundingSphere.getRadius(), boundingSphere.getPosition());
+      return !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(pickRay, 100, isPointInside, intersectionToPack, false));
    }
 
    public void setHighlighted(boolean highlighted)
