@@ -24,16 +24,16 @@ public class GDXEnvironmentObjectFactory
             try
             {
                environmentObject = constructor.newInstance();
+               if (environmentObject == null)
+               {
+                  throw new RuntimeException("Why is this null?");
+               }
             }
             catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
             {
                e.printStackTrace();
             }
 
-            if (environmentObject == null)
-            {
-               throw new RuntimeException("Why is this null?");
-            }
 
             return environmentObject;
          };
