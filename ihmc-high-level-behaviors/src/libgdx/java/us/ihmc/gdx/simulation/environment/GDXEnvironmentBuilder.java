@@ -200,18 +200,26 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
          for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
          {
             JsonNode objectNode = it.next();
-            GDXEnvironmentObject object = GDXEnvironmentObjectLibrary.loadBySimpleClassName(objectNode.get("type").asText());
+            String objectTypeName = objectNode.get("type").asText();
+            GDXEnvironmentObject object = GDXEnvironmentObjectLibrary.loadBySimpleClassName(objectTypeName);
 
-            tempTranslation.setX(objectNode.get("x").asDouble());
-            tempTranslation.setY(objectNode.get("y").asDouble());
-            tempTranslation.setZ(objectNode.get("z").asDouble());
-            tempOrientation.set(objectNode.get("qx").asDouble(),
-                                objectNode.get("qy").asDouble(),
-                                objectNode.get("qz").asDouble(),
-                                objectNode.get("qs").asDouble());
-            tempTransform.set(tempOrientation, tempTranslation);
-            object.setTransformToWorld(tempTransform);
-            addObject(object);
+            if (object != null)
+            {
+               tempTranslation.setX(objectNode.get("x").asDouble());
+               tempTranslation.setY(objectNode.get("y").asDouble());
+               tempTranslation.setZ(objectNode.get("z").asDouble());
+               tempOrientation.set(objectNode.get("qx").asDouble(),
+                                   objectNode.get("qy").asDouble(),
+                                   objectNode.get("qz").asDouble(),
+                                   objectNode.get("qs").asDouble());
+               tempTransform.set(tempOrientation, tempTranslation);
+               object.setTransformToWorld(tempTransform);
+               addObject(object);
+            }
+            else
+            {
+               LogTools.warn("Skipping loading object: {}", objectTypeName);
+            }
          }
       });
    }
