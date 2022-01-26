@@ -8,18 +8,23 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
@@ -27,6 +32,7 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectLibrary;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspacePathTools;
@@ -50,7 +56,12 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final ImFloat ambientLightAmount = new ImFloat(0.4f);
    private final GDX3DSceneManager sceneManager;
-   private final GDXEnvironmentObjectInteraction objectInteraction = new GDXEnvironmentObjectInteraction();
+   private boolean isPlacing = false;
+   private GDXEnvironmentObject selectedObject;
+   private GDXEnvironmentObject intersectedObject;
+   private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo();
+   private final ImGuiPanel poseGizmoTunerPanel = pose3DGizmo.createTunerPanel(getClass().getSimpleName());
+   private final Point3D tempIntersection = new Point3D();
    private final GDXBulletPhysicsManager bulletPhysicsManager = new GDXBulletPhysicsManager();
 
    public GDXEnvironmentBuilder(GDX3DSceneManager sceneManager)
@@ -58,7 +69,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       super(WINDOW_NAME);
       this.sceneManager = sceneManager;
       setRenderMethod(this::renderImGuiWidgets);
-      addChild(objectInteraction.getPoseGizmoTunerPanel());
+      addChild(poseGizmoTunerPanel);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -69,8 +80,85 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       sceneManager.addRenderableProvider(this::getRealRenderables, GDXSceneLevel.REAL_ENVIRONMENT);
       sceneManager.addRenderableProvider(this::getVirtualRenderables, GDXSceneLevel.VIRTUAL);
 
-      objectInteraction.create(baseUI.get3DSceneManager(), allObjects, lightObjects, this::addObject, this::removeObject);
-      baseUI.addImGui3DViewInputProcessor(objectInteraction::process3DViewInput);
+      pose3DGizmo.create(sceneManager.getCamera3D());
+      baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
+   }
+
+   public void process3DViewInput(ImGui3DViewInput viewInput)
+   {
+      if (selectedObject != null)
+      {
+         if (isPlacing)
+         {
+            Line3DReadOnly pickRay = viewInput.getPickRayInWorld();
+            Point3D pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
+                                                                                        Axis3D.Z,
+                                                                                        pickRay.getPoint(),
+                                                                                        pickRay.getDirection());
+            selectedObject.setPositionInWorld(pickPoint);
+            pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
+
+            if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
+            {
+               isPlacing = false;
+            }
+         }
+         else
+         {
+            pose3DGizmo.process3DViewInput(viewInput);
+            selectedObject.setTransformToWorld(pose3DGizmo.getTransformToParent());
+
+            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
+            if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
+            {
+               if (intersectedObject != selectedObject)
+               {
+                  selectedObject = intersectedObject;
+                  if (selectedObject != null)
+                  {
+                     pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
+                  }
+               }
+            }
+         }
+      }
+      else
+      {
+         if (viewInput.isWindowHovered())
+         {
+            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
+
+            if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
+            {
+               selectedObject = intersectedObject;
+               pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
+            }
+         }
+      }
+   }
+
+   private GDXEnvironmentObject calculatePickedObject(Line3DReadOnly pickRay)
+   {
+      double closestDistance = Double.POSITIVE_INFINITY;
+      GDXEnvironmentObject closestObject = null;
+      for (GDXEnvironmentObject object : allObjects)
+      {
+         boolean intersects = object.intersect(pickRay, tempIntersection);
+         double distance = tempIntersection.distance(pickRay.getPoint());
+         if (intersects && (closestObject == null || distance < closestDistance))
+         {
+            closestObject = object;
+            closestDistance = distance;
+
+         }
+      }
+      return closestObject;
+   }
+
+   public void resetSelection()
+   {
+      selectedObject = null;
+      intersectedObject = null;
    }
 
    public void update()
@@ -81,31 +169,39 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    public void renderImGuiWidgets()
    {
       bulletPhysicsManager.renderImGuiWidgets();
-      ImGui.text("Selected: " + objectInteraction.getSelectedObject());
-      ImGui.text("Intersected: " + objectInteraction.getIntersectedObject());
+
+      ImGui.separator();
+      if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
+      {
+         sceneManager.getSceneBasics().setAmbientLight(ambientLightAmount.get());
+      }
+
+      ImGui.separator();
+      ImGui.text("Selected: " + selectedObject);
+      ImGui.text("Intersected: " + intersectedObject);
 
       // TODO: Place robots
-      GDXEnvironmentObject objectToPlace = null;
-      if (!objectInteraction.isPlacing())
+      if (!isPlacing)
       {
          for (GDXEnvironmentObjectFactory objectFactory : GDXEnvironmentObjectLibrary.getObjectFactories())
          {
             if (ImGui.button(labels.get("Place " + objectFactory.getName())))
             {
-               objectToPlace = objectFactory.getSupplier().get();
+               GDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
+               addObject(objectToPlace);
+               selectedObject = objectToPlace;
+               isPlacing = true;
             }
          }
 
          ImGui.separator();
 
-         if (ImGui.sliderFloat("Ambient light", ambientLightAmount.getData(), 0.0f, 1.0f))
-         {
-            sceneManager.getSceneBasics().setAmbientLight(ambientLightAmount.get());
-         }
-
-         ImGui.separator();
       }
-      objectInteraction.handleObjectPlacementAndRemoval(objectToPlace);
+      if (selectedObject != null && (ImGui.button("Delete selected") || ImGui.isKeyReleased(ImGuiTools.getDeleteKey())))
+      {
+         removeObject(selectedObject);
+         resetSelection();
+      }
 
       ImGui.text("Environments:");
       if (!loadedFilesOnce && selectedEnvironmentFile != null)
@@ -170,7 +266,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
          reindexScripts();
       }
 
-      ImGui.checkbox("Show 3D Widget Tuner", objectInteraction.getPoseGizmoTunerPanel().getIsShowing());
+      ImGui.checkbox("Show 3D Widget Tuner", poseGizmoTunerPanel.getIsShowing());
    }
 
    private void loadEnvironment(Path environmentFile)
@@ -183,7 +279,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
          removeObject(object);
       }
 
-      objectInteraction.resetSelection();
+      resetSelection();
 
       JSONFileTools.loadFromWorkspace("ihmc-open-robotics-software",
                                       "ihmc-high-level-behaviors/src/libgdx/resources",
@@ -307,8 +403,15 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       {
          object.getRealisticModelInstance().getRenderables(renderables, pool);
       }
-
-      objectInteraction.getVirtualRenderables(renderables, pool);
+      if (selectedObject != null)
+      {
+         selectedObject.getCollisionModelInstance().getRenderables(renderables, pool);
+         pose3DGizmo.getRenderables(renderables, pool);
+      }
+      if (intersectedObject != null && intersectedObject != selectedObject)
+      {
+         intersectedObject.getCollisionModelInstance().getRenderables(renderables, pool);
+      }
       bulletPhysicsManager.getVirtualRenderables(renderables, pool);
    }
 
