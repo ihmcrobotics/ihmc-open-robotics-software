@@ -52,7 +52,6 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    private final GDX3DSceneManager sceneManager;
    private final GDXEnvironmentObjectInteraction objectInteraction = new GDXEnvironmentObjectInteraction();
    private final GDXBulletPhysicsManager bulletPhysicsManager = new GDXBulletPhysicsManager();
-   private final ImBoolean simulate = new ImBoolean(false);
 
    public GDXEnvironmentBuilder(GDX3DSceneManager sceneManager)
    {
@@ -76,15 +75,12 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
    public void update()
    {
-      if (simulate.get())
-      {
-         bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
-      }
+      bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
    }
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(labels.get("Simulate with Bullet"), simulate);
+      bulletPhysicsManager.renderImGuiWidgets();
       ImGui.text("Selected: " + objectInteraction.getSelectedObject());
       ImGui.text("Intersected: " + objectInteraction.getIntersectedObject());
 
@@ -181,7 +177,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    {
       loadedFilesOnce = true;
       selectedEnvironmentFile = environmentFile;
-      simulate.set(false);
+      bulletPhysicsManager.getSimulate().set(false);
       for (GDXEnvironmentObject object : allObjects.toArray(new GDXEnvironmentObject[0]))
       {
          removeObject(object);
@@ -305,6 +301,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       }
 
       objectInteraction.getVirtualRenderables(renderables, pool);
+      bulletPhysicsManager.getVirtualRenderables(renderables, pool);
    }
 
    public void destroy()
