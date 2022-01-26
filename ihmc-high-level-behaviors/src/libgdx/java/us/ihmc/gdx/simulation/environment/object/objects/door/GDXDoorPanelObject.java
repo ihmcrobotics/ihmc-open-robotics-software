@@ -5,8 +5,6 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
-import com.badlogic.gdx.physics.bullet.collision.btGImpactMeshShape;
-import com.badlogic.gdx.physics.bullet.collision.btTriangleIndexVertexArray;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
