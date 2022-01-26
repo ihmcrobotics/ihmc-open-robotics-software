@@ -23,7 +23,7 @@ public class GDXLargeCinderBlockRoughed extends GDXEnvironmentObject
    public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXLargeCinderBlockRoughed.class);
    private final double mass;
    private final btBoxShape boxShape;
-   private com.badlogic.gdx.physics.bullet.dynamics.btRigidBody btRigidBody;
+   private btRigidBody btRigidBody;
 
    public GDXLargeCinderBlockRoughed()
    {
