@@ -35,7 +35,7 @@ public class GDXBulletPhysicsDebugger
          @Override
          public void drawLine(Vector3 from, Vector3 to, Vector3 color)
          {
-            meshBuilder.addLine(from.x, from.y, from.z, to.x, to.y, to.z, 0.001f, new Color(color.x, color.y, color.z, 1.0f));
+            meshBuilder.addLine(from.x, from.y, from.z, to.x, to.y, to.z, 0.002f, new Color(color.x, color.y, color.z, 1.0f));
          }
 
          @Override
@@ -58,12 +58,6 @@ public class GDXBulletPhysicsDebugger
 
          @Override
          public void draw3dText(Vector3 location, String textString)
-         {
-
-         }
-
-         @Override
-         public void clearLines()
          {
 
          }

@@ -37,7 +37,7 @@ public class GDXDoorPanelObject extends GDXEnvironmentObject
       double sizeZ = 2.0;
       mass = 70.0;
       RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
-      collisionShapeOffset.getTranslation().add(-sizeX / 2.0, 0.0, 0.0);
+      collisionShapeOffset.getTranslation().add(0.0, sizeY / 2.0, sizeZ / 2.0);
       Sphere3D boundingSphere = new Sphere3D(2.5);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
@@ -48,6 +48,7 @@ public class GDXDoorPanelObject extends GDXEnvironmentObject
       }, getPascalCasedName() + "CollisionModel" + getObjectIndex());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
+      getBulletCollisionOffset().set(collisionShapeOffset);
       create(realisticModel, collisionGraphic, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, mass);
 
       boxShape = new btBoxShape(new Vector3((float) sizeX / 2.0f, (float) sizeY / 2.0f, (float) sizeZ / 2.0f));
