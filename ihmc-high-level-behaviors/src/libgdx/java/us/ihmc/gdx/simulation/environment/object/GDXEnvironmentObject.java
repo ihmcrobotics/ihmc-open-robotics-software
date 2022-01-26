@@ -27,6 +27,10 @@ import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+/**
+ * TODO: This class is absolutely disgusting. Objects probably need to not extend a class like this,
+ * but instead uses some nice tools methods for doing this stuff.
+ */
 public class GDXEnvironmentObject
 {
    private static final HashMap<String, AtomicInteger> OBJECT_INDEXES = new HashMap<>();
@@ -56,19 +60,31 @@ public class GDXEnvironmentObject
    private final FramePose3D placementFramePose = new FramePose3D();
    private ReferenceFrame realisticModelFrame;
    private ReferenceFrame collisionModelFrame;
+   private ReferenceFrame bulletCollisionFrame;
+   private ReferenceFrame bulletCollisionSpecificationFrame;
    private Matrix4 bulletTransform = new Matrix4();
+   private RigidBodyTransform bulletCollisionOffset = new RigidBodyTransform();
+   private RigidBodyTransform bulletCollisionFrameTransformToWorld = new RigidBodyTransform();
+   private FramePose3D bulletPose = new FramePose3D();
    private btMotionState bulletMotionState = new btMotionState()
    {
       @Override
       public void setWorldTransform(Matrix4 transformToWorld)
       {
-         setTransformToWorld(transformToWorld);
+         GDXTools.toEuclid(transformToWorld, bulletCollisionFrameTransformToWorld);
+         bulletCollisionFrame.update();
+         bulletPose.setToZero(bulletCollisionFrame);
+         bulletPose.applyInverseTransform(bulletCollisionOffset);
+         bulletPose.changeFrame(ReferenceFrame.getWorldFrame());
+         bulletPose.get(tempTransform);
+         setTransformToWorld(tempTransform);
       }
 
       @Override
       public void getWorldTransform(Matrix4 transformToWorld)
       {
-         GDXTools.toGDX(collisionModelFrame.getTransformToWorldFrame(), transformToWorld);
+         tempTransform.set(bulletCollisionSpecificationFrame.getTransformToWorldFrame());
+         GDXTools.toGDX(tempTransform, transformToWorld);
       }
    };
 
@@ -116,6 +132,12 @@ public class GDXEnvironmentObject
       collisionModelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
                                                                                               realisticModelFrame,
                                                                                               collisionShapeOffset);
+      bulletCollisionFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "BulletCollisionFrame" + objectIndex,
+                                                                                             ReferenceFrame.getWorldFrame(),
+                                                                                             bulletCollisionFrameTransformToWorld);
+      bulletCollisionSpecificationFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(pascalCasedName + "BulletCollisionSpecificationFrame" + objectIndex,
+                                                                                             realisticModelFrame,
+                                                                                             bulletCollisionOffset);
    }
 
    public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
@@ -269,5 +291,10 @@ public class GDXEnvironmentObject
    public btMotionState getBulletMotionState()
    {
       return bulletMotionState;
+   }
+
+   public RigidBodyTransform getBulletCollisionOffset()
+   {
+      return bulletCollisionOffset;
    }
 }
