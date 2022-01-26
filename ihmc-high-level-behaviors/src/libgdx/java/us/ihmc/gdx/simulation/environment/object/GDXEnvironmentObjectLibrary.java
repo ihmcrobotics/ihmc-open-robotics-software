@@ -3,6 +3,7 @@ package us.ihmc.gdx.simulation.environment.object;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorFrameObject;
 import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorLeverHandleObject;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorPanelObject;
 import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorPushHandleRightFiducialStaticHandleObject;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ public class GDXEnvironmentObjectLibrary
       objectFactories.add(GDXStairsObject.FACTORY);
       objectFactories.add(GDXDoorPushHandleRightFiducialStaticHandleObject.FACTORY);
       objectFactories.add(GDXDoorFrameObject.FACTORY);
+      objectFactories.add(GDXDoorPanelObject.FACTORY);
       objectFactories.add(GDXDoorLeverHandleObject.FACTORY);
       objectFactories.add(GDXPointLightObject.FACTORY);
       objectFactories.add(GDXDirectionalLightObject.FACTORY);
