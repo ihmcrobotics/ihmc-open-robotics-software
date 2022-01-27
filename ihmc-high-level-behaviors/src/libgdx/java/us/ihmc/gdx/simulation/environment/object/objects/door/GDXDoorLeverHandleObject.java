@@ -4,11 +4,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.physics.bullet.collision.*;
-import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.gdx.simulation.environment.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXModelLoader;
@@ -20,9 +18,6 @@ public class GDXDoorLeverHandleObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Door Lever Handle";
    public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDoorLeverHandleObject.class);
-   private final double mass;
-   private final btGImpactMeshShape btGImpactMeshShape;
-   private btRigidBody btRigidBody;
 
    public GDXDoorLeverHandleObject()
    {
@@ -32,7 +27,7 @@ public class GDXDoorLeverHandleObject extends GDXEnvironmentObject
       double sizeX = 0.065;
       double sizeY = 0.14;
       double sizeZ = 0.065;
-      mass = 0.7;
+      setMass(0.7f);
       RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
       collisionShapeOffset.getTranslation().add(-sizeX / 2.0, -0.04, 0.0);
       Sphere3D boundingSphere = new Sphere3D(0.2);
@@ -46,22 +41,11 @@ public class GDXDoorLeverHandleObject extends GDXEnvironmentObject
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
       RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
       getBulletCollisionOffset().setIdentity();
-      create(realisticModel, collisionGraphic, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, mass);
+      create(realisticModel, collisionGraphic, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside);
 
       btTriangleIndexVertexArray btTriangleIndexVertexArray = new btTriangleIndexVertexArray(realisticModel.meshParts.get(0));
-      btGImpactMeshShape = new btGImpactMeshShape(btTriangleIndexVertexArray);
+      btGImpactMeshShape btGImpactMeshShape = new btGImpactMeshShape(btTriangleIndexVertexArray);
       btGImpactMeshShape.updateBound();
-   }
-
-   @Override
-   public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
-   {
-      btRigidBody = bulletPhysicsManager.addRigidBody(btGImpactMeshShape, (float) mass, getBulletMotionState());
-   }
-
-   @Override
-   public void removeFromBullet(GDXBulletPhysicsManager bulletPhysicsManager)
-   {
-      bulletPhysicsManager.removeCollisionObject(btRigidBody);
+      setBtCollisionShape(btGImpactMeshShape);
    }
 }

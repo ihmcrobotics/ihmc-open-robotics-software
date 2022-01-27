@@ -113,7 +113,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             {
                if (intersectedObject != selectedObject)
                {
-                  selectedObject = intersectedObject;
+                  setObjectSelected(intersectedObject, true);
                   if (selectedObject != null)
                   {
                      pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
@@ -130,7 +130,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
             if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
-               selectedObject = intersectedObject;
+               setObjectSelected(intersectedObject, true);
                pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
             }
          }
@@ -157,7 +157,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
    public void resetSelection()
    {
-      selectedObject = null;
+      setObjectSelected(selectedObject, false);
       intersectedObject = null;
    }
 
@@ -189,13 +189,12 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             {
                GDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
                addObject(objectToPlace);
-               selectedObject = objectToPlace;
+               setObjectSelected(objectToPlace, true);
                isPlacing = true;
             }
          }
 
          ImGui.separator();
-
       }
       if (selectedObject != null && (ImGui.button("Delete selected") || ImGui.isKeyReleased(ImGuiTools.getDeleteKey())))
       {
@@ -331,6 +330,23 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       else
       {
          LogTools.error("Could not find environment file: {}", environmentFileName);
+      }
+   }
+
+   public void setObjectSelected(GDXEnvironmentObject environmentObject, boolean selected)
+   {
+      if (selected && environmentObject != null)
+      {
+         selectedObject = environmentObject;
+         environmentObject.setSelected(true);
+      }
+      else
+      {
+         if (environmentObject != null)
+         {
+            environmentObject.setSelected(false);
+         }
+         selectedObject = null;
       }
    }
 
