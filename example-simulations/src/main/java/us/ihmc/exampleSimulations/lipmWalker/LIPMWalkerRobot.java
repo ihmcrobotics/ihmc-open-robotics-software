@@ -4,6 +4,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotDescription.*;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
@@ -24,7 +25,7 @@ public class LIPMWalkerRobot
    private double thighRadiusOfGyrationX = 0.01;
    private double thighRadiusOfGyrationY = 0.01;
    private double thighRadiusOfGyrationZ = 0.01;
-   private double thighLength = 0.2;
+   private double thighLength = 0.6;
    private double thighRadius = 0.05;
 
    public LIPMWalkerRobot()
@@ -32,28 +33,39 @@ public class LIPMWalkerRobot
       RobotDescription description = new RobotDescription("LIPMWalker");
       FloatingPlanarJointDescription bodyJoint = new FloatingPlanarJointDescription("RootJoint", Plane.XZ);
 
-      LinkDescription bodyLink = new LinkDescription("LinkJoint");
+      LinkDescription bodyLink = new LinkDescription("bodyLink");
       bodyLink.setMassAndRadiiOfGyration(bodyMass, bodyRadiusOfGyrationX, bodyRadiusOfGyrationY, bodyRadiusOfGyrationZ);
+      bodyJoint.setLink(bodyLink);
       LinkGraphicsDescription bodyLinkGraphics = new LinkGraphicsDescription();
       bodyLinkGraphics.addSphere(bodyRadius, YoAppearance.AluminumMaterial());
       bodyLink.setLinkGraphics(bodyLinkGraphics);
-      bodyJoint.setLink(bodyLink);
-
 
       PinJointDescription leftHipJoint = new PinJointDescription("leftHip", new Vector3D(0.0, hipWidth/2.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
+      bodyJoint.addJoint(leftHipJoint);
+
+      PinJointDescription rightHipJoint = new PinJointDescription("rightHip", new Vector3D(0.0, -hipWidth/2.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
+      bodyJoint.addJoint(rightHipJoint);
 
       LinkDescription leftThigh = new LinkDescription("leftThigh");
-      bodyLink.setMassAndRadiiOfGyration(thighMass, thighRadiusOfGyrationX, thighRadiusOfGyrationY, thighRadiusOfGyrationZ);
+      leftThigh.setMassAndRadiiOfGyration(thighMass, thighRadiusOfGyrationX, thighRadiusOfGyrationY, thighRadiusOfGyrationZ);
       LinkGraphicsDescription leftThighGraphics = new LinkGraphicsDescription();
-
-      leftThighGraphics.rotate(Math.PI, Axis3D.Y);
       leftThighGraphics.addCylinder(thighLength, thighRadius);
+//      leftThighGraphics.rotate(Math.PI, Axis3D.Y);
       leftThigh.setLinkGraphics(leftThighGraphics);
       leftHipJoint.setLink(leftThigh);
-      bodyJoint.addJoint(leftHipJoint);
+
+      LinkDescription rightThigh = new LinkDescription("rightThigh");
+      rightThigh.setMassAndRadiiOfGyration(thighMass, thighRadiusOfGyrationX, thighRadiusOfGyrationY, thighRadiusOfGyrationZ);
+      LinkGraphicsDescription rightThighGraphics = new LinkGraphicsDescription();
+      rightThighGraphics.addCylinder(thighLength, thighRadius);
+//      rightThighGraphics.rotate(Math.PI, Axis3D.Y);
+      rightThigh.setLinkGraphics(rightThighGraphics);
+      rightHipJoint.setLink(rightThigh);
 
       description.addRootJoint(bodyJoint);
       robot = new RobotFromDescription(description);
+
+      LogTools.info("Robot: {}", robot.toString());
    }
 
    public Robot getRobot()
