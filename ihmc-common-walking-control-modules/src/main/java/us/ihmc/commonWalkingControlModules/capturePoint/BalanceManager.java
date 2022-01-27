@@ -210,6 +210,7 @@ public class BalanceManager
    private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
    private final FootstepTiming currentTiming = new FootstepTiming();
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
+   private final YoDouble timeAtStartOfSupportSequence = new YoDouble("TimeAtStartOfSupportSequence", registry);
 
    private final CoPTrajectoryGeneratorState copTrajectoryState;
    private final WalkingCoPTrajectoryGenerator copTrajectory;
@@ -600,7 +601,8 @@ public class BalanceManager
 
       // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
       if (footsteps.isEmpty() || !icpPlannerDone.getValue())
-         timeInSupportSequence.add(controllerToolbox.getControlDT());
+         timeInSupportSequence.set(yoTime.getValue() - timeAtStartOfSupportSequence.getValue());
+//         timeInSupportSequence.add(controllerToolbox.getControlDT());
 
       icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
       decayDesiredICPVelocity();
@@ -771,6 +773,7 @@ public class BalanceManager
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       timeInSupportSequence.set(0.0);
+      timeAtStartOfSupportSequence.set(yoTime.getValue());
       inSingleSupport.set(false);
       currentStateDuration.set(Double.NaN);
       totalStateDuration.set(Double.NaN);
@@ -792,6 +795,8 @@ public class BalanceManager
       stepAdjustmentController.reset();
       stepAdjustmentController.setFootstepToAdjust(currentFootstep, currentTiming.getSwingTime(), currentTiming.getTransferTime());
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
+
+      timeAtStartOfSupportSequence.set(yoTime.getValue() - currentTiming.getTransferTime());
 
       timeInSupportSequence.set(currentTiming.getTransferTime());
       currentStateDuration.set(currentTiming.getStepTime());
@@ -818,6 +823,7 @@ public class BalanceManager
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       comTrajectoryPlanner.initializeTrajectory(yoDesiredCoMPosition, Double.POSITIVE_INFINITY);
 
+      timeAtStartOfSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.POSITIVE_INFINITY);
       totalStateDuration.set(Double.POSITIVE_INFINITY);
@@ -844,6 +850,7 @@ public class BalanceManager
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
+      timeAtStartOfSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
       totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
@@ -874,6 +881,7 @@ public class BalanceManager
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
       currentTiming.set(footstepTimings.get(0));
+      timeAtStartOfSupportSequence.set(yoTime.getValue());
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(currentTiming.getTransferTime());
       totalStateDuration.set(currentTiming.getStepTime());
