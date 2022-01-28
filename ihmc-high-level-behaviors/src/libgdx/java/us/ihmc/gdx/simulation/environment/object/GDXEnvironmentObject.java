@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.physics.bullet.collision.CollisionConstants;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject.CollisionFlags;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
@@ -88,6 +90,7 @@ public class GDXEnvironmentObject
          GDXTools.toGDX(tempTransform, transformToWorld);
       }
    };
+   private GDXBulletPhysicsManager bulletPhysicsManager;
 
    public GDXEnvironmentObject(String titleCasedName, GDXEnvironmentObjectFactory factory)
    {
@@ -145,13 +148,15 @@ public class GDXEnvironmentObject
 
    public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
    {
+      this.bulletPhysicsManager = bulletPhysicsManager;
       if (btCollisionShape != null)
       {
-         btRigidBody = bulletPhysicsManager.addRigidBody(btCollisionShape, mass, getBulletMotionState());
+         if (btRigidBody == null)
+            btRigidBody = bulletPhysicsManager.addRigidBody(btCollisionShape, mass, getBulletMotionState());
       }
    }
 
-   public void removeFromBullet(GDXBulletPhysicsManager bulletPhysicsManager)
+   public void removeFromBullet()
    {
       if (btRigidBody != null)
       {
@@ -171,7 +176,19 @@ public class GDXEnvironmentObject
 
    public void setSelected(boolean selected)
    {
-
+      if (btRigidBody != null)
+      {
+         if (selected)
+         {
+            btRigidBody.setCollisionFlags(btRigidBody.getCollisionFlags() | CollisionFlags.CF_KINEMATIC_OBJECT);
+            btRigidBody.setActivationState(CollisionConstants.DISABLE_DEACTIVATION);
+         }
+         else
+         {
+            btRigidBody.setCollisionFlags(btRigidBody.getCollisionFlags() & ~CollisionFlags.CF_KINEMATIC_OBJECT);
+            btRigidBody.setActivationState(CollisionConstants.WANTS_DEACTIVATION);
+         }
+      }
    }
 
    public void setHighlighted(boolean highlighted)
