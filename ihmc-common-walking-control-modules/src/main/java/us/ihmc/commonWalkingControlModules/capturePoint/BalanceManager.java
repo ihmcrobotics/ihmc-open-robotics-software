@@ -85,7 +85,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BalanceManager
 {
-   private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = false;
+   private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
 
@@ -101,7 +101,7 @@ public class BalanceManager
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
-   private final CaptureRegionStepAdjustmentController stepAdjustmentController;
+   private final StepAdjustmentController stepAdjustmentController;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
@@ -301,15 +301,14 @@ public class BalanceManager
 
       if (USE_ERROR_BASED_STEP_ADJUSTMENT)
       {
-         stepAdjustmentController = null;
-//         stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
-//                                                                           controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
-//                                                                           bipedSupportPolygons,
-//                                                                           icpControlPolygons,
-//                                                                           controllerToolbox.getContactableFeet(),
-//                                                                           controllerToolbox.getControlDT(),
-//                                                                           registry,
-//                                                                           yoGraphicsListRegistry);
+         stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
+                                                                           controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+                                                                           bipedSupportPolygons,
+                                                                           icpControlPolygons,
+                                                                           controllerToolbox.getContactableFeet(),
+                                                                           controllerToolbox.getControlDT(),
+                                                                           registry,
+                                                                           yoGraphicsListRegistry);
       }
       else
       {

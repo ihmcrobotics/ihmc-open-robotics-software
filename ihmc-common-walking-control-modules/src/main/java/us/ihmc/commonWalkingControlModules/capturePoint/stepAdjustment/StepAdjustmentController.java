@@ -4,12 +4,15 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface StepAdjustmentController
 {
    void reset();
+
+   void setNextFootstep(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming);
 
    void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration, double nextTransferDuration);
 
