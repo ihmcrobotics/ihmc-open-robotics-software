@@ -3,6 +3,7 @@ package us.ihmc.gdx.tools;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
@@ -354,6 +355,11 @@ public class GDXTools
    public static void setTransparency(ModelInstance modelInstance, float transparency)
    {
       modelInstance.materials.get(0).set(new BlendingAttribute(true, transparency));
+   }
+
+   public static void setTransparency(Model model, float transparency)
+   {
+      model.materials.get(0).set(new BlendingAttribute(true, transparency));
    }
 
    public static void setDiffuseColor(ModelInstance modelInstance, Color color)
