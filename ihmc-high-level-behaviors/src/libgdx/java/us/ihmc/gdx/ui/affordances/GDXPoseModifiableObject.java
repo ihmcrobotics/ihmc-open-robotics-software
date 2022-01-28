@@ -60,14 +60,14 @@ public class GDXPoseModifiableObject
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (showCollisionMesh)
-         object.getCollisionModelInstance().getRenderables(renderables, pool);
+         object.getCollisionMeshRenderables(renderables, pool);
       if (isSelected)
          pose3DGizmo.getRenderables(renderables, pool);
    }
 
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      object.getRealisticModelInstance().getRenderables(renderables, pool);
+      object.getRealRenderables(renderables, pool);
    }
 
    public GDXEnvironmentObject getObject()

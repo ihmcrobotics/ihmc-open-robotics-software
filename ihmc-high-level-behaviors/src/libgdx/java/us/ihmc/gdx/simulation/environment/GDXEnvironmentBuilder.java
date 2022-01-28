@@ -406,7 +406,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       for (GDXEnvironmentObject object : allObjects)
       {
          if (!(object instanceof GDXPointLightObject) && !(object instanceof GDXDirectionalLightObject))
-            object.getRealisticModelInstance().getRenderables(renderables, pool);
+            object.getRealRenderables(renderables, pool);
       }
    }
 
@@ -414,16 +414,16 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    {
       for (GDXEnvironmentObject object : lightObjects)
       {
-         object.getRealisticModelInstance().getRenderables(renderables, pool);
+         object.getRealRenderables(renderables, pool);
       }
       if (selectedObject != null)
       {
-         selectedObject.getCollisionModelInstance().getRenderables(renderables, pool);
+         selectedObject.getCollisionMeshRenderables(renderables, pool);
          pose3DGizmo.getRenderables(renderables, pool);
       }
       if (intersectedObject != null && intersectedObject != selectedObject)
       {
-         intersectedObject.getCollisionModelInstance().getRenderables(renderables, pool);
+         intersectedObject.getCollisionMeshRenderables(renderables, pool);
       }
       bulletPhysicsManager.getVirtualRenderables(renderables, pool);
    }
