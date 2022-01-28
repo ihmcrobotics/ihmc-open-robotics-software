@@ -16,8 +16,14 @@ import java.util.function.IntFunction;
 
 public class HeightMapPlanarRegionCalculator
 {
-   private static final double distanceEpsilon = 0.055;
-   private static final double angularEpsilon = Math.toRadians(70.0);
+   private static final double distanceEpsilon0 = 0.015;
+   private static final double angularEpsilon0 = Math.toRadians(30.0);
+
+   private static final double distanceEpsilon1 = 0.04;
+   private static final double angularEpsilon1 = Math.toRadians(73.0);
+
+   private static final int minRegionSize = 10;
+   private static final int noRegionId = -1;
 
    /* Maps from cell key to region id */
    private int[] regionIds;
@@ -32,16 +38,34 @@ public class HeightMapPlanarRegionCalculator
    private final Plane3D planeEstimate = new Plane3D();
    private final LeastSquaresZPlaneFitter planeFitter = new LeastSquaresZPlaneFitter();
 
-   // TODO switch from plane expansion being based just on point being expanded to
-
    public void computeRegions(HeightMapData heightMapData, IntFunction<UnitVector3DBasics> surfaceNormals)
    {
       regionIds = new int[heightMapData.getCellsPerAxis() * heightMapData.getCellsPerAxis()];
-      Arrays.fill(regionIds, -1);
+      Arrays.fill(regionIds, noRegionId);
       regions.clear();
       planes.clear();
       int numMatches = 0;
 
+      /* First pass with tighter constraints */
+      growRegions(heightMapData, surfaceNormals, distanceEpsilon0, angularEpsilon0);
+      /* Second pass with looser constraints */
+      growRegions(heightMapData, surfaceNormals, distanceEpsilon1, angularEpsilon1);
+      /* Prune regions with insufficient cells */
+      removeRegionsWithInsufficientSize();
+
+      int numRegions = 0;
+      for (int i = 0; i < regions.size(); i++)
+      {
+         if (!regions.get(i).isEmpty())
+            numRegions++;
+      }
+
+      System.out.println("Num regions: " + numRegions);
+      System.out.println("Num matches: " + numMatches);
+   }
+
+   private void growRegions(HeightMapData heightMapData, IntFunction<UnitVector3DBasics> surfaceNormals, double distanceEpsilon, double angularEpsilon)
+   {
       for (int xi = 0; xi < heightMapData.getCellsPerAxis(); xi++)
       {
          for (int yi = 0; yi < heightMapData.getCellsPerAxis(); yi++)
@@ -68,8 +92,8 @@ public class HeightMapPlanarRegionCalculator
 
             double minUnassignedDistance = Double.MAX_VALUE;
             double minAssignedDistance = Double.MAX_VALUE;
-            int minUnassignedDistanceIndex = -1;
-            int minAssignedDistanceIndex = -1;
+            int minUnassignedDistanceIndex = noRegionId;
+            int minAssignedDistanceIndex = noRegionId;
 
             for (int i = 0; i < xSearchOffsets.length; i++)
             {
@@ -146,52 +170,6 @@ public class HeightMapPlanarRegionCalculator
             updatePlaneEstimate(regionIds[key], surfaceNormals, heightMapData);
          }
       }
-
-      /* Make a pass to merge neighbor regions */
-//      for (int xi = 0; xi < heightMapData.getCellsPerAxis(); xi++)
-//      {
-//         for (int yi = 0; yi < heightMapData.getCellsPerAxis(); yi++)
-//         {
-//            int key = HeightMapTools.indicesToKey(xi, yi, heightMapData.getCenterIndex());
-//            int regionId = regionIds[key];
-//            Plane3D plane = planes.get(regionId);
-//
-//            for (int i = 0; i < xSearchOffsets.length; i++)
-//            {
-//               int xNeighbor = xi + xSearchOffsets[i];
-//               int yNeighbor = yi + ySearchOffsets[i];
-//               int neighborKey = HeightMapTools.indicesToKey(xNeighbor, yNeighbor, heightMapData.getCenterIndex());
-//
-//               if (xNeighbor < 0 || xNeighbor >= heightMapData.getCellsPerAxis() || yNeighbor < 0 || yNeighbor >= heightMapData.getCellsPerAxis())
-//               {
-//                  continue;
-//               }
-//
-//               int neighborRegionId = regionIds[neighborKey];
-//               Plane3D neighborPlane = planes.get(neighborRegionId);
-//
-//               if (regionId == neighborRegionId)
-//               {
-//                  continue;
-//               }
-//
-//               boolean normalsAreSimilar = Math.abs(plane.getNormal().angle(neighborPlane.getNormal())) > Math.toRadians(25.0);
-//               boolean distanceIsClose = plane.distance(HeightMapTools.indexToCoordinate(yNeighbor, heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex()),
-//                                                        HeightMapTools.indexToCoordinate(yNeighbor, heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex()),
-//                                                        heightMapData.getHeightAt(xNeighbor, yNeighbor)) < 0.04;
-//
-//               if (normalsAreSimilar && distanceIsClose)
-//               {
-//                  // merge regions
-//                  mergeRegions(regionId, neighborRegionId, surfaceNormals, heightMapData);
-//                  break;
-//               }
-//            }
-//         }
-//      }
-
-      System.out.println("Num regions: " + regions.size());
-      System.out.println("Num matches: " + numMatches);
    }
 
    private void getPlaneEstimate(int key, IntFunction<UnitVector3DBasics> surfaceNormals, HeightMapData heightMapData)
@@ -258,20 +236,21 @@ public class HeightMapPlanarRegionCalculator
       }
    }
 
-   private void mergeRegions(int regionId0, int regionId1, IntFunction<UnitVector3DBasics> surfaceNormals, HeightMapData heightMapData)
+   private void removeRegionsWithInsufficientSize()
    {
-      TIntArrayList region0 = regions.get(regionId0);
-      TIntArrayList region1 = regions.get(regionId1);
-
-      region0.addAll(region1);
-
-      for (int i = 0; i < region1.size(); i++)
+      for (int i = regions.size() - 1; i >= 0; i--)
       {
-         regionIds[region1.get(i)] = regionId0;
-      }
+         TIntArrayList region = regions.get(i);
+         if (region.size() < minRegionSize)
+         {
+            for (int j = 0; j < region.size(); j++)
+            {
+               regionIds[region.get(j)] = noRegionId;
+            }
 
-      planes.get(regionId1).setToNaN();
-      updatePlaneEstimate(regionId0, surfaceNormals, heightMapData);
+            region.clear();
+         }
+      }
    }
 
    public int getRegionId(int cellKey)

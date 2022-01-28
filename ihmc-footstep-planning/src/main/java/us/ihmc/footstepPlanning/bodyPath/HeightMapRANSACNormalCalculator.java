@@ -16,10 +16,12 @@ import java.util.Random;
 
 public class HeightMapRANSACNormalCalculator
 {
-   private static final int iterations = 40;
-   private static final double ransacRadius = 0.2;
+   private static final int iterations = 120;
+   private static final double ransacRadius = 0.16;
    private static final double consensusRadius = 0.12;
-   private static final double distanceEpsilon = 0.03;
+   private static final double distanceEpsilon = 0.032;
+   private static final double maxAngleToConsider = Math.toRadians(50.0);
+   private static final double minNormalZ = Math.acos(maxAngleToConsider);
 
    private UnitVector3DBasics[] surfaceNormals;
 
@@ -36,8 +38,6 @@ public class HeightMapRANSACNormalCalculator
    private final Point3D point0 = new Point3D();
    private final Point3D point1 = new Point3D();
    private final TIntArrayList samples = new TIntArrayList();
-
-   private final List<TIntArrayList> parallelIndices = new ArrayList<>();
 
    private final Random random = new Random(3290);
 
@@ -145,6 +145,11 @@ public class HeightMapRANSACNormalCalculator
                           heightMapData.getHeightAt(xIndex1, yIndex1));
 
                candidatePlane.set(point, point0, point1);
+
+               if (Math.abs(candidatePlane.getNormal().getZ()) < minNormalZ)
+               {
+                  continue;
+               }
 
                int consensus = 0;
                for (int j = 0; j < xConsensusOffsets.size(); j++)

@@ -7,11 +7,13 @@ import controller_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.footstepPlanning.bodyPath.HeightMapRANSACNormalCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -36,11 +38,20 @@ import java.util.function.IntFunction;
 
 public class HeightMapSnapperVisualizer
 {
+   private static final boolean SHOW_NORMALS = false;
+   private static final boolean COLOR_REGIONS = true;
+
+   private static final boolean MARK_A_CELL = false;
+   private static final int indexXToMark = 80;
+   private static final int indexYToMark = 80;
+
+   private static final AppearanceDefinition defaultColor = YoAppearance.Olive();
+
    public HeightMapSnapperVisualizer()
    {
 //      File file = loadThroughChooser();
-      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stepping_stones_4.json");
-//      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stairs_1.json");
+//      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stepping_stones_4.json");
+      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stairs_1.json");
 //      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "cinders.json");
 
       if (file == null)
@@ -72,9 +83,6 @@ public class HeightMapSnapperVisualizer
       polygon.update();
 
       long t0 = System.nanoTime();
-
-//      HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
-//      surfaceNormalCalculator.computeSurfaceNormals(heightMapData, 0.3);
 
       HeightMapRANSACNormalCalculator surfaceNormalCalculator = new HeightMapRANSACNormalCalculator();
       surfaceNormalCalculator.computeSurfaceNormals(heightMapData);
@@ -148,12 +156,9 @@ public class HeightMapSnapperVisualizer
       graphics3DObject.addCube(heightMapData.getGridSizeXY(), heightMapData.getGridSizeXY(), 0.01, YoAppearance.Blue());
       graphics3DObject.addCoordinateSystem(0.3);
 
-      double minHeight = heightMapData.getMinHeight();
       double groundPlaneHeight = heightMapData.getEstimatedGroundHeight();
-      AppearanceDefinition low = YoAppearance.Black();
-      AppearanceDefinition high = YoAppearance.Olive();
 
-      AppearanceDefinition[] colors = new AppearanceDefinition[] {YoAppearance.Blue(), YoAppearance.Green(), YoAppearance.Red(), YoAppearance.Orange(), YoAppearance.Black(), YoAppearance.White(), YoAppearance.Indigo(), YoAppearance.Brown(), YoAppearance.DarkSalmon(), YoAppearance.HotPink(), YoAppearance.LightGreen(), YoAppearance.PaleGreen(), YoAppearance.Orchid(), YoAppearance.Turquoise(), YoAppearance.Tomato(), YoAppearance.Violet(), YoAppearance.Maroon()};
+      AppearanceDefinition[] colors = new AppearanceDefinition[] {YoAppearance.Blue(), YoAppearance.Green(), YoAppearance.Red(), YoAppearance.Orange(), YoAppearance.Black(), YoAppearance.White(), YoAppearance.Indigo(), YoAppearance.Brown(), YoAppearance.DarkSalmon(), YoAppearance.HotPink(), YoAppearance.LightGreen(), YoAppearance.PaleGreen(), YoAppearance.Orchid(), YoAppearance.Turquoise(), YoAppearance.Tomato(), YoAppearance.Violet(), YoAppearance.Maroon(), YoAppearance.Chartreuse()};
 
       int gridWidth = 2 * heightMapData.getCenterIndex() + 1;
       for (int key = 0; key < gridWidth * gridWidth; key++)
@@ -174,36 +179,44 @@ public class HeightMapSnapperVisualizer
 
          if (height > groundPlaneHeight + 1e-5)
          {
-            double alpha = MathTools.clamp((height - minHeight) / 0.2, 0.0, 1.0);
-            AppearanceDefinition interpolatedColor = YoAppearance.RGBColor(EuclidCoreTools.interpolate(low.getColor().getX(), high.getColor().getX(), alpha),
-                                                                           EuclidCoreTools.interpolate(low.getColor().getY(), high.getColor().getY(), alpha),
-                                                                           EuclidCoreTools.interpolate(low.getColor().getZ(), high.getColor().getZ(), alpha));
-
-            if (key == HeightMapTools.indicesToKey(84, 80, heightMapData.getCenterIndex()))
+            AppearanceDefinition color;
+            if (MARK_A_CELL && key == HeightMapTools.indicesToKey(indexXToMark, indexYToMark, heightMapData.getCenterIndex()))
             {
-               interpolatedColor = YoAppearance.Red();
+               color = YoAppearance.Red();
+            }
+            else if (COLOR_REGIONS)
+            {
+               int regionId = planarRegionCalculator.getRegionId(key);
+               if (regionId == -1)
+                  color = defaultColor;
+               else
+                  color = colors[regionId % colors.length];
+            }
+            else
+            {
+               color = defaultColor;
             }
 
-//            graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, interpolatedColor);
+            graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, color);
 
-            int regionId = planarRegionCalculator.getRegionId(key);
-            graphics3DObject.addCube(heightMapData.getGridResolutionXY(), heightMapData.getGridResolutionXY(), renderedHeight, true, colors[regionId % colors.length]);
+            if (SHOW_NORMALS)
+            {
+               graphics3DObject.translate(0.0, 0.0, 0.5 * renderedHeight + 0.01);
+               UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.apply(key);
+
+               if (!surfaceNormal.epsilonEquals(Axis3D.Z, 1e-4))
+               {
+                  Vector3D rotationAxis = new Vector3D();
+                  rotationAxis.cross(surfaceNormal, Axis3D.Z);
+                  rotationAxis.normalize();
+
+                  double angle = -Math.acos(surfaceNormal.getZ());
+                  graphics3DObject.rotate(angle, rotationAxis);
+               }
+
+               graphics3DObject.addCylinder(0.08, 0.006, YoAppearance.Orange());
+            }
          }
-
-//         graphics3DObject.translate(0.0, 0.0, 0.5 * renderedHeight + 0.01);
-//         UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.apply(key);
-//
-//         if (!surfaceNormal.epsilonEquals(Axis3D.Z, 1e-4))
-//         {
-//            Vector3D rotationAxis = new Vector3D();
-//            rotationAxis.cross(surfaceNormal, Axis3D.Z);
-//            rotationAxis.normalize();
-//
-//            double angle = -Math.acos(surfaceNormal.getZ());
-//            graphics3DObject.rotate(angle, rotationAxis);
-//         }
-
-//         graphics3DObject.addCylinder(0.08, 0.006, YoAppearance.Orange());
       }
 
       return graphics3DObject;
