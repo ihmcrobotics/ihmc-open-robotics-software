@@ -5,6 +5,8 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.dynamics.btHingeConstraint;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
+import imgui.type.ImFloat;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -21,6 +23,12 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
    public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDoorCombinedObject.class);
    private final GDXDoorPanelObject doorPanelObject;
    private final GDXDoorLeverHandleObject doorLeverObject;
+
+   private static final ImFloat lowLimit = new ImFloat(-0.5f);
+   private static final ImFloat highLimit = new ImFloat(0.5f);
+   private static final ImFloat relaxationFactor = new ImFloat(1.0f);
+   private static final ImFloat biasFactor = new ImFloat(0.3f);
+   private static final ImFloat softness = new ImFloat(0.9f);
 
    public GDXDoorCombinedObject()
    {
@@ -42,7 +50,8 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
       doorPanelObject.addToBullet(bulletPhysicsManager);
       doorLeverObject.addToBullet(bulletPhysicsManager);
 
-      Vector3 pivotInPanel = new Vector3(0.0f, 0.85f, 0.9f);
+//      Vector3 pivotInPanel = new Vector3(-0.03f, 0.85f, 0.9f);
+      Vector3 pivotInPanel = new Vector3(-0.03f, 0.4f, -0.13f);
       Vector3 pivotInLever = new Vector3(0.0f, 0.0f, 0.0f);
       Vector3 axisInPanel = new Vector3(1.0f, 0.0f, 0.0f);
       Vector3 axisInLever = new Vector3(1.0f, 0.0f, 0.0f);
@@ -55,13 +64,7 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
                                                                   axisInLever,
                                                                   useReferenceFrameA);
       // these limits from 0.0 to 1.0?
-      float lowLimit = 0.5f;
-      float highLimit = 0.5f;
-//      btHingeConstraint.setLimit(lowLimit, highLimit);
-//      float relaxationFactor;
-//      float biasFactor;
-//      float softness;
-//      btHingeConstraint.setLimit(lowLimit, highLimit, softness, biasFactor, relaxationFactor);
+      btHingeConstraint.setLimit(lowLimit.get(), highLimit.get(), softness.get(), biasFactor.get(), relaxationFactor.get());
 
       bulletPhysicsManager.getDiscreteDynamicsWorld().addConstraint(btHingeConstraint);
    }
@@ -122,4 +125,9 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
    {
       return doorPanelObject.getObjectTransform();
    }
+
+//   public static final renderImGuiWidgets()
+//   {
+//      ImGui.sliderFloat("Low limit", )
+//   }
 }
