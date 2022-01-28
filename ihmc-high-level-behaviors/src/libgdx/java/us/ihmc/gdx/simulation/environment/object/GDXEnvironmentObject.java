@@ -1,12 +1,7 @@
 package us.ihmc.gdx.simulation.environment.object;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.physics.bullet.collision.CollisionConstants;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject.CollisionFlags;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
@@ -53,8 +48,6 @@ public class GDXEnvironmentObject
    private Shape3DBasics collisionGeometryObject;
    private Function<Point3DReadOnly, Boolean> isPointInside;
    private Model collisionMesh;
-   private Material originalMaterial;
-   private Material highlightedMaterial;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform placementTransform = new RigidBodyTransform();
    private final ReferenceFrame placementFrame;
@@ -69,6 +62,7 @@ public class GDXEnvironmentObject
    private btCollisionShape btCollisionShape;
    private float mass = 0.0f;
    private btRigidBody btRigidBody;
+   private GDXBulletPhysicsManager bulletPhysicsManager;
    private final btMotionState bulletMotionState = new btMotionState()
    {
       @Override
@@ -90,7 +84,6 @@ public class GDXEnvironmentObject
          GDXTools.toGDX(tempTransform, transformToWorld);
       }
    };
-   private GDXBulletPhysicsManager bulletPhysicsManager;
 
    public GDXEnvironmentObject(String titleCasedName, GDXEnvironmentObjectFactory factory)
    {
@@ -127,7 +120,6 @@ public class GDXEnvironmentObject
       this.collisionMesh = collisionGraphic;
       realisticModelInstance = new GDXModelInstance(realisticModel);
       collisionModelInstance = new GDXModelInstance(collisionGraphic);
-      originalMaterial = new Material(realisticModelInstance.materials.get(0));
       realisticModelFrame
             = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(pascalCasedName + "RealisticModelFrame" + objectIndex,
                                                                                 placementFrame,
@@ -178,34 +170,7 @@ public class GDXEnvironmentObject
    {
       if (btRigidBody != null)
       {
-         if (selected)
-         {
-            btRigidBody.setCollisionFlags(btRigidBody.getCollisionFlags() | CollisionFlags.CF_KINEMATIC_OBJECT);
-            btRigidBody.setActivationState(CollisionConstants.DISABLE_DEACTIVATION);
-         }
-         else
-         {
-            btRigidBody.setCollisionFlags(btRigidBody.getCollisionFlags() & ~CollisionFlags.CF_KINEMATIC_OBJECT);
-            btRigidBody.setActivationState(CollisionConstants.WANTS_DEACTIVATION);
-         }
-      }
-   }
-
-   public void setHighlighted(boolean highlighted)
-   {
-      if (highlighted)
-      {
-         if (highlightedMaterial == null)
-         {
-            highlightedMaterial = new Material();
-            highlightedMaterial.set(ColorAttribute.createDiffuse(Color.ORANGE));
-         }
-
-         realisticModelInstance.materials.get(0).set(highlightedMaterial);
-      }
-      else
-      {
-         realisticModelInstance.materials.get(0).set(originalMaterial);
+         bulletPhysicsManager.setKinematicObject(btRigidBody, selected);
       }
    }
 
@@ -258,10 +223,10 @@ public class GDXEnvironmentObject
       placementFrame.update();
 
       placementFramePose.setFromReferenceFrame(realisticModelFrame);
-      GDXTools.toGDX(placementFramePose, tempTransform, getRealisticModelInstance().transform);
+      GDXTools.toGDX(placementFramePose, tempTransform, realisticModelInstance.transform);
 
       placementFramePose.setFromReferenceFrame(collisionModelFrame);
-      GDXTools.toGDX(placementFramePose, tempTransform, getCollisionModelInstance().transform);
+      GDXTools.toGDX(placementFramePose, tempTransform, collisionModelInstance.transform);
       collisionGeometryObject.getPose().set(placementFramePose);
       boundingSphere.getPosition().set(placementFramePose.getPosition());
    }
@@ -311,8 +276,13 @@ public class GDXEnvironmentObject
       this.mass = mass;
    }
 
-   public void setBtCollisionShape(com.badlogic.gdx.physics.bullet.collision.btCollisionShape btCollisionShape)
+   public void setBtCollisionShape(btCollisionShape btCollisionShape)
    {
       this.btCollisionShape = btCollisionShape;
+   }
+
+   public btRigidBody getBtRigidBody()
+   {
+      return btRigidBody;
    }
 }
