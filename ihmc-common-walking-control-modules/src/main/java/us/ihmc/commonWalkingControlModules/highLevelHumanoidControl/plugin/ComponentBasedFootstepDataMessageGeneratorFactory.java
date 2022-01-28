@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
@@ -22,6 +23,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -122,6 +124,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          continuousStepGenerator.setDesiredVelocityProvider(csgCommandInputManagerField.get().createDesiredVelocityProvider());
          continuousStepGenerator.setDesiredTurningVelocityProvider(csgCommandInputManagerField.get().createDesiredTurningVelocityProvider());
          continuousStepGenerator.setWalkInputProvider(csgCommandInputManagerField.get().createWalkInputProvider());
+         statusMessageOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, csgCommandInputManagerField.get()::setHighLevelStateChangeStatusMessage);
          updatables.add(csgCommandInputManagerField.get());
       }
       else if (useHeadingAndVelocityScriptField.get())
@@ -155,6 +158,7 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
       private boolean isUnitVelocities = false;
       private final Vector2D desiredVelocity = new Vector2D();
       private double turningVelocity = 0.0;
+      private HighLevelControllerName currentController;
 
       public CSGCommandInputManager()
       {
@@ -173,10 +177,15 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
          return commands;
       }
 
+      private void setHighLevelStateChangeStatusMessage(HighLevelStateChangeStatusMessage message)
+      {
+         currentController = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
+      }
+
       @Override
       public void update(double time)
       {
-         isOpen = true;
+         isOpen = currentController == HighLevelControllerName.WALKING;
 
          if (commandInputManager.isNewCommandAvailable(ContinuousStepGeneratorInputCommand.class))
          {
@@ -187,6 +196,9 @@ public class ComponentBasedFootstepDataMessageGeneratorFactory implements HighLe
             isUnitVelocities = command.isUnitVelocities();
             walk = command.isWalk();
          }
+
+         if (!isOpen)
+            walk = false;
       }
 
       public boolean isOpen()
