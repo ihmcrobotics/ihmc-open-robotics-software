@@ -240,12 +240,6 @@ public class GDXEnvironmentObject
       updateRenderablesPoses();
    }
 
-   public void setTransformToWorld(Matrix4 transformToWorld)
-   {
-      GDXTools.toEuclid(transformToWorld, placementTransform);
-      updateRenderablesPoses();
-   }
-
    protected void updateRenderablesPoses()
    {
       placementFrame.update();
