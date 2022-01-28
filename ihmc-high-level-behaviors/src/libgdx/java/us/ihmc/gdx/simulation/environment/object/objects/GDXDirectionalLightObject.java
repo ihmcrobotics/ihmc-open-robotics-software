@@ -2,10 +2,7 @@ package us.ihmc.gdx.simulation.environment.object.objects;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.euclid.shape.primitives.Sphere3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.gdx.lighting.GDXDirectionalLight;
@@ -28,19 +25,17 @@ public class GDXDirectionalLightObject extends GDXEnvironmentObject
       this.light = new GDXDirectionalLight();
 
       Model model = GDXModelPrimitives.buildModel(meshBuilder -> meshBuilder.addBox(0.2f, 0.2f, 0.05f, Color.YELLOW), "directionalModel");
-      RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
+      setRealisticModel(model);
       Box3D collisionBox = new Box3D(0.2f, 0.2f, 0.05f);
 
-      Sphere3D boundingSphere = new Sphere3D(collisionBox.getSize().length() / 2.0);
+      getBoundingSphere().setRadius(collisionBox.getSize().length() / 2.0);
 
-      Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
+      setCollisionModel(meshBuilder ->
       {
          Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
          meshBuilder.addBox(0.21f, 0.21f, 0.06f, color);
-      }, getPascalCasedName() + "CollisionModel" + getObjectIndex());
-      collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
-      RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
-      create(model, collisionGraphic, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside);
+      });
+      setCollisionGeometryObject(collisionBox);
    }
 
    @Override
