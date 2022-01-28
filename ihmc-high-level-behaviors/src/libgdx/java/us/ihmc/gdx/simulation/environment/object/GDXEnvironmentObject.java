@@ -1,10 +1,13 @@
 package us.ihmc.gdx.simulation.environment.object;
 
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -179,19 +182,16 @@ public class GDXEnvironmentObject
       return collisionShapeOffset;
    }
 
-   public GDXModelInstance getRealisticModelInstance()
+   public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      return realisticModelInstance;
+      if (realisticModelInstance != null)
+         realisticModelInstance.getRenderables(renderables, pool);
    }
 
-   public GDXModelInstance getCollisionModelInstance()
+   public void getCollisionMeshRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      return collisionModelInstance;
-   }
-
-   public Shape3DBasics getCollisionGeometryObject()
-   {
-      return collisionGeometryObject;
+      if (collisionModelInstance != null)
+         collisionModelInstance.getRenderables(renderables, pool);
    }
 
    public void setPositionInWorld(Point3DReadOnly positionInWorld)
