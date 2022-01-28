@@ -79,7 +79,8 @@ public class GDXBulletPhysicsDebugger
 
    public void renderImGuiWidgets()
    {
-      ImGui.checkbox(labels.get("Draw debug wireframes"), drawDebug);
+      // FIXME: There's a native memory leak I think. Or maybe just need to fix the mesh drawing above.
+      ImGui.checkbox(labels.get("Draw debug wireframes (Crashes after awhile)"), drawDebug);
    }
 
    public void update()
