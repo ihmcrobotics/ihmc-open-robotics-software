@@ -1,5 +1,6 @@
 package us.ihmc.gdx.simulation.environment.object;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
@@ -14,19 +15,24 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.simulation.environment.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -45,9 +51,9 @@ public class GDXEnvironmentObject
    private GDXModelInstance realisticModelInstance;
    private GDXModelInstance collisionModelInstance;
    private final StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
-   private RigidBodyTransform collisionShapeOffset;
-   private RigidBodyTransform wholeThingOffset;
-   private Sphere3D boundingSphere;
+   private RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
+   private RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
+   private Sphere3D boundingSphere = new Sphere3D(1.0);
    private Shape3DBasics collisionGeometryObject;
    private Function<Point3DReadOnly, Boolean> isPointInside;
    private Model collisionMesh;
@@ -104,41 +110,63 @@ public class GDXEnvironmentObject
       placementFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "PlacementFrame" + objectIndex,
                                                                                        ReferenceFrame.getWorldFrame(),
                                                                                        placementTransform);
-   }
-
-   public void create(Model realisticModel,
-                      Model collisionGraphic,
-                      RigidBodyTransform collisionShapeOffset,
-                      RigidBodyTransform wholeThingOffset,
-                      Sphere3D boundingSphere,
-                      Shape3DBasics collisionGeometryObject,
-                      Function<Point3DReadOnly, Boolean> isPointInside)
-   {
-      this.realisticModel = realisticModel;
-      this.collisionShapeOffset = collisionShapeOffset;
-      this.wholeThingOffset = wholeThingOffset;
-      this.boundingSphere = boundingSphere;
-      this.collisionGeometryObject = collisionGeometryObject;
-      this.isPointInside = isPointInside;
-      this.collisionMesh = collisionGraphic;
-      realisticModelInstance = new GDXModelInstance(realisticModel);
-      collisionModelInstance = new GDXModelInstance(collisionGraphic);
       realisticModelFrame
-            = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(pascalCasedName + "RealisticModelFrame" + objectIndex,
-                                                                                placementFrame,
-                                                                                wholeThingOffset);
+            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "RealisticModelFrame" + objectIndex,
+                                                                              placementFrame,
+                                                                              wholeThingOffset);
       collisionModelFrame
-            = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
-                                                                                realisticModelFrame,
-                                                                                collisionShapeOffset);
+            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
+                                                                              realisticModelFrame,
+                                                                              collisionShapeOffset);
       bulletCollisionFrame
             = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "BulletCollisionFrame" + objectIndex,
                                                                               ReferenceFrame.getWorldFrame(),
                                                                               bulletCollisionFrameTransformToWorld);
       bulletCollisionSpecificationFrame
-            = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(pascalCasedName + "BulletCollisionSpecificationFrame" + objectIndex,
-                                                                                realisticModelFrame,
-                                                                                bulletCollisionOffset);
+            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "BulletCollisionSpecificationFrame" + objectIndex,
+                                                                              realisticModelFrame,
+                                                                              bulletCollisionOffset);
+   }
+
+   public void setRealisticModel(Model realisticModel)
+   {
+      this.realisticModel = realisticModel;
+      realisticModelInstance = new GDXModelInstance(realisticModel);
+   }
+
+   public void setCollisionModel(Model collisionGraphic)
+   {
+      this.collisionMesh = collisionGraphic;
+      collisionModelInstance = new GDXModelInstance(collisionGraphic);
+   }
+
+   public void setCollisionModel(Consumer<GDXMultiColorMeshBuilder> meshBuilderConsumer)
+   {
+      Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilderConsumer, pascalCasedName + "CollisionModel" + getObjectIndex());
+      GDXTools.setTransparency(collisionGraphic, 0.4f);
+      setCollisionModel(collisionGraphic);
+   }
+
+   public void setCollisionGeometryObject(Shape3DBasics collisionGeometryObject)
+   {
+      this.collisionGeometryObject = collisionGeometryObject;
+      isPointInside = collisionGeometryObject::isPointInside;
+
+      if (collisionMesh == null && collisionGeometryObject instanceof Box3D)
+      {
+         Box3D box3D = (Box3D) collisionGeometryObject;
+         setCollisionModel(meshBuilder ->
+         {
+            Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
+            meshBuilder.addBox((float) box3D.getSizeX(), (float) box3D.getSizeY(), (float) box3D.getSizeZ(), color);
+            meshBuilder.addMultiLineBox(box3D.getVertices(), 0.01, color); // so we can see it better
+         });
+      }
+   }
+
+   public void setPointIsInsideAlgorithm(Function<Point3DReadOnly, Boolean> isPointInside)
+   {
+      this.isPointInside = isPointInside;
    }
 
    public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
@@ -221,6 +249,9 @@ public class GDXEnvironmentObject
    protected void updateRenderablesPoses()
    {
       placementFrame.update();
+      realisticModelFrame.update();
+      collisionModelFrame.update();
+      bulletCollisionSpecificationFrame.update();
 
       placementFramePose.setFromReferenceFrame(realisticModelFrame);
       GDXTools.toGDX(placementFramePose, tempTransform, realisticModelInstance.transform);
@@ -284,5 +315,15 @@ public class GDXEnvironmentObject
    public btRigidBody getBtRigidBody()
    {
       return btRigidBody;
+   }
+
+   public RigidBodyTransform getWholeThingOffset()
+   {
+      return wholeThingOffset;
+   }
+
+   public Sphere3D getBoundingSphere()
+   {
+      return boundingSphere;
    }
 }
