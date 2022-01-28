@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
@@ -26,6 +27,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -38,8 +40,6 @@ import java.util.function.Consumer;
 
 public class AStarBodyPathPlanner
 {
-   private static final double traversibilityCostScale = 0.7;
-
    private static final boolean checkForCollisions = false;
    private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useEdgeDetectorCost = false;
@@ -57,7 +57,9 @@ public class AStarBodyPathPlanner
    private final YoDouble edgeCost = new YoDouble("edgeCost", registry);
    private final YoDouble deltaHeight = new YoDouble("deltaHeight", registry);
    private final YoDouble snapHeight = new YoDouble("snapHeight", registry);
-   private final SideDependentList<YoDouble> inclineCost = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseNameForStartOfExpression() + "InclineCost", registry));
+   private final YoDouble incline = new YoDouble("incline", registry);
+   private final YoDouble roll = new YoDouble("roll", registry);
+   private final YoFrameVector3D leastSqNormal = new YoFrameVector3D("leastSqNormal", ReferenceFrame.getWorldFrame(), registry);
 
    private final PriorityQueue<BodyPathLatticePoint> stack;
    private BodyPathLatticePoint startNode, goalNode;
@@ -91,9 +93,10 @@ public class AStarBodyPathPlanner
    /* Parameters to extract */
    static final double groundClearance = 0.2;
    static final double maxStepUpDown = 0.2;
+   static final double maxIncline = Math.toRadians(55.0);
    static final double snapRadius = 0.1;
-   static final double boxSizeY = 0.6;
-   static final double boxSizeX = 0.25;
+   static final double boxSizeY = 0.7;
+   static final double boxSizeX = 0.3;
 
    public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, ConvexPolygon2D footPolygon)
    {
@@ -121,6 +124,9 @@ public class AStarBodyPathPlanner
                                          edgeCost.set(Double.NaN);
                                          deltaHeight.set(Double.NaN);
                                          rejectionReason.set(null);
+                                         leastSqNormal.setToZero();
+                                         roll.set(0.0);
+                                         incline.set(0.0);
                                       });
    }
 
@@ -157,8 +163,7 @@ public class AStarBodyPathPlanner
 
    private enum RejectionReason
    {
-      INVALID_SNAP,
-      TOO_HIGH_OR_LOW,
+      INVALID_SNAP, TOO_STEEP,
       COLLISION,
       NON_TRAVERSIBLE
    }
@@ -248,10 +253,13 @@ public class AStarBodyPathPlanner
                continue;
             }
 
+            double xyDistance = xyDistance(node, neighbor);
             deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - gridHeightMap.get(node)));
-            if (deltaHeight.getValue() > maxStepUpDown)
+            incline.set(Math.atan2(deltaHeight.getValue(), xyDistance));
+
+            if (Math.abs(incline.getValue()) > maxIncline)
             {
-               rejectionReason.set(RejectionReason.TOO_HIGH_OR_LOW);
+               rejectionReason.set(RejectionReason.TOO_STEEP);
                graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
                continue;
             }
@@ -267,8 +275,7 @@ public class AStarBodyPathPlanner
                }
             }
 
-            double edgeDistance = xyDistance(node, neighbor);
-            edgeCost.set(edgeDistance);
+            edgeCost.set(xyDistance);
 
             double traversibilityIndicator = traversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
             if (traversibilityCalculator.isTraversible())
@@ -295,28 +302,25 @@ public class AStarBodyPathPlanner
                Pose2D bodyPose = new Pose2D();
                bodyPose.set(node.getX(), node.getY(), yaw);
 
-               for (RobotSide side : RobotSide.values)
+               UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(HeightMapTools.coordinateToKey(bodyPose.getX(),
+                                                                                                                          bodyPose.getY(),
+                                                                                                                          heightMapData.getGridCenter().getX(),
+                                                                                                                          heightMapData.getGridCenter().getY(),
+                                                                                                                          heightMapData.getGridResolutionXY(),
+                                                                                                                          heightMapData.getCenterIndex()));
+
+               if (surfaceNormal != null)
                {
-                  Pose2D stepPose = new Pose2D();
-                  stepPose.set(bodyPose);
-                  stepPose.appendTranslation(0.0, side.negateIfRightSide(0.5 * parameters.getIdealFootstepWidth()));
-                  UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(HeightMapTools.coordinateToKey(stepPose.getX(),
-                                                                                                                             stepPose.getY(),
-                                                                                                                             heightMapData.getGridCenter().getX(),
-                                                                                                                             heightMapData.getGridCenter().getY(),
-                                                                                                                             heightMapData.getGridResolutionXY(),
-                                                                                                                             heightMapData.getCenterIndex()));
-
-                  if (surfaceNormal == null)
-                     continue;
-
                   Vector2D edge = new Vector2D(neighbor.getX() - node.getX(), neighbor.getY() - node.getY());
                   edge.normalize();
 
                   /* Roll is the amount of incline orthogonal to the direction of motion */
-                  double roll = Math.asin(Math.abs(edge.getY() * surfaceNormal.getX() - edge.getX() * surfaceNormal.getY()));
-                  inclineCost.get(side).set(3.0 * Math.max(0.0, roll - Math.toRadians(5.0)));
-                  edgeCost.add(inclineCost.get(side));
+                  leastSqNormal.set(surfaceNormal);
+                  roll.set(Math.asin(Math.abs(edge.getY() * surfaceNormal.getX() - edge.getX() * surfaceNormal.getY())));
+                  double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / Math.toRadians(22.0), 0.0, 1.0);
+                  double rollAngle = Math.max(0.0, Math.abs(roll.getValue()) - Math.toRadians(5.0));
+
+                  edgeCost.add(5.25 * inclineScale * rollAngle);
                }
             }
 
@@ -425,14 +429,14 @@ public class AStarBodyPathPlanner
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
 
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
    }
 
    private static Pair<Integer, Integer> rotate(int xOff, int yOff, int i)

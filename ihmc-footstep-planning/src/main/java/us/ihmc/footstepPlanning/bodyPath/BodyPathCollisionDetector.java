@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.bodyPath;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -10,13 +11,20 @@ class BodyPathCollisionDetector
 {
    private final TIntArrayList squaredUpCollisionOffsetsX = new TIntArrayList();
    private final TIntArrayList squaredUpCollisionOffsetsY = new TIntArrayList();
+
    private final TIntArrayList diagonalCollisionOffsetX = new TIntArrayList();
    private final TIntArrayList diagonalCollisionOffsetY = new TIntArrayList();
 
    void initialize(double gridResolutionXY, double boxSizeX, double boxSizeY)
    {
-      squaredUpCollisionOffsetsX.clear();
-      squaredUpCollisionOffsetsY.clear();
+      packOffsets(gridResolutionXY, squaredUpCollisionOffsetsX, squaredUpCollisionOffsetsY, boxSizeX, boxSizeY, 0.0);
+      packOffsets(gridResolutionXY, diagonalCollisionOffsetX, diagonalCollisionOffsetY, boxSizeX, boxSizeY, Math.toRadians(45.0));
+   }
+
+   private static void packOffsets(double gridResolutionXY, TIntArrayList xOffsets, TIntArrayList yOffsets, double boxSizeX, double boxSizeY, double angle)
+   {
+      xOffsets.clear();
+      yOffsets.clear();
       int minMaxOffsetX = (int) (0.5 * boxSizeX / gridResolutionXY);
       int minMaxOffsetY = (int) (0.5 * boxSizeY / gridResolutionXY);
 
@@ -24,28 +32,17 @@ class BodyPathCollisionDetector
       {
          for (int yi = -minMaxOffsetY; yi <= minMaxOffsetY; yi++)
          {
-            squaredUpCollisionOffsetsX.add(xi);
-            squaredUpCollisionOffsetsY.add(yi);
-         }
-      }
-
-      diagonalCollisionOffsetX.clear();
-      diagonalCollisionOffsetY.clear();
-      int minMaxOffsetXY = (int) (0.5 * EuclidCoreTools.norm(boxSizeX, boxSizeY) / gridResolutionXY);
-
-      for (int xi = -minMaxOffsetXY; xi <= minMaxOffsetXY; xi++)
-      {
-         for (int yi = -minMaxOffsetXY; yi <= minMaxOffsetXY; yi++)
-         {
             double x = xi * gridResolutionXY;
             double y = yi * gridResolutionXY;
 
-            if (MathTools.intervalContains(x,
-                                           Math.max(-y - boxSizeX / Math.sqrt(2.0), y - boxSizeY / Math.sqrt(2.0)),
-                                           Math.min(-y + boxSizeX / Math.sqrt(2.0), y + boxSizeY / Math.sqrt(2.0))))
+            double xP = Math.cos(angle) * x - Math.sin(angle) * y;
+            double yP = Math.sin(angle) * x + Math.cos(angle) * y;
+            double eps = 1e-8;
+
+            if (Math.abs(xP) < boxSizeX + eps && Math.abs(yP) < boxSizeY + eps)
             {
-               diagonalCollisionOffsetX.add(xi);
-               diagonalCollisionOffsetY.add(yi);
+               xOffsets.add(xi);
+               yOffsets.add(yi);
             }
          }
       }

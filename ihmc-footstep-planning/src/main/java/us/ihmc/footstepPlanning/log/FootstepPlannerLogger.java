@@ -355,6 +355,11 @@ public class FootstepPlannerLogger
             for (int j = 0; j < iterationData.getChildNodes().size(); j++)
             {
                AStarBodyPathEdgeData edgeData = planner.getBodyPathEdgeDataMap().get(new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j)));
+               if (edgeData == null)
+               {
+                  System.out.println();
+                  throw new RuntimeException("No edge data!" + "\n Parent: " + iterationData.getParentNode() + "\n Child: " + iterationData.getChildNodes().get(j));
+               }
 
                // indicate start of data
                writeLine(1, "Edge:");

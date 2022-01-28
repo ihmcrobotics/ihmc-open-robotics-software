@@ -157,7 +157,6 @@ public abstract class HeightMapUI extends Application
       heightMapParametersUIController.attachMessager(messager);
       heightMapParametersUIController.bindControls();
 
-
       view3dFactory.bindSubSceneSizeToPaneSize(mainPane);
       centerBorderPane.setCenter(view3dFactory.getSubSceneWrappedInsidePane());
 

@@ -47,7 +47,7 @@
                           </content>
                       </Tab>
       
-                      <Tab text="Log Table">
+                      <Tab text="Footstep Log Table">
                           <content>
                               <fx:include fx:id="footstepPlannerLogVisualizer" source="FootstepPlannerLogVisualizer.fxml" />
                           </content>
