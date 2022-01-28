@@ -56,6 +56,7 @@ public class GDXBulletPhysicsManager
 
    public btCollisionObject addStaticObject(btCollisionShape collisionShape, Matrix4 transformToWorld)
    {
+
       btCollisionObject staticObject = new btCollisionObject();
       staticObject.setCollisionShape(collisionShape);
       staticObject.setWorldTransform(transformToWorld);
@@ -102,6 +103,20 @@ public class GDXBulletPhysicsManager
          int maxSubSteps = 1000; // 0 means use variable time step
          float fixedTimeStep = (float) UnitConversions.hertzToSeconds(240); // value not used for variable time step
          discreteDynamicsWorld.stepSimulation(timeStep, maxSubSteps, fixedTimeStep); // FIXME: Sometimes EXCEPTION_ACCESS_VIOLATION
+      }
+   }
+
+   public void setKinematicObject(btRigidBody btRigidBody, boolean isKinematicObject)
+   {
+      if (isKinematicObject)
+      {
+         btRigidBody.setCollisionFlags(btRigidBody.getCollisionFlags() | btCollisionObject.CollisionFlags.CF_KINEMATIC_OBJECT);
+         btRigidBody.setActivationState(CollisionConstants.DISABLE_DEACTIVATION);
+      }
+      else
+      {
+         btRigidBody.setCollisionFlags(btRigidBody.getCollisionFlags() & ~btCollisionObject.CollisionFlags.CF_KINEMATIC_OBJECT);
+         btRigidBody.setActivationState(CollisionConstants.WANTS_DEACTIVATION);
       }
    }
 
