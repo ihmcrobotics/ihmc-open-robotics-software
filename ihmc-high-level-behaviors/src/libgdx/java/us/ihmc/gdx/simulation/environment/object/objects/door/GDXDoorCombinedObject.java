@@ -1,6 +1,5 @@
 package us.ihmc.gdx.simulation.environment.object.objects.door;
 
-import us.ihmc.gdx.simulation.environment.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 
@@ -17,17 +16,5 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
 
       doorPanelObject = new GDXDoorPanelObject();
       doorLeverObject = new GDXDoorLeverHandleObject();
-   }
-
-   @Override
-   public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
-   {
-
-   }
-
-   @Override
-   public void removeFromBullet(GDXBulletPhysicsManager bulletPhysicsManager)
-   {
-
    }
 }

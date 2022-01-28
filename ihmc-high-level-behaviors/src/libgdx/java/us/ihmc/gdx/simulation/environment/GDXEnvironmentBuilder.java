@@ -113,7 +113,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             {
                if (intersectedObject != selectedObject)
                {
-                  setObjectSelected(intersectedObject, true);
+                  updateObjectSelected(selectedObject, intersectedObject);
                   if (selectedObject != null)
                   {
                      pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
@@ -130,7 +130,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
             if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
-               setObjectSelected(intersectedObject, true);
+               updateObjectSelected(selectedObject, intersectedObject);
                pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
             }
          }
@@ -157,7 +157,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
    public void resetSelection()
    {
-      setObjectSelected(selectedObject, false);
+      updateObjectSelected(selectedObject, null);
       intersectedObject = null;
    }
 
@@ -189,7 +189,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             {
                GDXEnvironmentObject objectToPlace = objectFactory.getSupplier().get();
                addObject(objectToPlace);
-               setObjectSelected(objectToPlace, true);
+               updateObjectSelected(selectedObject, objectToPlace);
                isPlacing = true;
             }
          }
@@ -333,20 +333,17 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       }
    }
 
-   public void setObjectSelected(GDXEnvironmentObject environmentObject, boolean selected)
+   public void updateObjectSelected(GDXEnvironmentObject from, GDXEnvironmentObject to)
    {
-      if (selected && environmentObject != null)
+      if (from != to)
       {
-         selectedObject = environmentObject;
-         environmentObject.setSelected(true);
-      }
-      else
-      {
-         if (environmentObject != null)
-         {
-            environmentObject.setSelected(false);
-         }
-         selectedObject = null;
+         if (from != null)
+            from.setSelected(false);
+
+         if (to != null)
+            to.setSelected(true);
+
+         selectedObject = to;
       }
    }
 
@@ -372,7 +369,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    public void removeObject(GDXEnvironmentObject environmentObject)
    {
       allObjects.remove(environmentObject);
-      environmentObject.removeFromBullet(bulletPhysicsManager);
+      environmentObject.removeFromBullet();
 
       if (environmentObject instanceof GDXPointLightObject)
       {
