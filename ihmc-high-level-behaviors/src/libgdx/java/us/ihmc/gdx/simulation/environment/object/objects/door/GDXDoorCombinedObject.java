@@ -5,7 +5,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.dynamics.btHingeConstraint;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -21,6 +20,7 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Door Combined";
    public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDoorCombinedObject.class);
+   private final GDXDoorFrameObject doorFrameObject;
    private final GDXDoorPanelObject doorPanelObject;
    private final GDXDoorLeverHandleObject doorLeverObject;
 
@@ -34,6 +34,7 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
    {
       super(NAME, FACTORY);
 
+      doorFrameObject = new GDXDoorFrameObject();
       doorPanelObject = new GDXDoorPanelObject();
       doorLeverObject = new GDXDoorLeverHandleObject();
    }
@@ -47,31 +48,47 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
    @Override
    public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
    {
+      doorFrameObject.addToBullet(bulletPhysicsManager);
       doorPanelObject.addToBullet(bulletPhysicsManager);
       doorLeverObject.addToBullet(bulletPhysicsManager);
 
-//      Vector3 pivotInPanel = new Vector3(-0.03f, 0.85f, 0.9f);
-      Vector3 pivotInPanel = new Vector3(-0.03f, 0.4f, -0.13f);
-      Vector3 pivotInLever = new Vector3(0.0f, 0.0f, 0.0f);
-      Vector3 axisInPanel = new Vector3(1.0f, 0.0f, 0.0f);
-      Vector3 axisInLever = new Vector3(1.0f, 0.0f, 0.0f);
-      boolean useReferenceFrameA = true;
-      btHingeConstraint btHingeConstraint = new btHingeConstraint(doorPanelObject.getBtRigidBody(),
-                                                                  doorLeverObject.getBtRigidBody(),
-                                                                  pivotInPanel,
-                                                                  pivotInLever,
-                                                                  axisInPanel,
-                                                                  axisInLever,
-                                                                  useReferenceFrameA);
-      // these limits from 0.0 to 1.0?
-      btHingeConstraint.setLimit(lowLimit.get(), highLimit.get(), softness.get(), biasFactor.get(), relaxationFactor.get());
+      Vector3 pivotInFrameForDoorHinge = new Vector3(0.0f, 0.0f, 0.0f);
+      Vector3 pivotInPanelForDoorHinge = new Vector3(0.0f, -0.9144f / 2.0f, -2.0447f / 2.0f);
+      Vector3 axisInFrameForDoorHinge = new Vector3(0.0f, 0.0f, 1.0f);
+      Vector3 axisInPanelForDoorHinge = new Vector3(0.0f, 0.0f, 1.0f);
+      boolean useReferenceFrameAForDoorHinge = true;
+      btHingeConstraint doorHingeConstraint = new btHingeConstraint(doorFrameObject.getBtRigidBody(),
+                                                                    doorPanelObject.getBtRigidBody(),
+                                                                    pivotInFrameForDoorHinge,
+                                                                    pivotInPanelForDoorHinge,
+                                                                    axisInFrameForDoorHinge,
+                                                                    axisInPanelForDoorHinge,
+                                                                    useReferenceFrameAForDoorHinge);
+      doorHingeConstraint.setLimit(lowLimit.get(), highLimit.get(), softness.get(), biasFactor.get(), relaxationFactor.get());
+      bulletPhysicsManager.getDiscreteDynamicsWorld().addConstraint(doorHingeConstraint);
 
-      bulletPhysicsManager.getDiscreteDynamicsWorld().addConstraint(btHingeConstraint);
+//      Vector3 pivotInPanel = new Vector3(-0.03f, 0.85f, 0.9f);
+      Vector3 pivotInPanelForHandle = new Vector3(-0.03f, 0.4f, -0.13f);
+      Vector3 pivotInLeverForHandle = new Vector3(0.0f, 0.0f, 0.0f);
+      Vector3 axisInPanelForHandle = new Vector3(1.0f, 0.0f, 0.0f);
+      Vector3 axisInLeverForHandle = new Vector3(1.0f, 0.0f, 0.0f);
+      boolean useReferenceFrameAForHandle = true;
+      btHingeConstraint handleHingeConstraint = new btHingeConstraint(doorPanelObject.getBtRigidBody(),
+                                                                      doorLeverObject.getBtRigidBody(),
+                                                                      pivotInPanelForHandle,
+                                                                      pivotInLeverForHandle,
+                                                                      axisInPanelForHandle,
+                                                                      axisInLeverForHandle,
+                                                                      useReferenceFrameAForHandle);
+      // these limits from 0.0 to 1.0?
+      handleHingeConstraint.setLimit(lowLimit.get(), highLimit.get(), softness.get(), biasFactor.get(), relaxationFactor.get());
+      bulletPhysicsManager.getDiscreteDynamicsWorld().addConstraint(handleHingeConstraint);
    }
 
    @Override
    public void removeFromBullet()
    {
+      doorFrameObject.removeFromBullet();
       doorPanelObject.removeFromBullet();
       doorLeverObject.removeFromBullet();
    }
@@ -79,36 +96,37 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
    @Override
    public boolean intersect(Line3DReadOnly pickRay, Point3D intersectionToPack)
    {
-      return doorPanelObject.intersect(pickRay, intersectionToPack);
+      return doorFrameObject.intersect(pickRay, intersectionToPack);
    }
 
    @Override
    public void setSelected(boolean selected)
    {
-      doorPanelObject.setSelected(selected);
+      doorFrameObject.setSelected(selected);
    }
 
    @Override
    public void setPositionInWorld(Point3DReadOnly positionInWorld)
    {
-      doorPanelObject.setPositionInWorld(positionInWorld);
+      doorFrameObject.setPositionInWorld(positionInWorld);
    }
 
    @Override
    public void setPoseInWorld(Pose3D poseInWorld)
    {
-      doorPanelObject.setPoseInWorld(poseInWorld);
+      doorFrameObject.setPoseInWorld(poseInWorld);
    }
 
    @Override
    public void setTransformToWorld(RigidBodyTransform transformToWorld)
    {
-      doorPanelObject.setTransformToWorld(transformToWorld);
+      doorFrameObject.setTransformToWorld(transformToWorld);
    }
 
    @Override
    public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      doorFrameObject.getRealRenderables(renderables, pool);
       doorPanelObject.getRealRenderables(renderables, pool);
       doorLeverObject.getRealRenderables(renderables, pool);
    }
@@ -116,6 +134,7 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
    @Override
    public void getCollisionMeshRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      doorFrameObject.getCollisionMeshRenderables(renderables, pool);
       doorPanelObject.getCollisionMeshRenderables(renderables, pool);
       doorLeverObject.getCollisionMeshRenderables(renderables, pool);
    }
@@ -123,7 +142,7 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
    @Override
    public RigidBodyTransformReadOnly getObjectTransform()
    {
-      return doorPanelObject.getObjectTransform();
+      return doorFrameObject.getObjectTransform();
    }
 
 //   public static final renderImGuiWidgets()
