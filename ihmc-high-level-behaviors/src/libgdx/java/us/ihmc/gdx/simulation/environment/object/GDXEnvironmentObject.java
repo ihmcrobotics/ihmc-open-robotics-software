@@ -89,6 +89,7 @@ public class GDXEnvironmentObject
       @Override
       public void getWorldTransform(Matrix4 transformToWorld)
       {
+         bulletCollisionSpecificationFrame.update();
          tempTransform.set(bulletCollisionSpecificationFrame.getTransformToWorldFrame());
          GDXTools.toGDX(tempTransform, transformToWorld);
       }
@@ -245,7 +246,6 @@ public class GDXEnvironmentObject
       placementFrame.update();
       realisticModelFrame.update();
       collisionModelFrame.update();
-      bulletCollisionSpecificationFrame.update();
 
       placementFramePose.setFromReferenceFrame(realisticModelFrame);
       GDXTools.toGDX(placementFramePose, tempTransform, realisticModelInstance.transform);

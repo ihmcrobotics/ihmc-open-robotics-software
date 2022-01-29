@@ -22,13 +22,14 @@ public class GDXDoorPanelObject extends GDXEnvironmentObject
       double sizeX = 0.0508; // centered on X
       double sizeY = 0.9144;
       double sizeZ = 2.0447;
+      double simulationY = sizeY - 0.05; // prevent door hinge self collision
       setMass(70.0f);
       getCollisionShapeOffset().getTranslation().add(0.0, sizeY / 2.0, sizeZ / 2.0);
       getBoundingSphere().setRadius(2.5);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       setCollisionGeometryObject(collisionBox);
-      getBulletCollisionOffset().set(getCollisionShapeOffset());
+      getBulletCollisionOffset().getTranslation().add(0.0, sizeY / 2.0 + 0.025, sizeZ / 2.0);
 
-      setBtCollisionShape(new btBoxShape(new Vector3((float) sizeX / 2.0f, (float) sizeY / 2.0f, (float) sizeZ / 2.0f)));
+      setBtCollisionShape(new btBoxShape(new Vector3((float) sizeX / 2.0f, (float) simulationY / 2.0f, (float) sizeZ / 2.0f)));
    }
 }
