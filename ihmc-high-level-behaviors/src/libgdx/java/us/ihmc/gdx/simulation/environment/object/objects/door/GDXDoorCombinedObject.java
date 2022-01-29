@@ -52,8 +52,8 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
       doorPanelObject.addToBullet(bulletPhysicsManager);
       doorLeverObject.addToBullet(bulletPhysicsManager);
 
-      Vector3 pivotInFrameForDoorHinge = new Vector3(0.0f, 0.0f, 0.0f);
-      Vector3 pivotInPanelForDoorHinge = new Vector3(0.0f, -0.9144f / 2.0f, -2.0447f / 2.0f);
+      Vector3 pivotInFrameForDoorHinge = new Vector3(0.0f, 0.0f, 0.01f); // get the bottom of the door off the ground a little
+      Vector3 pivotInPanelForDoorHinge = new Vector3(0.0f, -((0.9144f - 0.05f) / 2.0f) - 0.05f, -2.0447f / 2.0f); // prevent door hinge self collision
       Vector3 axisInFrameForDoorHinge = new Vector3(0.0f, 0.0f, 1.0f);
       Vector3 axisInPanelForDoorHinge = new Vector3(0.0f, 0.0f, 1.0f);
       boolean useReferenceFrameAForDoorHinge = true;
