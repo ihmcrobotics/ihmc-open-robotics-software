@@ -19,9 +19,9 @@ public class GDXDoorPanelObject extends GDXEnvironmentObject
       Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/door/doorPanel/DoorPanel.g3dj");
       setRealisticModel(realisticModel);
 
-      double sizeX = 0.05; // centered on X
+      double sizeX = 0.0508; // centered on X
       double sizeY = 0.9144;
-      double sizeZ = 2.0;
+      double sizeZ = 2.0447;
       setMass(70.0f);
       getCollisionShapeOffset().getTranslation().add(0.0, sizeY / 2.0, sizeZ / 2.0);
       getBoundingSphere().setRadius(2.5);
