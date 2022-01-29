@@ -56,7 +56,6 @@ public class GDXBulletPhysicsManager
 
    public btCollisionObject addStaticObject(btCollisionShape collisionShape, Matrix4 transformToWorld)
    {
-
       btCollisionObject staticObject = new btCollisionObject();
       staticObject.setCollisionShape(collisionShape);
       staticObject.setWorldTransform(transformToWorld);
@@ -123,6 +122,7 @@ public class GDXBulletPhysicsManager
    public void removeCollisionObject(btCollisionObject collisionObject)
    {
       discreteDynamicsWorld.removeCollisionObject(collisionObject);
+      rigidBodies.remove(collisionObject);
    }
 
    public void renderImGuiWidgets()
