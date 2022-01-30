@@ -36,8 +36,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * TODO: This class is absolutely disgusting. Objects probably need to not extend a class like this,
- * but instead uses some nice tools methods for doing this stuff.
+ * TODO: This class probably needs renaming and setup as layers of interfaces.
  */
 public class GDXEnvironmentObject
 {
