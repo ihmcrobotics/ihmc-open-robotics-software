@@ -65,7 +65,7 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
                                                                     axisInPanelForDoorHinge,
                                                                     useReferenceFrameAForDoorHinge);
       doorHingeConstraint.setLimit(-2.0f, 2.0f, softness.get(), biasFactor.get(), relaxationFactor.get());
-      bulletPhysicsManager.getDiscreteDynamicsWorld().addConstraint(doorHingeConstraint);
+      bulletPhysicsManager.getMultiBodyDynamicsWorld().addConstraint(doorHingeConstraint);
 
 //      Vector3 pivotInPanel = new Vector3(-0.03f, 0.85f, 0.9f);
       Vector3 pivotInPanelForHandle = new Vector3(-0.03f, 0.4f, -0.13f);
@@ -82,7 +82,9 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
                                                                       useReferenceFrameAForHandle);
       // these limits from 0.0 to 1.0?
       handleHingeConstraint.setLimit(lowLimit.get(), highLimit.get(), softness.get(), biasFactor.get(), relaxationFactor.get());
-      bulletPhysicsManager.getDiscreteDynamicsWorld().addConstraint(handleHingeConstraint);
+      bulletPhysicsManager.getMultiBodyDynamicsWorld().addConstraint(handleHingeConstraint);
+
+//      doorPanelObject.setTransformToWorld();
    }
 
    @Override
