@@ -12,6 +12,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -40,7 +41,7 @@ import java.util.function.Consumer;
 
 public class AStarBodyPathPlanner
 {
-   private static final boolean checkForCollisions = false;
+   private static final boolean checkForCollisions = true;
    private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useEdgeDetectorCost = false;
 
@@ -89,6 +90,8 @@ public class AStarBodyPathPlanner
    private boolean reachedGoal = false;
    private final AtomicBoolean haltRequested = new AtomicBoolean();
    private static final int maxIterations = 3000;
+
+   private final AStarBodyPathSmoother smoother = new AStarBodyPathSmoother();
 
    /* Parameters to extract */
    static final double groundClearance = 0.2;
@@ -241,6 +244,7 @@ public class AStarBodyPathPlanner
 
          populateNeighbors(node);
 
+         double parentSnapHeight = gridHeightMap.get(node);
          for (int i = 0; i < neighbors.size(); i++)
          {
             BodyPathLatticePoint neighbor = neighbors.get(i);
@@ -254,7 +258,7 @@ public class AStarBodyPathPlanner
             }
 
             double xyDistance = xyDistance(node, neighbor);
-            deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - gridHeightMap.get(node)));
+            deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - parentSnapHeight));
             incline.set(Math.atan2(deltaHeight.getValue(), xyDistance));
 
             if (Math.abs(incline.getValue()) > maxIncline)
@@ -344,7 +348,7 @@ public class AStarBodyPathPlanner
          AStarBodyPathIterationData iterationData = new AStarBodyPathIterationData();
          iterationData.setParentNode(node);
          iterationData.getChildNodes().addAll(neighbors);
-         iterationData.setParentNodeHeight(gridHeightMap.get(node));
+         iterationData.setParentNodeHeight(parentSnapHeight);
          this.iterationData.add(iterationData);
 
          if (publishStatus(request))
@@ -359,7 +363,7 @@ public class AStarBodyPathPlanner
 
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
-      LogTools.info("reporting status");
+      LogTools.info("Reporting status");
 
       outputToPack.setRequestId(request.getRequestId());
       outputToPack.setBodyPathPlanningResult(result);
@@ -367,14 +371,24 @@ public class AStarBodyPathPlanner
       outputToPack.getBodyPath().clear();
       BodyPathLatticePoint terminalNode = reachedGoal ? goalNode : leastCostNode;
       List<BodyPathLatticePoint> path = graph.getPathFromStart(terminalNode);
+      List<Point3D> bodyPath = new ArrayList<>();
+
       for (int i = 0; i < path.size(); i++)
       {
+         bodyPath.add(new Point3D(path.get(i).getX(), path.get(i).getY(), gridHeightMap.get(path.get(i))));
+      }
+
+//      List<Point3D> smoothedPath = smoother.doSmoothing(bodyPath, heightMapData);
+      for (int i = 0; i < bodyPath.size(); i++)
+      {
          Pose3D waypoint = new Pose3D();
-         waypoint.getPosition().set(path.get(i).getX(), path.get(i).getY(), gridHeightMap.get(path.get(i)));
+//         waypoint.getPosition().set(smoothedPath.get(i));
+         waypoint.getPosition().set(bodyPath.get(i));
          outputToPack.getBodyPath().add(waypoint);
       }
 
       markSolutionEdges(terminalNode);
+
       statusCallbacks.forEach(callback -> callback.accept(outputToPack));
    }
 
@@ -429,14 +443,14 @@ public class AStarBodyPathPlanner
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
 
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
    }
 
    private static Pair<Integer, Integer> rotate(int xOff, int yOff, int i)
