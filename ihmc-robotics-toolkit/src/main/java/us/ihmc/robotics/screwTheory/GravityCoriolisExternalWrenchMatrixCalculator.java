@@ -88,14 +88,21 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
     * it.
     * </p>
     * 
-    * @param rootBody                             the supporting body of the subtree to be evaluated by
-    *                                             this calculator. Not modified.
-    * @param considerCoriolisAndCentrifugalForces whether the effort resulting from the Coriolis and
-    *                                             centrifugal forces should be considered.
+    * @param rootBody                       the supporting body of the subtree to be evaluated by this
+    *                                       calculator. Not modified.
+    * @param considerIgnoredSubtreesInertia whether the inertia of the ignored part(s) of the given
+    *                                       multi-body system should be considered. When {@code true},
+    *                                       this provides more accurate joint torques as they
+    *                                       compensate for instance for the gravity acting on the
+    *                                       ignored rigid-bodies, i.e. bodies which have an ancestor
+    *                                       joint that is ignored as specified in the given
+    *                                       {@code input}. When {@code false}, the resulting joint
+    *                                       torques may be less accurate and this calculator may gain
+    *                                       slight performance improvement.
     */
-   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBodyReadOnly rootBody, boolean considerCoriolisAndCentrifugalForces)
+   public GravityCoriolisExternalWrenchMatrixCalculator(RigidBodyReadOnly rootBody, boolean considerIgnoredSubtreesInertia)
    {
-      this(MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody), considerCoriolisAndCentrifugalForces);
+      this(MultiBodySystemReadOnly.toMultiBodySystemInput(rootBody), considerIgnoredSubtreesInertia);
    }
 
    /**
@@ -161,7 +168,8 @@ public class GravityCoriolisExternalWrenchMatrixCalculator
     *                                             less accurate and this calculator may gain slight
     *                                             performance improvement.
     */
-   public GravityCoriolisExternalWrenchMatrixCalculator(MultiBodySystemReadOnly input, boolean considerCoriolisAndCentrifugalForces,
+   public GravityCoriolisExternalWrenchMatrixCalculator(MultiBodySystemReadOnly input,
+                                                        boolean considerCoriolisAndCentrifugalForces,
                                                         boolean considerIgnoredSubtreesInertia)
    {
       this.input = input;
