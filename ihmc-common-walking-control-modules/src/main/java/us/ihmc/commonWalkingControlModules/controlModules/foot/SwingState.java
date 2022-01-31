@@ -55,7 +55,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingState extends AbstractFootControlState
 {
-   private static final boolean visualizeAdjustedSwing = false;
+   private static final boolean visualizeAdjustedSwing = true;
    private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
 
    private final YoBoolean replanTrajectory;
@@ -576,7 +576,7 @@ public class SwingState extends AbstractFootControlState
             adjustedWaypoint.changeFrame(footstepFrame);
             adjustedWaypoint.setReferenceFrame(adjustedFootstepFrame);
             adjustedWaypoint.changeFrame(worldFrame);
-            blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, swingDuration);
+            blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, getSwingTimeRemaining());
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     adjustedWaypoint.getPosition(),
                                                     swingTrajectoryCalculator.getFinalLinearVelocity(),
@@ -585,7 +585,7 @@ public class SwingState extends AbstractFootControlState
          }
          else
          {
-            blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, swingDuration);
+            blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, getSwingTimeRemaining());
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),
                                                     swingTrajectoryCalculator.getFinalLinearVelocity(),
