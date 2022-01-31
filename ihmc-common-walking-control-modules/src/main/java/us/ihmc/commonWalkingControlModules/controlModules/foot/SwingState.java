@@ -90,6 +90,7 @@ public class SwingState extends AbstractFootControlState
    private final YoBoolean isSwingSpeedUpEnabled;
    private final YoDouble currentTime;
    private final YoDouble currentTimeWithSwingSpeedUp;
+   private final YoDouble timeRemainingWhenAdjusted;
 
    private final double controlDT;
 
@@ -203,6 +204,7 @@ public class SwingState extends AbstractFootControlState
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
+      timeRemainingWhenAdjusted = new YoDouble(namePrefix + "TimeRemainingWhenStepAdjusted", registry);
       swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
       blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix, swingTrajectoryCalculator.getSwingTrajectory(), worldFrame, registry);
       touchdownTrajectory = new SoftTouchdownPoseTrajectoryGenerator(namePrefix + "Touchdown", registry);
@@ -294,6 +296,7 @@ public class SwingState extends AbstractFootControlState
       swingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
       replanTrajectory.set(false);
+      timeRemainingWhenAdjusted.setToNaN();;
 
       if (workspaceLimiterControlModule != null)
          workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
@@ -330,6 +333,7 @@ public class SwingState extends AbstractFootControlState
       yoDesiredLinearVelocity.setToNaN();
 
       footstepWasAdjusted.set(false);
+      timeRemainingWhenAdjusted.setToNaN();;
    }
 
    @Override
@@ -527,6 +531,7 @@ public class SwingState extends AbstractFootControlState
    {
       replanTrajectory.set(true);
       footstepWasAdjusted.set(true);
+      timeRemainingWhenAdjusted.set(Math.max(0.05, swingTime - currentTime.getValue()));
 
       adjustedFootstepPose.setIncludingFrame(adjustedFootstep.getFootstepPose());
 
@@ -563,7 +568,7 @@ public class SwingState extends AbstractFootControlState
          initialPose.changeFrame(worldFrame);
          blendedSwingTrajectory.blendInitialConstraint(initialPose, 0.0, swingTrajectoryBlendDuration);
       }
-      if (footstepWasAdjusted.getBooleanValue())
+      if (replanTrajectory.getBooleanValue())
       {
          // If there is a swing waypoint at the end of swing we want to preserve its transform to the footstep pose to not blend out
          // any touchdown trajectory when doing step adjustment.
@@ -576,7 +581,7 @@ public class SwingState extends AbstractFootControlState
             adjustedWaypoint.changeFrame(footstepFrame);
             adjustedWaypoint.setReferenceFrame(adjustedFootstepFrame);
             adjustedWaypoint.changeFrame(worldFrame);
-            blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, getSwingTimeRemaining());
+            blendedSwingTrajectory.blendFinalConstraint(adjustedWaypoint, swingDuration, timeRemainingWhenAdjusted.getDoubleValue());
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     adjustedWaypoint.getPosition(),
                                                     swingTrajectoryCalculator.getFinalLinearVelocity(),
@@ -585,7 +590,7 @@ public class SwingState extends AbstractFootControlState
          }
          else
          {
-            blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, getSwingTimeRemaining());
+            blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, timeRemainingWhenAdjusted.getDoubleValue());
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),
                                                     swingTrajectoryCalculator.getFinalLinearVelocity(),
