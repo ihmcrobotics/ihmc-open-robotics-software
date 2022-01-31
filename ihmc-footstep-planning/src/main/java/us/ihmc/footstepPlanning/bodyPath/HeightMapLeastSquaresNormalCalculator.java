@@ -45,6 +45,9 @@ public class HeightMapLeastSquaresNormalCalculator
       surfaceNormals = new UnitVector3DBasics[gridWidth * gridWidth];
       int centerIndex = heightMapData.getCenterIndex();
 
+      double maxIncline = Math.toRadians(45.0);
+      double snapHeightThreshold = patchWidth * Math.sin(maxIncline);
+
       for (int xIndex = 0; xIndex < gridWidth; xIndex++)
       {
          for (int yIndex = 0; yIndex < gridWidth; yIndex++)
@@ -64,7 +67,7 @@ public class HeightMapLeastSquaresNormalCalculator
                                                                           heightMapData.getGridResolutionXY(),
                                                                           heightMapData.getCenterIndex()));
 
-               heightMapSnapper.snapPolygonToHeightMap(translatedPatch, heightMapData);
+               heightMapSnapper.snapPolygonToHeightMap(translatedPatch, heightMapData, maxIncline);
                surfaceNormal.set(heightMapSnapper.getBestFitPlane().getNormal());
             }
          }

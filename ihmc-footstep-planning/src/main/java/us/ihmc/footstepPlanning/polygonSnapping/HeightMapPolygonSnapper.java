@@ -114,8 +114,6 @@ public class HeightMapPolygonSnapper
 
       RigidBodyTransform transformToReturn = createTransformToMatchSurfaceNormalPreserveX(bestFitPlane.getNormal());
 
-//      System.out.println("RMS = " + rootMeanSquaredError + ", \t" + bestFitPlane.getNormal());
-
       Point2DReadOnly centroid = polygonToSnap.getCentroid();
       double height = bestFitPlane.getZOnPlane(centroid.getX(), centroid.getY());
       setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
