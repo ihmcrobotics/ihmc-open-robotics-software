@@ -111,6 +111,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
    private final BooleanProvider useICPControlPlaneInStepAdjustment = new BooleanParameter(yoNamePrefix + "useICPControlPlaneInStepAdjustment", registry, false);
    private final DoubleProvider minimumTimeForStepAdjustment = new DoubleParameter(yoNamePrefix + "minimumTimeForStepAdjustment", registry, 0.1);
+   private final DoubleProvider distanceInsideToScaleSupportPolygon = new DoubleParameter(yoNamePrefix + "distanceInsideToScaleSupportPolygon", registry, 0.02);
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
@@ -124,8 +125,6 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
 
-   // TODO yo variablize this.
-   private final double distanceToScaelSupportPolygon = 0.02;
    private final FramePoint3D vertexInWorld = new FramePoint3D();
    private final FrameConvexPolygon2D allowableAreaForCoPInFoot = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D allowableAreaForCoP = new FrameConvexPolygon2D();
@@ -376,7 +375,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private void computeLimitedAreaForCoP()
    {
       FrameConvexPolygon2DReadOnly supportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(upcomingFootstepSide.getEnumValue().getOppositeSide());
-      polygonScaler.scaleConvexPolygon(supportPolygon, distanceToScaelSupportPolygon, allowableAreaForCoPInFoot);
+      polygonScaler.scaleConvexPolygon(supportPolygon, distanceInsideToScaleSupportPolygon.getValue(), allowableAreaForCoPInFoot);
 
       if (useICPControlPlaneInStepAdjustment.getValue())
       {
