@@ -1,45 +1,56 @@
 package us.ihmc.exampleSimulations.lipmWalker;
 
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class LIPMWalkerController implements RobotController
 {
    private final LIPMWalkerRobot robot;
    private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoDouble kpKnee = new YoDouble("kpKnee", registry);
+   private final YoDouble kdKnee = new YoDouble("kdKnee", registry);
+   
+   private final YoDouble q_d_leftKnee = new YoDouble("q_d_leftKnee", registry);
+   private final YoDouble q_d_rightKnee = new YoDouble("q_d_rightKnee", registry);
 
-   public LIPMWalkerController(LIPMWalkerRobot robot) {
+   private final SideDependentList<YoDouble> desiredKneeLengths = new SideDependentList<YoDouble>(q_d_leftKnee, q_d_rightKnee);
+
+   public LIPMWalkerController(LIPMWalkerRobot robot)
+   {
       this.robot = robot;
+      initialize();
    }
 
    @Override
    public void initialize()
    {
-      // TODO Auto-generated method stub
-
+      kpKnee.set(1000.0);
+      kdKnee.set(100.0);
+      
+      q_d_leftKnee.set(1.0);
+      q_d_rightKnee.set(1.0);
    }
 
    @Override
    public YoRegistry getYoRegistry()
    {
-      // TODO Auto-generated method stub
       return registry;
    }
 
    @Override
    public void doControl()
    {
-      for (RobotSide side: RobotSide.values())
+      for (RobotSide side : RobotSide.values())
       {
          double kneeLength = robot.getKneeLength(side);
          double kneeVelocity = robot.getKneeVelocity(side);
 
-         double kp = 100.0;
-         double kd = 10.0;
-         double desiredKneeLength = 1.0;
+         double desiredKneeLength = desiredKneeLengths.get(side).getValue();
 
-         double kneeForce = kp * (desiredKneeLength - kneeLength) + kd * (0.0 - kneeVelocity);
+         double kneeForce = kpKnee.getValue() * (desiredKneeLength - kneeLength) + kdKnee.getValue() * (0.0 - kneeVelocity);
          robot.setKneeForce(side, kneeForce);
       }
    }

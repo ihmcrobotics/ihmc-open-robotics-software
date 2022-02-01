@@ -98,7 +98,7 @@ public class LIPMWalkerRobot
 
    public void setKneeForce(RobotSide robotSide, double force)
    {
-      hipJoints.get(robotSide).setTau(force);
+      kneeJoints.get(robotSide).setTau(force);
    }
 
    private void setupInitialConditions()
