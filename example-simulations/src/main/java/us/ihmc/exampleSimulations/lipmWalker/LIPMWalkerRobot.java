@@ -15,6 +15,7 @@ import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.Plane;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.RobotFromDescription;
 
@@ -44,6 +45,15 @@ public class LIPMWalkerRobot
 
    public LIPMWalkerRobot()
    {
+      RobotDescription description = getRobotDescription();
+      robot = new RobotFromDescription(description);
+
+      Joint leftHip = robot.getJoint("leftHip");
+
+      LogTools.info("Robot: {}", robot.toString());
+   }
+
+   private RobotDescription getRobotDescription() {
       RobotDescription description = new RobotDescription("LIPMWalker");
       FloatingPlanarJointDescription bodyJoint = new FloatingPlanarJointDescription("RootJoint", Plane.XZ);
 
@@ -87,9 +97,7 @@ public class LIPMWalkerRobot
       rightKneeJoint.addGroundContactPoint(gc_rheel);
 
       description.addRootJoint(bodyJoint);
-      robot = new RobotFromDescription(description);
-
-      LogTools.info("Robot: {}", robot.toString());
+      return description;
    }
 
    private LinkDescription createShinLink(String shinLink, AppearanceDefinition appearance)
