@@ -66,8 +66,8 @@ public class LIPMWalkerRobot
       LinkDescription rightThigh = createThighLink("rightThigh");
       rightHipJoint.setLink(rightThigh);
 
-      SliderJointDescription rightKneeJoint = new SliderJointDescription("leftKnee", new Vector3D(0.0, 0.0, thighLength), new Vector3D(0.0, 0.0, 1.0));
-      SliderJointDescription leftKneeJoint = new SliderJointDescription("rightKnee", new Vector3D(0.0, 0.0, thighLength), new Vector3D(0.0, 0.0, 1.0));
+      SliderJointDescription leftKneeJoint = new SliderJointDescription("leftKnee", new Vector3D(), new Vector3D(0.0, 0.0, -1.0));
+      SliderJointDescription rightKneeJoint = new SliderJointDescription("rightKnee", new Vector3D(), new Vector3D(0.0, 0.0, -1.0));
 
       LinkDescription leftShin = createShinLink("leftShin", YoAppearance.Red());
       leftKneeJoint.setLink(leftShin);
@@ -97,9 +97,10 @@ public class LIPMWalkerRobot
       LinkDescription shinLinkDescription = new LinkDescription(shinLink);
       shinLinkDescription.setMassAndRadiiOfGyration(shinMass, shinRadiusOfGyrationX, shinRadiusOfGyrationY, shinRadiusOfGyrationZ);
       LinkGraphicsDescription shinGraphics = new LinkGraphicsDescription();
-      shinGraphics.translate(new Vector3D(0.0, 0.0, 2.0 * -thighLength));
-      shinGraphics.rotate(Math.PI, Axis3D.Y);
+//      shinGraphics.translate(new Vector3D(0.0, 0.0, 2.0 * -thighLength));
+//      shinGraphics.rotate(Math.PI, Axis3D.Y);
       shinGraphics.addCylinder(shinLength, shinRadius, appearance);
+      shinGraphics.addSphere(shinRadius, YoAppearance.AluminumMaterial());
       shinLinkDescription.setLinkGraphics(shinGraphics);
       return shinLinkDescription;
    }
