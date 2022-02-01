@@ -104,15 +104,14 @@ public class LIPMWalkerRobot
    private void setupInitialConditions()
    {
       bodyJoint.setCartesianPosition(0.0, 1.0);
-      bodyJoint.setCartesianVelocity(0.0, 0.5);
+      bodyJoint.setCartesianVelocity(0.5, 0.0);
       bodyJoint.setRotation(0.0);
 
-      leftHipJoint.setQ(0.2);
-      rightHipJoint.setQ(-0.2);
+      leftHipJoint.setQ(0.0);
+      rightHipJoint.setQ(0.0);
 
       leftKneeJoint.setQ(1.0);
-      rightKneeJoint.setQ(1.0);
-
+      rightKneeJoint.setQ(0.8);
    }
 
    private RobotDescription getRobotDescription()
@@ -168,8 +167,6 @@ public class LIPMWalkerRobot
       LinkDescription shinLinkDescription = new LinkDescription(shinLink);
       shinLinkDescription.setMassAndRadiiOfGyration(shinMass, shinRadiusOfGyrationX, shinRadiusOfGyrationY, shinRadiusOfGyrationZ);
       LinkGraphicsDescription shinGraphics = new LinkGraphicsDescription();
-//      shinGraphics.translate(new Vector3D(0.0, 0.0, 2.0 * -thighLength));
-//      shinGraphics.rotate(Math.PI, Axis3D.Y);
       shinGraphics.addCylinder(shinLength, shinRadius, appearance);
       shinGraphics.addSphere(shinRadius, YoAppearance.AluminumMaterial());
       shinLinkDescription.setLinkGraphics(shinGraphics);

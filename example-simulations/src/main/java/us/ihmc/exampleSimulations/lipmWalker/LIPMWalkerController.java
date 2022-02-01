@@ -31,7 +31,7 @@ public class LIPMWalkerController implements RobotController
       kdKnee.set(100.0);
       
       q_d_leftKnee.set(1.0);
-      q_d_rightKnee.set(1.0);
+      q_d_rightKnee.set(0.8);
    }
 
    @Override
