@@ -71,34 +71,41 @@ public class LIPMWalkerRobot
       LogTools.info("Robot: {}", robot.toString());
    }
 
-   public double getHipAngle(RobotSide robotSide) {
+   public double getHipAngle(RobotSide robotSide)
+   {
       return hipJoints.get(robotSide).getQ();
    }
 
-   public double getKneeAngle(RobotSide robotSide) {
+   public double getKneeLength(RobotSide robotSide)
+   {
       return kneeJoints.get(robotSide).getQ();
    }
 
-   public double getHipVelocity(RobotSide robotSide) {
+   public double getHipVelocity(RobotSide robotSide)
+   {
       return hipJoints.get(robotSide).getQD();
    }
 
-   public double getKneeVelocity(RobotSide robotSide) {
+   public double getKneeVelocity(RobotSide robotSide)
+   {
       return kneeJoints.get(robotSide).getQD();
    }
 
-   public void setJointTorque(RobotSide robotSide, double torque) {
+   public void setJointTorque(RobotSide robotSide, double torque)
+   {
       hipJoints.get(robotSide).setTau(torque);
    }
 
-   public void setKneeTorque(RobotSide robotSide, double force) {
+   public void setKneeForce(RobotSide robotSide, double force)
+   {
       hipJoints.get(robotSide).setTau(force);
    }
 
    private void setupInitialConditions()
    {
       bodyJoint.setCartesianPosition(0.0, 1.0);
-      bodyJoint.setRotation(0.1);
+      bodyJoint.setCartesianVelocity(0.0, 0.5);
+      bodyJoint.setRotation(0.0);
 
       leftHipJoint.setQ(0.2);
       rightHipJoint.setQ(-0.2);

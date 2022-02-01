@@ -1,11 +1,17 @@
 package us.ihmc.exampleSimulations.lipmWalker;
 
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class LIPMWalkerController implements RobotController
 {
+   private final LIPMWalkerRobot robot;
    private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   public LIPMWalkerController(LIPMWalkerRobot robot) {
+      this.robot = robot;
+   }
 
    @Override
    public void initialize()
@@ -24,8 +30,18 @@ public class LIPMWalkerController implements RobotController
    @Override
    public void doControl()
    {
-      // TODO Auto-generated method stub
+      for (RobotSide side: RobotSide.values())
+      {
+         double kneeLength = robot.getKneeLength(side);
+         double kneeVelocity = robot.getKneeVelocity(side);
 
+         double kp = 100.0;
+         double kd = 10.0;
+         double desiredKneeLength = 1.0;
+
+         double kneeForce = kp * (desiredKneeLength - kneeLength) + kd * (0.0 - kneeVelocity);
+         robot.setKneeForce(side, kneeForce);
+      }
    }
 
 }

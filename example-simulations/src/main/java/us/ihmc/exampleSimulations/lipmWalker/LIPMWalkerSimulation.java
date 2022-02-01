@@ -8,16 +8,17 @@ public class LIPMWalkerSimulation
 {
    public LIPMWalkerSimulation()
    {
-      LIPMWalkerController controller = new LIPMWalkerController();
       LIPMWalkerRobot robotConstructor = new LIPMWalkerRobot();
 
       Robot robot = robotConstructor.getRobot();
+      LIPMWalkerController controller = new LIPMWalkerController(robotConstructor);
 
       LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, 14220.0, 150.6, 125.0, 300.0, robot.getRobotsYoRegistry());
       robot.setGroundContactModel(groundContactModel);
 
       robot.setController(controller);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
+      scs.setSimulateNoFasterThanRealTime(true);
 
       scs.startOnAThread();
    }
