@@ -3,7 +3,12 @@ package us.ihmc.exampleSimulations.lipmWalker;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.log.LogTools;
@@ -69,6 +74,21 @@ public class LIPMWalkerRobot
       setupInitialConditions();
 
       LogTools.info("Robot: {}", robot.toString());
+   }
+
+   public Point3DReadOnly getCenterOfMassHeight()
+   {
+      Point3DBasics comPosition = new Point3D();
+      robot.computeCenterOfMass(comPosition);
+      return comPosition;
+   }
+
+   public Vector3DReadOnly getCenterOfMassVelocity()
+   {
+      Vector3DBasics comVelocity = new Vector3D();
+      double mass = robot.computeLinearMomentum(comVelocity);
+      comVelocity.scale(1.0/mass);
+      return comVelocity;
    }
 
    public double getHipAngle(RobotSide robotSide)
