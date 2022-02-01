@@ -805,10 +805,15 @@ public class BalanceManager
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
       currentTiming.set(footstepTimings.get(0));
       currentFootstep.set(footsteps.get(0));
-      nextFootstep.set(footsteps.get(1));
-      nextFootstepTiming.set(footstepTimings.get(1));
+
+
       stepAdjustmentController.reset();
-      stepAdjustmentController.setNextFootstep(nextFootstep, nextFootstepTiming);
+      if (footsteps.size() > 1 && footstepTimings.size() > 1)
+      {
+         nextFootstep.set(footsteps.get(1));
+         nextFootstepTiming.set(footstepTimings.get(1));
+         stepAdjustmentController.setNextFootstep(nextFootstep, nextFootstepTiming);
+      }
       stepAdjustmentController.setFootstepToAdjust(currentFootstep, currentTiming.getSwingTime(), currentTiming.getTransferTime());
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
 
