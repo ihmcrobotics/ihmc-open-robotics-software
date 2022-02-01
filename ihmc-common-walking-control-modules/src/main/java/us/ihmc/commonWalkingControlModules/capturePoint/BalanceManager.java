@@ -550,6 +550,13 @@ public class BalanceManager
    {
       plannerTimer.startMeasurement();
 
+      // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
+      if (footsteps.isEmpty() || !icpPlannerDone.getValue())
+      {
+         timeInSupportSequence.set(yoTime.getValue() - timeAtStartOfSupportSequence.getValue());
+      }
+
+
       // update online to account for foot slip
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -598,11 +605,6 @@ public class BalanceManager
          yoFinalDesiredCoMVelocity.setToNaN();
          yoFinalDesiredCoMAcceleration.setToNaN();
       }
-
-      // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
-      if (footsteps.isEmpty() || !icpPlannerDone.getValue())
-         timeInSupportSequence.set(yoTime.getValue() - timeAtStartOfSupportSequence.getValue());
-//         timeInSupportSequence.add(controllerToolbox.getControlDT());
 
       icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
       decayDesiredICPVelocity();
