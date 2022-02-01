@@ -15,9 +15,7 @@ import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.Plane;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.RobotFromDescription;
+import us.ihmc.simulationconstructionset.*;
 
 public class LIPMWalkerRobot
 {
@@ -43,17 +41,41 @@ public class LIPMWalkerRobot
 
    private final ArrayList<GroundContactPointDescription> gcPoints = new ArrayList<GroundContactPointDescription>(2);
 
+   private final FloatingPlanarJoint bodyJoint;
+   private final PinJoint leftHipJoint, rightHipJoint;
+   private final SliderJoint leftKneeJoint, rightKneeJoint;
+
    public LIPMWalkerRobot()
    {
       RobotDescription description = getRobotDescription();
       robot = new RobotFromDescription(description);
 
-      Joint leftHip = robot.getJoint("leftHip");
+      bodyJoint = (FloatingPlanarJoint) robot.getRootJoints().get(0);
+
+      leftHipJoint = (PinJoint) robot.getJoint("leftHip");
+      rightHipJoint = (PinJoint) robot.getJoint("rightHip");
+
+      leftKneeJoint = (SliderJoint) robot.getJoint("leftKnee");
+      rightKneeJoint = (SliderJoint) robot.getJoint("rightKnee");
+
+      setupInitialConditions();
 
       LogTools.info("Robot: {}", robot.toString());
    }
 
-   private RobotDescription getRobotDescription() {
+   private void setupInitialConditions()
+   {
+      bodyJoint.setCartesianPosition(0.0, 1.0);
+      leftHipJoint.setQ(0.2);
+      rightHipJoint.setQ(-0.2);
+
+      leftKneeJoint.setQ(1.0);
+      rightKneeJoint.setQ(1.0);
+
+   }
+
+   private RobotDescription getRobotDescription()
+   {
       RobotDescription description = new RobotDescription("LIPMWalker");
       FloatingPlanarJointDescription bodyJoint = new FloatingPlanarJointDescription("RootJoint", Plane.XZ);
 
