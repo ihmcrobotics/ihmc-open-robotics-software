@@ -15,6 +15,8 @@ import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.Plane;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.*;
 
 public class LIPMWalkerRobot
@@ -44,6 +46,8 @@ public class LIPMWalkerRobot
    private final FloatingPlanarJoint bodyJoint;
    private final PinJoint leftHipJoint, rightHipJoint;
    private final SliderJoint leftKneeJoint, rightKneeJoint;
+   private final SideDependentList<PinJoint> hipJoints;
+   private final SideDependentList<SliderJoint> kneeJoints;
 
    public LIPMWalkerRobot()
    {
@@ -55,12 +59,40 @@ public class LIPMWalkerRobot
       leftHipJoint = (PinJoint) robot.getJoint("leftHip");
       rightHipJoint = (PinJoint) robot.getJoint("rightHip");
 
+      hipJoints = new SideDependentList<>(leftHipJoint, rightHipJoint);
+
       leftKneeJoint = (SliderJoint) robot.getJoint("leftKnee");
       rightKneeJoint = (SliderJoint) robot.getJoint("rightKnee");
+
+      kneeJoints = new SideDependentList<>(leftKneeJoint, rightKneeJoint);
 
       setupInitialConditions();
 
       LogTools.info("Robot: {}", robot.toString());
+   }
+
+   public double getHipAngle(RobotSide robotSide) {
+      return hipJoints.get(robotSide).getQ();
+   }
+
+   public double getKneeAngle(RobotSide robotSide) {
+      return kneeJoints.get(robotSide).getQ();
+   }
+
+   public double getHipVelocity(RobotSide robotSide) {
+      return hipJoints.get(robotSide).getQD();
+   }
+
+   public double getKneeVelocity(RobotSide robotSide) {
+      return kneeJoints.get(robotSide).getQD();
+   }
+
+   public void setJointTorque(RobotSide robotSide, double torque) {
+      hipJoints.get(robotSide).setTau(torque);
+   }
+
+   public void setKneeTorque(RobotSide robotSide, double force) {
+      hipJoints.get(robotSide).setTau(force);
    }
 
    private void setupInitialConditions()
