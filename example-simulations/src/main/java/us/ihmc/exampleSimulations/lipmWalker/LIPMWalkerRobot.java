@@ -66,6 +66,8 @@ public class LIPMWalkerRobot
    private void setupInitialConditions()
    {
       bodyJoint.setCartesianPosition(0.0, 1.0);
+      bodyJoint.setRotation(0.1);
+
       leftHipJoint.setQ(0.2);
       rightHipJoint.setQ(-0.2);
 
@@ -109,8 +111,8 @@ public class LIPMWalkerRobot
       rightKneeJoint.setLink(rightShin);
       rightHipJoint.addJoint(rightKneeJoint);
 
-      GroundContactPointDescription gc_rheel = new GroundContactPointDescription("gc_rheel", new Vector3D(0.0, 0.0, shinLength));
-      GroundContactPointDescription gc_lheel = new GroundContactPointDescription("gc_lheel", new Vector3D(0.0, 0.0, shinLength));
+      GroundContactPointDescription gc_rheel = new GroundContactPointDescription("gc_rheel", new Vector3D(0.0, 0.0, 0.0));
+      GroundContactPointDescription gc_lheel = new GroundContactPointDescription("gc_lheel", new Vector3D(0.0, 0.0, 0.0));
 
       gcPoints.add(gc_rheel);
       gcPoints.add(gc_lheel);
