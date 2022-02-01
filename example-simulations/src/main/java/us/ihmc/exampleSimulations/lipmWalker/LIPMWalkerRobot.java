@@ -76,7 +76,14 @@ public class LIPMWalkerRobot
       LogTools.info("Robot: {}", robot.toString());
    }
 
-   public Point3DReadOnly getCenterOfMassHeight()
+   public double getMass()
+   {
+      Point3DBasics comPosition = new Point3D();
+      double mass = robot.computeCenterOfMass(comPosition);
+      return mass;
+   }
+
+   public Point3DReadOnly getCenterOfMassPosition()
    {
       Point3DBasics comPosition = new Point3D();
       robot.computeCenterOfMass(comPosition);
@@ -87,7 +94,7 @@ public class LIPMWalkerRobot
    {
       Vector3DBasics comVelocity = new Vector3D();
       double mass = robot.computeLinearMomentum(comVelocity);
-      comVelocity.scale(1.0/mass);
+      comVelocity.scale(1.0 / mass);
       return comVelocity;
    }
 
@@ -208,4 +215,5 @@ public class LIPMWalkerRobot
    {
       return robot;
    }
+
 }
