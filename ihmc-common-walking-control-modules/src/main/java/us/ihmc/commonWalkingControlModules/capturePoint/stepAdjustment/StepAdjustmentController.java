@@ -12,7 +12,7 @@ public interface StepAdjustmentController
 {
    void reset();
 
-   void setNextFootstep(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming);
+   void setFootstepAfterTheCurrentOne(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming);
 
    void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration, double nextTransferDuration);
 

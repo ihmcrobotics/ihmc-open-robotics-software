@@ -812,7 +812,7 @@ public class BalanceManager
       {
          nextFootstep.set(footsteps.get(1));
          nextFootstepTiming.set(footstepTimings.get(1));
-         stepAdjustmentController.setNextFootstep(nextFootstep, nextFootstepTiming);
+         stepAdjustmentController.setFootstepAfterTheCurrentOne(nextFootstep, nextFootstepTiming);
       }
       stepAdjustmentController.setFootstepToAdjust(currentFootstep, currentTiming.getSwingTime(), currentTiming.getTransferTime());
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);

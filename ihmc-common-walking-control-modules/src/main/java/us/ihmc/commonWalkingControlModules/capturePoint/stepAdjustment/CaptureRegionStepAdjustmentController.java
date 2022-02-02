@@ -163,7 +163,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    private SimpleFootstep nextFootstep;
    private FootstepTiming nextFootstepTiming;
 
-   public void setNextFootstep(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming)
+   public void setFootstepAfterTheCurrentOne(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming)
    {
       this.nextFootstep = nextFootstep;
       this.nextFootstepTiming = nextFootstepTiming;
