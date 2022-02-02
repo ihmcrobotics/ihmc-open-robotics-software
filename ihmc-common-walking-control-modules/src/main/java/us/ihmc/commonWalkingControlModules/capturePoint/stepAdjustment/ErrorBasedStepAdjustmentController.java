@@ -239,7 +239,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    }
 
    @Override
-   public void setNextFootstep(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming)
+   public void setFootstepAfterTheCurrentOne(SimpleFootstep nextFootstep, FootstepTiming nextFootstepTiming)
    {
       this.nextFootstep = nextFootstep;
       this.nextFootstepTiming = nextFootstepTiming;
