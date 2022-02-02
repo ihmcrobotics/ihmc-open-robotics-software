@@ -1,16 +1,13 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
+import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -20,14 +17,14 @@ import java.util.List;
 
 public class AStarBodyPathSmoother
 {
-   static final double collisionWeight = 15.0;
+   static final double collisionWeight = 700.0;
    static final double smoothnessWeight = 1.0;
-   static final double equalSpacingWeight = 1.0;
-   static final double rollWeight = 4.0;
+   static final double equalSpacingWeight = 2.0;
+   static final double rollWeight = 20.0;
 
    private static final int maxPoints = 200;
    private static final double gradientEpsilon = 1e-6;
-   private static final double hillClimbGainSingleWaypoint = 0.005;
+   private static final double hillClimbGainSingleWaypoint = 0.007;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -44,7 +41,7 @@ public class AStarBodyPathSmoother
    private final AStarBodyPathSmootherWaypoint[] waypoints = new AStarBodyPathSmootherWaypoint[maxPoints];
 
    /* Cost gradient in the direction of higher cost for each coordinate */
-   private final Vector2D[] gradients = new Vector2D[maxPoints];
+   private final YoVector2D[] gradients = new YoVector2D[maxPoints];
 
    public AStarBodyPathSmoother()
    {
@@ -55,7 +52,7 @@ public class AStarBodyPathSmoother
    {
       for (int i = 0; i < maxPoints; i++)
       {
-         gradients[i] = new Vector2D();
+         gradients[i] = new YoVector2D("gradient" + i, registry);
       }
 
       if (parentRegistry == null)
@@ -68,6 +65,10 @@ public class AStarBodyPathSmoother
          for (int i = 0; i < maxPoints; i++)
          {
             waypoints[i] = new AStarBodyPathSmootherWaypoint(i, surfaceNormalCalculator, graphicsListRegistry, registry);
+         }
+         for (int i = 1; i < maxPoints - 1; i++)
+         {
+            waypoints[i].setNeighbors(waypoints[i - 1], waypoints[i + 1]);
          }
 
          this.tickAndUpdatable = tickAndUpdatable;
@@ -114,7 +115,7 @@ public class AStarBodyPathSmoother
          tickAndUpdatable.tickAndUpdate();
       }
 
-      int maxIterations = 200;
+      int maxIterations = 3000;
       for (iteration.set(0); iteration.getValue() < maxIterations; iteration.increment())
       {
          maxCollision.set(0.0);
@@ -126,23 +127,27 @@ public class AStarBodyPathSmoother
             updateHeading(j);
          }
 
-         double fx = computeCost(0.0, 0.0);
+         double fx = computeCost(0,0.0, 0.0);
          for (int j = 1; j < pathSize - 1; j++)
          {
-            gradients[j].setX((computeCost(gradientEpsilon, 0.0) - fx) / gradientEpsilon);
-            gradients[j].setY((computeCost(0.0, gradientEpsilon) - fx) / gradientEpsilon);
+            gradients[j].setX((computeCost(j, gradientEpsilon, 0.0) - fx) / gradientEpsilon);
+            gradients[j].setY((computeCost(j, 0.0, gradientEpsilon) - fx) / gradientEpsilon);
          }
 
          if (heightMapData != null)
          {
-//            for (int j = 1; j < pathSize - 1; j++)
-//            {
-//               Vector2D collisionGradient = waypoints[j].computeCollisionGradient(heightMapData);
-//               gradients[j].add(collisionGradient);
-//
-//               Vector2D rollGradient = waypoints[j].computeRollInclineGradient(heightMapData);
-//               gradients[j].add(rollGradient);
-//            }
+            maxCollision.set(0.0);
+            for (int j = 1; j < pathSize - 1; j++)
+            {
+               Vector2D collisionGradient = waypoints[j].computeCollisionGradient(heightMapData);
+               gradients[j].add(collisionGradient);
+               maxCollision.set(Math.max(waypoints[j].getMaxCollision(), maxCollision.getValue()));
+
+               Vector2DBasics rollGradient = waypoints[j].computeRollInclineGradient(heightMapData);
+
+               gradients[j - 1].sub(rollGradient);
+               gradients[j + 1].add(rollGradient);
+            }
          }
 
          for (int j = 1; j < pathSize - 1; j++)
@@ -166,7 +171,7 @@ public class AStarBodyPathSmoother
       return smoothedPath;
    }
 
-   private double computeCost(double offsetX, double offsetY)
+   private double computeCost(int waypointIndex, double offsetX, double offsetY)
    {
       double displacementCost = 0.0;
       double curvatureCost = 0.0;
@@ -175,8 +180,8 @@ public class AStarBodyPathSmoother
       {
          double x0 = waypoints[i - 1].getPosition().getX();
          double y0 = waypoints[i - 1].getPosition().getY();
-         double x1 = offsetX + waypoints[i].getPosition().getX();
-         double y1 = offsetY + waypoints[i].getPosition().getY();
+         double x1 = waypoints[i].getPosition().getX() + (i == waypointIndex ? offsetX : 0.0);
+         double y1 = waypoints[i].getPosition().getY() + (i == waypointIndex ? offsetY : 0.0);
          double x2 = waypoints[i + 1].getPosition().getX();
          double y2 = waypoints[i + 1].getPosition().getY();
 
@@ -187,6 +192,7 @@ public class AStarBodyPathSmoother
          double heading0 = Math.atan2(y1 - y0, x1 - x0);
          double heading1 = Math.atan2(y2 - y1, x2 - x1);
          double deltaHeading = EuclidCoreTools.angleDifferenceMinusPiToPi(heading1, heading0);
+
          curvatureCost += smoothnessWeight * EuclidCoreTools.square(deltaHeading);
       }
 

@@ -25,7 +25,6 @@ import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -44,6 +43,7 @@ public class AStarBodyPathPlanner
    private static final boolean checkForCollisions = true;
    private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useEdgeDetectorCost = false;
+   private static final boolean useRANSACTraversibility = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -68,14 +68,18 @@ public class AStarBodyPathPlanner
    private BodyPathLatticePoint leastCostNode = null;
    private final YoEnum<RejectionReason> rejectionReason = new YoEnum<>("rejectionReason", registry, RejectionReason.class, true);
 
+   /* Indicator of how flat and planar and available footholds are, using least squares */
+   private final BodyPathLSTraversibilityCalculator leastSqTraversibilityCalculator;
    /* Indicator of how flat and planar and available footholds are */
-   private final BodyPathTraversibilityCalculator traversibilityCalculator;
+   private final BodyPathRANSACTraversibilityCalculator ransacTraversibilityCalculator;
    /* Uses edge detection as a heuristic for good areas to walk */
    private final HeightMapObstacleDetector obstacleDetector = new HeightMapObstacleDetector();
    /* Performs box collision check */
    private final BodyPathCollisionDetector collisionDetector = new BodyPathCollisionDetector();
-   /* Computes surface normals and penalizes pitch and roll */
+   /* Computes surface normals with least-squares and penalizing roll when changing elevation */
    private final HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
+   /* Computes surface normals with RANSAC, used for traversibility */
+   private final HeightMapRANSACNormalCalculator ransacNormalCalculator = new HeightMapRANSACNormalCalculator();
 
    private final TIntArrayList xSnapOffsets = new TIntArrayList();
    private final TIntArrayList ySnapOffsets = new TIntArrayList();
@@ -105,7 +109,6 @@ public class AStarBodyPathPlanner
    {
       this.parameters = parameters;
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
-      traversibilityCalculator = new BodyPathTraversibilityCalculator(parameters, footPolygon, gridHeightMap, registry);
 
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
       this.edgeData = new AStarBodyPathEdgeData(allVariables.size());
@@ -131,6 +134,17 @@ public class AStarBodyPathPlanner
                                          roll.set(0.0);
                                          incline.set(0.0);
                                       });
+
+      if (useRANSACTraversibility)
+      {
+         ransacTraversibilityCalculator = new BodyPathRANSACTraversibilityCalculator(gridHeightMap::get, ransacNormalCalculator, registry);
+         leastSqTraversibilityCalculator = null;
+      }
+      else
+      {
+         leastSqTraversibilityCalculator = new BodyPathLSTraversibilityCalculator(parameters, footPolygon, gridHeightMap, registry);
+         ransacTraversibilityCalculator = null;
+      }
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -141,7 +155,15 @@ public class AStarBodyPathPlanner
       }
 
       this.heightMapData = heightMapData;
-      traversibilityCalculator.setHeightMap(heightMapData);
+
+      if (useRANSACTraversibility)
+      {
+         ransacTraversibilityCalculator.setHeightMap(heightMapData);
+      }
+      else
+      {
+         leastSqTraversibilityCalculator.setHeightMap(heightMapData);
+      }
    }
 
    private static void packRadialOffsets(HeightMapData heightMapData, int minMaxOffsetXY, double radius, TIntArrayList xOffsets, TIntArrayList yOffsets)
@@ -200,7 +222,6 @@ public class AStarBodyPathPlanner
       expandedNodeSet.clear();
       gridHeightMap.put(startNode, startPose.getZ());
       leastCostNode = startNode;
-      traversibilityCalculator.initialize(startNode);
 
       if (useEdgeDetectorCost)
       {
@@ -210,6 +231,16 @@ public class AStarBodyPathPlanner
       {
          double patchWidth = 0.25;
          surfaceNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
+      }
+
+      if (useRANSACTraversibility)
+      {
+         ransacNormalCalculator.computeSurfaceNormals(heightMapData);
+         ransacTraversibilityCalculator.initialize(startNode);
+      }
+      else
+      {
+         leastSqTraversibilityCalculator.initialize(startNode);
       }
 
       planningLoop:
@@ -281,16 +312,33 @@ public class AStarBodyPathPlanner
 
             edgeCost.set(xyDistance);
 
-            double traversibilityIndicator = traversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
-            if (traversibilityCalculator.isTraversible())
+            if (useRANSACTraversibility)
             {
-               edgeCost.add(traversibilityIndicator);
+               double traversibilityIndicator = ransacTraversibilityCalculator.computeTraversibility(neighbor, node, i);
+               if (ransacTraversibilityCalculator.isTraversible())
+               {
+                  edgeCost.add(traversibilityIndicator);
+               }
+               else
+               {
+                  rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
+                  graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+                  continue;
+               }
             }
             else
             {
-               rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
-               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
-               continue;
+               double traversibilityIndicator = leastSqTraversibilityCalculator.computeTraversibilityIndicator(neighbor, node);
+               if (leastSqTraversibilityCalculator.isTraversible())
+               {
+                  edgeCost.add(traversibilityIndicator);
+               }
+               else
+               {
+                  rejectionReason.set(RejectionReason.NON_TRAVERSIBLE);
+                  graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+                  continue;
+               }
             }
 
             if (useEdgeDetectorCost)
