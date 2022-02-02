@@ -27,7 +27,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -73,7 +75,7 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
 
    private final FrameConvexPolygon2D captureRegionInWorld = new FrameConvexPolygon2D();
 
-   private final double distanceToScaelSupportPolygon = 0.02;
+   private final DoubleProvider distanceInsideToScaleSupportPolygon = new DoubleParameter(yoNamePrefix + "distanceInsideToScaleSupportPolygon", registry, 0.02);
    private final FrameConvexPolygon2D allowableAreaForCoP = new FrameConvexPolygon2D();
 
    private final ConvexPolygonScaler polygonScaler = new ConvexPolygonScaler();
@@ -317,6 +319,6 @@ public class CaptureRegionStepAdjustmentController implements StepAdjustmentCont
    private void computeLimitedAreaForCoP()
    {
       FrameConvexPolygon2DReadOnly supportPolygon = bipedSupportPolygons.getFootPolygonInWorldFrame(upcomingFootstepSide.getEnumValue().getOppositeSide());
-      polygonScaler.scaleConvexPolygon(supportPolygon, distanceToScaelSupportPolygon, allowableAreaForCoP);
+      polygonScaler.scaleConvexPolygon(supportPolygon, distanceInsideToScaleSupportPolygon.getValue(), allowableAreaForCoP);
    }
 }
