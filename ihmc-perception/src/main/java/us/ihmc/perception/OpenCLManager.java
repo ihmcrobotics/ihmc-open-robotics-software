@@ -70,7 +70,7 @@ public class OpenCLManager
       checkReturnCode();
 
       /* Create Command Queue */
-      IntPointer properties = new IntPointer(new int[] {0});
+      IntPointer properties = null;
       commandQueue = clCreateCommandQueueWithProperties(context, devices, properties, returnCode);
       checkReturnCode();
    }

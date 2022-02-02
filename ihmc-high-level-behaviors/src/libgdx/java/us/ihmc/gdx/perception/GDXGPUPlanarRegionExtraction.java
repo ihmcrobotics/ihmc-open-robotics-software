@@ -1,7 +1,6 @@
 package us.ihmc.gdx.perception;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
@@ -176,7 +175,7 @@ public class GDXGPUPlanarRegionExtraction
       principalOffsetYPixels.set((float) cy);
 
       parametersBuffer = new OpenCLFloatBuffer(16);
-      calculateDetivativeParameters();
+      calculateDerivativeParameters();
       inputFloatDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1, sourceDepthByteBufferOfFloats);
       inputScaledFloatDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       inputU16DepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
@@ -258,7 +257,7 @@ public class GDXGPUPlanarRegionExtraction
       wholeAlgorithmDurationStopwatch.start();
       gpuDurationStopwatch.start();
 
-      calculateDetivativeParameters();
+      calculateDerivativeParameters();
 
       // convert float to unint16
       // multiply by 1000 and cast to int
@@ -758,7 +757,7 @@ public class GDXGPUPlanarRegionExtraction
       }
    }
 
-   private void calculateDetivativeParameters()
+   private void calculateDerivativeParameters()
    {
       patchHeight = patchSize.get();
       patchWidth = patchSize.get();
