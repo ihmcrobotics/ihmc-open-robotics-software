@@ -568,7 +568,7 @@ public class SwingState extends AbstractFootControlState
          initialPose.changeFrame(worldFrame);
          blendedSwingTrajectory.blendInitialConstraint(initialPose, 0.0, swingTrajectoryBlendDuration);
       }
-      if (replanTrajectory.getBooleanValue())
+      if (footstepWasAdjusted.getBooleanValue())
       {
          // If there is a swing waypoint at the end of swing we want to preserve its transform to the footstep pose to not blend out
          // any touchdown trajectory when doing step adjustment.
