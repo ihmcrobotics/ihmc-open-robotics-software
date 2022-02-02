@@ -37,7 +37,7 @@ public class GDXPointLightObject extends GDXEnvironmentObject
    }
 
    @Override
-   protected void updateRenderablesPoses()
+   public void updateRenderablesPoses()
    {
       super.updateRenderablesPoses();
 

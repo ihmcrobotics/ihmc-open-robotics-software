@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.bullet.dynamics.btDiscreteDynamicsWorld;
+import com.badlogic.gdx.physics.bullet.dynamics.btMultiBodyDynamicsWorld;
 import com.badlogic.gdx.physics.bullet.linearmath.*;
 import com.badlogic.gdx.physics.bullet.linearmath.btIDebugDraw.DebugDrawModes;
 import com.badlogic.gdx.utils.Array;
@@ -20,15 +20,15 @@ public class GDXBulletPhysicsDebugger
 {
    private final btIDebugDraw btIDebugDraw;
    private int debugMode = DebugDrawModes.DBG_DrawWireframe; // TODO: Provide options in combo box
-   private btDiscreteDynamicsWorld discreteDynamicsWorld;
+   private btMultiBodyDynamicsWorld multiBodyDynamicsWorld;
    private GDXMultiColorMeshBuilder meshBuilder;
    private ModelInstance debugModelInstance;
    private ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean drawDebug = new ImBoolean(false);
 
-   public GDXBulletPhysicsDebugger(btDiscreteDynamicsWorld discreteDynamicsWorld)
+   public GDXBulletPhysicsDebugger(btMultiBodyDynamicsWorld multiBodyDynamicsWorld)
    {
-      this.discreteDynamicsWorld = discreteDynamicsWorld;
+      this.multiBodyDynamicsWorld = multiBodyDynamicsWorld;
 
       btIDebugDraw = new btIDebugDraw()
       {
@@ -74,13 +74,13 @@ public class GDXBulletPhysicsDebugger
             return debugMode;
          }
       };
-      discreteDynamicsWorld.setDebugDrawer(btIDebugDraw);
+      multiBodyDynamicsWorld.setDebugDrawer(btIDebugDraw);
    }
 
    public void renderImGuiWidgets()
    {
       // FIXME: There's a native memory leak I think. Or maybe just need to fix the mesh drawing above.
-      ImGui.checkbox(labels.get("Draw debug wireframes (Crashes after awhile)"), drawDebug);
+      ImGui.checkbox(labels.get("Draw debug wireframes (Crashes after a while)"), drawDebug);
    }
 
    public void update()
@@ -90,7 +90,7 @@ public class GDXBulletPhysicsDebugger
          debugModelInstance = GDXModelPrimitives.buildModelInstance(meshBuilder ->
          {
             this.meshBuilder = meshBuilder;
-            discreteDynamicsWorld.debugDrawWorld();
+            multiBodyDynamicsWorld.debugDrawWorld();
          }, "BulletDebug");
       }
    }

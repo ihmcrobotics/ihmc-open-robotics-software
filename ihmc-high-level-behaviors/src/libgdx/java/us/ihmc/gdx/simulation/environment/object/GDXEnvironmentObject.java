@@ -4,7 +4,9 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btMultiBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
@@ -70,6 +72,7 @@ public class GDXEnvironmentObject
    private btCollisionShape btCollisionShape;
    private float mass = 0.0f;
    private btRigidBody btRigidBody;
+   private btMultiBody btMultiBody;
    private GDXBulletPhysicsManager bulletPhysicsManager;
    private final btMotionState bulletMotionState = new btMotionState()
    {
@@ -179,11 +182,32 @@ public class GDXEnvironmentObject
       }
    }
 
+   public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager, btMultiBody btMultiBody)
+   {
+      this.bulletPhysicsManager = bulletPhysicsManager;
+      if (btCollisionShape != null)
+      {
+         if (btMultiBody == null)
+         {
+            this.btMultiBody = bulletPhysicsManager.addMultiBody(btMultiBody);
+         }
+      }
+   }
+
+   public void getInertia(Vector3 inertiaToPack)
+   {
+      btCollisionShape.calculateLocalInertia(mass, inertiaToPack);
+   }
+
    public void removeFromBullet()
    {
       if (btRigidBody != null)
       {
          bulletPhysicsManager.removeCollisionObject(btRigidBody);
+      }
+      if (btMultiBody != null)
+      {
+         bulletPhysicsManager.removeMultiBody(btMultiBody);
       }
    }
 
@@ -234,13 +258,19 @@ public class GDXEnvironmentObject
       updateRenderablesPoses();
    }
 
+   public void setTransformToWorld(Matrix4 transformToWorld)
+   {
+      GDXTools.toEuclid(transformToWorld, tempTransform);
+      setTransformToWorld(tempTransform);
+   }
+
    public void setTransformToWorld(RigidBodyTransform transformToWorld)
    {
       placementTransform.set(transformToWorld);
       updateRenderablesPoses();
    }
 
-   protected void updateRenderablesPoses()
+   public void updateRenderablesPoses()
    {
       placementFrame.update();
       realisticModelFrame.update();
@@ -300,9 +330,19 @@ public class GDXEnvironmentObject
       this.mass = mass;
    }
 
+   public float getMass()
+   {
+      return mass;
+   }
+
    public void setBtCollisionShape(btCollisionShape btCollisionShape)
    {
       this.btCollisionShape = btCollisionShape;
+   }
+
+   public com.badlogic.gdx.physics.bullet.collision.btCollisionShape getBtCollisionShape()
+   {
+      return btCollisionShape;
    }
 
    public btRigidBody getBtRigidBody()

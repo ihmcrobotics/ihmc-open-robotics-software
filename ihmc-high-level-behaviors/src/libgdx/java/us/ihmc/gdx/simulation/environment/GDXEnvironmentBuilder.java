@@ -164,6 +164,13 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    public void update()
    {
       bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
+      if (bulletPhysicsManager.getSimulate().get())
+      {
+         for (GDXEnvironmentObject allObject : allObjects)
+         {
+            allObject.updateRenderablesPoses();
+         }
+      }
    }
 
    public void renderImGuiWidgets()
@@ -177,8 +184,8 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       }
 
       ImGui.separator();
-      ImGui.text("Selected: " + selectedObject);
-      ImGui.text("Intersected: " + intersectedObject);
+      ImGui.text("Selected: " + (selectedObject == null ? "" : (selectedObject.getTitleCasedName() + " " + selectedObject.getObjectIndex())));
+      ImGui.text("Intersected: " + (intersectedObject == null ? "" : (intersectedObject.getTitleCasedName() + " " + intersectedObject.getObjectIndex())));
 
       // TODO: Place robots
       if (!isPlacing)
