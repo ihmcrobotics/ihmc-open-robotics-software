@@ -89,6 +89,9 @@ public class ICPController implements ICPControllerInterface
 
    private final DoubleProvider feedbackDirectionWeight;
 
+   private final BooleanProvider useDistanceInsideHeuristics = new BooleanParameter(yoNamePrefix + "UseDistanceInsideHeuristics", registry, false);
+
+   private final DistanceInsideHeuristics distanceInsideHeuristics;
    private final AngularMomentumIntegrator integrator;
 
    private final ICPControlGainsReadOnly feedbackGains;
@@ -181,6 +184,11 @@ public class ICPController implements ICPControllerInterface
       double defaultMaxAllowedDistanceCMPSupport =
             walkingControllerParameters != null ? walkingControllerParameters.getMaxAllowedDistanceCMPSupport() : Double.NaN;
       maxAllowedDistanceCMPSupport = new DoubleParameter(yoNamePrefix + "MaxAllowedDistanceCMPSupport", registry, defaultMaxAllowedDistanceCMPSupport);
+
+      distanceInsideHeuristics = new DistanceInsideHeuristics(bipedSupportPolygons.getSupportPolygonInWorld(),
+                                                              maxAllowedDistanceCMPSupport,
+                                                              safeCoPDistanceToEdge,
+                                                              registry);
 
       integrator = new AngularMomentumIntegrator(yoNamePrefix, icpOptimizationParameters, feedbackGains, controlDT, registry);
 
@@ -297,6 +305,8 @@ public class ICPController implements ICPControllerInterface
 
       scaleFeedbackWeightWithGain();
 
+      distanceInsideHeuristics.updateDistanceInside(currentICP);
+
       submitSolverTaskConditions();
 
       solver.setMaxNumberOfIterations(maxNumberOfIterations.getValue());
@@ -334,8 +344,16 @@ public class ICPController implements ICPControllerInterface
       solver.resetCoPFeedbackConditions();
       solver.resetFeedbackDirection();
       solver.setFeedbackConditions(scaledCoPFeedbackWeight, transformedGains, dynamicsObjectiveWeight.getValue());
-      solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getValue());
-      solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
+      if (useDistanceInsideHeuristics.getValue())
+      {
+         solver.setMaxCMPDistanceFromEdge(distanceInsideHeuristics.getCmpDistanceFromSupport());
+         solver.setCopSafeDistanceToEdge(distanceInsideHeuristics.getCoPDistanceInsideSupport());
+      }
+      else
+      {
+         solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getValue());
+         solver.setCopSafeDistanceToEdge(safeCoPDistanceToEdge.getValue());
+      }
       solver.setDesiredFeedbackDirection(unconstrainedFeedback, feedbackDirectionWeight.getValue());
 
       solver.setMaximumFeedbackMagnitude(transformedMagnitudeLimits);
