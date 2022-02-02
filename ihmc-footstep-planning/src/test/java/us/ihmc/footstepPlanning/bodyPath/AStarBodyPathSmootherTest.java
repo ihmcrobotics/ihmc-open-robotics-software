@@ -213,6 +213,18 @@ public class AStarBodyPathSmootherTest
       runDataset(2);
    }
 
+   @Test
+   public void testDataset3()
+   {
+      runDataset(3);
+   }
+
+   @Test
+   public void testDataset4()
+   {
+      runDataset(4);
+   }
+
    private void runDataset(int datasetIndex)
    {
       FootstepPlannerLogLoader loader = new FootstepPlannerLogLoader();

@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BodyPathTraversibilityCalculator
+public class BodyPathLSTraversibilityCalculator
 {
    private static final int minTraversibleSteps = 3;
 
@@ -51,10 +51,10 @@ public class BodyPathTraversibilityCalculator
    private final TDoubleArrayList traversibilityCosts = new TDoubleArrayList();
    private HeightMapData heightMapData;
 
-   public BodyPathTraversibilityCalculator(FootstepPlannerParametersReadOnly parameters,
-                                           ConvexPolygon2D footPolygon,
-                                           Map<BodyPathLatticePoint, Double> gridHeightMap,
-                                           YoRegistry registry)
+   public BodyPathLSTraversibilityCalculator(FootstepPlannerParametersReadOnly parameters,
+                                             ConvexPolygon2D footPolygon,
+                                             Map<BodyPathLatticePoint, Double> gridHeightMap,
+                                             YoRegistry registry)
    {
       this.parameters = parameters;
       this.footPolygon = footPolygon;

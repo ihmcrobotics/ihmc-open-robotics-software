@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -20,6 +21,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -33,7 +35,7 @@ import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathSmoother.rollWeight
 public class AStarBodyPathSmootherWaypoint
 {
    private static final double boxSizeX = 0.3;
-   private static final double boxSizeY = 0.7;
+   private static final double boxSizeY = 0.8;
    private static final double boxGroundOffset = 0.2;
    private final FrameBox3D collisionBox = new FrameBox3D();
 
@@ -47,8 +49,11 @@ public class AStarBodyPathSmootherWaypoint
    private final YoDouble headingFromPrevious;
    private final YoDouble headingToNext;
    private final YoDouble maxCollision;
+   private final YoDouble alphaRoll;
 
-   private final Vector2D rollDelta = new Vector2D();
+   private AStarBodyPathSmootherWaypoint previous, next;
+
+   private final YoVector2D rollDelta;
 
    public AStarBodyPathSmootherWaypoint(int waypointIndex,
                                         HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator,
@@ -63,13 +68,15 @@ public class AStarBodyPathSmootherWaypoint
       this.headingFromPrevious = new YoDouble("headingPrev" + waypointIndex, registry);
       this.headingToNext = new YoDouble("headingToNext" + waypointIndex, registry);
       this.maxCollision = new YoDouble("maxCollision" + waypointIndex, registry);
+      this.alphaRoll = new YoDouble("alphaRoll" + waypointIndex, registry);
+      this.rollDelta = new YoVector2D("deltaRoll" + waypointIndex, registry);
 
       visualize = parentRegistry != null;
       waypoint = new YoFramePoseUsingYawPitchRoll("waypoint" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
 
       if (visualize)
       {
-         YoGraphicPosition waypointGraphic = new YoGraphicPosition("waypointViz" + waypointIndex, waypoint.getPosition(), 0.0075, YoAppearance.Red());
+         YoGraphicPosition waypointGraphic = new YoGraphicPosition("waypointViz" + waypointIndex, waypoint.getPosition(), 0.02, YoAppearance.Red());
          Graphics3DObject collisionBoxGraphic = new Graphics3DObject();
          collisionBoxColor.setTransparency(0.6);
          collisionBoxGraphic.addCube(collisionBox.getSizeX(), collisionBox.getSizeY(), collisionBox.getSizeZ(), true, collisionBoxColor);
@@ -98,6 +105,12 @@ public class AStarBodyPathSmootherWaypoint
       {
          waypoint.setToNaN();
       }
+   }
+
+   public void setNeighbors(AStarBodyPathSmootherWaypoint previous, AStarBodyPathSmootherWaypoint next)
+   {
+      this.previous = previous;
+      this.next = next;
    }
 
    public void setHeading(double headingFromPrev, double headingToNext)
@@ -145,6 +158,7 @@ public class AStarBodyPathSmootherWaypoint
       Vector2D gradient = new Vector2D();
       int numCollisions = 0;
       double heightThreshold = waypointZ + boxGroundOffset;
+      maxCollision.set(0.0);
 
       for (int xi = -maxOffset; xi <= maxOffset; xi++)
       {
@@ -195,7 +209,7 @@ public class AStarBodyPathSmootherWaypoint
       return gradient;
    }
 
-   public Vector2D computeRollInclineGradient(HeightMapData heightMapData)
+   public Vector2DBasics computeRollInclineGradient(HeightMapData heightMapData)
    {
       UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(HeightMapTools.coordinateToKey(waypoint.getX(),
                                                                                                                  waypoint.getY(),
@@ -206,18 +220,14 @@ public class AStarBodyPathSmootherWaypoint
 
       if (surfaceNormal != null)
       {
-         Vector3D nCrossZ = new Vector3D();
-         nCrossZ.cross(surfaceNormal, Axis3D.Z);
+         Vector3D yLocal = new Vector3D();
+         yLocal.setX(-Math.sin(waypoint.getYaw()));
+         yLocal.setY(Math.cos(waypoint.getYaw()));
+         yLocal.scale(yLocal.dot(surfaceNormal));
 
-         Vector3D xLocal = new Vector3D();
-         xLocal.setX(Math.cos(waypoint.getYaw()));
-         xLocal.setY(Math.sin(waypoint.getYaw()));
-
-         Vector3D delta = new Vector3D();
-         delta.cross(xLocal, Axis3D.Z);
-         delta.scale(xLocal.dot(nCrossZ));
-
-         rollDelta.set(rollWeight * delta.getX(), rollWeight * delta.getY());
+         double alphaIncline = Math.atan2(next.getPosition().getZ() - previous.getPosition().getZ(), previous.getPosition().distanceXY(next.getPosition()));
+         double inclineScale = EuclidCoreTools.clamp((Math.abs(alphaIncline) - Math.toRadians(5.0)) / Math.toRadians(22.0), 0.0, 1.0);
+         rollDelta.set(rollWeight * inclineScale * yLocal.getX(), rollWeight * inclineScale * yLocal.getY());
       }
       else
       {
@@ -225,5 +235,10 @@ public class AStarBodyPathSmootherWaypoint
       }
 
       return rollDelta;
+   }
+
+   public double getMaxCollision()
+   {
+      return maxCollision.getValue();
    }
 }
