@@ -39,7 +39,7 @@ public class GDXDirectionalLightObject extends GDXEnvironmentObject
    }
 
    @Override
-   protected void updateRenderablesPoses()
+   public void updateRenderablesPoses()
    {
       super.updateRenderablesPoses();
 

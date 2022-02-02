@@ -33,6 +33,7 @@ public class GDXBulletPhysicsManager
    private btMultiBodyConstraintSolver solver;
    private btMultiBodyDynamicsWorld multiBodyDynamicsWorld;
    private final ArrayList<btRigidBody> rigidBodies = new ArrayList<>();
+   private final ArrayList<btMultiBody> multiBodies = new ArrayList<>();
    private final ArrayList<btCollisionObject> collisionObjects = new ArrayList<>(); // static, massless
    private ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean simulate = new ImBoolean(false);
@@ -90,6 +91,13 @@ public class GDXBulletPhysicsManager
       return rigidBody;
    }
 
+   public btMultiBody addMultiBody(btMultiBody multiBody)
+   {
+      multiBodyDynamicsWorld.addMultiBody(multiBody);
+      multiBodies.add(multiBody);
+      return multiBody;
+   }
+
    public void simulate(float timeStep)
    {
       debugger.update();
@@ -120,6 +128,12 @@ public class GDXBulletPhysicsManager
    {
       multiBodyDynamicsWorld.removeCollisionObject(collisionObject);
       rigidBodies.remove(collisionObject);
+   }
+
+   public void removeMultiBody(btMultiBody btMultiBody)
+   {
+      multiBodyDynamicsWorld.removeMultiBody(btMultiBody);
+      multiBodies.remove(btMultiBody);
    }
 
    public void renderImGuiWidgets()
