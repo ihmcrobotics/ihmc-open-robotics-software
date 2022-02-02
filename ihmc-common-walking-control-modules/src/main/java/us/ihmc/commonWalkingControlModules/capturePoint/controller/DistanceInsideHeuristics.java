@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -45,7 +46,7 @@ public class DistanceInsideHeuristics
 
    private final FramePoint2D copOfLeastEffort = new FramePoint2D();
 
-   public void updateDistanceInside(FramePoint2DReadOnly currentICP)
+   public void updateDistanceInside(FramePoint2DReadOnly currentICP, FramePoint2DReadOnly unconstrainedDesiredCMP)
    {
       double distanceFromSupport = supportPolygon.signedDistance(currentICP);
       if (distanceFromSupport <= 0.0)
@@ -59,24 +60,36 @@ public class DistanceInsideHeuristics
 
       supportPolygon.orthogonalProjection(currentICP, pointOnEdge);
 
-      lineToIntersect.set(pointOnEdge, currentICP);
+      lineToIntersect.set(unconstrainedDesiredCMP, currentICP);
       int intersections = supportPolygon.intersectionWith(lineToIntersect, pointOnEdge, otherPointOfIntersection);
-      double distanceFromCoPOfLeastEffortToEdge;
 
-      if (intersections == 1)
-      {
-         copOfLeastEffort.set(pointOnEdge);
-         distanceFromCoPOfLeastEffortToEdge = 0.0;
-      }
-      else if (intersections == 2)
+      double distanceFromCoPOfLeastEffortToEdge;
+      if (intersections == 2)
       {
          copOfLeastEffort.interpolate(pointOnEdge, otherPointOfIntersection, 0.5);
-         distanceFromCoPOfLeastEffortToEdge = 0.5 * pointOnEdge.distance(otherPointOfIntersection);
+         distanceFromCoPOfLeastEffortToEdge = 0.5 * (pointOnEdge.distance(otherPointOfIntersection));
       }
       else
       {
-         throw new RuntimeException("Should never get here.");
+         supportPolygon.getClosestPointWithRay(lineToIntersect, copOfLeastEffort);
+         distanceFromCoPOfLeastEffortToEdge = 0.0;
       }
+
+//      // this may be a bad heuristic, if the ICP is outrunning the plan
+//      if (copOfLeastEffort.distanceSquared(currentICP) > unconstrainedDesiredCMP.distanceSquared(currentICP))
+//      {
+//         copOfLeastEffort.set(unconstrainedDesiredCMP);
+//         copDistanceInsideSupport.set(safeCoPDistanceToEdge.getValue());
+//         cmpDistanceFromSupport.set(maxAllowedDistanceCMPSupport.getValue());
+//
+//         return;
+//      }
+//      else
+//      {
+//
+//      }
+
+
 
       double fractionReductionOfDistance = Math.min(distanceFromSupport / distanceWhenControlIsUseless.getValue(), 1.0);
 

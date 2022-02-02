@@ -305,7 +305,9 @@ public class ICPController implements ICPControllerInterface
 
       scaleFeedbackWeightWithGain();
 
-      distanceInsideHeuristics.updateDistanceInside(currentICP);
+      computeUnconstrainedFeedbackCMPGain();
+
+      distanceInsideHeuristics.updateDistanceInside(currentICP, unconstrainedFeedbackCMP);
 
       submitSolverTaskConditions();
 
@@ -336,8 +338,6 @@ public class ICPController implements ICPControllerInterface
                                         desiredICPVelocity,
                                         feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
                                         feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
-
-      computeUnconstrainedFeedbackCMPGain();
 
       UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 

@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -14,11 +16,20 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class DistanceInsideHeuristicsTest
 {
+   private static boolean visualize = false;
+
+   @BeforeEach
+   public void setup()
+   {
+      visualize &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
+
    @Test
    public void testSimpleStandingInside()
    {
       FrameConvexPolygon2DReadOnly polygon = generateBasicSupportPolygon(0.2, 0.4);
       FramePoint2D icp = new FramePoint2D();
+      FramePoint2D cmp = new FramePoint2D();
 
       double maxDistanceToCMP = 0.05;
       double minDistanceInside = 0.005;
@@ -29,18 +40,23 @@ public class DistanceInsideHeuristicsTest
       DefaultParameterReader reader = new DefaultParameterReader();
       reader.readParametersInRegistry(testRegistry);
 
-      DistanceInsideHeuristicsVisualizer visualizer = new DistanceInsideHeuristicsVisualizer(testRegistry, null);
+      DistanceInsideHeuristicsVisualizer visualizer = null;
+      if (visualize)
+      {
+         visualizer = new DistanceInsideHeuristicsVisualizer(testRegistry, null);
+         visualizer.updateInputs(polygon, icp, cmp);
+      }
 
-      visualizer.updateInputs(polygon, icp);
-
-      heuristics.updateDistanceInside(icp);
+      heuristics.updateDistanceInside(icp, cmp);
 
       assertEquals(maxDistanceToCMP, heuristics.getCmpDistanceFromSupport(), 1e-5);
       assertEquals(minDistanceInside, heuristics.getCoPDistanceInsideSupport(), 1e-5);
 
-      visualizer.updateOutputs(heuristics);
-
-      ThreadTools.sleepForever();
+      if (visualize)
+      {
+         visualizer.updateOutputs(heuristics);
+         ThreadTools.sleepForever();
+      }
    }
 
    @Test
@@ -50,6 +66,7 @@ public class DistanceInsideHeuristicsTest
       double width = 0.4;
       FrameConvexPolygon2DReadOnly polygon = generateBasicSupportPolygon(length, width);
       FramePoint2D icp = new FramePoint2D();
+      FramePoint2D cmp = new FramePoint2D();
 
       double maxDistanceToCMP = 0.05;
       double minDistanceInside = 0.005;
@@ -60,15 +77,18 @@ public class DistanceInsideHeuristicsTest
       DefaultParameterReader reader = new DefaultParameterReader();
       reader.readParametersInRegistry(testRegistry);
 
-      DistanceInsideHeuristicsVisualizer visualizer = new DistanceInsideHeuristicsVisualizer(testRegistry, null);
+      DistanceInsideHeuristicsVisualizer visualizer = null;
+      if (visualize)
+         visualizer = new DistanceInsideHeuristicsVisualizer(testRegistry, null);
 
       double distanceOutside = 0.1;
       double distanceToUseless = ((YoDouble) testRegistry.findVariable("distanceWhenCoPControlIsUseless")).getDoubleValue();
       icp.setY(0.5 * width + distanceOutside);
 
-      visualizer.updateInputs(polygon, icp);
+      if (visualize)
+         visualizer.updateInputs(polygon, icp, cmp);
 
-      heuristics.updateDistanceInside(icp);
+      heuristics.updateDistanceInside(icp, cmp);
 
       double fractionToUseless = Math.min(distanceOutside / distanceToUseless, 1.0);
       double maxShrinkDistance = 0.5 * width;
@@ -76,9 +96,20 @@ public class DistanceInsideHeuristicsTest
       assertEquals(InterpolationTools.linearInterpolate(maxDistanceToCMP, -maxShrinkDistance, fractionToUseless), heuristics.getCmpDistanceFromSupport(), 1e-5);
       assertEquals(InterpolationTools.linearInterpolate(minDistanceInside, maxShrinkDistance, fractionToUseless), heuristics.getCoPDistanceInsideSupport(), 1e-5);
 
-      visualizer.updateOutputs(heuristics);
+      if (visualize)
+         visualizer.updateOutputs(heuristics);
 
-      ThreadTools.sleepForever();
+      cmp.setX(-0.2);
+      if (visualize)
+         visualizer.updateInputs(polygon, icp, cmp);
+
+      heuristics.updateDistanceInside(icp, cmp);
+
+      if (visualize)
+      {
+         visualizer.updateOutputs(heuristics);
+         ThreadTools.sleepForever();
+      }
    }
 
    private FrameConvexPolygon2DReadOnly generateBasicSupportPolygon(double length, double width)

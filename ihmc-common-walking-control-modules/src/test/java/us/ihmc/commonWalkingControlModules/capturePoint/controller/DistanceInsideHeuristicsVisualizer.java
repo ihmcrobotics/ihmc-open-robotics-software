@@ -3,8 +3,10 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicLineSegment;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.simulationconstructionset.Robot;
@@ -17,8 +19,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.awt.*;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 public class DistanceInsideHeuristicsVisualizer
 {
@@ -28,6 +29,7 @@ public class DistanceInsideHeuristicsVisualizer
    private final SimulationOverheadPlotter plotter;
 
    private final YoFramePoint2D yoCapturePoint;
+   private final YoFramePoint2D unconstrainedCMP;
    private final YoFramePoint2D copOfLeastEffort;
 
    private final YoFrameConvexPolygon2D supportPolygonForViz;
@@ -42,6 +44,7 @@ public class DistanceInsideHeuristicsVisualizer
       cmpAllowableRegionViz = new YoFrameConvexPolygon2D("cmpAllowableRegion", worldFrame, 20, registry);
       copAllowableRegionViz = new YoFrameConvexPolygon2D("copAllowableRegion", worldFrame, 20, registry);
       yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
+      unconstrainedCMP = new YoFramePoint2D("unconstrainedCMP", worldFrame, registry);
       copOfLeastEffort = new YoFramePoint2D("copOfLeastEffort", worldFrame, registry);
 
       if (yoGraphicsListRegistry == null)
@@ -55,8 +58,12 @@ public class DistanceInsideHeuristicsVisualizer
       yoGraphicsListRegistry.registerArtifact("ICPControllerTest", copPolygonArtifact);
 
       YoGraphicPosition capturePointViz = new YoGraphicPosition("Capture Point", yoCapturePoint, 0.01, Blue(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoGraphicPosition copOfLeastEffortViz = new YoGraphicPosition("CoP of Least Effort", copOfLeastEffort, 0.01, Purple(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition unconstrainedCMPViz = new YoGraphicPosition("Unconstrained CMP", unconstrainedCMP, 0.01, Purple(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoArtifactLineSegment2d lineOfAction = new YoArtifactLineSegment2d("Line Of Action", yoCapturePoint, unconstrainedCMP, Color.GREEN);
+      YoGraphicPosition copOfLeastEffortViz = new YoGraphicPosition("CoP of Least Effort", copOfLeastEffort, 0.005, Purple(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       yoGraphicsListRegistry.registerArtifact("ICPControllerTest", capturePointViz.createArtifact());
+      yoGraphicsListRegistry.registerArtifact("ICPControllerTest", lineOfAction);
+      yoGraphicsListRegistry.registerArtifact("ICPControllerTest", unconstrainedCMPViz.createArtifact());
       yoGraphicsListRegistry.registerArtifact("ICPControllerTest", copOfLeastEffortViz.createArtifact());
 
       scs = new SimulationConstructionSet(new Robot("Test"));
@@ -73,10 +80,11 @@ public class DistanceInsideHeuristicsVisualizer
       plotter.update();
    }
 
-   public void updateInputs(FrameConvexPolygon2DReadOnly supportPolygon, FramePoint2DReadOnly currentICP)
+   public void updateInputs(FrameConvexPolygon2DReadOnly supportPolygon, FramePoint2DReadOnly currentICP, FramePoint2DReadOnly unconstrainedCMP)
    {
       supportPolygonForViz.set(supportPolygon);
       yoCapturePoint.set(currentICP);
+      this.unconstrainedCMP.set(unconstrainedCMP);
 
       plotter.update();
    }
