@@ -21,6 +21,7 @@ public class GDXEnvironmentObjectLibrary
       objectFactories.add(GDXDoorPanelObject.FACTORY);
       objectFactories.add(GDXDoorLeverHandleObject.FACTORY);
       objectFactories.add(GDXDoorCombinedObject.FACTORY);
+      objectFactories.add(GDXDoorCombinedMultiBodyObject.FACTORY);
       objectFactories.add(GDXPointLightObject.FACTORY);
       objectFactories.add(GDXDirectionalLightObject.FACTORY);
       objectFactories.add(GDXL515SensorObject.FACTORY);
