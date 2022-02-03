@@ -67,9 +67,9 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       doorPanelObject.getInertia(inertia);
       int parentIndex = -1;
       Quaternion rotationFromParent = new Quaternion();
-      Vector3 jointAxis = new Vector3(0.0f, 0.0f, -1.0f);
-      Vector3 offsetOfPivotFromParentCenterOfMass = new Vector3(0.0f, 0.0f, 0.01f);
-      Vector3 offsetOfCenterOfMassFromPivot = new Vector3(0.0f, -((0.9144f - 0.05f) / 2.0f) - 0.05f, -2.0447f / 2.0f);
+      Vector3 jointAxis = new Vector3(0.0f, 0.0f, 1.0f);
+      Vector3 offsetOfPivotFromParentCenterOfMass = new Vector3(0.0f, 0.03f, 0.01f);
+      Vector3 offsetOfCenterOfMassFromPivot = new Vector3(0.0f, 0.9144f / 2.0f, 2.0447f / 2.0f);
       boolean disableParentCollision = false;
       multiBody.setupRevolute(linkIndex,
                               mass,
@@ -81,8 +81,8 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
                               offsetOfCenterOfMassFromPivot,
                               disableParentCollision);
 
-      multiBody.finalizeMultiDof();
 
+      multiBody.finalizeMultiDof();
       bulletPhysicsManager.addMultiBody(multiBody);
 
       multiBody.setJointPos(0, 0.0f);
@@ -93,7 +93,6 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       GDXTools.toGDX(rigidBodyTransform, worldTransform);
       frameCollider.setWorldTransform(worldTransform);
-//      bulletPhysicsManager.getMultiBodyDynamicsWorld().addCollisionObject(frameCollider, 2, 1+2);
       bulletPhysicsManager.getMultiBodyDynamicsWorld().addCollisionObject(frameCollider); // TODO: Store and remove
 
       multiBody.setBaseCollider(frameCollider);
@@ -101,16 +100,17 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       btMultiBodyLinkCollider panelCollider = new btMultiBodyLinkCollider(multiBody, 0);
       panelCollider.setCollisionShape(doorPanelObject.getBtCollisionShape());
       panelCollider.setWorldTransform(worldTransform);
-//      bulletPhysicsManager.getMultiBodyDynamicsWorld().addCollisionObject(panelCollider, 2, 1+2);
       bulletPhysicsManager.getMultiBodyDynamicsWorld().addCollisionObject(panelCollider);
 
       multiBody.getLink(0).setCollider(panelCollider);
+
    }
 
    @Override
    public void copyBulletTransformToThisMultiBody()
    {
       doorFrameObject.copyBulletTransformToThis(multiBody.getBaseWorldTransform());
+      doorPanelObject.copyBulletTransformToThis(multiBody.getLink(0).getCollider().getWorldTransform());
    }
 
    @Override
