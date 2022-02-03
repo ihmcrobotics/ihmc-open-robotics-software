@@ -11,7 +11,6 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXBulletPhysicsManager;
@@ -26,6 +25,7 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
    private final GDXDoorFrameObject doorFrameObject;
    private final GDXDoorPanelObject doorPanelObject;
    private final GDXDoorLeverHandleObject doorLeverObject;
+   private final Matrix4 tempGDXTransform = new Matrix4();
 
    private btMultiBody multiBody;
 
@@ -108,12 +108,16 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
    }
 
    @Override
-   public void updateRenderablesPoses()
+   public void copyBulletTransformToThisMultiBody()
    {
-      Matrix4 baseWorldTransform = multiBody.getBaseWorldTransform();
-      doorFrameObject.setTransformToWorld(baseWorldTransform);
+      doorFrameObject.copyBulletTransformToThis(multiBody.getBaseWorldTransform());
+   }
 
-
+   @Override
+   public void copyThisTransformToBulletMultiBody()
+   {
+      doorFrameObject.getThisTransformForCopyToBullet(tempGDXTransform);
+      multiBody.setBaseWorldTransform(tempGDXTransform);
    }
 
    @Override
@@ -163,8 +167,14 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
    }
 
    @Override
-   public RigidBodyTransformReadOnly getObjectTransform()
+   public RigidBodyTransform getObjectTransform()
    {
       return doorFrameObject.getObjectTransform();
+   }
+
+   @Override
+   public boolean getIsSelected()
+   {
+      return doorFrameObject.getIsSelected();
    }
 }
