@@ -94,6 +94,8 @@ public class RosModule implements CloseableAndDisposable
                      RealtimeROS2Node realtimeROS2Node, PubSubImplementation pubSubImplementation)
    {
       LogTools.info("Starting ROS Module");
+      
+      System.out.println(rosCoreURI);
 
       String simpleRobotName = robotModelFactory.getRobotDefinition().getName();
       manageROS2Node = realtimeROS2Node == null;

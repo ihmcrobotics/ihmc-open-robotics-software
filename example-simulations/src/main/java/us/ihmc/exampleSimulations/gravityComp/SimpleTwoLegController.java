@@ -8,25 +8,25 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class SimpleLegController implements RobotController
+public class SimpleTwoLegController implements RobotController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final GravityCoriolisExternalWrenchMatrixCalculator gravityCompensator;
-   private final SimpleLegRobot robot;
+   private final SimpleTwoLeggedRobot robot;
    private final CenterOfMassReferenceFrame centerOfMassFrame;
-   
 
    private final double robotMass;
 
-   public SimpleLegController(double controlDT, SimpleLegRobot robot, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SimpleTwoLegController(double controlDT, SimpleTwoLeggedRobot robot, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.robot = robot;
 
@@ -41,21 +41,26 @@ public class SimpleLegController implements RobotController
    {
       robot.readSimulationSensorData();
       centerOfMassFrame.update();
-      FramePoint3D comFrame = new FramePoint3D(centerOfMassFrame);
-      comFrame.changeFrame(ReferenceFrameTools.getWorldFrame());
-      comFrame.setZ(0.0);
-      
-      gravityCompensator.setExternalWrenchesToZero();
-      
-
-      FrameVector3D footForce = new FrameVector3D(worldFrame, 0.0, 0.0, robotMass * 9.81);
-      
-      comFrame.changeFrame(robot.getFoot().getBodyFixedFrame());
-      
-      footForce.changeFrame(robot.getFoot().getBodyFixedFrame());
+//      FramePoint3D comFrame = new FramePoint3D(centerOfMassFrame);
+//      comFrame.changeFrame(ReferenceFrameTools.getWorldFrame());
+//      comFrame.setZ(0.0);
 
       gravityCompensator.setExternalWrenchesToZero();
-      gravityCompensator.getExternalWrench(robot.getFoot()).set(null,footForce,comFrame);
+
+      FrameVector3D footForce = new FrameVector3D(worldFrame, 0.0, 0.0, robotMass * 9.81 / 2);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePoint3D comFrame = new FramePoint3D(centerOfMassFrame);
+         comFrame.changeFrame(ReferenceFrameTools.getWorldFrame());
+         comFrame.setZ(0.0);
+         comFrame.changeFrame(robot.getFoot(robotSide).getBodyFixedFrame());
+         comFrame.setY(0);
+
+         footForce.changeFrame(robot.getFoot(robotSide).getBodyFixedFrame());
+
+         gravityCompensator.getExternalWrench(robot.getFoot(robotSide)).set(null, footForce, comFrame);
+      }
       gravityCompensator.compute();
       gravityCompensator.writeComputedJointWrenches(robot.getOneDoFJoints());
 
