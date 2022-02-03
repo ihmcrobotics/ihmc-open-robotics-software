@@ -134,7 +134,7 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
    }
 
    @Override
-   public RigidBodyTransformReadOnly getObjectTransform()
+   public RigidBodyTransform getObjectTransform()
    {
       return doorFrameObject.getObjectTransform();
    }

@@ -21,7 +21,6 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
@@ -59,6 +58,7 @@ public class GDXEnvironmentObject
    private Function<Point3DReadOnly, Boolean> isPointInside;
    private Model collisionMesh;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final Matrix4 tempGDXTransform = new Matrix4();
    private final RigidBodyTransform placementTransform = new RigidBodyTransform();
    private final ReferenceFrame placementFrame;
    private final FramePose3D placementFramePose = new FramePose3D();
@@ -74,28 +74,54 @@ public class GDXEnvironmentObject
    private btRigidBody btRigidBody;
    private btMultiBody btMultiBody;
    private GDXBulletPhysicsManager bulletPhysicsManager;
+   private boolean isSelected = false;
    private final btMotionState bulletMotionState = new btMotionState()
    {
       @Override
       public void setWorldTransform(Matrix4 transformToWorld)
       {
-         GDXTools.toEuclid(transformToWorld, bulletCollisionFrameTransformToWorld);
-         bulletCollisionFrame.update();
-         bulletPose.setToZero(bulletCollisionFrame);
-         bulletPose.applyInverseTransform(bulletCollisionOffset);
-         bulletPose.changeFrame(ReferenceFrame.getWorldFrame());
-         bulletPose.get(tempTransform);
-         setTransformToWorld(tempTransform);
+         copyBulletTransformToThis(transformToWorld);
       }
 
       @Override
       public void getWorldTransform(Matrix4 transformToWorld)
       {
-         bulletCollisionSpecificationFrame.update();
-         tempTransform.set(bulletCollisionSpecificationFrame.getTransformToWorldFrame());
-         GDXTools.toGDX(tempTransform, transformToWorld);
+         getThisTransformForCopyToBullet(transformToWorld);
       }
    };
+
+   public void copyBulletTransformToThisMultiBody()
+   {
+      if (btMultiBody != null)
+         copyBulletTransformToThis(btMultiBody.getBaseWorldTransform());
+   }
+
+   public void copyThisTransformToBulletMultiBody()
+   {
+      if (btMultiBody != null)
+      {
+         getThisTransformForCopyToBullet(tempGDXTransform);
+         btMultiBody.setBaseWorldTransform(tempGDXTransform);
+      }
+   }
+
+   public void copyBulletTransformToThis(Matrix4 transformToWorld)
+   {
+      GDXTools.toEuclid(transformToWorld, bulletCollisionFrameTransformToWorld);
+      bulletCollisionFrame.update();
+      bulletPose.setToZero(bulletCollisionFrame);
+      bulletPose.applyInverseTransform(bulletCollisionOffset);
+      bulletPose.changeFrame(ReferenceFrame.getWorldFrame());
+      bulletPose.get(tempTransform);
+      setTransformToWorld(tempTransform);
+   }
+
+   public void getThisTransformForCopyToBullet(Matrix4 transformToWorld)
+   {
+      bulletCollisionSpecificationFrame.update();
+      tempTransform.set(bulletCollisionSpecificationFrame.getTransformToWorldFrame());
+      GDXTools.toGDX(tempTransform, transformToWorld);
+   }
 
    public GDXEnvironmentObject(String titleCasedName, GDXEnvironmentObjectFactory factory)
    {
@@ -223,6 +249,7 @@ public class GDXEnvironmentObject
 
    public void setSelected(boolean selected)
    {
+      isSelected = selected;
       if (btRigidBody != null)
       {
          bulletPhysicsManager.setKinematicObject(btRigidBody, selected);
@@ -285,7 +312,7 @@ public class GDXEnvironmentObject
       boundingSphere.getPosition().set(placementFramePose.getPosition());
    }
 
-   public RigidBodyTransformReadOnly getObjectTransform()
+   public RigidBodyTransform getObjectTransform()
    {
       return placementTransform;
    }
@@ -358,5 +385,10 @@ public class GDXEnvironmentObject
    public Sphere3D getBoundingSphere()
    {
       return boundingSphere;
+   }
+
+   public boolean getIsSelected()
+   {
+      return isSelected;
    }
 }
