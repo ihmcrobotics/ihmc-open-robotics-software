@@ -15,6 +15,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.Timer;
 
 public class GDXBulletPhysicsDebugger
 {
@@ -25,6 +26,7 @@ public class GDXBulletPhysicsDebugger
    private ModelInstance debugModelInstance;
    private ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean drawDebug = new ImBoolean(false);
+   private final Timer autoDisableTimer = new Timer();
 
    public GDXBulletPhysicsDebugger(btMultiBodyDynamicsWorld multiBodyDynamicsWorld)
    {
@@ -79,8 +81,16 @@ public class GDXBulletPhysicsDebugger
 
    public void renderImGuiWidgets()
    {
+      if (autoDisableTimer.isExpired(3.0))
+      {
+         drawDebug.set(false);
+      }
+
       // FIXME: There's a native memory leak I think. Or maybe just need to fix the mesh drawing above.
-      ImGui.checkbox(labels.get("Draw debug wireframes (Crashes after a while)"), drawDebug);
+      if (ImGui.checkbox(labels.get("Draw debug wireframes (Crashes after a while)"), drawDebug) && drawDebug.get())
+      {
+         autoDisableTimer.reset();
+      }
    }
 
    public void update()
