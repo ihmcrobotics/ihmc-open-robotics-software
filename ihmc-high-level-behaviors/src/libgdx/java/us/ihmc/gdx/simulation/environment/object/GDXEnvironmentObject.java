@@ -256,6 +256,11 @@ public class GDXEnvironmentObject
       }
    }
 
+   public void setRawIsSelected(boolean selected)
+   {
+      isSelected = selected;
+   }
+
    public RigidBodyTransform getCollisionShapeOffset()
    {
       return collisionShapeOffset;
