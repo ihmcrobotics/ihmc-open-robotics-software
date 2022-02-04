@@ -296,7 +296,6 @@ public class SwingState extends AbstractFootControlState
       swingTimeSpeedUpFactor.set(1.0);
       currentTimeWithSwingSpeedUp.set(Double.NaN);
       replanTrajectory.set(false);
-      timeRemainingWhenAdjusted.setToNaN();;
 
       if (workspaceLimiterControlModule != null)
          workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
