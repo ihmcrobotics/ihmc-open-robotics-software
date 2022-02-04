@@ -39,19 +39,18 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
 //   private ModelInstance baseModelInstance;
    private final ArrayList<ModelInstance> linkModelInstances = new ArrayList<>();
    private int numberOfLinks;
+   private RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private Vector3 linkHalfExtents = new Vector3(0.05f, 0.1f, 0.37f);
 
    public GDXMultiBodySnakeObject()
    {
       super(NAME, FACTORY);
-      double length = 0.05;
-      double width = 0.1;
-      double height = 0.37;
 
-      Model realisticModel = GDXModelPrimitives.createBox((float) height * 2.0f, (float) width * 2.0f, (float) length * 2.0f, Color.BLUE).model;
+      Model realisticModel = GDXModelPrimitives.createBox(linkHalfExtents.x * 2.0f, linkHalfExtents.y * 2.0f, linkHalfExtents.z * 2.0f, Color.BLUE).model;
       setRealisticModel(realisticModel);
 
       setMass(1.0f);
-      Box3D collisionBox = new Box3D(length * 2.0, width * 2.0, height * 2.0);
+      Box3D collisionBox = new Box3D(linkHalfExtents.x * 2.0, linkHalfExtents.y * 2.0, linkHalfExtents.z * 2.0);
       setCollisionGeometryObject(collisionBox);
       getBoundingSphere().setRadius(collisionBox.getSize().length() / 2.0);
    }
@@ -64,7 +63,6 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
       boolean fixedBase = false;
       boolean canSleep = false;
 
-      Vector3 linkHalfExtents = new Vector3(0.05f, 0.1f, 0.37f);
       Vector3 baseInertiaDiagonal = new Vector3(0.0f, 0.0f, 0.0f);
 
       btBoxShape baseBox = new btBoxShape(linkHalfExtents);
@@ -133,6 +131,15 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
    {
       getThisTransformForCopyToBullet(tempGDXTransform);
       multiBody.setBaseWorldTransform(tempGDXTransform);
+
+      for (int i = 0; i < numberOfLinks; i++)
+      {
+         GDXTools.toEuclid(tempGDXTransform, tempTransform);
+         tempTransform.appendTranslation(0.0, 0.0, -linkHalfExtents.z * 2.0f);
+         GDXTools.toGDX(tempTransform, tempGDXTransform);
+         multiBody.getLink(i).getCollider().setWorldTransform(tempGDXTransform);
+         linkModelInstances.get(i).transform.set(tempGDXTransform);
+      }
    }
 
 //   @Override
