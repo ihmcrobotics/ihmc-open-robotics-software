@@ -124,6 +124,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       }
       else
       {
+         isPlacing = false;
          if (viewInput.isWindowHovered())
          {
             intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
