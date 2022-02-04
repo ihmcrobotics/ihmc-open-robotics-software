@@ -217,7 +217,10 @@ public class BalanceManager
    private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
    private final FootstepTiming currentTiming = new FootstepTiming();
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
+
+   private final YoDouble adjustedTimeInSupportSequence = new YoDouble("AdjustedTimeInSupportSequence", registry);
    private final YoDouble timeAdjustment = new YoDouble("timeAdjustment", registry);
+   private final YoDouble totalTimeAdjustment = new YoDouble("totalTimeAdjustment", registry);
 
    private final CoPTrajectoryGeneratorState copTrajectoryState;
    private final WalkingCoPTrajectoryGenerator copTrajectory;
@@ -592,7 +595,7 @@ public class BalanceManager
             angularMomentumHandler.resetAngularMomentum();
          }
 
-         angularMomentumHandler.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
+         angularMomentumHandler.computeAngularMomentum(adjustedTimeInSupportSequence.getDoubleValue());
       }
       else
       {
@@ -607,7 +610,7 @@ public class BalanceManager
       yoFinalDesiredCoMAcceleration.set(comTrajectoryPlanner.getDesiredCoMAcceleration());
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
-      comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
+      comTrajectoryPlanner.compute(adjustedTimeInSupportSequence.getDoubleValue());
 
 
       if (footstepTimings.isEmpty())
@@ -629,7 +632,7 @@ public class BalanceManager
       else
       {
          double timeAdjustmentToApply = 0.5 * computeTimeShiftToMinimizeTrackingError();
-         double timeIntoState = timeInSupportSequence.getDoubleValue();
+         double timeIntoState = adjustedTimeInSupportSequence.getDoubleValue();
          double timeRemainingInState = currentStateDuration.getDoubleValue() - timeIntoState;
          timeAdjustmentToApply = MathTools.clamp(timeAdjustmentToApply, -timeIntoState, timeRemainingInState);
          if (Math.abs(timeAdjustmentToApply) < 1e-3)
@@ -637,9 +640,11 @@ public class BalanceManager
          timeAdjustment.set(Double.isNaN(timeAdjustmentToApply) ? 0.0 : timeAdjustmentToApply);
       }
 
-      timeInSupportSequence.add(timeAdjustment.getValue());
+      totalTimeAdjustment.add(timeAdjustment.getValue());
 
-      icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
+      adjustedTimeInSupportSequence.set(timeInSupportSequence.getValue() + totalTimeAdjustment.getValue());
+
+      icpPlannerDone.set(adjustedTimeInSupportSequence.getValue() >= currentStateDuration.getValue());
       decayDesiredICPVelocity();
 
       plannerTimer.stopMeasurement();
@@ -686,7 +691,7 @@ public class BalanceManager
    public double estimateTimeRemainingForSwingUnderDisturbance()
    {
       double stateDuration = currentTiming.getStepTime();
-      double timeRemainingInCurrentState = timeInSupportSequence.getDoubleValue() - stateDuration;
+      double timeRemainingInCurrentState = adjustedTimeInSupportSequence.getDoubleValue() - stateDuration;
       if (icpPlannerDone.getBooleanValue())
          return 0.0;
 
@@ -779,7 +784,7 @@ public class BalanceManager
    {
       if (footstepTimings.isEmpty())
          return 0.0;
-      return currentTiming.getStepTime() - timeInSupportSequence.getValue();
+      return currentTiming.getStepTime() - adjustedTimeInSupportSequence.getValue();
    }
 
    public void goHome()
@@ -813,10 +818,13 @@ public class BalanceManager
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       timeInSupportSequence.set(0.0);
+      adjustedTimeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
       inStanding.set(true);
       currentStateDuration.set(Double.NaN);
       totalStateDuration.set(Double.NaN);
+
+      totalTimeAdjustment.set(0.0);
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
 
@@ -849,6 +857,9 @@ public class BalanceManager
       currentStateDuration.set(currentTiming.getStepTime());
       totalStateDuration.set(currentTiming.getStepTime());
 
+      adjustedTimeInSupportSequence.set(currentTiming.getTransferTime());
+      totalTimeAdjustment.set(0.0);
+
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuitySingleSupport.getValue());
       initializeOnStateChange = true;
       icpPlannerDone.set(false);
@@ -873,6 +884,9 @@ public class BalanceManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.POSITIVE_INFINITY);
       totalStateDuration.set(Double.POSITIVE_INFINITY);
+
+      adjustedTimeInSupportSequence.set(0.0);
+      totalTimeAdjustment.set(0.0);
 
       inSingleSupport.set(false);
       inStanding.set(true);
@@ -900,6 +914,9 @@ public class BalanceManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
       totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
+
+      adjustedTimeInSupportSequence.set(0.0);
+      totalTimeAdjustment.set(0.0);
 
       inSingleSupport.set(false);
       inStanding.set(false);
@@ -931,6 +948,9 @@ public class BalanceManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(currentTiming.getTransferTime());
       totalStateDuration.set(currentTiming.getStepTime());
+
+      adjustedTimeInSupportSequence.set(0.0);
+      totalTimeAdjustment.set(0.0);
 
       inStanding.set(false);
       inSingleSupport.set(false);
