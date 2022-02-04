@@ -20,7 +20,7 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
          */
         changeWalkingParameters(0.3, 1.05);
         setNumberOfSteps(4);
-        super.testTakingStep(testInfo, 0.25);
+        super.testTakingStep(testInfo, 0.24);
     }
 
     @Test
