@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -9,14 +8,13 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -24,8 +22,11 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
@@ -36,8 +37,13 @@ public class AStarBodyPathSmootherWaypoint
 {
    private static final double boxSizeX = 0.3;
    private static final double boxSizeY = 0.8;
-   private static final double boxGroundOffset = 0.2;
-   private final FrameBox3D collisionBox = new FrameBox3D();
+   private static final double boxGroundOffset = 0.35;
+   private static final FrameBox3D collisionBox = new FrameBox3D();
+
+   static
+   {
+      collisionBox.getSize().set(boxSizeX, boxSizeY, 0.6);
+   }
 
    private static final AppearanceDefinition collisionBoxColor = YoAppearance.RGBColorFromHex(0x824e38);
    private final boolean visualize;
@@ -45,14 +51,26 @@ public class AStarBodyPathSmootherWaypoint
    private final int waypointIndex;
    private final YoFramePoseUsingYawPitchRoll waypoint;
    private final HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator;
+   private final YoBoolean isTurnPoint;
 
    private final YoDouble headingFromPrevious;
    private final YoDouble headingToNext;
    private final YoDouble maxCollision;
    private final YoDouble alphaRoll;
 
-   private AStarBodyPathSmootherWaypoint previous, next;
+   private static final double gradientGraphicScale = 0.2;
+   private static final AppearanceDefinition smoothnessColor = YoAppearance.Blue();
+   private static final AppearanceDefinition spacingColor = YoAppearance.Green();
+   private static final AppearanceDefinition collisionColor = YoAppearance.Crimson();
+   private static final AppearanceDefinition rollColor = YoAppearance.Red();
+   private final YoGraphicPosition waypointGraphic, turnPointGraphic;
 
+   private final YoFrameVector3D yoSmoothnessGradient;
+   private final YoFrameVector3D yoEqualSpacingGradient;
+   private final YoFrameVector3D yoCollisionGradient;
+   private final YoFrameVector3D yoRollGradient;
+
+   private AStarBodyPathSmootherWaypoint previous, next;
    private final YoVector2D rollDelta;
 
    public AStarBodyPathSmootherWaypoint(int waypointIndex,
@@ -60,7 +78,6 @@ public class AStarBodyPathSmootherWaypoint
                                         YoGraphicsListRegistry graphicsListRegistry,
                                         YoRegistry parentRegistry)
    {
-      collisionBox.getSize().set(boxSizeX, boxSizeY, 0.6);
       this.surfaceNormalCalculator = surfaceNormalCalculator;
 
       YoRegistry registry = new YoRegistry("Waypoint" + waypointIndex);
@@ -70,27 +87,67 @@ public class AStarBodyPathSmootherWaypoint
       this.maxCollision = new YoDouble("maxCollision" + waypointIndex, registry);
       this.alphaRoll = new YoDouble("alphaRoll" + waypointIndex, registry);
       this.rollDelta = new YoVector2D("deltaRoll" + waypointIndex, registry);
+      this.isTurnPoint = new YoBoolean("isTurnPoint" + waypointIndex, registry);
 
       visualize = parentRegistry != null;
       waypoint = new YoFramePoseUsingYawPitchRoll("waypoint" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
 
       if (visualize)
       {
-         YoGraphicPosition waypointGraphic = new YoGraphicPosition("waypointViz" + waypointIndex, waypoint.getPosition(), 0.02, YoAppearance.Red());
+         waypointGraphic = new YoGraphicPosition("waypointViz" + waypointIndex, waypoint.getPosition(), 0.02, YoAppearance.Red());
+         turnPointGraphic = new YoGraphicPosition("turnPointViz" + waypointIndex, waypoint.getPosition(), 0.02, YoAppearance.White());
          Graphics3DObject collisionBoxGraphic = new Graphics3DObject();
          collisionBoxColor.setTransparency(0.6);
          collisionBoxGraphic.addCube(collisionBox.getSizeX(), collisionBox.getSizeY(), collisionBox.getSizeZ(), true, collisionBoxColor);
          YoGraphicShape yoCollisionBoxGraphic = new YoGraphicShape("collisionGraphic" + waypointIndex, collisionBoxGraphic, waypoint, 1.0);
 
          graphicsListRegistry.registerYoGraphic("Waypoints", waypointGraphic);
+         graphicsListRegistry.registerYoGraphic("Waypoints", turnPointGraphic);
          graphicsListRegistry.registerYoGraphic("Collisions", yoCollisionBoxGraphic);
 
+         yoSmoothnessGradient = new YoFrameVector3D("smoothGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
+         yoEqualSpacingGradient = new YoFrameVector3D("spacingGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
+         yoCollisionGradient = new YoFrameVector3D("collisionGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
+         yoRollGradient = new YoFrameVector3D("rollGradient" + waypointIndex, ReferenceFrame.getWorldFrame(), registry);
+
+         yoSmoothnessGradient.setToNaN();
+         yoEqualSpacingGradient.setToNaN();
+         yoCollisionGradient.setToNaN();
+         yoRollGradient.setToNaN();
+
+         YoGraphicVector smoothnessGradientViz = new YoGraphicVector("smoothnessGradientViz" + waypointIndex, waypoint.getPosition(), yoSmoothnessGradient, gradientGraphicScale, smoothnessColor);
+         YoGraphicVector equalSpacingGradientViz = new YoGraphicVector("spacingGradientViz" + waypointIndex, waypoint.getPosition(), yoEqualSpacingGradient, gradientGraphicScale, spacingColor);
+         YoGraphicVector collisionGradientViz = new YoGraphicVector("collisionGradientViz" + waypointIndex, waypoint.getPosition(), yoCollisionGradient, gradientGraphicScale, collisionColor);
+         YoGraphicVector rollGradientViz = new YoGraphicVector("rollGradientViz" + waypointIndex, waypoint.getPosition(), yoRollGradient, gradientGraphicScale, rollColor);
+
+         graphicsListRegistry.registerYoGraphic("Smoothness Gradient", smoothnessGradientViz);
+         graphicsListRegistry.registerYoGraphic("Spacing Gradient", equalSpacingGradientViz);
+         graphicsListRegistry.registerYoGraphic("Collision Gradient", collisionGradientViz);
+         graphicsListRegistry.registerYoGraphic("Roll Gradient", rollGradientViz);
+
          parentRegistry.addChild(registry);
+      }
+      else
+      {
+         waypointGraphic = null;
+         turnPointGraphic = null;
+         yoSmoothnessGradient = null;
+         yoEqualSpacingGradient = null;
+         yoCollisionGradient = null;
+         yoRollGradient = null;
       }
    }
 
    public void initialize(List<Point3D> bodyPath)
    {
+      isTurnPoint.set(false);
+
+      if (visualize)
+      {
+         waypointGraphic.showGraphicObject();
+         turnPointGraphic.hideGraphicObject();
+      }
+
       if (waypointIndex < bodyPath.size())
       {
          waypoint.getPosition().set(bodyPath.get(waypointIndex));
@@ -138,6 +195,22 @@ public class AStarBodyPathSmootherWaypoint
    public Point3DBasics getPosition()
    {
       return waypoint.getPosition();
+   }
+
+   public void setTurnPoint()
+   {
+      this.isTurnPoint.set(true);
+
+      if (visualize)
+      {
+         turnPointGraphic.showGraphicObject();
+         waypointGraphic.hideGraphicObject();
+      }
+   }
+
+   public boolean isTurnPoint()
+   {
+      return isTurnPoint.getValue();
    }
 
    public Vector2D computeCollisionGradient(HeightMapData heightMapData)
@@ -206,6 +279,11 @@ public class AStarBodyPathSmootherWaypoint
          gradient.scale(collisionWeight / numCollisions);
       }
 
+      if (visualize)
+      {
+         yoCollisionGradient.set(-gradient.getX(), -gradient.getY(), 0.0);
+      }
+
       return gradient;
    }
 
@@ -223,10 +301,11 @@ public class AStarBodyPathSmootherWaypoint
          Vector3D yLocal = new Vector3D();
          yLocal.setX(-Math.sin(waypoint.getYaw()));
          yLocal.setY(Math.cos(waypoint.getYaw()));
-         yLocal.scale(yLocal.dot(surfaceNormal));
+         alphaRoll.set(yLocal.dot(surfaceNormal));
+         yLocal.scale(alphaRoll.getValue());
 
-         double alphaIncline = Math.atan2(next.getPosition().getZ() - previous.getPosition().getZ(), previous.getPosition().distanceXY(next.getPosition()));
-         double inclineScale = EuclidCoreTools.clamp((Math.abs(alphaIncline) - Math.toRadians(5.0)) / Math.toRadians(22.0), 0.0, 1.0);
+         double alphaIncline = Math.atan2(next.getPosition().getZ() - previous.getPosition().getZ(), next.getPosition().distanceXY(previous.getPosition()));
+         double inclineScale = EuclidCoreTools.clamp((Math.abs(alphaIncline) - Math.toRadians(4.0)) / Math.toRadians(20.0), 0.0, 1.0);
          rollDelta.set(rollWeight * inclineScale * yLocal.getX(), rollWeight * inclineScale * yLocal.getY());
       }
       else
@@ -235,6 +314,18 @@ public class AStarBodyPathSmootherWaypoint
       }
 
       return rollDelta;
+   }
+
+   public void updateGradientGraphics(double spacingGradientX, double spacingGradientY, double smoothnessGradientX, double smoothnessGradientY)
+   {
+      yoEqualSpacingGradient.set(-spacingGradientX, -spacingGradientY, 0.0);
+      yoSmoothnessGradient.set(-smoothnessGradientX, -smoothnessGradientY, 0.0);
+      yoRollGradient.setToZero();
+   }
+
+   public void updateRollGraphics(double gradientX, double gradientY)
+   {
+      yoRollGradient.add(-gradientX, -gradientY, 0.0);
    }
 
    public double getMaxCollision()

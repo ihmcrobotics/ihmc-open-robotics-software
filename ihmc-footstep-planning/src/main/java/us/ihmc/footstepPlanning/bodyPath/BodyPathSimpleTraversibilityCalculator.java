@@ -18,12 +18,12 @@ import java.util.function.ToDoubleFunction;
 import static us.ihmc.footstepPlanning.bodyPath.BodyPathCollisionDetector.computeCollisionOffsetX;
 import static us.ihmc.footstepPlanning.bodyPath.BodyPathCollisionDetector.computeCollisionOffsetY;
 
-public class BodyPathRANSACTraversibilityCalculator
+public class BodyPathSimpleTraversibilityCalculator
 {
-   private static final double sampleSizeX = 0.3;
-   private static final double sampleSizeY = 0.3;
-   private static final double halfStanceWidth = 0.15;
-   private static final double heightWindow = 0.2;
+   static final double sampleSizeX = 0.3;
+   static final double sampleSizeY = 0.3;
+   static final double halfStanceWidth = 0.15;
+   static final double heightWindow = 0.2;
 
    private static final double minPercent = 0.2;
 
@@ -46,7 +46,7 @@ public class BodyPathRANSACTraversibilityCalculator
    private final TIntArrayList diagonalOffsetsX = new TIntArrayList();
    private final TIntArrayList diagonalOffsetsY = new TIntArrayList();
 
-   public BodyPathRANSACTraversibilityCalculator(ToDoubleFunction<BodyPathLatticePoint> gridHeightMap,
+   public BodyPathSimpleTraversibilityCalculator(ToDoubleFunction<BodyPathLatticePoint> gridHeightMap,
                                                  HeightMapRANSACNormalCalculator surfaceNormalCalculator,
                                                  YoRegistry registry)
    {

@@ -40,10 +40,11 @@ import java.util.function.Consumer;
 
 public class AStarBodyPathPlanner
 {
-   private static final boolean checkForCollisions = true;
+   private static final boolean checkForCollisions = false;
    private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useEdgeDetectorCost = false;
    private static final boolean useRANSACTraversibility = true;
+   private static final double rollCostWeight = 5.25;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -71,7 +72,7 @@ public class AStarBodyPathPlanner
    /* Indicator of how flat and planar and available footholds are, using least squares */
    private final BodyPathLSTraversibilityCalculator leastSqTraversibilityCalculator;
    /* Indicator of how flat and planar and available footholds are */
-   private final BodyPathRANSACTraversibilityCalculator ransacTraversibilityCalculator;
+   private final BodyPathSimpleTraversibilityCalculator ransacTraversibilityCalculator;
    /* Uses edge detection as a heuristic for good areas to walk */
    private final HeightMapObstacleDetector obstacleDetector = new HeightMapObstacleDetector();
    /* Performs box collision check */
@@ -137,7 +138,7 @@ public class AStarBodyPathPlanner
 
       if (useRANSACTraversibility)
       {
-         ransacTraversibilityCalculator = new BodyPathRANSACTraversibilityCalculator(gridHeightMap::get, ransacNormalCalculator, registry);
+         ransacTraversibilityCalculator = new BodyPathSimpleTraversibilityCalculator(gridHeightMap::get, ransacNormalCalculator, registry);
          leastSqTraversibilityCalculator = null;
       }
       else
@@ -370,9 +371,8 @@ public class AStarBodyPathPlanner
                   leastSqNormal.set(surfaceNormal);
                   roll.set(Math.asin(Math.abs(edge.getY() * surfaceNormal.getX() - edge.getX() * surfaceNormal.getY())));
                   double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / Math.toRadians(22.0), 0.0, 1.0);
-                  double rollAngle = Math.max(0.0, Math.abs(roll.getValue()) - Math.toRadians(5.0));
-
-                  edgeCost.add(5.25 * inclineScale * rollAngle);
+                  double rollAngleDeadbanded = Math.max(0.0, Math.abs(roll.getValue()) - Math.toRadians(5.0));
+                  edgeCost.add(rollCostWeight * inclineScale * rollAngleDeadbanded);
                }
             }
 
@@ -491,14 +491,14 @@ public class AStarBodyPathPlanner
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
 
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
    }
 
    private static Pair<Integer, Integer> rotate(int xOff, int yOff, int i)

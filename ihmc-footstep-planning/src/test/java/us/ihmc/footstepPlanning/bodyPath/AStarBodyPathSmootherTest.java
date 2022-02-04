@@ -64,7 +64,7 @@ public class AStarBodyPathSmootherTest
    {
       if (visualize)
       {
-//         scs.cropBuffer();
+         scs.cropBuffer();
          ThreadTools.sleepForever();
       }
    }
@@ -196,31 +196,31 @@ public class AStarBodyPathSmootherTest
    }
 
    @Test
-   public void testDataset0()
+   public void testStairsDataset()
    {
       runDataset(0);
    }
 
    @Test
-   public void testDataset1()
+   public void testSteppingStonesDataset()
    {
       runDataset(1);
    }
 
    @Test
-   public void testDataset2()
+   public void testObstaclesDataset()
    {
       runDataset(2);
    }
 
    @Test
-   public void testDataset3()
+   public void testRampDataset()
    {
       runDataset(3);
    }
 
    @Test
-   public void testDataset4()
+   public void testCindersDataset()
    {
       runDataset(4);
    }
@@ -240,8 +240,15 @@ public class AStarBodyPathSmootherTest
       HeightMapData heightMapData = new HeightMapData(heightMapMessage);
       List<Point3D> bodyPath = bodyPathPoseWaypoints.stream().map(Pose3D::getPosition).collect(Collectors.toList());
 
-      setup(heightMapData);
-      smoother.doSmoothing(bodyPath, heightMapData);
+      try
+      {
+         setup(heightMapData);
+         smoother.doSmoothing(bodyPath, heightMapData);
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
    }
 
    private static Graphics3DObject buildHeightMapGraphics(HeightMapData heightMapData)
