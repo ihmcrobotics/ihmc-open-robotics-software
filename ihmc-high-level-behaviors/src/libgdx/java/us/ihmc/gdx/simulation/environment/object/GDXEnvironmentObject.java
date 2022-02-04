@@ -105,6 +105,15 @@ public class GDXEnvironmentObject
       }
    }
 
+   public void copyThisTransformToBulletMultiBodyParentOnly()
+   {
+      if (btMultiBody != null)
+      {
+         getThisTransformForCopyToBullet(tempGDXTransform);
+         btMultiBody.setBaseWorldTransform(tempGDXTransform);
+      }
+   }
+
    public void copyBulletTransformToThis(Matrix4 transformToWorld)
    {
       GDXTools.toEuclid(transformToWorld, bulletCollisionFrameTransformToWorld);
