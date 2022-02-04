@@ -113,7 +113,7 @@ public class BalanceManager
    private final YoFrameVector3D yoFinalDesiredCoMVelocity = new YoFrameVector3D("finalDesiredCoMVelocity", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
 
-   private final SwingSpeedUpCalculator swingSpeedUpCalculator = new SwingSpeedUpCalculator();
+   private final TimeAdjustmentCalculator timeAdjustmentCalculator = new TimeAdjustmentCalculator();
 
    /** CoP position according to the ICP planner */
    private final YoFramePoint3D yoPerfectCoP = new YoFramePoint3D("perfectCoP", worldFrame, registry);
@@ -671,11 +671,11 @@ public class BalanceManager
 
       controllerToolbox.getCapturePoint(capturePoint2d);
       perfectCMP2d.set(yoPerfectCMP);
-      double deltaTimeToBeAccounted = swingSpeedUpCalculator.estimateDeltaTimeBetweenDesiredICPAndActualICP(yoDesiredCapturePoint,
-                                                                                                            perfectCMP2d,
-                                                                                                            yoFinalDesiredICP,
-                                                                                                            capturePoint2d,
-                                                                                                            controllerToolbox.getOmega0());
+      double deltaTimeToBeAccounted = timeAdjustmentCalculator.estimateDeltaTimeBetweenDesiredICPAndActualICP(yoDesiredCapturePoint,
+                                                                                                              perfectCMP2d,
+                                                                                                              yoFinalDesiredICP,
+                                                                                                              capturePoint2d,
+                                                                                                              controllerToolbox.getOmega0());
 
       if (Double.isNaN(deltaTimeToBeAccounted))
          return 0.0;
