@@ -24,7 +24,7 @@ public class GDXJMEBulletPhysicsDemo
    public GDXJMEBulletPhysicsDemo()
    {
       File nativesDirectory = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent,
-                                                                    "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                                    "ihmc-high-level-behaviors/src/test/resources",
                                                                     "libbulletjme")
                                                 .toFile();
       NativeLibraryLoader.loadLibbulletjme(true, nativesDirectory, "Release", "Sp");
