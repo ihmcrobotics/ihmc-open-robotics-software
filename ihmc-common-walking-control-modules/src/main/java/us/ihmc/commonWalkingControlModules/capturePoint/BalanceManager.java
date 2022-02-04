@@ -14,6 +14,8 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.CaptureRegionStepAdjustmentController;
+import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.ErrorBasedStepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
@@ -83,6 +85,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BalanceManager
 {
+   private static final boolean USE_ERROR_BASED_STEP_ADJUSTMENT = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean viewCoPHistory = false;
 
@@ -198,6 +201,8 @@ public class BalanceManager
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final FixedFrameVector3DBasics effectiveICPAdjustment = new FrameVector3D();
    private final SimpleFootstep currentFootstep = new SimpleFootstep();
+   private final SimpleFootstep nextFootstep = new SimpleFootstep();
+   private final FootstepTiming nextFootstepTiming = new FootstepTiming();
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
                                                                                                             new PlaneContactStateCommand());
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
@@ -294,14 +299,25 @@ public class BalanceManager
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
 
-      stepAdjustmentController = new StepAdjustmentController(walkingControllerParameters,
-                                                              controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
-                                                              bipedSupportPolygons,
-                                                              icpControlPolygons,
-                                                              controllerToolbox.getContactableFeet(),
-                                                              controllerToolbox.getControlDT(),
-                                                              registry,
-                                                              yoGraphicsListRegistry);
+      if (USE_ERROR_BASED_STEP_ADJUSTMENT)
+      {
+         stepAdjustmentController = new ErrorBasedStepAdjustmentController(walkingControllerParameters,
+                                                                           controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+                                                                           bipedSupportPolygons,
+                                                                           icpControlPolygons,
+                                                                           controllerToolbox.getContactableFeet(),
+                                                                           controllerToolbox.getControlDT(),
+                                                                           registry,
+                                                                           yoGraphicsListRegistry);
+      }
+      else
+      {
+         stepAdjustmentController = new CaptureRegionStepAdjustmentController(walkingControllerParameters,
+                                                                              controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+                                                                              bipedSupportPolygons,
+                                                                              registry,
+                                                                              yoGraphicsListRegistry);
+      }
 
       String graphicListName = getClass().getSimpleName();
 
@@ -789,7 +805,15 @@ public class BalanceManager
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
       currentTiming.set(footstepTimings.get(0));
       currentFootstep.set(footsteps.get(0));
+
+
       stepAdjustmentController.reset();
+      if (footsteps.size() > 1 && footstepTimings.size() > 1)
+      {
+         nextFootstep.set(footsteps.get(1));
+         nextFootstepTiming.set(footstepTimings.get(1));
+         stepAdjustmentController.setFootstepAfterTheCurrentOne(nextFootstep, nextFootstepTiming);
+      }
       stepAdjustmentController.setFootstepToAdjust(currentFootstep, currentTiming.getSwingTime(), currentTiming.getTransferTime());
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
 
