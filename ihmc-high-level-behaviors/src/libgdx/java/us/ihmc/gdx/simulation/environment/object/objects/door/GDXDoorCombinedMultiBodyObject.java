@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.dynamics.btMultiBody;
 import com.badlogic.gdx.physics.bullet.dynamics.btMultiBodyLinkCollider;
+import com.badlogic.gdx.physics.bullet.dynamics.btMultiBodyLinkFlags;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -41,20 +42,10 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
    @Override
    public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
    {
-      Vector3 pivotInFrameForDoorHinge = new Vector3(0.0f, 0.0f, 0.01f); // get the bottom of the door off the ground a little
-      Vector3 pivotInPanelForDoorHinge = new Vector3(0.0f, -((0.9144f - 0.05f) / 2.0f) - 0.05f, -2.0447f / 2.0f); // prevent door hinge self collision
-      Vector3 axisInFrameForDoorHinge = new Vector3(0.0f, 0.0f, 1.0f);
-      Vector3 axisInPanelForDoorHinge = new Vector3(0.0f, 0.0f, 1.0f);
-
-      Vector3 pivotInPanelForHandle = new Vector3(-0.03f, 0.4f, -0.13f);
-      Vector3 pivotInLeverForHandle = new Vector3(0.0f, 0.0f, 0.0f);
-      Vector3 axisInPanelForHandle = new Vector3(1.0f, 0.0f, 0.0f);
-      Vector3 axisInLeverForHandle = new Vector3(1.0f, 0.0f, 0.0f);
-
-      int numberOfLinks = 1;
-      float mass = doorFrameObject.getMass();
+      int numberOfLinks = 2;
+      float mass = 0.0f;
       Vector3 inertia = new Vector3();
-      doorFrameObject.getInertia(inertia);
+//      doorFrameObject.getInertia(inertia);
       boolean fixedBase = false;
       boolean canSleep = false;
       multiBody = new btMultiBody(numberOfLinks, mass, inertia, fixedBase, canSleep);
@@ -62,14 +53,30 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       multiBody.setWorldToBaseRot(new Quaternion().idt());
 
       int linkIndex = 0;
-      mass = doorPanelObject.getMass();
+      mass = doorFrameObject.getMass();
       inertia = new Vector3();
       doorPanelObject.getInertia(inertia);
       int parentIndex = -1;
       Quaternion rotationFromParent = new Quaternion();
+      Vector3 offsetOfPivotFromParentCenterOfMass = new Vector3(0.0f, 0.0f, 0.0f);
+      Vector3 offsetOfCenterOfMassFromPivot = new Vector3(0.0f, 0.0f, 0.0f);
+      multiBody.setupFixed(linkIndex,
+                           mass,
+                           inertia,
+                           parentIndex,
+                           rotationFromParent,
+                           offsetOfPivotFromParentCenterOfMass,
+                           offsetOfCenterOfMassFromPivot);
+
+      linkIndex = 1;
+      mass = doorPanelObject.getMass();
+      inertia = new Vector3();
+      doorPanelObject.getInertia(inertia);
+      parentIndex = 0;
+      rotationFromParent = new Quaternion();
       Vector3 jointAxis = new Vector3(0.0f, 0.0f, 1.0f);
-      Vector3 offsetOfPivotFromParentCenterOfMass = new Vector3(0.0f, 0.03f, 0.01f);
-      Vector3 offsetOfCenterOfMassFromPivot = new Vector3(0.0f, 0.9144f / 2.0f, 2.0447f / 2.0f);
+      offsetOfPivotFromParentCenterOfMass = new Vector3(0.0f, 0.03f, 0.01f);
+      offsetOfCenterOfMassFromPivot = new Vector3(0.0f, 0.9144f / 2.0f, 2.0447f / 2.0f);
       boolean disableParentCollision = false;
       multiBody.setupRevolute(linkIndex,
                               mass,
@@ -81,11 +88,13 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
                               offsetOfCenterOfMassFromPivot,
                               disableParentCollision);
 
+//      multiBody.getLink(0).setFlags(multiBody.getLink(0).getFlags() & ~btMultiBodyLinkFlags.BT_MULTIBODYLINKFLAGS_DISABLE_ALL_PARENT_COLLISION);
+//      multiBody.getLink(0).setFlags(multiBody.getLink(0).getFlags() & ~btMultiBodyLinkFlags.BT_MULTIBODYLINKFLAGS_DISABLE_PARENT_COLLISION);
 
       multiBody.finalizeMultiDof();
       bulletPhysicsManager.addMultiBody(multiBody);
 
-      multiBody.setJointPos(0, 0.0f);
+//      multiBody.setJointPos(0, 0.0f);
 
       btMultiBodyLinkCollider frameCollider = new btMultiBodyLinkCollider(multiBody, -1);
       frameCollider.setCollisionShape(doorFrameObject.getBtCollisionShape());
@@ -96,21 +105,22 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       bulletPhysicsManager.getMultiBodyDynamicsWorld().addCollisionObject(frameCollider); // TODO: Store and remove
 
       multiBody.setBaseCollider(frameCollider);
+//      multiBody.getLink(0).setCollider(frameCollider);
 
-      btMultiBodyLinkCollider panelCollider = new btMultiBodyLinkCollider(multiBody, 0);
+      btMultiBodyLinkCollider panelCollider = new btMultiBodyLinkCollider(multiBody, 1);
       panelCollider.setCollisionShape(doorPanelObject.getBtCollisionShape());
       panelCollider.setWorldTransform(worldTransform);
       bulletPhysicsManager.getMultiBodyDynamicsWorld().addCollisionObject(panelCollider);
 
-      multiBody.getLink(0).setCollider(panelCollider);
+      multiBody.getLink(1).setCollider(panelCollider);
 
    }
 
    @Override
    public void copyBulletTransformToThisMultiBody()
    {
-      doorFrameObject.copyBulletTransformToThis(multiBody.getBaseWorldTransform());
-      doorPanelObject.copyBulletTransformToThis(multiBody.getLink(0).getCollider().getWorldTransform());
+      doorFrameObject.copyBulletTransformToThis(multiBody.getBaseCollider().getWorldTransform());
+      doorPanelObject.copyBulletTransformToThis(multiBody.getLink(1).getCollider().getWorldTransform());
    }
 
    @Override
