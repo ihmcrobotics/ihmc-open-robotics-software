@@ -110,6 +110,8 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             pose3DGizmo.process3DViewInput(viewInput);
             selectedObject.setTransformToWorld(pose3DGizmo.getTransformToParent());
 
+            selectedObject.copyThisTransformToBulletMultiBodyParentOnly();
+
             intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
