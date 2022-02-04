@@ -642,7 +642,7 @@ public class BalanceManager
 
       totalTimeAdjustment.add(timeAdjustment.getValue());
 
-      adjustedTimeInSupportSequence.set(timeInSupportSequence.getValue() + totalTimeAdjustment.getValue());
+      adjustedTimeInSupportSequence.set(MathTools.clamp(timeInSupportSequence.getValue() + totalTimeAdjustment.getValue(), 0.0, currentStateDuration.getDoubleValue()));
 
       icpPlannerDone.set(adjustedTimeInSupportSequence.getValue() >= currentStateDuration.getValue());
       decayDesiredICPVelocity();
