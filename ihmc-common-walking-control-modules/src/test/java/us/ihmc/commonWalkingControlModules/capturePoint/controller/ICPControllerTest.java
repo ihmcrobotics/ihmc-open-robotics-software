@@ -20,7 +20,12 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -73,10 +78,24 @@ public class ICPControllerTest
                                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       if (testHeuristicController)
-         return new HeuristicICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         return new HeuristicICPController(walkingControllerParameters,
+                                           optimizationParameters,
+                                           bipedSupportPolygons,
+                                           null,
+                                           contactableFeet,
+                                           controlDT,
+                                           registry,
+                                           yoGraphicsListRegistry);
 
       else
-         return new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         return new ICPController(walkingControllerParameters,
+                                  optimizationParameters,
+                                  bipedSupportPolygons,
+                                  null,
+                                  contactableFeet,
+                                  controlDT,
+                                  registry,
+                                  yoGraphicsListRegistry);
    }
 
    public static void main(String[] args) throws Exception
@@ -88,7 +107,7 @@ public class ICPControllerTest
    public void visualizeRandom() throws Exception
    {
       YoRegistry registry = new YoRegistry("ICPControllerTest");
-      double kpParallel = 0.5;
+      double kpParallel = 0.0;
       double kpOrthogonal = 2.0;
       TestICPOptimizationParameters optimizationParameters = createTestICPOptimizationParameters(kpParallel, kpOrthogonal);
 
@@ -116,22 +135,30 @@ public class ICPControllerTest
 
       ArrayList<FrameVector2D> desiredICPVelocities = new ArrayList<>();
       ArrayList<FramePoint2D> desiredICPs = new ArrayList<>();
-      ArrayList<FramePoint2D> perfectCMPs = new ArrayList<>();
+      ArrayList<FramePoint2D> perfectCoPs = new ArrayList<>();
+      ArrayList<FrameVector2D> perfectCMPOffsets = new ArrayList<>();
       ArrayList<FramePoint2D> currentCoMPositions = new ArrayList<>();
       ArrayList<FramePoint2D> currentICPs = new ArrayList<>();
 
       ArrayList<FramePoint2D> desiredCMPs = new ArrayList<>();
       ArrayList<FramePoint2D> desiredCoPs = new ArrayList<>();
 
-      int numberOfTests = 10;
-      //      Random random = new Random(1776L);
-      Random random = new Random();
+      int numberOfTests = 300;
+      Random random = new Random(1776L);
+//      Random random = new Random();
 
       for (int i = 0; i < numberOfTests; i++)
       {
          FramePoint2D desiredICP = new FramePoint2D(worldFrame, EuclidCoreRandomTools.nextPoint2D(random, 0.2));
-         FramePoint2D perfectCMP = new FramePoint2D(worldFrame, EuclidCoreRandomTools.nextPoint2D(random, 0.06));
+         FramePoint2D perfectCoP = new FramePoint2D(worldFrame, EuclidCoreRandomTools.nextPoint2D(random, 0.06));
+         FrameVector2D perfectCMPOffset = new FrameVector2D(worldFrame, EuclidCoreRandomTools.nextVector2D(random));
+         perfectCMPOffset.scale(0.04);
 
+         FramePoint2D perfectCMP = new FramePoint2D(perfectCoP);
+         perfectCMP.add(perfectCMPOffset);
+
+         perfectCMPOffsets.add(perfectCMPOffset);
+         
          FramePoint2D currentICP = new FramePoint2D(desiredICP);
          FrameVector2D icpError = new FrameVector2D(worldFrame, EuclidCoreRandomTools.nextPoint2D(random, 0.1));
          currentICP.add(icpError);
@@ -145,12 +172,23 @@ public class ICPControllerTest
 
          desiredICPs.add(desiredICP);
          desiredICPVelocities.add(desiredICPVelocity);
-         perfectCMPs.add(perfectCMP);
+         perfectCoPs.add(perfectCoP);
          currentICPs.add(currentICP);
          currentCoMPositions.add(currentCoMPosition);
       }
 
-      solveAndVisualize(bipedSupportPolygons, controller, visualizer, omega, currentCoMPositions, currentICPs, desiredICPs, desiredICPVelocities, perfectCMPs, desiredCMPs, desiredCoPs);
+      solveAndVisualize(bipedSupportPolygons,
+                        controller,
+                        visualizer,
+                        omega,
+                        currentCoMPositions,
+                        currentICPs,
+                        desiredICPs,
+                        desiredICPVelocities,
+                        perfectCoPs,
+                        perfectCMPOffsets,
+                        desiredCMPs,
+                        desiredCoPs);
 
       ThreadTools.sleepForever();
    }
@@ -163,21 +201,26 @@ public class ICPControllerTest
                                   ArrayList<FramePoint2D> currentICPs,
                                   ArrayList<FramePoint2D> desiredICPs,
                                   ArrayList<FrameVector2D> desiredICPVelocities,
-                                  ArrayList<FramePoint2D> perfectCMPs,
+                                  ArrayList<FramePoint2D> perfectCoPs,
+                                  ArrayList<FrameVector2D> perfectCMPOffsets,
                                   ArrayList<FramePoint2D> desiredCMPs,
                                   ArrayList<FramePoint2D> desiredCoPs)
    {
       for (int i = 0; i < desiredICPs.size(); i++)
       {
          FramePoint2D desiredICP = desiredICPs.get(i);
-         FramePoint2D perfectCMP = perfectCMPs.get(i);
+         FramePoint2D perfectCoP = perfectCoPs.get(i);
+         FrameVector2D perfectCMPOffset = perfectCMPOffsets.get(i);
          FramePoint2D currentICP = currentICPs.get(i);
 
          FramePoint2D currentCoMPosition = currentCoMPositions.get(i);
          FrameVector2D desiredICPVelocity = desiredICPVelocities.get(i);
 
+         FramePoint2D perfectCMP = new FramePoint2D(perfectCoP);
+         perfectCMP.add(perfectCMPOffset);
+
          controller.initialize();
-         controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
+         controller.compute(desiredICP, desiredICPVelocity, perfectCoP, perfectCMPOffset, currentICP, currentCoMPosition, omega);
 
          FramePoint2D desiredCMP = new FramePoint2D(worldFrame);
          FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
@@ -188,7 +231,7 @@ public class ICPControllerTest
          desiredCMPs.add(desiredCMP);
          desiredCoPs.add(desiredCoP);
 
-         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
+         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
          visualizer.updateOutputs(desiredCoPs.get(i), desiredCMPs.get(i));
       }
    }
@@ -233,6 +276,7 @@ public class ICPControllerTest
 
       desiredICP.set(0.0, 0.12);
       perfectCMP.set(0.0, -0.15);
+      FramePoint2D perfectCoP = new FramePoint2D(perfectCMP);
 
       desiredICPVelocity.set(desiredICP);
       desiredICPVelocity.sub(perfectCMP);
@@ -243,7 +287,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       if (visualize)
-         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
+         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
 
       controller.initialize();
       controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
@@ -268,7 +312,8 @@ public class ICPControllerTest
          ThreadTools.sleepForever();
       }
 
-      Assert.assertTrue("distanceFromMiddleOfFootToCMP = " + distanceFromMiddleOfFootToCMP + ". It should be near zero.", distanceFromMiddleOfFootToCMP < 0.005);
+      Assert.assertTrue("distanceFromMiddleOfFootToCMP = " + distanceFromMiddleOfFootToCMP + ". It should be near zero.",
+                        distanceFromMiddleOfFootToCMP < 0.005);
       Assert.assertTrue("distanceFromLineToProjection = " + distanceFromLineToProjection + ". It should be near zero.", distanceFromLineToProjection < 0.005);
    }
 
@@ -318,6 +363,8 @@ public class ICPControllerTest
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
+      FramePoint2D perfectCoP = new FramePoint2D(perfectCMP);
+
       FrameVector2D icpError = new FrameVector2D(desiredICPVelocity);
       icpError.normalize();
       icpError.scale(-0.1);
@@ -328,7 +375,7 @@ public class ICPControllerTest
       FramePoint2D currentCoMPosition = new FramePoint2D(currentICP);
 
       if (visualize)
-         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
+         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
 
       controller.initialize();
       controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition, omega);
@@ -389,6 +436,8 @@ public class ICPControllerTest
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
+      FramePoint2D perfectCoP = new FramePoint2D(perfectCMP);
+
       FrameVector2D icpError = new FrameVector2D();
       FramePoint2D currentICP = new FramePoint2D();
       currentICP.set(desiredICP);
@@ -407,7 +456,7 @@ public class ICPControllerTest
       if (visualize)
       {
          visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
-         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
+         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
          visualizer.updateOutputs(desiredCoP, desiredCMP);
       }
 
@@ -501,6 +550,8 @@ public class ICPControllerTest
       desiredICPVelocity.sub(perfectCMP);
       desiredICPVelocity.scale(omega);
 
+      FramePoint2D perfectCoP = new FramePoint2D(perfectCMP);
+
       FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
       FramePoint2D currentICP = new FramePoint2D();
       currentICP.set(desiredICP);
@@ -536,7 +587,7 @@ public class ICPControllerTest
       if (visualize)
       {
          visualizer = new ICPControllerTestVisualizer(registry, yoGraphicsListRegistry);
-         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentCoMPosition);
+         visualizer.updateInputs(bipedSupportPolygons, desiredICP, desiredICPVelocity, perfectCMP, perfectCoP, currentICP, currentCoMPosition);
          visualizer.updateOutputs(desiredCMP, desiredCMP);
          ThreadTools.sleepForever();
       }
@@ -556,7 +607,14 @@ public class ICPControllerTest
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(10.0, 5.0, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
-      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters, bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      ICPController controller = new ICPController(walkingControllerParameters,
+                                                   optimizationParameters,
+                                                   bipedSupportPolygons,
+                                                   null,
+                                                   contactableFeet,
+                                                   controlDT,
+                                                   registry,
+                                                   null);
       new DefaultParameterReader().readParametersInRegistry(registry);
 
       double omega = walkingControllerParameters.getOmega0();
@@ -741,7 +799,8 @@ public class ICPControllerTest
             soleFrames.put(robotSide, soleFrame);
             List<FramePoint2D> contactFramePoints = contactableFoot.getContactPoints2d();
             double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
-            YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
+            YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix
+                  + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
 
             if ((supportFoot == null) || (supportFoot == robotSide))
                yoPlaneContactState.setFullyConstrained();
@@ -751,7 +810,10 @@ public class ICPControllerTest
          }
       }
 
-      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, soleZUpFrames.get(RobotSide.LEFT), soleZUpFrames.get(RobotSide.RIGHT));
+      ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame",
+                                                            worldFrame,
+                                                            soleZUpFrames.get(RobotSide.LEFT),
+                                                            soleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, null);
