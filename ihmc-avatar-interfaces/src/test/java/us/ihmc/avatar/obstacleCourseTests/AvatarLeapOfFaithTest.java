@@ -28,6 +28,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.SmallStepDownEnv
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
 {
@@ -102,7 +103,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stepLength, stepDownHeight);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("AvatarLeapOfFaithTest");
-
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingFinalCoMVelocityInjectionRatio")).set(1.0);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingfinalCoMAccelerationInjectionRatio")).set(1.0);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       setupCameraForWalkingUpToRamp();
@@ -179,6 +181,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
 
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingFinalCoMVelocityInjectionRatio")).set(1.0);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingfinalCoMAccelerationInjectionRatio")).set(1.0);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       setupCameraForWalkingUpToRamp();
@@ -248,7 +252,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stairLength, stepDownHeight);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
-
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingFinalCoMVelocityInjectionRatio")).set(1.0);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingfinalCoMAccelerationInjectionRatio")).set(1.0);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       setupCameraForWalkingUpToRamp();
@@ -319,7 +324,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(numberOfStepsDown, stairLength, stepDownHeight);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
-
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingFinalCoMVelocityInjectionRatio")).set(1.0);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingfinalCoMAccelerationInjectionRatio")).set(1.0);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       setupCameraForWalkingUpToRamp();
@@ -434,7 +440,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stairLengths, starterLength, 0.0, 0.0);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
-
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingFinalCoMVelocityInjectionRatio")).set(1.0);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingfinalCoMAccelerationInjectionRatio")).set(1.0);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       setupCameraForWalkingUpToRamp();
@@ -535,7 +542,8 @@ public abstract class AvatarLeapOfFaithTest implements MultiRobotTestInterface
       SmallStepDownEnvironment stepDownEnvironment = new SmallStepDownEnvironment(stepHeights, stepLengths, starterLength, 0.0, currentHeight);
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), stepDownEnvironment);
       drcSimulationTestHelper.createSimulation("HumanoidPointyRocksTest");
-
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingFinalCoMVelocityInjectionRatio")).set(1.0);
+      ((YoDouble) drcSimulationTestHelper.getYoVariable("FootSwingfinalCoMAccelerationInjectionRatio")).set(1.0);
       FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
 
       setupCameraForWalkingUpToRamp();
