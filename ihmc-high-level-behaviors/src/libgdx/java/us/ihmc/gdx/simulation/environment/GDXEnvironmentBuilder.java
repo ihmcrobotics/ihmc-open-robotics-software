@@ -98,6 +98,8 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             selectedObject.setPositionInWorld(pickPoint);
             pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
 
+            selectedObject.copyThisTransformToBulletMultiBody();
+
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                isPlacing = false;
@@ -164,13 +166,6 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
    public void update()
    {
-      if (bulletPhysicsManager.getSimulate().get())
-      {
-         for (GDXEnvironmentObject allObject : allObjects)
-         {
-            allObject.copyThisTransformToBulletMultiBody();
-         }
-      }
       bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
       if (bulletPhysicsManager.getSimulate().get())
       {
@@ -325,6 +320,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
                tempTransform.set(tempOrientation, tempTranslation);
                object.setTransformToWorld(tempTransform);
                addObject(object);
+               object.copyThisTransformToBulletMultiBody();
             }
             else
             {
