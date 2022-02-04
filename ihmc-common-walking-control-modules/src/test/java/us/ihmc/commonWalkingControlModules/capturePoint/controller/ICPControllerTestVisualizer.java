@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Brown;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
@@ -39,8 +40,8 @@ public class ICPControllerTestVisualizer
    private final YoGraphicPosition perfectCMPGraphic;
    private final SimulationOverheadPlotter plotter;
 
-   private final YoFramePoint2D perfectCMP;
-   //   private final YoFramePoint2D yoPerfectCoP;
+   private final YoFramePoint2D yoPerfectCMP;
+   private final YoFramePoint2D yoPerfectCoP;
    private final YoFramePoint2D yoDesiredCoP;
    private final YoFramePoint2D yoDesiredCMP;
    //   private final YoFramePoint2D yoAchievedCMP;
@@ -61,8 +62,8 @@ public class ICPControllerTestVisualizer
    {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      perfectCMP = new YoFramePoint2D("perfectCMP", worldFrame, registry);
-      //      yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
+      yoPerfectCMP = new YoFramePoint2D("perfectCMP", worldFrame, registry);
+      yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
 
       yoDesiredCoP = new YoFramePoint2D("desiredCoP", worldFrame, registry);
       yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
@@ -89,10 +90,15 @@ public class ICPControllerTestVisualizer
       desiredICPGraphic = new YoGraphicPosition("desiredICP", yoDesiredICP, 0.03, YoAppearance.Yellow());
       yoGraphicsListRegistry.registerYoGraphic("yoGraphics", desiredICPGraphic);
 
-      perfectCMPGraphic = new YoGraphicPosition("perfectCMP", perfectCMP, 0.0107, YoAppearance.Orange());
+      perfectCMPGraphic = new YoGraphicPosition("perfectCMP", yoPerfectCMP, 0.0107, YoAppearance.Orange());
       yoGraphicsListRegistry.registerYoGraphic("yoGraphics", perfectCMPGraphic);
 
-      YoGraphicVector desiredICPVelocityViz = new YoGraphicVector("DesiredICPVelocity", yoDesiredICP3D, yoDesiredICPVelocity3D, 0.01, YoAppearance.Yellow(), true);
+      YoGraphicVector desiredICPVelocityViz = new YoGraphicVector("DesiredICPVelocity",
+                                                                  yoDesiredICP3D,
+                                                                  yoDesiredICPVelocity3D,
+                                                                  0.01,
+                                                                  YoAppearance.Yellow(),
+                                                                  true);
 
       YoGraphicPosition desiredCoPViz = new YoGraphicPosition("Desired CoP", yoDesiredCoP, 0.01, Brown(), GraphicType.DIAMOND);
       YoGraphicPosition desiredCMPViz = new YoGraphicPosition("Desired CMP", yoDesiredCMP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
@@ -107,11 +113,15 @@ public class ICPControllerTestVisualizer
 
       yoGraphicsListRegistry.registerArtifact("ICPControllerTest", desiredICPVelocityViz.createArtifact());
 
-      YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredICP, 0.011, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
+      YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point",
+                                                                       yoDesiredICP,
+                                                                       0.011,
+                                                                       Yellow(),
+                                                                       GraphicType.BALL_WITH_ROTATED_CROSS);
       //      YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.012, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
       //      YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM", yoFinalDesiredCoM, 0.013, Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
-      YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", perfectCMP, 0.002, BlueViolet());
-      //      YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.0021, DarkViolet(), GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
+      YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.0021, DarkViolet(), GraphicType.BALL_WITH_CROSS);
 
       //      YoGraphicPosition adjustedDesiredCapturePointViz = new YoGraphicPosition("Adjusted Desired Capture Point", yoAdjustedDesiredCapturePoint, 0.005, Yellow(), GraphicType.DIAMOND);
 
@@ -124,11 +134,11 @@ public class ICPControllerTestVisualizer
       //      yoGraphicsListRegistry.registerArtifact("ICPControllerTest", finalDesiredCapturePointViz.createArtifact());
       //      yoGraphicsListRegistry.registerArtifact("ICPControllerTest", finalDesiredCoMViz.createArtifact());
       YoArtifactPosition perfectCMPArtifact = perfectCMPViz.createArtifact();
-//      perfectCMPArtifact.setVisible(false);
+      //      perfectCMPArtifact.setVisible(false);
       yoGraphicsListRegistry.registerArtifact("ICPControllerTest", perfectCMPArtifact);
-      //      YoArtifactPosition perfectCoPArtifact = perfectCoPViz.createArtifact();
+      YoArtifactPosition perfectCoPArtifact = perfectCoPViz.createArtifact();
       //      perfectCoPArtifact.setVisible(false);
-      //      yoGraphicsListRegistry.registerArtifact("ICPControllerTest", perfectCoPArtifact);
+      yoGraphicsListRegistry.registerArtifact("ICPControllerTest", perfectCoPArtifact);
 
       YoArtifactPolygon supportPolygonArtifact = new YoArtifactPolygon("Support Polygon", yoSupportPolygonInWorld, Color.pink, false);
 
@@ -150,6 +160,7 @@ public class ICPControllerTestVisualizer
                             FramePoint2D desiredICP,
                             FrameVector2D desiredICPVelocity,
                             FramePoint2D perfectCMP,
+                            FramePoint2D perfectCoP,
                             FramePoint2D currentICP,
                             FramePoint2D currentCoMPosition)
    {
@@ -159,14 +170,15 @@ public class ICPControllerTestVisualizer
       this.yoDesiredICP3D.set(desiredICP);
       this.yoDesiredICPVelocity.set(desiredICPVelocity);
       this.yoDesiredICPVelocity3D.set(desiredICPVelocity);
-      this.perfectCMP.set(perfectCMP);
+      this.yoPerfectCMP.set(perfectCMP);
+      this.yoPerfectCoP.set(perfectCoP);
       this.yoCapturePoint.set(currentICP);
       this.yoCenterOfMass.set(currentCoMPosition);
 
       yoSupportPolygonInWorld.set(supportPolygonInWorld);
 
-//      scs.setTime(scs.getTime() + 1.0);
-//      scs.tickAndUpdate();
+      //      scs.setTime(scs.getTime() + 1.0);
+      //      scs.tickAndUpdate();
 
       desiredICPGraphic.update();
       perfectCMPGraphic.update();
