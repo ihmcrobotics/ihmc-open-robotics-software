@@ -65,6 +65,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -211,10 +212,12 @@ public class BalanceManager
    private final List<FootstepTiming> footstepTimings = new ArrayList<>();
 
    private final YoBoolean inSingleSupport = new YoBoolean("InSingleSupport", registry);
+   private final YoBoolean inStanding = new YoBoolean("InStanding", registry);
    private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
    private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
    private final FootstepTiming currentTiming = new FootstepTiming();
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
+   private final YoDouble timeAdjustment = new YoDouble("timeAdjustment", registry);
 
    private final CoPTrajectoryGeneratorState copTrajectoryState;
    private final WalkingCoPTrajectoryGenerator copTrajectory;
@@ -606,6 +609,7 @@ public class BalanceManager
 
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
+
       if (footstepTimings.isEmpty())
       {
          yoFinalDesiredICP.setToNaN();
@@ -617,6 +621,23 @@ public class BalanceManager
       // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
       if (footsteps.isEmpty() || !icpPlannerDone.getValue())
          timeInSupportSequence.add(controllerToolbox.getControlDT());
+
+      if (inStanding.getValue())
+      {
+         timeAdjustment.set(0.0);
+      }
+      else
+      {
+         double timeAdjustmentToApply = 0.5 * computeTimeShiftToMinimizeTrackingError();
+         double timeIntoState = timeInSupportSequence.getDoubleValue();
+         double timeRemainingInState = currentStateDuration.getDoubleValue() - timeIntoState;
+         timeAdjustmentToApply = MathTools.clamp(timeAdjustmentToApply, -timeIntoState, timeRemainingInState);
+         if (Math.abs(timeAdjustmentToApply) < 1e-3)
+            timeAdjustmentToApply = 0.0;
+         timeAdjustment.set(Double.isNaN(timeAdjustmentToApply) ? 0.0 : timeAdjustmentToApply);
+      }
+
+      timeInSupportSequence.add(timeAdjustment.getValue());
 
       icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
       decayDesiredICPVelocity();
@@ -669,13 +690,7 @@ public class BalanceManager
       if (icpPlannerDone.getBooleanValue())
          return 0.0;
 
-      controllerToolbox.getCapturePoint(capturePoint2d);
-      perfectCMP2d.set(yoPerfectCMP);
-      double deltaTimeToBeAccounted = timeAdjustmentCalculator.estimateDeltaTimeBetweenDesiredICPAndActualICP(yoDesiredCapturePoint,
-                                                                                                              perfectCMP2d,
-                                                                                                              yoFinalDesiredICP,
-                                                                                                              capturePoint2d,
-                                                                                                              controllerToolbox.getOmega0());
+      double deltaTimeToBeAccounted = computeTimeShiftToMinimizeTrackingError();
 
       if (Double.isNaN(deltaTimeToBeAccounted))
          return 0.0;
@@ -684,6 +699,17 @@ public class BalanceManager
       estimatedTimeRemaining = MathTools.clamp(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
 
       return estimatedTimeRemaining;
+   }
+
+   private double computeTimeShiftToMinimizeTrackingError()
+   {
+      controllerToolbox.getCapturePoint(capturePoint2d);
+      perfectCMP2d.set(yoPerfectCMP);
+      return timeAdjustmentCalculator.estimateDeltaTimeBetweenDesiredICPAndActualICP(yoDesiredCapturePoint,
+                                                                                     perfectCMP2d,
+                                                                                     yoFinalDesiredICP,
+                                                                                     capturePoint2d,
+                                                                                     controllerToolbox.getOmega0());
    }
 
    public void freezePelvisXYControl()
@@ -788,6 +814,7 @@ public class BalanceManager
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       timeInSupportSequence.set(0.0);
       inSingleSupport.set(false);
+      inStanding.set(true);
       currentStateDuration.set(Double.NaN);
       totalStateDuration.set(Double.NaN);
 
@@ -802,6 +829,7 @@ public class BalanceManager
    public void initializeICPPlanForSingleSupport()
    {
       inSingleSupport.set(true);
+      inStanding.set(false);
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
       currentTiming.set(footstepTimings.get(0));
       currentFootstep.set(footsteps.get(0));
@@ -847,6 +875,7 @@ public class BalanceManager
       totalStateDuration.set(Double.POSITIVE_INFINITY);
 
       inSingleSupport.set(false);
+      inStanding.set(true);
       initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       stepAdjustmentController.reset();
@@ -873,6 +902,7 @@ public class BalanceManager
       totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
 
       inSingleSupport.set(false);
+      inStanding.set(false);
       initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       stepAdjustmentController.reset();
@@ -902,6 +932,7 @@ public class BalanceManager
       currentStateDuration.set(currentTiming.getTransferTime());
       totalStateDuration.set(currentTiming.getStepTime());
 
+      inStanding.set(false);
       inSingleSupport.set(false);
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuityTransfer.getValue());
 
