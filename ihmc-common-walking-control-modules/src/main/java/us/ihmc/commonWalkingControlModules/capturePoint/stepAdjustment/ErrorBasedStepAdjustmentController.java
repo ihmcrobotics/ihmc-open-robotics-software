@@ -59,6 +59,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
    private final BooleanProvider allowStepAdjustment;
    private final DoubleProvider footstepDeadband;
    private final DoubleProvider transferDurationSplitFraction;
+   private final DoubleProvider timeRemainingSafetyFactor;
 
    private final DoubleProvider minimumFootstepMultiplier;
    private final DoubleProvider minICPErrorForStepAdjustment;
@@ -179,6 +180,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       transferDurationSplitFraction = new DoubleParameter(yoNamePrefix + "TransferDurationSplitFraction",
                                                           registry,
                                                           icpOptimizationParameters.getTransferSplitFraction());
+      timeRemainingSafetyFactor = new DoubleParameter(yoNamePrefix + "TimeRemainingSafetyFactor", registry, 1.1);
 
       footstepDeadband = new DoubleParameter(yoNamePrefix + "FootstepDeadband", registry, icpOptimizationParameters.getAdjustmentDeadband());
 
@@ -327,7 +329,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       computeLimitedAreaForCoP();
       captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(),
-                                                     timeRemainingInState.getDoubleValue(),
+                                                     timeRemainingInState.getDoubleValue() / timeRemainingSafetyFactor.getValue(),
                                                      currentICP,
                                                      omega0,
                                                      allowableAreaForCoP);
