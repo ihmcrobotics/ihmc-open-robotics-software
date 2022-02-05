@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Brown;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkViolet;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 
@@ -12,9 +12,10 @@ import java.awt.Color;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -24,6 +25,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
@@ -83,7 +85,10 @@ public class ICPControllerTestVisualizer
       yoSupportPolygonInWorld = new YoFrameConvexPolygon2D("supportPolygon", worldFrame, 20, registry);
 
       Robot nullRobot = new Robot("test");
-      scs = new SimulationConstructionSet(nullRobot);
+      SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
+      parameters.setDataBufferSize(500);
+      scs = new SimulationConstructionSet(nullRobot, parameters);
+      scs.setDT(1.0, 1);
 
       //      ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
 
@@ -157,12 +162,12 @@ public class ICPControllerTestVisualizer
    }
 
    public void updateInputs(BipedSupportPolygons bipedSupportPolygons,
-                            FramePoint2D desiredICP,
-                            FrameVector2D desiredICPVelocity,
-                            FramePoint2D perfectCMP,
-                            FramePoint2D perfectCoP,
-                            FramePoint2D currentICP,
-                            FramePoint2D currentCoMPosition)
+                            FramePoint2DReadOnly desiredICP,
+                            FrameVector2DReadOnly desiredICPVelocity,
+                            FramePoint2DReadOnly perfectCMP,
+                            FramePoint2DReadOnly perfectCoP,
+                            FramePoint2DReadOnly currentICP,
+                            FramePoint2DReadOnly currentCoMPosition)
    {
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
