@@ -64,6 +64,8 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
       multiBody = new btMultiBody(numberOfLinks, mass, baseInertiaDiagonal, fixedBase, canSleep);
       multiBody.setBasePos(new Vector3());
       multiBody.setWorldToBaseRot(new Quaternion());
+      multiBody.setHasSelfCollision(true);
+      multiBody.setUseGyroTerm(true);
 
       baseCollider = new btMultiBodyLinkCollider(multiBody, -1);
       baseCollider.setCollisionShape(baseBox);
@@ -71,6 +73,7 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
       RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
       GDXTools.toGDX(rigidBodyTransform, worldTransform);
       baseCollider.setWorldTransform(worldTransform);
+      baseCollider.setFriction(1.0f);
       bulletPhysicsManager.getMultiBodyDynamicsWorld().addCollisionObject(baseCollider);
       multiBody.setBaseCollider(baseCollider);
 
@@ -96,6 +99,7 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
          btBoxShape linkBox = new btBoxShape(linkHalfExtents);
          linkCollider.setCollisionShape(linkBox);
          linkCollider.setWorldTransform(worldTransform);
+         linkCollider.setFriction(1.0f);
          bulletPhysicsManager.getMultiBodyDynamicsWorld().addCollisionObject(linkCollider);
          multiBody.getLink(linkIndex).setCollider(linkCollider);
          linkColliders.add(linkCollider);
