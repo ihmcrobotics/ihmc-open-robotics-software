@@ -118,7 +118,7 @@ public class LIPMWalkerRobot
       return kneeJoints.get(robotSide).getQD();
    }
 
-   public void setJointTorque(RobotSide robotSide, double torque)
+   public void setHipTorque(RobotSide robotSide, double torque)
    {
       hipJoints.get(robotSide).setTau(torque);
    }
@@ -138,7 +138,7 @@ public class LIPMWalkerRobot
       rightHipJoint.setQ(0.0);
 
       leftKneeJoint.setQ(1.0);
-      rightKneeJoint.setQ(0.8);
+      rightKneeJoint.setQ(0.9);
    }
 
    private RobotDescription getRobotDescription()
