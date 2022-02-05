@@ -82,6 +82,9 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       Quaternion rotationFromParent = new Quaternion();
       Vector3 jointAxis = new Vector3(0.0f, 0.0f, 1.0f);
       offsetOfPivotFromParentCenterOfMass = new Vector3(0.0f, 0.03f, 0.01f);
+      offsetOfPivotFromParentCenterOfMass.sub(doorFrameObject.getCenterOfMassInModelFrame().getX32(),
+                                              doorFrameObject.getCenterOfMassInModelFrame().getY32(),
+                                              doorFrameObject.getCenterOfMassInModelFrame().getZ32());
       offsetOfCenterOfMassFromPivot = new Vector3(0.0f, 0.9144f / 2.0f, 2.0447f / 2.0f);
       boolean disableParentCollision = false;
       multiBody.setupRevolute(linkIndex,

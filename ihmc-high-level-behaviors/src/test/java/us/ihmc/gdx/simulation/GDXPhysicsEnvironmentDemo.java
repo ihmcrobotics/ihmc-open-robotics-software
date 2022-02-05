@@ -7,6 +7,7 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXMultiBodySnakeObject;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorCombinedMultiBodyObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.log.LogTools;
 
@@ -41,6 +42,11 @@ public class GDXPhysicsEnvironmentDemo
             multiBodySnake.setPositionInWorld(new Point3D(0.0, 0.0, 4.0));
             environmentBuilder.addObject(multiBodySnake);
             multiBodySnake.copyThisTransformToBulletMultiBody();
+
+            GDXDoorCombinedMultiBodyObject doorObject = new GDXDoorCombinedMultiBodyObject();
+            doorObject.setPositionInWorld(new Point3D(0.0, 2.0, 0.0));
+            environmentBuilder.addObject(doorObject);
+            doorObject.copyThisTransformToBulletMultiBody();
          }
 
          @Override
