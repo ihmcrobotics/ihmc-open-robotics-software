@@ -48,21 +48,9 @@ public class HeuristicICPController implements ICPControllerInterface
    private final BooleanProvider useCMPFeedback;
    private final BooleanProvider useAngularMomentum;
 
-   private final BooleanProvider scaleFeedbackWeightWithGain;
-
-   private final DoubleProvider copFeedbackForwardWeight;
-   private final DoubleProvider copFeedbackLateralWeight;
-   //   private final DoubleProvider cmpFeedbackWeight;
-   private final DMatrixRMaj scaledCoPFeedbackWeight = new DMatrixRMaj(2, 2);
-
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final DoubleProvider feedbackRateWeight;
-   private final DoubleProvider copCMPFeedbackRateWeight;
-   //   private final DoubleProvider dynamicsObjectiveWeight;
-
    private final ICPControlGainsReadOnly feedbackGains;
-   private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
 
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoDouble icpParallelError = new YoDouble(yoNamePrefix + "ICPParallelError", registry);
@@ -139,18 +127,6 @@ public class HeuristicICPController implements ICPControllerInterface
 
       useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
       useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
-
-      scaleFeedbackWeightWithGain = new BooleanParameter(yoNamePrefix + "ScaleFeedbackWeightWithGain",
-                                                         registry,
-                                                         icpOptimizationParameters.scaleFeedbackWeightWithGain());
-
-      copFeedbackForwardWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackForwardWeight", registry, icpOptimizationParameters.getFeedbackForwardWeight());
-      copFeedbackLateralWeight = new DoubleParameter(yoNamePrefix + "CoPFeedbackLateralWeight", registry, icpOptimizationParameters.getFeedbackLateralWeight());
-
-      copCMPFeedbackRateWeight = new DoubleParameter(yoNamePrefix + "CoPCMPFeedbackRateWeight",
-                                                     registry,
-                                                     icpOptimizationParameters.getCoPCMPFeedbackRateWeight());
-      feedbackRateWeight = new DoubleParameter(yoNamePrefix + "FeedbackRateWeight", registry, icpOptimizationParameters.getFeedbackRateWeight());
 
       feedbackGains = new ParameterizedICPControlGains("", icpOptimizationParameters.getICPFeedbackGains(), registry);
 
