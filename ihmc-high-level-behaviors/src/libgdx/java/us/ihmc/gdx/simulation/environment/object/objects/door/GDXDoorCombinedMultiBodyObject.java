@@ -18,8 +18,6 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXTools;
 
-import java.util.ArrayList;
-
 public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Door Combined Multi Body";
@@ -32,11 +30,13 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
    private final RigidBodyTransform tempTransform2 = new RigidBodyTransform();
    private btMultiBodyLinkCollider frameCollider; // must store these or JNI wrapper will allocate on get and crash
    private btMultiBodyLinkCollider panelCollider;
-   private btMultiBodyLinkCollider handleCollider;
+   private btMultiBodyLinkCollider leverCollider;
 
    private btMultiBody multiBody;
-   private Vector3 offsetOfPivotFromParentCenterOfMass;
-   private Vector3 offsetOfCenterOfMassFromPivot;
+   private Vector3 panelOffsetOfPivotFromParentCenterOfMass;
+   private Vector3 panelOffsetOfCenterOfMassFromPivot;
+   private Vector3 leverOffsetOfPivotFromParentCenterOfMass;
+   private Vector3 leverOffsetOfCenterOfMassFromPivot;
 
    public GDXDoorCombinedMultiBodyObject()
    {
@@ -50,7 +50,7 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
    @Override
    public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
    {
-      int numberOfLinks = 1;
+      int numberOfLinks = 2;
       float mass = doorFrameObject.getMass();
       Vector3 inertia = new Vector3();
       doorFrameObject.getInertia(inertia);
@@ -81,20 +81,18 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       int parentIndex = -1;
       Quaternion rotationFromParent = new Quaternion();
       Vector3 jointAxis = new Vector3(0.0f, 0.0f, 1.0f);
-      offsetOfPivotFromParentCenterOfMass = new Vector3(0.0f, 0.03f, 0.01f);
-      offsetOfPivotFromParentCenterOfMass.sub(doorFrameObject.getCenterOfMassInModelFrame().getX32(),
-                                              doorFrameObject.getCenterOfMassInModelFrame().getY32(),
-                                              doorFrameObject.getCenterOfMassInModelFrame().getZ32());
-      offsetOfCenterOfMassFromPivot = new Vector3(0.0f, 0.9144f / 2.0f, 2.0447f / 2.0f);
+      panelOffsetOfPivotFromParentCenterOfMass = new Vector3(0.0f, 0.03f, 0.01f);
+      panelOffsetOfPivotFromParentCenterOfMass.sub(doorFrameObject.getCenterOfMassInModelFrame().getX32(),
+                                                   doorFrameObject.getCenterOfMassInModelFrame().getY32(),
+                                                   doorFrameObject.getCenterOfMassInModelFrame().getZ32());
+      panelOffsetOfCenterOfMassFromPivot = new Vector3(0.0f, 0.9144f / 2.0f, 2.0447f / 2.0f);
       boolean disableParentCollision = false;
       multiBody.setupRevolute(linkIndex,
                               mass,
                               inertia,
                               parentIndex,
                               rotationFromParent,
-                              jointAxis,
-                              offsetOfPivotFromParentCenterOfMass,
-                              offsetOfCenterOfMassFromPivot,
+                              jointAxis, panelOffsetOfPivotFromParentCenterOfMass, panelOffsetOfCenterOfMassFromPivot,
                               disableParentCollision);
 
       panelCollider = new btMultiBodyLinkCollider(multiBody, 0);
@@ -103,6 +101,31 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       panelCollider.setFriction(1.0f);
       bulletPhysicsManager.addMultiBodyCollisionShape(panelCollider);
       multiBody.getLink(0).setCollider(panelCollider);
+
+      linkIndex = 1;
+      mass = doorLeverObject.getMass();
+      inertia = new Vector3();
+      doorLeverObject.getInertia(inertia);
+      parentIndex = 0;
+      rotationFromParent = new Quaternion();
+      jointAxis = new Vector3(1.0f, 0.0f, 0.0f);
+      leverOffsetOfPivotFromParentCenterOfMass = new Vector3(-0.03f, 0.4f - 0.025f, -0.13f);
+      leverOffsetOfCenterOfMassFromPivot = new Vector3(0.0f, 0.0f, 0.0f);
+      disableParentCollision = false;
+      multiBody.setupRevolute(linkIndex,
+                              mass,
+                              inertia,
+                              parentIndex,
+                              rotationFromParent,
+                              jointAxis, leverOffsetOfPivotFromParentCenterOfMass, leverOffsetOfCenterOfMassFromPivot,
+                              disableParentCollision);
+
+      leverCollider = new btMultiBodyLinkCollider(multiBody, 1);
+      leverCollider.setCollisionShape(doorLeverObject.getBtCollisionShape());
+      leverCollider.setWorldTransform(worldTransform);
+      leverCollider.setFriction(1.0f);
+      bulletPhysicsManager.addMultiBodyCollisionShape(leverCollider);
+      multiBody.getLink(1).setCollider(leverCollider);
 
       multiBody.finalizeMultiDof();
       bulletPhysicsManager.addMultiBody(multiBody);
@@ -113,6 +136,7 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
    {
       doorFrameObject.copyBulletTransformToThis(frameCollider.getWorldTransform());
       doorPanelObject.copyBulletTransformToThis(panelCollider.getWorldTransform());
+      doorLeverObject.copyBulletTransformToThis(leverCollider.getWorldTransform());
    }
 
    @Override
@@ -129,14 +153,17 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       copyThisTransformToBulletMultiBodyParentOnly();
 
       GDXTools.toEuclid(tempGDXTransform, tempTransform);
-      tempTransform.appendTranslation(offsetOfPivotFromParentCenterOfMass.x, offsetOfPivotFromParentCenterOfMass.y, offsetOfPivotFromParentCenterOfMass.z);
-      tempTransform.appendTranslation(offsetOfCenterOfMassFromPivot.x, offsetOfCenterOfMassFromPivot.y, offsetOfCenterOfMassFromPivot.z);
+      tempTransform.appendTranslation(panelOffsetOfPivotFromParentCenterOfMass.x, panelOffsetOfPivotFromParentCenterOfMass.y, panelOffsetOfPivotFromParentCenterOfMass.z);
+      tempTransform.appendTranslation(panelOffsetOfCenterOfMassFromPivot.x, panelOffsetOfCenterOfMassFromPivot.y, panelOffsetOfCenterOfMassFromPivot.z);
       GDXTools.toGDX(tempTransform, tempGDXTransform);
       panelCollider.setWorldTransform(tempGDXTransform);
       tempTransform2.set(doorPanelObject.getBulletCollisionOffset());
       tempTransform2.invert();
       tempTransform.appendTranslation(tempTransform2.getTranslation());
       doorPanelObject.setTransformToWorld(tempTransform);
+
+      tempTransform.appendTranslation(-0.03f, 0.4f, -0.13f);
+      doorLeverObject.setTransformToWorld(tempTransform);
    }
 
    @Override
