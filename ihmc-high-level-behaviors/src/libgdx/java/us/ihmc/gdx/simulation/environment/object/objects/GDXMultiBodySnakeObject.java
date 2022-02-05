@@ -66,6 +66,8 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
       multiBody.setWorldToBaseRot(new Quaternion());
       multiBody.setHasSelfCollision(true);
       multiBody.setUseGyroTerm(true);
+      multiBody.setLinearDamping(0.1f);
+      multiBody.setAngularDamping(0.9f);
 
       baseCollider = new btMultiBodyLinkCollider(multiBody, -1);
       baseCollider.setCollisionShape(baseBox);
@@ -74,7 +76,7 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
       GDXTools.toGDX(rigidBodyTransform, worldTransform);
       baseCollider.setWorldTransform(worldTransform);
       baseCollider.setFriction(1.0f);
-      bulletPhysicsManager.getMultiBodyDynamicsWorld().addCollisionObject(baseCollider);
+      bulletPhysicsManager.addMultiBodyCollisionShape(baseCollider);
       multiBody.setBaseCollider(baseCollider);
 
       for (int i = 0; i < numberOfLinks; i++)
@@ -85,7 +87,7 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
          Quaternion rotationFromParent = new Quaternion();
          Vector3 offsetOfPivotFromParentCenterOfMass = new Vector3(0.0f, 0.0f, -linkHalfExtents.z);
          Vector3 offsetOfCenterOfMassFromPivot = new Vector3(0.0f, 0.0f, -linkHalfExtents.z);
-         boolean disableParentCollision = false;
+         boolean disableParentCollision = true;
          multiBody.setupSpherical(linkIndex,
                                   mass,
                                   baseInertiaDiagonal,
@@ -100,7 +102,7 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
          linkCollider.setCollisionShape(linkBox);
          linkCollider.setWorldTransform(worldTransform);
          linkCollider.setFriction(1.0f);
-         bulletPhysicsManager.getMultiBodyDynamicsWorld().addCollisionObject(linkCollider);
+         bulletPhysicsManager.addMultiBodyCollisionShape(linkCollider);
          multiBody.getLink(linkIndex).setCollider(linkCollider);
          linkColliders.add(linkCollider);
 
@@ -109,9 +111,6 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
 
       multiBody.finalizeMultiDof();
       bulletPhysicsManager.addMultiBody(multiBody);
-
-      multiBody.setLinearDamping(0.1f);
-      multiBody.setAngularDamping(0.9f);
    }
 
    @Override
