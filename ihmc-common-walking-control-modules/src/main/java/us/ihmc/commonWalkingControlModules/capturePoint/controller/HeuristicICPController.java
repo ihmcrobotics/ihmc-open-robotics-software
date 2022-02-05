@@ -2,8 +2,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
-import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
@@ -32,9 +30,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -192,7 +188,13 @@ public class HeuristicICPController implements ICPControllerInterface
       else
       {
          parallelDirection.setToNaN();
-         perpDirection.setToNaN();
+
+         perpDirection.set(icpError);
+         perpDirection.normalize();
+         if (perpDirection.containsNaN())
+         {
+            perpDirection.set(1.0, 0.0);
+         }
 
          icpPerpError.set(icpError.length());
          icpParallelError.set(0.0);
@@ -209,13 +211,20 @@ public class HeuristicICPController implements ICPControllerInterface
       limitAbsoluteValue(icpParallelFeedback, feedbackGains.getFeedbackPartMaxValueParallelToMotion());
       limitAbsoluteValue(icpPerpFeedback, feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
-      tempVector.set(parallelDirection);
-      tempVector.scale(icpParallelFeedback.getValue());
-      unconstrainedFeedback.set(tempVector);
+      unconstrainedFeedback.setToZero();
+      if (!parallelDirection.containsNaN())
+      {
+         tempVector.set(parallelDirection);
+         tempVector.scale(icpParallelFeedback.getValue());
+         unconstrainedFeedback.add(tempVector);
+      }
 
-      tempVector.set(perpDirection);
-      tempVector.scale(icpPerpFeedback.getValue());
-      unconstrainedFeedback.add(tempVector);
+      if (!perpDirection.containsNaN())
+      {
+         tempVector.set(perpDirection);
+         tempVector.scale(icpPerpFeedback.getValue());
+         unconstrainedFeedback.add(tempVector);
+      }
 
       unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
       unconstrainedFeedbackCMP.add(icpError);
