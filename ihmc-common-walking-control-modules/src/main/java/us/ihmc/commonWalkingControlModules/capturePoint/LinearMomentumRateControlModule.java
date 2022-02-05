@@ -6,6 +6,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.HeuristicICPController;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -64,6 +65,8 @@ public class LinearMomentumRateControlModule
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
+   private final YoBoolean useHeuristicICPController = new YoBoolean("useHeuristicICPController", registry);
+
    private final Vector3DReadOnly linearMomentumRateWeight;
    private final Vector3DReadOnly recoveryLinearMomentumRateWeight;
    private final Vector3DReadOnly angularMomentumRateWeight;
@@ -119,7 +122,7 @@ public class LinearMomentumRateControlModule
    private boolean desiredCMPcontainedNaN = false;
    private boolean desiredCoPcontainedNaN = false;
 
-   private final ICPControllerInterface icpController;
+   private final ICPControllerInterface optimizationICPController, heuristicICPController;
 
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -172,6 +175,8 @@ public class LinearMomentumRateControlModule
                                           YoRegistry parentRegistry,
                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      useHeuristicICPController.set(false);
+
       this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
       this.gravityZ = gravityZ;
 
@@ -228,13 +233,21 @@ public class LinearMomentumRateControlModule
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
       bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
 
-      icpController = new ICPController(walkingControllerParameters,
-                                        bipedSupportPolygons,
-                                        icpControlPolygons,
-                                        contactableFeet,
-                                        controlDT,
-                                        registry,
-                                        yoGraphicsListRegistry);
+      heuristicICPController = new HeuristicICPController(walkingControllerParameters,
+                                                          bipedSupportPolygons,
+                                                          icpControlPolygons,
+                                                          contactableFeet,
+                                                          controlDT,
+                                                          registry,
+                                                          yoGraphicsListRegistry);
+      
+      optimizationICPController = new ICPController(walkingControllerParameters,
+                                                    bipedSupportPolygons,
+                                                    icpControlPolygons,
+                                                    contactableFeet,
+                                                    controlDT,
+                                                    registry,
+                                                    yoGraphicsListRegistry);
 
       parentRegistry.addChild(registry);
    }
@@ -434,9 +447,13 @@ public class LinearMomentumRateControlModule
    private void updateICPControllerState()
    {
       if (initializeOnStateChange)
-         icpController.initialize();
+      {
+         optimizationICPController.initialize();
+         heuristicICPController.initialize();
+      }
 
-      icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+      optimizationICPController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+      heuristicICPController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }
 
    private void computeICPController()
@@ -444,15 +461,26 @@ public class LinearMomentumRateControlModule
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
-         icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, centerOfMass2d, omega0);
+         optimizationICPController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, centerOfMass2d, omega0);
+         heuristicICPController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, centerOfMass2d, omega0);
       }
       else
       {
          perfectCMPDelta.sub(perfectCMP, perfectCoP);
-         icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, centerOfMass2d, omega0);
+         optimizationICPController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, centerOfMass2d, omega0);
+         heuristicICPController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, centerOfMass2d, omega0);
       }
-      icpController.getDesiredCMP(desiredCMP);
-      icpController.getDesiredCoP(desiredCoP);
+
+      if (useHeuristicICPController.getValue())
+      {
+         heuristicICPController.getDesiredCMP(desiredCMP);
+         heuristicICPController.getDesiredCoP(desiredCoP); 
+      }
+      else
+      {
+         optimizationICPController.getDesiredCMP(desiredCMP);
+         optimizationICPController.getDesiredCoP(desiredCoP);
+      }
    }
 
    private void checkAndPackOutputs()
@@ -482,7 +510,15 @@ public class LinearMomentumRateControlModule
       }
 
       output.setDesiredCMP(desiredCMP);
-      output.setResidualICPErrorForStepAdjustment(icpController.getResidualError());
+
+      if (useHeuristicICPController.getValue())
+      {
+         output.setResidualICPErrorForStepAdjustment(heuristicICPController.getResidualError());
+      }
+      else
+      {
+         output.setResidualICPErrorForStepAdjustment(optimizationICPController.getResidualError());
+      }
    }
 
    private boolean computeDesiredLinearMomentumRateOfChange()
