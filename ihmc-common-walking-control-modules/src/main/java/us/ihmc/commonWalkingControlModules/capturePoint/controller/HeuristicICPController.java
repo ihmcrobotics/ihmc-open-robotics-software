@@ -42,8 +42,8 @@ public class HeuristicICPController implements ICPControllerInterface
 {
    private static final boolean VISUALIZE = true;
 
-   private final String yoNamePrefix = "controller";
-   private final YoRegistry registry = new YoRegistry("ICPController");
+   private final String yoNamePrefix = "heuristic";
+   private final YoRegistry registry = new YoRegistry("HeuristicICPController");
 
    private final BooleanProvider useCMPFeedback;
    private final BooleanProvider useAngularMomentum;
@@ -65,11 +65,16 @@ public class HeuristicICPController implements ICPControllerInterface
    private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
 
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
-//   private final YoDouble icpParallelError = new YoDouble(yoNamePrefix + "ICPParallelError", registry);
-//   private final YoDouble icpPerpError = new YoDouble(yoNamePrefix + "ICPPerpError", registry);
+   private final YoDouble icpParallelError = new YoDouble(yoNamePrefix + "ICPParallelError", registry);
+   private final YoDouble icpPerpError = new YoDouble(yoNamePrefix + "ICPPerpError", registry);
+
+   private final YoDouble icpParallelFeedback = new YoDouble(yoNamePrefix + "ICPParallelFeedback", registry);
+   private final YoDouble icpPerpFeedback = new YoDouble(yoNamePrefix + "ICPPerpFeedback", registry);
 
    private final FramePoint2D desiredICP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
+   private final FrameVector2D parallelDirection = new FrameVector2D();
+   private final FrameVector2D perpDirection = new FrameVector2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentICP = new FramePoint2D();
    private final FramePoint2D currentCoMPosition = new FramePoint2D();
@@ -198,28 +203,47 @@ public class HeuristicICPController implements ICPControllerInterface
 
       this.icpError.sub(currentICP, desiredICP);
 
-      //      System.out.println("currentICP = " + currentICP);
-      //      System.out.println("desiredICP = " + desiredICP);
-      //      System.out.println("perfectCMP = " + perfectCMP);
+      this.parallelDirection.set(this.desiredICPVelocity);
 
-      //      double kpOrthogonalToMotion = feedbackGains.getKpOrthogonalToMotion();
-      //      System.out.println("kpOrthogonalToMotion = " + kpOrthogonalToMotion);
+      if (parallelDirection.lengthSquared() > 1e-7)
+      {
+         parallelDirection.normalize();
+         perpDirection.set(-parallelDirection.getY(), parallelDirection.getX());
 
-      //      System.out.println("icpError = " + icpError);
+         icpParallelError.set(icpError.dot(parallelDirection));
+         icpPerpError.set(icpError.dot(perpDirection));
+      }
+      else
+      {
+         parallelDirection.setToNaN();
+         perpDirection.setToNaN();
+
+         icpPerpError.set(icpError.length());
+         icpParallelError.set(0.0);
+      }
+
       feedbackCMP.set(icpError);
 
-      helper.transformGainsFromDynamicsFrame(transformedGains,
-                                             desiredICPVelocity,
-                                             feedbackGains.getKpParallelToMotion(),
-                                             feedbackGains.getKpOrthogonalToMotion());
+      icpParallelFeedback.set(icpParallelError.getValue());
+      icpParallelFeedback.mul(feedbackGains.getKpParallelToMotion());
 
-      computeUnconstrainedFeedback();
+      icpPerpFeedback.set(icpPerpError.getValue());
+      icpPerpFeedback.mul(feedbackGains.getKpOrthogonalToMotion());
 
-      //      // There needs to be a +1.0 here to match the other Optimization based ICP Controller. Not sure why? 
-      //      feedbackCMP.scale(1.0 + kpOrthogonalToMotion);
-      //      feedbackCMP.add(perfectCMP);
-      //      
-      //      System.out.println("feedbackCMP = " + feedbackCMP);
+      limitAbsoluteValue(icpParallelFeedback, feedbackGains.getFeedbackPartMaxValueParallelToMotion());
+      limitAbsoluteValue(icpPerpFeedback, feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
+
+      tempVector.set(parallelDirection);
+      tempVector.scale(icpParallelFeedback.getValue());
+      unconstrainedFeedback.set(tempVector);
+
+      tempVector.set(perpDirection);
+      tempVector.scale(icpPerpFeedback.getValue());
+      unconstrainedFeedback.add(tempVector);
+
+      unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
+      unconstrainedFeedbackCMP.add(icpError);
+      unconstrainedFeedbackCMP.add(unconstrainedFeedback);
 
       unconstrainedFeedbackCoP.set(unconstrainedFeedbackCMP);
       unconstrainedFeedbackCoP.sub(perfectCMPOffset);
@@ -280,30 +304,28 @@ public class HeuristicICPController implements ICPControllerInterface
 
             supportPolygonInWorld.getClosestPointWithRay(projectionLine, closestPointWithProjectionLine);
 
-                        
             tempVector.set(currentICP);
             tempVector.sub(coPProjection);
             tempVector.normalize();
             double copProjectionDot = tempVector.dot(projectionVector);
-            
-            
+
             tempVector.set(currentICP);
             tempVector.sub(closestPointWithProjectionLine);
             tempVector.normalize();
             double closestPointWithProjectionLineDot = tempVector.dot(projectionVector);
-            
+
             if (copProjectionDot >= closestPointWithProjectionLineDot)
                feedbackCoP.set(coPProjection);
             else
                feedbackCoP.set(closestPointWithProjectionLine);
-            
-//            double coPProjectionDistanceSquared = coPProjection.distanceSquared(unconstrainedFeedbackCoP);
-//            double closestPointWithProjectionLineDistanceSquared = closestPointWithProjectionLine.distanceSquared(unconstrainedFeedbackCoP);
 
-//            if (coPProjectionDistanceSquared <= closestPointWithProjectionLineDistanceSquared)
-//               feedbackCoP.set(coPProjection);
-//            else
-//               feedbackCoP.set(closestPointWithProjectionLine);
+            //            double coPProjectionDistanceSquared = coPProjection.distanceSquared(unconstrainedFeedbackCoP);
+            //            double closestPointWithProjectionLineDistanceSquared = closestPointWithProjectionLine.distanceSquared(unconstrainedFeedbackCoP);
+
+            //            if (coPProjectionDistanceSquared <= closestPointWithProjectionLineDistanceSquared)
+            //               feedbackCoP.set(coPProjection);
+            //            else
+            //               feedbackCoP.set(closestPointWithProjectionLine);
          }
       }
 
@@ -313,12 +335,12 @@ public class HeuristicICPController implements ICPControllerInterface
       controllerTimer.stopMeasurement();
    }
 
-   private void computeUnconstrainedFeedback()
+   private void limitAbsoluteValue(YoDouble yoDouble, double maxAbsoluteValue)
    {
-      unconstrainedFeedback.setX(transformedGains.get(0, 0) * icpError.getX() + transformedGains.get(0, 1) * icpError.getY());
-      unconstrainedFeedback.setY(transformedGains.get(1, 0) * icpError.getX() + transformedGains.get(1, 1) * icpError.getY());
-      unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
-      unconstrainedFeedbackCMP.add(unconstrainedFeedback);
+      if (yoDouble.getValue() > maxAbsoluteValue)
+         yoDouble.set(maxAbsoluteValue);
+      else if (yoDouble.getValue() < -maxAbsoluteValue)
+         yoDouble.set(-maxAbsoluteValue);
    }
 
    private void setupVisualizers(YoGraphicsListRegistry yoGraphicsListRegistry)
