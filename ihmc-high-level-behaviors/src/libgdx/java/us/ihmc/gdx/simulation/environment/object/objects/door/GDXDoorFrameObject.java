@@ -21,10 +21,10 @@ public class GDXDoorFrameObject extends GDXEnvironmentObject
    {
       super(NAME, FACTORY);
       setRealisticModel(GDXModelLoader.loadG3DModel("environmentObjects/door/doorFrame/DoorFrame.g3dj"));
-      getCenterOfMassInModelFrame().set(new Point3D(0.0, (0.939887 / 2.0) - 0.006046, 0.1));
       double sizeX = 0.0889;
       double sizeY = 0.0889;
       double sizeZ = 2.159;
+      getCenterOfMassInModelFrame().set(0.0, (0.939887 / 2.0) - 0.006046, 0.1);
       setMass(100.0f);
       getRealisticModelOffset().getTranslation().sub(getCenterOfMassInModelFrame());
       getCollisionShapeOffset().getTranslation().sub(getCenterOfMassInModelFrame());
