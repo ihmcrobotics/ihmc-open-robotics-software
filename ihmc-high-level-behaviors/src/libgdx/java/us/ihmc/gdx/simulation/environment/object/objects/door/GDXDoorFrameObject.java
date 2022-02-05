@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.collision.btCompoundShape;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXModelLoader;
@@ -20,31 +21,39 @@ public class GDXDoorFrameObject extends GDXEnvironmentObject
    {
       super(NAME, FACTORY);
       setRealisticModel(GDXModelLoader.loadG3DModel("environmentObjects/door/doorFrame/DoorFrame.g3dj"));
+      getCenterOfMassInModelFrame().set(new Point3D(0.0, (0.939887 / 2.0) - 0.006046, 0.1));
       double sizeX = 0.0889;
       double sizeY = 0.0889;
       double sizeZ = 2.159;
       setMass(100.0f);
+      getRealisticModelOffset().getTranslation().sub(getCenterOfMassInModelFrame());
+      getCollisionShapeOffset().getTranslation().sub(getCenterOfMassInModelFrame());
       getCollisionShapeOffset().getTranslation().add(0.0, -0.006064, 0.0);
       getCollisionShapeOffset().getTranslation().add(0.0, -0.0889 / 2.0, 2.159 / 2.0);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       setCollisionGeometryObject(collisionBox);
       getBoundingSphere().setRadius(1.5);
+      getBoundingSphere().getPosition().sub(getCenterOfMassInModelFrame());
       getBoundingSphere().getPosition().add(0.0, 0.0, 2.159 / 2.0);
 
       RigidBodyTransform nearOriginFramePostOrigin = new RigidBodyTransform();
+      nearOriginFramePostOrigin.getTranslation().sub(getCenterOfMassInModelFrame());
       nearOriginFramePostOrigin.getTranslation().add(0.0, -0.006064, 0.0);
       nearOriginFramePostOrigin.getTranslation().add(0.0, -0.0889 / 2.0, 2.159 / 2.0);
 
       RigidBodyTransform nearOriginSupportBoardOrigin = new RigidBodyTransform();
+      nearOriginSupportBoardOrigin.getTranslation().sub(getCenterOfMassInModelFrame());
       nearOriginSupportBoardOrigin.getTranslation().add(0.0, -0.006064, 0.0);
       nearOriginSupportBoardOrigin.getTranslation().add(0.0, -0.0889, 0.0);
       nearOriginSupportBoardOrigin.getTranslation().add(0.0, -0.0381 / 2.0, 0.0889 / 2.0f);
 
       RigidBodyTransform farFramePostOrigin = new RigidBodyTransform();
+      farFramePostOrigin.getTranslation().sub(getCenterOfMassInModelFrame());
       farFramePostOrigin.getTranslation().add(0.0, 0.93415, 0.0);
       farFramePostOrigin.getTranslation().add(0.0, 0.0889 / 2.0, 2.159 / 2.0);
 
       RigidBodyTransform farSupportBoardOrigin = new RigidBodyTransform();
+      farSupportBoardOrigin.getTranslation().sub(getCenterOfMassInModelFrame());
       farSupportBoardOrigin.getTranslation().add(0.0, 0.93415, 0.0);
       farSupportBoardOrigin.getTranslation().add(0.0, 0.0889, 0.0);
       farSupportBoardOrigin.getTranslation().add(0.0, 0.0381 / 2.0, 0.0889 / 2.0f);

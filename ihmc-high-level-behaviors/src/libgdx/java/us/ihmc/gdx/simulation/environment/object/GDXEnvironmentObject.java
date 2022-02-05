@@ -52,7 +52,7 @@ public class GDXEnvironmentObject
    private GDXModelInstance collisionModelInstance;
    private final StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
    private RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
-   private RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
+   private RigidBodyTransform realisticModelOffset = new RigidBodyTransform();
    private Sphere3D boundingSphere = new Sphere3D(1.0);
    private Shape3DBasics collisionGeometryObject;
    private Function<Point3DReadOnly, Boolean> isPointInside;
@@ -71,6 +71,7 @@ public class GDXEnvironmentObject
    private final FramePose3D bulletPose = new FramePose3D();
    private btCollisionShape btCollisionShape;
    private float mass = 0.0f;
+   private final Point3D centerOfMassInModelFrame = new Point3D();
    private btRigidBody btRigidBody;
    private btMultiBody btMultiBody;
    private GDXBulletPhysicsManager bulletPhysicsManager;
@@ -151,10 +152,10 @@ public class GDXEnvironmentObject
       realisticModelFrame
             = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "RealisticModelFrame" + objectIndex,
                                                                               placementFrame,
-                                                                              wholeThingOffset);
+                                                                              realisticModelOffset);
       collisionModelFrame
             = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
-                                                                              realisticModelFrame,
+                                                                              placementFrame,
                                                                               collisionShapeOffset);
       bulletCollisionFrame
             = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "BulletCollisionFrame" + objectIndex,
@@ -162,7 +163,7 @@ public class GDXEnvironmentObject
                                                                               bulletCollisionFrameTransformToWorld);
       bulletCollisionSpecificationFrame
             = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "BulletCollisionSpecificationFrame" + objectIndex,
-                                                                              realisticModelFrame,
+                                                                              placementFrame,
                                                                               bulletCollisionOffset);
    }
 
@@ -376,6 +377,11 @@ public class GDXEnvironmentObject
       return mass;
    }
 
+   public Point3D getCenterOfMassInModelFrame()
+   {
+      return centerOfMassInModelFrame;
+   }
+
    public void setBtCollisionShape(btCollisionShape btCollisionShape)
    {
       this.btCollisionShape = btCollisionShape;
@@ -391,9 +397,9 @@ public class GDXEnvironmentObject
       return btRigidBody;
    }
 
-   public RigidBodyTransform getWholeThingOffset()
+   public RigidBodyTransform getRealisticModelOffset()
    {
-      return wholeThingOffset;
+      return realisticModelOffset;
    }
 
    public Sphere3D getBoundingSphere()
