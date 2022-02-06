@@ -128,6 +128,10 @@ public class LIPMWalkerRobot
       kneeJoints.get(robotSide).setTau(force);
    }
 
+   public double getKneeForce(RobotSide robotSide) {return kneeJoints.get(robotSide).getTau();}
+
+   public double getHipTorque(RobotSide robotSide) {return hipJoints.get(robotSide).getTau();}
+
    private void setupInitialConditions()
    {
       bodyJoint.setCartesianPosition(0.0, 1.0);
