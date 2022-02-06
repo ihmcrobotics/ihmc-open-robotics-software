@@ -48,9 +48,14 @@ public class ContactStateManager
       return totalStateDuration.getDoubleValue();
    }
 
+   public double getAdjustedTimeRemainingInCurrentSupportSequence()
+   {
+      return currentStateDuration.getDoubleValue() - adjustedTimeInSupportSequence.getDoubleValue();
+   }
+
    public double getTimeRemainingInCurrentSupportSequence()
    {
-      return adjustedTimeInSupportSequence.getDoubleValue() - currentStateDuration.getDoubleValue();
+      return currentStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue();
    }
 
    public double getTimeInSupportSequence()
@@ -147,10 +152,11 @@ public class ContactStateManager
 
    public double estimateTimeRemainingForSwingUnderDisturbance(DoubleProvider timeShiftProvider)
    {
-      double timeRemainingInCurrentState = getTimeRemainingInCurrentSupportSequence();
-      if (isContactStateDone())
-         return 0.0;
+      double timeRemainingInCurrentState = getAdjustedTimeRemainingInCurrentSupportSequence();
+//      if (isContactStateDone())
+//         return 0.0;
 
+      // FIXME is this necessary now?
       double deltaTimeToBeAccounted = timeShiftProvider.getValue();
 
       if (Double.isNaN(deltaTimeToBeAccounted))
