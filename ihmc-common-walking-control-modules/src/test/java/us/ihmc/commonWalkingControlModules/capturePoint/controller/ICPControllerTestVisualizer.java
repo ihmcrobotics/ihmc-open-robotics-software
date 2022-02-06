@@ -34,6 +34,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ICPControllerTestVisualizer
 {
@@ -42,6 +43,7 @@ public class ICPControllerTestVisualizer
    private final YoGraphicPosition perfectCMPGraphic;
    private final SimulationOverheadPlotter plotter;
 
+   private final YoDouble yoOmega0;
    private final YoFramePoint2D yoPerfectCMP;
    private final YoFramePoint2D yoPerfectCoP;
    private final YoFramePoint2D yoDesiredCoP;
@@ -49,11 +51,14 @@ public class ICPControllerTestVisualizer
    //   private final YoFramePoint2D yoAchievedCMP;
    private final YoFramePoint3D yoCenterOfMass;
    private final YoFramePoint2D yoCapturePoint;
+   private final YoFramePoint3D yoCapturePoint3D;
    private final YoFramePoint2D yoDesiredICP;
    private final YoFramePoint3D yoDesiredICP3D;
    //   private final YoFramePoint2D yoAdjustedDesiredCapturePoint;
    private final YoFrameVector2D yoDesiredICPVelocity;
-   private final YoFrameVector3D yoDesiredICPVelocity3D;
+   private final YoFrameVector3D yoDesiredScaledICPVelocity3D;
+   private final YoFrameVector2D yoExpectedControlICPVelocity;
+   private final YoFrameVector3D yoExpectedScaledControlICPVelocity3D;
 
    //   private final YoFramePoint2D yoFinalDesiredICP;
    //   private final YoFramePoint3D yoFinalDesiredCoM;
@@ -62,8 +67,14 @@ public class ICPControllerTestVisualizer
 
    public ICPControllerTestVisualizer(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      this(500, registry, yoGraphicsListRegistry);
+   }
+   
+   public ICPControllerTestVisualizer(int dataBufferSize, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+      yoOmega0 = new YoDouble("omega0", registry);
       yoPerfectCMP = new YoFramePoint2D("perfectCMP", worldFrame, registry);
       yoPerfectCoP = new YoFramePoint2D("perfectCoP", worldFrame, registry);
 
@@ -72,13 +83,18 @@ public class ICPControllerTestVisualizer
       //      yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
       yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
       yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
+      yoCapturePoint3D = new YoFramePoint3D("capturePoint3D", worldFrame, registry);
 
       yoDesiredICP = new YoFramePoint2D("desiredICP", worldFrame, registry);
       yoDesiredICP3D = new YoFramePoint3D("desiredICP3D", worldFrame, registry);
       //      yoAdjustedDesiredCapturePoint = new YoFramePoint2D("adjustedDesiredICP", worldFrame, registry);
       yoDesiredICPVelocity = new YoFrameVector2D("desiredICPVelocity", worldFrame, registry);
-      yoDesiredICPVelocity3D = new YoFrameVector3D("desiredICPVelocity3D", worldFrame, registry);
+      yoDesiredScaledICPVelocity3D = new YoFrameVector3D("desiredScaledICPVelocity3D", worldFrame, registry);
 
+      yoExpectedControlICPVelocity = new YoFrameVector2D("expectedControlICPVelocity", worldFrame, registry);
+      yoExpectedScaledControlICPVelocity3D = new YoFrameVector3D("expectedScaledControlICPVelocity3D", worldFrame, registry);
+
+      
       //      yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
       //      yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
 
@@ -86,7 +102,7 @@ public class ICPControllerTestVisualizer
 
       Robot nullRobot = new Robot("test");
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      parameters.setDataBufferSize(500);
+      parameters.setDataBufferSize(dataBufferSize);
       scs = new SimulationConstructionSet(nullRobot, parameters);
       scs.setDT(1.0, 1);
 
@@ -100,9 +116,16 @@ public class ICPControllerTestVisualizer
 
       YoGraphicVector desiredICPVelocityViz = new YoGraphicVector("DesiredICPVelocity",
                                                                   yoDesiredICP3D,
-                                                                  yoDesiredICPVelocity3D,
-                                                                  0.01,
+                                                                  yoDesiredScaledICPVelocity3D,
+                                                                  1.0,
                                                                   YoAppearance.Yellow(),
+                                                                  true);
+      
+      YoGraphicVector expectedControlICPVelocityViz = new YoGraphicVector("ExpectedFeedbackICPVelocity",
+                                                                  yoCapturePoint3D,
+                                                                  yoExpectedScaledControlICPVelocity3D,
+                                                                  1.0,
+                                                                  YoAppearance.Blue(),
                                                                   true);
 
       YoGraphicPosition desiredCoPViz = new YoGraphicPosition("Desired CoP", yoDesiredCoP, 0.01, Brown(), GraphicType.DIAMOND);
@@ -117,7 +140,8 @@ public class ICPControllerTestVisualizer
       yoGraphicsListRegistry.registerArtifact("ICPControllerTest", capturePointViz.createArtifact());
 
       yoGraphicsListRegistry.registerArtifact("ICPControllerTest", desiredICPVelocityViz.createArtifact());
-
+      yoGraphicsListRegistry.registerArtifact("ICPControllerTest", expectedControlICPVelocityViz.createArtifact());
+      
       YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point",
                                                                        yoDesiredICP,
                                                                        0.011,
@@ -161,7 +185,8 @@ public class ICPControllerTestVisualizer
       plotter.update();
    }
 
-   public void updateInputs(BipedSupportPolygons bipedSupportPolygons,
+   public void updateInputs(double omega0, 
+                            BipedSupportPolygons bipedSupportPolygons,
                             FramePoint2DReadOnly desiredICP,
                             FrameVector2DReadOnly desiredICPVelocity,
                             FramePoint2DReadOnly perfectCMP,
@@ -171,15 +196,20 @@ public class ICPControllerTestVisualizer
    {
       FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
 
+      this.yoOmega0.set(omega0);
+
       this.yoDesiredICP.set(desiredICP);
       this.yoDesiredICP3D.set(desiredICP);
       this.yoDesiredICPVelocity.set(desiredICPVelocity);
-      this.yoDesiredICPVelocity3D.set(desiredICPVelocity);
+      this.yoDesiredScaledICPVelocity3D.set(desiredICPVelocity);
+      yoDesiredScaledICPVelocity3D.scale(0.1);
       this.yoPerfectCMP.set(perfectCMP);
       this.yoPerfectCoP.set(perfectCoP);
       this.yoCapturePoint.set(currentICP);
+      this.yoCapturePoint3D.set(currentICP);
       this.yoCenterOfMass.set(currentCoMPosition);
 
+      
       yoSupportPolygonInWorld.set(supportPolygonInWorld);
 
       //      scs.setTime(scs.getTime() + 1.0);
@@ -194,10 +224,25 @@ public class ICPControllerTestVisualizer
    {
       this.yoDesiredCMP.set(desiredCMP);
       this.yoDesiredCoP.set(desiredCoP);
+      
+      
+      this.yoExpectedControlICPVelocity.sub(this.yoCapturePoint, yoDesiredCMP);
+      this.yoExpectedControlICPVelocity.scale(yoOmega0.getValue());
+
+      yoExpectedScaledControlICPVelocity3D.set(yoExpectedControlICPVelocity);
+      yoExpectedScaledControlICPVelocity3D.scale(0.1);
 
       scs.setTime(scs.getTime() + 1.0);
       scs.tickAndUpdate();
 
       plotter.update();
+   }
+
+   public void cropBuffer()
+   {
+      scs.gotoInPointNow();
+      scs.tick();
+      scs.setInPoint();
+      scs.cropBuffer();
    }
 }
