@@ -63,7 +63,6 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final YoDouble remainingSwingTimeAccordingToPlan = new YoDouble("remainingSwingTimeAccordingToPlan", registry);
    private final YoDouble estimatedRemainingSwingTimeUnderDisturbance = new YoDouble("estimatedRemainingSwingTimeUnderDisturbance", registry);
-   private final YoDouble optimizedRemainingSwingTime = new YoDouble("optimizedRemainingSwingTime", registry);
    private final YoDouble icpErrorThresholdToSpeedUpSwing = new YoDouble("icpErrorThresholdToSpeedUpSwing", registry);
 
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
@@ -123,7 +122,6 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private void setYoVariablesToNaN()
    {
-      optimizedRemainingSwingTime.setToNaN();
       estimatedRemainingSwingTimeUnderDisturbance.setToNaN();
       remainingSwingTimeAccordingToPlan.setToNaN();
    }
