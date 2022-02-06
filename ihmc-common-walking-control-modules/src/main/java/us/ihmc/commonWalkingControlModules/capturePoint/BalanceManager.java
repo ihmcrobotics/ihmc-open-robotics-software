@@ -65,7 +65,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -191,7 +190,6 @@ public class BalanceManager
 
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-   private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
    private final ExecutionTimer plannerTimer = new ExecutionTimer("icpPlannerTimer", registry);
 
    private boolean initializeOnStateChange = false;
@@ -211,16 +209,8 @@ public class BalanceManager
    private final List<Footstep> footsteps = new ArrayList<>();
    private final List<FootstepTiming> footstepTimings = new ArrayList<>();
 
-   private final YoBoolean inSingleSupport = new YoBoolean("InSingleSupport", registry);
-   private final YoBoolean inStanding = new YoBoolean("InStanding", registry);
-   private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
-   private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
-   private final FootstepTiming currentTiming = new FootstepTiming();
-   private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
-
-   private final YoDouble adjustedTimeInSupportSequence = new YoDouble("AdjustedTimeInSupportSequence", registry);
-   private final YoDouble timeAdjustment = new YoDouble("timeAdjustment", registry);
-   private final YoDouble totalTimeAdjustment = new YoDouble("totalTimeAdjustment", registry);
+   private final ContactStateManager contactStateManager;
+   private final DoubleProvider timeShiftProvider = this::computeTimeShiftToMinimizeTrackingError;
 
    private final CoPTrajectoryGeneratorState copTrajectoryState;
    private final WalkingCoPTrajectoryGenerator copTrajectory;
@@ -248,6 +238,8 @@ public class BalanceManager
 
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
+
+      contactStateManager = new ContactStateManager(controllerToolbox.getControlDT(), registry);
 
       angularMomentumHandler = new AngularMomentumHandler<>(totalMass,
                                                             gravityZ,
@@ -595,7 +587,7 @@ public class BalanceManager
             angularMomentumHandler.resetAngularMomentum();
          }
 
-         angularMomentumHandler.computeAngularMomentum(adjustedTimeInSupportSequence.getDoubleValue());
+         angularMomentumHandler.computeAngularMomentum(contactStateManager.getTimeInSupportSequence());
       }
       else
       {
@@ -603,15 +595,14 @@ public class BalanceManager
       }
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
-      comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue());
+      comTrajectoryPlanner.compute(contactStateManager.getTotalStateDuration());
 
       yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoFinalDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
       yoFinalDesiredCoMAcceleration.set(comTrajectoryPlanner.getDesiredCoMAcceleration());
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
-      comTrajectoryPlanner.compute(adjustedTimeInSupportSequence.getDoubleValue());
-
+      comTrajectoryPlanner.compute(contactStateManager.getTimeInSupportSequence());
 
       if (footstepTimings.isEmpty())
       {
@@ -621,30 +612,8 @@ public class BalanceManager
          yoFinalDesiredCoMAcceleration.setToNaN();
       }
 
-      // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
-      if (footsteps.isEmpty() || !icpPlannerDone.getValue())
-         timeInSupportSequence.add(controllerToolbox.getControlDT());
+         contactStateManager.updateTimeInState(timeShiftProvider);
 
-      if (inStanding.getValue())
-      {
-         timeAdjustment.set(0.0);
-      }
-      else
-      {
-         double timeAdjustmentToApply = 0.5 * computeTimeShiftToMinimizeTrackingError();
-         double timeIntoState = adjustedTimeInSupportSequence.getDoubleValue();
-         double timeRemainingInState = currentStateDuration.getDoubleValue() - timeIntoState;
-         timeAdjustmentToApply = MathTools.clamp(timeAdjustmentToApply, -timeIntoState, timeRemainingInState);
-         if (Math.abs(timeAdjustmentToApply) < 1e-3)
-            timeAdjustmentToApply = 0.0;
-         timeAdjustment.set(Double.isNaN(timeAdjustmentToApply) ? 0.0 : timeAdjustmentToApply);
-      }
-
-      totalTimeAdjustment.add(timeAdjustment.getValue());
-
-      adjustedTimeInSupportSequence.set(MathTools.clamp(timeInSupportSequence.getValue() + totalTimeAdjustment.getValue(), 0.0, currentStateDuration.getDoubleValue()));
-
-      icpPlannerDone.set(adjustedTimeInSupportSequence.getValue() >= currentStateDuration.getValue());
       decayDesiredICPVelocity();
 
       plannerTimer.stopMeasurement();
@@ -662,7 +631,7 @@ public class BalanceManager
          return;
       }
 
-      if (inSingleSupport.getValue() || !icpPlannerDone.getValue())
+      if (contactStateManager.isInSingleSupport() || !contactStateManager.isContactStateDone())
       {
          icpVelocityReductionFactor.set(Double.NaN);
          return;
@@ -690,20 +659,7 @@ public class BalanceManager
 
    public double estimateTimeRemainingForSwingUnderDisturbance()
    {
-      double stateDuration = currentTiming.getStepTime();
-      double timeRemainingInCurrentState = adjustedTimeInSupportSequence.getDoubleValue() - stateDuration;
-      if (icpPlannerDone.getBooleanValue())
-         return 0.0;
-
-      double deltaTimeToBeAccounted = computeTimeShiftToMinimizeTrackingError();
-
-      if (Double.isNaN(deltaTimeToBeAccounted))
-         return 0.0;
-
-      double estimatedTimeRemaining = timeRemainingInCurrentState - deltaTimeToBeAccounted;
-      estimatedTimeRemaining = MathTools.clamp(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
-
-      return estimatedTimeRemaining;
+      return contactStateManager.estimateTimeRemainingForSwingUnderDisturbance(timeShiftProvider);
    }
 
    private double computeTimeShiftToMinimizeTrackingError()
@@ -782,9 +738,10 @@ public class BalanceManager
 
    public double getTimeRemainingInCurrentState()
    {
+      // TODO is this necessary?
       if (footstepTimings.isEmpty())
          return 0.0;
-      return currentTiming.getStepTime() - adjustedTimeInSupportSequence.getValue();
+      return contactStateManager.getTimeRemainingInCurrentSupportSequence();
    }
 
    public void goHome()
@@ -817,14 +774,8 @@ public class BalanceManager
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-      timeInSupportSequence.set(0.0);
-      adjustedTimeInSupportSequence.set(0.0);
-      inSingleSupport.set(false);
-      inStanding.set(true);
-      currentStateDuration.set(Double.NaN);
-      totalStateDuration.set(Double.NaN);
 
-      totalTimeAdjustment.set(0.0);
+      contactStateManager.initialize();
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);
 
@@ -836,12 +787,11 @@ public class BalanceManager
 
    public void initializeICPPlanForSingleSupport()
    {
-      inSingleSupport.set(true);
-      inStanding.set(false);
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
-      currentTiming.set(footstepTimings.get(0));
       currentFootstep.set(footsteps.get(0));
 
+      double swingTime = footstepTimings.get(0).getSwingTime();
+      double transferTime = footstepTimings.get(0).getTransferTime();
 
       stepAdjustmentController.reset();
       if (footsteps.size() > 1 && footstepTimings.size() > 1)
@@ -850,19 +800,13 @@ public class BalanceManager
          nextFootstepTiming.set(footstepTimings.get(1));
          stepAdjustmentController.setFootstepAfterTheCurrentOne(nextFootstep, nextFootstepTiming);
       }
-      stepAdjustmentController.setFootstepToAdjust(currentFootstep, currentTiming.getSwingTime(), currentTiming.getTransferTime());
+      stepAdjustmentController.setFootstepToAdjust(currentFootstep, swingTime, transferTime);
       stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
 
-      timeInSupportSequence.set(currentTiming.getTransferTime());
-      currentStateDuration.set(currentTiming.getStepTime());
-      totalStateDuration.set(currentTiming.getStepTime());
-
-      adjustedTimeInSupportSequence.set(currentTiming.getTransferTime());
-      totalTimeAdjustment.set(0.0);
+      contactStateManager.initializeForSingleSupport(transferTime, swingTime);
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuitySingleSupport.getValue());
       initializeOnStateChange = true;
-      icpPlannerDone.set(false);
    }
 
    public void initializeICPPlanForStanding()
@@ -881,25 +825,14 @@ public class BalanceManager
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
       comTrajectoryPlanner.initializeTrajectory(yoDesiredCoMPosition, Double.POSITIVE_INFINITY);
 
-      timeInSupportSequence.set(0.0);
-      currentStateDuration.set(Double.POSITIVE_INFINITY);
-      totalStateDuration.set(Double.POSITIVE_INFINITY);
-
-      adjustedTimeInSupportSequence.set(0.0);
-      totalTimeAdjustment.set(0.0);
-
-      inSingleSupport.set(false);
-      inStanding.set(true);
       initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       stepAdjustmentController.reset();
-
-      icpPlannerDone.set(false);
    }
 
    public void initializeICPPlanForTransferToStanding()
    {
-      comTrajectoryPlanner.removeCompletedSegments(totalStateDuration.getDoubleValue());
+      comTrajectoryPlanner.removeCompletedSegments(contactStateManager.getTotalStateDuration());
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
 
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
@@ -911,20 +844,12 @@ public class BalanceManager
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
-      timeInSupportSequence.set(0.0);
-      currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
-      totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
 
-      adjustedTimeInSupportSequence.set(0.0);
-      totalTimeAdjustment.set(0.0);
+      contactStateManager.initializeForTransferToStanding(copTrajectoryState.getFinalTransferDuration());
 
-      inSingleSupport.set(false);
-      inStanding.set(false);
       initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
       stepAdjustmentController.reset();
-
-      icpPlannerDone.set(false);
    }
 
    public void initializeICPPlanForTransfer()
@@ -938,26 +863,17 @@ public class BalanceManager
 
       stepAdjustmentController.reset();
 
-      comTrajectoryPlanner.removeCompletedSegments(totalStateDuration.getDoubleValue());
+      comTrajectoryPlanner.removeCompletedSegments(contactStateManager.getTotalStateDuration());
 
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
-      currentTiming.set(footstepTimings.get(0));
-      timeInSupportSequence.set(0.0);
-      currentStateDuration.set(currentTiming.getTransferTime());
-      totalStateDuration.set(currentTiming.getStepTime());
+      contactStateManager.initializeForTransfer(footstepTimings.get(0).getTransferTime(), footstepTimings.get(0).getSwingTime());
 
-      adjustedTimeInSupportSequence.set(0.0);
-      totalTimeAdjustment.set(0.0);
-
-      inStanding.set(false);
-      inSingleSupport.set(false);
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuityTransfer.getValue());
 
       initializeOnStateChange = true;
-      icpPlannerDone.set(false);
    }
 
    public void computeNormalizedEllipticICPError(RobotSide transferToSide)
@@ -1005,7 +921,7 @@ public class BalanceManager
 
    public boolean isICPPlanDone()
    {
-      return icpPlannerDone.getValue();
+      return contactStateManager.isContactStateDone();
    }
 
    public void requestICPPlannerToHoldCurrentCoMInNextDoubleSupport()
