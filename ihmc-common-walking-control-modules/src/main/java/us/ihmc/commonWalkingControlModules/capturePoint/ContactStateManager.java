@@ -22,7 +22,8 @@ public class ContactStateManager
 
    private final YoBoolean contactStateIsDone = new YoBoolean("ContactStateIsDone", registry);
 
-
+   private final YoDouble remainingTimeInContactSequence = new YoDouble("remainingSwingTimeAccordingToPlan", registry);
+   private final YoDouble adjustedRemainingTimeUnderDisturbance = new YoDouble("adjustedRemainingTimeUnderDisturbance", registry);
 
    private final double controlDt;
 
@@ -50,12 +51,12 @@ public class ContactStateManager
 
    public double getAdjustedTimeRemainingInCurrentSupportSequence()
    {
-      return currentStateDuration.getDoubleValue() - adjustedTimeInSupportSequence.getDoubleValue();
+      return adjustedRemainingTimeUnderDisturbance.getDoubleValue();
    }
 
    public double getTimeRemainingInCurrentSupportSequence()
    {
-      return currentStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue();
+      return remainingTimeInContactSequence.getDoubleValue();
    }
 
    public double getTimeInSupportSequence()
@@ -84,6 +85,9 @@ public class ContactStateManager
       currentStateDuration.set(Double.POSITIVE_INFINITY);
       totalStateDuration.set(Double.POSITIVE_INFINITY);
 
+      remainingTimeInContactSequence.set(Double.POSITIVE_INFINITY);
+      adjustedRemainingTimeUnderDisturbance.set(Double.POSITIVE_INFINITY);
+
       adjustedTimeInSupportSequence.set(0.0);
       totalTimeAdjustment.set(0.0);
 
@@ -95,6 +99,8 @@ public class ContactStateManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(transferDuration);
       totalStateDuration.set(transferDuration + swingDuration);
+      remainingTimeInContactSequence.set(transferDuration);
+      adjustedRemainingTimeUnderDisturbance.set(transferDuration);
 
       adjustedTimeInSupportSequence.set(0.0);
       totalTimeAdjustment.set(0.0);
@@ -114,6 +120,8 @@ public class ContactStateManager
       timeInSupportSequence.set(transferDuration);
       currentStateDuration.set(stepDuration);
       totalStateDuration.set(stepDuration);
+      remainingTimeInContactSequence.set(swingDuration);
+      adjustedRemainingTimeUnderDisturbance.set(swingDuration);
 
       adjustedTimeInSupportSequence.set(transferDuration);
       totalTimeAdjustment.set(0.0);
@@ -126,6 +134,8 @@ public class ContactStateManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(finalTransferDuration);
       totalStateDuration.set(finalTransferDuration);
+      remainingTimeInContactSequence.set(finalTransferDuration);
+      adjustedRemainingTimeUnderDisturbance.set(finalTransferDuration);
 
       adjustedTimeInSupportSequence.set(0.0);
       totalTimeAdjustment.set(0.0);
@@ -136,36 +146,28 @@ public class ContactStateManager
       contactStateIsDone.set(false);
    }
 
-   public void updateTimeInState(DoubleProvider timeShiftProvider)
+   public void updateTimeInState(DoubleProvider timeShiftProvider, boolean shouldAdjustTimeFromTrackingError)
    {
       // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
       if (inStanding.getBooleanValue() || !contactStateIsDone.getBooleanValue())
          timeInSupportSequence.add(controlDt);
 
-      timeAdjustment.set(computeTimeAdjustmentForDynamicsBasedOnState(timeShiftProvider));
-      totalTimeAdjustment.add(timeAdjustment.getValue());
+      if (shouldAdjustTimeFromTrackingError)
+      {
+         timeAdjustment.set(computeTimeAdjustmentForDynamicsBasedOnState(timeShiftProvider));
+         totalTimeAdjustment.add(timeAdjustment.getValue());
+      }
+      else
+      {
+         timeAdjustment.set(0.0);
+      }
 
       adjustedTimeInSupportSequence.set(MathTools.clamp(timeInSupportSequence.getValue() + totalTimeAdjustment.getValue(), 0.0, currentStateDuration.getDoubleValue()));
 
+      remainingTimeInContactSequence.set(currentStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue());
+      adjustedRemainingTimeUnderDisturbance.set(currentStateDuration.getDoubleValue() - adjustedTimeInSupportSequence.getDoubleValue());
+
       contactStateIsDone.set(adjustedTimeInSupportSequence.getValue() >= currentStateDuration.getValue());
-   }
-
-   public double estimateTimeRemainingForSwingUnderDisturbance(DoubleProvider timeShiftProvider)
-   {
-      double timeRemainingInCurrentState = getAdjustedTimeRemainingInCurrentSupportSequence();
-//      if (isContactStateDone())
-//         return 0.0;
-
-      // FIXME is this necessary now?
-      double deltaTimeToBeAccounted = timeShiftProvider.getValue();
-
-      if (Double.isNaN(deltaTimeToBeAccounted))
-         return 0.0;
-
-      double estimatedTimeRemaining = timeRemainingInCurrentState - deltaTimeToBeAccounted;
-      estimatedTimeRemaining = MathTools.clamp(estimatedTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
-
-      return estimatedTimeRemaining;
    }
 
    private double computeTimeAdjustmentForDynamicsBasedOnState(DoubleProvider timeShiftProvider)

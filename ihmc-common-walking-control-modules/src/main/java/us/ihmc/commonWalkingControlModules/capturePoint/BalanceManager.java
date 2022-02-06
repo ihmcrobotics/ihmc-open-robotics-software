@@ -127,6 +127,9 @@ public class BalanceManager
    private final YoBoolean useMomentumRecoveryModeForBalance = new YoBoolean("useMomentumRecoveryModeForBalance", registry);
 
    private final YoDouble yoTime;
+   private final YoDouble icpErrorThresholdToAdjustTime = new YoDouble("icpErrorThresholdToAdjustTime", registry);
+   private final YoBoolean shouldAdjustTimeFromTrackingError = new YoBoolean("shouldAdjustTimeFromTrackingError", registry);
+
 
    private final ReferenceFrame centerOfMassFrame;
 
@@ -247,6 +250,8 @@ public class BalanceManager
                                                             controllerToolbox.getReferenceFrames().getSoleFrames(),
                                                             SettableContactStateProvider::new,
                                                             registry, yoGraphicsListRegistry);
+
+      icpErrorThresholdToAdjustTime.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -612,7 +617,8 @@ public class BalanceManager
          yoFinalDesiredCoMAcceleration.setToNaN();
       }
 
-         contactStateManager.updateTimeInState(timeShiftProvider);
+      shouldAdjustTimeFromTrackingError.set(getICPErrorMagnitude() > icpErrorThresholdToAdjustTime.getDoubleValue());
+      contactStateManager.updateTimeInState(timeShiftProvider, shouldAdjustTimeFromTrackingError.getBooleanValue());
 
       decayDesiredICPVelocity();
 
@@ -655,11 +661,6 @@ public class BalanceManager
    public void enablePelvisXYControl()
    {
       pelvisICPBasedTranslationManager.enable();
-   }
-
-   public double estimateTimeRemainingForSwingUnderDisturbance()
-   {
-      return contactStateManager.estimateTimeRemainingForSwingUnderDisturbance(timeShiftProvider);
    }
 
    private double computeTimeShiftToMinimizeTrackingError()
@@ -738,10 +739,12 @@ public class BalanceManager
 
    public double getTimeRemainingInCurrentState()
    {
-      // TODO is this necessary?
-      if (footstepTimings.isEmpty())
-         return 0.0;
       return contactStateManager.getTimeRemainingInCurrentSupportSequence();
+   }
+
+   public double getAdjustedTimeRemainingInCurrentSupportSequence()
+   {
+      return contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence();
    }
 
    public void goHome()
@@ -900,6 +903,11 @@ public class BalanceManager
    public double getICPDistanceOutsideSupportForStep()
    {
       return icpDistanceOutsideSupportForStep.getValue();
+   }
+
+   public boolean shouldAjudstTimeFromTrackingError()
+   {
+      return shouldAdjustTimeFromTrackingError.getBooleanValue();
    }
 
    public double getICPErrorMagnitude()
