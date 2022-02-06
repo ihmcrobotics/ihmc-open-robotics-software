@@ -49,8 +49,18 @@ public class HeuristicICPController implements ICPControllerInterface
    private final ICPControlGainsReadOnly feedbackGains;
 
    final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
+   private final YoDouble icpErrorMagnitude = new YoDouble(yoNamePrefix + "ICPErrorMagnitude", registry);
    private final YoDouble icpParallelError = new YoDouble(yoNamePrefix + "ICPParallelError", registry);
    private final YoDouble icpPerpError = new YoDouble(yoNamePrefix + "ICPPerpError", registry);
+
+   private final YoFrameVector2D pureFeedforwardControl = new YoFrameVector2D(yoNamePrefix + "PureFeedforwardControl", "", worldFrame, registry);
+   private final YoDouble pureFeedforwardMagnitude = new YoDouble(yoNamePrefix + "PureFeedforwardMagnitude", registry);
+
+   private final YoFrameVector2D pureFeedbackControl = new YoFrameVector2D(yoNamePrefix + "PureFeedbackControl", "", worldFrame, registry);
+   private final YoDouble pureFeedbackMagnitude = new YoDouble(yoNamePrefix + "PureFeedbackMagnitude", registry);
+
+   private final YoDouble feedbackFeedforwardAlpha = new YoDouble(yoNamePrefix + "FeedbackFeedforwardAlpha", registry);
+   private final YoDouble pureFeedbackThreshError = new YoDouble(yoNamePrefix + "PureFeedbackThreshError", registry);
 
    private final YoDouble icpParallelFeedback = new YoDouble(yoNamePrefix + "ICPParallelFeedback", registry);
    private final YoDouble icpPerpFeedback = new YoDouble(yoNamePrefix + "ICPPerpFeedback", registry);
@@ -116,6 +126,8 @@ public class HeuristicICPController implements ICPControllerInterface
                                  YoRegistry parentRegistry,
                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
+      pureFeedbackThreshError.set(0.2);
+
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
 
@@ -160,6 +172,12 @@ public class HeuristicICPController implements ICPControllerInterface
                        FramePoint2DReadOnly currentCoMPosition,
                        double omega0)
    {
+      //TODO: Try working in velocity and angle space instead of xy space.
+      // Have a gain on the velocity based on whether leading or lagging. 
+      // Then have a gain on the angle or something to push towards the ICP direction line.
+      // This should reduce the dependence on the perfect CoP/CMP, which can throw things off
+      // when there is a big error. And also should not cause so much outside to project fixes.
+      // Especially if you limit the amount of velocity increase you can have.
       controllerTimer.startMeasurement();
 
       this.desiredICP.setMatchingFrame(desiredICP);
@@ -174,6 +192,7 @@ public class HeuristicICPController implements ICPControllerInterface
       this.perfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
 
       this.icpError.sub(currentICP, desiredICP);
+      this.icpErrorMagnitude.set(icpError.length());
 
       this.parallelDirection.set(this.desiredICPVelocity);
 
@@ -200,7 +219,6 @@ public class HeuristicICPController implements ICPControllerInterface
          icpParallelError.set(0.0);
       }
 
-      feedbackCMP.set(icpError);
 
       icpParallelFeedback.set(icpParallelError.getValue());
       icpParallelFeedback.mul(feedbackGains.getKpParallelToMotion());
@@ -208,28 +226,66 @@ public class HeuristicICPController implements ICPControllerInterface
       icpPerpFeedback.set(icpPerpError.getValue());
       icpPerpFeedback.mul(feedbackGains.getKpOrthogonalToMotion());
 
+      pureFeedbackControl.set(icpError);
+      pureFeedbackControl.scale(feedbackGains.getKpOrthogonalToMotion());
+      pureFeedbackMagnitude.set(pureFeedbackControl.length());
+//      pureFeedbackControl.clipToMaxLength(maxLength);
+      
+      pureFeedforwardControl.sub(perfectCMP, desiredICP);
+      pureFeedforwardMagnitude.set(pureFeedforwardControl.length());
+      
+//      if (icpErrorMagnitude.getValue() >= pureFeedbackThreshError.getValue())
+         if (Math.abs(icpPerpError.getValue()) >= pureFeedbackThreshError.getValue())
+      {
+         feedbackFeedforwardAlpha.set(1.0);
+      }
+      else
+      {
+//         feedbackFeedforwardAlpha.set(icpErrorMagnitude.getValue()/pureFeedbackThreshError.getValue());
+         double perpErrorAdjusted = Math.abs(icpPerpError.getValue()) - pureFeedbackThreshError.getValue()/2.0;
+         if (perpErrorAdjusted < 0.0)
+            perpErrorAdjusted = 0.0;
+                  
+         feedbackFeedforwardAlpha.set(perpErrorAdjusted/(pureFeedbackThreshError.getValue()/2.0));
+      }
+      
       limitAbsoluteValue(icpParallelFeedback, feedbackGains.getFeedbackPartMaxValueParallelToMotion());
       limitAbsoluteValue(icpPerpFeedback, feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
-      unconstrainedFeedback.setToZero();
-      if (!parallelDirection.containsNaN())
-      {
-         tempVector.set(parallelDirection);
-         tempVector.scale(icpParallelFeedback.getValue());
-         unconstrainedFeedback.add(tempVector);
-      }
-
-      if (!perpDirection.containsNaN())
-      {
-         tempVector.set(perpDirection);
-         tempVector.scale(icpPerpFeedback.getValue());
-         unconstrainedFeedback.add(tempVector);
-      }
-
-      unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
-      unconstrainedFeedbackCMP.add(icpError);
+//      unconstrainedFeedback.interpolate(pureFeedforwardControl, pureFeedbackControl, feedbackFeedforwardAlpha.getValue());
+      
+      
+      unconstrainedFeedback.set(pureFeedforwardControl);
+      unconstrainedFeedback.scale(1.0 - feedbackFeedforwardAlpha.getValue());
+      unconstrainedFeedback.add(pureFeedbackControl);
+      
+      unconstrainedFeedbackCMP.set(currentICP);
       unconstrainedFeedbackCMP.add(unconstrainedFeedback);
 
+//      unconstrainedFeedback.setToZero();
+//      if (!parallelDirection.containsNaN())
+//      {
+//         tempVector.set(parallelDirection);
+//         tempVector.scale(icpParallelFeedback.getValue());
+//         unconstrainedFeedback.add(tempVector);
+//      }
+//
+//      if (!perpDirection.containsNaN())
+//      {
+//         tempVector.set(perpDirection);
+//         tempVector.scale(icpPerpFeedback.getValue());
+//         unconstrainedFeedback.add(tempVector);
+//      }
+//
+//      unconstrainedFeedbackCMP.add(perfectCoP, perfectCMPOffset);
+//      unconstrainedFeedbackCMP.add(icpError);
+//      unconstrainedFeedbackCMP.add(unconstrainedFeedback);
+
+      
+      
+      
+      
+      
       unconstrainedFeedbackCoP.set(unconstrainedFeedbackCMP);
       unconstrainedFeedbackCoP.sub(perfectCMPOffset);
 
@@ -246,6 +302,10 @@ public class HeuristicICPController implements ICPControllerInterface
 
       if (supportPolygonInWorld.isPointInside(unconstrainedFeedbackCoP))
       {
+         //TODO: Move more inside the foot if there is a large enough distance from the CMP to the ICP, so that 
+         // the foot doesn't unnecessarily rotate.
+         // Maybe after all the stuff is computed, do this tweak inside to prevent foot rotation if you can.
+         
          feedbackCoP.set(unconstrainedFeedbackCoP);
       }
 
@@ -272,6 +332,8 @@ public class HeuristicICPController implements ICPControllerInterface
                double firstDistanceSquared = firstProjectionIntersection.distanceSquared(unconstrainedFeedbackCoP);
                double secondDistanceSquared = secondProjectionIntersection.distanceSquared(unconstrainedFeedbackCoP);
 
+               //TODO: Take somewhere inside the foot if there is a large enough distance from the CMP to the ICP after the projection, so that 
+               // the foot doesn't unnecessarily rotate.
                if (firstDistanceSquared <= secondDistanceSquared)
                {
                   feedbackCoP.set(firstProjectionIntersection);
@@ -299,6 +361,7 @@ public class HeuristicICPController implements ICPControllerInterface
             tempVector.normalize();
             double closestPointWithProjectionLineDot = tempVector.dot(projectionVector);
 
+            // TODO: Not sure if this is what we want to be doing here. Might be something smarter.
             if (copProjectionDot >= closestPointWithProjectionLineDot)
                feedbackCoP.set(coPProjection);
             else
@@ -341,6 +404,7 @@ public class HeuristicICPController implements ICPControllerInterface
       YoGraphicPosition unconstrainedFeedbackCoPViz = new YoGraphicPosition(yoNamePrefix
             + "UnconstrainedFeedbackCoP", this.unconstrainedFeedbackCoP, 0.004, YoAppearance.Green(), GraphicType.BALL_WITH_ROTATED_CROSS);
 
+      //TODO: Figure out a viz that works with the logger.
       YoArtifactLine2d projectionLineViz = new YoArtifactLine2d(yoNamePrefix + "ProjectionLine", this.projectionLine, YoAppearance.Aqua().getAwtColor());
 
       YoGraphicPosition firstIntersectionViz = new YoGraphicPosition(yoNamePrefix
@@ -358,7 +422,7 @@ public class HeuristicICPController implements ICPControllerInterface
       artifactList.add(feedbackCoPViz.createArtifact());
       artifactList.add(unconstrainedFeedbackCMPViz.createArtifact());
       artifactList.add(unconstrainedFeedbackCoPViz.createArtifact());
-      artifactList.add(projectionLineViz);
+//      artifactList.add(projectionLineViz);
 
       artifactList.add(firstIntersectionViz.createArtifact());
       artifactList.add(secondIntersectionViz.createArtifact());
