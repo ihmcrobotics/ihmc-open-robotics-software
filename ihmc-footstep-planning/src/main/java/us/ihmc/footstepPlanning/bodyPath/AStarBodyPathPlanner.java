@@ -40,9 +40,8 @@ import java.util.function.Consumer;
 
 public class AStarBodyPathPlanner
 {
-   private static final boolean checkForCollisions = false;
+   private static final boolean checkForCollisions = true;
    private static final boolean computeSurfaceNormalCost = true;
-   private static final boolean useEdgeDetectorCost = false;
    private static final boolean useRANSACTraversibility = true;
    private static final double rollCostWeight = 5.25;
 
@@ -72,9 +71,7 @@ public class AStarBodyPathPlanner
    /* Indicator of how flat and planar and available footholds are, using least squares */
    private final BodyPathLSTraversibilityCalculator leastSqTraversibilityCalculator;
    /* Indicator of how flat and planar and available footholds are */
-   private final BodyPathSimpleTraversibilityCalculator ransacTraversibilityCalculator;
-   /* Uses edge detection as a heuristic for good areas to walk */
-   private final HeightMapObstacleDetector obstacleDetector = new HeightMapObstacleDetector();
+   private final BodyPathRANSACTraversibilityCalculator ransacTraversibilityCalculator;
    /* Performs box collision check */
    private final BodyPathCollisionDetector collisionDetector = new BodyPathCollisionDetector();
    /* Computes surface normals with least-squares and penalizing roll when changing elevation */
@@ -99,17 +96,28 @@ public class AStarBodyPathPlanner
    private final AStarBodyPathSmoother smoother = new AStarBodyPathSmoother();
 
    /* Parameters to extract */
-   static final double groundClearance = 0.2;
+   static final double groundClearance = 0.3;
    static final double maxStepUpDown = 0.2;
    static final double maxIncline = Math.toRadians(55.0);
    static final double snapRadius = 0.1;
-   static final double boxSizeY = 0.7;
+   static final double boxSizeY = 0.8;
    static final double boxSizeX = 0.3;
 
    public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, ConvexPolygon2D footPolygon)
    {
       this.parameters = parameters;
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
+
+      if (useRANSACTraversibility)
+      {
+         ransacTraversibilityCalculator = new BodyPathRANSACTraversibilityCalculator(gridHeightMap::get, ransacNormalCalculator, registry);
+         leastSqTraversibilityCalculator = null;
+      }
+      else
+      {
+         leastSqTraversibilityCalculator = new BodyPathLSTraversibilityCalculator(parameters, footPolygon, gridHeightMap, registry);
+         ransacTraversibilityCalculator = null;
+      }
 
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
       this.edgeData = new AStarBodyPathEdgeData(allVariables.size());
@@ -134,18 +142,8 @@ public class AStarBodyPathPlanner
                                          leastSqNormal.setToZero();
                                          roll.set(0.0);
                                          incline.set(0.0);
+                                         ransacTraversibilityCalculator.clearVariables();
                                       });
-
-      if (useRANSACTraversibility)
-      {
-         ransacTraversibilityCalculator = new BodyPathSimpleTraversibilityCalculator(gridHeightMap::get, ransacNormalCalculator, registry);
-         leastSqTraversibilityCalculator = null;
-      }
-      else
-      {
-         leastSqTraversibilityCalculator = new BodyPathLSTraversibilityCalculator(parameters, footPolygon, gridHeightMap, registry);
-         ransacTraversibilityCalculator = null;
-      }
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -167,8 +165,10 @@ public class AStarBodyPathPlanner
       }
    }
 
-   private static void packRadialOffsets(HeightMapData heightMapData, int minMaxOffsetXY, double radius, TIntArrayList xOffsets, TIntArrayList yOffsets)
+   static void packRadialOffsets(HeightMapData heightMapData, double radius, TIntArrayList xOffsets, TIntArrayList yOffsets)
    {
+      int minMaxOffsetXY = (int) Math.round(radius / heightMapData.getGridResolutionXY());
+
       xOffsets.clear();
       yOffsets.clear();
 
@@ -189,7 +189,9 @@ public class AStarBodyPathPlanner
 
    private enum RejectionReason
    {
-      INVALID_SNAP, TOO_STEEP,
+      INVALID_SNAP,
+      TOO_STEEP,
+      STEP_TOO_HIGH,
       COLLISION,
       NON_TRAVERSIBLE
    }
@@ -206,8 +208,7 @@ public class AStarBodyPathPlanner
       edgeDataMap.clear();
       gridHeightMap.clear();
 
-      int minMaxOffsetXY = (int) Math.round(snapRadius / heightMapData.getGridResolutionXY());
-      packRadialOffsets(heightMapData, minMaxOffsetXY, snapRadius, xSnapOffsets, ySnapOffsets);
+      packRadialOffsets(heightMapData, snapRadius, xSnapOffsets, ySnapOffsets);
 
       Pose3D startPose = new Pose3D();
       Pose3D goalPose = new Pose3D();
@@ -224,10 +225,6 @@ public class AStarBodyPathPlanner
       gridHeightMap.put(startNode, startPose.getZ());
       leastCostNode = startNode;
 
-      if (useEdgeDetectorCost)
-      {
-         obstacleDetector.compute(heightMapData);
-      }
       if (computeSurfaceNormalCost)
       {
          double patchWidth = 0.25;
@@ -291,6 +288,13 @@ public class AStarBodyPathPlanner
 
             double xyDistance = xyDistance(node, neighbor);
             deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - parentSnapHeight));
+            if (deltaHeight.getValue() > maxStepUpDown)
+            {
+               rejectionReason.set(RejectionReason.TOO_STEEP);
+               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
+               continue;
+            }
+
             incline.set(Math.atan2(deltaHeight.getValue(), xyDistance));
 
             if (Math.abs(incline.getValue()) > maxIncline)
@@ -312,6 +316,12 @@ public class AStarBodyPathPlanner
             }
 
             edgeCost.set(xyDistance);
+
+            boolean debug = neighbor.getXIndex() == 13 && neighbor.getYIndex() == -1 && node.getXIndex() == 12 && node.getYIndex() == 0;
+            if (debug)
+            {
+               System.out.println();
+            }
 
             if (useRANSACTraversibility)
             {
@@ -342,18 +352,12 @@ public class AStarBodyPathPlanner
                }
             }
 
-            if (useEdgeDetectorCost)
-            {
-               int xIndex = HeightMapTools.coordinateToIndex(node.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-               int yIndex = HeightMapTools.coordinateToIndex(node.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
-               double obstacleCost = obstacleDetector.getTerrainCost().get(xIndex, yIndex);
-               edgeCost.add(obstacleCost);
-            }
             if (computeSurfaceNormalCost)
             {
                double yaw = Math.atan2(neighbor.getY() - node.getY(), neighbor.getX() - node.getX());
                Pose2D bodyPose = new Pose2D();
-               bodyPose.set(node.getX(), node.getY(), yaw);
+//               bodyPose.set(0.5 * (node.getX() + neighbor.getX()), 0.5 * (node.getY() + neighbor.getY()), yaw);
+               bodyPose.set(neighbor.getX(), neighbor.getY(), yaw);
 
                UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(HeightMapTools.coordinateToKey(bodyPose.getX(),
                                                                                                                           bodyPose.getY(),
@@ -491,14 +495,14 @@ public class AStarBodyPathPlanner
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
 
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
-      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
+//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
    }
 
    private static Pair<Integer, Integer> rotate(int xOff, int yOff, int i)

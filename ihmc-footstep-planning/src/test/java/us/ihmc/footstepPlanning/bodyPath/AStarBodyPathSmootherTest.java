@@ -2,22 +2,30 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.HeightMapMessage;
+import org.apache.commons.lang3.Conversion;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
@@ -27,6 +35,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static us.ihmc.pathPlanning.HeightMapDataSetName.*;
 
 public class AStarBodyPathSmootherTest
 {
@@ -249,6 +259,71 @@ public class AStarBodyPathSmootherTest
       {
          e.printStackTrace();
       }
+   }
+
+   @Test
+   public void runTimingTest()
+   {
+      visualize = false;
+
+      HeightMapDataSetName[] datasets = new HeightMapDataSetName[]{Stairs_1, Cinders_2, Ramp, Obstacles_1};
+      FootstepPlannerRequest[] requests = new FootstepPlannerRequest[datasets.length];
+      HeightMapData[] heightMapData = new HeightMapData[datasets.length];
+      FootstepPlannerOutput output = new FootstepPlannerOutput();
+
+      AStarBodyPathPlanner planner = new AStarBodyPathPlanner(new DefaultFootstepPlannerParameters(), PlannerTools.createDefaultFootPolygon());
+      AStarBodyPathSmoother smoother = new AStarBodyPathSmoother();
+
+      for (int i = 0; i < datasets.length; i++)
+      {
+         FootstepPlannerRequest request = new FootstepPlannerRequest();
+         request.setTimeout(10.0);
+         request.setStartFootPoses(0.15, datasets[i].getStart());
+         request.setGoalFootPoses(0.15, datasets[i].getGoal());
+         requests[i] = request;
+
+         heightMapData[i] = datasets[i].getHeightMapData();
+      }
+
+      int warmupIterations = 2;
+      for (int i = 0; i < warmupIterations; i++)
+      {
+         for (int j = 0; j < datasets.length; j++)
+         {
+            planner.setHeightMapData(heightMapData[j]);
+            planner.handleRequest(requests[j], output);
+            smoother.doSmoothing(output.getBodyPath().stream().map(Pose3D::getPosition).collect(Collectors.toList()), heightMapData[j]);
+         }
+      }
+
+
+      int iterations = 10;
+      long initialPlanTime = 0;
+      long smoothTime = 0;
+
+      for (int i = 0; i < iterations; i++)
+      {
+         for (int j = 0; j < datasets.length; j++)
+         {
+            long t0 = System.currentTimeMillis();
+            planner.setHeightMapData(heightMapData[j]);
+            planner.handleRequest(requests[j], output);
+            long t1 = System.currentTimeMillis();
+            smoother.doSmoothing(output.getBodyPath().stream().map(Pose3D::getPosition).collect(Collectors.toList()), heightMapData[j]);
+            long t2 = System.currentTimeMillis();
+
+            initialPlanTime += (t1 - t0);
+            smoothTime += (t2 - t1);
+         }
+      }
+
+      long timePerInitialPlanMillis = initialPlanTime / (iterations * datasets.length);
+      long timePerSmoothMillis = smoothTime / (iterations * datasets.length);
+      long timePerTotalMillis = (initialPlanTime + smoothTime) / (iterations * datasets.length);
+
+      LogTools.info("Time per initial: " + Conversions.millisecondsToSeconds(timePerInitialPlanMillis) + " sec");
+      LogTools.info("Time per smooth:  " + Conversions.millisecondsToSeconds(timePerSmoothMillis) + " sec");
+      LogTools.info("Time per total:   " + Conversions.millisecondsToSeconds(timePerTotalMillis) + " sec");
    }
 
    private static Graphics3DObject buildHeightMapGraphics(HeightMapData heightMapData)

@@ -29,6 +29,7 @@ public class BodyPathLSTraversibilityCalculator
    private final Map<BodyPathLatticePoint, Double> gridHeightMap;
 
    private final YoDouble xBody, yBody, yawBody;
+   private BodyPathLatticePoint startNode;
 
    private final SideDependentList<YoDouble> xStep;
    private final SideDependentList<YoDouble> yStep;
@@ -40,9 +41,6 @@ public class BodyPathLSTraversibilityCalculator
    private final SideDependentList<YoDouble> inclineAlpha;
 
    private final YoDouble leftTraversibility, rightTraversibility;
-
-   private final HashMap<BodyPathLatticePoint, Double> leftTraversibilityMap = new HashMap<>();
-   private final HashMap<BodyPathLatticePoint, Double> rightTraversibilityMap = new HashMap<>();
 
    private final ConvexPolygon2D footPolygon;
    private final TDoubleArrayList xOffsets = new TDoubleArrayList();
@@ -93,14 +91,11 @@ public class BodyPathLSTraversibilityCalculator
    public void setHeightMap(HeightMapData heightMapData)
    {
       this.heightMapData = heightMapData;
-      leftTraversibilityMap.clear();
-      rightTraversibilityMap.clear();
    }
 
    public void initialize(BodyPathLatticePoint startNode)
    {
-      leftTraversibilityMap.put(startNode, 0.0);
-      rightTraversibilityMap.put(startNode, 0.0);
+      this.startNode = startNode;
    }
 
    public double computeTraversibilityIndicator(BodyPathLatticePoint node, BodyPathLatticePoint parentNode)
@@ -112,19 +107,25 @@ public class BodyPathLSTraversibilityCalculator
       yBody.set(bodyPose.getY());
       yawBody.set(bodyPose.getYaw());
 
+      double nodeHeight = gridHeightMap.get(parentNode);
       double parentHeight = gridHeightMap.get(parentNode);
+
       leftTraversibility.set(compute(RobotSide.LEFT, parentHeight));
       rightTraversibility.set(compute(RobotSide.RIGHT, parentHeight));
-
-      leftTraversibilityMap.put(node, leftTraversibility.getValue());
-      rightTraversibilityMap.put(node, rightTraversibility.getValue());
 
       double alphaNode0 = 0.2;
       double alphaNode1 = 0.05;
       double alphaEdge = 0.5;
 
-      double previousLeftTraversibility = leftTraversibilityMap.get(parentNode);
-      double previousRightTraversibility = rightTraversibilityMap.get(parentNode);
+      bodyPose.set(parentNode.getX(), parentNode.getY(), yaw);
+      double previousLeftTraversibility = 0.0;
+      double previousRightTraversibility = 0.0;
+
+      if (!parentNode.equals(startNode))
+      {
+         previousLeftTraversibility = compute(RobotSide.LEFT, nodeHeight);
+         previousRightTraversibility = compute(RobotSide.RIGHT, nodeHeight);
+      }
 
                // Node cost is scored by having one side that has good footholds
       return alphaNode0 * Math.min(leftTraversibility.getValue(), rightTraversibility.getValue()) +
