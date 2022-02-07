@@ -1,16 +1,14 @@
-package us.ihmc.footstepPlanning.ui;
+package us.ihmc.footstepPlanning;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.HeightMapMessagePubSubType;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -36,10 +34,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.IntFunction;
 
-public class HeightMapSnapperVisualizer
+public class HeightMapDataVisualizer
 {
-   private static final boolean SHOW_NORMALS = false;
-   private static final boolean COLOR_REGIONS = true;
+   private static final boolean SHOW_NORMALS = true;
+   private static final boolean COLOR_REGIONS = false;
 
    private static final boolean MARK_A_CELL = false;
    private static final int indexXToMark = 80;
@@ -47,11 +45,11 @@ public class HeightMapSnapperVisualizer
 
    private static final AppearanceDefinition defaultColor = YoAppearance.Olive();
 
-   public HeightMapSnapperVisualizer()
+   public HeightMapDataVisualizer()
    {
 //      File file = loadThroughChooser();
 //      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stepping_stones_4.json");
-      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stairs_1.json");
+      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stairs_2.json");
 //      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "cinders.json");
 
       if (file == null)
@@ -257,6 +255,6 @@ public class HeightMapSnapperVisualizer
 
    public static void main(String[] args)
    {
-      new HeightMapSnapperVisualizer();
+      new HeightMapDataVisualizer();
    }
 }

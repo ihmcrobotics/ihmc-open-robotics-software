@@ -1,5 +1,8 @@
 package us.ihmc.footstepPlanning.bodyPath;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -48,10 +51,15 @@ public class AStarBodyPathSmootherWaypoint
    private static final AppearanceDefinition collisionBoxColor = YoAppearance.RGBColorFromHex(0x824e38);
    private final boolean visualize;
 
+   private HeightMapData heightMapData;
    private final int waypointIndex;
    private final YoFramePoseUsingYawPitchRoll waypoint;
    private final HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator;
    private final YoBoolean isTurnPoint;
+   private int cellKey;
+
+   private final TIntArrayList xSnapOffsets = new TIntArrayList();
+   private final TIntArrayList ySnapOffsets = new TIntArrayList();
 
    private final YoDouble headingFromPrevious;
    private final YoDouble headingToNext;
@@ -138,9 +146,11 @@ public class AStarBodyPathSmootherWaypoint
       }
    }
 
-   public void initialize(List<Point3D> bodyPath)
+   public void initialize(List<Point3D> bodyPath, HeightMapData heightMapData)
    {
+      this.heightMapData = heightMapData;
       isTurnPoint.set(false);
+      AStarBodyPathPlanner.packRadialOffsets(heightMapData, AStarBodyPathPlanner.snapRadius, xSnapOffsets, ySnapOffsets);
 
       if (visualize)
       {
@@ -213,7 +223,7 @@ public class AStarBodyPathSmootherWaypoint
       return isTurnPoint.getValue();
    }
 
-   public Vector2D computeCollisionGradient(HeightMapData heightMapData)
+   public Vector2D computeCollisionGradient()
    {
       int maxOffset = (int) Math.round(0.5 * EuclidCoreTools.norm(boxSizeX, boxSizeY) / heightMapData.getGridResolutionXY());
 
@@ -301,7 +311,7 @@ public class AStarBodyPathSmootherWaypoint
          Vector3D yLocal = new Vector3D();
          yLocal.setX(-Math.sin(waypoint.getYaw()));
          yLocal.setY(Math.cos(waypoint.getYaw()));
-         alphaRoll.set(yLocal.dot(surfaceNormal));
+         alphaRoll.set(MathTools.square(yLocal.dot(surfaceNormal)));
          yLocal.scale(alphaRoll.getValue());
 
          double alphaIncline = Math.atan2(next.getPosition().getZ() - previous.getPosition().getZ(), next.getPosition().distanceXY(previous.getPosition()));
@@ -314,6 +324,37 @@ public class AStarBodyPathSmootherWaypoint
       }
 
       return rollDelta;
+   }
+
+   public void updateHeight()
+   {
+      int currentKey = HeightMapTools.coordinateToKey(waypoint.getX(), waypoint.getY(), heightMapData.getGridCenter().getX(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), heightMapData.getCenterIndex());
+      if (currentKey != cellKey)
+      {
+         snap();
+         cellKey = currentKey;
+      }
+   }
+
+   private void snap()
+   {
+      int centerIndex = heightMapData.getCenterIndex();
+      int xIndex = HeightMapTools.coordinateToIndex(waypoint.getX(), heightMapData.getGridCenter().getX(), heightMapData.getGridResolutionXY(), centerIndex);
+      int yIndex = HeightMapTools.coordinateToIndex(waypoint.getY(), heightMapData.getGridCenter().getY(), heightMapData.getGridResolutionXY(), centerIndex);
+
+      double maxHeight = heightMapData.getEstimatedGroundHeight();
+      for (int i = 0; i < xSnapOffsets.size(); i++)
+      {
+         int xQuery = xIndex + xSnapOffsets.get(i);
+         int yQuery = yIndex + ySnapOffsets.get(i);
+         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
+         if (heightQuery > maxHeight)
+         {
+            maxHeight = heightQuery;
+         }
+      }
+
+      waypoint.setZ(maxHeight);
    }
 
    public void updateGradientGraphics(double spacingGradientX, double spacingGradientY, double smoothnessGradientX, double smoothnessGradientY)
