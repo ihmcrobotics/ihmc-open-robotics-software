@@ -206,40 +206,68 @@ public class AStarBodyPathSmootherTest
    }
 
    @Test
-   public void testStairsDataset()
+   // unstable. maybe a bad roll-z
+   public void testCinders1()
    {
-      runDataset(0);
+      runDataset("cinders_1");
    }
 
    @Test
-   public void testSteppingStonesDataset()
+   public void testCinders2()
    {
-      runDataset(1);
+      runDataset("cinders_2");
    }
 
    @Test
-   public void testObstaclesDataset()
+   public void testObstacles1()
    {
-      runDataset(2);
+      runDataset("obstacles_1");
    }
 
    @Test
-   public void testRampDataset()
+   // nan gradient? it disappears
+   public void testObstacles2()
    {
-      runDataset(3);
+      runDataset("obstacles_2");
    }
 
    @Test
-   public void testCindersDataset()
+   // unstable, prob roll-z term
+   public void testRamp()
    {
-      runDataset(4);
+      runDataset("ramp");
    }
 
-   private void runDataset(int datasetIndex)
+   @Test
+   public void testStairs1()
+   {
+      runDataset("stairs_1");
+   }
+
+   @Test
+   public void testStairs2()
+   {
+      runDataset("stairs_2");
+   }
+
+   @Test
+   public void testSteppingStones3()
+   {
+      runDataset("stepping_stones_3");
+   }
+
+   @Test
+   // super unstable
+   public void testSteppingStones4()
+   {
+      runDataset("stepping_stones_4");
+   }
+
+   private void runDataset(String name)
    {
       FootstepPlannerLogLoader loader = new FootstepPlannerLogLoader();
 
-      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "dataset" + datasetIndex);
+      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + name);
       loader.load(file);
       FootstepPlannerLog log = loader.getLog();
 
