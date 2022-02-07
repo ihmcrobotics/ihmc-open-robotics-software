@@ -33,6 +33,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.log.LogTools;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 
 import java.nio.FloatBuffer;
 
@@ -336,6 +337,15 @@ public class GDXTools
    {
       Color gdxColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
       toGDX(appearanceDefinition, gdxColor);
+      return gdxColor;
+   }
+
+   public static Color toGDX(ColorDefinition colorDefinition)
+   {
+      Color gdxColor = new Color((float) colorDefinition.getRed(),
+                                 (float) colorDefinition.getGreen(),
+                                 (float) colorDefinition.getBlue(),
+                                 (float) colorDefinition.getAlpha());
       return gdxColor;
    }
 
