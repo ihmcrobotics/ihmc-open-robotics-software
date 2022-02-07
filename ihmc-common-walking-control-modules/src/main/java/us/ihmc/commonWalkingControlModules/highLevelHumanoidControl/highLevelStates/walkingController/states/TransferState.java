@@ -165,7 +165,8 @@ public abstract class TransferState extends WalkingState
                                                      desiredCoP,
                                                      balanceManager.getDesiredICP(),
                                                      capturePoint2d,
-                                                     balanceManager.getFinalDesiredICP());
+                                                     balanceManager.getFinalDesiredICP(),
+                                                     balanceManager.getPerfectCoP());
 
          if (feetManager.okForPointToeOff())
          {
