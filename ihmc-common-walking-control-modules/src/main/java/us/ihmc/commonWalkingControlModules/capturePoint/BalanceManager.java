@@ -747,6 +747,11 @@ public class BalanceManager
       return contactStateManager.getAdjustedTimeRemainingInCurrentSupportSequence();
    }
 
+   public double getExtraTimeAdjustmentForSwing()
+   {
+      return contactStateManager.getExtraTimeAdjustmentForSwing();
+   }
+
    public void goHome()
    {
       if (pelvisICPBasedTranslationManager.isEnabled())
