@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -29,6 +30,13 @@ public class ContactStateManager
 
    private final YoDouble minimumSwingDuration = new YoDouble("minSwingDurationUnderDisturbance", registry);
    private final YoDouble minimumTransferDuration = new YoDouble("minTransferDurationUnderDisturbance", registry);
+
+   private final BooleanParameter speedUpTransferDynamicsFromError = new BooleanParameter("speedUpTransferDynamicsFromError", registry, false);
+   private final BooleanParameter slowDownTransferDynamicsFromError = new BooleanParameter("slowDownTransferDynamicsFromError", registry, false);
+   private final BooleanParameter speedUpSwingDynamicsFromError = new BooleanParameter("speedUpSwingDynamicsFromError", registry, false);
+   private final BooleanParameter slowDownSwingDynamicsFromError = new BooleanParameter("slowDownSwingDynamicsFromError", registry, false);
+
+   private final YoDouble timeAdjustmentForSwing = new YoDouble("extraTimeAdjustmentForSwing", registry);
 
    private final double controlDt;
 
@@ -69,6 +77,11 @@ public class ContactStateManager
    public double getTimeRemainingInCurrentSupportSequence()
    {
       return remainingTimeInContactSequence.getDoubleValue();
+   }
+
+   public double getExtraTimeAdjustmentForSwing()
+   {
+      return timeAdjustmentForSwing.getDoubleValue();
    }
 
    public double getTimeInSupportSequence()
@@ -182,13 +195,42 @@ public class ContactStateManager
          double minAdjustment = -remainingTimeAfterAdjustment;
 
          double proposedAdjustment = computeTimeAdjustmentForDynamicsBasedOnState(timeShiftProvider);
-         timeAdjustment.set(MathTools.clamp(proposedAdjustment, minAdjustment, maxAdjustment));
-         totalTimeAdjustment.add(timeAdjustment.getValue());
+         proposedAdjustment = MathTools.clamp(proposedAdjustment, minAdjustment, maxAdjustment);
+         if (proposedAdjustment > 0.0)
+         {
+            if ((isInSingleSupport() && speedUpSwingDynamicsFromError.getValue()) || (!isInSingleSupport() && speedUpTransferDynamicsFromError.getValue()))
+            {
+               timeAdjustment.set(proposedAdjustment);
+               timeAdjustmentForSwing.set(0.0);
+            }
+            else
+            {
+               timeAdjustmentForSwing.set(proposedAdjustment);
+               timeAdjustment.set(0.0);
+            }
+         }
+         else
+         {
+            if ((isInSingleSupport() && slowDownSwingDynamicsFromError.getValue()) || (!isInSingleSupport() && slowDownTransferDynamicsFromError.getValue()))
+            {
+               timeAdjustment.set(proposedAdjustment);
+               timeAdjustmentForSwing.set(0.0);
+            }
+            else
+            {
+               timeAdjustmentForSwing.set(proposedAdjustment);
+               timeAdjustment.set(0.0);
+            }
+         }
       }
       else
       {
+         timeAdjustmentForSwing.set(0.0);
          timeAdjustment.set(0.0);
       }
+
+      totalTimeAdjustment.add(timeAdjustment.getValue());
+
 
       adjustedTimeInSupportSequence.set(MathTools.clamp(timeInSupportSequence.getValue() + totalTimeAdjustment.getValue(), 0.0, currentStateDuration.getDoubleValue()));
 
