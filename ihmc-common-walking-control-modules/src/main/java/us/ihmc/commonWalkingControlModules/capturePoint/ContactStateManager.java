@@ -190,7 +190,7 @@ public class ContactStateManager
          double minDuration = (inSingleSupport.getBooleanValue() ? minimumSwingDuration.getDoubleValue() : minimumTransferDuration.getDoubleValue());
          double maxTotalAdjustment = currentStateDuration.getDoubleValue() - offsetTimeInState.getDoubleValue() - minDuration;
 
-         double remainingTimeAfterAdjustment = remainingTimeInContactSequence.getDoubleValue() - totalTimeAdjustment.getDoubleValue();
+         double remainingTimeAfterAdjustment = Math.max(remainingTimeInContactSequence.getDoubleValue() - totalTimeAdjustment.getDoubleValue(), 0.0);
          double maxAdjustment = Math.min(remainingTimeAfterAdjustment, maxTotalAdjustment - totalTimeAdjustment.getDoubleValue());
          double minAdjustment = -remainingTimeAfterAdjustment;
 
