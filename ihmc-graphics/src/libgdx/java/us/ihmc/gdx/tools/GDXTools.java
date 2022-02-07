@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import org.apache.commons.lang3.tuple.Pair;
@@ -259,6 +260,14 @@ public class GDXTools
       gdxRotationMatrix.val[Matrix4.M20] = (float) euclidRotationMatrix.getM20();
       gdxRotationMatrix.val[Matrix4.M21] = (float) euclidRotationMatrix.getM21();
       gdxRotationMatrix.val[Matrix4.M22] = (float) euclidRotationMatrix.getM22();
+   }
+
+   public static void toGDX(us.ihmc.euclid.tuple4D.Quaternion euclidQuaternion, Quaternion gdxQuaternion)
+   {
+      gdxQuaternion.x = euclidQuaternion.getX32();
+      gdxQuaternion.y = euclidQuaternion.getY32();
+      gdxQuaternion.z = euclidQuaternion.getZ32();
+      gdxQuaternion.w = euclidQuaternion.getS32();
    }
 
    public static Vector3 toGDX(Tuple3DReadOnly euclidTuple)
