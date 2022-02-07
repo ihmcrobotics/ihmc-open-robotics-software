@@ -1,7 +1,8 @@
 {
+  "dockspacePanels" : { },
   "windows" : {
     "Environment###java.lang.Class:Environment" : true,
-    "Lighting" : false,
-    "Input Debugger" : false
+    "Input Debugger" : false,
+    "VR Thread Debugger" : false
   }
 }

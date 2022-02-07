@@ -1,7 +1,7 @@
 {
   "ambientLight" : 0.914,
   "objects" : [ {
-    "type" : "GDXPushHandleRightDoorObject",
+    "type" : "GDXDoorPushHandleRightFiducialStaticHandleObject",
     "x" : 1.7137600116067575,
     "y" : 0.49949752631181465,
     "z" : -1.499858017846393E-17,
