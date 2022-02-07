@@ -247,7 +247,7 @@ public class ContactStateManager
       }
       else
       {
-         double timeAdjustmentToApply = 0.5 * timeShiftProvider.getValue();
+         double timeAdjustmentToApply = timeShiftProvider.getValue();
          double timeIntoState = adjustedTimeInSupportSequence.getDoubleValue();
          double timeRemainingInState = currentStateDuration.getDoubleValue() - timeIntoState;
          timeAdjustmentToApply = MathTools.clamp(timeAdjustmentToApply, -timeIntoState, timeRemainingInState);

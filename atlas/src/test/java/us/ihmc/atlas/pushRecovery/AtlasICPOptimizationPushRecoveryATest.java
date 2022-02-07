@@ -91,6 +91,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    }
 
    @Tag("humanoid-push-recovery")
+   @Tag("humanoid-push-recovery")
    @Override
    @Test
    public void testPushICPOptimizationForwardPushInSwing() throws Exception
@@ -104,7 +105,7 @@ public class AtlasICPOptimizationPushRecoveryATest extends AvatarICPOptimization
    @Test
    public void testPushICPOptimizationInwardPushInSwing() throws Exception
    {
-      percentWeight = 0.2;
+      percentWeight = 0.15;
       super.testPushICPOptimizationInwardPushInSwing();
    }
 
