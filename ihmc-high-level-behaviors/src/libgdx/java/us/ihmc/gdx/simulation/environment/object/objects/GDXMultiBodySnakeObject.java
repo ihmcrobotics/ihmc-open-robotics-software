@@ -52,16 +52,15 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
    public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
    {
       numberOfLinks = 5;
-      float mass = 1.0f;
       boolean fixedBase = false;
       boolean canSleep = false;
 
       Vector3 baseInertiaDiagonal = new Vector3(0.0f, 0.0f, 0.0f);
 
       btBoxShape baseBox = new btBoxShape(linkHalfExtents);
-      baseBox.calculateLocalInertia(mass, baseInertiaDiagonal);
+      baseBox.calculateLocalInertia(getMass(), baseInertiaDiagonal);
 
-      multiBody = new btMultiBody(numberOfLinks, mass, baseInertiaDiagonal, fixedBase, canSleep);
+      multiBody = new btMultiBody(numberOfLinks, getMass(), baseInertiaDiagonal, fixedBase, canSleep);
       multiBody.setBasePos(new Vector3());
       multiBody.setWorldToBaseRot(new Quaternion());
       multiBody.setHasSelfCollision(true);
@@ -82,14 +81,13 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
       for (int i = 0; i < numberOfLinks; i++)
       {
          int linkIndex = i;
-         mass = 1.0f;
          int parentIndex = linkIndex - 1;
          Quaternion rotationFromParent = new Quaternion();
          Vector3 offsetOfPivotFromParentCenterOfMass = new Vector3(0.0f, 0.0f, -linkHalfExtents.z);
          Vector3 offsetOfCenterOfMassFromPivot = new Vector3(0.0f, 0.0f, -linkHalfExtents.z);
          boolean disableParentCollision = true;
          multiBody.setupSpherical(linkIndex,
-                                  mass,
+                                  getMass(),
                                   baseInertiaDiagonal,
                                   parentIndex,
                                   rotationFromParent,
