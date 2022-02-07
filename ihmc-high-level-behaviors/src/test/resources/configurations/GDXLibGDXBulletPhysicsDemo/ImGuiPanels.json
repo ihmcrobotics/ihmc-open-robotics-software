@@ -1,0 +1,7 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "VR Thread Debugger" : false,
+    "libGDX Bullet Physics" : true
+  }
+}

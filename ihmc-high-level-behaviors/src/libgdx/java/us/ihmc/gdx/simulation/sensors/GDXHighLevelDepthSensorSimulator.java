@@ -400,7 +400,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), getLowLevelSimulator().getColorPanel().getIsShowing());
       ImGui.checkbox("Use Sensor Color", useSensorColor);
-      ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.02f);
+      ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.10f);
       ImGui.colorPicker4("Color", color);
       ImGui.text("Publish:");
       if (ros1DepthImageTopic != null)

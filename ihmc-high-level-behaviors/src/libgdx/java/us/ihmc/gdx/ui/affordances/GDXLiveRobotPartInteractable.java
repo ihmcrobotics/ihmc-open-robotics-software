@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.graphics.GDXReferenceFrameGraphic;
 
@@ -60,10 +61,10 @@ public class GDXLiveRobotPartInteractable
    {
       mouseIntersects = collisionLink.getIntersects();
       boolean isClickedOn = mouseIntersects && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
-      boolean isDeletedThisFrame = modified && selectablePose3DGizmo.isSelected() && ImGui.isKeyReleased(input.getDeleteKey());
+      boolean isDeletedThisFrame = modified && selectablePose3DGizmo.isSelected() && ImGui.isKeyReleased(ImGuiTools.getDeleteKey());
       boolean unmodifiedButHovered = !modified && mouseIntersects;
       boolean becomesModified = unmodifiedButHovered && isClickedOn;
-      boolean executeMotionKeyPressed = ImGui.isKeyReleased(input.getSpaceKey());
+      boolean executeMotionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getSpaceKey());
       boolean modifiedButNotSelectedHovered = modified && !selectablePose3DGizmo.isSelected() && mouseIntersects;
 
       if (isDeletedThisFrame)

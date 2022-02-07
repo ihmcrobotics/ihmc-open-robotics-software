@@ -49,7 +49,8 @@ public class SphereRayIntersection
       rayOriginInSphereFrame.setZ(pickRay.getPoint().getZ() - sphere.getPosition().getZ());
       int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndEllipsoid3D(sphere.getRadius(),
                                                                                              sphere.getRadius(),
-                                                                                             sphere.getRadius(), rayOriginInSphereFrame,
+                                                                                             sphere.getRadius(),
+                                                                                             rayOriginInSphereFrame,
                                                                                              pickRay.getDirection(),
                                                                                              firstIntersectionToPack,
                                                                                              secondIntersectionToPack);

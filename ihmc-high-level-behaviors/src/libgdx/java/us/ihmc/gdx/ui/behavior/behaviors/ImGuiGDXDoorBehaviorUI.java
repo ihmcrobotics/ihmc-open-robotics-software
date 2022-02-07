@@ -19,7 +19,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.gdx.imgui.ImGuiEnumPlot;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXPushHandleRightDoorObject;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorPushHandleRightFiducialStaticHandleObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
@@ -54,7 +54,7 @@ public class ImGuiGDXDoorBehaviorUI extends ImGuiGDXBehaviorUIInterface
    private final ImGuiMovingPlot distanceToDoorPlot = new ImGuiMovingPlot("Distance to door", 1000, 250, 15);
    private final ImGuiMovingPlot detectedDoorPlot = new ImGuiMovingPlot("Detected door", 1000, 250, 15);
    private final ImBoolean reviewDoorPose = new ImBoolean(true);
-   private GDXPushHandleRightDoorObject door;
+   private GDXDoorPushHandleRightFiducialStaticHandleObject door;
    private final ImBoolean showDetectedDoorGraphic = new ImBoolean(true);
 
    public ImGuiGDXDoorBehaviorUI(BehaviorHelper helper)
@@ -66,7 +66,7 @@ public class ImGuiGDXDoorBehaviorUI extends ImGuiGDXBehaviorUIInterface
       {
          this.detectedDoorPose.set(detectedDoorPose);
          doorDetectionMessageReceivedStopwatch.reset();
-         door.set(detectedDoorPose.getRight());
+         door.setPoseInWorld(detectedDoorPose.getRight());
       });
       helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
       {
@@ -85,7 +85,7 @@ public class ImGuiGDXDoorBehaviorUI extends ImGuiGDXBehaviorUIInterface
    @Override
    public void create(GDXImGuiBasedUI baseUI)
    {
-      door = new GDXPushHandleRightDoorObject(YoAppearance.DarkSlateBlue());
+      door = new GDXDoorPushHandleRightFiducialStaticHandleObject(YoAppearance.DarkSlateBlue());
 
    }
 
@@ -184,7 +184,7 @@ public class ImGuiGDXDoorBehaviorUI extends ImGuiGDXBehaviorUIInterface
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (showDetectedDoorGraphic.get() && !distanceToDoor.get().isNaN())
-         door.getCollisionModelInstance().getRenderables(renderables, pool);
+         door.getCollisionMeshRenderables(renderables, pool);
    }
 
    @Override
