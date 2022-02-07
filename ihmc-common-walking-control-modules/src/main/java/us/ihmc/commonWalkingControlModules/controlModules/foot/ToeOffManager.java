@@ -63,6 +63,7 @@ public class ToeOffManager
    private final BooleanProvider updatePointContactDuringToeOff;
    private final BooleanProvider checkECMPForToeOff;
    private final BooleanProvider checkCoPForToeOff;
+   private final BooleanProvider checkPerfectCoPForToeOff;
 
    private final BooleanProvider lookAtTwoStepCapturabilityForToeOff;
 
@@ -80,6 +81,7 @@ public class ToeOffManager
    private final YoBoolean isCurrentICPOKForToeOff = new YoBoolean("isCurrentICPOKForToeOff", registry);
    private final YoBoolean isDesiredECMPOKForToeOff = new YoBoolean("isDesiredECMPOKForToeOff", registry);
    private final YoBoolean isDesiredCoPOKForToeOff = new YoBoolean("isDesiredCoPOKForToeOff", registry);
+   private final YoBoolean isPerfectCoPOKForToeOff = new YoBoolean("isPerfectCoPOKForToeOff", registry);
    private final YoBoolean isFrontFootWellPositionedForToeOff = new YoBoolean("isFrontFootWellPositionedForToeOff", registry);
 
    private final YoBoolean icpIsInsideSupportFoot = new YoBoolean("icpIsInsideSupportFoot", registry);
@@ -92,6 +94,8 @@ public class ToeOffManager
                                                                                                     isDesiredECMPOKForToeOff, smallGlitchWindowSize);
    private final GlitchFilteredYoBoolean isDesiredCoPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredCoPOKForToeOffFilt", registry,
                                                                                                    isDesiredCoPOKForToeOff, smallGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isPerfectCoPOKForToeOffFilt = new GlitchFilteredYoBoolean("isPerfectCoPOKForToeOffFilt", registry,
+                                                                                                   isPerfectCoPOKForToeOff, smallGlitchWindowSize);
 
    private final DoubleProvider minStepLengthForToeOff;
    private final DoubleProvider minStepForwardForToeOff;
@@ -175,6 +179,7 @@ public class ToeOffManager
 
       checkECMPForToeOff = new BooleanParameter("checkECMPForToeOff", registry, toeOffParameters.checkECMPLocationToTriggerToeOff());
       checkCoPForToeOff = new BooleanParameter("checkCoPForToeOff", registry, toeOffParameters.checkCoPLocationToTriggerToeOff());
+      checkPerfectCoPForToeOff = new BooleanParameter("checkPerfectCoPForToeOff", registry, false);
 
       forceToeOffAtJointLimit = new BooleanParameter("forceToeOffAtJointLimit", registry, toeOffParameters.forceToeOffAtJointLimit());
 
@@ -245,6 +250,9 @@ public class ToeOffManager
 
       isDesiredCoPOKForToeOff.set(false);
       isDesiredCoPOKForToeOffFilt.set(false);
+
+      isPerfectCoPOKForToeOff.set(false);
+      isPerfectCoPOKForToeOffFilt.set(false);
 
       icpIsInsideSupportFoot.set(true);
 
@@ -397,7 +405,8 @@ public class ToeOffManager
                                                FramePoint2DReadOnly desiredCoP,
                                                FramePoint2DReadOnly desiredICP,
                                                FramePoint2DReadOnly currentICP,
-                                               FramePoint2DReadOnly finalDesiredICP)
+                                               FramePoint2DReadOnly finalDesiredICP,
+                                               FramePoint2DReadOnly perfectCoP)
    {
       setPolygonFromSupportFoot(trailingLeg, leadingFootSupportPolygon);
       if (lookAtTwoStepCapturabilityForToeOff.getValue() && setPolygonFromNextFootstep(nextFootSupportPolygon))
@@ -452,6 +461,7 @@ public class ToeOffManager
                         percentProximity);
 
       checkCoPLocation(desiredCoP);
+      checkPerfectCoPLocation(perfectCoP);
       checkECMPLocation(desiredECMP);
 
       if (!toeContact.evaluateToeOffConditions(trailingLeg))
@@ -581,6 +591,24 @@ public class ToeOffManager
       {
          isDesiredCoPOKForToeOff.set(true);
          isDesiredCoPOKForToeOffFilt.set(true);
+      }
+   }
+
+   private void checkPerfectCoPLocation(FramePoint2DReadOnly perfectCoP)
+   {
+      tempPoint.setIncludingFrame(perfectCoP);
+      tempPoint.changeFrameAndProjectToXYPlane(onToesSupportPolygon.getReferenceFrame());
+      copProximityToOnToes.set(onToesSupportPolygon.signedDistance(tempPoint));
+
+      if (checkPerfectCoPForToeOff.getValue())
+      {
+         isPerfectCoPOKForToeOff.set(copProximityToOnToes.getDoubleValue() < copProximityForToeOff.getValue());
+         isPerfectCoPOKForToeOffFilt.update();
+      }
+      else
+      {
+         isPerfectCoPOKForToeOff.set(true);
+         isPerfectCoPOKForToeOffFilt.set(true);
       }
    }
 
@@ -1017,8 +1045,8 @@ public class ToeOffManager
             return false;
          }
 
-         // I don't care about the CoP location during transfer
-         if (!isDesiredECMPOKForToeOffFilt.getBooleanValue())
+         // I don't care about the feedback CoP location during transfer
+         if (!isDesiredECMPOKForToeOffFilt.getBooleanValue() || !isPerfectCoPOKForToeOffFilt.getBooleanValue())
          {
             doPointToeOff.set(false);
             computeToePointContact.set(true);

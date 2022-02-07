@@ -503,10 +503,11 @@ public class FeetManager
                                                FramePoint2DReadOnly desiredCoP,
                                                FramePoint2DReadOnly desiredICP,
                                                FramePoint2DReadOnly currentICP,
-                                               FramePoint2DReadOnly finalDesiredICP)
+                                               FramePoint2DReadOnly finalDesiredICP,
+                                               FramePoint2DReadOnly perfectCoP)
    {
       toeOffManager.submitNextFootstep(nextFootstep, nextNextFootstep);
-      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP);
+      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP, perfectCoP);
    }
 
    /**
