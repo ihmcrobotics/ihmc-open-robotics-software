@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -15,6 +16,7 @@ public class ContactStateManager
    private final YoDouble currentStateDuration = new YoDouble("CurrentStateDuration", registry);
    private final YoDouble totalStateDuration = new YoDouble("totalStateDuration", registry);
    private final YoDouble timeInSupportSequence = new YoDouble("TimeInSupportSequence", registry);
+   private final YoDouble offsetTimeInState = new YoDouble("offsetTimeInState", registry);
 
    private final YoDouble adjustedTimeInSupportSequence = new YoDouble("AdjustedTimeInSupportSequence", registry);
    private final YoDouble timeAdjustment = new YoDouble("timeAdjustment", registry);
@@ -25,10 +27,20 @@ public class ContactStateManager
    private final YoDouble remainingTimeInContactSequence = new YoDouble("remainingSwingTimeAccordingToPlan", registry);
    private final YoDouble adjustedRemainingTimeUnderDisturbance = new YoDouble("adjustedRemainingTimeUnderDisturbance", registry);
 
+   private final YoDouble minimumSwingDuration = new YoDouble("minSwingDurationUnderDisturbance", registry);
+   private final YoDouble minimumTransferDuration = new YoDouble("minTransferDurationUnderDisturbance", registry);
+
    private final double controlDt;
 
-   public ContactStateManager(double controlDt, YoRegistry parentRegistry)
+   public ContactStateManager(WalkingControllerParameters walkingControllerParameters, double controlDt, YoRegistry parentRegistry)
    {
+      this(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery(), walkingControllerParameters.getMinimumTransferTime(), controlDt, parentRegistry);
+   }
+
+   public ContactStateManager(double minimumSwingTime, double minimumTransferTime, double controlDt, YoRegistry parentRegistry)
+   {
+      this.minimumSwingDuration.set(minimumSwingTime);
+      this.minimumTransferDuration.set(minimumTransferTime);
       this.controlDt = controlDt;
 
       parentRegistry.addChild(registry);
@@ -72,6 +84,7 @@ public class ContactStateManager
       inStanding.set(true);
       currentStateDuration.set(Double.NaN);
       totalStateDuration.set(Double.NaN);
+      offsetTimeInState.set(0.0);
 
       totalTimeAdjustment.set(0.0);
    }
@@ -84,6 +97,7 @@ public class ContactStateManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.POSITIVE_INFINITY);
       totalStateDuration.set(Double.POSITIVE_INFINITY);
+      offsetTimeInState.set(0.0);
 
       remainingTimeInContactSequence.set(Double.POSITIVE_INFINITY);
       adjustedRemainingTimeUnderDisturbance.set(Double.POSITIVE_INFINITY);
@@ -101,6 +115,7 @@ public class ContactStateManager
       totalStateDuration.set(transferDuration + swingDuration);
       remainingTimeInContactSequence.set(transferDuration);
       adjustedRemainingTimeUnderDisturbance.set(transferDuration);
+      offsetTimeInState.set(0.0);
 
       adjustedTimeInSupportSequence.set(0.0);
       totalTimeAdjustment.set(0.0);
@@ -122,6 +137,8 @@ public class ContactStateManager
       totalStateDuration.set(stepDuration);
       remainingTimeInContactSequence.set(swingDuration);
       adjustedRemainingTimeUnderDisturbance.set(swingDuration);
+      offsetTimeInState.set(transferDuration);
+
 
       adjustedTimeInSupportSequence.set(transferDuration);
       totalTimeAdjustment.set(0.0);
@@ -136,6 +153,7 @@ public class ContactStateManager
       totalStateDuration.set(finalTransferDuration);
       remainingTimeInContactSequence.set(finalTransferDuration);
       adjustedRemainingTimeUnderDisturbance.set(finalTransferDuration);
+      offsetTimeInState.set(0.0);
 
       adjustedTimeInSupportSequence.set(0.0);
       totalTimeAdjustment.set(0.0);
@@ -152,9 +170,19 @@ public class ContactStateManager
       if (inStanding.getBooleanValue() || !contactStateIsDone.getBooleanValue())
          timeInSupportSequence.add(controlDt);
 
+      remainingTimeInContactSequence.set(currentStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue());
+
       if (shouldAdjustTimeFromTrackingError)
       {
-         timeAdjustment.set(computeTimeAdjustmentForDynamicsBasedOnState(timeShiftProvider));
+         double minDuration = (inSingleSupport.getBooleanValue() ? minimumSwingDuration.getDoubleValue() : minimumTransferDuration.getDoubleValue());
+         double maxTotalAdjustment = currentStateDuration.getDoubleValue() - offsetTimeInState.getDoubleValue() - minDuration;
+
+         double remainingTimeAfterAdjustment = remainingTimeInContactSequence.getDoubleValue() - totalTimeAdjustment.getDoubleValue();
+         double maxAdjustment = Math.min(remainingTimeAfterAdjustment, maxTotalAdjustment - totalTimeAdjustment.getDoubleValue());
+         double minAdjustment = -remainingTimeAfterAdjustment;
+
+         double proposedAdjustment = computeTimeAdjustmentForDynamicsBasedOnState(timeShiftProvider);
+         timeAdjustment.set(MathTools.clamp(proposedAdjustment, minAdjustment, maxAdjustment));
          totalTimeAdjustment.add(timeAdjustment.getValue());
       }
       else
@@ -164,7 +192,6 @@ public class ContactStateManager
 
       adjustedTimeInSupportSequence.set(MathTools.clamp(timeInSupportSequence.getValue() + totalTimeAdjustment.getValue(), 0.0, currentStateDuration.getDoubleValue()));
 
-      remainingTimeInContactSequence.set(currentStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue());
       adjustedRemainingTimeUnderDisturbance.set(currentStateDuration.getDoubleValue() - adjustedTimeInSupportSequence.getDoubleValue());
 
       contactStateIsDone.set(adjustedTimeInSupportSequence.getValue() >= currentStateDuration.getValue());
