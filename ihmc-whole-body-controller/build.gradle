@@ -36,7 +36,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.9") {
+   api("us.ihmc:ihmc-robot-data-logger:0.22.1") {
       exclude group: "org.junit.jupiter", module: "junit-jupiter-api"
       exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
       exclude group: "org.junit.platform", module: "junit-platform-commons"

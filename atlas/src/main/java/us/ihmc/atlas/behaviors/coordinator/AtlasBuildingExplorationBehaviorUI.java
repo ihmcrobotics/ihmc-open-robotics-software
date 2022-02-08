@@ -44,7 +44,8 @@ public class AtlasBuildingExplorationBehaviorUI
       JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       LogTools.info("Starting behavior module");
-      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, ros2CommunicationMode, behaviorMessagerCommunicationMode);
+      boolean enableROS1 = true;
+      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, ros2CommunicationMode, behaviorMessagerCommunicationMode, enableROS1);
 
       LogTools.info("Starting behavior UI");
       JavaFXBehaviorUI behaviorUI = JavaFXBehaviorUI.create(behaviorRegistry,

@@ -58,7 +58,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    final LookAndStepImminentStanceTracker imminentStanceTracker;
    final ControllerStatusTracker controllerStatusTracker;
    final TypedNotification<Boolean> approvalNotification;
-   private final DelayFixedPlanarRegionsSubscription delayFixedPlanarRegionsSubscription;
+   private DelayFixedPlanarRegionsSubscription delayFixedPlanarRegionsSubscription;
 
    /**
     * At any time the behavior will be executing on one of this tasks
@@ -120,7 +120,13 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          swingPlannerParameters.setAllFromStrings(parameters);
       });
 
-      operatorReviewEnabledInput = helper.subscribeViaReference(OperatorReviewEnabled, true);
+      operatorReviewEnabledInput = new AtomicReference<>();
+      helper.subscribeViaCallback(OperatorReviewEnabled, enabled ->
+      {
+         LogTools.info("Received operator review enabled toggle message: {}", enabled);
+         operatorReviewEnabledInput.set(enabled);
+         helper.publish(OperatorReviewEnabledToUI, enabled);
+      });
       approvalNotification = helper.subscribeViaNotification(ReviewApproval);
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
@@ -145,11 +151,13 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       helper.subscribeViaCallback(BodyPathInput, this::bodyPathPlanInput);
 
       footstepPlanning.initialize(this);
-      delayFixedPlanarRegionsSubscription = helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING,
-                                                                                       regions -> footstepPlanning.acceptPlanarRegions(regions.getRight()));
-      delayFixedPlanarRegionsSubscription.subscribe(helper.getROS1Helper());
-      delayFixedPlanarRegionsSubscription.setEnabled(true);
-      delayFixedPlanarRegionsSubscription.setPosePublisherEnabled(true);
+      if (helper.getROS1Helper() != null)
+      {
+         delayFixedPlanarRegionsSubscription = helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING, regions -> footstepPlanning.acceptPlanarRegions(regions.getRight()));
+         delayFixedPlanarRegionsSubscription.subscribe(helper.getROS1Helper());
+         delayFixedPlanarRegionsSubscription.setEnabled(true);
+         delayFixedPlanarRegionsSubscription.setPosePublisherEnabled(true);
+      }
       helper.subscribeViaCallback(ROS2_REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
       helper.subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(helper.getRobotModel().getSimpleRobotName()),
                                   footstepPlanning::acceptRobotConfigurationData);
@@ -203,7 +211,8 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
 
    public void destroy()
    {
-      delayFixedPlanarRegionsSubscription.destroy();
+      if (delayFixedPlanarRegionsSubscription != null)
+         delayFixedPlanarRegionsSubscription.destroy();
       bodyPathPlanning.destroy();
       footstepPlanning.destroy();
       reset.destroy();

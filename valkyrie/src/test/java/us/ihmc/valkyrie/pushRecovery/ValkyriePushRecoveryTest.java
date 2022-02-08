@@ -7,8 +7,12 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.DRCPushRecoveryTest;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.parameters.ValkyrieSteppingParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
 public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
@@ -21,7 +25,29 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    @Override
    protected DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS);
+      return new ValkyrieRobotModel(RobotTarget.SCS)
+      {
+         public WalkingControllerParameters getWalkingControllerParameters()
+         {
+            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget())
+            {
+               @Override
+               public SteppingParameters getSteppingParameters()
+               {
+                  return new ValkyrieSteppingParameters(getRobotPhysicalProperties(), getTarget())
+                  {
+                     @Override
+                     public double getMaxStepWidth()
+                     {
+                        return 0.8;
+                     }
+                  };
+
+               };
+            };
+         }
+      };
+
    }
 
    @Tag("humanoid-push-recovery-slow")
