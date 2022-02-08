@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.bodyPath;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
@@ -53,7 +54,13 @@ public class HeightMapLeastSquaresNormalCalculator
          for (int yIndex = 0; yIndex < gridWidth; yIndex++)
          {
             UnitVector3DBasics surfaceNormal = new UnitVector3D(0.0, 0.0, 1.0);
-            surfaceNormals[HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex)] = surfaceNormal;
+            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+            if (key == 12282)
+            {
+               System.out.println();
+            }
+
+            surfaceNormals[key] = surfaceNormal;
 
             if (xIndex > 0 && yIndex > 0 && xIndex < gridWidth - 1 && yIndex < gridWidth - 1)
             {
@@ -67,8 +74,11 @@ public class HeightMapLeastSquaresNormalCalculator
                                                                           heightMapData.getGridResolutionXY(),
                                                                           heightMapData.getCenterIndex()));
 
-               heightMapSnapper.snapPolygonToHeightMap(translatedPatch, heightMapData, maxIncline);
-               surfaceNormal.set(heightMapSnapper.getBestFitPlane().getNormal());
+               RigidBodyTransform transform = heightMapSnapper.snapPolygonToHeightMap(translatedPatch, heightMapData, maxIncline);
+               if (transform != null)
+               {
+                  surfaceNormal.set(heightMapSnapper.getBestFitPlane().getNormal());
+               }
             }
          }
       }

@@ -5,6 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -27,10 +28,11 @@ public class AStarBodyPathSmoother
    static final double smoothnessWeight = 1.0;
    static final double equalSpacingWeight = 2.0;
    static final double rollWeight = 150.0;
+   static final double displacementWeight = 0.0;
 
    private static final int maxPoints = 200;
    private static final double gradientEpsilon = 1e-6;
-   private static final double hillClimbGain = 5e-4;
+   private static final double hillClimbGain = 2e-4;
    private static final double minCurvatureToPenalize = Math.toRadians(5.0);
 
    private static final int iterations = 500;
@@ -38,7 +40,7 @@ public class AStarBodyPathSmoother
    private static final int turnPointIteration = 12;
    private final TIntArrayList turnPointIndices = new TIntArrayList();
    private static final int minTurnPointProximity = 7;
-   private static final double turnPointYawThreshold = Math.toRadians(30.0);
+   private static final double turnPointYawThreshold = Math.toRadians(20.0);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -121,7 +123,7 @@ public class AStarBodyPathSmoother
 
       for (int i = 1; i < bodyPath.size() - 1; i++)
       {
-         updateHeading(i);
+         waypoints[i].update();
       }
 
       if (visualize)
@@ -134,36 +136,44 @@ public class AStarBodyPathSmoother
       {
          maxCollision.set(0.0);
 
-         for (int j = 1; j < pathSize - 1; j++)
+         for (int waypointIndex = 1; waypointIndex < pathSize - 1; waypointIndex++)
          {
-            computeSmoothenessGradient(j, gradients[j]);
+            computeSmoothenessGradient(waypointIndex, gradients[waypointIndex]);
+
+            Tuple3DReadOnly displacementGradient = waypoints[waypointIndex].computeDisplacementGradient();
+            gradients[waypointIndex].add(displacementGradient.getX(), displacementGradient.getY());
          }
 
          if (heightMapData != null)
          {
-            for (int j = 1; j < pathSize - 1; j++)
+            for (int waypointIndex = 1; waypointIndex < pathSize - 1; waypointIndex++)
             {
-               gradients[j].add(waypoints[j].computeCollisionGradient());
-               maxCollision.set(Math.max(waypoints[j].getMaxCollision(), maxCollision.getValue()));
+               if (waypointIndex == 15)
+               {
+                  System.out.println();
+               }
 
-               if (waypoints[j].isTurnPoint())
+               gradients[waypointIndex].add(waypoints[waypointIndex].computeCollisionGradient());
+               maxCollision.set(Math.max(waypoints[waypointIndex].getMaxCollision(), maxCollision.getValue()));
+
+               if (waypoints[waypointIndex].isTurnPoint())
                {
                   continue;
                }
 
-               Vector2DBasics rollGradient = waypoints[j].computeRollInclineGradient(heightMapData);
-               gradients[j - 1].sub(rollGradient);
-               gradients[j + 1].add(rollGradient);
+               Vector2DBasics rollGradient = waypoints[waypointIndex].computeRollInclineGradient(heightMapData);
+               gradients[waypointIndex - 1].sub(rollGradient);
+               gradients[waypointIndex + 1].add(rollGradient);
 
                if (visualize)
                {
-                  if (j - 1 != 0)
+                  if (waypointIndex - 1 != 0)
                   {
-                     waypoints[j - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
+                     waypoints[waypointIndex - 1].updateRollGraphics(-rollGradient.getX(), -rollGradient.getY());
                   }
-                  if (j + 1 != pathSize - 1)
+                  if (waypointIndex + 1 != pathSize - 1)
                   {
-                     waypoints[j + 1].updateRollGraphics(rollGradient.getX(), rollGradient.getY());
+                     waypoints[waypointIndex + 1].updateRollGraphics(rollGradient.getX(), rollGradient.getY());
                   }
                }
             }
@@ -177,8 +187,7 @@ public class AStarBodyPathSmoother
 
          for (int j = 1; j < pathSize - 1; j++)
          {
-            updateHeading(j);
-            waypoints[j].updateHeight();
+            waypoints[j].update();
          }
 
          if (iteration.getValue() == turnPointIteration)
@@ -248,20 +257,6 @@ public class AStarBodyPathSmoother
       double heading0 = Math.atan2(y1 - y0, x1 - x0);
       double heading1 = Math.atan2(y2 - y1, x2 - x1);
       return Math.max(Math.abs(EuclidCoreTools.angleDifferenceMinusPiToPi(heading1, heading0)) - deadband, 0.0);
-   }
-
-   public void updateHeading(int i)
-   {
-      double x0 = waypoints[i - 1].getPosition().getX();
-      double y0 = waypoints[i - 1].getPosition().getY();
-      double x1 = waypoints[i].getPosition().getX();
-      double y1 = waypoints[i].getPosition().getY();
-      double x2 = waypoints[i + 1].getPosition().getX();
-      double y2 = waypoints[i + 1].getPosition().getY();
-
-      double heading0 = Math.atan2(y1 - y0, x1 - x0);
-      double heading1 = Math.atan2(y2 - y1, x2 - x1);
-      waypoints[i].setHeading(heading0, heading1);
    }
 
    private void computeTurnPoints()
