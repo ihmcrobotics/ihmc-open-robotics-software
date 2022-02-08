@@ -155,6 +155,7 @@ public class GDXLowLevelDepthSensorSimulator
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
       parametersBuffer = new OpenCLFloatBuffer(28);
 
+      // TODO these panels should be removable to a separate class
       depthPanel = new GDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
       colorPanel = new ImGuiVideoPanel(colorWindowName, true);
       colorPanel.setTexture(frameBuffer.getColorTexture());
@@ -175,6 +176,11 @@ public class GDXLowLevelDepthSensorSimulator
    public void render(GDX3DSceneManager sceneManager)
    {
       render(sceneManager, null, 0.01f);
+   }
+
+   public void render(GDX3DSceneBasics sceneBasics)
+   {
+      render(sceneBasics, null, 0.01f);
    }
 
    public void render(GDX3DSceneManager sceneManager, Color userPointColor, float pointSize)
