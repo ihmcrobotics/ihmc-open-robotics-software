@@ -182,10 +182,10 @@ public class GDXPose3DGizmo implements RenderableProvider
       }
 
       // keyboard based controls
-      boolean upArrowHeld = ImGui.isKeyDown(input.getUpArrowKey());
-      boolean downArrowHeld = ImGui.isKeyDown(input.getDownArrowKey());
-      boolean leftArrowHeld = ImGui.isKeyDown(input.getLeftArrowKey());
-      boolean rightArrowHeld = ImGui.isKeyDown(input.getRightArrowKey());
+      boolean upArrowHeld = ImGui.isKeyDown(ImGuiTools.getUpArrowKey());
+      boolean downArrowHeld = ImGui.isKeyDown(ImGuiTools.getDownArrowKey());
+      boolean leftArrowHeld = ImGui.isKeyDown(ImGuiTools.getLeftArrowKey());
+      boolean rightArrowHeld = ImGui.isKeyDown(ImGuiTools.getRightArrowKey());
       boolean anyArrowHeld = upArrowHeld || downArrowHeld || leftArrowHeld || rightArrowHeld;
       if (anyArrowHeld) // only the arrow keys do the moving
       {

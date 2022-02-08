@@ -2,46 +2,44 @@ package us.ihmc.gdx.simulation.environment.object.objects;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.euclid.shape.primitives.Sphere3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXModelLoader;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class GDXStairsObject extends GDXEnvironmentObject
 {
-   private static final AtomicInteger INDEX = new AtomicInteger();
+   public static final String NAME = "Stairs";
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXStairsObject.class);
 
    public GDXStairsObject()
    {
-      Model realisticModel = GDXModelLoader.loadG3DModel("stairs/Stairs.g3dj");
+      super(NAME, FACTORY);
+      Model realisticModel = GDXModelLoader.loadG3DModel("environmentObjects/stairs/Stairs.g3dj");
+      setRealisticModel(realisticModel);
 
-      double sizeX = 0.3;
-      double sizeY = 0.3;
-      double sizeZ = 0.01;
-      RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
-      Sphere3D boundingSphere = new Sphere3D(0.7);
+      double sizeX = 1.475;
+      double sizeY = 2.355;
+      double sizeZ = 1.072;
+      setMass(500.0f);
+      getCollisionShapeOffset().getTranslation().add(-sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);
+      getBoundingSphere().setRadius(5.0);
+      getBoundingSphere().getPosition().add(sizeX / 2.0, sizeY / 2.0, sizeZ / 2.0);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
-      Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
+      setCollisionModel(meshBuilder ->
       {
          Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
          meshBuilder.addBox((float) sizeX, (float) sizeY, (float) sizeZ, color);
          meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
-      }, "collisionModel" + INDEX.getAndIncrement());
-      collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
-      RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
-      create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
-   }
+      });
+      setCollisionGeometryObject(collisionBox);
 
-   @Override
-   public GDXStairsObject duplicate()
-   {
-      return new GDXStairsObject();
+      // The stairs is multiple meshes I think, so more complicated; crashes currently; probably need to make a simpler mesh
+//      btTriangleIndexVertexArray btTriangleIndexVertexArray = new btTriangleIndexVertexArray(realisticModel.meshParts);
+//      btGImpactMeshShape btGImpactMeshShape = new btGImpactMeshShape(btTriangleIndexVertexArray);
+//      btGImpactMeshShape.updateBound();
+//      setBtCollisionShape(btGImpactMeshShape);
    }
 }
