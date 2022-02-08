@@ -165,8 +165,11 @@ public class GDXBulletPhysicsManager
       }
       for (btRigidBody rigidBody : rigidBodies)
       {
-         // Can probably just call removeCollisionObject
          multiBodyDynamicsWorld.removeRigidBody(rigidBody);
+      }
+      for (btMultiBody multiBody : multiBodies)
+      {
+         multiBodyDynamicsWorld.removeMultiBody(multiBody);
       }
    }
 

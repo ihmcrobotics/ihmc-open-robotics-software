@@ -75,7 +75,7 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
       GDXTools.toGDX(rigidBodyTransform, worldTransform);
       baseCollider.setWorldTransform(worldTransform);
       baseCollider.setFriction(1.0f);
-      bulletPhysicsManager.addMultiBodyCollisionShape(baseCollider);
+      addMultiBodyCollisionShape(bulletPhysicsManager, baseCollider);
       multiBody.setBaseCollider(baseCollider);
 
       for (int i = 0; i < numberOfLinks; i++)
@@ -100,7 +100,7 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
          linkCollider.setCollisionShape(linkBox);
          linkCollider.setWorldTransform(worldTransform);
          linkCollider.setFriction(1.0f);
-         bulletPhysicsManager.addMultiBodyCollisionShape(linkCollider);
+         addMultiBodyCollisionShape(bulletPhysicsManager, linkCollider);
          multiBody.getLink(linkIndex).setCollider(linkCollider);
          linkColliders.add(linkCollider);
 
@@ -108,7 +108,7 @@ public class GDXMultiBodySnakeObject extends GDXEnvironmentObject
       }
 
       multiBody.finalizeMultiDof();
-      bulletPhysicsManager.addMultiBody(multiBody);
+      addBtMultiBody(bulletPhysicsManager, multiBody);
    }
 
    @Override

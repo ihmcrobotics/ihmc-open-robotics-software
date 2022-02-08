@@ -5,9 +5,12 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
 import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
 import com.badlogic.gdx.physics.bullet.dynamics.btMultiBody;
+import com.badlogic.gdx.physics.bullet.dynamics.btMultiBodyLinkCollider;
 import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.dynamics.btTypedConstraint;
 import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -31,6 +34,7 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -76,6 +80,8 @@ public class GDXEnvironmentObject
    private btMultiBody btMultiBody;
    private GDXBulletPhysicsManager bulletPhysicsManager;
    private boolean isSelected = false;
+   private final ArrayList<btCollisionObject> addedCollisionObjects = new ArrayList<>();
+   private final ArrayList<btTypedConstraint> addedConstraints = new ArrayList<>();
    private final btMotionState bulletMotionState = new btMotionState()
    {
       @Override
@@ -218,16 +224,25 @@ public class GDXEnvironmentObject
       }
    }
 
-   public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager, btMultiBody btMultiBody)
+   public void addBtMultiBody(GDXBulletPhysicsManager bulletPhysicsManager, btMultiBody btMultiBody)
    {
       this.bulletPhysicsManager = bulletPhysicsManager;
-      if (btCollisionShape != null)
-      {
-         if (btMultiBody == null)
-         {
-            this.btMultiBody = bulletPhysicsManager.addMultiBody(btMultiBody);
-         }
-      }
+      this.btMultiBody = btMultiBody;
+      bulletPhysicsManager.addMultiBody(btMultiBody);
+   }
+
+   public void addMultiBodyCollisionShape(GDXBulletPhysicsManager bulletPhysicsManager, btMultiBodyLinkCollider collisionObject)
+   {
+      this.bulletPhysicsManager = bulletPhysicsManager;
+      addedCollisionObjects.add(collisionObject);
+      bulletPhysicsManager.addMultiBodyCollisionShape(collisionObject);
+   }
+
+   public void addConstraint(GDXBulletPhysicsManager bulletPhysicsManager, btTypedConstraint constraint)
+   {
+      this.bulletPhysicsManager = bulletPhysicsManager;
+      addedConstraints.add(constraint);
+      bulletPhysicsManager.getMultiBodyDynamicsWorld().addConstraint(constraint);
    }
 
    public void getInertia(Vector3 inertiaToPack)
@@ -245,6 +260,16 @@ public class GDXEnvironmentObject
       {
          bulletPhysicsManager.removeMultiBody(btMultiBody);
       }
+      for (btCollisionObject addedCollisionObject : addedCollisionObjects)
+      {
+         bulletPhysicsManager.removeCollisionObject(addedCollisionObject);
+      }
+      addedCollisionObjects.clear();
+      for (btTypedConstraint addedConstraint : addedConstraints)
+      {
+         bulletPhysicsManager.getMultiBodyDynamicsWorld().removeConstraint(addedConstraint);
+      }
+      addedConstraints.clear();
    }
 
    /**
