@@ -1,9 +1,8 @@
 package us.ihmc.gdx.simulation.scs2;
 
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.SimpleLongProperty;
 import us.ihmc.log.LogTools;
 import us.ihmc.scs2.session.Session;
+import us.ihmc.scs2.sessionVisualizer.jfx.tools.YoVariableDatabase;
 import us.ihmc.scs2.sharedMemory.LinkedBufferProperties;
 import us.ihmc.scs2.sharedMemory.LinkedYoRegistry;
 import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
@@ -14,23 +13,14 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class GDXYoManager
 {
-   private final LongProperty rootRegistryHashCodeProperty = new SimpleLongProperty(this, "rootRegistryHashCode", 0);
-
    private YoRegistry rootRegistry;
    private LinkedYoRegistry linkedRootRegistry;
    private LinkedBufferProperties linkedBufferProperties;
    private LinkedYoVariableFactory linkedYoVariableFactory;
-
-   private boolean updatingYoVariables = true;
+   private YoVariableDatabase rootRegistryDatabase = null;
 
    public GDXYoManager()
    {
-   }
-
-   public void update()
-   {
-      if (linkedRootRegistry != null && !updatingYoVariables)
-         linkedRootRegistry.pull();
    }
 
    public void startSession(Session session)
@@ -40,8 +30,14 @@ public class GDXYoManager
       linkedYoVariableFactory = session.getLinkedYoVariableFactory();
       linkedRootRegistry = linkedYoVariableFactory.newLinkedYoRegistry(rootRegistry);
       linkedBufferProperties = linkedYoVariableFactory.newLinkedBufferProperties();
-
+      rootRegistryDatabase = new YoVariableDatabase(rootRegistry, linkedRootRegistry);
       LogTools.info("UI linked YoVariables created");
+   }
+
+   public void update()
+   {
+      if (linkedRootRegistry != null)
+         linkedRootRegistry.pull();
    }
 
    public void stopSession()
@@ -50,12 +46,11 @@ public class GDXYoManager
       linkedYoVariableFactory = null;
       linkedRootRegistry = null;
       linkedBufferProperties = null;
-      rootRegistryHashCodeProperty.set(-1L);
    }
 
    public boolean isSessionLoaded()
    {
-      return linkedRootRegistry != null && !updatingYoVariables;
+      return linkedRootRegistry != null;
    }
 
    public LinkedYoRegistry newLinkedYoRegistry(YoRegistry registry)
@@ -73,11 +68,6 @@ public class GDXYoManager
       return rootRegistry;
    }
 
-   public boolean isUpdatingYoVariables()
-   {
-      return updatingYoVariables;
-   }
-
    public LinkedYoRegistry getLinkedRootRegistry()
    {
       return linkedRootRegistry;
@@ -89,11 +79,6 @@ public class GDXYoManager
          return null;
       else
          return linkedYoVariableFactory.newLinkedBufferProperties();
-   }
-
-   public LongProperty rootRegistryHashCodeProperty()
-   {
-      return rootRegistryHashCodeProperty;
    }
 
    public int getBufferSize()

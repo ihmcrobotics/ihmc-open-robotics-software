@@ -28,7 +28,6 @@ import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.gdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.gdx.ui.yo.ImGuiYoVariableClientManagerWidget;
 import us.ihmc.gdx.vr.GDXVRContext;
-import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 
@@ -59,10 +58,11 @@ public class ImGuiGDXBehaviorUIManager
 
    public ImGuiGDXBehaviorUIManager(ROS2Node ros2Node,
                                     Supplier<? extends DRCRobotModel> robotModelSupplier,
-                                    ImGuiGDXBehaviorUIRegistry behaviorRegistry)
+                                    ImGuiGDXBehaviorUIRegistry behaviorRegistry,
+                                    boolean enableROS1)
    {
       this.behaviorRegistry = behaviorRegistry;
-      helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
+      helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node, enableROS1);
       messagerManagerWidget = new ImGuiMessagerManagerWidget(helper.getMessagerHelper(), behaviorModuleHost::get);
       yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(helper.getYoVariableClientHelper(),
                                                                              behaviorModuleHost::get,
@@ -100,7 +100,7 @@ public class ImGuiGDXBehaviorUIManager
       // TODO: This needs to be a message sent to the module. This panel should react to differently shaped incoming trees.
 
       // disable things
-      yoEnabled.set(false);
+      setEnabled(false);
 
       helper.publish(BehaviorModule.API.SET_HIGHEST_LEVEL_BEHAVIOR, behaviorName);
 
@@ -184,6 +184,12 @@ public class ImGuiGDXBehaviorUIManager
       }
       ImGui.sameLine();
       ImGui.text("Server: " + yoEnabled.get());
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      imEnabled.set(enabled);
+      yoEnabled.set(enabled);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
