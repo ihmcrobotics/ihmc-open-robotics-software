@@ -88,8 +88,8 @@ public class RobotDefinitionTools
             FloatingJoint floatingJoint = (FloatingJoint) joint;
             if (initialState.hasOutputFor(JointStateType.CONFIGURATION))
             {
-               floatingJoint.setPosition(initialState.getConfiguration().getPosition());
-               floatingJoint.setOrientation(initialState.getConfiguration().getOrientation());
+               floatingJoint.setPosition(initialState.getPosition());
+               floatingJoint.setOrientation(initialState.getOrientation());
             }
             if (initialState.hasOutputFor(JointStateType.VELOCITY))
             {
@@ -250,12 +250,17 @@ public class RobotDefinitionTools
          STPRamp3DDefinition stpGeometry = new STPRamp3DDefinition(stpRamp3D.getSize());
          stpGeometry.setMargins(stpRamp3D.getMinimumMargin(), stpRamp3D.getMaximumMargin());
          geometry = stpGeometry;
+         pose.set(stpRamp3D.getPose());
+         // So the origin is at the center of the bottom face
+         pose.appendTranslation(0.5 * stpRamp3D.getSizeX(), 0.0, 0.0);
       }
       else if (shape instanceof FrameRamp3DReadOnly)
       {
          FrameRamp3DReadOnly ramp3D = (FrameRamp3DReadOnly) shape;
          geometry = new Ramp3DDefinition(ramp3D.getSize());
          pose.set(ramp3D.getPose());
+         // So the origin is at the center of the bottom face
+         pose.appendTranslation(0.5 * ramp3D.getSizeX(), 0.0, 0.0);
       }
       else if (shape instanceof FrameSphere3DReadOnly)
       {
