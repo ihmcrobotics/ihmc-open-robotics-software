@@ -5,7 +5,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.exampleSimulations.springflamingo.SpringFlamingoController;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -13,7 +12,6 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,6 +20,12 @@ public class LIPMWalkerController implements RobotController
 {
    private final LIPMWalkerRobot robot;
    private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   
+   
+   private final YoDouble kpBodyPitch = new YoDouble("kpBodyPitch", registry);
+   private final YoDouble kdBodyPitch = new YoDouble("kdBodyPitch", registry);
+   private final YoDouble desiredBodyPitch = new YoDouble("desiredBodyPitch", registry);
+   
    private final YoDouble kpKnee = new YoDouble("kpKnee", registry);
    private final YoDouble kdKnee = new YoDouble("kdKnee", registry);
    private final YoDouble kpHip = new YoDouble("kpHip", registry);
@@ -72,6 +76,10 @@ public class LIPMWalkerController implements RobotController
    @Override
    public void initialize()
    {
+      kpBodyPitch.set(1000.0);
+      kdBodyPitch.set(100.0);
+      desiredBodyPitch.set(0.0);
+      
       kpKnee.set(30000.0);
       kdKnee.set(1000.0);
 
@@ -84,7 +92,7 @@ public class LIPMWalkerController implements RobotController
       q_d_leftHip.set(0.0);
       q_d_rightHip.set(0.0);
 
-      desiredHeight.set(0.926);
+      desiredHeight.set(1.0);
    }
 
    @Override
@@ -133,7 +141,7 @@ public class LIPMWalkerController implements RobotController
          totalSupportKneeForce = 10.0;
       
       robot.setKneeForce(side, totalSupportKneeForce);
-      robot.setHipTorque(side, 0.0);
+      robot.setHipTorque(side, -kpBodyPitch.getValue() * (desiredBodyPitch.getValue() - robot.getBodyPitchAngle()) + kdBodyPitch.getValue() * robot.getBodyPitchAngularVelocity());
 
       worldHipAngles.get(side).set(robot.getHipAngle(side) + robot.getBodyPitchAngle());
    }
@@ -185,7 +193,6 @@ public class LIPMWalkerController implements RobotController
       /* Compute hip torque. */
       desiredHipAngles.get(side).set(desiredHipAngle);
       double feedBackHipTorque = kpHip.getValue() * (desiredHipAngle - hipAngle) + kdHip.getValue() * (0.0 - hipVelocity);
-      feedBackHipTorque = 0.0;
       
       robot.setHipTorque(side, feedBackHipTorque);
    }
