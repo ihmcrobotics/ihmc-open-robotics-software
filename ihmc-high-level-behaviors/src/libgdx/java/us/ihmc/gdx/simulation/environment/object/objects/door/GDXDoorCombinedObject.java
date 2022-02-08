@@ -11,7 +11,7 @@ import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.gdx.simulation.environment.GDXBulletPhysicsManager;
+import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 

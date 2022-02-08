@@ -27,6 +27,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectLibrary;

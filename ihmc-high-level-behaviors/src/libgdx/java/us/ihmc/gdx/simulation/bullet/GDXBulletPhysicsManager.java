@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation.environment;
+package us.ihmc.gdx.simulation.bullet;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
@@ -14,7 +14,6 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.simulation.GDXBulletPhysicsDebugger;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.UnitConversions;
 
