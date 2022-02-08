@@ -99,14 +99,14 @@ public class LIPMWalkerRobot
       return comVelocity;
    }
 
-   public double getBodyAngle()
+   public double getBodyPitchAngle()
    {
-      return bodyJoint.getQ_rot().getValue();
+      return this.bodyJoint.getQ_rot().getValue();
    }
 
-   public double getBodyAngularVelocity()
+   public double getBodyPitchAngularVelocity()
    {
-      return bodyJoint.getQd_rot().getValue();
+      return this.bodyJoint.getQd_rot().getValue();
    }
 
    public double getHipAngle(RobotSide robotSide)

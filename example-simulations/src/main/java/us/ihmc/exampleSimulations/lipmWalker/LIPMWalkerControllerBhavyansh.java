@@ -27,8 +27,6 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
    private final YoDouble kpHip = new YoDouble("kpHip", registry);
    private final YoDouble kdHip = new YoDouble("kdHip", registry);
 
-   private final YoDouble q_pitch;
-
    private final YoDouble q_d_leftKnee = new YoDouble("q_d_leftKnee", registry);
    private final YoDouble q_d_rightKnee = new YoDouble("q_d_rightKnee", registry);
    private final YoDouble q_d_leftHip = new YoDouble("q_d_leftHip", registry);
@@ -61,11 +59,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
    public LIPMWalkerControllerBhavyansh(LIPMWalkerRobot robot)
    {
-
       this.robot = robot;
-
-      q_pitch = (YoDouble) robot.getRobot().findVariable("q_pitch");
-
       initialize();
 
       stateMachines = setupStateMachines();
@@ -130,7 +124,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       robot.setKneeForce(side, feedForwardSupportKneeForce + feedBackKneeForce);
       robot.setHipTorque(side, 0.0);
 
-      worldHipAngles.get(side).set(robot.getHipAngle(side) + q_pitch.getValue());
+      worldHipAngles.get(side).set(robot.getHipAngle(side) + robot.getBodyPitchAngle());
    }
 
    private void controlSwingLeg(RobotSide side, Vector3DReadOnly footLocation)
@@ -140,9 +134,9 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       double feedBackKneeForce;
       double desiredHipAngle;
 
-      double hipAngle = robot.getHipAngle(side) + q_pitch.getValue();
+      double hipAngle = robot.getHipAngle(side) + robot.getBodyPitchAngle();
       worldHipAngles.get(side).set(hipAngle);
-      double supportHipAngle = robot.getHipAngle(side.getOppositeSide()) + q_pitch.getValue();
+      double supportHipAngle = robot.getHipAngle(side.getOppositeSide()) + robot.getBodyPitchAngle();
       double hipVelocity = robot.getHipVelocity(side);
 
       double desiredKneeLength = EuclidCoreTools.squareRoot(footLocation.lengthSquared() / 4 + desiredHeight.getValue() * desiredHeight.getValue());
