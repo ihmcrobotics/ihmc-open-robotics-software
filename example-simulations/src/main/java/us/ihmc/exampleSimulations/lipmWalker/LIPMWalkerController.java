@@ -126,7 +126,7 @@ public class LIPMWalkerController implements RobotController
 
       /* Compute and set orbital energy YoDouble. Based on virtual spring-mass system. */
       comXVelocity.set(robot.getCenterOfMassVelocity().getX());
-      comXPositionFromFoot.set(getCenterOfMassDistanceFromSupportFoot());
+      comXPositionFromFoot.set(robot.getCenterOfMassXDistanceFromSupportFoot());
 
       double orbitalEnergyValue = 0.5 * comXVelocity.getValue() * comXVelocity.getValue() - 0.5 * g / desiredHeight.getDoubleValue() * comXPositionFromFoot.getValue() * comXPositionFromFoot.getValue();
       orbitalEnergy.set(orbitalEnergyValue);
@@ -144,20 +144,6 @@ public class LIPMWalkerController implements RobotController
       robot.setHipTorque(side, -kpBodyPitch.getValue() * (desiredBodyPitch.getValue() - robot.getBodyPitchAngle()) + kdBodyPitch.getValue() * robot.getBodyPitchAngularVelocity());
 
       worldHipAngles.get(side).set(robot.getHipAngle(side) + robot.getBodyPitchAngle());
-   }
-
-   private double getCenterOfMassDistanceFromSupportFoot()
-   {
-      Point3D leftFootPosition = robot.getFootPosition(RobotSide.LEFT);
-      Point3D rightFootPosition = robot.getFootPosition(RobotSide.RIGHT);
-      
-      Point3D lowerFoot = leftFootPosition;
-      if (rightFootPosition.getZ() < leftFootPosition.getZ())
-      {
-         lowerFoot = rightFootPosition;
-      }
-
-      return robot.getCenterOfMassPosition().getX() - lowerFoot.getX();
    }
 
    private void controlSwingLeg(RobotSide side, Vector3DReadOnly footLocation)

@@ -74,9 +74,9 @@ public class LIPMWalkerRobot
       kneeJoints = new SideDependentList<>(leftKneeJoint, rightKneeJoint);
 
       heelPoints = new SideDependentList<GroundContactPoint>();
-      
+
       List<GroundContactPoint> contactPoints = robot.getAllGroundContactPoints();
-      for (GroundContactPoint point: contactPoints)
+      for (GroundContactPoint point : contactPoints)
       {
          if (point.getName() == "gc_rheel")
          {
@@ -87,7 +87,7 @@ public class LIPMWalkerRobot
             heelPoints.set(RobotSide.LEFT, point);
          }
       }
-      
+
       setupInitialConditions();
 
       LogTools.info("Robot: {}", robot.toString());
@@ -157,12 +157,23 @@ public class LIPMWalkerRobot
 
    public Point3D getFootPosition(RobotSide robotSide)
    {
-      return heelPoints.get(robotSide).getPositionCopy(); 
+      return heelPoints.get(robotSide).getPositionCopy();
    }
 
-   public double getKneeForce(RobotSide robotSide) {return kneeJoints.get(robotSide).getTau();}
+   public double getFootZForce(RobotSide robotSide)
+   {
+      return heelPoints.get(robotSide).getYoForce().getZ();
+   }
 
-   public double getHipTorque(RobotSide robotSide) {return hipJoints.get(robotSide).getTau();}
+   public double getKneeForce(RobotSide robotSide)
+   {
+      return kneeJoints.get(robotSide).getTau();
+   }
+
+   public double getHipTorque(RobotSide robotSide)
+   {
+      return hipJoints.get(robotSide).getTau();
+   }
 
    private void setupInitialConditions()
    {
@@ -245,6 +256,23 @@ public class LIPMWalkerRobot
       thighGraphics.addCylinder(thighLength, thighRadius, YoAppearance.AluminumMaterial());
       thighLinkDescription.setLinkGraphics(thighGraphics);
       return thighLinkDescription;
+   }
+
+   public double getCenterOfMassXDistanceFromSupportFoot()
+   {
+      Point3D leftFootPosition = getFootPosition(RobotSide.LEFT);
+      Point3D rightFootPosition = getFootPosition(RobotSide.RIGHT);
+
+      double leftForce = getFootZForce(RobotSide.LEFT);
+      double rightForce = getFootZForce(RobotSide.RIGHT);
+
+      Point3D loadedFootPosition = leftFootPosition;
+      if (Math.abs(rightForce) > Math.abs(leftForce))
+      {
+         loadedFootPosition = rightFootPosition;
+      }
+
+      return getCenterOfMassPosition().getX() - loadedFootPosition.getX();
    }
 
    public Robot getRobot()
