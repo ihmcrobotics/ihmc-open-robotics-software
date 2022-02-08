@@ -10,7 +10,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class LIPMWalkerController implements RobotController
+public class LIPMWalkerControllerTobi implements RobotController
 {
    private final LIPMWalkerRobot robot;
    private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -32,7 +32,7 @@ public class LIPMWalkerController implements RobotController
    
    private final YoDouble desiredHeight = new YoDouble("desiredHeight", registry);
 
-   public LIPMWalkerController(LIPMWalkerRobot robot)
+   public LIPMWalkerControllerTobi(LIPMWalkerRobot robot)
    {
       this.robot = robot;
       initialize();
@@ -68,7 +68,7 @@ public class LIPMWalkerController implements RobotController
       double mass = robot.getMass();
       comHeight.set(centerOfMassPosition.getZ());
       orbitalEnergy.set(0.5f * centerOfMassVelocity.getX() * centerOfMassVelocity.getX() - 9.81f / 2.0f / centerOfMassPosition.getZ() * centerOfMassPosition.getX() * centerOfMassPosition.getX());
-      bodyAngle.set(robot.getBodyAngle());
+      bodyAngle.set(robot.getBodyPitchAngle());
       progress.set(progress.getValue() + 1.0);
       double numSteps = progress.getValue() / stepTime.getValue();
       double stepProgress = (progress.getValue() % stepTime.getValue()) / stepTime.getValue();
@@ -89,7 +89,7 @@ public class LIPMWalkerController implements RobotController
       robot.setKneeForce(swingSide, kpKnee.getValue() * (desiredKneeLength - robot.getKneeLength(swingSide)) + kdKnee.getValue() * (desiredFootSpeed - robot.getKneeVelocity(swingSide)));
       double desiredHipAngle = -robot.getHipAngle(swingSide.getOppositeSide());
       double hipTorque = kpHip.getValue() * (desiredHipAngle - robot.getHipAngle(swingSide)) + kdHip.getValue() * (0.0 - robot.getHipVelocity(swingSide));
-      robot.setJointTorque(swingSide, hipTorque);
+      robot.setHipTorque(swingSide, hipTorque);
 
       // Support Side:
       double kneeLength = robot.getKneeLength(supportSide);
@@ -99,8 +99,8 @@ public class LIPMWalkerController implements RobotController
       double feedBackKneeForce = kpKnee.getValue() * (desiredHeight.getValue() - comHeight.getValue()) + kdKnee.getValue() * (0.0 - centerOfMassVelocity.getZ());
       robot.setKneeForce(supportSide, feedBackKneeForce);
 
-      hipTorque = hipTorque - kpHip.getValue() * robot.getBodyAngle() - kdHip.getValue() * robot.getBodyAngularVelocity();
-      robot.setJointTorque(supportSide, -hipTorque);
+      hipTorque = hipTorque - kpHip.getValue() * robot.getBodyPitchAngle() - kdHip.getValue() * robot.getBodyPitchAngularVelocity();
+      robot.setHipTorque(supportSide, -hipTorque);
 
       // Switch support
       if (robot.getFootPosition(swingSide).getZ() < 0.01)
