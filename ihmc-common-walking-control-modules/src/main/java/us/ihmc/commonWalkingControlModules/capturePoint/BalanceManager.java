@@ -716,6 +716,12 @@ public class BalanceManager
       return yoDesiredCapturePoint;
    }
 
+   public FramePoint2DReadOnly getPerfectCoP()
+   {
+      perfectCoP2d.set(yoPerfectCoP);
+      return perfectCoP2d;
+   }
+
    public FrameVector2DReadOnly getDesiredICPVelocity()
    {
       return yoDesiredICPVelocity;
