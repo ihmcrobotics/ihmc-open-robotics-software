@@ -115,6 +115,16 @@ public class LIPMWalkerRobot
       return comVelocity;
    }
 
+   public double getBodyXPosition()
+   {
+      return this.bodyJoint.getQ_t1().getValue();
+   }
+
+   public double getBodyZPosition()
+   {
+      return this.bodyJoint.getQ_t2().getValue();
+   }
+
    public double getBodyPitchAngle()
    {
       return this.bodyJoint.getQ_rot().getValue();
@@ -163,6 +173,11 @@ public class LIPMWalkerRobot
    public double getFootZForce(RobotSide robotSide)
    {
       return heelPoints.get(robotSide).getYoForce().getZ();
+   }
+   
+   public boolean getFootSwitch(RobotSide robotSide)
+   {
+      return (heelPoints.get(robotSide).getYoFootSwitch().getValue() > 0.5);
    }
 
    public double getKneeForce(RobotSide robotSide)
