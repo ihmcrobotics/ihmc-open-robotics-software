@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.lipmWalker;
 
+import us.ihmc.exampleSimulations.lipmWalkerTobi.LIPMWalkerController;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;

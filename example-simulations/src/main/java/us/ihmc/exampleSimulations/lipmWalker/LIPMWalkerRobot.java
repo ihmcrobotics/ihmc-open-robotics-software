@@ -1,6 +1,7 @@
 package us.ihmc.exampleSimulations.lipmWalker;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -98,6 +99,16 @@ public class LIPMWalkerRobot
       return comVelocity;
    }
 
+   public double getBodyAngle()
+   {
+      return bodyJoint.getQ_rot().getValue();
+   }
+
+   public double getBodyAngularVelocity()
+   {
+      return bodyJoint.getQd_rot().getValue();
+   }
+
    public double getHipAngle(RobotSide robotSide)
    {
       return hipJoints.get(robotSide).getQ();
@@ -128,13 +139,29 @@ public class LIPMWalkerRobot
       kneeJoints.get(robotSide).setTau(force);
    }
 
+   public Point3D getFootPosition(RobotSide robotSide)
+   {
+      List<GroundContactPoint> contactPoints = robot.getAllGroundContactPoints();
+      for (GroundContactPoint point: contactPoints)
+      {
+         if (point.getName() == "gc_rheel" && robotSide == RobotSide.RIGHT)
+         {
+            return point.getPositionCopy();
+         }
+         if (point.getName() == "gc_lheel" && robotSide == RobotSide.LEFT)
+         {
+            return point.getPositionCopy();
+         }
+      }
+      return null;
+   }
+
    public double getKneeForce(RobotSide robotSide) {return kneeJoints.get(robotSide).getTau();}
 
    public double getHipTorque(RobotSide robotSide) {return hipJoints.get(robotSide).getTau();}
 
    private void setupInitialConditions()
    {
-      bodyJoint.setCartesianPosition(0.0, 1.0);
       bodyJoint.setCartesianVelocity(0.6, 0.0);
       bodyJoint.setRotation(0.0);
 
