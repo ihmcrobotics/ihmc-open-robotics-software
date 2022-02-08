@@ -13,6 +13,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -40,10 +41,15 @@ public class LIPMWalkerController implements RobotController
 
    private final YoDouble orbitalEnergy = new YoDouble("orbitalEnergy", registry);
 
+   private final YoDouble hipDiffAngle = new YoDouble("hipDiffAngle", registry);
+
+
    private enum States
    {
-      SUPPORT, SWING
+      SUPPORT, SWING;
    }
+
+   private final SideDependentList<StateMachine<States, State>> stateMachines;
 
    private final double g  = 9.81;
 
@@ -51,6 +57,8 @@ public class LIPMWalkerController implements RobotController
    {
       this.robot = robot;
       initialize();
+
+      stateMachines = setupStateMachines();
    }
 
    @Override
@@ -59,8 +67,8 @@ public class LIPMWalkerController implements RobotController
       kpKnee.set(1000.0);
       kdKnee.set(100.0);
 
-      kpHip.set(500.0);
-      kdHip.set(50.0);
+      kpHip.set(600.0);
+      kdHip.set(70.0);
 
       q_d_leftKnee.set(1.0);
       q_d_rightKnee.set(1.0);
@@ -80,17 +88,13 @@ public class LIPMWalkerController implements RobotController
    @Override
    public void doControl()
    {
-      RobotSide side = RobotSide.LEFT;
+      for(RobotSide robotSide : RobotSide.values())
+      {
+         stateMachines.get(robotSide).doAction();
+         stateMachines.get(robotSide).doTransitions();
+      }
 
-      // Support Side:
-      controlSupportLeg(side);
-
-      // Swing Side:
-      side = RobotSide.RIGHT;
-
-      Vector3DReadOnly footLocation = calculateStepLocation();
-
-      controlSwingLeg(side, footLocation);
+      LogTools.info("StateMachine: Left:{} Right:{}", stateMachines.get(RobotSide.LEFT).getCurrentStateKey(), stateMachines.get(RobotSide.RIGHT).getCurrentStateKey());
    }
 
    private void controlSupportLeg(RobotSide side)
@@ -114,6 +118,7 @@ public class LIPMWalkerController implements RobotController
       double feedBackKneeForce =
             kpKnee.getValue() * (desiredHeight.getValue() - comHeight.getValue()) + kdKnee.getValue() * (0.0 - centerOfMassVelocity.getZ());
       robot.setKneeForce(side, feedForwardSupportKneeForce + feedBackKneeForce);
+      robot.setHipTorque(side, 0.0);
    }
 
    private void controlSwingLeg(RobotSide side, Vector3DReadOnly footLocation)
@@ -121,19 +126,33 @@ public class LIPMWalkerController implements RobotController
       double kneeLength;
       double kneeVelocity;
       double feedBackKneeForce;
+      double hipAngle = robot.getHipAngle(side);
+      double supportHipAngle = robot.getHipAngle(side.getOppositeSide());
+      double hipAngleDifference = hipAngle - supportHipAngle;
+      hipDiffAngle.set(hipAngleDifference);
+
+
+      double desiredKneeLength = EuclidCoreTools.squareRoot(footLocation.lengthSquared() / 4 + desiredHeight.getValue() * desiredHeight.getValue());
+
+      double hipVelocity = robot.getHipVelocity(side);
+      double desiredHipAngle = -2 * EuclidCoreTools.atan2(footLocation.length() / 2, desiredHeight.getValue());
+
       /* Compute knee force. */
       kneeLength = robot.getKneeLength(side);
       kneeVelocity = robot.getKneeVelocity(side);
-      double desiredKneeLength = EuclidCoreTools.squareRoot(footLocation.lengthSquared() / 4 + desiredHeight.getValue() * desiredHeight.getValue());
-      desiredKneeLength = 1.05;
-      feedBackKneeForce = kpKnee.getValue() * (desiredKneeLength - kneeLength) + kdKnee.getValue() * (0.0 - kneeVelocity);
+
+      if(hipAngleDifference > 0.1)
+         desiredKneeLength = 0.9;
+      else if(hipAngleDifference < -0.1)
+         desiredKneeLength = 1.08;
+
+
+      feedBackKneeForce = 200 * (desiredKneeLength - kneeLength) + 50 * (0.0 - kneeVelocity);
       robot.setKneeForce(side, feedBackKneeForce);
 
       /* Compute hip torque. */
-      double hipAngle = robot.getHipAngle(side);
-      double hipVelocity = robot.getHipVelocity(side);
-      double desiredHipAngle = -2 * EuclidCoreTools.atan2(footLocation.length() / 2, desiredHeight.getValue());
-      double feedBackHipTorque = kpHip.getValue() * (-Math.PI / 2 - hipAngle) + kdHip.getValue() * (0.0 - hipVelocity);
+      desiredHipAngles.get(side).set(desiredHipAngle);
+      double feedBackHipTorque = kpHip.getValue() * (desiredHipAngle - hipAngle) + kdHip.getValue() * (0.0 - hipVelocity);
       robot.setHipTorque(side, feedBackHipTorque);
    }
 
@@ -143,29 +162,29 @@ public class LIPMWalkerController implements RobotController
       return footLocation;
    }
 
-   private SideDependentList<StateMachine<LIPMWalkerController.States, State>> setupStateMachines()
+   private SideDependentList<StateMachine<States, State>> setupStateMachines()
    {
       // States and Actions:
-      StateMachineFactory<LIPMWalkerController.States, State> leftFactory = new StateMachineFactory<>(LIPMWalkerController.States.class);
-      StateMachineFactory<LIPMWalkerController.States, State> rightFactory = new StateMachineFactory<>(LIPMWalkerController.States.class);
+      StateMachineFactory<States, State> leftFactory = new StateMachineFactory<>(States.class);
+      StateMachineFactory<States, State> rightFactory = new StateMachineFactory<>(States.class);
 
       // Left State Transitions:
-      leftFactory.addTransition(LIPMWalkerController.States.SUPPORT, LIPMWalkerController.States.SWING, new HeelOffGroundCondition(RobotSide.LEFT));
-      leftFactory.addTransition(LIPMWalkerController.States.SWING, States.SUPPORT, new HeelOnGroundCondition(RobotSide.LEFT));
+      leftFactory.addTransition(States.SUPPORT, States.SWING, new HeelOffGroundCondition(RobotSide.LEFT));
+      leftFactory.addTransition(States.SWING, States.SUPPORT, new HeelOnGroundCondition(RobotSide.LEFT));
 
       // Right State Transitions:
-      rightFactory.addTransition(LIPMWalkerController.States.SUPPORT, LIPMWalkerController.States.SWING, new HeelOffGroundCondition(RobotSide.RIGHT));
-      rightFactory.addTransition(LIPMWalkerController.States.SWING, LIPMWalkerController.States.SUPPORT, new HeelOnGroundCondition(RobotSide.RIGHT));
+      rightFactory.addTransition(States.SUPPORT, States.SWING, new HeelOffGroundCondition(RobotSide.RIGHT));
+      rightFactory.addTransition(States.SWING, States.SUPPORT, new HeelOnGroundCondition(RobotSide.RIGHT));
 
       // Assemble the Left State Machine:
-      leftFactory.addState(LIPMWalkerController.States.SUPPORT, new SupportState(RobotSide.LEFT));
-      leftFactory.addState(LIPMWalkerController.States.SWING, new SwingState(RobotSide.LEFT));
+      leftFactory.addState(States.SUPPORT, new SupportState(RobotSide.LEFT));
+      leftFactory.addState(States.SWING, new SwingState(RobotSide.LEFT));
 
       // Assemble the Right State Machine:
-      rightFactory.addState(LIPMWalkerController.States.SUPPORT, new SupportState(RobotSide.RIGHT));
-      rightFactory.addState(LIPMWalkerController.States.SWING, new SwingState(RobotSide.RIGHT));
+      rightFactory.addState(States.SUPPORT, new SupportState(RobotSide.RIGHT));
+      rightFactory.addState(States.SWING, new SwingState(RobotSide.RIGHT));
 
-      return new SideDependentList<>(leftFactory.build(LIPMWalkerController.States.SWING), rightFactory.build(LIPMWalkerController.States.SUPPORT));
+      return new SideDependentList<>(leftFactory.build(States.SUPPORT), rightFactory.build(States.SWING));
    }
 
    private class SupportState implements State
@@ -186,7 +205,8 @@ public class LIPMWalkerController implements RobotController
       @Override
       public void doAction(double timeInState)
       {
-
+         // Support Side:
+         controlSupportLeg(robotSide);
       }
 
       @Override
@@ -214,7 +234,8 @@ public class LIPMWalkerController implements RobotController
       @Override
       public void doAction(double timeInState)
       {
-
+         Vector3DReadOnly footLocation = calculateStepLocation();
+         controlSwingLeg(robotSide, footLocation);
       }
 
       @Override
@@ -236,7 +257,7 @@ public class LIPMWalkerController implements RobotController
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         return robot.getKneeForce(robotSide) < 0.0;
+         return robot.getKneeForce(robotSide) < 8.0 && robot.getHipAngle(robotSide) - robot.getHipAngle(robotSide.getOppositeSide()) > 0.1;
       }
    }
 
@@ -252,7 +273,8 @@ public class LIPMWalkerController implements RobotController
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         return robot.getKneeForce(robotSide) > 2.0;
+         LogTools.info("Side: {} getKneeForce(): {}", robotSide, robot.getKneeForce(robotSide));
+         return robot.getKneeForce(robotSide) > 0 && robot.getHipAngle(robotSide) - robot.getHipAngle(robotSide.getOppositeSide()) < 0.1 && robot.getHipAngle(robotSide) < -0.8;
       }
    }
 
