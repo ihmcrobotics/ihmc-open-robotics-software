@@ -120,7 +120,13 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          swingPlannerParameters.setAllFromStrings(parameters);
       });
 
-      operatorReviewEnabledInput = helper.subscribeViaReference(OperatorReviewEnabled, true);
+      operatorReviewEnabledInput = new AtomicReference<>();
+      helper.subscribeViaCallback(OperatorReviewEnabled, enabled ->
+      {
+         LogTools.info("Received operator review enabled toggle message: {}", enabled);
+         operatorReviewEnabledInput.set(enabled);
+         helper.publish(OperatorReviewEnabledToUI, enabled);
+      });
       approvalNotification = helper.subscribeViaNotification(ReviewApproval);
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
