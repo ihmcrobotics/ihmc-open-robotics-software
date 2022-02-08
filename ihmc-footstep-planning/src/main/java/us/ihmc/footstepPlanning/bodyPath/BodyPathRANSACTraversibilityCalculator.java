@@ -20,16 +20,16 @@ import static us.ihmc.footstepPlanning.bodyPath.BodyPathCollisionDetector.comput
 
 public class BodyPathRANSACTraversibilityCalculator
 {
-   static final double sampleSizeX = 0.3;
-   static final double sampleSizeY = 0.4;
-   static final double halfStanceWidth = 0.22;
+   static final double sampleSizeX = 0.35;
+   static final double sampleSizeY = 0.35;
+   static final double halfStanceWidth = 0.25;
    static final double heightWindow = 0.18;
    static final double nonGroundDiscount = 0.7;
    static final double inclineWeight = 0.1;
 
-   private static final double minPercent = 0.2;
-   private static final double minNormalToPenalize = Math.toRadians(45.0);
-   private static final double maxNormalToPenalize = Math.toRadians(70.0);
+   static final double minPercent = 0.2;
+   static final double minNormalToPenalize = Math.toRadians(45.0);
+   static final double maxNormalToPenalize = Math.toRadians(70.0);
 
    private BodyPathLatticePoint startNode;
    private final ToDoubleFunction<BodyPathLatticePoint> gridHeightMap;

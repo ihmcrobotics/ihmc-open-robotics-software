@@ -206,7 +206,6 @@ public class AStarBodyPathSmootherTest
    }
 
    @Test
-   // was unstable cause of smoothness cost. lowering threshold to be a turn point fixed it.
    public void testCinders1()
    {
       runDataset("cinders_1");
@@ -231,10 +230,15 @@ public class AStarBodyPathSmootherTest
    }
 
    @Test
-   // unstable, prob roll-z term
    public void testRamp()
    {
       runDataset("ramp");
+   }
+
+   @Test
+   public void testRampAtAnAngle()
+   {
+      runDataset("ramp_at_an_angle");
    }
 
    @Test

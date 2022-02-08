@@ -44,7 +44,7 @@ public class HeightMapRANSACNormalCalculator
 
    private final Random random = new Random(3290);
 
-   public void computeSurfaceNormals(HeightMapData heightMapData)
+   public void initialize(HeightMapData heightMapData)
    {
       if (xRansacOffsets == null || !EuclidCoreTools.epsilonEquals(gridResolution, heightMapData.getGridResolutionXY(), 1e-3))
       {

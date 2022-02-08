@@ -233,7 +233,7 @@ public class AStarBodyPathPlanner
 
       if (useRANSACTraversibility)
       {
-         ransacNormalCalculator.computeSurfaceNormals(heightMapData);
+         ransacNormalCalculator.initialize(heightMapData);
          ransacTraversibilityCalculator.initialize(startNode);
       }
       else
