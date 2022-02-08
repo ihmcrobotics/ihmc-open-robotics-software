@@ -11,7 +11,8 @@ public class LIPMWalkerSimulation
       LIPMWalkerRobot robotConstructor = new LIPMWalkerRobot();
 
       Robot robot = robotConstructor.getRobot();
-      LIPMWalkerController controller = new LIPMWalkerController(robotConstructor);
+      LIPMWalkerControllerBhavyansh controller = new LIPMWalkerControllerBhavyansh(robotConstructor);
+//      LIPMWalkerControllerToby controller = new LIPMWalkerControllerToby(robotConstructor);
 
       LinearGroundContactModel groundContactModel = new LinearGroundContactModel(robot, 14220.0, 150.6, 125.0, 300.0, robot.getRobotsYoRegistry());
       robot.setGroundContactModel(groundContactModel);
