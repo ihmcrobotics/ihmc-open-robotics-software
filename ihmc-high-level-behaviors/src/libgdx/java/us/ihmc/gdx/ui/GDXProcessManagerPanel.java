@@ -39,13 +39,13 @@ public abstract class GDXProcessManagerPanel
 
    protected final ArrayList<MissionControlProcess> processes = new ArrayList<>();
 
-   private final RestartableMissionControlProcess ros1MasterProcess;
-   private final RestartableMissionControlProcess behaviorModuleProcess;
-   private final RestartableMissionControlProcess behaviorManagerProcess;
-   private final RestartableMissionControlProcess footstepPlanningModuleProcess;
-   private final RestartableMissionControlProcess mapsenseHeadlessProcess;
-   private final RestartableMissionControlProcess objectDetectionProcess;
-   private final RestartableMissionControlProcess lidarREAProcess;
+   private final ROS1MasterProcess ros1MasterProcess;
+   private final BehaviorModuleProcess behaviorModuleProcess;
+   private final BehaviorManagerProcess behaviorManagerProcess;
+   private final FootstepPlanningModuleProcess footstepPlanningModuleProcess;
+   private final MapSenseHeadlessProcess mapsenseHeadlessProcess;
+   private final ObjectDetectionProcess objectDetectionProcess;
+   private final LidarREAProcess lidarREAProcess;
    protected final EnvironmentInitialSetup environmentInitialSetup;
 
    public GDXProcessManagerPanel()
@@ -162,42 +162,47 @@ public abstract class GDXProcessManagerPanel
       messagerMode.set(communicationMode.ordinal());
    }
 
+   public void setROS2Mode(CommunicationMode communicationMode)
+   {
+      ros2Mode.set(communicationMode.ordinal());
+   }
+
    public void setEnableROS1(boolean enableROS1)
    {
       this.enableROS1.set(enableROS1);
    }
 
-   public RestartableMissionControlProcess getBehaviorModuleProcess()
+   public BehaviorModuleProcess getBehaviorModuleProcess()
    {
       return behaviorModuleProcess;
    }
 
-   public RestartableMissionControlProcess getRos1MasterProcess()
+   public ROS1MasterProcess getRos1MasterProcess()
    {
       return ros1MasterProcess;
    }
 
-   public RestartableMissionControlProcess getBehaviorManagerProcess()
+   public BehaviorManagerProcess getBehaviorManagerProcess()
    {
       return behaviorManagerProcess;
    }
 
-   public RestartableMissionControlProcess getFootstepPlanningModuleProcess()
+   public FootstepPlanningModuleProcess getFootstepPlanningModuleProcess()
    {
       return footstepPlanningModuleProcess;
    }
 
-   public RestartableMissionControlProcess getMapsenseHeadlessProcess()
+   public MapSenseHeadlessProcess getMapsenseHeadlessProcess()
    {
       return mapsenseHeadlessProcess;
    }
 
-   public RestartableMissionControlProcess getObjectDetectionProcess()
+   public ObjectDetectionProcess getObjectDetectionProcess()
    {
       return objectDetectionProcess;
    }
 
-   public RestartableMissionControlProcess getLidarREAProcess()
+   public LidarREAProcess getLidarREAProcess()
    {
       return lidarREAProcess;
    }
