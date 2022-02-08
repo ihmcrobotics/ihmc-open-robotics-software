@@ -27,8 +27,9 @@ public class LIPMWalkerController implements RobotController
    private final YoDouble kpHip = new YoDouble("kpHip", registry);
    private final YoDouble kdHip = new YoDouble("kdHip", registry);
 
-   private final YoDouble q_pitch;
-
+   private final YoDouble comXVelocity = new YoDouble("comXVelocity", registry);
+   private final YoDouble comXPositionFromFoot = new YoDouble("comXPositionFromFoot", registry);
+   
    private final YoDouble q_d_leftKnee = new YoDouble("q_d_leftKnee", registry);
    private final YoDouble q_d_rightKnee = new YoDouble("q_d_rightKnee", registry);
    private final YoDouble q_d_leftHip = new YoDouble("q_d_leftHip", registry);
@@ -61,10 +62,7 @@ public class LIPMWalkerController implements RobotController
 
    public LIPMWalkerController(LIPMWalkerRobot robot)
    {
-
       this.robot = robot;
-
-      q_pitch = (YoDouble) robot.getRobot().findVariable("q_pitch");
 
       initialize();
 
@@ -119,7 +117,10 @@ public class LIPMWalkerController implements RobotController
       double mass = robot.getMass();
 
       /* Compute and set orbital energy YoDouble. Based on virtual spring-mass system. */
-      double orbitalEnergyValue = 0.5 * mass * centerOfMassVelocity.lengthSquared() - 0.5 * g / desiredHeight.getDoubleValue() * centerOfMassPosition.distanceFromOriginSquared();
+      comXVelocity.set(robot.getCenterOfMassVelocity().getX());
+      comXPositionFromFoot.set(getCenterOfMassDistanceFromSupportFoot());
+
+      double orbitalEnergyValue = 0.5 * comXVelocity.getValue() * comXVelocity.getValue() - 0.5 * g / desiredHeight.getDoubleValue() * comXPositionFromFoot.getValue() * comXPositionFromFoot.getValue();
       orbitalEnergy.set(orbitalEnergyValue);
 
       comHeight.set(centerOfMassPosition.getZ());
@@ -130,7 +131,12 @@ public class LIPMWalkerController implements RobotController
       robot.setKneeForce(side, feedForwardSupportKneeForce + feedBackKneeForce);
       robot.setHipTorque(side, 0.0);
 
-      worldHipAngles.get(side).set(robot.getHipAngle(side) + q_pitch.getValue());
+      worldHipAngles.get(side).set(robot.getHipAngle(side) + robot.getBodyPitchAngle());
+   }
+
+   private double getCenterOfMassDistanceFromSupportFoot()
+   {
+      return robot.getCenterOfMassPosition().getX();
    }
 
    private void controlSwingLeg(RobotSide side, Vector3DReadOnly footLocation)
@@ -140,9 +146,9 @@ public class LIPMWalkerController implements RobotController
       double feedBackKneeForce;
       double desiredHipAngle;
 
-      double hipAngle = robot.getHipAngle(side) + q_pitch.getValue();
+      double hipAngle = robot.getHipAngle(side) + robot.getBodyPitchAngle();
       worldHipAngles.get(side).set(hipAngle);
-      double supportHipAngle = robot.getHipAngle(side.getOppositeSide()) + q_pitch.getValue();
+      double supportHipAngle = robot.getHipAngle(side.getOppositeSide()) + robot.getBodyPitchAngle();
       double hipVelocity = robot.getHipVelocity(side);
 
       double desiredKneeLength = EuclidCoreTools.squareRoot(footLocation.lengthSquared() / 4 + desiredHeight.getValue() * desiredHeight.getValue());
