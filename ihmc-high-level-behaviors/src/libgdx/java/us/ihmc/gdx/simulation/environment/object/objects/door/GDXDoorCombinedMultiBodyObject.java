@@ -71,7 +71,7 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       GDXTools.toGDX(rigidBodyTransform, worldTransform);
       frameCollider.setWorldTransform(worldTransform);
       frameCollider.setFriction(1.0f);
-      bulletPhysicsManager.addMultiBodyCollisionShape(frameCollider); // TODO: Store and remove
+      addMultiBodyCollisionShape(bulletPhysicsManager, frameCollider); // TODO: Store and remove
       multiBody.setBaseCollider(frameCollider);
 
       int linkIndex = 0;
@@ -99,7 +99,7 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       panelCollider.setCollisionShape(doorPanelObject.getBtCollisionShape());
       panelCollider.setWorldTransform(worldTransform);
       panelCollider.setFriction(1.0f);
-      bulletPhysicsManager.addMultiBodyCollisionShape(panelCollider);
+      addMultiBodyCollisionShape(bulletPhysicsManager, panelCollider);
       multiBody.getLink(0).setCollider(panelCollider);
 
       linkIndex = 1;
@@ -124,11 +124,11 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
       leverCollider.setCollisionShape(doorLeverObject.getBtCollisionShape());
       leverCollider.setWorldTransform(worldTransform);
       leverCollider.setFriction(1.0f);
-      bulletPhysicsManager.addMultiBodyCollisionShape(leverCollider);
+      addMultiBodyCollisionShape(bulletPhysicsManager, leverCollider);
       multiBody.getLink(1).setCollider(leverCollider);
 
       multiBody.finalizeMultiDof();
-      bulletPhysicsManager.addMultiBody(multiBody);
+      addBtMultiBody(bulletPhysicsManager, multiBody);
    }
 
    @Override
