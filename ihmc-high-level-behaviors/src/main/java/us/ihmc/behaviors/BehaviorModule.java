@@ -53,28 +53,31 @@ public class BehaviorModule
    private DRCRobotModel robotModel;
    private final CommunicationMode ros2CommunicationMode;
    private final CommunicationMode messagerCommunicationMode;
+   private final boolean enableROS1;
    private BehaviorDefinition highestLevelBehaviorDefinition;
    private BehaviorHelper helper;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
-      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTERPROCESS, CommunicationMode.INTERPROCESS);
+      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTERPROCESS, CommunicationMode.INTERPROCESS, true);
    }
 
    public static BehaviorModule createIntraprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
-      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS);
+      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS, false);
    }
 
    public BehaviorModule(BehaviorRegistry behaviorRegistry, 
                          DRCRobotModel robotModel,
                          CommunicationMode ros2CommunicationMode,
-                         CommunicationMode messagerCommunicationMode)
+                         CommunicationMode messagerCommunicationMode,
+                         boolean enableROS1)
    {
       this.behaviorRegistry = behaviorRegistry;
       this.robotModel = robotModel;
       this.ros2CommunicationMode = ros2CommunicationMode;
       this.messagerCommunicationMode = messagerCommunicationMode;
+      this.enableROS1 = enableROS1;
 
       rootNode = new BehaviorTreeControlFlowNode()
       {
@@ -106,7 +109,7 @@ public class BehaviorModule
 
       LogTools.info("Starting behavior module in ROS 2: {}, Messager: {} modes", ros2CommunicationMode.name(), messagerCommunicationMode.name());
       ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "behavior_module");
-      helper = new BehaviorHelper(highestLevelNodeDefinition.getName(), robotModel, ros2Node);
+      helper = new BehaviorHelper(highestLevelNodeDefinition.getName(), robotModel, ros2Node, enableROS1);
       highestLevelNode = highestLevelNodeDefinition.getBehaviorSupplier().build(helper);
       if (highestLevelNode.getYoRegistry() != null)
       {

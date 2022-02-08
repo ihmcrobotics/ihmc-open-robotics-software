@@ -50,7 +50,8 @@ public class AtlasExploreAreaBehaviorDemo extends AtlasSimulationBasics
 
       JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.of(ExploreAreaBehaviorUI.DEFINITION, LookAndStepBehaviorUI.DEFINITION);
 
-      behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER);
+      boolean enableROS1 = false;
+      behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER, enableROS1);
 
       LogTools.info("Creating behavior user interface");
       behaviorUI = JavaFXBehaviorUI.create(behaviorRegistry,

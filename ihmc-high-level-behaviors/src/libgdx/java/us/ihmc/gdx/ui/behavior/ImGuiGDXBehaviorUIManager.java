@@ -59,10 +59,11 @@ public class ImGuiGDXBehaviorUIManager
 
    public ImGuiGDXBehaviorUIManager(ROS2Node ros2Node,
                                     Supplier<? extends DRCRobotModel> robotModelSupplier,
-                                    ImGuiGDXBehaviorUIRegistry behaviorRegistry)
+                                    ImGuiGDXBehaviorUIRegistry behaviorRegistry,
+                                    boolean enableROS1)
    {
       this.behaviorRegistry = behaviorRegistry;
-      helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
+      helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node, enableROS1);
       messagerManagerWidget = new ImGuiMessagerManagerWidget(helper.getMessagerHelper(), behaviorModuleHost::get);
       yoVariableClientManagerWidget = new ImGuiYoVariableClientManagerWidget(helper.getYoVariableClientHelper(),
                                                                              behaviorModuleHost::get,
