@@ -28,7 +28,6 @@ import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.gdx.ui.tools.ImGuiMessagerManagerWidget;
 import us.ihmc.gdx.ui.yo.ImGuiYoVariableClientManagerWidget;
 import us.ihmc.gdx.vr.GDXVRContext;
-import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 
@@ -101,7 +100,7 @@ public class ImGuiGDXBehaviorUIManager
       // TODO: This needs to be a message sent to the module. This panel should react to differently shaped incoming trees.
 
       // disable things
-      yoEnabled.set(false);
+      setEnabled(false);
 
       helper.publish(BehaviorModule.API.SET_HIGHEST_LEVEL_BEHAVIOR, behaviorName);
 
@@ -185,6 +184,12 @@ public class ImGuiGDXBehaviorUIManager
       }
       ImGui.sameLine();
       ImGui.text("Server: " + yoEnabled.get());
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      imEnabled.set(enabled);
+      yoEnabled.set(enabled);
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
