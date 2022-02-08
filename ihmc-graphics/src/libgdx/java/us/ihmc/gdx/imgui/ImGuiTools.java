@@ -3,6 +3,7 @@ package us.ihmc.gdx.imgui;
 import com.badlogic.gdx.Input;
 import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
+import imgui.flag.ImGuiKey;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
@@ -31,6 +32,15 @@ public class ImGuiTools
 
    private static ImFont bigFont;
    private static ImFont nodeFont;
+
+   private static boolean userKeysHaveBeenMapped = false;
+   private static int spaceKey;
+   private static int deleteKey;
+   private static int escapeKey;
+   private static int upArrowKey;
+   private static int downArrowKey;
+   private static int leftArrowKey;
+   private static int rightArrowKey;
 
    public static int nextWidgetIndex()
    {
@@ -180,5 +190,65 @@ public class ImGuiTools
       box.setMin(posX, posY);
       box.setMax(posX + ImGui.getWindowSizeX(), posY + (int) ImGui.getWindowSizeX());
       return box;
+   }
+
+   private static void initializeUserMappedKeys()
+   {
+      spaceKey = ImGui.getKeyIndex(ImGuiKey.Space);
+      deleteKey = ImGui.getKeyIndex(ImGuiKey.Delete);
+      escapeKey = ImGui.getKeyIndex(ImGuiKey.Escape);
+      upArrowKey = ImGui.getKeyIndex(ImGuiKey.UpArrow);
+      downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
+      leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
+      rightArrowKey = ImGui.getKeyIndex(ImGuiKey.RightArrow);
+   }
+
+   public static int getSpaceKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return spaceKey;
+   }
+
+   public static int getDeleteKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return deleteKey;
+   }
+
+   public static int getEscapeKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return escapeKey;
+   }
+
+   public static int getUpArrowKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return upArrowKey;
+   }
+
+   public static int getDownArrowKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return downArrowKey;
+   }
+
+   public static int getLeftArrowKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return leftArrowKey;
+   }
+
+   public static int getRightArrowKey()
+   {
+      if (!userKeysHaveBeenMapped)
+         initializeUserMappedKeys();
+      return rightArrowKey;
    }
 }

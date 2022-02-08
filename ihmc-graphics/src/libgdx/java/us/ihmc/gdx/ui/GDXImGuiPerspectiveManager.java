@@ -11,6 +11,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 
 import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
@@ -184,6 +185,11 @@ public class GDXImGuiPerspectiveManager
    public void reloadPerspective()
    {
       applyPerspectiveDirectory();
-      load.accept(currentConfigurationLocation);
+      Path directory = currentConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
+            ? perspectiveDirectory.getWorkspaceDirectory() : perspectiveDirectory.getExternalDirectory();
+      if (Files.exists(directory))
+      {
+         load.accept(currentConfigurationLocation);
+      }
    }
 }

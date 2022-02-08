@@ -9,9 +9,11 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.sharedMemory.LinkedYoRegistry;
+import us.ihmc.scs2.sharedMemory.LinkedYoVariable;
 import us.ihmc.scs2.sharedMemory.tools.SharedMemoryTools;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class GDXSimulatedRobot
 {
@@ -36,6 +38,11 @@ public class GDXSimulatedRobot
                                                                     robotDefinition,
                                                                     mirroredBoxRegistry);
       robotLinkedYoRegistry = yoManager.newLinkedYoRegistry(mirroredBoxRegistry);
+      mirroredBoxRegistry.getVariables().forEach(var ->
+      {
+         LinkedYoVariable<YoVariable> linkYoVariable = robotLinkedYoRegistry.linkYoVariable(var);
+         linkYoVariable.addUser(this);
+      });
    }
 
    public void update()

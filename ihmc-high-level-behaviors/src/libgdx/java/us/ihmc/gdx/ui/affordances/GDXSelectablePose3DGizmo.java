@@ -8,6 +8,7 @@ import imgui.internal.ImGui;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
@@ -42,7 +43,7 @@ public class GDXSelectablePose3DGizmo
       boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
       boolean isClickedOn = mouseIntersects && leftMouseReleasedWithoutDrag;
       boolean somethingElseIsClickedOn = !mouseIntersects && leftMouseReleasedWithoutDrag;
-      boolean deselectionKeyPressed = ImGui.isKeyReleased(input.getDeleteKey()) || ImGui.isKeyReleased(input.getEscapeKey());
+      boolean deselectionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) || ImGui.isKeyReleased(ImGuiTools.getEscapeKey());
 
       // Determine selectedness
       if (isClickedOn)
