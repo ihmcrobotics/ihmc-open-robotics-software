@@ -27,7 +27,7 @@ import us.ihmc.simulationconstructionset.*;
 
 public class LIPMWalkerRobot
 {
-   private double bodyRadius = 0.2;
+   private double bodyXRadius = 0.1, bodyYRadius = 0.2, bodyZRadius = 0.4;
    private double bodyRadiusOfGyrationY = 0.2;
    private double bodyRadiusOfGyrationZ = 0.2;
    private double bodyRadiusOfGyrationX = 0.2;
@@ -186,7 +186,7 @@ public class LIPMWalkerRobot
       bodyLink.setMassAndRadiiOfGyration(bodyMass, bodyRadiusOfGyrationX, bodyRadiusOfGyrationY, bodyRadiusOfGyrationZ);
       bodyJoint.setLink(bodyLink);
       LinkGraphicsDescription bodyLinkGraphics = new LinkGraphicsDescription();
-      bodyLinkGraphics.addSphere(bodyRadius, YoAppearance.AluminumMaterial());
+      bodyLinkGraphics.addEllipsoid(bodyXRadius, bodyYRadius, bodyZRadius, YoAppearance.AluminumMaterial());
       bodyLink.setLinkGraphics(bodyLinkGraphics);
 
       PinJointDescription leftHipJoint = new PinJointDescription("leftHip", new Vector3D(0.0, hipWidth / 2.0, 0.0), new Vector3D(0.0, 1.0, 0.0));
