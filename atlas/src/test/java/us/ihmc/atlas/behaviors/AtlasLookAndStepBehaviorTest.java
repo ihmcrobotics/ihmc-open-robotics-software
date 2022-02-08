@@ -237,7 +237,12 @@ public class AtlasLookAndStepBehaviorTest
 
       AtlasRobotModel robotModelForBehavior = createRobotModel();
       robotModelForBehavior.getSwingPlannerParameters().setMinimumSwingFootClearance(0.0);
-      behaviorModule = new BehaviorModule(BehaviorRegistry.of(LookAndStepBehavior.DEFINITION), robotModelForBehavior, COMMUNICATION_MODE, COMMUNICATION_MODE);
+      boolean enableROS1 = false;
+      behaviorModule = new BehaviorModule(BehaviorRegistry.of(LookAndStepBehavior.DEFINITION),
+                                          robotModelForBehavior,
+                                          COMMUNICATION_MODE,
+                                          COMMUNICATION_MODE,
+                                          enableROS1);
       behaviorMessager = behaviorModule.getMessager();
 
       if (VISUALIZE)

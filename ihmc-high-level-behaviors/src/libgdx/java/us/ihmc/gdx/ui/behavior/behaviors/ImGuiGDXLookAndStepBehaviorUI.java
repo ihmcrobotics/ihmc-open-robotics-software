@@ -288,8 +288,9 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
    {
       boolean wasTickedRecently = wasTickedRecently(0.5);
       boolean currentStateIsNotEmpty = !currentState.isEmpty();
-      boolean notCurrentlyReset = !currentState.equals(LookAndStepBehavior.State.RESET.name());
-      boolean areGraphicsEnabled = wasTickedRecently && currentStateIsNotEmpty && notCurrentlyReset;
+      boolean isInResetState = currentState.equals(LookAndStepBehavior.State.RESET.name());
+      boolean isPlacingGoal = goalAffordance.isPlacingGoal();
+      boolean areGraphicsEnabled = (wasTickedRecently && currentStateIsNotEmpty && !isInResetState) || isPlacingGoal;
       if (invertShowGraphics.get())
          areGraphicsEnabled = !areGraphicsEnabled;
       return areGraphicsEnabled;
