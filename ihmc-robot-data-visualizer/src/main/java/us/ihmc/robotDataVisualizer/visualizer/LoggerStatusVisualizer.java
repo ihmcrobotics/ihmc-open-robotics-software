@@ -60,7 +60,7 @@ public class LoggerStatusVisualizer
          @Override
          public void actionPerformed(ActionEvent e)
          {
-            client.sendCommand(DataServerCommand.RESTAT_LOG, 0);
+            client.sendCommand(DataServerCommand.RESTART_LOG, 0);
          }
       });
       
