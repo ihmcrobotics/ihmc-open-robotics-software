@@ -28,7 +28,7 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-quadruped-robotics:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
-   api("us.ihmc:simulation-construction-set:0.21.13")
+   api("us.ihmc:simulation-construction-set:0.21.15")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
