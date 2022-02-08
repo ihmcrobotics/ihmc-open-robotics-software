@@ -28,10 +28,10 @@ import us.ihmc.simulationconstructionset.*;
 public class LIPMWalkerRobot
 {
    private double bodyRadius = 0.2;
-   private double bodyRadiusOfGyrationY = 0.1;
-   private double bodyRadiusOfGyrationZ = 0.1;
-   private double bodyRadiusOfGyrationX = 0.1;
-   private double bodyMass = 1.0;
+   private double bodyRadiusOfGyrationY = 0.2;
+   private double bodyRadiusOfGyrationZ = 0.2;
+   private double bodyRadiusOfGyrationX = 0.2;
+   private double bodyMass = 30.0;
    private Robot robot;
    private double hipWidth = 0.3;
    private double thighMass = 0.2;
@@ -40,7 +40,7 @@ public class LIPMWalkerRobot
    private double thighRadiusOfGyrationZ = 0.01;
    private double thighLength = 0.6;
    private double thighRadius = 0.05;
-   private double shinMass = 0.2;
+   private double shinMass = 0.05;
    private double shinRadiusOfGyrationX = 0.01;
    private double shinRadiusOfGyrationY = 0.01;
    private double shinRadiusOfGyrationZ = 0.01;
@@ -54,6 +54,7 @@ public class LIPMWalkerRobot
    private final SliderJoint leftKneeJoint, rightKneeJoint;
    private final SideDependentList<PinJoint> hipJoints;
    private final SideDependentList<SliderJoint> kneeJoints;
+   private final SideDependentList<GroundContactPoint> heelPoints;
 
    public LIPMWalkerRobot()
    {
@@ -72,6 +73,21 @@ public class LIPMWalkerRobot
 
       kneeJoints = new SideDependentList<>(leftKneeJoint, rightKneeJoint);
 
+      heelPoints = new SideDependentList<GroundContactPoint>();
+      
+      List<GroundContactPoint> contactPoints = robot.getAllGroundContactPoints();
+      for (GroundContactPoint point: contactPoints)
+      {
+         if (point.getName() == "gc_rheel")
+         {
+            heelPoints.set(RobotSide.RIGHT, point);
+         }
+         if (point.getName() == "gc_lheel")
+         {
+            heelPoints.set(RobotSide.LEFT, point);
+         }
+      }
+      
       setupInitialConditions();
 
       LogTools.info("Robot: {}", robot.toString());
@@ -141,19 +157,7 @@ public class LIPMWalkerRobot
 
    public Point3D getFootPosition(RobotSide robotSide)
    {
-      List<GroundContactPoint> contactPoints = robot.getAllGroundContactPoints();
-      for (GroundContactPoint point: contactPoints)
-      {
-         if (point.getName() == "gc_rheel" && robotSide == RobotSide.RIGHT)
-         {
-            return point.getPositionCopy();
-         }
-         if (point.getName() == "gc_lheel" && robotSide == RobotSide.LEFT)
-         {
-            return point.getPositionCopy();
-         }
-      }
-      return null;
+      return heelPoints.get(robotSide).getPositionCopy(); 
    }
 
    public double getKneeForce(RobotSide robotSide) {return kneeJoints.get(robotSide).getTau();}

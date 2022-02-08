@@ -72,8 +72,8 @@ public class LIPMWalkerController implements RobotController
    @Override
    public void initialize()
    {
-      kpKnee.set(1000.0);
-      kdKnee.set(100.0);
+      kpKnee.set(30000.0);
+      kdKnee.set(1000.0);
 
       kpHip.set(971.25);
       kdHip.set(80.0);
@@ -84,7 +84,7 @@ public class LIPMWalkerController implements RobotController
       q_d_leftHip.set(0.0);
       q_d_rightHip.set(0.0);
 
-      desiredHeight.set(0.8);
+      desiredHeight.set(0.926);
    }
 
    @Override
@@ -128,7 +128,11 @@ public class LIPMWalkerController implements RobotController
       double feedForwardSupportKneeForce = g * mass * kneeLength / centerOfMassPosition.getZ();
       double feedBackKneeForce =
             kpKnee.getValue() * (desiredHeight.getValue() - comHeight.getValue()) + kdKnee.getValue() * (0.0 - centerOfMassVelocity.getZ());
-      robot.setKneeForce(side, feedForwardSupportKneeForce + feedBackKneeForce);
+      double totalSupportKneeForce = feedForwardSupportKneeForce + feedBackKneeForce;
+      if (totalSupportKneeForce < 10.0)
+         totalSupportKneeForce = 10.0;
+      
+      robot.setKneeForce(side, totalSupportKneeForce);
       robot.setHipTorque(side, 0.0);
 
       worldHipAngles.get(side).set(robot.getHipAngle(side) + robot.getBodyPitchAngle());
@@ -136,7 +140,16 @@ public class LIPMWalkerController implements RobotController
 
    private double getCenterOfMassDistanceFromSupportFoot()
    {
-      return robot.getCenterOfMassPosition().getX();
+      Point3D leftFootPosition = robot.getFootPosition(RobotSide.LEFT);
+      Point3D rightFootPosition = robot.getFootPosition(RobotSide.RIGHT);
+      
+      Point3D lowerFoot = leftFootPosition;
+      if (rightFootPosition.getZ() < leftFootPosition.getZ())
+      {
+         lowerFoot = rightFootPosition;
+      }
+
+      return robot.getCenterOfMassPosition().getX() - lowerFoot.getX();
    }
 
    private void controlSwingLeg(RobotSide side, Vector3DReadOnly footLocation)
@@ -172,6 +185,8 @@ public class LIPMWalkerController implements RobotController
       /* Compute hip torque. */
       desiredHipAngles.get(side).set(desiredHipAngle);
       double feedBackHipTorque = kpHip.getValue() * (desiredHipAngle - hipAngle) + kdHip.getValue() * (0.0 - hipVelocity);
+      feedBackHipTorque = 0.0;
+      
       robot.setHipTorque(side, feedBackHipTorque);
    }
 
