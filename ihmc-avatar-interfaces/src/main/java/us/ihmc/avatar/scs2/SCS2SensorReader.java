@@ -291,16 +291,16 @@ public class SCS2SensorReader implements SensorReader
          {
             IMUSensor controllerSensor = controllerIMUSensors.get(i);
             SimIMUSensor simSensor = simIMUSensors.get(i);
-            controllerSensor.setOrientationMeasurement(simSensor.getOrientation());
-            controllerSensor.setAngularVelocityMeasurement(simSensor.getAngularVelocity());
-            controllerSensor.setLinearAccelerationMeasurement(simSensor.getLinearAcceleration());
+            controllerSensor.setOrientationMeasurement(simSensor.getOrientationFiltered());
+            controllerSensor.setAngularVelocityMeasurement(simSensor.getAngularVelocityFiltered());
+            controllerSensor.setLinearAccelerationMeasurement(simSensor.getLinearAccelerationFiltered());
          }
 
          for (int i = 0; i < wrenchSensorDefinitions.size(); i++)
          {
             ForceSensorData controllerData = controllerWrenchSensors.get(i);
             SimWrenchSensor simWrench = simWrenchSensors.get(i);
-            controllerData.setWrench(simWrench.getWrench().getAngularPart(), simWrench.getWrench().getLinearPart());
+            controllerData.setWrench(simWrench.getWrenchFiltered().getAngularPart(), simWrench.getWrenchFiltered().getLinearPart());
          }
       }
       else
@@ -309,9 +309,9 @@ public class SCS2SensorReader implements SensorReader
          {
             IMUDefinition definition = imuSensorDefinitions.get(i);
             SimIMUSensor simSensor = simIMUSensors.get(i);
-            sensorProcessing.setOrientationSensorValue(definition, simSensor.getOrientation());
-            sensorProcessing.setAngularVelocitySensorValue(definition, simSensor.getAngularVelocity());
-            sensorProcessing.setLinearAccelerationSensorValue(definition, simSensor.getLinearAcceleration());
+            sensorProcessing.setOrientationSensorValue(definition, simSensor.getOrientationFiltered());
+            sensorProcessing.setAngularVelocitySensorValue(definition, simSensor.getAngularVelocityFiltered());
+            sensorProcessing.setLinearAccelerationSensorValue(definition, simSensor.getLinearAccelerationFiltered());
          }
 
          for (int i = 0; i < wrenchSensorDefinitions.size(); i++)
