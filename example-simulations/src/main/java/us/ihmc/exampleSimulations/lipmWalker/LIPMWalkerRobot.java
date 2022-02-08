@@ -135,7 +135,7 @@ public class LIPMWalkerRobot
    private void setupInitialConditions()
    {
       bodyJoint.setCartesianPosition(0.0, 1.0);
-      bodyJoint.setCartesianVelocity(0.5, 0.0);
+      bodyJoint.setCartesianVelocity(0.6, 0.0);
       bodyJoint.setRotation(0.0);
 
       leftHipJoint.setQ(0.0);

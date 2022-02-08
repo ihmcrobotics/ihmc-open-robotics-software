@@ -27,15 +27,21 @@ public class LIPMWalkerController implements RobotController
    private final YoDouble kpHip = new YoDouble("kpHip", registry);
    private final YoDouble kdHip = new YoDouble("kdHip", registry);
 
+   private final YoDouble q_pitch;
+
    private final YoDouble q_d_leftKnee = new YoDouble("q_d_leftKnee", registry);
    private final YoDouble q_d_rightKnee = new YoDouble("q_d_rightKnee", registry);
    private final YoDouble q_d_leftHip = new YoDouble("q_d_leftHip", registry);
    private final YoDouble q_d_rightHip = new YoDouble("q_d_rightHip", registry);
 
+   private final YoDouble q_rightHipWorld = new YoDouble("q_rightHipWorld", registry);
+   private final YoDouble q_leftHipWorld = new YoDouble("q_leftHipWorld", registry);
+
    private final YoDouble comHeight = new YoDouble("comHeight", registry);
 
    private final SideDependentList<YoDouble> desiredKneeLengths = new SideDependentList<YoDouble>(q_d_leftKnee, q_d_rightKnee);
    private final SideDependentList<YoDouble> desiredHipAngles = new SideDependentList<YoDouble>(q_d_leftHip, q_d_rightHip);
+   private final SideDependentList<YoDouble> worldHipAngles = new SideDependentList<YoDouble>(q_leftHipWorld, q_rightHipWorld);
 
    private final YoDouble desiredHeight = new YoDouble("desiredHeight", registry);
 
@@ -55,7 +61,11 @@ public class LIPMWalkerController implements RobotController
 
    public LIPMWalkerController(LIPMWalkerRobot robot)
    {
+
       this.robot = robot;
+
+      q_pitch = (YoDouble) robot.getRobot().findVariable("q_pitch");
+
       initialize();
 
       stateMachines = setupStateMachines();
@@ -67,8 +77,8 @@ public class LIPMWalkerController implements RobotController
       kpKnee.set(1000.0);
       kdKnee.set(100.0);
 
-      kpHip.set(600.0);
-      kdHip.set(70.0);
+      kpHip.set(971.25);
+      kdHip.set(80.0);
 
       q_d_leftKnee.set(1.0);
       q_d_rightKnee.set(1.0);
@@ -119,6 +129,8 @@ public class LIPMWalkerController implements RobotController
             kpKnee.getValue() * (desiredHeight.getValue() - comHeight.getValue()) + kdKnee.getValue() * (0.0 - centerOfMassVelocity.getZ());
       robot.setKneeForce(side, feedForwardSupportKneeForce + feedBackKneeForce);
       robot.setHipTorque(side, 0.0);
+
+      worldHipAngles.get(side).set(robot.getHipAngle(side) + q_pitch.getValue());
    }
 
    private void controlSwingLeg(RobotSide side, Vector3DReadOnly footLocation)
@@ -126,28 +138,29 @@ public class LIPMWalkerController implements RobotController
       double kneeLength;
       double kneeVelocity;
       double feedBackKneeForce;
-      double hipAngle = robot.getHipAngle(side);
-      double supportHipAngle = robot.getHipAngle(side.getOppositeSide());
-      double hipAngleDifference = hipAngle - supportHipAngle;
-      hipDiffAngle.set(hipAngleDifference);
+      double desiredHipAngle;
 
+      double hipAngle = robot.getHipAngle(side) + q_pitch.getValue();
+      worldHipAngles.get(side).set(hipAngle);
+      double supportHipAngle = robot.getHipAngle(side.getOppositeSide()) + q_pitch.getValue();
+      double hipVelocity = robot.getHipVelocity(side);
 
       double desiredKneeLength = EuclidCoreTools.squareRoot(footLocation.lengthSquared() / 4 + desiredHeight.getValue() * desiredHeight.getValue());
 
-      double hipVelocity = robot.getHipVelocity(side);
-      double desiredHipAngle = -2 * EuclidCoreTools.atan2(footLocation.length() / 2, desiredHeight.getValue());
+//      desiredHipAngle = - EuclidCoreTools.atan2(footLocation.length() / 2, desiredHeight.getValue());
+      desiredHipAngle = -1.0;
 
       /* Compute knee force. */
       kneeLength = robot.getKneeLength(side);
       kneeVelocity = robot.getKneeVelocity(side);
 
-      if(hipAngleDifference > 0.1)
-         desiredKneeLength = 0.9;
-      else if(hipAngleDifference < -0.1)
-         desiredKneeLength = 1.08;
+      if(hipAngle > -0.05)
+         desiredKneeLength = 0.70;
+      else if(hipAngle < -0.1)
+         desiredKneeLength = 1.0425;
 
 
-      feedBackKneeForce = 200 * (desiredKneeLength - kneeLength) + 50 * (0.0 - kneeVelocity);
+      feedBackKneeForce = 10 * (desiredKneeLength - kneeLength) + 5 * (0.0 - kneeVelocity);
       robot.setKneeForce(side, feedBackKneeForce);
 
       /* Compute hip torque. */
@@ -257,7 +270,7 @@ public class LIPMWalkerController implements RobotController
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         return robot.getKneeForce(robotSide) < 8.0 && robot.getHipAngle(robotSide) - robot.getHipAngle(robotSide.getOppositeSide()) > 0.1;
+         return robot.getKneeForce(robotSide) < 10.0 && worldHipAngles.get(robotSide).getValue() > 0.1;
       }
    }
 
@@ -274,7 +287,7 @@ public class LIPMWalkerController implements RobotController
       public boolean testCondition(double timeInCurrentState)
       {
          LogTools.info("Side: {} getKneeForce(): {}", robotSide, robot.getKneeForce(robotSide));
-         return robot.getKneeForce(robotSide) > 0 && robot.getHipAngle(robotSide) - robot.getHipAngle(robotSide.getOppositeSide()) < 0.1 && robot.getHipAngle(robotSide) < -0.8;
+         return robot.getKneeForce(robotSide) > 0.0 && worldHipAngles.get(robotSide).getValue() < -0.1;
       }
    }
 
