@@ -1,6 +1,5 @@
 package us.ihmc.gdx.simulation;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Vector3;
@@ -11,9 +10,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
 
@@ -21,10 +19,12 @@ public class GDXBulletPhysicsDebugger
 {
    private final btIDebugDraw btIDebugDraw;
    private int debugMode = DebugDrawModes.DBG_DrawWireframe; // TODO: Provide options in combo box
-   private btMultiBodyDynamicsWorld multiBodyDynamicsWorld;
-   private GDXMultiColorMeshBuilder meshBuilder;
-   private ModelInstance debugModelInstance;
-   private ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final btMultiBodyDynamicsWorld multiBodyDynamicsWorld;
+   private final RecyclingArrayList<GDXBulletPhysicsDebuggerModel> models = new RecyclingArrayList<>(GDXBulletPhysicsDebuggerModel::new);
+   private GDXBulletPhysicsDebuggerModel currentModel;
+   private int lineDraws;
+   private final int maxLineDrawsPerModel = 100;
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean drawDebug = new ImBoolean(false);
    private final Timer autoDisableTimer = new Timer();
 
@@ -37,7 +37,16 @@ public class GDXBulletPhysicsDebugger
          @Override
          public void drawLine(Vector3 from, Vector3 to, Vector3 color)
          {
-            meshBuilder.addLine(from.x, from.y, from.z, to.x, to.y, to.z, 0.002f, new Color(color.x, color.y, color.z, 1.0f));
+            if (lineDraws >= maxLineDrawsPerModel)
+            {
+               lineDraws = 0;
+               currentModel.end();
+               nextModel();
+            }
+
+            currentModel.addLine(from, to, color);
+
+            ++lineDraws;
          }
 
          @Override
@@ -97,19 +106,29 @@ public class GDXBulletPhysicsDebugger
    {
       if (drawDebug.get())
       {
-         debugModelInstance = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-         {
-            this.meshBuilder = meshBuilder;
-            multiBodyDynamicsWorld.debugDrawWorld();
-         }, "BulletDebug");
+         models.clear();
+         lineDraws = 0;
+         nextModel();
+         multiBodyDynamicsWorld.debugDrawWorld();
+         currentModel.end();
       }
+   }
+
+   private void nextModel()
+   {
+      currentModel = models.add();
+      currentModel.begin();
    }
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (debugModelInstance != null)
+      for (GDXBulletPhysicsDebuggerModel model : models)
       {
-         debugModelInstance.getRenderables(renderables, pool);
+         ModelInstance modelInstance = model.getModelInstance();
+         if (modelInstance != null)
+         {
+            modelInstance.getRenderables(renderables, pool);
+         }
       }
    }
 }
