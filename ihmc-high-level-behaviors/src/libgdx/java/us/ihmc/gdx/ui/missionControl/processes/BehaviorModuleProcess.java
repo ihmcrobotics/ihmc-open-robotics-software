@@ -18,7 +18,7 @@ public class BehaviorModuleProcess extends RestartableMissionControlProcess
    private final ImInt messagerMode;
    private final ImBoolean enableROS1;
    // TODO: GUI selection
-   private final ImGuiGDXBehaviorUIRegistry behaviorRegistry;
+   private ImGuiGDXBehaviorUIRegistry behaviorRegistry;
    private BehaviorModule behaviorModule;
 
    public BehaviorModuleProcess(Supplier<DRCRobotModel> robotModelSupplier,
@@ -50,6 +50,11 @@ public class BehaviorModuleProcess extends RestartableMissionControlProcess
    {
       behaviorModule.destroy();
       behaviorModule = null;
+   }
+
+   public void setBehaviorRegistry(ImGuiGDXBehaviorUIRegistry behaviorRegistry)
+   {
+      this.behaviorRegistry = behaviorRegistry;
    }
 
    @Override
