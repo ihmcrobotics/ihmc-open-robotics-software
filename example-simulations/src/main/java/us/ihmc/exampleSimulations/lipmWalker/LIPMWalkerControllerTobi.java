@@ -1,8 +1,7 @@
-package us.ihmc.exampleSimulations.lipmWalkerTobi;
+package us.ihmc.exampleSimulations.lipmWalker;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.exampleSimulations.lipmWalker.LIPMWalkerRobot;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.RobotController;
