@@ -436,4 +436,9 @@ public class GDXEnvironmentObject
    {
       return isSelected;
    }
+
+   public GDXModelInstance getRealisticModelInstance()
+   {
+      return realisticModelInstance;
+   }
 }
