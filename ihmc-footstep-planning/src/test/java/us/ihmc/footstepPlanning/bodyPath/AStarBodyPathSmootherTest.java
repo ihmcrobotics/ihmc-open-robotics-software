@@ -206,7 +206,7 @@ public class AStarBodyPathSmootherTest
    }
 
    @Test
-   // unstable. maybe a bad roll-z
+   // was unstable cause of smoothness cost. lowering threshold to be a turn point fixed it.
    public void testCinders1()
    {
       runDataset("cinders_1");
@@ -225,7 +225,6 @@ public class AStarBodyPathSmootherTest
    }
 
    @Test
-   // nan gradient? it disappears
    public void testObstacles2()
    {
       runDataset("obstacles_2");
@@ -257,7 +256,6 @@ public class AStarBodyPathSmootherTest
    }
 
    @Test
-   // super unstable
    public void testSteppingStones4()
    {
       runDataset("stepping_stones_4");
