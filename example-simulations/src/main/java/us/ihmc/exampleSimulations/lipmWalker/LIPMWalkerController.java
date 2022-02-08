@@ -181,6 +181,15 @@ public class LIPMWalkerController implements RobotController
       StateMachineFactory<States, State> leftFactory = new StateMachineFactory<>(States.class);
       StateMachineFactory<States, State> rightFactory = new StateMachineFactory<>(States.class);
 
+      leftFactory.setNamePrefix("leftState");
+      rightFactory.setNamePrefix("rightState");
+      
+      leftFactory.setRegistry(registry);
+      rightFactory.setRegistry(registry);
+      
+      leftFactory.buildClock(robot.getRobot().getYoTime());
+      rightFactory.buildClock(robot.getRobot().getYoTime());
+ 
       // Left State Transitions:
       leftFactory.addTransition(States.SUPPORT, States.SWING, new HeelOffGroundCondition(RobotSide.LEFT));
       leftFactory.addTransition(States.SWING, States.SUPPORT, new HeelOnGroundCondition(RobotSide.LEFT));
