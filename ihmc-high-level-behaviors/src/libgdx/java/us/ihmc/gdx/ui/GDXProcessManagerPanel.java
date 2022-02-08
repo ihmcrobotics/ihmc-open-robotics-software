@@ -12,6 +12,7 @@ import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIRegistry;
 import us.ihmc.gdx.ui.missionControl.MissionControlProcess;
 import us.ihmc.gdx.ui.missionControl.RestartableMissionControlProcess;
@@ -21,9 +22,6 @@ import us.ihmc.pubsub.impl.intraprocess.IntraProcessDomain;
 
 import java.util.ArrayList;
 
-import static us.ihmc.gdx.imgui.ImGuiTools.uniqueIDOnly;
-import static us.ihmc.gdx.imgui.ImGuiTools.uniqueLabel;
-
 public abstract class GDXProcessManagerPanel
 {
    private final String windowName = ImGuiTools.uniqueLabel("Process Manager");
@@ -31,10 +29,12 @@ public abstract class GDXProcessManagerPanel
    private final String RTPS_DOMAIN_ID_STRING = String.valueOf(NetworkParameters.getRTPSDomainID());
    private final String RTPS_SUBNET_STRING = String.valueOf(NetworkParameters.getHost(NetworkParameterKeys.RTPSSubnet));
 
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    protected final ImInt robotTarget = new ImInt(1);
    protected final String[] robotTargets = new String[] {"Real robot", "Simulation"};
    protected final ImInt ros2Mode = new ImInt(0);
    protected final ImInt messagerMode = new ImInt(0);
+   protected final ImBoolean enableROS1 = new ImBoolean(true);
    protected final ImBoolean logToFile = new ImBoolean(false);
 
    protected final ArrayList<MissionControlProcess> processes = new ArrayList<>();
@@ -63,7 +63,7 @@ public abstract class GDXProcessManagerPanel
       ImGuiGDXBehaviorUIRegistry behaviorRegistry = ImGuiGDXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       ros1MasterProcess = new ROS1MasterProcess();
-      behaviorModuleProcess = new BehaviorModuleProcess(this::createRobotModel, ros2Mode, messagerMode, behaviorRegistry);
+      behaviorModuleProcess = new BehaviorModuleProcess(this::createRobotModel, ros2Mode, messagerMode, enableROS1, behaviorRegistry);
       behaviorManagerProcess = new BehaviorManagerProcess(this::createRobotModel);
       footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::createRobotModel, this::getROS2Mode);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
@@ -105,21 +105,22 @@ public abstract class GDXProcessManagerPanel
       ImGui.pushItemWidth(150.0f);
       ImGui.text("Robot target:");
       ImGui.sameLine();
-      ImGui.combo(uniqueIDOnly(this, "RobotTarget"), robotTarget, robotTargets, robotTargets.length);
+      ImGui.combo(labels.get("RobotTarget"), robotTarget, robotTargets, robotTargets.length);
       ImGui.text("Robot version:");
       ImGui.sameLine();
-      ImGui.combo(uniqueIDOnly(this, "RobotVersion"), getRobotVersion(), getRobotVersions(), getRobotVersions().length);
+      ImGui.combo(labels.get("RobotVersion"), getRobotVersion(), getRobotVersions(), getRobotVersions().length);
       ImGui.text("ROS 2 Mode: ");
       ImGui.sameLine();
-      ImGui.combo(uniqueIDOnly(this, "ROS2Mode"), ros2Mode, CommunicationMode.ROS2_NAMES, CommunicationMode.VALUES.length);
+      ImGui.combo(labels.get("ROS2Mode"), ros2Mode, CommunicationMode.ROS2_NAMES, CommunicationMode.VALUES.length);
       ImGui.text("Messager Mode: ");
       ImGui.sameLine();
-      ImGui.combo(uniqueIDOnly(this, "MessagerMode"), messagerMode, CommunicationMode.MESSAGER_NAMES, CommunicationMode.VALUES.length);
+      ImGui.combo(labels.get("MessagerMode"), messagerMode, CommunicationMode.MESSAGER_NAMES, CommunicationMode.VALUES.length);
+      ImGui.checkbox(labels.get("Enable ROS 1"), enableROS1);
       ImGui.popItemWidth();
 
       ImGui.text("Simulation:");
 
-      ImGui.checkbox(uniqueLabel(this, "Log to file"), logToFile);
+      ImGui.checkbox(labels.get("Log to file"), logToFile);
 
       for (MissionControlProcess process : processes)
       {
@@ -159,6 +160,11 @@ public abstract class GDXProcessManagerPanel
    public void setMessagerMode(CommunicationMode communicationMode)
    {
       messagerMode.set(communicationMode.ordinal());
+   }
+
+   public void setEnableROS1(boolean enableROS1)
+   {
+      this.enableROS1.set(enableROS1);
    }
 
    public RestartableMissionControlProcess getBehaviorModuleProcess()
