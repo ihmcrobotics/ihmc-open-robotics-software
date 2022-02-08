@@ -271,6 +271,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                            DebugRegistry debugRegistry)
    {
       this.yoVariableClientInterface = yoVariableClientInterface;
+      loggerStatusVisualizer.setClientInterface(yoVariableClientInterface);
 
       Robot robot = new Robot("DummyRobot");
       if (handshake.getModelLoaderClass() != null)
