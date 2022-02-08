@@ -1,13 +1,17 @@
 package us.ihmc.robotDataVisualizer.visualizer;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 
+import us.ihmc.robotDataLogger.YoVariableClientInterface;
 import us.ihmc.robotDataLogger.websocket.command.DataServerCommand;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -38,9 +42,10 @@ public class LoggerStatusVisualizer
    private final ScheduledExecutorService offlineExecutor = Executors.newSingleThreadScheduledExecutor();
    private ScheduledFuture<?> offlineExecutorFuture = null;
 
+   private YoVariableClientInterface client;
+
    public LoggerStatusVisualizer()
    {
-
       reportLoggerOffline();
    }
    
@@ -48,6 +53,18 @@ public class LoggerStatusVisualizer
    {
       scs.addJLabel(logger);
       scs.addJLabel(camera);
+      
+      JButton stopLog = new JButton("Restart Log");
+      stopLog.addActionListener(new ActionListener()
+      {
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            client.sendCommand(DataServerCommand.RESTAT_LOG, 0);
+         }
+      });
+      
+      scs.addButton(stopLog);
    }
    
 
@@ -99,6 +116,11 @@ public class LoggerStatusVisualizer
          logger.setText(LOGGER_OFFLINE);
          camera.setText(CAMERA_OFF);
       });
+   }
+
+   public void setClientInterface(YoVariableClientInterface yoVariableClientInterface)
+   {
+      client = yoVariableClientInterface;
    }
 
 }
