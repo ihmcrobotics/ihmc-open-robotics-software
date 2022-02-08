@@ -83,7 +83,7 @@ public class HeightMapDataVisualizer
       long t0 = System.nanoTime();
 
       HeightMapRANSACNormalCalculator surfaceNormalCalculator = new HeightMapRANSACNormalCalculator();
-      surfaceNormalCalculator.computeSurfaceNormals(heightMapData);
+      surfaceNormalCalculator.initialize(heightMapData);
 
       long t1 = System.nanoTime();
       System.out.println("Surface normal calculation: " + Conversions.nanosecondsToSeconds(t1 - t0) + " sec");
