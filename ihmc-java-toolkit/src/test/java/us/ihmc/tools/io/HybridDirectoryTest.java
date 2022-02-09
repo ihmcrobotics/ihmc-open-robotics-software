@@ -3,6 +3,7 @@ package us.ihmc.tools.io;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -79,5 +80,27 @@ public class HybridDirectoryTest
       LogTools.info(file.getWorkspaceFile());
       LogTools.info(file.getExternalFile());
       LogTools.info(file.getClasspathResource());
+   }
+
+   @Test
+   public void testReadResourcesFromJar()
+   {
+      Path dotIHMC = Paths.get(System.getProperty("user.home")).resolve(".ihmc");
+      String openRobotics = "ihmc-open-robotics-software";
+      String subsequentPathToResourceFolder = "ihmc-java-toolkit/src/test/resources";
+      HybridDirectory directory;
+      directory = new HybridDirectory(dotIHMC, openRobotics, subsequentPathToResourceFolder, HybridDirectoryTest.class);
+
+      for (String resource : ResourceTools.listResources(directory.getPathNecessaryForResourceExploring(), ".*"))
+      {
+         LogTools.info(resource);
+      }
+
+      LogTools.info("Walking flat");
+
+      directory.walkResourcesFlat((path, pathType) ->
+      {
+         LogTools.info("{}: {}", pathType.name(), path);
+      });
    }
 }

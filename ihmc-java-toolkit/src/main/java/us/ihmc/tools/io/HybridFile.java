@@ -12,6 +12,7 @@ public class HybridFile
    private final Supplier<URL> getResource;
    private final Path externalFile;
    private final Path workspaceFile;
+   private HybridResourceMode mode = HybridResourceMode.WORKSPACE;
 
    public HybridFile(HybridDirectory directory, String subsequentPathToFile)
    {
@@ -30,7 +31,33 @@ public class HybridFile
       }
 
       externalFile = directory.getExternalDirectory().resolve(subsequentPathToFile);
-      workspaceFile = directory.getWorkspaceDirectory().resolve(subsequentPathToFile);
+      if (directory.isWorkspaceWritingAvailable())
+         workspaceFile = directory.getWorkspaceDirectory().resolve(subsequentPathToFile);
+      else
+         workspaceFile = null;
+   }
+
+   /**
+    * i.e. Cannot write to resource directories inside JARs
+    */
+   public boolean isWorkspaceWritingAvailable()
+   {
+      return workspaceFile != null;
+   }
+
+   public void setMode(HybridResourceMode mode)
+   {
+      this.mode = mode;
+   }
+
+   public HybridResourceMode getMode()
+   {
+      return mode;
+   }
+
+   public Path getFileForWriting()
+   {
+      return mode == HybridResourceMode.WORKSPACE ? workspaceFile : externalFile;
    }
 
    public InputStream getClasspathResourceAsStream()
