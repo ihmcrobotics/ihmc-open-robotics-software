@@ -254,6 +254,12 @@ public class AStarBodyPathSmootherTest
    }
 
    @Test
+   public void testStairsHuggingEdge()
+   {
+      runDataset("stairs_hugging_edge");
+   }
+
+   @Test
    public void testSteppingStones3()
    {
       runDataset("stepping_stones_3");
