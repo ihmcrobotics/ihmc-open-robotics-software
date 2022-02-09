@@ -23,8 +23,8 @@ public class BodyPathRANSACTraversibilityCalculator
    static final double sampleSizeX = 0.35;
    static final double sampleSizeY = 0.35;
    static final double halfStanceWidth = 0.25;
-   static final double heightWindow = 0.18;
-   static final double nonGroundDiscount = 0.7;
+   static final double heightWindow = 0.15;
+   static final double nonGroundDiscount = 0.6;
    static final double inclineWeight = 0.1;
 
    static final double minPercent = 0.2;
@@ -161,12 +161,15 @@ public class BodyPathRANSACTraversibilityCalculator
             }
             else
             {
-               double nonGroundAlpha = heightQuery - heightMapData.getEstimatedGroundHeight() < heightWindow ? nonGroundDiscount : 1.0;
+               double heightAboveGroundPlane = heightQuery - heightMapData.getEstimatedGroundHeight();
+               double maxHeightFullDiscount = 0.07;
+               double nonGroundPlaneAlpha = EuclidCoreTools.clamp((heightWindow - heightAboveGroundPlane) / (heightWindow - maxHeightFullDiscount), 0.0, 1.0);
+               double cellValue = EuclidCoreTools.interpolate(1.0, nonGroundDiscount, nonGroundPlaneAlpha);
 
                UnitVector3DBasics normal = surfaceNormalCalculator.getSurfaceNormal(xQuery, yQuery);
                double incline = Math.acos(normal.getZ());
-               double inclineAlpha = MathTools.clamp(EuclidCoreTools.interpolate(0.0, 1.0, (incline - minNormalToPenalize) / (maxNormalToPenalize - minNormalToPenalize)), 0.0, 1.0);
-               traversibilityScoreNumerator += ((1.0 - inclineWeight) * nonGroundAlpha + inclineWeight * inclineAlpha);
+               double inclineAlpha = MathTools.clamp((incline - minNormalToPenalize) / (maxNormalToPenalize - minNormalToPenalize), 0.0, 1.0);
+               traversibilityScoreNumerator += ((1.0 - inclineWeight) * cellValue + inclineWeight * inclineAlpha);
             }
          }
       }

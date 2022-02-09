@@ -23,11 +23,12 @@ import java.util.stream.Collectors;
 public class AStarBodyPathSmoother
 {
    static final double collisionWeight = 700.0;
-   static final double smoothnessWeight = 1.0;
+   static final double smoothnessWeight = 0.7;
    static final double equalSpacingWeight = 2.0;
-   static final double rollWeight = 210.0;
+   static final double rollWeight = 150.0;
    static final double displacementWeight = 0.0;
-   static final double traversibilityWeight = 6.0;
+   static final double traversibilityWeight = 20.0;
+   static final double flatGroundWeight = 4.0;
 
    private static final int maxPoints = 80;
    private static final double gradientEpsilon = 1e-6;
@@ -158,11 +159,13 @@ public class AStarBodyPathSmoother
                waypoints[waypointIndex].computeCurrentTraversibility();
             }
 
-            for (int waypointIndex = 1; waypointIndex < pathSize - 1; waypointIndex++)
+            for (int waypointIndex = 2; waypointIndex < pathSize - 2; waypointIndex++)
             {
+               /* Collision gradient */
                gradients[waypointIndex].add(waypoints[waypointIndex].computeCollisionGradient());
                maxCollision.set(Math.max(waypoints[waypointIndex].getMaxCollision(), maxCollision.getValue()));
 
+               /* Traversibility gradient */
                Tuple3DReadOnly traversibilityGradient = waypoints[waypointIndex].computeTraversibilityGradient();
                gradients[waypointIndex].sub(traversibilityGradient.getX(), traversibilityGradient.getY());
 
@@ -171,6 +174,16 @@ public class AStarBodyPathSmoother
                   continue;
                }
 
+               /* Ground plane gradient */
+               Tuple3DReadOnly groundPlaneGradient = waypoints[waypointIndex].computeGroundPlaneGradient();
+               gradients[waypointIndex].sub(groundPlaneGradient.getX(), groundPlaneGradient.getY());
+
+               if (waypoints[waypointIndex].isTurnPoint())
+               {
+                  continue;
+               }
+
+               /* Roll-z gradient */
                Vector2DBasics rollGradient = waypoints[waypointIndex].computeRollInclineGradient(heightMapData);
                gradients[waypointIndex - 1].sub(rollGradient);
                gradients[waypointIndex + 1].add(rollGradient);

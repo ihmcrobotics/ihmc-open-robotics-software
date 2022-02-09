@@ -100,7 +100,7 @@ public class AStarBodyPathPlanner
    static final double maxStepUpDown = 0.2;
    static final double maxIncline = Math.toRadians(55.0);
    static final double snapRadius = 0.1;
-   static final double boxSizeY = 0.8;
+   static final double boxSizeY = 0.85;
    static final double boxSizeX = 0.3;
 
    public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, ConvexPolygon2D footPolygon)
