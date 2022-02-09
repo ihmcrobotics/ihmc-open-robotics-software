@@ -2,6 +2,7 @@ package us.ihmc.avatar.heightMap;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.HeightMapMessagePubSubType;
 import gnu.trove.list.array.TFloatArrayList;
@@ -65,8 +66,12 @@ public class HeightMapUpdater
    private final PoseReferenceFrame ousterFrame = new PoseReferenceFrame("ousterFrame", ReferenceFrame.getWorldFrame());
    private final HeightMapManager heightMap;
    private final IHMCROS2Publisher<HeightMapMessage> publisher;
-   private final AtomicReference<Point2D> gridCenter = new AtomicReference<>(new Point2D());
    private final AtomicReference<HeightMapMessage> latestMessage = new AtomicReference<>();
+
+   private final AtomicBoolean clearRequested = new AtomicBoolean();
+   private final AtomicDouble gridCenterX = new AtomicDouble();
+   private final AtomicDouble gridCenterY = new AtomicDouble();
+   private final AtomicDouble maxHeight = new AtomicDouble();
 
    private final TIntArrayList holeKeyList = new TIntArrayList();
    private final TFloatArrayList holeHeights = new TFloatArrayList();
@@ -102,8 +107,10 @@ public class HeightMapUpdater
          }
       });
 
-      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterX, x -> gridCenter.set(new Point2D(x, gridCenter.get().getY())));
-      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterY, y -> gridCenter.set(new Point2D(gridCenter.get().getX(), y)));
+      messager.registerTopicListener(HeightMapMessagerAPI.Clear, c -> clearRequested.set(true));
+      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterX, gridCenterX::set);
+      messager.registerTopicListener(HeightMapMessagerAPI.GridCenterY, gridCenterY::set);
+      messager.registerTopicListener(HeightMapMessagerAPI.MaxHeight, maxHeight::set);
 
       messager.registerTopicListener(HeightMapMessagerAPI.PublishFrequency, publishFrequency::set);
       messager.registerTopicListener(HeightMapMessagerAPI.Export, e -> ThreadTools.startAThread(this::export, "Height map exporter"));
@@ -166,10 +173,11 @@ public class HeightMapUpdater
          }
       }
 
-      Point2D gridCenter = this.gridCenter.getAndSet(null);
-      if (gridCenter != null)
+      if (clearRequested.getAndSet(false))
       {
-         heightMap.setGridCenter(gridCenter.getX(), gridCenter.getY());
+         heightMap.setMaxHeight(maxHeight.get());
+         heightMap.getGridCenterXY().set(gridCenterX.get(), gridCenterY.get());
+         heightMap.clear();
       }
 
       // Update height map
