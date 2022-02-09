@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.HeightMapMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
@@ -33,6 +34,7 @@ public class HeightMapVisualizer extends AnimationTimer
 
    private final ExecutorService meshComputation = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private final AtomicBoolean processing = new AtomicBoolean(false);
+   private final AtomicDouble maxHeightToVisualize = new AtomicDouble(Double.NaN);
 
    public HeightMapVisualizer()
    {
@@ -42,6 +44,11 @@ public class HeightMapVisualizer extends AnimationTimer
       Color blue = Color.BLUE;
       heightMapColor = Color.color(olive.getRed(), olive.getGreen(), olive.getBlue(), 0.95f);
       groundPlaneColor = Color.color(blue.getRed(), blue.getGreen(), blue.getBlue(), 0.8).brighter();
+   }
+
+   public void setMaxHeight(double maxHeight)
+   {
+      this.maxHeightToVisualize.set(maxHeight);
    }
 
    public void update(HeightMapMessage data)
@@ -89,6 +96,12 @@ public class HeightMapVisualizer extends AnimationTimer
                          renderedGroundPlaneHeight,
                          new Point3D(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY(), heightMapMessage.getEstimatedGroundHeight()),
                          groundPlaneColor);
+
+      double maxHeight = maxHeightToVisualize.get();
+      if (!Double.isNaN(maxHeight))
+      {
+         meshBuilder.addCube(0.05, 0.0, 0.0, maxHeight, Color.BLACK);
+      }
 
       heightMapToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
       processing.set(false);

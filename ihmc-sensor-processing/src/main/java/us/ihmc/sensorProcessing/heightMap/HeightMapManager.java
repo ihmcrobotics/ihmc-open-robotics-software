@@ -16,6 +16,7 @@ public class HeightMapManager
    /*  From HeightMapMessage.msg  */
    public static final int maxCellCount = 30000;
 
+   private double maxHeight = Double.MAX_VALUE;
    private final double gridResolutionXY;
    private final int centerIndex;
    private final int cellsPerAxis;
@@ -93,26 +94,31 @@ public class HeightMapManager
             Point3D point = new Point3D(pointCloud[i]);
 
             // cinders
-//            if (point.getZ() > 0.4)
-//               continue;
+            //            if (point.getZ() > 0.4)
+            //               continue;
 
             // stairs side
-//            if (point.getX() < 0.5 && point.getZ() > 0.3)
-//               continue;
-//            if (point.getY() > 1.0 && point.getZ() > 0.3)
-//               continue;
+            //            if (point.getX() < 0.5 && point.getZ() > 0.3)
+            //               continue;
+            //            if (point.getY() > 1.0 && point.getZ() > 0.3)
+            //               continue;
 
             // stairs
-//            if (point.getX() < 0.6 && point.getZ() > -0.2)
-//               continue;
+            //            if (point.getX() < 0.6 && point.getZ() > -0.2)
+            //               continue;
 
             // narrow passage
-//            if ((point.getX() < 0.6 || point.getY() < -1.5) && point.getZ() > 0.2)
-//               continue;
+            //            if ((point.getX() < 0.6 || point.getY() < -1.5) && point.getZ() > 0.2)
+            //               continue;
 
             // stepping stones
-            if (point.getZ() > 0.4)
+            //            if (point.getZ() > 0.4)
+            //               continue;
+
+            if (point.getZ() > maxHeight)
+            {
                continue;
+            }
 
             int xIndex = HeightMapTools.coordinateToIndex(point.getX(), gridCenterXY.getX(), gridResolutionXY, centerIndex);
             if (xIndex < 0 || xIndex >= cellsPerAxis)
@@ -262,5 +268,10 @@ public class HeightMapManager
    public Point2D getGridCenterXY()
    {
       return gridCenterXY;
+   }
+
+   public void setMaxHeight(double maxHeight)
+   {
+      this.maxHeight = maxHeight;
    }
 }

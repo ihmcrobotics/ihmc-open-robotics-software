@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.Spinner?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.heightMap.HeightMapParametersUIController" prefHeight="300">
     <left>
         <GridPane vgap="3">
@@ -44,8 +34,10 @@
             <Label text="Enable updates" GridPane.columnIndex="0" GridPane.rowIndex="8" />
             <CheckBox fx:id="enableUpdates" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="8" />
 
-            <Label text="Snap test" GridPane.columnIndex="0" GridPane.rowIndex="9" />
-            <Spinner fx:id="snapTestId" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+            <Button text="Clear" fx:id="clear" prefWidth="120.0" GridPane.rowIndex="9" onAction="#clear" />
+
+            <Label text="Max height" GridPane.columnIndex="0" GridPane.rowIndex="10" />
+            <Spinner fx:id="maxHeight" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="10" />
 
         </GridPane>
     </left>

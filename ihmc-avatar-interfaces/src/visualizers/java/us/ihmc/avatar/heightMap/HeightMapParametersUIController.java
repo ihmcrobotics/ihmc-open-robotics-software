@@ -5,7 +5,6 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableView;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
@@ -27,7 +26,7 @@ public class HeightMapParametersUIController
    @FXML
    private CheckBox enableUpdates;
    @FXML
-   private Spinner<Integer> snapTestId;
+   private Spinner<Double> maxHeight;
 
    @FXML
    private TableView<StoredPropertyTableViewWrapper.ParametersTableRow> parameterTable;
@@ -51,14 +50,14 @@ public class HeightMapParametersUIController
       publishFreq.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE));
       gridCenterX.setValueFactory(createGridCenterFactory());
       gridCenterY.setValueFactory(createGridCenterFactory());
-      snapTestId.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(-1, Integer.MAX_VALUE));
-      snapTestId.getValueFactory().setValue(-1);
-      snapTestId.valueProperty().addListener((obs, vOld, vNew) -> messager.submitMessage(HeightMapMessagerAPI.SnapTestId, snapTestId.getValue()));
+
+      maxHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 2.0, 0.1));
 
       messager.bindBidirectional(HeightMapMessagerAPI.PublishFrequency, publishFreq.getValueFactory().valueProperty(), false);
       messager.bindBidirectional(HeightMapMessagerAPI.GridCenterX, gridCenterX.getValueFactory().valueProperty(), false);
       messager.bindBidirectional(HeightMapMessagerAPI.GridCenterY, gridCenterY.getValueFactory().valueProperty(), false);
       messager.bindBidirectional(HeightMapMessagerAPI.EnableUpdates, enableUpdates.selectedProperty(), false);
+      messager.bindBidirectional(HeightMapMessagerAPI.MaxHeight, maxHeight.getValueFactory().valueProperty(), true);
    }
 
    public void onPrimaryStageLoaded()
@@ -89,6 +88,12 @@ public class HeightMapParametersUIController
    public void importHeightMap()
    {
       messager.submitMessage(HeightMapMessagerAPI.Import, true);
+   }
+
+   @FXML
+   public void clear()
+   {
+      messager.submitMessage(HeightMapMessagerAPI.Clear, true);
    }
 
    private SpinnerValueFactory.DoubleSpinnerValueFactory createGridCenterFactory()
