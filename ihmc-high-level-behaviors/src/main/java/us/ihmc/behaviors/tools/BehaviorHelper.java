@@ -66,27 +66,21 @@ import java.util.function.Function;
  */
 public class BehaviorHelper extends CommunicationHelper implements MessagerPublishSubscribeAPI, YoVariableClientPublishSubscribeAPI
 {
-   private final ROS1Helper ros1Helper;
+   private ROS1Helper ros1Helper;
    private final MessagerHelper messagerHelper = new MessagerHelper(BehaviorRegistry.getActiveRegistry().getMessagerAPI());
    private final YoVariableClientHelper yoVariableClientHelper;
    private StatusLogger statusLogger;
    private ControllerStatusTracker controllerStatusTracker;
+   private static final boolean commsEnabledToStart = true;
 
    // TODO: Considerations for ROS 1, Messager, and YoVariableClient with reconnecting
-   public BehaviorHelper(String titleCasedBehaviorName, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
-   {
-      this(titleCasedBehaviorName, robotModel, ros2Node, true);
-   }
-
-   public BehaviorHelper(String titleCasedBehaviorName,
-                         DRCRobotModel robotModel,
-                         ROS2NodeInterface ros2Node,
-                         boolean commsEnabledToStart)
+   public BehaviorHelper(String titleCasedBehaviorName, DRCRobotModel robotModel, ROS2NodeInterface ros2Node, boolean enableROS1)
    {
       super(robotModel, ros2Node, commsEnabledToStart);
       String ros1NodeName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, titleCasedBehaviorName.replace(" ", ""));
       String yoVariableRegistryName = WordUtils.capitalize(titleCasedBehaviorName).replace(" ", "");
-      this.ros1Helper = new ROS1Helper(ros1NodeName);
+      if (enableROS1)
+         ros1Helper = new ROS1Helper(ros1NodeName);
       yoVariableClientHelper = new YoVariableClientHelper(yoVariableRegistryName);
       messagerHelper.setCommunicationCallbacksEnabled(commsEnabledToStart);
    }
@@ -271,7 +265,8 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    public void destroy()
    {
       super.destroy();
-      ros1Helper.destroy();
+      if (ros1Helper != null)
+         ros1Helper.destroy();
       messagerHelper.disconnect();
       yoVariableClientHelper.disconnect();
    }
