@@ -250,8 +250,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          bodyPathPlanner.handleRequest(request, output);
          List<Pose3D> bodyPathWaypoints = output.getBodyPath();
 
-         setNominalOrientations(bodyPathWaypoints);
-
          if (bodyPathWaypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails())
          {
             reportBodyPathPlan(BodyPathPlanningResult.NO_PATH_EXISTS);

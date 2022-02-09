@@ -17,12 +17,14 @@ import java.util.Random;
 
 public class HeightMapRANSACNormalCalculator
 {
-   private static final int iterations = 120;
-   private static final double ransacRadius = 0.16;
+   private static final int iterations = 100;
+   private static final double minRansacRadius = 0.04;
+   private static final double maxRansacRadius = 0.16;
    private static final double consensusRadius = 0.12;
    private static final double distanceEpsilon = 0.032;
    private static final double maxAngleToConsider = Math.toRadians(65.0);
    private static final double minNormalZ = Math.acos(maxAngleToConsider);
+   private static final double acceptableConcensus = 0.3;
 
    private UnitVector3DBasics[] surfaceNormals;
    private boolean[] hasComputedNormal;
@@ -33,6 +35,7 @@ public class HeightMapRANSACNormalCalculator
    private TIntArrayList yRansacOffsets;
    private TIntArrayList xConsensusOffsets;
    private TIntArrayList yConsensusOffsets;
+   private int concensusSampleSize = 0;
 
    private final Plane3D maxConsensusPlane = new Plane3D();
    private final Plane3D candidatePlane = new Plane3D();
@@ -49,7 +52,7 @@ public class HeightMapRANSACNormalCalculator
       if (xRansacOffsets == null || !EuclidCoreTools.epsilonEquals(gridResolution, heightMapData.getGridResolutionXY(), 1e-3))
       {
          gridResolution = heightMapData.getGridResolutionXY();
-         int maxOffset = (int) Math.round(ransacRadius / heightMapData.getGridResolutionXY());
+         int maxOffset = (int) Math.round(maxRansacRadius / heightMapData.getGridResolutionXY());
 
          xRansacOffsets = new TIntArrayList();
          yRansacOffsets = new TIntArrayList();
@@ -60,23 +63,23 @@ public class HeightMapRANSACNormalCalculator
          {
             for (int yi = -maxOffset; yi <= maxOffset; yi++)
             {
-               if (heightMapData.getGridResolutionXY() * EuclidCoreTools.norm(xi, yi) < ransacRadius)
+               double radius = heightMapData.getGridResolutionXY() * EuclidCoreTools.norm(xi, yi);
+               if (radius > minRansacRadius && radius < maxRansacRadius)
                {
                   xRansacOffsets.add(xi);
                   yRansacOffsets.add(yi);
                }
-               if (heightMapData.getGridResolutionXY() * EuclidCoreTools.norm(xi, yi) < consensusRadius)
+               if (radius < consensusRadius)
                {
                   xConsensusOffsets.add(xi);
                   yConsensusOffsets.add(yi);
                }
             }
          }
-
-         LogTools.info("Offsets: " + xRansacOffsets.size());
       }
 
       this.heightMapData = heightMapData;
+      this.concensusSampleSize = xRansacOffsets.size();
       int gridWidth = 2 * heightMapData.getCenterIndex() + 1;
       hasComputedNormal = new boolean[gridWidth * gridWidth];
       surfaceNormals = new UnitVector3DBasics[gridWidth * gridWidth];
@@ -180,6 +183,11 @@ public class HeightMapRANSACNormalCalculator
          {
             maxConsensus = consensus;
             maxConsensusPlane.set(candidatePlane);
+         }
+
+         if (maxConsensus > acceptableConcensus * concensusSampleSize)
+         {
+            break;
          }
       }
 

@@ -2,11 +2,14 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.YoVector2D;
@@ -32,7 +35,7 @@ public class AStarBodyPathSmoother
 
    private static final int maxPoints = 80;
    private static final double gradientEpsilon = 1e-6;
-   private static final double hillClimbGain = 2e-4;
+   private static final double hillClimbGain = 3e-4;
    private static final double minCurvatureToPenalize = Math.toRadians(5.0);
 
    static final double halfStanceWidthTraversibility = 0.18;
@@ -41,7 +44,7 @@ public class AStarBodyPathSmoother
    static final double traversibilitySampleWindowX = 0.2;
    static final double traversibilitySampleWindowY = 0.14;
 
-   private static final int iterations = 500;
+   private static final int iterations = 250;
 
    private static final int turnPointIteration = 12;
    private final TIntArrayList turnPointIndices = new TIntArrayList();
@@ -56,8 +59,8 @@ public class AStarBodyPathSmoother
    private final boolean visualize;
 
    private int pathSize;
-   private final HeightMapLeastSquaresNormalCalculator surfaceNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
-   private final HeightMapRANSACNormalCalculator ransacNormalCalculator = new HeightMapRANSACNormalCalculator();
+   private HeightMapLeastSquaresNormalCalculator leastSquaresNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
+   private HeightMapRANSACNormalCalculator ransacNormalCalculator = new HeightMapRANSACNormalCalculator();
 
    private final AStarBodyPathSmootherWaypoint[] waypoints = new AStarBodyPathSmootherWaypoint[maxPoints];
 
@@ -78,7 +81,7 @@ public class AStarBodyPathSmoother
 
       for (int i = 0; i < maxPoints; i++)
       {
-         waypoints[i] = new AStarBodyPathSmootherWaypoint(i, surfaceNormalCalculator, ransacNormalCalculator, graphicsListRegistry, (parentRegistry == null) ? null : registry);
+         waypoints[i] = new AStarBodyPathSmootherWaypoint(i, graphicsListRegistry, (parentRegistry == null) ? null : registry);
       }
 
       if (parentRegistry == null)
@@ -97,8 +100,9 @@ public class AStarBodyPathSmoother
       }
    }
 
-   public List<Point3D> doSmoothing(List<Point3D> bodyPath, HeightMapData heightMapData)
+   public List<Pose3D> doSmoothing(List<Point3D> bodyPath, HeightMapData heightMapData)
    {
+      LogTools.info("Starting waypoint optimization");
       pathSize = bodyPath.size();
       turnPointIndices.clear();
 
@@ -109,7 +113,13 @@ public class AStarBodyPathSmoother
 
       if (pathSize == 2)
       {
-         return bodyPath;
+         Point3D start = bodyPath.get(0);
+         Point3D goal = bodyPath.get(1);
+         double yaw = Math.atan2(goal.getY() - start.getY(), goal.getX() - start.getX());
+         List<Pose3D> waypoints = new ArrayList<>();
+         waypoints.add(new Pose3D(start, new Quaternion(yaw, 0.0, 0.0)));
+         waypoints.add(new Pose3D(goal, new Quaternion(yaw, 0.0, 0.0)));
+         return waypoints;
       }
 
       for (int i = 0; i < pathSize; i++)
@@ -120,13 +130,13 @@ public class AStarBodyPathSmoother
       if (heightMapData != null)
       {
          double patchWidth = 0.7;
-         surfaceNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
+         leastSquaresNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
          ransacNormalCalculator.initialize(heightMapData);
       }
 
       for (int i = 0; i < maxPoints; i++)
       {
-         waypoints[i].initialize(bodyPath, heightMapData);
+         waypoints[i].initialize(bodyPath, heightMapData, ransacNormalCalculator, leastSquaresNormalCalculator);
       }
 
       for (int i = 1; i < bodyPath.size() - 1; i++)
@@ -224,10 +234,10 @@ public class AStarBodyPathSmoother
          }
       }
 
-      List<Point3D> smoothedPath = new ArrayList<>();
+      List<Pose3D> smoothedPath = new ArrayList<>();
       for (int i = 0; i < pathSize; i++)
       {
-         smoothedPath.add(new Point3D(waypoints[i].getPosition()));
+         smoothedPath.add(new Pose3D(waypoints[i].getPose()));
       }
 
       return smoothedPath;
@@ -326,5 +336,15 @@ public class AStarBodyPathSmoother
             }
          }
       }
+   }
+
+   public void setLeastSquaresNormalCalculator(HeightMapLeastSquaresNormalCalculator leastSquaresNormalCalculator)
+   {
+      this.leastSquaresNormalCalculator = leastSquaresNormalCalculator;
+   }
+
+   public void setRansacNormalCalculator(HeightMapRANSACNormalCalculator ransacNormalCalculator)
+   {
+      this.ransacNormalCalculator = ransacNormalCalculator;
    }
 }

@@ -41,6 +41,9 @@ PlanarRegionsListMessage planar_regions_list
 # Planned body path. Empty if planner failed
 geometry_msgs/Pose[] body_path
 
+# Planned body path before smoothing, used for debugging. Empty if planner failed
+geometry_msgs/Point[] body_path_unsmoothed
+
 # Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
 geometry_msgs/Pose goal_pose
 
