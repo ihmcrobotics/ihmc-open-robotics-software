@@ -21,7 +21,7 @@ mainDependencies {
    api("us.ihmc:euclid:0.17.0")
    api("us.ihmc:ihmc-yovariables:0.9.11")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
-   api("us.ihmc:simulation-construction-set:0.21.13")
+   api("us.ihmc:simulation-construction-set:0.21.15")
    api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-robot-description:0.21.3")
@@ -30,7 +30,7 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.22.1") {
+   api("us.ihmc:ihmc-robot-data-logger:0.23.0") {
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-api")
       exclude(group = "org.junit.jupiter", module = "junit-jupiter-engine")
       exclude(group = "org.junit.platform", module = "junit-platform-commons")
