@@ -38,7 +38,7 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.17.0")
    api("us.ihmc:ihmc-yovariables:0.9.11")
-   api("us.ihmc:simulation-construction-set:0.21.13")
+   api("us.ihmc:simulation-construction-set:0.21.15")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -89,7 +89,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
 
 testDependencies {
    api("us.ihmc:ihmc-commons-testing:0.30.5")
-   api("us.ihmc:simulation-construction-set:0.21.13")
+   api("us.ihmc:simulation-construction-set:0.21.15")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
