@@ -14,6 +14,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -144,6 +145,9 @@ public class AStarBodyPathPlanner
                                          incline.set(0.0);
                                          ransacTraversibilityCalculator.clearVariables();
                                       });
+
+      smoother.setRansacNormalCalculator(ransacNormalCalculator);
+      smoother.setLeastSquaresNormalCalculator(surfaceNormalCalculator);
    }
 
    public void setHeightMapData(HeightMapData heightMapData)
@@ -154,6 +158,7 @@ public class AStarBodyPathPlanner
       }
 
       this.heightMapData = heightMapData;
+      ransacNormalCalculator.initialize(heightMapData);
 
       if (useRANSACTraversibility)
       {
@@ -317,12 +322,6 @@ public class AStarBodyPathPlanner
 
             edgeCost.set(xyDistance);
 
-            boolean debug = neighbor.getXIndex() == 13 && neighbor.getYIndex() == -1 && node.getXIndex() == 12 && node.getYIndex() == 0;
-            if (debug)
-            {
-               System.out.println();
-            }
-
             if (useRANSACTraversibility)
             {
                double traversibilityIndicator = ransacTraversibilityCalculator.computeTraversibility(neighbor, node, i);
@@ -416,31 +415,41 @@ public class AStarBodyPathPlanner
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
       LogTools.info("Reporting status");
+      boolean performSmoothing = result == BodyPathPlanningResult.FOUND_SOLUTION;
 
       outputToPack.setRequestId(request.getRequestId());
       outputToPack.setBodyPathPlanningResult(result);
 
       outputToPack.getBodyPath().clear();
+      outputToPack.getBodyPathUnsmoothed().clear();
+
       BodyPathLatticePoint terminalNode = reachedGoal ? goalNode : leastCostNode;
       List<BodyPathLatticePoint> path = graph.getPathFromStart(terminalNode);
       List<Point3D> bodyPath = new ArrayList<>();
 
       for (int i = 0; i < path.size(); i++)
       {
-         bodyPath.add(new Point3D(path.get(i).getX(), path.get(i).getY(), gridHeightMap.get(path.get(i))));
+         Point3D waypoint = new Point3D(path.get(i).getX(), path.get(i).getY(), gridHeightMap.get(path.get(i)));
+         bodyPath.add(waypoint);
+         outputToPack.getBodyPathUnsmoothed().add(waypoint);
+
+         if (!performSmoothing)
+         {
+            outputToPack.getBodyPath().add(new Pose3D(waypoint, new Quaternion()));
+         }
       }
 
-//      List<Point3D> smoothedPath = smoother.doSmoothing(bodyPath, heightMapData);
-      for (int i = 0; i < bodyPath.size(); i++)
+      if (performSmoothing)
       {
-         Pose3D waypoint = new Pose3D();
-//         waypoint.getPosition().set(smoothedPath.get(i));
-         waypoint.getPosition().set(bodyPath.get(i));
-         outputToPack.getBodyPath().add(waypoint);
+         List<Pose3D> smoothedPath = smoother.doSmoothing(bodyPath, heightMapData);
+         for (int i = 0; i < bodyPath.size(); i++)
+         {
+            Pose3D waypoint = new Pose3D(smoothedPath.get(i));
+            outputToPack.getBodyPath().add(waypoint);
+         }
       }
 
       markSolutionEdges(terminalNode);
-
       statusCallbacks.forEach(callback -> callback.accept(outputToPack));
    }
 

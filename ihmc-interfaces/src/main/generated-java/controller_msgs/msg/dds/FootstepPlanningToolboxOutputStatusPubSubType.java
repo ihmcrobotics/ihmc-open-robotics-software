@@ -55,6 +55,9 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -98,6 +101,11 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getBodyPath().get(i0), current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getBodyPathUnsmoothed().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBodyPathUnsmoothed().get(i0), current_alignment);}
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalPose(), current_alignment);
 
       current_alignment += controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.getCdrSerializedSize(data.getPlannerTimings(), current_alignment);
@@ -129,6 +137,10 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       cdr.write_type_e(data.getBodyPath());else
           throw new RuntimeException("body_path field exceeds the maximum length");
 
+      if(data.getBodyPathUnsmoothed().size() <= 100)
+      cdr.write_type_e(data.getBodyPathUnsmoothed());else
+          throw new RuntimeException("body_path_unsmoothed field exceeds the maximum length");
+
       geometry_msgs.msg.dds.PosePubSubType.write(data.getGoalPose(), cdr);
       controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.write(data.getPlannerTimings(), cdr);
       if(data.getExceptionMessage().length() <= 255)
@@ -154,6 +166,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       	
       controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.read(data.getPlanarRegionsList(), cdr);	
       cdr.read_type_e(data.getBodyPath());	
+      cdr.read_type_e(data.getBodyPathUnsmoothed());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getGoalPose(), cdr);	
       controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType.read(data.getPlannerTimings(), cdr);	
       cdr.read_type_d(data.getExceptionMessage());	
@@ -173,6 +186,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       ser.write_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
       ser.write_type_e("body_path", data.getBodyPath());
+      ser.write_type_e("body_path_unsmoothed", data.getBodyPathUnsmoothed());
       ser.write_type_a("goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalPose());
 
       ser.write_type_a("planner_timings", new controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType(), data.getPlannerTimings());
@@ -193,6 +207,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       ser.read_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
 
       ser.read_type_e("body_path", data.getBodyPath());
+      ser.read_type_e("body_path_unsmoothed", data.getBodyPathUnsmoothed());
       ser.read_type_a("goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGoalPose());
 
       ser.read_type_a("planner_timings", new controller_msgs.msg.dds.FootstepPlanningTimingsMessagePubSubType(), data.getPlannerTimings());

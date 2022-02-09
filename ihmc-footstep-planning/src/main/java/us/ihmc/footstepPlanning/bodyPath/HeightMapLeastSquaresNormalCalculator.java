@@ -59,11 +59,6 @@ public class HeightMapLeastSquaresNormalCalculator
          {
             UnitVector3DBasics surfaceNormal = new UnitVector3D(0.0, 0.0, 1.0);
             int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
-            if (key == 12282)
-            {
-               System.out.println();
-            }
-
             surfaceNormals[key] = surfaceNormal;
 
             if (xIndex > 0 && yIndex > 0 && xIndex < gridWidth - 1 && yIndex < gridWidth - 1)

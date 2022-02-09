@@ -4,6 +4,8 @@ import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -34,6 +36,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
+import java.util.function.IntFunction;
 
 import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner.*;
 import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathSmoother.*;
@@ -60,8 +63,8 @@ public class AStarBodyPathSmootherWaypoint
    private final YoFramePoseUsingYawPitchRoll waypoint;
    private final PoseReferenceFrame waypointFrame;
    private final SideDependentList<ReferenceFrame> nominalStepFrames;
-   private final HeightMapLeastSquaresNormalCalculator leastSquaresSurfaceNormalCalculator;
-   private final HeightMapRANSACNormalCalculator ransacNormalCalculator;
+   private HeightMapLeastSquaresNormalCalculator leastSquaresSurfaceNormalCalculator;
+   private HeightMapRANSACNormalCalculator ransacNormalCalculator;
    private final YoBoolean isTurnPoint;
    private int previousCellKey, cellKey;
 
@@ -119,13 +122,9 @@ public class AStarBodyPathSmootherWaypoint
    private final YoVector2D rollDelta;
 
    public AStarBodyPathSmootherWaypoint(int waypointIndex,
-                                        HeightMapLeastSquaresNormalCalculator leastSquaresSurfaceNormalCalculator,
-                                        HeightMapRANSACNormalCalculator ransacNormalCalculator,
                                         YoGraphicsListRegistry graphicsListRegistry,
                                         YoRegistry parentRegistry)
    {
-      this.leastSquaresSurfaceNormalCalculator = leastSquaresSurfaceNormalCalculator;
-      this.ransacNormalCalculator = ransacNormalCalculator;
       this.waypointIndex = waypointIndex;
 
       YoRegistry registry = new YoRegistry("Waypoint" + waypointIndex);
@@ -227,10 +226,12 @@ public class AStarBodyPathSmootherWaypoint
       }
    }
 
-   public void initialize(List<Point3D> bodyPath, HeightMapData heightMapData)
+   public void initialize(List<Point3D> bodyPath, HeightMapData heightMapData, HeightMapRANSACNormalCalculator ransacNormalCalculator, HeightMapLeastSquaresNormalCalculator leastSquaresSurfaceNormalCalculator)
    {
       this.heightMapData = heightMapData;
       this.pathSize = bodyPath.size();
+      this.ransacNormalCalculator = ransacNormalCalculator;
+      this.leastSquaresSurfaceNormalCalculator = leastSquaresSurfaceNormalCalculator;
 
       isTurnPoint.set(false);
       AStarBodyPathPlanner.packRadialOffsets(heightMapData, AStarBodyPathPlanner.snapRadius, xSnapOffsets, ySnapOffsets);
@@ -321,6 +322,11 @@ public class AStarBodyPathSmootherWaypoint
    public Point3DBasics getPosition()
    {
       return waypoint.getPosition();
+   }
+
+   public Pose3DReadOnly getPose()
+   {
+      return waypoint;
    }
 
    public void setTurnPoint()
@@ -660,7 +666,7 @@ public class AStarBodyPathSmootherWaypoint
 
       double heading0 = Math.atan2(y1 - y0, x1 - x0);
       double heading1 = Math.atan2(y2 - y1, x2 - x1);
-      this.waypoint.setYaw(AngleTools.computeAngleAverage(heading0, heading1));
+      this.waypoint.setOrientationYawPitchRoll(AngleTools.computeAngleAverage(heading0, heading1), 0.0,  0.0);
 
       // Compute new height if shifted
       if (firstTick || cellKey != previousCellKey)
