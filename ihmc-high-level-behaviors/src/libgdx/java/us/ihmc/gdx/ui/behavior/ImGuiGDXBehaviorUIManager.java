@@ -55,6 +55,7 @@ public class ImGuiGDXBehaviorUIManager
    private final YoBooleanClientHelper yoEnabled;
    private final ImGuiGDXBehaviorUIRegistry behaviorRegistry;
    private ImGuiGDXBehaviorUIInterface rootBehaviorUI;
+   private GDXImGuiBasedUI baseUI;
 
    public ImGuiGDXBehaviorUIManager(ROS2Node ros2Node,
                                     Supplier<? extends DRCRobotModel> robotModelSupplier,
@@ -109,6 +110,7 @@ public class ImGuiGDXBehaviorUIManager
       rootBehaviorUI.clearChildren();
       behaviorRegistry.setHighestLevelNode(behaviorRegistry.getBehaviorFromName(behaviorName));
       highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(helper);
+      highestLevelUI.create(baseUI);
       rootBehaviorUI.addChild(highestLevelUI);
 
       imNodeBehaviorTreeUI.setRootNode(rootBehaviorUI);
@@ -116,6 +118,7 @@ public class ImGuiGDXBehaviorUIManager
 
    public void create(GDXImGuiBasedUI baseUI)
    {
+      this.baseUI = baseUI;
       imNodeBehaviorTreeUI.create();
 
       highestLevelUI.create(baseUI);
