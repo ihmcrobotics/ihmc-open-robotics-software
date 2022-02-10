@@ -27,6 +27,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -204,9 +205,11 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
 
-      ROS2Topic controllerPreviewOutputTopic = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
-                                                                                    .withOutput();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopic, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
+      ROS2Topic<PlanarRegionsListMessage> mapsenseRegions = ROS2Tools.MAPSENSE_REGIONS;
+      new ROS2Callback<>(ros2Node, mapsenseRegions, p -> messager.submitMessage(FootstepPlannerMessagerAPI.GPUREARegions, PlanarRegionMessageConverter.convertToPlanarRegionsList(p)));
+
+      ROS2Topic<HeightMapMessage> heightMapOutput = ROS2Tools.HEIGHT_MAP_OUTPUT;
+      new ROS2Callback<>(ros2Node, heightMapOutput, m -> messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, m));
 
       /* publishers */
       plannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
@@ -253,14 +256,6 @@ public class RemoteUIMessageConverter
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.HaltPlanning, request -> requestHaltPlanning());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestWalkingPreview, request ->
-      {
-         ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
-         toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
-         walkingPreviewToolboxStatePublisher.publish(toolboxStateMessage);
-         walkingPreviewRequestPublisher.publish(request);
-      });
-
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
 
       IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher =

@@ -79,6 +79,7 @@ public class FootstepPlannerUI
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
    private final BodyPathLogRenderer bodyPathLogRenderer;
    private final ManualFootstepAdjustmentListener manualFootstepAdjustmentListener;
+   private final HeightMapNavigationUpdater heightMapNavigationUpdater;
    private final RobotIKVisualizer robotIKVisualizer;
    private final HeightMapVisualizer heightMapVisualizer = new HeightMapVisualizer();
 
@@ -318,7 +319,17 @@ public class FootstepPlannerUI
       manualFootstepAdjustmentListener.start();
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
-      new HeightMapNavigationUpdater(messager, walkingControllerParameters, defaultContactPoints).start();
+
+      if (robotVisualizer != null)
+      {
+         heightMapNavigationUpdater = new HeightMapNavigationUpdater(messager, walkingControllerParameters, defaultContactPoints, robotVisualizer.getFullRobotModel());
+         heightMapNavigationUpdater.start();
+      }
+      else
+      {
+         heightMapNavigationUpdater = null;
+      }
+
       heightMapVisualizer.start();
 
       messager.registerTopicListener(HeightMapData, data -> planarRegionViewer.clear());
@@ -441,6 +452,9 @@ public class FootstepPlannerUI
       bodyPathMeshViewer.stop();
       visibilityGraphsRenderer.stop();
       heightMapVisualizer.stop();
+
+      if (heightMapNavigationUpdater != null)
+         heightMapNavigationUpdater.stop();
 
       if (robotVisualizer != null)
          robotVisualizer.stop();

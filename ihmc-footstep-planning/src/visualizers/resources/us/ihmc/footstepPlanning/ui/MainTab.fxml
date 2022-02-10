@@ -242,8 +242,8 @@
                 <Region prefHeight="5" />
 
                 <GridPane alignment="TOP_CENTER" layoutX="23.0" layoutY="29.0">
-                    <Button mnemonicParsing="false" onAction="#startHeightMapNavigation" prefWidth="130.0" text="Start Height Map Nav" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
-                    <Button mnemonicParsing="false" onAction="#stopHeightMapNavigation" prefWidth="130.0" text="Stop Height Map Nav" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
+                    <Button mnemonicParsing="false" onAction="#startHeightMapNavigation" prefWidth="220.0" text="Start Height Map Nav" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
+                    <Button mnemonicParsing="false" onAction="#stopHeightMapNavigation" prefWidth="220.0" text="Stop Height Map Nav" GridPane.columnIndex="0" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
 
                <columnConstraints>
                   <ColumnConstraints />

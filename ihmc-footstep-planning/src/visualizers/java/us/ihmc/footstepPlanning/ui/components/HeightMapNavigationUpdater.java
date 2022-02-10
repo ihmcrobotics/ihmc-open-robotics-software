@@ -20,10 +20,11 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
-import us.ihmc.robotEnvironmentAwareness.slam.DriftCorrectionResult;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -37,6 +38,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 {
    private final Messager messager;
    private final Stopwatch stopwatch = new Stopwatch();
+   private static final double replanDelay = 1.0;
 
    private final AtomicReference<Boolean> startHeightMapNavigation;
    private final AtomicReference<Boolean> stopHeightMapNavigation;
@@ -51,11 +53,13 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private RobotSide lastStepSide;
    private long previousStepMessageId = 0;
+   private final Pose3D lastStepPose = new Pose3D();
 
    private final AtomicReference<PlanarRegionsList> planarRegions;
    private final AtomicReference<State> currentState = new AtomicReference<>();
    private final FootstepPlanningModule planningModule;
    private final FootstepPlannerLogger logger;
+   private final HumanoidReferenceFrames referenceFrames;
 
    private enum State
    {
@@ -64,11 +68,13 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       FOLLOW_PATH
    }
 
-   public HeightMapNavigationUpdater(Messager messager, WalkingControllerParameters walkingControllerParameters, SideDependentList<List<Point2D>> defaultContactPoints)
+   public HeightMapNavigationUpdater(Messager messager, WalkingControllerParameters walkingControllerParameters, SideDependentList<List<Point2D>> defaultContactPoints, FullHumanoidRobotModel fullHumanoidRobotModel)
    {
       this.messager = messager;
-      startHeightMapNavigation = messager.createInput(FootstepPlannerMessagerAPI.StartHeightMapNavigation);
-      stopHeightMapNavigation = messager.createInput(FootstepPlannerMessagerAPI.StopHeightMapNavigation);
+      this.referenceFrames = new HumanoidReferenceFrames(fullHumanoidRobotModel);
+
+      startHeightMapNavigation = messager.createInput(FootstepPlannerMessagerAPI.StartHeightMapNavigation, false);
+      stopHeightMapNavigation = messager.createInput(FootstepPlannerMessagerAPI.StopHeightMapNavigation, false);
       goalPosition = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
       goalOrientation = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootOrientation);
       heightMapMessage = messager.createInput(FootstepPlannerMessagerAPI.HeightMapData);
@@ -127,7 +133,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
          LogTools.info("Starting plan");
          FootstepPlannerOutput output = planningModule.handleRequest(request);
-         LogTools.info("Finished plan");
+         LogTools.info("Finished plan, logging session.");
          logger.logSession();
 
          if (output.getBodyPathPlanningResult() != BodyPathPlanningResult.FOUND_SOLUTION)
@@ -144,6 +150,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
             request.getBodyPathWaypoints().add(new Pose3D(output.getBodyPath().get(i)));
          }
 
+         messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, request.getBodyPathWaypoints());
          currentState.set(State.FOLLOW_PATH);
       }
 
@@ -174,7 +181,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          request.setPlanBodyPath(false);
          request.setPerformAStarSearch(true);
          request.setHeightMapMessage(null);
-         request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions.get()));
+         request.setPlanarRegionsList(planarRegions.get());
 
          RobotSide stepSide = lastStepSide.getOppositeSide();
          request.setRequestedInitialStanceSide(stepSide);
@@ -196,6 +203,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
          if (result != FootstepPlanningResult.FOUND_SOLUTION)
          {
+            logger.logSession();
             return;
          }
 
@@ -210,22 +218,25 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          long messageId = UUID.randomUUID().getLeastSignificantBits();
          footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
          footstepDataListMessage.getQueueingProperties().setPreviousMessageId(previousStepMessageId);
-         remoteHumanoidInterface.requestWalk(footstepDataListMessage);
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessage);
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
 
          firstStep.set(false);
          lastStepSide = stepSide;
          lastStepPose.set(footstep.getFootstepPose());
          previousStepMessageId = messageId;
+         logger.logSession();
          stopwatch.lap();
       }
    }
 
-
    private void setStartFootPosesToCurrent()
    {
+      referenceFrames.updateFrames();
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         FramePose3D foot = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(robotSide));
+         FramePose3D foot = new FramePose3D(referenceFrames.getSoleFrame(robotSide));
          foot.changeFrame(ReferenceFrame.getWorldFrame());
          request.setStartFootPose(robotSide, foot);
       }
@@ -233,6 +244,8 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
    private void setStartFootPosesBasedOnLastCommandedStep()
    {
+      referenceFrames.updateFrames();
+
       for (RobotSide robotSide : RobotSide.values)
       {
          if (robotSide == lastStepSide)
@@ -241,7 +254,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          }
          else
          {
-            FramePose3D foot = new FramePose3D(syncedRobot.getReferenceFrames().getSoleFrame(robotSide));
+            FramePose3D foot = new FramePose3D(referenceFrames.getSoleFrame(robotSide));
             foot.changeFrame(ReferenceFrame.getWorldFrame());
             request.setStartFootPose(robotSide, foot);
          }
