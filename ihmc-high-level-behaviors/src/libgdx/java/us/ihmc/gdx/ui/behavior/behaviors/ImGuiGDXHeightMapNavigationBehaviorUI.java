@@ -72,5 +72,11 @@ public class ImGuiGDXHeightMapNavigationBehaviorUI extends ImGuiGDXBehaviorUIInt
       footstepPlanGraphic.destroy();
       planarRegionsGraphic.destroy();
    }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
+   }
 }
 

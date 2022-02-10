@@ -271,4 +271,10 @@ public class HeightMapNavigationBehavior extends ResettingNode implements Behavi
       currentState.set(State.WAITING_TO_START);
       goalPose.set(null);
    }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
+   }
 }
