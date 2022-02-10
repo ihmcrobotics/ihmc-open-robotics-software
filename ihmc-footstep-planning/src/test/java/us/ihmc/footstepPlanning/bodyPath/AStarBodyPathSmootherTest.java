@@ -307,7 +307,7 @@ public class AStarBodyPathSmootherTest
       HeightMapData[] heightMapData = new HeightMapData[datasets.length];
       FootstepPlannerOutput output = new FootstepPlannerOutput();
 
-      AStarBodyPathPlanner planner = new AStarBodyPathPlanner(new DefaultFootstepPlannerParameters(), PlannerTools.createDefaultFootPolygon());
+      AStarBodyPathPlanner planner = new AStarBodyPathPlanner(new DefaultFootstepPlannerParameters(), PlannerTools.createDefaultFootPolygons());
       AStarBodyPathSmoother smoother = new AStarBodyPathSmoother();
 
       for (int i = 0; i < datasets.length; i++)

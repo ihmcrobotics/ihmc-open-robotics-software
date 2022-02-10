@@ -21,6 +21,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -89,7 +90,7 @@ public class AStarBodyPathPlannerVisualizer
 
       scs.addStaticLinkGraphics(heightMapGraphics(heightMapData));
 
-      ConvexPolygon2D footPolygon = PlannerTools.createDefaultFootPolygon();
+      SideDependentList<ConvexPolygon2D> footPolygon = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
 
       AStarBodyPathPlanner bodyPathPlanner = new AStarBodyPathPlanner(parameters, footPolygon);
