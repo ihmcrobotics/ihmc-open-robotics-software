@@ -16,6 +16,7 @@ public class ImGuiGDXBehaviorUIRegistry extends BehaviorRegistry
       DEFAULT_BEHAVIORS.register(ImGuiGDXBuildingExplorationBehaviorUI.DEFINITION);
       DEFAULT_BEHAVIORS.register(ImGuiGDXDoorBehaviorUI.DEFINITION);
       DEFAULT_BEHAVIORS.register(ImGuiGDXTraverseStairsBehaviorUI.DEFINITION);
+      DEFAULT_BEHAVIORS.register(ImGuiGDXHeightMapNavigationBehaviorUI.DEFINITION);
    }
 
    private final TreeSet<ImGuiGDXBehaviorUIDefinition> uiDefinitionEntries = new TreeSet<>(Comparator.comparing(ImGuiGDXBehaviorUIDefinition::getName));
