@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.behaviors.heightMapNavigation.HeightMapNavigationBehavior;
+import us.ihmc.behaviors.heightMapNavigation.HeightMapNavigationBehaviorAPI;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.ROS2Tools;
@@ -57,6 +58,11 @@ public class ImGuiGDXHeightMapNavigationBehaviorUI extends ImGuiGDXBehaviorUIInt
       goalAffordance.renderPlaceGoalButton();
       ImGui.sameLine();
       ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
+
+      if (ImGui.button("Start"))
+      {
+         helper.getMessager().submitMessage(HeightMapNavigationBehaviorAPI.RequestStart, true);
+      }
    }
 
    @Override
