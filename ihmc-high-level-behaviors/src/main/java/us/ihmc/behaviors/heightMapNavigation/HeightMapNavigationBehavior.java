@@ -52,7 +52,7 @@ public class HeightMapNavigationBehavior extends ResettingNode implements Behavi
    }
 
    private static final double replanDelay = 0.5;
-   private static final BehaviorTreeNodeStatus defaultStatus = BehaviorTreeNodeStatus.SUCCESS;
+   private static final BehaviorTreeNodeStatus defaultStatus = BehaviorTreeNodeStatus.RUNNING;
    private final BehaviorHelper helper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
@@ -164,8 +164,11 @@ public class HeightMapNavigationBehavior extends ResettingNode implements Behavi
          {
             request.getBodyPathWaypoints().add(new Pose3D(output.getBodyPath().get(i)));
          }
+
+         currentState.set(State.FOLLOW_PATH);
       }
-      else
+
+      if (currentState.get() == State.FOLLOW_PATH)
       {
          // Execute steps
          if (requestStop.getAndSet(false))

@@ -20,6 +20,10 @@ import us.ihmc.robotics.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class GDXHeightMapGraphic implements RenderableProvider
 {
    private final ModelBuilder modelBuilder = new ModelBuilder();
@@ -46,12 +50,18 @@ public class GDXHeightMapGraphic implements RenderableProvider
    public void generateMeshesAsync(HeightMapMessage heightMapMessage)
    {
       LogTools.info("Receiving height map with " + heightMapMessage.getKeys().size() + " cells, ground plane at " + heightMapMessage.getEstimatedGroundHeight());
-      executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
+
+      if (!isGeneratingMeshes.getAndSet(true))
+      {
+         executorService.clearQueueAndExecute(() -> generateMeshes(heightMapMessage));
+      }
    }
+
+   private final AtomicBoolean isGeneratingMeshes = new AtomicBoolean();
 
    public synchronized void generateMeshes(HeightMapMessage heightMapMessage)
    {
-      GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
+      List<GDXMultiColorMeshBuilder> meshBuilders = new ArrayList<>();
       Color olive = Color.OLIVE;
       Color blue = Color.BLUE;
 
@@ -59,8 +69,9 @@ public class GDXHeightMapGraphic implements RenderableProvider
       double gridResolutionXY = heightMapMessage.getXyResolution();
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), gridResolutionXY);
 
-      for (int i = 0; i < heights.size() && i < 100; i++)
+      for (int i = 0; i < heights.size(); i++)
       {
+         GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
          int xIndex = HeightMapTools.keyToXIndex(heightMapMessage.getKeys().get(i), centerIndex);
          int yIndex = HeightMapTools.keyToYIndex(heightMapMessage.getKeys().get(i), centerIndex);
          double x = HeightMapTools.indexToCoordinate(xIndex, heightMapMessage.getGridCenterX(), gridResolutionXY, centerIndex);
@@ -69,14 +80,17 @@ public class GDXHeightMapGraphic implements RenderableProvider
          double renderedHeight = height - heightMapMessage.getEstimatedGroundHeight();
 
          meshBuilder.addBox(gridResolutionXY, gridResolutionXY, renderedHeight, new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight), olive);
+         meshBuilders.add(meshBuilder);
       }
 
+      GDXMultiColorMeshBuilder groundMeshBuilder = new GDXMultiColorMeshBuilder();
       double renderedGroundPlaneHeight = 0.005;
-      meshBuilder.addBox(heightMapMessage.getGridSizeXy(),
-                         heightMapMessage.getGridSizeXy(),
-                         renderedGroundPlaneHeight,
-                         new Point3D(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY(), heightMapMessage.getEstimatedGroundHeight()),
-                         blue);
+      groundMeshBuilder.addBox(heightMapMessage.getGridSizeXy(),
+                               heightMapMessage.getGridSizeXy(),
+                               renderedGroundPlaneHeight,
+                               new Point3D(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY(), heightMapMessage.getEstimatedGroundHeight()),
+                               blue);
+      meshBuilders.add(groundMeshBuilder);
 
       buildMeshAndCreateModelInstance = () ->
       {
@@ -86,9 +100,12 @@ public class GDXHeightMapGraphic implements RenderableProvider
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
 
-         Mesh mesh = meshBuilder.generateMesh();
-         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
-         modelBuilder.part(meshPart, material);
+         for (int i = 0; i < meshBuilders.size(); i++)
+         {
+            Mesh mesh = meshBuilders.get(i).generateMesh();
+            MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
+            modelBuilder.part(meshPart, material);
+         }
 
          if (lastModel != null)
             lastModel.dispose();
@@ -96,6 +113,8 @@ public class GDXHeightMapGraphic implements RenderableProvider
          lastModel = modelBuilder.end();
          modelInstance = new ModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
       };
+
+      isGeneratingMeshes.set(false);
    }
 
    @Override
