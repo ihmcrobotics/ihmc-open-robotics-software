@@ -26,11 +26,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.footstepPlanning.ui.components.FootPoseFromMidFootUpdater;
-import us.ihmc.footstepPlanning.ui.components.FootstepCompletionListener;
-import us.ihmc.footstepPlanning.ui.components.GoalOrientationEditor;
-import us.ihmc.footstepPlanning.ui.components.ManualFootstepAdjustmentListener;
-import us.ihmc.footstepPlanning.ui.components.UIFootstepPlanManager;
+import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.controllers.*;
 import us.ihmc.footstepPlanning.ui.viewers.*;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -80,7 +76,6 @@ public class FootstepPlannerUI
    private final BodyPathMeshViewer bodyPathMeshViewer;
    private final VisibilityGraphsRenderer visibilityGraphsRenderer;
    private final JavaFXRobotVisualizer robotVisualizer;
-   private final JavaFXRobotVisualizer walkingPreviewVisualizer;
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
    private final BodyPathLogRenderer bodyPathLogRenderer;
    private final ManualFootstepAdjustmentListener manualFootstepAdjustmentListener;
@@ -283,22 +278,10 @@ public class FootstepPlannerUI
 
       if (previewModelFactory == null)
       {
-         walkingPreviewVisualizer = null;
          robotIKVisualizer = null;
       }
       else
       {
-         MaterialDefinition previewRobotMaterial = new MaterialDefinition(ColorDefinitions.AliceBlue());
-         previewModelFactory.getRobotDefinition()
-                            .forEachRigidBodyDefinition(body -> body.getVisualDefinitions()
-                                                                    .forEach(visual -> visual.setMaterialDefinition(previewRobotMaterial)));
-         walkingPreviewVisualizer = new JavaFXRobotVisualizer(previewModelFactory);
-         walkingPreviewVisualizer.getRootNode().setMouseTransparent(true);
-         view3dFactory.addNodeToView(walkingPreviewVisualizer.getRootNode());
-         mainTabController.setPreviewModel(walkingPreviewVisualizer.getFullRobotModel());
-         walkingPreviewVisualizer.getFullRobotModel().getRootJoint().setJointPosition(new Vector3D(Double.NaN, Double.NaN, Double.NaN));
-         walkingPreviewVisualizer.start();
-
          robotIKVisualizer = new RobotIKVisualizer(previewModelFactory, jointMap, messager);
          messager.registerTopicListener(RobotConfigurationData, robotIKVisualizer::submitNewConfiguration);
          view3dFactory.addNodeToView(robotIKVisualizer.getRootNode());
@@ -335,6 +318,7 @@ public class FootstepPlannerUI
       manualFootstepAdjustmentListener.start();
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
+      new HeightMapNavigationUpdater(messager, walkingControllerParameters, defaultContactPoints).start();
       heightMapVisualizer.start();
 
       messager.registerTopicListener(HeightMapData, data -> planarRegionViewer.clear());
