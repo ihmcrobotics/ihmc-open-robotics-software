@@ -20,9 +20,10 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapPlanarRegionCalculator;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.robotics.heightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -71,7 +72,7 @@ public class HeightMapDataVisualizer
          return;
       }
 
-      HeightMapData heightMapData = new HeightMapData(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
 
       ConvexPolygon2D polygon = new ConvexPolygon2D();
       polygon.addVertex(0.11, 0.043);

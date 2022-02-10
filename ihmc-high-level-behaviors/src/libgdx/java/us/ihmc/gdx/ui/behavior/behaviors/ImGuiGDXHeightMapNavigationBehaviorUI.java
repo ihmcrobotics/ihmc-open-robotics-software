@@ -1,15 +1,20 @@
 package us.ihmc.gdx.ui.behavior.behaviors;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.behaviors.heightMapNavigation.HeightMapNavigationBehavior;
+import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
+import us.ihmc.gdx.visualizers.GDXHeightMapGraphic;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 
 import static us.ihmc.behaviors.heightMapNavigation.HeightMapNavigationBehaviorAPI.GoalPose;
@@ -24,6 +29,7 @@ public class ImGuiGDXHeightMapNavigationBehaviorUI extends ImGuiGDXBehaviorUIInt
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
+   private final GDXHeightMapGraphic heightMapGraphic = new GDXHeightMapGraphic();
 
    public ImGuiGDXHeightMapNavigationBehaviorUI(BehaviorHelper helper)
    {
@@ -34,6 +40,8 @@ public class ImGuiGDXHeightMapNavigationBehaviorUI extends ImGuiGDXBehaviorUIInt
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);
       });
+
+      helper.subscribeViaCallback(ROS2Tools.HEIGHT_MAP_OUTPUT, heightMapGraphic::generateMeshesAsync);
    }
 
    @Override
@@ -58,7 +66,15 @@ public class ImGuiGDXHeightMapNavigationBehaviorUI extends ImGuiGDXBehaviorUIInt
       {
          footstepPlanGraphic.update();
          planarRegionsGraphic.update();
+         heightMapGraphic.update();
       }
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      goalAffordance.getRenderables(renderables, pool);
+      heightMapGraphic.getRenderables(renderables, pool);
    }
 
    private boolean areGraphicsEnabled()
@@ -71,6 +87,7 @@ public class ImGuiGDXHeightMapNavigationBehaviorUI extends ImGuiGDXBehaviorUIInt
    {
       footstepPlanGraphic.destroy();
       planarRegionsGraphic.destroy();
+      heightMapGraphic.destroy();
    }
 
    @Override

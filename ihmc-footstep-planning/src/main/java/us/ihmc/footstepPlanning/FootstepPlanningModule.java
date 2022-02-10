@@ -46,7 +46,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -180,7 +181,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       if (heightMapAvailable)
       {
-         heightMapData = new HeightMapData(request.getHeightMapMessage());
+         heightMapData = HeightMapMessageTools.unpackMessage(request.getHeightMapMessage());
          aStarFootstepPlanner.setHeightMapData(heightMapData);
       }
       else

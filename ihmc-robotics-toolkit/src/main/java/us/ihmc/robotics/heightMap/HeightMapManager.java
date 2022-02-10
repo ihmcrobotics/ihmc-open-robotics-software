@@ -1,13 +1,11 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.robotics.heightMap;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class HeightMapManager
 {
@@ -23,11 +21,12 @@ public class HeightMapManager
    private final HeightMapCell[] heightMapCells;
    private final TIntArrayList occupiedCells = new TIntArrayList();
 
-   private final HeightMapParameters parameters = new HeightMapParameters(null);
+   private final HeightMapParametersReadOnly parameters;
    private final Point2D gridCenterXY = new Point2D();
 
-   public HeightMapManager(double gridResolutionXY, double gridSizeXY)
+   public HeightMapManager(HeightMapParametersReadOnly parameters, double gridResolutionXY, double gridSizeXY)
    {
+      this.parameters = parameters;
       this.gridResolutionXY = gridResolutionXY;
       this.centerIndex = HeightMapTools.computeCenterIndex(gridSizeXY, gridResolutionXY);
       this.cellsPerAxis = 2 * centerIndex + 1;

@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.bodyPath;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.robotics.heightMap.HeightMapData;
 
 public class BodyPathCollisionDetectorTest
 {

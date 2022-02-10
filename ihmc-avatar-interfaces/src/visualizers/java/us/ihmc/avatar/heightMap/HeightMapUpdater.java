@@ -20,16 +20,15 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapManager;
+import us.ihmc.robotics.heightMap.HeightMapManager;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.robotics.heightMap.HeightMapTools;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -91,7 +90,7 @@ public class HeightMapUpdater
       publisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.HEIGHT_MAP_OUTPUT);
 
       parameters = new HeightMapParameters();
-      heightMap = new HeightMapManager(parameters.getGridResolutionXY(), parameters.getGridSizeXY());
+      heightMap = new HeightMapManager(parameters, parameters.getGridResolutionXY(), parameters.getGridSizeXY());
       AtomicReference<Boolean> enableUpdates = messager.createInput(HeightMapMessagerAPI.EnableUpdates);
 
       messager.registerTopicListener(HeightMapMessagerAPI.PointCloudData, pointCloudData ->

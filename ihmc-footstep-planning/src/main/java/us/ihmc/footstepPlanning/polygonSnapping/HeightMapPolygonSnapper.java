@@ -8,9 +8,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.robotics.heightMap.HeightMapTools;
 
 import java.util.ArrayList;
 import java.util.List;
