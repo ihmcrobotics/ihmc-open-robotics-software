@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.robotics.heightMap;
 
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:

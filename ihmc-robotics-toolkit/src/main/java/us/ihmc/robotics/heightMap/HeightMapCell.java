@@ -1,26 +1,21 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.robotics.heightMap;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.providers.LongProvider;
-
-import java.util.concurrent.atomic.AtomicBoolean;
+import us.ihmc.robotics.heightMap.HeightMapParametersReadOnly;
 
 /**
  * Contains data for a given XY grid cell.
  */
-class HeightMapCell
+public class HeightMapCell
 {
    /* Option to simply take highest point at each cell */
    private static final boolean QUICK_UPDATE = false;
 
    /** Observed heights within cell */
    private final TDoubleArrayList heightMeasurements = new TDoubleArrayList();
-   private final HeightMapParameters parameters;
+   private final HeightMapParametersReadOnly parameters;
 
    private int oldestIndex;
    private final AtomicDouble estimatedHeight = new AtomicDouble();
@@ -29,13 +24,13 @@ class HeightMapCell
    private boolean isGroundCell = false;
    private boolean hasSufficientNeighbors = false;
 
-   public HeightMapCell(HeightMapParameters parameters)
+   public HeightMapCell(HeightMapParametersReadOnly parameters)
    {
       this.parameters = parameters;
       clear();
    }
 
-   void addPoint(double height)
+   public void addPoint(double height)
    {
       if (QUICK_UPDATE)
       {
@@ -85,14 +80,14 @@ class HeightMapCell
       estimatedHeight.set(heightMeasurements.sum() / heightMeasurements.size());
    }
 
-   void clear()
+   public void clear()
    {
       heightMeasurements.clear();
       oldestIndex = 0;
       estimatedHeight.set(Double.NaN);
    }
 
-   void resetAtHeight(double height)
+   public void resetAtHeight(double height)
    {
       clear();
       estimatedHeight.set(height);

@@ -1,8 +1,9 @@
 package us.ihmc.sensorProcessing.heightMap;
 
+import us.ihmc.robotics.heightMap.HeightMapParametersReadOnly;
 import us.ihmc.tools.property.StoredPropertySet;
 
-public class HeightMapParameters extends StoredPropertySet
+public class HeightMapParameters extends StoredPropertySet implements HeightMapParametersReadOnly
 {
    public static final String PROJECT_NAME = "ihmc-open-robotics-software";
    public static final String PATH_TO_RESOURCES = "ihmc-sensor-processing/src/main/resources";
@@ -31,6 +32,7 @@ public class HeightMapParameters extends StoredPropertySet
    /**
     * Resolution of the height map grid
     */
+   @Override
    public double getGridResolutionXY()
    {
       return get(HeightMapParameterKeys.gridResolutionXY);
@@ -39,6 +41,7 @@ public class HeightMapParameters extends StoredPropertySet
    /**
     * Length of the side of the square height map grid
     */
+   @Override
    public double getGridSizeXY()
    {
       return get(HeightMapParameterKeys.gridSizeXY);
@@ -47,6 +50,7 @@ public class HeightMapParameters extends StoredPropertySet
    /**
     * Max z relative to robot mid foot z. Points above this threshold are ignored.
     */
+   @Override
    public double getMaxZ()
    {
       return get(HeightMapParameterKeys.maxZ);
@@ -55,11 +59,13 @@ public class HeightMapParameters extends StoredPropertySet
    /**
     * When calibrated on flat ground, this is the average standard deviation observed for a grid cell.
     */
+   @Override
    public double getNominalStandardDeviation()
    {
       return get(HeightMapParameterKeys.nominalStandardDeviation);
    }
 
+   @Override
    public int getMaxPointsPerCell()
    {
       return get(HeightMapParameterKeys.maxPointsPerCell);
@@ -69,6 +75,7 @@ public class HeightMapParameters extends StoredPropertySet
     * If a grid cell is at height h, points below (h - s * m) are ignored, and points above (h + s * m) will cause the cell to throw out old data and reset.
     * where s is getNominalStandardDeviation() and m is this value.
     */
+   @Override
    public double getMahalanobisScale()
    {
       return get(HeightMapParameterKeys.mahalonobisScale);

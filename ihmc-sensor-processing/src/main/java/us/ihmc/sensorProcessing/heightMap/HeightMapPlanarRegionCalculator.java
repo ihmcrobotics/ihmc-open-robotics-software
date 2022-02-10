@@ -8,6 +8,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
+import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.robotics.heightMap.HeightMapTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -2,10 +2,10 @@ package us.ihmc.pathPlanning;
 
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.HeightMapMessagePubSubType;
-import geometry_msgs.Pose;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,7 +43,7 @@ public enum HeightMapDataSetName
       try
       {
          message = serializer.deserialize(inputStream);
-         heightMapData = new HeightMapData(message);
+         heightMapData = HeightMapMessageTools.unpackMessage(message);
       }
       catch (IOException e)
       {

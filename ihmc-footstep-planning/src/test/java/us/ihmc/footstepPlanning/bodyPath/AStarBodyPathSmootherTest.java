@@ -2,10 +2,7 @@ package us.ihmc.footstepPlanning.bodyPath;
 
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.HeightMapMessage;
-import org.apache.commons.lang3.Conversion;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
@@ -23,11 +20,11 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.robotics.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.robotics.heightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -283,7 +280,7 @@ public class AStarBodyPathSmootherTest
       List<Pose3D> bodyPathPoseWaypoints = statusPacket.getBodyPath();
       HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
 
-      HeightMapData heightMapData = new HeightMapData(heightMapMessage);
+      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       List<Point3D> bodyPath = bodyPathPoseWaypoints.stream().map(Pose3D::getPosition).collect(Collectors.toList());
 
       try

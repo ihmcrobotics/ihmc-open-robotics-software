@@ -1,9 +1,9 @@
-package us.ihmc.sensorProcessing.heightMap;
+package us.ihmc.robotics.heightMap;
 
-import controller_msgs.msg.dds.HeightMapMessage;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.heightMap.HeightMapTools;
 
 import java.util.Arrays;
 
@@ -40,21 +40,6 @@ public class HeightMapData
       maxY = gridCenterY + halfWidth;
 
       reset();
-   }
-
-   public HeightMapData(HeightMapMessage heightMapMessage)
-   {
-      this(heightMapMessage.getXyResolution(), heightMapMessage.getGridSizeXy(), heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY());
-
-      for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
-      {
-         double height = heightMapMessage.getHeights().get(i);
-         int key = heightMapMessage.getKeys().get(i);
-         heights[key] = height;
-         occupiedCells.add(key);
-      }
-
-      this.estimatedGroundHeight = heightMapMessage.getEstimatedGroundHeight();
    }
 
    public void reset()
@@ -109,6 +94,19 @@ public class HeightMapData
       else
       {
          return estimatedGroundHeight;
+      }
+   }
+
+   public void setHeightAt(int key, double height)
+   {
+      if (key >= 0 && key < heights.length)
+      {
+         if (Double.isNaN(heights[key]))
+         {
+            occupiedCells.add(key);
+         }
+
+         heights[key] = height;
       }
    }
 
