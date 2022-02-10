@@ -42,7 +42,7 @@ public class BodyPathLSTraversibilityCalculator
 
    private final YoDouble leftTraversibility, rightTraversibility;
 
-   private final ConvexPolygon2D footPolygon;
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final TDoubleArrayList xOffsets = new TDoubleArrayList();
    private final TDoubleArrayList yOffsets = new TDoubleArrayList();
    private final TDoubleArrayList yawOffsets = new TDoubleArrayList();
@@ -50,12 +50,12 @@ public class BodyPathLSTraversibilityCalculator
    private HeightMapData heightMapData;
 
    public BodyPathLSTraversibilityCalculator(FootstepPlannerParametersReadOnly parameters,
-                                             ConvexPolygon2D footPolygon,
+                                             SideDependentList<ConvexPolygon2D> footPolygons,
                                              Map<BodyPathLatticePoint, Double> gridHeightMap,
                                              YoRegistry registry)
    {
       this.parameters = parameters;
-      this.footPolygon = footPolygon;
+      this.footPolygons = footPolygons;
       this.gridHeightMap = gridHeightMap;
 
       xBody = new YoDouble("xBody", registry);
@@ -147,7 +147,7 @@ public class BodyPathLSTraversibilityCalculator
       traversibilityCosts.clear();
       validSteps.get(side).set(0);
 
-      double fullFootholdArea = footPolygon.getArea();
+      double fullFootholdArea = footPolygons.get(side).getArea();
       double maxAreaToPenalize = 0.9;
       double minAreaThreshold = 0.65;
 
@@ -180,7 +180,7 @@ public class BodyPathLSTraversibilityCalculator
                RigidBodyTransform transform = new RigidBodyTransform();
                stepPose.get(transform);
 
-               ConvexPolygon2D footPolygon = new ConvexPolygon2D(this.footPolygon);
+               ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(side));
                footPolygon.applyTransform(transform);
 
                RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon,

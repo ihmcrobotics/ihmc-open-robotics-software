@@ -26,6 +26,7 @@ import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -104,7 +105,7 @@ public class AStarBodyPathPlanner
    static final double boxSizeY = 0.85;
    static final double boxSizeX = 0.3;
 
-   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, ConvexPolygon2D footPolygon)
+   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
       stack = new PriorityQueue<>(new NodeComparator<>(graph, this::heuristics));
@@ -116,7 +117,7 @@ public class AStarBodyPathPlanner
       }
       else
       {
-         leastSqTraversibilityCalculator = new BodyPathLSTraversibilityCalculator(parameters, footPolygon, gridHeightMap, registry);
+         leastSqTraversibilityCalculator = new BodyPathLSTraversibilityCalculator(parameters, footPolygons, gridHeightMap, registry);
          ransacTraversibilityCalculator = null;
       }
 
