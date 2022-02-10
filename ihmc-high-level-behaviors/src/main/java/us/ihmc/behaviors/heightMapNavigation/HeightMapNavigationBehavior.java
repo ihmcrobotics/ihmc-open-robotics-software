@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.heightMapNavigation;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HeightMapMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -28,6 +29,8 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -72,6 +75,7 @@ public class HeightMapNavigationBehavior extends ResettingNode implements Behavi
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final RemoteHumanoidRobotInterface remoteHumanoidInterface;
+   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("RegionsRelay", true);
 
    public HeightMapNavigationBehavior(BehaviorHelper helper)
    {
@@ -96,6 +100,12 @@ public class HeightMapNavigationBehavior extends ResettingNode implements Behavi
       planningModule.addCustomTerminationCondition((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> bestPathSize > 0);
       remoteHumanoidInterface = helper.getOrCreateRobotInterface();
       logger = new FootstepPlannerLogger(planningModule);
+
+      helper.subscribeViaCallback(ROS2Tools.MAPSENSE_REGIONS, newValue ->
+      {
+         planarRegions.set(newValue);
+         executor.submit(() -> helper.publish(HeightMapNavigationBehaviorAPI.PlanarRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(newValue)));
+      });
    }
 
    @Override
@@ -182,6 +192,9 @@ public class HeightMapNavigationBehavior extends ResettingNode implements Behavi
          request.setHeightMapMessage(null);
          request.setPlanarRegionsList(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions.get()));
 
+         RobotSide stepSide = lastStepSide.getOppositeSide();
+         request.setRequestedInitialStanceSide(stepSide);
+
          if (firstStep.get())
          {
             setStartFootPosesToCurrent();
@@ -203,6 +216,12 @@ public class HeightMapNavigationBehavior extends ResettingNode implements Behavi
          }
 
          ExecutionMode executionMode = firstStep.get() ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
+         PlannedFootstep footstep = output.getFootstepPlan().getFootstep(0);
+         footstepDataListMessage.getFootstepDataList().clear();
+         FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
+         footstepDataMessage.getLocation().set(footstep.getFootstepPose().getPosition());
+         footstepDataMessage.getOrientation().set(footstep.getFootstepPose().getOrientation());
+
          footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
          long messageId = UUID.randomUUID().getLeastSignificantBits();
          footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
@@ -210,6 +229,8 @@ public class HeightMapNavigationBehavior extends ResettingNode implements Behavi
          remoteHumanoidInterface.requestWalk(footstepDataListMessage);
 
          firstStep.set(false);
+         lastStepSide = stepSide;
+         lastStepPose.set(footstep.getFootstepPose());
          previousStepMessageId = messageId;
          stopwatch.lap();
       }
