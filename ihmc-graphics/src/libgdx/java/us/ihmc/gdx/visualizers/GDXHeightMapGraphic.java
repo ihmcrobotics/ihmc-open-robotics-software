@@ -59,7 +59,7 @@ public class GDXHeightMapGraphic implements RenderableProvider
       double gridResolutionXY = heightMapMessage.getXyResolution();
       int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), gridResolutionXY);
 
-      for (int i = 0; i < heights.size(); i++)
+      for (int i = 0; i < heights.size() && i < 100; i++)
       {
          int xIndex = HeightMapTools.keyToXIndex(heightMapMessage.getKeys().get(i), centerIndex);
          int yIndex = HeightMapTools.keyToYIndex(heightMapMessage.getKeys().get(i), centerIndex);
