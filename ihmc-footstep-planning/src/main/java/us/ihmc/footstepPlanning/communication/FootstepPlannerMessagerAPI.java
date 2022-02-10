@@ -63,7 +63,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
    public static final Topic<Boolean> AcceptNewPlanarRegions = topic("AcceptNewPlanarRegions");
    public static final Topic<OcTreeKeyListMessage> OcTreeData = topic("OcTreeData");
-   public static final Topic<Boolean> EnableHeightMap = topic("EnableHeightMap");
 
    // UI control
    public static final Topic<Boolean> IgnorePartialFootholds = topic("IgnorePartialFootholds");
@@ -179,6 +178,11 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<HeadTrajectoryMessage> HeadTrajectoryMessageTopic = topic("HeadTrajectoryMessageTopic");
    public static final Topic<NeckTrajectoryMessage> NeckTrajectoryMessageTopic = topic("NeckTrajectoryMessageTopic");
 
+   // Height map navigation
+   public static final Topic<Boolean> StartHeightMapNavigation = topic("StartHeightMapNavigation");
+   public static final Topic<Boolean> StopHeightMapNavigation = topic("StopHeightMapNavigation");
+   public static final Topic<PlanarRegionsList> GPUREARegions = topic("GPUREARegions");
+
    // Logging
    public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");
    public static final Topic<FootstepPlannerLogLoader.LoadRequestType> RequestLoadLog = topic("RequestLoadLog");
@@ -209,10 +213,6 @@ public class FootstepPlannerMessagerAPI
    // Test dashboard, only displayed if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");
    public static final Topic<DataSet> TestDataSetSelected = topic("TestDataSetSelected");
-
-   // Walking preview
-   public static final Topic<WalkingControllerPreviewInputMessage> RequestWalkingPreview = topic("RequestWalkingPreview");
-   public static final Topic<WalkingControllerPreviewOutputMessage> WalkingPreviewOutput = topic("WalkingPreviewOutput");
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 

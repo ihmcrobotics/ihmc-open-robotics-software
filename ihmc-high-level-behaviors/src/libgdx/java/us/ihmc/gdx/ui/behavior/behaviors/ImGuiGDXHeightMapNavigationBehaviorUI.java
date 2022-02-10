@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.behaviors.heightMapNavigation.HeightMapNavigationBehavior;
 import us.ihmc.behaviors.heightMapNavigation.HeightMapNavigationBehaviorAPI;
-import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
