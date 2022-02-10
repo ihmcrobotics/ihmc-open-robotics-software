@@ -14,6 +14,7 @@ public enum AtlasRobotVersion
    ATLAS_UNPLUGGED_V5_NO_FOREARMS,
    ATLAS_UNPLUGGED_V5_NO_HANDS,
    ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ,
+   ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ_BULLET,
    ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI,
    ATLAS_UNPLUGGED_V5_TROOPER;
 
@@ -50,6 +51,8 @@ public enum AtlasRobotVersion
       case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
       case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
          return "models/GFE/atlas_unplugged_v5_dual_robotiq.sdf";
+      case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ_BULLET:
+         return "models/GFE/atlas_unplugged_v5_dual_robotiq_bullet.sdf";
       case ATLAS_UNPLUGGED_V5_NO_FOREARMS:
          return "models/GFE/atlas_unplugged_v5_no_forearms.sdf";
       case ATLAS_UNPLUGGED_V5_TROOPER:
