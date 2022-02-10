@@ -190,8 +190,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
    public static final Topic<Triple<Map<GraphEdge<FootstepGraphNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>, List<VariableDescriptor>>> GraphData = topic("GraphData");
    public static final Topic<Triple<Map<GraphEdge<BodyPathLatticePoint>, AStarBodyPathEdgeData>, List<AStarBodyPathIterationData>, List<VariableDescriptor>>> BodyPathGraphData = topic("BodyPathGraphData");
-   public static final Topic<Pose3DReadOnly> BodyPathStartNode = topic("BodyPathStartNode");
-   public static final Topic<Pose3DReadOnly> BodyPathEndNode = topic("BodyPathEndNode");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StartOfSwingStepToVisualize = topic("StartOfSwingStepToVisualize");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StanceStepToVisualize = topic("StanceStepToVisualize");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> TouchdownStepToVisualize = topic("TouchdownStepToVisualize");
