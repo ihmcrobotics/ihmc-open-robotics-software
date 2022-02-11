@@ -16,6 +16,9 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -250,6 +253,9 @@ public class LookAndStepBodyPathPlanningTask
 
    private Pair<BodyPathPlanningResult, List<Pose3DReadOnly>> performTaskWithFlatGround()
    {
+      double proximityForTurning = 0.25;
+
+      // FIXME THIS IS TERRIBLE.
       // calculate and send body path plan
       FramePose3D leftFootPoseTemp = new FramePose3D();
       leftFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
@@ -260,8 +266,31 @@ public class LookAndStepBodyPathPlanningTask
       Pose3D start = new Pose3D();
       start.interpolate(leftFootPoseTemp, rightFootPoseTemp, 0.5);
 
+      Vector3D goalDirection = new Vector3D();
+      goalDirection.sub(goal.getPosition(), start.getPosition());
+      double goalDistance = goalDirection.length();
+
+      goalDirection.scale(proximityForTurning / goalDirection.length());
+      double heading = Math.atan2(goalDirection.getY(), goalDirection.getX());
+
+
+      Pose3D poseNearStart = new Pose3D();
+      poseNearStart.getPosition().set(start.getPosition());
+      poseNearStart.getPosition().add(goalDirection);
+      poseNearStart.getOrientation().setToYawOrientation(heading);
+
+      Pose3D poseNearGoal = new Pose3D();
+      poseNearGoal.getPosition().set(goal.getPosition());
+      poseNearGoal.getPosition().sub(goalDirection);
+      poseNearGoal.getOrientation().setToYawOrientation(heading);
+
       List<Pose3DReadOnly> waypoints = new ArrayList<>();
       waypoints.add(start);
+      if (goalDistance > 2.0 * proximityForTurning)
+      {
+         waypoints.add(poseNearStart);
+         waypoints.add(poseNearGoal);
+      }
       waypoints.add(goal);
 
       return new MutablePair<>(BodyPathPlanningResult.FOUND_SOLUTION, waypoints);
