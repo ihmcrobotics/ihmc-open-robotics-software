@@ -34,17 +34,21 @@ public class LookAndStepSteppingTask
    protected RobotWalkRequester robotWalkRequester;
    protected Runnable replanFootstepsOutput;
 
+
    protected FootstepPlan footstepPlan;
    protected ROS2SyncedRobotModel syncedRobot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected long previousStepMessageId = 0L;
    protected LookAndStepImminentStanceTracker imminentStanceTracker;
 
+   protected final Input footstepCompletedInput = new Input();
+
    public static class LookAndStepStepping extends LookAndStepSteppingTask
    {
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
       private BehaviorTaskSuppressor suppressor;
+
 
       public void initialize(LookAndStepBehavior lookAndStep)
       {
@@ -88,8 +92,15 @@ public class LookAndStepSteppingTask
          footstepPlanInput.set(footstepPlan);
       }
 
+      public void acceptFootstepCompleted()
+      {
+         footstepCompletedInput.set();
+      }
+
       private void evaluateAndRun()
       {
+         footstepCompletedInput.getNotification().poll(); // reset this
+
          footstepPlan = footstepPlanInput.getLatest();
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
@@ -155,9 +166,23 @@ public class LookAndStepSteppingTask
 
       double percentSwingToWait = lookAndStepParameters.getPercentSwingToWait();
       double waitDuration = swingDuration * percentSwingToWait;
-      statusLogger.info("Waiting {} s for {} % of swing...", waitDuration, percentSwingToWait);
+      statusLogger.info("Waiting {} s for {} % of swing...", waitDuration, (100.0 * percentSwingToWait));
+      double timeWaited = 0.0;
+
+      boolean stepCompletedEarly = false;
+      while (timeWaited < waitDuration)
+      {
+         ThreadTools.sleepSeconds(0.01);
+         timeWaited += 0.01;
+
+         if (footstepCompletedInput.getNotification().poll())
+         {
+            stepCompletedEarly = true;
+            break;
+         }
+      }
       ThreadTools.sleepSeconds(waitDuration);
-      statusLogger.info("{} % of swing complete!", percentSwingToWait);
+      statusLogger.info("{} % of swing complete! Step completed early = {}", timeWaited / swingDuration, stepCompletedEarly);
       replanFootstepsOutput.run();
    }
 
