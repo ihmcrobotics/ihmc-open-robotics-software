@@ -140,7 +140,7 @@ public class LookAndStepLocalizationTask
       uiPublisher.publishToUI(ClosestPointForUI, imminentPoseAlongPath);
 
       Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
-      double distanceToExactGoal = closestPointAlongPath.distanceXY(terminalGoal.getPosition());
+      double distanceToExactGoal = imminentMidFeetPose.getPosition().distanceXY(terminalGoal.getPosition());
       boolean reachedGoalZone = distanceToExactGoal < lookAndStepParameters.getGoalSatisfactionRadius();
       double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(imminentMidFeetPose.getYaw(), terminalGoal.getYaw()));
       reachedGoalZone &= yawToExactGoal < lookAndStepParameters.getGoalSatisfactionOrientationDelta();
