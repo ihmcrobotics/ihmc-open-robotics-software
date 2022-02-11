@@ -434,6 +434,7 @@ public class LookAndStepFootstepPlanningTask
             rejectionReasonsMessage.add(MutablePair.of(reason.ordinal(), MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
          }
          uiPublisher.publishToUI(FootstepPlannerRejectionReasons, rejectionReasonsMessage);
+         uiPublisher.publishToUI(PlanningFailed, true);
 
          doFailureAction("Footstep planning failure. Aborting task...");
       }
