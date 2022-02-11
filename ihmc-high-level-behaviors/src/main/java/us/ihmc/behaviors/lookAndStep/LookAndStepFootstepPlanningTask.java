@@ -138,7 +138,7 @@ public class LookAndStepFootstepPlanningTask
 
          localizationResultInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
          planarRegionsManager.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
-         footstepCompletedInput.addCallback(() -> executor.clearQueueAndExecute(this::evaluateAndRun));
+         footstepCompletedInput.addCallback(() -> executor.clearQueueAndExecute(this::evaluateAndRun)); // FIXME should this be interrupt and execute?
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
@@ -393,7 +393,7 @@ public class LookAndStepFootstepPlanningTask
       // TODO: only set square up steps at the end
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(combinedRegionsForPlanning);
-      footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeout());
+      footstepPlannerRequest.setTimeout(/*Math.max(lookAndStepParameters.getFootstepPlannerTimeout(), */lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration());
       footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
       footstepPlannerRequest.setSnapGoalSteps(true);
 
