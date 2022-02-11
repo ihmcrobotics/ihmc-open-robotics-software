@@ -461,4 +461,9 @@ public class GDXEnvironmentObject
    {
       return realisticModelInstance;
    }
+
+   public ReferenceFrame getBulletCollisionSpecificationFrame()
+   {
+      return bulletCollisionSpecificationFrame;
+   }
 }
