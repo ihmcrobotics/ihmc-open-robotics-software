@@ -33,6 +33,7 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -197,14 +198,22 @@ public class GDXEnvironmentObject
       this.collisionGeometryObject = collisionGeometryObject;
       isPointInside = collisionGeometryObject::isPointInside;
 
-      if (collisionMesh == null && collisionGeometryObject instanceof Box3D)
+      if (collisionMesh == null)
       {
-         Box3D box3D = (Box3D) collisionGeometryObject;
          setCollisionModel(meshBuilder ->
          {
             Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
-            meshBuilder.addBox((float) box3D.getSizeX(), (float) box3D.getSizeY(), (float) box3D.getSizeZ(), color);
-            meshBuilder.addMultiLineBox(box3D.getVertices(), 0.01, color); // so we can see it better
+            if (collisionGeometryObject instanceof Box3D)
+            {
+               Box3D box3D = (Box3D) collisionGeometryObject;
+               meshBuilder.addBox((float) box3D.getSizeX(), (float) box3D.getSizeY(), (float) box3D.getSizeZ(), color);
+               meshBuilder.addMultiLineBox(box3D.getVertices(), 0.01, color); // so we can see it better
+            }
+            else if (collisionGeometryObject instanceof Sphere3D)
+            {
+               Sphere3D sphere3D = (Sphere3D) collisionGeometryObject;
+               meshBuilder.addSphere((float) sphere3D.getRadius(), color);
+            }
          });
       }
    }
@@ -348,7 +357,18 @@ public class GDXEnvironmentObject
 
       placementFramePose.setFromReferenceFrame(collisionModelFrame);
       GDXTools.toGDX(placementFramePose, tempTransform, collisionModelInstance.transform);
-      collisionGeometryObject.getPose().set(placementFramePose);
+      if (collisionGeometryObject.getPose() == null)
+      {
+         if (collisionGeometryObject instanceof Sphere3D)
+         {
+            Sphere3D sphere = (Sphere3D) collisionGeometryObject;
+            sphere.getPosition().set(placementFramePose.getPosition());
+         }
+      }
+      else
+      {
+         collisionGeometryObject.getPose().set(placementFramePose);
+      }
       boundingSphere.getPosition().set(placementFramePose.getPosition());
    }
 
