@@ -66,7 +66,10 @@ public class KinematicsToolboxOutputConverter
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
 
-      neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
+      if (head == null)
+         neckJoints = new OneDoFJointBasics[0];
+      else
+         neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -238,6 +241,7 @@ public class KinematicsToolboxOutputConverter
    {
       computePelvisTrajectoryMessage(worldFrame);
    }
+
    public void computePelvisTrajectoryMessage(ReferenceFrame trajectoryFrame)
    {
       checkIfDataHasBeenSet();
