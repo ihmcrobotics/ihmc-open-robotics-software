@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 public class HeuristicICPControllerHelper
 {
 
-   public static double computeAdjustmentDistance(double adjustedICP, double firstIntersection, double secondIntersection, double firstPerfect, double secondPerfect, double minICPPushDelta)
+   public static double computeAdjustmentDistance(double adjustedICP, double firstIntersection, double secondIntersection, double firstPerfect, double secondPerfect, double minICPPushDelta, double maxProjectionInside)
    {
       double firstBoundary = firstPerfect;
       double secondBoundary = secondPerfect;
