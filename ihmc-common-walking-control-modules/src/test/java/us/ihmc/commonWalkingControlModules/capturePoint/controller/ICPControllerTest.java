@@ -55,7 +55,7 @@ public class ICPControllerTest
    private static final double stanceWidth = 0.35;
 
    private static boolean visualize = false;
-   private static boolean testHeuristicController = false;
+   private static boolean testHeuristicController = !false;
 
    @BeforeEach
    public void setup()
@@ -104,10 +104,14 @@ public class ICPControllerTest
       ICPControllerTest test = new ICPControllerTest();
       //      test.visualizeRandom();
 //      test.visualizeCasesOfInterest();
-      test.visualizeOverGridWithNoProjection();
+      
+      double footLength = 0.25;
+      double footWidth = 0.1;
+      double stanceWidth = 0.35;
+      test.visualizeOverGrid(footLength, footWidth, stanceWidth);
    }
 
-   public void visualizeOverGridWithNoProjection() throws Exception
+   public void visualizeOverGrid(double footLength, double footWidth, double stanceWidth) throws Exception
    {
       YoRegistry registry = new YoRegistry("ICPControllerTest");
       double kpParallel = 1.0;
@@ -115,11 +119,7 @@ public class ICPControllerTest
       TestICPOptimizationParameters optimizationParameters = createTestICPOptimizationParameters(kpParallel, kpOrthogonal);
 
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
-      
-      double footLength = 10.25;
-      double footWidth = 10.1;
-      double stanceWidth = 0.35;
-      
+
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, footWidth, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
