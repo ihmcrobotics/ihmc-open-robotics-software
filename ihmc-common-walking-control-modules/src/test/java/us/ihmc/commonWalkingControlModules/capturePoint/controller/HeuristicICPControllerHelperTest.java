@@ -294,6 +294,183 @@ class HeuristicICPControllerHelperTest
    }
 
    @Test
+   void testMaximumProjectionInsideAsMaxProjectionInsideIncreases()
+   {
+      double adjustedICP = 0.5;
+      double firstIntersection = 0.1;
+      double secondIntersection = 0.4;
+      double firstPerfect = firstIntersection;
+      double secondPerfect = secondIntersection;
+      double minICPPushDelta = 0.05;
+      double maxProjectionInside = 0.1;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
+
+      double expectedAdjustment = 0.2;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      maxProjectionInside = 0.2;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
+
+      expectedAdjustment = 0.25;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      for (int i = 0; i < 100; i++)
+      {
+         maxProjectionInside += 0.01;
+
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
+         assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+      }
+      
+      adjustedICP = 0.3;
+      firstIntersection = 0.1;
+      secondIntersection = 0.4;
+      firstPerfect = firstIntersection;
+      secondPerfect = secondIntersection;
+      minICPPushDelta = 0.1;
+      maxProjectionInside = 0.05;
+
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
+
+      expectedAdjustment = 0.15;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+      
+   }
+   
+   @Test
+   void testMaximumProjectionInsideTrickyOne()
+   {
+      double copShift = 0.21;
+      
+      double adjustedICP = 0.5 - copShift;
+      double firstIntersection = 0.1 - copShift;
+      double secondIntersection = 0.4 - copShift;
+      double firstPerfect = firstIntersection;
+      double secondPerfect = secondIntersection;
+      double minICPPushDelta = 0.05;
+      double maxProjectionInside = 0.1;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
+
+      double expectedAdjustment = 0.0;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+   }
+   
+   @Test
+   void testMaximumProjectionInsideTrickyTwo()
+   {      
+      double adjustedICP = 0.2;
+      double firstIntersection = -0.2;
+      double secondIntersection = 0.3;
+      double firstPerfect = firstIntersection;
+      double secondPerfect = secondIntersection;
+      double minICPPushDelta = 0.1;
+      double maxProjectionInside = 0.1;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
+
+      double expectedAdjustment = 0.0;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+   }
+   
+   @Test
+   void testMaximumProjectionInsideTrickyThree()
+   {      
+      double adjustedICP = 0.05;
+      double firstIntersection = -0.1;
+      double secondIntersection = 0.3;
+      double firstPerfect = firstIntersection;
+      double secondPerfect = secondIntersection;
+      double minICPPushDelta = 0.02;
+      double maxProjectionInside = 0.0;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
+
+      double expectedAdjustment = 0.0;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+   }
+   
+   @Test
+   void testMaximumProjectionInsideAsCoPShiftsForward()
+   {
+      double adjustedICP = 0.5;
+      double firstIntersection = 0.1;
+      double secondIntersection = 0.4;
+      double firstPerfect = firstIntersection;
+      double secondPerfect = secondIntersection;
+      double minICPPushDelta = 0.05;
+      double maxProjectionInside = 0.1;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
+
+      double expectedAdjustment = firstIntersection + maxProjectionInside;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      for (int i = 0; i < 20; i++)
+      {
+         adjustedICP -=0.01;
+         firstIntersection -=0.01;
+         secondIntersection -=0.01;
+         firstPerfect = firstIntersection;
+         secondPerfect = secondIntersection;
+         expectedAdjustment = firstIntersection + maxProjectionInside;
+
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
+         assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+      }
+      
+      for (int i = 0; i < 20; i++)
+      {
+         adjustedICP -=0.01;
+         firstIntersection -=0.01;
+         secondIntersection -=0.01;
+         firstPerfect = firstIntersection;
+         secondPerfect = secondIntersection;
+         expectedAdjustment = 0.0;
+
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
+         assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+      }
+   }
+
+   @Test
    void testRandom()
    {
       Random random = new Random(1776L);

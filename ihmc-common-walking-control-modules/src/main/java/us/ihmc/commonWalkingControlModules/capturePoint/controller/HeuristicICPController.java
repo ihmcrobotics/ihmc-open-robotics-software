@@ -137,7 +137,7 @@ public class HeuristicICPController implements ICPControllerInterface
    {
       pureFeedbackThreshError.set(0.2);
       minICPPushDelta.set(0.03);
-      maxProjectionInside.set(Double.POSITIVE_INFINITY);
+      maxProjectionInside.set(0.05);
 
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
