@@ -1,19 +1,15 @@
 package us.ihmc.exampleSimulations.lipmWalker;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.exampleSimulations.springflamingo.SpringFlamingoController;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,6 +18,9 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 {
    private final LIPMWalkerRobot robot;
    private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   private YoDouble t;
+
    private final YoDouble kpKnee = new YoDouble("kpKnee", registry);
    private final YoDouble kdKnee = new YoDouble("kdKnee", registry);
    private final YoDouble kpHip = new YoDouble("kpHip", registry);
@@ -37,6 +36,9 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
    private final YoDouble comHeight = new YoDouble("comHeight", registry);
 
+   private final YoDouble comXVelocity = new YoDouble("comXVelocity", registry);
+   private final YoDouble comXPositionFromFoot = new YoDouble("comXPositionFromFoot", registry);
+
    private final SideDependentList<YoDouble> desiredKneeLengths = new SideDependentList<YoDouble>(q_d_leftKnee, q_d_rightKnee);
    private final SideDependentList<YoDouble> desiredHipAngles = new SideDependentList<YoDouble>(q_d_leftHip, q_d_rightHip);
    private final SideDependentList<YoDouble> worldHipAngles = new SideDependentList<YoDouble>(q_leftHipWorld, q_rightHipWorld);
@@ -45,8 +47,11 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
    private final YoDouble orbitalEnergy = new YoDouble("orbitalEnergy", registry);
 
+   private final YoDouble strideLength = new YoDouble("strideLength", registry);
+
    private final YoDouble hipDiffAngle = new YoDouble("hipDiffAngle", registry);
 
+   private double timeOfLastFootSwitch = 0.0;
 
    private enum States
    {
@@ -55,11 +60,14 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
    private final SideDependentList<StateMachine<States, State>> stateMachines;
 
-   private final double g  = 9.81;
+   private final double g = 9.81;
 
    public LIPMWalkerControllerBhavyansh(LIPMWalkerRobot robot)
    {
       this.robot = robot;
+
+      t = (YoDouble) robot.getRobot().findVariable("t");
+
       initialize();
 
       stateMachines = setupStateMachines();
@@ -68,14 +76,15 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
    @Override
    public void initialize()
    {
+
       kpKnee.set(1000.0);
       kdKnee.set(100.0);
 
       kpHip.set(971.25);
       kdHip.set(80.0);
 
-      q_d_leftKnee.set(1.0);
-      q_d_rightKnee.set(1.0);
+      q_d_leftKnee.set(0.8);
+      q_d_rightKnee.set(0.7);
 
       q_d_leftHip.set(0.0);
       q_d_rightHip.set(0.0);
@@ -92,13 +101,11 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
    @Override
    public void doControl()
    {
-      for(RobotSide robotSide : RobotSide.values())
+      for (RobotSide robotSide : RobotSide.values())
       {
          stateMachines.get(robotSide).doAction();
          stateMachines.get(robotSide).doTransitions();
       }
-
-      LogTools.info("StateMachine: Left:{} Right:{}", stateMachines.get(RobotSide.LEFT).getCurrentStateKey(), stateMachines.get(RobotSide.RIGHT).getCurrentStateKey());
    }
 
    private void controlSupportLeg(RobotSide side)
@@ -113,7 +120,11 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       double mass = robot.getMass();
 
       /* Compute and set orbital energy YoDouble. Based on virtual spring-mass system. */
-      double orbitalEnergyValue = 0.5 * mass * centerOfMassVelocity.lengthSquared() - 0.5 * g / desiredHeight.getDoubleValue() * centerOfMassPosition.distanceFromOriginSquared();
+      comXVelocity.set(robot.getCenterOfMassVelocity().getX());
+      comXPositionFromFoot.set(robot.getCenterOfMassXDistanceFromSupportFoot());
+
+      double orbitalEnergyValue = 0.5 * comXVelocity.getValue() * comXVelocity.getValue()
+                                  - 0.5 * g / desiredHeight.getDoubleValue() * comXPositionFromFoot.getValue() * comXPositionFromFoot.getValue();
       orbitalEnergy.set(orbitalEnergyValue);
 
       comHeight.set(centerOfMassPosition.getZ());
@@ -141,23 +152,23 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
       double desiredKneeLength = EuclidCoreTools.squareRoot(footLocation.lengthSquared() / 4 + desiredHeight.getValue() * desiredHeight.getValue());
 
-//      desiredHipAngle = - EuclidCoreTools.atan2(footLocation.length() / 2, desiredHeight.getValue());
-      desiredHipAngle = -1.0;
+      desiredHipAngle = -EuclidCoreTools.atan2(footLocation.length() / 2, desiredHeight.getValue());
+      //      desiredHipAngle = -0.3;
 
-      /* Compute knee force. */
+      /* +++++++++++++++++++++++++++++++++++ Compute and set knee force. ++++++++++++++++++++++++++++++++++++++++++++++*/
       kneeLength = robot.getKneeLength(side);
       kneeVelocity = robot.getKneeVelocity(side);
 
-      if(hipAngle > -0.05)
-         desiredKneeLength = 0.70;
-      else if(hipAngle < -0.1)
-         desiredKneeLength = 1.0425;
+      if (StrictMath.abs(desiredHipAngle - hipAngle) < 0.01)
+         desiredKneeLength = EuclidCoreTools.squareRoot(footLocation.lengthSquared() / 4 + desiredHeight.getValue() * desiredHeight.getValue()) + 0.1;
+      else
+         desiredKneeLength = 0.7;
+      ;
 
-
-      feedBackKneeForce = 10 * (desiredKneeLength - kneeLength) + 5 * (0.0 - kneeVelocity);
+      feedBackKneeForce = 1000 * (desiredKneeLength - kneeLength) + 100 * (0.0 - kneeVelocity);
       robot.setKneeForce(side, feedBackKneeForce);
 
-      /* Compute hip torque. */
+      //      /* +++++++++++++++++++++++++++++++++++ Compute and set hip torque. ++++++++++++++++++++++++++++++++++++++++++++*/
       desiredHipAngles.get(side).set(desiredHipAngle);
       double feedBackHipTorque = kpHip.getValue() * (desiredHipAngle - hipAngle) + kdHip.getValue() * (0.0 - hipVelocity);
       robot.setHipTorque(side, feedBackHipTorque);
@@ -165,7 +176,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
    Vector3DReadOnly calculateStepLocation()
    {
-      Vector3DReadOnly footLocation = new Vector3D(1.0, 0.0, 0.0);
+      Vector3DReadOnly footLocation = new Vector3D(0.6, 0.0, 0.0);
       return footLocation;
    }
 
@@ -177,13 +188,13 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
       leftFactory.setNamePrefix("leftState");
       rightFactory.setNamePrefix("rightState");
-      
+
       leftFactory.setRegistry(registry);
       rightFactory.setRegistry(registry);
-      
+
       leftFactory.buildClock(robot.getRobot().getYoTime());
       rightFactory.buildClock(robot.getRobot().getYoTime());
- 
+
       // Left State Transitions:
       leftFactory.addTransition(States.SUPPORT, States.SWING, new HeelOffGroundCondition(RobotSide.LEFT));
       leftFactory.addTransition(States.SWING, States.SUPPORT, new HeelOnGroundCondition(RobotSide.LEFT));
@@ -273,7 +284,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         return robot.getKneeForce(robotSide) < 10.0 && worldHipAngles.get(robotSide).getValue() > 0.1;
+         return robot.getFootSwitch(robotSide.getOppositeSide()) && (t.getValue() - timeOfLastFootSwitch > 0.1);
       }
    }
 
@@ -289,9 +300,13 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         LogTools.info("Side: {} getKneeForce(): {}", robotSide, robot.getKneeForce(robotSide));
-         return robot.getKneeForce(robotSide) > 0.0 && worldHipAngles.get(robotSide).getValue() < -0.1;
+         double timeDiff = t.getValue() - timeOfLastFootSwitch;
+         boolean fs = robot.getFootSwitch(robotSide) && timeDiff > 0.1;
+         if (fs)
+         {
+            timeOfLastFootSwitch = t.getValue();
+         }
+         return fs;
       }
    }
-
 }
