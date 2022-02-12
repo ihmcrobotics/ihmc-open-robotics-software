@@ -21,7 +21,15 @@ class HeuristicICPControllerHelperTest
       double firstPerfect = -0.1;
       double secondPerfect = 0.1;
       double minICPPushDelta = 0.1;
-      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      double maxProjectionInside = Double.POSITIVE_INFINITY;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
 
       assertEquals(copAdjustment, 0.0, 1e-7);
    }
@@ -35,7 +43,15 @@ class HeuristicICPControllerHelperTest
       double firstPerfect = 0.2;
       double secondPerfect = 0.3;
       double minICPPushDelta = 0.1;
-      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      double maxProjectionInside = Double.POSITIVE_INFINITY;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
 
       double expectedAdjustment = 0.25;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
@@ -51,7 +67,7 @@ class HeuristicICPControllerHelperTest
          secondIntersection -= shiftTowardICP;
          firstPerfect -= shiftTowardICP;
          secondPerfect -= shiftTowardICP;
-         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
          expectedAdjustment -= shiftTowardICP;
          assertEquals(expectedAdjustment, copAdjustment, 1e-7);
@@ -70,7 +86,15 @@ class HeuristicICPControllerHelperTest
       double firstPerfect = 0.2;
       double secondPerfect = 0.3;
       double minICPPushDelta = 0.0;
-      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      double maxProjectionInside = Double.POSITIVE_INFINITY;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
 
       double expectedAdjustment = 0.25;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
@@ -81,7 +105,7 @@ class HeuristicICPControllerHelperTest
       for (int i = 0; i < 25; i++)
       {
          minICPPushDelta += increaseMinICPPushDelta;
-         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
          assertEquals(expectedAdjustment, copAdjustment, 1e-7);
       }
@@ -90,7 +114,7 @@ class HeuristicICPControllerHelperTest
       for (int i = 0; i < 15; i++)
       {
          minICPPushDelta += increaseMinICPPushDelta;
-         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
          expectedAdjustment -= increaseMinICPPushDelta;
          assertEquals(expectedAdjustment, copAdjustment, 1e-7);
@@ -100,7 +124,7 @@ class HeuristicICPControllerHelperTest
       for (int i = 0; i < 25; i++)
       {
          minICPPushDelta += increaseMinICPPushDelta;
-         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
          expectedAdjustment = firstIntersection;
          assertEquals(expectedAdjustment, copAdjustment, 1e-7);
@@ -116,11 +140,18 @@ class HeuristicICPControllerHelperTest
       double firstPerfect = -0.05;
       double secondPerfect = 0.3;
       double minICPPushDelta = 1.0;
-      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      double maxProjectionInside = Double.POSITIVE_INFINITY;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
 
       double expectedAdjustment = 0.0;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
-
    }
 
    @Test
@@ -132,7 +163,15 @@ class HeuristicICPControllerHelperTest
       double firstPerfect = 0.3;
       double secondPerfect = 0.4;
       double minICPPushDelta = 0.15;
-      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      double maxProjectionInside = Double.POSITIVE_INFINITY;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
 
       double expectedAdjustment = 0.2;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
@@ -141,7 +180,7 @@ class HeuristicICPControllerHelperTest
       {
          adjustedICP -= 0.01;
 
-         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
          assertEquals(expectedAdjustment, copAdjustment, 1e-7);
       }
    }
@@ -155,28 +194,36 @@ class HeuristicICPControllerHelperTest
       double firstPerfect = 0.15;
       double secondPerfect = 0.2;
       double minICPPushDelta = 0.1;
-      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      double maxProjectionInside = Double.POSITIVE_INFINITY;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
 
       double expectedAdjustment = 0.2;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       firstPerfect = 0.3;
       secondPerfect = 0.35;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
       expectedAdjustment = 0.3;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       firstPerfect = 0.1;
       secondPerfect = 0.15;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
       expectedAdjustment = 0.15;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       firstPerfect = 0.05;
       secondPerfect = 0.1;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
       expectedAdjustment = 0.1;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
@@ -191,7 +238,15 @@ class HeuristicICPControllerHelperTest
       double firstPerfect = 0.05;
       double secondPerfect = 0.1;
       double minICPPushDelta = 0.01;
-      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      double maxProjectionInside = Double.POSITIVE_INFINITY;
+
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
 
       double expectedAdjustment = 0.1;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
@@ -201,7 +256,7 @@ class HeuristicICPControllerHelperTest
          firstPerfect -= 0.01;
          secondPerfect -= 0.01;
 
-         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
          assertEquals(expectedAdjustment, copAdjustment, 1e-7);
       }
 
@@ -211,7 +266,7 @@ class HeuristicICPControllerHelperTest
       firstPerfect = 0.3;
       secondPerfect = 0.35;
       minICPPushDelta = 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
       expectedAdjustment = 0.3;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
@@ -223,7 +278,7 @@ class HeuristicICPControllerHelperTest
 
          expectedAdjustment += 0.01;
 
-         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
          assertEquals(expectedAdjustment, copAdjustment, 1e-7);
       }
 
@@ -232,7 +287,7 @@ class HeuristicICPControllerHelperTest
          firstPerfect += 0.01;
          secondPerfect += 0.01;
 
-         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+         copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
          assertEquals(expectedAdjustment, copAdjustment, 1e-7);
       }
 
@@ -254,7 +309,15 @@ class HeuristicICPControllerHelperTest
          double firstPerfect = randomInInterval(random, -0.5, 0.5);
          double secondPerfect = firstPerfect + 0.01 + 0.5 * random.nextDouble();
          double minICPPushDelta = 0.01 + 0.50 * random.nextDouble();
-         double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+         double maxProjectionInside = Double.POSITIVE_INFINITY;
+
+         double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                       firstIntersection,
+                                                                                       secondIntersection,
+                                                                                       firstPerfect,
+                                                                                       secondPerfect,
+                                                                                       minICPPushDelta,
+                                                                                       maxProjectionInside);
 
          assertTrue(copAdjustment >= firstIntersection);
          assertTrue(copAdjustment <= secondIntersection);
@@ -282,13 +345,20 @@ class HeuristicICPControllerHelperTest
       double firstPerfect = firstIntersection;
       double secondPerfect = secondIntersection;
       double minICPPushDelta = 0.0;
-      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      double maxProjectionInside = Double.POSITIVE_INFINITY;
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP,
+                                                                                    firstIntersection,
+                                                                                    secondIntersection,
+                                                                                    firstPerfect,
+                                                                                    secondPerfect,
+                                                                                    minICPPushDelta,
+                                                                                    maxProjectionInside);
 
       double expectedAdjustment = firstIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = 1.2;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
@@ -300,19 +370,19 @@ class HeuristicICPControllerHelperTest
       secondPerfect = secondIntersection;
 
       minICPPushDelta = 0.05;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
       expectedAdjustment = adjustedICP - minICPPushDelta;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = 0.2;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
       expectedAdjustment = firstIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = 1.2;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
       expectedAdjustment = firstIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
@@ -328,23 +398,23 @@ class HeuristicICPControllerHelperTest
       double midPoint = 0.5 * (firstIntersection + secondIntersection);
 
       minICPPushDelta = 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
 
       expectedAdjustment = midPoint;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - midPoint + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = adjustedICP - minICPPushDelta;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - 0.05;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = firstIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP + 0.05;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = firstIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
@@ -358,27 +428,27 @@ class HeuristicICPControllerHelperTest
       midPoint = 0.5 * (firstIntersection + secondIntersection);
 
       minICPPushDelta = 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = midPoint;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - secondIntersection + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = midPoint;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - midPoint + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = adjustedICP - minICPPushDelta;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - firstIntersection + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = firstIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = firstIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
@@ -394,27 +464,27 @@ class HeuristicICPControllerHelperTest
       midPoint = 0.5 * (firstIntersection + secondIntersection);
 
       minICPPushDelta = 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = midPoint;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - secondIntersection + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = midPoint;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - midPoint + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = adjustedICP - minICPPushDelta;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = 0.0;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - firstIntersection + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = 0.0;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
@@ -423,7 +493,7 @@ class HeuristicICPControllerHelperTest
       // First intersection and midpoint are behind unprojected CoP. Second intersection is in front of CoP.
       // minICPPushDelta is important to consider. 
       // Move as close to the midpoint as allowed, considering the minICPPushDelta
-      
+
       // Or: Don't move at all!!??
 
       firstIntersection = -0.5;
@@ -434,27 +504,27 @@ class HeuristicICPControllerHelperTest
       midPoint = 0.5 * (firstIntersection + secondIntersection);
 
       minICPPushDelta = 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = 0.0; //midPoint;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - secondIntersection + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = 0.0; //midPoint;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = 0.0; //midPoint;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - midPoint + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = 0.0;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - firstIntersection + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = 0.0;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
@@ -472,27 +542,27 @@ class HeuristicICPControllerHelperTest
       midPoint = 0.5 * (firstIntersection + secondIntersection);
 
       minICPPushDelta = 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = secondIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = secondIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - secondIntersection + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = secondIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - midPoint + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = secondIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
 
       minICPPushDelta = adjustedICP - firstIntersection + 0.01;
-      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta, maxProjectionInside);
       expectedAdjustment = secondIntersection;
       assertEquals(expectedAdjustment, copAdjustment, 1e-7);
    }

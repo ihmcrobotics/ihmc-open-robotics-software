@@ -47,6 +47,7 @@ public class HeuristicICPController implements ICPControllerInterface
    private final YoDouble firstPerfect = new YoDouble(yoNamePrefix + "FirstPerfect", registry);
    private final YoDouble secondPerfect = new YoDouble(yoNamePrefix + "SecondPerfect", registry);
    private final YoDouble minICPPushDelta = new YoDouble(yoNamePrefix + "MinICPPushDelta", registry);
+   private final YoDouble maxProjectionInside = new YoDouble(yoNamePrefix + "MaxProjectionInside", registry);
    private final YoDouble adjustmentDistance = new YoDouble(yoNamePrefix + "AdjustmentDistance", registry);
 
    private final BooleanProvider useCMPFeedback;
@@ -136,6 +137,7 @@ public class HeuristicICPController implements ICPControllerInterface
    {
       pureFeedbackThreshError.set(0.2);
       minICPPushDelta.set(0.03);
+      maxProjectionInside.set(Double.POSITIVE_INFINITY);
 
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
@@ -350,6 +352,8 @@ public class HeuristicICPController implements ICPControllerInterface
          secondProjectionIntersection.set(tempVector);
       }
 
+      //TODO: Decide whether or not to use the perfect points in the projection.
+      //TODO: Right now we are just setting them to the intersections.
       firstPerfect.set(firstIntersection.getValue());
       secondPerfect.set(secondIntersection.getValue());
 
@@ -366,7 +370,8 @@ public class HeuristicICPController implements ICPControllerInterface
                                                                                     secondIntersection.getValue(),
                                                                                     firstPerfect.getValue(),
                                                                                     secondPerfect.getValue(),
-                                                                                    minICPPushDelta.getValue()));
+                                                                                    minICPPushDelta.getValue(),
+                                                                                    maxProjectionInside.getValue()));
 
       tempVector.set(projectionVector);
       tempVector.scale(adjustmentDistance.getValue());
