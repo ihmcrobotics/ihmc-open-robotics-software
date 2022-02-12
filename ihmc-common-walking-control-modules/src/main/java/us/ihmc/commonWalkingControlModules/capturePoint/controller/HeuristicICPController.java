@@ -332,11 +332,11 @@ public class HeuristicICPController implements ICPControllerInterface
       }
 
       tempVector.set(firstProjectionIntersection);
-      tempVector.sub(unconstrainedFeedbackCMP);
+      tempVector.sub(unconstrainedFeedbackCoP);
       firstIntersection.set(tempVector.dot(projectionVector));
 
       tempVector.set(secondProjectionIntersection);
-      tempVector.sub(unconstrainedFeedbackCMP);
+      tempVector.sub(unconstrainedFeedbackCoP);
       secondIntersection.set(tempVector.dot(projectionVector));
 
       if (firstIntersection.getValue() > secondIntersection.getValue())
@@ -344,6 +344,10 @@ public class HeuristicICPController implements ICPControllerInterface
          double temp = firstIntersection.getValue();
          firstIntersection.set(secondIntersection.getValue());
          secondIntersection.set(temp);
+         
+         tempVector.set(firstProjectionIntersection);
+         firstProjectionIntersection.set(secondProjectionIntersection);
+         secondProjectionIntersection.set(tempVector);
       }
 
       firstPerfect.set(firstIntersection.getValue());
