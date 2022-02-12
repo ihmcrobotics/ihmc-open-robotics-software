@@ -108,6 +108,22 @@ class HeuristicICPControllerHelperTest
    }
 
    @Test
+   void testDoNotMoveWhenMinICPPushDeltaIsLarge()
+   {
+      double adjustedICP = 0.05;
+      double firstIntersection = -0.05;
+      double secondIntersection = 0.3;
+      double firstPerfect = -0.05;
+      double secondPerfect = 0.3;
+      double minICPPushDelta = 1.0;
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+
+      double expectedAdjustment = 0.0;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+   }
+
+   @Test
    void testPushingBackwardSoJustGoOnEdge()
    {
       double adjustedICP = 0.35;
@@ -254,6 +270,231 @@ class HeuristicICPControllerHelperTest
    private double randomInInterval(Random random, double first, double second)
    {
       return first + (second - first) * random.nextDouble();
+   }
+
+   @Test
+   void testTheTwentyNineCombosIgnoringPerfect()
+   {
+      // First intersection is in front of ICP. Gotta push backward. Best is stay on that edge. Does not matter what minICPPushDelta is...
+      double adjustedICP = 1.0;
+      double firstIntersection = 1.1;
+      double secondIntersection = 1.2;
+      double firstPerfect = firstIntersection;
+      double secondPerfect = secondIntersection;
+      double minICPPushDelta = 0.0;
+      double copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+
+      double expectedAdjustment = firstIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = 1.2;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      // First intersection is behind ICP. Midpoint is in front of ICP. minICPPushDelta is important to consider. 
+      // Move as close to the ICP as allowed, considering both the first intersection and the minICPPushDelta
+      firstIntersection = 0.9;
+      secondIntersection = 1.3;
+      firstPerfect = firstIntersection;
+      secondPerfect = secondIntersection;
+
+      minICPPushDelta = 0.05;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+
+      expectedAdjustment = adjustedICP - minICPPushDelta;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = 0.2;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+
+      expectedAdjustment = firstIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = 1.2;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+
+      expectedAdjustment = firstIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      // First intersection is behind ICP. Midpoint is now behind ICP. minICPPushDelta is important to consider. 
+      // Move as close to the midpoint as allowed, considering both the first intersection and the minICPPushDelta
+
+      firstIntersection = 0.7;
+      secondIntersection = 1.1;
+      firstPerfect = firstIntersection;
+      secondPerfect = secondIntersection;
+
+      double midPoint = 0.5 * (firstIntersection + secondIntersection);
+
+      minICPPushDelta = 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+
+      expectedAdjustment = midPoint;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - midPoint + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = adjustedICP - minICPPushDelta;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - 0.05;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = firstIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP + 0.05;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = firstIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      // Both intersections and midpoint are behind ICP. minICPPushDelta is important to consider. 
+      // Move as close to the midpoint as allowed, considering both the first intersection and the minICPPushDelta
+      firstIntersection = 0.4;
+      secondIntersection = 0.8;
+      firstPerfect = firstIntersection;
+      secondPerfect = secondIntersection;
+
+      midPoint = 0.5 * (firstIntersection + secondIntersection);
+
+      minICPPushDelta = 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = midPoint;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - secondIntersection + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = midPoint;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - midPoint + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = adjustedICP - minICPPushDelta;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - firstIntersection + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = firstIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = firstIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      // First intersection is behind unprojected CoP. Second intersection and midpoint are in front of CoP.
+      // minICPPushDelta is important to consider. 
+      // Move as close to the midpoint as allowed, considering the minICPPushDelta
+
+      firstIntersection = -0.1;
+      secondIntersection = 0.5;
+      firstPerfect = firstIntersection;
+      secondPerfect = secondIntersection;
+
+      midPoint = 0.5 * (firstIntersection + secondIntersection);
+
+      minICPPushDelta = 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = midPoint;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - secondIntersection + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = midPoint;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - midPoint + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = adjustedICP - minICPPushDelta;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = 0.0;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - firstIntersection + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = 0.0;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      //TODO: Not sure if this is the behavior we want! This will speed things up a lot, which reduces robustness...
+
+      // First intersection and midpoint are behind unprojected CoP. Second intersection is in front of CoP.
+      // minICPPushDelta is important to consider. 
+      // Move as close to the midpoint as allowed, considering the minICPPushDelta
+      
+      // Or: Don't move at all!!??
+
+      firstIntersection = -0.5;
+      secondIntersection = 0.1;
+      firstPerfect = firstIntersection;
+      secondPerfect = secondIntersection;
+
+      midPoint = 0.5 * (firstIntersection + secondIntersection);
+
+      minICPPushDelta = 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = 0.0; //midPoint;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - secondIntersection + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = 0.0; //midPoint;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = 0.0; //midPoint;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - midPoint + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = 0.0;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - firstIntersection + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = 0.0;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      //    TODO: Not sure if this is the behavior we want! This will speed things up a lot, which reduces robustness...
+
+      // Both intersections and midpoint are behind unprojected CoP.
+      // minICPPushDelta is important to consider. 
+      // Move as close to the midpoint as allowed, considering the minICPPushDelta
+
+      firstIntersection = -0.8;
+      secondIntersection = -0.2;
+      firstPerfect = firstIntersection;
+      secondPerfect = secondIntersection;
+
+      midPoint = 0.5 * (firstIntersection + secondIntersection);
+
+      minICPPushDelta = 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = secondIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = secondIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - secondIntersection + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = secondIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - midPoint + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = secondIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
+
+      minICPPushDelta = adjustedICP - firstIntersection + 0.01;
+      copAdjustment = HeuristicICPControllerHelper.computeAdjustmentDistance(adjustedICP, firstIntersection, secondIntersection, firstPerfect, secondPerfect, minICPPushDelta);
+      expectedAdjustment = secondIntersection;
+      assertEquals(expectedAdjustment, copAdjustment, 1e-7);
    }
 
    public static void main(String[] args)
