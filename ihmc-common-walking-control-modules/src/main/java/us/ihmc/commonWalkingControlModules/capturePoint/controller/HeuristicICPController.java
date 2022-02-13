@@ -136,8 +136,8 @@ public class HeuristicICPController implements ICPControllerInterface
                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       pureFeedbackThreshError.set(0.06);
-      minICPPushDelta.set(0.03);
-      maxProjectionInside.set(0.05);
+      minICPPushDelta.set(0.05);
+      maxProjectionInside.set(0.04);
 
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
