@@ -351,11 +351,17 @@ public class GDXTools
 
    public static Color toGDX(ColorDefinition colorDefinition)
    {
-      Color gdxColor = new Color((float) colorDefinition.getRed(),
-                                 (float) colorDefinition.getGreen(),
-                                 (float) colorDefinition.getBlue(),
-                                 (float) colorDefinition.getAlpha());
+      Color gdxColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+      toGDX(colorDefinition, gdxColor);
       return gdxColor;
+   }
+
+   public static void toGDX(ColorDefinition colorDefinition, Color gdxColor)
+   {
+      gdxColor.r = (float) colorDefinition.getRed();
+      gdxColor.g = (float) colorDefinition.getGreen();
+      gdxColor.b = (float) colorDefinition.getBlue();
+      gdxColor.a = (float) colorDefinition.getAlpha();
    }
 
    public static Color toGDX(double red, double green, double blue, double alpha)
