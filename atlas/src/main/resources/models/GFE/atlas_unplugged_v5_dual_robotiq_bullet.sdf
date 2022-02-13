@@ -607,22 +607,6 @@
           </mesh>
         </geometry>
       </visual>
-      <visual name='utorso_crash_visual'>
-      	<material>
-        	<lighting>1</lighting>
-        	<ambient>0.75686275 0 0.75686275 1</ambient>
-        	<diffuse>.7 0 .7 1</diffuse>
-        	<specular>1 0 1 1</specular>
-        	<emmisive>0 0 1 1</emmisive>
-        </material>
-        <pose>0 0 0 0 -0 0</pose>
-        <geometry>
-          <mesh>
-            <scale>1 1 1</scale>
-            <uri>model://atlas_description/meshes_unplugged/ATLAS_UNPLUGGED_UPPER_BODY_CRASH_PROTECTION_NO_SHOULDER.stl</uri>
-          </mesh>
-        </geometry>
-      </visual>
       <visual name='utorso_visual_utorso_1'>
         <pose>0.155 0.121 0.785 0 -0 1.309</pose>
         <geometry>
