@@ -14,6 +14,7 @@ public class HumanoidKinematicsSimulationParameters
    private double initialRobotY = 0.0;
    private double playbackSpeedMultiplier = 10.0;
    private double dt = UnitConversions.hertzToSeconds(70);
+   private boolean runNoFasterThanRealtime = false;
 
    public double getInitialGroundHeight()
    {
@@ -103,5 +104,15 @@ public class HumanoidKinematicsSimulationParameters
    public double getUpdatePeriod()
    {
       return dt / playbackSpeedMultiplier;
+   }
+
+   public void setRunNoFasterThanRealtime(boolean runNoFasterThanRealtime)
+   {
+      this.runNoFasterThanRealtime = runNoFasterThanRealtime;
+   }
+
+   public boolean runNoFasterThanRealtime()
+   {
+      return runNoFasterThanRealtime;
    }
 }
