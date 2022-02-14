@@ -3,11 +3,13 @@ package us.ihmc.behaviors.lookAndStep;
 import java.util.UUID;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.footstepPlanning.*;
@@ -34,14 +36,15 @@ public class LookAndStepSteppingTask
    protected RobotWalkRequester robotWalkRequester;
    protected Runnable replanFootstepsOutput;
 
-
    protected FootstepPlan footstepPlan;
    protected ROS2SyncedRobotModel syncedRobot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected long previousStepMessageId = 0L;
    protected LookAndStepImminentStanceTracker imminentStanceTracker;
+   protected ControllerStatusTracker controllerStatusTracker;
+   private final Timer timerSincePlanWasSent = new Timer();
 
-   protected final Input footstepCompletedInput = new Input();
+   protected final TypedInput<RobotConfigurationData> robotConfigurationData = new TypedInput<>();
 
    public static class LookAndStepStepping extends LookAndStepSteppingTask
    {
@@ -49,9 +52,9 @@ public class LookAndStepSteppingTask
       private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
       private BehaviorTaskSuppressor suppressor;
 
-
       public void initialize(LookAndStepBehavior lookAndStep)
       {
+         controllerStatusTracker = lookAndStep.controllerStatusTracker;
          imminentStanceTracker = lookAndStep.imminentStanceTracker;
          statusLogger = lookAndStep.statusLogger;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
@@ -75,8 +78,7 @@ public class LookAndStepSteppingTask
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Stepping task");
          suppressor.addCondition("Not in robot motion state", () -> !lookAndStep.behaviorStateReference.get().equals(LookAndStepBehavior.State.STEPPING));
          suppressor.addCondition(() -> "Footstep plan not OK: numberOfSteps = " + (footstepPlan == null ? null : footstepPlan.getNumberOfSteps())
-                                       + ". Planning again...",
-                                 () -> !(footstepPlan != null && footstepPlan.getNumberOfSteps() > 0), replanFootstepsOutput);
+                                       + ". Planning again...", () -> !(footstepPlan != null && footstepPlan.getNumberOfSteps() > 0), replanFootstepsOutput);
          suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
          suppressor.addCondition("Robot not in walking state", () -> !lookAndStep.controllerStatusTracker.isInWalkingState());
       }
@@ -92,15 +94,8 @@ public class LookAndStepSteppingTask
          footstepPlanInput.set(footstepPlan);
       }
 
-      public void acceptFootstepCompleted()
-      {
-         footstepCompletedInput.set();
-      }
-
       private void evaluateAndRun()
       {
-         footstepCompletedInput.getNotification().poll(); // reset this
-
          footstepPlan = footstepPlanInput.getLatest();
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
@@ -115,8 +110,6 @@ public class LookAndStepSteppingTask
 
    protected void performTask()
    {
-      imminentStanceTracker.addCommandedFootsteps(footstepPlan);
-
       statusLogger.warn("Requesting walk");
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
@@ -133,57 +126,55 @@ public class LookAndStepSteppingTask
       {
          executionMode = previousStepMessageId == 0L ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
       }
+      imminentStanceTracker.addCommandedFootsteps(footstepPlan, executionMode);
+
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
       long messageId = UUID.randomUUID().getLeastSignificantBits();
       footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
       footstepDataListMessage.getQueueingProperties().setPreviousMessageId(previousStepMessageId);
       previousStepMessageId = messageId;
       TypedNotification<WalkingStatusMessage> walkingStatusNotification = robotWalkRequester.requestWalk(footstepDataListMessage);
+      timerSincePlanWasSent.reset();
 
       ThreadTools.startAsDaemon(() -> robotWalkingThread(walkingStatusNotification), "RobotWalking");
       sleepForPartOfSwingThread(lookAndStepParameters.getSwingDuration());
    }
 
+
    private void sleepForPartOfSwingThread(double swingDuration)
    {
-      if (lookAndStepParameters.getMaxStepsToSendToController() > 1)
-      {
-         // first wait for a step from the previous command list to complete
-         // TODO: Figure out exactly how long to wait
-         // TODO: Or implement a timeout
-         boolean waitForPreviouslyCommandedStep = imminentStanceTracker.getPreviousStepsCompletedSinceCommanded() < 1;
-         if (waitForPreviouslyCommandedStep)
-         {
-            LogTools.info("Waiting for previously commanded step to complete...");
-         }
-         Timer timer = new Timer();
-         timer.reset();
-         while (imminentStanceTracker.getPreviousStepsCompletedSinceCommanded() < 1 && timer.isRunning(3.0))
-         {
-            ThreadTools.sleep(50);
-         }
-      }
-
+      double estimatedRobotTimeWhenPlanWasSent = getEstimatedRobotTime();
       double percentSwingToWait = lookAndStepParameters.getPercentSwingToWait();
       double waitDuration = swingDuration * percentSwingToWait;
       statusLogger.info("Waiting {} s for {} % of swing...", waitDuration, (100.0 * percentSwingToWait));
-      double timeWaited = 0.0;
 
+      double timeToTriggerAReplan = estimatedRobotTimeWhenPlanWasSent + waitDuration;
+
+      // sleep until the time has passed, making sure to only quit once we've started the first step in the plan we just sent, with a timeout period
       boolean stepCompletedEarly = false;
-      while (timeWaited < waitDuration)
+      while (Math.max(getEstimatedRobotTime(), estimatedRobotTimeWhenPlanWasSent + timerSincePlanWasSent.getElapsedTime()) < timeToTriggerAReplan ||
+             (imminentStanceTracker.getStepsStartedSinceCommanded() < 1 && getEstimatedRobotTime() < estimatedRobotTimeWhenPlanWasSent + 10.0))
       {
          ThreadTools.sleepSeconds(0.01);
-         timeWaited += 0.01;
 
-         if (footstepCompletedInput.getNotification().poll())
+         if (imminentStanceTracker.getStepsStartedSinceCommanded() < 1)
+            continue;
+
+         if (!controllerStatusTracker.isWalking() || imminentStanceTracker.getStepsCompletedSinceCommanded() > 0)
          {
             stepCompletedEarly = true;
             break;
          }
       }
-      ThreadTools.sleepSeconds(waitDuration);
-      statusLogger.info("{} % of swing complete! Step completed early = {}", timeWaited / swingDuration, stepCompletedEarly);
+
+      statusLogger.info("{} % of swing complete! Step completed early = {}", (getEstimatedRobotTime() - estimatedRobotTimeWhenPlanWasSent) / swingDuration,
+                        stepCompletedEarly);
       replanFootstepsOutput.run();
+   }
+
+   private double getEstimatedRobotTime()
+   {
+      return Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()) + syncedRobot.getDataReceptionTimerSnapshot().getTimePassedSinceReset();
    }
 
    private void robotWalkingThread(TypedNotification<WalkingStatusMessage> walkingStatusNotification)
