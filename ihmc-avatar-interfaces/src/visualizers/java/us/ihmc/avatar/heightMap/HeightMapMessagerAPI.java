@@ -17,7 +17,12 @@ class HeightMapMessagerAPI
    private static final MessagerAPIFactory.CategoryTheme HeightMap = apiFactory.createCategoryTheme("HeightMap");
 
    public static final MessagerAPIFactory.Topic<Boolean> Clear = topic("Clear");
+
    public static final MessagerAPIFactory.Topic<Double> MaxHeight = topic("MaxHeight");
+   public static final MessagerAPIFactory.Topic<Double> xPosition = topic("xPosition");
+   public static final MessagerAPIFactory.Topic<Double> yPosition = topic("yPosition");
+   public static final MessagerAPIFactory.Topic<Double> zPosition = topic("zPosition");
+
    public static final MessagerAPIFactory.Topic<Pair<PointCloud2, FramePose3D>> PointCloudData = topic("PointCloudData");
    public static final MessagerAPIFactory.Topic<HeightMapMessage> HeightMapData = topic("HeightMapData");
    public static final MessagerAPIFactory.Topic<HeightMapParameters> parameters = topic("Parameters");

@@ -296,10 +296,17 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       else
       {
          List<Pose3DReadOnly> waypoints = new ArrayList<>();
-         waypoints.add(startMidFootPose);
-         waypoints.addAll(request.getBodyPathWaypoints());
-         waypoints.add(goalMidFootPose);
-         setNominalOrientations(waypoints);
+
+         if (request.getBodyPathWaypoints().isEmpty())
+         {
+            waypoints.add(startMidFootPose);
+            waypoints.add(goalMidFootPose);
+            setNominalOrientations(waypoints);
+         }
+         else
+         {
+            waypoints.addAll(request.getBodyPathWaypoints());
+         }
 
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
          reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);

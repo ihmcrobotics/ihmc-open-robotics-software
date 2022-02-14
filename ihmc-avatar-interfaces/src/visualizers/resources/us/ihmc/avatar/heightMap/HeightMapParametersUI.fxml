@@ -2,7 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.heightMap.HeightMapParametersUIController" prefHeight="300">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.avatar.heightMap.HeightMapParametersUIController" prefHeight="400">
     <left>
         <GridPane vgap="3">
             <columnConstraints>
@@ -38,6 +38,15 @@
 
             <Label text="Max height" GridPane.columnIndex="0" GridPane.rowIndex="10" />
             <Spinner fx:id="maxHeight" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+
+            <Label text="X Position" GridPane.columnIndex="0" GridPane.rowIndex="11" />
+            <Spinner fx:id="xPosition" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+
+            <Label text="Y Position" GridPane.columnIndex="0" GridPane.rowIndex="12" />
+            <Spinner fx:id="yPosition" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="12" />
+
+            <Label text="Z Position" GridPane.columnIndex="0" GridPane.rowIndex="13" />
+            <Spinner fx:id="zPosition" editable="true" prefWidth="120.0" GridPane.columnIndex="1" GridPane.rowIndex="13" />
 
         </GridPane>
     </left>

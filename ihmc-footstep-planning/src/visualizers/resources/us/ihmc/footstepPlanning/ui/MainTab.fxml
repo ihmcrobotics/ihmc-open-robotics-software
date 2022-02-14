@@ -247,6 +247,7 @@
                     <Button mnemonicParsing="false" onAction="#approve" prefWidth="150.0" text="Approve" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="1" />
                     <Button mnemonicParsing="false" onAction="#replan" prefWidth="150.0" text="Replan" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="2" />
                     <Button mnemonicParsing="false" onAction="#writeHeightMapLog" prefWidth="150.0" text="Log" GridPane.columnIndex="1" GridPane.halignment="CENTER" GridPane.rowIndex="3" />
+                    <Button mnemonicParsing="false" onAction="#resendLastStep" prefWidth="150.0" text="Resend" GridPane.columnIndex="2" GridPane.halignment="CENTER" GridPane.rowIndex="0" />
 
                <columnConstraints>
                   <ColumnConstraints />
