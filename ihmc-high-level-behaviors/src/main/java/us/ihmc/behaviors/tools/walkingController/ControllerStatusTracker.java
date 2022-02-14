@@ -3,7 +3,9 @@ package us.ihmc.behaviors.tools.walkingController;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
@@ -31,7 +33,9 @@ public class ControllerStatusTracker
    private volatile HighLevelControllerName latestKnownState;
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Timer capturabilityBasedStatusTimer = new Timer();
+   private final Timer robotConfigurationDataTimer = new Timer();
    private volatile boolean isWalking = false;
+   private volatile boolean isWalkingFromConfigurationData = false;
    private final Notification finishedWalkingNotification = new Notification();
    private final ArrayList<Runnable> notWalkingStateAnymoreCallbacks = new ArrayList<>();
    private Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
@@ -43,6 +47,7 @@ public class ControllerStatusTracker
 
       finishedWalkingNotification.set();
 
+      new IHMCROS2Callback<>(ros2Node, ROS2Tools.getRobotConfigurationDataTopic(robotName), this::acceptRobotConfigurationData);
       new IHMCROS2Callback<>(ros2Node, getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
       new IHMCROS2Callback<>(ros2Node, getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
       new IHMCROS2Callback<>(ros2Node, getTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
@@ -60,6 +65,16 @@ public class ControllerStatusTracker
       lastPlanOffset.setToZero();
       finishedWalkingNotification.poll();
       capturabilityBasedStatusTimer.reset();
+      robotConfigurationDataTimer.reset();
+   }
+
+   private void acceptRobotConfigurationData(RobotConfigurationData message)
+   {
+      robotConfigurationDataTimer.reset();
+      if (RobotMotionStatus.fromByte(message.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION)
+         isWalkingFromConfigurationData = true;
+      else
+         isWalkingFromConfigurationData = false;
    }
 
    private void acceptHighLevelStateChangeStatusMessage(HighLevelStateChangeStatusMessage message)
@@ -124,6 +139,9 @@ public class ControllerStatusTracker
 
    public boolean isWalking()
    {
+      if (!robotConfigurationDataTimer.isExpired(CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME))
+         return isWalkingFromConfigurationData;
+
       return isWalking;
    }
 
