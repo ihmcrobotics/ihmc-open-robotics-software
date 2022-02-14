@@ -333,6 +333,24 @@ public class MainTabController
       messager.submitMessage(StopHeightMapNavigation, true);
    }
 
+   @FXML
+   public void approve()
+   {
+      messager.submitMessage(ApproveStep, true);
+   }
+
+   @FXML
+   public void replan()
+   {
+      messager.submitMessage(ReplanStep, true);
+   }
+
+   @FXML
+   public void writeHeightMapLog()
+   {
+      messager.submitMessage(WriteHeightMapLog, true);
+   }
+
    private void setStartFromRobot()
    {
       if (humanoidReferenceFrames == null)
