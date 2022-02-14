@@ -29,6 +29,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -91,7 +92,7 @@ public class LookAndStepFootstepPlanningTask
    {
       // instance variables
       private ResettableExceptionHandlingExecutorService executor;
-      private ControllerStatusTracker controllerStatusTracker;
+      protected ControllerStatusTracker controllerStatusTracker;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
 
       private final TypedInput<LookAndStepBodyPathLocalizationResult> localizationResultInput = new TypedInput<>();
@@ -139,7 +140,7 @@ public class LookAndStepFootstepPlanningTask
          localizationResultInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
          planarRegionsManager.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
          footstepCompletedInput.addCallback(() -> {
-            executor.interruptAndReset(); // stop the current plan, it's out of date.
+//            executor.interruptAndReset(); // stop the current plan, it's out of date.
             executor.clearQueueAndExecute(this::evaluateAndRun);
          });
 
@@ -394,11 +395,14 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
+
+      double plannerTimeout = /*Math.max(lookAndStepParameters.getFootstepPlannerTimeout(), */lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration();
+      plannerTimeout = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION ? plannerTimeout : 5.0;
       // TODO: Set start footholds!!
       // TODO: only set square up steps at the end
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(combinedRegionsForPlanning);
-      footstepPlannerRequest.setTimeout(/*Math.max(lookAndStepParameters.getFootstepPlannerTimeout(), */lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration());
+      footstepPlannerRequest.setTimeout(plannerTimeout);
       footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
       footstepPlannerRequest.setSnapGoalSteps(true);
 
@@ -506,9 +510,6 @@ public class LookAndStepFootstepPlanningTask
    {
       // Finish the currently swinging step and stop walking
       helper.getOrCreateRobotInterface().pauseWalking();
-
-      // FIXME This can cause it to get stuck by erasing the history
-      planarRegionsManager.clear();
 
       statusLogger.info(message);
       plannerFailedLastTime.set(true);
