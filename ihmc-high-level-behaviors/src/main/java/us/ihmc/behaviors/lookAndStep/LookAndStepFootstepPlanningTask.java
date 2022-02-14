@@ -477,6 +477,12 @@ public class LookAndStepFootstepPlanningTask
             startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
          }
 
+         if (!checkToMakeSurePlanIsStillReachable(fullPlan, startFootPoses))
+         {
+            uiPublisher.publishToUI(PlanningFailed, true);
+            doFailureAction("Footstep planning produced unreachable steps. Aborting task...");
+         }
+
 
          FootstepPlan reducedPlan = new FootstepPlan();
          for (int i = 0; i < lookAndStepParameters.getMaxStepsToSendToController() && i < fullPlan.getNumberOfSteps(); i++)
@@ -529,6 +535,19 @@ public class LookAndStepFootstepPlanningTask
       }
 
       return true;
+   }
+
+   private boolean checkToMakeSurePlanIsStillReachable(FootstepPlan footstepPlan, SideDependentList<MinimalFootstep> startFootPoses)
+   {
+      PlannedFootstep firstStep = footstepPlan.getFootstep(0);
+      FramePose3DReadOnly stepPose = firstStep.getFootstepPose();
+      MinimalFootstep stanceFoot = startFootPoses.get(firstStep.getRobotSide().getOppositeSide());
+      Pose3DReadOnly stancePose = stanceFoot.getSolePoseInWorld();
+
+      if (stepPose.getPosition().distanceXY(stancePose.getPosition()) > footstepPlannerParameters.getMaximumStepReach())
+         return false;
+
+      return Math.abs(stepPose.getPosition().getZ() - stancePose.getZ()) < footstepPlannerParameters.getMaxStepZ();
    }
 
 
