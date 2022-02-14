@@ -135,6 +135,9 @@ public abstract class HeightMapUI extends Application
          heightMapVisualizer = new HeightMapVisualizer();
          messager.registerTopicListener(HeightMapMessagerAPI.HeightMapData, heightMapVisualizer::update);
          messager.registerTopicListener(HeightMapMessagerAPI.MaxHeight, heightMapVisualizer::setMaxHeight);
+         messager.registerTopicListener(HeightMapMessagerAPI.xPosition, v -> heightMapVisualizer.setPosition(0, v));
+         messager.registerTopicListener(HeightMapMessagerAPI.yPosition, v -> heightMapVisualizer.setPosition(1, v));
+         messager.registerTopicListener(HeightMapMessagerAPI.zPosition, v -> heightMapVisualizer.setPosition(2, v));
          view3dFactory.addNodeToView(heightMapVisualizer.getRoot());
          heightMapVisualizer.start();
       }

@@ -44,6 +44,7 @@ public class HeightMapVisualizer extends AnimationTimer
    private final ExecutorService meshComputation = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private final AtomicBoolean processing = new AtomicBoolean(false);
    private final AtomicDouble maxHeightToVisualize = new AtomicDouble(Double.NaN);
+   private final Point3D debugPosition = new Point3D();
    private final AtomicReference<PlanarRegionsList> planarRegions = new AtomicReference<>();
 
    public HeightMapVisualizer()
@@ -59,6 +60,11 @@ public class HeightMapVisualizer extends AnimationTimer
    public void setMaxHeight(double maxHeight)
    {
       this.maxHeightToVisualize.set(maxHeight);
+   }
+
+   public void setPosition(int i, double position)
+   {
+      this.debugPosition.setElement(i, position);
    }
 
    public void update(HeightMapMessage data)
@@ -84,8 +90,6 @@ public class HeightMapVisualizer extends AnimationTimer
          heightMapMeshView.setMaterial(heightMapMesh.getValue());
       }
    }
-
-   private final Color planarRegionColor = Color.rgb(190, 89, 110);
 
    private void computeMesh(HeightMapMessage heightMapMessage)
    {
@@ -120,33 +124,7 @@ public class HeightMapVisualizer extends AnimationTimer
          meshBuilder.addCube(0.05, 0.0, 0.0, maxHeight, Color.BLACK);
       }
 
-      PlanarRegionsList planarRegions = this.planarRegions.get();
-      if (planarRegions != null)
-      {
-         RigidBodyTransform transformToWorld = new RigidBodyTransform();
-
-         List<MeshView> regionMeshViews = new ArrayList<>();
-
-         for (int regionIndex = 0; regionIndex < planarRegions.getNumberOfPlanarRegions(); regionIndex++)
-         {
-            PlanarRegion planarRegion = planarRegions.getPlanarRegion(regionIndex);
-
-            int regionId = planarRegion.getRegionId();
-            planarRegion.getTransformToWorld(transformToWorld);
-
-            meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), 0.01, planarRegionColor, true);
-
-            for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
-            {
-               ConvexPolygon2D convexPolygon2d = planarRegion.getConvexPolygon(polygonIndex);
-               meshBuilder.addPolygon(transformToWorld, convexPolygon2d, planarRegionColor);
-            }
-
-            MeshView regionMeshView = new MeshView(meshBuilder.generateMesh());
-            regionMeshView.setMaterial(new PhongMaterial(IdMappedColorFunction.INSTANCE.apply(regionId)));
-            regionMeshViews.add(regionMeshView);
-         }
-      }
+      meshBuilder.addCube(0.05, debugPosition, Color.ORANGE);
 
       heightMapToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
       processing.set(false);

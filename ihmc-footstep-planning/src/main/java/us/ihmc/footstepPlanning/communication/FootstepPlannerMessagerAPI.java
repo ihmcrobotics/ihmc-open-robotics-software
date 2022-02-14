@@ -185,6 +185,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ApproveStep = topic("ApproveStep");
    public static final Topic<Boolean> ReplanStep = topic("ReplanStep");
    public static final Topic<Boolean> WriteHeightMapLog = topic("WriteHeightMapLog");
+   public static final Topic<Boolean> ResendLastStep = topic("ResendLastStep");
 
    // Logging
    public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");

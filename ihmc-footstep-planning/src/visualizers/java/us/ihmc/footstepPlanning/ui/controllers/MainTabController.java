@@ -351,6 +351,12 @@ public class MainTabController
       messager.submitMessage(WriteHeightMapLog, true);
    }
 
+   @FXML
+   public void resendLastStep()
+   {
+      messager.submitMessage(ResendLastStep, true);
+   }
+
    private void setStartFromRobot()
    {
       if (humanoidReferenceFrames == null)

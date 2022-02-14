@@ -27,6 +27,12 @@ public class HeightMapParametersUIController
    private CheckBox enableUpdates;
    @FXML
    private Spinner<Double> maxHeight;
+   @FXML
+   private Spinner<Double> xPosition;
+   @FXML
+   private Spinner<Double> yPosition;
+   @FXML
+   private Spinner<Double> zPosition;
 
    @FXML
    private TableView<StoredPropertyTableViewWrapper.ParametersTableRow> parameterTable;
@@ -51,13 +57,21 @@ public class HeightMapParametersUIController
       gridCenterX.setValueFactory(createGridCenterFactory());
       gridCenterY.setValueFactory(createGridCenterFactory());
 
-      maxHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 2.0, 0.1));
+      double initialValue = 0.4;
+      maxHeight.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, initialValue, 0.1));
+
+      xPosition.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, -2.0, 0.1));
+      yPosition.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, -1.0, 0.1));
+      zPosition.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-Double.MAX_VALUE, Double.MAX_VALUE, 0.6, 0.1));
 
       messager.bindBidirectional(HeightMapMessagerAPI.PublishFrequency, publishFreq.getValueFactory().valueProperty(), false);
       messager.bindBidirectional(HeightMapMessagerAPI.GridCenterX, gridCenterX.getValueFactory().valueProperty(), false);
       messager.bindBidirectional(HeightMapMessagerAPI.GridCenterY, gridCenterY.getValueFactory().valueProperty(), false);
       messager.bindBidirectional(HeightMapMessagerAPI.EnableUpdates, enableUpdates.selectedProperty(), false);
       messager.bindBidirectional(HeightMapMessagerAPI.MaxHeight, maxHeight.getValueFactory().valueProperty(), true);
+      messager.bindBidirectional(HeightMapMessagerAPI.xPosition, xPosition.getValueFactory().valueProperty(), true);
+      messager.bindBidirectional(HeightMapMessagerAPI.yPosition, yPosition.getValueFactory().valueProperty(), true);
+      messager.bindBidirectional(HeightMapMessagerAPI.zPosition, zPosition.getValueFactory().valueProperty(), true);
    }
 
    public void onPrimaryStageLoaded()

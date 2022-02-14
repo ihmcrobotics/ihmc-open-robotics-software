@@ -90,6 +90,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+   private final FootstepDataListMessage footstepDataListMessageCache = new FootstepDataListMessage();
    private RobotSide lastStepSide;
    private long previousStepMessageId = 0;
    private final Pose3D lastStepPose = new Pose3D();
@@ -151,6 +152,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ApproveStep, executeRequested::set);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ReplanStep, replanRequested::set);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.WriteHeightMapLog, writeLog::set);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ResendLastStep, r -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessageCache));
 
       currentState.set(State.WAITING_TO_START);
 
@@ -205,6 +207,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
                                    uiUpdateCounter++;
                                    if (rawGPUPlanarRegionList.getNumOfRegions() == 0)
                                    {
+                                      LogTools.info("Received empty regions");
                                       return;
                                    }
 
@@ -215,13 +218,18 @@ public class HeightMapNavigationUpdater extends AnimationTimer
                                    planarRegionsList.applyTransform(zForwardXRightToZUpXForward);
                                    planarRegionsList.applyTransform(steppingFrame.getTransformToWorldFrame());
 
-                                   collisionFilter.update();
-                                   gpuPlanarRegionUpdater.filterCollidingPlanarRegions(planarRegionsList, collisionFilter);
+//                                   collisionFilter.update();
+//                                   gpuPlanarRegionUpdater.filterCollidingPlanarRegions(planarRegionsList, collisionFilter);
                                    this.planarRegions.set(planarRegionsList);
 
-                                   if (uiUpdateCounter == uiUpdateRate)
+                                   if (planarRegionsList.getNumberOfPlanarRegions() == 0)
+                                   {
+                                      LogTools.info("No regions left after applying collision filter");
+                                   }
+                                   else if (uiUpdateCounter >= uiUpdateRate)
                                    {
                                       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
+                                      LogTools.info("Received planar regions");
                                       uiUpdateCounter = 0;
                                    }
 
@@ -346,17 +354,34 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          stopwatch.lap();
 
          footstepDataListMessage.getFootstepDataList().clear();
-         PlannedFootstep footstep = planningModule.getOutput().getFootstepPlan().getFootstep(0);
-         FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
-         footstepDataMessage.getLocation().set(footstep.getFootstepPose().getPosition());
-         footstepDataMessage.getOrientation().set(footstep.getFootstepPose().getOrientation());
-         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
+
+//         if (footstep.getFoothold().isEmpty())
+//         {
+//            ConvexPolygon2D footPolygon = footPolygons.get(footstep.getRobotSide());
+//            for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
+//            {
+//               footstepDataMessage.getPredictedContactPoints2d().add().set(footPolygon.getVertex(i));
+//            }
+//         }
+//         else
+//         {
+//            ConvexPolygon2D footPolygon = footstep.getFoothold();
+//            for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
+//            {
+//               footstepDataMessage.getPredictedContactPoints2d().add().set(footPolygon.getVertex(i));
+//            }
+//         }
+
+         logger.logSession();
 
          if ((result != FootstepPlanningResult.FOUND_SOLUTION && result != FootstepPlanningResult.HALTED) || output.getFootstepPlan().getNumberOfSteps() == 0)
          {
-            logger.logSession();
             return;
          }
+
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
+         PlannedFootstep footstep = planningModule.getOutput().getFootstepPlan().getFootstep(0);
+         footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
 
          currentState.set(State.APPROVE_AND_SEND);
       }
@@ -372,6 +397,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
          if (executeRequested.getAndSet(false))
          {
+            LogTools.info("Executing step");
             ExecutionMode executionMode = ExecutionMode.QUEUE;
 
             footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
@@ -379,6 +405,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
             footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
             footstepDataListMessage.getQueueingProperties().setPreviousMessageId(previousStepMessageId);
             messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessage);
+            footstepDataListMessageCache.set(footstepDataListMessage);
 
             firstStep.set(false);
             lastStepSide = lastStepSide.getOppositeSide();
@@ -388,6 +415,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
             logger.logSession();
             stopwatch.lap();
             setStartFootPosesBasedOnLastCommandedStep();
+            currentState.set(State.WAIT_A_BIT);
          }
       }
 

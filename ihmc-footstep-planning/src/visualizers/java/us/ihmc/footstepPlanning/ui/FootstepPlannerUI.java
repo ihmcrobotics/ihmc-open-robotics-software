@@ -62,8 +62,8 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
  */
 public class FootstepPlannerUI
 {
-   private static final boolean ENABLE_HEIGHT_MAP_VIZ = true;
-   private static final boolean SETUP_HEIGHT_MAP_NAV = false;
+   private static final boolean ENABLE_HEIGHT_MAP_VIZ = false;
+   private static final boolean SETUP_HEIGHT_MAP_NAV = true;
 
    private final JavaFXMessager messager;
    private final Stage primaryStage;
