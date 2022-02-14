@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -29,6 +30,7 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -139,10 +141,7 @@ public class LookAndStepFootstepPlanningTask
 
          localizationResultInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
          planarRegionsManager.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
-         footstepCompletedInput.addCallback(() -> {
-//            executor.interruptAndReset(); // stop the current plan, it's out of date.
-            executor.clearQueueAndExecute(this::evaluateAndRun);
-         });
+         footstepCompletedInput.addCallback(() -> executor.clearQueueAndExecute(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
@@ -173,11 +172,17 @@ public class LookAndStepFootstepPlanningTask
                                        && numberOfIncompleteFootsteps > lookAndStepParameters.getAcceptableIncompleteFootsteps());
          suppressor.addCondition(() -> "Swing planner type parameter not valid: " + lookAndStepParameters.getSwingPlannerType(),
                                  () -> swingPlannerType == null);
+         suppressor.addCondition("Planner is current running.", () -> footstepPlanningModule.isPlanning());
       }
 
       public void acceptFootstepCompleted()
       {
          footstepCompletedInput.set();
+      }
+
+      public void acceptFootstepStarted(FootstepStatusMessage footstepStatusMessage)
+      {
+         stepsStartedWhilePlanning.add(footstepStatusMessage);
       }
 
       public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
@@ -248,7 +253,8 @@ public class LookAndStepFootstepPlanningTask
          syncedRobot.update();
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
                                                      .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
-         lastStanceSide = lastStanceSideReference.get();
+         PlannedFootstepReadOnly lastStartedFootstep = imminentStanceTracker.getLastStartedFootstep();
+         lastStanceSide = lastStartedFootstep == null ? null : lastStartedFootstep.getRobotSide().getOppositeSide();
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
          numberOfCompletedFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
@@ -285,9 +291,13 @@ public class LookAndStepFootstepPlanningTask
    protected int numberOfIncompleteFootsteps;
    protected int numberOfCompletedFootsteps;
    protected SwingPlannerType swingPlannerType;
+   protected final List<FootstepStatusMessage> stepsStartedWhilePlanning = new ArrayList<>();
 
    protected void performTask()
    {
+      // clear the list so we can inspect on completion
+      stepsStartedWhilePlanning.clear();
+
       // detect flat ground; work in progress
       ConvexPolytope3D convexPolytope = new ConvexPolytope3D();
       for (Point3D point3D : capturabilityBasedStatus.getLeftFootSupportPolygon3d())
@@ -316,8 +326,7 @@ public class LookAndStepFootstepPlanningTask
 
       // move point along body path plan by plan horizon
       Pose3D subGoalPoseBetweenFeet = new Pose3D();
-      double planHorizonDistance = Math.max(lookAndStepParameters.getPlanHorizon(),
-                                            lookAndStepParameters.getNumberOfStepsToTryToPlan() * footstepPlannerParameters.getMaximumStepReach());
+      double planHorizonDistance = lookAndStepParameters.getPlanHorizon() + (lookAndStepParameters.getNumberOfStepsToTryToPlan() - 1) * footstepPlannerParameters.getMaximumStepReach();
       int segmentIndexOfGoal = BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan,
                                                                            closestPointAlongPath,
                                                                            subGoalPoseBetweenFeet.getPosition(),
@@ -325,7 +334,6 @@ public class LookAndStepFootstepPlanningTask
                                                                            planHorizonDistance);
 
       statusLogger.info("Found next sub goal: {}", subGoalPoseBetweenFeet);
-      // TODO: Calculate orientation based on a trajectory
       subGoalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       // calculate impassibility
@@ -397,7 +405,7 @@ public class LookAndStepFootstepPlanningTask
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
 
       double plannerTimeout = /*Math.max(lookAndStepParameters.getFootstepPlannerTimeout(), */lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration();
-      plannerTimeout = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION ? plannerTimeout : 5.0;
+      plannerTimeout = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION ? plannerTimeout : 2.0;
       // TODO: Set start footholds!!
       // TODO: only set square up steps at the end
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
@@ -422,6 +430,10 @@ public class LookAndStepFootstepPlanningTask
       statusLogger.info("Footstep planner completed with {}, {} step(s)",
                         footstepPlannerOutput.getFootstepPlanningResult(),
                         footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
+      statusLogger.info("Planner timing took a total of {} s, with {} s spent before planning and {} s spent planning",
+                        FormattingTools.getFormattedDecimal3D(footstepPlannerOutput.getPlannerTimings().getTotalElapsedSeconds()),
+                        FormattingTools.getFormattedDecimal3D(footstepPlannerOutput.getPlannerTimings().getTimeBeforePlanningSeconds()),
+                        FormattingTools.getFormattedDecimal3D(footstepPlannerOutput.getPlannerTimings().getTimePlanningStepsSeconds()));
 
       // print log duration?
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
@@ -431,7 +443,7 @@ public class LookAndStepFootstepPlanningTask
 
       // TODO: Detect step down and reject unless we planned two steps.
       // Should get closer to the edge somehow?  Solve this in the footstep planner?
-      if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
+      if (footstepPlannerOutput.getFootstepPlan().isEmpty()) // failed
       {
          FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanningModule);
          rejectionReasonReport.update();
@@ -451,59 +463,110 @@ public class LookAndStepFootstepPlanningTask
       {
          planarRegionsManager.dequeueToSize();
 
-         FootstepPlan footstepPlan = new FootstepPlan();
-         for (int i = 0; i < lookAndStepParameters.getMaxStepsToSendToController() && i < footstepPlannerOutput.getFootstepPlan().getNumberOfSteps(); i++)
+         FootstepPlan fullPlan = new FootstepPlan();
+         for (int i = 0; i < footstepPlannerOutput.getFootstepPlan().getNumberOfSteps(); i++)
          {
-            footstepPlan.addFootstep(new PlannedFootstep(footstepPlannerOutput.getFootstepPlan().getFootstep(i)));
+            fullPlan.addFootstep(new PlannedFootstep(footstepPlannerOutput.getFootstepPlan().getFootstep(i)));
          }
-         footstepPlan.setFinalTransferSplitFraction(footstepPlannerOutput.getFootstepPlan().getFinalTransferSplitFraction());
-         footstepPlan.setFinalTransferWeightDistribution(footstepPlannerOutput.getFootstepPlan().getFinalTransferWeightDistribution());
 
-         uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlan, "Look and Step Planned"));
-
-         // Extend the swing duration if necessary.
-         // TODO: Check and see if this is ensured by the footstep planner and remove it.
-         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+         if (stepsStartedWhilePlanning.size() > 0)
          {
-            PlannedFootstep footstep = footstepPlan.getFootstep(i);
-            Pose3DReadOnly startStep;
-            if (i == 0)
-            {
-               startStep = startFootPoses.get(footstep.getRobotSide()).getSolePoseInWorld();
-            }
-            else
-            {
-               startStep = footstepPlan.getFootstep(i - 1).getFootstepPose();
-            }
-            double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
-            double maxStepZ = footstepPlannerParameters.getMaxStepZ();
-            double calculatedSwing = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength,
-                                                                                 footstepPlannerParameters.getMaxSwingReach(),
-                                                                                 maxStepZ,
-                                                                                 swingPlannerParameters.getMinimumSwingTime(),
-                                                                                 swingPlannerParameters.getMaximumSwingTime(),
-                                                                                 startStep.getPosition(),
-                                                                                 footstep.getFootstepPose().getPosition());
-            if (footstep.getSwingDuration() < calculatedSwing)
-            {
-               statusLogger.info("Increasing swing duration to {} s", calculatedSwing);
-               footstep.setSwingDuration(calculatedSwing);
-            }
-            footstep.setTransferDuration(lookAndStepParameters.getTransferDuration()); // But probably keep this.
+            if (!removeStepsThatWereCompletedWhilePlanning(fullPlan))
+               return;
+
+            startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
          }
+
+
+         FootstepPlan reducedPlan = new FootstepPlan();
+         for (int i = 0; i < lookAndStepParameters.getMaxStepsToSendToController() && i < fullPlan.getNumberOfSteps(); i++)
+         {
+            reducedPlan.addFootstep(new PlannedFootstep(fullPlan.getFootstep(i)));
+         }
+         reducedPlan.setFinalTransferSplitFraction(fullPlan.getFinalTransferSplitFraction());
+         reducedPlan.setFinalTransferWeightDistribution(fullPlan.getFinalTransferWeightDistribution());
+
+         uiPublisher.publishToUI(PlannedFootstepsForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(reducedPlan, "Look and Step Planned"));
+
+         updatePlannedFootstepDurations(reducedPlan, startFootPoses);
 
          if (operatorReviewEnabledSupplier.get())
          {
             if (lookAndStepParameters.getMaxStepsToSendToController() > 1)
                helper.getOrCreateRobotInterface().pauseWalking();
-            review.review(footstepPlan);
+            review.review(reducedPlan);
          }
          else
          {
-            autonomousOutput.accept(footstepPlan);
+            autonomousOutput.accept(reducedPlan);
          }
       }
    }
+
+   private boolean removeStepsThatWereCompletedWhilePlanning(FootstepPlan fullPlan)
+   {
+      for (int i = 0; i < stepsStartedWhilePlanning.size() && !fullPlan.isEmpty(); i++)
+      {
+         FootstepStatusMessage message = stepsStartedWhilePlanning.get(i);
+         RobotSide swingSideStarted = RobotSide.fromByte(message.getRobotSide());
+
+         if (fullPlan.getFootstep(0).getRobotSide() == swingSideStarted)
+         {
+            fullPlan.remove(0);
+         }
+         else
+         {
+            uiPublisher.publishToUI(PlanningFailed, true);
+            doFailureAction("Footstep planning failure, our sequencing is wrong. Aborting task...");
+            return false;
+         }
+      }
+      if (fullPlan.isEmpty())
+      {
+         uiPublisher.publishToUI(PlanningFailed, true);
+         doFailureAction("Footstep planning failure. We finished all the steps. Aborting task...");
+         return false;
+      }
+
+      return true;
+   }
+
+
+   private void updatePlannedFootstepDurations(FootstepPlan footstepPlan, SideDependentList<MinimalFootstep> startFootPoses)
+   {
+      // Extend the swing duration if necessary.
+      // TODO: Check and see if this is ensured by the footstep planner and remove it.
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+      {
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
+         Pose3DReadOnly startStep;
+         if (i == 0)
+         {
+            startStep = startFootPoses.get(footstep.getRobotSide()).getSolePoseInWorld();
+         }
+         else
+         {
+            startStep = footstepPlan.getFootstep(i - 1).getFootstepPose();
+         }
+         double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
+         double maxStepZ = footstepPlannerParameters.getMaxStepZ();
+         double calculatedSwing = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength,
+                                                                              footstepPlannerParameters.getMaxSwingReach(),
+                                                                              maxStepZ,
+                                                                              swingPlannerParameters.getMinimumSwingTime(),
+                                                                              swingPlannerParameters.getMaximumSwingTime(),
+                                                                              startStep.getPosition(),
+                                                                              footstep.getFootstepPose().getPosition());
+         if (footstep.getSwingDuration() < calculatedSwing)
+         {
+            statusLogger.info("Increasing swing duration to {} s", calculatedSwing);
+            footstep.setSwingDuration(calculatedSwing);
+         }
+         footstep.setTransferDuration(lookAndStepParameters.getTransferDuration()); // But probably keep this.
+      }
+   }
+
+
 
 
    private void doFailureAction(String message)

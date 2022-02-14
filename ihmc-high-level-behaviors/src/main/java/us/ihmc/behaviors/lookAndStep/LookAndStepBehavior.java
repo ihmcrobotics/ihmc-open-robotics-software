@@ -167,7 +167,10 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          if (status.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
          {
             footstepPlanning.acceptFootstepCompleted();
-            stepping.acceptFootstepCompleted();
+         }
+         else
+         {
+            footstepPlanning.acceptFootstepStarted(status);
          }
       });
 
