@@ -171,11 +171,11 @@ public class TransferToWalkingSingleSupportState extends TransferState
          }
       }
 
-
       RobotSide swingSide = transferToSide.getOppositeSide();
       feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
+      walkingTrajectoryPath.computeTrajectory(getStateEnum());
 
       if (!doManualLiftOff())
       {

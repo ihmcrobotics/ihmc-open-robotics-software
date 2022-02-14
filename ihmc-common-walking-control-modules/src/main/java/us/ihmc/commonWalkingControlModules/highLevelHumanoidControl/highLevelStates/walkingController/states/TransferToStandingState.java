@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.WalkingTrajectoryPath;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -71,6 +72,7 @@ public class TransferToStandingState extends WalkingState
    public void doAction(double timeInState)
    {
       balanceManager.computeICPPlan();
+      controllerToolbox.getWalkingTrajectoryPath().computeTrajectory(getStateEnum());
 
       switchToPointToeOffIfAlreadyInLine();
 
@@ -143,7 +145,7 @@ public class TransferToStandingState extends WalkingState
    @Override
    public void onEntry()
    {
-      balanceManager.clearWalkingPath();
+      initializeWalkingTrajectoryPath();
       balanceManager.clearICPPlan();
       balanceManager.clearSwingFootTrajectory();
 
@@ -218,6 +220,13 @@ public class TransferToStandingState extends WalkingState
             legConfigurationManager.setStraight(robotSide);
          }
       }
+   }
+
+   private void initializeWalkingTrajectoryPath()
+   {
+      WalkingTrajectoryPath walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
+      walkingTrajectoryPath.clearFootsteps();
+      walkingTrajectoryPath.initialize();
    }
 
    @Override

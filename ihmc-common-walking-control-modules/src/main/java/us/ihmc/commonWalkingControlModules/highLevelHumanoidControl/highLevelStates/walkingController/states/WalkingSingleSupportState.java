@@ -132,6 +132,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
+      controllerToolbox.getWalkingTrajectoryPath().computeTrajectory(getStateEnum());
 
       super.doAction(timeInState);
 

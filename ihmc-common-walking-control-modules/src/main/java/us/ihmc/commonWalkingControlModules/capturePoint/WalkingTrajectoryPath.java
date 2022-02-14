@@ -1,11 +1,11 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -49,8 +49,8 @@ public class WalkingTrajectoryPath
 
    private final YoPreallocatedList<WaypointData> waypoints;
 
-   private final List<Footstep> footsteps = new ArrayList<>();
-   private final List<FootstepTiming> footstepTimings = new ArrayList<>();
+   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep::new);
+   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming::new);
 
    private final DoubleProvider time;
    private final YoDouble startTime = new YoDouble(namePrefix + "StartTime", registry);
@@ -68,6 +68,8 @@ public class WalkingTrajectoryPath
    private final YoDouble lastYawRate = new YoDouble(namePrefix + "LastYawRate", registry);
 
    private final BagOfBalls trajectoryPositionViz;
+   private final YoFrameVector3D currentZUpViz;
+   private final YoFrameVector3D currentHeadingViz;
 
    private final MovingReferenceFrame walkingTrajectoryPathFrame = new MovingReferenceFrame("walkingTrajectoryPathFrame", worldFrame, true)
    {
@@ -107,11 +109,17 @@ public class WalkingTrajectoryPath
                                            10);
       if (yoGraphicList != null)
       {
+         currentZUpViz = new YoFrameVector3D(namePrefix + "CurrentZUp", worldFrame, registry);
+         currentHeadingViz = new YoFrameVector3D(namePrefix + "CurrentHeading", worldFrame, registry);
+         yoGraphicList.add(new YoGraphicVector(namePrefix + "CurrentHeadingViz", currentPosition, currentHeadingViz, 0.35, YoAppearance.Blue()));
+         yoGraphicList.add(new YoGraphicVector(namePrefix + "CurrentZUpViz", currentPosition, currentZUpViz, 0.25, YoAppearance.Blue()));
          trajectoryPositionViz = new BagOfBalls(100, 0.005, "walkingPathViz", YoAppearance.Red(), registry, yoGraphicsListRegistry);
          yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
       }
       else
       {
+         currentZUpViz = null;
+         currentHeadingViz = null;
          trajectoryPositionViz = null;
       }
 
@@ -137,20 +145,32 @@ public class WalkingTrajectoryPath
       footstepTimings.clear();
    }
 
-   public void addFootstep(Footstep footstep, FootstepTiming footstepTiming)
+   public void addFootsteps(WalkingMessageHandler walkingMessageHandler)
    {
-      footsteps.add(footstep);
-      footstepTimings.add(footstepTiming);
+      for (int i = 0; i < walkingMessageHandler.getCurrentNumberOfFootsteps(); i++)
+      {
+         walkingMessageHandler.peekFootstep(i, footsteps.add());
+         walkingMessageHandler.peekTiming(i, footstepTimings.add());
+      }
    }
 
-   private final SideDependentList<Pose3D> footPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
+   public void addFootstep(Footstep footstep, FootstepTiming footstepTiming)
+   {
+      footsteps.add().set(footstep);
+      footstepTimings.add().set(footstepTiming);
+   }
+
+   private final SideDependentList<Pose3D> supportFootPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
+   private final SideDependentList<Pose3D> tempFootPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
 
    public void initialize()
    {
       startTime.set(time.getValue());
 
       for (RobotSide robotSide : RobotSide.values)
-         footPoses.get(robotSide).set(soleFrames.get(robotSide).getTransformToRoot());
+      {
+         supportFootPoses.get(robotSide).set(soleFrames.get(robotSide).getTransformToRoot());
+      }
 
       WaypointData waypoint = waypoints.add();
       waypoint.time.set(0.0);
@@ -158,7 +178,7 @@ public class WalkingTrajectoryPath
       if (reset.getValue())
       {
          reset.set(false);
-         waypoint.yaw.set(computeAverage(footPoses, waypoint.position));
+         waypoint.yaw.set(computeAverage(supportFootPoses, waypoint.position));
          waypoint.linearVelocity.setToZero();
          waypoint.yawRate.set(0.0);
       }
@@ -176,12 +196,17 @@ public class WalkingTrajectoryPath
       {
          WaypointData previousWaypoint = waypoint;
 
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            tempFootPoses.get(robotSide).set(supportFootPoses.get(robotSide));
+         }
+
          for (int i = 0; i < footsteps.size(); i++)
          {
             waypoint = waypoints.add();
             Footstep footstep = footsteps.get(i);
-            footPoses.get(footstep.getRobotSide()).set(footstep.getFootstepPose());
-            double yaw = computeAverage(footPoses, waypoint.position);
+            tempFootPoses.get(footstep.getRobotSide()).set(footstep.getFootstepPose());
+            double yaw = computeAverage(tempFootPoses, waypoint.position);
             waypoint.yaw.set(previousWaypoint.yaw.getValue() + AngleTools.computeAngleDifferenceMinusPiToPi(yaw, previousWaypoint.yaw.getValue()));
             waypoint.time.set(previousWaypoint.time.getValue() + footstepTimings.get(i).getStepTime());
             waypoint.updateViz();
@@ -201,15 +226,18 @@ public class WalkingTrajectoryPath
 
    private static double computeAverage(SideDependentList<? extends Pose3DReadOnly> input, Point3DBasics output)
    {
-      Pose3DReadOnly leftPose = input.get(RobotSide.LEFT);
-      Pose3DReadOnly rightPose = input.get(RobotSide.RIGHT);
-      output.interpolate(leftPose.getPosition(), rightPose.getPosition(), 0.5);
-      return AngleTools.computeAngleAverage(leftPose.getYaw(), rightPose.getYaw());
+      return computeAverage(input.get(RobotSide.LEFT), input.get(RobotSide.RIGHT), output);
    }
 
-   public void computeTrajectory()
+   private static double computeAverage(Pose3DReadOnly firstPose, Pose3DReadOnly secondPose, Point3DBasics output)
    {
-      updateFirstWaypoint();
+      output.interpolate(firstPose.getPosition(), secondPose.getPosition(), 0.5);
+      return AngleTools.computeAngleAverage(firstPose.getYaw(), secondPose.getYaw());
+   }
+
+   public void computeTrajectory(WalkingStateEnum currentState)
+   {
+      updateWaypoints(currentState);
       updatePolynomials();
 
       double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
@@ -244,18 +272,58 @@ public class WalkingTrajectoryPath
 
    private void updateViz()
    {
+      if (trajectoryPositionViz == null)
+         return;
+
+      RotationMatrixTools.applyYawRotation(currentYaw.getValue(), Axis3D.X, currentHeadingViz);
+      currentZUpViz.set(Axis3D.Z);
+
       for (int i = 0; i < trajectoryPositionViz.getNumberOfBalls(); i++)
       {
          double t = ((double) i) / (trajectoryPositionViz.getNumberOfBalls() - 1.0) * totalDuration.getValue();
 
-         trajectoryManager.computePosition(t, tempBallPosition);
+         if (footsteps.isEmpty())
+            tempBallPosition.set(waypoints.getFirst().position);
+         else
+            trajectoryManager.computePosition(t, tempBallPosition);
          trajectoryPositionViz.setBall(tempBallPosition, i);
       }
    }
 
-   private void updateFirstWaypoint()
+   private void updateWaypoints(WalkingStateEnum currentState)
    {
+      if (currentState.isDoubleSupport())
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            RigidBodyTransform soleTransform = soleFrames.get(robotSide).getTransformToRoot();
+            supportFootPoses.get(robotSide).set(soleTransform);
+            tempFootPoses.get(robotSide).set(soleTransform);
+         }
+      }
+      else
+      {
+         RobotSide supportSide = currentState.getSupportSide();
+         RigidBodyTransform soleTransform = soleFrames.get(supportSide).getTransformToRoot();
+         supportFootPoses.get(supportSide).set(soleTransform);
 
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            tempFootPoses.get(robotSide).set(supportFootPoses.get(robotSide));
+         }
+
+      }
+
+      WaypointData firstWaypoint = waypoints.getFirst();
+      firstWaypoint.yaw.set(computeAverage(supportFootPoses, firstWaypoint.position));
+      
+      if (!footsteps.isEmpty())
+      {
+         Footstep firstFootstep = footsteps.get(0);
+         tempFootPoses.get(firstFootstep.getRobotSide()).set(firstFootstep.getFootstepPose());
+         WaypointData secondWaypoint = waypoints.get(1);
+         secondWaypoint.yaw.set(computeAverage(tempFootPoses, secondWaypoint.position));
+      }
    }
 
    private void updatePolynomials()
@@ -286,8 +354,10 @@ public class WalkingTrajectoryPath
       private final YoFrameVector3D linearVelocity;
       private final YoDouble yawRate;
 
+      private final YoFrameVector3D zUpViz;
       private final YoFrameVector3D headingViz;
-      private final YoGraphicVector waypointViz;
+      private final YoGraphicVector waypointZUpViz;
+      private final YoGraphicVector waypointHeadingViz;
 
       private WaypointData(String namePrefix, String nameSuffix, YoRegistry registry, YoGraphicsList yoGraphicsList)
       {
@@ -300,14 +370,19 @@ public class WalkingTrajectoryPath
 
          if (yoGraphicsList != null)
          {
+            zUpViz = new YoFrameVector3D(namePrefix + "ZUpViz" + nameSuffix, worldFrame, registry);
             headingViz = new YoFrameVector3D(namePrefix + "HeadingViz" + nameSuffix, worldFrame, registry);
-            waypointViz = new YoGraphicVector(namePrefix + "WaypointViz" + nameSuffix, position, headingViz, 0.3, YoAppearance.Orange());
-            yoGraphicsList.add(waypointViz);
+            waypointZUpViz = new YoGraphicVector(nameSuffix + "WaypointZUpViz" + nameSuffix, position, zUpViz, 0.1, YoAppearance.Orange());
+            waypointHeadingViz = new YoGraphicVector(namePrefix + "WaypointHeadingViz" + nameSuffix, position, headingViz, 0.3, YoAppearance.Orange());
+            yoGraphicsList.add(waypointZUpViz);
+            yoGraphicsList.add(waypointHeadingViz);
          }
          else
          {
+            zUpViz = null;
             headingViz = null;
-            waypointViz = null;
+            waypointZUpViz = null;
+            waypointHeadingViz = null;
          }
 
          clear();
@@ -324,7 +399,10 @@ public class WalkingTrajectoryPath
       public void updateViz()
       {
          if (headingViz != null)
+         {
+            zUpViz.set(Axis3D.Z);
             RotationMatrixTools.applyYawRotation(yaw.getValue(), Axis3D.X, headingViz);
+         }
       }
 
       public double getPosition(Axis3D axis)
@@ -354,70 +432,74 @@ public class WalkingTrajectoryPath
    {
       private final DMatrixRMaj[] linearSolutions = {new DMatrixRMaj(1, 1), new DMatrixRMaj(1, 1), new DMatrixRMaj(1, 1)};
       private final DMatrixRMaj yawSolution = new DMatrixRMaj(1, 1);
-      private final MultiCubicSpline1DSolver solver = new MultiCubicSpline1DSolver();
+      private final MultiCubicSpline1DSolver[] linearSolvers = {new MultiCubicSpline1DSolver(), new MultiCubicSpline1DSolver(), new MultiCubicSpline1DSolver()};
+      private final MultiCubicSpline1DSolver yawSolver = new MultiCubicSpline1DSolver();
       private double totalDuration;
 
       public void initialize(YoPreallocatedList<WaypointData> waypoints)
       {
-         totalDuration = waypoints.getLast().time.getValue();
+         WaypointData firstWaypoint = waypoints.getFirst();
+         WaypointData lastWaypoint = waypoints.getLast();
+         totalDuration = lastWaypoint.time.getValue();
 
          for (Axis3D axis : Axis3D.values)
          {
-            solver.clearWaypoints();
-            solver.clearWeights();
-            solver.setEndpoints(waypoints.getFirst().getPosition(axis),
-                                waypoints.getFirst().getLinearVelocity(axis),
-                                waypoints.getLast().getPosition(axis),
-                                waypoints.getLast().getLinearVelocity(axis));
+            MultiCubicSpline1DSolver linearSolver = linearSolvers[axis.ordinal()];
+            linearSolver.clearWaypoints();
+            linearSolver.clearWeights();
+            linearSolver.setEndpoints(firstWaypoint.getPosition(axis),
+                                      firstWaypoint.getLinearVelocity(axis) * totalDuration,
+                                      lastWaypoint.getPosition(axis),
+                                      lastWaypoint.getLinearVelocity(axis) * totalDuration);
 
             for (int i = 1; i < waypoints.size() - 1; i++)
             {
                WaypointData waypoint = waypoints.get(i);
-               solver.addWaypoint(waypoint.getPosition(axis), waypoint.time.getValue() / totalDuration);
+               linearSolver.addWaypoint(waypoint.getPosition(axis), waypoint.time.getValue() / totalDuration);
             }
 
-            solver.solve(linearSolutions[axis.ordinal()]);
+            linearSolver.solve(linearSolutions[axis.ordinal()]);
          }
 
-         solver.clearWaypoints();
-         solver.clearWeights();
-         solver.setEndpoints(waypoints.getFirst().yaw.getValue(),
-                             waypoints.getFirst().yawRate.getValue(),
-                             waypoints.getLast().yaw.getValue(),
-                             waypoints.getLast().yawRate.getValue());
+         yawSolver.clearWaypoints();
+         yawSolver.clearWeights();
+         yawSolver.setEndpoints(firstWaypoint.yaw.getValue(),
+                                firstWaypoint.yawRate.getValue() * totalDuration,
+                                lastWaypoint.yaw.getValue(),
+                                lastWaypoint.yawRate.getValue() * totalDuration);
 
          for (int i = 1; i < waypoints.size() - 1; i++)
          {
             WaypointData waypoint = waypoints.get(i);
-            solver.addWaypoint(waypoint.yaw.getValue(), waypoint.time.getValue() / totalDuration);
+            yawSolver.addWaypoint(waypoint.yaw.getValue(), waypoint.time.getValue() / totalDuration);
          }
 
-         solver.solve(yawSolution);
+         yawSolver.solve(yawSolution);
       }
 
       public void computePosition(double time, Tuple3DBasics positionToPack)
       {
-         positionToPack.setX(solver.computePosition(time / totalDuration, linearSolutions[0]));
-         positionToPack.setY(solver.computePosition(time / totalDuration, linearSolutions[1]));
-         positionToPack.setZ(solver.computePosition(time / totalDuration, linearSolutions[2]));
+         positionToPack.setX(linearSolvers[0].computePosition(time / totalDuration, linearSolutions[0]));
+         positionToPack.setY(linearSolvers[1].computePosition(time / totalDuration, linearSolutions[1]));
+         positionToPack.setZ(linearSolvers[2].computePosition(time / totalDuration, linearSolutions[2]));
       }
 
       public double computeYaw(double time)
       {
-         return solver.computePosition(time / totalDuration, yawSolution);
+         return yawSolver.computePosition(time / totalDuration, yawSolution);
       }
 
       public void computeLinearVelocity(double time, Tuple3DBasics velocityToPack)
       {
-         velocityToPack.setX(solver.computeVelocity(time / totalDuration, linearSolutions[0]));
-         velocityToPack.setY(solver.computeVelocity(time / totalDuration, linearSolutions[1]));
-         velocityToPack.setZ(solver.computeVelocity(time / totalDuration, linearSolutions[2]));
+         velocityToPack.setX(linearSolvers[0].computeVelocity(time / totalDuration, linearSolutions[0]));
+         velocityToPack.setY(linearSolvers[1].computeVelocity(time / totalDuration, linearSolutions[1]));
+         velocityToPack.setZ(linearSolvers[2].computeVelocity(time / totalDuration, linearSolutions[2]));
          velocityToPack.scale(1.0 / totalDuration);
       }
 
       public double computeYawRate(double time)
       {
-         return solver.computeVelocity(time / totalDuration, yawSolution) / totalDuration;
+         return yawSolver.computeVelocity(time / totalDuration, yawSolution) / totalDuration;
       }
    }
 }

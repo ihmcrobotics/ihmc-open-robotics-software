@@ -94,7 +94,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final SideDependentList<FrameConvexPolygon2D> defaultFootPolygons = new SideDependentList<>();
 
    private final ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver;
-   private final WalkingTrajectoryPath walkingTrajectoryPath;
 
    protected final LinkedHashMap<ContactablePlaneBody, YoFramePoint2D> footDesiredCenterOfPressures = new LinkedHashMap<>();
    private final YoDouble desiredCoPAlpha;
@@ -161,6 +160,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final YoFramePoint2D yoCenterOfPressure = new YoFramePoint2D("CenterOfPressure", worldFrame, registry);
 
    private WalkingMessageHandler walkingMessageHandler;
+   private WalkingTrajectoryPath walkingTrajectoryPath;
 
    private final YoBoolean controllerFailed = new YoBoolean("controllerFailed", registry);
 
@@ -206,7 +206,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       if (yoGraphicsListRegistry != null)
       {
-         referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry, referenceFrames.getMidFeetUnderPelvisFrame());
+         referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry);
       }
       else
       {

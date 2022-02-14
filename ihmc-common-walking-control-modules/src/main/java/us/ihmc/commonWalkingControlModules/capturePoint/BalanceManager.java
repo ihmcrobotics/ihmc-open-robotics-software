@@ -91,7 +91,6 @@ public class BalanceManager
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final WalkingTrajectoryPath walkingTrajectoryPath;
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
@@ -232,8 +231,6 @@ public class BalanceManager
                          SplitFractionCalculatorParametersReadOnly splitFractionParameters,
                          YoRegistry parentRegistry)
    {
-      this.walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
-
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
 
@@ -418,7 +415,6 @@ public class BalanceManager
       copTrajectoryState.addFootstepTiming(timing);
       footsteps.add(footstep);
       footstepTimings.add(timing);
-      walkingTrajectoryPath.addFootstep(footstep, timing);
    }
 
    public void setPlanarRegionStepConstraintHandler(StepConstraintRegionHandler planarRegionStepConstraint)
@@ -451,11 +447,6 @@ public class BalanceManager
       boolean footstepWasAdjusted = stepAdjustmentController.wasFootstepAdjusted();
       footstep.setPose(stepAdjustmentController.getFootstepSolution());
       return footstepWasAdjusted;
-   }
-
-   public void clearWalkingPath()
-   {
-      walkingTrajectoryPath.clearFootsteps();
    }
 
    public void clearICPPlan()
@@ -596,7 +587,6 @@ public class BalanceManager
 
    public void computeICPPlan()
    {
-      walkingTrajectoryPath.computeTrajectory();
       computeICPPlanInternal(copTrajectory);
    }
 
@@ -886,7 +876,6 @@ public class BalanceManager
 
    public void initializeICPPlanForTransferToStanding()
    {
-      walkingTrajectoryPath.initialize();
       comTrajectoryPlanner.removeCompletedSegments(contactStateManager.getTotalStateDuration());
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
 
@@ -909,7 +898,6 @@ public class BalanceManager
 
    public void initializeICPPlanForTransfer()
    {
-      walkingTrajectoryPath.initialize();
       computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
