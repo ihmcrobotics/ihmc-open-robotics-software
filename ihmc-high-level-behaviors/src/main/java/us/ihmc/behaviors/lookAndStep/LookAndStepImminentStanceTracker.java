@@ -125,6 +125,7 @@ public class LookAndStepImminentStanceTracker
                {
                   foothold.addVertex(vertex);
                }
+               foothold.update();
                imminentStanceFeet.set(side, new MinimalFootstep(side, solePose, foothold,
                                                                 "Look and Step " + side.getPascalCaseName() + " Imminent Stance (Prior)"));
             }
