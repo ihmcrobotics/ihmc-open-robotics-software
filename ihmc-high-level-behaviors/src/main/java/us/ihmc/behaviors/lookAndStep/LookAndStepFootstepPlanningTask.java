@@ -312,11 +312,13 @@ public class LookAndStepFootstepPlanningTask
 
       // move point along body path plan by plan horizon
       Pose3D subGoalPoseBetweenFeet = new Pose3D();
+      double planHorizonDistance = Math.max(lookAndStepParameters.getPlanHorizon(),
+                                            lookAndStepParameters.getNumberOfStepsToTryToPlan() * footstepPlannerParameters.getMaximumStepReach());
       int segmentIndexOfGoal = BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan,
                                                                            closestPointAlongPath,
                                                                            subGoalPoseBetweenFeet.getPosition(),
                                                                            closestSegmentIndex,
-                                                                           lookAndStepParameters.getPlanHorizon());
+                                                                           planHorizonDistance);
 
       statusLogger.info("Found next sub goal: {}", subGoalPoseBetweenFeet);
       // TODO: Calculate orientation based on a trajectory
