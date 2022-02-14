@@ -61,7 +61,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 {
    private final Messager messager;
    private final Stopwatch stopwatch = new Stopwatch();
-   private static final double replanDelay = 2.1;
+   private static final double replanDelay = 0.8;
    private static final double swingDuration = 1.6;
    private static final RobotSide initialStanceSide = RobotSide.RIGHT;
 
@@ -98,6 +98,9 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
    private final AtomicReference<PlanarRegionsList> planarRegions = new AtomicReference<>();
    private final AtomicReference<State> currentState = new AtomicReference<>();
+   private final AtomicBoolean executeRequested = new AtomicBoolean();
+   private final AtomicBoolean replanRequested = new AtomicBoolean();
+   private final AtomicBoolean writeLog = new AtomicBoolean();
    private final FootstepPlanningModule planningModule;
    private final FootstepPlannerLogger logger;
    private final HumanoidReferenceFrames referenceFrames;
@@ -112,7 +115,9 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    {
       WAITING_TO_START,
       PLAN_BODY_PATH,
-      FOLLOW_PATH
+      PLAN_A_STEP,
+      APPROVE_AND_SEND,
+      WAIT_A_BIT
    }
 
    public HeightMapNavigationUpdater(Messager messager,
@@ -142,6 +147,10 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       planningModule = new FootstepPlanningModule("HeightMap", new DefaultVisibilityGraphParameters(), footstepPlannerParameters, new DefaultSwingPlannerParameters(), walkingControllerParameters, footPolygons, null);
       logger = new FootstepPlannerLogger(planningModule);
       planningModule.addCustomTerminationCondition((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> iterations > 1);
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ApproveStep, executeRequested::set);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ReplanStep, replanRequested::set);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.WriteHeightMapLog, writeLog::set);
 
       currentState.set(State.WAITING_TO_START);
 
@@ -224,6 +233,23 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    @Override
    public void handle(long l)
    {
+      // Execute steps
+      if (stopHeightMapNavigation.getAndSet(false))
+      {
+         LogTools.error("Stop requested");
+         currentState.set(State.WAITING_TO_START);
+         writeLog();
+         reset();
+         return;
+      }
+
+      if (writeLog.getAndSet(false))
+      {
+         writeLog();
+         reset();
+         return;
+      }
+
       if (currentState.get() == State.WAITING_TO_START)
       {
          if (!startHeightMapNavigation.getAndSet(false))
@@ -282,39 +308,16 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          bodyPathUnsmoothed.addAll(output.getBodyPathUnsmoothed());
 
          messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, request.getBodyPathWaypoints());
-         currentState.set(State.FOLLOW_PATH);
+         currentState.set(State.PLAN_A_STEP);
+         setStartFootPosesToCurrent();
+         stopwatch.start();
+
+         RobotSide stepSide = lastStepSide.getOppositeSide();
+         request.setRequestedInitialStanceSide(stepSide);
       }
 
-      if (currentState.get() == State.FOLLOW_PATH)
+      if (currentState.get() == State.PLAN_A_STEP)
       {
-         // Execute steps
-         if (stopHeightMapNavigation.getAndSet(false))
-         {
-            LogTools.error("Stop requested");
-            currentState.set(State.WAITING_TO_START);
-
-            // pack all data into one log
-            FootstepPlannerOutput output = planningModule.getOutput();
-            output.getBodyPath().clear();
-            for (int i = 0; i < output.getBodyPath().size(); i++)
-            {
-               output.getBodyPath().add(new Pose3D(request.getBodyPathWaypoints().get(i)));
-            }
-
-            RobotSide side = initialStanceSide.getOppositeSide();
-            for (int i = 0; i < steps.size(); i++)
-            {
-               PlannedFootstep footstep = output.getFootstepPlan().addFootstep(side, new FramePose3D(steps.get(i)));
-               footstep.getFoothold().set(footPolygons.get(side));
-               side = side.getOppositeSide();
-            }
-
-            request.setHeightMapMessage(heightMapUsedForPlanning);
-            logger.logSession();
-
-            reset();
-            return;
-         }
          if (planarRegions.get() == null)
          {
             LogTools.error("No planar regions");
@@ -336,20 +339,18 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          request.setPlanarRegionsList(planarRegions.get());
          request.setRequestedInitialStanceSide(lastStepSide);
 
-         if (firstStep)
-         {
-            setStartFootPosesToCurrent();
-         }
-         else
-         {
-            setStartFootPosesBasedOnLastCommandedStep();
-         }
-
          LogTools.info("Planning step");
          FootstepPlannerOutput output = planningModule.handleRequest(request);
          FootstepPlanningResult result = output.getFootstepPlanningResult();
          LogTools.info(" \t " + result);
          stopwatch.lap();
+
+         footstepDataListMessage.getFootstepDataList().clear();
+         PlannedFootstep footstep = planningModule.getOutput().getFootstepPlan().getFootstep(0);
+         FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
+         footstepDataMessage.getLocation().set(footstep.getFootstepPose().getPosition());
+         footstepDataMessage.getOrientation().set(footstep.getFootstepPose().getOrientation());
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
 
          if ((result != FootstepPlanningResult.FOUND_SOLUTION && result != FootstepPlanningResult.HALTED) || output.getFootstepPlan().getNumberOfSteps() == 0)
          {
@@ -357,28 +358,46 @@ public class HeightMapNavigationUpdater extends AnimationTimer
             return;
          }
 
-         ExecutionMode executionMode = firstStep ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
-         PlannedFootstep footstep = output.getFootstepPlan().getFootstep(0);
-         footstep.limitFootholdVertices();
-         footstep.setSwingDuration(swingDuration);
+         currentState.set(State.APPROVE_AND_SEND);
+      }
 
-         footstepDataListMessage.getFootstepDataList().clear();
-         footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
+      if (currentState.get() == State.APPROVE_AND_SEND)
+      {
+         if (replanRequested.getAndSet(false))
+         {
+            // keep same request
+            currentState.set(State.PLAN_A_STEP);
+            return;
+         }
 
-         footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
-         long messageId = UUID.randomUUID().getLeastSignificantBits();
-         footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
-         footstepDataListMessage.getQueueingProperties().setPreviousMessageId(previousStepMessageId);
-         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessage);
-         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
+         if (executeRequested.getAndSet(false))
+         {
+            ExecutionMode executionMode = ExecutionMode.QUEUE;
 
-         this.firstStep.set(false);
-         lastStepSide = lastStepSide.getOppositeSide();
-         lastStepPose.set(footstep.getFootstepPose());
-         steps.add(new Pose3D(footstep.getFootstepPose()));
-         previousStepMessageId = messageId;
-         logger.logSession();
-         stopwatch.lap();
+            footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
+            long messageId = UUID.randomUUID().getLeastSignificantBits();
+            footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
+            footstepDataListMessage.getQueueingProperties().setPreviousMessageId(previousStepMessageId);
+            messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessage);
+
+            firstStep.set(false);
+            lastStepSide = lastStepSide.getOppositeSide();
+            lastStepPose.set(footstepDataListMessage.getFootstepDataList().get(0).getLocation(), footstepDataListMessage.getFootstepDataList().get(0).getOrientation());
+            steps.add(new Pose3D(lastStepPose));
+            previousStepMessageId = messageId;
+            logger.logSession();
+            stopwatch.lap();
+            setStartFootPosesBasedOnLastCommandedStep();
+         }
+      }
+
+      if (currentState.get() == State.WAIT_A_BIT)
+      {
+         if (stopwatch.lapElapsed() > replanDelay)
+         {
+            currentState.set(State.PLAN_A_STEP);
+            return;
+         }
       }
    }
 
@@ -413,6 +432,28 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       }
    }
 
+   private void writeLog()
+   {
+      // pack all data into one log
+      FootstepPlannerOutput output = planningModule.getOutput();
+      output.getBodyPath().clear();
+      for (int i = 0; i < output.getBodyPath().size(); i++)
+      {
+         output.getBodyPath().add(new Pose3D(request.getBodyPathWaypoints().get(i)));
+      }
+
+      RobotSide side = initialStanceSide.getOppositeSide();
+      for (int i = 0; i < steps.size(); i++)
+      {
+         PlannedFootstep footstep = output.getFootstepPlan().addFootstep(side, new FramePose3D(steps.get(i)));
+         footstep.getFoothold().set(footPolygons.get(side));
+         side = side.getOppositeSide();
+      }
+
+      request.setHeightMapMessage(heightMapUsedForPlanning);
+      logger.logSession();
+   }
+
    private void reset()
    {
       stopHeightMapNavigation.set(false);
@@ -422,6 +463,8 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       lastStepSide = initialStanceSide;
       stopwatch.start();
       steps.clear();
+      replanRequested.set(false);
+      executeRequested.set(false);
    }
 
    public void destroy()
