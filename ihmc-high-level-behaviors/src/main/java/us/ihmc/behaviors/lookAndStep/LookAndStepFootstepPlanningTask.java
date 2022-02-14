@@ -138,7 +138,10 @@ public class LookAndStepFootstepPlanningTask
 
          localizationResultInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
          planarRegionsManager.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
-         footstepCompletedInput.addCallback(() -> executor.clearQueueAndExecute(this::evaluateAndRun)); // FIXME should this be interrupt and execute?
+         footstepCompletedInput.addCallback(() -> {
+            executor.interruptAndReset(); // stop the current plan, it's out of date.
+            executor.clearQueueAndExecute(this::evaluateAndRun);
+         });
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
