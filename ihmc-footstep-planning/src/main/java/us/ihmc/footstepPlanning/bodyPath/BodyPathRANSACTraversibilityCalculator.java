@@ -24,7 +24,6 @@ public class BodyPathRANSACTraversibilityCalculator
    static final double sampleSizeY = 0.35;
    static final double halfStanceWidth = 0.25;
    static final double heightWindow = 0.15;
-   static final double nonGroundDiscount = 0.6;
    static final double inclineWeight = 0.1;
 
    static final double minPercent = 0.2;
@@ -88,21 +87,21 @@ public class BodyPathRANSACTraversibilityCalculator
       double parentHeight = gridHeightMap.applyAsDouble(parentNode);
       double nodeHeight = gridHeightMap.applyAsDouble(node);
 
-      double leftTraversibility = compute(RobotSide.LEFT, node, yawIndex, parentHeight, true);
-      double rightTraversibility = compute(RobotSide.RIGHT, node, yawIndex, parentHeight, true);
+      double leftTraversibility = compute(RobotSide.LEFT, node, yawIndex, parentHeight, nodeHeight, true);
+      double rightTraversibility = compute(RobotSide.RIGHT, node, yawIndex, parentHeight, nodeHeight,true);
 
       stanceScore.get(RobotSide.LEFT).set(leftTraversibility);
       stanceScore.get(RobotSide.RIGHT).set(rightTraversibility);
 
-      double alphaStance = 0.6;
-      double alphaStep = 0.5;
+      double alphaStance = 4.0;
+      double alphaStep = 2.0;
 
       double previousLeftTraversibility = 1.0;
       double previousRightTraversibility = 1.0;
       if (!startNode.equals(parentNode))
       {
-         previousLeftTraversibility = compute(RobotSide.LEFT, parentNode, yawIndex, nodeHeight, false);
-         previousRightTraversibility = compute(RobotSide.RIGHT, parentNode, yawIndex, nodeHeight, false);
+         previousLeftTraversibility = compute(RobotSide.LEFT, parentNode, yawIndex, nodeHeight, parentHeight, false);
+         previousRightTraversibility = compute(RobotSide.RIGHT, parentNode, yawIndex, nodeHeight, parentHeight, false);
       }
 
       double stanceTraversibility = Math.max(leftTraversibility, rightTraversibility);
@@ -121,7 +120,7 @@ public class BodyPathRANSACTraversibilityCalculator
       return stanceScore.get(RobotSide.LEFT).getValue() >= minPercent || stanceScore.get(RobotSide.RIGHT).getValue() >= minPercent;
    }
 
-   private double compute(RobotSide side, BodyPathLatticePoint node, int yawIndex, double nominalHeight, boolean updateYoVariables)
+   private double compute(RobotSide side, BodyPathLatticePoint node, int yawIndex, double oppositeHeight, double nominalHeight, boolean updateYoVariables)
    {
       stepPose.set(node.getX(), node.getY(), getYaw(yawIndex));
       stepPose.appendTranslation(0.0, side.negateIfRightSide(halfStanceWidth));
@@ -136,8 +135,24 @@ public class BodyPathRANSACTraversibilityCalculator
       int numberOfTraversibleCells = 0;
 
       double traversibilityScoreNumerator = 0.0;
-      double minHeight = nominalHeight - heightWindow;
-      double maxHeight = nominalHeight + heightWindow;
+      double minHeight = Math.max(oppositeHeight, nominalHeight) - heightWindow;
+      double maxHeight = Math.min(oppositeHeight, nominalHeight) + heightWindow;
+      double averageHeight = 0.5 * (nominalHeight + oppositeHeight);
+
+      double lowestNonGroundAlpha = 0.85;
+      double heightAboveGround = Math.abs(averageHeight - heightMapData.getEstimatedGroundHeight());
+      double nonGroundAlpha = 1.0;
+      double groundProximity = 0.07;
+      if (heightAboveGround < groundProximity)
+      {
+         nonGroundAlpha = lowestNonGroundAlpha + (1.0 - lowestNonGroundAlpha) * heightAboveGround / groundProximity;
+      }
+
+      if (minHeight > maxHeight - 1e-3)
+      {
+         traversibileCells.get(side).set(0);
+         return 0.0;
+      }
 
       for (int i = 0; i < xOffsets.size(); i++)
       {
@@ -155,22 +170,20 @@ public class BodyPathRANSACTraversibilityCalculator
          {
             numberOfTraversibleCells++;
 
-            if (heightMapData.isCellAtGroundPlane(xQuery, yQuery))
-            {
-               traversibilityScoreNumerator += 1.0;
-            }
-            else
-            {
-               double heightAboveGroundPlane = heightQuery - heightMapData.getEstimatedGroundHeight();
-               double maxHeightFullDiscount = 0.07;
-               double nonGroundPlaneAlpha = EuclidCoreTools.clamp((heightWindow - heightAboveGroundPlane) / (heightWindow - maxHeightFullDiscount), 0.0, 1.0);
-               double cellValue = EuclidCoreTools.interpolate(1.0, nonGroundDiscount, nonGroundPlaneAlpha);
+            double heightDeadband = 0.03;
+            double deltaHeight = Math.max(0.0, Math.abs(averageHeight - heightQuery) - heightDeadband);
+            double cellPercentage = 1.0 - deltaHeight / heightWindow;
+            double nonGroundDiscount = 1.0;
 
-               UnitVector3DBasics normal = surfaceNormalCalculator.getSurfaceNormal(xQuery, yQuery);
-               double incline = Math.acos(normal.getZ());
-               double inclineAlpha = MathTools.clamp((incline - minNormalToPenalize) / (maxNormalToPenalize - minNormalToPenalize), 0.0, 1.0);
-               traversibilityScoreNumerator += ((1.0 - inclineWeight) * cellValue + inclineWeight * inclineAlpha);
+            if (!heightMapData.isCellAtGroundPlane(xQuery, yQuery))
+            {
+               nonGroundDiscount = nonGroundAlpha;
             }
+
+            UnitVector3DBasics normal = surfaceNormalCalculator.getSurfaceNormal(xQuery, yQuery);
+            double incline = Math.max(0.0, Math.acos(normal.getZ()) - minNormalToPenalize);
+            double inclineAlpha = MathTools.clamp((maxNormalToPenalize - incline) / (maxNormalToPenalize - minNormalToPenalize), 0.0, 1.0);
+            traversibilityScoreNumerator += nonGroundDiscount * ((1.0 - inclineWeight) * cellPercentage + inclineWeight * inclineAlpha);
          }
       }
 

@@ -233,6 +233,12 @@ public class AStarBodyPathSmootherTest
    }
 
    @Test
+   public void testRamp2()
+   {
+      runDataset("ramp_2");
+   }
+
+   @Test
    public void testRampAtAnAngle()
    {
       runDataset("ramp_at_an_angle");

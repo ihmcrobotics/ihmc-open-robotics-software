@@ -13,6 +13,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.footstepPlanning.bodyPath.HeightMapLeastSquaresNormalCalculator;
 import us.ihmc.footstepPlanning.bodyPath.HeightMapRANSACNormalCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
@@ -49,9 +50,12 @@ public class HeightMapDataVisualizer
    public HeightMapDataVisualizer()
    {
 //      File file = loadThroughChooser();
-//      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stepping_stones_4.json");
-      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stairs_2.json");
+      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stepping_stones_3.json");
+//      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "stairs_2.json");
 //      File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "cinders.json");
+
+//            File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "ramp_2.json");
+//            File file = new File(System.getProperty("user.home") + File.separator + "heightMapDatasets" + File.separator + "ramp_3.json");
 
       if (file == null)
          return;
@@ -83,21 +87,24 @@ public class HeightMapDataVisualizer
 
       long t0 = System.nanoTime();
 
-      HeightMapRANSACNormalCalculator surfaceNormalCalculator = new HeightMapRANSACNormalCalculator();
-      surfaceNormalCalculator.initialize(heightMapData);
+      HeightMapLeastSquaresNormalCalculator lsSurfaceNormalCalculator = new HeightMapLeastSquaresNormalCalculator();
+      lsSurfaceNormalCalculator.computeSurfaceNormals(heightMapData, 0.4);
+
+//      HeightMapRANSACNormalCalculator surfaceNormalCalculator = new HeightMapRANSACNormalCalculator();
+//      surfaceNormalCalculator.initialize(heightMapData);
 
       long t1 = System.nanoTime();
       System.out.println("Surface normal calculation: " + Conversions.nanosecondsToSeconds(t1 - t0) + " sec");
 
       HeightMapPlanarRegionCalculator planarRegionCalculator = new HeightMapPlanarRegionCalculator();
-      planarRegionCalculator.computeRegions(heightMapData, surfaceNormalCalculator::getSurfaceNormal);
+//      planarRegionCalculator.computeRegions(heightMapData, lsSurfaceNormalCalculator::getSurfaceNormal);
 
       long t2 = System.nanoTime();
       System.out.println("Planar region calculation:  " + Conversions.nanosecondsToSeconds(t2 - t1) + " sec");
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
       scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(buildHeightMapGraphics(heightMapData, surfaceNormalCalculator::getSurfaceNormal, planarRegionCalculator));
+      scs.addStaticLinkGraphics(buildHeightMapGraphics(heightMapData, lsSurfaceNormalCalculator::getSurfaceNormal, planarRegionCalculator));
 
       // good values
 //      scs.addStaticLinkGraphics(buildSnapGraphics(heightMapData,
