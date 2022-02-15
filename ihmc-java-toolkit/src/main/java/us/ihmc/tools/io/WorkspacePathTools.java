@@ -22,11 +22,10 @@ public class WorkspacePathTools
     */
    public static Path findPathToResource(String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String resourcePathString)
    {
-      return PathTools.findDirectoryInline(directoryNameToAssumePresent)
-                      .resolve(subsequentPathToResourceFolder)
-                      .resolve(resourcePathString)
-                      .toAbsolutePath()
-                      .normalize();
+      Path directoryInline = PathTools.findDirectoryInline(directoryNameToAssumePresent);
+      if (directoryInline != null)
+         return directoryInline.resolve(subsequentPathToResourceFolder).resolve(resourcePathString).toAbsolutePath().normalize();
+      return null;
    }
 
    /**

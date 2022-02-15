@@ -175,7 +175,8 @@ public class RecoveryTransferState extends PushRecoveryState
                                                      desiredCoP,
                                                      balanceManager.getDesiredICP(),
                                                      capturePoint2d,
-                                                     balanceManager.getFinalDesiredICP());
+                                                     balanceManager.getFinalDesiredICP(),
+                                                     balanceManager.getLinearMomentumRateControlModuleInput().getPerfectCoP());
 
          if (feetManager.okForPointToeOff())
          {
