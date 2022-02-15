@@ -7,7 +7,6 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionCalculator;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
 import us.ihmc.commons.FormattingTools;
@@ -15,23 +14,13 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -61,13 +50,11 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
@@ -244,9 +231,11 @@ public class LookAndStepFootstepPlanningTask
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          lidarREAPlanarRegionReceptionTimerSnapshot = lidarREAPlanarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
-         capturabilityBasedStatusReceptionTimerSnapshot = capturabilityBasedStatusExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
+         capturabilityBasedStatusReceptionTimerSnapshot
+               = capturabilityBasedStatusExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          robotConfigurationData = robotConfigurationDataInput.getLatest();
-         robotConfigurationDataReceptionTimerSnapshot = robotConfigurationDataExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
+         robotConfigurationDataReceptionTimerSnapshot
+               = robotConfigurationDataExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepParameters.getWaitTimeAfterPlanFailed());
          localizationResult = localizationResultInput.getLatest();
          syncedRobot.update();
@@ -319,7 +308,8 @@ public class LookAndStepFootstepPlanningTask
 
       // move point along body path plan by plan horizon
       Pose3D subGoalPoseBetweenFeet = new Pose3D();
-      double planHorizonDistance = lookAndStepParameters.getPlanHorizon() + (lookAndStepParameters.getNumberOfStepsToTryToPlan() - 1) * footstepPlannerParameters.getMaximumStepReach();
+      double planHorizonDistance = lookAndStepParameters.getPlanHorizon()
+                                   + (lookAndStepParameters.getNumberOfStepsToTryToPlan() - 1) * footstepPlannerParameters.getMaximumStepReach();
       BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan, closestPointAlongPath, subGoalPoseBetweenFeet, closestSegmentIndex, planHorizonDistance);
 
       statusLogger.info("Found next sub goal: {}", subGoalPoseBetweenFeet);
@@ -390,7 +380,8 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
 
-      double plannerTimeout = /*Math.max(lookAndStepParameters.getFootstepPlannerTimeout(), */lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration();
+      double plannerTimeout = /*Math.max(lookAndStepParameters.getFootstepPlannerTimeout(), */
+            lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration();
       plannerTimeout = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION ? plannerTimeout : 2.0;
       // TODO: Set start footholds!!
       // TODO: only set square up steps at the end
@@ -403,8 +394,8 @@ public class LookAndStepFootstepPlanningTask
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getSwingPlanningModule().getSwingPlannerParameters().set(swingPlannerParameters);
       footstepPlanningModule.clearCustomTerminationConditions();
-      footstepPlanningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestSecondToFinalStep, bestPathSize) -> bestPathSize
-                                                                                                                                                >= lookAndStepParameters.getNumberOfStepsToTryToPlan());
+      footstepPlanningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestSecondToFinalStep, bestPathSize) ->
+                                                                 bestPathSize >= lookAndStepParameters.getNumberOfStepsToTryToPlan());
       MinimumFootstepChecker stepInPlaceChecker = new MinimumFootstepChecker();
       stepInPlaceChecker.setStanceFeetPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(), startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       footstepPlanningModule.getChecker().clearCustomFootstepCheckers();
