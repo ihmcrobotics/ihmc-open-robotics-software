@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.lists.PreallocatedList;
 import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -16,6 +16,7 @@ import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
@@ -28,11 +29,14 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.lists.YoPreallocatedList;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.trajectories.generators.MultiCubicSpline1DSolver;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -40,6 +44,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingTrajectoryPath
 {
+   private static final int MAX_NUMBER_OF_FOOTSTEPS = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String namePrefix = "walkingTrajectoryPath";
@@ -49,8 +54,8 @@ public class WalkingTrajectoryPath
 
    private final YoPreallocatedList<WaypointData> waypoints;
 
-   private final RecyclingArrayList<Footstep> footsteps = new RecyclingArrayList<>(Footstep::new);
-   private final RecyclingArrayList<FootstepTiming> footstepTimings = new RecyclingArrayList<>(FootstepTiming::new);
+   private final PreallocatedList<Footstep> footsteps = new PreallocatedList<>(Footstep.class, Footstep::new, MAX_NUMBER_OF_FOOTSTEPS);
+   private final PreallocatedList<FootstepTiming> footstepTimings = new PreallocatedList<>(FootstepTiming.class, FootstepTiming::new, MAX_NUMBER_OF_FOOTSTEPS);
 
    private final DoubleProvider time;
    private final YoDouble startTime = new YoDouble(namePrefix + "StartTime", registry);
@@ -89,12 +94,19 @@ public class WalkingTrajectoryPath
       }
    };
 
+   private final DoubleParameter filterBreakFrequency;
+
+   private final double dt;
+   private final ExecutionTimer timer = new ExecutionTimer(namePrefix + "Timer", registry);
+
    public WalkingTrajectoryPath(DoubleProvider time,
+                                double updateDT,
                                 SideDependentList<MovingReferenceFrame> soleFrames,
                                 YoGraphicsListRegistry yoGraphicsListRegistry,
                                 YoRegistry parentRegistry)
    {
       this.time = time;
+      this.dt = updateDT;
       this.soleFrames = soleFrames;
 
       YoGraphicsList yoGraphicList;
@@ -106,7 +118,7 @@ public class WalkingTrajectoryPath
                                            SupplierBuilder.indexedSupplier(i -> new WaypointData(namePrefix, Integer.toString(i), registry, yoGraphicList)),
                                            "walkingPath",
                                            registry,
-                                           10);
+                                           MAX_NUMBER_OF_FOOTSTEPS + 1);
       if (yoGraphicList != null)
       {
          currentZUpViz = new YoFrameVector3D(namePrefix + "CurrentZUp", worldFrame, registry);
@@ -122,6 +134,8 @@ public class WalkingTrajectoryPath
          currentHeadingViz = null;
          trajectoryPositionViz = null;
       }
+
+      filterBreakFrequency = new DoubleParameter(namePrefix + "FilterBreakFrequency", registry, 5.0);
 
       reset();
       clearFootsteps();
@@ -149,6 +163,9 @@ public class WalkingTrajectoryPath
    {
       for (int i = 0; i < walkingMessageHandler.getCurrentNumberOfFootsteps(); i++)
       {
+         if (footsteps.remaining() == 0)
+            break;
+
          walkingMessageHandler.peekFootstep(i, footsteps.add());
          walkingMessageHandler.peekTiming(i, footstepTimings.add());
       }
@@ -156,6 +173,9 @@ public class WalkingTrajectoryPath
 
    public void addFootstep(Footstep footstep, FootstepTiming footstepTiming)
    {
+      if (footsteps.remaining() == 0)
+         return;
+
       footsteps.add().set(footstep);
       footstepTimings.add().set(footstepTiming);
    }
@@ -235,9 +255,11 @@ public class WalkingTrajectoryPath
       return AngleTools.computeAngleAverage(firstPose.getYaw(), secondPose.getYaw());
    }
 
-   public void computeTrajectory(WalkingStateEnum currentState)
+   public void computeTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
    {
-      updateWaypoints(currentState);
+      timer.startMeasurement();
+
+      updateWaypoints(leftFootConstraintType, rightFootConstraintType);
       updatePolynomials();
 
       double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
@@ -266,6 +288,8 @@ public class WalkingTrajectoryPath
       walkingTrajectoryPathFrame.update();
 
       updateViz();
+
+      timer.stopMeasurement();
    }
 
    private final Point3D tempBallPosition = new Point3D();
@@ -290,40 +314,42 @@ public class WalkingTrajectoryPath
       }
    }
 
-   private void updateWaypoints(WalkingStateEnum currentState)
+   private final Point3D newWaypointPosition = new Point3D();
+
+   private void updateWaypoints(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
    {
-      if (currentState.isDoubleSupport())
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            RigidBodyTransform soleTransform = soleFrames.get(robotSide).getTransformToRoot();
-            supportFootPoses.get(robotSide).set(soleTransform);
-            tempFootPoses.get(robotSide).set(soleTransform);
-         }
-      }
-      else
-      {
-         RobotSide supportSide = currentState.getSupportSide();
-         RigidBodyTransform soleTransform = soleFrames.get(supportSide).getTransformToRoot();
-         supportFootPoses.get(supportSide).set(soleTransform);
+      if (leftFootConstraintType == ConstraintType.FULL)
+         supportFootPoses.get(RobotSide.LEFT).set(soleFrames.get(RobotSide.LEFT).getTransformToRoot());
+      if (rightFootConstraintType == ConstraintType.FULL)
+         supportFootPoses.get(RobotSide.RIGHT).set(soleFrames.get(RobotSide.RIGHT).getTransformToRoot());
 
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            tempFootPoses.get(robotSide).set(supportFootPoses.get(robotSide));
-         }
-
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         tempFootPoses.get(robotSide).set(supportFootPoses.get(robotSide));
       }
 
+      double filterAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
+
+      double newYaw = computeAverage(tempFootPoses, newWaypointPosition);
       WaypointData firstWaypoint = waypoints.getFirst();
-      firstWaypoint.yaw.set(computeAverage(supportFootPoses, firstWaypoint.position));
-      
+      updateFilteredWaypoint(firstWaypoint, newWaypointPosition, newYaw, filterAlpha);
+
       if (!footsteps.isEmpty())
       {
          Footstep firstFootstep = footsteps.get(0);
          tempFootPoses.get(firstFootstep.getRobotSide()).set(firstFootstep.getFootstepPose());
+         newYaw = computeAverage(tempFootPoses, newWaypointPosition);
          WaypointData secondWaypoint = waypoints.get(1);
-         secondWaypoint.yaw.set(computeAverage(tempFootPoses, secondWaypoint.position));
+         updateFilteredWaypoint(secondWaypoint, newWaypointPosition, newYaw, filterAlpha);
+         secondWaypoint.yaw.set(firstWaypoint.yaw.getValue()
+               + AngleTools.computeAngleDifferenceMinusPiToPi(secondWaypoint.yaw.getValue(), firstWaypoint.yaw.getValue()));
       }
+   }
+
+   public static void updateFilteredWaypoint(WaypointData waypoint, Point3DReadOnly newPosition, double newYaw, double alpha)
+   {
+      waypoint.position.interpolate(newPosition, waypoint.position, alpha);
+      waypoint.yaw.set(AngleTools.interpolateAngle(newYaw, waypoint.yaw.getValue(), alpha));
    }
 
    private void updatePolynomials()

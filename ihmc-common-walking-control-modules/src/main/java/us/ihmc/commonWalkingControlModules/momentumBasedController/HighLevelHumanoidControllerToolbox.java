@@ -189,7 +189,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.footSwitches = new SideDependentList<>(footSwitches);
       this.wristForceSensors = wristForceSensors;
 
-      walkingTrajectoryPath = new WalkingTrajectoryPath(yoTime, fullRobotModel.getSoleFrames(), yoGraphicsListRegistry, registry);
+      walkingTrajectoryPath = new WalkingTrajectoryPath(yoTime, controlDT, fullRobotModel.getSoleFrames(), yoGraphicsListRegistry, registry);
       referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       referenceFrameHashCodeResolver.put(walkingTrajectoryPath.getWalkingTrajectoryPathFrame());
 
