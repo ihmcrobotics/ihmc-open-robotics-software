@@ -5,12 +5,15 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialBasics;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -45,36 +48,36 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
    private final SideDependentList<YoDouble> desiredKneeLengths = new SideDependentList<YoDouble>(q_d_leftKnee, q_d_rightKnee);
    private final SideDependentList<YoDouble> desiredHipAngles = new SideDependentList<YoDouble>(q_d_leftHip, q_d_rightHip);
    private final SideDependentList<YoDouble> worldHipAngles = new SideDependentList<YoDouble>(q_leftHipWorld, q_rightHipWorld);
+   private final SideDependentList<StateMachine<States, State>> stateMachines;
 
    private final YoDouble desiredHeight = new YoDouble("desiredHeight", registry);
-
    private final YoDouble orbitalEnergy = new YoDouble("orbitalEnergy", registry);
-
    private final YoDouble strideLength = new YoDouble("strideLength", registry);
-
    private final YoDouble hipDiffAngle = new YoDouble("hipDiffAngle", registry);
+   private final YoDouble swingTime = new YoDouble("swingTime", registry);
 
-   private double timeOfLastFootSwitch = 0.0;
-   private boolean footLocationCalculated = false;
+   private PolynomialBasics trajectorySwingHipPitch;
+   private PolynomialBasics trajectorySwingKneeLength;
+   private Vector3DReadOnly footLocation;
 
    private enum States
    {
       SUPPORT, SWING;
    }
 
-   private final SideDependentList<StateMachine<States, State>> stateMachines;
-
+   private double timeOfLastFootSwitch = 0.0;
+   private boolean footLocationCalculated = false;
    private final double g = 9.81;
    private double desiredTopVelocity = 0.7;
    private double desiredEnergy = 0.5 * desiredTopVelocity * desiredTopVelocity;
-   private double stepLength = 0.6;
-   private Vector3DReadOnly footLocation;
 
    public LIPMWalkerControllerBhavyansh(LIPMWalkerRobot robot)
    {
       this.robot = robot;
 
       t = (YoDouble) robot.getRobot().findVariable("t");
+      trajectorySwingHipPitch = new YoPolynomial("trajectorySwingHipAngle", 6, registry);
+      trajectorySwingKneeLength = new YoPolynomial("trajectorySwingKneeLength", 6, registry);
 
       initialize();
 
@@ -85,11 +88,11 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
    public void initialize()
    {
 
-      kpKnee.set(500.0);
-      kdKnee.set(50.0);
+      kpKnee.set(1200.0);
+      kdKnee.set(800.0);
 
-      kpHip.set(1000.0);
-      kdHip.set(60.0);
+      kpHip.set(700.0);
+      kdHip.set(40.0);
 
       q_d_leftKnee.set(0.8);
       q_d_rightKnee.set(0.7);
@@ -100,6 +103,14 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       desiredHeight.set(0.8);
 
       strideLength.set(0.2);
+      swingTime.set(0.4);
+
+
+      footLocation = calculateStepLocation();
+      footXTarget.set(footLocation.getX());
+
+      calculateSwingTrajectories(RobotSide.RIGHT, swingTime.getValue() / 2);
+
 
    }
 
@@ -149,51 +160,55 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       worldHipAngles.get(side).set(robot.getHipAngle(side) + robot.getBodyPitchAngle());
    }
 
-   private void controlSwingLeg(RobotSide side, Vector3DReadOnly footLocation)
+   private void controlSwingLeg(RobotSide side, double timeInState)
    {
-      double kneeLength;
-      double kneeVelocity;
       double feedBackKneeForce;
-      double desiredHipAngle;
 
       double hipAngle = robot.getHipAngle(side) + robot.getBodyPitchAngle();
       worldHipAngles.get(side).set(hipAngle);
 
       double supportHipAngle = robot.getHipAngle(side.getOppositeSide()) + robot.getBodyPitchAngle();
       double hipVelocity = robot.getHipVelocity(side);
+      double kneeLength = robot.getKneeLength(side);
+      double kneeVelocity = robot.getKneeVelocity(side);
 
-      double desiredKneeLength = EuclidCoreTools.squareRoot(footLocation.lengthSquared() / 4 + desiredHeight.getValue() * desiredHeight.getValue());
-
-      /* +++++++++++++++++++++++++++++++++++ Compute and set knee force. ++++++++++++++++++++++++++++++++++++++++++++++*/
-      kneeLength = robot.getKneeLength(side);
-      kneeVelocity = robot.getKneeVelocity(side);
-
-      desiredHipAngle = -EuclidCoreTools.atan2(footLocation.length() / 2, desiredHeight.getValue());
-      if (hipAngle - 0.1 < desiredHipAngle && worldHipAngles.get(side.getOppositeSide()).getValue() + 0.05 > -desiredHipAngle)
-         desiredKneeLength = EuclidCoreTools.squareRoot(footLocation.lengthSquared() / 4 + desiredHeight.getValue() * desiredHeight.getValue()) + 0.03;
-      else
-         desiredKneeLength = 0.75;
-
+      /* ----------------------------------- Compute and set knee force. ----------------------------------------------*/
+      trajectorySwingKneeLength.compute(timeInState);
+      double desiredKneeLength = trajectorySwingKneeLength.getValue();
+      double desiredKneeVelocity = trajectorySwingKneeLength.getVelocity();
+      feedBackKneeForce = 3000 * (desiredKneeLength - kneeLength) + 200 * (desiredKneeVelocity - kneeVelocity);
       desiredKneeLengths.get(side).set(desiredKneeLength);
-
-      feedBackKneeForce = 3000 * (desiredKneeLength - kneeLength) + 200 * (0.0 - kneeVelocity);
       robot.setKneeForce(side, feedBackKneeForce);
 
-      /* +++++++++++++++++++++++++++++++++++ Compute and set hip torque. ++++++++++++++++++++++++++++++++++++++++++++*/
+      /* ----------------------------------- Compute and set hip torque. --------------------------------------------*/
+      trajectorySwingHipPitch.compute(timeInState);
+      double desiredHipAngle = trajectorySwingHipPitch.getValue();
+      double desiredHipVelocity = trajectorySwingHipPitch.getVelocity();
+      double feedBackHipTorque = kpHip.getValue() * (desiredHipAngle - hipAngle) + kdHip.getValue() * (desiredHipVelocity - hipVelocity);
       desiredHipAngles.get(side).set(desiredHipAngle);
-      double feedBackHipTorque = kpHip.getValue() * (desiredHipAngle - hipAngle) + kdHip.getValue() * (0.0 - hipVelocity);
       robot.setHipTorque(side, feedBackHipTorque);
    }
 
    Vector3DReadOnly calculateStepLocation()
    {
       double energy = orbitalEnergy.getValue();
-      double x_final = stepLength / 2 + desiredHeight.getValue() / (g * stepLength) * (desiredEnergy - energy);
+      double x_final = strideLength.getValue() / 2 + desiredHeight.getValue() / (g * strideLength.getValue()) * (desiredEnergy - energy);
 
       LogTools.info("Xf: {} \tEnergy: {} \tDesiredEnergy: {}", x_final, energy, desiredEnergy);
 
       Vector3DReadOnly footLocation = new Vector3D(x_final, 0.0, 0.0);
       return footLocation;
+   }
+
+   private void calculateSwingTrajectories(RobotSide swingSide, double totalTime)
+   {
+      double hipAngle = worldHipAngles.get(swingSide).getValue();
+      double kneeLength = robot.getKneeLength(swingSide);
+      double desiredKneeLength = EuclidCoreTools.squareRoot(footLocation.lengthSquared() / 4 + desiredHeight.getValue() * desiredHeight.getValue());
+      double desiredHipAngle = -EuclidCoreTools.atan2(footLocation.length() / 2, desiredHeight.getValue());
+      trajectorySwingHipPitch.setQuintic(0.0, totalTime, hipAngle, 0.0, 0.0, desiredHipAngle, 0.0, 0.0);
+      trajectorySwingKneeLength.setQuintic(0.0, totalTime, 0.75, 0.0, 0.0, desiredKneeLength + 0.01, 0.0, 0.0);
+
    }
 
    private SideDependentList<StateMachine<States, State>> setupStateMachines()
@@ -277,15 +292,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       @Override
       public void doAction(double timeInState)
       {
-         if(t.getValue() - timeOfLastFootSwitch < 0.1)
-         {
-            footLocation = calculateStepLocation();
-
-
-            footXTarget.set(footLocation.getX());
-            footLocationCalculated = true;
-         }
-         controlSwingLeg(robotSide, footLocation);
+         controlSwingLeg(robotSide, timeInState);
       }
 
       @Override
@@ -324,11 +331,14 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       public boolean testCondition(double timeInCurrentState)
       {
          double timeDiff = t.getValue() - timeOfLastFootSwitch;
-         boolean fs = robot.getFootSwitch(robotSide) && timeDiff > 0.1;
+         boolean fs = robot.getFootSwitch(robotSide) && timeDiff > 0.1; // Eliminates switch bouncing.
          if (fs)
          {
-
+            footLocation = calculateStepLocation();
             footXTarget.set(footLocation.getX());
+
+            calculateSwingTrajectories(robotSide.getOppositeSide(), swingTime.getValue());
+
             timeOfLastFootSwitch = t.getValue();
          }
          return fs;
