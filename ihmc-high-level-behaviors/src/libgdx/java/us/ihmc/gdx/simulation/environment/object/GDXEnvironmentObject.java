@@ -135,9 +135,14 @@ public class GDXEnvironmentObject
 
    public void getThisTransformForCopyToBullet(Matrix4 transformToWorld)
    {
-      bulletCollisionSpecificationFrame.update();
-      tempTransform.set(bulletCollisionSpecificationFrame.getTransformToWorldFrame());
+      getThisTransformForCopyToBullet(tempTransform);
       GDXTools.toGDX(tempTransform, transformToWorld);
+   }
+
+   public void getThisTransformForCopyToBullet(RigidBodyTransform transformToWorld)
+   {
+      bulletCollisionSpecificationFrame.update();
+      transformToWorld.set(bulletCollisionSpecificationFrame.getTransformToWorldFrame());
    }
 
    public GDXEnvironmentObject(String titleCasedName, GDXEnvironmentObjectFactory factory)
