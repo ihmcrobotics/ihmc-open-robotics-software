@@ -186,6 +186,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ReplanStep = topic("ReplanStep");
    public static final Topic<Boolean> WriteHeightMapLog = topic("WriteHeightMapLog");
    public static final Topic<Boolean> ResendLastStep = topic("ResendLastStep");
+   public static final Topic<Boolean> ReconnectRos1Node = topic("ReconnectRos1Node");
 
    // Logging
    public static final Topic<Boolean> RequestGenerateLog = topic("RequestGenerateLog");

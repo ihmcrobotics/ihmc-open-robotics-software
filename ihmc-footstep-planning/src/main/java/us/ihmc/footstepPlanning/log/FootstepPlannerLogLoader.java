@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -38,6 +39,7 @@ import java.io.*;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class FootstepPlannerLogLoader
@@ -539,35 +541,58 @@ public class FootstepPlannerLogLoader
       return polygon;
    }
 
-   public static void main(String[] args)
+   public static void main(String[] args) throws IOException
    {
+//      FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
+//      LoadResult loadResult = logLoader.load();
+//      if (loadResult != LoadResult.LOADED)
+//      {
+//         return;
+//      }
+//
+//      FootstepPlannerLog log = logLoader.getLog();
+//      FootstepPlanningRequestPacket requestPacket = log.getRequestPacket();
+//      Pose3D startPose = new Pose3D();
+//      Pose3D goalPose = new Pose3D();
+//      startPose.interpolate(requestPacket.getStartLeftFootPose(), requestPacket.getStartRightFootPose(), 0.5);
+//      goalPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
+//
+//      String dataSetName = "20210419_111333_GPUCinders1";
+//      PlanarRegionsListMessage planarRegionsMessage = requestPacket.getPlanarRegionsListMessage();
+//      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
+//
+//      DataSet dataSet = new DataSet(dataSetName, planarRegionsList);
+//
+//      PlannerInput plannerInput = new PlannerInput();
+//      plannerInput.setStartPosition(startPose.getPosition());
+//      plannerInput.setStartYaw(startPose.getYaw());
+//      plannerInput.setGoalPosition(goalPose.getPosition());
+//      plannerInput.setGoalYaw(goalPose.getYaw());
+//      dataSet.setPlannerInput(plannerInput);
+//
+//      DataSetIOTools.exportDataSet(dataSet);
+
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
       LoadResult loadResult = logLoader.load();
-      if (loadResult != LoadResult.LOADED)
-      {
-         return;
-      }
 
       FootstepPlannerLog log = logLoader.getLog();
-      FootstepPlanningRequestPacket requestPacket = log.getRequestPacket();
-      Pose3D startPose = new Pose3D();
-      Pose3D goalPose = new Pose3D();
-      startPose.interpolate(requestPacket.getStartLeftFootPose(), requestPacket.getStartRightFootPose(), 0.5);
-      goalPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
+      HeightMapMessage heightMapMessage = log.getRequestPacket().getHeightMapMessage();
 
-      String dataSetName = "20210419_111333_GPUCinders1";
-      PlanarRegionsListMessage planarRegionsMessage = requestPacket.getPlanarRegionsListMessage();
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
+      JSONSerializer<HeightMapMessage> serializer = new JSONSerializer<>(new HeightMapMessagePubSubType());
+      byte[] serializedHeightMap = serializer.serializeToBytes(heightMapMessage);
 
-      DataSet dataSet = new DataSet(dataSetName, planarRegionsList);
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      String fileName = "HeightMap" + dateFormat.format(new Date()) + ".json";
+      String file = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator + fileName;
 
-      PlannerInput plannerInput = new PlannerInput();
-      plannerInput.setStartPosition(startPose.getPosition());
-      plannerInput.setStartYaw(startPose.getYaw());
-      plannerInput.setGoalPosition(goalPose.getPosition());
-      plannerInput.setGoalYaw(goalPose.getYaw());
-      dataSet.setPlannerInput(plannerInput);
+      FileTools.ensureFileExists(new File(file).toPath());
+      FileOutputStream outputStream = new FileOutputStream(file);
+      PrintStream printStream = new PrintStream(outputStream);
 
-      DataSetIOTools.exportDataSet(dataSet);
+      printStream.write(serializedHeightMap);
+      printStream.flush();
+      outputStream.close();
+      printStream.close();
+
    }
 }
