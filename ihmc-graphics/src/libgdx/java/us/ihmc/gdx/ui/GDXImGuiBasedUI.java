@@ -49,7 +49,6 @@ public class GDXImGuiBasedUI
    private final Path dotIHMCDirectory = Paths.get(System.getProperty("user.home"), ".ihmc");
    private String configurationExtraPath;
    private final HybridDirectory configurationBaseDirectory;
-   private HybridDirectory perspectiveDirectory;
    private HybridFile libGDXSettingsFile;
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = ""; // TODO: Add status at bottom of window

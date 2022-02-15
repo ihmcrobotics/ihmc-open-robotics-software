@@ -265,12 +265,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       Map<OneDoFJointBasics, Double> privilegedConfiguration = new HashMap<>();
       RobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      defaultRobotInitialSetup.initializeRobot(robot);
+      FullHumanoidRobotModel robot = robotModel.createFullRobotModel();
+      defaultRobotInitialSetup.initializeFullRobotModel(robot);
 
       for (OneDoFJointBasics joint : getDesiredOneDoFJoint())
       {
-         double q_priv = robot.getOneDegreeOfFreedomJoint(joint.getName()).getQ();
+         double q_priv = robot.getOneDoFJointByName(joint.getName()).getQ();
          privilegedConfiguration.put(joint, q_priv);
       }
 

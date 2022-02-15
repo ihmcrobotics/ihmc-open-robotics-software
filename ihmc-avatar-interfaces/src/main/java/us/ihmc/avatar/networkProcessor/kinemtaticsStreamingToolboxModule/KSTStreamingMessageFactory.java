@@ -54,7 +54,10 @@ public class KSTStreamingMessageFactory
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
 
-      neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
+      if (head == null)
+         neckJoints = new OneDoFJointBasics[0];
+      else
+         neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
 
       for (RobotSide robotSide : RobotSide.values)
       {
