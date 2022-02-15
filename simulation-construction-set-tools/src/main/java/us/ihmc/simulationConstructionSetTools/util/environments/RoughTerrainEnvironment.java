@@ -19,41 +19,28 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceMaterial;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationConstructionSetTools.util.ground.ConvexPolytopeTerrainObject;
 import us.ihmc.simulationConstructionSetTools.util.ground.RotatableConvexPolygonTerrainObject;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
-public class RoughTerrianEnvironment implements CommonAvatarEnvironmentInterface
+public class RoughTerrainEnvironment implements CommonAvatarEnvironmentInterface
 {
    private final CombinedTerrainObject3D flatGround;
    private final Random random = new Random(1989L);
 
-   public RoughTerrianEnvironment()
+   public RoughTerrainEnvironment()
    {
+
       flatGround = new CombinedTerrainObject3D("Blop");
       flatGround.addTerrainObject(DefaultCommonAvatarEnvironment.setUpGround("Ground"));
 
-      flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", false, 0.0, 0.0));
-      flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", false, 0.0, 45.0, 4.0, 10.0, 80, 0.3, 21, 0.0, 2.0, 0.5, true, 4));
-      flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", true, 0.0, 90.0));
-      //flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", 0.0, 45.0));
-      //flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", 0.0, 90.0));
-      //flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", 0.0, 135.0));
-      //flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", 0.0, 180.0));
-      //flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", 0.0, -135.0));
-      //flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", 0.0, -90.0));
-      //flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", 0.0, -45.0));
+      //flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks", false, 0.0, 0.0));
+      flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks1", false, 0.0, 0.0, 5.0, 8.0, 80, 0.3, 30, 0.0, 2.0, 0.5, true, 4));
+      flatGround.addTerrainObject(setUpPathRocks3D("Path Rocks2", false, 0.0, 45.0, 4.0, 10.0, 60, 0.3, 50, 0.0, 2.0, 0.5, true, 4));
+      flatGround.addTerrainObject(setUpPathRocks3D("Path Flat Rocks", true, 0.0, 90.0));
 
-      flatGround.addTerrainObject(setUpPathStairs("Path Stairs", 0.0, 0.0));
-      flatGround.addTerrainObject(setUpPathStairs("Path Stairs", 0.0, -45.0, 5.0, 1.5, 0.4, 0.4, 1.2, 11.0));
-      //flatGround.addTerrainObject(setUpPathStairs("Path Stairs", 0.0, 45.0));
-      //flatGround.addTerrainObject(setUpPathStairs("Path Stairs", 0.0, 90.0));
-      //flatGround.addTerrainObject(setUpPathStairs("Path Stairs", 0.0, 135.0));
-      //flatGround.addTerrainObject(setUpPathStairs("Path Stairs", 0.0, 180.0));
-      //flatGround.addTerrainObject(setUpPathStairs("Path Stairs", 0.0, -135.0));
-      //flatGround.addTerrainObject(setUpPathStairs("Path Stairs", 0.0, -90.0));
-      //flatGround.addTerrainObject(setUpPathStairs("Path Stairs", 0.0, -45.0));
+      flatGround.addTerrainObject(setUpPathStairs("Path Stairs1", 0.0, 0.0));
+      flatGround.addTerrainObject(setUpPathStairs("Path Stairs2", 0.0, -45.0, 5.0, 1.5, 0.4, 0.4, 1.2, 11.0));
+      flatGround.addTerrainObject(setUpPathStairs("Path Stairs3", 0.0, 45.0, 5.0, 2.5, 0.3, 0.3, 1.0, 9.0));
    }
 
    @Override
@@ -76,14 +63,13 @@ public class RoughTerrianEnvironment implements CommonAvatarEnvironmentInterface
       // fullyRandom Will do a neat grid if set to false;
       boolean fullyRandom = true;
       int rocksPerRow = 4;
-      
+
       if (flatRocks)
       {
          rocksStartY = 3.5;
          maxRockCentroidHeight = 0.2;
          pointsPerRock = 21;
       }
-
 
       return setUpPathRocks3D(name,
                               flatRocks,
@@ -100,7 +86,7 @@ public class RoughTerrianEnvironment implements CommonAvatarEnvironmentInterface
                               fullyRandom,
                               rocksPerRow);
    }
-   
+
    private CombinedTerrainObject3D setUpPathStairs(String name, double heightOffset, double courseAngle)
    {
       double startDistance = 4.5;
@@ -143,7 +129,7 @@ public class RoughTerrianEnvironment implements CommonAvatarEnvironmentInterface
                         fullyRandom,
                         rocksPerRow);
    }
-   
+
    private CombinedTerrainObject3D addRocks3D(String name,
                                               boolean flatRocks,
                                               double heightOffset,
@@ -167,7 +153,7 @@ public class RoughTerrianEnvironment implements CommonAvatarEnvironmentInterface
       for (int i = 0; i < numberOfRocks; i++)
       {
          double centroidHeight = random.nextDouble() * maxRockCentroidHeight + heightOffset;
-         
+
          Vector3D normal = generateRandomUpFacingNormal(maxAbsXYNormalValue);
 
          double[] approximateCentroid = generateRandomApproximateCentroid(i,
@@ -190,7 +176,7 @@ public class RoughTerrianEnvironment implements CommonAvatarEnvironmentInterface
 
       return combinedTerrainObject3D;
    }
-   
+
    private Vector3D generateRandomUpFacingNormal(double maxAbsXYNormalValue)
    {
       double normalX = random.nextDouble() * (2.0 * maxAbsXYNormalValue) - maxAbsXYNormalValue;
@@ -219,7 +205,12 @@ public class RoughTerrianEnvironment implements CommonAvatarEnvironmentInterface
       return vertices;
    }
 
-   public static void addRock3D(CombinedTerrainObject3D combinedTerrainObject, Vector3D normal, double[][] vertices, RigidBodyTransform rockRotation, boolean flatRocks, double centroidHeight)
+   public static void addRock3D(CombinedTerrainObject3D combinedTerrainObject,
+                                Vector3D normal,
+                                double[][] vertices,
+                                RigidBodyTransform rockRotation,
+                                boolean flatRocks,
+                                double centroidHeight)
    {
       YoAppearanceMaterial rockAppearance = new YoAppearanceMaterial();
       rockAppearance.setSpecularColor(0.5f, 0.5f, 0.5f);
@@ -251,7 +242,7 @@ public class RoughTerrianEnvironment implements CommonAvatarEnvironmentInterface
             Point3D point3d = new Point3D(point[0], point[1], point[2]);
             vertexPoints.add(point3d);
          }
-         
+
          ConvexPolytope3D convexPolytope = new ConvexPolytope3D(Vertex3DSupplier.asVertex3DSupplier(vertexPoints));
 
          convexPolytope.applyTransform(rockRotation);
@@ -259,7 +250,6 @@ public class RoughTerrianEnvironment implements CommonAvatarEnvironmentInterface
          combinedTerrainObject.addTerrainObject(rock);
       }
 
-      
    }
 
    private double[] generateRandomApproximateCentroid(int position,
@@ -352,14 +342,5 @@ public class RoughTerrianEnvironment implements CommonAvatarEnvironmentInterface
       location.getTranslation().set(new Vector3D(x, y, height / 2 + heightOffset));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
-   }
-
-   public static void main(String[] args)
-   {
-      RoughTerrianEnvironment environment = new RoughTerrianEnvironment();
-      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
-      scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
-      scs.startOnAThread();
    }
 }
