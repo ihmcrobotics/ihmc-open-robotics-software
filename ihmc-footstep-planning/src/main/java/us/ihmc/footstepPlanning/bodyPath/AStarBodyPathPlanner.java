@@ -46,8 +46,8 @@ public class AStarBodyPathPlanner
    private static final boolean checkForCollisions = true;
    private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useRANSACTraversibility = true;
-   private static final double rollCostWeight = 10.25;
-   private static final double inclineCostWeight = 3.0; // 3.0;
+   private static final double rollCostWeight = 5.0;
+   private static final double inclineCostWeight = 3.0;
    private static final double inclineCostDeadband = Math.toRadians(3.0);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -70,6 +70,8 @@ public class AStarBodyPathPlanner
    private final YoDouble rollCost = new YoDouble("rollCost", registry);
    private final YoDouble nominalIncline = new YoDouble("nominalIncline", registry);
    private final YoFrameVector3D leastSqNormal = new YoFrameVector3D("leastSqNormal", ReferenceFrame.getWorldFrame(), registry);
+
+   private final HashMap<BodyPathLatticePoint, Double> rollMap = new HashMap<>();
 
    private final PriorityQueue<BodyPathLatticePoint> stack;
    private BodyPathLatticePoint startNode, goalNode;
@@ -167,6 +169,7 @@ public class AStarBodyPathPlanner
 
       this.heightMapData = heightMapData;
       ransacNormalCalculator.initialize(heightMapData);
+      rollMap.clear();
 
       if (useRANSACTraversibility)
       {
@@ -199,7 +202,6 @@ public class AStarBodyPathPlanner
          }
       }
    }
-
 
    private enum RejectionReason
    {
@@ -242,7 +244,7 @@ public class AStarBodyPathPlanner
 
       if (computeSurfaceNormalCost)
       {
-         double patchWidth = 0.25;
+         double patchWidth = 0.3;
          surfaceNormalCalculator.computeSurfaceNormals(heightMapData, patchWidth);
       }
 
@@ -365,30 +367,12 @@ public class AStarBodyPathPlanner
             {
                double yaw = Math.atan2(neighbor.getY() - node.getY(), neighbor.getX() - node.getX());
                Pose2D bodyPose = new Pose2D();
-//               bodyPose.set(0.5 * (node.getX() + neighbor.getX()), 0.5 * (node.getY() + neighbor.getY()), yaw);
+
                bodyPose.set(neighbor.getX(), neighbor.getY(), yaw);
+               bodyPose.interpolate(new Pose2D(node.getX(), node.getY(), yaw), 0.5);
+               computeRollCost(node, neighbor, bodyPose);
 
-               UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(HeightMapTools.coordinateToKey(bodyPose.getX(),
-                                                                                                                          bodyPose.getY(),
-                                                                                                                          heightMapData.getGridCenter().getX(),
-                                                                                                                          heightMapData.getGridCenter().getY(),
-                                                                                                                          heightMapData.getGridResolutionXY(),
-                                                                                                                          heightMapData.getCenterIndex()));
-
-               if (surfaceNormal != null)
-               {
-                  Vector2D edge = new Vector2D(neighbor.getX() - node.getX(), neighbor.getY() - node.getY());
-                  edge.normalize();
-
-                  /* Roll is the amount of incline orthogonal to the direction of motion */
-                  leastSqNormal.set(surfaceNormal);
-                  roll.set(Math.asin(Math.abs(edge.getY() * surfaceNormal.getX() - edge.getX() * surfaceNormal.getY())));
-                  double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / Math.toRadians(7.0), 0.0, 1.0);
-                  double rollDeadband = Math.toRadians(2.0);
-                  double rollAngleDeadbanded = Math.max(0.0, Math.abs(roll.getValue()) - rollDeadband);
-                  rollCost.set(rollCostWeight * inclineScale * rollAngleDeadbanded);
-                  edgeCost.add(rollCost);
-               }
+               computeRollCost(node, neighbor, bodyPose);
             }
 
             if (incline.getValue() < nominalIncline.getValue())
@@ -400,6 +384,11 @@ public class AStarBodyPathPlanner
                double inclineDelta = Math.abs(incline.getValue() - nominalIncline.getValue());
                inclineCost.set(inclineCostWeight * Math.max(0.0, inclineDelta - inclineCostDeadband));
                this.edgeCost.add(inclineCost);
+            }
+
+            if (edgeCost.getValue() < 0.0)
+            {
+               throw new RuntimeException("Negative edge cost!");
             }
 
             graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
@@ -433,6 +422,39 @@ public class AStarBodyPathPlanner
       }
 
       reportStatus(request, outputToPack);
+   }
+
+   private void computeRollCost(BodyPathLatticePoint node, BodyPathLatticePoint neighbor, Pose2D bodyPose)
+   {
+      UnitVector3DBasics surfaceNormal = surfaceNormalCalculator.getSurfaceNormal(HeightMapTools.coordinateToKey(bodyPose.getX(),
+                                                                                                                 bodyPose.getY(),
+                                                                                                                 heightMapData.getGridCenter().getX(),
+                                                                                                                 heightMapData.getGridCenter().getY(),
+                                                                                                                 heightMapData.getGridResolutionXY(),
+                                                                                                                 heightMapData.getCenterIndex()));
+
+      if (surfaceNormal != null)
+      {
+         Vector2D edge = new Vector2D(neighbor.getX() - node.getX(), neighbor.getY() - node.getY());
+         edge.normalize();
+
+         /* Roll is the amount of incline orthogonal to the direction of motion */
+         leastSqNormal.set(surfaceNormal);
+         roll.set(Math.asin(Math.abs(edge.getY() * surfaceNormal.getX() - edge.getX() * surfaceNormal.getY())));
+         double effectiveRoll = roll.getDoubleValue();
+
+         if (rollMap.containsKey(node))
+         {
+            effectiveRoll += rollMap.get(node);
+         }
+
+         rollMap.put(neighbor, roll.getValue());
+         double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / Math.toRadians(7.0), 0.0, 1.0);
+         double rollDeadband = Math.toRadians(2.0);
+         double rollAngleDeadbanded = Math.max(0.0, Math.abs(effectiveRoll) - rollDeadband);
+         rollCost.set(rollCostWeight * inclineScale * rollAngleDeadbanded);
+         edgeCost.add(rollCost);
+      }
    }
 
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
@@ -545,14 +567,14 @@ public class AStarBodyPathPlanner
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex(), latticePoint.getYIndex() - 1));
       neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 1));
 
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
-//      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() + 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() + 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() + 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() + 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 2, latticePoint.getYIndex() - 1));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() - 1, latticePoint.getYIndex() - 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 1, latticePoint.getYIndex() - 2));
+      neighbors.add(new BodyPathLatticePoint(latticePoint.getXIndex() + 2, latticePoint.getYIndex() - 1));
    }
 
    private static Pair<Integer, Integer> rotate(int xOff, int yOff, int i)
