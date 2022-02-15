@@ -46,6 +46,7 @@ import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -380,9 +381,9 @@ public class LookAndStepFootstepPlanningTask
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(),
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
 
-      double plannerTimeout = /*Math.max(lookAndStepParameters.getFootstepPlannerTimeout(), */
-            lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration();
-      plannerTimeout = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION ? plannerTimeout : 2.0;
+      double plannerTimeoutWhenMoving =  lookAndStepParameters.getPercentSwingToWait() * lookAndStepParameters.getSwingDuration();
+      boolean robotIsInMotion = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION;
+      double plannerTimeout = robotIsInMotion ? plannerTimeoutWhenMoving : lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped();
       // TODO: Set start footholds!!
       // TODO: only set square up steps at the end
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
@@ -407,10 +408,13 @@ public class LookAndStepFootstepPlanningTask
       statusLogger.info("Footstep planner completed with {}, {} step(s)",
                         footstepPlannerOutput.getFootstepPlanningResult(),
                         footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
-      statusLogger.info("Planner timing took a total of {} s, with {} s spent before planning and {} s spent planning",
-                        FormattingTools.getFormattedDecimal3D(footstepPlannerOutput.getPlannerTimings().getTotalElapsedSeconds()),
-                        FormattingTools.getFormattedDecimal3D(footstepPlannerOutput.getPlannerTimings().getTimeBeforePlanningSeconds()),
-                        FormattingTools.getFormattedDecimal3D(footstepPlannerOutput.getPlannerTimings().getTimePlanningStepsSeconds()));
+      statusLogger.info(StringTools.format3D("Planner timing took a total of {} s"
+                                             + ", with {} s spent before planning and {} s spent planning"
+                                             + ", and with a timeout of {} s",
+                        footstepPlannerOutput.getPlannerTimings().getTotalElapsedSeconds(),
+                        footstepPlannerOutput.getPlannerTimings().getTimeBeforePlanningSeconds(),
+                        footstepPlannerOutput.getPlannerTimings().getTimePlanningStepsSeconds(),
+                        plannerTimeout));
 
       // print log duration?
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
