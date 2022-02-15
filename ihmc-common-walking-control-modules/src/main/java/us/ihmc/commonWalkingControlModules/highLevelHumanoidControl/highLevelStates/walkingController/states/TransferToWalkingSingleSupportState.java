@@ -88,7 +88,6 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                                                            walkingControllerParameters.getMinimumSlowTransferDuration());
       resubmitStepsInTransferEveryTick.set(walkingControllerParameters.resubmitStepsInSwingEveryTick());
 
-
       numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
       footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
@@ -156,7 +155,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
-      if (resubmitStepsInTransferEveryTick.getBooleanValue() && balanceManager.getNumberOfStepsBeingConsidered() < walkingMessageHandler.getCurrentNumberOfFootsteps())
+      if (resubmitStepsInTransferEveryTick.getBooleanValue()
+            && balanceManager.getNumberOfStepsBeingConsidered() < walkingMessageHandler.getCurrentNumberOfFootsteps())
       {
          int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
          for (int i = balanceManager.getNumberOfStepsBeingConsidered() - 1; i < stepsToAdd; i++)
@@ -175,7 +175,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
-      walkingTrajectoryPath.computeTrajectory(getStateEnum());
+      walkingTrajectoryPath.computeTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT),
+                                              feetManager.getCurrentConstraintType(RobotSide.RIGHT));
 
       if (!doManualLiftOff())
       {
