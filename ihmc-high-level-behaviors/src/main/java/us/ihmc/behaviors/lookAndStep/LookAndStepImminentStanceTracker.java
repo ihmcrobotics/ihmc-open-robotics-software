@@ -49,7 +49,7 @@ public class LookAndStepImminentStanceTracker
       {
          RobotSide robotSide = RobotSide.fromByte(footstepStatusMessage.getRobotSide());
 
-         if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.COMPLETED)
+         if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.STARTED)
          {
             Pose3D completedPose = new Pose3D(footstepStatusMessage.getDesiredFootPositionInWorld(),
                                               footstepStatusMessage.getDesiredFootOrientationInWorld());
@@ -65,7 +65,8 @@ public class LookAndStepImminentStanceTracker
                {
                   LogTools.info("Commanded step {} completed. {}", stepsCompletedSinceCommanded,
                                 robotSide.name());
-                  ++stepsCompletedSinceCommanded;
+                  stepsStartedSinceCommanded++;
+
                   commandedFootstepQueue.removeFirst();
                   if (!commandedFootstepQueue.isEmpty())
                   {
@@ -77,8 +78,7 @@ public class LookAndStepImminentStanceTracker
          else
          {
             lastStartedFootstep.set(new PlannedFootstepCopier(commandedImminentStancePoses.get(robotSide)));
-
-            stepsStartedSinceCommanded++;
+            ++stepsCompletedSinceCommanded;
          }
       }
    }
