@@ -17,6 +17,7 @@ public class GDXReferenceFrameGraphic implements RenderableProvider
    private final RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
    private final FramePose3D framePose3D = new FramePose3D();
    private final ModelInstance coordinateFrameInstance;
+   private ReferenceFrame referenceFrame;
 
    public GDXReferenceFrameGraphic(double length)
    {
@@ -29,6 +30,12 @@ public class GDXReferenceFrameGraphic implements RenderableProvider
    }
 
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      updateFromLastGivenFrame();
+   }
+
+   public void updateFromLastGivenFrame()
    {
       framePose3D.setToZero(referenceFrame);
       framePose3D.changeFrame(ReferenceFrame.getWorldFrame());
