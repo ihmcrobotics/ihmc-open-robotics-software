@@ -146,7 +146,7 @@ public class ConvexPolytopeTerrainObjectTest
    }
    
    @Test
-   public void testIfInside()
+   public void testCheckIfInside()
    {
       Random random = new Random(148547);
       
@@ -165,8 +165,8 @@ public class ConvexPolytopeTerrainObjectTest
          ConvexPolytopeTerrainObject convexPolytopeTerraian = new ConvexPolytopeTerrainObject(vectorNormal, convexPolytope);
          
          //check point inside the convexPolytope
-         intersectionToPack = new Point3D(0.0, 0.0, 0.0);
-         normalToPack = new Vector3D(0.0, 0.0, 0.0);
+         intersectionToPack.set(0, 0, 0);
+         normalToPack.set(0, 0, 0);
          assertTrue(convexPolytopeTerraian.checkIfInside(x, y, z, intersectionToPack, normalToPack));
          assertEquals(x, intersectionToPack.getX());
          assertEquals(y, intersectionToPack.getY());
@@ -175,8 +175,8 @@ public class ConvexPolytopeTerrainObjectTest
          
          //check point above the convexPolytope
          Double zAboveConvexPolytope = z +  convexPolytopeTerraian.getBoundingBox().getMaxZ() + 1.0;
-         intersectionToPack = new Point3D(0.0, 0.0, 0.0);
-         normalToPack = new Vector3D(0.0, 0.0, 0.0);
+         intersectionToPack.set(0, 0, 0);
+         normalToPack.set(0, 0, 0);
          assertFalse(convexPolytopeTerraian.checkIfInside(x, y, zAboveConvexPolytope, intersectionToPack, normalToPack));
          assertEquals(x, intersectionToPack.getX());
          assertEquals(y, intersectionToPack.getY());
@@ -186,8 +186,8 @@ public class ConvexPolytopeTerrainObjectTest
          
          //check point below the convexPolytope
          Double zBelowConvexPolytope = z +  convexPolytopeTerraian.getBoundingBox().getMinZ() - 1.0;
-         intersectionToPack = new Point3D(0.0, 0.0, 0.0);
-         normalToPack = new Vector3D(0.0, 0.0, 0.0);
+         intersectionToPack.set(0, 0, 0);
+         normalToPack.set(0, 0, 0);
          assertFalse(convexPolytopeTerraian.checkIfInside(x, y, zBelowConvexPolytope, intersectionToPack, normalToPack));
          assertEquals(x, intersectionToPack.getX());
          assertEquals(y, intersectionToPack.getY());
@@ -198,8 +198,8 @@ public class ConvexPolytopeTerrainObjectTest
          
          //check point on side of the convexPolytope
          Double xOutsideConvexPolytope = x +  convexPolytopeTerraian.getBoundingBox().getMaxX() + 1.0;
-         intersectionToPack = new Point3D(0.0, 0.0, 0.0);
-         normalToPack = new Vector3D(0.0, 0.0, 0.0);
+         intersectionToPack.set(0, 0, 0);
+         normalToPack.set(0, 0, 0);
          assertFalse(convexPolytopeTerraian.checkIfInside(xOutsideConvexPolytope, y, z, intersectionToPack, normalToPack));
          assertEquals(xOutsideConvexPolytope, intersectionToPack.getX());
          assertEquals(y, intersectionToPack.getY());
@@ -207,6 +207,23 @@ public class ConvexPolytopeTerrainObjectTest
          assertEquals(normalToPack.getX(), 0.0);
          assertEquals(normalToPack.getY(), 0.0);
          assertEquals(normalToPack.getZ(), 0.0);
+         
+         //verify checkIfInside can be called with intersectionToPack and/or NormalToPack are null
+         intersectionToPack.set(0, 0, 0);
+         normalToPack.set(0, 0, 0);
+         assertTrue(convexPolytopeTerraian.checkIfInside(x, y, z, null, normalToPack));
+         intersectionToPack.set(x, y, convexPolytopeTerraian.heightAt(x, y, z));
+         assertEquals(convexPolytope.getClosestFace(intersectionToPack).getNormal(), normalToPack);
+         
+         intersectionToPack.set(0, 0, 0);
+         normalToPack.set(0, 0, 0);
+         assertTrue(convexPolytopeTerraian.checkIfInside(x, y, z, intersectionToPack, null));
+         intersectionToPack.set(x, y, convexPolytopeTerraian.heightAt(x, y, z));
+         assertEquals(x, intersectionToPack.getX());
+         assertEquals(y, intersectionToPack.getY());
+         assertEquals(convexPolytopeTerraian.heightAt(x, y, z), intersectionToPack.getZ());      
+         
+         assertTrue(convexPolytopeTerraian.checkIfInside(x, y, z, null, null));
       }
    }
       
@@ -230,14 +247,14 @@ public class ConvexPolytopeTerrainObjectTest
          ConvexPolytopeTerrainObject convexPolytopeTerraian = new ConvexPolytopeTerrainObject(vectorNormal, convexPolytope);
          
          //check point inside the convexPolytope
-         normalToPack = new Vector3D(0.0, 0.0, 0.0);
+         normalToPack.set(0, 0, 0);
          Double heightAt = convexPolytopeTerraian.heightAndNormalAt(x, y, z, normalToPack);
          assertEquals(heightAt, convexPolytopeTerraian.heightAt(x, y, z));
          assertEquals(convexPolytope.getClosestFace(new Point3D(x, y, heightAt)).getNormal(), normalToPack);
          
          //check point above the convexPolytope
          Double zAboveConvexPolytope = z +  convexPolytopeTerraian.getBoundingBox().getMaxZ() + 1.0;
-         normalToPack = new Vector3D(0.0, 0.0, 0.0);
+         normalToPack.set(0, 0, 0);
          heightAt = convexPolytopeTerraian.heightAndNormalAt(x, y, zAboveConvexPolytope, normalToPack);
          assertNotEquals(heightAt, Double.NEGATIVE_INFINITY);
          //Since only z was changed above the shape, it should equal the same heightAt as the point inside the shape
@@ -246,7 +263,7 @@ public class ConvexPolytopeTerrainObjectTest
          
          //check point below the convexPolytope
          Double zBelowConvexPolytope = z +  convexPolytopeTerraian.getBoundingBox().getMinZ() - 1.0;
-         normalToPack = new Vector3D(0.0, 0.0, 0.0);
+         normalToPack.set(0, 0, 0);
          heightAt = convexPolytopeTerraian.heightAndNormalAt(x, y, zBelowConvexPolytope, normalToPack);
          assertEquals(heightAt, Double.NEGATIVE_INFINITY);
          assertEquals(normalToPack.getX(), 0.0);
@@ -255,7 +272,7 @@ public class ConvexPolytopeTerrainObjectTest
          
          //check point on side of the convexPolytope
          Double xOutsideConvexPolytope = x +  convexPolytopeTerraian.getBoundingBox().getMaxX() + 1.0;
-         normalToPack = new Vector3D(0.0, 0.0, 0.0);
+         normalToPack.set(0, 0, 0);
          heightAt = convexPolytopeTerraian.heightAndNormalAt(xOutsideConvexPolytope, y, z, normalToPack);
          assertEquals(heightAt, Double.NEGATIVE_INFINITY);
          assertEquals(normalToPack.getX(), 0.0);
