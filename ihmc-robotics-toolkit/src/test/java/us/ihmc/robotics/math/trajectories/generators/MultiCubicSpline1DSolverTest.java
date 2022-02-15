@@ -9,6 +9,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.robotics.Assert;
 
@@ -35,6 +36,52 @@ public class MultiCubicSpline1DSolverTest
 
       double percentDiff = 100 * Math.abs(costUsingNative - costNotUsingNative) / costNotUsingNative;
       Assert.assertTrue(percentDiff < permissableError);
+   }
+
+   @Test
+   public void testAccelerationIntegrationResult()
+   {
+      DMatrixRMaj solution = new DMatrixRMaj(1, 1);
+      MultiCubicSpline1DSolver solver = new MultiCubicSpline1DSolver(true);
+      double[] times = {0.0, 0.25, 0.75, 1.0};
+      solver.setEndpoints(0, 1, 0, 1);
+      solver.addWaypoint(2, times[1]);
+      solver.addWaypoint(-2, times[2]);
+      double costUsingNative = solver.solve(solution);
+
+      int numberOfSplines = solution.getNumRows() / MultiCubicSpline1DSolver.coefficients;
+      double expectedAccelerationIntegrated = 0.0;
+
+      for (int i = 0; i < numberOfSplines; i++)
+      {
+         int offset = i * MultiCubicSpline1DSolver.coefficients;
+         double c0 = solution.get(offset + 0);
+         double c1 = solution.get(offset + 1);
+
+         double t0 = times[i];
+         double tf = times[i + 1];
+
+         // This is the integration of the acceleration squared.
+         // The acceleration function is: xDDot = 6 c0 t + 2 c1
+         // The squared acceleration function is: xDDot^2 = 12 c0^2 t^2 + 24 c0 c1 t + 4 c1^2
+         // The integrated squared acceleration function from t0 to tf is: 12 c0^2 (tf^3 - t0^3) + 12 c0 c1 (tf^2 - t0^2) + 4 c1^2 (tf - t0)
+         expectedAccelerationIntegrated += (12.0 * c0 * c0 * (tf * tf * tf - t0 * t0 * t0) + 12.0 * c0 * c1 * (tf * tf - t0 * t0) + 4.0 * c1 * c1 * (tf - t0));
+      }
+
+      double dt = 0.00001;
+      double accelerationNumericallyIntegrated = 0.0;
+
+      for (double t = dt; t <= 1.0; t += dt)
+      {
+         double accCurr = solver.computeAcceleration(t, solution);
+         accelerationNumericallyIntegrated += MathTools.square(Math.abs(accCurr)) * dt;
+      }
+
+      expectedAccelerationIntegrated *= 0.5;
+      accelerationNumericallyIntegrated *= 0.5;
+
+      assertEquals(expectedAccelerationIntegrated, costUsingNative, Math.max(expectedAccelerationIntegrated, 1.0) * 1.0e-12);
+      assertEquals(accelerationNumericallyIntegrated, costUsingNative, Math.max(accelerationNumericallyIntegrated, 1.0) * 1.0e-7);
    }
 
    @Test
