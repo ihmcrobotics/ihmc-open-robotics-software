@@ -125,6 +125,14 @@ public class GDXModelPrimitives
       return buildModelInstance(meshBuilder -> meshBuilder.addBox(lx, ly, lz, color), "box");
    }
 
+   public static ModelInstance createCylinder(double height, double radius, Color color)
+   {
+      return buildModelInstance(meshBuilder ->
+      {
+         meshBuilder.addCylinder(height, radius, new Point3D(), color);
+      }, "cylinder");
+   }
+
    public static ModelInstance createArrow(double length, Color color)
    {
       return buildModelInstance(meshBuilder ->
