@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HeightMapMessage;
 import javafx.animation.AnimationTimer;
 import map_sense.RawGPUPlanarRegionList;
@@ -10,7 +9,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -22,9 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.ui.components.collision.CollidingScanRegionFilter;
@@ -62,7 +58,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    private final Messager messager;
    private final Stopwatch stopwatch = new Stopwatch();
    private static final double replanDelay = 0.8;
-   private static final double swingDuration = 1.6;
    private static final RobotSide initialStanceSide = RobotSide.RIGHT;
 
    private static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
@@ -80,6 +75,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    private final AtomicReference<Boolean> stopHeightMapNavigation;
    private final AtomicBoolean firstStep = new AtomicBoolean();
    private final AtomicBoolean firstTickInStepState = new AtomicBoolean();
+   private final AtomicBoolean reconnectRos1Node = new AtomicBoolean();
 
    private final AtomicReference<Point3D> goalPosition;
    private final AtomicReference<Quaternion> goalOrientation;
@@ -145,6 +141,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
                                                 return defaultFoothold;
                                              });
 
+      footstepPlannerParameters.setIdealFootstepLength(0.28);
       planningModule = new FootstepPlanningModule("HeightMap", new DefaultVisibilityGraphParameters(), footstepPlannerParameters, new DefaultSwingPlannerParameters(), walkingControllerParameters, footPolygons, null);
       logger = new FootstepPlannerLogger(planningModule);
       planningModule.addCustomTerminationCondition((plannerTime, iterations, bestFinalStep, bestSecondToLastStep, bestPathSize) -> iterations > 1);
@@ -153,12 +150,10 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ReplanStep, replanRequested::set);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.WriteHeightMapLog, writeLog::set);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ResendLastStep, r -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessageCache));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ReconnectRos1Node, reconnectRos1Node::set);
 
       currentState.set(State.WAITING_TO_START);
-
-      ros1Node = RosTools.createRosNode(rosuri, "height_map_navigator");
-      createROS1Callback(RosTools.MAPSENSE_REGIONS, ros1Node, this::handleRegions);
-      ros1Node.execute();
+      createAndConnectRos1Node();
 
       steppingFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("steppingCamera", referenceFrames.getChestFrame(), transformChestToL515DepthCamera);
 
@@ -241,6 +236,17 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    @Override
    public void handle(long l)
    {
+      // Reconnect ros 1 node
+      if (reconnectRos1Node.getAndSet(false))
+      {
+         LogTools.info("Reconnecting ros 1 node");
+         ros1Node.shutdown();
+
+         createAndConnectRos1Node();
+
+         LogTools.info("Reconnected ros 1 node");
+      }
+
       // Execute steps
       if (stopHeightMapNavigation.getAndSet(false))
       {
@@ -381,6 +387,8 @@ public class HeightMapNavigationUpdater extends AnimationTimer
 
          messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
          PlannedFootstep footstep = planningModule.getOutput().getFootstepPlan().getFootstep(0);
+         footstep.setSwingDuration(1.9);
+
          footstepDataListMessage.getFootstepDataList().add().set(footstep.getAsMessage());
 
          currentState.set(State.APPROVE_AND_SEND);
@@ -427,6 +435,13 @@ public class HeightMapNavigationUpdater extends AnimationTimer
             return;
          }
       }
+   }
+
+   private void createAndConnectRos1Node()
+   {
+      ros1Node = RosTools.createRosNode(rosuri, "height_map_navigator");
+      createROS1Callback(RosTools.MAPSENSE_REGIONS, ros1Node, this::handleRegions);
+      ros1Node.execute();
    }
 
    private void setStartFootPosesToCurrent()

@@ -28,7 +28,7 @@ public class AStarBodyPathSmoother
    static final double collisionWeight = 700.0;
    static final double smoothnessWeight = 0.7;
    static final double equalSpacingWeight = 2.0;
-   static final double rollWeight = 150.0;
+   static final double rollWeight = 190.0;
    static final double displacementWeight = 0.0;
    static final double traversibilityWeight = 20.0;
    static final double flatGroundWeight = 4.0;
@@ -44,7 +44,7 @@ public class AStarBodyPathSmoother
    static final double traversibilitySampleWindowX = 0.2;
    static final double traversibilitySampleWindowY = 0.14;
 
-   private static final int iterations = 250;
+   private static final int iterations = 300;
 
    private static final int turnPointIteration = 12;
    private final TIntArrayList turnPointIndices = new TIntArrayList();

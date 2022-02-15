@@ -357,6 +357,12 @@ public class MainTabController
       messager.submitMessage(ResendLastStep, true);
    }
 
+   @FXML
+   public void reconnect()
+   {
+      messager.submitMessage(ReconnectRos1Node, true);
+   }
+
    private void setStartFromRobot()
    {
       if (humanoidReferenceFrames == null)

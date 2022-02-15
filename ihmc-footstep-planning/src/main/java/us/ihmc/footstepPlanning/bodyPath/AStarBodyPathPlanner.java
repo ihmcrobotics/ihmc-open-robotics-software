@@ -46,7 +46,9 @@ public class AStarBodyPathPlanner
    private static final boolean checkForCollisions = true;
    private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useRANSACTraversibility = true;
-   private static final double rollCostWeight = 5.25;
+   private static final double rollCostWeight = 10.25;
+   private static final double inclineCostWeight = 3.0; // 3.0;
+   private static final double inclineCostDeadband = Math.toRadians(3.0);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -62,7 +64,11 @@ public class AStarBodyPathPlanner
    private final YoDouble deltaHeight = new YoDouble("deltaHeight", registry);
    private final YoDouble snapHeight = new YoDouble("snapHeight", registry);
    private final YoDouble incline = new YoDouble("incline", registry);
+   private final YoDouble inclineCost = new YoDouble("inclineCost", registry);
+   private final YoDouble traversibilityCost = new YoDouble("traversibilityCost", registry);
    private final YoDouble roll = new YoDouble("roll", registry);
+   private final YoDouble rollCost = new YoDouble("rollCost", registry);
+   private final YoDouble nominalIncline = new YoDouble("nominalIncline", registry);
    private final YoFrameVector3D leastSqNormal = new YoFrameVector3D("leastSqNormal", ReferenceFrame.getWorldFrame(), registry);
 
    private final PriorityQueue<BodyPathLatticePoint> stack;
@@ -232,6 +238,7 @@ public class AStarBodyPathPlanner
       expandedNodeSet.clear();
       gridHeightMap.put(startNode, startPose.getZ());
       leastCostNode = startNode;
+      nominalIncline.set(Math.atan2(goalPose.getZ() - startPose.getZ(), goalPose.getPosition().distanceXY(startPose.getPosition())));
 
       if (computeSurfaceNormalCost)
       {
@@ -327,10 +334,10 @@ public class AStarBodyPathPlanner
 
             if (useRANSACTraversibility)
             {
-               double traversibilityIndicator = ransacTraversibilityCalculator.computeTraversibility(neighbor, node, i);
+               traversibilityCost.set(ransacTraversibilityCalculator.computeTraversibility(neighbor, node, i));
                if (ransacTraversibilityCalculator.isTraversible())
                {
-                  edgeCost.add(traversibilityIndicator);
+                  edgeCost.add(traversibilityCost);
                }
                else
                {
@@ -376,10 +383,23 @@ public class AStarBodyPathPlanner
                   /* Roll is the amount of incline orthogonal to the direction of motion */
                   leastSqNormal.set(surfaceNormal);
                   roll.set(Math.asin(Math.abs(edge.getY() * surfaceNormal.getX() - edge.getX() * surfaceNormal.getY())));
-                  double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / Math.toRadians(22.0), 0.0, 1.0);
-                  double rollAngleDeadbanded = Math.max(0.0, Math.abs(roll.getValue()) - Math.toRadians(5.0));
-                  edgeCost.add(rollCostWeight * inclineScale * rollAngleDeadbanded);
+                  double inclineScale = EuclidCoreTools.clamp(Math.abs(incline.getValue()) / Math.toRadians(7.0), 0.0, 1.0);
+                  double rollDeadband = Math.toRadians(2.0);
+                  double rollAngleDeadbanded = Math.max(0.0, Math.abs(roll.getValue()) - rollDeadband);
+                  rollCost.set(rollCostWeight * inclineScale * rollAngleDeadbanded);
+                  edgeCost.add(rollCost);
                }
+            }
+
+            if (incline.getValue() < nominalIncline.getValue())
+            {
+               inclineCost.set(0.0);
+            }
+            else
+            {
+               double inclineDelta = Math.abs(incline.getValue() - nominalIncline.getValue());
+               inclineCost.set(inclineCostWeight * Math.max(0.0, inclineDelta - inclineCostDeadband));
+               this.edgeCost.add(inclineCost);
             }
 
             graph.checkAndSetEdge(node, neighbor, edgeCost.getValue());
@@ -577,7 +597,25 @@ public class AStarBodyPathPlanner
       }
 
       double maxHeight = heights.max();
-      gridHeightMap.put(latticePoint, maxHeight);
+      double heightSampleDelta = 0.08;
+      double minHeight = maxHeight - heightSampleDelta;
+
+      double runningSum = 0.0;
+      int numberOfSamples = 0;
+
+      for (int i = 0; i < xSnapOffsets.size(); i++)
+      {
+         int xQuery = xIndex + xSnapOffsets.get(i);
+         int yQuery = yIndex + ySnapOffsets.get(i);
+         double heightQuery = heightMapData.getHeightAt(xQuery, yQuery);
+         if (!Double.isNaN(heightQuery) && heightQuery > minHeight)
+         {
+            runningSum += heightQuery;
+            numberOfSamples++;
+         }
+      }
+
+      gridHeightMap.put(latticePoint, runningSum / numberOfSamples);
       return maxHeight;
    }
 
