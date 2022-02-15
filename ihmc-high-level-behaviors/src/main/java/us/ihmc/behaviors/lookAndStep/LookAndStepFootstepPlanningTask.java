@@ -86,7 +86,6 @@ public class LookAndStepFootstepPlanningTask
    protected LookAndStepReview<FootstepPlan> review = new LookAndStepReview<>();
    protected Consumer<FootstepPlan> autonomousOutput;
    protected Timer planningFailedTimer = new Timer();
-   protected AtomicReference<RobotSide> lastStanceSideReference;
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
    protected YoDouble footholdVolume;
 
@@ -117,7 +116,6 @@ public class LookAndStepFootstepPlanningTask
          uiPublisher = lookAndStep.helper::publish;
          footstepPlanningModule = lookAndStep.helper.getOrCreateFootstepPlanner();
          defaultFootPolygons = FootstepPlanningModuleLauncher.createFootPolygons(lookAndStep.helper.getRobotModel());
-         lastStanceSideReference = lookAndStep.lastStanceSide;
          operatorReviewEnabledSupplier = lookAndStep.operatorReviewEnabledInput::get;
          behaviorStateReference = lookAndStep.behaviorStateReference::get;
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
@@ -392,8 +390,6 @@ public class LookAndStepFootstepPlanningTask
          }
       }
       plannerFailedLastTime.set(false);
-
-      lastStanceSideReference.set(stanceSide);
 
       uiPublisher.publishToUI(SubGoalForUI, new Pose3D(subGoalPoseBetweenFeet));
 

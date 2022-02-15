@@ -255,7 +255,6 @@ public class LookAndStepBodyPathPlanningTask
    {
       double proximityForTurning = 0.25;
 
-      // FIXME THIS IS TERRIBLE.
       // calculate and send body path plan
       FramePose3D leftFootPoseTemp = new FramePose3D();
       leftFootPoseTemp.setToZero(syncedRobot.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
