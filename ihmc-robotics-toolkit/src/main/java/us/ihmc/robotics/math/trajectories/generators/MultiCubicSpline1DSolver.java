@@ -267,8 +267,6 @@ public class MultiCubicSpline1DSolver
       {
          NativeCommonOps.solve(E, d, solutionToPack);
          solutionToPack.reshape(subProblemSize, 1);
-         NativeCommonOps.multQuad(solutionToPack, H, b);
-
          // b = x^T H x
          NativeCommonOps.multQuad(solutionToPack, H_minAccel, b);
       }
