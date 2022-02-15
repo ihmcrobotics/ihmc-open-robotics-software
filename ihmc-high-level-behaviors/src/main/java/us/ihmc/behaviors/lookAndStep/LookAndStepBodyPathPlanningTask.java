@@ -17,7 +17,9 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.PathTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -270,7 +272,7 @@ public class LookAndStepBodyPathPlanningTask
       double goalDistance = goalDirection.length();
 
       goalDirection.scale(proximityForTurning / goalDirection.length());
-      double heading = Math.atan2(goalDirection.getY(), goalDirection.getX());
+      double heading = BodyPathPlannerTools.calculateHeading(new Vector2D(goalDirection));
 
 
       Pose3D poseNearStart = new Pose3D();

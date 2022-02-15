@@ -17,6 +17,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -298,14 +299,8 @@ public class LookAndStepFootstepPlanningTask
 
       // detect flat ground; work in progress
       ConvexPolytope3D convexPolytope = new ConvexPolytope3D();
-      for (Point3D point3D : capturabilityBasedStatus.getLeftFootSupportPolygon3d())
-      {
-         convexPolytope.addVertex(point3D);
-      }
-      for (Point3D point3D : capturabilityBasedStatus.getRightFootSupportPolygon3d())
-      {
-         convexPolytope.addVertex(point3D);
-      }
+      convexPolytope.addVertices(Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getLeftFootSupportPolygon3d()));
+      convexPolytope.addVertices(Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getRightFootSupportPolygon3d()));
       footholdVolume.set(convexPolytope.getVolume());
 
       SideDependentList<MinimalFootstep> startFootPoses = imminentStanceTracker.calculateImminentStancePoses();
@@ -318,21 +313,16 @@ public class LookAndStepFootstepPlanningTask
 
       uiPublisher.publishToUI(PlanarRegionsForUI, combinedRegionsForPlanning);
 
-      Point3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
+      Pose3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
       int closestSegmentIndex = localizationResult.getClosestSegmentIndex();
       List<? extends Pose3DReadOnly> bodyPathPlan = localizationResult.getBodyPathPlan();
 
       // move point along body path plan by plan horizon
       Pose3D subGoalPoseBetweenFeet = new Pose3D();
       double planHorizonDistance = lookAndStepParameters.getPlanHorizon() + (lookAndStepParameters.getNumberOfStepsToTryToPlan() - 1) * footstepPlannerParameters.getMaximumStepReach();
-      int segmentIndexOfGoal = BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan,
-                                                                           closestPointAlongPath,
-                                                                           subGoalPoseBetweenFeet.getPosition(),
-                                                                           closestSegmentIndex,
-                                                                           planHorizonDistance);
+      BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan, closestPointAlongPath, subGoalPoseBetweenFeet, closestSegmentIndex, planHorizonDistance);
 
       statusLogger.info("Found next sub goal: {}", subGoalPoseBetweenFeet);
-      subGoalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       // calculate impassibility
       if (lookAndStepParameters.getStopForImpassibilities() && lidarREAPlanarRegions != null)
