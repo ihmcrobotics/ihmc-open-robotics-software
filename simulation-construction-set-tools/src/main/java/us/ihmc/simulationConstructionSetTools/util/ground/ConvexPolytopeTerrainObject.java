@@ -1,14 +1,14 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
-import us.ihmc.euclid.shape.convexPolytope.Vertex3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.Face3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -74,26 +74,37 @@ public class ConvexPolytopeTerrainObject implements TerrainObject3D, HeightMapWi
       return Double.NEGATIVE_INFINITY;
    }
 
+   private final Point3D tempIntersection = new Point3D();
+
    @Override
    public boolean checkIfInside(double x, double y, double z, Point3DBasics intersectionToPack, Vector3DBasics normalToPack)
    {
-      intersectionToPack.setX(x);
-      intersectionToPack.setY(y);
-      intersectionToPack.setZ(heightAt(x, y, z));
-      
-      if (intersectionToPack.getZ() > Double.NEGATIVE_INFINITY)
-         normalToPack.set(convexPolytope.getClosestFace(intersectionToPack).getNormal());
+      double heightAt = heightAt(x, y, z);
 
-      return (z < intersectionToPack.getZ());
+      if (intersectionToPack != null)
+      {
+         intersectionToPack.setX(x);
+         intersectionToPack.setY(y);
+         intersectionToPack.setZ(heightAt);
+      }
+
+      if (normalToPack != null)
+      {
+         if (heightAt > Double.NEGATIVE_INFINITY)
+         {
+            tempIntersection.set(x, y, heightAt);
+            normalToPack.set(convexPolytope.getClosestFace(tempIntersection).getNormal());
+         }
+      }
+
+      return (z < heightAt);
    }
 
    @Override
    public double heightAndNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
-      Point3D intersectionToIgnore = new Point3D();
-      
-      checkIfInside(x, y, z, intersectionToIgnore, normalToPack);
-      
+      checkIfInside(x, y, z, null, normalToPack);
+
       return heightAt(x, y, z);
    }
 
@@ -122,6 +133,12 @@ public class ConvexPolytopeTerrainObject implements TerrainObject3D, HeightMapWi
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;
+   }
+
+   @Override
+   public List<? extends Shape3DReadOnly> getTerrainCollisionShapes()
+   {
+      return Collections.singletonList(convexPolytope);
    }
 
 }
