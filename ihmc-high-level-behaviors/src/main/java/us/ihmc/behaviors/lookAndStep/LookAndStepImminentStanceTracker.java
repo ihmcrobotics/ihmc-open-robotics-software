@@ -55,7 +55,9 @@ public class LookAndStepImminentStanceTracker
                                               footstepStatusMessage.getDesiredFootOrientationInWorld());
             FramePose3D commandedPose = new FramePose3D();
 
-            lastCompletedFootstep.set(new PlannedFootstepCopier(commandedImminentStancePoses.get(robotSide)));
+            lastStartedFootstep.set(new PlannedFootstepCopier(commandedImminentStancePoses.get(robotSide)));
+
+            stepsStartedSinceCommanded++;
 
             if (!commandedFootstepQueue.isEmpty())
             {
@@ -65,19 +67,20 @@ public class LookAndStepImminentStanceTracker
                {
                   LogTools.info("Commanded step {} completed. {}", stepsCompletedSinceCommanded,
                                 robotSide.name());
-                  stepsStartedSinceCommanded++;
 
-                  commandedFootstepQueue.removeFirst();
-                  if (!commandedFootstepQueue.isEmpty())
-                  {
-                     commandedImminentStancePoses.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
-                  }
+                  PlannedFootstepReadOnly stepStarted = commandedFootstepQueue.removeFirst();
+                  commandedImminentStancePoses.put(stepStarted.getRobotSide(), stepStarted);
                }
             }
          }
          else
          {
-            lastStartedFootstep.set(new PlannedFootstepCopier(commandedImminentStancePoses.get(robotSide)));
+            lastCompletedFootstep.set(new PlannedFootstepCopier(commandedImminentStancePoses.get(robotSide)));
+            if (!commandedFootstepQueue.isEmpty())
+            {
+               commandedImminentStancePoses.put(commandedFootstepQueue.getFirst().getRobotSide(), commandedFootstepQueue.getFirst());
+            }
+
             ++stepsCompletedSinceCommanded;
          }
       }
