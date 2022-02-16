@@ -63,7 +63,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationForwardPushInSwing() throws Exception
    {
-      percentWeight = 0.5;
+      percentWeight = 0.4;
       super.testPushICPOptimizationForwardPushInSwing();
    }
 
@@ -72,7 +72,7 @@ public class ValkyrieICPOptimizationPushRecoveryATest extends AvatarICPOptimizat
    @Test
    public void testPushICPOptimizationInwardPushInSwing() throws Exception
    {
-      percentWeight = 0.18;
+      percentWeight = 0.15;
       super.testPushICPOptimizationInwardPushInSwing();
    }
 
