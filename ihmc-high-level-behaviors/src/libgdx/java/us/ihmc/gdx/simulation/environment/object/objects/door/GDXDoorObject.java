@@ -18,10 +18,10 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.tools.GDXTools;
 
-public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
+public class GDXDoorObject extends GDXEnvironmentObject
 {
    public static final String NAME = "Door Combined Multi Body";
-   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDoorCombinedMultiBodyObject.class);
+   public static final GDXEnvironmentObjectFactory FACTORY = new GDXEnvironmentObjectFactory(NAME, GDXDoorObject.class);
    private final GDXDoorFrameObject doorFrameObject;
    private final GDXDoorPanelObject doorPanelObject;
    private final GDXDoorLeverHandleObject doorLeverObject;
@@ -38,7 +38,7 @@ public class GDXDoorCombinedMultiBodyObject extends GDXEnvironmentObject
    private Vector3 leverOffsetOfPivotFromParentCenterOfMass;
    private Vector3 leverOffsetOfCenterOfMassFromPivot;
 
-   public GDXDoorCombinedMultiBodyObject()
+   public GDXDoorObject()
    {
       super(NAME, FACTORY);
 
