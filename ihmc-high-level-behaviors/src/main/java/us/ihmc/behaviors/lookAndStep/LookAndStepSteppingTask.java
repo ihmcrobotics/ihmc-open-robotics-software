@@ -34,7 +34,7 @@ public class LookAndStepSteppingTask
    protected SwingPlannerParametersReadOnly swingPlannerParameters;
 
    protected RobotWalkRequester robotWalkRequester;
-   protected Runnable replanFootstepsOutput;
+   protected Runnable doneWaitingForSwingOutput;
 
    protected FootstepPlan footstepPlan;
    protected ROS2SyncedRobotModel syncedRobot;
@@ -63,7 +63,7 @@ public class LookAndStepSteppingTask
          swingPlannerParameters = lookAndStep.swingPlannerParameters;
          uiPublisher = lookAndStep.helper::publish;
          robotWalkRequester = lookAndStep.robotInterface::requestWalk;
-         replanFootstepsOutput = () ->
+         doneWaitingForSwingOutput = () ->
          {
             if (!lookAndStep.isBeingReset.get())
             {
@@ -78,7 +78,7 @@ public class LookAndStepSteppingTask
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Stepping task");
          suppressor.addCondition("Not in robot motion state", () -> !lookAndStep.behaviorStateReference.get().equals(LookAndStepBehavior.State.STEPPING));
          suppressor.addCondition(() -> "Footstep plan not OK: numberOfSteps = " + (footstepPlan == null ? null : footstepPlan.getNumberOfSteps())
-                                       + ". Planning again...", () -> !(footstepPlan != null && footstepPlan.getNumberOfSteps() > 0), replanFootstepsOutput);
+                                       + ". Planning again...", () -> !(footstepPlan != null && footstepPlan.getNumberOfSteps() > 0), doneWaitingForSwingOutput);
          suppressor.addCondition("Robot disconnected", () -> !robotDataReceptionTimerSnaphot.isRunning());
          suppressor.addCondition("Robot not in walking state", () -> !lookAndStep.controllerStatusTracker.isInWalkingState());
       }
@@ -110,7 +110,6 @@ public class LookAndStepSteppingTask
 
    protected void performTask()
    {
-      statusLogger.warn("Requesting walk");
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
       FootstepDataMessageConverter.appendPlanToMessage(footstepPlan, footstepDataListMessage);
@@ -133,43 +132,84 @@ public class LookAndStepSteppingTask
       footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
       footstepDataListMessage.getQueueingProperties().setPreviousMessageId(previousStepMessageId);
       previousStepMessageId = messageId;
+      statusLogger.warn("Requesting walk {}ing {} step plan starting with {} foot.",
+                        executionMode.name(),
+                        footstepPlan.getNumberOfSteps(),
+                        footstepPlan.getFootstep(0).getRobotSide().name());
       TypedNotification<WalkingStatusMessage> walkingStatusNotification = robotWalkRequester.requestWalk(footstepDataListMessage);
       timerSincePlanWasSent.reset();
 
       ThreadTools.startAsDaemon(() -> robotWalkingThread(walkingStatusNotification), "RobotWalking");
-      sleepForPartOfSwingThread(lookAndStepParameters.getSwingDuration());
+      waitForPartOfSwing(lookAndStepParameters.getSwingDuration());
    }
 
-
-   private void sleepForPartOfSwingThread(double swingDuration)
+   private void waitForPartOfSwing(double swingDuration)
    {
       double estimatedRobotTimeWhenPlanWasSent = getEstimatedRobotTime();
       double percentSwingToWait = lookAndStepParameters.getPercentSwingToWait();
       double waitDuration = swingDuration * percentSwingToWait;
-      statusLogger.info("Waiting {} s for {} % of swing...", waitDuration, (100.0 * percentSwingToWait));
+      double waitForStepToStartTimeout = 10.0;
+      double robotTimeToTimeout = estimatedRobotTimeWhenPlanWasSent + waitForStepToStartTimeout;
+      statusLogger.info("Waiting up to {} s for commanded step to start...", waitForStepToStartTimeout);
 
-      double timeToTriggerAReplan = estimatedRobotTimeWhenPlanWasSent + waitDuration;
-
-      // sleep until the time has passed, making sure to only quit once we've started the first step in the plan we just sent, with a timeout period
-      boolean stepCompletedEarly = false;
-      while (Math.max(getEstimatedRobotTime(), estimatedRobotTimeWhenPlanWasSent + timerSincePlanWasSent.getElapsedTime()) < timeToTriggerAReplan ||
-             (imminentStanceTracker.getStepsStartedSinceCommanded() < 1 && getEstimatedRobotTime() < estimatedRobotTimeWhenPlanWasSent + 10.0))
+      boolean stepStartTimeRecorded = false;
+      double robotTimeInWhichStepStarted = Double.NaN;
+      double robotTimeToStopWaiting = Double.NaN;
+      while (true)
       {
-         ThreadTools.sleepSeconds(0.01);
+         double moreRobustRobotTime = getMoreRobustRobotTime(estimatedRobotTimeWhenPlanWasSent);
+         boolean stepHasNotStartedYet = imminentStanceTracker.getStepsStartedSinceCommanded() < 1;
+         // FIXME: What if the queue size was larger? Need to know when the step we sent is started
+         boolean stepHasStarted = imminentStanceTracker.getStepsStartedSinceCommanded() > 0;
+         boolean hasTimedOut = moreRobustRobotTime >= robotTimeToTimeout;
+         boolean robotIsNotWalkingAnymoreForSomeReason = !controllerStatusTracker.isWalking();
+         boolean stepCompletedEarly = imminentStanceTracker.getStepsCompletedSinceCommanded() > 0;
 
-         if (imminentStanceTracker.getStepsStartedSinceCommanded() < 1)
-            continue;
-
-         if (!controllerStatusTracker.isWalking() || imminentStanceTracker.getStepsCompletedSinceCommanded() > 0)
+         // Part 1: Wait for the step to start with a timeout
+         if (stepHasNotStartedYet && hasTimedOut)
          {
-            stepCompletedEarly = true;
+            statusLogger.info("Commanded step did not start within {} s. Done waiting.", waitForStepToStartTimeout);
             break;
          }
+
+         // Part 2: The commanded step has started
+         if (stepHasStarted)
+         {
+            if (!stepStartTimeRecorded)
+            {
+               stepStartTimeRecorded = true;
+               robotTimeInWhichStepStarted = getMoreRobustRobotTime(estimatedRobotTimeWhenPlanWasSent);
+               robotTimeToStopWaiting = moreRobustRobotTime + waitDuration;
+               statusLogger.info("Waiting {} s for {} % of swing...", waitDuration, percentSwingToWait * 100.0);
+            }
+
+            if (robotIsNotWalkingAnymoreForSomeReason)
+            {
+               statusLogger.info("Robot not walking anymore {} s after step started for some reason. Done waiting.",
+                                 moreRobustRobotTime - robotTimeInWhichStepStarted);
+               break;
+            }
+            else if (stepCompletedEarly)
+            {
+               statusLogger.info("Step completed {} s early. Done waiting.", robotTimeToStopWaiting - moreRobustRobotTime);
+               break;
+            }
+            else if (moreRobustRobotTime >= robotTimeToStopWaiting)
+            {
+               statusLogger.info("{} % of swing complete! Done waiting.", (moreRobustRobotTime - estimatedRobotTimeWhenPlanWasSent) / swingDuration);
+               break;
+            }
+         }
+
+         ThreadTools.sleepSeconds(0.01); // Prevent free spinning
       }
 
-      statusLogger.info("{} % of swing complete! Step completed early = {}", (getEstimatedRobotTime() - estimatedRobotTimeWhenPlanWasSent) / swingDuration,
-                        stepCompletedEarly);
-      replanFootstepsOutput.run();
+      doneWaitingForSwingOutput.run();
+   }
+
+   private double getMoreRobustRobotTime(double estimatedRobotTimeWhenPlanWasSent)
+   {
+      return Math.max(getEstimatedRobotTime(), estimatedRobotTimeWhenPlanWasSent + timerSincePlanWasSent.getElapsedTime());
    }
 
    private double getEstimatedRobotTime()
