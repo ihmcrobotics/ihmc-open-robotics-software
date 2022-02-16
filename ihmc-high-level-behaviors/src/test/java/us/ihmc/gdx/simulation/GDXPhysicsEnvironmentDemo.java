@@ -1,27 +1,15 @@
 package us.ihmc.gdx.simulation;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.Bullet;
-import com.badlogic.gdx.physics.bullet.collision.btBoxShape;
 import com.badlogic.gdx.physics.bullet.linearmath.LinearMath;
-import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
-import us.ihmc.commons.RandomNumbers;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.simulation.environment.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.GDXEnvironmentBuilder;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
-import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXMultiBodySnakeObject;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.log.LogTools;
-
-import java.util.Random;
 
 public class GDXPhysicsEnvironmentDemo
 {
@@ -29,7 +17,6 @@ public class GDXPhysicsEnvironmentDemo
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
    private final GDXEnvironmentBuilder environmentBuilder = new GDXEnvironmentBuilder(baseUI.get3DSceneManager());
-   private final Vector3 tempVector = new Vector3();
 
    public GDXPhysicsEnvironmentDemo()
    {
@@ -46,7 +33,20 @@ public class GDXPhysicsEnvironmentDemo
             environmentBuilder.create(baseUI);
             baseUI.getImGuiPanelManager().addPanel(environmentBuilder);
 
-            // load falling blocks world
+            GDXLabFloorObject labFloorObject = new GDXLabFloorObject();
+            labFloorObject.setPositionInWorld(new Point3D(0.0, 0.0, -0.5));
+            environmentBuilder.addObject(labFloorObject);
+            labFloorObject.copyThisTransformToBulletMultiBody();
+
+            GDXMultiBodySnakeObject multiBodySnake = new GDXMultiBodySnakeObject();
+            multiBodySnake.setPositionInWorld(new Point3D(0.0, 0.0, 4.0));
+            environmentBuilder.addObject(multiBodySnake);
+            multiBodySnake.copyThisTransformToBulletMultiBody();
+
+            GDXDoorObject doorObject = new GDXDoorObject();
+            doorObject.setPositionInWorld(new Point3D(0.0, 2.0, 0.0));
+            environmentBuilder.addObject(doorObject);
+            doorObject.copyThisTransformToBulletMultiBody();
          }
 
          @Override

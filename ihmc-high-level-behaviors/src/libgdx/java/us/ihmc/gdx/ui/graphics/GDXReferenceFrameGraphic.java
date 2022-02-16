@@ -1,5 +1,6 @@
 package us.ihmc.gdx.ui.graphics;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
@@ -16,13 +17,25 @@ public class GDXReferenceFrameGraphic implements RenderableProvider
    private final RigidBodyTransform rigidBodyTransform = new RigidBodyTransform();
    private final FramePose3D framePose3D = new FramePose3D();
    private final ModelInstance coordinateFrameInstance;
+   private ReferenceFrame referenceFrame;
 
    public GDXReferenceFrameGraphic(double length)
    {
       coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(length);
    }
 
+   public GDXReferenceFrameGraphic(double length, Color color)
+   {
+      coordinateFrameInstance = GDXModelPrimitives.createCoordinateFrameInstance(length, color);
+   }
+
    public void setToReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
+      updateFromLastGivenFrame();
+   }
+
+   public void updateFromLastGivenFrame()
    {
       framePose3D.setToZero(referenceFrame);
       framePose3D.changeFrame(ReferenceFrame.getWorldFrame());

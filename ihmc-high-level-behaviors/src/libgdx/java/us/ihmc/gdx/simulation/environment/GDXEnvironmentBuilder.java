@@ -27,6 +27,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
+import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectLibrary;
@@ -98,6 +99,8 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
             selectedObject.setPositionInWorld(pickPoint);
             pose3DGizmo.getTransformToParent().set(selectedObject.getObjectTransform());
 
+            selectedObject.copyThisTransformToBulletMultiBody();
+
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                isPlacing = false;
@@ -107,6 +110,8 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
          {
             pose3DGizmo.process3DViewInput(viewInput);
             selectedObject.setTransformToWorld(pose3DGizmo.getTransformToParent());
+
+            selectedObject.copyThisTransformToBulletMultiBodyParentOnly();
 
             intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -124,6 +129,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
       }
       else
       {
+         isPlacing = false;
          if (viewInput.isWindowHovered())
          {
             intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
@@ -163,13 +169,6 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
 
    public void update()
    {
-      if (bulletPhysicsManager.getSimulate().get())
-      {
-         for (GDXEnvironmentObject allObject : allObjects)
-         {
-            allObject.copyThisTransformToBulletMultiBody();
-         }
-      }
       bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
       if (bulletPhysicsManager.getSimulate().get())
       {
@@ -324,6 +323,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
                tempTransform.set(tempOrientation, tempTranslation);
                object.setTransformToWorld(tempTransform);
                addObject(object);
+               object.copyThisTransformToBulletMultiBody();
             }
             else
             {
