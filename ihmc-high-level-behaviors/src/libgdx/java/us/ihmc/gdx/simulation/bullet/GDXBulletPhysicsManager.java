@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation.environment;
+package us.ihmc.gdx.simulation.bullet;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Matrix4;
@@ -14,7 +14,6 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.gdx.simulation.GDXBulletPhysicsDebugger;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.UnitConversions;
 
@@ -86,7 +85,9 @@ public class GDXBulletPhysicsManager
       Vector3 localInertia = new Vector3();
       collisionShape.calculateLocalInertia(mass, localInertia);
       btRigidBody rigidBody = new btRigidBody(mass, motionState, collisionShape, localInertia);
-      multiBodyDynamicsWorld.addRigidBody(rigidBody);
+      int collisionGroup = 1; // group 1 is rigid and static bodies
+      int collisionGroupMask = 1 + 2; // Allow interaction with group 2, which is multi bodies
+      multiBodyDynamicsWorld.addRigidBody(rigidBody, collisionGroup, collisionGroupMask);
       rigidBodies.add(rigidBody);
       return rigidBody;
    }
@@ -96,6 +97,13 @@ public class GDXBulletPhysicsManager
       multiBodyDynamicsWorld.addMultiBody(multiBody);
       multiBodies.add(multiBody);
       return multiBody;
+   }
+
+   public void addMultiBodyCollisionShape(btMultiBodyLinkCollider collisionShape)
+   {
+      int collisionGroup = 2; // Multi bodies need to be in a separate collision group
+      int collisionGroupMask = 1 + 2; // But allowed to interact with group 1, which is rigid and static bodies
+      multiBodyDynamicsWorld.addCollisionObject(collisionShape, collisionGroup, collisionGroupMask);
    }
 
    public void simulate(float timeStep)
@@ -156,8 +164,11 @@ public class GDXBulletPhysicsManager
       }
       for (btRigidBody rigidBody : rigidBodies)
       {
-         // Can probably just call removeCollisionObject
          multiBodyDynamicsWorld.removeRigidBody(rigidBody);
+      }
+      for (btMultiBody multiBody : multiBodies)
+      {
+         multiBodyDynamicsWorld.removeMultiBody(multiBody);
       }
    }
 
