@@ -16,9 +16,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.userDesired.UserDesiredControllerCommandGenerators;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.QueuedControllerCommandGenerator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScript;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
@@ -115,6 +113,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private YoGraphicsListRegistry yoGraphicsListRegistry;
 
    private HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters;
+   private HeadingAndVelocityScriptFactory customHVScriptFactory;
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean createQueuedControllerCommandGenerator = false;
    private boolean createUserDesiredControllerCommandGenerator = false;
@@ -223,13 +222,24 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
          if (useHeadingAndVelocityScript)
          {
-            HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(controlDT,
-                                                                                               controllerToolbox.getYoTime(),
-                                                                                               headingAndVelocityEvaluationScriptParameters,
-                                                                                               registry);
-            continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
-            continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
-            controllerToolbox.addUpdatable(script);
+            if (customHVScriptFactory == null) // use the default HV script
+            {
+               HeadingAndVelocityEvaluationScript script = new HeadingAndVelocityEvaluationScript(controlDT,
+                                                                                                  controllerToolbox.getYoTime(),
+                                                                                                  headingAndVelocityEvaluationScriptParameters,
+                                                                                                  registry);
+               continuousStepGenerator.setDesiredTurningVelocityProvider(script.getDesiredTurningVelocityProvider());
+               continuousStepGenerator.setDesiredVelocityProvider(script.getDesiredVelocityProvider());
+               controllerToolbox.addUpdatable(script);
+            }
+            else
+            {
+               HeadingAndVelocityScript customHVScript = customHVScriptFactory.getHeadingAndVelocityScript(controlDT, controllerToolbox.getYoTime(), registry);
+               continuousStepGenerator.setDesiredTurningVelocityProvider(customHVScript.getDesiredTurningVelocityProvider());
+               continuousStepGenerator.setDesiredVelocityProvider(customHVScript.getDesiredVelocityProvider());
+               controllerToolbox.addUpdatable(customHVScript);
+            }
+
          }
          else
          {
@@ -307,6 +317,11 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public void setHeadingAndVelocityEvaluationScriptParameters(HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters)
    {
       headingAndVelocityEvaluationScriptParameters = walkingScriptParameters;
+   }
+
+   public void setCustomHeadingAndVelocityScriptFactory(HeadingAndVelocityScriptFactory customHVScriptFactory)
+   {
+      this.customHVScriptFactory = customHVScriptFactory;
    }
 
    public void useDefaultDiagnosticControlState()

@@ -28,7 +28,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
  * some work to do here.
  * </p>
  */
-public class HeadingAndVelocityEvaluationScript implements Updatable
+public class HeadingAndVelocityEvaluationScript extends HeadingAndVelocityScript
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameVector2D desiredVelocity = new YoFrameVector2D("scriptedDesiredVelocity", ReferenceFrame.getWorldFrame(), registry);
@@ -118,11 +118,13 @@ public class HeadingAndVelocityEvaluationScript implements Updatable
                            createSlowDownToZero(), createTurnInPlace180(), createChangeHeadingWalkingStraight(), createSlowDownToZero());
    }
 
+   @Override
    public DesiredVelocityProvider getDesiredVelocityProvider()
    {
       return () -> desiredVelocityRateLimited;
    }
 
+   @Override
    public DesiredTurningVelocityProvider getDesiredTurningVelocityProvider()
    {
       return () -> desiredTurningVelocityRateLimited.getValue();

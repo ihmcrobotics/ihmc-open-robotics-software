@@ -7,8 +7,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class HeadingAndVelocityScript implements Updatable
 {
-   protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-
    public abstract DesiredVelocityProvider getDesiredVelocityProvider();
 
    public abstract DesiredTurningVelocityProvider getDesiredTurningVelocityProvider();

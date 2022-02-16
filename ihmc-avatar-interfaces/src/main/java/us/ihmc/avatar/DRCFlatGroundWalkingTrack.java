@@ -17,6 +17,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityScript;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityScriptFactory;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
@@ -81,10 +83,26 @@ public class DRCFlatGroundWalkingTrack
            walkingScriptParameters, null, null);
    }
 
+   public DRCFlatGroundWalkingTrack(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+                                    DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
+                                    DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters,
+                                    HeadingAndVelocityScriptFactory customHVScriptFactory)
+   {
+      this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model, walkingProvider,
+           walkingScriptParameters, customHVScriptFactory, null, null);
+   }
+
+   private DRCFlatGroundWalkingTrack(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
+                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
+                                     DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters,
+                                     PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber, HighLevelControllerStateFactory customControllerStateFactory) {
+      this(robotInitialSetup, guiInitialSetup, scsInitialSetup, useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep,
+                                model, walkingProvider, walkingScriptParameters, null, externalPelvisCorrectorSubscriber, customControllerStateFactory);
+   }
 
    private DRCFlatGroundWalkingTrack(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup,
                                     DRCSCSInitialSetup scsInitialSetup, boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep,
-                                    DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters,
+                                    DRCRobotModel model, WalkingProvider walkingProvider, HeadingAndVelocityEvaluationScriptParameters walkingScriptParameters, HeadingAndVelocityScriptFactory customHVScriptFactory,
                                     PelvisPoseCorrectionCommunicatorInterface externalPelvisCorrectorSubscriber, HighLevelControllerStateFactory customControllerStateFactory)
    {
       //    scsInitialSetup = new DRCSCSInitialSetup(TerrainType.FLAT);
@@ -127,6 +145,7 @@ public class DRCFlatGroundWalkingTrack
                                                                                                     splitFractionParameters);
       setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
+      controllerFactory.setCustomHeadingAndVelocityScriptFactory(customHVScriptFactory);
       controllerFactory.createControllerNetworkSubscriber(model.getSimpleRobotName(), realtimeROS2Node);
       if (customControllerStateFactory != null)
          controllerFactory.addCustomControlState(customControllerStateFactory);
