@@ -25,7 +25,8 @@ public class GDXBulletPhysicsDebugger
    private int lineDraws;
    private final int maxLineDrawsPerModel = 100;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImBoolean drawDebug = new ImBoolean(false);
+   private final ImBoolean updateDebugDrawings = new ImBoolean(false);
+   private final ImBoolean showDebugDrawings = new ImBoolean(true);
    private final Timer autoDisableTimer = new Timer();
 
    public GDXBulletPhysicsDebugger(btMultiBodyDynamicsWorld multiBodyDynamicsWorld)
@@ -92,19 +93,24 @@ public class GDXBulletPhysicsDebugger
    {
       if (autoDisableTimer.isExpired(3.0))
       {
-         drawDebug.set(false);
+         updateDebugDrawings.set(false);
       }
 
       // FIXME: There's a native memory leak I think. Or maybe just need to fix the mesh drawing above.
-      if (ImGui.checkbox(labels.get("Draw debug wireframes (Crashes after a while)"), drawDebug) && drawDebug.get())
+      if (ImGui.checkbox(labels.get("Update Bullet debug drawings (Crashes after a while)"), updateDebugDrawings) && updateDebugDrawings.get())
       {
          autoDisableTimer.reset();
+         if (updateDebugDrawings.get())
+         {
+            showDebugDrawings.set(true);
+         }
       }
+      ImGui.checkbox(labels.get("Show Bullet debug drawings"), showDebugDrawings);
    }
 
    public void update()
    {
-      if (drawDebug.get())
+      if (updateDebugDrawings.get())
       {
          models.clear();
          lineDraws = 0;
@@ -122,12 +128,15 @@ public class GDXBulletPhysicsDebugger
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (GDXBulletPhysicsDebuggerModel model : models)
+      if (showDebugDrawings.get())
       {
-         ModelInstance modelInstance = model.getModelInstance();
-         if (modelInstance != null)
+         for (GDXBulletPhysicsDebuggerModel model : models)
          {
-            modelInstance.getRenderables(renderables, pool);
+            ModelInstance modelInstance = model.getModelInstance();
+            if (modelInstance != null)
+            {
+               modelInstance.getRenderables(renderables, pool);
+            }
          }
       }
    }
