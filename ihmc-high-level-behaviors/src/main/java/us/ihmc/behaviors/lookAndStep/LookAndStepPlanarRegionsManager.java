@@ -17,6 +17,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -25,10 +27,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -37,6 +36,7 @@ public class LookAndStepPlanarRegionsManager
    private final double minimumTranslationToAppend = 0.2;
    private final double minimumRotationToAppend = Math.toRadians(30);
    private final double maxDistanceToRemember = 2.0;
+   private final boolean useSLAMToCombineRegions = true;
 
    private final LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    private final BipedalSupportPlanarRegionCalculator bipedalSupportPlanarRegionCalculator;
@@ -51,6 +51,10 @@ public class LookAndStepPlanarRegionsManager
    private final TypedInput<RobotConfigurationData> robotConfigurationDataInput = new TypedInput<>();
 
    protected PlanarRegionsHistory planarRegionsHistory = new PlanarRegionsHistory();
+   private final List<PlanarRegionsList> planarRegionsForPlanning = new ArrayList<>();
+
+   private final PlanarRegionSLAM planarRegionSLAM = new PlanarRegionSLAM();
+   private final PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters();
 
    public LookAndStepPlanarRegionsManager(LookAndStepBehaviorParametersReadOnly lookAndStepParameters,
                                           DRCRobotModel robotModel,
@@ -65,6 +69,12 @@ public class LookAndStepPlanarRegionsManager
    {
       planarRegionsInput.set(planarRegionsList);
       planarRegionsExpirationTimer.reset();
+
+      if (lookAndStepParameters.getAssumeFlatGround())
+      {
+         addPlanarRegionsToHistory(planarRegionsList);
+         dequeueToSize();
+      }
    }
 
    public void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
@@ -81,7 +91,7 @@ public class LookAndStepPlanarRegionsManager
 
    public Collection<PlanarRegionsList> getPlanarRegionsHistory()
    {
-      return planarRegionsHistory.getPlanarRegions();
+      return planarRegionsForPlanning;
    }
 
    public PlanarRegionsList getReceivedPlanarRegions()
@@ -119,10 +129,10 @@ public class LookAndStepPlanarRegionsManager
 
    public String computeRegionsToPlanWith(SideDependentList<MinimalFootstep> startFootPoses)
    {
-      FramePose3D sensorPose = new FramePose3D(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
-      sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
-
       boolean isDataValid = capturabilityBasedStatusReceptionTimerSnapshot.isRunning() && robotConfigurationDataReceptionTimerSnapshot.isRunning();
+
+      List<PlanarRegionsList> regionsToUseFromHistory = new ArrayList<>();
+      List<PlanarRegionsList> regionsCreatedLocally = new ArrayList<>();
 
       if (planarRegionsHistory.isEmpty() && lookAndStepParameters.getPlanarRegionsHistorySize() > 0 && lookAndStepParameters.getUseInitialSupportRegions()
           && isDataValid)
@@ -130,34 +140,36 @@ public class LookAndStepPlanarRegionsManager
          bipedalSupportPlanarRegionCalculator.calculateSupportRegions(lookAndStepParameters.getSupportRegionScaleFactor(),
                                                                       capturabilityBasedStatus,
                                                                       robotConfigurationData);
-         planarRegionsHistory.addLast(sensorPose, bipedalSupportPlanarRegionCalculator.getSupportRegionsAsList(), minimumTranslationToAppend, minimumRotationToAppend);
+         regionsCreatedLocally.add(bipedalSupportPlanarRegionCalculator.getSupportRegionsAsList());
       }
+
 
       String status;
       if (lookAndStepParameters.getAssumeFlatGround())
       {
          status = "Assuming Flat Ground.";
-         planarRegionsHistory.addLast(sensorPose,
-                                      constructFlatGroundCircleRegion(computeMidFeetPose(), lookAndStepParameters.getAssumedFlatGroundCircleRadius()),
-                                      minimumTranslationToAppend,
-                                      minimumRotationToAppend);
-
+         regionsCreatedLocally.add(constructFlatGroundCircleRegion(computeMidFeetPose(), lookAndStepParameters.getAssumedFlatGroundCircleRadius()));
       }
       else if (lookAndStepParameters.getDetectFlatGround())
       {
+         addPlanarRegionsToHistory(planarRegions);
+         regionsToUseFromHistory.addAll(planarRegionsHistory.getPlanarRegions());
+
          FramePose3DReadOnly midFeetPose = computeMidFeetPose();
 
-         List<PlanarRegion> largeEnoughRegions = planarRegions.getPlanarRegionsAsList()
-                                                              .stream()
-                                                              .filter(region -> PlanarRegionTools.computePlanarRegionArea(region)
-                                                                                > lookAndStepParameters.getDetectFlatGroundMinRegionAreaToConsider())
-                                                              .collect(Collectors.toList());
+         List<PlanarRegion> largeEnoughRegions = new ArrayList<>();
+         for (PlanarRegionsList regions : regionsToUseFromHistory)
+         {
+            largeEnoughRegions.addAll(regions.getPlanarRegionsAsList().stream()
+                                                             .filter(region -> PlanarRegionTools.computePlanarRegionArea(region)
+                                                                               > lookAndStepParameters.getDetectFlatGroundMinRegionAreaToConsider())
+                                                             .collect(Collectors.toList()));
+         }
 
          // are the feet coplanar
          if (!areFeetCoplanar(startFootPoses))
          {
             status = "Flat ground not detected.";
-            planarRegionsHistory.addLast(sensorPose, planarRegions, minimumTranslationToAppend, minimumRotationToAppend);
          }
          else
          {
@@ -166,15 +178,18 @@ public class LookAndStepPlanarRegionsManager
             Vector3DReadOnly footNormal = getFootNormal(startFootPoses.get(RobotSide.LEFT));
 
             List<PlanarRegion> largeNonCoplanarRegions = largeEnoughRegions.stream().filter(region ->
-            {
-               boolean areHeightsTheSame = EuclidCoreTools.epsilonEquals(leftFootPosition.getZ(),
-                                                                         region.getPlaneZGivenXY(leftFootPosition.getX(), leftFootPosition.getY()),
-                                                                         lookAndStepParameters.getDetectFlatGroundZTolerance());
-               if (!areHeightsTheSame)
-                  return true;
+                                                                                            {
+                                                                                               boolean areHeightsTheSame = EuclidCoreTools.epsilonEquals(
+                                                                                                     leftFootPosition.getZ(),
+                                                                                                     region.getPlaneZGivenXY(leftFootPosition.getX(),
+                                                                                                                             leftFootPosition.getY()),
+                                                                                                     lookAndStepParameters.getDetectFlatGroundZTolerance());
+                                                                                               if (!areHeightsTheSame)
+                                                                                                  return true;
 
-               return region.getNormal().angle(footNormal) > lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
-            }).collect(Collectors.toList());
+                                                                                               return region.getNormal().angle(footNormal)
+                                                                                                      > lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
+                                                                                            }).collect(Collectors.toList());
 
             double closestNonCoplanarDistance = lookAndStepParameters.getAssumedFlatGroundCircleRadius();
             for (int i = 0; i < largeNonCoplanarRegions.size(); i++)
@@ -188,25 +203,54 @@ public class LookAndStepPlanarRegionsManager
             if (closestNonCoplanarDistance >= lookAndStepParameters.getDetectFlatGroundMinRadius())
             {
                status = "Flat ground detected.";
-               planarRegionsHistory.addLast(sensorPose,
-                                            constructFlatGroundCircleRegion(midFeetPose, closestNonCoplanarDistance),
-                                            minimumTranslationToAppend,
-                                            minimumRotationToAppend);
+               regionsCreatedLocally.add(constructFlatGroundCircleRegion(midFeetPose, 0.9 * closestNonCoplanarDistance));
             }
             else
             {
                status = "Flat ground not detected.";
-               planarRegionsHistory.addLast(sensorPose, planarRegions, minimumTranslationToAppend, minimumRotationToAppend);
             }
          }
       }
       else
       {
          status = "Not looking for flat ground.";
-         planarRegionsHistory.addLast(sensorPose, planarRegions, minimumTranslationToAppend, minimumRotationToAppend);
+         addPlanarRegionsToHistory(planarRegions);
+         regionsToUseFromHistory.addAll(planarRegionsHistory.getPlanarRegions());
+      }
+
+      if (useSLAMToCombineRegions)
+      {
+         planarRegionsForPlanning.clear();
+         if (regionsToUseFromHistory.isEmpty())
+         {
+            planarRegionsForPlanning.addAll(regionsCreatedLocally);
+         }
+         else
+         {
+            PlanarRegionsList map = regionsToUseFromHistory.remove(0);
+            while (!regionsToUseFromHistory.isEmpty())
+               map = PlanarRegionSLAM.slam(map, regionsToUseFromHistory.remove(0), parameters).getMergedMap();
+            while (!regionsCreatedLocally.isEmpty())
+               map = PlanarRegionSLAM.slam(map, regionsCreatedLocally.remove(0), parameters).getMergedMap();
+            planarRegionsForPlanning.add(map);
+         }
+      }
+      else
+      {
+         planarRegionsForPlanning.clear();
+         planarRegionsForPlanning.addAll(regionsToUseFromHistory);
+         planarRegionsForPlanning.addAll(regionsCreatedLocally);
       }
 
       return status;
+   }
+
+   private void addPlanarRegionsToHistory(PlanarRegionsList planarRegions)
+   {
+      FramePose3D sensorPose = new FramePose3D(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
+      sensorPose.changeFrame(ReferenceFrame.getWorldFrame());
+      planarRegionsHistory.addLast(sensorPose, planarRegions, minimumTranslationToAppend, minimumRotationToAppend);
+      dequeueToSize();
    }
 
    public void dequeueToSize()
@@ -263,66 +307,86 @@ public class LookAndStepPlanarRegionsManager
 
    private static class PlanarRegionsHistory
    {
-      private final ArrayDeque<PlanarRegionsList> planarRegionsQueue = new ArrayDeque<>();
-      private final ArrayDeque<FramePose3DReadOnly> sensorPoseQueue = new ArrayDeque<>();
+      private final List<FramePose3DReadOnly> sensorList = new ArrayList<>();
+      private final HashMap<FramePose3DReadOnly, PlanarRegionsList> regionsFromSensors = new HashMap<>();
+
+      private final FramePose3D lastPose = new FramePose3D();
 
       public boolean isEmpty()
       {
-         return planarRegionsQueue.isEmpty();
+         return regionsFromSensors.isEmpty();
       }
 
-      public void removeFirst()
-      {
-         planarRegionsQueue.removeFirst();
-         sensorPoseQueue.removeFirst();
-      }
-
-      public void addLast(FramePose3DReadOnly sensorPose, PlanarRegionsList planarRegionsList, double minimumTranslationToAppend,
+      public void addLast(FramePose3DReadOnly sensorPose,
+                          PlanarRegionsList planarRegionsList,
+                          double minimumTranslationToAppend,
                           double minimumRotationToAppend)
       {
+         lastPose.set(sensorPose);
+
          if (!isEmpty())
          {
-            FramePose3DReadOnly lastSensorPose = sensorPoseQueue.getLast();
 
-            boolean hasSensorMovedFarEnough = sensorPose.getPositionDistance(lastSensorPose) > minimumTranslationToAppend  ||
-                                              sensorPose.getOrientationDistance(lastSensorPose) > minimumRotationToAppend;
-            if (!hasSensorMovedFarEnough)
+            List<FramePose3DReadOnly> posesToRemove = regionsFromSensors.keySet().parallelStream()
+                                                       .filter(pose -> pose.getPositionDistance(sensorPose) < minimumTranslationToAppend
+                                                                          && pose.getOrientationDistance(sensorPose) < minimumRotationToAppend).collect(
+                        Collectors.toList());
+
+            if (!posesToRemove.isEmpty())
             {
-               // remove the last ones, we're going to overwrite them
-               planarRegionsQueue.removeLast();
-               sensorPoseQueue.removeLast();
+               for (int i = 0; i < posesToRemove.size(); i++)
+               {
+                  regionsFromSensors.remove(posesToRemove.get(i));
+                  sensorList.remove(posesToRemove.get(i));
+               }
             }
          }
 
-
-         planarRegionsQueue.add(planarRegionsList);
-         sensorPoseQueue.add(sensorPose);
+         sensorList.add(sensorPose);
+         regionsFromSensors.put(sensorPose, planarRegionsList);
       }
 
       public void dequeueToSize(int size, double maxDistance)
       {
-         while (sensorPoseQueue.getFirst().getPositionDistance(sensorPoseQueue.getLast()) > maxDistance)
-         {
-            sensorPoseQueue.removeFirst();
-            planarRegionsQueue.removeFirst();
-         }
+         List<FramePose3DReadOnly> samplesTooFarAway = regionsFromSensors.keySet().stream().filter(pose -> pose.getPositionDistance(lastPose) > maxDistance).collect(
+               Collectors.toList());
+         samplesTooFarAway.forEach(regionsFromSensors::remove);
+         samplesTooFarAway.forEach(sensorList::remove);
 
-         while (planarRegionsQueue.size() > size)
+         List<FramePose3DReadOnly> sortedRegions = regionsFromSensors.keySet().stream().sorted((poseA, poseB) ->
+                                                     {
+                                                        if (poseA.getPositionDistance(lastPose) < poseB.getPositionDistance(lastPose))
+                                                           return -1;
+                                                        else
+                                                           return 1;
+                                                     }).collect(Collectors.toList());
+
+         int numberOfRegions = sortedRegions.size();
+         while (numberOfRegions > size)
          {
-            sensorPoseQueue.removeFirst();
-            planarRegionsQueue.removeFirst();
+            FramePose3DReadOnly removedPose = sortedRegions.remove(numberOfRegions - 1);
+            sensorList.remove(removedPose);
+            regionsFromSensors.remove(removedPose);
+            numberOfRegions--;
          }
       }
 
       public void clear()
       {
-         planarRegionsQueue.clear();
-         sensorPoseQueue.clear();
+         sensorList.clear();
+         regionsFromSensors.clear();
       }
 
       public Collection<PlanarRegionsList> getPlanarRegions()
       {
-         return planarRegionsQueue;
+         return regionsFromSensors.values();
+      }
+
+      public List<PlanarRegionsList> getOrderedRegionList()
+      {
+         List<PlanarRegionsList> regions = new ArrayList<>();
+         sensorList.forEach(sensor -> regions.add(regionsFromSensors.get(sensor)));
+         return regions;
       }
    }
 }
