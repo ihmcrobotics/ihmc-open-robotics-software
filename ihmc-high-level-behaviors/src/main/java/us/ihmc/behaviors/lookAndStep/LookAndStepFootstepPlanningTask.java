@@ -250,7 +250,7 @@ public class LookAndStepFootstepPlanningTask
          numberOfCompletedFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
          swingPlannerType = SwingPlannerType.fromInt(lookAndStepParameters.getSwingPlannerType());
 
-         planarRegionsManager.updateSnapShot();
+         planarRegionsManager.updateSnapshot();
 
          if (suppressor.evaulateShouldAccept())
          {

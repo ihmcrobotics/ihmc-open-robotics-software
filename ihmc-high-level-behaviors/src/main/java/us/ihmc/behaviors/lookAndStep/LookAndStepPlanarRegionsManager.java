@@ -6,17 +6,13 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionCalculator;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -111,7 +107,7 @@ public class LookAndStepPlanarRegionsManager
    private TimerSnapshotWithExpiration capturabilityBasedStatusReceptionTimerSnapshot;
    private TimerSnapshotWithExpiration robotConfigurationDataReceptionTimerSnapshot;
 
-   public void updateSnapShot()
+   public void updateSnapshot()
    {
       planarRegions = planarRegionsInput.getLatest();
       capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
@@ -120,7 +116,6 @@ public class LookAndStepPlanarRegionsManager
       capturabilityBasedStatusReceptionTimerSnapshot = capturabilityBasedStatusExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
       robotConfigurationDataReceptionTimerSnapshot = robotConfigurationDataExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
    }
-
 
    public String computeRegionsToPlanWith(SideDependentList<MinimalFootstep> startFootPoses)
    {
@@ -171,18 +166,15 @@ public class LookAndStepPlanarRegionsManager
             Vector3DReadOnly footNormal = getFootNormal(startFootPoses.get(RobotSide.LEFT));
 
             List<PlanarRegion> largeNonCoplanarRegions = largeEnoughRegions.stream().filter(region ->
-                                                                                            {
-                                                                                               boolean areHeightsTheSame = EuclidCoreTools.epsilonEquals(
-                                                                                                     leftFootPosition.getZ(),
-                                                                                                     region.getPlaneZGivenXY(leftFootPosition.getX(),
-                                                                                                                             leftFootPosition.getY()),
-                                                                                                     lookAndStepParameters.getDetectFlatGroundZTolerance());
-                                                                                               if (!areHeightsTheSame)
-                                                                                                  return true;
+            {
+               boolean areHeightsTheSame = EuclidCoreTools.epsilonEquals(leftFootPosition.getZ(),
+                                                                         region.getPlaneZGivenXY(leftFootPosition.getX(), leftFootPosition.getY()),
+                                                                         lookAndStepParameters.getDetectFlatGroundZTolerance());
+               if (!areHeightsTheSame)
+                  return true;
 
-                                                                                               return region.getNormal().angle(footNormal)
-                                                                                                      > lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
-                                                                                            }).collect(Collectors.toList());
+               return region.getNormal().angle(footNormal) > lookAndStepParameters.getDetectFlatGroundOrientationTolerance();
+            }).collect(Collectors.toList());
 
             double closestNonCoplanarDistance = lookAndStepParameters.getAssumedFlatGroundCircleRadius();
             for (int i = 0; i < largeNonCoplanarRegions.size(); i++)
@@ -196,7 +188,10 @@ public class LookAndStepPlanarRegionsManager
             if (closestNonCoplanarDistance >= lookAndStepParameters.getDetectFlatGroundMinRadius())
             {
                status = "Flat ground detected.";
-               planarRegionsHistory.addLast(sensorPose, constructFlatGroundCircleRegion(midFeetPose, closestNonCoplanarDistance), minimumTranslationToAppend, minimumRotationToAppend);
+               planarRegionsHistory.addLast(sensorPose,
+                                            constructFlatGroundCircleRegion(midFeetPose, closestNonCoplanarDistance),
+                                            minimumTranslationToAppend,
+                                            minimumRotationToAppend);
             }
             else
             {
@@ -303,7 +298,6 @@ public class LookAndStepPlanarRegionsManager
          planarRegionsQueue.add(planarRegionsList);
          sensorPoseQueue.add(sensorPose);
       }
-
 
       public void dequeueToSize(int size, double maxDistance)
       {
