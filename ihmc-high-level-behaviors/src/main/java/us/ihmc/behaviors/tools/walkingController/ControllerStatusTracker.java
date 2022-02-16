@@ -38,7 +38,7 @@ public class ControllerStatusTracker
    private volatile boolean isWalkingFromConfigurationData = false;
    private final Notification finishedWalkingNotification = new Notification();
    private final ArrayList<Runnable> notWalkingStateAnymoreCallbacks = new ArrayList<>();
-   private Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
+   private final Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
 
    public ControllerStatusTracker(StatusLogger statusLogger, ROS2NodeInterface ros2Node, String robotName)
    {
@@ -71,10 +71,7 @@ public class ControllerStatusTracker
    private void acceptRobotConfigurationData(RobotConfigurationData message)
    {
       robotConfigurationDataTimer.reset();
-      if (RobotMotionStatus.fromByte(message.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION)
-         isWalkingFromConfigurationData = true;
-      else
-         isWalkingFromConfigurationData = false;
+      isWalkingFromConfigurationData = RobotMotionStatus.fromByte(message.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION;
    }
 
    private void acceptHighLevelStateChangeStatusMessage(HighLevelStateChangeStatusMessage message)
