@@ -254,7 +254,7 @@ public class GDXGPUPlanarRegionExtraction
       if (!enabled.get())
          return;
 
-      setParametersFromImGuiDoodles();
+      setParametersFromImGuiWidgets();
 
       wholeAlgorithmDurationStopwatch.start();
       gpuDurationStopwatch.start();
@@ -830,10 +830,10 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.sliderInt("Min Number of Nodes", minNumberOfNodesSlider.getData(), 0, 100);
       ImGui.checkbox("Cut Narrow Passage", cutNarrowPassageChecked);
 
-      setParametersFromImGuiDoodles();
+      setParametersFromImGuiWidgets();
    }
 
-   private void setParametersFromImGuiDoodles()
+   private void setParametersFromImGuiWidgets()
    {
       concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthTresholdSlider.get());
       concaveHullFactoryParameters.setTriangulationTolerance(triangulationToleranceSlider.get());
