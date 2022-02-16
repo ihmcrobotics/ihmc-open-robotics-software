@@ -514,7 +514,7 @@ public class SwingState extends AbstractFootControlState
     */
    public double requestSwingSpeedUp(double speedUpFactor)
    {
-      if (isSwingSpeedUpEnabled.getBooleanValue() && (speedUpFactor > 1.1 && speedUpFactor > swingTimeSpeedUpFactor.getDoubleValue()))
+      if (isSwingSpeedUpEnabled.getBooleanValue() && (speedUpFactor > 1.001 && speedUpFactor > swingTimeSpeedUpFactor.getDoubleValue()))
       {
          speedUpFactor = MathTools.clamp(speedUpFactor, swingTimeSpeedUpFactor.getDoubleValue(), maxSwingTimeSpeedUpFactor.getDoubleValue());
 
