@@ -3,17 +3,15 @@ package us.ihmc.gdx.simulation.environment.object.objects.door;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.bullet.dynamics.btHingeConstraint;
-import com.badlogic.gdx.physics.bullet.dynamics.btMultiBody;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.gdx.simulation.environment.GDXBulletPhysicsManager;
+import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObjectFactory;
 
@@ -30,7 +28,8 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
    private static final ImFloat relaxationFactor = new ImFloat(1.0f);
    private static final ImFloat biasFactor = new ImFloat(0.3f);
    private static final ImFloat softness = new ImFloat(0.9f);
-   private btMultiBody multiBody;
+   private btHingeConstraint doorHingeConstraint;
+   private btHingeConstraint handleHingeConstraint;
 
    public GDXDoorCombinedObject()
    {
@@ -53,7 +52,7 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
       Vector3 axisInFrameForDoorHinge = new Vector3(0.0f, 0.0f, 1.0f);
       Vector3 axisInPanelForDoorHinge = new Vector3(0.0f, 0.0f, 1.0f);
       boolean useReferenceFrameAForDoorHinge = true;
-      btHingeConstraint doorHingeConstraint = new btHingeConstraint(doorFrameObject.getBtRigidBody(),
+      doorHingeConstraint = new btHingeConstraint(doorFrameObject.getBtRigidBody(),
                                                                     doorPanelObject.getBtRigidBody(),
                                                                     pivotInFrameForDoorHinge,
                                                                     pivotInPanelForDoorHinge,
@@ -61,7 +60,7 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
                                                                     axisInPanelForDoorHinge,
                                                                     useReferenceFrameAForDoorHinge);
       doorHingeConstraint.setLimit(-2.0f, 2.0f, softness.get(), biasFactor.get(), relaxationFactor.get());
-      bulletPhysicsManager.getMultiBodyDynamicsWorld().addConstraint(doorHingeConstraint);
+      addConstraint(bulletPhysicsManager, doorHingeConstraint);
 
 //      Vector3 pivotInPanel = new Vector3(-0.03f, 0.85f, 0.9f);
       Vector3 pivotInPanelForHandle = new Vector3(-0.03f, 0.4f, -0.13f);
@@ -69,7 +68,7 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
       Vector3 axisInPanelForHandle = new Vector3(1.0f, 0.0f, 0.0f);
       Vector3 axisInLeverForHandle = new Vector3(1.0f, 0.0f, 0.0f);
       boolean useReferenceFrameAForHandle = true;
-      btHingeConstraint handleHingeConstraint = new btHingeConstraint(doorPanelObject.getBtRigidBody(),
+      handleHingeConstraint = new btHingeConstraint(doorPanelObject.getBtRigidBody(),
                                                                       doorLeverObject.getBtRigidBody(),
                                                                       pivotInPanelForHandle,
                                                                       pivotInLeverForHandle,
@@ -78,7 +77,18 @@ public class GDXDoorCombinedObject extends GDXEnvironmentObject
                                                                       useReferenceFrameAForHandle);
       // these limits from 0.0 to 1.0?
       handleHingeConstraint.setLimit(lowLimit.get(), highLimit.get(), softness.get(), biasFactor.get(), relaxationFactor.get());
-      bulletPhysicsManager.getMultiBodyDynamicsWorld().addConstraint(handleHingeConstraint);
+      addConstraint(bulletPhysicsManager, handleHingeConstraint);
+   }
+
+   @Override
+   public void removeFromBullet()
+   {
+      super.removeFromBullet();
+      doorHingeConstraint.dispose();
+      handleHingeConstraint.dispose();
+      doorFrameObject.removeFromBullet();
+      doorPanelObject.removeFromBullet();
+      doorLeverObject.removeFromBullet();
    }
 
    @Override
