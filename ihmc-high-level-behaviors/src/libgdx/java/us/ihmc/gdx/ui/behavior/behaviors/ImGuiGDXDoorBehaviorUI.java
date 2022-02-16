@@ -19,11 +19,10 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.gdx.imgui.ImGuiEnumPlot;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
-import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorPushHandleRightFiducialStaticHandleObject;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behavior.registry.ImGuiGDXBehaviorUIInterface;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
@@ -54,7 +53,7 @@ public class ImGuiGDXDoorBehaviorUI extends ImGuiGDXBehaviorUIInterface
    private final ImGuiMovingPlot distanceToDoorPlot = new ImGuiMovingPlot("Distance to door", 1000, 250, 15);
    private final ImGuiMovingPlot detectedDoorPlot = new ImGuiMovingPlot("Detected door", 1000, 250, 15);
    private final ImBoolean reviewDoorPose = new ImBoolean(true);
-   private GDXDoorPushHandleRightFiducialStaticHandleObject door;
+   private GDXDoorObject door;
    private final ImBoolean showDetectedDoorGraphic = new ImBoolean(true);
 
    public ImGuiGDXDoorBehaviorUI(BehaviorHelper helper)
@@ -85,7 +84,7 @@ public class ImGuiGDXDoorBehaviorUI extends ImGuiGDXBehaviorUIInterface
    @Override
    public void create(GDXImGuiBasedUI baseUI)
    {
-      door = new GDXDoorPushHandleRightFiducialStaticHandleObject(YoAppearance.DarkSlateBlue());
+      door = new GDXDoorObject();
 
    }
 
