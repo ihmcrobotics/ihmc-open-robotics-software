@@ -371,14 +371,13 @@ public class HumanoidKinematicsSimulation
       doControl();
 
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(fullRobotModel);
-      // FIXME shouldn't this use yoTime?
       robotConfigurationData.setMonotonicTime(Conversions.secondsToNanoseconds(yoTime.getValue()));
       robotConfigurationData.setRobotMotionStatus(robotMotionStatus.toByte());
       robotConfigurationDataPublisher.publish(robotConfigurationData);
 
-      if (kinematicsSimulationParameters.runNoFasterThanRealtime())
+      if (kinematicsSimulationParameters.runNoFasterThanMaxRealtimeRate())
       {
-         while (updateTimer.totalElapsed() < kinematicsSimulationParameters.getDt())
+         while (updateTimer.totalElapsed() < kinematicsSimulationParameters.getDt() / kinematicsSimulationParameters.getMaxRealtimeRate())
             ThreadTools.sleep(1);
       }
    }
