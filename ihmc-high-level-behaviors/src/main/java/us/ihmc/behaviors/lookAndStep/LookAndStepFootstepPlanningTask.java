@@ -224,6 +224,7 @@ public class LookAndStepFootstepPlanningTask
          review.reset();
          plannerFailedLastTime.set(false);
          planarRegionsManager.clear();
+         lastPlanStanceSide = null;
       }
 
       private void evaluateAndRun()
@@ -243,7 +244,7 @@ public class LookAndStepFootstepPlanningTask
          robotDataReceptionTimerSnaphot = syncedRobot.getDataReceptionTimerSnapshot()
                                                      .withExpiration(lookAndStepParameters.getRobotConfigurationDataExpiration());
          PlannedFootstepReadOnly lastStartedFootstep = imminentStanceTracker.getLastStartedFootstep();
-         lastStanceSide = lastStartedFootstep == null ? null : lastStartedFootstep.getRobotSide().getOppositeSide();
+         stanceSideWhenLastFootstepStarted = lastStartedFootstep == null ? null : lastStartedFootstep.getRobotSide().getOppositeSide();
          behaviorState = behaviorStateReference.get();
          numberOfIncompleteFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfIncompleteFootsteps();
          numberOfCompletedFootsteps = controllerStatusTracker.getFootstepTracker().getNumberOfCompletedFootsteps();
@@ -275,7 +276,8 @@ public class LookAndStepFootstepPlanningTask
    protected TimerSnapshotWithExpiration robotConfigurationDataReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
-   protected RobotSide lastStanceSide;
+   protected RobotSide stanceSideWhenLastFootstepStarted;
+   protected RobotSide lastPlanStanceSide;
    protected LookAndStepBehavior.State behaviorState;
    protected int numberOfIncompleteFootsteps;
    protected int numberOfCompletedFootsteps;
@@ -349,14 +351,17 @@ public class LookAndStepFootstepPlanningTask
       RobotSide stanceSide;
       // if last plan failed
       // if foot is in the air
-      // if how many steps are left
-
-      if (lastStanceSide != null)
+      // how many steps are left
+      boolean isInMotion = RobotMotionStatus.fromByte(robotConfigurationData.getRobotMotionStatus()) == RobotMotionStatus.IN_MOTION;
+      if (isInMotion && stanceSideWhenLastFootstepStarted != null)
       {
-         // if planner failed last time, do not switch sides
-         //         stanceSide = plannerFailedLastTime.get() ? lastStanceSide : lastStanceSide.getOppositeSide();
-         // Actually look and step can get stuck if you don't switch sides
-         stanceSide = lastStanceSide.getOppositeSide();
+         // If we are in motion (currently walking), make sure to plan w.r.t. the stance side when the last step started
+         stanceSide = stanceSideWhenLastFootstepStarted.getOppositeSide();
+      }
+      // If we are stopped, prevent look and step from getting stuck if one side isn't feasible and alternate planning with left and right
+      else if (lastPlanStanceSide != null)
+      {
+         stanceSide = lastPlanStanceSide.getOppositeSide();
       }
       else // if first step, step with furthest foot from the goal
       {
@@ -370,6 +375,7 @@ public class LookAndStepFootstepPlanningTask
             stanceSide = RobotSide.RIGHT;
          }
       }
+      lastPlanStanceSide = stanceSide;
       plannerFailedLastTime.set(false);
 
       uiPublisher.publishToUI(SubGoalForUI, new Pose3D(subGoalPoseBetweenFeet));
