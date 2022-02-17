@@ -158,8 +158,8 @@ public class AStarBodyPathSmoother
          {
             computeSmoothenessGradient(waypointIndex, gradients[waypointIndex]);
 
-            Tuple3DReadOnly displacementGradient = waypoints[waypointIndex].computeDisplacementGradient();
-            gradients[waypointIndex].add(displacementGradient.getX(), displacementGradient.getY());
+//            Tuple3DReadOnly displacementGradient = waypoints[waypointIndex].computeDisplacementGradient();
+//            gradients[waypointIndex].add(displacementGradient.getX(), displacementGradient.getY());
          }
 
          if (heightMapData != null)

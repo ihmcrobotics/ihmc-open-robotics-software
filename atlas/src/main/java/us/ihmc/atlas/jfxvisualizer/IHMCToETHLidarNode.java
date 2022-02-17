@@ -1,5 +1,7 @@
 package us.ihmc.atlas.jfxvisualizer;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang.mutable.MutableInt;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.LittleEndianHeapChannelBuffer;
@@ -12,14 +14,20 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.avatar.ros.RosTfPublisher;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
@@ -140,6 +148,32 @@ public class IHMCToETHLidarNode
       RosPointCloudPublisher publisher = new RosPointCloudPublisher(PointType.XYZI, false);
       ros1Node.attachPublisher("/os_cloud_node2/points", publisher);
 
+      GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
+      AtomicReference<RawGPUPlanarRegionList> regionsReference = new AtomicReference<>();
+      AbstractRosTopicSubscriber<RawGPUPlanarRegionList> mapsenseSubscriber = new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
+      {
+         @Override
+         public void onNewMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
+         {
+            regionsReference.set(rawGPUPlanarRegionList);
+         }
+      };
+      ros1Node.attachSubscriber(RosTools.MAPSENSE_REGIONS, mapsenseSubscriber);
+
+      RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
+      transformChestToL515DepthCamera.setIdentity();
+      transformChestToL515DepthCamera.getTranslation().set(0.275000, 0.052000, 0.140000);
+      transformChestToL515DepthCamera.getRotation().setYawPitchRoll(0.010000, 1.151900, 0.045000);
+      ReferenceFrame steppingFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("steppingCamera", syncedRobot.getReferenceFrames().getChestFrame(), transformChestToL515DepthCamera);
+
+      RigidBodyTransform zForwardXRightToZUpXForward = new RigidBodyTransform();
+      zForwardXRightToZUpXForward.appendPitchRotation(Math.PI / 2.0);
+      zForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
+
+      IHMCROS2Publisher<PlanarRegionsListMessage> regionsPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                        PlanarRegionsListMessage.class,
+                                                                                                        REACommunicationProperties.outputTopic);
+
       RosTfPublisher tfPublisher = new RosTfPublisher(ros1Node, null);
 
       new Thread(() ->
@@ -153,26 +187,42 @@ public class IHMCToETHLidarNode
                     while (true)
                     {
                        PointCloud2 pointCloud = inputPointCloud.getAndSet(null);
-                       if (pointCloud != null)
+                       RawGPUPlanarRegionList regions = regionsReference.getAndSet(null);
+
+                       if (pointCloud != null || regions != null)
                        {
                           syncedRobot.update();
-                          ReferenceFrame ousterFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
-                          MovingReferenceFrame pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
+                       }
 
+                       if (pointCloud != null)
+                       {
+                          ReferenceFrame ousterFrame = syncedRobot.getReferenceFrames().getOusterLidarFrame();
                           RigidBodyTransform ousterToWorld = ousterFrame.getTransformToWorldFrame();
-                          RigidBodyTransform pelvisToWorld = pelvisFrame.getTransformToWorldFrame();
 
                           if (debug)
                              System.out.println(ousterToWorld);
 
                           Time currentTime = ros1Node.getCurrentTime();
                           long timestamp = currentTime.totalNsecs();
-                          System.out.println(currentTime.secs + "sec \t" + currentTime.nsecs + "ns");
+                          LogTools.info("Broadcasting height map message");
                           tfPublisher.publish(ousterToWorld, timestamp, "odom", "os_sensor");
 
                           pointCloud.getHeader().setStamp(currentTime);
                           publisher.publish(pointCloud);
                        }
+
+                       if (regions != null)
+                       {
+                          PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(regions);
+                          planarRegionsList.applyTransform(zForwardXRightToZUpXForward);
+                          planarRegionsList.applyTransform(steppingFrame.getTransformToWorldFrame());
+
+                          PlanarRegionsListMessage planarRegionsListMessage =  PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+                          regionsPublisher.publish(planarRegionsListMessage);
+                          LogTools.info("Broadcasting mapsense regions");
+                       }
+
+                       ThreadTools.sleep(50);
                     }
                  }).start();
    }
