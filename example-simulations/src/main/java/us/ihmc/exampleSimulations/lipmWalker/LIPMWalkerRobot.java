@@ -200,7 +200,7 @@ public class LIPMWalkerRobot
       rightHipJoint.setQ(0.0);
 
       leftKneeJoint.setQ(0.8);
-      rightKneeJoint.setQ(0.7);
+      rightKneeJoint.setQ(0.6);
    }
 
    private RobotDescription getRobotDescription()
