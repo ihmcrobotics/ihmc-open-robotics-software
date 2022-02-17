@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.ToolboxStateMessage;
+import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
@@ -201,7 +202,9 @@ public abstract class ToolboxModule implements CloseableAndDisposable
             {
                LogTools.info("{}: Trying to start YoVariableServer using port: {}.", name, yoVariableServerSettings.getPort());
                yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
-               yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
+               yoVariableServer.setMainRegistry(registry,
+                                                AvatarSimulationFactory.createYoVariableServerJointList(fullRobotModel.getElevator()),
+                                                yoGraphicsListRegistry);
                yoVariableServer.start();
                break;
             }
