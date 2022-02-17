@@ -28,7 +28,7 @@ public class AStarBodyPathSmoother
    static final double collisionWeight = 700.0;
    static final double smoothnessWeight = 0.7;
    static final double equalSpacingWeight = 2.0;
-   static final double rollWeight = 190.0;
+   static final double rollWeight = 70.0;
    static final double displacementWeight = 0.0;
    static final double traversibilityWeight = 20.0;
    static final double flatGroundWeight = 4.0;
@@ -49,7 +49,7 @@ public class AStarBodyPathSmoother
    private static final int turnPointIteration = 12;
    private final TIntArrayList turnPointIndices = new TIntArrayList();
    private static final int minTurnPointProximity = 7;
-   private static final double turnPointYawThreshold = Math.toRadians(20.0);
+   private static final double turnPointYawThreshold = Math.toRadians(30.0);
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -225,7 +225,7 @@ public class AStarBodyPathSmoother
 
          if (iteration.getValue() == turnPointIteration)
          {
-            computeTurnPoints();
+//            computeTurnPoints();
          }
 
          if (visualize) // && this.iteration.getValue() % 100 == 0)

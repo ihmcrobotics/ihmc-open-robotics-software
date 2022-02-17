@@ -222,7 +222,7 @@ public class IHMCToETHLidarNode
                           LogTools.info("Broadcasting mapsense regions");
                        }
 
-                       ThreadTools.sleep(50);
+                       ThreadTools.sleep(350);
                     }
                  }).start();
    }
