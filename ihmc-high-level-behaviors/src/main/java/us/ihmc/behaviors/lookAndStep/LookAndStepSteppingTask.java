@@ -148,9 +148,9 @@ public class LookAndStepSteppingTask
       double estimatedRobotTimeWhenPlanWasSent = getEstimatedRobotTime();
       double percentSwingToWait = lookAndStepParameters.getPercentSwingToWait();
       double waitDuration = swingDuration * percentSwingToWait;
-      double waitForStepToStartTimeout = 10.0;
-      double robotTimeToTimeout = estimatedRobotTimeWhenPlanWasSent + waitForStepToStartTimeout;
-      statusLogger.info("Waiting up to {} s for commanded step to start...", waitForStepToStartTimeout);
+      double maxDurationToWait = 10.0;
+      double robotTimeToStopWaitingRegardless = estimatedRobotTimeWhenPlanWasSent + maxDurationToWait;
+      statusLogger.info("Waiting up to {} s for commanded step to start...", maxDurationToWait);
 
       boolean stepStartTimeRecorded = false;
       double robotTimeInWhichStepStarted = Double.NaN;
@@ -158,17 +158,16 @@ public class LookAndStepSteppingTask
       while (true)
       {
          double moreRobustRobotTime = getMoreRobustRobotTime(estimatedRobotTimeWhenPlanWasSent);
-         boolean stepHasNotStartedYet = imminentStanceTracker.getStepsStartedSinceCommanded() < 1;
          // FIXME: What if the queue size was larger? Need to know when the step we sent is started
          boolean stepHasStarted = imminentStanceTracker.getStepsStartedSinceCommanded() > 0;
-         boolean hasTimedOut = moreRobustRobotTime >= robotTimeToTimeout;
+         boolean haveWaitedMaxDuration = moreRobustRobotTime >= robotTimeToStopWaitingRegardless;
          boolean robotIsNotWalkingAnymoreForSomeReason = !controllerStatusTracker.isWalking();
          boolean stepCompletedEarly = imminentStanceTracker.getStepsCompletedSinceCommanded() > 0;
 
          // Part 1: Wait for the step to start with a timeout
-         if (stepHasNotStartedYet && hasTimedOut)
+         if (haveWaitedMaxDuration)
          {
-            statusLogger.info("Commanded step did not start within {} s. Done waiting.", waitForStepToStartTimeout);
+            statusLogger.info("Waited max duration of {} s. Done waiting.", maxDurationToWait);
             break;
          }
 
