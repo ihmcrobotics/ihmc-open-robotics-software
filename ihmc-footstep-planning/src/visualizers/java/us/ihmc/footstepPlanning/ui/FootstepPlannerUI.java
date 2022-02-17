@@ -469,7 +469,6 @@ public class FootstepPlannerUI
 
       if (heightMapNavigationUpdater != null)
       {
-         heightMapNavigationUpdater.destroy();
          heightMapNavigationUpdater.stop();
       }
 

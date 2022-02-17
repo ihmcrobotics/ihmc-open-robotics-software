@@ -104,8 +104,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    private final ReferenceFrame steppingFrame;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
 
-   private final URI rosuri = NetworkParameters.getROSURI();
-   private RosMainNode ros1Node;
    private CollidingScanRegionFilter collisionFilter;
 
    private enum State
@@ -153,7 +151,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ReconnectRos1Node, reconnectRos1Node::set);
 
       currentState.set(State.WAITING_TO_START);
-      createAndConnectRos1Node();
 
       steppingFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent("steppingCamera", referenceFrames.getChestFrame(), transformChestToL515DepthCamera);
 
@@ -236,17 +233,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    @Override
    public void handle(long l)
    {
-      // Reconnect ros 1 node
-      if (reconnectRos1Node.getAndSet(false))
-      {
-         LogTools.info("Reconnecting ros 1 node");
-         ros1Node.shutdown();
-
-         createAndConnectRos1Node();
-
-         LogTools.info("Reconnected ros 1 node");
-      }
-
       // Execute steps
       if (stopHeightMapNavigation.getAndSet(false))
       {
@@ -437,13 +423,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       }
    }
 
-   private void createAndConnectRos1Node()
-   {
-      ros1Node = RosTools.createRosNode(rosuri, "height_map_navigator");
-      createROS1Callback(RosTools.MAPSENSE_REGIONS, ros1Node, this::handleRegions);
-      ros1Node.execute();
-   }
-
    private void setStartFootPosesToCurrent()
    {
       referenceFrames.updateFrames();
@@ -508,11 +487,5 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       steps.clear();
       replanRequested.set(false);
       executeRequested.set(false);
-   }
-
-   public void destroy()
-   {
-      ros1Node.shutdown();
-      ros1Node = null;
    }
 }
