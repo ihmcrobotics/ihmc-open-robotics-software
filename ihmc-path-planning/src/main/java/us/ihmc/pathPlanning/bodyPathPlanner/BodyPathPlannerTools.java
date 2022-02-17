@@ -1,21 +1,16 @@
 package us.ihmc.pathPlanning.bodyPathPlanner;
 
-import javafx.geometry.Pos;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.AngleTools;
 
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class BodyPathPlannerTools
