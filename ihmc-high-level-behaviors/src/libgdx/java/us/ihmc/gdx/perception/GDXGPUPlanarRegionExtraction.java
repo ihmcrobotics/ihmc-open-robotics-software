@@ -841,7 +841,6 @@ public class GDXGPUPlanarRegionExtraction
       concaveHullFactoryParameters.setRemoveAllTrianglesWithTwoBorderEdges(removeAllTrianglesWithTwoBorderEdgesChecked.get());
       concaveHullFactoryParameters.setAllowSplittingConcaveHull(allowSplittingConcaveHullChecked.get());
 
-
       polygonizerParameters.setConcaveHullThreshold(concaveHullThresholdSlider.get());
       polygonizerParameters.setShallowAngleThreshold(shallowAngleThresholdSlider.get());
       polygonizerParameters.setPeakAngleThreshold(peakAngleThresholdSlider.get());
@@ -850,7 +849,6 @@ public class GDXGPUPlanarRegionExtraction
       polygonizerParameters.setMinNumberOfNodes(minNumberOfNodesSlider.get());
       polygonizerParameters.setCutNarrowPassage(cutNarrowPassageChecked.get());
    }
-
 
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
