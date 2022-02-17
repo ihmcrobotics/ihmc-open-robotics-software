@@ -621,10 +621,14 @@ public class AStarBodyPathSmootherWaypoint
             {
                double nonGroundAlpha = heightQuery - heightMapData.getEstimatedGroundHeight() < heightWindow ? nonGroundDiscount : 1.0;
 
+               double heightDeadband = 0.05;
+               double deltaHeight = Math.max(0.0, Math.abs(nominalHeight - heightQuery) - heightDeadband);
+               double cellPercentage = 1.0 - deltaHeight / heightWindow;
+
                UnitVector3DBasics normal = ransacNormalCalculator.getSurfaceNormal(xQuery, yQuery);
                double incline = Math.acos(normal.getZ());
                double inclineAlpha = MathTools.clamp(EuclidCoreTools.interpolate(0.0, 1.0, (incline - minNormalToPenalize) / (maxNormalToPenalize - minNormalToPenalize)), 0.0, 1.0);
-               traversibilityScoreNumerator += ((1.0 - inclineWeight) * nonGroundAlpha + inclineWeight * inclineAlpha);
+               traversibilityScoreNumerator += cellPercentage * ((1.0 - inclineWeight) * nonGroundAlpha + inclineWeight * inclineAlpha);
             }
          }
       }

@@ -7,7 +7,6 @@ import map_sense.RawGPUPlanarRegionList;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -38,12 +37,9 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosNodeInterface;
-import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -85,6 +81,8 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
 
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
+
+   private long sequenceID = 0;
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
    private final FootstepDataListMessage footstepDataListMessageCache = new FootstepDataListMessage();
    private RobotSide lastStepSide;
@@ -130,6 +128,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
       goalPosition = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootPosition);
       goalOrientation = messager.createInput(FootstepPlannerMessagerAPI.GoalMidFootOrientation);
       heightMapMessage = messager.createInput(FootstepPlannerMessagerAPI.HeightMapData);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegions::set);
 
       footPolygons = new SideDependentList<>(side ->
                                              {
@@ -189,46 +188,6 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    private final AtomicBoolean isProcessingRegions = new AtomicBoolean();
    private int uiUpdateCounter = 0;
    private final int uiUpdateRate = 40;
-
-   private void handleRegions(RawGPUPlanarRegionList rawGPUPlanarRegionList)
-   {
-      if (!isProcessingRegions.getAndSet(true))
-      {
-         executorService.submit(() ->
-                                {
-                                   uiUpdateCounter++;
-                                   if (rawGPUPlanarRegionList.getNumOfRegions() == 0)
-                                   {
-                                      LogTools.info("Received empty regions");
-                                      return;
-                                   }
-
-                                   referenceFrames.updateFrames();
-                                   steppingFrame.update();
-
-                                   PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
-                                   planarRegionsList.applyTransform(zForwardXRightToZUpXForward);
-                                   planarRegionsList.applyTransform(steppingFrame.getTransformToWorldFrame());
-
-//                                   collisionFilter.update();
-//                                   gpuPlanarRegionUpdater.filterCollidingPlanarRegions(planarRegionsList, collisionFilter);
-                                   this.planarRegions.set(planarRegionsList);
-
-                                   if (planarRegionsList.getNumberOfPlanarRegions() == 0)
-                                   {
-                                      LogTools.info("No regions left after applying collision filter");
-                                   }
-                                   else if (uiUpdateCounter >= uiUpdateRate)
-                                   {
-                                      messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
-                                      LogTools.info("Received planar regions");
-                                      uiUpdateCounter = 0;
-                                   }
-
-                                   isProcessingRegions.set(false);
-                                });
-      }
-   }
 
    @Override
    public void handle(long l)
@@ -392,14 +351,21 @@ public class HeightMapNavigationUpdater extends AnimationTimer
          if (executeRequested.getAndSet(false))
          {
             LogTools.info("Executing step");
-            ExecutionMode executionMode = ExecutionMode.QUEUE;
+            ExecutionMode executionMode = ExecutionMode.OVERRIDE;
 
             footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
             long messageId = UUID.randomUUID().getLeastSignificantBits();
             footstepDataListMessage.getQueueingProperties().setMessageId(messageId);
             footstepDataListMessage.getQueueingProperties().setPreviousMessageId(previousStepMessageId);
+
+            // sequence ids
+            footstepDataListMessage.getQueueingProperties().setMessageId(sequenceID);
+            footstepDataListMessage.setSequenceId(sequenceID);
+            footstepDataListMessage.getFootstepDataList().get(0).setSequenceId(sequenceID);
+
             messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessage);
             footstepDataListMessageCache.set(footstepDataListMessage);
+            sequenceID++;
 
             firstStep.set(false);
             lastStepSide = lastStepSide.getOppositeSide();

@@ -181,10 +181,11 @@ public class BodyPathLSTraversibilityCalculator
                ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(side));
                footPolygon.applyTransform(transform);
 
+               double heightWindow = 0.2;
                RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon,
                                                                                  heightMapData,
                                                                                  parameters.getHeightMapSnapThreshold(),
-                                                                                 parentHeight - AStarBodyPathPlanner.maxStepUpDown);
+                                                                                 parentHeight - heightWindow);
                if (snapTransform == null)
                {
                   if (xi == 0 && yi == 0 && ti == 0)

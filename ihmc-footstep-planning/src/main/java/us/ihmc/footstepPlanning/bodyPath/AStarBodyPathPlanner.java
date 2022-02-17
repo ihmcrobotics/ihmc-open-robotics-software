@@ -46,7 +46,7 @@ public class AStarBodyPathPlanner
    private static final boolean checkForCollisions = true;
    private static final boolean computeSurfaceNormalCost = true;
    private static final boolean useRANSACTraversibility = true;
-   private static final double rollCostWeight = 5.0;
+   private static final double rollCostWeight = 3.5;
    private static final double inclineCostWeight = 3.0;
    private static final double inclineCostDeadband = Math.toRadians(3.0);
 
@@ -108,9 +108,8 @@ public class AStarBodyPathPlanner
 
    /* Parameters to extract */
    static final double groundClearance = 0.3;
-   static final double maxStepUpDown = 0.2;
    static final double maxIncline = Math.toRadians(55.0);
-   static final double snapRadius = 0.1;
+   static final double snapRadius = 0.15;
    static final double boxSizeY = 0.85;
    static final double boxSizeX = 0.3;
 
@@ -305,13 +304,6 @@ public class AStarBodyPathPlanner
 
             double xyDistance = xyDistance(node, neighbor);
             deltaHeight.set(Math.abs(snapHeight.getDoubleValue() - parentSnapHeight));
-            if (deltaHeight.getValue() > maxStepUpDown)
-            {
-               rejectionReason.set(RejectionReason.TOO_STEEP);
-               graph.checkAndSetEdge(node, neighbor, Double.POSITIVE_INFINITY);
-               continue;
-            }
-
             incline.set(Math.atan2(deltaHeight.getValue(), xyDistance));
 
             if (Math.abs(incline.getValue()) > maxIncline)

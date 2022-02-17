@@ -139,7 +139,7 @@ public class BodyPathRANSACTraversibilityCalculator
       double maxHeight = Math.min(oppositeHeight, nominalHeight) + heightWindow;
       double averageHeight = 0.5 * (nominalHeight + oppositeHeight);
 
-      double lowestNonGroundAlpha = 0.85;
+      double lowestNonGroundAlpha = 1.0;
       double heightAboveGround = Math.abs(averageHeight - heightMapData.getEstimatedGroundHeight());
       double nonGroundAlpha = 1.0;
       double groundProximity = 0.07;
