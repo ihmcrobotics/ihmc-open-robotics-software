@@ -33,7 +33,7 @@ public class SinggleLeggedPIDController implements RobotController
    // Initial Error
    private double positionError_z = 0.0;
    private double differentialError_z = 0.0;
-   private double positionError_hip_theta = 0.0; //TODO : Replace 'theta' to 'pitch'
+   private double positionError_hip_theta = 0.0;
    private double positionError_knee_theta = 0.0;
    private double differentialError_hip_theta = 0.0;
    private double differentialError_knee_theta = 0.0;

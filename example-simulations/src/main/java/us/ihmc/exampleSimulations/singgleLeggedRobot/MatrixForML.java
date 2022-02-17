@@ -13,14 +13,14 @@ public class MatrixForML
 
    public MatrixForML(int row, int col)
    {
-      Mat = new double[row][col];
+      this.Mat = new double[row][col];
       this.row = row;
       this.col = col;
    }
 
    public MatrixForML(int row, int col, double[][] matrix)
    {
-      Mat = new double[row][col];
+      this.Mat = new double[row][col];
       this.row = row;
       this.col = col;
 
@@ -28,11 +28,24 @@ public class MatrixForML
       {
          for (int j = 0; j < col; j++)
          {
-            Mat[row][col] = matrix[row][col];
+            this.Mat[i][j] = matrix[i][j];
          }
       }
    }
-
+   public int getRow()
+   {
+      return row;
+   }
+   
+   public int getCol()
+   {
+      return col;
+   }
+   
+   public double[][] getMat()
+   {
+      return Mat;
+   }
    public void set(double[][] matrix)
    {
       for (int i = 0; i < row; i++)
@@ -162,7 +175,7 @@ public class MatrixForML
       return ret;
 
    }
-   
+
    public MatrixForML div(double scalar)
    {
 
@@ -179,4 +192,161 @@ public class MatrixForML
       return ret;
 
    }
+
+   public MatrixForML inverse()
+   {
+      if (row != col)
+      {
+         System.out.println("Can't do matrix inverse. (DIM ERROR)");
+         return null;
+      }
+      else
+      {
+         MatrixForML ret = new MatrixForML(row, col);
+         double det = this.determinant(Mat, row);
+         ret.set(this.adjoint(row));
+         ret = ret.div(det);
+         return ret;
+      }
+   }
+   
+   public void getCofactor(double[][] mat,double temp[][], int p, int q, int n)
+   {
+      int i = 0, j = 0;
+
+      for (int row = 0; row < n; row++)
+      {
+         for (int col = 0; col < n; col++)
+         {
+            if (row != p && col != q)
+            {
+               temp[i][j++] = mat[row][col];
+               if (j == n - 1)
+               {
+                  j = 0;
+                  i++;
+               }
+            }
+         }
+      }
+   }
+   
+   public double determinant(double[][] mat, int n)
+   {
+      double D = 0; 
+      int sign = 1;
+      double temp[][] = new double[row][row];
+      
+      if(row != col)
+      {
+         System.out.println("Can't calculate matrix determinant. (DIM ERROR)");
+         return D;
+      }
+      
+      if (n == 1)
+         return mat[0][0];  
+      
+      for (int f = 0; f < n; f++)
+      {
+         getCofactor(mat, temp, 0, f, n);
+         D += sign * mat[0][f] * determinant(temp, n - 1);
+
+         sign = -sign;
+      }
+
+      return D;
+   }
+   
+   
+   public double[][] adjoint(int N)
+   {
+      double[][] adj = new double[row][row];
+       if (N == 1)
+       {
+           adj[0][0] = 1;
+           return adj;
+       }
+    
+       int sign = 1;
+       double [][]temp = new double[N][N];
+    
+       for (int i = 0; i < N; i++)
+       {
+           for (int j = 0; j < N; j++)
+           {
+               getCofactor(Mat, temp, i, j, N);
+    
+               sign = ((i + j) % 2 == 0)? 1: -1;
+    
+               adj[j][i] = (sign)*(determinant(temp, N-1));
+           }
+       }
+       return adj;
+   }
+
+   public MatrixForML adj()
+   {
+      if (row != col)
+      {
+         System.out.println("Can't make adjoint matrix. (DIM ERROR)");
+         return this;
+      }
+      else
+      {
+         MatrixForML ret = new MatrixForML(row, col);
+
+         return ret;
+      }
+   }
+   
+   public MatrixForML transpose()
+   {
+      
+         MatrixForML ret = new MatrixForML(col, row);
+         for (int i = 0 ; i<col ; i++)
+         {
+            for(int j = 0; j<row ; j ++)
+            {
+               ret.set(i, j, this.getDoubleValue(j, i));
+            }
+         }
+         
+         return ret;
+      
+   }
+   
+   public MatrixForML cross(MatrixForML vectorB)
+   {
+      // this x vectorB
+      
+      if ((row != 3) || (col != 1) || (vectorB.row != 3) || (vectorB.col != 1))
+      {
+         System.out.println("Can't calculate cross product. (DIM ERROR)");
+         return this;
+      }
+      
+      else
+      {
+         MatrixForML matA = new MatrixForML(3, 3);
+         matA.set(0,0,0);
+         matA.set(0,1,-this.getDoubleValue(2, 0));
+         matA.set(0,2,this.getDoubleValue(1, 0));
+         
+         matA.set(1,0,this.getDoubleValue(2, 0));
+         matA.set(1,1,0);
+         matA.set(1,2,-this.getDoubleValue(0, 0));
+         
+         matA.set(2,0,-this.getDoubleValue(1, 0));
+         matA.set(2,1,this.getDoubleValue(0, 0));
+         matA.set(2,2,0);
+         
+         MatrixForML ret = new MatrixForML(3, 1);
+         
+         ret = matA.dot(vectorB);
+         
+         return ret;
+      }
+   }
+
+
 }
