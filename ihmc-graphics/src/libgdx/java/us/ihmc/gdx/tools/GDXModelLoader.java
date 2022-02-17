@@ -91,10 +91,7 @@ public class GDXModelLoader
          LogTools.warn("Model file \"{}\" is not an OBJ or STL. Skipping...", modelFileName);
          return null;
       }
-
-      String[] splitSlash = modelFileName.split("/");
-      String objFileName = splitSlash[splitSlash.length - 1];
-      String modifiedFileName = objFileName.replace(".obj", "").replace(".STL", "") + ".g3dj";
+      String modifiedFileName = modelFileName.replace(".obj", "").replace(".STL", "") + ".g3dj";
       return modifiedFileName;
    }
 }
