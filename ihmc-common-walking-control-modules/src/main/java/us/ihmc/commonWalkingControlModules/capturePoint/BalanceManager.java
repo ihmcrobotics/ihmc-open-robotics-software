@@ -592,7 +592,7 @@ public class BalanceManager
             angularMomentumHandler.resetAngularMomentum();
          }
 
-         angularMomentumHandler.computeAngularMomentum(Math.min(timeInSupportSequence.getDoubleValue(), currentStateDuration.getDoubleValue() - 1e-3));
+         angularMomentumHandler.computeAngularMomentum(contactStateManager.getTimeInSupportSequence());
       }
       else
       {
