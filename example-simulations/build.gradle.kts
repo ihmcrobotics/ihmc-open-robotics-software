@@ -31,7 +31,7 @@ mainDependencies {
    api("us.ihmc:simulation-construction-set:0.21.16")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:ihmc-common-walking-control-modules:source")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.8")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-description:0.21.3")
    api("us.ihmc:ihmc-graphics-description:0.19.4")
