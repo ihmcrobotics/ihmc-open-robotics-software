@@ -30,12 +30,13 @@ import java.util.*;
 public class StoredPropertySet implements StoredPropertySetBasics
 {
    private final StoredPropertyKeyList keys;
-   private String saveFileName;
-
    private final Object[] values;
    private final Class<?> classForLoading;
+   private final String uncapitalizedClassName;
    private final String directoryNameToAssumePresent;
    private final String subsequentPathToResourceFolder;
+   private String saveFileName;
+   private String currentVersionSuffix;
 
    private final Map<StoredPropertyKey, List<Runnable>> propertyChangedListeners = new HashMap<>();
 
@@ -51,14 +52,15 @@ public class StoredPropertySet implements StoredPropertySetBasics
                             Class<?> classForLoading,
                             String directoryNameToAssumePresent,
                             String subsequentPathToResourceFolder,
-                            String fileNameSuffix)
+                            String versionSuffix)
    {
       this.keys = keys;
       this.classForLoading = classForLoading;
+      this.uncapitalizedClassName = StringUtils.uncapitalize(classForLoading.getSimpleName());
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
 
-      this.saveFileName = StringUtils.uncapitalize(classForLoading.getSimpleName()) + fileNameSuffix + ".ini";
+      updateBackingSaveFile(versionSuffix);
 
       values = new Object[keys.keys().size()];
 
@@ -219,10 +221,16 @@ public class StoredPropertySet implements StoredPropertySetBasics
       }
    }
 
+   public void updateBackingSaveFile(String versionSuffix)
+   {
+      currentVersionSuffix = versionSuffix;
+      saveFileName = uncapitalizedClassName + currentVersionSuffix + ".ini";
+   }
+
    @Override
    public void load()
    {
-      load(saveFileName);
+      load(true);
    }
 
    @Override
@@ -231,15 +239,24 @@ public class StoredPropertySet implements StoredPropertySetBasics
       load(fileName, true);
    }
 
-   public void loadUnsafe()
+   @Override
+   public void load(String fileName, boolean crashIfMissingKeys)
    {
-      load(saveFileName, false);
+      if (!fileName.startsWith(StringUtils.uncapitalize(classForLoading.getSimpleName())))
+         throw new RuntimeException("This filename " + fileName +
+                                    " breaks the contract of the StoredPropertySet API. The filename should be the class name + suffix.");
+      fileName = fileName.replace(".ini", "");
+      updateBackingSaveFile(fileName.substring(StringUtils.uncapitalize(classForLoading.getSimpleName()).length()));
+      load(crashIfMissingKeys);
    }
 
-   private void load(String fileName, boolean crashIfMissingKeys)
+   public void loadUnsafe()
    {
-      this.saveFileName = fileName;
+      load(false);
+   }
 
+   private void load(boolean crashIfMissingKeys)
+   {
       ExceptionTools.handle(() ->
       {
          Properties properties = new Properties();
@@ -455,5 +472,30 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
          return Objects.deepEquals(values, other.values);
       }
+   }
+
+   public String getCurrentVersionSuffix()
+   {
+      return currentVersionSuffix;
+   }
+
+   public String getUncapitalizedClassName()
+   {
+      return uncapitalizedClassName;
+   }
+
+   public Class<?> getClassForLoading()
+   {
+      return classForLoading;
+   }
+
+   public String getDirectoryNameToAssumePresent()
+   {
+      return directoryNameToAssumePresent;
+   }
+
+   public String getSubsequentPathToResourceFolder()
+   {
+      return subsequentPathToResourceFolder;
    }
 }

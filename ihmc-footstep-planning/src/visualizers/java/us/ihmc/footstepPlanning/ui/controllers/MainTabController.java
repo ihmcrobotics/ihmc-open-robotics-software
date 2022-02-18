@@ -60,6 +60,8 @@ public class MainTabController
    @FXML
    private CheckBox performAStarSearch;
    @FXML
+   private CheckBox planSingleStep;
+   @FXML
    private CheckBox ignorePartialFootholds;
    @FXML
    private Spinner<Double> timeout;
@@ -227,6 +229,7 @@ public class MainTabController
       swingPlannerType.setValue(SwingPlannerType.NONE);
 
       messager.bindBidirectional(BindStartToRobot, bindStartToRobot.selectedProperty(), true);
+      messager.bindBidirectional(PlanSingleStep, planSingleStep.selectedProperty(), true);
       messager.bindBidirectional(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty(), true);
       messager.bindBidirectional(OverrideStepTimings, overrideTiming.selectedProperty(), true);
       messager.bindBidirectional(ManualSwingTime, swingTimeSpinner.valueFactoryProperty().getValue().valueProperty(), true);

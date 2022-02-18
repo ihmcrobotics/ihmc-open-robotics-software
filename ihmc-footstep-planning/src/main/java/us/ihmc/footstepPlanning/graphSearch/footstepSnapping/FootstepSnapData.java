@@ -150,8 +150,14 @@ public class FootstepSnapData implements FootstepSnapDataReadOnly
 
    public static FootstepSnapData identityData()
    {
+      return identityData(0.0);
+   }
+
+   public static FootstepSnapData identityData(double flatGroundHeight)
+   {
       FootstepSnapData snapData = new FootstepSnapData();
       snapData.getSnapTransform().setIdentity();
+      snapData.getSnapTransform().getTranslation().setZ(flatGroundHeight);
       snapData.getWiggleTransformInWorld().setIdentity();
       snapData.getCroppedFoothold().clearAndUpdate();
       return snapData;

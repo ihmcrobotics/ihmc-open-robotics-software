@@ -63,9 +63,13 @@ public class BoundingBoxCollisionDetector
          if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(bodyBox.getBoundingBox()))
          {
             PlanarRegion region = planarRegionsList.getPlanarRegion(i);
-            if (collisionDetector.evaluateCollision(region, bodyBox).areShapesColliding())
+            EuclidShape3DCollisionResult collisionResult = collisionDetector.evaluateCollision(region, bodyBox);
+            if (collisionResult.areShapesColliding())
             {
                collisionData.setCollisionDetected(true);
+               collisionData.setCollisionResult(collisionResult);
+               collisionData.getPlanarRegion().set(region);
+               collisionData.getBodyBox().set(bodyBox);
                break;
             }
          }

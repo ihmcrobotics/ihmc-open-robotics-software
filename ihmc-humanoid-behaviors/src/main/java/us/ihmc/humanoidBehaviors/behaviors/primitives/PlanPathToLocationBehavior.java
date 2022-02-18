@@ -167,7 +167,6 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             goalRightFootPose.appendTranslation(0.0, -0.5 * footstepPlannerParameters.getIdealFootstepWidth(), 0.0);
             footstepPlan.addFootstep(RobotSide.LEFT, startLeftFootPose);
             footstepPlan.addFootstep(RobotSide.RIGHT, startLeftFootPose);
-            request.setRequestedPathHeading(desiredHeading);
             if(squareUpEndSteps)
             {
                request.getGoalLeftFootPose().set(goalLeftFootPose);
@@ -183,9 +182,13 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
             request.setTimeout(timeout);
             request.setAssumeFlatGround(assumeFlatGround);
-            if (planarRegions.get() != null)
+            if (planarRegions.get() != null && !assumeFlatGround)
             {
                request.getPlanarRegionsListMessage().set(planarRegions.get());
+            }
+            else if (assumeFlatGround)
+            {
+               publishTextToSpeech("PlanPathToLocationBehavior: Assuming flat ground, Requesting Plan without planar regions");
             }
             else
             {

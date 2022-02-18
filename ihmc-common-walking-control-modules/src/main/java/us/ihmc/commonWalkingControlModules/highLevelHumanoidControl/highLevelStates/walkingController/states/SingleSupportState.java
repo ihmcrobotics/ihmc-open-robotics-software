@@ -88,8 +88,7 @@ public abstract class SingleSupportState extends WalkingState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      balanceManager.resetPushRecovery();
    }
 }

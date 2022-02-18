@@ -12,7 +12,8 @@ import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVis
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotModels.FullRobotModel;
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
@@ -30,7 +31,7 @@ public class ValkyrieFullRobotModelVisualizer
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS);
 
 
-      RobotDescription robotDescription = robotModel.getRobotDescription();
+      RobotDefinition robotDescription = robotModel.getRobotDefinition();
 //      jaxbSDFLoader.createRobot(jointMap, false);
       FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
@@ -55,7 +56,7 @@ public class ValkyrieFullRobotModelVisualizer
 
 //      ((OneDoFJoint)fullRobotModel.getChest().getParentJoint()).setQ(1.0);
 
-      GraphicsRobot robotGraphics = new GraphicsIDRobot(robotDescription.getName(), fullRobotModel.getElevator(), robotDescription, false);
+      GraphicsRobot robotGraphics = new GraphicsIDRobot(robotDescription.getName(), fullRobotModel.getElevator(), RobotDefinitionConverter.toGraphicsObjectsHolder(robotDescription));
       robotGraphics.update();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();

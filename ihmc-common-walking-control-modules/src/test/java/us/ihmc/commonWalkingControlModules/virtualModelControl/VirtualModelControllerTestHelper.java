@@ -1,6 +1,11 @@
 package us.ihmc.commonWalkingControlModules.virtualModelControl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -47,7 +52,12 @@ import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.PinJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -589,7 +599,6 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBodyBasics elevator;
@@ -604,7 +613,6 @@ public class VirtualModelControllerTestHelper
       PlanarRobotArm()
       {
          elevator = new RigidBody("elevator", worldFrame);
-         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
          upperArm = createUpperArm(elevator);
@@ -676,12 +684,6 @@ public class VirtualModelControllerTestHelper
          elevator.updateFramesRecursively();
       }
 
-      @Override
-      public MovingReferenceFrame getElevatorFrame()
-      {
-         return elevatorFrame;
-      }
-
       public ReferenceFrame getCenterOfMassFrame()
       {
          return centerOfMassFrame;
@@ -741,15 +743,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-         List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
-
-         for (int i = 0; i < list.size(); i++)
-            oneDoFJointsToPack.set(i, list.get(i));
-      }
-
-      @Override
       public IMUDefinition[] getIMUDefinitions()
       {
          return null;
@@ -791,23 +784,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJointBasics[] getControllableOneDoFJoints()
-      {
-         return null;
-      }
-
-      @Override
-      public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-      }
-
-      @Override
-      public OneDoFJointBasics getOneDoFJointByName(String name)
-      {
-         return null;
-      }
-
-      @Override
       public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
@@ -832,20 +808,9 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getHeadBaseFrame()
-      {
-         return null;
-      }
-
-      @Override
       public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return null;
-      }
-
-      @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
       }
 
       @Override
@@ -860,7 +825,6 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBodyBasics elevator;
@@ -874,7 +838,6 @@ public class VirtualModelControllerTestHelper
       RobotArm()
       {
          elevator = new RigidBody("elevator", worldFrame);
-         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
 
          shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3D(), Z);
@@ -954,12 +917,6 @@ public class VirtualModelControllerTestHelper
          elevator.updateFramesRecursively();
       }
 
-      @Override
-      public MovingReferenceFrame getElevatorFrame()
-      {
-         return elevatorFrame;
-      }
-
       public ReferenceFrame getCenterOfMassFrame()
       {
          return centerOfMassFrame;
@@ -1016,15 +973,6 @@ public class VirtualModelControllerTestHelper
       public OneDoFJointBasics[] getOneDoFJoints()
       {
          return oneDoFJoints;
-      }
-
-      @Override
-      public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-         List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
-
-         for (int i = 0; i < list.size(); i++)
-            oneDoFJointsToPack.set(i, list.get(i));
       }
 
       @Override
@@ -1086,23 +1034,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJointBasics[] getControllableOneDoFJoints()
-      {
-         return null;
-      }
-
-      @Override
-      public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-      }
-
-      @Override
-      public OneDoFJointBasics getOneDoFJointByName(String name)
-      {
-         return null;
-      }
-
-      @Override
       public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
@@ -1127,20 +1058,9 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getHeadBaseFrame()
-      {
-         return null;
-      }
-
-      @Override
       public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return null;
-      }
-
-      @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
       }
 
       @Override
@@ -1155,7 +1075,6 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBodyBasics elevator;
@@ -1173,7 +1092,6 @@ public class VirtualModelControllerTestHelper
       ForkedRobotArm()
       {
          elevator = new RigidBody("elevator", worldFrame);
-         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), elevator);
 
          shoulderDifferentialYaw = createDifferential("shoulderDifferential", elevator, new Vector3D(), Z);
@@ -1284,12 +1202,6 @@ public class VirtualModelControllerTestHelper
          elevator.updateFramesRecursively();
       }
 
-      @Override
-      public MovingReferenceFrame getElevatorFrame()
-      {
-         return elevatorFrame;
-      }
-
       public ReferenceFrame getCenterOfMassFrame()
       {
          return centerOfMassFrame;
@@ -1346,15 +1258,6 @@ public class VirtualModelControllerTestHelper
       public OneDoFJointBasics[] getOneDoFJoints()
       {
          return oneDoFJoints;
-      }
-
-      @Override
-      public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-         List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
-
-         for (int i = 0; i < list.size(); i++)
-            oneDoFJointsToPack.set(i, list.get(i));
       }
 
       @Override
@@ -1416,23 +1319,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJointBasics[] getControllableOneDoFJoints()
-      {
-         return null;
-      }
-
-      @Override
-      public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-      }
-
-      @Override
-      public OneDoFJointBasics getOneDoFJointByName(String name)
-      {
-         return null;
-      }
-
-      @Override
       public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
@@ -1457,20 +1343,9 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getHeadBaseFrame()
-      {
-         return null;
-      }
-
-      @Override
       public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return null;
-      }
-
-      @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
       }
 
       @Override
@@ -1485,7 +1360,6 @@ public class VirtualModelControllerTestHelper
       private final SCSRobotFromInverseDynamicsRobotModel scsRobotArm;
 
       private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      private final MovingReferenceFrame elevatorFrame;
       private final ReferenceFrame centerOfMassFrame;
 
       private final RigidBodyBasics elevator;
@@ -1502,7 +1376,6 @@ public class VirtualModelControllerTestHelper
       PlanarForkedRobotArm()
       {
          elevator = new RigidBody("elevator", worldFrame);
-         elevatorFrame = elevator.getBodyFixedFrame();
          centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), elevator);
 
          List<JointBasics> joints = new ArrayList<>();
@@ -1603,12 +1476,6 @@ public class VirtualModelControllerTestHelper
          elevator.updateFramesRecursively();
       }
 
-      @Override
-      public MovingReferenceFrame getElevatorFrame()
-      {
-         return elevatorFrame;
-      }
-
       public ReferenceFrame getCenterOfMassFrame()
       {
          return centerOfMassFrame;
@@ -1668,15 +1535,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-         List<OneDoFJointBasics> list = Arrays.asList(oneDoFJoints);
-
-         for (int i = 0; i < list.size(); i++)
-            oneDoFJointsToPack.set(i, list.get(i));
-      }
-
-      @Override
       public IMUDefinition[] getIMUDefinitions()
       {
          return null;
@@ -1718,23 +1576,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJointBasics[] getControllableOneDoFJoints()
-      {
-         return null;
-      }
-
-      @Override
-      public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-      }
-
-      @Override
-      public OneDoFJointBasics getOneDoFJointByName(String name)
-      {
-         return null;
-      }
-
-      @Override
       public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
@@ -1759,20 +1600,9 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getHeadBaseFrame()
-      {
-         return null;
-      }
-
-      @Override
       public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return null;
-      }
-
-      @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
       }
 
       @Override
@@ -1849,12 +1679,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public MovingReferenceFrame getElevatorFrame()
-      {
-         return elevator.getBodyFixedFrame();
-      }
-
-      @Override
       public SixDoFJoint getRootJoint()
       {
          return rootJoint;
@@ -1903,14 +1727,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public void getOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-         oneDoFJointsToPack.clear();
-         for (OneDoFJointBasics joint : joints)
-            oneDoFJointsToPack.add(joint);
-      }
-
-      @Override
       public IMUDefinition[] getIMUDefinitions()
       {
          return null;
@@ -1938,23 +1754,6 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public OneDoFJointBasics[] getControllableOneDoFJoints()
-      {
-         return null;
-      }
-
-      @Override
-      public void getControllableOneDoFJoints(List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
-      }
-
-      @Override
-      public OneDoFJointBasics getOneDoFJointByName(String name)
-      {
-         return null;
-      }
-
-      @Override
       public RigidBodyBasics getEndEffector(Enum<?> segmentEnum)
       {
          return null;
@@ -1979,20 +1778,9 @@ public class VirtualModelControllerTestHelper
       }
 
       @Override
-      public ReferenceFrame getHeadBaseFrame()
-      {
-         return null;
-      }
-
-      @Override
       public Map<String, OneDoFJointBasics> getOneDoFJointsAsMap()
       {
          return null;
-      }
-
-      @Override
-      public void getOneDoFJointsFromRootToHere(OneDoFJointBasics oneDoFJointAtEndOfChain, List<OneDoFJointBasics> oneDoFJointsToPack)
-      {
       }
 
       @Override

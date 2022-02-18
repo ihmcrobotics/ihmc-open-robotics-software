@@ -227,7 +227,9 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       int contactPointLocationsSize = contactPointLocations.size();
 
       if (contactPointLocationsSize != totalNumberOfContactPoints)
-         throw new RuntimeException("contactPointLocationsSize != totalNumberOfContactPoints");
+         throw new RuntimeException("contactPointLocationsSize != totalNumberOfContactPoints. "
+                                    + "This contact state size= " + totalNumberOfContactPoints + ", "
+                                    + "attempted to set with " + contactPointLocationsSize + " contact points.");
 
       for (int i = 0; i < contactPointLocationsSize; i++)
       {

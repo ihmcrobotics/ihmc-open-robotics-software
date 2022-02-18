@@ -312,7 +312,7 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
       JointDesiredOutputList jointDesiredOutputList = runtimeEnvironment.getJointDesiredOutputList();
 
       DoNothingControllerState doNothingState = new DoNothingControllerState(controlledJoints, highLevelControllerParameters);
-      StandPrepControllerState standPrepState = new StandPrepControllerState(controlledJoints, highLevelControllerParameters, jointDesiredOutputList);
+      StandPrepControllerState standPrepState = new StandPrepControllerState(controlledJoints, highLevelControllerParameters, jointDesiredOutputList, null);
       StandReadyControllerState standReadyState = new StandReadyControllerState(controlledJoints, highLevelControllerParameters, jointDesiredOutputList);
       QuadrupedWalkingControllerState walkingState = new QuadrupedWalkingControllerState(runtimeEnvironment,
                                                                                          controllerToolbox,

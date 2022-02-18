@@ -3,7 +3,7 @@ package us.ihmc.behaviors.tools.behaviorTrees;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeAction;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 
-public class BehaviorTreeConstantInstantTestAction implements BehaviorTreeAction
+public class BehaviorTreeConstantInstantTestAction extends BehaviorTreeAction
 {
    private final Runnable action;
    private BehaviorTreeNodeStatus status;
@@ -19,7 +19,7 @@ public class BehaviorTreeConstantInstantTestAction implements BehaviorTreeAction
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       action.run();
       return status;

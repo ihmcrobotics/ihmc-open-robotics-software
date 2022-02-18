@@ -40,7 +40,7 @@ public class UserDesiredFootPoseControllerCommandGenerator
       for (RobotSide robotSide : RobotSide.values())
       {
          ReferenceFrame ankleFrame = fullRobotModel.getSoleFrame(robotSide).getParent();
-         ZUpFrame zUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUpFrame");
+         ZUpFrame zUpFrame = new ZUpFrame(ankleFrame, robotSide.getCamelCaseNameForStartOfExpression() + "ZUpFrame");
          ankleZUpFrames.set(robotSide, zUpFrame);
       }
       

@@ -23,6 +23,7 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    private final CenterOfPressureDataHolder centerOfPressureDataHolder;
    private final DesiredExternalWrenchHolder desiredExternalWrenchHolder;
    private final FrameVector3D linearMomentumRate = new FrameVector3D();
+   private final FrameVector3D angularMomentumRate = new FrameVector3D();
    private final RootJointDesiredConfigurationData rootJointDesiredConfigurationData = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
 
@@ -37,12 +38,15 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
     * its data. This constructor should be removed after the thread refactor summer 2019.
     */
    @Deprecated
-   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder, DesiredExternalWrenchHolder desiredExternalWrenchHolder,
-                               OneDoFJointBasics[] controlledOneDoFJoints, JointDesiredOutputList lowLevelControllerOutput)
+   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder,
+                               DesiredExternalWrenchHolder desiredExternalWrenchHolder,
+                               OneDoFJointBasics[] controlledOneDoFJoints,
+                               JointDesiredOutputList lowLevelControllerOutput)
    {
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       this.desiredExternalWrenchHolder = desiredExternalWrenchHolder;
       linearMomentumRate.setToNaN(ReferenceFrame.getWorldFrame());
+      angularMomentumRate.setToNaN(ReferenceFrame.getWorldFrame());
       if (lowLevelControllerOutput != null)
          jointDesiredOutputList = lowLevelControllerOutput;
       else
@@ -116,6 +120,22 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       return linearMomentumRate;
    }
 
+   public void setAngularMomentumRate(FrameVector3DReadOnly angularMomentumRate)
+   {
+      this.angularMomentumRate.setIncludingFrame(angularMomentumRate);
+   }
+
+   @Override
+   public void getAngularMomentumRate(FrameVector3DBasics angularMomentumRateToPack)
+   {
+      angularMomentumRateToPack.setIncludingFrame(angularMomentumRate);
+   }
+
+   public FrameVector3D getAngularMomentumRate()
+   {
+      return angularMomentumRate;
+   }
+
    public void setRootJointDesiredConfigurationData(RootJointDesiredConfigurationDataReadOnly rootJointDesiredConfigurationData)
    {
       this.rootJointDesiredConfigurationData.set(rootJointDesiredConfigurationData);
@@ -156,6 +176,7 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       centerOfPressureDataHolder.set(other.centerOfPressureDataHolder);
       desiredExternalWrenchHolder.set(other.desiredExternalWrenchHolder);
       linearMomentumRate.setIncludingFrame(other.linearMomentumRate);
+      angularMomentumRate.setIncludingFrame(other.angularMomentumRate);
       rootJointDesiredConfigurationData.set(other.rootJointDesiredConfigurationData);
       lowLevelOneDoFJointDesiredDataHolder.set(other.lowLevelOneDoFJointDesiredDataHolder);
    }
@@ -178,6 +199,8 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
          if (!desiredExternalWrenchHolder.equals(other.desiredExternalWrenchHolder))
             return false;
          if (!linearMomentumRate.equals(other.linearMomentumRate))
+            return false;
+         if (!angularMomentumRate.equals(other.angularMomentumRate))
             return false;
          if (!rootJointDesiredConfigurationData.equals(other.rootJointDesiredConfigurationData))
             return false;

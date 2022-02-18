@@ -29,6 +29,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
@@ -72,6 +73,7 @@ public class WholeBodyVirtualModelControlSolver
    private final YoFrameVector3D yoDesiredMomentumRateAngular;
    private final YoFrameVector3D yoAchievedMomentumRateAngular;
    private final FrameVector3D achievedMomentumRateLinear = new FrameVector3D();
+   private final FrameVector3D achievedMomentumRateAngular = new FrameVector3D();
 
    private final Wrench residualRootJointWrench = new Wrench();
    private final FrameVector3D residualRootJointForce = new FrameVector3D();
@@ -99,7 +101,7 @@ public class WholeBodyVirtualModelControlSolver
       rootJoint = toolbox.getRootJoint();
       optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, registry);
 
-      if (rootJoint.subtreeStream().filter(JointReadOnly::isLoopClosure).findFirst().isPresent())
+      if (SubtreeStreams.fromChildren(toolbox.getRootBody()).filter(JointReadOnly::isLoopClosure).findFirst().isPresent())
          throw new UnsupportedOperationException("The virtual model control does not support kinematic loops yet.");
 
       jointIndexHandler = toolbox.getJointIndexHandler();
@@ -175,6 +177,7 @@ public class WholeBodyVirtualModelControlSolver
       yoAchievedMomentumRateLinear.setMatchingFrame(centroidalMomentumRateSolution.getLinearPart());
       yoAchievedMomentumRateAngular.setMatchingFrame(centroidalMomentumRateSolution.getAngularPart());
       achievedMomentumRateLinear.setIncludingFrame(yoAchievedMomentumRateLinear);
+      achievedMomentumRateAngular.setIncludingFrame(yoAchievedMomentumRateAngular);
 
       // submit forces for contact forces
       for (int bodyIndex = 0; bodyIndex < rigidBodiesWithExternalWrench.size(); bodyIndex++)
@@ -380,5 +383,10 @@ public class WholeBodyVirtualModelControlSolver
    public FrameVector3DReadOnly getAchievedMomentumRateLinear()
    {
       return achievedMomentumRateLinear;
+   }
+   
+   public FrameVector3DReadOnly getAchievedMomentumRateAngular()
+   {
+      return achievedMomentumRateAngular;
    }
 }

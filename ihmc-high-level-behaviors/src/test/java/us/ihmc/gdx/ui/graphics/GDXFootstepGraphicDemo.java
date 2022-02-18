@@ -40,20 +40,20 @@ public class GDXFootstepGraphicDemo
             foothold.addVertex(-halfLength, halfWidth);
             foothold.addVertex(-halfLength, -halfWidth);
             foothold.update();
-            footsteps.add(new MinimalFootstep(RobotSide.LEFT, leftPose, foothold));
+            footsteps.add(new MinimalFootstep(RobotSide.LEFT, leftPose, foothold, "Left"));
             Pose3D rightPose = new Pose3D();
             rightPose.setY(-1.0);
-            footsteps.add(new MinimalFootstep(RobotSide.RIGHT, rightPose, foothold));
+            footsteps.add(new MinimalFootstep(RobotSide.RIGHT, rightPose, foothold, "Right"));
             footstepPlanGraphic.generateMeshes(footsteps);
 
-            baseUI.getSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
-            baseUI.getSceneManager().addRenderableProvider(footstepPlanGraphic);
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addRenderableProvider(footstepPlanGraphic);
          }
 
          @Override
          public void render()
          {
-            footstepPlanGraphic.render();
+            footstepPlanGraphic.update();
 
             baseUI.renderBeforeOnScreenUI();
 

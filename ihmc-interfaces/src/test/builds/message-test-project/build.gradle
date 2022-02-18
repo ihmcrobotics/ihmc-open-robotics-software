@@ -2,19 +2,17 @@ buildscript {
    repositories {
       maven { url = uri("https://plugins.gradle.org/m2/") }
       mavenCentral()
-      maven { url "https://dl.bintray.com/ihmcrobotics/maven-release" }
-      maven { url "https://dl.bintray.com/ihmcrobotics/maven-vendor" }
       mavenLocal()
       jcenter()
    }
    dependencies {
-      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.19.4"
+      classpath "us.ihmc:ros2-msg-to-pubsub-generator:0.20.5"
    }
 }
 
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -29,8 +27,8 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:ihmc-pub-sub:0.15.0")
-   api("us.ihmc:ros2-common-interfaces:0.19.4")
+   api("us.ihmc:ihmc-pub-sub:0.16.2")
+   api("us.ihmc:ros2-common-interfaces:0.20.5")
 }
 
 def generator = new us.ihmc.ros2.rosidl.ROS2InterfaceGenerator();

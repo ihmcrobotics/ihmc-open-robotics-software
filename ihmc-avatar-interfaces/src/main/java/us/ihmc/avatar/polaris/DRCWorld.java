@@ -3,14 +3,12 @@ package us.ihmc.avatar.polaris;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
+import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 
 public abstract class DRCWorld 
 {
-   private static final Class<DRCRobotSDFLoader> myClass = DRCRobotSDFLoader.class;
    protected final ArrayList<String> resourceDirectories = new ArrayList<String>();
 
    public DRCWorld()

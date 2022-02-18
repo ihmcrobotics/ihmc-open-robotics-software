@@ -159,12 +159,14 @@ public abstract class TransferState extends WalkingState
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
          feetManager.updateToeOffStatusDoubleSupport(trailingLeg,
                                                      nextFootstep,
+                                                     null,
                                                      trailingFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
                                                      desiredCoP,
                                                      balanceManager.getDesiredICP(),
                                                      capturePoint2d,
-                                                     balanceManager.getFinalDesiredICP());
+                                                     balanceManager.getFinalDesiredICP(),
+                                                     balanceManager.getPerfectCoP());
 
          if (feetManager.okForPointToeOff())
          {
@@ -203,7 +205,7 @@ public abstract class TransferState extends WalkingState
       }
 
       double extraToeOffHeight = 0.0;
-      if (feetManager.canDoDoubleSupportToeOff(nextFootstep.getFootstepPose().getPosition(), transferToSide)) // FIXME should this be swing side?
+      if (feetManager.canDoDoubleSupportToeOff(null, transferToSide)) // FIXME should this be swing side?
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
@@ -228,8 +230,6 @@ public abstract class TransferState extends WalkingState
          failureDetectionControlModule.setNextFootstep(null);
       }
 
-      balanceManager.resetPushRecovery();
-
       double transferTime = walkingMessageHandler.getNextTransferTime();
       pelvisOrientationManager.setTrajectoryTime(transferTime);
    }
@@ -240,7 +240,7 @@ public abstract class TransferState extends WalkingState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       if (isUnloading != null)
       {

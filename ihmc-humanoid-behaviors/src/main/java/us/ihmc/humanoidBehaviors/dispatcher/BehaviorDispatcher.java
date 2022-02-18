@@ -233,7 +233,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       if (desiredBehaviorSubscriber.checkForNewBehaviorRequested())
       {
          requestedBehavior.set(desiredBehaviorSubscriber.getRequestedBehavior());
-         behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING,(requestedBehavior.getEnumValue() instanceof HumanoidBehaviorType)? (HumanoidBehaviorType)requestedBehavior.getEnumValue():null));
+         behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_RUNNING, (requestedBehavior.getEnumValue() instanceof HumanoidBehaviorType)? (HumanoidBehaviorType)requestedBehavior.getEnumValue():null));
 
       }
    }
@@ -257,7 +257,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
                break;
             case RESUME:
                stateMachine.resume();
-               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOS_RUNNING,(currentBehaviorKey instanceof HumanoidBehaviorType)? (HumanoidBehaviorType)currentBehaviorKey:null));
+               behaviorStatusPublisher.publish(HumanoidMessageTools.createBehaviorStatusPacket(CurrentBehaviorStatus.BEHAVIOR_RUNNING, (currentBehaviorKey instanceof HumanoidBehaviorType)? (HumanoidBehaviorType)currentBehaviorKey:null));
                behaviorControlModeResponsePublisher.publish(HumanoidMessageTools.createBehaviorControlModeResponsePacket(BehaviorControlModeEnum.RESUME));
                break;
             default:

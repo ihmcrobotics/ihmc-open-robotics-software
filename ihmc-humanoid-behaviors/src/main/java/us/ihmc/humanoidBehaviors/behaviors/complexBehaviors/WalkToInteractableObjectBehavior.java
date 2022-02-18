@@ -80,6 +80,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          protected void setBehaviorInput()
          {
             Pair<FramePose3D, Double> desiredGoalAndHeading = computeDesiredGoalAndHeading(walkToPoint1,true);
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setAssumeFlatGround(true);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(desiredGoalAndHeading.getLeft());
 
@@ -95,6 +96,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          {
             Pair<FramePose3D, Double> desiredGoalAndHeading = computeDesiredGoalAndHeading(walkToPoint2,false);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setAssumeFlatGround(true);
 
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(desiredGoalAndHeading.getLeft());
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setHeading(desiredGoalAndHeading.getRight());
@@ -187,7 +189,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
 
    private boolean hasWalkingSucceded()
    {
-      return atlasPrimitiveActions.walkToLocationPlannedBehavior.isDone();
+      return atlasPrimitiveActions.walkToLocationPlannedBehavior.isDone()&&atlasPrimitiveActions.walkToLocationPlannedBehavior.walkSucceded();
    }
 
    public void setWalkPoints(FramePoint3D walkToPoint1, FramePoint3D walkToPoint2)

@@ -129,17 +129,17 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
 
       switch (packet.pointType)
       {
-      case XYZI:
-         packet.intensities = new float[numberOfPoints];
+         case XYZI:
+            packet.intensities = new float[numberOfPoints];
 
-         break;
+            break;
 
-      case XYZRGB:
-         packet.pointColors = new int[numberOfPoints];
-         break;
+         case XYZRGB:
+            packet.pointColors = new int[numberOfPoints];
+            break;
 
-      case XYZ:
-         break;
+         case XYZ:
+            break;
       }
 
       int offset = pointCloud.getData().arrayOffset();
@@ -163,20 +163,20 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
 
          switch (packet.pointType)
          {
-         case XYZI:
-            packet.intensities[i] = byteBuffer.getFloat();
-            break;
+            case XYZI:
+               packet.intensities[i] = byteBuffer.getFloat();
+               break;
 
-         case XYZRGB:
-            int b = byteToUnsignedInt(byteBuffer.get());
-            int g = byteToUnsignedInt(byteBuffer.get());
-            int r = byteToUnsignedInt(byteBuffer.get());
-            int a = byteToUnsignedInt(byteBuffer.get());
-            packet.pointColors[i] = toRGB(r, g, b);
-            break;
+            case XYZRGB:
+               int b = byteToUnsignedInt(byteBuffer.get());
+               int g = byteToUnsignedInt(byteBuffer.get());
+               int r = byteToUnsignedInt(byteBuffer.get());
+               int a = byteToUnsignedInt(byteBuffer.get());
+               packet.pointColors[i] = toRGB(r, g, b);
+               break;
 
-         case XYZ:
-            break;
+            case XYZ:
+               break;
          }
       }
 
@@ -200,5 +200,4 @@ public abstract class RosPointCloudSubscriber extends AbstractRosTopicSubscriber
 
    @Override
    public abstract void onNewMessage(PointCloud2 pointCloud);
-
 }

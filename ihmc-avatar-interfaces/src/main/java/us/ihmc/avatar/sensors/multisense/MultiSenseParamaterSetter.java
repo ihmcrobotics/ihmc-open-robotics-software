@@ -21,6 +21,7 @@ import dynamic_reconfigure.ReconfigureResponse;
 import dynamic_reconfigure.StrParameter;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -64,51 +65,47 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
 
    public boolean setupNativeROSCommunicator(double lidarSpindleVelocity)
    {
-      String rosPrefix = "/opt/ros";
-      if (useRosHydro(rosPrefix))
+      if (isRosVersion("hydro"))
       {
          LogTools.info("Using ROS Hydro");
-         String[] spindleSpeedShellString = {"sh", "-c", ". /opt/ros/hydro/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
-               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-         return shellOutSpindleSpeedCommand(spindleSpeedShellString);
+         return shellOutSpindleSpeedCommand(spindleSpeedShellString("hydro", lidarSpindleVelocity));
       }
-      else if (useRosGroovy(rosPrefix))
+      else if (isRosVersion("groovy"))
       {
          LogTools.info("Using ROS Groovy");
-         String[] spindleSpeedShellString = {"sh", "-c", ". /opt/ros/groovy/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
-               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-         return shellOutSpindleSpeedCommand(spindleSpeedShellString);
+         return shellOutSpindleSpeedCommand(spindleSpeedShellString("groovy", lidarSpindleVelocity));
       }
-      else if (useRosFuerte(rosPrefix))
+      else if (isRosVersion("fuerte"))
       {
          LogTools.info("Using ROS Fuerte");
-         String[] spindleSpeedShellString = {"sh", "-c", ". /opt/ros/fuerte/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
-               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-         return shellOutSpindleSpeedCommand(spindleSpeedShellString);
+         return shellOutSpindleSpeedCommand(spindleSpeedShellString("fuerte", lidarSpindleVelocity));
       }
-      else if (useRosIndigo(rosPrefix))
+      else if (isRosVersion("indigo"))
       {
          LogTools.info("Using ROS Indigo");
-         String[] spindleSpeedShellString = {"sh", "-c", ". /opt/ros/indigo/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
-               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-         return shellOutSpindleSpeedCommand(spindleSpeedShellString);
+         return shellOutSpindleSpeedCommand(spindleSpeedShellString("indigo", lidarSpindleVelocity));
       }
-      else if (useRosKinetic(rosPrefix))
+      else if (isRosVersion("kinetic"))
       {
          LogTools.info("Using ROS Kinetic");
-         String[] spindleSpeedShellString = {"sh", "-c", ". /opt/ros/kinetic/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
-               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-         return shellOutSpindleSpeedCommand(spindleSpeedShellString);
+         return shellOutSpindleSpeedCommand(spindleSpeedShellString("kinetic", lidarSpindleVelocity));
       }
-      else if (useRosMelodic(rosPrefix))
+      else if (isRosVersion("melodic"))
       {
          LogTools.info("Using ROS Melodic");
-         String[] spindleSpeedShellString = {"sh", "-c", ". /opt/ros/melodic/setup.sh; rosrun dynamic_reconfigure dynparam set /multisense motor_speed "
-               + lidarSpindleVelocity + "; rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
-         return shellOutSpindleSpeedCommand(spindleSpeedShellString);
+         return shellOutSpindleSpeedCommand(spindleSpeedShellString("melodic", lidarSpindleVelocity));
       }
 
       throw new RuntimeException();
+   }
+
+   private String[] spindleSpeedShellString(String distroName, double lidarSpindleVelocity)
+   {
+      return new String[] {"env", "ROS_MASTER_URI=", NetworkParameters.getROSURI().toString(),
+                           "sh", "-c",
+                           "/opt/ros/" + distroName + "/setup.sh;"
+                           + " rosrun dynamic_reconfigure dynparam set /multisense motor_speed " + lidarSpindleVelocity + ";"
+                           + " rosrun dynamic_reconfigure dynparam set /multisense network_time_sync true"};
    }
 
    private boolean shellOutSpindleSpeedCommand(String[] shellCommandString)
@@ -152,34 +149,9 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       }
    }
 
-   private boolean useRosMelodic(String rosPrefix)
+   private boolean isRosVersion(String distroName)
    {
-      return new File(rosPrefix + "/melodic").exists();
-   }
-
-   private boolean useRosFuerte(String rosPrefix)
-   {
-      return new File(rosPrefix + "/fuerte").exists();
-   }
-
-   private boolean useRosGroovy(String rosPrefix)
-   {
-      return new File(rosPrefix + "/groovy").exists();
-   }
-
-   private boolean useRosHydro(String rosPrefix)
-   {
-      return new File(rosPrefix + "/hydro").exists();
-   }
-
-   private boolean useRosIndigo(String rosPrefix)
-   {
-      return new File(rosPrefix + "/indigo").exists();
-   }
-
-   private boolean useRosKinetic(String rosPrefix)
-   {
-      return new File(rosPrefix + "/kinetic").exists();
+      return new File("/opt/ros/" + distroName).exists();
    }
 
    public void setupMultisenseSpindleSpeedPublisher(RosMainNode rosMainNode, final double lidarSpindleVelocity)

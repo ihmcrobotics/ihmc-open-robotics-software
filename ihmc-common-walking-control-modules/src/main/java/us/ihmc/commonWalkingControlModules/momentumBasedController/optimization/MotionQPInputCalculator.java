@@ -33,15 +33,19 @@ import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.spatial.*;
+import us.ihmc.mecano.spatial.Momentum;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
+import us.ihmc.mecano.spatial.SpatialForce;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -67,6 +71,7 @@ public class MotionQPInputCalculator
 
    private final DMatrixRMaj tempTaskJacobian = new DMatrixRMaj(SpatialVector.SIZE, 12);
    private final NativeMatrix tempTaskJacobianNative = new NativeMatrix(SpatialVector.SIZE, 12);
+   private final NativeMatrix tempTaskVelocityJacobianNative = new NativeMatrix(SpatialVector.SIZE, 12);
    private final NativeMatrix projectedTaskJacobian = new NativeMatrix(SpatialVector.SIZE, 12);
    private final DMatrixRMaj tempTaskObjective = new DMatrixRMaj(SpatialVector.SIZE, 1);
    private final DMatrixRMaj tempTaskWeight = new DMatrixRMaj(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
@@ -234,9 +239,9 @@ public class MotionQPInputCalculator
       if (!success)
          return false;
 
-      tempTaskJacobianNative.set(qpInputToPack.taskJacobian);
+      tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
       allTaskJacobianNative.set(allTaskJacobian);
-      velocityNativeNullspaceProjector.project(tempTaskJacobianNative, allTaskJacobianNative, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());;
+      velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative, allTaskJacobianNative, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());;
       projectedTaskJacobian.get(qpInputToPack.taskJacobian);
 
       return true;

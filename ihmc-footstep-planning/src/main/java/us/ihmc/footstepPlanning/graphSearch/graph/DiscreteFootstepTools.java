@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
+import us.ihmc.commonWalkingControlModules.polygonWiggling.StepConstraintPolygonTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -115,82 +116,12 @@ public class DiscreteFootstepTools
       getFootPolygon(stepA, footPolygonsInSoleFrame.get(stepA.getRobotSide()), footPolygonA);
       getFootPolygon(stepB, footPolygonsInSoleFrame.get(stepB.getRobotSide()), footPolygonB);
 
-      if (arePolygonsIntersecting(footPolygonA, footPolygonB))
+      if (StepConstraintPolygonTools.arePolygonsIntersecting(footPolygonA, footPolygonB))
       {
          return 0.0;
       }
 
-      return distanceBetweenPolygons(footPolygonA, footPolygonB);
-   }
-
-   public static boolean arePolygonsIntersecting(ConvexPolygon2DReadOnly polygonA, ConvexPolygon2DReadOnly polygonB)
-   {
-      for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
-      {
-         Point2DReadOnly vA1 = polygonA.getVertex(i);
-         Point2DReadOnly vA2 = polygonA.getNextVertex(i);
-
-         // in case one polygon is completely contained in the other
-         if (polygonB.isPointInside(vA1))
-         {
-            return true;
-         }
-
-         for (int j = 0; j < polygonB.getNumberOfVertices(); j++)
-         {
-            Point2DReadOnly vB1 = polygonB.getVertex(j);
-            Point2DReadOnly vB2 = polygonB.getNextVertex(j);
-
-            if (polygonA.isPointInside(vB1))
-            {
-               return true;
-            }
-
-            double vA1x = vA1.getX();
-            double vA1y = vA1.getY();
-            double vA2x = vA2.getX();
-            double vA2y = vA2.getY();
-            double vB1x = vB1.getX();
-            double vB1y = vB1.getY();
-            double vB2x = vB2.getX();
-            double vB2y = vB2.getY();
-            boolean intersection = EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(vA1x, vA1y, vA2x, vA2y, vB1x, vB1y, vB2x, vB2y, null);
-            if (intersection)
-            {
-               return true;
-            }
-         }
-      }
-
-      return false;
-   }
-
-   /**
-    * Written assuming that the polygons aren't intersecting. This is brute force and probably less efficient
-    * than {@link ConvexPolygonTools#computeMinimumDistancePoints}, but that method was seen to give bad results for polygons
-    * intersecting by epsilon (didn't seem to be picked up by the method's initial intersecion check, and probably throws off the algorithm).
-    */
-   public static double distanceBetweenPolygons(ConvexPolygon2D polygonA, ConvexPolygon2D polygonB)
-   {
-      double minDistance = Double.POSITIVE_INFINITY;
-      for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
-      {
-         for (int j = 0; j < polygonB.getNumberOfVertices(); j++)
-         {
-            double vA1x = polygonA.getVertex(i).getX();
-            double vA1y = polygonA.getVertex(i).getY();
-            double vA2x = polygonA.getNextVertex(i).getX();
-            double vA2y = polygonA.getNextVertex(i).getY();
-            double vB1x = polygonB.getVertex(j).getX();
-            double vB1y = polygonB.getVertex(j).getY();
-            double vB2x = polygonB.getNextVertex(j).getX();
-            double vB2y = polygonB.getNextVertex(j).getY();
-            double distance = EuclidGeometryTools.closestPoint2DsBetweenTwoLineSegment2Ds(vA1x, vA1y, vA2x, vA2y, vB1x, vB1y, vB2x, vB2y, null, null);
-            minDistance = Math.min(minDistance, distance);
-         }
-      }
-
-      return minDistance;
+      return StepConstraintPolygonTools.distanceBetweenPolygons(footPolygonA, footPolygonB);
    }
 
    public static DiscreteFootstep constructStepInPreviousStepFrame(double stepLength, double stepWidth, double stepYaw, DiscreteFootstep node)

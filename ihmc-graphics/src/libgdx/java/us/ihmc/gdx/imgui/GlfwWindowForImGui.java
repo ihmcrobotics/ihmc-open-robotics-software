@@ -17,15 +17,13 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 public class GlfwWindowForImGui
 {
    private final String windowTitle;
-   private final int windowWidth;
-   private final int windowHeight;
-   private long windowHandle;
+   private final int[] windowWidthArray = new int[] {800};
+   private final int[] windowHeightArray = new int[] {600};
+   private long windowHandle = NULL;
 
-   public GlfwWindowForImGui(String windowTitle, int windowWidth, int windowHeight)
+   public GlfwWindowForImGui(String windowTitle)
    {
       this.windowTitle = windowTitle;
-      this.windowWidth = windowWidth;
-      this.windowHeight = windowHeight;
    }
 
    // TODO: Extract more settings options
@@ -40,7 +38,7 @@ public class GlfwWindowForImGui
 
       long monitor = NULL;
       long share = NULL;
-      windowHandle = glfwCreateWindow(windowWidth, windowHeight, windowTitle, monitor, share);
+      windowHandle = glfwCreateWindow(windowWidthArray[0], windowHeightArray[0], windowTitle, monitor, share);
 
       if (windowHandle == NULL) {
          throw new RuntimeException("Failed to create the GLFW window");
@@ -85,5 +83,32 @@ public class GlfwWindowForImGui
    public long getWindowHandle()
    {
       return windowHandle;
+   }
+
+   public void setWindowSize(int width, int height)
+   {
+      windowWidthArray[0] = width;
+      windowHeightArray[0] = height;
+      if (windowHandle != NULL)
+         glfwSetWindowSize(windowHandle, width, height);
+   }
+
+   public int getWindowWidth()
+   {
+      if (windowHandle != NULL)
+         glfwGetWindowSize(windowHandle, windowWidthArray, windowHeightArray);
+      return windowWidthArray[0];
+   }
+
+   public int getWindowHeight()
+   {
+      if (windowHandle != NULL)
+         glfwGetWindowSize(windowHandle, windowWidthArray, windowHeightArray);
+      return windowHeightArray[0];
+   }
+
+   public String getWindowTitle()
+   {
+      return windowTitle;
    }
 }

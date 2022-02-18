@@ -57,10 +57,10 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (2 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 12; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 12; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -165,11 +165,11 @@ public class FootstepDataMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
       cdr.write_type_e(data.getCustomWaypointProportions());else
           throw new RuntimeException("custom_waypoint_proportions field exceeds the maximum length");
 
-      if(data.getCustomPositionWaypoints().size() <= 10)
+      if(data.getCustomPositionWaypoints().size() <= 12)
       cdr.write_type_e(data.getCustomPositionWaypoints());else
           throw new RuntimeException("custom_position_waypoints field exceeds the maximum length");
 
-      if(data.getSwingTrajectory().size() <= 10)
+      if(data.getSwingTrajectory().size() <= 12)
       cdr.write_type_e(data.getSwingTrajectory());else
           throw new RuntimeException("swing_trajectory field exceeds the maximum length");
 

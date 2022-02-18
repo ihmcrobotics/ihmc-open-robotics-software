@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.javafx;
 
+import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.javafx.behaviors.*;
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
@@ -9,8 +10,8 @@ import java.util.LinkedHashSet;
 
 public class JavaFXBehaviorUIRegistry extends BehaviorRegistry
 {
-   public static final JavaFXBehaviorUIRegistry DEFAULT_BEHAVIORS = new JavaFXBehaviorUIRegistry();
-   public static final JavaFXBehaviorUIRegistry ARCHIVED_BEHAVIORS = new JavaFXBehaviorUIRegistry();
+   public static final JavaFXBehaviorUIRegistry DEFAULT_BEHAVIORS = new JavaFXBehaviorUIRegistry(BuildingExplorationBehaviorUI.DEFINITION);
+   public static final JavaFXBehaviorUIRegistry ARCHIVED_BEHAVIORS = new JavaFXBehaviorUIRegistry(ExploreAreaBehaviorUI.DEFINITION);
    static
    {
       DEFAULT_BEHAVIORS.register(BuildingExplorationBehaviorUI.DEFINITION);
@@ -28,14 +29,19 @@ public class JavaFXBehaviorUIRegistry extends BehaviorRegistry
    private int numberOfUIs = 0;
    private String nameOfOnlyUIBehavior;
 
-   public static JavaFXBehaviorUIRegistry of(JavaFXBehaviorUIDefinition... entries)
+   public static JavaFXBehaviorUIRegistry of(BehaviorDefinition highestLevelNode, JavaFXBehaviorUIDefinition... entries)
    {
-      JavaFXBehaviorUIRegistry registry = new JavaFXBehaviorUIRegistry();
+      JavaFXBehaviorUIRegistry registry = new JavaFXBehaviorUIRegistry(highestLevelNode);
       for (JavaFXBehaviorUIDefinition entry : entries)
       {
          registry.register(entry);
       }
       return registry;
+   }
+
+   public JavaFXBehaviorUIRegistry(BehaviorDefinition highestLevelNode)
+   {
+      super(highestLevelNode);
    }
 
    public void register(JavaFXBehaviorUIDefinition definition)

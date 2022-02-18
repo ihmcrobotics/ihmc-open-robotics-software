@@ -103,7 +103,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    {
       useVal2Scale = true;
       Random random = new Random(53415);
-      testStairs(testInfo, true, false, 1.0, 0.25, 0.0, createFootstepCorruptor(random, 0.02, 0.05, 0.05, 0.1, 0.2, 0.2));
+      testStairs(testInfo, true, false, 1.0, 0.25, 0.0, createFootstepCorruptor(random, 0.01, 0.05, 0.05, 0.1, 0.2, 0.2));
    }
 
    @Test

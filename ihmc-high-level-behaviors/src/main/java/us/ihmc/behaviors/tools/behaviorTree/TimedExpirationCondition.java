@@ -48,7 +48,7 @@ public class TimedExpirationCondition extends BehaviorTreeCondition
    }
 
    @Override
-   protected boolean checkCondition()
+   public boolean checkCondition()
    {
       if (!hasBeenRenewed)
          return false;

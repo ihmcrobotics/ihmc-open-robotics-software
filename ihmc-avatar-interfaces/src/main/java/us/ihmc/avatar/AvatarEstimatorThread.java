@@ -4,12 +4,11 @@ import java.util.Map;
 import java.util.function.BooleanSupplier;
 
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,9 +16,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorStateUpdater;
@@ -45,11 +44,17 @@ public class AvatarEstimatorThread extends ModularRobotController
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   public AvatarEstimatorThread(SensorReader sensorReader, FullHumanoidRobotModel estimatorFullRobotModel, HumanoidRobotContextData humanoidRobotContextData,
-                                   StateEstimatorController mainStateEstimator, PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators,
-                                   ForceSensorStateUpdater forceSensorStateUpdater,
-                                   IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher, YoRegistry estimatorRegistry,
-                                   YoGraphicsListRegistry yoGraphicsListRegistry)
+   private final ExecutionTimer estimatorThreadTimer;
+
+   public AvatarEstimatorThread(SensorReader sensorReader,
+                                FullHumanoidRobotModel estimatorFullRobotModel,
+                                HumanoidRobotContextData humanoidRobotContextData,
+                                StateEstimatorController mainStateEstimator,
+                                PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators,
+                                ForceSensorStateUpdater forceSensorStateUpdater,
+                                IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher,
+                                YoRegistry estimatorRegistry,
+                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super("EstimatorController");
 
@@ -74,14 +79,21 @@ public class AvatarEstimatorThread extends ModularRobotController
          addRobotController(secondaryStateEstimators.get(i).getRight());
       }
 
+      estimatorThreadTimer = new ExecutionTimer("estimatorThreadTimer", super.getYoRegistry());
+
       firstTick = new YoBoolean("firstTick", estimatorRegistry);
       firstTick.set(true);
    }
 
    public void run()
    {
+      estimatorThreadTimer.startMeasurement();
+
       try
       {
+         // In the case the SensorReader.compute() does fill the sensor data, it has to be called before initialize of the state estimator.
+         sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
+
          if (firstTick.getBooleanValue())
          {
             initialize();
@@ -98,8 +110,6 @@ public class AvatarEstimatorThread extends ModularRobotController
             if (secondaryStateEstimators.get(i).getLeft().getAsBoolean())
                secondaryStateEstimators.get(i).getRight().initializeEstimator(rootToWorldTransform);
          }
-
-         sensorReader.compute(humanoidRobotContextData.getTimestamp(), humanoidRobotContextData.getSensorDataContext());
 
          doControl();
 
@@ -119,6 +129,8 @@ public class AvatarEstimatorThread extends ModularRobotController
          }
          throw new RuntimeException(e);
       }
+
+      estimatorThreadTimer.stopMeasurement();
    }
 
    public void initializeStateEstimators(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
@@ -138,15 +150,18 @@ public class AvatarEstimatorThread extends ModularRobotController
       humanoidRobotContextData.setEstimatorRan(false);
    }
 
-   public void setupHighLevelControllerCallback(String robotName, RealtimeROS2Node realtimeROS2Node,
+   public void setupHighLevelControllerCallback(HighLevelHumanoidControllerFactory controllerFactory,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
-      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateChangeStatusMessage.class, outputTopic, subscriber ->
+      controllerFactory.attachControllerStateChangedListener(new ControllerStateChangedListener()
       {
-         HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
-         StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
-         mainStateEstimator.requestStateEstimatorMode(requestedMode);
+         @Override
+         public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
+         {
+            StateEstimatorMode requestedMode = stateModeMap.get(newState);
+            if (requestedMode != null)
+               mainStateEstimator.requestStateEstimatorMode(requestedMode);
+         }
       });
    }
 

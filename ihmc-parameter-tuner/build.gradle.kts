@@ -1,8 +1,8 @@
 plugins {
    id("us.ihmc.ihmc-build")
-   id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.20"
-   id("us.ihmc.log-tools-plugin") version "0.6.1"
+   id("us.ihmc.ihmc-ci") version "7.6"
+   id("us.ihmc.ihmc-cd") version "1.23"
+   id("us.ihmc.log-tools-plugin") version "0.6.3"
 }
 
 ihmc {
@@ -14,14 +14,13 @@ ihmc {
 
 mainDependencies {
    api("net.sf.trove4j:trove4j:3.0.3")
-   api("org.apache.commons:commons-lang3:3.8.1")
-   api("org.apache.commons:commons-math3:3.3")
+   api("org.apache.commons:commons-math3:3.6.1")
    api("jakarta.xml.bind:jakarta.xml.bind-api:2.3.2")
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
-   api("us.ihmc:ihmc-yovariables:0.9.9")
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.7")
+   api("us.ihmc:ihmc-yovariables:0.9.11")
+   api("us.ihmc:ihmc-javafx-toolkit:0.20.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.23.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 

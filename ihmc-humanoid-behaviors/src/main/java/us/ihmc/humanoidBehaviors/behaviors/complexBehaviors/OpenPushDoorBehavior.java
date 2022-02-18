@@ -35,8 +35,8 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
    enum OpenDoorState
    {
       START,
-      MOVE_LEFT_HAND_TO_INITIAL_LOCATION,
-      MOVE_RIGHT_HAND_TO_INITIAL_LOCATION,
+      MOVE_HANDs_TO_INITIAL_LOCATION,
+      //MOVE_RIGHT_HAND_TO_INITIAL_LOCATION,
       TURN_ON_OPEN_DOOR_DETECTOR,
       TURN_DOOR_KNOB,
       PUSH_ON_DOOR,
@@ -55,7 +55,7 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
    private SleepBehavior sleepBehavior;
    private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
    protected final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<DoorLocationPacket>();
-   private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
+  // private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
    
    private long timeFirstDoorPushFinished = Long.MAX_VALUE;
 
@@ -66,7 +66,7 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
    {
       super(robotName, "OpenDoorBehavior", OpenDoorState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-      this.doorOpenDetectorBehaviorService = doorOpenDetectorBehaviorService;
+     // this.doorOpenDetectorBehaviorService = doorOpenDetectorBehaviorService;
       uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
       abortMessagePublisher = createPublisherForController(AutomaticManipulationAbortMessage.class);
@@ -112,17 +112,18 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
          @Override
          public boolean isDone()
          {
-            //wait for the door to be located and a baseline set for open detection
-            if (doorLocationPacket.get() != null)
-            {
-               setGrabLocation(doorLocationPacket.get().getDoorTransformToWorld());
-            }
-            return doorLocationPacket.get() != null;
+        	 return true;
+//            //wait for the door to be located and a baseline set for open detection
+//            if (doorLocationPacket.get() != null)
+//            {
+//               setGrabLocation(doorLocationPacket.get().getDoorTransformToWorld());
+//            }
+//            return doorLocationPacket.get() != null;
          }
 
       };
 
-      BehaviorAction moveLeftHandToDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
+      BehaviorAction moveHandsToDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior,atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -138,6 +139,15 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
                                                                                RobotSide.LEFT,
                                                                                "Moving Left Hand To Door",
                                                                                4));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.769,
+                    -0.095,
+                    1.032,
+                    1.549469789243062,
+                    0.08444685410187032,
+                    0.037877956817564146,
+                    RobotSide.RIGHT,
+                    "Moving Right Hand Above Door Knob",
+                    4));
 
          }
       };
@@ -149,11 +159,6 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             setAutomaticArmAbort(false);
 
-            //pre speedup values for distance from door -0.102
-            //            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.833, -0.0635, 1.079, 1.551252338779563, 0.048351007951384285, 0.007252343575301105, RobotSide.RIGHT, "Moving Right Hand Above Door Knob",3));
-
-            //RIGHT hand in MultiClickdoor_0_objID1219 ( 0.769, -0.095,  1.032 ) orientation 1.549469789243062, 0.08444685410187032, 0.037877956817564146
-
             atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.769,
                                                                                 -0.095,
                                                                                 1.032,
@@ -164,37 +169,34 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
                                                                                 "Moving Right Hand Above Door Knob",
                                                                                 4));
 
-            //  atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.298, -0.147, 1.097, 1.2554068994570775, 0.03416782147174632,
-            //                                                                    0.26586161890007015, RobotSide.LEFT, "Moving Left Hand To Door",4));
-
          }
       };
 
-      BehaviorAction setDoorDetectorStart = new BehaviorAction()
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            publishTextToSpeech("Starting Door Open Detector Service");
-
-            doorOpenDetectorBehaviorService.reset();
-            doorOpenDetectorBehaviorService.run(true);
-         }
-
-         @Override
-         public boolean isDone()
-         {
-            //wait for the door to be located and a baseline set for open detection
-            if (doorOpenDetectorBehaviorService.doorDetected())
-            {
-               publishTextToSpeech("Door Open Detector Service has closed door position saved");
-
-            }
-            return doorOpenDetectorBehaviorService.doorDetected();
-
-         }
-
-      };
+//      BehaviorAction setDoorDetectorStart = new BehaviorAction()
+//      {
+//         @Override
+//         protected void setBehaviorInput()
+//         {
+//            publishTextToSpeech("Starting Door Open Detector Service");
+//
+//            doorOpenDetectorBehaviorService.reset();
+//            doorOpenDetectorBehaviorService.run(true);
+//         }
+//
+//         @Override
+//         public boolean isDone()
+//         {
+//            //wait for the door to be located and a baseline set for open detection
+//            if (doorOpenDetectorBehaviorService.doorDetected())
+//            {
+//               publishTextToSpeech("Door Open Detector Service has closed door position saved");
+//
+//            }
+//            return doorOpenDetectorBehaviorService.doorDetected();
+//
+//         }
+//
+//      };
 
       BehaviorAction moveRightHandToDoorKnob = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
@@ -263,15 +265,12 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             //otherwise the robot stops the arm motion because it is to fast
             setAutomaticArmAbort(false);
-            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.455,
-                                                                               0.15,
-                                                                               1.154,
-                                                                               1.7318790859631,
-                                                                               0.9163508562370669,
-                                                                               -0.2253954188985998,
+
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.317,  0.300,  1.264,
+                                                                               1.472225053162252, 0.03597891325029729, 1.5545423993328358,
                                                                                RobotSide.LEFT,
                                                                                "Pushing Door",
-                                                                               2));
+                                                                               3));
          }
 
       };
@@ -282,12 +281,9 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
          protected void setBehaviorInput()
          {
             setAutomaticArmAbort(true);
-            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.274,
-                                                                               -0.208,
-                                                                               0.798,
-                                                                               1.2609443582725661,
-                                                                               0.02096196100421688,
-                                                                               0.27326972080173334,
+
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.350, -0.018,  0.882 ,
+                                                                               1.4668096379070716, 0.03925846523623192, 1.6360375489656063,
                                                                                RobotSide.LEFT,
                                                                                "Pulling Left Hand Back",
                                                                                1));
@@ -324,21 +320,17 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
          }
       };
 
-      factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION);
-      factory.addStateAndDoneTransition(OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION,
-                                        moveLeftHandToDoor,
-                                        OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION);
-      factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION, moveRightHandToDoor, OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR);
-      factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.TURN_DOOR_KNOB);
+      factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.MOVE_HANDs_TO_INITIAL_LOCATION);
+      factory.addStateAndDoneTransition(OpenDoorState.MOVE_HANDs_TO_INITIAL_LOCATION,
+                                        moveHandsToDoor,
+                                        OpenDoorState.TURN_DOOR_KNOB);
+      //factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION, moveRightHandToDoor, OpenDoorState.TURN_DOOR_KNOB);
+     // factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.TURN_DOOR_KNOB);
 
       factory.addStateAndDoneTransition(OpenDoorState.TURN_DOOR_KNOB, moveRightHandToDoorKnob, OpenDoorState.PUSH_ON_DOOR);
 
-     // factory.addStateAndDoneTransition(OpenDoorState.PUSH_ON_DOOR, pushDoorALittle, OpenDoorState.PUSH_OPEN_DOOR);
-     // factory.addStateAndDoneTransition(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen, OpenDoorState.PULL_BACK_HANDS);
-     // factory.addStateAndDoneTransition(OpenDoorState.PULL_BACK_HANDS, pullHandsBack, OpenDoorState.DONE);
-     // factory.addState(OpenDoorState.DONE, done);
 
-      //      
+
       factory.addState(OpenDoorState.PUSH_ON_DOOR, pushDoorALittle);
       factory.addState(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen);
       factory.addState(OpenDoorState.PULL_BACK_HANDS, pullHandsBack);

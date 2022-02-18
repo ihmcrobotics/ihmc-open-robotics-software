@@ -4,6 +4,8 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
@@ -34,6 +36,8 @@ import us.ihmc.matrixlib.NativeCommonOps;
  */
 public class MultiCubicSpline1DSolver
 {
+   private final boolean useNativeCommonOps;
+
    public static final int coefficients = 4;
    private static final double regularizationWeight = 1E-10;
 
@@ -95,8 +99,19 @@ public class MultiCubicSpline1DSolver
    private final DMatrixRMaj E = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj d = new DMatrixRMaj(1, 1);
 
+   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(0);
+
+   private final DMatrixRMaj solutionTranspose = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(1, 1);
+
    public MultiCubicSpline1DSolver()
    {
+      this(true);
+   }
+
+   public MultiCubicSpline1DSolver(boolean useNativeCommonOps)
+   {
+      this.useNativeCommonOps = useNativeCommonOps;
       clearWeights();
    }
 
@@ -247,10 +262,29 @@ public class MultiCubicSpline1DSolver
       CommonOps_DDRM.insert(f, d, 0, 0);
       CommonOps_DDRM.insert(b, d, subProblemSize, 0);
 
-      NativeCommonOps.solve(E, d, solutionToPack);
-      solutionToPack.reshape(subProblemSize, 1);
-      //      NativeCommonOps.multQuad(solutionToPack, H, b);
-      NativeCommonOps.multQuad(solutionToPack, H_minAccel, b);
+      if (useNativeCommonOps)
+      {
+         NativeCommonOps.solve(E, d, solutionToPack);
+         solutionToPack.reshape(subProblemSize, 1);
+         NativeCommonOps.multQuad(solutionToPack, H, b);
+
+         // b = x^T H x
+         NativeCommonOps.multQuad(solutionToPack, H_minAccel, b);
+      }
+      else
+      {
+         solver.setA(E);
+         solver.solve(d, solutionToPack);
+
+         solutionToPack.reshape(subProblemSize, 1);
+         //      NativeCommonOps.multQuad(solutionToPack, H, b);
+
+         // b = x^T H x
+         solutionTranspose.reshape(solutionToPack.getNumCols(), solutionToPack.getNumRows());
+         CommonOps_DDRM.transpose(solutionToPack, solutionTranspose);
+         CommonOps_DDRM.mult(solutionTranspose, H, tempMatrix);
+         CommonOps_DDRM.mult(tempMatrix, solutionToPack, b);
+      }
 
       return 0.5 * b.get(0, 0);
    }

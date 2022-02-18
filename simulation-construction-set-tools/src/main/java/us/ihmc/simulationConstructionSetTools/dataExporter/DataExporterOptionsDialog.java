@@ -26,7 +26,6 @@ class DataExporterOptionsDialog
    private final JCheckBox createVideoCheckBox = new JCheckBox("Create Video");
    private final JCheckBox tagCodeCheckBox = new JCheckBox("Auto Tag Code");
    private final JTextField tagTextField = new JTextField();
-   private final JTextField filenameTextField = new JTextField();
 
    private boolean isCancelled = false;
    private final JDialog dialog;
@@ -93,23 +92,25 @@ class DataExporterOptionsDialog
       gridBagConstraints.gridy++;
       gridBagConstraints.gridwidth = 2;
       panel.add(createGraphsCheckBoxPDF, gridBagConstraints);
-      createGraphsCheckBoxPDF.setSelected(true);
+      createGraphsCheckBoxPDF.setSelected(false);
 
       gridBagConstraints.gridy++;
       gridBagConstraints.gridwidth = 2;
       panel.add(createVideoCheckBox, gridBagConstraints);
-      createVideoCheckBox.setSelected(true);
+      createVideoCheckBox.setSelected(false);
 
+      tagCodeCheckBox.setSelected(false);
+      tagTextField.setText(tag);
+      
+      //TODO: Get tag working again if we want it.
 
       gridBagConstraints.gridy++;
-      gridBagConstraints.gridwidth = 1;
-      panel.add(tagCodeCheckBox, gridBagConstraints);
-      tagCodeCheckBox.setSelected(false);
+//      gridBagConstraints.gridwidth = 1;
+//      panel.add(tagCodeCheckBox, gridBagConstraints);
 
       gridBagConstraints.gridx++;
       gridBagConstraints.gridwidth = 1;
       panel.add(tagTextField, gridBagConstraints);
-      tagTextField.setText(tag);
 
 //    gridBagConstraints.gridy++;
 //    gridBagConstraints.gridwidth = 1;

@@ -121,8 +121,8 @@ public class FootstepDataMessage extends Packet<FootstepDataMessage> implements 
       predicted_contact_points_2d_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
       custom_waypoint_proportions_ = new us.ihmc.idl.IDLSequence.Double (2, "type_6");
 
-      custom_position_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (10, new geometry_msgs.msg.dds.PointPubSubType());
-      swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> (10, new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
+      custom_position_waypoints_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (12, new geometry_msgs.msg.dds.PointPubSubType());
+      swing_trajectory_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.SE3TrajectoryPointMessage> (12, new controller_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
 
    }
 

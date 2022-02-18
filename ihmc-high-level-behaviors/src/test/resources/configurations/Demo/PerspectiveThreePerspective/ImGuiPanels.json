@@ -1,0 +1,8 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "Window 1" : false,
+    "Window 2" : true,
+    "Window 3" : true
+  }
+}
