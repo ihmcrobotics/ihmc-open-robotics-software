@@ -146,7 +146,7 @@ public class AlphaFilteredYoVariable extends YoDouble implements ProcessingYoVar
 
    public static double computeBreakFrequencyGivenAlpha(double alpha, double dt)
    {
-      return (1.0 - alpha) / (Math.PI * dt + Math.PI * alpha * dt);
+      return (1.0 - alpha) / (Math.PI * dt * (1.0 + alpha));
    }
 
    public static void main(String[] args)

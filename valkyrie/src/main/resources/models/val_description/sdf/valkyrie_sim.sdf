@@ -2807,7 +2807,7 @@
       <child>hokuyo_link</child>
       <parent>upperNeckPitchLink</parent>
       <axis>
-        <xyz>1.0 0 0</xyz>
+        <xyz>0.9914 0.0 -0.1305</xyz>
         <limit>
           <lower>-1e+16</lower>
           <upper>1e+16</upper>

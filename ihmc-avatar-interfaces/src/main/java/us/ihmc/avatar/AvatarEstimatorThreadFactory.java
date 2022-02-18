@@ -11,7 +11,7 @@ import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
@@ -35,6 +35,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -109,6 +110,7 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField = new OptionalFactoryField<>("robotMotionStatusFromController");
    private final OptionalFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField = new OptionalFactoryField<>("centerOfPressureDataHolderFromController");
    private final OptionalFactoryField<ForceSensorDataHolder> forceSensorDataHolderField = new OptionalFactoryField<>("forceSensorDataHolder");
+   private final OptionalFactoryField<CenterOfMassDataHolder> centerOfMassDataHolderField = new OptionalFactoryField<>("centerOfMassDataHolder");
    private final OptionalFactoryField<ForceSensorDefinition[]> forceSensorDefinitionsField = new OptionalFactoryField<>("forceSensorDefinitionsField");
    private final OptionalFactoryField<IMUDefinition[]> imuDefinitionsField = new OptionalFactoryField<>("imuDefinitions");
 
@@ -174,7 +176,7 @@ public class AvatarEstimatorThreadFactory
       configureWithDRCRobotModel(robotModel, null);
    }
 
-   public void configureWithDRCRobotModel(DRCRobotModel robotModel, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   public void configureWithDRCRobotModel(DRCRobotModel robotModel, RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       configureWithWholeBodyControllerParameters(robotModel);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -454,6 +456,7 @@ public class AvatarEstimatorThreadFactory
       estimatorFactory.setStateEstimatorParameters(getStateEstimatorParameters());
       estimatorFactory.setContactableBodiesFactory(getContactableBodiesFactory());
       estimatorFactory.setEstimatorForceSensorDataHolder(getForceSensorDataHolder());
+      estimatorFactory.setEstimatorCenterOfMassDataHolderToUpdate(getCenterOfMassDataHolder());
       estimatorFactory.setCenterOfPressureDataHolderFromController(getCenterOfPressureDataHolderFromController());
       estimatorFactory.setRobotMotionStatusFromController(getRobotMotionStatusFromController());
       estimatorFactory.setExternalPelvisCorrectorSubscriber(getExternalPelvisPoseSubscriberField());
@@ -581,6 +584,7 @@ public class AvatarEstimatorThreadFactory
       {
          HumanoidRobotContextDataFactory contextDataFactory = getHumanoidRobotContextDataFactory();
          contextDataFactory.setForceSensorDataHolder(getForceSensorDataHolder());
+         contextDataFactory.setCenterOfMassDataHolder(getCenterOfMassDataHolder());
          contextDataFactory.setCenterOfPressureDataHolder(getCenterOfPressureDataHolderFromController());
          contextDataFactory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
          contextDataFactory.setJointDesiredOutputList(getDesiredJointDataHolder());
@@ -617,6 +621,13 @@ public class AvatarEstimatorThreadFactory
       if (!forceSensorDataHolderField.hasValue())
          forceSensorDataHolderField.set(new ForceSensorDataHolder(getForceSensorDefinitions()));
       return forceSensorDataHolderField.get();
+   }
+
+   public CenterOfMassDataHolder getCenterOfMassDataHolder()
+   {
+      if (!centerOfMassDataHolderField.hasValue())
+         centerOfMassDataHolderField.set(new CenterOfMassDataHolder());
+      return centerOfMassDataHolderField.get();
    }
 
    public ForceSensorDefinition[] getForceSensorDefinitions()

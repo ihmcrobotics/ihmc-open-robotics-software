@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -8,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 
@@ -29,6 +31,7 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
    private double swingHeight = -1.0;
    private final TDoubleArrayList customWaypointProportions = new TDoubleArrayList();
    private final List<Point3D> customWaypointPositions = new ArrayList<>();
+   private final List<FrameSE3TrajectoryPoint> swingTrajectory = new ArrayList<>();
 
    private double swingDuration = -1.0;
    private double transferDuration = -1.0;
@@ -182,6 +185,11 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       }
    }
 
+   public List<FrameSE3TrajectoryPoint> getSwingTrajectory()
+   {
+      return swingTrajectory;
+   }
+
    public FootstepDataMessage getAsMessage()
    {
       FootstepDataMessage footstepDataMessage = new FootstepDataMessage();
@@ -209,6 +217,16 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       for (int i = 0; i < customWaypointPositions.size(); i++)
       {
          footstepDataMessage.getCustomPositionWaypoints().add().set(customWaypointPositions.get(i));
+      }
+
+      for (int i = 0; i < swingTrajectory.size(); i++)
+      {
+         SE3TrajectoryPointMessage swingTrajectoryPointToSet = footstepDataMessage.getSwingTrajectory().add();
+         swingTrajectoryPointToSet.setTime(swingTrajectory.get(i).getTime());
+         swingTrajectoryPointToSet.getPosition().set(swingTrajectory.get(i).getPosition());
+         swingTrajectoryPointToSet.getOrientation().set(swingTrajectory.get(i).getOrientation());
+         swingTrajectoryPointToSet.getLinearVelocity().set(swingTrajectory.get(i).getLinearVelocity());
+         swingTrajectoryPointToSet.getAngularVelocity().set(swingTrajectory.get(i).getAngularVelocity());
       }
 
       footstepDataMessage.setSwingDuration(swingDuration);
@@ -241,6 +259,17 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
          Point3D waypoint0 = footstepDataMessage.getCustomPositionWaypoints().get(0);
          Point3D waypoint1 = footstepDataMessage.getCustomPositionWaypoints().get(1);
          plannedFootstep.setCustomWaypointPositions(waypoint0, waypoint1);
+      }
+      for (int i = 0; i < footstepDataMessage.getSwingTrajectory().size(); i++)
+      {
+         SE3TrajectoryPointMessage trajectoryPoint = footstepDataMessage.getSwingTrajectory().get(i);
+         FrameSE3TrajectoryPoint trajectoryPointToSet = new FrameSE3TrajectoryPoint();
+         trajectoryPointToSet.set(trajectoryPoint.getTime(),
+                                  trajectoryPoint.getPosition(),
+                                  trajectoryPoint.getOrientation(),
+                                  trajectoryPoint.getLinearVelocity(),
+                                  trajectoryPoint.getAngularVelocity());
+         plannedFootstep.getSwingTrajectory().add(trajectoryPointToSet);
       }
 
       plannedFootstep.setSwingDuration(footstepDataMessage.getSwingDuration());

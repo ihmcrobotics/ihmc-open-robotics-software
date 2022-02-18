@@ -54,27 +54,21 @@ public class NavigableRegionsFactory
       PlanarRegionFilter planarRegionFilter = parameters.getPlanarRegionFilter();
       double orthogonalAngle = parameters.getRegionOrthogonalAngle();
       double clusterResolution = parameters.getClusterResolution();
-      NavigableExtrusionDistanceCalculator preferredNavigableCalculator = parameters.getPreferredNavigableExtrusionDistanceCalculator();
       NavigableExtrusionDistanceCalculator navigableCalculator = parameters.getNavigableExtrusionDistanceCalculator();
-      ObstacleExtrusionDistanceCalculator preferredObstacleCalculator = parameters.getPreferredObstacleExtrusionDistanceCalculator();
       ObstacleExtrusionDistanceCalculator obstacleCalculator = parameters.getObstacleExtrusionDistanceCalculator();
       ObstacleRegionFilter obstacleRegionFilter = parameters.getObstacleRegionFilter();
-      return createNavigableRegion(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter,
-                                   preferredNavigableCalculator, navigableCalculator, preferredObstacleCalculator, obstacleCalculator,
-                                   parameters.includePreferredExtrusions());
+      return createNavigableRegion(region, otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, planarRegionFilter, navigableCalculator,
+                                   obstacleCalculator);
    }
 
    public static NavigableRegion createNavigableRegion(PlanarRegion region, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
                                                        ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter filter,
-                                                       NavigableExtrusionDistanceCalculator preferredNavigableCalculator,
                                                        NavigableExtrusionDistanceCalculator navigableCalculator,
-                                                       ObstacleExtrusionDistanceCalculator preferredObstacleCalculator,
-                                                       ObstacleExtrusionDistanceCalculator obstacleCalculator,
-                                                       boolean includePreferredExtrusions)
+                                                       ObstacleExtrusionDistanceCalculator obstacleCalculator)
    {
       ClusterInfo clusterInfo = new ClusterInfo(otherRegions, orthogonalAngle, clusterResolution, obstacleRegionFilter, filter,
-                                                        preferredNavigableCalculator, navigableCalculator, preferredObstacleCalculator,
-                                                        obstacleCalculator, includePreferredExtrusions);
+                                                        navigableCalculator,
+                                                        obstacleCalculator);
       NavigableRegion navigableRegion = new NavigableRegion(region, clusterInfo);
 
       if (AUTO_POPULATE_CLUSTERS)
@@ -85,10 +79,8 @@ public class NavigableRegionsFactory
 
    public static void populateNavigableRegionCluster(NavigableRegion navigableRegionToPack, List<PlanarRegion> otherRegions, double orthogonalAngle, double clusterResolution,
                                                      ObstacleRegionFilter obstacleRegionFilter, PlanarRegionFilter planarRegionFilter,
-                                                     NavigableExtrusionDistanceCalculator preferredNavigableCalculator,
                                                      NavigableExtrusionDistanceCalculator navigableCalculator,
-                                                     ObstacleExtrusionDistanceCalculator preferredObstacleCalculator,
-                                                     ObstacleExtrusionDistanceCalculator obstacleCalculator, boolean includePreferredExtrusions)
+                                                     ObstacleExtrusionDistanceCalculator obstacleCalculator)
    {
       PlanarRegion homeRegion = navigableRegionToPack.getHomePlanarRegion();
 
@@ -98,9 +90,9 @@ public class NavigableRegionsFactory
       obstacleRegions = REAPlanarRegionTools
             .filterRegionsByTruncatingVerticesBeneathHomeRegion(obstacleRegions, homeRegion, DEPTH_THRESHOLD_FOR_CONVEX_DECOMPOSITION, planarRegionFilter);
 
-      Cluster homeRegionCluster = ClusterTools.createHomeRegionCluster(homeRegion, preferredNavigableCalculator, navigableCalculator, includePreferredExtrusions);
-      PairList<Cluster, PlanarRegion> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredObstacleCalculator,
-                                                                                             obstacleCalculator, includePreferredExtrusions);
+      Cluster homeRegionCluster = ClusterTools.createHomeRegionCluster(homeRegion, navigableCalculator);
+      PairList<Cluster, PlanarRegion> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle,
+                                                                                             obstacleCalculator);
 
       // fills long edges with interpolated points for visibility graph building later
       addPointsAlongPolygon(homeRegionCluster, clusterResolution);
@@ -113,10 +105,6 @@ public class NavigableRegionsFactory
    private static void addPointsAlongPolygon(Cluster cluster, double clusterResolution)
    {
       ExtrusionHull expandListOf2DPoints = PointCloudTools.addPointsAlongExtrusionHull(cluster.getNavigableExtrusionsInLocal(), clusterResolution);
-      List<ExtrusionHull> currentListOfPreferred2DPoints = cluster.getPreferredNavigableExtrusionsInLocal();
-      List<ExtrusionHull> expandedListOfPreferred2DPoints = currentListOfPreferred2DPoints.stream().map(extrusion -> PointCloudTools
-            .addPointsAlongExtrusionHull(extrusion, clusterResolution)).collect(Collectors.toList());
       cluster.setNavigableExtrusionsInLocal(expandListOf2DPoints);
-      cluster.setPreferredNavigableExtrusionsInLocal(expandedListOfPreferred2DPoints);
    }
 }

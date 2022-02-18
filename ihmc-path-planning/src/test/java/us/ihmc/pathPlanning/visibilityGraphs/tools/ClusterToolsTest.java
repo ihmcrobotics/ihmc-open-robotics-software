@@ -450,8 +450,8 @@ public class ClusterToolsTest
          }
       };
 
-      PairList<Cluster, PlanarRegion> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle, preferredExtrusionDistanceCalculator,
-                                                                                             extrusionDistanceCalculator, true);
+      PairList<Cluster, PlanarRegion> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle,
+                                                                                             extrusionDistanceCalculator);
 
       assertEquals(1, obstacleClusters.size());
       Cluster obstacleCluster = obstacleClusters.get(0).getLeft();
@@ -606,7 +606,7 @@ public class ClusterToolsTest
       List<PlanarRegion> obstacleRegions = new ArrayList<>();
       obstacleRegions.add(planarRegion0);
       PairList<Cluster, PlanarRegion> obstacleClustersOn1 = ClusterTools.createObstacleClusters(planarRegion1, obstacleRegions, orthogonalAngle,
-                                                                                                preferredExtrusionDistanceCalculator, extrusionDistanceCalculator, true);
+                                                                                                extrusionDistanceCalculator);
 
       assertEquals(1, obstacleClustersOn1.size());
       Cluster obstacleCluster = obstacleClustersOn1.get(0).getLeft();
@@ -628,8 +628,8 @@ public class ClusterToolsTest
 
       obstacleRegions = new ArrayList<>();
       obstacleRegions.add(planarRegion0);
-      obstacleClustersOn1 = ClusterTools.createObstacleClusters(planarRegion1, obstacleRegions, orthogonalAngle, preferredExtrusionDistanceCalculator,
-                                                                extrusionDistanceCalculator, true);
+      obstacleClustersOn1 = ClusterTools.createObstacleClusters(planarRegion1, obstacleRegions, orthogonalAngle,
+                                                                extrusionDistanceCalculator);
 
       assertEquals(1, obstacleClustersOn1.size());
       obstacleCluster = obstacleClustersOn1.get(0).getLeft();
@@ -768,7 +768,7 @@ public class ClusterToolsTest
 
 
       PairList<Cluster, PlanarRegion> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, obstacleRegions, orthogonalAngle,
-                                                                                             extrusionDistanceCalculator, extrusionDistanceCalculator, true);
+                                                                                             extrusionDistanceCalculator);
       assertEquals(1, obstacleClusters.size());
 
       Cluster cluster = obstacleClusters.get(0).getLeft();
@@ -1079,7 +1079,7 @@ public class ClusterToolsTest
                                                                                                         planarRegionFilter);
 
       PairList<Cluster, PlanarRegion> obstacleClusters = ClusterTools.createObstacleClusters(homeRegion, filteredObstacleRegions, orthogonalAngle,
-                                                                                             preferredExtrusionDistanceCalculator, extrusionDistanceCalculator, true);
+                                                                                             extrusionDistanceCalculator);
       return obstacleClusters;
    }
 

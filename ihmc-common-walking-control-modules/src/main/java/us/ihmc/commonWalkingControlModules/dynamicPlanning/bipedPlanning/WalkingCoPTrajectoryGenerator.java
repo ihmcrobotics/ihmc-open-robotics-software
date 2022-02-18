@@ -491,17 +491,29 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                        FrameConvexPolygon2DReadOnly nextFootPolygon,
                                        RobotSide supportSide)
    {
-      if (setExitCoPUnderSpecialCases(copLocationToPack, footPolygon, nextFootPolygon, supportSide))
+      tempFramePoint1.setIncludingFrame(nextFootPolygon.getCentroid(), 0.0);
+      tempFramePoint1.changeFrame(footPolygon.getReferenceFrame());
+      tempFramePoint2.setIncludingFrame(footPolygon.getCentroid(), 0.0);
+      double supportToSwingStepLength = tempFramePoint1.getX() - tempFramePoint2.getX();
+      double supportToSwingStepHeight = tempFramePoint1.getZ() - tempFramePoint2.getZ();
+
+      if (setExitCoPIfSupportIsEmpty(copLocationToPack, footPolygon, supportSide))
          return;
 
+      double lengthOffsetFactor = parameters.getExitCMPLengthOffsetFactor();
+      if (supportToSwingStepHeight < parameters.getStepHeightToPutExitCoPOnToesSteppingDown())
+         lengthOffsetFactor *= parameters.getStepDownLengthOffsetScaleFactor();
+
       computeCoPLocation(copLocationToPack,
-                         parameters.getExitCMPLengthOffsetFactor(),
+                         lengthOffsetFactor,
                          parameters.getExitCMPOffset(),
                          parameters.getExitCMPMinX(),
                          parameters.getExitCMPMaxX(),
                          footPolygon,
                          nextFootPolygon,
                          supportSide);
+
+      setExitCoPUnderSpecialCases(copLocationToPack, footPolygon, supportSide, supportToSwingStepHeight);
    }
 
    private void computeCoPLocation(FramePoint3DBasics copLocationToPack,
@@ -515,6 +527,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    {
       // FIXME this should be done in the sole frame, not the world frame
       copInFootFrame.setIncludingFrame(basePolygon.getCentroid());
+
+
 
       double copXOffset = MathTools.clamp(copOffset.getX() + lengthOffsetFactor * getStepLength(otherPolygon, basePolygon),
                                           minXOffset,
@@ -535,16 +549,11 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
     *
     * @return true if any of these cases held, at which point the CoP has been placed. False if none of them held, at which it still needs to be computed.
     */
-   private boolean setExitCoPUnderSpecialCases(FramePoint3DBasics framePointToPack,
+   private boolean setExitCoPIfSupportIsEmpty(FramePoint3DBasics framePointToPack,
                                                FrameConvexPolygon2DReadOnly supportFootPolygon,
-                                               FrameConvexPolygon2DReadOnly upcomingSwingFootPolygon,
                                                RobotSide supportSide)
    {
-      tempFramePoint1.setIncludingFrame(upcomingSwingFootPolygon.getCentroid(), 0.0);
-      tempFramePoint1.changeFrame(supportFootPolygon.getReferenceFrame());
-      tempFramePoint2.setIncludingFrame(supportFootPolygon.getCentroid(), 0.0);
-      double supportToSwingStepLength = tempFramePoint1.getX() - tempFramePoint2.getX();
-      double supportToSwingStepHeight = tempFramePoint1.getZ() - tempFramePoint2.getZ();
+
       if (supportFootPolygon.getArea() == 0.0)
       { // FIXME this is bad if it's a line, right?
          if (supportFootPolygon.getNumberOfVertices() == 2)
@@ -557,7 +566,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
          else
          {
             copInFootFrame.setIncludingFrame(supportFootPolygon.getReferenceFrame(), supportFootPolygon.getVertex(0));
-
          }
          copInFootFrame.changeFrameAndProjectToXYPlane(worldFrame);
 
@@ -565,21 +573,38 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
          framePointToPack.changeFrame(worldFrame);
          return true;
       }
-      else if (parameters.getPlanForToeOffCalculator().shouldPutCMPOnToes(supportToSwingStepLength, supportToSwingStepHeight))
+      return false;
+   }
+
+   /**
+    * Checks for the following conditions to have been the case:
+    * - the support polygon is empty
+    * - the exit CoP goes in the toes
+    * - the exit CoP goes in the toes when stepping down
+    *
+    * @return true if any of these cases held, at which point the CoP has been placed. False if none of them held, at which it still needs to be computed.
+    */
+   private void setExitCoPUnderSpecialCases(FramePoint3DBasics framePointToPack,
+                                            FrameConvexPolygon2DReadOnly supportFootPolygon,
+                                            RobotSide supportSide,
+                                            double stepHeight)
+   {
+
+      framePointToPack.changeFrame(supportFootPolygon.getReferenceFrame());
+
+      if (parameters.getPlanForToeOffCalculator().shouldPutCMPOnToes(stepHeight, framePointToPack, supportFootPolygon))
       {
+         copInFootFrame.changeFrame(supportFootPolygon.getReferenceFrame());
+
          copInFootFrame.setIncludingFrame(supportFootPolygon.getCentroid());
          copInFootFrame.add(supportFootPolygon.getMaxX() - parameters.getExitCoPForwardSafetyMarginOnToes(),
                               supportSide.negateIfLeftSide(parameters.getExitCMPOffset().getY()));
-         constrainToPolygon(copInFootFrame, supportFootPolygon, parameters.getSafeDistanceFromCoPToSupportEdgesWhenSteppingDown());
+
+         constrainToPolygon(copInFootFrame, supportFootPolygon, parameters.getExitCoPForwardSafetyMarginOnToes());
 
          framePointToPack.setIncludingFrame(copInFootFrame, 0.0);
-         framePointToPack.changeFrame(worldFrame);
-         return true;
       }
-      else
-      {
-         return false;
-      }
+      framePointToPack.changeFrame(worldFrame);
    }
 
    private final FramePoint2D mostForwardPointOnOtherPolygon = new FramePoint2D();

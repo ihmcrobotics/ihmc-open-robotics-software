@@ -163,9 +163,8 @@ public class NavigableRegionsManager
 
       navigableRegions.createNavigableRegions(); // big deal; does a lot of computation and finds obstacles
 
-      visibilityGraph = new VisibilityGraph(navigableRegions, parameters.getInterRegionConnectionFilter(),
-                                            parameters.getPreferredToPreferredInterRegionConnectionFilter(),
-                                            parameters.getPreferredToNonPreferredInterRegionConnectionFilter(),
+      visibilityGraph = new VisibilityGraph(navigableRegions,
+                                            parameters.getInterRegionConnectionFilter(),
                                             parameters);
 
       if (fullyExpandVisibilityGraph)

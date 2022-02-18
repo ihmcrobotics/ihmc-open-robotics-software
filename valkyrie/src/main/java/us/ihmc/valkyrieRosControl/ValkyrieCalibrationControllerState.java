@@ -204,7 +204,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }
@@ -224,7 +224,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          jointTorqueOffsetEstimatorController.estimateTorqueOffset(false);
          jointTorqueOffsetEstimatorController.exportTorqueOffsets();
@@ -315,7 +315,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
       }
    }

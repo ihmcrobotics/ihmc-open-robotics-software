@@ -1,0 +1,31 @@
+#ifndef __controller_msgs__msg__MultiContactTrajectorySequenceMessage__idl__
+#define __controller_msgs__msg__MultiContactTrajectorySequenceMessage__idl__
+
+#include "controller_msgs/msg/./MultiContactTrajectoryMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC multi-contact controller API.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::MultiContactTrajectorySequenceMessage_")
+      struct MultiContactTrajectorySequenceMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Sequence of trajectories to be executed in succession
+         */
+        sequence<controller_msgs::msg::dds::MultiContactTrajectoryMessage, 50> trajectory_sequence;
+      };
+    };
+  };
+};
+
+#endif

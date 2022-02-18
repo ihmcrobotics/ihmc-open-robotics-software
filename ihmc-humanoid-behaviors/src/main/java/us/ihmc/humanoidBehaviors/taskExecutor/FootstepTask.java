@@ -28,7 +28,7 @@ public class FootstepTask extends BehaviorAction
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       footstepListBehavior.doPostBehaviorCleanup();
       footsteps.clear();

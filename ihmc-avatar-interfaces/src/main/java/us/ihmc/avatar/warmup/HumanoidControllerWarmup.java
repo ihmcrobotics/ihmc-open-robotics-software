@@ -14,6 +14,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -31,6 +32,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.FrameMessageCommandConverter;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -73,10 +75,12 @@ public abstract class HumanoidControllerWarmup
    private final SideDependentList<YoEnum<ConstraintType>> footStates = new SideDependentList<>();
 
    private FullHumanoidRobotModel fullRobotModel;
+   private CenterOfMassStateProvider centerOfMassStateProvider;
    private HumanoidReferenceFrames referenceFrames;
    private OneDoFJointBasics[] oneDoFJoints;
 
    private HighLevelControlManagerFactory managerFactory;
+   private WholeBodyControllerCoreFactory controllerCoreFactory;
    private HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private WalkingControllerState walkingControllerState;
@@ -219,8 +223,11 @@ public abstract class HumanoidControllerWarmup
       frameAngularVelocity.scale(velocityDecay);
       frameLinearVelocity.changeFrame(rootJoint.getFrameAfterJoint());
       frameAngularVelocity.changeFrame(rootJoint.getFrameAfterJoint());
-      rootJointTwist.setIncludingFrame(rootJoint.getFrameAfterJoint(), rootJoint.getFrameBeforeJoint(), rootJoint.getFrameAfterJoint(), frameAngularVelocity,
-                         frameLinearVelocity);
+      rootJointTwist.setIncludingFrame(rootJoint.getFrameAfterJoint(),
+                                       rootJoint.getFrameBeforeJoint(),
+                                       rootJoint.getFrameAfterJoint(),
+                                       frameAngularVelocity,
+                                       frameLinearVelocity);
       rootJoint.setJointTwist(rootJointTwist);
    }
 
@@ -245,7 +252,8 @@ public abstract class HumanoidControllerWarmup
       contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
                                                        contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i),
+         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
+                                                            additionalContactNames.get(i),
                                                             additionalContactTransforms.get(i));
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(referenceFrames);
@@ -261,16 +269,34 @@ public abstract class HumanoidControllerWarmup
       SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, totalRobotWeight, referenceFrames.getSoleZUpFrames());
       JointBasics[] jointsToIgnore = DRCControllerThread.createListOfJointsToIgnore(fullRobotModel, robotModel, robotModel.getSensorInformation());
 
-      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel, referenceFrames, footSwitches, null, yoTime, gravityZ, omega0, feet, controlDT,
-                                                                 null, contactableBodies, yoGraphicsListRegistry, jointsToIgnore);
+      controllerToolbox = new HighLevelHumanoidControllerToolbox(fullRobotModel,
+                                                                 centerOfMassStateProvider,
+                                                                 referenceFrames,
+                                                                 footSwitches,
+                                                                 null,
+                                                                 yoTime,
+                                                                 gravityZ,
+                                                                 omega0,
+                                                                 feet,
+                                                                 controlDT,
+                                                                 null,
+                                                                 contactableBodies,
+                                                                 yoGraphicsListRegistry,
+                                                                 jointsToIgnore);
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime, feet, statusOutputManager,
-                                                                              yoTime, yoGraphicsListRegistry, controllerToolbox.getYoVariableRegistry());
+      WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime,
+                                                                              defaultSwingTime,
+                                                                              defaultInitialTransferTime,
+                                                                              defaultFinalTransferTime,
+                                                                              feet,
+                                                                              statusOutputManager,
+                                                                              yoTime,
+                                                                              yoGraphicsListRegistry,
+                                                                              controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory = new HighLevelControlManagerFactory(managerFactoryParent);
@@ -278,16 +304,25 @@ public abstract class HumanoidControllerWarmup
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
       managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
 
+      controllerCoreFactory = new WholeBodyControllerCoreFactory(managerFactoryParent);
+      controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+      controllerCoreFactory.setWalkingControllerParameters(walkingControllerParameters);
 
-      walkingControllerState = new WalkingControllerState(commandInputManager, statusOutputManager, managerFactory, controllerToolbox,
-                                                          robotModel.getHighLevelControllerParameters(), robotModel.getWalkingControllerParameters());
+      walkingControllerState = new WalkingControllerState(commandInputManager,
+                                                          statusOutputManager,
+                                                          managerFactory,
+                                                          controllerCoreFactory,
+                                                          controllerToolbox,
+                                                          robotModel.getHighLevelControllerParameters(),
+                                                          robotModel.getWalkingControllerParameters());
    }
 
    @SuppressWarnings("unchecked")
    public void setupController()
    {
       fullRobotModel = robotModel.createFullRobotModel();
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(), ReferenceFrame.getWorldFrame());
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
       oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
       // Create registries to match controller so the XML gets loaded properly.
@@ -322,14 +357,15 @@ public abstract class HumanoidControllerWarmup
       ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), drcControllerThread);
 
       YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
-                                                         PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
+                                                       PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
       if (Double.isNaN(defaultHeight.getValueAsDouble()))
       {
          throw new RuntimeException("Need to load a default height.");
       }
    }
 
-   private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactableFoot> feet, double totalRobotWeight,
+   private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<ContactableFoot> feet,
+                                                                     double totalRobotWeight,
                                                                      SideDependentList<? extends ReferenceFrame> soleZupFrames)
    {
       SideDependentList<FootSwitchInterface> ret = new SideDependentList<>();

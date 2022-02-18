@@ -27,11 +27,11 @@ public class JointStateUpdater
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final RigidBodyBasics rootBody;
-
    private OneDoFJointBasics[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;
    private final List<IMUBasedJointStateEstimator> imuBasedJointStateEstimators;
+
+   private RigidBodyBasics rootBody;
 
    public JointStateUpdater(FullInverseDynamicsStructure inverseDynamicsStructure,
                             SensorOutputMapReadOnly sensorOutputMapReadOnly,
@@ -39,7 +39,6 @@ public class JointStateUpdater
                             YoRegistry parentRegistry)
    {
       rootBody = inverseDynamicsStructure.getElevator();
-
       this.sensorMap = sensorOutputMapReadOnly;
 
       JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());

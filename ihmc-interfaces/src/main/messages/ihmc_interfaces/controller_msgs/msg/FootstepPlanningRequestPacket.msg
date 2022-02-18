@@ -7,8 +7,9 @@ byte ROBOT_SIDE_LEFT = 0
 byte ROBOT_SIDE_RIGHT = 1
 
 byte SWING_PLANNER_TYPE_NONE = 0
-byte SWING_PLANNER_TYPE_POSITION = 1
-byte SWING_PLANNER_TYPE_PROPORTION = 2
+byte SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION = 1
+byte SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION = 2
+byte SWING_PLANNER_TYPE_PROPORTION = 3
 
 int32 NO_PLAN_ID = -1
 
@@ -33,16 +34,14 @@ bool abort_if_body_path_planner_fails
 bool plan_body_path
 # If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
 bool perform_a_star_search true
-# Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+# Requested body path waypoints in world-frame. If non-empty, planner will follow this path and will not plan a body path
+# The robot will walk with the orientation of waypoint N between points N and N+1
 geometry_msgs/Pose[<=50] body_path_waypoints
 
 # (In beta) acceptable xy distance from the given goal for the planner to terminate
 float64 goal_distance_proximity -1.0
 # (In beta) acceptable yaw offset from the given goal for the planner to terminate
 float64 goal_yaw_proximity -1.0
-# Specifies the desired robot heading. Zero (default) is facing forward, pi is walking backwards, positive angles is facing left (right foot leads).
-# The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-float64 requested_path_heading 0.0
 # Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
 float64 timeout 5.0
 # Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
@@ -51,7 +50,8 @@ int32 max_iterations -1
 float64 horizon_length
 # Planar regions to use, if you don't want to assume flat ground
 PlanarRegionsListMessage planar_regions_list_message
-# Explicitly tell the planner to use flat ground
+# If true, steps are snapped assuming flat ground.
+# Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
 bool assume_flat_ground
 # Set this id to keep track of your request
 int32 planner_request_id -1

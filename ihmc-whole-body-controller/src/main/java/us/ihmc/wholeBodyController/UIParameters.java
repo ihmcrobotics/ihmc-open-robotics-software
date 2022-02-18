@@ -30,6 +30,11 @@ public interface UIParameters
       return 3.0;
    }
 
+   public default RigidBodyTransform getTransformWristToHand(RobotSide side)
+   {
+      return null;
+   }
+
    public abstract Transform getJmeTransformWristToHand(RobotSide side);
 
    public default RobotCollisionModel getSelectionModel()

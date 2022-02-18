@@ -2,6 +2,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector2D;
@@ -17,7 +19,7 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
 
    private static final double defaultStepLengthToPutExitCoPOnToes = 0.2;
    private static final double defaultStepHeightToPutExitCoPOnToesSteppingDown = -0.1;
-   private static final double defaultStepLengthToPutExitCoPOnToesSteppingDown = 0.16;
+   private static final double defaultDistanceFromFootEdgeToSnapToToe = 0.02;
 
    private static final boolean defaultPlanWithExitCMPOnToes = false;
    private static final boolean defaultPlanWithExitCMPOnToesWhenSteppingDown = true;
@@ -29,10 +31,9 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    private static final double defaultBallCMPMaxX = 0.055;
 
    private static final double defaultExitCMPMinX = 0.0;
-   private static final double defaultExitCMPMaxX = 0.08;
+   private static final double defaultExitCMPMaxX = 0.1;
 
    private static final double defaultDurationForContinuityMaintenanceSegment = 0.2;
-   private static final double defaultSafeDistanceFromCoPToSupportEdgesWhenSteppingDown = 0.0;
    private static final double defaultExitCoPForwardSafetyMarginOnToes = 1.6e-2;
 
    private static final double defaultTransferSplitFraction = 0.5;
@@ -48,13 +49,15 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    private static final double defaultBallCMPLengthOffsetFactor = 1.0 / 8.0;
    private static final double defaultExitCMPLengthOffsetFactor = 1.0 / 3.0;
 
+   private static final double defaultStepDownLengthOffsetScaleFactor = 2;
+
    private static final int defaultNumberOfStepsToConsider = 3;
 
    protected final DoubleParameter minimumDistanceInsidePolygon;
 
    protected final DoubleParameter stepLengthToPutExitCoPOnToes;
    protected final DoubleParameter stepHeightToPutExitCoPOnToesSteppingDown;
-   protected final DoubleParameter stepLengthToPutExitCoPOnToesSteppingDown;
+   protected final DoubleParameter distanceFromFootEdgeToSnapToToe;
 
    protected final BooleanParameter planWithExitCMPOnToes;
    protected final BooleanParameter planWithExitCMPOnToesWhenSteppingDown;
@@ -72,6 +75,8 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    protected final ParameterVector2D ballCMPOffset;
    protected final ParameterVector2D exitCMPOffset;
 
+   private final DoubleParameter stepDownLengthOffsetScaleFactor;
+
    protected final DoubleParameter entryCMPLengthOffsetFactor;
    protected final DoubleParameter ballCMPLengthOffsetFactor;
    protected final DoubleParameter exitCMPLengthOffsetFactor;
@@ -86,7 +91,6 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    protected final IntegerParameter numberOfStepsToConsider;
 
    private final DoubleParameter durationForContinuityMaintenanceSegment;
-   private final DoubleParameter safeDistanceFromCoPToSupportEdgesWhenSteppingDown;
    private final DoubleParameter exitCoPForwardSafetyMarginOnToes;
 
    private final YoRegistry registry = new YoRegistry("CoPTrajectoryParameters");
@@ -96,11 +100,15 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
       minimumDistanceInsidePolygon = new DoubleParameter("minimumDistanceInsidePolygon", registry, defaultMinimumDistanceInsidePolygon);
 
       stepLengthToPutExitCoPOnToes = new DoubleParameter("stepLengthToPutExitCoPOnToes", registry, defaultStepLengthToPutExitCoPOnToes);
-      stepHeightToPutExitCoPOnToesSteppingDown = new DoubleParameter("stepHeightToPutExitCoPOnToesSteppingDown", registry, defaultStepHeightToPutExitCoPOnToesSteppingDown);
-      stepLengthToPutExitCoPOnToesSteppingDown = new DoubleParameter("stepLengthToPutExitCoPOnToesSteppingDown", registry, defaultStepLengthToPutExitCoPOnToesSteppingDown);
+      stepHeightToPutExitCoPOnToesSteppingDown = new DoubleParameter("stepHeightToPutExitCoPOnToesSteppingDown",
+                                                                     registry,
+                                                                     defaultStepHeightToPutExitCoPOnToesSteppingDown);
+      distanceFromFootEdgeToSnapToToe = new DoubleParameter("distanceFromFootEdgeToSnapToToe", registry, defaultDistanceFromFootEdgeToSnapToToe);
 
       planWithExitCMPOnToes = new BooleanParameter("planWithExitCMPOnToes", registry, defaultPlanWithExitCMPOnToes);
-      planWithExitCMPOnToesWhenSteppingDown = new BooleanParameter("planWithExitCMPOnToesWhenSteppingDown", registry,defaultPlanWithExitCMPOnToesWhenSteppingDown);
+      planWithExitCMPOnToesWhenSteppingDown = new BooleanParameter("planWithExitCMPOnToesWhenSteppingDown",
+                                                                   registry,
+                                                                   defaultPlanWithExitCMPOnToesWhenSteppingDown);
 
       entryCMPMinX = new DoubleParameter("entryCMPMinX", registry, defaultEntryCMPMinX);
       entryCMPMaxX = new DoubleParameter("entryCMPMaxX", registry, defaultEntryCMPMaxX);
@@ -119,10 +127,13 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
       ballCMPLengthOffsetFactor = new DoubleParameter("ballCMPLengthOffsetFactor", registry, defaultBallCMPLengthOffsetFactor);
       exitCMPLengthOffsetFactor = new DoubleParameter("exitCMPLengthOffsetFactor", registry, defaultExitCMPLengthOffsetFactor);
 
+      stepDownLengthOffsetScaleFactor = new DoubleParameter("stepDownLengthOffsetScaleFactor", registry, defaultStepDownLengthOffsetScaleFactor);
+
       numberOfStepsToConsider = new IntegerParameter("numberOfStepsToConsider", registry, defaultNumberOfStepsToConsider);
 
-      durationForContinuityMaintenanceSegment = new DoubleParameter("durationForContinuityMaintenanceSegment", registry, defaultDurationForContinuityMaintenanceSegment);
-      safeDistanceFromCoPToSupportEdgesWhenSteppingDown = new DoubleParameter("safeDistanceFromCoPToSupportEdgesWhenSteppingDown", registry, defaultSafeDistanceFromCoPToSupportEdgesWhenSteppingDown);
+      durationForContinuityMaintenanceSegment = new DoubleParameter("durationForContinuityMaintenanceSegment",
+                                                                    registry,
+                                                                    defaultDurationForContinuityMaintenanceSegment);
       exitCoPForwardSafetyMarginOnToes = new DoubleParameter("exitCoPForwardSafetyMarginOnToes", registry, defaultExitCoPForwardSafetyMarginOnToes);
 
       swingDurationShiftFraction = new DoubleParameter("defaultSwingDurationShiftFraction", registry, defaultSwingDurationShiftFraction);
@@ -135,15 +146,16 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
       registerVariableToSave(minimumDistanceInsidePolygon);
       registerVariableToSave(stepLengthToPutExitCoPOnToes);
       registerVariableToSave(stepHeightToPutExitCoPOnToesSteppingDown);
-      registerVariableToSave(stepLengthToPutExitCoPOnToesSteppingDown);
       registerVariableToSave(entryCMPMinX);
       registerVariableToSave(entryCMPMaxX);
       registerVariableToSave(ballCMPMinX);
       registerVariableToSave(ballCMPMaxX);
       registerVariableToSave(exitCMPMinX);
       registerVariableToSave(exitCMPMaxX);
+      registerVariableToSave(stepDownLengthOffsetScaleFactor);
       registerVariableToSave(planWithExitCMPOnToes);
       registerVariableToSave(planWithExitCMPOnToesWhenSteppingDown);
+      registerVariableToSave(distanceFromFootEdgeToSnapToToe);
       registerVariableToSave(entryCMPOffset.getXParameter());
       registerVariableToSave(entryCMPOffset.getYParameter());
       registerVariableToSave(ballCMPOffset.getXParameter());
@@ -155,7 +167,6 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
       registerVariableToSave(exitCMPLengthOffsetFactor);
       registerVariableToSave(numberOfStepsToConsider);
       registerVariableToSave(durationForContinuityMaintenanceSegment);
-      registerVariableToSave(safeDistanceFromCoPToSupportEdgesWhenSteppingDown);
       registerVariableToSave(exitCoPForwardSafetyMarginOnToes);
       registerVariableToSave(swingDurationShiftFraction);
       registerVariableToSave(swingSplitFraction);
@@ -173,17 +184,12 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    private final PlanForToeOffCalculator planForToeOffCalculator = new PlanForToeOffCalculator()
    {
       @Override
-      public boolean shouldPutCMPOnToes(double stepLength, double stepHeight)
+      public boolean shouldPutCMPOnToes(double stepHeight, FramePoint3DReadOnly copPointInSoleFrame, FrameConvexPolygon2DReadOnly supportPolygon)
       {
-         if (getPlanWithExitCMPOnToes() && MathTools.isGreaterThanWithPrecision(stepLength, getStepLengthToPutExitCoPOnToes(), Epsilons.ONE_HUNDREDTH))
-            return true;
-         if (getPlanWithExitCMPOnToesWhenSteppingDown() && MathTools.isLessThanWithPrecision(stepHeight,
-                                                                                             getStepHeightToPutExitCoPOnToesSteppingDown(),
-                                                                                             Epsilons.ONE_HUNDREDTH) && MathTools.isGreaterThanWithPrecision(
-               stepLength,
-               getStepLengthToPutExitCoPOnToesSteppingDown(),
-               Epsilons.ONE_HUNDREDTH))
-            return true;
+         if (getPlanWithExitCMPOnToes() || (getPlanWithExitCMPOnToesWhenSteppingDown() && MathTools.isLessThanWithPrecision(stepHeight,
+                                                                                                                            getStepHeightToPutExitCoPOnToesSteppingDown(),
+                                                                                                                            Epsilons.ONE_HUNDREDTH)))
+            return MathTools.epsilonEquals(copPointInSoleFrame.getX(), supportPolygon.getMaxX(), getDistanceFromFootEdgeToSnapToToe());
 
          return false;
       }
@@ -209,19 +215,14 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
       return planWithExitCMPOnToesWhenSteppingDown.getValue();
    }
 
-   public double getStepLengthToPutExitCoPOnToes()
-   {
-      return stepLengthToPutExitCoPOnToes.getValue();
-   }
-
-   public double getStepLengthToPutExitCoPOnToesSteppingDown()
-   {
-      return stepLengthToPutExitCoPOnToesSteppingDown.getValue();
-   }
-
    public double getStepHeightToPutExitCoPOnToesSteppingDown()
    {
       return stepHeightToPutExitCoPOnToesSteppingDown.getValue();
+   }
+
+   public double getDistanceFromFootEdgeToSnapToToe()
+   {
+      return distanceFromFootEdgeToSnapToToe.getValue();
    }
 
    public double getEntryCMPMinX()
@@ -269,6 +270,11 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
       return exitCMPOffset;
    }
 
+   public double getStepDownLengthOffsetScaleFactor()
+   {
+      return stepDownLengthOffsetScaleFactor.getValue();
+   }
+
    public double getEntryCMPLengthOffsetFactor()
    {
       return entryCMPLengthOffsetFactor.getValue();
@@ -292,11 +298,6 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    public double getDurationForContinuityMaintenanceSegment()
    {
       return durationForContinuityMaintenanceSegment.getValue();
-   }
-
-   public double getSafeDistanceFromCoPToSupportEdgesWhenSteppingDown()
-   {
-      return safeDistanceFromCoPToSupportEdgesWhenSteppingDown.getValue();
    }
 
    public double getExitCoPForwardSafetyMarginOnToes()

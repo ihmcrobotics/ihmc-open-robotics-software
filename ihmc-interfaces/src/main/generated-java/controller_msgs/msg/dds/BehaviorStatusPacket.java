@@ -12,7 +12,7 @@ import us.ihmc.pubsub.TopicDataType;
 public class BehaviorStatusPacket extends Packet<BehaviorStatusPacket> implements Settable<BehaviorStatusPacket>, EpsilonComparable<BehaviorStatusPacket>
 {
    public static final byte NO_BEHAVIOR_RUNNING = (byte) 0;
-   public static final byte BEHAVIOS_RUNNING = (byte) 1;
+   public static final byte BEHAVIOR_RUNNING = (byte) 1;
    public static final byte BEHAVIOR_PAUSED = (byte) 2;
    public static final byte BEHAVIOR_FINISHED_FAILED = (byte) 3;
    public static final byte BEHAVIOR_FINISHED_SUCCESS = (byte) 4;

@@ -10,7 +10,7 @@ module controller_msgs
       const octet NO_BEHAVIOR_RUNNING =
       0;
 
-      const octet BEHAVIOS_RUNNING =
+      const octet BEHAVIOR_RUNNING =
       1;
 
       const octet BEHAVIOR_PAUSED =

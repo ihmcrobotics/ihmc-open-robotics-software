@@ -7,24 +7,17 @@ import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.HumanoidExperimentalSimulationEndToEndTest;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.HumanoidRobotInitialSetup;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.NeckJointName;
-import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperimentalSimulationEndToEndTest
 {
@@ -54,7 +47,7 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
       simulationTestingParameters.setUsePefectSensors(true);
 
       ValkyrieRobotModel robotModel = getRobotModel();
-      robotModel.setRobotInitialSetup(new FlyingValkyrieInitialSetup());
+      robotModel.setRobotInitialSetup(new FlyingValkyrieInitialSetup(robotModel.getJointMap()));
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
       drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
@@ -68,110 +61,43 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
 
       RigidBodyBasics elevator = drcSimulationTestHelper.getControllerFullRobotModel().getElevator();
-      assertRigidBodiesAreAboveFlatGround(elevator, p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()), 0.0);
+      assertRigidBodiesAreAboveFlatGround(elevator,
+                                          p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()),
+                                          0.0);
       assertOneDoFJointsAreWithingLimits(elevator, 2.0e-2);
    }
 
-   private static class FlyingValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
+   private static class FlyingValkyrieInitialSetup extends HumanoidRobotInitialSetup
    {
-
-      private HumanoidFloatingRootJointRobot robot;
-      private HumanoidJointNameMap jointMap;
-
-      @Override
-      public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
+      public FlyingValkyrieInitialSetup(HumanoidJointNameMap jointMap)
       {
-         this.robot = robot;
-         this.jointMap = jointMap;
+         super(jointMap);
 
-         setJoint(RobotSide.LEFT, LegJointName.HIP_PITCH, -0.7, 0.0);
-         setJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH, 1.5, 0.0);
-         setJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH, 0.7, 0.0);
+         { // LEFT side
+            setJoint(RobotSide.LEFT, LegJointName.HIP_PITCH, -0.7);
+            setJoint(RobotSide.LEFT, LegJointName.KNEE_PITCH, 1.5);
+            setJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH, 0.7);
 
-         setJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH, 0.3, 0.0);
-         setJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH, 0.0, 0.0);
-         setJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH, 0.8, 0.0);
+            setJoint(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH, 1.1);
+            setJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL, -1.2);
+            setJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH, -2.0);
+         }
 
-         setJoint(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH, 1.1, 0.0);
-         setJoint(RobotSide.LEFT, ArmJointName.SHOULDER_ROLL, -1.2, 0.0);
-         setJoint(RobotSide.LEFT, ArmJointName.ELBOW_PITCH, -2.0, 0.0);
+         { // RIGHT side
+            setJoint(RobotSide.RIGHT, LegJointName.HIP_PITCH, 0.3);
+            setJoint(RobotSide.RIGHT, LegJointName.KNEE_PITCH, 0.0);
+            setJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH, 0.8);
 
-         setJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_PITCH, 0.0, 0.0);
-         setJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL, -1.3, 0.0);
-         setJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW, -1.5, 0.0);
-         setJoint(RobotSide.RIGHT, ArmJointName.ELBOW_PITCH, 0.3, 0.0);
+            setJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_PITCH, 0.0);
+            setJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_ROLL, -1.3);
+            setJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_YAW, -1.5);
+            setJoint(RobotSide.RIGHT, ArmJointName.ELBOW_PITCH, 0.3);
+         }
 
-         setJoint(SpineJointName.SPINE_ROLL, -0.1, 0.0);
-
-         setJoint(NeckJointName.DISTAL_NECK_PITCH, -0.8, 0.0);
-         setJoint(NeckJointName.DISTAL_NECK_YAW, -0.1, 0.0);
-
-         robot.getRootJoint().setPosition(-20.0, 0.0, 1.0);
-         robot.getRootJoint().setRotation(new RotationMatrix(new YawPitchRoll(0.0, 1.0, 0.0)));
-
-         robot.getRootJoint().setVelocity(8.0, 0.0, 20.0);
-         robot.getRootJoint().setAngularVelocityInBody(new Vector3D(0.0, 1.5, 0.0));
-      }
-
-      private void setJoint(RobotSide robotSide, LegJointName legJointName, double q, double qd)
-      {
-         setJoint(jointMap.getLegJointName(robotSide, legJointName), q, qd);
-      }
-
-      private void setJoint(RobotSide robotSide, ArmJointName armJointName, double q, double qd)
-      {
-         setJoint(jointMap.getArmJointName(robotSide, armJointName), q, qd);
-      }
-
-      private void setJoint(SpineJointName spineJointName, double q, double qd)
-      {
-         setJoint(jointMap.getSpineJointName(spineJointName), q, qd);
-      }
-
-      private void setJoint(NeckJointName neckJointName, double q, double qd)
-      {
-         setJoint(jointMap.getNeckJointName(neckJointName), q, qd);
-      }
-
-      private void setJoint(String jointName, double q, double qd)
-      {
-         OneDegreeOfFreedomJoint joint = robot.getOneDegreeOfFreedomJoint(jointName);
-         joint.setQ(q);
-         joint.setQd(qd);
-      }
-
-      @Override
-      public void setInitialYaw(double yaw)
-      {
-
-      }
-
-      @Override
-      public double getInitialYaw()
-      {
-         return 0;
-      }
-
-      @Override
-      public void setInitialGroundHeight(double groundHeight)
-      {
-      }
-
-      @Override
-      public double getInitialGroundHeight()
-      {
-         return 0;
-      }
-
-      @Override
-      public void setOffset(Vector3D additionalOffset)
-      {
-      }
-
-      @Override
-      public void getOffset(Vector3D offsetToPack)
-      {
+         rootJointOrientation.setYawPitchRoll(0.0, 1.0, 0.0);
+         rootJointPosition.set(-20.0, 0.0, 1.0);
+         rootJointAngularVelocityInBody.set(0.0, 1.0, 0.0);
+         rootJointLinearVelocityInWorld.set(8.0, 0.0, 20.0);
       }
    }
-
 }

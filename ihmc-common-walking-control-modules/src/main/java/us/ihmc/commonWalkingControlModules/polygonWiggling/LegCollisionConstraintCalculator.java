@@ -12,10 +12,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCylinder;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -25,7 +22,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class LegCollisionConstraintCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final static double defaultLegRadiusGraphic = 0.21; // YoGraphicCylinder doesn't support changing radius on the fly...
+   private static final double defaultShinRadiusWhenOneMeterLong = 0.3167;
 
    private Cylinder3D legCollisionShape = null;
    private final RigidBodyTransform legShapeTransformToSoleFrame = new RigidBodyTransform();
@@ -38,7 +35,7 @@ public class LegCollisionConstraintCalculator
 
    private final YoFramePoint3D legShapeBase = new YoFramePoint3D("legShapeBase", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D legShapeDirection = new YoFrameVector3D("legShapeDirection", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicCylinder legCollisionShapeGraphic;
+   private final YoGraphicVector legCollisionShapeGraphic;
    private final YoFramePoint3D legIntersectionPosition = new YoFramePoint3D("legIntersectionPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D regionIntersectionPosition = new YoFramePoint3D("regionIntersectionPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D gradientDirection = new YoFrameVector3D("intersectionNormal", ReferenceFrame.getWorldFrame(), registry);
@@ -57,12 +54,15 @@ public class LegCollisionConstraintCalculator
    public LegCollisionConstraintCalculator(YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       AppearanceDefinition appearance = YoAppearance.LightGoldenRodYellow();
-      appearance.setTransparency(0.85);
+      appearance.setTransparency(0.15);
 
-      legCollisionShapeGraphic = new YoGraphicCylinder("legCollisionGraphic", legShapeBase, legShapeDirection, appearance, defaultLegRadiusGraphic);
-      legIntersectionPositionGraphic = new YoGraphicPosition("intersectionPositionGraphic", legIntersectionPosition, 0.01, YoAppearance.Orange());
-      regionIntersectionPositionGraphic = new YoGraphicPosition("regionIntersectionPositionGraphic", regionIntersectionPosition, 0.01, YoAppearance.Black());
+      legCollisionShapeGraphic = new YoGraphicVector("legCollisionGraphic", legShapeBase, legShapeDirection, appearance);
+      legIntersectionPositionGraphic = new YoGraphicPosition("intersectionPositionGraphic", legIntersectionPosition, 0.02, YoAppearance.Orange());
+      regionIntersectionPositionGraphic = new YoGraphicPosition("regionIntersectionPositionGraphic", regionIntersectionPosition, 0.02, YoAppearance.Black());
       gradientDirectionGraphic = new YoGraphicVector("intersectionDirectionGraphic", legIntersectionPosition, gradientDirection, 1.0, YoAppearance.Orange(), true, 0.01);
+
+      legCollisionShapeGraphic.setDrawArrowhead(false);
+      legCollisionShapeGraphic.setLineRadiusWhenOneMeterLong(defaultShinRadiusWhenOneMeterLong);
 
       legShapeBase.setToZero();
       legShapeDirection.set(0.0, 0.0, 1.0);
@@ -161,5 +161,9 @@ public class LegCollisionConstraintCalculator
    {
       this.legCollisionShape = legCollisionShape;
       this.legShapeTransformToSoleFrame.set(legShapeTransformToSoleFrame);
+      double lineRadiusWhenOneMeterLong = legCollisionShape.getRadius() / legCollisionShape.getLength();
+
+      if (legCollisionShapeGraphic != null)
+         legCollisionShapeGraphic.setLineRadiusWhenOneMeterLong(lineRadiusWhenOneMeterLong);
    }
 }

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -16,14 +15,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.RawSensorReader;
-import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunction;
-import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -68,13 +66,17 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       this(robot, fullRobotModel, null, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FullRobotModel fullRobotModel, ForceSensorDataHolder forceSensorDataHolderToUpdate,
+   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot,
+                                          FullRobotModel fullRobotModel,
+                                          ForceSensorDataHolder forceSensorDataHolderToUpdate,
                                           ReferenceFrames referenceFrames)
    {
       this(robot, fullRobotModel.getRootJoint(), forceSensorDataHolderToUpdate, referenceFrames);
    }
 
-   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot, FloatingJointBasics rootJoint, ForceSensorDataHolder forceSensorDataHolderToUpdate,
+   public SDFPerfectSimulatedSensorReader(FloatingRootJointRobot robot,
+                                          FloatingJointBasics rootJoint,
+                                          ForceSensorDataHolder forceSensorDataHolderToUpdate,
                                           ReferenceFrames referenceFrames)
    {
       name = robot.getName() + "SimulatedSensorReader";
@@ -90,17 +92,17 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          {
             OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
 
-            if (oneDoFJoint instanceof InvertedFourBarJoint)
+            if (oneDoFJoint instanceof CrossFourBarJoint)
             {
-               String jointAName = ((InvertedFourBarJoint) oneDoFJoint).getJointA().getName();
-               String jointBName = ((InvertedFourBarJoint) oneDoFJoint).getJointB().getName();
-               String jointCName = ((InvertedFourBarJoint) oneDoFJoint).getJointC().getName();
-               String jointDName = ((InvertedFourBarJoint) oneDoFJoint).getJointD().getName();
-               oneDoFJointStateUpdaters.add(new InvertedFourBarJointStateUpdater((InvertedFourBarJoint) oneDoFJoint,
-                                                                                 robot.getOneDegreeOfFreedomJoint(jointAName),
-                                                                                 robot.getOneDegreeOfFreedomJoint(jointBName),
-                                                                                 robot.getOneDegreeOfFreedomJoint(jointCName),
-                                                                                 robot.getOneDegreeOfFreedomJoint(jointDName)));
+               String jointAName = ((CrossFourBarJoint) oneDoFJoint).getJointA().getName();
+               String jointBName = ((CrossFourBarJoint) oneDoFJoint).getJointB().getName();
+               String jointCName = ((CrossFourBarJoint) oneDoFJoint).getJointC().getName();
+               String jointDName = ((CrossFourBarJoint) oneDoFJoint).getJointD().getName();
+               oneDoFJointStateUpdaters.add(new CrossFourBarJointStateUpdater((CrossFourBarJoint) oneDoFJoint,
+                                                                              robot.getOneDegreeOfFreedomJoint(jointAName),
+                                                                              robot.getOneDegreeOfFreedomJoint(jointBName),
+                                                                              robot.getOneDegreeOfFreedomJoint(jointCName),
+                                                                              robot.getOneDegreeOfFreedomJoint(jointDName)));
             }
             else
             {
@@ -324,46 +326,6 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          inverseDynamicsJoint.setQd(scsJoint.getQD());
          inverseDynamicsJoint.setQdd(scsJoint.getQDD());
          inverseDynamicsJoint.setTau(scsJoint.getTau());
-      }
-   }
-
-   public static class InvertedFourBarJointStateUpdater implements Runnable
-   {
-      private final InvertedFourBarJoint invertedFourBarJoint;
-      private final OneDegreeOfFreedomJoint scsJointA, scsJointB, scsJointC, scsJointD;
-
-      public InvertedFourBarJointStateUpdater(InvertedFourBarJoint invertedFourBarJoint, OneDegreeOfFreedomJoint scsJointA, OneDegreeOfFreedomJoint scsJointB,
-                                              OneDegreeOfFreedomJoint scsJointC, OneDegreeOfFreedomJoint scsJointD)
-      {
-         this.invertedFourBarJoint = invertedFourBarJoint;
-         this.scsJointA = scsJointA;
-         this.scsJointB = scsJointB;
-         this.scsJointC = scsJointC;
-         this.scsJointD = scsJointD;
-      }
-
-      @Override
-      public void run()
-      {
-         FourBarKinematicLoopFunction fourBarFunction = invertedFourBarJoint.getFourBarFunction();
-
-         DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
-         if (scsJointA != null && scsJointD != null)
-         {
-            invertedFourBarJoint.setQ(scsJointA.getQ() + scsJointD.getQ());
-            invertedFourBarJoint.setQd(scsJointA.getQD() + scsJointD.getQD());
-            invertedFourBarJoint.setQdd(scsJointA.getQDD() + scsJointD.getQDD());
-            fourBarFunction.updateState(false, false);
-            invertedFourBarJoint.setTau(loopJacobian.get(0) * scsJointA.getTau() + loopJacobian.get(3) * scsJointD.getTau());
-         }
-         else
-         {
-            invertedFourBarJoint.setQ(scsJointB.getQ() + scsJointC.getQ());
-            invertedFourBarJoint.setQd(scsJointB.getQD() + scsJointC.getQD());
-            invertedFourBarJoint.setQdd(scsJointB.getQDD() + scsJointC.getQDD());
-            fourBarFunction.updateState(false, false);
-            invertedFourBarJoint.setTau(loopJacobian.get(1) * scsJointB.getTau() + loopJacobian.get(2) * scsJointC.getTau());
-         }
       }
    }
 }

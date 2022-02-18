@@ -2,7 +2,7 @@ package us.ihmc.stateEstimation.humanoid;
 
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
 /**
@@ -21,14 +21,14 @@ public interface StateEstimatorController extends RobotController, StateEstimato
     * @param rootJointTransform the transform of the floating root joint that is estimated.
     * @param jointPositions     a map from joint names to initial joint positions.
     */
-   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions);
+   public void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions);
 
    /**
     * Initializes the root joint pose in the estimator.
     *
     * @param rootJointTransform the transform of the floating root joint that is estimated.
     */
-   public default void initializeEstimator(RigidBodyTransform rootJointTransform)
+   public default void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform)
    {
       initializeEstimator(rootJointTransform, EMPTY_JOINT_POSITION_MAP);
    }

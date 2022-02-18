@@ -10,7 +10,7 @@ import us.ihmc.tools.property.StoredPropertySet;
  * Parameters for the planar region SLAM algorithm.
  * <p>
  * On construction, these properties are loaded from the INI file:
- * ihmc-avatar-interfaces/src/behaviors/resources/us/ihmc/humanoidBehaviors/tools/perception/planarRegionSLAMParameters.ini
+ * ihmc-high-level-behaviors/src/main/resources/us/ihmc/humanoidBehaviors/tools/perception/planarRegionSLAMParameters.ini
  * <p>
  * To save/load properties, call the save() and load() methods.
  * <p>

@@ -58,6 +58,11 @@ public class MultiContactScriptWriter
       return true;
    }
 
+   public void clear()
+   {
+      messagesToWrite.clear();
+   }
+
    public void recordConfiguration(KinematicsToolboxSnapshotDescription description)
    {
       messagesToWrite.add(description);

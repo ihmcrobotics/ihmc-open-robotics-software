@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.swing;
 
 import controller_msgs.msg.dds.SwingPlannerParametersPacket;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
@@ -132,6 +133,101 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       return get(SwingPlannerParameterKeys.additionalSwingTimeIfExpanded);
    }
 
+   default double getExtraSizePercentageLow(Axis3D axis)
+   {
+      switch (axis)
+      {
+         case X:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeXLow);
+         case Y:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeYLow);
+         case Z:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeZLow);
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
+   }
+
+   default double getExtraSizePercentageHigh(Axis3D axis)
+   {
+      switch (axis)
+      {
+         case X:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeXHigh);
+         case Y:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeYHigh);
+         case Z:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeZHigh);
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
+   }
+
+   default double getExtraSizeLow(Axis3D axis)
+   {
+      switch (axis)
+      {
+         case X:
+            return get(SwingPlannerParameterKeys.extraSizeXLow);
+         case Y:
+            return get(SwingPlannerParameterKeys.extraSizeYLow);
+         case Z:
+            return get(SwingPlannerParameterKeys.extraSizeZLow);
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
+   }
+
+   default double getExtraSizeHigh(Axis3D axis)
+   {
+      switch (axis)
+      {
+         case X:
+            return get(SwingPlannerParameterKeys.extraSizeXHigh);
+         case Y:
+            return get(SwingPlannerParameterKeys.extraSizeYHigh);
+         case Z:
+            return get(SwingPlannerParameterKeys.extraSizeZHigh);
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
+   }
+
+   default double getPercentageLowMaxDisplacement()
+   {
+      return get(SwingPlannerParameterKeys.percentageMaxDisplacementLow);
+   }
+
+   default double getPercentageHighMaxDisplacement()
+   {
+      return get(SwingPlannerParameterKeys.percentageMaxDisplacementHigh);
+   }
+
+   default double getMaxDisplacementLow()
+   {
+      return get(SwingPlannerParameterKeys.maxDisplacementLow);
+   }
+
+   default double getMaxDisplacementHigh()
+   {
+      return get(SwingPlannerParameterKeys.maxDisplacementHigh);
+   }
+
+   default double getMotionCorrelationAlpha()
+   {
+      return get(SwingPlannerParameterKeys.motionCorrelationAlpha);
+   }
+
+   default boolean getAllowLateralMotion()
+   {
+      return get(SwingPlannerParameterKeys.allowLateralMotion);
+   }
+
+   default double getMinXYTranslationToPlanSwing()
+   {
+      return get(SwingPlannerParameterKeys.minXYTranslationToPlanSwing);
+   }
+
    default SwingPlannerParametersPacket getAsPacket()
    {
       SwingPlannerParametersPacket packet = new SwingPlannerParametersPacket();
@@ -153,6 +249,26 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       packet.setAdjustmentIncrementDistanceGain(getAdjustmentIncrementDistanceGain());
       packet.setMinimumHeightAboveFloorForCollision(getMinimumHeightAboveFloorForCollision());
       packet.setAdditionalSwingTimeIfExpanded(getAdditionalSwingTimeIfExpanded());
+
+      packet.setPercentageExtraSizeXLow(getExtraSizePercentageLow(Axis3D.X));
+      packet.setPercentageExtraSizeXHigh(getExtraSizePercentageHigh(Axis3D.X));
+      packet.setExtraSizeXLow(getExtraSizeLow(Axis3D.X));
+      packet.setExtraSizeXHigh(getExtraSizeHigh(Axis3D.X));
+      packet.setPercentageExtraSizeYLow(getExtraSizePercentageLow(Axis3D.Y));
+      packet.setPercentageExtraSizeYHigh(getExtraSizePercentageHigh(Axis3D.Y));
+      packet.setExtraSizeYLow(getExtraSizeLow(Axis3D.Y));
+      packet.setExtraSizeYHigh(getExtraSizeHigh(Axis3D.Y));
+      packet.setPercentageExtraSizeZLow(getExtraSizePercentageLow(Axis3D.Z));
+      packet.setPercentageExtraSizeZHigh(getExtraSizePercentageHigh(Axis3D.Z));
+      packet.setExtraSizeZLow(getExtraSizeLow(Axis3D.Z));
+      packet.setExtraSizeZHigh(getExtraSizeHigh(Axis3D.Z));
+      packet.setPercentageMaxDisplacementLow(getPercentageLowMaxDisplacement());
+      packet.setPercentageMaxDisplacementHigh(getPercentageHighMaxDisplacement());
+      packet.setMaxDisplacementLow(getMaxDisplacementLow());
+      packet.setMaxDisplacementHigh(getMaxDisplacementHigh());
+      packet.setMotionCorrelationAlpha(getMotionCorrelationAlpha());
+      packet.setAllowLateralMotion(getAllowLateralMotion());
+      packet.setMinXyTranslationToPlanSwing(getMinXYTranslationToPlanSwing());
 
       return packet;
    }

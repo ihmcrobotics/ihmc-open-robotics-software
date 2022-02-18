@@ -89,6 +89,13 @@ float64 maximum_step_reach
 # Field default value -11.1
 float64 maximum_step_yaw
 
+# If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
+bool use_reachability_map
+
+# Solution quality threshold when using IK-based feasibility check, only used when use_reachability_map is true.
+# Field default value -11.1
+float64 solution_quality_threshold
+
 # Minimum step width the planner will consider for candidate steps.
 # 
 # Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,

@@ -14,7 +14,7 @@ public class RemoteBehaviorInterface
    {
       KryoMessager moduleMessager = KryoMessager.createClient(behaviorRegistry.getMessagerAPI(),
                                                               behaviorModuleAddress,
-                                                              NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
+                                                              NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort(),
                                                               new BehaviorMessagerUpdateThread(RemoteBehaviorInterface.class.getSimpleName(), 5));
       ThreadTools.startAThread(() -> ExceptionTools.handle(moduleMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION),
                                "KryoMessagerAsyncConnectionThread");

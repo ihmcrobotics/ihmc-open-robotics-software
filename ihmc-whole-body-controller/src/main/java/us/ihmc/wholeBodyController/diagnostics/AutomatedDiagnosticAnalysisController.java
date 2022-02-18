@@ -148,6 +148,13 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    {
       timer.startMeasurement();
 
+      doControlInternal();
+
+      timer.stopMeasurement();
+   }
+
+   private void doControlInternal()
+   {
       if (!hasBeenInitialized)
       {
          initialize();
@@ -156,7 +163,6 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
       if (!robotIsAlive.getBooleanValue())
       {
-         initialize();
          if (doIdleControl.getBooleanValue())
             doIdleControl();
          return;
@@ -187,8 +193,6 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          }
       }
       isDiagnosticComplete.set(isDone);
-
-      timer.stopMeasurement();
    }
 
    private void doIdleControl()

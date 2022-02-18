@@ -110,7 +110,6 @@ public class CenterOfMassHeightManager
                        FrameVector2DReadOnly desiredCoMVelocity,
                        boolean isInDoubleSupport,
                        double omega0,
-                       boolean isRecoveringFromPush,
                        FeetManager feetManager)
    {
       stateMachine.doActionAndTransition();
@@ -119,7 +118,6 @@ public class CenterOfMassHeightManager
                                            desiredCoMVelocity,
                                            isInDoubleSupport,
                                            omega0,
-                                           isRecoveringFromPush,
                                            feetManager);
    }
 
@@ -230,6 +228,11 @@ public class CenterOfMassHeightManager
    public void initializeToNominalDesiredHeight()
    {
       centerOfMassHeightControlState.initializeToNominalDesiredHeight();
+   }
+
+   public void initializeTransitionToFall(double transitionDuration)
+   {
+      centerOfMassHeightControlState.initializeTransitionToFall(transitionDuration);
    }
 
    public FeedbackControlCommand<?> getFeedbackControlCommand()

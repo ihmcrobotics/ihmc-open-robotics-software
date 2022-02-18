@@ -4,6 +4,7 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 
 public class ForceSensorDefinition implements Settable<ForceSensorDefinition>
@@ -12,7 +13,7 @@ public class ForceSensorDefinition implements Settable<ForceSensorDefinition>
    private RigidBodyBasics rigidBody;
    private ReferenceFrame sensorFrame;
 
-   public static ReferenceFrame createSensorFrame(String sensorName, RigidBodyBasics rigidBody, RigidBodyTransform transformFromSensorToParentJoint)
+   public static ReferenceFrame createSensorFrame(String sensorName, RigidBodyBasics rigidBody, RigidBodyTransformReadOnly transformFromSensorToParentJoint)
    {
       ReferenceFrame frameAfterJoint = rigidBody.getParentJoint().getFrameAfterJoint();
       return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(sensorName + "Frame", frameAfterJoint, transformFromSensorToParentJoint);

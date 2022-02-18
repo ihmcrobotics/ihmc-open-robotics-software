@@ -29,7 +29,7 @@ public class DefaultSwingPlannerParameters extends StoredPropertySet implements 
       }
       else
       {
-         load();
+         loadUnsafe();
       }
    }
 

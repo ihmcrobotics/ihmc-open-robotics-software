@@ -7,31 +7,32 @@ import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.factory.SimulatedHandControlTask;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.ValkyrieHandFingerTrajectoryMessageSubscriber;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
-import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
+public class SimulatedValkyrieFingerController implements RobotController
 {
-   private final YoDouble handControllerTime;
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final SimulatedValkyrieFingerJointAngleProducer jointAngleProducer;
+   private final JointDesiredOutputListBasics jointDesiredOutputList;
 
    private final double trajectoryTime = ValkyrieHandFingerTrajectoryMessageConversion.trajectoryTimeForSim;
    private final double extendedTrajectoryTime = trajectoryTime * ValkyrieHandFingerTrajectoryMessageConversion.extendedTimeRatioForThumb;
@@ -48,26 +49,23 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
    private final SideDependentList<ValkyrieFingerSetTrajectoryGenerator<ValkyrieHandJointName>> handJointFingerSetControllers = new SideDependentList<>();
    private final SideDependentList<ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName>> fingerSetControllers = new SideDependentList<>();
 
-   private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDegreeOfFreedomJoint>> allHandJointsNameToJointsMap = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
-   private final SideDependentList<EnumMap<ValkyrieHandJointName, YoDouble>> currentHandJointAngles = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
+   private final SideDependentList<EnumMap<ValkyrieHandJointName, OneDoFJointBasics>> allHandJointsNameToJointsMap = SideDependentList.createListOfEnumMaps(ValkyrieHandJointName.class);
 
-   private long timestamp;
-
-   private final MirroredYoVariableRegistry registry;
-
-   public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node, DRCRobotModel robotModel,
-                                            ROS2Topic outputTopic, ROS2Topic inputTopic)
+   public SimulatedValkyrieFingerController(FullRobotModel fullRobotModel,
+                                            JointDesiredOutputListBasics jointDesiredOutputList,
+                                            DoubleProvider yoTime,
+                                            RealtimeROS2Node realtimeROS2Node,
+                                            ROS2Topic<?> outputTopic,
+                                            ROS2Topic<?> inputTopic)
    {
-      super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
-
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      handControllerTime = new YoDouble("handControllerTime", registry);
+      this.jointDesiredOutputList = jointDesiredOutputList;
 
       if (realtimeROS2Node != null)
       {
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, HandJointAnglePacket.class,
+         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
+                                                                                                                  HandJointAnglePacket.class,
                                                                                                                   outputTopic);
-         jointAngleProducer = new SimulatedValkyrieFingerJointAngleProducer(jointAnglePublisher, simulatedRobot);
+         jointAngleProducer = new SimulatedValkyrieFingerJointAngleProducer(jointAnglePublisher, fullRobotModel);
       }
       else
          jointAngleProducer = null;
@@ -80,15 +78,15 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
          for (ValkyrieHandJointName valkyrieHandJointName : ValkyrieHandJointName.values())
          {
             YoDouble handJointHandler = new YoDouble(valkyrieHandJointName.getJointName(robotSide) + "_handJointHandler", registry);
-            double currentHandJoint = simulatedRobot.getOneDegreeOfFreedomJoint(valkyrieHandJointName.getJointName(robotSide)).getQ();
+            double currentHandJoint = fullRobotModel.getOneDoFJointByName(valkyrieHandJointName.getJointName(robotSide)).getQ(); // FIXME That's not going to get initialized properly
             handJointHandler.set(currentHandJoint);
             sideDependentHandJointHandlers.get(robotSide).put(valkyrieHandJointName, handJointHandler);
          }
-         ValkyrieFingerSetTrajectoryGenerator<ValkyrieHandJointName> handJointFingerSetController = new ValkyrieFingerSetTrajectoryGenerator<ValkyrieHandJointName>(ValkyrieHandJointName.class,
-                                                                                                                                                                    robotSide,
-                                                                                                                                                                    handControllerTime,
-                                                                                                                                                                    sideDependentHandJointHandlers.get(robotSide),
-                                                                                                                                                                    registry);
+         ValkyrieFingerSetTrajectoryGenerator<ValkyrieHandJointName> handJointFingerSetController = new ValkyrieFingerSetTrajectoryGenerator<>(ValkyrieHandJointName.class,
+                                                                                                                                               robotSide,
+                                                                                                                                               yoTime,
+                                                                                                                                               sideDependentHandJointHandlers.get(robotSide),
+                                                                                                                                               registry);
          handJointFingerSetControllers.put(robotSide, handJointFingerSetController);
       }
 
@@ -100,13 +98,13 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
          for (ValkyrieFingerMotorName valkyrieFingerMotorName : ValkyrieFingerMotorName.values())
          {
             YoDouble fingerMotorHandler = new YoDouble(valkyrieFingerMotorName.getJointName(robotSide) + "_fingerMotorHandler", registry);
-            double currentFingerMotor = 0.0; // TODO : use ValkyrieRosControlFingerStateEstimator 
+            double currentFingerMotor = 0.0; // TODO : use ValkyrieRosControlFingerStateEstimator
             fingerMotorHandler.set(currentFingerMotor);
             sideDependentFingerMotorHandlers.get(robotSide).put(valkyrieFingerMotorName, fingerMotorHandler);
          }
-         ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName> fingerSetController = new ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName>(ValkyrieFingerMotorName.class,
+         ValkyrieFingerSetTrajectoryGenerator<ValkyrieFingerMotorName> fingerSetController = new ValkyrieFingerSetTrajectoryGenerator<>(ValkyrieFingerMotorName.class,
                                                                                                                                                                robotSide,
-                                                                                                                                                               handControllerTime,
+                                                                                                                                                               yoTime,
                                                                                                                                                                sideDependentFingerMotorHandlers.get(robotSide),
                                                                                                                                                                registry);
          fingerSetControllers.put(robotSide, fingerSetController);
@@ -118,10 +116,8 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
          for (ValkyrieHandJointName valkyrieHandJointName : ValkyrieHandJointName.values())
          {
             String jointName = valkyrieHandJointName.getJointName(robotSide);
-            OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = simulatedRobot.getOneDegreeOfFreedomJoint(jointName);
-            allHandJointsNameToJointsMap.get(robotSide).put(valkyrieHandJointName, oneDegreeOfFreedomJoint);
-            YoDouble currentHandJointAngle = new YoDouble("q_current_" + jointName, registry);
-            currentHandJointAngles.get(robotSide).put(valkyrieHandJointName, currentHandJointAngle);
+            OneDoFJointBasics oneDoFJoint = fullRobotModel.getOneDoFJointByName(jointName);
+            allHandJointsNameToJointsMap.get(robotSide).put(valkyrieHandJointName, oneDoFJoint);
          }
       }
 
@@ -135,41 +131,39 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
          valkyrieHandFingerTrajectoryMessageSubscribers.put(robotSide, valkyrieHandFingerTrajectoryMessageSubscriber);
          if (realtimeROS2Node != null)
          {
-            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HandDesiredConfigurationMessage.class, inputTopic,
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                          HandDesiredConfigurationMessage.class,
+                                                          inputTopic,
                                                           handDesiredConfigurationSubscriber);
-            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, ValkyrieHandFingerTrajectoryMessage.class, inputTopic,
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
+                                                          ValkyrieHandFingerTrajectoryMessage.class,
+                                                          inputTopic,
                                                           valkyrieHandFingerTrajectoryMessageSubscriber);
          }
       }
-
-      this.registry = new MirroredYoVariableRegistry(registry);
    }
 
    @Override
-   public boolean initialize()
+   public void initialize()
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         for (ValkyrieHandJointName valkyrieHandJointName : ValkyrieHandJointName.values())
-         {
-            OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = allHandJointsNameToJointsMap.get(robotSide).get(valkyrieHandJointName);
-            currentHandJointAngles.get(robotSide).get(valkyrieHandJointName).set(oneDegreeOfFreedomJoint.getQ());
-         }
-      }
-      return true;
+   }
+
+   @Override
+   public void doControl()
+   {
+      read();
+      execute();
+      write();
    }
 
    public void read()
    {
-      handControllerTime.set(Conversions.nanosecondsToSeconds(timestamp));
-
       if (jointAngleProducer != null)
       {
          jointAngleProducer.sendHandJointAnglesPacket();
       }
    }
 
-   @Override
    public void execute()
    {
       checkForNewHandDesiredConfigurationRequested();
@@ -189,11 +183,10 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
          for (ValkyrieHandJointName valkyrieHandJointName : ValkyrieHandJointName.values())
          {
             double desiredQ = handJointFingerSetControllers.get(robotSide).getDesired(valkyrieHandJointName);
-
-            OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = allHandJointsNameToJointsMap.get(robotSide).get(valkyrieHandJointName);
-            oneDegreeOfFreedomJoint.getQYoVariable().set(desiredQ);
-            YoDouble currentHandJointAngle = currentHandJointAngles.get(robotSide).get(valkyrieHandJointName);
-            currentHandJointAngle.set(oneDegreeOfFreedomJoint.getQ());
+            OneDoFJointBasics joint = allHandJointsNameToJointsMap.get(robotSide).get(valkyrieHandJointName);
+            JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+            jointDesiredOutput.setControlMode(JointDesiredControlMode.POSITION);
+            jointDesiredOutput.setDesiredPosition(desiredQ);
          }
 
          EnumMap<ValkyrieHandJointName, YoDouble> handJointEnumMap = sideDependentHandJointHandlers.get(robotSide);
@@ -212,7 +205,7 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
    }
 
    @Override
-   public YoRegistry getRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -225,63 +218,64 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
          {
             HandConfiguration desiredHandConfiguration = HandConfiguration.fromByte(handDesiredConfigurationMessageSubscribers.get(robotSide).pollMessage()
                                                                                                                               .getDesiredHandConfiguration());
+
             handJointFingerSetControllers.get(robotSide).clearTrajectories();
             fingerSetControllers.get(robotSide).clearTrajectories();
             switch (desiredHandConfiguration)
             {
-            case CLOSE:
-               for (ValkyrieHandJointName handJointName : ValkyrieHandJointName.values)
-               {
-                  double desiredHandJoint = ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, 1.0);
-                  if (handJointName.getFingerName() == FingerName.THUMB)
-                     handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, extendedTrajectoryTime, desiredHandJoint);
-                  else
-                     handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, trajectoryTime, desiredHandJoint);
-               }
+               case CLOSE:
+                  for (ValkyrieHandJointName handJointName : ValkyrieHandJointName.values)
+                  {
+                     double desiredHandJoint = ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, 1.0);
+                     if (handJointName.getFingerName() == FingerName.THUMB)
+                        handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, extendedTrajectoryTime, desiredHandJoint);
+                     else
+                        handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, trajectoryTime, desiredHandJoint);
+                  }
 
-               for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
-               {
-                  double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName, 1.0);
-                  if (fingerMotorName.getFingerName() == FingerName.THUMB)
-                     fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, extendedTrajectoryTime, desiredFingerMotor);
-                  else
-                     fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, trajectoryTime, desiredFingerMotor);
-               }
+                  for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+                  {
+                     double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName, 1.0);
+                     if (fingerMotorName.getFingerName() == FingerName.THUMB)
+                        fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, extendedTrajectoryTime, desiredFingerMotor);
+                     else
+                        fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, trajectoryTime, desiredFingerMotor);
+                  }
 
-               break;
+                  break;
 
-            case OPEN:
-               for (ValkyrieHandJointName handJointName : ValkyrieHandJointName.values)
-               {
-                  double desiredHandJoint = ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, 0.0);
-                  if (handJointName.getFingerName() == FingerName.THUMB)
-                     handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, extendedTrajectoryTime, desiredHandJoint);
-                  else
-                     handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, trajectoryTime, desiredHandJoint);
-               }
-               for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
-               {
-                  double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName, 0.0);
-                  if (fingerMotorName.getFingerName() == FingerName.THUMB)
-                     fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, extendedTrajectoryTime, desiredFingerMotor);
-                  else
-                     fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, trajectoryTime, desiredFingerMotor);
-               }
-               break;
+               case OPEN:
+                  for (ValkyrieHandJointName handJointName : ValkyrieHandJointName.values)
+                  {
+                     double desiredHandJoint = ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, 0.0);
+                     if (handJointName.getFingerName() == FingerName.THUMB)
+                        handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, extendedTrajectoryTime, desiredHandJoint);
+                     else
+                        handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, trajectoryTime, desiredHandJoint);
+                  }
+                  for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+                  {
+                     double desiredFingerMotor = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName, 0.0);
+                     if (fingerMotorName.getFingerName() == FingerName.THUMB)
+                        fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, extendedTrajectoryTime, desiredFingerMotor);
+                     else
+                        fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, trajectoryTime, desiredFingerMotor);
+                  }
+                  break;
 
-            case STOP:
-               for (ValkyrieHandJointName handJointName : ValkyrieHandJointName.values)
-                  handJointFingerSetControllers.get(robotSide)
-                                               .appendStopPoint(handJointName,
-                                                                sideDependentHandJointHandlers.get(robotSide).get(handJointName).getDoubleValue());
-               for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
-                  fingerSetControllers.get(robotSide).appendStopPoint(fingerMotorName,
-                                                                      sideDependentFingerMotorHandlers.get(robotSide).get(fingerMotorName).getDoubleValue());
-               break;
+               case STOP:
+                  for (ValkyrieHandJointName handJointName : ValkyrieHandJointName.values)
+                     handJointFingerSetControllers.get(robotSide)
+                                                  .appendStopPoint(handJointName,
+                                                                   sideDependentHandJointHandlers.get(robotSide).get(handJointName).getDoubleValue());
+                  for (ValkyrieFingerMotorName fingerMotorName : ValkyrieFingerMotorName.values)
+                     fingerSetControllers.get(robotSide).appendStopPoint(fingerMotorName,
+                                                                         sideDependentFingerMotorHandlers.get(robotSide).get(fingerMotorName).getDoubleValue());
+                  break;
 
-            default:
+               default:
 
-               break;
+                  break;
             }
             handJointFingerSetControllers.get(robotSide).executeTrajectories();
             fingerSetControllers.get(robotSide).executeTrajectories();
@@ -312,7 +306,7 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
                }
                else if (indexOfTrajectory == -2)
                {
-                  ;
+
                }
                else
                {
@@ -320,12 +314,12 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
                                                                                                             .getJointTrajectoryMessages();
                   Object<TrajectoryPoint1DMessage> trajectoryPoints = jointTrajectoryMessages.get(indexOfTrajectory).getTrajectoryPoints();
 
-                  for (int i = 0; i < trajectoryPoints.size(); i++)
+                  for (TrajectoryPoint1DMessage trajectoryPoint1DMessage : trajectoryPoints)
                   {
-                     TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPoints.get(i);
                      double wayPointTime = trajectoryPoint1DMessage.getTime();
-                     double wayPointPosition = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide, fingerMotorName,
-                                                                                                     trajectoryPoint1DMessage.getPosition());
+                     double wayPointPosition = ValkyrieFingerControlParameters.getDesiredFingerMotorPosition(robotSide,
+                                                                                                             fingerMotorName,
+                                                                                                             trajectoryPoint1DMessage.getPosition());
                      fingerSetControllers.get(robotSide).appendWayPoint(fingerMotorName, wayPointTime, wayPointPosition);
                   }
                   setEstimatedDesiredValueOnHandJointFingerSetController(robotSide, fingerMotorName, handFingerTrajectoryMessage);
@@ -349,7 +343,8 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
       return -1;
    }
 
-   private void setEstimatedDesiredValueOnHandJointFingerSetController(RobotSide robotSide, ValkyrieFingerMotorName fingerMotorName,
+   private void setEstimatedDesiredValueOnHandJointFingerSetController(RobotSide robotSide,
+                                                                       ValkyrieFingerMotorName fingerMotorName,
                                                                        ValkyrieHandFingerTrajectoryMessage handFingerTrajectoryMessage)
    {
       int numberOfHandJoints = 3;
@@ -364,9 +359,8 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
          Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = handFingerTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
          Object<TrajectoryPoint1DMessage> trajectoryPoints = jointTrajectoryMessages.get(indexOfTrajectory).getTrajectoryPoints();
 
-         for (int j = 0; j < trajectoryPoints.size(); j++)
+         for (TrajectoryPoint1DMessage trajectoryPoint1DMessage : trajectoryPoints)
          {
-            TrajectoryPoint1DMessage trajectoryPoint1DMessage = trajectoryPoints.get(j);
             double wayPointTime = trajectoryPoint1DMessage.getTime();
             double wayPointPosition = ValkyrieFingerControlParameters.getDesiredHandJoint(robotSide, handJointName, trajectoryPoint1DMessage.getPosition());
             handJointFingerSetControllers.get(robotSide).appendWayPoint(handJointName, wayPointTime, wayPointPosition);
@@ -387,26 +381,11 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
       }
    }
 
-   @Override
    protected void cleanup()
    {
       if (jointAngleProducer != null)
       {
          jointAngleProducer.cleanup();
       }
-   }
-
-   @Override
-   protected void updateMasterContext(HumanoidRobotContextData context)
-   {
-      write();
-      registry.updateMirror();
-   }
-
-   @Override
-   protected void updateLocalContext(HumanoidRobotContextData context)
-   {
-      timestamp = context.getTimestamp();
-      read();
    }
 }

@@ -550,7 +550,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
 
    @Test
    public void testWalkingForwardWithPartialFootholdsAndStopBetweenSteps() throws SimulationExceededMaximumTimeException
-   {simulationTestingParameters.setKeepSCSUp(true);
+   {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       double transferTime = 0.0;

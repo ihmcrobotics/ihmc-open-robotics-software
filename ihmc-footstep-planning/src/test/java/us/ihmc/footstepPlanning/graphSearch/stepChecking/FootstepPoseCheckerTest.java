@@ -1,9 +1,13 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
 import org.junit.jupiter.api.Test;
+import org.lwjgl.Sys;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -13,12 +17,18 @@ import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -35,7 +45,7 @@ public class FootstepPoseCheckerTest
 
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
-      FootstepPoseChecker checker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker checker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
       parameters.setMaximumStepXWhenFullyPitched(0.3);
       parameters.setMinimumStepZWhenFullyPitched(0.05);
 
@@ -90,7 +100,7 @@ public class FootstepPoseCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      FootstepPoseChecker nodeChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double snappedPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double reachAtChild = Math.abs(snappedPosition - parameters.getIdealFootstepWidth());
@@ -126,7 +136,7 @@ public class FootstepPoseCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      FootstepPoseChecker nodeChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double snappedPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double reachAtChild = Math.abs(snappedPosition - parameters.getIdealFootstepWidth());
@@ -162,7 +172,7 @@ public class FootstepPoseCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      FootstepPoseChecker nodeChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double parentYaw = snapToYawGrid(Math.toRadians(75));
 
@@ -179,16 +189,23 @@ public class FootstepPoseCheckerTest
       double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
       DiscreteFootstep parentNode = new DiscreteFootstep(0.0, 0.0, parentYaw, RobotSide.RIGHT);
 
-      DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + snapDownToYaw(maxValue), RobotSide.LEFT);
+      DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(),
+                                                                childPosition.getY(),
+                                                                parentYaw + snapDownToYaw(maxValue),
+                                                                RobotSide.LEFT);
       DiscreteFootstep childNodeAtMinYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + snapUpToYaw(minValue), RobotSide.LEFT);
 
       assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
       assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode, null));
 
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + maxYaw, RobotSide.LEFT), parentNode, null));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + maxYaw, RobotSide.LEFT),
+                                                 parentNode,
+                                                 null));
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + minYaw, RobotSide.LEFT), parentNode, null));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + minYaw, RobotSide.LEFT),
+                                                 parentNode,
+                                                 null));
    }
 
    @Test
@@ -207,7 +224,7 @@ public class FootstepPoseCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      FootstepPoseChecker nodeChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double parentYaw = snapToYawGrid(Math.toRadians(75));
 
@@ -224,16 +241,23 @@ public class FootstepPoseCheckerTest
       double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
       DiscreteFootstep parentNode = new DiscreteFootstep(0.0, 0.0, parentYaw, RobotSide.LEFT);
 
-      DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - snapDownToYaw(maxValue), RobotSide.RIGHT);
+      DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(),
+                                                                childPosition.getY(),
+                                                                parentYaw - snapDownToYaw(maxValue),
+                                                                RobotSide.RIGHT);
       DiscreteFootstep childNodeAtMinYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - snapUpToYaw(minValue), RobotSide.RIGHT);
 
       assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
       assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode, null));
 
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - maxYaw, RobotSide.RIGHT), parentNode, null));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - maxYaw, RobotSide.RIGHT),
+                                                 parentNode,
+                                                 null));
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - minYaw, RobotSide.RIGHT), parentNode, null));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - minYaw, RobotSide.RIGHT),
+                                                 parentNode,
+                                                 null));
    }
 
    @Test
@@ -252,7 +276,7 @@ public class FootstepPoseCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      FootstepPoseChecker nodeChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double snappedYPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double snappedXPosition = snapDownToGrid(0.8 * parameters.getMaximumStepReach());
@@ -274,6 +298,148 @@ public class FootstepPoseCheckerTest
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH, nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
    }
 
+   private final double minimumOffsetX = -0.7;
+   private final double maximumOffsetX = 0.7;
+   private final double minimumOffsetY = -0.4;
+   private final double maximumOffsetY = 0.9;
+   private final double minimumOffsetZ = 0.0;
+   private final double maximumOffsetZ = 0.4;
+   private final double minimumOffsetYaw = -Math.toRadians(80.0);
+   private final double maximumOffsetYaw = Math.toRadians(80.0);
+
+   private final double spacingXYZ = 0.05;
+   private final int yawDivisions = 10;
+   private final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
+
+   @Test
+   public void testFindNearestLatticePoint()
+   {
+      StepReachabilityData stepReachabilityData = createTestReachabilityData();
+
+      // Test different X value
+      FramePose3D testFootPose = new FramePose3D();
+      testFootPose.getPosition().set(2 * spacingXYZ + 0.001, -5 * spacingXYZ, 5 * spacingXYZ);
+      testFootPose.getOrientation().setYawPitchRoll(yawSpacing * 3, 0.0, 0.0);
+      StepReachabilityLatticePoint nearestLatticePoint = new StepReachabilityLatticePoint(testFootPose.getX(),
+                                                                                          testFootPose.getY(),
+                                                                                          testFootPose.getZ(),
+                                                                                          testFootPose.getYaw(),
+                                                                                          stepReachabilityData.getXyzSpacing(),
+                                                                                          stepReachabilityData.getYawDivisions(),
+                                                                                          stepReachabilityData.getGridSizeYaw()
+                                                                                          / stepReachabilityData.getYawDivisions());
+      assertEquals(2, nearestLatticePoint.getXIndex());
+      assertEquals(-5, nearestLatticePoint.getYIndex());
+      assertEquals(5, nearestLatticePoint.getZIndex());
+      assertEquals(3, nearestLatticePoint.getYawIndex());
+
+      // Test different Y value
+      testFootPose = new FramePose3D();
+      testFootPose.getPosition().set(-3 * spacingXYZ, -2 * spacingXYZ + 0.004, 2 * spacingXYZ);
+      testFootPose.getOrientation().setYawPitchRoll(yawSpacing * 1, 0.0, 0.0);
+      nearestLatticePoint = new StepReachabilityLatticePoint(testFootPose.getX(),
+                                                             testFootPose.getY(),
+                                                             testFootPose.getZ(),
+                                                             testFootPose.getYaw(),
+                                                             stepReachabilityData.getXyzSpacing(),
+                                                             stepReachabilityData.getYawDivisions(),
+                                                             stepReachabilityData.getGridSizeYaw() / stepReachabilityData.getYawDivisions());
+      assertEquals(-3, nearestLatticePoint.getXIndex());
+      assertEquals(-2, nearestLatticePoint.getYIndex());
+      assertEquals(2, nearestLatticePoint.getZIndex());
+      assertEquals(1, nearestLatticePoint.getYawIndex());
+
+      // Test different Z value
+      testFootPose = new FramePose3D();
+      testFootPose.getPosition().set(-3 * spacingXYZ, -2 * spacingXYZ, -1 * spacingXYZ + 0.004);
+      testFootPose.getOrientation().setYawPitchRoll(yawSpacing * 1, 0.0, 0.0);
+      nearestLatticePoint = new StepReachabilityLatticePoint(testFootPose.getX(),
+                                                             testFootPose.getY(),
+                                                             testFootPose.getZ(),
+                                                             testFootPose.getYaw(),
+                                                             stepReachabilityData.getXyzSpacing(),
+                                                             stepReachabilityData.getYawDivisions(),
+                                                             stepReachabilityData.getGridSizeYaw() / stepReachabilityData.getYawDivisions());
+      assertEquals(-3, nearestLatticePoint.getXIndex());
+      assertEquals(-2, nearestLatticePoint.getYIndex());
+      assertEquals(-1, nearestLatticePoint.getZIndex());
+      assertEquals(1, nearestLatticePoint.getYawIndex());
+
+      // Test different yaw value
+      testFootPose = new FramePose3D();
+      testFootPose.getPosition().set(4 * spacingXYZ, 2 * spacingXYZ, 3 * spacingXYZ);
+      testFootPose.getOrientation().setYawPitchRoll(yawSpacing * 4 + 0.002, 0.0, 0.0);
+      nearestLatticePoint = new StepReachabilityLatticePoint(testFootPose.getX(),
+                                                             testFootPose.getY(),
+                                                             testFootPose.getZ(),
+                                                             testFootPose.getYaw(),
+                                                             stepReachabilityData.getXyzSpacing(),
+                                                             stepReachabilityData.getYawDivisions(),
+                                                             stepReachabilityData.getGridSizeYaw() / stepReachabilityData.getYawDivisions());
+      assertEquals(4, nearestLatticePoint.getXIndex());
+      assertEquals(2, nearestLatticePoint.getYIndex());
+      assertEquals(3, nearestLatticePoint.getZIndex());
+      assertEquals(4, nearestLatticePoint.getYawIndex());
+
+      // Test different X,Y, yaw values
+      testFootPose = new FramePose3D();
+      testFootPose.getPosition().set(-5 * spacingXYZ - 0.002, 3 * spacingXYZ + 0.001, -2 * spacingXYZ + 0.001);
+      testFootPose.getOrientation().setYawPitchRoll(yawSpacing * 2 + 0.002, 0.0, 0.0);
+      nearestLatticePoint = new StepReachabilityLatticePoint(testFootPose.getX(),
+                                                             testFootPose.getY(),
+                                                             testFootPose.getZ(),
+                                                             testFootPose.getYaw(),
+                                                             stepReachabilityData.getXyzSpacing(),
+                                                             stepReachabilityData.getYawDivisions(),
+                                                             stepReachabilityData.getGridSizeYaw() / stepReachabilityData.getYawDivisions());
+      assertEquals(-5, nearestLatticePoint.getXIndex());
+      assertEquals(3, nearestLatticePoint.getYIndex());
+      assertEquals(-2, nearestLatticePoint.getZIndex());
+      assertEquals(2, nearestLatticePoint.getYawIndex());
+   }
+
+   private StepReachabilityData createTestReachabilityData()
+   {
+      StepReachabilityData testReachabilityData = new StepReachabilityData();
+      Map<StepReachabilityLatticePoint, Double> reachabilityMap = new HashMap<>();
+      boolean boolSwitch = false;
+
+      int minimumXIndex = (int) Math.round(minimumOffsetX / spacingXYZ);
+      int maximumXIndex = (int) Math.round(maximumOffsetX / spacingXYZ);
+      int minimumYIndex = (int) Math.round(minimumOffsetY / spacingXYZ);
+      int maximumYIndex = (int) Math.round(maximumOffsetY / spacingXYZ);
+      int minimumZIndex = (int) Math.round(minimumOffsetZ / spacingXYZ);
+      int maximumZIndex = (int) Math.round(maximumOffsetZ / spacingXYZ);
+      int minimumYawIndex = -Math.floorMod((int) (Math.round((minimumOffsetYaw) / yawSpacing)), yawDivisions);
+      int maximumYawIndex = Math.floorMod((int) (Math.round((maximumOffsetYaw) / yawSpacing)), yawDivisions);
+
+      for (int xIndex = minimumXIndex; xIndex <= maximumXIndex; xIndex++)
+      {
+         for (int yIndex = minimumYIndex; yIndex <= maximumYIndex; yIndex++)
+         {
+            for (int zIndex = minimumZIndex; zIndex <= maximumZIndex; zIndex++)
+            {
+               for (int yawIndex = minimumYawIndex; yawIndex <= maximumYawIndex; yawIndex++)
+               {
+                  if (xIndex == 0 && yIndex == 0 && zIndex == 0)
+                     continue;
+
+                  StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, zIndex, yawIndex);
+
+                  if (boolSwitch)
+                     reachabilityMap.put(latticePoint, 20.0);
+                  else
+                     reachabilityMap.put(latticePoint, 0.0);
+                  boolSwitch = !boolSwitch;
+               }
+            }
+         }
+      }
+      //      System.out.println(reachabilityMap);
+      testReachabilityData.setLegReachabilityMap(reachabilityMap);
+      testReachabilityData.setGridData(spacingXYZ, maximumOffsetYaw - minimumOffsetYaw, yawDivisions);
+      return testReachabilityData;
+   }
 
    private static double snapToGrid(double value)
    {

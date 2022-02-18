@@ -22,7 +22,7 @@ public class NetworkPorts
    public static final NetworkPorts RIGHT_HAND_PORT = new NetworkPorts(5004, "right_hand");
 
    // Network manager ports
-   public static final NetworkPorts BEHAVIOUR_MODULE_PORT = new NetworkPorts(6001, "behaviour_module");
+   public static final NetworkPorts BEHAVIOR_MODULE_MESSAGER_PORT = new NetworkPorts(6001, "behaviour_module");
    public static final NetworkPorts BEHAVIOUR_COMMUNICATION_PORT = new NetworkPorts(6000, "behaviour_communication");
 
    public static final NetworkPorts UI_MODULE = new NetworkPorts(6002, "ui_module");
@@ -61,6 +61,7 @@ public class NetworkPorts
    public static final NetworkPorts REA_MODULE2_UI_PORT = new NetworkPorts(6034, "rea_module2_ui");
    public static final NetworkPorts LIVEMAP_UI_PORT = new NetworkPorts(6035, "livemap_ui");
 
+   public static final NetworkPorts BEHAVIOR_MODULE_YOVARIABLESERVER_PORT = new NetworkPorts(6036, "behavior_module_yovariableserver");
 
    // Mission control ports
    public static final NetworkPorts MISSION_CONTROL_SERVER_PORT = new NetworkPorts(2046, "mission_control_server");

@@ -6,6 +6,7 @@ import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -23,6 +24,7 @@ import us.ihmc.robotics.screwTheory.MovingMidFrameZUpFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.containers.ContainerTools;
 
 public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
@@ -53,10 +55,40 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    private final ReferenceFrame centerOfMassFrame;
    private final ReferenceFrame lidarSensorFrame;
+   private ReferenceFrame headCameraFrame;
+   private ReferenceFrame steppingCameraFrame;
+   private ReferenceFrame objectDetectionCameraFrame;
+   private ReferenceFrame headZED2CameraFrame;
+   private ReferenceFrame ousterLidarFrame;
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
    {
+      this(fullRobotModel, null);
+   }
+
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation)
+   {
+      this(fullRobotModel, new CenterOfMassReferenceFrame("centerOfMass", worldFrame, fullRobotModel.getElevator()), sensorInformation);
+   }
+
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel,
+                                  CenterOfMassStateProvider centerOfMassStateProvider,
+                                  HumanoidRobotSensorInformation sensorInformation)
+   {
+      this(fullRobotModel, new ReferenceFrame("centerOfMassFrame", worldFrame)
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.getTranslation().set(centerOfMassStateProvider.getCenterOfMassPosition());
+         }
+      }, sensorInformation);
+   }
+
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame, HumanoidRobotSensorInformation sensorInformation)
+   {
       this.fullRobotModel = fullRobotModel;
+      this.centerOfMassFrame = centerOfMassFrame;
 
       if (fullRobotModel.getPelvis() != null)
       {
@@ -86,16 +118,17 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          }
       }
 
-      if (!fullRobotModel.getLidarSensorNames().isEmpty()
-          && fullRobotModel.getLidarSensorNames().get(0) != null &&
-            !fullRobotModel.getLidarSensorNames().get(0).isEmpty())
+      if (!fullRobotModel.getLidarSensorNames().isEmpty() && fullRobotModel.getLidarSensorNames().get(0) != null
+            && !fullRobotModel.getLidarSensorNames().get(0).isEmpty())
       {
          String lidarSensorName = fullRobotModel.getLidarSensorNames().get(0);
          ReferenceFrame lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarSensorName);
          RigidBodyTransform lidarBaseToSensorTransform = fullRobotModel.getLidarBaseToSensorTransform(lidarSensorName);
          if (lidarBaseFrame != null && lidarBaseToSensorTransform != null)
          {
-            lidarSensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, lidarBaseToSensorTransform);
+            lidarSensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("lidarSensorFrame",
+                                                                                                 lidarBaseFrame,
+                                                                                                 lidarBaseToSensorTransform);
          }
          else
          {
@@ -105,6 +138,10 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       else
       {
          lidarSensorFrame = null;
+      }
+      if (sensorInformation != null)
+      {
+         headCameraFrame = fullRobotModel.getCameraFrame(sensorInformation.getHeadCameraName());
       }
 
       if (robotJointNames.getSpineJointNames() != null)
@@ -163,13 +200,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       }
 
       midFeetZUpFrame = new MovingMidFrameZUpFrame("midFeetZUp", getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT));
-      midFootZUpGroundFrame = new MovingMidFootZUpGroundFrame("midFeetZUpAverageYaw", localSoleZUpFrames.get(RobotSide.LEFT),
+      midFootZUpGroundFrame = new MovingMidFootZUpGroundFrame("midFeetZUpAverageYaw",
+                                                              localSoleZUpFrames.get(RobotSide.LEFT),
                                                               localSoleZUpFrames.get(RobotSide.RIGHT));
 
       midFeetUnderPelvisWalkDirectionFrame = new MovingWalkingReferenceFrame("walkingFrame", pelvisFrame, midFootZUpGroundFrame);
-
-      RigidBodyBasics elevator = fullRobotModel.getElevator();
-      centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMass", worldFrame, elevator);
 
       // set default CommonHumanoidReferenceFrameIds for certain frames used commonly for control
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.MIDFEET_ZUP_FRAME, getMidFeetZUpFrame());
@@ -182,6 +217,14 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       if (chest != null)
       {
          addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CHEST_FRAME, chest.getBodyFixedFrame());
+      }
+
+      if (sensorInformation != null)
+      {
+         steppingCameraFrame = sensorInformation.getSteppingCameraFrame(this);
+         objectDetectionCameraFrame = sensorInformation.getObjectDetectionCameraFrame(this);
+         headZED2CameraFrame = sensorInformation.getHeadZED2CameraFrame(this);
+         ousterLidarFrame = sensorInformation.getOusterLidarFrame(this);
       }
    }
 
@@ -340,6 +383,16 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       midFeetUnderPelvisWalkDirectionFrame.update();
 
       centerOfMassFrame.update();
+
+      if (lidarSensorFrame != null)
+         lidarSensorFrame.update();
+      if (steppingCameraFrame != null)
+      {
+         steppingCameraFrame.update();
+         objectDetectionCameraFrame.update();
+         headZED2CameraFrame.update();
+         ousterLidarFrame.update();
+      }
    }
 
    @Override
@@ -393,5 +446,30 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public ReferenceFrame getLidarSensorFrame()
    {
       return lidarSensorFrame;
+   }
+
+   public ReferenceFrame getHeadCameraFrame()
+   {
+      return headCameraFrame;
+   }
+
+   public ReferenceFrame getSteppingCameraFrame()
+   {
+      return steppingCameraFrame;
+   }
+
+   public ReferenceFrame getObjectDetectionCameraFrame()
+   {
+      return objectDetectionCameraFrame;
+   }
+
+   public ReferenceFrame getHeadZED2CameraFrame()
+   {
+      return headZED2CameraFrame;
+   }
+
+   public ReferenceFrame getOusterLidarFrame()
+   {
+      return ousterLidarFrame;
    }
 }

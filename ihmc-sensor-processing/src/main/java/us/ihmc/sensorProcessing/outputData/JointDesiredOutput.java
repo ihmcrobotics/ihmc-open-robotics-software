@@ -3,6 +3,7 @@ package us.ihmc.sensorProcessing.outputData;
 public class JointDesiredOutput implements JointDesiredOutputBasics
 {
    private JointDesiredControlMode controlMode;
+   private JointDesiredLoadMode loadMode;
 
    private double desiredTorque = Double.NaN;
    private double desiredPosition = Double.NaN;
@@ -23,6 +24,8 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
 
    private double positionFeedbackMaxError = Double.NaN;
    private double velocityFeedbackMaxError = Double.NaN;
+   
+   private double maxTorque = Double.NaN;
 
    public JointDesiredOutput()
    {
@@ -33,6 +36,7 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    public void clear()
    {
       controlMode = null;
+      loadMode = null;
       desiredTorque = Double.NaN;
       desiredPosition = Double.NaN;
       desiredVelocity = Double.NaN;
@@ -52,12 +56,20 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
 
       positionFeedbackMaxError = Double.NaN;
       velocityFeedbackMaxError = Double.NaN;
+      
+      maxTorque = Double.NaN;
    }
 
    @Override
    public void setControlMode(JointDesiredControlMode controlMode)
    {
       this.controlMode = controlMode;
+   }
+
+   @Override
+   public void setLoadMode(JointDesiredLoadMode loadMode)
+   {
+      this.loadMode = loadMode;
    }
 
    @Override
@@ -94,6 +106,12 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    public JointDesiredControlMode getControlMode()
    {
       return controlMode;
+   }
+
+   @Override
+   public JointDesiredLoadMode getLoadMode()
+   {
+      return loadMode;
    }
 
    @Override
@@ -274,4 +292,17 @@ public class JointDesiredOutput implements JointDesiredOutputBasics
    {
       return getRepresentativeString();
    }
+
+   @Override
+   public double getMaxTorque()
+   {
+      return maxTorque;
+   }
+
+   public void setMaxTorque(double feedbackMaxTorque)
+   {
+      this.maxTorque = feedbackMaxTorque;
+   }
+   
+   
 }

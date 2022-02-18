@@ -1,62 +1,55 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.robotics.math.filters.ButterworthFilteredYoVariable.ButterworthFilterType;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.filters.ButterworthFilteredYoVariable.ButterworthFilterType;
 
 /**
- *         <p>
- *         A YoButterworthFusedVariable takes two inputs measuring the same signal and
- *         filters them together. One of the signals is considered accurate
- *         at low frequencies and the other accurate at high frequencies. The
- *         user also supplies an alpha which relates the relative confidence
- *         frequencies. Either the underlying inputs must be passed in to a
- *         constructor as YoVariables and update() called every tick or
- *         update(double, double) must be called every tick with the variables.
- *         The YoAlphaFilteredVariable updates it's val with the current filtered
- *         version using a low pass and a high pass Butterworth Filter
- *         </p>
- *         <pre>
+ * <p>
+ * A YoButterworthFusedVariable takes two inputs measuring the same signal and filters them
+ * together. One of the signals is considered accurate at low frequencies and the other accurate at
+ * high frequencies. The user also supplies an alpha which relates the relative confidence
+ * frequencies. Either the underlying inputs must be passed in to a constructor as YoVariables and
+ * update() called every tick or update(double, double) must be called every tick with the
+ * variables. The YoAlphaFilteredVariable updates it's val with the current filtered version using a
+ * low pass and a high pass Butterworth Filter
+ * </p>
+ * 
+ * <pre>
  *            steady_state_offset_{n} = steady_state_offset_{n-1} + alpha * (fused_{n-1} - slow_signal_{n})
  *            fused_{n} = fast_signal_{n} - steady_state_offset_{n}
- *         </pre>
- *         <p>
- *         A lower alpha means that the relative confidence frequency of the
- *         slowSignal is lower.
- *         </p>
+ * </pre>
+ * <p>
+ * A lower alpha means that the relative confidence frequency of the slowSignal is lower.
+ * </p>
  */
 public class ButterworthFusedYoVariable extends YoDouble
 {
    private final ButterworthFilteredYoVariable lowPassFilteredSlowVariable, highPassFilteredFastVariable;
 
-   public ButterworthFusedYoVariable(String name, YoRegistry yoVariableRegistry, double alpha)
+   public ButterworthFusedYoVariable(String name, YoRegistry registry, double alpha)
    {
-      super(name, yoVariableRegistry);
-
-      lowPassFilteredSlowVariable = new ButterworthFilteredYoVariable(name + "lowPass", yoVariableRegistry, alpha, ButterworthFilterType.LOW_PASS);
-      highPassFilteredFastVariable = new ButterworthFilteredYoVariable(name + "highPass", yoVariableRegistry, alpha, ButterworthFilterType.HIGH_PASS);
+      this(name, registry, alpha, null, null);
    }
 
-   public ButterworthFusedYoVariable(String name, YoRegistry yoVariableRegistry, double alpha, YoDouble slowSignal, YoDouble fastSignal)
+   public ButterworthFusedYoVariable(String name, YoRegistry registry, double alpha, DoubleProvider slowSignal, DoubleProvider fastSignal)
    {
-      super(name, yoVariableRegistry);
+      this(name, registry, AlphaFilteredYoVariable.createAlphaYoDouble(name, alpha, registry), slowSignal, fastSignal);
+   }
 
-      lowPassFilteredSlowVariable = new ButterworthFilteredYoVariable(name + "lowPass", yoVariableRegistry, alpha, slowSignal, ButterworthFilterType.LOW_PASS);
-      highPassFilteredFastVariable = new ButterworthFilteredYoVariable(name + "highPass", yoVariableRegistry, alpha, fastSignal,
-            ButterworthFilterType.HIGH_PASS);
+   public ButterworthFusedYoVariable(String name, YoRegistry registry, DoubleProvider alphaVariable)
+   {
+      this(name, registry, alphaVariable, null, null);
+   }
 
+   public ButterworthFusedYoVariable(String name, YoRegistry registry, DoubleProvider alphaVariable, DoubleProvider slowSignal, DoubleProvider fastSignal)
+   {
+      super(name, registry);
+
+      lowPassFilteredSlowVariable = new ButterworthFilteredYoVariable(name + "LowPass", registry, alphaVariable, slowSignal, ButterworthFilterType.LOW_PASS);
+      highPassFilteredFastVariable = new ButterworthFilteredYoVariable(name + "HighPass", registry, alphaVariable, fastSignal, ButterworthFilterType.HIGH_PASS);
       reset();
-   }
-
-   public ButterworthFusedYoVariable(String name, YoRegistry yoVariableRegistry, YoDouble alphaVariable, YoDouble slowSignal,
-         YoDouble fastSignal)
-   {
-      super(name, yoVariableRegistry);
-
-      lowPassFilteredSlowVariable = new ButterworthFilteredYoVariable(name + "lowPass", yoVariableRegistry, alphaVariable, slowSignal,
-            ButterworthFilterType.LOW_PASS);
-      highPassFilteredFastVariable = new ButterworthFilteredYoVariable(name + "highPass", yoVariableRegistry, alphaVariable, fastSignal,
-            ButterworthFilterType.HIGH_PASS);
    }
 
    public void reset()

@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.exploreArea;
 
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -15,7 +17,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.behaviorTree.ParallelNodeBasics;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -30,7 +31,7 @@ import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.*;
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.FoundBodyPath;
 
-public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
+public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNode
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean useNewGoalDetermination = true;
@@ -39,7 +40,7 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
    private final BehaviorHelper helper;
    private final VisibilityGraphPathPlanner bodyPathPlanner;
    private final Supplier<List<Point3D>> pointsObservedFromSupplier;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final Supplier<PlanarRegionsList> concatenatedMapSupplier;
    private final Supplier<BoundingBox3D> concatenatedMapBoundingBoxSupplier;
    private final StatusLogger statusLogger;
@@ -86,7 +87,7 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
    }
 
    @Override
-   public void doAction()
+   public BehaviorTreeNodeStatus doActionInternal()
    {
       helper.publish(CurrentState, ExploreAreaBehaviorState.DetermineNextLocations);
 
@@ -96,9 +97,17 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
       determineNextPlacesToWalkTo(syncedRobot);
 
 //      exploreAreaMapUI.update();
+
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
-   private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)
+   @Override
+   public void resetInternal()
+   {
+
+   }
+
+   private void determineNextPlacesToWalkTo(ROS2SyncedRobotModel syncedRobot)
    {
       PlanarRegionsList concatenatedMap = concatenatedMapSupplier.get();
       BoundingBox3D concatenatedMapBoundingBox = concatenatedMapBoundingBoxSupplier.get();

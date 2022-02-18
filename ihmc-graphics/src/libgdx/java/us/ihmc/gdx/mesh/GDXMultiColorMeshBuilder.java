@@ -1,7 +1,9 @@
 package us.ihmc.gdx.mesh;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -12,7 +14,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.gdx.mesh.GDXMeshBuilder;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.graphicsDescription.TexCoord2f;
@@ -26,6 +27,7 @@ import java.util.List;
 public class GDXMultiColorMeshBuilder
 {
    private static final int DEFAULT_RES = 32;
+   private static final float TwoPi = 2.0f * (float) Math.PI;
 
    private int hueResolution = 256;
    private int saturationResolution = -1;
@@ -35,6 +37,19 @@ public class GDXMultiColorMeshBuilder
 
    public GDXMultiColorMeshBuilder()
    {
+   }
+
+   /**
+    * Add a box to this builder.
+    *
+    * @param lx     box length along the x-axis.
+    * @param ly     box length along the y-axis.
+    * @param lz     box length along the z-axis.
+    * @param color  color of the box. Color accuracy depends on the color palette in use.
+    */
+   public void addBox(double lx, double ly, double lz, Color color)
+   {
+      addMesh(MeshDataGenerator.Cube(lx, ly, lz, true, null), color);
    }
 
    /**
@@ -173,6 +188,163 @@ public class GDXMultiColorMeshBuilder
    public void addCylinder(double height, double radius, Tuple3DReadOnly offset, Color color)
    {
       addMesh(MeshDataGenerator.Cylinder(radius, height, DEFAULT_RES), offset, color);
+   }
+
+   /**
+    * Add a hollow cylinder to this builder. Its axis is aligned with the z-axis in its local coordinate
+    * system.
+    *
+    * @param height      height along z of the cylinder.
+    * @param outerRadius the cylinder's outer radius.
+    * @param innerRadius the cylinder's inner radius.
+    * @param offset      coordinates of the cylinder's center. Not modified.
+    * @param orientation axis-angle describing the cylinder orientation with respect to world. Not
+    *                    modified.
+    * @param color       color of the cylinder. Color accuracy depends on the color palette in use.
+    */
+   public void addHollowCylinder(double height, double outerRadius, double innerRadius, Tuple3DReadOnly offset, Orientation3DReadOnly orientation, Color color)
+   {
+      addMesh(HollowCylinder(outerRadius, innerRadius, height, DEFAULT_RES), offset, orientation, color);
+   }
+
+   /**
+    * Add a hollow cylinder to this builder. Its axis is aligned with the z-axis.
+    *
+    * @param height height along z of the cylinder.
+    * @param outerRadius the cylinder's outer radius.
+    * @param innerRadius the cylinder's inner radius.
+    * @param offset coordinates of the cylinder's center. Not modified.
+    * @param color  color of the cylinder. Color accuracy depends on the color palette in use.
+    */
+   public void addHollowCylinder(double height, double outerRadius, double innerRadius, Tuple3DReadOnly offset, Color color)
+   {
+      addMesh(HollowCylinder(outerRadius, innerRadius, height, DEFAULT_RES), offset, color);
+   }
+
+   public static MeshDataHolder HollowCylinder(double outerRadius, double innerRadius, double height, int N)
+   {
+      return HollowCylinder((float) outerRadius, (float) innerRadius, (float) height, N);
+   }
+
+   public static MeshDataHolder HollowCylinder(float outerRadius, float innerRadius, float height, int N)
+   {
+      Point3D32[] points = new Point3D32[8 * N];
+      Vector3D32[] normals = new Vector3D32[8 * N];
+      TexCoord2f[] textPoints = new TexCoord2f[8 * N];
+
+      for (int i = 0; i < N; i++)
+      {
+         double angle = i * TwoPi / N;
+         float cosAngle = (float) Math.cos(angle);
+         float sinAngle = (float) Math.sin(angle);
+
+         float vertexX = outerRadius * cosAngle;
+         float vertexY = outerRadius * sinAngle;
+
+         // Bottom vertices
+         points[i] = new Point3D32(vertexX, vertexY, 0.0f);
+         normals[i] = new Vector3D32(0.0f, 0.0f, -1.0f);
+         textPoints[i] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
+
+         // Top vertices
+         points[i + N] = new Point3D32(vertexX, vertexY, height);
+         normals[i + N] = new Vector3D32(0.0f, 0.0f, 1.0f);
+         textPoints[i + N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
+
+         // Outer vertices
+         // Bottom
+         points[i + 2 * N] = new Point3D32(vertexX, vertexY, 0.0f);
+         normals[i + 2 * N] = new Vector3D32(cosAngle, sinAngle, 0.0f);
+         textPoints[i + 2 * N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
+
+         // Top
+         points[i + 3 * N] = new Point3D32(vertexX, vertexY, height);
+         normals[i + 3 * N] = new Vector3D32(cosAngle, sinAngle, 0.0f);
+         textPoints[i + 3 * N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
+      }
+
+      for (int i = 0; i < N; i++)
+      {
+         double angle = i * TwoPi / N;
+         float cosAngle = (float) Math.cos(angle);
+         float sinAngle = (float) Math.sin(angle);
+
+         float vertexX = innerRadius * cosAngle;
+         float vertexY = innerRadius * sinAngle;
+
+         // Bottom vertices
+         points[i + 4 * N] = new Point3D32(vertexX, vertexY, 0.0f);
+         normals[i + 4 * N] = new Vector3D32(0.0f, 0.0f, -1.0f);
+         textPoints[i + 4 * N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
+
+         // Top vertices
+         points[i + 5 * N] = new Point3D32(vertexX, vertexY, height);
+         normals[i + 5 * N] = new Vector3D32(0.0f, 0.0f, 1.0f);
+         textPoints[i + 5 * N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
+
+         // Inner vertices
+         // Bottom
+         points[i + 6 * N] = new Point3D32(vertexX, vertexY, 0.0f);
+         normals[i + 6 * N] = new Vector3D32(-cosAngle, -sinAngle, 0.0f);
+         textPoints[i + 6 * N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
+
+         // Top
+         points[i + 7 * N] = new Point3D32(vertexX, vertexY, height);
+         normals[i + 7 * N] = new Vector3D32(-cosAngle, -sinAngle, 0.0f);
+         textPoints[i + 7 * N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
+      }
+
+      int numberOfTriangles = 4 * N;
+      int[] triangleIndices = new int[6 * numberOfTriangles];
+
+      int index = 0;
+
+      // counter clockwise winding order
+      for (int i = 0; i < N; i++)
+      { // The bottom cap
+         triangleIndices[index++] = i;
+         triangleIndices[index++] = i + 4 * N;
+         triangleIndices[index++] = (i + 1) % N;
+         triangleIndices[index++] = i + 4 * N;
+         triangleIndices[index++] = (i + 1) % N + 4 * N;
+         triangleIndices[index++] = (i + 1) % N;
+      }
+
+      for (int i = 0; i < N; i++)
+      { // The top cap
+         triangleIndices[index++] = i + N;
+         triangleIndices[index++] = (i + 1) % N + N;
+         triangleIndices[index++] = i + 5 * N;
+         triangleIndices[index++] = i + 5 * N;
+         triangleIndices[index++] = (i + 1) % N + N;
+         triangleIndices[index++] = (i + 1) % N + 5 * N;
+      }
+
+      for (int i = 0; i < N; i++)
+      { // The outer cylinder part
+         // Lower triangle
+         triangleIndices[index++] = i + 2 * N;
+         triangleIndices[index++] = (i + 1) % N + 2 * N;
+         triangleIndices[index++] = i + 3 * N;
+         // Upper triangle
+         triangleIndices[index++] = (i + 1) % N + 2 * N;
+         triangleIndices[index++] = (i + 1) % N + 3 * N;
+         triangleIndices[index++] = i + 3 * N;
+      }
+
+      for (int i = 0; i < N; i++)
+      { // The inner cylinder part
+         // Lower triangle
+         triangleIndices[index++] = i + 6 * N;
+         triangleIndices[index++] = i + 7 * N;
+         triangleIndices[index++] = (i + 1) % N + 6 * N;
+         // Upper triangle
+         triangleIndices[index++] = (i + 1) % N + 6 * N;
+         triangleIndices[index++] = i + 7 * N;
+         triangleIndices[index++] = (i + 1) % N + 7 * N;
+      }
+
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
    /**
@@ -315,6 +487,16 @@ public class GDXMultiColorMeshBuilder
       addLine(start.getX(), start.getY(), start.getZ(), end.getX(), end.getY(), end.getZ(), lineWidth, startColor, endColor);
    }
 
+   public void addCapsule(double height, double xRadius, double yRadius, double zRadius, int latitudeN, int longitudeN, Color color)
+   {
+      addCapsule((float) height, (float) xRadius, (float) yRadius, (float) zRadius, latitudeN, longitudeN, color);
+   }
+
+   public void addCapsule(float height, float xRadius, float yRadius, float zRadius, int latitudeN, int longitudeN, Color color)
+   {
+      addMesh(MeshDataGenerator.Capsule(height, xRadius, yRadius, zRadius, latitudeN, longitudeN), color);
+   }
+
    /**
     * Combines the given mesh with the mesh contained in this builder while specifying the color of the
     * given mesh.
@@ -391,7 +573,6 @@ public class GDXMultiColorMeshBuilder
     * @param eightVertices
     * @param lineWidth
     * @param color
-    * @param close
     */
    public void addMultiLineBox(Point3DReadOnly[] eightVertices, double lineWidth, Color color)
    {
@@ -593,6 +774,176 @@ public class GDXMultiColorMeshBuilder
       addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset, color);
    }
 
+   public void addWedge(double lx, double ly, double lz, Color color)
+   {
+      addMesh(MeshDataGenerator.Wedge(lx, ly, lz), color);
+   }
+
+   /**
+    * Add a isosceles triangular prism to this builder. The prism's origin is at the center of it's base face with the peak on top
+    * like a roofline along the Y axis. The depth of the prism is along the Y axis.
+    *
+    * @param triangleWidth   The width/base of the upward pointing isosceles triangle
+    * @param triangleHeight  The height of the upward pointing isosceles triangle
+    * @param prismThickness  The thichness/depth extruded by the triangle to make a prism
+    * @param offset          Coordinates of the origin
+    */
+   public void addIsoscelesTriangularPrism(double triangleWidth, double triangleHeight, double prismThickness, Tuple3DReadOnly offset, Color color)
+   {
+      addMesh(IsoscelesTriangularPrism(triangleWidth, triangleHeight, prismThickness), offset, color);
+   }
+
+   /**
+    * Add a isosceles triangular prism to this builder. The prism's origin is at the center of it's base face with the peak on top
+    * like a roofline along the Y axis. The depth of the prism is along the Y axis.
+    *
+    * @param triangleWidth   The width/base of the upward pointing isosceles triangle
+    * @param triangleHeight  The height of the upward pointing isosceles triangle
+    * @param prismThickness  The thichness/depth extruded by the triangle to make a prism
+    * @param offset          Coordinates of the origin
+    * @param orientation     Orientation of the origin
+    */
+   public void addIsoscelesTriangularPrism(double triangleWidth,
+                                           double triangleHeight,
+                                           double prismThickness,
+                                           Tuple3DReadOnly offset,
+                                           Orientation3DReadOnly orientation,
+                                           Color color)
+   {
+      addMesh(IsoscelesTriangularPrism(triangleWidth, triangleHeight, prismThickness), offset, orientation, color);
+   }
+
+   public static MeshDataHolder IsoscelesTriangularPrism(double triangleWidth, double triangleHeight, double prismThickness)
+   {
+      return IsoscelesTriangularPrism((float) triangleWidth, (float) triangleHeight, (float) prismThickness);
+   }
+
+   public static MeshDataHolder IsoscelesTriangularPrism(float triangleWidth, float triangleHeight, float prismThickness)
+   {
+      Point3D32[] points = new Point3D32[18];
+      Vector3D32[] normals = new Vector3D32[18];
+      TexCoord2f[] textPoints = new TexCoord2f[18];
+
+      // Bottom face vertices
+      points[0] = new Point3D32(-triangleWidth / 2.0f, -prismThickness / 2.0f, 0.0f);
+      normals[0] = new Vector3D32(0.0f, 0.0f, -1.0f);
+      textPoints[0] = new TexCoord2f(0.0f, 0.0f);
+      points[1] = new Point3D32(triangleWidth / 2.0f, -prismThickness / 2.0f, 0.0f);
+      normals[1] = new Vector3D32(0.0f, 0.0f, -1.0f);
+      textPoints[1] = new TexCoord2f(1.0f, 0.0f);
+      points[2] = new Point3D32(triangleWidth / 2.0f, prismThickness / 2.0f, 0.0f);
+      normals[2] = new Vector3D32(0.0f, 0.0f, -1.0f);
+      textPoints[2] = new TexCoord2f(1.0f, 1.0f);
+      points[3] = new Point3D32(-triangleWidth / 2.0f, prismThickness / 2.0f, 0.0f);
+      normals[3] = new Vector3D32(0.0f, 0.0f, -1.0f);
+      textPoints[3] = new TexCoord2f(0.0f, 1.0f);
+
+      // Back face vertices
+      points[4] = new Point3D32(0.0f, -prismThickness / 2.0f, triangleHeight);
+      normals[4] = new Vector3D32(1.0f, 0.0f, 0.0f);
+      textPoints[4] = new TexCoord2f(0.0f, 1.0f);
+      points[5] = new Point3D32(0.0f, prismThickness / 2.0f, triangleHeight);
+      normals[5] = new Vector3D32(1.0f, 0.0f, 0.0f);
+      textPoints[5] = new TexCoord2f(1.0f, 1.0f);
+      points[6] = new Point3D32(points[2]);
+      normals[6] = new Vector3D32(1.0f, 0.0f, 0.0f);
+      textPoints[6] = new TexCoord2f(textPoints[2]);
+      points[7] = new Point3D32(points[1]);
+      normals[7] = new Vector3D32(1.0f, 0.0f, 0.0f);
+      textPoints[7] = new TexCoord2f(textPoints[1]);
+
+      // Top face vertices
+      float wedgeAngle = (float) Math.atan2(triangleHeight, triangleWidth / 2.0);
+      points[8] = new Point3D32(points[0]);
+      normals[8] = new Vector3D32(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[8] = new TexCoord2f(textPoints[0]);
+      points[9] = new Point3D32(points[4]);
+      normals[9] = new Vector3D32(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[9] = new TexCoord2f(textPoints[4]);
+      points[10] = new Point3D32(points[5]);
+      normals[10] = new Vector3D32(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[10] = new TexCoord2f(textPoints[5]);
+      points[11] = new Point3D32(points[3]);
+      normals[11] = new Vector3D32(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[11] = new TexCoord2f(textPoints[3]);
+
+      // Right face vertices
+      points[12] = new Point3D32(points[0]);
+      normals[12] = new Vector3D32(0.0f, -1.0f, 0.0f);
+      textPoints[12] = new TexCoord2f(textPoints[0]);
+      points[13] = new Point3D32(points[1]);
+      normals[13] = new Vector3D32(0.0f, -1.0f, 0.0f);
+      textPoints[13] = new TexCoord2f(textPoints[1]);
+      points[14] = new Point3D32(points[4]);
+      normals[14] = new Vector3D32(0.0f, -1.0f, 0.0f);
+      textPoints[14] = new TexCoord2f(textPoints[4]);
+
+      // Left face vertices
+      points[15] = new Point3D32(points[2]);
+      normals[15] = new Vector3D32(0.0f, 1.0f, 0.0f);
+      textPoints[15] = new TexCoord2f(textPoints[2]);
+      points[16] = new Point3D32(points[3]);
+      normals[16] = new Vector3D32(0.0f, 1.0f, 0.0f);
+      textPoints[16] = new TexCoord2f(textPoints[3]);
+      points[17] = new Point3D32(points[5]);
+      normals[17] = new Vector3D32(0.0f, 1.0f, 0.0f);
+      textPoints[17] = new TexCoord2f(textPoints[5]);
+
+      int numberOfTriangles = 2 * 3 + 2;
+      int[] triangleIndices = new int[3 * numberOfTriangles];
+
+      int index = 0;
+
+      // Bottom face
+      triangleIndices[index++] = 0;
+      triangleIndices[index++] = 2;
+      triangleIndices[index++] = 1;
+
+      triangleIndices[index++] = 0;
+      triangleIndices[index++] = 3;
+      triangleIndices[index++] = 2;
+
+      // Back face
+      triangleIndices[index++] = 7;
+      triangleIndices[index++] = 5;
+      triangleIndices[index++] = 4;
+
+      triangleIndices[index++] = 5;
+      triangleIndices[index++] = 7;
+      triangleIndices[index++] = 6;
+
+      // Top face
+      triangleIndices[index++] = 8;
+      triangleIndices[index++] = 9;
+      triangleIndices[index++] = 10;
+
+      triangleIndices[index++] = 8;
+      triangleIndices[index++] = 10;
+      triangleIndices[index++] = 11;
+
+      // Right face
+      triangleIndices[index++] = 12;
+      triangleIndices[index++] = 13;
+      triangleIndices[index++] = 14;
+
+      // Left face
+      triangleIndices[index++] = 15;
+      triangleIndices[index++] = 16;
+      triangleIndices[index++] = 17;
+
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
+   }
+
+   public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, Color color)
+   {
+      addMesh(MeshDataGenerator.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, 25), color);
+   }
+
+   public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, int resolution, Color color)
+   {
+      addMesh(MeshDataGenerator.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, resolution), color);
+   }
+
    public void addMesh(MeshDataHolder meshDataHolder, Tuple3DReadOnly offset, AxisAngle orientation, Color color)
    {
       meshBuilder.addMesh(createMeshDataWithColor(meshDataHolder, color), offset, orientation);
@@ -615,12 +966,46 @@ public class GDXMultiColorMeshBuilder
 
    public float[] getTextureLocation(Color color)
    {
-      float x;
+      // texture 64 vertical pixels of white to black fully saturated hues
+      // then, 12 pixels of grayscale blacl left to right white
+      // texture is 256 pixels wide to span the different hues red to violet
+      // texture is 76 pixels tall
       float[] hsv = new float[3];
       color.toHsv(hsv);
-      x = (float) (hsv[0] / 360.0);
-      float y = 0.5f;
+
+      float hue = hsv[0];
+      float saturation = hsv[1];
+      float value = hsv[2];
+      float x;
+      float y;
+//      LogTools.info("H: {} S: {} V: {}", hue, saturation, value);
+
+      if (saturation < 0.1) // black and white
+      {
+         x = value;
+         y = 0.98f;
+      }
+      else
+      {
+         float percentHeightIsHues = 64.0f / 76.0f;
+         x = hue / 360.0f;
+         y = percentHeightIsHues - percentHeightIsHues * value / 2.0f;
+      }
+//      LogTools.info("X: {} Y: {}", x, y);
+
+      // x is 0.0 -> 1.0 is left to right
+      // y is 0.0 -> 1.0 top to bottom
       return new float[] {x, y};
+   }
+
+   public static String getPalletImagePath()
+   {
+      return "RGB_24bits_hue_value_palette.png";
+   }
+
+   public static Texture loadPaletteTexture()
+   {
+      return new Texture(Gdx.files.classpath(getPalletImagePath()));
    }
 
    public Mesh generateMesh()
@@ -632,13 +1017,4 @@ public class GDXMultiColorMeshBuilder
    {
       meshBuilder.clear();
    }
-
-//   public Material generateMaterial(AssetManager assetManager)
-//   {
-//      Material material = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
-//      Texture texture = assetManager.loadTexture("palette.png");
-//      material.setTexture("DiffuseMap", texture);
-//      material.createMeshDataWithColor("Diffuse", ColorRGBA.White);
-//      return material;
-//   }
 }

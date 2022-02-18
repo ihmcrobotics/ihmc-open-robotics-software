@@ -6,6 +6,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.jfxvisualizer.AtlasFootstepPlannerUI;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.dynamicsSimulation.HumanoidDynamicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -92,9 +93,9 @@ public class AtlasBehaviorUIDemo
       else
       {
          LogTools.info("Creating dynamics simulation");
-         AtlasDynamicsSimulation.createForManualTest(createRobotModel(),
-                                                     new PlanarRegionsListDefinedEnvironment(ENVIRONMENT.get(), 0.02, false),
-                                                     recordFrequencySpeedup, 10).simulate();
+         HumanoidDynamicsSimulation.createForManualTest(createRobotModel(),
+                                                        new PlanarRegionsListDefinedEnvironment(ENVIRONMENT.get(), 0.02, false),
+                                                        recordFrequencySpeedup, 10).simulate();
       }
    }
 

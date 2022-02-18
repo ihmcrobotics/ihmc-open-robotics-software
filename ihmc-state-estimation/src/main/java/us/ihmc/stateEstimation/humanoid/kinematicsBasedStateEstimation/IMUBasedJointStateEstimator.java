@@ -67,7 +67,7 @@ public class IMUBasedJointStateEstimator
       velocityBreakFrequency = new DoubleParameter(name + "AlphaFuseVelocity", registry, parameters.getBreakFrequencyForVelocityEstimation());
       positionBreakFrequency = new DoubleParameter(name + "AlphaFusePosition", registry, parameters.getBreakFrequencyForPositionEstimation());
 
-      DoubleProvider slopTime = new DoubleParameter(name + "SlopTime", registry, parameters.getVelocityEstimationBacklashSlopTime());
+      DoubleProvider slopTime = new DoubleParameter(name + "SlopTime", registry, 0.0);
 
       jointVelocities = new BacklashProcessingYoVariable[joints.length];
       jointPositionsFromIMUOnly = new YoDouble[joints.length];

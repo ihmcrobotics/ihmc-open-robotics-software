@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointVelocityIntegratorResetMode;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -44,6 +45,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
       switch (state)
       {
          case WALKING:
+         case PUSH_RECOVERY:
             return getDesiredJointBehaviorForWalking();
          case DO_NOTHING_BEHAVIOR:
          case FALLING_STATE:
@@ -56,7 +58,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    @Override
    public List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorsUnderLoad(HighLevelControllerName state)
    {
-      if (state == HighLevelControllerName.WALKING)
+      if ((state == HighLevelControllerName.WALKING) || (state == HighLevelControllerName.PUSH_RECOVERY))
          return getDesiredJointBehaviorForWalkingUnderLoad();
       else
          return null;
@@ -210,7 +212,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
          settings.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9996, 0.004));
          settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.004));
          settings.setMaxPositionError(0.2);
-         settings.setMaxVelocity(2.0);
+         settings.setMaxVelocityError(2.0);
 
          List<String> neckJointNames = new ArrayList<>();
          for (NeckJointName name : jointMap.getNeckJointNames())
@@ -223,7 +225,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
          settings.setPositionBreakFrequency(1.2);
          settings.setVelocityBreakFrequency(2.4);
          settings.setMaxPositionError(0.2);
-         settings.setMaxVelocity(2.0);
+         settings.setMaxVelocityError(2.0);
 
          List<String> shoulderJointNames = new ArrayList<>();
          for (ArmJointName name : new ArmJointName[] {ArmJointName.SHOULDER_YAW, ArmJointName.SHOULDER_ROLL})
@@ -241,7 +243,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
          settings.setPositionBreakFrequency(1.0);
          settings.setVelocityBreakFrequency(1.25);
          settings.setMaxPositionError(0.2);
-         settings.setMaxVelocity(2.0);
+         settings.setMaxVelocityError(2.0);
 
          ArmJointName[] elbowJoints = new ArmJointName[] {ArmJointName.ELBOW_PITCH, ArmJointName.ELBOW_ROLL};
          List<String> elbowJointNames = new ArrayList<>();
@@ -260,7 +262,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
          settings.setPositionBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.9999, 0.004));
          settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.004));
          settings.setMaxPositionError(0.2);
-         settings.setMaxVelocity(2.0);
+         settings.setMaxVelocityError(2.0);
 
          ArmJointName[] wristJoints = new ArmJointName[] {ArmJointName.FIRST_WRIST_PITCH, ArmJointName.WRIST_ROLL, ArmJointName.SECOND_WRIST_PITCH};
          List<String> wristJointNames = new ArrayList<>();
@@ -277,15 +279,35 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
       { // Spine joints:
          JointAccelerationIntegrationParameters settings = new JointAccelerationIntegrationParameters();
          settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.985, 0.004));
-         settings.setMaxVelocity(2.0);
+         settings.setMaxVelocityError(2.0);
          integrationSettings.add(new GroupParameter<>("SpineAccelerationIntegration", settings, jointMap.getSpineJointNamesAsStrings()));
       }
 
-      { // Leg joints:
+      { // Leg joints (but knee):
+         List<String> legJoints = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL));
+         }
          JointAccelerationIntegrationParameters settings = new JointAccelerationIntegrationParameters();
          settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.985, 0.004));
-         settings.setMaxVelocity(5.0);
-         integrationSettings.add(new GroupParameter<>("LegAccelerationIntegration", settings, jointMap.getLegJointNamesAsStrings()));
+         settings.setMaxVelocityError(5.0);
+         integrationSettings.add(new GroupParameter<>("LegAccelerationIntegration", settings, legJoints));
+      }
+
+      { // Knee joints:
+         List<String> kneeJoints = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            kneeJoints.add(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH));
+         JointAccelerationIntegrationParameters settings = new JointAccelerationIntegrationParameters();
+         settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.985, 0.004));
+         settings.setMaxVelocityError(5.0);
+         settings.setVelocityResetMode(JointVelocityIntegratorResetMode.ZERO_VELOCITY);
+         integrationSettings.add(new GroupParameter<>("KneeAccelerationIntegration", settings, kneeJoints));
       }
 
       return integrationSettings;

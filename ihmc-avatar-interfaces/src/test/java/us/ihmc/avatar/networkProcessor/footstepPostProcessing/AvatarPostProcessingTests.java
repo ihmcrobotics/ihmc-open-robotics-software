@@ -154,10 +154,11 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       goalPose.getPosition().set(1.0, 0.0, -height);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
-      request.setRequestedPathHeading(Math.toRadians(30.0));
+      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose,
+                                                         footstepPlannerParameters);
+//      request.setRequestedPathHeading(Math.toRadians(30.0));
 
-      request.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
+      request.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
 
       runTest(request);
    }
@@ -190,7 +191,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
-      requestPacket.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
+      requestPacket.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
 
       runTest(requestPacket);
    }
@@ -424,6 +425,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getFootstepPlannerParameters().setMinimumFootholdPercent(0.99);
       footstepPlanningModule.getFootstepPlannerParameters().setMaximumStepZ(0.32);
+      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffBottoms(-1.0);
+      footstepPlanningModule.getFootstepPlannerParameters().setMinimumDistanceFromCliffTops(-1.0);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
 
       System.out.println("output. " + plannerOutput.getFootstepPlanningResult());
@@ -434,8 +437,13 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       }
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(),
-                                                                                                                     -1.0,
-                                                                                                                     -1.0);
+                                                                                                                     0.4,
+                                                                                                                     0.8);
+      for (FootstepDataMessage footstepDataMessage : footstepDataListMessage.footstep_data_list_)
+      {
+         footstepDataMessage.setSwingDuration(0.8);
+         footstepDataMessage.setTransferDuration(0.4);
+      }
 
       drcSimulationTestHelper.publishToController(footstepDataListMessage);
 

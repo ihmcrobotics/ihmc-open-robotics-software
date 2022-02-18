@@ -37,13 +37,18 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
+   private boolean useExperimentalPhysicsEngine = true;
+
+   public void setUseExperimentalPhysicsEngine(boolean useExperimentalPhysicsEngine)
+   {
+      this.useExperimentalPhysicsEngine = useExperimentalPhysicsEngine;
+   }
 
    public abstract double getDesiredPelvisHeightAboveFoot();
 
    @BeforeEach
    public void setup()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp() && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
    }
 
@@ -67,7 +72,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
@@ -106,7 +111,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
       drcSimulationTestHelper.createSimulation("DRCWalkingOffOfLargePlatformTest");
 
       setupCameraForWalkingOffOfLargePlatform();
@@ -226,7 +231,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
                                                                                                              new Point3D(-5.65, -7.471 - width / 2.0, 0.0),
                                                                                                              new Quaternion(-0.0042976203878775715, -0.010722204803598987, 0.9248070170408506, -0.38026115501738456)));
       footstepDataListMessage.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(RobotSide.RIGHT,
-                                                                                                             new Point3D(-5.65, -7.471 + width / 2.0, 0.0),
+                                                                                                             new Point3D(-5.90, -7.471 + width / 2.0, 0.0),
                                                                                                              new Quaternion(-8.975861226689934E-4, 0.002016837110644428, 0.9248918980282926, -0.380223754740342)));
       return footstepDataListMessage;
    }

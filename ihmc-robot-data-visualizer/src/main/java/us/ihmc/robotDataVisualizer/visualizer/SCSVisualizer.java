@@ -265,7 +265,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public final void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser,
+   public final void start(YoVariableClientInterface yoVariableClientInterface,
+                           LogHandshake handshake,
+                           YoVariableHandshakeParser handshakeParser,
                            DebugRegistry debugRegistry)
    {
       this.yoVariableClientInterface = yoVariableClientInterface;
@@ -291,7 +293,30 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       parameters.setCreateGUI(showGUI);
       parameters.setDataBufferSize(this.bufferSize);
 
-      this.scs = new SimulationConstructionSet(robot, parameters);
+      this.scs = new SimulationConstructionSet(robot, parameters)
+      {
+         @Override
+         public void simulate()
+         {
+            // Disables the simulate button
+         }
+
+         @Override
+         public void play()
+         {
+            // Disables the playback button while connected.
+            if (!yoVariableClientInterface.isConnected())
+               super.play();
+         }
+
+         @Override
+         public void stop()
+         {
+            // Disables the stop button while connected.
+            if (!yoVariableClientInterface.isConnected())
+               super.stop();
+         }
+      };
       if (hideViewport)
       {
          scs.hideViewport();
@@ -392,7 +417,14 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       for (int i = 0; i < stateListeners.size(); i++)
       {
          SCSVisualizerStateListener stateListener = stateListeners.get(i);
-         stateListener.starting(scs, robot, this.registry);
+         try
+         {
+            stateListener.starting(scs, robot, this.registry);
+         }
+         catch (IOException | InterruptedException e)
+         {
+            e.printStackTrace();
+         }
       }
 
       for (String yoVariableName : buttons.keySet())

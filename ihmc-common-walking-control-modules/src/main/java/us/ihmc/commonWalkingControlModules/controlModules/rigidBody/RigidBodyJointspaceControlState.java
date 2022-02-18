@@ -176,7 +176,7 @@ public class RigidBodyJointspaceControlState extends RigidBodyControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
    }
 

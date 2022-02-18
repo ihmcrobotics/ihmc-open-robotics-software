@@ -4,7 +4,7 @@ set -o xtrace
 
 # Make sure it works one way or the other to reduce possible errors
 if (( EUID == 0 )); then
-    echo "Run with sudo." 1>&2
+    echo "Run without sudo." 1>&2
     exit 1
 fi
 
@@ -13,7 +13,8 @@ sudo -u root docker run \
     --interactive \
     --rm \
     --network host \
+    --dns=1.1.1.1 \
     --privileged \
     --gpus all \
     --device /dev/dri:/dev/dri \
-    ihmcrobotics/nvidia:0.2 bash
+    ihmcrobotics/nvidia:0.4 bash

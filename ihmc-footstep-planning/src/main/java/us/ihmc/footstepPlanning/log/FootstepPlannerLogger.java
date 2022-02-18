@@ -518,30 +518,6 @@ public class FootstepPlannerLogger
          writePoint2D(numTabs + 2, nonNavigableExtrusions.get(i));
       }
 
-      List<ExtrusionHull> preferredNavigableExtrusions = navigableRegion.getHomeRegionCluster().getPreferredNavigableExtrusionsInLocal();
-      writeLine(numTabs + 1, "preferredNavigableExtrusions:" + preferredNavigableExtrusions.size());
-      for (int i = 0; i < preferredNavigableExtrusions.size(); i++)
-      {
-         ExtrusionHull preferredNavigableExtrusion = preferredNavigableExtrusions.get(i);
-         writeLine(numTabs + 2, "extrusion:" + preferredNavigableExtrusion.size());
-         for (int j = 0; j < preferredNavigableExtrusion.size(); j++)
-         {
-            writePoint2D(numTabs + 3, preferredNavigableExtrusion.get(j));
-         }
-      }
-
-      List<ExtrusionHull> preferredNonNavigableExtrusions = navigableRegion.getHomeRegionCluster().getPreferredNonNavigableExtrusionsInLocal();
-      writeLine(numTabs + 1, "preferredNonNavigableExtrusions:" + preferredNonNavigableExtrusions.size());
-      for (int i = 0; i < preferredNonNavigableExtrusions.size(); i++)
-      {
-         ExtrusionHull preferredNavigableExtrusion = preferredNonNavigableExtrusions.get(i);
-         writeLine(numTabs + 2, "extrusion:" + preferredNavigableExtrusion.size());
-         for (int j = 0; j < preferredNavigableExtrusion.size(); j++)
-         {
-            writePoint2D(numTabs + 3, preferredNavigableExtrusion.get(j));
-         }
-      }
-
       writeVisibilityMap("visibilityMapInLocal", numTabs + 1, navigableRegion.getVisibilityMapInLocal());
    }
 
