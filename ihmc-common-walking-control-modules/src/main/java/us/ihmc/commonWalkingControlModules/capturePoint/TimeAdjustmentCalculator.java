@@ -5,7 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 
-public class SwingSpeedUpCalculator
+public class TimeAdjustmentCalculator
 {
    private final FrameLine2D desiredICPToFinalICPLine = new FrameLine2D();
    private final FrameLineSegment2D desiredICPToFinalICPLineSegment = new FrameLineSegment2D();
@@ -41,5 +41,10 @@ public class SwingSpeedUpCalculator
          return 0.0;
       else
          return Math.log(distanceRatio) / omega0;
+   }
+
+   public FramePoint2DReadOnly getProjectedICPEstimate()
+   {
+      return projectedICPEstimate;
    }
 }

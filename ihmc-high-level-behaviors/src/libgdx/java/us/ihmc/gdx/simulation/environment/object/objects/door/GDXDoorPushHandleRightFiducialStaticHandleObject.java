@@ -47,6 +47,6 @@ public class GDXDoorPushHandleRightFiducialStaticHandleObject extends GDXEnviron
       collisionBox.getPose().getTranslation().set(getCollisionShapeOffset().getTranslation());
       setCollisionGeometryObject(collisionBox);
 
-      getWholeThingOffset().appendYawRotation(-Math.PI / 2.0);
+      getRealisticModelOffset().appendYawRotation(-Math.PI / 2.0);
    }
 }
