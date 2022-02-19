@@ -58,7 +58,8 @@ public class AvatarSimulation
 
    public void dispose()
    {
-      robotController.dispose();
+      if (robotController != null)
+         robotController.dispose();
       robotController = null;
    }
 
@@ -67,6 +68,7 @@ public class AvatarSimulation
       dispose();
       if (yoVariableServer != null)
          yoVariableServer.close();
+      yoVariableServer = null;
       ThreadTools.startAsDaemon(() -> simulationConstructionSet.stopSimulationThread(), "WaitForSimulationThreadToStop");
       simulationConstructionSet.closeAndDispose();
    }
