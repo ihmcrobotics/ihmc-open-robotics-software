@@ -11,6 +11,9 @@ import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.SerializationException;
+import org.lwjgl.assimp.AIScene;
+import us.ihmc.gdx.tools.assimp.AssimpResourceImporter;
+import us.ihmc.gdx.tools.assimp.GDXAssimpModelLoader;
 import us.ihmc.log.LogTools;
 
 import java.util.HashMap;
@@ -43,7 +46,10 @@ public class GDXModelLoader
          FileHandle fileHandle = Gdx.files.internal(modelFileName);
          try
          {
-            Model loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
+//            Model loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
+            AssimpResourceImporter assimpResourceImporter = new AssimpResourceImporter();
+            AIScene assimpScene = assimpResourceImporter.importScene(fileHandle.path());
+            Model loadedModel = new GDXAssimpModelLoader(assimpScene, fileHandle.parent().path()).load();
             for (Material material : loadedModel.materials)
             {
                if (!material.has(TextureAttribute.Diffuse))
@@ -85,13 +91,14 @@ public class GDXModelLoader
     */
    public static String modifyFileName(String modelFileName)
    {
-      String lowerCase = modelFileName.toLowerCase();
-      if (!lowerCase.endsWith(".obj") && !lowerCase.endsWith(".stl"))
-      {
-         LogTools.warn("Model file \"{}\" is not an OBJ or STL. Skipping...", modelFileName);
-         return null;
-      }
-      String modifiedFileName = modelFileName.replace(".obj", "").replace(".STL", "") + ".g3dj";
-      return modifiedFileName;
+//      String lowerCase = modelFileName.toLowerCase();
+//      if (!lowerCase.endsWith(".obj") && !lowerCase.endsWith(".stl"))
+//      {
+//         LogTools.warn("Model file \"{}\" is not an OBJ or STL. Skipping...", modelFileName);
+//         return null;
+//      }
+//      String modifiedFileName = modelFileName.replace(".obj", "").replace(".STL", "") + ".g3dj";
+//      return modifiedFileName;
+      return modelFileName;
    }
 }
