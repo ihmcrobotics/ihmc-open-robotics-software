@@ -33,7 +33,7 @@ public class GDXAssimpModelLoader
 
       // meshes
       int numberOfMeshes = assimpScene.mNumMeshes();
-      LogTools.info("Number of meshes: {}", numberOfMeshes);
+      LogTools.debug("Number of meshes: {}", numberOfMeshes);
       PointerBuffer meshesPointerBuffer = assimpScene.mMeshes();
       modelData.meshes.ensureCapacity(numberOfMeshes);
       ArrayList<GDXAssimpMeshLoader> gdxAssimpMeshLoaders = new ArrayList<>();
@@ -48,7 +48,7 @@ public class GDXAssimpModelLoader
 
       // materials
       int numberOfMaterials = assimpScene.mNumMaterials();
-      LogTools.info("Number of materials: {}", numberOfMaterials);
+      LogTools.debug("Number of materials: {}", numberOfMaterials);
       ArrayList<GDXAssimpMaterialLoader> gdxAssimpMaterialLoaders = new ArrayList<>();
       if (numberOfMaterials > 0)
       {
