@@ -8,7 +8,10 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
+import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
+import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.SerializationException;
+import com.badlogic.gdx.utils.UBJsonReader;
 import org.lwjgl.assimp.AIScene;
 import us.ihmc.gdx.tools.assimp.AssimpResourceImporter;
 import us.ihmc.gdx.tools.assimp.GDXAssimpModelLoader;
@@ -46,11 +49,22 @@ public class GDXModelLoader
          FileHandle fileHandle = Gdx.files.internal(modelFileName);
          try
          {
-//            Model loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
-            AssimpResourceImporter assimpResourceImporter = new AssimpResourceImporter();
-            String modelFilePath = fileHandle.path();
-            AIScene assimpScene = assimpResourceImporter.importScene(modelFilePath);
-            Model loadedModel = new GDXAssimpModelLoader(assimpScene, fileHandle.parent().path()).load();
+            Model loadedModel;
+            if (modelFileName.endsWith(".g3dj"))
+            {
+               loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
+            }
+            else if (modelFileName.endsWith(".g3db"))
+            {
+               loadedModel = new G3dModelLoader(new UBJsonReader()).loadModel(fileHandle);
+            }
+            else
+            {
+               AssimpResourceImporter assimpResourceImporter = new AssimpResourceImporter();
+               String modelFilePath = fileHandle.path();
+               AIScene assimpScene = assimpResourceImporter.importScene(modelFilePath);
+               loadedModel = new GDXAssimpModelLoader(assimpScene, fileHandle.parent().path()).load();
+            }
             for (Material material : loadedModel.materials)
             {
                if (!material.has(TextureAttribute.Diffuse))
