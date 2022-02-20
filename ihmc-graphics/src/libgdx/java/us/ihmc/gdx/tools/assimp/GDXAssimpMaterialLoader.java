@@ -10,6 +10,7 @@ import org.lwjgl.assimp.AIString;
 import org.lwjgl.assimp.Assimp;
 import org.lwjgl.system.MemoryUtil;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -104,9 +105,7 @@ public class GDXAssimpMaterialLoader
 
             String filtered = rawTextureFileName.charAt(0) == '.' ? rawTextureFileName : rawTextureFileName.substring(1);
             String stringFromMemUTF8 = filtered.trim();
-            String textureFilePath = stringFromMemUTF8;
-            Path resolved = Paths.get(basePath).resolve(textureFilePath);
-            textureFilePath = resolved.normalize().toString();
+            String textureFilePath = ResourceTools.sanitizeResourcePath(stringFromMemUTF8);
 //            if (textureFilePath.startsWith("/"))
 //               textureFilePath = textureFilePath.substring(1);
             //            textureFilePath = Paths.get(basePath).resolve("extremities_diffuse_unplugged.jpg").normalize().toString();

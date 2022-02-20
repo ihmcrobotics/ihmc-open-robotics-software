@@ -15,7 +15,10 @@ import org.lwjgl.assimp.AIScene;
 import us.ihmc.gdx.tools.assimp.AssimpResourceImporter;
 import us.ihmc.gdx.tools.assimp.GDXAssimpModelLoader;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.resources.ResourceTools;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class GDXModelLoader
@@ -43,12 +46,13 @@ public class GDXModelLoader
       Model model = loadedModels.get(modelFileName);
       if (model == null)
       {
-         FileHandle fileHandle = Gdx.files.internal(modelFileName);
+         FileHandle fileHandle = Gdx.files.internal(ResourceTools.sanitizeResourcePath(modelFileName));
          try
          {
 //            Model loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
             AssimpResourceImporter assimpResourceImporter = new AssimpResourceImporter();
-            AIScene assimpScene = assimpResourceImporter.importScene(fileHandle.path());
+            String modelFilePath = fileHandle.path();
+            AIScene assimpScene = assimpResourceImporter.importScene(modelFilePath);
             Model loadedModel = new GDXAssimpModelLoader(assimpScene, fileHandle.parent().path()).load();
             for (Material material : loadedModel.materials)
             {
