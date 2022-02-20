@@ -290,11 +290,11 @@ public class LIPMWalkerRobot
       return getCenterOfMassPosition().getX() - loadedFootPosition.getX();
    }
 
-   public double getCenterOfMassXDistanceFromSupportFoot(RobotSide stanceSide)
-   {
-      Point3D loadedFootPosition = getFootPosition(stanceSide);
-      return getCenterOfMassPosition().getX() - loadedFootPosition.getX();
-   }
+//   public double getCenterOfMassXDistanceFromSupportFoot(RobotSide stanceSide)
+//   {
+//      Point3D loadedFootPosition = getFootPosition(stanceSide);
+//      return getCenterOfMassPosition().getX() - loadedFootPosition.getX();
+//   }
 
    public Robot getRobot()
    {
