@@ -15,11 +15,10 @@ public class AssimpResourceImporter
 
       int postProcessingSteps = 0; // none
       postProcessingSteps += Assimp.aiProcess_FlipUVs;
+      postProcessingSteps += Assimp.aiProcess_Triangulate;
 //      postProcessingSteps += Assimp.aiProcess_OptimizeGraph;
 //      postProcessingSteps += Assimp.aiProcess_OptimizeMeshes;
-//      postProcessingSteps += Assimp.aiProcess_Triangulate;
 //      postProcessingSteps += Assimp.aiProcess_JoinIdenticalVertices;
-
 
       AIFileOpenProcI assimpFileOpenFunction = new AIFileOpenProcI()
       {
