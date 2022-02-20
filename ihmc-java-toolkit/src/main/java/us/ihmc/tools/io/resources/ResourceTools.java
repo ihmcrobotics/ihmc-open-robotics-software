@@ -91,6 +91,14 @@ public class ResourceTools
       return readResourceToString(getResourceSystem(Paths.get(path)));
    }
 
+   public static String sanitizeResourcePath(String resourcePath)
+   {
+      Path resourcePathAsPathRaw = Paths.get(resourcePath);
+      Path firstPart = resourcePathAsPathRaw.getName(0);
+      Path normalizedAbsoluteResourceFolderPath = firstPart.resolve(firstPart.relativize(resourcePathAsPathRaw).normalize());
+      return normalizedAbsoluteResourceFolderPath.toString();
+   }
+
    public static Set<String> listResources()
    {
       return listResources("", ".*");
