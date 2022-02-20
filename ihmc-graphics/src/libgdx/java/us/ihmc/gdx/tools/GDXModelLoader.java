@@ -24,6 +24,7 @@ public class GDXModelLoader
 {
    private static final GDXModelLoader modelLoader = new GDXModelLoader();
 
+   private final HashMap<String, Object> modelLoadingSynchronizers = new HashMap<>();
    private final HashMap<String, Model> loadedModels = new HashMap<>();
 
    private GDXModelLoader()
@@ -43,50 +44,59 @@ public class GDXModelLoader
    private Model loadOrGetModel(String modelFileName)
    {
       modelFileName = ResourceTools.sanitizeResourcePath(modelFileName);
-      Model model = loadedModels.get(modelFileName);
-      if (model == null)
+
+      Object preventLoadingMoreThanOnceSynchronizer = modelLoadingSynchronizers.computeIfAbsent(modelFileName, key -> new Object());
+
+      Model model;
+      synchronized (preventLoadingMoreThanOnceSynchronizer)
       {
-         FileHandle fileHandle = Gdx.files.internal(modelFileName);
-         try
+         model = loadedModels.get(modelFileName);
+         if (model == null)
          {
-            Model loadedModel;
-            if (modelFileName.endsWith(".g3dj"))
+            LogTools.debug("Loading {}", modelFileName);
+            FileHandle fileHandle = Gdx.files.internal(modelFileName);
+            try
             {
-               loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
-            }
-            else if (modelFileName.endsWith(".g3db"))
-            {
-               loadedModel = new G3dModelLoader(new UBJsonReader()).loadModel(fileHandle);
-            }
-            else
-            {
-               AssimpResourceImporter assimpResourceImporter = new AssimpResourceImporter();
-               String modelFilePath = fileHandle.path();
-               AIScene assimpScene = assimpResourceImporter.importScene(modelFilePath);
-               loadedModel = new GDXAssimpModelLoader(assimpScene, fileHandle.parent().path()).load();
-            }
-            for (Material material : loadedModel.materials)
-            {
-               if (!material.has(TextureAttribute.Diffuse))
+               Model loadedModel;
+               if (modelFileName.endsWith(".g3dj"))
                {
-                  LogTools.warn("Material \"" + material.id + "\" in model \"" + modelFileName + "\" does not contain TextureAttribute Diffuse. Creating...");
-
-                  Pixmap map = new Pixmap(100, 100, Pixmap.Format.RGBA8888);
-                  map.setColor(((ColorAttribute) material.get(ColorAttribute.Diffuse)).color);
-                  map.drawRectangle(0, 0, 100, 100);
-
-                  material.set(TextureAttribute.createDiffuse(new Texture(map)));
-
-                  map.dispose();
+                  loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
                }
-            }
+               else if (modelFileName.endsWith(".g3db"))
+               {
+                  loadedModel = new G3dModelLoader(new UBJsonReader()).loadModel(fileHandle);
+               }
+               else
+               {
+                  AssimpResourceImporter assimpResourceImporter = new AssimpResourceImporter();
+                  String modelFilePath = fileHandle.path();
+                  AIScene assimpScene = assimpResourceImporter.importScene(modelFilePath);
+                  loadedModel = new GDXAssimpModelLoader(assimpScene, fileHandle.parent().path()).load();
+               }
+               for (Material material : loadedModel.materials)
+               {
+                  if (!material.has(TextureAttribute.Diffuse))
+                  {
+                     LogTools.warn(
+                           "Material \"" + material.id + "\" in model \"" + modelFileName + "\" does not contain TextureAttribute Diffuse. Creating...");
 
-            loadedModels.put(modelFileName, loadedModel);
-            return loadedModel;
-         }
-         catch (SerializationException | NullPointerException e)
-         {
-            return null;
+                     Pixmap map = new Pixmap(100, 100, Pixmap.Format.RGBA8888);
+                     map.setColor(((ColorAttribute) material.get(ColorAttribute.Diffuse)).color);
+                     map.drawRectangle(0, 0, 100, 100);
+
+                     material.set(TextureAttribute.createDiffuse(new Texture(map)));
+
+                     map.dispose();
+                  }
+               }
+
+               loadedModels.put(modelFileName, loadedModel);
+               return loadedModel;
+            }
+            catch (SerializationException | NullPointerException e)
+            {
+               return null;
+            }
          }
       }
       return model;
