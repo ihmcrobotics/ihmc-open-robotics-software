@@ -36,7 +36,7 @@ public class GDXAssimpMeshLoader
    {
       modelMesh = new ModelMesh();
       String meshName = assimpMesh.mName().dataString().trim();
-      LogTools.info("Mesh name: {}", meshName);
+      LogTools.debug("Mesh name: {}", meshName);
       if (!meshName.isEmpty())
          modelMesh.id = meshName;
 //      else
@@ -56,7 +56,7 @@ public class GDXAssimpMeshLoader
       int gdxPrimitiveType = getGdxPrimitiveType(primitiveTypes);
 
       int numberOfFaces = assimpMesh.mNumFaces();
-      LogTools.info("Number of faces: {}", numberOfFaces);
+      LogTools.debug("Number of faces: {}", numberOfFaces);
 
       modelMeshPart.primitiveType = gdxPrimitiveType;
       TShortArrayList indexArray = new TShortArrayList();
@@ -72,7 +72,7 @@ public class GDXAssimpMeshLoader
          }
       }
       modelMeshPart.indices = indexArray.toArray();
-      LogTools.info("Number of indices: {}", modelMeshPart.indices.length);
+      LogTools.debug("Number of indices: {}", modelMeshPart.indices.length);
 
       parts.add(modelMeshPart);
       modelMesh.parts = parts.toArray(ModelMeshPart.class);
@@ -121,7 +121,7 @@ public class GDXAssimpMeshLoader
       // vertices and faces guaranteed to present; else need to check null
       Array<VertexAttribute> vertexAttributes = new Array<>();
       numberOfVertices = assimpMesh.mNumVertices();
-      LogTools.info("Number of vertices: {}", numberOfVertices);
+      LogTools.debug("Number of vertices: {}", numberOfVertices);
       vertexAttributes.add(VertexAttribute.Position());
 
       hasNormals = assimpMesh.mNormals() != null;
@@ -129,21 +129,21 @@ public class GDXAssimpMeshLoader
       {
          vertexAttributes.add(VertexAttribute.Normal());
       }
-      LogTools.info("Has normals: {}", hasNormals);
+      LogTools.debug("Has normals: {}", hasNormals);
 
       hasTangents = assimpMesh.mTangents() != null;
       if (hasTangents)
       {
          vertexAttributes.add(VertexAttribute.Tangent());
       }
-      LogTools.info("Has tangents: {}", hasTangents);
+      LogTools.debug("Has tangents: {}", hasTangents);
 
       hasBitangents = assimpMesh.mTangents() != null;
       if (hasBitangents)
       {
          vertexAttributes.add(VertexAttribute.Binormal());
       }
-      LogTools.info("Has bitangents: {}", hasBitangents);
+      LogTools.debug("Has bitangents: {}", hasBitangents);
 
       // TODO: There actually can be up to Assimp.AI_MAX_NUMBER_OF_COLOR_SETS (4) colors per vertex
       hasColors = assimpMesh.mColors(0) != null;
@@ -151,7 +151,7 @@ public class GDXAssimpMeshLoader
       {
          vertexAttributes.add(VertexAttribute.ColorUnpacked());
       }
-      LogTools.info("Has colors: {}", hasColors);
+      LogTools.debug("Has colors: {}", hasColors);
 
       // TODO: There actually can be up to Assimp.AI_MAX_NUMBER_OF_TEXTURECOORDS (4) texture coodinates per vertex
       hasTextureCoordinates = assimpMesh.mTextureCoords(0) != null;
@@ -160,7 +160,7 @@ public class GDXAssimpMeshLoader
          int unit = 0; // texture id?
          vertexAttributes.add(VertexAttribute.TexCoords(unit));
       }
-      LogTools.info("Has texture coordinates: {}", hasTextureCoordinates);
+      LogTools.debug("Has texture coordinates: {}", hasTextureCoordinates);
 
       return vertexAttributes.toArray(VertexAttribute.class);
    }

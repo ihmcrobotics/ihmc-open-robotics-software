@@ -31,9 +31,9 @@ public class GDXAssimpMaterialLoader
       modelMaterial = new ModelMaterial();
 
       int numberAllocated = assimpMaterial.mNumAllocated();
-      LogTools.info("Number allocated: {}", numberAllocated);
+      LogTools.debug("Number allocated: {}", numberAllocated);
       int numberOfMaterialProperties = assimpMaterial.mNumProperties();
-      LogTools.info("Number of material properties: {}", numberOfMaterialProperties);
+      LogTools.debug("Number of material properties: {}", numberOfMaterialProperties);
 
       loadTextureInformation();
 
@@ -141,7 +141,7 @@ public class GDXAssimpMaterialLoader
          {
             valueAsString += " buffer of length " + assimpMaterialProperty.mDataLength();
          }
-         LogTools.info("Property: {}: {}", materialPropertyKey, valueAsString);
+         LogTools.debug("Property: {}: {}", materialPropertyKey, valueAsString);
       }
 
       return modelMaterial;
@@ -171,7 +171,7 @@ public class GDXAssimpMaterialLoader
 
       if (numberOfMaterialTexturesOfType > 0)
       {
-         LogTools.info("Number of {} textures: {}", getTextureTypeString(textureType), numberOfMaterialTexturesOfType);
+         LogTools.debug("Number of {} textures: {}", getTextureTypeString(textureType), numberOfMaterialTexturesOfType);
 
          if (modelMaterial.textures == null)
             modelMaterial.textures = new Array<>();
@@ -196,12 +196,12 @@ public class GDXAssimpMaterialLoader
                                         mapmode,
                                         flags);
             String textureFilePath = ResourceTools.sanitizeResourcePath(Paths.get(basePath).resolve(path.dataString()).toString());
-            LogTools.info("Path: {}", textureFilePath);
-            LogTools.info("Mapping: {}", mapping[0]);
-            LogTools.info("UV source channel index: {}", uvSourceChannelIndex[0]);
-            LogTools.info("Blend factor: {}", blendFactor[0]);
-            LogTools.info("Blend with previous texture operation: {}", blendWithPreviousTextureOperation[0]);
-            LogTools.info("Flags: {}", flags[0]);
+            LogTools.debug("Path: {}", textureFilePath);
+            LogTools.debug("Mapping: {}", mapping[0]);
+            LogTools.debug("UV source channel index: {}", uvSourceChannelIndex[0]);
+            LogTools.debug("Blend factor: {}", blendFactor[0]);
+            LogTools.debug("Blend with previous texture operation: {}", blendWithPreviousTextureOperation[0]);
+            LogTools.debug("Flags: {}", flags[0]);
 
             ModelTexture modelTexture = new ModelTexture();
             modelTexture.fileName = textureFilePath;

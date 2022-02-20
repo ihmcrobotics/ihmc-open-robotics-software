@@ -9,7 +9,7 @@ public class AssimpResourceImporter
 {
    public AIScene importScene(String resourcePath)
    {
-      LogTools.info("Using assimp {}.{}", Assimp.aiGetVersionMajor(), Assimp.aiGetVersionMinor());
+      LogTools.debug("Using assimp {}.{}", Assimp.aiGetVersionMajor(), Assimp.aiGetVersionMinor());
 
       int postProcessingSteps = 0; // none
       postProcessingSteps += Assimp.aiProcess_FlipUVs;
@@ -22,7 +22,7 @@ public class AssimpResourceImporter
          public void invoke(long messageAddress, long userDataAddress)
          {
             String messageString = MemoryUtil.memUTF8(messageAddress);
-            LogTools.info("[Assimp] {}", messageString.trim());
+            LogTools.debug("[Assimp] {}", messageString.trim());
          }
       };
 
