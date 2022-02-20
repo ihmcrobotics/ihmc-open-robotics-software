@@ -8,8 +8,6 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
-import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
-import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.SerializationException;
 import org.lwjgl.assimp.AIScene;
 import us.ihmc.gdx.tools.assimp.AssimpResourceImporter;
@@ -17,8 +15,6 @@ import us.ihmc.gdx.tools.assimp.GDXAssimpModelLoader;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class GDXModelLoader
@@ -43,10 +39,11 @@ public class GDXModelLoader
 
    private Model loadOrGetModel(String modelFileName)
    {
+      modelFileName = ResourceTools.sanitizeResourcePath(modelFileName);
       Model model = loadedModels.get(modelFileName);
       if (model == null)
       {
-         FileHandle fileHandle = Gdx.files.internal(ResourceTools.sanitizeResourcePath(modelFileName));
+         FileHandle fileHandle = Gdx.files.internal(modelFileName);
          try
          {
 //            Model loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
