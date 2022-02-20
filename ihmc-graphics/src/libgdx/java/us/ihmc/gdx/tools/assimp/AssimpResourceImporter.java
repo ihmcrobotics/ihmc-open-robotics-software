@@ -7,29 +7,19 @@ import us.ihmc.log.LogTools;
 
 public class AssimpResourceImporter
 {
+   public static boolean ASSIMP_INITIAL_SETUP = false;
+
    public AIScene importScene(String resourcePath)
    {
-      LogTools.debug("Using assimp {}.{}", Assimp.aiGetVersionMajor(), Assimp.aiGetVersionMinor());
+      ensureAssimpInitialSetup();
 
       int postProcessingSteps = 0; // none
       postProcessingSteps += Assimp.aiProcess_FlipUVs;
+//      postProcessingSteps += Assimp.aiProcess_OptimizeGraph;
+//      postProcessingSteps += Assimp.aiProcess_OptimizeMeshes;
+//      postProcessingSteps += Assimp.aiProcess_Triangulate;
+//      postProcessingSteps += Assimp.aiProcess_JoinIdenticalVertices;
 
-      Assimp.aiEnableVerboseLogging(LogTools.getLevel().isLessSpecificThan(Level.DEBUG));
-
-      AILogStreamCallbackI assimpLogStreamCallback = new AILogStreamCallbackI()
-      {
-         @Override
-         public void invoke(long messageAddress, long userDataAddress)
-         {
-            String messageString = MemoryUtil.memUTF8(messageAddress);
-            LogTools.debug("[Assimp] {}", messageString.trim());
-         }
-      };
-
-      AILogStream assimpLogStream = AILogStream.create();
-      assimpLogStream.callback(assimpLogStreamCallback);
-      assimpLogStream.user(MemoryUtil.memAddress(MemoryUtil.memAlloc(1)));
-      Assimp.aiAttachLogStream(assimpLogStream);
 
       AIFileOpenProcI assimpFileOpenFunction = new AIFileOpenProcI()
       {
@@ -67,5 +57,32 @@ public class AssimpResourceImporter
       }
 
       return assimpScene;
+   }
+
+   private static void ensureAssimpInitialSetup()
+   {
+      if (!ASSIMP_INITIAL_SETUP)
+      {
+         ASSIMP_INITIAL_SETUP = true;
+
+         LogTools.debug("Using assimp {}.{}", Assimp.aiGetVersionMajor(), Assimp.aiGetVersionMinor());
+
+         Assimp.aiEnableVerboseLogging(LogTools.getLevel().isLessSpecificThan(Level.DEBUG));
+
+         AILogStreamCallbackI assimpLogStreamCallback = new AILogStreamCallbackI()
+         {
+            @Override
+            public void invoke(long messageAddress, long userDataAddress)
+            {
+               String messageString = MemoryUtil.memUTF8(messageAddress);
+               LogTools.debug("[Assimp] {}", messageString.trim());
+            }
+         };
+
+         AILogStream assimpLogStream = AILogStream.create();
+         assimpLogStream.callback(assimpLogStreamCallback);
+         assimpLogStream.user(MemoryUtil.memAddress(MemoryUtil.memAlloc(1)));
+         Assimp.aiAttachLogStream(assimpLogStream);
+      }
    }
 }
