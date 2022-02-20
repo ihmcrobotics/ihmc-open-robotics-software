@@ -5,18 +5,23 @@ import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelMesh;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelMeshPart;
 import com.badlogic.gdx.utils.Array;
+import gnu.trove.list.array.TShortArrayList;
 import org.lwjgl.assimp.AIFace;
 import org.lwjgl.assimp.AIMesh;
 import org.lwjgl.assimp.AIVector3D;
+import org.lwjgl.assimp.Assimp;
 import us.ihmc.log.LogTools;
 
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
 
 public class GDXAssimpMeshLoader
 {
    private final AIMesh assimpMesh;
    private boolean hasNormals;
+   private boolean hasTangents;
+   private boolean hasBitangents;
    private boolean hasColors;
    private boolean hasTextureCoordinates;
    private int numberOfVertices;
@@ -47,36 +52,68 @@ public class GDXAssimpMeshLoader
       ModelMeshPart modelMeshPart = new ModelMeshPart();
       modelMeshPart.id = meshName;
 
+      int primitiveTypes = assimpMesh.mPrimitiveTypes();
+      int gdxPrimitiveType = getGdxPrimitiveType(primitiveTypes);
+
       int numberOfFaces = assimpMesh.mNumFaces();
       LogTools.info("Number of faces: {}", numberOfFaces);
 
-      if (numberOfFaces > 0)
-      {
-         int numberOfIndices = assimpMesh.mFaces().get(0).mNumIndices();
-         LogTools.info("Number of indices: {}", numberOfIndices);
-         if (numberOfIndices != 3)
-            LogTools.error("Number of indices not implemented");
-      }
-
-      modelMeshPart.primitiveType = GL20.GL_TRIANGLES;
-      ShortBuffer indexBuffer = ShortBuffer.allocate(numberOfFaces * 3 * Short.BYTES);
+      modelMeshPart.primitiveType = gdxPrimitiveType;
+      TShortArrayList indexArray = new TShortArrayList();
       for (int i = 0; i < numberOfFaces; i++)
       {
          // We are assuming that faces have 3 indices each
+         // TODO: Check on Assimp.AI_SCENE_FLAGS_NON_VERBOSE_FORMAT, where face indices are compacted
          AIFace assimpFace = assimpMesh.mFaces().get(i);
-         int index0 = assimpFace.mIndices().get(0);
-         int index1 = assimpFace.mIndices().get(1);
-         int index2 = assimpFace.mIndices().get(2);
-         indexBuffer.put((short) index0);
-         indexBuffer.put((short) index1);
-         indexBuffer.put((short) index2);
+         for (int j = 0; j < assimpFace.mNumIndices(); j++)
+         {
+            int faceVertexIndex = assimpFace.mIndices().get(j);
+            indexArray.add((short) faceVertexIndex);
+         }
       }
-      modelMeshPart.indices = indexBuffer.array();
+      modelMeshPart.indices = indexArray.toArray();
+      LogTools.info("Number of indices: {}", modelMeshPart.indices.length);
 
       parts.add(modelMeshPart);
       modelMesh.parts = parts.toArray(ModelMeshPart.class);
 
       return modelMesh;
+   }
+
+   private int getGdxPrimitiveType(int primitiveTypes)
+   {
+      int gdxPrimitiveType;
+      if (primitiveTypes == Assimp.aiPrimitiveType_POINT)
+      {
+         gdxPrimitiveType = GL20.GL_POINTS;
+         String message = "Points not implemented!";
+         LogTools.error(message);
+         throw new RuntimeException(message);
+      }
+      else if (primitiveTypes == Assimp.aiPrimitiveType_LINE)
+      {
+         gdxPrimitiveType = GL20.GL_LINES;
+         String message = "Lines not implemented!";
+         LogTools.error(message);
+         throw new RuntimeException(message);
+      }
+      else if (primitiveTypes == Assimp.aiPrimitiveType_TRIANGLE)
+      {
+         gdxPrimitiveType = GL20.GL_TRIANGLES;
+      }
+      else if (primitiveTypes == Assimp.aiPrimitiveType_POLYGON)
+      {
+         String message = "Polygons not implemented!";
+         LogTools.error(message);
+         throw new RuntimeException(message);
+      }
+      else
+      {
+         String message = "Combined primitive type not implemented!";
+         LogTools.error(message);
+         throw new RuntimeException(message);
+      }
+      return gdxPrimitiveType;
    }
 
    private VertexAttribute[] loadAttributes()
@@ -93,6 +130,20 @@ public class GDXAssimpMeshLoader
          vertexAttributes.add(VertexAttribute.Normal());
       }
       LogTools.info("Has normals: {}", hasNormals);
+
+      hasTangents = assimpMesh.mTangents() != null;
+      if (hasTangents)
+      {
+         vertexAttributes.add(VertexAttribute.Tangent());
+      }
+      LogTools.info("Has tangents: {}", hasTangents);
+
+      hasBitangents = assimpMesh.mTangents() != null;
+      if (hasBitangents)
+      {
+         vertexAttributes.add(VertexAttribute.Binormal());
+      }
+      LogTools.info("Has bitangents: {}", hasBitangents);
 
       // TODO: There actually can be up to Assimp.AI_MAX_NUMBER_OF_COLOR_SETS (4) colors per vertex
       hasColors = assimpMesh.mColors(0) != null;
@@ -142,6 +193,24 @@ public class GDXAssimpMeshLoader
             vertexHeapBuffer.put(normalX);
             vertexHeapBuffer.put(normalY);
             vertexHeapBuffer.put(normalZ);
+         }
+         if (hasTangents)
+         {
+            float tangentX = assimpMesh.mTangents().get(j).x();
+            float tangentY = assimpMesh.mTangents().get(j).y();
+            float tangentZ = assimpMesh.mTangents().get(j).z();
+            vertexHeapBuffer.put(tangentX);
+            vertexHeapBuffer.put(tangentY);
+            vertexHeapBuffer.put(tangentZ);
+         }
+         if (hasBitangents)
+         {
+            float bitangentX = assimpMesh.mBitangents().get(j).x();
+            float bitangentY = assimpMesh.mBitangents().get(j).y();
+            float bitangentZ = assimpMesh.mBitangents().get(j).z();
+            vertexHeapBuffer.put(bitangentX);
+            vertexHeapBuffer.put(bitangentY);
+            vertexHeapBuffer.put(bitangentZ);
          }
          if (hasColors)
          {
