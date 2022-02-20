@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelMesh;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelMeshPart;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.utils.Array;
 import gnu.trove.list.array.TShortArrayList;
 import org.lwjgl.assimp.AIFace;
@@ -122,6 +123,8 @@ public class GDXAssimpMeshLoader
       Array<VertexAttribute> vertexAttributes = new Array<>();
       numberOfVertices = assimpMesh.mNumVertices();
       LogTools.debug("Number of vertices: {}", numberOfVertices);
+      if (numberOfVertices > MeshBuilder.MAX_VERTICES)
+         LogTools.error("Mesh contains too many vertices! {}/{}", numberOfVertices, MeshBuilder.MAX_VERTICES);
       vertexAttributes.add(VertexAttribute.Position());
 
       hasNormals = assimpMesh.mNormals() != null;

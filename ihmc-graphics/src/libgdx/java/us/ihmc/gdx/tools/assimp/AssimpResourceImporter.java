@@ -1,5 +1,6 @@
 package us.ihmc.gdx.tools.assimp;
 
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import org.apache.logging.log4j.Level;
 import org.lwjgl.assimp.*;
 import org.lwjgl.system.MemoryUtil;
@@ -13,9 +14,23 @@ public class AssimpResourceImporter
    {
       ensureAssimpInitialSetup();
 
+      AIPropertyStore assimpPropertyStore = Assimp.aiCreatePropertyStore();
+
       int postProcessingSteps = 0; // none
+
+      /** libGDX reads UVs flipped from assimp default */
       postProcessingSteps += Assimp.aiProcess_FlipUVs;
+
+      /** libGDX needs triangles */
       postProcessingSteps += Assimp.aiProcess_Triangulate;
+
+      /** libGDX has limits in MeshBuilder.
+       *  Not sure if there is a triangle limit.
+       */
+      Assimp.aiSetImportPropertyInteger(assimpPropertyStore, Assimp.AI_CONFIG_PP_SLM_VERTEX_LIMIT, MeshBuilder.MAX_VERTICES);
+//      Assimp.aiSetImportPropertyInteger(assimpPropertyStore, Assimp.AI_CONFIG_PP_SLM_TRIANGLE_LIMIT, MeshBuilder.MAX_VERTICES);
+      postProcessingSteps += Assimp.aiProcess_SplitLargeMeshes;
+
 //      postProcessingSteps += Assimp.aiProcess_OptimizeGraph;
 //      postProcessingSteps += Assimp.aiProcess_OptimizeMeshes;
 //      postProcessingSteps += Assimp.aiProcess_JoinIdenticalVertices;
@@ -48,7 +63,7 @@ public class AssimpResourceImporter
       assimpFileIO.CloseProc(assimpFileCloseFunction);
       assimpFileIO.UserData(MemoryUtil.memAddress(MemoryUtil.memAlloc(1)));
 
-      AIScene assimpScene = Assimp.aiImportFileEx(resourcePath, postProcessingSteps, assimpFileIO);
+      AIScene assimpScene = Assimp.aiImportFileExWithProperties(resourcePath, postProcessingSteps, assimpFileIO, assimpPropertyStore);
 
       if (assimpScene == null)
       {
