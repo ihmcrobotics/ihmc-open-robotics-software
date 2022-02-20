@@ -20,6 +20,7 @@ public class GDXAssimpMeshLoader
    private boolean hasColors;
    private boolean hasTextureCoordinates;
    private int numberOfVertices;
+   private ModelMesh modelMesh;
 
    public GDXAssimpMeshLoader(AIMesh assimpMesh)
    {
@@ -28,7 +29,7 @@ public class GDXAssimpMeshLoader
 
    public ModelMesh load(int index)
    {
-      ModelMesh modelMesh = new ModelMesh();
+      modelMesh = new ModelMesh();
       String meshName = assimpMesh.mName().dataString().trim();
       LogTools.info("Mesh name: {}", meshName);
       if (!meshName.isEmpty())
@@ -163,5 +164,15 @@ public class GDXAssimpMeshLoader
          }
       }
       return vertexHeapBuffer.array();
+   }
+
+   public AIMesh getAssimpMesh()
+   {
+      return assimpMesh;
+   }
+
+   public ModelMesh getModelMesh()
+   {
+      return modelMesh;
    }
 }

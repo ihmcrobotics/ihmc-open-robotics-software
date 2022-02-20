@@ -1,25 +1,25 @@
 package us.ihmc.gdx.tools.assimp;
 
-import com.badlogic.gdx.graphics.g3d.model.data.ModelMaterial;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelMesh;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelNode;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelNodePart;
 import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
+import org.lwjgl.assimp.AIMesh;
 import org.lwjgl.assimp.AINode;
 import org.lwjgl.system.MemoryUtil;
 import us.ihmc.euclid.matrix.RotationMatrix;
 
+import java.util.ArrayList;
+
 public class GDXAssimpNodeLoader
 {
-   private final Array<ModelMesh> meshesForIdLookup;
-   private final Array<ModelMaterial> materialsForIdLookup;
+   private final ArrayList<GDXAssimpMeshLoader> gdxAssimpMeshLoaders;
+   private final ArrayList<GDXAssimpMaterialLoader> gdxAssimpMaterialLoaders;
 
-   public GDXAssimpNodeLoader(Array<ModelMesh> meshesForIdLookup, Array<ModelMaterial> materialsForIdLookup)
+   public GDXAssimpNodeLoader(ArrayList<GDXAssimpMeshLoader> gdxAssimpMeshLoaders, ArrayList<GDXAssimpMaterialLoader> gdxAssimpMaterialLoaders)
    {
-      this.meshesForIdLookup = meshesForIdLookup;
-      this.materialsForIdLookup = materialsForIdLookup;
+      this.gdxAssimpMeshLoaders = gdxAssimpMeshLoaders;
+      this.gdxAssimpMaterialLoaders = gdxAssimpMaterialLoaders;
    }
 
    public ModelNode load(AINode assimpRootNode)
@@ -64,9 +64,13 @@ public class GDXAssimpNodeLoader
          for (int i = 0; i < numberOfMeshes; i++)
          {
             ModelNodePart modelNodePart = new ModelNodePart();
-            int meshId = assimpNode.mMeshes().get(i);
-            modelNodePart.meshPartId = meshesForIdLookup.get(meshId).id;
-            modelNodePart.materialId = materialsForIdLookup.get(materialsForIdLookup.size - 1).id; // TODO: Is this right?
+            int assimpMeshIndex = assimpNode.mMeshes().get(i);
+
+            GDXAssimpMeshLoader gdxAssimpMeshLoader = gdxAssimpMeshLoaders.get(assimpMeshIndex);
+            AIMesh assimpMesh = gdxAssimpMeshLoader.getAssimpMesh();
+            int assimpMaterialIndex = assimpMesh.mMaterialIndex();
+            modelNodePart.meshPartId = gdxAssimpMeshLoader.getModelMesh().id;
+            modelNodePart.materialId = gdxAssimpMaterialLoaders.get(assimpMaterialIndex).getModelMaterial().id;
             modelNode.parts[i] = modelNodePart;
          }
       }

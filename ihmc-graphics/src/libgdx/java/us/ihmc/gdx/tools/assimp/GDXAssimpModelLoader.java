@@ -13,6 +13,8 @@ import org.lwjgl.assimp.AIScene;
 import org.lwjgl.system.MemoryUtil;
 import us.ihmc.log.LogTools;
 
+import java.util.ArrayList;
+
 public class GDXAssimpModelLoader
 {
    private final AIScene assimpScene;
@@ -34,16 +36,20 @@ public class GDXAssimpModelLoader
       LogTools.info("Number of meshes: {}", numberOfMeshes);
       PointerBuffer meshesPointerBuffer = assimpScene.mMeshes();
       modelData.meshes.ensureCapacity(numberOfMeshes);
+      ArrayList<GDXAssimpMeshLoader> gdxAssimpMeshLoaders = new ArrayList<>();
       for (int i = 0; i < numberOfMeshes; i++)
       {
          AIMesh assimpMesh = new AIMesh(MemoryUtil.memByteBuffer(meshesPointerBuffer.get(i), AIMesh.SIZEOF));
-         ModelMesh modelMesh = new GDXAssimpMeshLoader(assimpMesh).load(i);
+         GDXAssimpMeshLoader gdxAssimpMeshLoader = new GDXAssimpMeshLoader(assimpMesh);
+         ModelMesh modelMesh = gdxAssimpMeshLoader.load(i);
+         gdxAssimpMeshLoaders.add(gdxAssimpMeshLoader);
          modelData.meshes.add(modelMesh);
       }
 
       // materials
       int numberOfMaterials = assimpScene.mNumMaterials();
       LogTools.info("Number of materials: {}", numberOfMaterials);
+      ArrayList<GDXAssimpMaterialLoader> gdxAssimpMaterialLoaders = new ArrayList<>();
       if (numberOfMaterials > 0)
       {
          modelData.materials.ensureCapacity(numberOfMaterials);
@@ -51,8 +57,9 @@ public class GDXAssimpModelLoader
          for (int i = 0; i < numberOfMaterials; i++)
          {
             AIMaterial assimpMaterial = new AIMaterial(MemoryUtil.memByteBuffer(materialsPointerBuffer.get(i), AIMaterial.SIZEOF));
-            GDXAssimpMaterialLoader assimpMaterialLoader = new GDXAssimpMaterialLoader(assimpMaterial, basePath);
-            ModelMaterial modelMaterial = assimpMaterialLoader.load();
+            GDXAssimpMaterialLoader gdxAssimpMaterialLoader = new GDXAssimpMaterialLoader(assimpMaterial, basePath);
+            gdxAssimpMaterialLoaders.add(gdxAssimpMaterialLoader);
+            ModelMaterial modelMaterial = gdxAssimpMaterialLoader.load();
             modelData.materials.add(modelMaterial);
          }
       }
@@ -60,7 +67,7 @@ public class GDXAssimpModelLoader
       // nodes
       AINode assimpRootNode = assimpScene.mRootNode();
       modelData.nodes.ensureCapacity(1);
-      modelData.nodes.add(new GDXAssimpNodeLoader(modelData.meshes, modelData.materials).load(assimpRootNode));
+      modelData.nodes.add(new GDXAssimpNodeLoader(gdxAssimpMeshLoaders, gdxAssimpMaterialLoaders).load(assimpRootNode));
 
       TextureProvider.FileTextureProvider textureProvider = new TextureProvider.FileTextureProvider();
       Model model = new Model(modelData, textureProvider);

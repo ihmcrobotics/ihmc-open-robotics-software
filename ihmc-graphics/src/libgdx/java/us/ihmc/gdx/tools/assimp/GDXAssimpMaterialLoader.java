@@ -12,13 +12,13 @@ import org.lwjgl.system.MemoryUtil;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class GDXAssimpMaterialLoader
 {
    private final AIMaterial assimpMaterial;
    private final String basePath;
+   private ModelMaterial modelMaterial;
 
    public GDXAssimpMaterialLoader(AIMaterial assimpMaterial, String basePath)
    {
@@ -28,12 +28,14 @@ public class GDXAssimpMaterialLoader
 
    public ModelMaterial load()
    {
-      ModelMaterial modelMaterial = new ModelMaterial();
+      modelMaterial = new ModelMaterial();
 
       int numberAllocated = assimpMaterial.mNumAllocated();
       LogTools.info("Number allocated: {}", numberAllocated);
       int numberOfMaterialProperties = assimpMaterial.mNumProperties();
       LogTools.info("Number of material properties: {}", numberOfMaterialProperties);
+
+      loadTextureInformation();
 
       for (int j = 0; j < numberOfMaterialProperties; j++)
       {
@@ -93,36 +95,7 @@ public class GDXAssimpMaterialLoader
          }
          else if (materialPropertyKey.equals(Assimp._AI_MATKEY_TEXTURE_BASE))
          {
-//            LogTools.info(stringFromMemUTF8);
-//            AIString aiString = AIString.create();
-//            Assimp.aiGetMaterialString(assimpMaterial, materialPropertyKey, assimpMaterialProperty.mType(), textureFileNameIndex, aiString);
-//            String textureFilePath = aiString.dataString().trim();
-            String rawTextureFileName = MemoryUtil.memUTF8(assimpMaterialProperty.mData()).trim();
-
-            // TODO: Where are these codes defined?  Maybe the order they come in
-            boolean isDiffuse = rawTextureFileName.charAt(0) == '7';
-            boolean isAmbient = rawTextureFileName.charAt(0) == '-';
-
-            String filtered = rawTextureFileName.charAt(0) == '.' ? rawTextureFileName : rawTextureFileName.substring(1);
-            String stringFromMemUTF8 = filtered.trim();
-            String textureFilePath = ResourceTools.sanitizeResourcePath(stringFromMemUTF8);
-//            if (textureFilePath.startsWith("/"))
-//               textureFilePath = textureFilePath.substring(1);
-            //            textureFilePath = Paths.get(basePath).resolve("extremities_diffuse_unplugged.jpg").normalize().toString();
-
-            if (modelMaterial.textures == null)
-               modelMaterial.textures = new Array<>();
-
-            ModelTexture modelTexture = new ModelTexture();
-            modelTexture.fileName = textureFilePath;
-            modelTexture.id = "texture" + modelMaterial.textures.size;
-            if (isDiffuse)
-               modelTexture.usage = ModelTexture.USAGE_DIFFUSE;
-            else if (isAmbient)
-               modelTexture.usage = ModelTexture.USAGE_AMBIENT;
-            else
-               LogTools.error("Implement this usage! {}", rawTextureFileName.charAt(0));
-            modelMaterial.textures.add(modelTexture);
+            // Loaded separately
          }
          else if (materialPropertyKey.equals(Assimp._AI_MATKEY_UVWSRC_BASE))
          {
@@ -152,18 +125,8 @@ public class GDXAssimpMaterialLoader
          }
          else if (valueType == Assimp.aiPTI_String)
          {
-            String stringFromMemUTF8 = MemoryUtil.memUTF8(assimpMaterialProperty.mData()).substring(1).trim(); // FIXME: Why substring 1 hack required?
-//            AIString aiString = AIString.create();
-//            Assimp.aiGetMaterialString(assimpMaterial, materialPropertyKey, assimpMaterialProperty.mType(), assimpMaterialProperty.mIndex(), aiString);
-//            String stringFromGetMaterialString = aiString.dataString().trim();
-//            if (!stringFromGetMaterialString.isEmpty())
-//            {
-//               valueAsString = stringFromGetMaterialString;
-//            }
-//            else
-//            {
-               valueAsString = stringFromMemUTF8;
-//            }
+            String stringFromMemUTF8 = MemoryUtil.memUTF8(assimpMaterialProperty.mData()).trim();
+            valueAsString = stringFromMemUTF8;
          }
          else if (valueType == Assimp.aiPTI_Integer)
          {
@@ -184,6 +147,139 @@ public class GDXAssimpMaterialLoader
       return modelMaterial;
    }
 
+   private void loadTextureInformation()
+   {
+      loadTextureInformation(Assimp.aiTextureType_NONE);
+      loadTextureInformation(Assimp.aiTextureType_DIFFUSE);
+      loadTextureInformation(Assimp.aiTextureType_SPECULAR);
+      loadTextureInformation(Assimp.aiTextureType_AMBIENT);
+      loadTextureInformation(Assimp.aiTextureType_EMISSIVE);
+      loadTextureInformation(Assimp.aiTextureType_HEIGHT);
+      loadTextureInformation(Assimp.aiTextureType_NORMALS);
+      loadTextureInformation(Assimp.aiTextureType_SHININESS);
+      loadTextureInformation(Assimp.aiTextureType_OPACITY);
+      loadTextureInformation(Assimp.aiTextureType_DISPLACEMENT);
+      loadTextureInformation(Assimp.aiTextureType_LIGHTMAP);
+      loadTextureInformation(Assimp.aiTextureType_REFLECTION);
+      loadTextureInformation(Assimp.aiTextureType_UNKNOWN);
+
+   }
+
+   private void loadTextureInformation(int textureType)
+   {
+      int numberOfMaterialTexturesOfType = Assimp.aiGetMaterialTextureCount(assimpMaterial, textureType);
+
+      if (numberOfMaterialTexturesOfType > 0)
+      {
+         LogTools.info("Number of {} textures: {}", getTextureTypeString(textureType), numberOfMaterialTexturesOfType);
+
+         if (modelMaterial.textures == null)
+            modelMaterial.textures = new Array<>();
+
+         for (int i = 0; i < numberOfMaterialTexturesOfType; i++)
+         {
+            AIString path = AIString.create();
+            int[] mapping = new int[1];
+            int[] uvSourceChannelIndex = new int[1];
+            float[] blendFactor = new float[1];
+            int[] blendWithPreviousTextureOperation = new int[1];
+            int[] mapmode = null;
+            int[] flags = new int[1];
+            Assimp.aiGetMaterialTexture(assimpMaterial,
+                                        textureType,
+                                        i,
+                                        path,
+                                        mapping,
+                                        uvSourceChannelIndex,
+                                        blendFactor,
+                                        blendWithPreviousTextureOperation,
+                                        mapmode,
+                                        flags);
+            String textureFilePath = ResourceTools.sanitizeResourcePath(Paths.get(basePath).resolve(path.dataString()).toString());
+            LogTools.info("Path: {}", textureFilePath);
+            LogTools.info("Mapping: {}", mapping[0]);
+            LogTools.info("UV source channel index: {}", uvSourceChannelIndex[0]);
+            LogTools.info("Blend factor: {}", blendFactor[0]);
+            LogTools.info("Blend with previous texture operation: {}", blendWithPreviousTextureOperation[0]);
+            LogTools.info("Flags: {}", flags[0]);
+
+            ModelTexture modelTexture = new ModelTexture();
+            modelTexture.fileName = textureFilePath;
+            modelTexture.id = "texture" + modelMaterial.textures.size;
+            modelTexture.usage = getModelTextureTypeCode(textureType);
+            modelMaterial.textures.add(modelTexture);
+         }
+      }
+   }
+
+   private String getTextureTypeString(int textureType)
+   {
+      switch (textureType)
+      {
+         case Assimp.aiTextureType_NONE:
+            return "None";
+         case Assimp.aiTextureType_DIFFUSE:
+            return "Diffuse";
+         case Assimp.aiTextureType_SPECULAR:
+            return "Specular";
+         case Assimp.aiTextureType_AMBIENT:
+            return "Ambient";
+         case Assimp.aiTextureType_EMISSIVE:
+            return "Emissive";
+         case Assimp.aiTextureType_HEIGHT:
+            return "Height";
+         case Assimp.aiTextureType_NORMALS:
+            return "Normals";
+         case Assimp.aiTextureType_SHININESS:
+            return "Shininess";
+         case Assimp.aiTextureType_OPACITY:
+            return "Opacity";
+         case Assimp.aiTextureType_DISPLACEMENT:
+            return "Displacement";
+         case Assimp.aiTextureType_LIGHTMAP:
+            return "Lightmap";
+         case Assimp.aiTextureType_REFLECTION:
+            return "Reflection";
+         case Assimp.aiTextureType_UNKNOWN:
+            return "Unknown";
+      }
+      return "NotAType";
+   }
+
+   private int getModelTextureTypeCode(int textureType)
+   {
+      switch (textureType)
+      {
+         case Assimp.aiTextureType_NONE:
+            return ModelTexture.USAGE_NONE;
+         case Assimp.aiTextureType_DIFFUSE:
+            return ModelTexture.USAGE_DIFFUSE;
+         case Assimp.aiTextureType_SPECULAR:
+            return ModelTexture.USAGE_SPECULAR;
+         case Assimp.aiTextureType_AMBIENT:
+            return ModelTexture.USAGE_AMBIENT;
+         case Assimp.aiTextureType_EMISSIVE:
+            return ModelTexture.USAGE_EMISSIVE;
+         case Assimp.aiTextureType_HEIGHT:
+            return ModelTexture.USAGE_BUMP; // TODO: Does HEIGHT == BUMP?
+         case Assimp.aiTextureType_NORMALS:
+            return ModelTexture.USAGE_NORMAL;
+         case Assimp.aiTextureType_SHININESS:
+            return ModelTexture.USAGE_SHININESS;
+         case Assimp.aiTextureType_OPACITY:
+            return ModelTexture.USAGE_TRANSPARENCY;
+         case Assimp.aiTextureType_DISPLACEMENT:
+            return -1; // FIXME: Not supported by libGDX
+         case Assimp.aiTextureType_LIGHTMAP:
+            return -1; // FIXME: Not supported by libGDX
+         case Assimp.aiTextureType_REFLECTION:
+            return ModelTexture.USAGE_REFLECTION;
+         case Assimp.aiTextureType_UNKNOWN:
+            return ModelTexture.USAGE_UNKNOWN;
+      }
+      return -1;
+   }
+
    private Color loadColor(AIMaterialProperty assimpMaterialProperty)
    {
       int valueType = assimpMaterialProperty.mType();
@@ -202,5 +298,15 @@ public class GDXAssimpMaterialLoader
       else
          color.a = 1.0f;
       return color;
+   }
+
+   public AIMaterial getAssimpMaterial()
+   {
+      return assimpMaterial;
+   }
+
+   public ModelMaterial getModelMaterial()
+   {
+      return modelMaterial;
    }
 }
