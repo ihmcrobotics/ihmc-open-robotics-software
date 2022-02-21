@@ -51,10 +51,15 @@ public class GDXAssimpMaterialLoader
          else if (materialPropertyKey.equals(Assimp.AI_MATKEY_COLOR_DIFFUSE))
          {
             modelMaterial.diffuse = loadColor(assimpMaterialProperty);
-//            modelMaterial.diffuse.r = 0.588235f;
-//            modelMaterial.diffuse.g = 0.588235f;
-//            modelMaterial.diffuse.b = 0.588235f;
-//            modelMaterial.diffuse.a = 1.0f;
+
+            float desiredMax = 0.588235f; // This to get lighting looking good in engine
+            float max = Math.max(Math.max(modelMaterial.diffuse.r, modelMaterial.diffuse.g), modelMaterial.diffuse.b);
+            float ratio = desiredMax / max;
+
+            modelMaterial.diffuse.r = ratio * modelMaterial.diffuse.r;
+            modelMaterial.diffuse.g = ratio * modelMaterial.diffuse.g;
+            modelMaterial.diffuse.b = ratio * modelMaterial.diffuse.b;
+            modelMaterial.diffuse.a = 1.0f;
          }
          else if (materialPropertyKey.equals(Assimp.AI_MATKEY_COLOR_AMBIENT))
          {
