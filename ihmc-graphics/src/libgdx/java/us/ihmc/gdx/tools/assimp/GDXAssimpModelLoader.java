@@ -67,7 +67,7 @@ public class GDXAssimpModelLoader
       {
          AIMesh assimpMesh = new AIMesh(MemoryUtil.memByteBuffer(meshesPointerBuffer.get(i), AIMesh.SIZEOF));
          GDXAssimpMeshLoader gdxAssimpMeshLoader = new GDXAssimpMeshLoader(assimpMesh);
-         ModelMesh modelMesh = gdxAssimpMeshLoader.load(i);
+         ModelMesh modelMesh = gdxAssimpMeshLoader.load();
          gdxAssimpMeshLoaders.add(gdxAssimpMeshLoader);
          modelData.meshes.add(modelMesh);
       }
