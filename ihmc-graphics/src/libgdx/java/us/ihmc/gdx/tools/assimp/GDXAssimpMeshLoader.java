@@ -14,8 +14,7 @@ import org.lwjgl.assimp.Assimp;
 import us.ihmc.log.LogTools;
 
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GDXAssimpMeshLoader
 {
@@ -28,15 +27,25 @@ public class GDXAssimpMeshLoader
    private int numberOfVertices;
    private ModelMesh modelMesh;
 
+   private static final HashMap<String, Integer> sameMeshIds = new HashMap<>();
+
    public GDXAssimpMeshLoader(AIMesh assimpMesh)
    {
       this.assimpMesh = assimpMesh;
    }
 
-   public ModelMesh load(int index)
+   public ModelMesh load()
    {
       modelMesh = new ModelMesh();
       String meshName = assimpMesh.mName().dataString().trim();
+
+      // Ensure meshes have unique names, which happens especially when meshes get broken up due to size by assimp
+      String originalMeshName = meshName;
+      int indexOfThisName = sameMeshIds.computeIfAbsent(meshName, key -> 0);
+      if (indexOfThisName > 0)
+         meshName = meshName + indexOfThisName;
+      sameMeshIds.put(originalMeshName, indexOfThisName + 1);
+
       LogTools.debug("Mesh name: {}", meshName);
       if (!meshName.isEmpty())
          modelMesh.id = meshName;
