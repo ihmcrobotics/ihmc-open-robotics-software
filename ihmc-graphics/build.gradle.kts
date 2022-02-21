@@ -58,6 +58,11 @@ libgdxDependencies {
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-windows")
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-windows-x86")
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-macos")
+   api("org.lwjgl:lwjgl-assimp:$lwjglVersion")
+   api("org.lwjgl:lwjgl-assimp:$lwjglVersion:natives-linux")
+   api("org.lwjgl:lwjgl-assimp:$lwjglVersion:natives-windows")
+   api("org.lwjgl:lwjgl-assimp:$lwjglVersion:natives-windows-x86")
+   api("org.lwjgl:lwjgl-assimp:$lwjglVersion:natives-macos")
 
    val imguiVersion = "1.84.1.4"
    api("io.github.spair:imgui-java-binding:$imguiVersion")
