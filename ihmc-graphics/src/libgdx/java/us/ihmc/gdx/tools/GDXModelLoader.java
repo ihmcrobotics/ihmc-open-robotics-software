@@ -54,24 +54,22 @@ public class GDXModelLoader
          if (model == null)
          {
             LogTools.debug("Loading {}", modelFileName);
-            FileHandle fileHandle = Gdx.files.internal(modelFileName);
             try
             {
                Model loadedModel;
                if (modelFileName.endsWith(".g3dj"))
                {
+                  FileHandle fileHandle = Gdx.files.internal(modelFileName);
                   loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
                }
                else if (modelFileName.endsWith(".g3db"))
                {
+                  FileHandle fileHandle = Gdx.files.internal(modelFileName);
                   loadedModel = new G3dModelLoader(new UBJsonReader()).loadModel(fileHandle);
                }
                else
                {
-                  AssimpResourceImporter assimpResourceImporter = new AssimpResourceImporter();
-                  String modelFilePath = fileHandle.path();
-                  AIScene assimpScene = assimpResourceImporter.importScene(modelFilePath);
-                  loadedModel = new GDXAssimpModelLoader(assimpScene, fileHandle.parent().path()).load();
+                  loadedModel = new GDXAssimpModelLoader(modelFileName).load();
                }
                for (Material material : loadedModel.materials)
                {

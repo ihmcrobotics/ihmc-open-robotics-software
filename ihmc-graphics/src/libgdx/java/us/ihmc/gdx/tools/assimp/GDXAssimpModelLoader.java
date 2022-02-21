@@ -1,15 +1,15 @@
 package us.ihmc.gdx.tools.assimp;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelMaterial;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelMesh;
+import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.TextureProvider;
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.assimp.AIMaterial;
-import org.lwjgl.assimp.AIMesh;
-import org.lwjgl.assimp.AINode;
-import org.lwjgl.assimp.AIScene;
+import org.lwjgl.assimp.*;
 import org.lwjgl.system.MemoryUtil;
 import us.ihmc.log.LogTools;
 
@@ -17,17 +17,43 @@ import java.util.ArrayList;
 
 public class GDXAssimpModelLoader
 {
-   private final AIScene assimpScene;
    private final String basePath;
+   private final AssimpResourceImporter assimpResourceImporter = new AssimpResourceImporter();
+   private final String modelFilePath;
 
-   public GDXAssimpModelLoader(AIScene assimpScene, String basePath)
+   public GDXAssimpModelLoader(String modelFilePath)
    {
-      this.assimpScene = assimpScene;
-      this.basePath = basePath;
+      this.modelFilePath = modelFilePath;
+
+      FileHandle fileHandle = Gdx.files.internal(modelFilePath);
+      basePath = fileHandle.parent().path();
    }
 
    public Model load()
    {
+      AIPropertyStore assimpPropertyStore = Assimp.aiCreatePropertyStore();
+
+      int postProcessingSteps = 0; // none
+
+      /** libGDX reads UVs flipped from assimp default */
+      postProcessingSteps += Assimp.aiProcess_FlipUVs;
+
+      /** libGDX needs triangles */
+      postProcessingSteps += Assimp.aiProcess_Triangulate;
+
+      /** libGDX has limits in MeshBuilder.
+       *  Not sure if there is a triangle limit.
+       */
+      Assimp.aiSetImportPropertyInteger(assimpPropertyStore, Assimp.AI_CONFIG_PP_SLM_VERTEX_LIMIT, MeshBuilder.MAX_VERTICES);
+      //      Assimp.aiSetImportPropertyInteger(assimpPropertyStore, Assimp.AI_CONFIG_PP_SLM_TRIANGLE_LIMIT, MeshBuilder.MAX_VERTICES);
+      postProcessingSteps += Assimp.aiProcess_SplitLargeMeshes;
+
+      //      postProcessingSteps += Assimp.aiProcess_OptimizeGraph;
+      //      postProcessingSteps += Assimp.aiProcess_OptimizeMeshes;
+      //      postProcessingSteps += Assimp.aiProcess_JoinIdenticalVertices;
+
+      AIScene assimpScene = assimpResourceImporter.importScene(modelFilePath, postProcessingSteps, assimpPropertyStore);
+
       ModelData modelData = new ModelData();
       modelData.id = "";
 
