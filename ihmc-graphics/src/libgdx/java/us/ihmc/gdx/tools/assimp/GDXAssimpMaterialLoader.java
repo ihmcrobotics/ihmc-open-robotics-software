@@ -51,10 +51,10 @@ public class GDXAssimpMaterialLoader
          else if (materialPropertyKey.equals(Assimp.AI_MATKEY_COLOR_DIFFUSE))
          {
             modelMaterial.diffuse = loadColor(assimpMaterialProperty);
-            modelMaterial.diffuse.r = 0.588235f;
-            modelMaterial.diffuse.g = 0.588235f;
-            modelMaterial.diffuse.b = 0.588235f;
-            modelMaterial.diffuse.a = 1.0f;
+//            modelMaterial.diffuse.r = 0.588235f;
+//            modelMaterial.diffuse.g = 0.588235f;
+//            modelMaterial.diffuse.b = 0.588235f;
+//            modelMaterial.diffuse.a = 1.0f;
          }
          else if (materialPropertyKey.equals(Assimp.AI_MATKEY_COLOR_AMBIENT))
          {
@@ -283,20 +283,29 @@ public class GDXAssimpMaterialLoader
    private Color loadColor(AIMaterialProperty assimpMaterialProperty)
    {
       int valueType = assimpMaterialProperty.mType();
+
       if (valueType != Assimp.aiPTI_Float)
          LogTools.error("Implement other types!");
-      if (assimpMaterialProperty.mDataLength() != 3 * Float.BYTES
-          && assimpMaterialProperty.mDataLength() != 4 * Float.BYTES)
-         LogTools.error("Implement other lengths!");
 
-      Color color = new Color();
-      color.r = assimpMaterialProperty.mData().getFloat(0);
-      color.g = assimpMaterialProperty.mData().getFloat(1);
-      color.b = assimpMaterialProperty.mData().getFloat(2);
-      if (assimpMaterialProperty.mDataLength() == 4 * Float.BYTES)
-         color.a = assimpMaterialProperty.mData().getFloat(3);
+      int materialPropertyDataLength = assimpMaterialProperty.mDataLength();
+      boolean isThreeFloats = materialPropertyDataLength == 3 * Float.BYTES;
+      boolean isFourFloats = materialPropertyDataLength == 4 * Float.BYTES;
+
+      Color color = new Color(0.5f, 0.5f, 0.5f, 1.0f);
+      if (isThreeFloats || isFourFloats)
+      {
+         color.r = assimpMaterialProperty.mData().getFloat();
+         color.g = assimpMaterialProperty.mData().getFloat(Float.BYTES);
+         color.b = assimpMaterialProperty.mData().getFloat(2 * Float.BYTES);
+         if (isFourFloats)
+            color.a = assimpMaterialProperty.mData().getFloat(3 * Float.BYTES);
+         else
+            color.a = 1.0f;
+      }
       else
-         color.a = 1.0f;
+      {
+         LogTools.error("What to do with {} float(s)?", materialPropertyDataLength / Float.BYTES);
+      }
       return color;
    }
 
