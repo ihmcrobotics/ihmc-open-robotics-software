@@ -75,7 +75,7 @@ public class GDXModelLoader
                {
                   if (!material.has(TextureAttribute.Diffuse))
                   {
-                     LogTools.warn(
+                     LogTools.debug(
                            "Material \"" + material.id + "\" in model \"" + modelFileName + "\" does not contain TextureAttribute Diffuse. Creating...");
 
                      Pixmap map = new Pixmap(100, 100, Pixmap.Format.RGBA8888);
