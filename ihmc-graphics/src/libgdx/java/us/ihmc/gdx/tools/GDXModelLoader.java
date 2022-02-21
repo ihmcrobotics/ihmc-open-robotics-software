@@ -12,8 +12,6 @@ import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.SerializationException;
 import com.badlogic.gdx.utils.UBJsonReader;
-import org.lwjgl.assimp.AIScene;
-import us.ihmc.gdx.tools.assimp.AssimpResourceImporter;
 import us.ihmc.gdx.tools.assimp.GDXAssimpModelLoader;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.resources.ResourceTools;
@@ -107,21 +105,5 @@ public class GDXModelLoader
          loadedModel.dispose();
       }
       loadedModels.clear();
-   }
-
-   /**
-    * TODO: Implement Collada, STL, etc model loaders
-    */
-   public static String modifyFileName(String modelFileName)
-   {
-//      String lowerCase = modelFileName.toLowerCase();
-//      if (!lowerCase.endsWith(".obj") && !lowerCase.endsWith(".stl"))
-//      {
-//         LogTools.warn("Model file \"{}\" is not an OBJ or STL. Skipping...", modelFileName);
-//         return null;
-//      }
-//      String modifiedFileName = modelFileName.replace(".obj", "").replace(".STL", "") + ".g3dj";
-//      return modifiedFileName;
-      return modelFileName;
    }
 }
