@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.awt.Color;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +23,7 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.MathTools;
@@ -50,7 +50,9 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
+import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Object;
@@ -64,12 +66,17 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -92,7 +99,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    private static final boolean VERBOSE = false;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
+   private static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
@@ -156,9 +163,9 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       robot.setGravity(0);
 
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
-      RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
-      robotDescription.setName("Ghost");
-      KinematicsToolboxControllerTest.recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
+      RobotDefinition robotDefinition = ghostRobotModel.getRobotDefinition();
+      robotDefinition.setName("Ghost");
+      RobotDefinitionTools.setRobotDefinitionMaterial(robotDefinition, ghostMaterial);
       ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -172,6 +179,41 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          scs.setCameraPosition(8.0, 0.0, 3.0);
          scs.startOnAThread();
          blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
+      }
+   }
+
+   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
+   {
+      if (joint == null)
+         return;
+      LinkDescription link = joint.getLink();
+      if (link == null)
+         return;
+      LinkGraphicsDescription linkGraphics = link.getLinkGraphics();
+
+      if (linkGraphics != null)
+      {
+         List<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
+
+         if (graphics3dInstructions == null)
+            return;
+
+         for (Graphics3DPrimitiveInstruction primitive : graphics3dInstructions)
+         {
+            if (primitive instanceof Graphics3DInstruction)
+            {
+               Graphics3DInstruction modelInstruction = (Graphics3DInstruction) primitive;
+               modelInstruction.setAppearance(ghostApperance);
+            }
+         }
+      }
+
+      if (joint.getChildrenJoints() == null)
+         return;
+
+      for (JointDescription child : joint.getChildrenJoints())
+      {
+         recursivelyModifyGraphics(child, ghostApperance);
       }
    }
 
@@ -660,7 +702,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    {
       FullHumanoidRobotModel initialFullRobotModel = robotModel.createFullRobotModel();
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      robotModel.getDefaultRobotInitialSetup(groundHeight, offsetYaw).initializeRobot(robot, robotModel.getJointMap());
+      robotModel.getDefaultRobotInitialSetup(groundHeight, offsetYaw).initializeRobot(robot);
       DRCPerfectSensorReaderFactory drcPerfectSensorReaderFactory = new DRCPerfectSensorReaderFactory(robot, 0);
       drcPerfectSensorReaderFactory.build(initialFullRobotModel.getRootJoint(), null, null, null, null);
       SensorDataContext sensorDataContext = new SensorDataContext();

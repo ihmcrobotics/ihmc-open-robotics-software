@@ -2,6 +2,8 @@ package us.ihmc.footstepPlanning.ui.viewers;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -22,6 +24,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -97,10 +100,22 @@ public class SwingPlanMeshViewer extends AnimationTimer
          plan.getFootstep(i).getFootstepPose(footPose);
          FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
 
-         for (Point3D waypoint : footstepDataMessage.getCustomPositionWaypoints())
+         TrajectoryType trajectoryType = TrajectoryType.fromByte(footstepDataMessage.getTrajectoryType());
+         if (trajectoryType == TrajectoryType.CUSTOM)
          {
-            meshBuilder.addSphere(footWaypointRadius, waypoint, footWaypointColor);
+            for (Point3D waypoint : footstepDataMessage.getCustomPositionWaypoints())
+            {
+               meshBuilder.addSphere(footWaypointRadius, waypoint, footWaypointColor);
+            }
          }
+         if (trajectoryType == TrajectoryType.WAYPOINTS)
+         {
+            for (SE3TrajectoryPointMessage waypoint : footstepDataMessage.getSwingTrajectory())
+            {
+               meshBuilder.addSphere(footWaypointRadius, waypoint.getPosition(), footWaypointColor);
+            }
+         }
+
 
          previousStanceFootPosition.set(stanceFootPosition);
          stanceFootPosition.set(footPose.getPosition());

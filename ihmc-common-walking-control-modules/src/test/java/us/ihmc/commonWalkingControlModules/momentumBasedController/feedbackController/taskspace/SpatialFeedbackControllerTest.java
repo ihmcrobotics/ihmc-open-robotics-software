@@ -342,7 +342,7 @@ public final class SpatialFeedbackControllerTest
          elevator.updateFramesRecursively();
 
          assertArrayEquals(jointAccelerations.data, jointAccelerationsFromJerryQP.data, 1.0e-4);
-         assertArrayEquals(jointAccelerations.data, jointAccelerationsFromQPOASES.data, 2.0e-1);
+         assertArrayEquals(jointAccelerations.data, jointAccelerationsFromQPOASES.data, 3.0e-1);
 
          currentPosition.setIncludingFrame(bodyFixedPointToControl);
          currentPosition.changeFrame(worldFrame);

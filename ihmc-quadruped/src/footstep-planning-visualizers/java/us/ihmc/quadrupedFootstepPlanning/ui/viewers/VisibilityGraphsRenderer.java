@@ -41,7 +41,6 @@ public class VisibilityGraphsRenderer
 
       clusterMeshViewer = new ClusterMeshViewer(messager, executorService);
       clusterMeshViewer.setTopics(PawStepPlannerMessagerAPI.GlobalResetTopic, PawStepPlannerMessagerAPI.ShowClusterRawPoints,
-                                  PawStepPlannerMessagerAPI.ShowClusterPreferredNavigableExtrusions, PawStepPlannerMessagerAPI.ShowClusterPreferredNonNavigableExtrusions,
                                   PawStepPlannerMessagerAPI.ShowClusterNavigableExtrusions, PawStepPlannerMessagerAPI.ShowClusterNonNavigableExtrusions,
                                   PawStepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData);
 

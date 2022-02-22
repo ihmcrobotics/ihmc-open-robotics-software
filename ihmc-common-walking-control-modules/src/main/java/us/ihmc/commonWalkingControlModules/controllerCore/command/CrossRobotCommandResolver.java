@@ -73,6 +73,7 @@ import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorData;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -114,7 +115,8 @@ public class CrossRobotCommandResolver
       jointHashCodeResolver = new JointHashCodeResolver(fullRobotModel);
    }
 
-   public CrossRobotCommandResolver(ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver, RigidBodyHashCodeResolver rigidBodyHashCodeResolver,
+   public CrossRobotCommandResolver(ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver,
+                                    RigidBodyHashCodeResolver rigidBodyHashCodeResolver,
                                     JointHashCodeResolver jointHashCodeResolver)
    {
       this.referenceFrameHashCodeResolver = referenceFrameHashCodeResolver;
@@ -138,10 +140,12 @@ public class CrossRobotCommandResolver
    public void resolveControllerCoreOutput(ControllerCoreOutput in, ControllerCoreOutput out)
    {
       resolveFrameTuple3D(in.getLinearMomentumRate(), out.getLinearMomentumRate());
+      resolveFrameTuple3D(in.getAngularMomentumRate(), out.getAngularMomentumRate());
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureData(), out.getCenterOfPressureData());
       resolveDesiredExternalWrenchHolder(in.getDesiredExternalWrenchData(), out.getDesiredExternalWrenchData());
       out.setRootJointDesiredConfigurationData(in.getRootJointDesiredConfigurationData());
-      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolderPreferred(), out.getLowLevelOneDoFJointDesiredDataHolderPreferred());
+      resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolderPreferred(),
+                                                  out.getLowLevelOneDoFJointDesiredDataHolderPreferred());
    }
 
    public void resolveCenterOfPressureDataHolder(CenterOfPressureDataHolder in, CenterOfPressureDataHolder out)
@@ -191,6 +195,14 @@ public class CrossRobotCommandResolver
       out.set(in.getSensorName(), resolveRigidBody(in.getRigidBody()), resolveReferenceFrame(in.getSensorFrame()));
    }
 
+   public void resolveCenterOfMassDataHolder(CenterOfMassDataHolder in, CenterOfMassDataHolder out)
+   {
+      out.setHasCenterOfMassPosition(in.hasCenterOfMassPosition());
+      out.setHasCenterOfMassVelocity(in.hasCenterOfMassVelocity());
+      resolveFrameTuple3D(in.getCenterOfMassPosition(), out.getCenterOfMassPosition());
+      resolveFrameTuple3D(in.getCenterOfMassVelocity(), out.getCenterOfMassVelocity());
+   }
+
    public void resolveHumanoidRobotContextData(HumanoidRobotContextData in, HumanoidRobotContextData out)
    {
       resolveHumanoidRobotContextDataScheduler(in, out);
@@ -226,6 +238,7 @@ public class CrossRobotCommandResolver
    {
       resolveHumanoidRobotContextJointData(in.getProcessedJointData(), out.getProcessedJointData());
       resolveForceSensorDataHolder(in.getForceSensorDataHolder(), out.getForceSensorDataHolder());
+      resolveCenterOfMassDataHolder(in.getCenterOfMassDataHolder(), out.getCenterOfMassDataHolder());
       out.setEstimatorRan(in.getEstimatorRan());
 
       // TODO: remove this hack.
@@ -300,54 +313,54 @@ public class CrossRobotCommandResolver
          InverseDynamicsCommand<?> commandToResolve = in.getCommand(commandIndex);
          switch (commandToResolve.getCommandType())
          {
-         case CENTER_OF_PRESSURE:
-            resolveCenterOfPressureCommand((CenterOfPressureCommand) commandToResolve, out.addCenterOfPressureCommand());
-            break;
-         case CONTACT_WRENCH:
-            resolveContactWrenchCommand((ContactWrenchCommand) commandToResolve, out.addContactWrenchCommand());
-            break;
-         case EXTERNAL_WRENCH:
-            resolveExternalWrenchCommand((ExternalWrenchCommand) commandToResolve, out.addExternalWrenchCommand());
-            break;
-         case OPTIMIZATION_SETTINGS:
-            resolveInverseDynamicsOptimizationSettingsCommand((InverseDynamicsOptimizationSettingsCommand) commandToResolve,
-                                                              out.addInverseDynamicsOptimizationSettingsCommand());
-            break;
-         case JOINT_ACCELERATION_INTEGRATION:
-            resolveJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) commandToResolve, out.addJointAccelerationIntegrationCommand());
-            break;
-         case JOINT_LIMIT_ENFORCEMENT:
-            resolveJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) commandToResolve, out.addJointLimitEnforcementMethodCommand());
-            break;
-         case JOINTSPACE:
-            resolveJointspaceAccelerationCommand((JointspaceAccelerationCommand) commandToResolve, out.addJointspaceAccelerationCommand());
-            break;
-         case MOMENTUM:
-            resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
-            break;
-         case MOMENTUM_COST:
-            resolveLinearMomentumRateCostCommand((LinearMomentumRateCostCommand) commandToResolve, out.addLinearMomentumRateCostCommand());
-            break;
-         case PLANE_CONTACT_STATE:
-            resolvePlaneContactStateCommand((PlaneContactStateCommand) commandToResolve, out.addPlaneContactStateCommand());
-            break;
-         case TASKSPACE:
-            resolveSpatialAccelerationCommand((SpatialAccelerationCommand) commandToResolve, out.addSpatialAccelerationCommand());
-            break;
-         case COMMAND_LIST:
-            resolveInverseDynamicsCommandListInternal((InverseDynamicsCommandList) commandToResolve, out);
-            break;
-         case PRIVILEGED_CONFIGURATION:
-            resolvePrivilegedConfigurationCommand((PrivilegedConfigurationCommand) commandToResolve, out.addPrivilegedConfigurationCommand());
-            break;
-         case PRIVILEGED_JOINTSPACE_COMMAND:
-            resolvePrivilegedJointSpaceCommand((PrivilegedJointSpaceCommand) commandToResolve, out.addPrivilegedJointSpaceCommand());
-            break;
-         case LIMIT_REDUCTION:
-            resolveJointLimitReductionCommand((JointLimitReductionCommand) commandToResolve, out.addJointLimitReductionCommand());
-            break;
-         default:
-            throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
+            case CENTER_OF_PRESSURE:
+               resolveCenterOfPressureCommand((CenterOfPressureCommand) commandToResolve, out.addCenterOfPressureCommand());
+               break;
+            case CONTACT_WRENCH:
+               resolveContactWrenchCommand((ContactWrenchCommand) commandToResolve, out.addContactWrenchCommand());
+               break;
+            case EXTERNAL_WRENCH:
+               resolveExternalWrenchCommand((ExternalWrenchCommand) commandToResolve, out.addExternalWrenchCommand());
+               break;
+            case OPTIMIZATION_SETTINGS:
+               resolveInverseDynamicsOptimizationSettingsCommand((InverseDynamicsOptimizationSettingsCommand) commandToResolve,
+                                                                 out.addInverseDynamicsOptimizationSettingsCommand());
+               break;
+            case JOINT_ACCELERATION_INTEGRATION:
+               resolveJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) commandToResolve, out.addJointAccelerationIntegrationCommand());
+               break;
+            case JOINT_LIMIT_ENFORCEMENT:
+               resolveJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) commandToResolve, out.addJointLimitEnforcementMethodCommand());
+               break;
+            case JOINTSPACE:
+               resolveJointspaceAccelerationCommand((JointspaceAccelerationCommand) commandToResolve, out.addJointspaceAccelerationCommand());
+               break;
+            case MOMENTUM:
+               resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
+               break;
+            case MOMENTUM_COST:
+               resolveLinearMomentumRateCostCommand((LinearMomentumRateCostCommand) commandToResolve, out.addLinearMomentumRateCostCommand());
+               break;
+            case PLANE_CONTACT_STATE:
+               resolvePlaneContactStateCommand((PlaneContactStateCommand) commandToResolve, out.addPlaneContactStateCommand());
+               break;
+            case TASKSPACE:
+               resolveSpatialAccelerationCommand((SpatialAccelerationCommand) commandToResolve, out.addSpatialAccelerationCommand());
+               break;
+            case COMMAND_LIST:
+               resolveInverseDynamicsCommandListInternal((InverseDynamicsCommandList) commandToResolve, out);
+               break;
+            case PRIVILEGED_CONFIGURATION:
+               resolvePrivilegedConfigurationCommand((PrivilegedConfigurationCommand) commandToResolve, out.addPrivilegedConfigurationCommand());
+               break;
+            case PRIVILEGED_JOINTSPACE_COMMAND:
+               resolvePrivilegedJointSpaceCommand((PrivilegedJointSpaceCommand) commandToResolve, out.addPrivilegedJointSpaceCommand());
+               break;
+            case LIMIT_REDUCTION:
+               resolveJointLimitReductionCommand((JointLimitReductionCommand) commandToResolve, out.addJointLimitReductionCommand());
+               break;
+            default:
+               throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
          }
       }
    }
@@ -361,39 +374,40 @@ public class CrossRobotCommandResolver
          InverseKinematicsCommand<?> commandToResolve = in.getCommand(commandIndex);
          switch (commandToResolve.getCommandType())
          {
-         case OPTIMIZATION_SETTINGS:
-            resolveInverseKinematicsOptimizationSettingsCommand((InverseKinematicsOptimizationSettingsCommand) commandToResolve,
-                                                                out.addInverseKinematicsOptimizationSettingsCommand());
-            break;
-         case LIMIT_REDUCTION:
-            resolveJointLimitReductionCommand((JointLimitReductionCommand) commandToResolve, out.addJointLimitReductionCommand());
-            break;
-         case JOINT_LIMIT_ENFORCEMENT:
-            resolveJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) commandToResolve, out.addJointLimitEnforcementMethodCommand());
-            break;
-         case JOINTSPACE:
-            resolveJointspaceVelocityCommand((JointspaceVelocityCommand) commandToResolve, out.addJointspaceVelocityCommand());
-            break;
-         case MOMENTUM:
-            resolveMomentumCommand((MomentumCommand) commandToResolve, out.addMomentumCommand());
-            break;
-         case MOMENTUM_CONVEX_CONSTRAINT:
-            resolveLinearMomentumConvexConstraint2DCommand((LinearMomentumConvexConstraint2DCommand) commandToResolve, out.addLinearMomentumConvexConstraint2DCommand());
-            break;
-         case PRIVILEGED_CONFIGURATION:
-            resolvePrivilegedConfigurationCommand((PrivilegedConfigurationCommand) commandToResolve, out.addPrivilegedConfigurationCommand());
-            break;
-         case PRIVILEGED_JOINTSPACE_COMMAND:
-            resolvePrivilegedJointSpaceCommand((PrivilegedJointSpaceCommand) commandToResolve, out.addPrivilegedJointSpaceCommand());
-            break;
-         case TASKSPACE:
-            resolveSpatialVelocityCommand((SpatialVelocityCommand) commandToResolve, out.addSpatialVelocityCommand());
-            break;
-         case COMMAND_LIST:
-            resolveInverseKinematicsCommandListInternal((InverseKinematicsCommandList) commandToResolve, out);
-            break;
-         default:
-            throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
+            case OPTIMIZATION_SETTINGS:
+               resolveInverseKinematicsOptimizationSettingsCommand((InverseKinematicsOptimizationSettingsCommand) commandToResolve,
+                                                                   out.addInverseKinematicsOptimizationSettingsCommand());
+               break;
+            case LIMIT_REDUCTION:
+               resolveJointLimitReductionCommand((JointLimitReductionCommand) commandToResolve, out.addJointLimitReductionCommand());
+               break;
+            case JOINT_LIMIT_ENFORCEMENT:
+               resolveJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) commandToResolve, out.addJointLimitEnforcementMethodCommand());
+               break;
+            case JOINTSPACE:
+               resolveJointspaceVelocityCommand((JointspaceVelocityCommand) commandToResolve, out.addJointspaceVelocityCommand());
+               break;
+            case MOMENTUM:
+               resolveMomentumCommand((MomentumCommand) commandToResolve, out.addMomentumCommand());
+               break;
+            case MOMENTUM_CONVEX_CONSTRAINT:
+               resolveLinearMomentumConvexConstraint2DCommand((LinearMomentumConvexConstraint2DCommand) commandToResolve,
+                                                              out.addLinearMomentumConvexConstraint2DCommand());
+               break;
+            case PRIVILEGED_CONFIGURATION:
+               resolvePrivilegedConfigurationCommand((PrivilegedConfigurationCommand) commandToResolve, out.addPrivilegedConfigurationCommand());
+               break;
+            case PRIVILEGED_JOINTSPACE_COMMAND:
+               resolvePrivilegedJointSpaceCommand((PrivilegedJointSpaceCommand) commandToResolve, out.addPrivilegedJointSpaceCommand());
+               break;
+            case TASKSPACE:
+               resolveSpatialVelocityCommand((SpatialVelocityCommand) commandToResolve, out.addSpatialVelocityCommand());
+               break;
+            case COMMAND_LIST:
+               resolveInverseKinematicsCommandListInternal((InverseKinematicsCommandList) commandToResolve, out);
+               break;
+            default:
+               throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
          }
       }
    }
@@ -407,48 +421,48 @@ public class CrossRobotCommandResolver
          VirtualModelControlCommand<?> commandToResolve = in.getCommand(commandIndex);
          switch (commandToResolve.getCommandType())
          {
-         case CENTER_OF_PRESSURE:
-            resolveCenterOfPressureCommand((CenterOfPressureCommand) commandToResolve, out.addCenterOfPressureCommand());
-            break;
-         case CONTACT_WRENCH:
-            resolveContactWrenchCommand((ContactWrenchCommand) commandToResolve, out.addContactWrenchCommand());
-            break;
-         case EXTERNAL_WRENCH:
-            resolveExternalWrenchCommand((ExternalWrenchCommand) commandToResolve, out.addExternalWrenchCommand());
-            break;
-         case OPTIMIZATION_SETTINGS:
-            resolveVirtualModelControlOptimizationSettingsCommand((VirtualModelControlOptimizationSettingsCommand) commandToResolve,
-                                                                  out.addVirtualModelControlOptimizationSettingsCommand());
-            break;
-         case JOINT_ACCELERATION_INTEGRATION:
-            resolveJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) commandToResolve, out.addJointAccelerationIntegrationCommand());
-            break;
-         case JOINT_LIMIT_ENFORCEMENT:
-            resolveJointLimitEnforcementCommand((JointLimitEnforcementCommand) commandToResolve, out.addJointLimitEnforcementCommand());
-            break;
-         case JOINTSPACE:
-            resolveJointTorqueCommand((JointTorqueCommand) commandToResolve, out.addJointTorqueCommand());
-            break;
-         case MOMENTUM:
-            resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
-            break;
-         case PLANE_CONTACT_STATE:
-            resolvePlaneContactStateCommand((PlaneContactStateCommand) commandToResolve, out.addPlaneContactStateCommand());
-            break;
-         case COMMAND_LIST:
-            resolveVirtualModelControlCommandListInternal((VirtualModelControlCommandList) commandToResolve, out);
-            break;
-         case VIRTUAL_FORCE:
-            resolveVirtualForceCommand((VirtualForceCommand) commandToResolve, out.addVirtualForceCommand());
-            break;
-         case VIRTUAL_TORQUE:
-            resolveVirtualTorqueCommand((VirtualTorqueCommand) commandToResolve, out.addVirtualTorqueCommand());
-            break;
-         case VIRTUAL_WRENCH:
-            resolveVirtualWrenchCommand((VirtualWrenchCommand) commandToResolve, out.addVirtualWrenchCommand());
-            break;
-         default:
-            throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
+            case CENTER_OF_PRESSURE:
+               resolveCenterOfPressureCommand((CenterOfPressureCommand) commandToResolve, out.addCenterOfPressureCommand());
+               break;
+            case CONTACT_WRENCH:
+               resolveContactWrenchCommand((ContactWrenchCommand) commandToResolve, out.addContactWrenchCommand());
+               break;
+            case EXTERNAL_WRENCH:
+               resolveExternalWrenchCommand((ExternalWrenchCommand) commandToResolve, out.addExternalWrenchCommand());
+               break;
+            case OPTIMIZATION_SETTINGS:
+               resolveVirtualModelControlOptimizationSettingsCommand((VirtualModelControlOptimizationSettingsCommand) commandToResolve,
+                                                                     out.addVirtualModelControlOptimizationSettingsCommand());
+               break;
+            case JOINT_ACCELERATION_INTEGRATION:
+               resolveJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) commandToResolve, out.addJointAccelerationIntegrationCommand());
+               break;
+            case JOINT_LIMIT_ENFORCEMENT:
+               resolveJointLimitEnforcementCommand((JointLimitEnforcementCommand) commandToResolve, out.addJointLimitEnforcementCommand());
+               break;
+            case JOINTSPACE:
+               resolveJointTorqueCommand((JointTorqueCommand) commandToResolve, out.addJointTorqueCommand());
+               break;
+            case MOMENTUM:
+               resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
+               break;
+            case PLANE_CONTACT_STATE:
+               resolvePlaneContactStateCommand((PlaneContactStateCommand) commandToResolve, out.addPlaneContactStateCommand());
+               break;
+            case COMMAND_LIST:
+               resolveVirtualModelControlCommandListInternal((VirtualModelControlCommandList) commandToResolve, out);
+               break;
+            case VIRTUAL_FORCE:
+               resolveVirtualForceCommand((VirtualForceCommand) commandToResolve, out.addVirtualForceCommand());
+               break;
+            case VIRTUAL_TORQUE:
+               resolveVirtualTorqueCommand((VirtualTorqueCommand) commandToResolve, out.addVirtualTorqueCommand());
+               break;
+            case VIRTUAL_WRENCH:
+               resolveVirtualWrenchCommand((VirtualWrenchCommand) commandToResolve, out.addVirtualWrenchCommand());
+               break;
+            default:
+               throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
          }
       }
    }
@@ -462,26 +476,26 @@ public class CrossRobotCommandResolver
          FeedbackControlCommand<?> commandToResolve = in.getCommand(commandIndex);
          switch (commandToResolve.getCommandType())
          {
-         case JOINTSPACE:
-            resolveOneDoFJointFeedbackControlCommand((OneDoFJointFeedbackControlCommand) commandToResolve, out.addOneDoFJointFeedbackControlCommand());
-            break;
-         case ORIENTATION:
-            resolveOrientationFeedbackControlCommand((OrientationFeedbackControlCommand) commandToResolve, out.addOrientationFeedbackControlCommand());
-            break;
-         case POINT:
-            resolvePointFeedbackControlCommand((PointFeedbackControlCommand) commandToResolve, out.addPointFeedbackControlCommand());
-            break;
-         case TASKSPACE:
-            resolveSpatialFeedbackControlCommand((SpatialFeedbackControlCommand) commandToResolve, out.addSpatialFeedbackControlCommand());
-            break;
-         case MOMENTUM:
-            resolveCenterOfMassFeedbackControlCommand((CenterOfMassFeedbackControlCommand) commandToResolve, out.addCenterOfMassFeedbackControlCommand());
-            break;
-         case COMMAND_LIST:
-            resolveFeedbackControlCommandListInternal((FeedbackControlCommandList) commandToResolve, out);
-            break;
-         default:
-            throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
+            case JOINTSPACE:
+               resolveOneDoFJointFeedbackControlCommand((OneDoFJointFeedbackControlCommand) commandToResolve, out.addOneDoFJointFeedbackControlCommand());
+               break;
+            case ORIENTATION:
+               resolveOrientationFeedbackControlCommand((OrientationFeedbackControlCommand) commandToResolve, out.addOrientationFeedbackControlCommand());
+               break;
+            case POINT:
+               resolvePointFeedbackControlCommand((PointFeedbackControlCommand) commandToResolve, out.addPointFeedbackControlCommand());
+               break;
+            case TASKSPACE:
+               resolveSpatialFeedbackControlCommand((SpatialFeedbackControlCommand) commandToResolve, out.addSpatialFeedbackControlCommand());
+               break;
+            case MOMENTUM:
+               resolveCenterOfMassFeedbackControlCommand((CenterOfMassFeedbackControlCommand) commandToResolve, out.addCenterOfMassFeedbackControlCommand());
+               break;
+            case COMMAND_LIST:
+               resolveFeedbackControlCommandListInternal((FeedbackControlCommandList) commandToResolve, out);
+               break;
+            default:
+               throw new RuntimeException("The command type: " + commandToResolve.getCommandType() + " is not handled.");
          }
       }
    }

@@ -87,10 +87,10 @@ public class BasicPipeLineBehavior extends AbstractBehavior
          }
 
          @Override
-         public void onExit()
+         public void onExit(double timeInState)
          {
 
-            super.onExit();
+            super.onExit(timeInState);
             currentState = BasicStates.BEHAVIOR_COMPLETE;
 
          }

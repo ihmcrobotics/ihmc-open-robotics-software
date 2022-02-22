@@ -66,7 +66,7 @@ public class TrajectoryPointOptimizer
 
    private final TDoubleArrayList x0, x1, xd0, xd1;
    private final ArrayList<DMatrixRMaj> waypoints = new ArrayList<>();
-   private final MultiCubicSpline1DSolver solver = new MultiCubicSpline1DSolver();
+   private final MultiCubicSpline1DSolver solver;
    private final TDoubleArrayList w0, w1, wd0, wd1;
 
    private final DMatrixRMaj intervalTimes = new DMatrixRMaj(1, 1);
@@ -85,23 +85,39 @@ public class TrajectoryPointOptimizer
    private final DMatrixRMaj tempCoeffs = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj tempLine = new DMatrixRMaj(1, 1);
 
-   public TrajectoryPointOptimizer(int dimensions, YoRegistry parentRegistry)
-   {
-      this("", dimensions, parentRegistry);
+   public TrajectoryPointOptimizer(int dimensions, YoRegistry parentRegistry) {
+      this(dimensions, parentRegistry, true);
    }
 
-   public TrajectoryPointOptimizer(String namePrefix, int dimensions, YoRegistry parentRegistry)
+   public TrajectoryPointOptimizer(int dimensions, YoRegistry parentRegistry, boolean useNativeCommonOps)
    {
-      this(namePrefix, dimensions);
+      this("", dimensions, parentRegistry, useNativeCommonOps);
+   }
+
+   public TrajectoryPointOptimizer(String namePrefix, int dimensions, YoRegistry parentRegistry) {
+      this(namePrefix, dimensions, parentRegistry, true);
+   }
+
+   public TrajectoryPointOptimizer(String namePrefix, int dimensions, YoRegistry parentRegistry, boolean useNativeCommonOps)
+   {
+      this(namePrefix, dimensions, useNativeCommonOps);
       parentRegistry.addChild(registry);
    }
 
-   public TrajectoryPointOptimizer(int dimensions)
-   {
-      this("", dimensions);
+   public TrajectoryPointOptimizer(int dimensions) {
+      this("", dimensions, true);
    }
 
-   public TrajectoryPointOptimizer(String namePrefix, int dimensions)
+   public TrajectoryPointOptimizer(int dimensions, boolean useNativeCommonOps)
+   {
+      this("", dimensions, useNativeCommonOps);
+   }
+
+   public TrajectoryPointOptimizer(String namePrefix, int dimensions) {
+      this(namePrefix, dimensions, true);
+   }
+
+   public TrajectoryPointOptimizer(String namePrefix, int dimensions, boolean useNativeCommonOps)
    {
       this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.dimensions = new YoInteger(namePrefix + "Dimensions", registry);
@@ -112,6 +128,8 @@ public class TrajectoryPointOptimizer
       this.computeTimer = new ExecutionTimer(namePrefix + "ComputeTimer", 0.0, registry);
       this.timeUpdateTimer = new ExecutionTimer(namePrefix + "TimeUpdateTimer", 0.0, registry);
       this.timeGain = new YoDouble(namePrefix + "TimeGain", registry);
+
+      solver = new MultiCubicSpline1DSolver(useNativeCommonOps);
 
       dimensions = Math.max(dimensions, 0);
       this.dimensions.set(dimensions);

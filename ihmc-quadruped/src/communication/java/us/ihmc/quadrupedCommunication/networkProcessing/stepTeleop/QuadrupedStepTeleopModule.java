@@ -43,7 +43,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
                                     PointFootSnapperParameters pointFootSnapperParameters, LogModelProvider modelProvider, boolean startYoVariableServer,
                                     boolean logYoVariables, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      super(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer,
+      super(modelFactory.getRobotDefinition().getName(), modelFactory.createFullRobotModel(), modelProvider, startYoVariableServer,
             new DataServerSettings(logYoVariables, "StepTeleopModule"), updatePeriodMilliseconds, pubSubImplementation);
 
 

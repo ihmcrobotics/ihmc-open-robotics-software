@@ -1,20 +1,53 @@
 package us.ihmc.valkyrie.pushRecovery;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.DRCPushRecoveryTest;
+import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.parameters.ValkyrieSteppingParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 
 public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
 {
    @Override
+   public double getAngledPushMagnitude()
+   {
+      return 320.0;
+   }
+
+   @Override
    protected DRCRobotModel getRobotModel()
    {
-      return new ValkyrieRobotModel(RobotTarget.SCS);
+      return new ValkyrieRobotModel(RobotTarget.SCS)
+      {
+         public WalkingControllerParameters getWalkingControllerParameters()
+         {
+            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget())
+            {
+               @Override
+               public SteppingParameters getSteppingParameters()
+               {
+                  return new ValkyrieSteppingParameters(getRobotPhysicalProperties(), getTarget())
+                  {
+                     @Override
+                     public double getMaxStepWidth()
+                     {
+                        return 0.8;
+                     }
+                  };
+
+               };
+            };
+         }
+      };
+
    }
 
    @Tag("humanoid-push-recovery-slow")
@@ -71,6 +104,27 @@ public class ValkyriePushRecoveryTest extends DRCPushRecoveryTest
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
       super.testPushWhileInTransfer();
+   }
+
+   @Disabled
+   @Test
+   public void testFailureAfterRecoveryStep() throws SimulationExceededMaximumTimeException
+   {
+      super.testFailureAfterRecoveryStep();
+   }
+
+   @Disabled
+   @Test
+   public void testRecoveryAngledWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoveryAngledWhileInFlamingoStance();
+   }
+
+   @Disabled
+   @Test
+   public void testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoveryPushForwardWhileInFlamingoStanceAndAfterTouchDown();
    }
 
    @Tag("humanoid-push-recovery")

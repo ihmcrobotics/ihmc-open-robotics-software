@@ -3,8 +3,8 @@ package us.ihmc.footstepPlanning.graphSearch;
 import us.ihmc.footstepPlanning.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
-import us.ihmc.footstepPlanning.graphSearch.stepExpansion.FootstepExpansion;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculatorInterface;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.FootstepExpansion;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 
@@ -130,6 +130,11 @@ public class AStarFootstepPlannerIterationConductor
    public DirectedGraph<FootstepGraphNode> getGraph()
    {
       return graph;
+   }
+
+   public double getCostFromStart(FootstepGraphNode node)
+   {
+      return graph.getCostFromStart(node);
    }
 
    public AStarIterationData<FootstepGraphNode> getIterationData()

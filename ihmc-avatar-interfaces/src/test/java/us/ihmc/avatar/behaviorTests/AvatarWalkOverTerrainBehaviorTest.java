@@ -70,7 +70,7 @@ public abstract class AvatarWalkOverTerrainBehaviorTest implements MultiRobotTes
 
       simulationTestHelper.createSimulation(getClass().getSimpleName(), !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer(), true);
 
-      PacketCommunicator behaviorCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOUR_MODULE_PORT,
+      PacketCommunicator behaviorCommunicator = PacketCommunicator.createIntraprocessPacketCommunicator(NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT,
                                                                                                         new IHMCCommunicationKryoNetClassList());
       behaviorCommunicator.connect();
 

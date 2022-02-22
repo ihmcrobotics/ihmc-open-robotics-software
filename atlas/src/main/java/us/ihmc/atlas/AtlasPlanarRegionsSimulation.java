@@ -10,7 +10,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 
 public class AtlasPlanarRegionsSimulation
 {
-   private static final DataSetName DATA_SET_TO_USE = DataSetName._20200513_151318_StairsIHMC_Bottom;
+   private static final DataSetName DATA_SET_TO_USE = DataSetName._20190219_182005_SimpleStepOnBox;
    private static final boolean GENERATE_GROUND_PLANE = false;
    private static final boolean ADD_EXTRA_CONTACT_POINTS = true;
 

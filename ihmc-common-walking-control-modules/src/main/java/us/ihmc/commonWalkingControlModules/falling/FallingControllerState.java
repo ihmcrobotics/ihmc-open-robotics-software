@@ -49,7 +49,7 @@ public class FallingControllerState extends HighLevelControllerState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
    }
 

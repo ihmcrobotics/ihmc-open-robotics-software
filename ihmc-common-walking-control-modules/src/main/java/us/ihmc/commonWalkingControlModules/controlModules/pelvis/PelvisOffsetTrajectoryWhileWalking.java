@@ -95,7 +95,7 @@ public class PelvisOffsetTrajectoryWhileWalking
             nextFootstep.getSoleReferenceFrame().getTransformToDesiredFrame(transformToParent, getParent());
          }
       };
-      nextSoleZUpFrame = new ZUpFrame(worldFrame, nextSoleFrame, "nextAnkleZUp");
+      nextSoleZUpFrame = new ZUpFrame(nextSoleFrame, "nextAnkleZUp");
 
       addPelvisOffsetsBasedOnStep.set(pelvisOffsetWhileWalkingParameters.addPelvisOrientationOffsetsFromWalkingMotion());
       pelvisPitchAngleRatio.set(pelvisOffsetWhileWalkingParameters.getPelvisPitchRatioOfLegAngle());

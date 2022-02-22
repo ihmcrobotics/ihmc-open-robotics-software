@@ -27,7 +27,7 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
    }
 
    @Override
-   default void onExit()
+   default void onExit(double timeInState)
    {
    }
 
@@ -56,7 +56,6 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
                                 FrameVector2DReadOnly desiredCoMVelocity,
                                 boolean isInDoubleSupport,
                                 double omega0,
-                                boolean isRecoveringFromPush,
                                 FeetManager feetManager);
 
    default TaskspaceTrajectoryStatusMessage pollStatusToReport()

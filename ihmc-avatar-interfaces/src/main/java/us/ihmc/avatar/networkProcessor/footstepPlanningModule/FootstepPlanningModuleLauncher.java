@@ -2,10 +2,11 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -16,9 +17,6 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlannerRequestedAction;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.FootstepPlannerOccupancyMapAssembler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -39,6 +37,9 @@ public class FootstepPlanningModuleLauncher
    private static final String LOG_DIRECTORY_ENVIRONMENT_VARIABLE = "IHMC_FOOTSTEP_PLANNER_LOG_DIR";
    private static final String LOG_DIRECTORY;
 
+   // TODO publish version of ihmc-commons with access to capacity of RecyclingArrayList so that ros message field capacities can be accessed from the field's java object
+   private static final int footstepPlanCapacity = 50;
+
    static
    {
       String requestedLogDirectory = System.getenv(LOG_DIRECTORY_ENVIRONMENT_VARIABLE);
@@ -51,9 +52,11 @@ public class FootstepPlanningModuleLauncher
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel)
    {
       String moduleName = robotModel.getSimpleRobotName();
-      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
+      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
+      StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
@@ -63,7 +66,8 @@ public class FootstepPlanningModuleLauncher
                                         footstepPlannerParameters,
                                         swingPlannerParameters,
                                         walkingControllerParameters,
-                                        footPolygons);
+                                        footPolygons,
+                                        stepReachabilityData);
    }
 
    /**
@@ -168,6 +172,7 @@ public class FootstepPlanningModuleLauncher
 
       footstepPlanningModule.addStatusCallback(output ->
                                                {
+                                                  cropPlanToCapacity(output.getFootstepPlan());
                                                   FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
                                                   output.setPacket(outputStatus);
                                                   resultPublisher.publish(outputStatus);
@@ -178,6 +183,14 @@ public class FootstepPlanningModuleLauncher
                                                              FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, -1.0, -1.0);
                                                              swingReplanPublisher.publish(footstepDataListMessage);
                                                           });
+   }
+
+   private static void cropPlanToCapacity(FootstepPlan footstepPlan)
+   {
+      while (footstepPlan.getNumberOfSteps() > footstepPlanCapacity)
+      {
+         footstepPlan.remove(footstepPlan.getNumberOfSteps() - 1);
+      }
    }
 
    private static void createOccupancyGridCallback(ROS2NodeInterface ros2Node,

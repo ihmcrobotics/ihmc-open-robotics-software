@@ -28,7 +28,7 @@ public class FootPlacementConstraintCalculator
       {
          Point2DReadOnly vertex = polygonToWiggle.get(i);
 
-         boolean pointIsInside = PointInPolygonSolver.isPointInsidePolygon(concavePolygonToWiggleInto, vertex);
+         boolean pointIsInside = StepConstraintPolygonTools.isPointInsidePolygon(concavePolygonToWiggleInto, vertex);
          double distanceSquaredFromPerimeter = distanceSquaredFromPerimeter(concavePolygonToWiggleInto, vertex, closestPerimeterPoint);
 
          double signedDistanceSquared = pointIsInside ? -distanceSquaredFromPerimeter : distanceSquaredFromPerimeter;

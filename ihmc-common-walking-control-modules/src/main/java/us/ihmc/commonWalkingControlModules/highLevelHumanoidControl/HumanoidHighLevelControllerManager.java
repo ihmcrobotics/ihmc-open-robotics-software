@@ -13,7 +13,9 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLow
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerStateTransitionFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -77,10 +79,13 @@ public class HumanoidHighLevelControllerManager implements RobotController
    public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
                                              HighLevelControllerName initialControllerState, HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
+                                             PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              YoEnum<HighLevelControllerName> requestedHighLevelControllerState,
                                              EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
                                              ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
-                                             HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
+                                             HighLevelControlManagerFactory managerFactory,
+                                             WholeBodyControllerCoreFactory controllerCoreFactory,
+                                             HighLevelHumanoidControllerToolbox controllerToolbox,
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder, JointDesiredOutputListBasics lowLevelControllerOutput)
    {
@@ -97,13 +102,14 @@ public class HumanoidHighLevelControllerManager implements RobotController
       controllerFactoryHelper = new HighLevelControllerFactoryHelper();
       controllerFactoryHelper.setCommandInputManager(commandInputManager);
       controllerFactoryHelper.setStatusMessageOutputManager(statusMessageOutputManager);
-      controllerFactoryHelper.setParameters(highLevelControllerParameters, walkingControllerParameters);
+      controllerFactoryHelper.setParameters(highLevelControllerParameters, walkingControllerParameters, pushRecoveryControllerParameters);
       controllerFactoryHelper.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       controllerFactoryHelper.setLowLevelControllerOutput(lowLevelControllerOutput);
       controllerFactoryHelper.setRequestedHighLevelControllerState(requestedHighLevelControllerState);
       controllerFactoryHelper.setForceSensorDataHolder(forceSensorDataHolder);
 
       stateMachine = setUpStateMachine(initialControllerState, controllerStateFactories, controllerTransitionFactories, managerFactory,
+                                       controllerCoreFactory,
                                        controllerToolbox.getYoTime(), registry);
       isListeningToHighLevelStateMessage.set(true);
       for (HighLevelControllerState highLevelControllerState : highLevelControllerStates.values())
@@ -190,11 +196,14 @@ public class HumanoidHighLevelControllerManager implements RobotController
    private StateMachine<HighLevelControllerName, HighLevelControllerState> setUpStateMachine(HighLevelControllerName initialControllerState,
                                                                                              EnumMap<HighLevelControllerName, HighLevelControllerStateFactory> controllerStateFactories,
                                                                                              ArrayList<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories,
-                                                                                             HighLevelControlManagerFactory managerFactory, YoDouble yoTime,
+                                                                                             HighLevelControlManagerFactory managerFactory,
+                                                                                             WholeBodyControllerCoreFactory controllerCoreFactory,
+                                                                                             YoDouble yoTime,
                                                                                              YoRegistry registry)
    {
       controllerFactoryHelper.setControllerFactories(controllerStateFactories);
       controllerFactoryHelper.setHighLevelControlManagerFactory(managerFactory);
+      controllerFactoryHelper.setWholeBodyControllerCoreFactory(controllerCoreFactory);
 
       StateMachineFactory<HighLevelControllerName, HighLevelControllerState> factory = new StateMachineFactory<>(HighLevelControllerName.class);
       factory.setNamePrefix("highLevelControllerName").setRegistry(registry).buildYoClock(yoTime);
@@ -236,6 +245,8 @@ public class HumanoidHighLevelControllerManager implements RobotController
             statusMessageOutputManager.reportStatusMessage(highLevelStateChangeStatusMessage);
          }
       });
+
+      factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousHighLevelControllerName(from)));
 
       return factory.build(initialControllerState);
    }

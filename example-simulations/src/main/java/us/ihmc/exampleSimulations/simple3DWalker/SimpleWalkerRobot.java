@@ -103,7 +103,7 @@ public class SimpleWalkerRobot extends Robot
             transformToParent.getRotation().set(bodyRotation);
          }
       };
-      bodyZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), bodyFrame,"bodyZUpFrame");
+      bodyZUpFrame = new ZUpFrame(bodyFrame,"bodyZUpFrame");
       bodyJoint.setLink(bodyLink);
       this.addRootJoint(bodyJoint);
 

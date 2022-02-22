@@ -11,10 +11,11 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredLoadMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -125,9 +126,9 @@ public class JointSettingsHelper
 
       if (!jointsWithoutParameters.isEmpty())
       {
-         PrintTools.warn("In State " + stateName + "\n"
-               + "Got joints without acceleration integration parameters.\n"
-               + "Will use default values for: " + jointsWithoutParameters);
+         LogTools.warn("In State " + stateName + "\n"
+                       + "Got joints without acceleration integration parameters.\n"
+                       + "Will use default values for: " + jointsWithoutParameters);
       }
       if (!jointsWithoutBehaviors.isEmpty())
       {
@@ -143,6 +144,7 @@ public class JointSettingsHelper
          JointDesiredOutputBasics jointDesiredOutput = stateSpecificJointSettings.getJointDesiredOutput(jointIdx);
          boolean isLoaded = jointLoadStatusProvider.isJointLoadBearing(jointNames[jointIdx]);
          boolean wasLoaded = jointsLoaded[jointIdx];
+         jointDesiredOutput.setLoadMode(isLoaded ? JointDesiredLoadMode.LOADED : JointDesiredLoadMode.NOT_LOADED);
          jointDesiredOutput.setResetIntegrators(isLoaded != wasLoaded);
          jointsLoaded[jointIdx] = isLoaded;
 
@@ -160,7 +162,7 @@ public class JointSettingsHelper
             jointDesiredOutput.setVelocityIntegrationBreakFrequency(integrationParametersLoaded.getVelocityBreakFrequency());
             jointDesiredOutput.setPositionIntegrationBreakFrequency(integrationParametersLoaded.getPositionBreakFrequency());
             jointDesiredOutput.setPositionIntegrationMaxError(integrationParametersLoaded.getMaxPositionError());
-            jointDesiredOutput.setVelocityIntegrationMaxError(integrationParametersLoaded.getMaxVelocity());
+            jointDesiredOutput.setVelocityIntegrationMaxError(integrationParametersLoaded.getMaxVelocityError());
          }
          else if (integrationParametersNoLoad != null)
          { // The joint is not loaded or we do not have parameters for the loaded joint but we have default no load parameters.
@@ -168,7 +170,7 @@ public class JointSettingsHelper
             jointDesiredOutput.setVelocityIntegrationBreakFrequency(integrationParametersNoLoad.getVelocityBreakFrequency());
             jointDesiredOutput.setPositionIntegrationBreakFrequency(integrationParametersNoLoad.getPositionBreakFrequency());
             jointDesiredOutput.setPositionIntegrationMaxError(integrationParametersNoLoad.getMaxPositionError());
-            jointDesiredOutput.setVelocityIntegrationMaxError(integrationParametersNoLoad.getMaxVelocity());
+            jointDesiredOutput.setVelocityIntegrationMaxError(integrationParametersNoLoad.getMaxVelocityError());
          }
 
          JointDesiredBehaviorReadOnly desiredBehaviorNoLoad = jointDesiredBehaviorNoLoad[jointIdx];

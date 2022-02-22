@@ -3,22 +3,25 @@ package us.ihmc.gdx.ui.missionControl;
 import imgui.internal.ImGui;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 public abstract class RestartableMissionControlProcess implements MissionControlProcess
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    volatile boolean starting = false;
    volatile boolean started = false;
    volatile boolean stopping = false;
 
-   private final ResettableExceptionHandlingExecutorService executorService;
+   private ResettableExceptionHandlingExecutorService executorService;
 
-   public RestartableMissionControlProcess()
+   public ResettableExceptionHandlingExecutorService getOrCreateExecutor()
    {
-      executorService = MissingThreadTools.newSingleThreadExecutor(getName() + "ManagementThread", true);
+      if (executorService == null)
+         executorService = MissingThreadTools.newSingleThreadExecutor(getName() + "ManagementThread", true);
+      return executorService;
    }
 
    protected abstract void startInternal();
@@ -28,19 +31,19 @@ public abstract class RestartableMissionControlProcess implements MissionControl
    public abstract String getName();
 
    @Override
-   public void render()
+   public void renderImGuiWidgets()
    {
       ImGui.text(getName() + ":");
       ImGui.sameLine();
       if (started)
       {
-         if (ImGui.button(ImGuiTools.uniqueLabel(getName(), "Restart")))
+         if (ImGui.button(labels.get("Restart")))
          {
             stop();
             start();
          }
          ImGui.sameLine();
-         if (ImGui.button(ImGuiTools.uniqueLabel(getName(), "Stop")))
+         if (ImGui.button(labels.get("Stop")))
          {
             stop();
          }
@@ -48,14 +51,30 @@ public abstract class RestartableMissionControlProcess implements MissionControl
       else if (starting)
       {
          ImGui.text("Starting...");
+//         ImGui.sameLine();
+//         if (ImGui.button(labels.get("Cancel", 0)))
+//         {
+//            getOrCreateExecutor().interruptAndReset();
+//            starting = false;
+//            started = false;
+//            stopping = false;
+//         }
       }
       else if (stopping)
       {
          ImGui.text("Stopping...");
+//         ImGui.sameLine();
+//         if (ImGui.button(labels.get("Cancel", 1)))
+//         {
+//            getOrCreateExecutor().interruptAndReset();
+//            starting = false;
+//            started = false;
+//            stopping = false;
+//         }
       }
       else
       {
-         if (ImGui.button(ImGuiTools.uniqueLabel(getName(), "Start")))
+         if (ImGui.button(labels.get("Start")))
          {
             start();
          }
@@ -65,7 +84,7 @@ public abstract class RestartableMissionControlProcess implements MissionControl
    public void start()
    {
       starting = true;
-      executorService.execute(() ->
+      getOrCreateExecutor().execute(() ->
       {
          startInternal();
          starting = false;
@@ -77,7 +96,7 @@ public abstract class RestartableMissionControlProcess implements MissionControl
    {
       started = false;
       stopping = true;
-      executorService.execute(() ->
+      getOrCreateExecutor().execute(() ->
       {
          stopInternal();
          stopping = false;
@@ -121,7 +140,7 @@ public abstract class RestartableMissionControlProcess implements MissionControl
             LogTools.error("{} ran out of time to stop!", getName());
          }
       }
-      if (!executorService.isShutdown())
+      if (executorService != null && !executorService.isShutdown())
          executorService.destroy();
    }
 }

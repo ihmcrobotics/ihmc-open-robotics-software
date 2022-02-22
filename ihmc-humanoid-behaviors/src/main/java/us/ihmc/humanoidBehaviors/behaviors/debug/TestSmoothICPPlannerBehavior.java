@@ -134,9 +134,9 @@ public class TestSmoothICPPlannerBehavior extends StateMachineBehavior<TestSmoot
       BehaviorAction waitForConfirmation = new BehaviorAction()
       {
          @Override
-         public void onExit()
+         public void onExit(double timeInState)
          {
-            super.onExit();
+            super.onExit(timeInState);
          }
       };
 

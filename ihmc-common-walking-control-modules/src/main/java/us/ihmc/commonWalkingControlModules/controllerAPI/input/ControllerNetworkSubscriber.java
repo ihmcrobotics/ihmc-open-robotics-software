@@ -91,16 +91,6 @@ public class ControllerNetworkSubscriber
       createGlobalStatusMessageListener();
    }
 
-   public ROS2Topic<?> getInputTopic()
-   {
-      return inputTopic;
-   }
-
-   public ROS2Topic<?> getOutputTopic()
-   {
-      return outputTopic;
-   }
-
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
                                                                             int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)

@@ -14,7 +14,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -73,8 +72,8 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final PoseReferenceFrame solePoseReferenceFrame = new PoseReferenceFrame("desiredPositionFrame", worldFrame);
    private final PoseReferenceFrame startOfSwingReferenceFrame = new PoseReferenceFrame("startOfSwingFrame", worldFrame);
    private final PoseReferenceFrame endOfSwingReferenceFrame = new PoseReferenceFrame("endOfSwingFrame", worldFrame);
-   private final ZUpFrame endOfSwingZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), endOfSwingReferenceFrame, "endOfSwingZUpFrame");
-   private final ZUpFrame startOfSwingZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), startOfSwingReferenceFrame, "startOfSwingZUpFrame");
+   private final ZUpFrame endOfSwingZUpFrame = new ZUpFrame(endOfSwingReferenceFrame, "endOfSwingZUpFrame");
+   private final ZUpFrame startOfSwingZUpFrame = new ZUpFrame(startOfSwingReferenceFrame, "startOfSwingZUpFrame");
 
    private static final int numberOfTrajectorySegmentsToCalculateLength = 10;
    private final YoDouble initialTrajectoryLength;
@@ -139,7 +138,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix,
                                                                 steppingParameters.getMinSwingHeightFromStanceFoot(),
                                                                 steppingParameters.getMaxSwingHeightFromStanceFoot(),
-                                                                steppingParameters.getDefaultSwingHeightFromStanceFoot(), this.registry,
+                                                                steppingParameters.getDefaultSwingHeightFromStanceFoot(),
+                                                                steppingParameters.getCustomWaypointAngleThreshold(),
+                                                                this.registry,
                                                                 graphicsListRegistry);
       minimumSwingHeight = steppingParameters.getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = steppingParameters.getMaxSwingHeightFromStanceFoot();
@@ -630,7 +631,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
          for (PlanarRegion planarRegion : planarRegions)
          {
-            Point3DReadOnly closestPointOnRegion = PlanarRegionTools.closestPointOnPlane(trajectoryPosition, planarRegion);
+            Point3DReadOnly closestPointOnRegion = PlanarRegionTools.closestPointOnPlanarRegion(trajectoryPosition, planarRegion);
             updateClosestAndMostSevereIntersectionPoint(SwingOverPlanarRegionsCollisionType.NO_INTERSECTION, closestPointOnRegion);
 
             if (closestPointOnRegion == null)

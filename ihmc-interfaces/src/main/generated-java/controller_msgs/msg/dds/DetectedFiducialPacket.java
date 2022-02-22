@@ -17,10 +17,13 @@ public class DetectedFiducialPacket extends Packet<DetectedFiducialPacket> imple
    public long sequence_id_;
    public long fiducial_id_;
    public us.ihmc.euclid.geometry.Pose3D fiducial_transform_to_world_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  bounds_;
 
    public DetectedFiducialPacket()
    {
       fiducial_transform_to_world_ = new us.ihmc.euclid.geometry.Pose3D();
+      bounds_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D> (100, new geometry_msgs.msg.dds.PointPubSubType());
+
    }
 
    public DetectedFiducialPacket(DetectedFiducialPacket other)
@@ -36,6 +39,7 @@ public class DetectedFiducialPacket extends Packet<DetectedFiducialPacket> imple
       fiducial_id_ = other.fiducial_id_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.fiducial_transform_to_world_, fiducial_transform_to_world_);
+      bounds_.set(other.bounds_);
    }
 
    /**
@@ -69,6 +73,12 @@ public class DetectedFiducialPacket extends Packet<DetectedFiducialPacket> imple
    }
 
 
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getBounds()
+   {
+      return bounds_;
+   }
+
+
    public static Supplier<DetectedFiducialPacketPubSubType> getPubSubType()
    {
       return DetectedFiducialPacketPubSubType::new;
@@ -91,6 +101,13 @@ public class DetectedFiducialPacket extends Packet<DetectedFiducialPacket> imple
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fiducial_id_, other.fiducial_id_, epsilon)) return false;
 
       if (!this.fiducial_transform_to_world_.epsilonEquals(other.fiducial_transform_to_world_, epsilon)) return false;
+      if (this.bounds_.size() != other.bounds_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.bounds_.size(); i++)
+         {  if (!this.bounds_.get(i).epsilonEquals(other.bounds_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -109,6 +126,7 @@ public class DetectedFiducialPacket extends Packet<DetectedFiducialPacket> imple
       if(this.fiducial_id_ != otherMyClass.fiducial_id_) return false;
 
       if (!this.fiducial_transform_to_world_.equals(otherMyClass.fiducial_transform_to_world_)) return false;
+      if (!this.bounds_.equals(otherMyClass.bounds_)) return false;
 
       return true;
    }
@@ -124,7 +142,9 @@ public class DetectedFiducialPacket extends Packet<DetectedFiducialPacket> imple
       builder.append("fiducial_id=");
       builder.append(this.fiducial_id_);      builder.append(", ");
       builder.append("fiducial_transform_to_world=");
-      builder.append(this.fiducial_transform_to_world_);
+      builder.append(this.fiducial_transform_to_world_);      builder.append(", ");
+      builder.append("bounds=");
+      builder.append(this.bounds_);
       builder.append("}");
       return builder.toString();
    }

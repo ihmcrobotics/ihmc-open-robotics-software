@@ -4,7 +4,6 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.gdx.vr.GDXVRManager;
 
 public class GDXApplicationCreator
 {
@@ -24,13 +23,7 @@ public class GDXApplicationCreator
       applicationConfiguration.setTitle(title);
       applicationConfiguration.setWindowedMode((int) width, (int) height);
       // TODO: These options are work in progress. Not sure what is the best setting for everyone.
-      if (GDXVRManager.isVREnabled())
-      {
-         applicationConfiguration.useVsync(false); // important to disable vsync for VR
-         applicationConfiguration.setIdleFPS(240);
-         applicationConfiguration.setForegroundFPS(240);
-      }
-      else if (Boolean.parseBoolean(System.getProperty("gdx.free.spin")))
+      if (Boolean.parseBoolean(System.getProperty("gdx.free.spin")))
       {
          applicationConfiguration.setIdleFPS(Integer.MAX_VALUE);
          applicationConfiguration.setForegroundFPS(Integer.MAX_VALUE);
@@ -42,7 +35,7 @@ public class GDXApplicationCreator
       }
       applicationConfiguration.useVsync(false); // vsync on seems to limit FPS to 30 so keep off
       applicationConfiguration.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
-      applicationConfiguration.useOpenGL3(true, 3, 2);
+      applicationConfiguration.useOpenGL3(true, 3, 3);
       return applicationConfiguration;
    }
 
@@ -51,9 +44,7 @@ public class GDXApplicationCreator
       launchGDXApplication(getDefaultConfiguration(title, width, height), applicationAdapter, title);
    }
 
-   public static void launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration,
-                                                        Lwjgl3ApplicationAdapter applicationAdapter,
-                                                        String title)
+   public static void launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration, Lwjgl3ApplicationAdapter applicationAdapter, String title)
    {
       ThreadTools.startAThread(() ->
       {

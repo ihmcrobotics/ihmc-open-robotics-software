@@ -2,37 +2,22 @@ package us.ihmc.behaviors.tools.behaviorTree;
 
 import java.util.function.BooleanSupplier;
 
-import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
-
 /**
  * A behavior tree action that draws from a boolean supplier.
  */
-public class BehaviorTreeCondition implements BehaviorTreeAction
+public class BehaviorTreeCondition extends BehaviorTreeAction implements BehaviorTreeConditionBasics
 {
    private final BooleanSupplier conditionSupplier;
 
    public BehaviorTreeCondition(BooleanSupplier conditionSupplier)
    {
       this.conditionSupplier = conditionSupplier;
-   }
-
-   protected boolean checkCondition()
-   {
-      return conditionSupplier.getAsBoolean();
+      setType(BehaviorTreeCondition.class);
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public boolean checkCondition()
    {
-      boolean success = checkCondition();
-
-      if (success)
-      {
-         return SUCCESS;
-      }
-      else
-      {
-         return FAILURE;
-      }
+      return conditionSupplier.getAsBoolean();
    }
 }

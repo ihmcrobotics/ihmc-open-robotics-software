@@ -359,28 +359,6 @@ public class FootstepPlannerLogLoader
       {
          homeRegionCluster.getNonNavigableExtrusionsInLocal().addPoint(readPoint2D(false, dataFileReader.readLine()));
       }
-      int numberOfPreferredNaviableExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
-      for (int i = 0; i < numberOfPreferredNaviableExtrusions; i++)
-      {
-         int numberOfExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
-         ExtrusionHull extrusionHull = new ExtrusionHull();
-         for (int j = 0; j < numberOfExtrusions; j++)
-         {
-            extrusionHull.addPoint(readPoint2D(false, dataFileReader.readLine()));
-         }
-         homeRegionCluster.getPreferredNavigableExtrusionsInLocal().add(extrusionHull);
-      }
-      int numberOfPreferredNonNaviableExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
-      for (int i = 0; i < numberOfPreferredNonNaviableExtrusions; i++)
-      {
-         int numberOfExtrusions = getIntCSV(true, dataFileReader.readLine())[0];
-         ExtrusionHull extrusionHull = new ExtrusionHull();
-         for (int j = 0; j < numberOfExtrusions; j++)
-         {
-            extrusionHull.addPoint(readPoint2D(false, dataFileReader.readLine()));
-         }
-         homeRegionCluster.getPreferredNonNavigableExtrusionsInLocal().add(extrusionHull);
-      }
 
       VisibilityMap visibilityMapInLocal = new VisibilityMap();
       loadVisibilityMap(dataFileReader, visibilityMapInLocal);
@@ -525,7 +503,7 @@ public class FootstepPlannerLogLoader
       startPose.interpolate(requestPacket.getStartLeftFootPose(), requestPacket.getStartRightFootPose(), 0.5);
       goalPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
 
-      String dataSetName = "20210223_155750_Door";
+      String dataSetName = "20210419_111333_GPUCinders1";
       PlanarRegionsListMessage planarRegionsMessage = requestPacket.getPlanarRegionsListMessage();
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
 

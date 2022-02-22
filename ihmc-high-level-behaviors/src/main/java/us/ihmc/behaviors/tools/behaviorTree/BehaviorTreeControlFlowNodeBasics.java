@@ -3,44 +3,36 @@ package us.ihmc.behaviors.tools.behaviorTree;
 import java.util.ArrayList;
 
 /**
- * Add default ArrayList storage of children nodes for a control flow node.
+ * A behavior tree control flow node can have children, so provide the ability to add them.
  */
-public abstract class BehaviorTreeControlFlowNodeBasics implements BehaviorTreeControlFlowNode
+public interface BehaviorTreeControlFlowNodeBasics extends BehaviorTreeNodeBasics
 {
-   private final ArrayList<BehaviorTreeNode> children = new ArrayList<>();
-   private boolean hasBeenClocked = false;
-
-   protected ArrayList<BehaviorTreeNode> getChildren()
+   public default BehaviorTreeNodeStatus tick()
    {
-      return children;
-   }
-
-   @Override
-   public <T extends BehaviorTreeNode> T addChild(T child)
-   {
-      children.add(child);
-      return child;
-   }
-
-   @Override
-   public void clock()
-   {
-      hasBeenClocked = true;
-      for (BehaviorTreeNode child : getChildren())
-      {
-         child.clock();
-      }
-   }
-
-   @Override
-   public BehaviorTreeNodeStatus tick()
-   {
-      if (!hasBeenClocked)
+      if (!getHasBeenClocked())
       {
          clock();
       }
-      hasBeenClocked = false;
+      setHasBeenClocked(false);
 
-      return null;
+      return BehaviorTreeNodeBasics.super.tick();
    }
+
+   public default void clock()
+   {
+      setHasBeenClocked(true);
+      for (BehaviorTreeNodeBasics child : getChildren())
+      {
+         child.clock();
+      }
+      BehaviorTreeNodeBasics.super.clock();
+   }
+
+   public abstract <T extends BehaviorTreeNodeBasics> T addChild(T child);
+
+   public abstract ArrayList<BehaviorTreeNodeBasics> getChildren();
+
+   public abstract void setHasBeenClocked(boolean hasBeenClocked);
+
+   public abstract boolean getHasBeenClocked();
 }

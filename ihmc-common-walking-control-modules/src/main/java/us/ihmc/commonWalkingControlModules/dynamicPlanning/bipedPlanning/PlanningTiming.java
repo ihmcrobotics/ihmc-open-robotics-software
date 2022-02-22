@@ -45,6 +45,12 @@ public class PlanningTiming extends YoSaveableModuleState
       setTransferTime(timing.getTransferTime());
    }
 
+   public void set(double swingTime, double transferTime)
+   {
+      setSwingTime(swingTime);
+      setTransferTime(transferTime);
+   }
+
    public void setSwingTime(double swingTime)
    {
       this.swingTime.set(swingTime);

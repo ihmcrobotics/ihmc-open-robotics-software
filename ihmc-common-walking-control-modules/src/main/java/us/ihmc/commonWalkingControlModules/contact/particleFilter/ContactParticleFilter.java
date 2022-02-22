@@ -50,7 +50,7 @@ public class ContactParticleFilter
 
    private final JointBasics[] joints;
    private final int dofs;
-   private final JointspaceExternalContactEstimator jointspaceExternalContactEstimator;
+   private final ExternalTorqueEstimator externalTorqueEstimator;
    private final DMatrixRMaj systemJacobian;
    private final DMatrixRMaj jointNoiseVariance;
    private final DMatrixRMaj jointNoiseVarianceInv;
@@ -117,7 +117,7 @@ public class ContactParticleFilter
                                 YoRegistry parentRegistry)
    {
       this.joints = joints;
-      this.jointspaceExternalContactEstimator = new JointspaceExternalContactEstimator(joints, dt, dynamicMatrixUpdater, registry);
+      this.externalTorqueEstimator = new ExternalTorqueEstimator(joints, dt, dynamicMatrixUpdater, registry);
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
       this.systemJacobian = new DMatrixRMaj(estimationVariables, dofs);
       this.jointNoiseVariance = CommonOps_DDRM.identity(dofs);
@@ -179,7 +179,7 @@ public class ContactParticleFilter
 
    public void initializeJointspaceEstimator()
    {
-      jointspaceExternalContactEstimator.initialize();
+      externalTorqueEstimator.initialize();
       contactPointEvaluator.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
    }
 
@@ -239,9 +239,9 @@ public class ContactParticleFilter
 
    public double computeJointspaceDisturbance()
    {
-      jointspaceExternalContactEstimator.doControl();
+      externalTorqueEstimator.doControl();
 
-      DMatrixRMaj jointspaceResidual = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
+      DMatrixRMaj jointspaceResidual = externalTorqueEstimator.getEstimatedExternalTorque();
       NativeCommonOps.multQuad(jointspaceResidual, jointNoiseVarianceInv, jointspaceResidualMagnitude);
       yoJointspaceResidualMagnitude.set(jointspaceResidualMagnitude.get(0, 0));
       return yoJointspaceResidualMagnitude.getValue();
@@ -249,7 +249,7 @@ public class ContactParticleFilter
 
    public void computeParticleFilterEstimation()
    {
-      DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
+      DMatrixRMaj observedExternalJointTorque = externalTorqueEstimator.getEstimatedExternalTorque();
 
       double totalWeight = 0.0;
 
@@ -383,7 +383,7 @@ public class ContactParticleFilter
          MatrixTools.setMatrixBlock(systemJacobian, 0, column, contactPointJacobian, 0, j, estimationVariables, 1, 1.0);
       }
 
-      contactPointEvaluator.computeMaximumLikelihoodForce(jointspaceExternalContactEstimator.getObservedExternalJointTorque(),
+      contactPointEvaluator.computeMaximumLikelihoodForce(externalTorqueEstimator.getEstimatedExternalTorque(),
                                                           systemJacobian,
                                                           jointNoiseVariance,
                                                           averageProjectedParticle.getContactPointFrame());
@@ -548,6 +548,6 @@ public class ContactParticleFilter
 
    public DMatrixRMaj getJointResiduals()
    {
-      return jointspaceExternalContactEstimator.getObservedExternalJointTorque();
+      return externalTorqueEstimator.getEstimatedExternalTorque();
    }
 }

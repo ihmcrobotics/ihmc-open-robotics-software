@@ -11,6 +11,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
+<?import javafx.scene.layout.VBox?>
 <AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.RobotOperationTabController">
 	<children>
       <HBox fx:id="robotOperationHBox">
@@ -21,7 +22,8 @@
       				<Button fx:id="homeAll" onAction="#homeAll" prefWidth="130.0" text="Home All" GridPane.rowIndex="1" />
       				<Button fx:id="freeze" onAction="#freeze" prefWidth="130.0" text="Freeze" GridPane.rowIndex="2" />
       				<Button fx:id="standPrep" onAction="#standPrep" prefWidth="130.0" text="Stand Prep" GridPane.rowIndex="3" />
-      				<Button fx:id="shutdown" onAction="#shutdown" prefWidth="130.0" text="Shutdown" GridPane.rowIndex="4" />
+                    <VBox GridPane.rowIndex="4" prefHeight="50"/>
+      				<Button fx:id="shutdown" onAction="#shutdown" prefWidth="130.0" text="Shutdown" GridPane.rowIndex="5" />
       
       				<Button fx:id="abortWalking" onAction="#abortWalking" prefHeight="26.0" prefWidth="146.0" text="Abort Walking" GridPane.columnIndex="1" GridPane.rowIndex="1" />
       				<Button fx:id="pauseWalking" onAction="#pauseWalking" prefHeight="26.0" prefWidth="145.0" text="Pause Walking" GridPane.columnIndex="1" GridPane.rowIndex="2" />

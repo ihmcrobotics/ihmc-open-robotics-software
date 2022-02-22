@@ -1,5 +1,6 @@
 package us.ihmc.gdx.ui.graphics.live;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
@@ -13,20 +14,21 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
-import us.ihmc.gdx.imgui.ImGuiPlot;
+import us.ihmc.gdx.ui.visualizers.ImGuiFrequencyPlot;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class GDXROS1PointCloudVisualizer implements RenderableProvider
+public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implements RenderableProvider
 {
-   private static final int MAX_POINTS = 50000;
+   private static final int MAX_POINTS = 100000;
 
    private final String ros1PointCloudTopic;
-   private final ReferenceFrame sensorBaseFrame;
-   private final RigidBodyTransformReadOnly baseToSensorTransform;
+   private ReferenceFrame frame;
+   private RigidBodyTransformReadOnly transformAfterFrame;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
 //   private final ImFloat tuneX = new ImFloat(0.275f);
@@ -35,7 +37,7 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
 //   private final ImFloat tuneYaw = new ImFloat(0.01f);
 //   private final ImFloat tunePitch = new ImFloat(24.0f);
 //   private final ImFloat tuneRoll = new ImFloat(-0.045f);
-   private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
 
    private boolean packingA = true;
    private final RecyclingArrayList<Point3D32> pointsA = new RecyclingArrayList<>(MAX_POINTS, Point3D32::new);
@@ -43,30 +45,41 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
 
    private final ResettableExceptionHandlingExecutorService threadQueue;
 
-   private GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
+   private final GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
    private final RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
 
-   private boolean enabled = false;
    private AbstractRosTopicSubscriber<PointCloud2> subscriber;
    private long receivedCount = 0;
+   private Color color = Color.WHITE;
 
+   private boolean flipToZUp = false;
 
-   public GDXROS1PointCloudVisualizer(String ros1PointCloudTopic,
-                                      ReferenceFrame sensorBaseFrame,
-                                      RigidBodyTransformReadOnly baseToSensorTransform)
+   public GDXROS1PointCloudVisualizer(String title, String ros1PointCloudTopic)
    {
+      super(title);
       this.ros1PointCloudTopic = ros1PointCloudTopic;
-      this.sensorBaseFrame = sensorBaseFrame;
-      this.baseToSensorTransform = baseToSensorTransform;
-
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    }
 
-   public void setEnabled(boolean enabled)
+   @Override
+   public void create()
    {
-      this.enabled = enabled;
+      super.create();
+      pointCloudRenderer.create(MAX_POINTS);
    }
 
+   public void setFrame(ReferenceFrame frame)
+   {
+      this.frame = frame;
+   }
+
+   public void setFrame(ReferenceFrame frame, RigidBodyTransformReadOnly transformAfterFrame)
+   {
+      this.frame = frame;
+      this.transformAfterFrame = transformAfterFrame;
+   }
+
+   @Override
    public void subscribe(RosNodeInterface ros1Node)
    {
       subscriber = new AbstractRosTopicSubscriber<PointCloud2>(PointCloud2._TYPE)
@@ -74,13 +87,14 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
          @Override
          public void onNewMessage(PointCloud2 pointCloud2)
          {
-            ++receivedCount;
+            frequencyPlot.recordEvent();
             queueRenderPointCloud(pointCloud2);
          }
       };
       ros1Node.attachSubscriber(ros1PointCloudTopic, subscriber);
    }
 
+   @Override
    public void unsubscribe(RosNodeInterface ros1Node)
    {
       ros1Node.removeSubscriber(subscriber);
@@ -88,16 +102,17 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
 
    private void queueRenderPointCloud(PointCloud2 message)
    {
-      if (enabled)
+      if (isActive())
       {
          threadQueue.clearQueueAndExecute(() ->
          {
             try
             {
-               boolean hasColors = true;
+               boolean hasColors = false;
                PointCloudData pointCloudData = new PointCloudData(message, MAX_POINTS, hasColors);
 
-               pointCloudData.flipToZUp();
+               if (flipToZUp)
+                  pointCloudData.flipToZUp();
 
                // Should be tuned somewhere else
 //               baseToSensorTransform.setToZero();
@@ -105,9 +120,13 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
 //               double pitch = Math.toRadians(90.0 - tunePitch.get());
 //               baseToSensorTransform.appendOrientation(new YawPitchRoll(tuneYaw.get(), pitch, tuneRoll.get()));
 
-               sensorBaseFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
-               transformToWorld.multiply(baseToSensorTransform);
-               pointCloudData.applyTransform(transformToWorld);
+               if (frame != null)
+               {
+                  frame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
+                  if (transformAfterFrame != null)
+                     transformToWorld.multiply(transformAfterFrame);
+                  pointCloudData.applyTransform(transformToWorld);
+               }
 
                synchronized (pointsToRender)
                {
@@ -129,9 +148,11 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
       }
    }
 
-   public void create()
+   @Override
+   public void update()
    {
-      pointCloudRenderer.create(MAX_POINTS);
+      super.update();
+      updateMesh();
    }
 
    public void updateMesh()
@@ -141,7 +162,7 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
 
    public void updateMesh(float alpha)
    {
-      if (enabled)
+      if (isActive())
       {
          pointsToRender.clear();
          synchronized (pointsToRender)
@@ -153,18 +174,21 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
             }
          }
 
-         pointCloudRenderer.setPointsToRender(pointsToRender);
+         pointCloudRenderer.setPointsToRender(pointsToRender, color);
          if (!pointsToRender.isEmpty())
          {
-            pointCloudRenderer.updateMesh(alpha);
+            pointCloudRenderer.updateMesh();
          }
       }
    }
 
+   @Override
    public void renderImGuiWidgets()
    {
+      super.renderImGuiWidgets();
+
       ImGui.text(ros1PointCloudTopic);
-      receivedPlot.render(receivedCount);
+      frequencyPlot.renderImGuiWidgets();
 
       // 0.25, 0.0, 0.11
 //      ImGui.dragFloat("TuneX", tuneX.getData(), 0.0001f, 0.21f, 0.32f);
@@ -178,7 +202,17 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (enabled)
+      if (isActive())
          pointCloudRenderer.getRenderables(renderables, pool);
+   }
+
+   public void setFlipToZUp(boolean flipToZUp)
+   {
+      this.flipToZUp = flipToZUp;
+   }
+
+   public void setColor(Color color)
+   {
+      this.color = color;
    }
 }

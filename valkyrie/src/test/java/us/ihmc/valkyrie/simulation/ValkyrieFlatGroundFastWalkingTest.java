@@ -112,7 +112,7 @@ public class ValkyrieFlatGroundFastWalkingTest extends AvatarFlatGroundFastWalki
    @Override
    public double getFastSwingTime()
    {
-      return 0.49;
+      return 0.55;
    }
 
    @Override

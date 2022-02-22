@@ -10,6 +10,13 @@ public interface JointTorqueOffsetEstimator
 
    public double getEstimatedJointTorqueOffset(OneDoFJointBasics joint);
 
+   public default void resetEstimatedJointTorqueOffsets()
+   {
+      List<OneDoFJointBasics> joints = getOneDoFJoints();
+      for (int i = 0; i < joints.size(); i++)
+         resetEstimatedJointTorqueOffset(joints.get(i));
+   }
+
    public void resetEstimatedJointTorqueOffset(OneDoFJointBasics joint);
 
    public boolean hasTorqueOffsetForJoint(OneDoFJointBasics joint);

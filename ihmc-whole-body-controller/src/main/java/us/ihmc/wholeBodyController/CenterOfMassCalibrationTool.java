@@ -202,7 +202,7 @@ public class CenterOfMassCalibrationTool implements Updatable
       }
       else
       {
-         jointZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), jointFrame, jointName + "ZUp");
+         jointZUpFrame = new ZUpFrame(jointFrame, jointName + "ZUp");
       }
       
       CenterOfMassCalculator centerOfMassCalculator = new CenterOfMassCalculator(rootBody, jointZUpFrame);

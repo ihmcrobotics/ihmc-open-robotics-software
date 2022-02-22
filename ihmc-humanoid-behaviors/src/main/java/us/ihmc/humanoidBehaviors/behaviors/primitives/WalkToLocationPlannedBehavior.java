@@ -143,6 +143,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          protected void setBehaviorInput()
          {
             setupComplete = true;
+            publishTextToSpeech("WalkToLocationPlannedBehavior:waiting For Goal To Be Set");
+
 
          }
 
@@ -150,6 +152,11 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          public boolean isDone(double timeInState)
          {
             // TODO Auto-generated method stub
+            if(currentGoalPose.get() != null)
+            {
+               publishTextToSpeech("WalkToLocationPlannedBehavior:waitForGoalToBeSet is complete");
+
+            }
             return currentGoalPose.get() != null;
          }
       };
@@ -159,6 +166,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          @Override
          protected void setBehaviorInput()
          {
+            publishTextToSpeech("WalkToLocationPlannedBehavior:planFootSteps state");
+
             goalLocationChanged = false;
             RobotSide initialStanceSide = RobotSide.LEFT;
             FramePose3D leftFootPose = new FramePose3D(referenceFrames.getSoleFrame(RobotSide.LEFT));
@@ -182,6 +191,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          @Override
          protected void setBehaviorInput()
          {
+            publishTextToSpeech("WalkToLocationPlannedBehavior:sendPlanToController state");
 
             if (planPathToLocationBehavior.getFootStepList() != null)
             {

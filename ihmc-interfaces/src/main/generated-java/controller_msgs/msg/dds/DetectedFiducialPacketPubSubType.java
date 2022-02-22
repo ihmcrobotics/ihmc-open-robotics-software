@@ -46,6 +46,9 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -67,6 +70,11 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getFiducialTransformToWorld(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getBounds().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBounds().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -78,6 +86,10 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
       cdr.write_type_4(data.getFiducialId());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getFiducialTransformToWorld(), cdr);
+      if(data.getBounds().size() <= 100)
+      cdr.write_type_e(data.getBounds());else
+          throw new RuntimeException("bounds field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.DetectedFiducialPacket data, us.ihmc.idl.CDR cdr)
@@ -87,6 +99,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
       data.setFiducialId(cdr.read_type_4());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getFiducialTransformToWorld(), cdr);	
+      cdr.read_type_e(data.getBounds());	
 
    }
 
@@ -97,6 +110,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
       ser.write_type_4("fiducial_id", data.getFiducialId());
       ser.write_type_a("fiducial_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getFiducialTransformToWorld());
 
+      ser.write_type_e("bounds", data.getBounds());
    }
 
    @Override
@@ -106,6 +120,7 @@ public class DetectedFiducialPacketPubSubType implements us.ihmc.pubsub.TopicDat
       data.setFiducialId(ser.read_type_4("fiducial_id"));
       ser.read_type_a("fiducial_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getFiducialTransformToWorld());
 
+      ser.read_type_e("bounds", data.getBounds());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.DetectedFiducialPacket src, controller_msgs.msg.dds.DetectedFiducialPacket dest)

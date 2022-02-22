@@ -59,6 +59,46 @@ public class JSONFileTools
       }
    }
 
+   public static void loadUserWithClasspathDefaultFallback(HybridFile hybridFile, Consumer<JsonNode> jsonNodeConsumer)
+   {
+      InputStream settingsStream;
+      if (!Files.exists(hybridFile.getExternalFile()))
+      {
+         settingsStream = hybridFile.getClasspathResourceAsStream();
+         if (settingsStream == null)
+         {
+            LogTools.warn("Defaults not found. Please save to {}. Not loading anything.", hybridFile.getWorkspaceFile().toString());
+            return;
+         }
+         else
+         {
+            LogTools.info("{} not found. Loading defaults from {}", hybridFile.getExternalFile().toString(), hybridFile.getWorkspaceFile().toString());
+         }
+      }
+      else
+      {
+         LogTools.info("Loading {}", hybridFile.getExternalFile().toString());
+         settingsStream = FileTools.newFileDataInputStream(hybridFile.getExternalFile(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      }
+
+      try (InputStream closableStream = settingsStream)
+      {
+         load(closableStream, jsonNodeConsumer);
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+      }
+   }
+
+   public static void loadFromWorkspace(String directoryNameToAssumePresent,
+                                        String subsequentPathToResourceFolder,
+                                        String resourcePathString,
+                                        Consumer<JsonNode> jsonNodeConsumer)
+   {
+      load(WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, resourcePathString), jsonNodeConsumer);
+   }
+
    public static boolean loadFromClasspath(Class<?> classForLoading,
                                            String resourcePathString,
                                            Consumer<JsonNode> jsonNodeConsumer)
@@ -107,6 +147,7 @@ public class JSONFileTools
 
    public static boolean save(Path settingsPath, Consumer<ObjectNode> rootConsumer)
    {
+      FileTools.ensureDirectoryExists(settingsPath.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
       try (PrintStream printStream = new PrintStream(settingsPath.toFile()))
       {
          JsonFactory jsonFactory = new JsonFactory();
@@ -122,4 +163,6 @@ public class JSONFileTools
          return false;
       }
    }
+
+
 }

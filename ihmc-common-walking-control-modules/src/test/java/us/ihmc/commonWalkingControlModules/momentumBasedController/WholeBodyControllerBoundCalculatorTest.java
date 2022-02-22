@@ -71,13 +71,5 @@ public class WholeBodyControllerBoundCalculatorTest
 
          assertEquals("error at q = " + q, qddMaxExpected, qddotMax.get(0, 0), 1e-6);
       }
-
-      joint.setQ(-0.98524);
-      joint.setQd(-0.03476);
-
-      calculator.computeJointAccelerationLimits(qddotAbsolute, qddotMin, qddotMax);
-
-      assertEquals(0.0, qddotMin.get(0, 0), 1e-6);
-      assertEquals(qddotAbsolute, qddotMax.get(0, 0), 1e-6);
    }
 }

@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -15,6 +14,7 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerTerminationCondition;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
@@ -25,6 +25,8 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeROS2Node;
 
+import java.util.List;
+
 /**
  * This class provides a visualizer for the footstep planner module.
  * It allows user to create plans, log and load plans from disk, tune parameters,
@@ -32,7 +34,6 @@ import us.ihmc.ros2.RealtimeROS2Node;
  */
 public class AtlasFootstepPlannerUI extends Application
 {
-   private static final boolean launchPlannerToolbox = true;
    private static final double GOAL_DISTANCE_PROXIMITY = 0.1;
 
    private SharedMemoryJavaFXMessager messager;
@@ -44,6 +45,9 @@ public class AtlasFootstepPlannerUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
+      List<String> parameters = getParameters().getRaw();
+      boolean launchPlannerToolbox = parameters == null || !parameters.contains(getSuppressToolboxFlag());
+
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
       DRCRobotModel previewModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
@@ -80,6 +84,18 @@ public class AtlasFootstepPlannerUI extends Application
          FootstepPlannerLogger logger = new FootstepPlannerLogger(plannerModule);
          Runnable loggerRunnable = () -> logger.logSessionAndReportToMessager(messager);
          messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanSingleStep, planSingleStep ->
+         {
+            if (planSingleStep)
+            {
+               FootstepPlannerTerminationCondition terminationCondition = (plannerTime, iterations, bestPathFinalStep, bestSecondToFinalStep, bestPathSize) -> bestPathSize >= 1;
+               plannerModule.addCustomTerminationCondition(terminationCondition);
+            }
+            else
+            {
+               plannerModule.clearCustomTerminationConditions();
+            }
+         });
 
          // Automatically send graph data over messager
          plannerModule.addStatusCallback(status -> handleMessagerCallbacks(plannerModule, status));
@@ -112,6 +128,14 @@ public class AtlasFootstepPlannerUI extends Application
          plannerModule.closeAndDispose();
 
       Platform.exit();
+   }
+
+   /**
+    * Pass this as a program argument to suppress the toolbox from being launched
+    */
+   public static String getSuppressToolboxFlag()
+   {
+      return "suppressToolbox";
    }
 
    public static void main(String[] args)

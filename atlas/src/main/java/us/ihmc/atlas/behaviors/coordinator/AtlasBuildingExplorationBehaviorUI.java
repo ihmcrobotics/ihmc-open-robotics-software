@@ -4,12 +4,12 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorOld;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.log.LogTools;
@@ -44,7 +44,8 @@ public class AtlasBuildingExplorationBehaviorUI
       JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       LogTools.info("Starting behavior module");
-      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, ros2CommunicationMode, behaviorMessagerCommunicationMode);
+      boolean enableROS1 = true;
+      BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, ros2CommunicationMode, behaviorMessagerCommunicationMode, enableROS1);
 
       LogTools.info("Starting behavior UI");
       JavaFXBehaviorUI behaviorUI = JavaFXBehaviorUI.create(behaviorRegistry,
@@ -53,7 +54,7 @@ public class AtlasBuildingExplorationBehaviorUI
                                                             behaviorMessagerCommunicationMode,
                                                             "localhost",
                                                             behaviorModule.getMessager());
-      behaviorUI.selectBehavior(BuildingExplorationBehavior.DEFINITION);
+      behaviorUI.selectBehavior(BuildingExplorationBehaviorOld.DEFINITION);
    }
 
    public static void main(String[] args)

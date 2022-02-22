@@ -8,7 +8,6 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -97,8 +96,8 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    private static final String multisense_laser_topic__as_string = multisense_namespace + "/lidar_points2";
    private static final String multisense_filtered_laser_as_point_cloud_topic_string = multisense_namespace + "/filtered_cloud";
    private static final String multisense_ground_point_cloud_topic_string = multisense_namespace + "/highly_filtered_cloud";
-   private static final String bodyIMUSensor = "pelvis_imu_sensor_at_pelvis_frame";
-   private static final String chestIMUSensor = "utorso_imu_sensor_chest";
+   private static final String bodyIMUSensor = "imu_sensor_at_pelvis_frame";
+   private static final String chestIMUSensor = "imu_sensor_chest";
    private static final String[] imuSensorsToUseInStateEstimator = {bodyIMUSensor};
 
    /**
@@ -184,15 +183,47 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformTrackingCameraToDepthCamera.invert();
    }
 
-   public static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
+   private static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
    static
    {
       // TODO: Move this stuff to a file so it can be tuned and saved
-      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.14);
+      transformChestToL515DepthCamera.setIdentity();
+      transformChestToL515DepthCamera.getTranslation().set(0.275000, 0.052000, 0.140000);
+      transformChestToL515DepthCamera.getRotation().setYawPitchRoll(0.010000, 1.151900, 0.045000);
+   }
 
-      transformChestToL515DepthCamera.appendTranslation(chestToSensor);
+   private static final RigidBodyTransform transformChestToD435DepthCamera = new RigidBodyTransform();
+   static
+   {
+      transformChestToD435DepthCamera.setIdentity();
+      transformChestToD435DepthCamera.getTranslation().set(0.300000, 0.020000, 0.580000);
+      transformChestToD435DepthCamera.getRotation().setYawPitchRoll(0.0, 0.0, 0.0);
+   }
+
+   private static final RigidBodyTransform transformChestToOuster = new RigidBodyTransform();
+   static
+   {
+      transformChestToOuster.setIdentity();
+      transformChestToOuster.getTranslation().set(0.265000, -0.0200, 0.720000);
+      transformChestToOuster.getRotation().setYawPitchRoll(0.00000, 0.52400, 0.000000);
+   }
+
+   private static final RigidBodyTransform transformChestToZED2 = new RigidBodyTransform();
+   static
+   {
+      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.4);
+      transformChestToZED2.appendTranslation(chestToSensor);
       double pitch = Math.toRadians(90.0 - 24.0);
-      transformChestToL515DepthCamera.appendOrientation(new YawPitchRoll(0.01, pitch, -0.045));
+      transformChestToZED2.appendOrientation(new YawPitchRoll(0.01, pitch, -0.045));
+   }
+
+   private static final RigidBodyTransform transformChestToRightBlackfly = new RigidBodyTransform();
+   static
+   {
+      transformChestToRightBlackfly.setIdentity();
+      transformChestToRightBlackfly.getTranslation().set(transformChestToOuster.getTranslation()); // measured relative to Ouster for convenience
+      transformChestToRightBlackfly.getTranslation().add(0.02, -0.12, -0.15);
+      transformChestToRightBlackfly.getRotation().setYawPitchRoll(Math.toRadians(0.0), Math.toRadians(35.0), Math.toRadians(-5.0));
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
@@ -282,9 +313,9 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       cameraParameters[BLACKFLY_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT, right_fisheye_camera_name, fisheye_right_camera_topic,
                                                                                    fisheye_pose_source, fisheye_right_camera_info, BLACKFLY_RIGHT_CAMERA_ID);
 
-      setupROSLocationService = target == RobotTarget.REAL_ROBOT || (target == RobotTarget.SCS && SEND_ROBOT_DATA_TO_ROS);
-      setupROSParameterSetters = target == RobotTarget.REAL_ROBOT;
-      isMultisenseHead = target == RobotTarget.REAL_ROBOT;
+      setupROSLocationService = false; //target == RobotTarget.REAL_ROBOT || (target == RobotTarget.SCS && SEND_ROBOT_DATA_TO_ROS);
+      setupROSParameterSetters = false; //target == RobotTarget.REAL_ROBOT;
+      isMultisenseHead = false; //target == RobotTarget.REAL_ROBOT;
 
       setupStaticTransformsForRos();
    }
@@ -432,15 +463,38 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    }
 
    @Override
-   public RigidBodyTransformReadOnly getSteppingCameraTransform()
+   public RigidBodyTransform getSteppingCameraTransform()
    {
       return transformChestToL515DepthCamera;
    }
 
-
    @Override
-   public ReferenceFrame getSteppingCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   public ReferenceFrame getSteppingCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
       return referenceFrames.getChestFrame();
+   }
+
+   @Override
+   public RigidBodyTransform getObjectDetectionCameraTransform()
+   {
+      return transformChestToRightBlackfly;
+   }
+
+   @Override
+   public String getHeadCameraName()
+   {
+      return "stereo_camera_left";
+   }
+
+   @Override
+   public RigidBodyTransform getHeadZED2CameraTransform()
+   {
+      return transformChestToZED2;
+   }
+
+   @Override
+   public RigidBodyTransform getOusterLidarTransform()
+   {
+      return transformChestToOuster;
    }
 }

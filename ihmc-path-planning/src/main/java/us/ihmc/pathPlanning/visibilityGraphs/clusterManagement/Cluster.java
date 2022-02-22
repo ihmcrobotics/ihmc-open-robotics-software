@@ -31,13 +31,10 @@ public class Cluster
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    private final List<Point3DReadOnly> rawPointsInLocal3D = new ArrayList<>();
-   private final List<ExtrusionHull> preferredNavigableExtrusionsInLocal = new ArrayList<>();
-   private final List<ExtrusionHull> preferredNonNavigableExtrusionsInLocal = new ArrayList<>();
    private final ExtrusionHull navigableExtrusionsInLocal = new ExtrusionHull();
    private final ExtrusionHull nonNavigableExtrusionInLocal = new ExtrusionHull();
 
    private final BoundingBox2D nonNavigableExtrusionsBoundingBox = new BoundingBox2D(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-   private final BoundingBox2D preferredNonNavigableExtrusionsBoundingBox = new BoundingBox2D(Double.NaN, Double.NaN, Double.NaN, Double.NaN);
 
    public enum ExtrusionSide
    {
@@ -101,12 +98,6 @@ public class Cluster
       nonNavigableExtrusionInLocal.clear();
    }
 
-   public void clearPreferredNonNavigableExtrusions()
-   {
-      preferredNonNavigableExtrusionsBoundingBox.setToNaN();
-      preferredNonNavigableExtrusionsInLocal.clear();
-   }
-
    /** Returns true if it's on an edge.    */
    public boolean isInsideNonNavigableZone(Point2DReadOnly query)
    {
@@ -131,27 +122,6 @@ public class Cluster
          if (!boundingBox.isInsideEpsilon(query, epsilon))
             return false;
          return PlanarRegionTools.isPointInsidePolygon(nonNavigableExtrusionInLocal.getPoints(), query, epsilon);
-      }
-   }
-
-   public boolean isInsidePreferredNonNavigableZone(Point2DReadOnly query)
-   {
-      if (preferredNonNavigableExtrusionsInLocal.isEmpty())
-         return false;
-
-      BoundingBox2DReadOnly boundingBox = getPreferredNonNavigableExtrusionsBoundingBox();
-
-      if (extrusionSide == ExtrusionSide.INSIDE)
-      {
-         if (!boundingBox.isInsideEpsilon(query, 1e-7))
-            return true;
-         return preferredNonNavigableExtrusionsInLocal.stream().noneMatch(extrusion -> PlanarRegionTools.isPointInsidePolygon(extrusion.getPoints(), query));
-      }
-      else
-      {
-         if (!boundingBox.isInsideEpsilon(query, 1e-7))
-            return false;
-         return preferredNonNavigableExtrusionsInLocal.stream().anyMatch(extrusion -> PlanarRegionTools.isPointInsidePolygon(extrusion.getPoints(), query));
       }
    }
 
@@ -292,36 +262,6 @@ public class Cluster
       return navigableExtrusionsInLocal.copy(extrusionHull -> extrusionHull.stream().map(this::toWorld2D).collect(Collectors.toList()));
    }
 
-
-   public List<List<Point3DReadOnly>> getPreferredNavigableExtrusionsInWorld()
-   {
-      List<List<Point3DReadOnly>> extrusionsInWorld = new ArrayList<>();
-      for (ExtrusionHull preferredExtrusionsInLocal : preferredNavigableExtrusionsInLocal)
-         extrusionsInWorld.add(preferredExtrusionsInLocal.stream().map(this::toWorld3D).collect(Collectors.toList()));
-      return extrusionsInWorld;
-   }
-
-   public void addPreferredNavigableExtrusionInLocal(ExtrusionHull navigableExtrusionInLocal)
-   {
-      preferredNavigableExtrusionsInLocal.add(navigableExtrusionInLocal.copy());
-   }
-
-   public void addPreferredNavigableExtrusionsInLocal(List<ExtrusionHull> navigableExtrusionInLocal)
-   {
-      navigableExtrusionInLocal.forEach(this::addPreferredNavigableExtrusionInLocal);
-   }
-
-   public List<ExtrusionHull> getPreferredNavigableExtrusionsInLocal()
-   {
-      return preferredNavigableExtrusionsInLocal;
-   }
-
-   public void setPreferredNavigableExtrusionsInLocal(List<ExtrusionHull> listsOfPoints)
-   {
-      preferredNavigableExtrusionsInLocal.clear();
-      addPreferredNavigableExtrusionsInLocal(listsOfPoints);
-   }
-
    public void setNonNavigableExtrusionsInLocal(ExtrusionHull points)
    {
       clearNonNavigableExtrusions();
@@ -378,43 +318,6 @@ public class Cluster
    {
       return nonNavigableExtrusionInLocal.copy(extrusionHull -> extrusionHull.stream().map(this::toWorld2D).collect(Collectors.toList()));
    }
-
-   public void setPreferredNonNavigableExtrusionsInLocal(List<ExtrusionHull> points)
-   {
-      clearPreferredNonNavigableExtrusions();
-      addPreferredNonNavigableExtrusionsInLocal(points);
-   }
-
-   public void addPreferredNonNavigableExtrusionInLocal(ExtrusionHull nonNavigableExtrusionInLocal)
-   {
-      ExtrusionHull extrusionCopy = nonNavigableExtrusionInLocal.copy();
-      extrusionCopy.stream().forEach(preferredNonNavigableExtrusionsBoundingBox::updateToIncludePoint);
-      preferredNonNavigableExtrusionsInLocal.add(extrusionCopy);
-   }
-
-   public void addPreferredNonNavigableExtrusionsInLocal(List<ExtrusionHull> nonNavigableExtrusionInLocal)
-   {
-      nonNavigableExtrusionInLocal.forEach(this::addPreferredNonNavigableExtrusionInLocal);
-   }
-
-   public BoundingBox2DReadOnly getPreferredNonNavigableExtrusionsBoundingBox()
-   {
-      return preferredNonNavigableExtrusionsBoundingBox;
-   }
-
-   public List<ExtrusionHull> getPreferredNonNavigableExtrusionsInLocal()
-   {
-      return preferredNonNavigableExtrusionsInLocal;
-   }
-
-   public List<List<Point3DReadOnly>> getPreferredNonNavigableExtrusionsInWorld()
-   {
-      List<List<Point3DReadOnly>> listToReturn = new ArrayList<>();
-      preferredNonNavigableExtrusionsInLocal.forEach(pointList -> listToReturn.add(pointList.stream().map(this::toWorld3D).collect(Collectors.toList())));
-      return listToReturn;
-   }
-
-
 
    private Point3DReadOnly toWorld3D(Point2DReadOnly pointInLocal)
    {

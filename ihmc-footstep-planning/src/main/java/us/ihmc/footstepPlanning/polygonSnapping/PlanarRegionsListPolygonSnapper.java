@@ -13,6 +13,12 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class PlanarRegionsListPolygonSnapper
 {
+   /** If two regions have snaps within this height threshold, take the flatter one */
+   private static final double heightEpsilonToTakeFlatterRegion = 0.003;
+
+   /** Return null snap if region has this (or higher) incline. 0 if flat and half-pi is vertical surface */
+   private static final double maximumInclineToConsider = Math.toRadians(75.0);
+   private static final double minimumNormalZToConsider = Math.cos(maximumInclineToConsider);
 
    /**
     * Snaps an XY polygon down onto a PlanarRegionsList. Returns the RigidBodyTransform required to perform the snap.
@@ -41,7 +47,6 @@ public class PlanarRegionsListPolygonSnapper
 
    public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2DReadOnly polygonToSnap, List<PlanarRegion> planarRegionsListToSnapTo, double maximumRegionHeightToConsider, PlanarRegion regionToPack)
    {
-      double allowableExtraZ = 0.003; // For close ones. When close, take one that is flatter...
       List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(polygonToSnap, planarRegionsListToSnapTo);
 
       if ((intersectingRegions == null) || (intersectingRegions.isEmpty()))
@@ -68,14 +73,13 @@ public class PlanarRegionsListPolygonSnapper
          {
             continue;
          }
-
-         if (highestVertexInWorld.getZ() > highestZ + allowableExtraZ)
+         else if (highestVertexInWorld.getZ() > highestZ + heightEpsilonToTakeFlatterRegion)
          {
             highestZ = highestVertexInWorld.getZ();
             highestTransform = snapTransform;
             highestPlanarRegion = planarRegion;
          }
-         else if (highestVertexInWorld.getZ() > highestZ - allowableExtraZ)
+         else if (highestVertexInWorld.getZ() > highestZ - heightEpsilonToTakeFlatterRegion)
          {
             // Tie. Let's take the one with the flatter surface normal.
             planarRegion.getNormal(surfaceNormal);
@@ -95,14 +99,17 @@ public class PlanarRegionsListPolygonSnapper
          return null;
       }
 
-      //TODO: For now, just ignore Planar Regions that are tilted too much.
-      //TODO: But later, we need to make sure they are not obstacles that need to be avoided...
       highestPlanarRegion.getNormal(highestSurfaceNormal);
-      if (Math.abs(highestSurfaceNormal.getZ()) < 0.2)
+      if (Math.abs(highestSurfaceNormal.getZ()) < minimumNormalZToConsider)
+      {
          return null;
+      }
 
       if (regionToPack != null)
+      {
          regionToPack.set(highestPlanarRegion);
+      }
+
       return highestTransform;
    }
 }

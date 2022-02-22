@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.BehaviorControlModePacket;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
+import us.ihmc.log.LogTools;
 
 public class BehaviorControlModeSubscriber implements PacketConsumer<BehaviorControlModePacket>
 {
@@ -29,6 +30,8 @@ public class BehaviorControlModeSubscriber implements PacketConsumer<BehaviorCon
    public void receivedPacket(BehaviorControlModePacket object)
    {
       packetReference.set(object);
-      System.out.println(getClass().getSimpleName() + " received packet");
+      LogTools.info("Received {}. Source: {}",
+                    BehaviorControlModeEnum.fromByte(object.getBehaviorControlModeEnumRequest()).name(),
+                    object.getSource());
    }
 }

@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -29,7 +29,7 @@ public class GDXBodyPathPlanGraphic implements RenderableProvider
    private final float startColorHue = (float) javafx.scene.paint.Color.GREEN.getHue();
    private final float goalColorHue = (float) javafx.scene.paint.Color.RED.getHue();
 
-   private volatile Runnable toRender = null;
+   private volatile Runnable buildMeshAndCreateModelInstance = null;
 
    private final ModelBuilder modelBuilder = new ModelBuilder();
    private ModelInstance modelInstance;
@@ -37,12 +37,12 @@ public class GDXBodyPathPlanGraphic implements RenderableProvider
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-   public void render()
+   public void update()
    {
-      if (toRender != null)
+      if (buildMeshAndCreateModelInstance != null)
       {
-         toRender.run();
-         toRender = null;
+         buildMeshAndCreateModelInstance.run();
+         buildMeshAndCreateModelInstance = null;
       }
    }
 
@@ -78,13 +78,13 @@ public class GDXBodyPathPlanGraphic implements RenderableProvider
          meshBuilder.addLine(lineStart, lineEnd, LINE_THICKNESS, new Color().fromHsv(lineStartHue, 1.0f, 0.5f), new Color().fromHsv(lineEndHue, 1.0f, 1.0f));
       }
 
-      toRender = () ->
+      buildMeshAndCreateModelInstance = () ->
       {
          modelBuilder.begin();
          Mesh mesh = meshBuilder.generateMesh();
-         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
+         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
          com.badlogic.gdx.graphics.g3d.Material material = new Material();
-         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+         Texture paletteTexture = GDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(new com.badlogic.gdx.graphics.Color(0.7f, 0.7f, 0.7f, 1.0f)));
          modelBuilder.part(meshPart, material);
