@@ -200,7 +200,7 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
 //      footstepPlannerRequest.setPlanarRegionsList(...);
       footstepPlannerRequest.setAssumeFlatGround(true); // FIXME Assuming flat ground
-//      footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeout());
+//      footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeoutWhileStopped());
 //      footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
 //      footstepPlannerRequest.setSnapGoalSteps(true);
 
