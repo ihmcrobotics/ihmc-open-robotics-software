@@ -106,6 +106,17 @@ public class GDXBulletPhysicsManager
       multiBodyDynamicsWorld.addCollisionObject(collisionShape, collisionGroup, collisionGroupMask);
    }
 
+   public void addMultiBodyConstraint(btMultiBodyConstraint constraint)
+   {
+      // TODO: Need to manage/remove this?
+      multiBodyDynamicsWorld.addMultiBodyConstraint(constraint);
+   }
+
+   public void removeMultiBodyConstraint(btMultiBodyConstraint constraint)
+   {
+      multiBodyDynamicsWorld.removeMultiBodyConstraint(constraint);
+   }
+
    public void simulate(float timeStep)
    {
       debugger.update();
