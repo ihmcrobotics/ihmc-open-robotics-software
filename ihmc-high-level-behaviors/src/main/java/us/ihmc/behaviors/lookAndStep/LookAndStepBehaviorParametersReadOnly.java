@@ -106,9 +106,9 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(planHorizon);
    }
 
-   default double getFootstepPlannerTimeout()
+   default double getFootstepPlannerTimeoutWhileStopped()
    {
-      return get(footstepPlannerTimeout);
+      return get(footstepPlannerTimeoutWhileStopped);
    }
 
    default double getSwingDuration()
