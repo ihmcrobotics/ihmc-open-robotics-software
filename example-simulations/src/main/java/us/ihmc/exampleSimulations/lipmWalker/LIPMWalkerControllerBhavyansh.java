@@ -17,6 +17,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 
@@ -69,6 +70,8 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
    private PolynomialBasics trajectorySwingKneeLength;
    private Vector3DReadOnly nextStepCoMLocation;
 
+   private final YoInteger numberOfStepsTaken = new YoInteger("numberOfStepsTaken", registry);
+
    private enum States
    {
       SUPPORT, SWING;
@@ -100,12 +103,13 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
    @Override
    public void initialize()
    {
+      numberOfStepsTaken.set(0);
 
       kpKnee.set(1000.0);
       kdKnee.set(100.0);
 
-      kpHip.set(2000.0);
-      kdHip.set(60.0);
+      kpHip.set(800.0);
+      kdHip.set(20.0);
 
       q_d_leftKnee.set(0.8);
       q_d_rightKnee.set(0.7);
@@ -115,7 +119,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
       desiredHeight.set(0.8);
 
-      strideLength.set(0.3);
+      strideLength.set(0.5);
       swingTime.set(0.4);
 
       timeOfLastFootSwitch.set(0.0);
@@ -153,9 +157,9 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
          stateMachines.get(robotSide).doTransitions();
       }
 
-      LogTools.info("State -> Left: {}, Right: {}",
-                    stateMachines.get(RobotSide.LEFT).getCurrentStateKey(),
-                    stateMachines.get(RobotSide.RIGHT).getCurrentStateKey());
+//      LogTools.info("State -> Left: {}, Right: {}",
+//                    stateMachines.get(RobotSide.LEFT).getCurrentStateKey(),
+//                    stateMachines.get(RobotSide.RIGHT).getCurrentStateKey());
    }
 
    public void filterFootForces()
@@ -261,7 +265,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
       /* ----------------------------------- Compute and set knee force. ----------------------------------------------*/
       desiredKneeLengths.get(side).set(desiredKneeLength);
-      feedBackKneeForce = 1000 * (desiredKneeLengths.get(side).getValue() - kneeLength) + 100 * (desiredKneeVelocity - kneeVelocity);
+      feedBackKneeForce = 1300 * (desiredKneeLengths.get(side).getValue() - kneeLength) + 70 * (desiredKneeVelocity - kneeVelocity);
       robot.setKneeForce(side, feedBackKneeForce);
 
       /* ----------------------------------- Compute and set hip torque. --------------------------------------------*/
@@ -402,7 +406,8 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
          LogTools.info("Switch: {} {} {}", fs, footZForces.get(robotSide).getValue(), timeDiff);
          if (fs)
          {
-            LogTools.info("N -> ComX: {}", robot.getCenterOfMassXDistanceFromSupportFoot());
+            numberOfStepsTaken.set(numberOfStepsTaken.getValue() + 1);
+            LogTools.info("Step: {} -> ComX: {}", robot.getCenterOfMassXDistanceFromSupportFoot(), numberOfStepsTaken.getValue());
 
             groundContactPositions.add(robot.getFootPosition(robotSide).getX());
 
