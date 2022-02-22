@@ -16,6 +16,18 @@ public class AtlasKinematicSimulation
 {
    public static HumanoidKinematicsSimulation create(AtlasRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
+      return create(robotModel, kinematicsSimulationParameters, false);
+   }
+
+   public static HumanoidKinematicsSimulation createForPreviews(AtlasRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
+   {
+      return create(robotModel, kinematicsSimulationParameters, true);
+   }
+
+   private static HumanoidKinematicsSimulation create(AtlasRobotModel robotModel,
+                                                      HumanoidKinematicsSimulationParameters kinematicsSimulationParameters,
+                                                      boolean createForPreviews)
+   {
       AtlasWalkingControllerParameters walkingControllerParameters = (AtlasWalkingControllerParameters) robotModel.getWalkingControllerParameters();
       walkingControllerParameters.setDoPrepareManipulationForLocomotion(false);
       walkingControllerParameters.setSteppingParameters(new AtlasKinematicSteppingParameters(robotModel.getJointMap()));
@@ -23,7 +35,9 @@ public class AtlasKinematicSimulation
             new AtlasKinematicSwingTrajectoryParameters(robotModel.getTarget(), robotModel.getJointMap().getModelScale()));
       walkingControllerParameters.setJointPrivilegedConfigurationParameters(
             new AtlasKinematicJointPrivilegedConfigurationParameters(robotModel.getTarget() == RobotTarget.REAL_ROBOT));
-      return HumanoidKinematicsSimulation.create(robotModel, kinematicsSimulationParameters);
+      return createForPreviews ?
+            HumanoidKinematicsSimulation.createForPreviews(robotModel, kinematicsSimulationParameters) :
+            HumanoidKinematicsSimulation.create(robotModel, kinematicsSimulationParameters);
    }
 
    static class AtlasKinematicSteppingParameters extends AtlasSteppingParameters
@@ -72,7 +86,7 @@ public class AtlasKinematicSimulation
    {
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
       kinematicsSimulationParameters.setPubSubImplementation(PubSubImplementation.FAST_RTPS);
-      AtlasKinematicSimulation.create(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false),
+      AtlasKinematicSimulation.create(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.SCS, false),
                                       kinematicsSimulationParameters);
    }
 }

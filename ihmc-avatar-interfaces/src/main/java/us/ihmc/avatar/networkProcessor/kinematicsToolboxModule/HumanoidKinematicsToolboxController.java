@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
@@ -20,7 +21,7 @@ import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
@@ -243,10 +244,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (desiredFullRobotModel.getHand(robotSide) != null)
-            listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
+         listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
       }
+
+      // Some robots may not have some the bodies.
+      listOfControllableRigidBodies.removeIf(Objects::isNull);
 
       return listOfControllableRigidBodies;
    }
@@ -261,13 +264,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public void setInitialRobotConfiguration(DRCRobotModel robotModel)
    {
       Map<OneDoFJointBasics, Double> privilegedConfiguration = new HashMap<>();
-      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      defaultRobotInitialSetup.initializeRobot(robot, robotModel.getJointMap());
+      RobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
+      FullHumanoidRobotModel robot = robotModel.createFullRobotModel();
+      defaultRobotInitialSetup.initializeFullRobotModel(robot);
 
       for (OneDoFJointBasics joint : getDesiredOneDoFJoint())
       {
-         double q_priv = robot.getOneDegreeOfFreedomJoint(joint.getName()).getQ();
+         double q_priv = robot.getOneDoFJointByName(joint.getName()).getQ();
          privilegedConfiguration.put(joint, q_priv);
       }
 

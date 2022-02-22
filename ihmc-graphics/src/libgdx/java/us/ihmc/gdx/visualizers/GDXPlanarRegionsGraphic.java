@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.lwjgl.opengl.GL32;
+import org.lwjgl.opengl.GL41;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -37,24 +37,29 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
    private boolean drawBoundingBox = false;
    private boolean drawNormal;
 
-   private volatile Runnable toRender = null;
+   private volatile Runnable buildMeshAndCreateModelInstance = null;
 
    private ModelInstance modelInstance;
    private Model lastModel;
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
+   public void clear()
+   {
+      generateMeshes(new PlanarRegionsList());
+   }
+
    public void generateFlatGround()
    {
       generateMeshes(PlanarRegionsList.flatGround(20.0));
    }
 
-   public void render()
+   public void update()
    {
-      if (toRender != null)
+      if (buildMeshAndCreateModelInstance != null)
       {
-         toRender.run();
-         toRender = null;
+         buildMeshAndCreateModelInstance.run();
+         buildMeshAndCreateModelInstance = null;
       }
    }
 
@@ -72,18 +77,18 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
          meshBuilders.add(meshBuilder);
          singleRegionMeshBuilder(planarRegion, meshBuilder); // should do in parallel somehow?
       }
-      toRender = () ->
+      buildMeshAndCreateModelInstance = () ->
       {
          modelBuilder.begin();
          Material material = new Material();
-         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+         Texture paletteTexture = GDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
 
          for (GDXMultiColorMeshBuilder meshBuilder : meshBuilders)
          {
             Mesh mesh = meshBuilder.generateMesh();
-            MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
+            MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL41.GL_TRIANGLES);
             modelBuilder.part(meshPart, material);
          }
 

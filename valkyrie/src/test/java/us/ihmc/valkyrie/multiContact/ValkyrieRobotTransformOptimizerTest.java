@@ -31,8 +31,8 @@ public class ValkyrieRobotTransformOptimizerTest extends HumanoidRobotTransformO
       ValkyrieMutableInitialSetup initialSetupA = ValkyrieInitialSetupFactories.newCrawl1(robotModel.getJointMap());
 
       ValkyrieMutableInitialSetup initialSetupB = ValkyrieInitialSetupFactories.newCrawl1(robotModel.getJointMap());
-      initialSetupB.rootJointOrientation.preMultiply(EuclidCoreRandomTools.nextQuaternion(random));
-      initialSetupB.rootJointPosition.add(EuclidCoreRandomTools.nextPoint3D(random));
+      initialSetupB.getRootJointOrientation().preMultiply(EuclidCoreRandomTools.nextQuaternion(random));
+      initialSetupB.getRootJointPosition().add(EuclidCoreRandomTools.nextPoint3D(random));
 
       runTest(initialSetupA, initialSetupB, 1.0e-10);
    }
@@ -46,12 +46,12 @@ public class ValkyrieRobotTransformOptimizerTest extends HumanoidRobotTransformO
       ValkyrieMutableInitialSetup initialSetupA = ValkyrieInitialSetupFactories.newCrawl1(robotModel.getJointMap());
 
       ValkyrieMutableInitialSetup initialSetupB = ValkyrieInitialSetupFactories.newCrawl1(robotModel.getJointMap());
-      initialSetupB.rootJointOrientation.preMultiply(EuclidCoreRandomTools.nextQuaternion(random));
-      initialSetupB.rootJointPosition.add(EuclidCoreRandomTools.nextPoint3D(random));
+      initialSetupB.getRootJointOrientation().preMultiply(EuclidCoreRandomTools.nextQuaternion(random));
+      initialSetupB.getRootJointPosition().add(EuclidCoreRandomTools.nextPoint3D(random));
 
       double errorNorm = 0.0;
 
-      for (Entry<String, Double> entry : initialSetupB.jointPositions.entrySet())
+      for (Entry<String, Double> entry : initialSetupB.getJointPositions().entrySet())
       {
          double error = 0.05 * (0.5 - random.nextDouble());
          errorNorm += error * error;

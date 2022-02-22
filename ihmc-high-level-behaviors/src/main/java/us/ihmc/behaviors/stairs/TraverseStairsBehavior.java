@@ -1,19 +1,26 @@
 package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
-import std_msgs.msg.dds.Empty;
+import controller_msgs.msg.dds.DetectedFiducialPacket;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
+import us.ihmc.behaviors.tools.BehaviorTools;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.tools.Timer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.concurrent.Executors;
@@ -21,15 +28,18 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.create;
+import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
-public class TraverseStairsBehavior implements BehaviorInterface
+public class TraverseStairsBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Traverse Stairs", TraverseStairsBehavior::new, create());
    private static final int UPDATE_RATE_MILLIS = 100;
+   public static final int STAIRS_FIDUCIAL_ID = 350;
 
    private final BehaviorHelper helper;
+   private ROS2SyncedRobotModel syncedRobot;
    private final StatusLogger statusLogger;
    private final RemoteHumanoidRobotInterface robotInterface;
    private final TraverseStairsBehaviorParameters parameters = new TraverseStairsBehaviorParameters();
@@ -38,19 +48,23 @@ public class TraverseStairsBehavior implements BehaviorInterface
    private ScheduledFuture<?> behaviorTask = null;
    private final AtomicBoolean isRunning = new AtomicBoolean(false);
 
-   private final IHMCROS2Publisher<Empty> completedPublisher;
-   private final IHMCROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionParametersPublisher;
-
    private final AtomicBoolean hasPublishedCompleted = new AtomicBoolean();
    private final AtomicBoolean behaviorHasCrashed = new AtomicBoolean();
+   private final AtomicBoolean operatorReviewEnabled = new AtomicBoolean(true);
+   private final AtomicReference<DetectedFiducialPacket> detectedFiducial = new AtomicReference<>();
 
-   private final StateMachine<TraverseStairsStateName, State> stateMachine;
+   private final StateMachine<TraverseStairsStateName, TraverseStairsState> stateMachine;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final TraverseStairsSquareUpState squareUpState;
    private final TraverseStairsPauseState pauseState;
    private final TraverseStairsPlanStepsState planStepsState;
    private final TraverseStairsExecuteStepsState executeStepsState;
+   private TraverseStairsStateName currentState = TraverseStairsStateName.SQUARE_UP;
+   private final Timer stairsDetectedTimer = new Timer();
+   private TraverseStairsLifecycleStateName currentLifeCycleState;
+   private final Pose3D stairsPose = new Pose3D(BehaviorTools.createNaNPose());
+   private double distanceToStairs = 0.0;
 
    public enum TraverseStairsStateName
    {
@@ -64,6 +78,15 @@ public class TraverseStairsBehavior implements BehaviorInterface
       EXECUTE_STEPS
    }
 
+   public enum TraverseStairsLifecycleStateName
+   {
+      CRASHED,
+      RUNNING,
+      NOT_RUNNING,
+      COMPLETED,
+      AWAITING_APPROVAL,
+   }
+
    public TraverseStairsBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
@@ -71,22 +94,35 @@ public class TraverseStairsBehavior implements BehaviorInterface
       robotInterface = helper.getOrCreateRobotInterface();
       statusLogger = helper.getOrCreateStatusLogger();
 
-      completedPublisher = ROS2Tools.createPublisher(helper.getROS2Node(), TraverseStairsBehaviorAPI.COMPLETED);
-      supportRegionParametersPublisher = ROS2Tools.createPublisherTypeNamed(helper.getROS2Node(), BipedalSupportPlanarRegionParametersMessage.class,
-                                                                            ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER
-                                                                                  .withRobot(helper.getRobotModel().getSimpleRobotName()).withInput());
-
       squareUpState = new TraverseStairsSquareUpState(helper, parameters);
       pauseState = new TraverseStairsPauseState(helper, parameters);
-      planStepsState = new TraverseStairsPlanStepsState(helper, parameters);
+      planStepsState = new TraverseStairsPlanStepsState(helper, parameters, operatorReviewEnabled);
       executeStepsState = new TraverseStairsExecuteStepsState(helper, parameters, planStepsState::getOutput);
 
       stateMachine = buildStateMachine();
+
+      helper.subscribeViaCallback(START, this::start);
+      helper.subscribeViaCallback(STOP, this::stop);
+      helper.subscribeViaCallback(OperatorReviewEnabled, enabled ->
+      {
+         statusLogger.info("Operator review {}", enabled ? "enabled" : "disabled");
+         operatorReviewEnabled.set(enabled);
+      });
+      helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
+      {
+         if (detectedFiducialMessage.getFiducialId() == STAIRS_FIDUCIAL_ID)
+         {
+            stairsDetectedTimer.reset();
+            detectedFiducial.set(detectedFiducialMessage);
+            stairsPose.set(detectedFiducialMessage.getFiducialTransformToWorld());
+            helper.publish(DetectedStairsPose, new Pose3D(detectedFiducialMessage.getFiducialTransformToWorld()));
+         }
+      });
    }
 
-   private StateMachine<TraverseStairsStateName, State> buildStateMachine()
+   private StateMachine<TraverseStairsStateName, TraverseStairsState> buildStateMachine()
    {
-      StateMachineFactory<TraverseStairsStateName, State> factory = new StateMachineFactory<>(TraverseStairsStateName.class);
+      StateMachineFactory<TraverseStairsStateName, TraverseStairsState> factory = new StateMachineFactory<>(TraverseStairsStateName.class);
 
       factory.setNamePrefix("traverseStairs");
       factory.setRegistry(registry);
@@ -102,62 +138,117 @@ public class TraverseStairsBehavior implements BehaviorInterface
       factory.addTransition(TraverseStairsStateName.PLAN_STEPS, TraverseStairsStateName.EXECUTE_STEPS, planStepsState::shouldTransitionToExecute);
       factory.addTransition(TraverseStairsStateName.PLAN_STEPS, TraverseStairsStateName.PAUSE, planStepsState::shouldTransitionBackToPause);
       factory.addDoneTransition(TraverseStairsStateName.EXECUTE_STEPS, TraverseStairsStateName.PAUSE);
+      factory.addStateChangedListener((from, to) ->
+      {
+         currentState = to;
+         helper.publish(TraverseStairsBehaviorAPI.State, to.name());
+      });
+
+      factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousStateName(from)));
 
       return factory.build(TraverseStairsStateName.SQUARE_UP);
    }
 
-   @Override
-   public void setEnabled(boolean enable)
+   public void setSyncedRobot(ROS2SyncedRobotModel syncedRobot)
    {
-      LogTools.info((enable ? "Enable" : "Disable") + " requested");
+      this.syncedRobot = syncedRobot;
+   }
 
-      if (enable)
+   @Override
+   public void clock()
+   {
+      FramePose3DReadOnly robotPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
+      distanceToStairs = stairsPose.getPosition().distance(robotPose.getPosition());
+      helper.publish(DistanceToStairs, distanceToStairs);
+
+      super.clock();
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+      start();
+
+      if (behaviorHasCrashed.get())
       {
-         if (isRunning.getAndSet(true))
-         {
-            return;
-         }
-
-         planStepsState.reset();
-         executeStepsState.clearWalkingCompleteFlag();
-
-         hasPublishedCompleted.set(false);
-         behaviorHasCrashed.set(false);
-         helper.setCommunicationCallbacksEnabled(true);
-         stateMachine.resetToInitialState();
-         behaviorTask = executorService.scheduleAtFixedRate(this::update, 0, UPDATE_RATE_MILLIS, TimeUnit.MILLISECONDS);
-
-         BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
-         supportRegionParametersMessage.setEnable(false);
-         supportRegionParametersPublisher.publish(supportRegionParametersMessage);
+         currentLifeCycleState = TraverseStairsLifecycleStateName.CRASHED;
+      }
+      else if (executeStepsState.planEndsAtGoal() && executeStepsState.walkingIsComplete())
+      {
+         currentLifeCycleState = TraverseStairsLifecycleStateName.COMPLETED;
+      }
+      else if (currentState == TraverseStairsStateName.PLAN_STEPS && !planStepsState.isStillPlanning() && planStepsState.searchWasSuccessful())
+      {
+         currentLifeCycleState = TraverseStairsLifecycleStateName.AWAITING_APPROVAL;
+      }
+      else if (isRunning.get())
+      {
+         currentLifeCycleState = TraverseStairsLifecycleStateName.RUNNING;
       }
       else
       {
-         if (!isRunning.getAndSet(false))
-         {
-            return;
-         }
-
-         if (behaviorTask != null)
-         {
-            // TODO send pause walking command
-            behaviorTask.cancel(true);
-            behaviorTask = null;
-         }
-
-         BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
-         supportRegionParametersMessage.setEnable(true);
-         supportRegionParametersMessage.setSupportRegionScaleFactor(2.0);
-         supportRegionParametersPublisher.publish(supportRegionParametersMessage);
-
-         helper.setCommunicationCallbacksEnabled(false);
+         currentLifeCycleState = TraverseStairsLifecycleStateName.NOT_RUNNING;
       }
+      helper.publish(LifecycleState, currentLifeCycleState.name());
+
+      return BehaviorTreeNodeStatus.SUCCESS;
+   }
+
+   @Override
+   public void reset()
+   {
+      stop();
+   }
+
+   private void stop()
+   {
+      if (!isRunning.getAndSet(false))
+      {
+         return;
+      }
+      helper.publish(LifecycleState, TraverseStairsLifecycleStateName.NOT_RUNNING.name());
+
+      if (behaviorTask != null)
+      {
+         // TODO send pause walking command
+         behaviorTask.cancel(true);
+         behaviorTask = null;
+      }
+
+//      BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
+//      supportRegionParametersMessage.setEnable(true);
+//      supportRegionParametersMessage.setSupportRegionScaleFactor(2.0);
+//      supportRegionParametersPublisher.publish(supportRegionParametersMessage);
+   }
+
+   private void start()
+   {
+      if (isRunning.getAndSet(true))
+      {
+         return;
+      }
+
+      helper.publish(LifecycleState, TraverseStairsLifecycleStateName.RUNNING.name());
+
+      planStepsState.reset();
+      pauseState.reset();
+      executeStepsState.clearWalkingCompleteFlag();
+
+      hasPublishedCompleted.set(false);
+      behaviorHasCrashed.set(false);
+      stateMachine.resetToInitialState();
+      behaviorTask = executorService.scheduleAtFixedRate(this::update, 0, UPDATE_RATE_MILLIS, TimeUnit.MILLISECONDS);
+
+      BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
+      supportRegionParametersMessage.setEnable(false);
+      helper.publish(ROS2Tools::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
    }
 
    private void update()
    {
       if (behaviorHasCrashed.get())
       {
+         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
          return;
       }
 
@@ -167,7 +258,7 @@ public class TraverseStairsBehavior implements BehaviorInterface
 
          if (executeStepsState.planEndsAtGoal() && executeStepsState.walkingIsComplete() && !hasPublishedCompleted.get())
          {
-            completedPublisher.publish(new Empty());
+            helper.publish(TraverseStairsBehaviorAPI.COMPLETED);
             hasPublishedCompleted.set(true);
          }
       }
@@ -175,6 +266,33 @@ public class TraverseStairsBehavior implements BehaviorInterface
       {
          e.printStackTrace();
          behaviorHasCrashed.set(true);
+         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
       }
+   }
+
+   public boolean hasSeenStairsecently()
+   {
+      return stairsDetectedTimer.isRunning(5.0);
+   }
+
+   public double getDistanceToStairs()
+   {
+      return distanceToStairs;
+   }
+
+   public boolean isGoing()
+   {
+      return currentLifeCycleState == TraverseStairsLifecycleStateName.RUNNING || currentLifeCycleState == TraverseStairsLifecycleStateName.AWAITING_APPROVAL;
+   }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
+   }
+
+   public void destroy()
+   {
+      planStepsState.destroy();
    }
 }

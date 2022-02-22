@@ -2,12 +2,16 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.internal.ImGui;
-import imgui.flag.*;
+import org.apache.logging.log4j.Level;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.gdx.tools.GDXApplicationCreator;
+import us.ihmc.gdx.imgui.ImGuiMovingPlot;
+import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.tools.string.StringTools;
+
+import java.time.LocalDateTime;
 
 public class GDXImGuiBasedUIDemo
 {
@@ -17,47 +21,37 @@ public class GDXImGuiBasedUIDemo
                                                               "Demo");
 
    private final Stopwatch stopwatch = new Stopwatch().start();
+   private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
+   private final ImGuiLogWidget logWidget = new ImGuiLogWidget("Log");
+   private long renderCount = 0;
 
    public GDXImGuiBasedUIDemo()
    {
-      GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
+      baseUI.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
          public void create()
          {
             baseUI.create();
 
-            baseUI.getSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
-            baseUI.getSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
-            baseUI.getImGuiDockingSetup().splitAdd("Window", ImGuiDir.Right, 0.20);
+            baseUI.getImGuiPanelManager().addPanel("Window 1", GDXImGuiBasedUIDemo.this::renderWindow1);
+            baseUI.getImGuiPanelManager().addPanel("Window 2", GDXImGuiBasedUIDemo.this::renderWindow2);
+            baseUI.getImGuiPanelManager().addPanel("Window 3", GDXImGuiBasedUIDemo.this::renderWindow3);
+
+            logWidget.submitEntry(Level.WARN, "WARN at " + LocalDateTime.now());
+            logWidget.submitEntry(Level.ERROR, "ERROR at " + LocalDateTime.now());
+            logWidget.submitEntry(Level.DEBUG, "DEBUG at " + LocalDateTime.now());
+            logWidget.submitEntry(Level.FATAL, "FATAL at " + LocalDateTime.now());
+            logWidget.submitEntry(Level.TRACE, "TRACE at " + LocalDateTime.now());
          }
 
          @Override
          public void render()
          {
             baseUI.renderBeforeOnScreenUI();
-
-            ImGui.begin("Window");
-            if (ImGui.beginTabBar("main"))
-            {
-               if (ImGui.beginTabItem("Window"))
-               {
-                  ImGui.text("Tab bar detected!");
-                  ImGui.endTabItem();
-               }
-               ImGui.endTabBar();
-            }
-            ImGui.text(StringTools.format3D("Time: {} s", stopwatch.totalElapsed()).get());
-            ImGui.button("I'm a Button!");
-            float[] values = new float[100];
-            for (int i = 0; i < 100; i++)
-            {
-               values[i] = i;
-            }
-            ImGui.plotLines("Histogram", values, 100);
-            ImGui.end();
-
             baseUI.renderEnd();
          }
 
@@ -66,7 +60,39 @@ public class GDXImGuiBasedUIDemo
          {
             baseUI.dispose();
          }
-      }, getClass());
+      });
+   }
+
+   private void renderWindow1()
+   {
+      if (ImGui.beginTabBar("main"))
+      {
+         if (ImGui.beginTabItem("Window"))
+         {
+            ImGui.text("Tab bar detected!");
+            ImGui.endTabItem();
+         }
+         ImGui.endTabBar();
+      }
+      ImGui.text(StringTools.format3D("Time: {} s", stopwatch.totalElapsed()).get());
+      ImGui.button("I'm a Button!");
+      float[] values = new float[100];
+      for (int i = 0; i < 100; i++)
+      {
+         values[i] = i;
+      }
+      ImGui.plotLines("Histogram", values, 100);
+      renderPlot.calculate(renderCount++);
+
+      logWidget.renderImGuiWidgets();
+   }
+
+   private void renderWindow2()
+   {
+   }
+
+   private void renderWindow3()
+   {
    }
 
    public static void main(String[] args)

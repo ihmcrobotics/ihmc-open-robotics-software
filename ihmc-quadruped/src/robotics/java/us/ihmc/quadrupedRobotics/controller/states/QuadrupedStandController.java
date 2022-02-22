@@ -81,7 +81,7 @@ public class QuadrupedStandController implements EventState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
       bodyOrientationManager.disableBodyPitchOscillation();
       balanceManager.disableBodyXYControl();

@@ -331,10 +331,16 @@ public class ValkyrieJointMap implements HumanoidJointNameMap
    @Override
    public Set<String> getLastSimulatedJoints()
    {
-      HashSet<String> lastSimulatedJoints = new HashSet<>();
-      for (RobotSide robotSide : RobotSide.values)
-         lastSimulatedJoints.add(armJointStrings.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH));
-      return lastSimulatedJoints;
+      switch (robotVersion)
+      {
+         case DEFAULT:
+            HashSet<String> lastSimulatedJoints = new HashSet<>();
+            for (RobotSide robotSide : RobotSide.values)
+               lastSimulatedJoints.add(armJointStrings.get(robotSide).get(ArmJointName.FIRST_WRIST_PITCH));
+            return lastSimulatedJoints;
+         default:
+            return Collections.emptySet();
+      }
    }
 
    @Override

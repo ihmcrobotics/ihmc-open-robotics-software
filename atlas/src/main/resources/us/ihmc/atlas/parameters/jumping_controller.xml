@@ -26,9 +26,9 @@
             <parameter name="HeadAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
             <parameter name="HeadAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
             <parameter name="HeadAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-            <parameter name="PelvisAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
-            <parameter name="PelvisAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
-            <parameter name="PelvisAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
+            <parameter name="PelvisAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+            <parameter name="PelvisAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
+            <parameter name="PelvisAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.05"/>
             <parameter name="HandAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
             <parameter name="HandAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
             <parameter name="HandAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
@@ -41,9 +41,9 @@
             <parameter name="HandLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
             <parameter name="HandLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
             <parameter name="HandLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
-            <parameter name="FootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="30.0"/>
-            <parameter name="FootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="30.0"/>
-            <parameter name="FootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="50.0"/>
+            <parameter name="FootLinearWeightX" type="DoubleParameter" min="0.0" max="1.0" value="130.0"/>
+            <parameter name="FootLinearWeightY" type="DoubleParameter" min="0.0" max="1.0" value="130.0"/>
+            <parameter name="FootLinearWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="150.0"/>
             <parameter name="LoadedFootAngularWeightX" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
             <parameter name="LoadedFootAngularWeightY" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>
             <parameter name="LoadedFootAngularWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="5.0"/>

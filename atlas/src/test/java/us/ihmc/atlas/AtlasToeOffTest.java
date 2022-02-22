@@ -73,7 +73,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     @Override
     public double getMaxStepLength()
     {
-        return 1.1;
+        return 0.9;
     }
 
     @Override

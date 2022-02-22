@@ -6,14 +6,64 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters.*;
 
 public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default boolean getAutomaticallyInjectSupportRegions()
+   default boolean getUseInitialSupportRegions()
    {
-      return get(automaticallyInjectSupportRegions);
+      return get(useInitialSupportRegions);
    }
 
-   default boolean getEnableBipedalSupportRegions()
+   default boolean getAssumeFlatGround()
    {
-      return get(enableBipedalSupportRegions);
+      return get(assumeFlatGround);
+   }
+
+   default boolean getDetectFlatGround()
+   {
+      return get(detectFlatGround);
+   }
+
+   default double getDetectFlatGroundZTolerance()
+   {
+      return get(detectFlatGroundZTolerance);
+   }
+
+   default double getDetectFlatGroundOrientationTolerance()
+   {
+      return get(detectFlatGroundOrientationTolerance);
+   }
+
+   default double getDetectFlatGroundMinRegionAreaToConsider()
+   {
+      return get(detectFlatGroundMinRegionAreaToConsider);
+   }
+
+   default double getDetectFlatGroundMinRadius()
+   {
+      return get(detectFlatGroundMinRadius);
+   }
+
+   default double getAssumedFlatGroundCircleRadius()
+   {
+      return get(assumedFlatGroundCircleRadius);
+   }
+
+   default boolean getSquareUpAtTheEnd()
+   {
+      return get(squareUpAtTheEnd);
+   }
+
+   default double getSupportRegionScaleFactor()
+   {
+      return get(supportRegionScaleFactor);
+   }
+
+   default int getPlanarRegionsHistorySize()
+   {
+      return get(planarRegionsHistorySize);
+   }
+
+   default int getMaxStepsToSendToController()
+   {
+      return get(maxStepsToSendToController);
    }
 
    default boolean getFlatGroundBodyPathPlan()
@@ -21,9 +71,9 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(flatGroundBodyPathPlan);
    }
 
-   default int getMinimumNumberOfPlannedSteps()
+   default int getNumberOfStepsToTryToPlan()
    {
-      return get(minimumNumberOfPlannedSteps);
+      return get(numberOfStepsToTryToPlan);
    }
 
    default double getMinimumStepTranslation()
@@ -61,14 +111,14 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(footstepPlannerTimeout);
    }
 
-   default double getSwingTime()
+   default double getSwingDuration()
    {
-      return get(swingTime);
+      return get(swingDuration);
    }
 
-   default double getTransferTime()
+   default double getTransferDuration()
    {
-      return get(transferTime);
+      return get(transferDuration);
    }
 
    default double getWaitTimeAfterPlanFailed()
@@ -109,5 +159,15 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    default int getSwingPlannerType()
    {
       return get(swingPlannerType);
+   }
+
+   default double getHorizonFromDebrisToStop()
+   {
+      return get(horizonFromDebrisToStop);
+   }
+
+   default boolean getStopForImpassibilities()
+   {
+      return get(stopForImpassibilities);
    }
 }

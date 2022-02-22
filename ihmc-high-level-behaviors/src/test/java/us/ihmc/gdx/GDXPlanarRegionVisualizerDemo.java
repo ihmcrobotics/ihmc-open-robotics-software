@@ -28,7 +28,7 @@ public class GDXPlanarRegionVisualizerDemo
          @Override
          public void render()
          {
-            planarRegionsGraphic.render();
+            planarRegionsGraphic.update();
             
             sceneManager.setViewportBoundsToWindow();
             sceneManager.render();

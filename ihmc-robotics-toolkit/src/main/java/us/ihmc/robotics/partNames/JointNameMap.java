@@ -28,6 +28,21 @@ public interface JointNameMap<E extends Enum<E> & RobotSegment<E>> extends Robot
       return 20.0;
    }
 
+   default double getJointKLimit(String jointName)
+   {
+      return getDefaultKLimit();
+   }
+   
+   default double getJointBLimit(String jointName)
+   {
+      return getDefaultBLimit();
+   }
+
+   default double getDefaultVelocityLimitDamping()
+   {
+      return 500.0;
+   }
+
    /**
     * @return list of joints that will not be inertia scaled for simulation stability
     */
@@ -62,5 +77,6 @@ public interface JointNameMap<E extends Enum<E> & RobotSegment<E>> extends Robot
    E[] getRobotSegments();
 
    E getEndEffectorsRobotSegment(String jointNameBeforeEndEffector);
+
 
 }

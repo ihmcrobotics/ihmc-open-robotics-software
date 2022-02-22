@@ -9,8 +9,8 @@ public class TraverseStairsBehaviorParameters extends StoredPropertySet
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final DoubleStoredPropertyKey pauseTime = keys.addDoubleKey("Pause time", 3.5);
-   public static final IntegerStoredPropertyKey numberOfStairsPerExecution = keys.addIntegerKey("Number Of Stairs Per Execution", 2);
+   public static final DoubleStoredPropertyKey pauseTime = keys.addDoubleKey("Pause time", 10.0);
+   public static final IntegerStoredPropertyKey numberOfStairsPerExecution = keys.addIntegerKey("Number Of Stairs Per Execution", 3);
    public static final DoubleStoredPropertyKey planningTimeout = keys.addDoubleKey("Planning timeout", 10.0);
 
    // TODO look back at logs for these
@@ -24,7 +24,7 @@ public class TraverseStairsBehaviorParameters extends StoredPropertySet
 
    public TraverseStairsBehaviorParameters()
    {
-      super(keys, TraverseStairsBehaviorParameters.class, "ihmc-open-robotics-software", "ihmc-avatar-interfaces/src/behaviors/resources");
+      super(keys, TraverseStairsBehaviorParameters.class, "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/main/resources");
       load();
    }
 

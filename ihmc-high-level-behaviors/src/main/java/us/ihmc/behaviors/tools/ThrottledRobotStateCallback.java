@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.tools;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
@@ -14,13 +14,13 @@ import java.util.function.Consumer;
 public class ThrottledRobotStateCallback
 {
    private final double updatePeriod;
-   private final RemoteSyncedRobotModel syncableRobot;
+   private final ROS2SyncedRobotModel syncableRobot;
    private final Timer throttleTimer = new Timer();
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-   private final ArrayList<Consumer<RemoteSyncedRobotModel>> consumers = new ArrayList<>();
+   private final ArrayList<Consumer<ROS2SyncedRobotModel>> consumers = new ArrayList<>();
    private final Runnable waitThenAct = this::waitThenAct;
 
-   public ThrottledRobotStateCallback(ROS2NodeInterface ros2Node, DRCRobotModel robotModel, double rateHz, Consumer<RemoteSyncedRobotModel> syncedRobotConsumer)
+   public ThrottledRobotStateCallback(ROS2NodeInterface ros2Node, DRCRobotModel robotModel, double rateHz, Consumer<ROS2SyncedRobotModel> syncedRobotConsumer)
    {
       this(ros2Node, robotModel, rateHz);
       addConsumer(syncedRobotConsumer);
@@ -29,7 +29,7 @@ public class ThrottledRobotStateCallback
    public ThrottledRobotStateCallback(ROS2NodeInterface ros2Node, DRCRobotModel robotModel, double rateHz)
    {
       updatePeriod = UnitConversions.hertzToSeconds(rateHz);
-      syncableRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncableRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       syncableRobot.addRobotConfigurationDataReceivedCallback(() -> executor.clearQueueAndExecute(waitThenAct));
    }
 
@@ -37,14 +37,14 @@ public class ThrottledRobotStateCallback
    {
       throttleTimer.sleepUntilExpiration(updatePeriod);
       syncableRobot.update();
-      for (Consumer<RemoteSyncedRobotModel> consumer : consumers)
+      for (Consumer<ROS2SyncedRobotModel> consumer : consumers)
       {
          consumer.accept(syncableRobot);
       }
       throttleTimer.reset();
    }
 
-   public void addConsumer(Consumer<RemoteSyncedRobotModel> syncedRobotConsumer)
+   public void addConsumer(Consumer<ROS2SyncedRobotModel> syncedRobotConsumer)
    {
       consumers.add(syncedRobotConsumer);
    }

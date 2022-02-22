@@ -123,7 +123,7 @@ public class ValkyrieNetworkProcessor
       final String valkyrieNetworkProcessorConfig = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator
             + "ValkyrieNetworkProcessorModuleConfig.ini";
 
-      File configurationFile = new File(System.getProperty("us.ihmc.networkParameterFile", valkyrieNetworkProcessorConfig)).getAbsoluteFile();
+      File configurationFile = new File(System.getProperty("us.ihmc.networkProcessorModuleConfig", valkyrieNetworkProcessorConfig)).getAbsoluteFile();
       LogTools.info("Looking for network processor module configuration in " + configurationFile.getAbsolutePath());
       EnumMap<ValkyrieNetworkProcessorParameters, Boolean> parameters = iniToParameters(configurationFile);
 

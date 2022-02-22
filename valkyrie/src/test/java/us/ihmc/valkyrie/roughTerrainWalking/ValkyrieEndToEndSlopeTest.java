@@ -11,11 +11,8 @@ import org.junit.jupiter.api.TestInfo;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.factory.RobotDefinitionTools;
 import us.ihmc.avatar.roughTerrainWalking.HumanoidEndToEndSlopeTest;
-import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
-import us.ihmc.modelFileLoaders.SdfLoader.SDFJointHolder;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
@@ -57,17 +54,8 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
 
       if (removeAnkleJointLimits)
       {
-         robotModel.setSDFDescriptionMutator(new SDFDescriptionMutatorList(robotModel.getSDFDescriptionMutator(), new SDFDescriptionMutator()
-         {
-            @Override
-            public void mutateJointForModel(GeneralizedSDFRobotModel model, SDFJointHolder jointHolder)
-            {
-               if (jointHolder.getName().contains("Ankle"))
-               {
-                  jointHolder.setLimits(-Math.PI, Math.PI);
-               }
-            }
-         }));
+         robotModel.setRobotDefinitionMutator(robotModel.getRobotDefinitionMutator()
+                                                        .andThen(RobotDefinitionTools.jointLimitMutator("Ankle", -Math.PI, Math.PI)));
       }
 
       return robotModel;
@@ -148,9 +136,9 @@ public class ValkyrieEndToEndSlopeTest extends HumanoidEndToEndSlopeTest
    {
       useVal2Scale = true;
       swingDuration = 0.8;
-      transferDuration = 0.35;
+      transferDuration = 0.40;
       maxStepLength = 0.20;
-      heightOffset = 0.05;
+      heightOffset = 0.04;
       torsoPitch = 0.666;
       testSlope(testInfo, goUp, useSideSteps, swingDuration, transferDuration, maxStepLength, heightOffset, torsoPitch, true, disableToeOff);
    }

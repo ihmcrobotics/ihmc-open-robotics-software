@@ -7,6 +7,7 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
@@ -18,39 +19,60 @@ public class HumanoidFloatingRootJointRobot extends FloatingRootJointRobot
    private final SideDependentList<ArrayList<GroundContactPoint>> footGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
    private final SideDependentList<ArrayList<GroundContactPoint>> handGroundContactPoints = new SideDependentList<ArrayList<GroundContactPoint>>();
 
-   public HumanoidFloatingRootJointRobot(RobotDescription robotDescription, HumanoidJointNameMap sdfJointNameMap)
+   public HumanoidFloatingRootJointRobot(RobotDescription robotDescription, HumanoidJointNameMap jointNameMap)
    {
-      this(robotDescription, sdfJointNameMap, true, true);
+      this(robotDescription, jointNameMap, true, true);
    }
 
-   public HumanoidFloatingRootJointRobot(RobotDescription robotDescription, HumanoidJointNameMap sdfJointNameMap, boolean enableDamping, boolean enableJointTorqueAndVelocityLimits)
+   public HumanoidFloatingRootJointRobot(RobotDescription robotDescription,
+                                         HumanoidJointNameMap jointNameMap,
+                                         boolean enableDamping,
+                                         boolean enableJointTorqueAndVelocityLimits)
    {
-      super(robotDescription, enableDamping, enableJointTorqueAndVelocityLimits && (sdfJointNameMap == null || sdfJointNameMap.isTorqueVelocityLimitsEnabled()));
+      super(robotDescription, enableDamping, enableJointTorqueAndVelocityLimits && (jointNameMap == null || jointNameMap.isTorqueVelocityLimitsEnabled()));
+      initialWithJointNameMap(jointNameMap);
+   }
 
+   public HumanoidFloatingRootJointRobot(RobotDefinition robotDefinition, HumanoidJointNameMap jointNameMap)
+   {
+      this(robotDefinition, jointNameMap, true, true);
+   }
+
+   public HumanoidFloatingRootJointRobot(RobotDefinition robotDefinition,
+                                         HumanoidJointNameMap jointNameMap,
+                                         boolean enableDamping,
+                                         boolean enableJointTorqueAndVelocityLimits)
+   {
+      super(robotDefinition, enableDamping, enableJointTorqueAndVelocityLimits && (jointNameMap == null || jointNameMap.isTorqueVelocityLimitsEnabled()));
+      initialWithJointNameMap(jointNameMap);
+   }
+
+   private void initialWithJointNameMap(HumanoidJointNameMap jointNameMap)
+   {
       for (RobotSide robotSide : RobotSide.values)
       {
          footGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
          handGroundContactPoints.put(robotSide, new ArrayList<GroundContactPoint>());
-         if(sdfJointNameMap != null)
+         if (jointNameMap != null)
          {
-            jointsBeforeFeet.put(robotSide, sdfJointNameMap.getJointBeforeFootName(robotSide));
+            jointsBeforeFeet.put(robotSide, jointNameMap.getJointBeforeFootName(robotSide));
          }
       }
 
-      for(Joint joint : getOneDegreeOfFreedomJoints())
+      for (Joint joint : getOneDegreeOfFreedomJoints())
       {
-         for(RobotSide robotSide : RobotSide.values)
+         for (RobotSide robotSide : RobotSide.values)
          {
             ArrayList<GroundContactPoint> contactPointsForJoint = getGroundContactPointsOnJoint(joint);
 
-            if(contactPointsForJoint != null)
+            if (contactPointsForJoint != null)
             {
                String jointName = joint.getName();
-               if (jointName.equals(sdfJointNameMap.getJointBeforeFootName(robotSide)))
+               if (jointName.equals(jointNameMap.getJointBeforeFootName(robotSide)))
                {
                   footGroundContactPoints.get(robotSide).addAll(contactPointsForJoint);
                }
-               else if (jointName.equals(sdfJointNameMap.getJointBeforeHandName(robotSide)))
+               else if (jointName.equals(jointNameMap.getJointBeforeHandName(robotSide)))
                {
                   handGroundContactPoints.get(robotSide).addAll(contactPointsForJoint);
                }

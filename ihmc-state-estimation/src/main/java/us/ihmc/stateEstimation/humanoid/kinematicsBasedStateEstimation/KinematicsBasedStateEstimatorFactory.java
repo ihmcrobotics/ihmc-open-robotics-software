@@ -86,7 +86,7 @@ public class KinematicsBasedStateEstimatorFactory
       return this;
    }
 
-   public KinematicsBasedStateEstimatorFactory setContactableBodiesFactory(ContactableBodiesFactory contactableBodiesFactory)
+   public KinematicsBasedStateEstimatorFactory setContactableBodiesFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory)
    {
       this.contactableBodiesFactoryField.set(contactableBodiesFactory);
       return this;
@@ -158,8 +158,13 @@ public class KinematicsBasedStateEstimatorFactory
          bipedFeetMap.put(foot, bipedFeet.get(robotSide));
 
          Set<ContactableFoot> otherFoot = Collections.singleton(bipedFeet.get(robotSide.getOppositeSide()));
-         FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(namePrefix, bipedFeet.get(robotSide), otherFoot, footForceSensorForEstimator,
-                                                                          totalRobotWeight, null, stateEstimatorRegistry);
+         FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(namePrefix,
+                                                                          bipedFeet.get(robotSide),
+                                                                          otherFoot,
+                                                                          footForceSensorForEstimator,
+                                                                          totalRobotWeight,
+                                                                          null,
+                                                                          stateEstimatorRegistry);
          footSwitchMap.put(foot, footSwitch);
       }
 
@@ -169,12 +174,16 @@ public class KinematicsBasedStateEstimatorFactory
       CenterOfMassDataHolder estimatorCenterOfMassDataHolder = estimatorCenterOfMassDataHolderToUpdateField.hasValue()
             ? estimatorCenterOfMassDataHolderToUpdateField.get()
             : null;
-      DRCKinematicsBasedStateEstimator estimator = new DRCKinematicsBasedStateEstimator(fullInverseDynamicsStructure, stateEstimatorParameters,
+      DRCKinematicsBasedStateEstimator estimator = new DRCKinematicsBasedStateEstimator(fullInverseDynamicsStructure,
+                                                                                        stateEstimatorParameters,
                                                                                         sensorOutputMapReadOnlyField.get(),
                                                                                         estimatorCenterOfMassDataHolder,
-                                                                                        imuSensorsToUseInStateEstimator, gravityMagnitude, footSwitchMap,
+                                                                                        imuSensorsToUseInStateEstimator,
+                                                                                        gravityMagnitude,
+                                                                                        footSwitchMap,
                                                                                         centerOfPressureDataHolderFromControllerField.get(),
-                                                                                        robotMotionStatusFromControllerField.get(), bipedFeetMap,
+                                                                                        robotMotionStatusFromControllerField.get(),
+                                                                                        bipedFeetMap,
                                                                                         stateEstimatorYoGraphicsListRegistry);
 
       if (externalPelvisPoseSubscriberField.hasValue())

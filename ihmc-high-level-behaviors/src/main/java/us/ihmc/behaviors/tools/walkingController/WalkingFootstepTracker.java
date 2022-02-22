@@ -26,7 +26,7 @@ public class WalkingFootstepTracker
    private int stepsCommanded = 0;
    private int stepsCompleted = 0;
 
-   private SideDependentList<FootstepDataMessage> lastCommandedFootsteps = new SideDependentList<>();
+   private final SideDependentList<FootstepDataMessage> lastCommandedFootsteps = new SideDependentList<>();
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {

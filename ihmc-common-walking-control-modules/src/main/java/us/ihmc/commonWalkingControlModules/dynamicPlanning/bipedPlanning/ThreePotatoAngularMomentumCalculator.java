@@ -1,6 +1,9 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingCoPTrajectoryGeneratorState;
+import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
+
+import java.util.List;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -14,7 +17,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
@@ -37,10 +40,6 @@ import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.List;
-
-import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
 public class ThreePotatoAngularMomentumCalculator
 {
@@ -102,7 +101,7 @@ public class ThreePotatoAngularMomentumCalculator
    private final BagOfBalls secondPotatoVis;
    private final BagOfBalls thirdPotatoVis;
 
-   private final CenterOfMassJacobian centerOfMassJacobian;
+   private final CenterOfMassStateProvider centerOfMassStateProvider;
    private final SideDependentList<MovingReferenceFrame> soleFrames;
 
    private final ExecutionTimer angularMomentumEstimationTimer = new ExecutionTimer("angularMomentumEstimation", registry);
@@ -113,13 +112,13 @@ public class ThreePotatoAngularMomentumCalculator
    public ThreePotatoAngularMomentumCalculator(double totalMass,
                                                DoubleProvider potatoMassFraction,
                                                double gravityZ,
-                                               CenterOfMassJacobian centerOfMassJacobian,
+                                               CenterOfMassStateProvider centerOfMassStateProvider,
                                                SideDependentList<MovingReferenceFrame> soleFrames,
                                                YoRegistry parentRegistry,
                                                YoGraphicsListRegistry graphicsListRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
-      this.centerOfMassJacobian = centerOfMassJacobian;
+      this.centerOfMassStateProvider = centerOfMassStateProvider;
       this.soleFrames = soleFrames;
       this.totalMass = totalMass;
       this.potatoMassFraction = potatoMassFraction;
@@ -167,11 +166,6 @@ public class ThreePotatoAngularMomentumCalculator
       footTrajectoryPredictor.compute(state);
    }
 
-   public void predictFootTrajectories(JumpingCoPTrajectoryGeneratorState state)
-   {
-      footTrajectoryPredictor.compute(state);
-   }
-
    public void reset()
    {
       predictedCoMTrajectory = null;
@@ -205,12 +199,12 @@ public class ThreePotatoAngularMomentumCalculator
       desiredScaledAngularMomentumRate.set(heightScaledAngularMomentumTrajectory.getVelocity());
 
       totalAngularMomentum.setToZero();
-      if (centerOfMassJacobian != null && soleFrames != null)
+      if (centerOfMassStateProvider != null && soleFrames != null)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePoint3DReadOnly comPosition = centerOfMassJacobian.getCenterOfMass();
-            FrameVector3DReadOnly comVelocity = centerOfMassJacobian.getCenterOfMassVelocity();
+            FramePoint3DReadOnly comPosition = centerOfMassStateProvider.getCenterOfMassPosition();
+            FrameVector3DReadOnly comVelocity = centerOfMassStateProvider.getCenterOfMassVelocity();
 
             potatoPosition.setToZero(soleFrames.get(robotSide));
             potatoPosition.changeFrame(ReferenceFrame.getWorldFrame());

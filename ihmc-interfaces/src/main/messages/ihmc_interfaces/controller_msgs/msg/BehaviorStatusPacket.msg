@@ -1,7 +1,7 @@
 # This message is part of the IHMC humanoid behavior module.
 
 byte NO_BEHAVIOR_RUNNING = 0
-byte BEHAVIOS_RUNNING = 1
+byte BEHAVIOR_RUNNING = 1
 byte BEHAVIOR_PAUSED = 2
 byte BEHAVIOR_FINISHED_FAILED = 3
 byte BEHAVIOR_FINISHED_SUCCESS = 4

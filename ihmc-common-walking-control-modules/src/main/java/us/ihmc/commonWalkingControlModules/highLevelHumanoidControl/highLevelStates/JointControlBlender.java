@@ -4,7 +4,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.DeltaLimitedYoVariable;
-import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -72,9 +71,21 @@ public class JointControlBlender
       if (ENABLE_TAU_SCALE)
          blendingFactor *= tauScale.getDoubleValue();
 
-      JointDesiredControlMode controlMode = outputDataToPack.getControlMode();
+      if (blendingFactor == 0.0)
+      {
+         outputDataToPack.set(outputData0);
+         return;
+      }
+
+      if (blendingFactor == 1.0)
+      {
+         outputDataToPack.set(outputData1);
+         return;
+      }
+
       outputDataToPack.clear();
-      outputDataToPack.setControlMode(controlMode);
+      outputDataToPack.setControlMode(outputData0.getControlMode());
+      outputDataToPack.setLoadMode(outputData0.getLoadMode());
 
       double currentJointAngle = oneDoFJoint.getQ();
       double currentJointVelocity = oneDoFJoint.getQd();

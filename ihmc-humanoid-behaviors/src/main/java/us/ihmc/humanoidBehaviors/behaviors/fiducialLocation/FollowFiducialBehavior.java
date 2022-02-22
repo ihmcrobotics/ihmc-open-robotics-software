@@ -175,10 +175,10 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
             }
 
             @Override
-            public void onExit()
+            public void onExit(double timeInState)
             {
                lookUp();
-               super.onExit();
+               super.onExit(timeInState);
             }
 
             private void lookDown()
@@ -324,7 +324,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          PrintTools.info("leaving");
 
@@ -389,7 +389,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       }
 
       @Override
-      public void onExit()
+      public void onExit(double timeInState)
       {
          footstepStatusReference.set(null);
       }

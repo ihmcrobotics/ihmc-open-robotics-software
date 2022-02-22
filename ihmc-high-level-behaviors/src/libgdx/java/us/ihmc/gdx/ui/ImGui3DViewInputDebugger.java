@@ -1,6 +1,6 @@
 package us.ihmc.gdx.ui;
 
-import imgui.internal.ImGui;
+import imgui.flag.ImGuiMouseButton;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 
 public class ImGui3DViewInputDebugger
@@ -22,10 +22,10 @@ public class ImGui3DViewInputDebugger
             screenXPlot.setValue(input.getMousePosX());
             screenYPlot.setValue(input.getMousePosY());
          }
-         if (input.isDragging())
+         if (input.isDragging(ImGuiMouseButton.Left))
          {
-            deltaXPlot.setValue(input.getMouseDraggedX());
-            deltaYPlot.setValue(input.getMouseDraggedY());
+            deltaXPlot.setValue(input.getMouseDraggedX(ImGuiMouseButton.Left));
+            deltaYPlot.setValue(input.getMouseDraggedY(ImGuiMouseButton.Left));
          }
       });
 
@@ -38,15 +38,11 @@ public class ImGui3DViewInputDebugger
 
    public void render()
    {
-      ImGui.begin(getWindowName());
-
       screenXPlot.render();
       screenYPlot.render();
       deltaXPlot.render();
       deltaYPlot.render();
       scrolledYPlot.render();
-
-      ImGui.end();
    }
 
    public String getWindowName()

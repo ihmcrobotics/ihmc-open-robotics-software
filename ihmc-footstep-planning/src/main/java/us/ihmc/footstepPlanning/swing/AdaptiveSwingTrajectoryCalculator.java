@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.swing;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -109,13 +110,15 @@ public class AdaptiveSwingTrajectoryCalculator
    public double calculateSwingTime(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
    {
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
-
       double maxStepZ = footstepPlannerParameters.getMaxStepZ();
-      double maximumStepDistance = EuclidCoreTools.norm(footstepPlannerParameters.getMaximumStepReach(), maxStepZ);
 
-      double stepDistance = startPosition.distance(endPosition);
-      double alpha = MathTools.clamp((stepDistance - idealStepLength) / (maximumStepDistance - idealStepLength), 0.0, 1.0);
-      return swingPlannerParameters.getMinimumSwingTime() + alpha * (swingPlannerParameters.getMaximumSwingTime() - swingPlannerParameters.getMinimumSwingTime());
+      return AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength,
+                                                         footstepPlannerParameters.getMaxSwingReach(),
+                                                         maxStepZ,
+                                                         swingPlannerParameters.getMinimumSwingTime(),
+                                                         swingPlannerParameters.getMaximumSwingTime(),
+                                                         startPosition,
+                                                         endPosition);
    }
 
    public void checkForFootCollision(Pose3DReadOnly startPose, PlannedFootstep step)

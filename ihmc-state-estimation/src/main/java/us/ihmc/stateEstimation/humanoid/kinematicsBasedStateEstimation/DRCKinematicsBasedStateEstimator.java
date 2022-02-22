@@ -1,5 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
+import static us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater.wrapFootSwitchInterfaces;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +11,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.visualizer.ExternalWrenchJointTorqueBasedEstimatorVisualizer;
 import us.ihmc.commons.Conversions;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
@@ -29,6 +31,10 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.DistributedIMUBasedCenterOfMassStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.MomentumStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.SimpleMomentumStateUpdater;
+import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.centerOfMassEstimator.WrenchBasedMomentumStateUpdater;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -42,6 +48,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = false;
    private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
 
+   private enum MomentumEstimatorMode
+   {
+      NONE, SIMPLE, DISTRIBUTED_IMUS, WRENCH_BASED
+   };
+
+   private static final MomentumEstimatorMode MOMENTUM_ESTIMATOR_MODE = MomentumEstimatorMode.NONE;
+
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
    private final YoDouble yoTime = new YoDouble("t_stateEstimator", registry);
@@ -52,6 +65,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final JointStateUpdater jointStateUpdater;
    private final PelvisRotationalStateUpdaterInterface pelvisRotationalStateUpdater;
    private final PelvisLinearStateUpdater pelvisLinearStateUpdater;
+   private final MomentumStateUpdater momentumStateUpdater;
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
@@ -93,6 +107,8 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.sensorOutput = sensorOutputMap;
       this.footSwitchList = new ArrayList<>(footSwitches.values());
+
+      rootJoint = inverseDynamicsStructure.getRootJoint();
 
       usePelvisCorrector = new YoBoolean("useExternalPelvisCorrector", registry);
       usePelvisCorrector.set(true);
@@ -183,13 +199,47 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                               imuBiasStateEstimator,
                                                               cancelGravityFromAccelerationMeasurement,
                                                               footSwitches,
-                                                              estimatorCenterOfMassDataHolderToUpdate,
                                                               centerOfPressureDataHolderFromController,
                                                               feet,
                                                               gravitationalAcceleration,
                                                               stateEstimatorParameters,
                                                               yoGraphicsListRegistry,
                                                               registry);
+
+      switch (MOMENTUM_ESTIMATOR_MODE)
+      {
+         case DISTRIBUTED_IMUS:
+            momentumStateUpdater = new DistributedIMUBasedCenterOfMassStateUpdater(rootJoint,
+                                                                                   sensorOutputMap.getIMUOutputs(),
+                                                                                   pelvisLinearStateUpdater.getCurrentListOfTrustedFeet(),
+                                                                                   estimatorDT,
+                                                                                   gravitationalAcceleration,
+                                                                                   estimatorCenterOfMassDataHolderToUpdate);
+            break;
+         case SIMPLE:
+            momentumStateUpdater = new SimpleMomentumStateUpdater(rootJoint,
+                                                                  gravitationalAcceleration,
+                                                                  stateEstimatorParameters,
+                                                                  footSwitches,
+                                                                  estimatorCenterOfMassDataHolderToUpdate,
+                                                                  yoGraphicsListRegistry);
+            break;
+         case WRENCH_BASED:
+            momentumStateUpdater = new WrenchBasedMomentumStateUpdater(rootJoint,
+                                                                       wrapFootSwitchInterfaces(footSwitchList),
+                                                                       estimatorDT,
+                                                                       gravitationalAcceleration,
+                                                                       estimatorCenterOfMassDataHolderToUpdate);
+            break;
+         case NONE:
+            momentumStateUpdater = null;
+            break;
+         default:
+            throw new IllegalArgumentException("Unhandled mode: " + MOMENTUM_ESTIMATOR_MODE);
+      }
+
+      if (momentumStateUpdater != null)
+         registry.addChild(momentumStateUpdater.getRegistry());
 
       if (yoGraphicsListRegistry != null)
       {
@@ -241,7 +291,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          estimatedWrenchVisualizer = null;
       }
 
-      rootJoint = inverseDynamicsStructure.getRootJoint();
       yoRootTwist = new YoFixedFrameTwist("RootTwist",
                                           rootJoint.getFrameAfterJoint(),
                                           rootJoint.getFrameBeforeJoint(),
@@ -274,6 +323,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
          pelvisRotationalStateUpdater.initialize();
       }
       pelvisLinearStateUpdater.initialize();
+
+      if (momentumStateUpdater != null)
+         momentumStateUpdater.initialize();
 
       imuBiasStateEstimator.initialize();
       imuYawDriftEstimator.initialize();
@@ -319,6 +371,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             break;
       }
 
+      if (momentumStateUpdater != null)
+         momentumStateUpdater.update();
+
       yoRootTwist.setMatchingFrame(rootJoint.getJointTwist());
 
       List<RigidBodyBasics> trustedFeet = pelvisLinearStateUpdater.getCurrentListOfTrustedFeet();
@@ -351,7 +406,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    }
 
    @Override
-   public void initializeEstimator(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
+   public void initializeEstimator(RigidBodyTransformReadOnly rootJointTransform, TObjectDoubleMap<String> jointPositions)
    {
       pelvisLinearStateUpdater.initializeRootJointPosition(rootJointTransform.getTranslation());
       reinitializeStateEstimator.set(true);

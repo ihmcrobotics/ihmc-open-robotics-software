@@ -4,25 +4,32 @@ import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
 import imgui.type.ImInt;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.PathTools;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.tools.property.*;
 
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 
-public class ImGuiStoredPropertySetTuner
+public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 {
-   private String windowName;
    private StoredPropertySetBasics storedPropertySet;
    private StoredPropertyKeyList keys;
    private Runnable onParametersUpdatedCallback;
+   private final TreeSet<String> versions = new TreeSet<>();
 
-   private HashMap<DoubleStoredPropertyKey, ImDouble> doubleValues = new HashMap<>();
-   private HashMap<IntegerStoredPropertyKey, ImInt> integerValues = new HashMap<>();
-   private HashMap<BooleanStoredPropertyKey, ImBoolean> booleanValues = new HashMap<>();
+   private final HashMap<DoubleStoredPropertyKey, ImDouble> doubleValues = new HashMap<>();
+   private final HashMap<IntegerStoredPropertyKey, ImInt> integerValues = new HashMap<>();
+   private final HashMap<BooleanStoredPropertyKey, ImBoolean> booleanValues = new HashMap<>();
 
-   public ImGuiStoredPropertySetTuner(String windowName)
+   public ImGuiStoredPropertySetTuner(String name)
    {
-      this.windowName = windowName;
+      super(name);
+      setRenderMethod(this::renderImGuiWidgets);
    }
 
    public void create(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys, Runnable onParametersUpdatedCallback)
@@ -30,6 +37,19 @@ public class ImGuiStoredPropertySetTuner
       this.storedPropertySet = storedPropertySet;
       this.keys = keys;
       this.onParametersUpdatedCallback = onParametersUpdatedCallback;
+
+      Path saveFileDirectory = storedPropertySet.findSaveFileDirectory();
+      PathTools.walkFlat(saveFileDirectory, (path, pathType) ->
+      {
+         String fileName = path.getFileName().toString();
+         String prefix = storedPropertySet.getUncapitalizedClassName();
+         String extension = ".ini";
+         if (pathType == BasicPathVisitor.PathType.FILE && fileName.startsWith(prefix) && fileName.endsWith(extension))
+         {
+            versions.add(fileName.replaceAll(extension, "").substring(prefix.length()));
+         }
+         return FileVisitResult.CONTINUE;
+      });
 
       for (StoredPropertyKey<?> propertyKey : keys.keys())
       {
@@ -56,10 +76,18 @@ public class ImGuiStoredPropertySetTuner
       }
    }
 
-   public void render()
+   public void renderImGuiWidgets()
    {
-      ImGui.begin(windowName);
-//      ImGuiInputTextFlags. // TODO: Mess with various flags
+      for (String version : versions)
+      {
+         if (ImGui.radioButton(version.isEmpty() ? "Primary" : version, storedPropertySet.getCurrentVersionSuffix().equals(version)))
+         {
+            storedPropertySet.updateBackingSaveFile(version);
+            load();
+         }
+      }
+
+      //      ImGuiInputTextFlags. // TODO: Mess with various flags
       ImGui.pushItemWidth(150.0f);
       for (StoredPropertyKey<?> propertyKey : keys.keys())
       {
@@ -93,30 +121,42 @@ public class ImGuiStoredPropertySetTuner
       }
       if (ImGui.button("Load"))
       {
-         storedPropertySet.load();
-         for (Map.Entry<DoubleStoredPropertyKey, ImDouble> entry : doubleValues.entrySet())
-         {
-            entry.getValue().set(storedPropertySet.get(entry.getKey()));
-         }
-         for (Map.Entry<IntegerStoredPropertyKey, ImInt> entry : integerValues.entrySet())
-         {
-            entry.getValue().set(storedPropertySet.get(entry.getKey()));
-         }
-         for (Map.Entry<BooleanStoredPropertyKey, ImBoolean> entry : booleanValues.entrySet())
-         {
-            entry.getValue().set(storedPropertySet.get(entry.getKey()));
-         }
+         load();
       }
       ImGui.sameLine();
       if (ImGui.button("Save"))
       {
          storedPropertySet.save();
       }
-      ImGui.end();
    }
 
-   public String getWindowName()
+   private void load()
    {
-      return windowName;
+      storedPropertySet.load();
+      for (Map.Entry<DoubleStoredPropertyKey, ImDouble> entry : doubleValues.entrySet())
+      {
+         entry.getValue().set(storedPropertySet.get(entry.getKey()));
+      }
+      for (Map.Entry<IntegerStoredPropertyKey, ImInt> entry : integerValues.entrySet())
+      {
+         entry.getValue().set(storedPropertySet.get(entry.getKey()));
+      }
+      for (Map.Entry<BooleanStoredPropertyKey, ImBoolean> entry : booleanValues.entrySet())
+      {
+         entry.getValue().set(storedPropertySet.get(entry.getKey()));
+      }
+
+      onParametersUpdatedCallback.run();
+   }
+
+   public <T> void changeParameter(StoredPropertyKey<T> key, T value)
+   {
+      storedPropertySet.set(key, value);
+      onParametersUpdatedCallback.run();
+   }
+
+   public StoredPropertySetReadOnly getParameters()
+   {
+      return storedPropertySet;
    }
 }

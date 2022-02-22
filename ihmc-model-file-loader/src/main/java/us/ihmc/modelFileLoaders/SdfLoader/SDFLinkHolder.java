@@ -16,7 +16,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 public class SDFLinkHolder
 {
    // From SDF File
-   private final String name;
+   private String name;
    private final RigidBodyTransform transformToModelReferenceFrame;
    private double mass;
    private final RigidBodyTransform inertialFrameWithRespectToLinkFrame;
@@ -150,6 +150,11 @@ public class SDFLinkHolder
    public String getName()
    {
       return name;
+   }
+
+   public void setName(String name)
+   {
+      this.name = name;
    }
 
    public List<SDFVisual> getVisuals()

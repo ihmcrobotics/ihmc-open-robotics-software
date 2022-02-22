@@ -262,7 +262,7 @@ public class GradientDescentStepConstraintSolverTest
          for (int i = 0; i < transformedFoot.getNumberOfVertices(); i++)
          {
             Point2DReadOnly vertex = transformedFoot.getVertex(i);
-            boolean isInPolygon = PointInPolygonSolver.isPointInsidePolygon(polygon, vertex);
+            boolean isInPolygon = StepConstraintPolygonTools.isPointInsidePolygon(polygon, vertex);
             double distanceFromPolygon = distanceFromPolygon(polygon, vertex);
             double epsilon = gradientDescentStepConstraintSolver.getGradientMagnitudeToTerminate() / gradientDescentStepConstraintSolver.getAlpha();
 

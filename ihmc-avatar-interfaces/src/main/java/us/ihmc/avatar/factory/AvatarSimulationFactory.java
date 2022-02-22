@@ -2,6 +2,7 @@ package us.ihmc.avatar.factory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -12,6 +13,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
+import us.ihmc.avatar.AvatarSimulatedHandControlThread;
 import us.ihmc.avatar.BarrierSchedulerTools;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
@@ -20,9 +22,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
-import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.avatar.kinematicsSimulation.IntraprocessYoVariableLogger;
+import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -36,6 +38,10 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
@@ -84,7 +90,7 @@ public class AvatarSimulationFactory
    private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
    private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
    private final RequiredFactoryField<CommonAvatarEnvironmentInterface> commonAvatarEnvironment = new RequiredFactoryField<>("commonAvatarEnvironmentInterface");
-   private final RequiredFactoryField<DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new RequiredFactoryField<>("robotInitialSetup");
+   private final RequiredFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new RequiredFactoryField<>("robotInitialSetup");
    private final RequiredFactoryField<DRCSCSInitialSetup> scsInitialSetup = new RequiredFactoryField<>("scsInitialSetup");
    private final RequiredFactoryField<DRCGuiInitialSetup> guiInitialSetup = new RequiredFactoryField<>("guiInitialSetup");
    private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2Node = new RequiredFactoryField<>("realtimeROS2Node");
@@ -111,13 +117,14 @@ public class AvatarSimulationFactory
    private ActualCMPComputer actualCMPComputer;
    private FullHumanoidRobotModel masterFullRobotModel;
    private HumanoidRobotContextData masterContext;
+   private ExperimentalSimulation experimentalSimulation;
 
    private DRCRobotModelShapeCollisionSettings shapeCollisionSettings;
 
    private void createHumanoidFloatingRootJointRobot()
    {
       humanoidFloatingRootJointRobot = robotModel.get().createHumanoidFloatingRootJointRobot(createCollisionMeshes.get());
-      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot);
    }
 
    private void initializeCollisionManager()
@@ -175,16 +182,15 @@ public class AvatarSimulationFactory
 
       if (scsInitialSetup.get().getUseExperimentalPhysicsEngine())
       {
-         ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(allSimulatedRobotList.toArray(new Robot[0]),
-                                                                                    simulationConstructionSetParameters.getDataBufferSize());
+         experimentalSimulation = new ExperimentalSimulation(allSimulatedRobotList.toArray(new Robot[0]),
+                                                             simulationConstructionSetParameters.getDataBufferSize());
          experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -Math.abs(gravity.get())));
 
          CollidableHelper helper = new CollidableHelper();
          String environmentCollisionMask = "ground";
          String robotCollisionMask = robotModel.get().getSimpleRobotName();
          MultiBodySystemStateWriter robotInitialStateWriter = ExperimentalSimulation.toRobotInitialStateWriter(robotInitialSetup.get()::initializeRobot,
-                                                                                                               robotModel.get(),
-                                                                                                               robotModel.get().getJointMap());
+                                                                                                               robotModel.get());
          experimentalSimulation.addEnvironmentCollidables(helper, robotCollisionMask, environmentCollisionMask, commonAvatarEnvironment.get());
          RobotCollisionModel simulationRobotCollisionModel = robotModel.get()
                                                                        .getSimulationRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask);
@@ -251,8 +257,8 @@ public class AvatarSimulationFactory
    {
       String robotName = robotModel.get().getSimpleRobotName();
 
-      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotName);
 
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
       if (externalPelvisCorrectorSubscriber.hasValue())
@@ -311,9 +317,20 @@ public class AvatarSimulationFactory
       // Create the tasks that will be run on their own threads.
       int estimatorDivisor = (int) Math.round(robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       int controllerDivisor = (int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT());
+      int handControlDivisor = (int) Math.round(robotModel.getSimulatedHandControlDT() / robotModel.getSimulateDT());
       HumanoidRobotControlTask estimatorTask = new EstimatorTask(estimatorThread, estimatorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
       HumanoidRobotControlTask controllerTask = new ControllerTask(controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
-      SimulatedHandControlTask handControlTask = robotModel.createSimulatedHandController(humanoidFloatingRootJointRobot, realtimeROS2Node.get());
+
+      AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
+      SimulatedHandControlTask handControlTask = null;
+
+      if (handControlThread != null)
+      {
+         List<String> fingerJointNames = handControlThread.getControlledOneDoFJoints().stream().map(JointReadOnly::getName).collect(Collectors.toList());
+         SimulatedHandSensorReader handSensorReader = robotModel.createSimulatedHandSensorReader(humanoidFloatingRootJointRobot, fingerJointNames);
+         SimulatedHandOutputWriter handOutputWriter = robotModel.createSimulatedHandOutputWriter(humanoidFloatingRootJointRobot);
+         handControlTask = new SimulatedHandControlTask(handSensorReader, handControlThread, handOutputWriter, handControlDivisor, robotModel.getSimulateDT());
+      }
 
       // Previously done in estimator thread write
       if (simulationOutputWriter != null)
@@ -382,7 +399,7 @@ public class AvatarSimulationFactory
       if (yoVariableServer != null)
       {
          yoVariableServer.setMainRegistry(estimatorThread.getYoRegistry(),
-                                          estimatorThread.getFullRobotModel().getElevator(),
+                                          createYoVariableServerJointList(estimatorThread.getFullRobotModel().getElevator()),
                                           estimatorThread.getYoGraphicsListRegistry());
          estimatorTask.addRunnableOnTaskThread(() -> yoVariableServer.update(estimatorThread.getHumanoidRobotContextData().getTimestamp(),
                                                                              estimatorThread.getYoRegistry()));
@@ -401,8 +418,32 @@ public class AvatarSimulationFactory
       controllerTask.addRunnableOnSchedulerThread(() -> controllerRobotVisualizer.update());
       addRegistryAndGraphics(estimatorRobotVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
       addRegistryAndGraphics(controllerRobotVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
+
       if (handControlTask != null)
-         robotController.getYoRegistry().addChild(handControlTask.getRegistry());
+      {
+         SimulationRobotVisualizer handControlVisualizer = new SimulationRobotVisualizer(handControlThread.getYoVariableRegistry(), null);
+         handControlTask.addRunnableOnSchedulerThread(() -> handControlVisualizer.update());
+         addRegistryAndGraphics(handControlVisualizer, robotController.getYoRegistry(), simulationConstructionSet);
+      }
+   }
+
+   public static List<JointBasics> createYoVariableServerJointList(RigidBodyBasics rootBody)
+   {
+      List<JointBasics> joints = new ArrayList<>();
+
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
+      {
+         if (joint instanceof CrossFourBarJoint)
+         {
+            joints.addAll(((CrossFourBarJoint) joint).getFourBarFunction().getLoopJoints());
+         }
+         else
+         {
+            joints.add(joint);
+         }
+      }
+
+      return joints;
    }
 
    private static void addRegistryAndGraphics(SimulationRobotVisualizer visualizer, YoRegistry registry, SimulationConstructionSet scs)
@@ -427,7 +468,7 @@ public class AvatarSimulationFactory
           * need to move to where the robot itself determines coordinates, and the sensors are all in the
           * robot-determined world coordinates..
           */
-         robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+         robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot);
          try
          {
             humanoidFloatingRootJointRobot.update();
@@ -485,6 +526,11 @@ public class AvatarSimulationFactory
                                                                                controllerThread.getDesiredJointDataHolder());
       if (lowLevelController != null)
          humanoidFloatingRootJointRobot.setController(lowLevelController);
+   }
+
+   public ExperimentalSimulation getExperimentalSimulation()
+   {
+      return experimentalSimulation;
    }
 
    private void setupPassiveJoints()
@@ -551,7 +597,7 @@ public class AvatarSimulationFactory
       }
 
       scsInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get(), null);
-      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+      robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot);
       humanoidFloatingRootJointRobot.update();
    }
 
@@ -620,7 +666,7 @@ public class AvatarSimulationFactory
       this.commonAvatarEnvironment.set(commonAvatarEnvironment);
    }
 
-   public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
+   public void setRobotInitialSetup(RobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       this.robotInitialSetup.set(robotInitialSetup);
    }

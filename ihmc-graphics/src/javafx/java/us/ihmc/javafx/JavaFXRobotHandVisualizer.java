@@ -17,10 +17,9 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotModels.description.RobotDefinitionConverter;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 
@@ -48,7 +47,7 @@ public class JavaFXRobotHandVisualizer
       handControlFrameToWorld.set(fullRobotModel.getHandControlFrame(robotSide).getTransformToWorldFrame());
       RigidBodyTransform rootNodeToWorld = new RigidBodyTransform();
 
-      RobotDescription robotDescription = fullRobotModelFactory.getRobotDescription();
+      RobotDefinition robotDefinition = fullRobotModelFactory.getRobotDefinition();
 
       RigidBodyBasics handBody = fullRobotModel.getHand(robotSide).getParentJoint().getPredecessor();
       if (handBody != null)
@@ -56,12 +55,9 @@ public class JavaFXRobotHandVisualizer
          JointBasics parentJoint = handBody.getParentJoint();
          rootNodeToWorld.set(handBody.getBodyFixedFrame().getTransformToWorldFrame());
 
-         LinkDescription linkDescription = robotDescription.getLinkDescription(parentJoint.getName());
-         if (linkDescription.getLinkGraphics() == null)
-         {
-            linkDescription.setLinkGraphics(new LinkGraphicsDescription());
-         }
-         graphicsRobot = new GraphicsIDRobot(robotSide.getCamelCaseNameForStartOfExpression() + "HandGraphics", handBody, robotDescription, false);
+         graphicsRobot = new GraphicsIDRobot(robotSide.getCamelCaseNameForStartOfExpression() + "HandGraphics",
+                                             handBody,
+                                             RobotDefinitionConverter.toGraphicsObjectsHolder(robotDefinition));
 
          robotRootNode = new JavaFXGraphics3DNode(graphicsRobot.getRootNode());
          robotRootNode.setMouseTransparent(true);
@@ -78,7 +74,8 @@ public class JavaFXRobotHandVisualizer
    public void updateTransform(RigidBodyTransform transform)
    {
       FramePose3D transformFromXboxController = new FramePose3D(ReferenceFrame.getWorldFrame(), transform);
-      RigidBodyTransform transformControlFrameToHandBodyPose = new RigidBodyTransform(handBodyPoseToControlFrame.getOrientation(), handBodyPoseToControlFrame.getPosition());
+      RigidBodyTransform transformControlFrameToHandBodyPose = new RigidBodyTransform(handBodyPoseToControlFrame.getOrientation(),
+                                                                                      handBodyPoseToControlFrame.getPosition());
       transformFromXboxController.appendTransform(transformControlFrameToHandBodyPose);
 
       RigidBodyTransform transformToViz = new RigidBodyTransform(transformFromXboxController.getOrientation(), transformFromXboxController.getPosition());

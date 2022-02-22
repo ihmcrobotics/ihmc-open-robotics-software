@@ -146,8 +146,6 @@ public class TransferToStandingState extends WalkingState
       balanceManager.clearICPPlan();
       balanceManager.clearSwingFootTrajectory();
 
-      balanceManager.resetPushRecovery();
-
       WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
 
       if(previousStateEnum != null && previousStateEnum.isSingleSupport())
@@ -222,7 +220,7 @@ public class TransferToStandingState extends WalkingState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
    }
 }

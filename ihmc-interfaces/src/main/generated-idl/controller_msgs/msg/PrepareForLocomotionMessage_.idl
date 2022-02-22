@@ -25,6 +25,11 @@ module controller_msgs
         @defaultValue(value=True)
         boolean prepare_manipulation;
         /**
+         * When true, the controller will cancel any chest trajectory in progress, if any, before starting to walk.
+         */
+        @defaultValue(value=True)
+        boolean prepare_chest;
+        /**
          * When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
          */
         @defaultValue(value=True)

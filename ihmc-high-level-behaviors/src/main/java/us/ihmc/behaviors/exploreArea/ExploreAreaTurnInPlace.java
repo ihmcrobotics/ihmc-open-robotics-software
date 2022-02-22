@@ -2,8 +2,10 @@ package us.ihmc.behaviors.exploreArea;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -18,7 +20,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.behaviorTree.ParallelNodeBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -26,13 +27,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
 
-public class ExploreAreaTurnInPlace extends ParallelNodeBasics
+public class ExploreAreaTurnInPlace extends AsynchronousActionNode
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final ExploreAreaBehaviorParameters parameters;
    private final BehaviorHelper helper;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ExploreAreaLatticePlanner exploreAreaLatticePlanner;
 
    private final FootstepPlanningModule footstepPlanner;
@@ -56,7 +57,7 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    }
 
    @Override
-   public void doAction()
+   public BehaviorTreeNodeStatus doActionInternal()
    {
       helper.publish(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
 
@@ -89,6 +90,14 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
 
       turnInPlace(turnYaw);
       ThreadTools.sleepSeconds(3.0);
+
+      return BehaviorTreeNodeStatus.SUCCESS;
+   }
+
+   @Override
+   public void resetInternal()
+   {
+
    }
 
    private LatticeCell findNearestHole()

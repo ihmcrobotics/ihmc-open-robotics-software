@@ -313,6 +313,11 @@ public class ExperimentalPhysicsEngine
       return time.getValue();
    }
 
+   public List<PhysicsEngineRobotData> getPhysicsEngineData()
+   {
+      return robotList;
+   }
+
    public YoRegistry getPhysicsEngineRegistry()
    {
       return registry;

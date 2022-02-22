@@ -52,6 +52,17 @@ public class Activator
       return activationChanged;
    }
 
+   /**
+    * Must have called {@link #poll()} first! Get whether the activation state changed on
+    * the last poll and is activated.
+    *
+    * @return activation changed and is activated
+    */
+   public boolean isNewlyActivated()
+   {
+      return hasChanged() && activated;
+   }
+
    /** THREAD 2 ACCESS BELOW THIS POINT */
 
    /**

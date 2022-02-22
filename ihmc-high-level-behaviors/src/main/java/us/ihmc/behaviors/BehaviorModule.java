@@ -1,204 +1,208 @@
 package us.ihmc.behaviors;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.behaviors.tools.behaviorTree.*;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.BehaviorMessagerUpdateThread;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.messager.kryo.KryoMessager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTools;
+import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.*;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
-import static us.ihmc.behaviors.BehaviorModule.API.BehaviorSelection;
+import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT;
+import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT;
 
 public class BehaviorModule
 {
    private static SharedMemoryMessager sharedMemoryMessager;
 
-   private final RosMainNode ros1Node;
-   private final boolean manageROS1Node;
-   private final ROS2Node ros2Node;
-   private final boolean manageROS2Node;
-   private final Messager messager;
-   private final boolean manageMessager;
+   private ROS2Node ros2Node;
+   public static final double YO_VARIABLE_SERVER_UPDATE_PERIOD = UnitConversions.hertzToSeconds(100.0);
+   private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
+   private YoVariableServer yoVariableServer;
+   private final YoDouble yoTime = new YoDouble("time", yoRegistry);
+   private final YoBoolean enabled = new YoBoolean("enabled", yoRegistry);
+   private PausablePeriodicThread yoServerUpdateThread;
    private StatusLogger statusLogger;
-   private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();
-   private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
+   private BehaviorTreeControlFlowNode rootNode;
+   private BehaviorInterface highestLevelNode;
+   private PausablePeriodicThread behaviorTreeTickThread;
+   private BehaviorRegistry behaviorRegistry;
+   private DRCRobotModel robotModel;
+   private final CommunicationMode ros2CommunicationMode;
+   private final CommunicationMode messagerCommunicationMode;
+   private final boolean enableROS1;
+   private BehaviorDefinition highestLevelBehaviorDefinition;
+   private BehaviorHelper helper;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
-      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTERPROCESS, CommunicationMode.INTERPROCESS);
+      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTERPROCESS, CommunicationMode.INTERPROCESS, true);
    }
 
    public static BehaviorModule createIntraprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
-      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS);
+      return new BehaviorModule(behaviorRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS, false);
    }
 
    public BehaviorModule(BehaviorRegistry behaviorRegistry, 
                          DRCRobotModel robotModel,
                          CommunicationMode ros2CommunicationMode,
-                         CommunicationMode messagerCommunicationMode)
+                         CommunicationMode messagerCommunicationMode,
+                         boolean enableROS1)
    {
-      this.manageROS1Node = true;
-      this.manageROS2Node = true;
-      this.manageMessager = true;
+      this.behaviorRegistry = behaviorRegistry;
+      this.robotModel = robotModel;
+      this.ros2CommunicationMode = ros2CommunicationMode;
+      this.messagerCommunicationMode = messagerCommunicationMode;
+      this.enableROS1 = enableROS1;
+
+      rootNode = new BehaviorTreeControlFlowNode()
+      {
+         @Override
+         public BehaviorTreeNodeStatus tickInternal()
+         {
+            if (enabled.getValue())
+               return highestLevelNode.tick();
+            else
+               return BehaviorTreeNodeStatus.FAILURE;
+         }
+      };
+      rootNode.setName("Behavior Module");
+
+      highestLevelBehaviorDefinition = behaviorRegistry.getHighestLevelNode();
+      setupHighLevelBehavior(highestLevelBehaviorDefinition);
+   }
+
+   private void setupHighLevelBehavior(BehaviorDefinition highestLevelNodeDefinition)
+   {
+      if (highestLevelNode != null)
+      {
+         helper.destroy();
+         ros2Node.destroy();
+         behaviorTreeTickThread.destroy();
+         yoVariableServer.close();
+         highestLevelNode.destroy();
+      }
 
       LogTools.info("Starting behavior module in ROS 2: {}, Messager: {} modes", ros2CommunicationMode.name(), messagerCommunicationMode.name());
-
-      ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "behavior_backpack");
-
-      MessagerAPI messagerAPI = behaviorRegistry.getMessagerAPI();
-
-      PubSubImplementation pubSubImplementation;
-      if (ros2CommunicationMode == CommunicationMode.INTERPROCESS)
+      ros2Node = ROS2Tools.createROS2Node(ros2CommunicationMode.getPubSubImplementation(), "behavior_module");
+      helper = new BehaviorHelper(highestLevelNodeDefinition.getName(), robotModel, ros2Node, enableROS1);
+      highestLevelNode = highestLevelNodeDefinition.getBehaviorSupplier().build(helper);
+      if (highestLevelNode.getYoRegistry() != null)
       {
-         pubSubImplementation = PubSubImplementation.FAST_RTPS;
-      }
-      else // intraprocess
-      {
-         pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+         yoRegistry.addChild(highestLevelNode.getYoRegistry());
       }
       if (messagerCommunicationMode == CommunicationMode.INTERPROCESS)
       {
-         messager = KryoMessager.createServer(messagerAPI,
-                                              NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
-                                              new BehaviorMessagerUpdateThread(BehaviorModule.class.getSimpleName(), 5));
+         helper.getMessagerHelper().startServer(BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
       }
-      else // intraprocess
+      else
       {
-         messager = new SharedMemoryMessager(messagerAPI);
+         sharedMemoryMessager = new SharedMemoryMessager(behaviorRegistry.getMessagerAPI());
+         helper.getMessagerHelper().connectViaSharedMemory(sharedMemoryMessager);
+         sharedMemoryMessager.startMessager();
       }
-      ThreadTools.startAThread(() -> ExceptionTools.handle(messager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");
+      statusLogger = new StatusLogger(helper.getMessagerHelper().getMessager()::submitMessage);
+      rootNode.addChild(highestLevelNode);
 
-      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_backpack");
-
-      init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
-   }
-
-   public BehaviorModule(BehaviorRegistry behaviorRegistry,
-                         DRCRobotModel robotModel,
-                         RosMainNode ros1Node,
-                         ROS2Node ros2Node,
-                         Messager messager)
-   {
-      this.ros1Node = ros1Node;
-      this.manageROS1Node = false;
-      this.ros2Node = ros2Node;
-      this.manageROS2Node = false;
-      this.messager = messager;
-      this.manageMessager = false;
-
-      init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
-   }
-
-   private void init(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, RosMainNode ros1Node, ROS2Node ros2Node, Messager messager)
-   {
-      if (messager instanceof SharedMemoryMessager)
-         sharedMemoryMessager = (SharedMemoryMessager) messager;
-
-      statusLogger = new StatusLogger(messager::submitMessage);
-
-      for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
+      behaviorTreeTickThread = new PausablePeriodicThread("BehaviorTree", UnitConversions.hertzToSeconds(5.0), () ->
       {
-         BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros1Node, ros2Node, false);
-         BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
-         constructedBehaviors.put(behaviorDefinition.getName(), Pair.of(behaviorDefinition, constructedBehavior));
-      }
-
-      messager.registerTopicListener(BehaviorSelection, this::stringBasedSelection);
+         rootNode.tick();
+         helper.publish(API.BehaviorTreeStatus, new BehaviorTreeStatus(rootNode));
+      });
+      behaviorTreeTickThread.start();
 
       new IHMCROS2Callback<>(ros2Node, API.SHUTDOWN, message ->
       {
          statusLogger.info("Received SHUTDOWN. Shutting down...");
-
          ThreadTools.startAsDaemon(this::destroy, "DestroyThread");
       });
 
-      ros1Node.execute();
-   }
+      int port = BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort();
+      DataServerSettings dataServerSettings = new DataServerSettings(false, true, port, null);
+      yoVariableServer = new YoVariableServer(getClass().getSimpleName(), null, dataServerSettings, 0.01);
+      yoVariableServer.setMainRegistry(yoRegistry, null);
+      LogTools.info("Starting YoVariableServer on {}...", port);
+      yoVariableServer.start();
+      LogTools.info("Starting YoVariableServer update thread for {}...", port);
+      MutableLong timestamp = new MutableLong();
+      LocalDateTime startTime = LocalDateTime.now();
+      yoServerUpdateThread = new PausablePeriodicThread("YoServerUpdate", YO_VARIABLE_SERVER_UPDATE_PERIOD, () ->
+      {
+         yoTime.set(Conversions.nanosecondsToSeconds(-LocalDateTime.now().until(startTime, ChronoUnit.NANOS)));
+         yoVariableServer.update(timestamp.getAndAdd(Conversions.secondsToNanoseconds(YO_VARIABLE_SERVER_UPDATE_PERIOD)));
+      });
+      yoServerUpdateThread.start();
 
-   private void stringBasedSelection(String selection)
-   {
-      ArrayList<String> selectedBehaviors = new ArrayList<>();
-      selectedBehaviors.add(selection);
-      if (constructedBehaviors.containsKey(selection)) // i.e. Might be "None"
+      new IHMCROS2Callback<>(ros2Node, API.SHUTDOWN, message ->
       {
-         for (BehaviorDefinition subBehavior : constructedBehaviors.get(selection).getLeft().getSubBehaviors())
-         {
-            selectedBehaviors.add(subBehavior.getName());
-         }
-      }
+         statusLogger.info("Received SHUTDOWN. Shutting down...");
+         ThreadTools.startAsDaemon(this::destroy, "DestroyThread");
+      });
 
-      boolean selectedOne = false;
-      for (Map.Entry<String, Pair<BehaviorDefinition, BehaviorInterface>> behavior : constructedBehaviors.entrySet())
+      new IHMCROS2Callback<>(ros2Node, API.SET_HIGHEST_LEVEL_BEHAVIOR, highestLevelBehaviorName ->
       {
-         String behaviorName = behavior.getKey();
-         boolean selected = selectedBehaviors.contains(behaviorName);
-         if (selected)
+         BehaviorDefinition candidateHighestLevelNodeDefinition = null;
+         for (BehaviorDefinition definitionEntry : behaviorRegistry.getDefinitionEntries())
          {
-            selectedOne = true;
+            if (definitionEntry.getName().equals(highestLevelBehaviorName.getDataAsString()))
+            {
+               candidateHighestLevelNodeDefinition = definitionEntry;
+            }
          }
-         if (enabledBehaviors.computeIfAbsent(behaviorName, key -> false) != selected)
+         if (candidateHighestLevelNodeDefinition == null)
          {
-            enabledBehaviors.put(behaviorName, selected);
-            statusLogger.info("{} {} behavior.", selected ? "Enabling" : "Disabling", behaviorName);
-            behavior.getValue().getRight().setEnabled(selected);
+            statusLogger.info("No behavior definition matches {}. Doing nothing.", highestLevelBehaviorName.getDataAsString());
          }
-      }
-      if (!selectedOne)
-      {
-         statusLogger.info("All behaviors disabled.");
-      }
+         else if (highestLevelBehaviorDefinition == candidateHighestLevelNodeDefinition)
+         {
+            statusLogger.info("Highest level behavior is already set to {}. Doing nothing.", highestLevelBehaviorName.getDataAsString());
+         }
+         else
+         {
+            statusLogger.info("Switching highest level behavior to {}...", highestLevelBehaviorName.getDataAsString());
+            setupHighLevelBehavior(candidateHighestLevelNodeDefinition);
+         }
+      });
    }
 
    public Messager getMessager()
    {
-      return messager;
+      return helper.getMessager();
    }
 
    public void destroy()
    {
       statusLogger.info("Shutting down...");
-
-      if (manageROS2Node)
-      {
-         ros2Node.destroy();
-      }
-      if (manageROS1Node)
-      {
-         ros1Node.shutdown();
-      }
-      if (manageMessager)
-      {
-         ExceptionTools.handle(() -> getMessager().closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
-      }
-
-      for (Pair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors.values())
-      {
-         behavior.getRight().destroy();
-      }
+      behaviorTreeTickThread.destroy();
+      yoVariableServer.close();
+      sharedMemoryMessager = null;
+      helper.destroy();
+      ros2Node.destroy();
+      highestLevelNode.destroy();
    }
 
    public static SharedMemoryMessager getSharedMemoryMessager()
@@ -210,6 +214,8 @@ public class BehaviorModule
    public static class API
    {
       public static final ROS2Topic<Empty> SHUTDOWN = ROS2Tools.BEHAVIOR_MODULE.withOutput().withType(Empty.class).withSuffix("shutdown");
+      public static final ROS2Topic<std_msgs.msg.dds.String> SET_HIGHEST_LEVEL_BEHAVIOR
+            = ROS2Tools.BEHAVIOR_MODULE.withType(std_msgs.msg.dds.String.class).withSuffix("set_highest_level_behavior");
 
       private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
       private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("Root");
@@ -217,6 +223,7 @@ public class BehaviorModule
 
       public static final MessagerAPIFactory.Topic<String> BehaviorSelection = topic("BehaviorSelection");
       public static final MessagerAPIFactory.Topic<MutablePair<Integer, String>> StatusLog = topic("StatusLog");
+      public static final MessagerAPIFactory.Topic<BehaviorTreeControlFlowNode> BehaviorTreeStatus = topic("BehaviorTreeStatus");
 
       private static <T> MessagerAPIFactory.Topic<T> topic(String name)
       {

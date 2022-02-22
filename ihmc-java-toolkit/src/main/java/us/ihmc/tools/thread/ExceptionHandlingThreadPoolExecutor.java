@@ -110,7 +110,6 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
          {
             LogTools.warn("There were no afterExecute handlers to run.");
          }
-
       }
       catch (NullPointerException nullPointerException)
       {
