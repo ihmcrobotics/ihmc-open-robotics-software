@@ -3,11 +3,18 @@ package us.ihmc.exampleSimulations.lipmWalker;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.simple.SimpleMatrix;
+
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -32,7 +39,7 @@ public class LIPMWalkerRobot
    private double bodyRadiusOfGyrationZ = 0.2;
    private double bodyRadiusOfGyrationX = 0.2;
    private double bodyMass = 30.0;
-   private Robot robot;
+   private final Robot robot;
    private double hipWidth = 0.3;
    private double thighMass = 0.2;
    private double thighRadiusOfGyrationX = 0.01;
@@ -55,6 +62,9 @@ public class LIPMWalkerRobot
    private final SideDependentList<PinJoint> hipJoints;
    private final SideDependentList<SliderJoint> kneeJoints;
    private final SideDependentList<GroundContactPoint> heelPoints;
+   
+//   private SimpleMatrix leftlegJacobian, rightlegJacobian;
+//   private final SideDependentList<SimpleMatrix> legJacobians;
 
    public LIPMWalkerRobot()
    {
@@ -74,7 +84,7 @@ public class LIPMWalkerRobot
       kneeJoints = new SideDependentList<>(leftKneeJoint, rightKneeJoint);
 
       heelPoints = new SideDependentList<GroundContactPoint>();
-
+      
       List<GroundContactPoint> contactPoints = robot.getAllGroundContactPoints();
       for (GroundContactPoint point : contactPoints)
       {
@@ -92,7 +102,12 @@ public class LIPMWalkerRobot
 
       LogTools.info("Robot: {}", robot.toString());
    }
-
+   
+   public double getTime()
+   {
+      return robot.getTime();  // GMN: Why do I need to do this??
+   }
+   
    public double getMass()
    {
       Point3DBasics comPosition = new Point3D();
@@ -123,6 +138,11 @@ public class LIPMWalkerRobot
    public double getBodyZPosition()
    {
       return this.bodyJoint.getQ_t2().getValue();
+   }
+
+   public double getBodyZVelocity()
+   {
+      return this.bodyJoint.getQd_t2().getValue();
    }
 
    public double getBodyPitchAngle()
@@ -189,18 +209,54 @@ public class LIPMWalkerRobot
    {
       return hipJoints.get(robotSide).getTau();
    }
+   
+//   public DMatrixRMaj getlegJacobian(RobotSide robotSide)
+   public DMatrixRMaj getlegJacobian(double th1, double ph2, double L3)
+   {
+//      double th1 = getBodyPitchAngle();
+//      double ph2 = getHipAngle(robotSide);
+//      double L3 = Math.abs(getKneeLength(robotSide));
+
+      Matrix3D Cw1 = new Matrix3D(new RotationMatrix(0,th1,0));
+      Matrix3D C12 = new Matrix3D(new RotationMatrix(0,ph2,0));
+      Matrix3D Cw2 = new Matrix3D(new RotationMatrix(0,th1+ph2,0)); // GMN: don't like, but can't find what I want...
+      
+      Tuple3DReadOnly Lv2 = new Vector3D(0,0,-L3);
+      
+      Tuple3DBasics Wv1 = new Vector3D(); // pos foot rt & ewrt body-frame
+      C12.transform(Lv2,Wv1);  // Wv1 = C12*Lv2
+      
+      Tuple3DBasics Jcol1 = new Vector3D(Wv1.getZ(),0,-Wv1.getX()); // skew(Wv1)'*[0;1;0]
+      Cw1.transform(Jcol1); // transform to world-frame
+      
+      Tuple3DBasics Jcol2 = new Vector3D(Lv2.getZ(),0,-Lv2.getX()); // skew(Lv2)'*[0;1;0]
+      Cw2.transform(Jcol2); // transform to world-frame
+      
+      Tuple3DBasics Jcol3 = new Vector3D(0,0,-1);  // -zhat = -[0;0;1]
+      Cw2.transform(Jcol3); // transform to world-frame
+      
+      DMatrixRMaj Jleg = new DMatrixRMaj(2,3);
+      Jleg.set(0,0,Jcol1.getX());
+      Jleg.set(1,0,Jcol1.getZ());
+      Jleg.set(0,1,Jcol2.getX());
+      Jleg.set(1,1,Jcol2.getZ());
+      Jleg.set(0,2,Jcol3.getX());
+      Jleg.set(1,2,Jcol3.getZ());
+      
+      return Jleg;      
+   }
 
    private void setupInitialConditions()
    {
-      bodyJoint.setCartesianPosition(0.0, 1.0);
-      bodyJoint.setCartesianVelocity(0.6, 0.0);
+      bodyJoint.setCartesianPosition(0.0, 0.8);
+      bodyJoint.setCartesianVelocity(0.2, 0.0);
       bodyJoint.setRotation(0.0);
 
       leftHipJoint.setQ(0.0);
+      leftKneeJoint.setQ(0.79);
+      
       rightHipJoint.setQ(0.0);
-
-      leftKneeJoint.setQ(1.0);
-      rightKneeJoint.setQ(0.9);
+      rightKneeJoint.setQ(0.6);
    }
 
    private RobotDescription getRobotDescription()
