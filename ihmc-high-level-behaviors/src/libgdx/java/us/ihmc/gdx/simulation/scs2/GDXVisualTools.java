@@ -79,13 +79,12 @@ public class GDXVisualTools
       if (geometryDefinition instanceof ModelFileGeometryDefinition)
       {
          ModelFileGeometryDefinition modelFileGeometryDefinition = (ModelFileGeometryDefinition) geometryDefinition;
-         String fileName = modelFileGeometryDefinition.getFileName();
+         String modelFileName = modelFileGeometryDefinition.getFileName();
 
-         String modifiedFileName = GDXModelLoader.modifyFileName(fileName);
-         if (modifiedFileName == null)
+         if (modelFileName == null)
             return null;
 
-         gdxModel.setModel(GDXModelLoader.loadG3DModel(modifiedFileName));
+         gdxModel.setModel(GDXModelLoader.loadG3DModel(modelFileName));
       }
       else
       {

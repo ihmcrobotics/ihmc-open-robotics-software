@@ -67,6 +67,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
 
    private final GDXSphereAndArrowGraphic subGoalGraphic = new GDXSphereAndArrowGraphic();
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
+   private final GDXPlanarRegionsGraphic receivedRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final GDXBodyPathPlanGraphic bodyPathPlanGraphic = new GDXBodyPathPlanGraphic();
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
    private final GDXFootstepPlanGraphic commandedFootstepsGraphic = new GDXFootstepPlanGraphic();
@@ -77,6 +78,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
    private final GDXBoxVisualizer obstacleBoxVisualizer = new GDXBoxVisualizer();
    private final ImBoolean invertShowGraphics = new ImBoolean(false);
+   private final ImBoolean showReceivedRegions = new ImBoolean(false);
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -89,6 +91,11 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          ++numberOfSteppingRegionsReceived;
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);
+      });
+      helper.subscribeViaCallback(ReceivedPlanarRegionsForUI, regions ->
+      {
+         if (regions != null)
+            receivedRegionsGraphic.generateMeshesAsync(regions);
       });
       helper.subscribeViaCallback(GoalForUI, goalAffordance::setGoalPoseNoCallbacks);
       helper.subscribeViaCallback(SubGoalForUI, subGoalGraphic::setToPose);
@@ -175,6 +182,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          startAndGoalFootstepsGraphic.update();
          planarRegionsGraphic.update();
          bodyPathPlanGraphic.update();
+         if (showReceivedRegions.get())
+            receivedRegionsGraphic.update();
       }
    }
 
@@ -205,6 +214,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          clearGraphics();
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Invert"), invertShowGraphics);
+      ImGui.checkbox(labels.get("Received Regions"), showReceivedRegions);
 
       if (ImGui.checkbox("Operator review", operatorReview))
       {
@@ -310,6 +320,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
          startAndGoalFootstepsGraphic.getRenderables(renderables, pool);
          planarRegionsGraphic.getRenderables(renderables, pool);
          bodyPathPlanGraphic.getRenderables(renderables, pool);
+         if (showReceivedRegions.get())
+            receivedRegionsGraphic.getRenderables(renderables, pool);
       }
    }
 
@@ -322,6 +334,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       startAndGoalFootstepsGraphic.clear();
       planarRegionsGraphic.clear();
       bodyPathPlanGraphic.clear();
+      receivedRegionsGraphic.clear();
    }
 
    @Override
@@ -333,6 +346,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends ImGuiGDXBehaviorUIInterface
       planarRegionsGraphic.destroy();
       bodyPathPlanGraphic.destroy();
       obstacleBoxVisualizer.dispose();
+      receivedRegionsGraphic.destroy();
    }
 
    public String getWindowName()

@@ -54,7 +54,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
    final VisibilityGraphsParametersBasics visibilityGraphParameters;
    final AtomicBoolean isBeingReset = new AtomicBoolean();
    final AtomicReference<Boolean> operatorReviewEnabledInput;
-   final AtomicReference<RobotSide> lastStanceSide;
    final LookAndStepImminentStanceTracker imminentStanceTracker;
    final ControllerStatusTracker controllerStatusTracker;
    final TypedNotification<Boolean> approvalNotification;
@@ -130,7 +129,6 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       approvalNotification = helper.subscribeViaNotification(ReviewApproval);
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
-      lastStanceSide = new AtomicReference<>();
       imminentStanceTracker = new LookAndStepImminentStanceTracker(helper);
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publish);
       controllerStatusTracker = helper.getOrCreateControllerStatusTracker();
@@ -167,6 +165,10 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
          if (status.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
          {
             footstepPlanning.acceptFootstepCompleted();
+         }
+         else
+         {
+            footstepPlanning.acceptFootstepStarted(status);
          }
       });
 

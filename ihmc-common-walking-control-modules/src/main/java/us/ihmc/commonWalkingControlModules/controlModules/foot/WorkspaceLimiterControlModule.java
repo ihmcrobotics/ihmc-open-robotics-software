@@ -666,7 +666,7 @@ public class WorkspaceLimiterControlModule
             return false;
       }
 
-      double maxPercent = maxPercentOfLegLengthForSingularityAvoidanceInSwingForFoot.getValue();
+      double maxPercent = maxPercentOfLegLengthForSingularityAvoidanceInSupport.getValue();
       boolean singularityAvoidanceShouldBeDisabled =
             desiredPercentOfLegLength.getDoubleValue() < maxPercent - percentOfLegLengthMarginToDisableSingularityAvoidance.getValue();
       boolean legDoesNotNeedSingularityAvoidance =
