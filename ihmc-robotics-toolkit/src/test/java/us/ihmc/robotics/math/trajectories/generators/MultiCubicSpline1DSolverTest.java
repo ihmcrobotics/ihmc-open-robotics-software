@@ -11,43 +11,19 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.robotics.Assert;
 
 public class MultiCubicSpline1DSolverTest
 {
-   private final double permissableError = 1e-3;
-
-   @Test
-   public void testNotUsingNativeCommonOps()
-   {
-      DMatrixRMaj mat = new DMatrixRMaj(1, 1);
-      MultiCubicSpline1DSolver solverUsingNative = new MultiCubicSpline1DSolver(true);
-      solverUsingNative.setEndpoints(0, 1, 0, 1);
-      solverUsingNative.addWaypoint(2, 0.25);
-      solverUsingNative.addWaypoint(-2, 0.75);
-      double costUsingNative = solverUsingNative.solve(mat);
-
-      mat = new DMatrixRMaj(1, 1);
-      MultiCubicSpline1DSolver solverNotUsingNative = new MultiCubicSpline1DSolver(false);
-      solverNotUsingNative.setEndpoints(0, 1, 0, 1);
-      solverNotUsingNative.addWaypoint(2, 0.25);
-      solverNotUsingNative.addWaypoint(-2, 0.75);
-      double costNotUsingNative = solverNotUsingNative.solve(mat);
-
-      double percentDiff = 100 * Math.abs(costUsingNative - costNotUsingNative) / costNotUsingNative;
-      Assert.assertTrue(percentDiff < permissableError);
-   }
-
    @Test
    public void testAccelerationIntegrationResult()
    {
       DMatrixRMaj solution = new DMatrixRMaj(1, 1);
-      MultiCubicSpline1DSolver solver = new MultiCubicSpline1DSolver(true);
+      MultiCubicSpline1DSolver solver = new MultiCubicSpline1DSolver();
       double[] times = {0.0, 0.25, 0.75, 1.0};
       solver.setEndpoints(0, 1, 0, 1);
       solver.addWaypoint(2, times[1]);
       solver.addWaypoint(-2, times[2]);
-      double costUsingNative = solver.solve(solution);
+      double costUsingNative = solver.solveAndComputeCost(solution);
 
       int numberOfSplines = solution.getNumRows() / MultiCubicSpline1DSolver.coefficients;
       double expectedAccelerationIntegrated = 0.0;
