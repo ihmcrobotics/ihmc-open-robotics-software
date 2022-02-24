@@ -128,17 +128,17 @@ public class LIPMWalkerControllerGMN implements RobotController
    @Override
    public void initialize()
    {
-      // Dead-beat TDLO: (all discrete poles = 0)
-      kx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow(-1+Math.exp(LIPTipFreq*stepTime),2));
-      bx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow( 1+Math.exp(LIPTipFreq*stepTime),2));
+//      // Dead-beat TDLO: (all discrete poles = 0)
+//      kx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow(-1+Math.exp(LIPTipFreq*stepTime),2));
+//      bx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow( 1+Math.exp(LIPTipFreq*stepTime),2));
       
-//      // Pole-placement:   GMN - Can't handle imaginary part yet!
-//      double p1 = 0.05;
-//      double p2 = 0.05;
-//      double k = LIPTipFreq;
-//      double Ts = stepTime;
-//      kx_TDLO = (1+Math.exp(2*k*Ts)+2*Math.exp(k*Ts)*(-p1-p2+p1*p2))/(2*Math.pow(-1+Math.exp(k*Ts),2));
-//      bx_TDLO = (1+Math.exp(2*k*Ts)-2*Math.exp(k*Ts)*( p1+p2+p1*p2))/(2*Math.pow( 1+Math.exp(k*Ts),2));
+      // Pole-placement:   GMN - Can't handle imaginary part yet!
+      double p1 = 0.08;
+      double p2 = 0.08;
+      double k = LIPTipFreq;
+      double Ts = stepTime;
+      kx_TDLO = (1+Math.exp(2*k*Ts)+2*Math.exp(k*Ts)*(-p1-p2+p1*p2))/(2*Math.pow(-1+Math.exp(k*Ts),2));
+      bx_TDLO = (1+Math.exp(2*k*Ts)-2*Math.exp(k*Ts)*( p1+p2+p1*p2))/(2*Math.pow( 1+Math.exp(k*Ts),2));
       
       LRlastTime.get(RobotSide.LEFT).set(-1.0);
       LRlastTime.get(RobotSide.RIGHT).set(-1.0);
@@ -306,8 +306,8 @@ public class LIPMWalkerControllerGMN implements RobotController
    double simpleTDLOStepLocation(double xLO)
    {
       // Simple TDLO:
-//      return (kx_TDLO*(xTD.getValue()-xLO)-bx_TDLO*(xTD.getValue()+xLO));      
-      return (kx_TDLO*(xTD.getValue()-xLO)-bx_TDLO*(xTD.getValue()+xLO) - 0.08);      
+      return (kx_TDLO*(xTD.getValue()-xLO)-bx_TDLO*(xTD.getValue()+xLO));      
+//      return (kx_TDLO*(xTD.getValue()-xLO)-bx_TDLO*(xTD.getValue()+xLO) - 0.08);      
    }
 
    // predicted-LO TDLO (sort of like "Black Diamond" TDLO)
