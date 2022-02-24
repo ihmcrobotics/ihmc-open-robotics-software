@@ -30,6 +30,9 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
    private YoDouble t;
 
+   private final YoDouble kpBody = new YoDouble("kpBody", registry);
+   private final YoDouble kdBody = new YoDouble("kdBody", registry);
+
    private final YoDouble kpKnee = new YoDouble("kpKnee", registry);
    private final YoDouble kdKnee = new YoDouble("kdKnee", registry);
    private final YoDouble kpHip = new YoDouble("kpHip", registry);
@@ -108,6 +111,9 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
    public void initialize()
    {
       numberOfStepsTaken.set(0);
+
+      kpBody.set(200.0);
+      kdBody.set(30.0);
 
       kpKnee.set(1000.0);
       kdKnee.set(100.0);
@@ -227,7 +233,10 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       double feedBackKneeForce =
             kpKnee.getValue() * (desiredHeight.getValue() - comHeight.getValue()) + kdKnee.getValue() * (0.0 - centerOfMassVelocity.getZ());
       robot.setKneeForce(side, feedForwardSupportKneeForce + feedBackKneeForce);
-      robot.setHipTorque(side, 0.0);
+      
+      
+      
+      robot.setHipTorque(side, -kpBody.getValue() * (0.0 - robot.getBodyPitchAngle()) + kdBody.getValue() * robot.getBodyPitchAngularVelocity());
 
       worldHipAngles.get(side).set(robot.getHipAngle(side) + robot.getBodyPitchAngle());
    }
