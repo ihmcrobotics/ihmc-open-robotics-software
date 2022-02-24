@@ -6,6 +6,7 @@
 // Q: What would it mean to have a clock-less controller?
 // Q: Try some AM compensation or Natural Posture control?
 // Q: [FOR JERRY] How to make larger time window for interactive sim playback?
+//    Q: [FOR JERRY] How to save above as reloaded config?
 //
 // TODO:
 // ====
@@ -52,6 +53,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 //import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
@@ -93,6 +95,8 @@ public class LIPMWalkerControllerGMN implements RobotController
    private final YoDouble rightLastTime = new YoDouble("rightLastTime",registry);
    private final YoDouble leftx_d_foot = new YoDouble("leftx_d_foot",registry);
    private final YoDouble rightx_d_foot = new YoDouble("rightx_d_foot",registry);
+   private final YoDouble lefttimeInStance = new YoDouble("lefttimeInState",registry);
+   private final YoDouble righttimeInStance = new YoDouble("righttimeInState",registry);
    private final YoMatrix leftSwingCoeffs = new YoMatrix("leftSwingCoeffs",3,1,registry);
    private final YoMatrix rightSwingCoeffs = new YoMatrix("rightSwingCoeffs",3,1,registry);
    private final YoMatrix leftq_d = new YoMatrix("leftq_d",2,1,registry);
@@ -100,12 +104,19 @@ public class LIPMWalkerControllerGMN implements RobotController
    
    private final SideDependentList<YoDouble> LRlastTime = new SideDependentList<YoDouble>(leftLastTime,rightLastTime);
    private final SideDependentList<YoDouble> LRx_d_foot = new SideDependentList<YoDouble>(leftx_d_foot,rightx_d_foot);
+   private final SideDependentList<YoDouble> timeInStance = new SideDependentList<YoDouble>(lefttimeInStance,righttimeInStance);
    private final SideDependentList<YoBoolean> inLiftState = 
          new SideDependentList<YoBoolean>(new YoBoolean("leftinLiftState","left in LIFT",registry),
                                           new YoBoolean("rightinLiftState","right in LIFT",registry)); // GMN: work-around for incompatible "State" types, UGH!
    private final SideDependentList<YoMatrix> LRSwingCoeffs = new SideDependentList<YoMatrix>(leftSwingCoeffs,rightSwingCoeffs);
    private final SideDependentList<YoMatrix> LRq_d = new SideDependentList<YoMatrix>(leftq_d,rightq_d);
+   
+   // For logging & debugging:
+   private final SideDependentList<YoDouble> desiredxTD = 
+         new SideDependentList<YoDouble>(new YoDouble("leftdesiredxTD","left desired xTD",registry),
+                                         new YoDouble("rightdesiredxTD","right desired xTD",registry));
 
+   
    public LIPMWalkerControllerGMN(LIPMWalkerRobot robot)
    {
       this.robot = robot;
@@ -121,9 +132,9 @@ public class LIPMWalkerControllerGMN implements RobotController
       kx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow(-1+Math.exp(LIPTipFreq*stepTime),2));
       bx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow( 1+Math.exp(LIPTipFreq*stepTime),2));
       
-//      // Pole-placement:
-//      double p1 = 0.2;
-//      double p2 = 0;
+//      // Pole-placement:   GMN - Can't handle imaginary part yet!
+//      double p1 = 0.05;
+//      double p2 = 0.05;
 //      double k = LIPTipFreq;
 //      double Ts = stepTime;
 //      kx_TDLO = (1+Math.exp(2*k*Ts)+2*Math.exp(k*Ts)*(-p1-p2+p1*p2))/(2*Math.pow(-1+Math.exp(k*Ts),2));
@@ -196,7 +207,7 @@ public class LIPMWalkerControllerGMN implements RobotController
       double thd_body = robot.getBodyPitchAngularVelocity();
   
       // The body-servo:
-      double Fz = 50*(desiredBodyHeight - z_body_w) - 5*zd_body_w + 0.999*mass*9.81; // GMN
+      double Fz = 500*(desiredBodyHeight - z_body_w) - 50*zd_body_w + 0.999*mass*9.81; // GMN
       double My = 100*(0 - th_body) - 10*thd_body; // GMN
       
       double xcop = getXcop(side);
@@ -230,11 +241,15 @@ public class LIPMWalkerControllerGMN implements RobotController
       // Dead-reckoning on foot x pos to desired:
       double dt_denom = (stepTime-0.1) - timeInSwing; // GMN: Added 0.1 sec arrive early...
 //      double dt_denom = stepTime - timeInSwing; // GMN: Added 0.1 sec arrive early...
-      if (dt_denom < 0.01)
+      if (dt_denom < 0.001)
       {
-         dt_denom = 0.01; // GMN
+         dt_denom = 0.001; // GMN
       }
-      double xd_d_foot = (desiredTD - LRx_d_foot.get(side).getValue())/dt_denom; // GMN
+      double xd_d_foot = 0.0;
+//      if (timeInSwing > 0.05) // GMN: try to prevent dragging while lifting; refactor so this happens in LIFT only; also really needs to be r.t. world
+//      {
+         xd_d_foot = (desiredTD - LRx_d_foot.get(side).getValue())/dt_denom; // GMN
+//      }
       LRx_d_foot.get(side).set(LRx_d_foot.get(side).getValue() + xd_d_foot*dT);
       
       // get zd_d_foot:
@@ -253,8 +268,8 @@ public class LIPMWalkerControllerGMN implements RobotController
       Jq.set(1,1,Jleg.get(1,2));
       CommonOps_DDRM.invert(Jq);  // Jq now holds its inverse
       DMatrixRMaj RHS = new DMatrixRMaj(2,1);
-      RHS.set(0,0,xd_d_foot - Jleg.get(0,0)*thd_body); // GMN: including body-pitch rate bias
-      RHS.set(1,0,zd_d_foot - Jleg.get(1,0)*thd_body); // GMN: including body-pitch rate bias
+      RHS.set(0,0,xd_d_foot - 0*Jleg.get(0,0)*thd_body); // GMN: including body-pitch rate bias
+      RHS.set(1,0,zd_d_foot - 0*Jleg.get(1,0)*thd_body); // GMN: including body-pitch rate bias
       DMatrixRMaj qd_d = new DMatrixRMaj(2,1);
       CommonOps_DDRM.mult(Jq, RHS, qd_d); // resolved-rate IK
       // Easier way?????
@@ -282,6 +297,8 @@ public class LIPMWalkerControllerGMN implements RobotController
    {
       Point3D pos_foot = robot.getFootPosition(side);
       double xcop = pos_foot.getX() - robot.getBodyXPosition(); // xcop r.t. body
+//      Point3DReadOnly pos_CoM = robot.getCenterOfMassPosition();
+//      double xcop = pos_foot.getX() - pos_CoM.getX(); // xcop r.t. CoM
       
       return xcop;
    }
@@ -289,8 +306,8 @@ public class LIPMWalkerControllerGMN implements RobotController
    double simpleTDLOStepLocation(double xLO)
    {
       // Simple TDLO:
-      return (kx_TDLO*(xTD.getValue()-xLO)-bx_TDLO*(xTD.getValue()+xLO));      
-//      return (kx_TDLO*(xTD-xLO)-bx_TDLO*(xTD+xLO) - 0.04);
+//      return (kx_TDLO*(xTD.getValue()-xLO)-bx_TDLO*(xTD.getValue()+xLO));      
+      return (kx_TDLO*(xTD.getValue()-xLO)-bx_TDLO*(xTD.getValue()+xLO) - 0.08);      
    }
 
    // predicted-LO TDLO (sort of like "Black Diamond" TDLO)
@@ -416,6 +433,7 @@ public class LIPMWalkerControllerGMN implements RobotController
       {
          // Support Side:
          controlSupportLeg(side);
+         timeInStance.get(side).set(timeInState);
       }
 
       @Override
@@ -466,7 +484,10 @@ public class LIPMWalkerControllerGMN implements RobotController
          double xCoP = getXcop(side.getOppositeSide());
          double desiredTD = simpleTDLOStepLocation(xCoP); // simple TDLO
 //         double desiredTD = predictedTDLOStepLocation(timeInState,xTD,xCoP); // predicted TDLO
+         desiredxTD.get(side).set(desiredTD); // logging
          controlSwingLeg(side,timeInState,dT,desiredTD);
+//         double stanceTime = timeInStance.get(side.getOppositeSide()).getValue();
+//         controlSwingLeg(side,stanceTime,dT,desiredTD);
       }
 
       @Override
@@ -504,7 +525,10 @@ public class LIPMWalkerControllerGMN implements RobotController
          double xCoP = getXcop(side.getOppositeSide());
          double desiredTD = simpleTDLOStepLocation(xCoP); // simple TDLO
 //         double desiredTD = predictedTDLOStepLocation(timeInState,xTD,xCoP); // predicted TDLO
-         controlSwingLeg(side,timeInState,dT,desiredTD);
+         desiredxTD.get(side).set(desiredTD); // logging
+//       controlSwingLeg(side,timeInState,dT,desiredTD);
+         double stanceTime = timeInStance.get(side.getOppositeSide()).getValue();
+         controlSwingLeg(side,stanceTime,dT,desiredTD);
       }
 
       @Override
