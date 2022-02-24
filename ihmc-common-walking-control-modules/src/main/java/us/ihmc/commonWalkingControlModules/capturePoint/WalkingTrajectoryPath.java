@@ -45,8 +45,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingTrajectoryPath
 {
-   private static final int MAX_NUMBER_OF_FOOTSTEPS = 10;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final String WALKING_TRAJECTORY_PATH_FRAME_NAME = "walkingTrajectoryPathFrame";
+   public static final String WALKING_TRAJECTORY_FRAME_NAMEID = worldFrame.getNameId() + ReferenceFrame.SEPARATOR + WALKING_TRAJECTORY_PATH_FRAME_NAME;
+   public static final int WALKING_TRAJECTORY_FRAME_ID = WALKING_TRAJECTORY_FRAME_NAMEID.hashCode();
+
+   private static final int MAX_NUMBER_OF_FOOTSTEPS = 4;
 
    private final String namePrefix = "walkingTrajectoryPath";
 
@@ -77,7 +81,7 @@ public class WalkingTrajectoryPath
    private final YoFrameVector3D currentZUpViz;
    private final YoFrameVector3D currentHeadingViz;
 
-   private final MovingReferenceFrame walkingTrajectoryPathFrame = new MovingReferenceFrame("walkingTrajectoryPathFrame", worldFrame, true)
+   private final MovingReferenceFrame walkingTrajectoryPathFrame = new MovingReferenceFrame(WALKING_TRAJECTORY_PATH_FRAME_NAME, worldFrame, true)
    {
       @Override
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -136,12 +140,22 @@ public class WalkingTrajectoryPath
          trajectoryPositionViz = null;
       }
 
-      filterBreakFrequency = new DoubleParameter(namePrefix + "FilterBreakFrequency", registry, 5.0);
+      filterBreakFrequency = new DoubleParameter(namePrefix + "FilterBreakFrequency", registry, 0.5);
 
       reset();
+      clearWaypoints();
       clearFootsteps();
 
       parentRegistry.addChild(registry);
+   }
+
+   private void clearWaypoints()
+   {
+      for (int i = 0; i < waypoints.size(); i++)
+      {
+         waypoints.get(i).clear();
+      }
+      waypoints.clear();
    }
 
    public void reset()
@@ -151,11 +165,6 @@ public class WalkingTrajectoryPath
 
    public void clearFootsteps()
    {
-      for (int i = 0; i < waypoints.size(); i++)
-      {
-         waypoints.get(i).clear();
-      }
-      waypoints.clear();
       footsteps.clear();
       footstepTimings.clear();
    }
@@ -192,6 +201,8 @@ public class WalkingTrajectoryPath
       {
          supportFootPoses.get(robotSide).set(soleFrames.get(robotSide).getTransformToRoot());
       }
+
+      clearWaypoints();
 
       WaypointData waypoint = waypoints.add();
       waypoint.time.set(0.0);
@@ -242,6 +253,36 @@ public class WalkingTrajectoryPath
       {
          waypoints.getFirst().linearVelocity.setToZero();
          totalDuration.set(0.0);
+      }
+   }
+
+   public void updateFootsteps()
+   {
+      if (!footsteps.isEmpty())
+      {
+         WaypointData waypoint = waypoints.getFirst();
+         WaypointData previousWaypoint = waypoint;
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            tempFootPoses.get(robotSide).set(supportFootPoses.get(robotSide));
+         }
+
+         for (int i = 0; i < footsteps.size(); i++)
+         {
+            waypoint = waypoints.get(i + 1);
+            Footstep footstep = footsteps.get(i);
+            tempFootPoses.get(footstep.getRobotSide()).set(footstep.getFootstepPose());
+            double yaw = computeAverage(tempFootPoses, waypoint.position);
+            waypoint.yaw.set(previousWaypoint.yaw.getValue() + AngleTools.computeAngleDifferenceMinusPiToPi(yaw, previousWaypoint.yaw.getValue()));
+            waypoint.time.set(previousWaypoint.time.getValue() + footstepTimings.get(i).getStepTime());
+            waypoint.updateViz();
+            previousWaypoint = waypoint;
+         }
+
+         waypoints.getLast().linearVelocity.setToZero();
+         waypoints.getLast().yawRate.set(0.0);
+         totalDuration.set(previousWaypoint.time.getValue());
       }
    }
 
