@@ -103,6 +103,11 @@ public class GDXEnvironmentObject
          copyBulletTransformToThis(btMultiBody.getBaseWorldTransform());
    }
 
+   public void afterSimulate()
+   {
+
+   }
+
    public void copyThisTransformToBulletMultiBody()
    {
       if (btMultiBody != null)
