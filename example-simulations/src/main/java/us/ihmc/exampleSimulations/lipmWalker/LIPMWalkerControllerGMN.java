@@ -13,7 +13,6 @@
 // + I have some controller state that is not rewindable - need to fix
 //   + YoVariables
 //   + check out YoMatrix
-// + Replace "robotSide" with just "side" everywhere
 // + Don't start var names with caps
 // + Make human-readable var names
 //
@@ -43,6 +42,7 @@
 // + Body-pitch servo
 // + Swing IK
 // + TDLO implementation
+// + Replace "robotSide" with just "side" everywhere
 
  
 
@@ -52,7 +52,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+//import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -167,10 +167,10 @@ public class LIPMWalkerControllerGMN implements RobotController
       
       
       
-      for(RobotSide robotSide : RobotSide.values())
+      for(RobotSide side : RobotSide.values())
       {
-         stateMachines.get(robotSide).doAction();
-         stateMachines.get(robotSide).doTransitions();
+         stateMachines.get(side).doAction();
+         stateMachines.get(side).doTransitions();
       }
 
       LogTools.info("StateMachine: Left:{} Right:{}", stateMachines.get(RobotSide.LEFT).getCurrentStateKey(), stateMachines.get(RobotSide.RIGHT).getCurrentStateKey());
@@ -397,25 +397,25 @@ public class LIPMWalkerControllerGMN implements RobotController
 
    private class SupportState implements State
    {
-      private final RobotSide robotSide;
+      private final RobotSide side;
 
-      public SupportState(RobotSide robotSide)
+      public SupportState(RobotSide side)
       {
-         this.robotSide = robotSide;
+         this.side = side;
       }
 
       @Override
       public void onEntry()
       {
          // Record xTD for TDLO:
-         xTD.set(getXcop(robotSide));
+         xTD.set(getXcop(side));
       }
 
       @Override
       public void doAction(double timeInState)
       {
          // Support Side:
-         controlSupportLeg(robotSide);
+         controlSupportLeg(side);
       }
 
       @Override
@@ -427,62 +427,62 @@ public class LIPMWalkerControllerGMN implements RobotController
 
    private class LiftState implements State
    {
-      private final RobotSide robotSide;
+      private final RobotSide side;
 
-      public LiftState(RobotSide robotSide)
+      public LiftState(RobotSide side)
       {
-         this.robotSide = robotSide;
+         this.side = side;
       }
 
       @Override
       public void onEntry()
       {
-         LRlastTime.get(robotSide).set(-1.0);
+         LRlastTime.get(side).set(-1.0);
 
          // Build the z-spline:
-         Point3D pos_foot = robot.getFootPosition(robotSide);
-         LRSwingCoeffs.get(robotSide).set(buildSwingZdot(pos_foot.getZ()));
+         Point3D pos_foot = robot.getFootPosition(side);
+         LRSwingCoeffs.get(side).set(buildSwingZdot(pos_foot.getZ()));
          
          // Initialize the diff IK:
          DMatrixRMaj q_d = new DMatrixRMaj(2,1);
-         q_d.set(0,0,robot.getHipAngle(robotSide));
-         q_d.set(1,0,robot.getKneeLength(robotSide));
-         LRq_d.get(robotSide).set(q_d);
-         LRx_d_foot.get(robotSide).set(getXcop(robotSide));
+         q_d.set(0,0,robot.getHipAngle(side));
+         q_d.set(1,0,robot.getKneeLength(side));
+         LRq_d.get(side).set(q_d);
+         LRx_d_foot.get(side).set(getXcop(side));
          
-         inLiftState.get(robotSide).set(true);
+         inLiftState.get(side).set(true);
       }
 
       @Override
       public void doAction(double timeInState)
       {
-         if (LRlastTime.get(robotSide).getValue() < 0)
+         if (LRlastTime.get(side).getValue() < 0)
          {
-            LRlastTime.get(robotSide).set(timeInState);
+            LRlastTime.get(side).set(timeInState);
          }
-         double dT = timeInState - LRlastTime.get(robotSide).getValue();
-         LRlastTime.get(robotSide).set(timeInState);
+         double dT = timeInState - LRlastTime.get(side).getValue();
+         LRlastTime.get(side).set(timeInState);
          
-         double xCoP = getXcop(robotSide.getOppositeSide());
+         double xCoP = getXcop(side.getOppositeSide());
          double desiredTD = simpleTDLOStepLocation(xCoP); // simple TDLO
 //         double desiredTD = predictedTDLOStepLocation(timeInState,xTD,xCoP); // predicted TDLO
-         controlSwingLeg(robotSide,timeInState,dT,desiredTD);
+         controlSwingLeg(side,timeInState,dT,desiredTD);
       }
 
       @Override
       public void onExit(double timeInState)
       {
-         inLiftState.get(robotSide).set(false);
+         inLiftState.get(side).set(false);
       }
    }
 
    private class SwingState implements State
    {
-      private final RobotSide robotSide;
+      private final RobotSide side;
 
-      public SwingState(RobotSide robotSide)
+      public SwingState(RobotSide side)
       {
-         this.robotSide = robotSide;
+         this.side = side;
       }
 
       @Override
@@ -494,17 +494,17 @@ public class LIPMWalkerControllerGMN implements RobotController
       @Override
       public void doAction(double timeInState)
       {
-         if (LRlastTime.get(robotSide).getValue() < 0)
+         if (LRlastTime.get(side).getValue() < 0)
          {
-            LRlastTime.get(robotSide).set(timeInState);
+            LRlastTime.get(side).set(timeInState);
          }
-         double dT = timeInState - LRlastTime.get(robotSide).getValue();
-         LRlastTime.get(robotSide).set(timeInState);
+         double dT = timeInState - LRlastTime.get(side).getValue();
+         LRlastTime.get(side).set(timeInState);
          
-         double xCoP = getXcop(robotSide.getOppositeSide());
+         double xCoP = getXcop(side.getOppositeSide());
          double desiredTD = simpleTDLOStepLocation(xCoP); // simple TDLO
 //         double desiredTD = predictedTDLOStepLocation(timeInState,xTD,xCoP); // predicted TDLO
-         controlSwingLeg(robotSide,timeInState,dT,desiredTD);
+         controlSwingLeg(side,timeInState,dT,desiredTD);
       }
 
       @Override
@@ -517,17 +517,17 @@ public class LIPMWalkerControllerGMN implements RobotController
    // LIFT -> SWING: The LIFTING foot has cleared the ground:
    private class HeelOffGroundCondition implements StateTransitionCondition
    {
-      private final RobotSide robotSide;
+      private final RobotSide side;
 
-      public HeelOffGroundCondition(RobotSide robotSide)
+      public HeelOffGroundCondition(RobotSide side)
       {
-         this.robotSide = robotSide;
+         this.side = side;
       }
 
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         Point3D pos_foot = robot.getFootPosition(robotSide); // GMN: What is behind this function?  Super-sensing?
+         Point3D pos_foot = robot.getFootPosition(side); // GMN: What is behind this function?  Super-sensing?
          boolean result = (pos_foot.getZ() > SwingHeight/4); 
          return (result);
       }
@@ -536,11 +536,11 @@ public class LIPMWalkerControllerGMN implements RobotController
    // SUPPORT -> LIFT: The current STANCE foot detects that the OTHER foot has hit the ground:
    private class OtherHeelOnGroundCondition implements StateTransitionCondition
    {
-      private final RobotSide robotSide;
+      private final RobotSide side;
 
-      public OtherHeelOnGroundCondition(RobotSide robotSide)
+      public OtherHeelOnGroundCondition(RobotSide side)
       {
-         this.robotSide = robotSide;
+         this.side = side;
       }
 
       @Override
@@ -548,8 +548,8 @@ public class LIPMWalkerControllerGMN implements RobotController
       {
          // GMN: Is there a way to find & look at the contact state of the OTHER side of the robot???
          // GMN: Make the state transition simply be when the OTHER side is on the ground:
-         boolean result = ((robot.getFootZForce(this.robotSide.getOppositeSide()) > 10) && 
-                           (inLiftState.get(robotSide.getOppositeSide()).getValue() == false));
+         boolean result = ((robot.getFootZForce(this.side.getOppositeSide()) > 10) && 
+                           (inLiftState.get(side.getOppositeSide()).getValue() == false));
          return (result);
       }
    }
@@ -557,21 +557,21 @@ public class LIPMWalkerControllerGMN implements RobotController
    // SWING -> SUPPORT: The current SWING foot hits the ground:
    private class HeelOnGroundCondition implements StateTransitionCondition
    {
-      private final RobotSide robotSide;
+      private final RobotSide side;
 
-      public HeelOnGroundCondition(RobotSide robotSide)
+      public HeelOnGroundCondition(RobotSide side)
       {
-         this.robotSide = robotSide;
+         this.side = side;
       }
 
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         boolean result = ((robot.getFootZForce(this.robotSide) > 10) &&
-                           (inLiftState.get(robotSide).getValue() == false));
+         boolean result = ((robot.getFootZForce(this.side) > 10) &&
+                           (inLiftState.get(side).getValue() == false));
          return (result);
          
-//         LogTools.info("Side: {} getKneeForce(): {}", robotSide, robot.getKneeForce(robotSide));
+//         LogTools.info("Side: {} getKneeForce(): {}", side, robot.getKneeForce(side));
       }
    }
 }
