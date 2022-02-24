@@ -53,6 +53,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -86,24 +87,24 @@ public class LIPMWalkerControllerGMN implements RobotController
    private final double SwingHeight = 0.12;
    private double kx_TDLO, bx_TDLO;
    
-   public YoDouble xTD = new YoDouble("xTD", registry);  // GMN: Need to restructure this...
+   private final YoDouble xTD = new YoDouble("xTD", registry);  // GMN: Need to restructure this...
    
-   private YoDouble leftLastTime = new YoDouble("leftLastTime",registry);
-   private YoDouble rightLastTime = new YoDouble("rightLastTime",registry);
-   private YoDouble leftx_d_foot = new YoDouble("leftx_d_foot",registry);
-   private YoDouble rightx_d_foot = new YoDouble("rightx_d_foot",registry);
-   private YoMatrix leftSwingCoeffs = new YoMatrix("leftSwingCoeffs",3,1,registry);
-   private YoMatrix rightSwingCoeffs = new YoMatrix("rightSwingCoeffs",3,1,registry);
-   private YoMatrix leftq_d = new YoMatrix("leftq_d",2,1,registry);
-   private YoMatrix rightq_d = new YoMatrix("rightq_d",2,1,registry);
+   private final YoDouble leftLastTime = new YoDouble("leftLastTime",registry);
+   private final YoDouble rightLastTime = new YoDouble("rightLastTime",registry);
+   private final YoDouble leftx_d_foot = new YoDouble("leftx_d_foot",registry);
+   private final YoDouble rightx_d_foot = new YoDouble("rightx_d_foot",registry);
+   private final YoMatrix leftSwingCoeffs = new YoMatrix("leftSwingCoeffs",3,1,registry);
+   private final YoMatrix rightSwingCoeffs = new YoMatrix("rightSwingCoeffs",3,1,registry);
+   private final YoMatrix leftq_d = new YoMatrix("leftq_d",2,1,registry);
+   private final YoMatrix rightq_d = new YoMatrix("rightq_d",2,1,registry);
    
-   private SideDependentList<YoDouble> LRlastTime = new SideDependentList<YoDouble>(leftLastTime,rightLastTime);
-   private SideDependentList<YoDouble> LRx_d_foot = new SideDependentList<YoDouble>(leftx_d_foot,rightx_d_foot);
-   private SideDependentList<YoBoolean> inLiftState = 
+   private final SideDependentList<YoDouble> LRlastTime = new SideDependentList<YoDouble>(leftLastTime,rightLastTime);
+   private final SideDependentList<YoDouble> LRx_d_foot = new SideDependentList<YoDouble>(leftx_d_foot,rightx_d_foot);
+   private final SideDependentList<YoBoolean> inLiftState = 
          new SideDependentList<YoBoolean>(new YoBoolean("leftinLiftState","left in LIFT",registry),
                                           new YoBoolean("rightinLiftState","right in LIFT",registry)); // GMN: work-around for incompatible "State" types, UGH!
-   private SideDependentList<YoMatrix> LRSwingCoeffs = new SideDependentList<YoMatrix>(leftSwingCoeffs,rightSwingCoeffs);
-   private SideDependentList<YoMatrix> LRq_d = new SideDependentList<YoMatrix>(leftq_d,rightq_d);
+   private final SideDependentList<YoMatrix> LRSwingCoeffs = new SideDependentList<YoMatrix>(leftSwingCoeffs,rightSwingCoeffs);
+   private final SideDependentList<YoMatrix> LRq_d = new SideDependentList<YoMatrix>(leftq_d,rightq_d);
 
    public LIPMWalkerControllerGMN(LIPMWalkerRobot robot)
    {
@@ -116,13 +117,6 @@ public class LIPMWalkerControllerGMN implements RobotController
    @Override
    public void initialize()
    {
-//    kpHip.set(971.25);
-//    kdHip.set(80.0);
-//      kpKnee.set(1000.0);
-//      kdKnee.set(100.0);
-      
-//      LIPTipFreq = Math.sqrt(g/desiredBodyHeight);
-      
       // Dead-beat TDLO: (all discrete poles = 0)
       kx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow(-1+Math.exp(LIPTipFreq*stepTime),2));
       bx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow( 1+Math.exp(LIPTipFreq*stepTime),2));
@@ -179,7 +173,7 @@ public class LIPMWalkerControllerGMN implements RobotController
          stateMachines.get(robotSide).doTransitions();
       }
 
-//      LogTools.info("StateMachine: Left:{} Right:{}", stateMachines.get(RobotSide.LEFT).getCurrentStateKey(), stateMachines.get(RobotSide.RIGHT).getCurrentStateKey());
+      LogTools.info("StateMachine: Left:{} Right:{}", stateMachines.get(RobotSide.LEFT).getCurrentStateKey(), stateMachines.get(RobotSide.RIGHT).getCurrentStateKey());
    }
 
    private void controlSupportLeg(RobotSide side)
@@ -192,7 +186,7 @@ public class LIPMWalkerControllerGMN implements RobotController
       // + Do tau = J-transpose * F
       // + Assign leg actuator torques/forces
       
-      Point3DReadOnly centerOfMassPosition = robot.getCenterOfMassPosition();
+//      Point3DReadOnly centerOfMassPosition = robot.getCenterOfMassPosition();
 //      Vector3DReadOnly centerOfMassVelocity = robot.getCenterOfMassVelocity();
       double mass = robot.getMass();
       
