@@ -14,6 +14,8 @@
 //   + YoVariables
 //   + check out YoMatrix
 // + Replace "robotSide" with just "side" everywhere
+// + Don't start var names with caps
+// + Make human-readable var names
 //
 // + Check-in code
 // + IMPROVE LOGGING SO CAN DEBUG BETTER
@@ -51,6 +53,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -66,22 +69,6 @@ public class LIPMWalkerControllerGMN implements RobotController
 {
    private final LIPMWalkerRobot robot;
    private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-//   private final YoDouble kpKnee = new YoDouble("kpKnee", registry);
-//   private final YoDouble kdKnee = new YoDouble("kdKnee", registry);
-//   private final YoDouble kpHip = new YoDouble("kpHip", registry);
-//   private final YoDouble kdHip = new YoDouble("kdHip", registry);
-   
-//   private final YoDouble q_d_leftKnee = new YoDouble("q_d_leftKnee", registry);
-//   private final YoDouble q_d_rightKnee = new YoDouble("q_d_rightKnee", registry);
-//   private final YoDouble q_d_leftHip = new YoDouble("q_d_leftHip", registry);
-//   private final YoDouble q_d_rightHip = new YoDouble("q_d_rightHip", registry);
-
-//   private final YoDouble q_rightHipWorld = new YoDouble("q_rightHipWorld", registry);
-//   private final YoDouble q_leftHipWorld = new YoDouble("q_leftHipWorld", registry);
-
-//   private final YoDouble comHeight = new YoDouble("comHeight", registry);
-//   private final YoDouble desiredHeight = new YoDouble("desiredHeight", registry);
-//   private final YoDouble orbitalEnergy = new YoDouble("orbitalEnergy", registry);
 
    private enum States
    {
@@ -101,21 +88,22 @@ public class LIPMWalkerControllerGMN implements RobotController
    
    public YoDouble xTD = new YoDouble("xTD", registry);  // GMN: Need to restructure this...
    
-   // GMN: Don't start var names with caps
-   // GMN: Make human-readable var names
    private YoDouble leftLastTime = new YoDouble("leftLastTime",registry);
    private YoDouble rightLastTime = new YoDouble("rightLastTime",registry);
    private YoDouble leftx_d_foot = new YoDouble("leftx_d_foot",registry);
    private YoDouble rightx_d_foot = new YoDouble("rightx_d_foot",registry);
+   private YoMatrix leftSwingCoeffs = new YoMatrix("leftSwingCoeffs",3,1,registry);
+   private YoMatrix rightSwingCoeffs = new YoMatrix("rightSwingCoeffs",3,1,registry);
+   private YoMatrix leftq_d = new YoMatrix("leftq_d",2,1,registry);
+   private YoMatrix rightq_d = new YoMatrix("rightq_d",2,1,registry);
    
    private SideDependentList<YoDouble> LRlastTime = new SideDependentList<YoDouble>(leftLastTime,rightLastTime);
    private SideDependentList<YoDouble> LRx_d_foot = new SideDependentList<YoDouble>(leftx_d_foot,rightx_d_foot);
    private SideDependentList<YoBoolean> inLiftState = 
          new SideDependentList<YoBoolean>(new YoBoolean("leftinLiftState","left in LIFT",registry),
                                           new YoBoolean("rightinLiftState","right in LIFT",registry)); // GMN: work-around for incompatible "State" types, UGH!
-   
-   private SideDependentList<DMatrixRMaj> LRSwingCoeffs = new SideDependentList<>(new DMatrixRMaj(3,1), new DMatrixRMaj(3,1));
-   private SideDependentList<DMatrixRMaj> LRq_d = new SideDependentList<>(new DMatrixRMaj(2,1), new DMatrixRMaj(2,1));
+   private SideDependentList<YoMatrix> LRSwingCoeffs = new SideDependentList<YoMatrix>(leftSwingCoeffs,rightSwingCoeffs);
+   private SideDependentList<YoMatrix> LRq_d = new SideDependentList<YoMatrix>(leftq_d,rightq_d);
 
    public LIPMWalkerControllerGMN(LIPMWalkerRobot robot)
    {
@@ -259,9 +247,11 @@ public class LIPMWalkerControllerGMN implements RobotController
       double zd_d_foot = calculateSwingZdot(side,timeInSwing);
       
       // Do diffIK; use measured th_body as FF term?
+      DMatrixRMaj q_d = new DMatrixRMaj(2,1);
+      LRq_d.get(side).get(q_d);
       DMatrixRMaj Jleg = robot.getlegJacobian(robot.getBodyPitchAngle(),  // includes body-pitch
-                                              LRq_d.get(side).get(0,0),
-                                              LRq_d.get(side).get(1,0)); 
+                                              q_d.get(0,0),
+                                              q_d.get(1,0)); 
       DMatrixRMaj Jq = new DMatrixRMaj(2,2); // just leg joints
       Jq.set(0,0,Jleg.get(0,1));
       Jq.set(0,1,Jleg.get(0,2)); 
@@ -273,8 +263,12 @@ public class LIPMWalkerControllerGMN implements RobotController
       RHS.set(1,0,zd_d_foot - Jleg.get(1,0)*thd_body); // GMN: including body-pitch rate bias
       DMatrixRMaj qd_d = new DMatrixRMaj(2,1);
       CommonOps_DDRM.mult(Jq, RHS, qd_d); // resolved-rate IK
-      LRq_d.get(side).set(0,0,LRq_d.get(side).get(0,0)+qd_d.get(0,0)*dT); // Easier way?????
-      LRq_d.get(side).set(1,0,LRq_d.get(side).get(1,0)+qd_d.get(1,0)*dT); // Easier way?????
+      // Easier way?????
+      q_d.set(0,0,q_d.get(0,0)+qd_d.get(0,0)*dT);
+      q_d.set(1,0,q_d.get(1,0)+qd_d.get(1,0)*dT);
+      LRq_d.get(side).set(q_d);
+//      LRq_d.get(side).set(0,0,LRq_d.get(side).get(0,0)+qd_d.get(0,0)*dT); // Easier way?????
+//      LRq_d.get(side).set(1,0,LRq_d.get(side).get(1,0)+qd_d.get(1,0)*dT); // Easier way?????
       
       double q_hip = robot.getHipAngle(side);
       double qd_hip = robot.getHipVelocity(side);
@@ -282,8 +276,8 @@ public class LIPMWalkerControllerGMN implements RobotController
       double qd_knee = robot.getKneeVelocity(side);
 
       // Servo joints to the desired joint trajs:
-      double Tauhip  = 100*(LRq_d.get(side).get(0,0) - q_hip)  + 10*(qd_d.get(0,0) - qd_hip);
-      double Tauknee = 100*(LRq_d.get(side).get(1,0) - q_knee) + 10*(qd_d.get(1,0) - qd_knee);
+      double Tauhip  = 800*(q_d.get(0,0) - q_hip)  + 80*(qd_d.get(0,0) - qd_hip);
+      double Tauknee = 800*(q_d.get(1,0) - q_knee) + 80*(qd_d.get(1,0) - qd_knee);
       
       robot.setHipTorque(side, Tauhip);
       robot.setKneeForce(side, Tauknee);
@@ -363,7 +357,8 @@ public class LIPMWalkerControllerGMN implements RobotController
    double calculateSwingZdot(RobotSide side, double t)
    {
       // This is z-dot:
-      DMatrixRMaj coeffs = LRSwingCoeffs.get(side);
+      DMatrixRMaj coeffs = new DMatrixRMaj(3,1);
+      LRSwingCoeffs.get(side).get(coeffs);
       return (3*coeffs.get(0,0)*Math.pow(t,2) + 2*coeffs.get(1,0)*t + coeffs.get(2,0));
    }
 
@@ -452,11 +447,13 @@ public class LIPMWalkerControllerGMN implements RobotController
 
          // Build the z-spline:
          Point3D pos_foot = robot.getFootPosition(robotSide);
-         LRSwingCoeffs.set(robotSide,buildSwingZdot(pos_foot.getZ()));
+         LRSwingCoeffs.get(robotSide).set(buildSwingZdot(pos_foot.getZ()));
          
          // Initialize the diff IK:
-         LRq_d.get(robotSide).set(0,0,robot.getHipAngle(robotSide));
-         LRq_d.get(robotSide).set(1,0,robot.getKneeLength(robotSide));
+         DMatrixRMaj q_d = new DMatrixRMaj(2,1);
+         q_d.set(0,0,robot.getHipAngle(robotSide));
+         q_d.set(1,0,robot.getKneeLength(robotSide));
+         LRq_d.get(robotSide).set(q_d);
          LRx_d_foot.get(robotSide).set(getXcop(robotSide));
          
          inLiftState.get(robotSide).set(true);
