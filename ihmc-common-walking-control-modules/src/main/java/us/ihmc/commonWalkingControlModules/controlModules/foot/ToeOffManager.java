@@ -86,16 +86,26 @@ public class ToeOffManager
 
    private final YoBoolean icpIsInsideSupportFoot = new YoBoolean("icpIsInsideSupportFoot", registry);
 
-   private final GlitchFilteredYoBoolean isDesiredICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredICPOKForToeOffFilt", registry,
-                                                                                                   isDesiredICPOKForToeOff, smallGlitchWindowSize);
-   private final GlitchFilteredYoBoolean isCurrentICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isCurrentICPOKForToeOffFilt", registry,
-                                                                                                   isCurrentICPOKForToeOff, smallGlitchWindowSize);
-   private final GlitchFilteredYoBoolean isDesiredECMPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredECMPOKForToeOffFilt", registry,
-                                                                                                    isDesiredECMPOKForToeOff, smallGlitchWindowSize);
-   private final GlitchFilteredYoBoolean isDesiredCoPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredCoPOKForToeOffFilt", registry,
-                                                                                                   isDesiredCoPOKForToeOff, smallGlitchWindowSize);
-   private final GlitchFilteredYoBoolean isPerfectCoPOKForToeOffFilt = new GlitchFilteredYoBoolean("isPerfectCoPOKForToeOffFilt", registry,
-                                                                                                   isPerfectCoPOKForToeOff, smallGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isDesiredICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredICPOKForToeOffFilt",
+                                                                                                   registry,
+                                                                                                   isDesiredICPOKForToeOff,
+                                                                                                   smallGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isCurrentICPOKForToeOffFilt = new GlitchFilteredYoBoolean("isCurrentICPOKForToeOffFilt",
+                                                                                                   registry,
+                                                                                                   isCurrentICPOKForToeOff,
+                                                                                                   smallGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isDesiredECMPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredECMPOKForToeOffFilt",
+                                                                                                    registry,
+                                                                                                    isDesiredECMPOKForToeOff,
+                                                                                                    smallGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isDesiredCoPOKForToeOffFilt = new GlitchFilteredYoBoolean("isDesiredCoPOKForToeOffFilt",
+                                                                                                   registry,
+                                                                                                   isDesiredCoPOKForToeOff,
+                                                                                                   smallGlitchWindowSize);
+   private final GlitchFilteredYoBoolean isPerfectCoPOKForToeOffFilt = new GlitchFilteredYoBoolean("isPerfectCoPOKForToeOffFilt",
+                                                                                                   registry,
+                                                                                                   isPerfectCoPOKForToeOff,
+                                                                                                   smallGlitchWindowSize);
 
    private final DoubleProvider minStepLengthForToeOff;
    private final DoubleProvider minStepForwardForToeOff;
@@ -109,7 +119,6 @@ public class ToeOffManager
 
    private final YoBoolean isStepLongEnough = new YoBoolean("isStepLongEnough", registry);
    private final YoBoolean isStepLongEnoughAlongX = new YoBoolean("isStepLongEnoughAlongX", registry);
-
 
    // debug variables
    private final YoDouble ecmpProximityToOnToes = new YoDouble("ecmpProximityToOnToes", registry);
@@ -152,23 +161,37 @@ public class ToeOffManager
 
    private final double inPlaceWidth;
 
-   public ToeOffManager(HighLevelHumanoidControllerToolbox controllerToolbox, ToeOffCalculator toeOffCalculator,
-                        WalkingControllerParameters walkingControllerParameters, SideDependentList<? extends ContactablePlaneBody> feet,
-                        YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public ToeOffManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                        ToeOffCalculator toeOffCalculator,
+                        WalkingControllerParameters walkingControllerParameters,
+                        SideDependentList<? extends ContactablePlaneBody> feet,
+                        YoRegistry parentRegistry,
+                        YoGraphicsListRegistry graphicsListRegistry)
    {
-      this(controllerToolbox.getFullRobotModel(), toeOffCalculator, walkingControllerParameters, feet, createFootContactStates(controllerToolbox),
-           parentRegistry, graphicsListRegistry);
+      this(controllerToolbox.getFullRobotModel(),
+           toeOffCalculator,
+           walkingControllerParameters,
+           feet,
+           createFootContactStates(controllerToolbox),
+           parentRegistry,
+           graphicsListRegistry);
    }
 
-   public ToeOffManager(FullHumanoidRobotModel fullRobotModel, ToeOffCalculator toeOffCalculator, WalkingControllerParameters walkingControllerParameters,
-                        SideDependentList<? extends ContactablePlaneBody> feet, SideDependentList<YoPlaneContactState> footContactStates,
-                        YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
+   public ToeOffManager(FullHumanoidRobotModel fullRobotModel,
+                        ToeOffCalculator toeOffCalculator,
+                        WalkingControllerParameters walkingControllerParameters,
+                        SideDependentList<? extends ContactablePlaneBody> feet,
+                        SideDependentList<YoPlaneContactState> footContactStates,
+                        YoRegistry parentRegistry,
+                        YoGraphicsListRegistry graphicsListRegistry)
    {
       ToeOffParameters toeOffParameters = walkingControllerParameters.getToeOffParameters();
       legInspector = new LegJointLimitsInspector(toeOffParameters, parentRegistry);
 
       doToeOffIfPossibleInDoubleSupport = new BooleanParameter("doToeOffIfPossibleInDoubleSupport", registry, toeOffParameters.doToeOffIfPossible());
-      doToeOffIfPossibleInSingleSupport = new BooleanParameter("doToeOffIfPossibleInSingleSupport", registry, toeOffParameters.doToeOffIfPossibleInSingleSupport());
+      doToeOffIfPossibleInSingleSupport = new BooleanParameter("doToeOffIfPossibleInSingleSupport",
+                                                               registry,
+                                                               toeOffParameters.doToeOffIfPossibleInSingleSupport());
 
       icpPercentOfStanceForDSToeOff = new DoubleParameter("icpPercentOfStanceForDSToeOff", registry, toeOffParameters.getICPPercentOfStanceForDSToeOff());
       icpPercentOfStanceForSSToeOff = new DoubleParameter("icpPercentOfStanceForSSToeOff", registry, toeOffParameters.getICPPercentOfStanceForSSToeOff());
@@ -183,7 +206,9 @@ public class ToeOffManager
 
       forceToeOffAtJointLimit = new BooleanParameter("forceToeOffAtJointLimit", registry, toeOffParameters.forceToeOffAtJointLimit());
 
-      lookAtTwoStepCapturabilityForToeOff = new BooleanParameter("lookAtTwoStepCapturabilityForToeOff", registry, toeOffParameters.lookAtTwoStepCapturabilityForToeOff());
+      lookAtTwoStepCapturabilityForToeOff = new BooleanParameter("lookAtTwoStepCapturabilityForToeOff",
+                                                                 registry,
+                                                                 toeOffParameters.lookAtTwoStepCapturabilityForToeOff());
 
       this.toeOffCalculator = toeOffCalculator;
 
@@ -192,10 +217,10 @@ public class ToeOffManager
 
       this.inPlaceWidth = walkingControllerParameters.getSteppingParameters().getInPlaceWidth();
 
-      double footLength = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset() + walkingControllerParameters.getSteppingParameters()
-                                                                                                                                 .getFootForwardOffset();
+      double footLength = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset()
+            + walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
 
-      extraCoMMaxHeightWithToes =  new DoubleParameter("extraCoMMaxHeightWithToes", registry, extraCoMHeightWithToes);
+      extraCoMMaxHeightWithToes = new DoubleParameter("extraCoMMaxHeightWithToes", registry, extraCoMHeightWithToes);
 
       minStepLengthForToeOff = new DoubleParameter("minStepLengthForToeOff", registry, toeOffParameters.getMinStepLengthForToeOff());
       minStepForwardForToeOff = new DoubleParameter("minStepForwardForToeOff", registry, footLength);
@@ -218,10 +243,8 @@ public class ToeOffManager
       toeContacts.put(ToeContact.LINE, new ToeLineContact());
       toeContacts.put(ToeContact.POINT, new ToePointContact());
 
-      YoArtifactPolygon nextFootPolygonArtifact = new YoArtifactPolygon("Next Foot support Polygon", nextFootPolygonViz,
-                                                                    Color.BLUE, false);
-      YoArtifactPolygon onToesFootPolygonArtifact = new YoArtifactPolygon("On Toes Polygon", onToesPolygonViz,
-                                                                    Color.GREEN, false);
+      YoArtifactPolygon nextFootPolygonArtifact = new YoArtifactPolygon("Next Foot support Polygon", nextFootPolygonViz, Color.BLUE, false);
+      YoArtifactPolygon onToesFootPolygonArtifact = new YoArtifactPolygon("On Toes Polygon", onToesPolygonViz, Color.GREEN, false);
       ArtifactList artifactList = new ArtifactList(getClass().getSimpleName());
       artifactList.add(nextFootPolygonArtifact);
       artifactList.add(onToesFootPolygonArtifact);
@@ -277,6 +300,7 @@ public class ToeOffManager
 
    /**
     * Sets the upcoming footstep, which is used to predict the support polygon in single support.
+    * 
     * @param nextFootstep
     */
    public void submitNextFootstep(Footstep nextFootstep, Footstep nextNextFootstep)
@@ -287,26 +311,29 @@ public class ToeOffManager
 
    /**
     * <p>
-    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link ToeOffManager#doLineToeOff} variable accordingly.
+    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the
+    * {@link ToeOffManager#doLineToeOff} variable accordingly.
     * </p>
     * <p>
     * These checks include:
     * </p>
     * <ol>
-    *   <li>doToeOffIfPossibleInDoubleSupport</li>
-    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
-    *   <li>desiredICP location being within the leading foot base of support.</li>
-    *   <li>currentICP location being within the leading foot base of support.</li>
-    *   <li>needToSwitchToToeOffForAnkleLimit</li>
+    * <li>doToeOffIfPossibleInDoubleSupport</li>
+    * <li>desiredECMP location being within the support polygon account for toe-off, if
+    * {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    * <li>desiredICP location being within the leading foot base of support.</li>
+    * <li>currentICP location being within the leading foot base of support.</li>
+    * <li>needToSwitchToToeOffForAnkleLimit</li>
     * </ol>
     * <p>
-    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
-    * positioning of the leading leg to determine if it is acceptable.
+    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current
+    * state being with the base of support. Then checks the positioning of the leading leg to determine
+    * if it is acceptable.
     * </p>
     *
     * @param desiredECMP current desired ECMP from ICP feedback.
-    * @param desiredICP current desired ICP from the reference trajectory.
-    * @param currentICP current ICP based on the robot state.
+    * @param desiredICP  current desired ICP from the reference trajectory.
+    * @param currentICP  current ICP based on the robot state.
     */
    public void updateToeOffStatusSingleSupport(FramePoint3DReadOnly exitCMP,
                                                FramePoint2DReadOnly desiredECMP,
@@ -350,13 +377,7 @@ public class ToeOffManager
       trailingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
       FramePose3DReadOnly nextFootPose = nextFootstep.getFootstepPose();
-      checkICPLocations(trailingLeg,
-                        desiredICP,
-                        currentICP,
-                        toeContact.getToeOffPoint(),
-                        nextFootSupportPolygon,
-                        nextFootPose.getPosition(),
-                        percentProximity);
+      checkICPLocations(trailingLeg, desiredICP, currentICP, toeContact.getToeOffPoint(), nextFootSupportPolygon, nextFootPose.getPosition(), percentProximity);
 
       checkCoPLocation(desiredCoP);
       checkECMPLocation(desiredECMP);
@@ -377,27 +398,30 @@ public class ToeOffManager
 
    /**
     * <p>
-    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link ToeOffManager#doLineToeOff} variable accordingly.
+    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the
+    * {@link ToeOffManager#doLineToeOff} variable accordingly.
     * </p>
     * <p>
     * These checks include:
     * </p>
     * <ol>
-    *   <li>doToeOffIfPossibleInDoubleSupport</li>
-    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
-    *   <li>desiredICP location being within the leading foot base of support.</li>
-    *   <li>currentICP location being within the leading foot base of support.</li>
-    *   <li>needToSwitchToToeOffForAnkleLimit</li>
+    * <li>doToeOffIfPossibleInDoubleSupport</li>
+    * <li>desiredECMP location being within the support polygon account for toe-off, if
+    * {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    * <li>desiredICP location being within the leading foot base of support.</li>
+    * <li>currentICP location being within the leading foot base of support.</li>
+    * <li>needToSwitchToToeOffForAnkleLimit</li>
     * </ol>
     * <p>
-    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
-    * positioning of the leading leg to determine if it is acceptable.
+    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current
+    * state being with the base of support. Then checks the positioning of the leading leg to determine
+    * if it is acceptable.
     * </p>
     *
     * @param trailingLeg robot side for the trailing leg
     * @param desiredECMP current desired ECMP from ICP feedback.
-    * @param desiredICP current desired ICP from the reference trajectory.
-    * @param currentICP current ICP based on the robot state.
+    * @param desiredICP  current desired ICP from the reference trajectory.
+    * @param currentICP  current ICP based on the robot state.
     */
    public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg,
                                                FramePoint3DReadOnly exitCMP,
@@ -480,6 +504,7 @@ public class ToeOffManager
 
    /**
     * Sets the support polygon of the location of the leading support foot. Only works during transfer
+    * 
     * @param trailingLeg trailing leg
     */
    private void setPolygonFromSupportFoot(RobotSide trailingLeg, FrameConvexPolygon2DBasics polygonToPack)
@@ -613,12 +638,12 @@ public class ToeOffManager
    }
 
    private void checkICPLocations(RobotSide trailingLeg,
-                                    FramePoint2DReadOnly desiredICP,
-                                    FramePoint2DReadOnly currentICP,
-                                    FramePoint2DReadOnly toeOffPoint,
-                                    FrameConvexPolygon2DReadOnly leadingFootSupportPolygon,
-                                    FramePoint3DReadOnly nextFootPosition,
-                                    double percentProximity)
+                                  FramePoint2DReadOnly desiredICP,
+                                  FramePoint2DReadOnly currentICP,
+                                  FramePoint2DReadOnly toeOffPoint,
+                                  FrameConvexPolygon2DReadOnly leadingFootSupportPolygon,
+                                  FramePoint3DReadOnly nextFootPosition,
+                                  double percentProximity)
    {
       icpIsInsideSupportFoot.set(trailingFootSupportPolygon.isPointInside(currentICP));
 
@@ -648,9 +673,7 @@ public class ToeOffManager
       legInspector.updateTrailingAnkleLowerLimitsStatus(anklePitch);
    }
 
-   private double computeDistanceToLeadingFoot(RobotSide trailingLeg,
-                                               FramePoint3DReadOnly nextFootPosition,
-                                              FramePoint2DReadOnly toeOffPoint)
+   private double computeDistanceToLeadingFoot(RobotSide trailingLeg, FramePoint3DReadOnly nextFootPosition, FramePoint2DReadOnly toeOffPoint)
    {
       ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getSoleFrame();
       tempLeadingFootPosition.setIncludingFrame(nextFootPosition);
@@ -722,14 +745,16 @@ public class ToeOffManager
 
       if (isSteppingUp.getBooleanValue())
          return true;
-      
+
       return isForwardStepping.getBooleanValue() && isStepLongEnough.getValue() && isStepLongEnoughAlongX.getValue();
    }
 
    /**
-    * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
+    * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to
+    * achieve toe off.
+    * 
     * @param nextFootstepPose footstep to consider.
-    * @param transferToSide upcoming support side.
+    * @param transferToSide   upcoming support side.
     * @return whether or not the footstep location is ok.
     */
    public boolean canDoSingleSupportToeOff(FramePose3DReadOnly nextFootstepPose, RobotSide transferToSide)
@@ -741,9 +766,11 @@ public class ToeOffManager
    }
 
    /**
-    * Checks whether or not the next footstep in {@param nextFootstepPose} is in correct location to achieve toe off.
+    * Checks whether or not the next footstep in {@param nextFootstepPose} is in correct location to
+    * achieve toe off.
+    * 
     * @param nextFootstepPose footstep to consider.
-    * @param transferToSide upcoming support side.
+    * @param transferToSide   upcoming support side.
     * @return whether or not the footstep location is ok.
     */
    public boolean canDoDoubleSupportToeOff(FramePose3DReadOnly nextFootstepPose, RobotSide transferToSide)
@@ -795,7 +822,8 @@ public class ToeOffManager
    }
 
    /**
-    * Call after any of the following methods to get whether the upcoming footstep corresponds to a step up or not:
+    * Call after any of the following methods to get whether the upcoming footstep corresponds to a
+    * step up or not:
     * <ul>
     * <li>{@link #canDoToeOff(FramePose3DReadOnly, RobotSide)}
     * <li>{@link #canDoSingleSupportToeOff(FramePose3DReadOnly, RobotSide)}
