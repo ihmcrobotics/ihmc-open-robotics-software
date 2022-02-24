@@ -126,6 +126,12 @@ public class HeightMapData
       heights[key] = z;
    }
 
+   public double getHeightAt(int key)
+   {
+      double height = heights[key];
+      return Double.isNaN(height) ? estimatedGroundHeight : height;
+   }
+
    public double getHeightAt(int xIndex, int yIndex)
    {
       if (xIndex < 0 || yIndex < 0 || xIndex >= cellsPerAxis || yIndex >= cellsPerAxis)
