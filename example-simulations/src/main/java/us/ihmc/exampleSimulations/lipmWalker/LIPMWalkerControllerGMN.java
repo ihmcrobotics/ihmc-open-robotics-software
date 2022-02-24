@@ -9,8 +9,11 @@
 //
 // TODO:
 // ====
+// + ELIMINATE DUPLICATE CODE BTW LIFT & SWING STATES
 // + I have some controller state that is not rewindable - need to fix
 //   + YoVariables
+//   + check out YoMatrix
+// + Replace "robotSide" with just "side" everywhere
 //
 // + Check-in code
 // + IMPROVE LOGGING SO CAN DEBUG BETTER
@@ -47,6 +50,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -54,6 +58,8 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class LIPMWalkerControllerGMN implements RobotController
@@ -87,18 +93,29 @@ public class LIPMWalkerControllerGMN implements RobotController
    private final SideDependentList<StateMachine<States, State>> stateMachines;
 
    private final double g  = 9.81;
-   public double xTD;  // GMN: Need to restructure this...
-   private double desiredBodyHeight = 0.8;
-   private double stepTime = 0.65;
-   private double LIPTipFreq;
+   private final double desiredBodyHeight = 0.8;
+   private final double stepTime = 0.65;
+   private final double LIPTipFreq = Math.sqrt(g/desiredBodyHeight);
+   private final double SwingHeight = 0.12;
    private double kx_TDLO, bx_TDLO;
-   private double SwingHeight = 0.12;
    
-   private SideDependentList<Double> LRlastTime = new SideDependentList<>(-1.0,-1.0);
+   public YoDouble xTD = new YoDouble("xTD", registry);  // GMN: Need to restructure this...
+   
+   // GMN: Don't start var names with caps
+   // GMN: Make human-readable var names
+   private YoDouble leftLastTime = new YoDouble("leftLastTime",registry);
+   private YoDouble rightLastTime = new YoDouble("rightLastTime",registry);
+   private YoDouble leftx_d_foot = new YoDouble("leftx_d_foot",registry);
+   private YoDouble rightx_d_foot = new YoDouble("rightx_d_foot",registry);
+   
+   private SideDependentList<YoDouble> LRlastTime = new SideDependentList<YoDouble>(leftLastTime,rightLastTime);
+   private SideDependentList<YoDouble> LRx_d_foot = new SideDependentList<YoDouble>(leftx_d_foot,rightx_d_foot);
+   private SideDependentList<YoBoolean> inLiftState = 
+         new SideDependentList<YoBoolean>(new YoBoolean("leftinLiftState","left in LIFT",registry),
+                                          new YoBoolean("rightinLiftState","right in LIFT",registry)); // GMN: work-around for incompatible "State" types, UGH!
+   
    private SideDependentList<DMatrixRMaj> LRSwingCoeffs = new SideDependentList<>(new DMatrixRMaj(3,1), new DMatrixRMaj(3,1));
-   private SideDependentList<Double> LRx_d_foot = new SideDependentList<>(0.0,0.0);
    private SideDependentList<DMatrixRMaj> LRq_d = new SideDependentList<>(new DMatrixRMaj(2,1), new DMatrixRMaj(2,1));
-   private SideDependentList<Boolean> inLiftState = new SideDependentList<>(false, false); // GMN: work-around for incompatible "State" types, UGH!
 
    public LIPMWalkerControllerGMN(LIPMWalkerRobot robot)
    {
@@ -116,11 +133,22 @@ public class LIPMWalkerControllerGMN implements RobotController
 //      kpKnee.set(1000.0);
 //      kdKnee.set(100.0);
       
-      LIPTipFreq = Math.sqrt(g/desiredBodyHeight);
+//      LIPTipFreq = Math.sqrt(g/desiredBodyHeight);
       
       // Dead-beat TDLO: (all discrete poles = 0)
       kx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow(-1+Math.exp(LIPTipFreq*stepTime),2));
       bx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow( 1+Math.exp(LIPTipFreq*stepTime),2));
+      
+//      // Pole-placement:
+//      double p1 = 0.2;
+//      double p2 = 0;
+//      double k = LIPTipFreq;
+//      double Ts = stepTime;
+//      kx_TDLO = (1+Math.exp(2*k*Ts)+2*Math.exp(k*Ts)*(-p1-p2+p1*p2))/(2*Math.pow(-1+Math.exp(k*Ts),2));
+//      bx_TDLO = (1+Math.exp(2*k*Ts)-2*Math.exp(k*Ts)*( p1+p2+p1*p2))/(2*Math.pow( 1+Math.exp(k*Ts),2));
+      
+      LRlastTime.get(RobotSide.LEFT).set(-1.0);
+      LRlastTime.get(RobotSide.RIGHT).set(-1.0);
    }
  
    @Override
@@ -176,7 +204,7 @@ public class LIPMWalkerControllerGMN implements RobotController
       // + Do tau = J-transpose * F
       // + Assign leg actuator torques/forces
       
-//      Point3DReadOnly centerOfMassPosition = robot.getCenterOfMassPosition();
+      Point3DReadOnly centerOfMassPosition = robot.getCenterOfMassPosition();
 //      Vector3DReadOnly centerOfMassVelocity = robot.getCenterOfMassVelocity();
       double mass = robot.getMass();
       
@@ -187,7 +215,7 @@ public class LIPMWalkerControllerGMN implements RobotController
   
       // The body-servo:
       double Fz = 50*(desiredBodyHeight - z_body_w) - 5*zd_body_w + 0.999*mass*9.81; // GMN
-      double My = 50*(0 - th_body) - 5*thd_body; // GMN
+      double My = 100*(0 - th_body) - 10*thd_body; // GMN
       
       double xcop = getXcop(side);
       
@@ -219,12 +247,13 @@ public class LIPMWalkerControllerGMN implements RobotController
       
       // Dead-reckoning on foot x pos to desired:
       double dt_denom = (stepTime-0.1) - timeInSwing; // GMN: Added 0.1 sec arrive early...
+//      double dt_denom = stepTime - timeInSwing; // GMN: Added 0.1 sec arrive early...
       if (dt_denom < 0.01)
       {
          dt_denom = 0.01; // GMN
       }
-      double xd_d_foot = (desiredTD - LRx_d_foot.get(side))/dt_denom; // GMN
-      LRx_d_foot.set(side,LRx_d_foot.get(side) + xd_d_foot*dT);
+      double xd_d_foot = (desiredTD - LRx_d_foot.get(side).getValue())/dt_denom; // GMN
+      LRx_d_foot.get(side).set(LRx_d_foot.get(side).getValue() + xd_d_foot*dT);
       
       // get zd_d_foot:
       double zd_d_foot = calculateSwingZdot(side,timeInSwing);
@@ -269,13 +298,36 @@ public class LIPMWalkerControllerGMN implements RobotController
       return xcop;
    }
    
-   double calculateStepLocation(double xLO)
+   double simpleTDLOStepLocation(double xLO)
    {
-      // TDLO here......
-      // + a desired x position on the ground
+      // Simple TDLO:
+      return (kx_TDLO*(xTD.getValue()-xLO)-bx_TDLO*(xTD.getValue()+xLO));      
+//      return (kx_TDLO*(xTD-xLO)-bx_TDLO*(xTD+xLO) - 0.04);
+   }
+
+   // predicted-LO TDLO (sort of like "Black Diamond" TDLO)
+   double predictedTDLOStepLocation(double t, double xTDk, double xCoP)
+   {
+      double k = LIPTipFreq;
+      double Ts = stepTime;
+      if (t < 0.2*Ts)
+      {
+         t = 0.2*Ts;
+      }
       
-      return (kx_TDLO*(xTD-xLO)-bx_TDLO*(xTD+xLO));      
-//      return (kx_TDLO*(xTD-xLO)-bx_TDLO*(xTD+xLO) - 0.04);      
+      // See reMarkable notes Feb 23, 2022:
+      double cTD = (Math.exp(k*Ts)-Math.exp(2*k*(t-Ts)))/(1-Math.exp(2*k*t));
+      double cCoP = Math.exp(k*(t-Ts))*(Math.exp(2*k*Ts)-1)/(Math.exp(2*k*t)-1);
+      
+      // predicted upcoming LO location:
+      double xLOk = cTD*xTDk + cCoP*xCoP;
+      
+      // predicted final TDLO TD location r.t. body:
+      double xTDk1 = kx_TDLO*(xTDk-xLOk)-bx_TDLO*(xTDk+xLOk);
+      
+//      // desired TD location: (attempt to get a location ideally fixed in the world)
+//      return (xCoP - xLOk + xTDk1);
+      return xTDk1;
    }
    
    // See reMarkable notes: 2/21/2022
@@ -367,7 +419,7 @@ public class LIPMWalkerControllerGMN implements RobotController
       public void onEntry()
       {
          // Record xTD for TDLO:
-         xTD = getXcop(robotSide);
+         xTD.set(getXcop(robotSide));
       }
 
       @Override
@@ -396,7 +448,7 @@ public class LIPMWalkerControllerGMN implements RobotController
       @Override
       public void onEntry()
       {
-         LRlastTime.set(robotSide,-1.0);
+         LRlastTime.get(robotSide).set(-1.0);
 
          // Build the z-spline:
          Point3D pos_foot = robot.getFootPosition(robotSide);
@@ -405,30 +457,31 @@ public class LIPMWalkerControllerGMN implements RobotController
          // Initialize the diff IK:
          LRq_d.get(robotSide).set(0,0,robot.getHipAngle(robotSide));
          LRq_d.get(robotSide).set(1,0,robot.getKneeLength(robotSide));
-         LRx_d_foot.set(robotSide,getXcop(robotSide));
+         LRx_d_foot.get(robotSide).set(getXcop(robotSide));
          
-         inLiftState.set(robotSide,true);
+         inLiftState.get(robotSide).set(true);
       }
 
       @Override
       public void doAction(double timeInState)
       {
-         if (LRlastTime.get(robotSide) < 0)
+         if (LRlastTime.get(robotSide).getValue() < 0)
          {
-            LRlastTime.set(robotSide,timeInState);
+            LRlastTime.get(robotSide).set(timeInState);
          }
-         double dT = timeInState - LRlastTime.get(robotSide);
-         LRlastTime.set(robotSide,timeInState);
+         double dT = timeInState - LRlastTime.get(robotSide).getValue();
+         LRlastTime.get(robotSide).set(timeInState);
          
-         double xLO = getXcop(robotSide.getOppositeSide());
-         double desiredTD = calculateStepLocation(xLO); // TDLO
+         double xCoP = getXcop(robotSide.getOppositeSide());
+         double desiredTD = simpleTDLOStepLocation(xCoP); // simple TDLO
+//         double desiredTD = predictedTDLOStepLocation(timeInState,xTD,xCoP); // predicted TDLO
          controlSwingLeg(robotSide,timeInState,dT,desiredTD);
       }
 
       @Override
       public void onExit(double timeInState)
       {
-         inLiftState.set(robotSide,false);
+         inLiftState.get(robotSide).set(false);
       }
    }
 
@@ -450,11 +503,16 @@ public class LIPMWalkerControllerGMN implements RobotController
       @Override
       public void doAction(double timeInState)
       {
-         double dT = timeInState - LRlastTime.get(robotSide);
-         LRlastTime.set(robotSide,timeInState);
+         if (LRlastTime.get(robotSide).getValue() < 0)
+         {
+            LRlastTime.get(robotSide).set(timeInState);
+         }
+         double dT = timeInState - LRlastTime.get(robotSide).getValue();
+         LRlastTime.get(robotSide).set(timeInState);
          
-         double xLO = getXcop(robotSide.getOppositeSide());
-         double desiredTD = calculateStepLocation(xLO); // TDLO
+         double xCoP = getXcop(robotSide.getOppositeSide());
+         double desiredTD = simpleTDLOStepLocation(xCoP); // simple TDLO
+//         double desiredTD = predictedTDLOStepLocation(timeInState,xTD,xCoP); // predicted TDLO
          controlSwingLeg(robotSide,timeInState,dT,desiredTD);
       }
 
@@ -500,7 +558,7 @@ public class LIPMWalkerControllerGMN implements RobotController
          // GMN: Is there a way to find & look at the contact state of the OTHER side of the robot???
          // GMN: Make the state transition simply be when the OTHER side is on the ground:
          boolean result = ((robot.getFootZForce(this.robotSide.getOppositeSide()) > 10) && 
-                           (inLiftState.get(this.robotSide.getOppositeSide()) == false));
+                           (inLiftState.get(robotSide.getOppositeSide()).getValue() == false));
          return (result);
       }
    }
@@ -519,7 +577,7 @@ public class LIPMWalkerControllerGMN implements RobotController
       public boolean testCondition(double timeInCurrentState)
       {
          boolean result = ((robot.getFootZForce(this.robotSide) > 10) &&
-                           (inLiftState.get(this.robotSide) == false));
+                           (inLiftState.get(robotSide).getValue() == false));
          return (result);
          
 //         LogTools.info("Side: {} getKneeForce(): {}", robotSide, robot.getKneeForce(robotSide));
