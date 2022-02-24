@@ -224,8 +224,20 @@ public class WalkingTrajectoryPath
 
       waypoint.updateViz();
 
+      updateFootstepsInternal();
+   }
+
+   public void updateFootsteps(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
+   {
+      updateSupportFootPoses(leftFootConstraintType, rightFootConstraintType);
+      updateFootstepsInternal();
+   }
+
+   private void updateFootstepsInternal()
+   {
       if (!footsteps.isEmpty())
       {
+         WaypointData waypoint = waypoints.getFirst();
          WaypointData previousWaypoint = waypoint;
 
          for (RobotSide robotSide : RobotSide.values)
@@ -235,7 +247,8 @@ public class WalkingTrajectoryPath
 
          for (int i = 0; i < footsteps.size(); i++)
          {
-            waypoint = waypoints.add();
+            int waypointIndex = i + 1;
+            waypoint = waypoints.size() == waypointIndex ? waypoints.add() : waypoints.get(waypointIndex);
             Footstep footstep = footsteps.get(i);
             tempFootPoses.get(footstep.getRobotSide()).set(footstep.getFootstepPose());
             double yaw = computeAverage(tempFootPoses, waypoint.position);
@@ -256,52 +269,12 @@ public class WalkingTrajectoryPath
       }
    }
 
-   public void updateFootsteps()
-   {
-      if (!footsteps.isEmpty())
-      {
-         WaypointData waypoint = waypoints.getFirst();
-         WaypointData previousWaypoint = waypoint;
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            tempFootPoses.get(robotSide).set(supportFootPoses.get(robotSide));
-         }
-
-         for (int i = 0; i < footsteps.size(); i++)
-         {
-            waypoint = waypoints.get(i + 1);
-            Footstep footstep = footsteps.get(i);
-            tempFootPoses.get(footstep.getRobotSide()).set(footstep.getFootstepPose());
-            double yaw = computeAverage(tempFootPoses, waypoint.position);
-            waypoint.yaw.set(previousWaypoint.yaw.getValue() + AngleTools.computeAngleDifferenceMinusPiToPi(yaw, previousWaypoint.yaw.getValue()));
-            waypoint.time.set(previousWaypoint.time.getValue() + footstepTimings.get(i).getStepTime());
-            waypoint.updateViz();
-            previousWaypoint = waypoint;
-         }
-
-         waypoints.getLast().linearVelocity.setToZero();
-         waypoints.getLast().yawRate.set(0.0);
-         totalDuration.set(previousWaypoint.time.getValue());
-      }
-   }
-
-   private static double computeAverage(SideDependentList<? extends Pose3DReadOnly> input, Point3DBasics output)
-   {
-      return computeAverage(input.get(RobotSide.LEFT), input.get(RobotSide.RIGHT), output);
-   }
-
-   private static double computeAverage(Pose3DReadOnly firstPose, Pose3DReadOnly secondPose, Point3DBasics output)
-   {
-      output.interpolate(firstPose.getPosition(), secondPose.getPosition(), 0.5);
-      return AngleTools.computeAngleAverage(firstPose.getYaw(), secondPose.getYaw());
-   }
-
    public void computeTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
    {
       timer.startMeasurement();
 
-      updateWaypoints(leftFootConstraintType, rightFootConstraintType);
+      updateSupportFootPoses(leftFootConstraintType, rightFootConstraintType);
+      updateWaypoints();
       updatePolynomials();
 
       double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
@@ -334,6 +307,14 @@ public class WalkingTrajectoryPath
       timer.stopMeasurement();
    }
 
+   public void updateSupportFootPoses(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
+   {
+      if (leftFootConstraintType == ConstraintType.FULL)
+         supportFootPoses.get(RobotSide.LEFT).set(soleFrames.get(RobotSide.LEFT).getTransformToRoot());
+      if (rightFootConstraintType == ConstraintType.FULL)
+         supportFootPoses.get(RobotSide.RIGHT).set(soleFrames.get(RobotSide.RIGHT).getTransformToRoot());
+   }
+
    private final Point3D tempBallPosition = new Point3D();
 
    private void updateViz()
@@ -358,13 +339,8 @@ public class WalkingTrajectoryPath
 
    private final Point3D newWaypointPosition = new Point3D();
 
-   private void updateWaypoints(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
+   private void updateWaypoints()
    {
-      if (leftFootConstraintType == ConstraintType.FULL)
-         supportFootPoses.get(RobotSide.LEFT).set(soleFrames.get(RobotSide.LEFT).getTransformToRoot());
-      if (rightFootConstraintType == ConstraintType.FULL)
-         supportFootPoses.get(RobotSide.RIGHT).set(soleFrames.get(RobotSide.RIGHT).getTransformToRoot());
-
       for (RobotSide robotSide : RobotSide.values)
       {
          tempFootPoses.get(robotSide).set(supportFootPoses.get(robotSide));
@@ -699,5 +675,16 @@ public class WalkingTrajectoryPath
          yawPolynomial.compute(time);
          return yawPolynomial.getVelocity();
       }
+   }
+
+   private static double computeAverage(SideDependentList<? extends Pose3DReadOnly> input, Point3DBasics output)
+   {
+      return computeAverage(input.get(RobotSide.LEFT), input.get(RobotSide.RIGHT), output);
+   }
+
+   private static double computeAverage(Pose3DReadOnly firstPose, Pose3DReadOnly secondPose, Point3DBasics output)
+   {
+      output.interpolate(firstPose.getPosition(), secondPose.getPosition(), 0.5);
+      return AngleTools.computeAngleAverage(firstPose.getYaw(), secondPose.getYaw());
    }
 }
