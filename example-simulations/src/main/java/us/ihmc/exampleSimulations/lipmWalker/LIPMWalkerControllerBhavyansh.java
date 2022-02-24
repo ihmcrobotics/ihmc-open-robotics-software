@@ -1,5 +1,8 @@
 package us.ihmc.exampleSimulations.lipmWalker;
 
+import java.util.ArrayList;
+
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -14,12 +17,11 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-
-import java.util.ArrayList;
 
 public class LIPMWalkerControllerBhavyansh implements RobotController
 {
@@ -68,8 +70,8 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
    private PolynomialBasics trajectorySwingHipPitch;
    private PolynomialBasics trajectorySwingKneeLength;
-   private Vector3DReadOnly nextStepCoMLocation;
-
+   private final YoFrameVector3D nextStepCoMLocation;
+   
    private final YoInteger numberOfStepsTaken = new YoInteger("numberOfStepsTaken", registry);
 
    private enum States
@@ -92,6 +94,8 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       t = (YoDouble) robot.getRobot().findVariable("t");
       trajectorySwingHipPitch = new YoPolynomial("trajectorySwingHipAngle", 6, registry);
       trajectorySwingKneeLength = new YoPolynomial("trajectorySwingKneeLength", 6, registry);
+
+      nextStepCoMLocation = new YoFrameVector3D("nextStepCoMLocation", ReferenceFrame.getWorldFrame(), registry);
 
       initialize();
 
@@ -129,7 +133,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       desiredEnergy.set(0.5 * desiredTopVelocity.getValue() * desiredTopVelocity.getValue());
 
       orbitalEnergy.set(0.5 * 0.7 * 0.7);
-      nextStepCoMLocation = calculateStepCoMPosition();
+      calculateStepCoMPosition();
       footXTarget.set(nextStepCoMLocation.getX());
 
       calculateSwingTrajectories(RobotSide.RIGHT, nextStepCoMLocation, 0.0, true);
@@ -179,7 +183,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       orbitalEnergy.set(orbitalEnergyValue);
    }
 
-   Vector3DReadOnly calculateStepCoMPosition()
+   private void calculateStepCoMPosition()
    {
       double energy = orbitalEnergy.getValue();
       double x_final = (strideLength.getValue() / 2) + (desiredHeight.getValue() / (g * strideLength.getValue()) * (desiredEnergy.getValue() - energy));
@@ -187,7 +191,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       LogTools.info("Xf: {} \tEnergy: {} \tDesiredEnergy: {}", x_final, energy, desiredEnergy);
 
       Vector3DReadOnly stepCoMPosition = new Vector3D(x_final, 0.0, 0.0);
-      return stepCoMPosition;
+      nextStepCoMLocation.set(stepCoMPosition);
    }
 
    private void calculateSwingTrajectories(RobotSide swingSide, Vector3DReadOnly stepCoMPosition, double comPositionFromSupportFoot, boolean initial)
@@ -242,7 +246,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
 
       if (StrictMath.abs(comXPositionFromFoot.getValue()) < 0.01 && swingTrajectoriesCalculated.getValue() == false)
       {
-         nextStepCoMLocation = calculateStepCoMPosition();
+         calculateStepCoMPosition();
          footXTarget.set(nextStepCoMLocation.getX());
          calculateSwingTrajectories(side, nextStepCoMLocation, robot.getCenterOfMassXDistanceFromSupportFoot(), false);
          swingTrajectoriesCalculated.set(true);
