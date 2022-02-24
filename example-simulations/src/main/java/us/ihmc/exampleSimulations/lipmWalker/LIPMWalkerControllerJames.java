@@ -41,9 +41,13 @@ public class LIPMWalkerControllerJames implements RobotController
    private final YoDouble q_rightHipWorld = new YoDouble("q_rightHipWorld", registry);
    private final YoDouble q_leftHipWorld = new YoDouble("q_leftHipWorld", registry);
 
+   private final YoDouble finalKneeLength = new YoDouble("finalKneeLength", registry);
+
    private final SideDependentList<YoDouble> desiredKneeLengths = new SideDependentList<YoDouble>(q_d_leftKnee, q_d_rightKnee);
    private final SideDependentList<YoDouble> desiredHipAngles = new SideDependentList<YoDouble>(q_d_leftHip, q_d_rightHip);
    private final SideDependentList<YoDouble> worldHipAngles = new SideDependentList<YoDouble>(q_leftHipWorld, q_rightHipWorld);
+
+   private final YoDouble footIntoGroundLength = new YoDouble("footIntoGroundLength", registry);
 
    private final YoDouble comHeight = new YoDouble("comHeight", registry);
    private final YoDouble desiredHeight = new YoDouble("desiredHeight", registry);
@@ -52,7 +56,7 @@ public class LIPMWalkerControllerJames implements RobotController
    private final YoDouble topOfStrideVelocity = new YoDouble("topOfStrideVelocity", registry);
    private final YoBoolean isTopOfStrideVelocityRecorded = new YoBoolean("isTopOfStrideVelocityRecorded", registry);
    private final YoDouble desiredStepLength = new YoDouble("desiredStepLength", registry);
-   private final YoDouble kpStepLength = new YoDouble("kpStepDouble", registry);
+   private final YoDouble kpStepLength = new YoDouble("kpStepLength", registry);
 
    private final YoDouble f_leftFoot = new YoDouble("f_leftFoot", registry);
    private final YoDouble f_rightFoot = new YoDouble("f_rightFoot", registry);
@@ -81,8 +85,8 @@ public class LIPMWalkerControllerJames implements RobotController
    @Override
    public void initialize()
    {
-      kpBodyPitch.set(1000.0);
-      kdBodyPitch.set(100.0);
+      kpBodyPitch.set(200.0);
+      kdBodyPitch.set(30.0);
       desiredBodyPitch.set(0.0);
 
       kpKnee.set(750.0);
@@ -103,7 +107,9 @@ public class LIPMWalkerControllerJames implements RobotController
       desiredTopOfStrideVelocity.set(1.0);
       isTopOfStrideVelocityRecorded.set(false);
 
-      kpStepLength.set(0.1);
+      kpStepLength.set(0.5);
+      
+      footIntoGroundLength.set(0.01);
 
       supportSide = RobotSide.LEFT;
    }
@@ -133,9 +139,10 @@ public class LIPMWalkerControllerJames implements RobotController
       {
          double desiredKneeLength = Math.sqrt((desiredHeight.getValue() * desiredHeight.getValue()) + (0.5 * desiredStepLength.getValue() * 0.5 * desiredStepLength.getValue()));
          desiredKneeLengths.get(supportSide).set(desiredKneeLength);
-         desiredKneeLengths.get(swingSide).set(desiredKneeLength);
+         desiredKneeLengths.get(swingSide).set(desiredKneeLength + footIntoGroundLength.getValue());
          double desiredHipAngle = Math.atan2(0.5 * desiredStepLength.getValue(), desiredHeight.getValue());
-         desiredHipAngles.get(supportSide).set(desiredHipAngle);
+//         desiredHipAngles.get(supportSide).set(desiredHipAngle);
+         desiredHipAngles.get(supportSide).set(Double.NaN);
          desiredHipAngles.get(swingSide).set(-desiredHipAngle);
       }
 
@@ -144,13 +151,13 @@ public class LIPMWalkerControllerJames implements RobotController
       double feedForwardKneeForce = g * mass * kneeLength / centerOfMassPosition.getZ();
       double feedBackKneeForce = kpKnee.getValue() * (desiredHeight.getValue() - comHeight.getValue()) + kdKnee.getValue() * (0.0 - centerOfMassVelocity.getZ());
       // NOTE: not happy about this fudge factor on the feedforward -- I can't find a good enough set of knee gains.
-      robot.setKneeForce(supportSide, 0.94 * feedForwardKneeForce + feedBackKneeForce);
+      robot.setKneeForce(supportSide, feedForwardKneeForce + feedBackKneeForce);
       // TODO: if totalForce < 0, cap below, or make below cap 10% of body force
 
       double hipAngle = robot.getHipAngle(supportSide) + robot.getBodyPitchAngle();
       worldHipAngles.get(supportSide).set(hipAngle);
       double hipVelocity = robot.getHipVelocity(supportSide);
-      double feedBackHipTorque = kpHip.getValue() * (desiredHipAngles.get(supportSide).getValue() - hipAngle) + kdKnee.getValue() * (0.0 - hipVelocity);
+      double feedBackHipTorque = -kpBodyPitch.getValue() * (desiredBodyPitch.getValue() - robot.getBodyPitchAngle()) - kdBodyPitch.getValue() * (0.0 - robot.getBodyPitchAngularVelocity());
       robot.setHipTorque(supportSide, feedBackHipTorque);
 
       // Swing Leg
@@ -178,27 +185,41 @@ public class LIPMWalkerControllerJames implements RobotController
          {
             topOfStrideVelocity.set(comXVelocity.getValue());
             double newSwingHipAngle;
-            if (topOfStrideVelocity.getValue() < desiredTopOfStrideVelocity.getValue())
-               newSwingHipAngle = desiredHipAngles.get(swingSide).getValue() - 0.062 * (desiredTopOfStrideVelocity.getValue() - topOfStrideVelocity.getValue());
-            else
-               newSwingHipAngle = desiredHipAngles.get(swingSide).getValue() + 0.062 * (desiredTopOfStrideVelocity.getValue() - topOfStrideVelocity.getValue());
-            desiredHipAngles.get(swingSide).set(newSwingHipAngle);
-            double newSwingKneeLength = desiredHeight.getValue() / Math.cos(newSwingHipAngle);
-            desiredKneeLengths.get(swingSide).set(newSwingKneeLength);
+//            if (topOfStrideVelocity.getValue() < desiredTopOfStrideVelocity.getValue())
+               newSwingHipAngle = desiredHipAngles.get(swingSide).getValue() + kpStepLength.getValue() * (desiredTopOfStrideVelocity.getValue() - topOfStrideVelocity.getValue());
+//            else
+//               newSwingHipAngle = desiredHipAngles.get(swingSide).getValue() + 0.062 * (desiredTopOfStrideVelocity.getValue() - topOfStrideVelocity.getValue());
+               if (newSwingHipAngle > -0.05)
+                  newSwingHipAngle = -0.05;
+               if (newSwingHipAngle > 1.0)
+                  newSwingHipAngle = 1.0;
+
+               desiredHipAngles.get(swingSide).set(newSwingHipAngle);
+            double newSwingKneeLength = desiredHeight.getValue() / Math.cos(newSwingHipAngle) + footIntoGroundLength.getValue();
+            finalKneeLength.set(newSwingKneeLength);
+
+//            desiredKneeLengths.get(swingSide).set(newSwingKneeLength);
             isTopOfStrideVelocityRecorded.set(true);
          }
       }
+      
+      double percentOver = 0.5 + 0.5 * robot.getHipAngle(supportSide) / (0.2);
+      if (percentOver < 0.5) percentOver = 0.5;
+      if (percentOver > 1.5) percentOver = 1.5;
+      
+      
+      desiredKneeLengths.get(swingSide).set(finalKneeLength.getValue() * percentOver);
 
       // Support Leg Switching
       boolean isSwingFootOnGround = robot.getFootPosition(swingSide).getZ() < 0.001 && worldHipAngles.get(swingSide).getValue() < worldHipAngles.get(supportSide).getValue();
       boolean isSwingAnklePastVertical = isTopOfStrideVelocityRecorded.getValue() && worldHipAngles.get(swingSide).getValue() > 0.0;
-      if ( isSwingFootOnGround || isSwingAnklePastVertical )
+      if ( isSwingFootOnGround)// || isSwingAnklePastVertical )
       {
          // We change swing leg hip angle halfway through the step, for the next step let's assume that the new hip angle we chose was perfect and set BOTH
          // hip angles to be that by updating the step length as below. We'll end up selecting a new hip angle halfway through the next step anyway.
          // NOTE: The minus in front of the tan is because hip angles are negative going forward. As tan is an odd function, we need to prefix a minus to
          // get the desired results.
-         desiredStepLength.set(2.0 * desiredHeight.getValue() * -Math.tan(desiredHipAngles.get(swingSide).getValue()));
+//         desiredStepLength.set(2.0 * desiredHeight.getValue() * -Math.tan(desiredHipAngles.get(swingSide).getValue()));
          supportSide = supportSide.getOppositeSide();
          isTopOfStrideVelocityRecorded.set(false);
       }
