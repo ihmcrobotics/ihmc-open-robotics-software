@@ -103,7 +103,12 @@ public class GDXEnvironmentObject
          copyBulletTransformToThis(btMultiBody.getBaseWorldTransform());
    }
 
-   public void afterSimulate()
+   public void update(GDXBulletPhysicsManager bulletPhysicsManager)
+   {
+
+   }
+
+   public void afterSimulate(GDXBulletPhysicsManager bulletPhysicsManager)
    {
 
    }

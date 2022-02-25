@@ -20,6 +20,18 @@ public class ImPlotYoPlot
 
    public void render(boolean update)
    {
+      updateVariables(update);
+      imPlotPlot.render();
+   }
+
+   public void render(float plotWidth, float plotHeight, boolean update)
+   {
+      updateVariables(update);
+      imPlotPlot.render(plotWidth, plotHeight);
+   }
+
+   private void updateVariables(boolean update)
+   {
       if (update)
       {
          for (int i = 0; i < variablesToPlot.length; i++)
@@ -29,6 +41,5 @@ public class ImPlotYoPlot
             doublePlotLine.addValue(yoDouble.getValue());
          }
       }
-      imPlotPlot.render();
    }
 }

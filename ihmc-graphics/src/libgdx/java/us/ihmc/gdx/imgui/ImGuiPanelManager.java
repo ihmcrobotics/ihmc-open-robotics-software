@@ -24,6 +24,11 @@ public class ImGuiPanelManager
       panels.add(new ImGuiPanel(windowName));
    }
 
+   public void removePanel(ImGuiPanel panel)
+   {
+      panels.remove(panel);
+   }
+
    public void renderPanelMenu()
    {
       for (ImGuiPanel panel : panels)
