@@ -26,6 +26,11 @@ public class ImPlotPlot
 
    public ImPlotPlot(String label)
    {
+      this(label, 60);
+   }
+
+   public ImPlotPlot(String label, float plotHeight)
+   {
       this.label = label;
       ImPlotTools.ensureImPlotInitialized();
       ImPlotTools.setSCSStyle();
@@ -47,7 +52,7 @@ public class ImPlotPlot
       yFlags += ImPlotAxisFlags.NoLabel;
       yFlags += ImPlotAxisFlags.AutoFit;
 
-      graphHeight = 250;
+      graphHeight = plotHeight;
       graphWidth = 100;
 
       outerBoundsDimensionsPixels = new ImVec2(graphWidth, graphHeight);

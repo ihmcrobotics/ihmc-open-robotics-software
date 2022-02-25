@@ -13,9 +13,9 @@ public class ImPlotPlotDemo
    private final ImGuiGlfwWindow baseUI = new ImGuiGlfwWindow(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-   private ImPlotPlot imPlotPlot = new ImPlotPlot("ImPlot 1");
+   private ImPlotPlot imPlotPlot = new ImPlotPlot("ImPlot 1", 250f);
    private final ImPlotDoublePlotLine linePlot = new ImPlotDoublePlotLine("Variable");
-   private ImPlotPlot fpsPlot = new ImPlotPlot("Frames per second");
+   private ImPlotPlot fpsPlot = new ImPlotPlot("Frames per second", 250f);
    private final ImPlotDoublePlotLine fpsPlotLine = new ImPlotDoublePlotLine("Frames per second");
    private double value = 0.0;
    private Stopwatch stopwatch = new Stopwatch().start();

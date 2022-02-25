@@ -175,6 +175,7 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
          for (GDXEnvironmentObject allObject : allObjects)
          {
             allObject.copyBulletTransformToThisMultiBody();
+            allObject.afterSimulate();
          }
       }
    }
@@ -450,5 +451,10 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    public String getWindowName()
    {
       return WINDOW_NAME;
+   }
+
+   public GDXBulletPhysicsManager getBulletPhysicsManager()
+   {
+      return bulletPhysicsManager;
    }
 }
