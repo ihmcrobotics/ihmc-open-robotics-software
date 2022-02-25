@@ -61,8 +61,13 @@ public class ImPlotPlot
    public void render()
    {
       graphWidth = ImGui.getColumnWidth();
-      outerBoundsDimensionsPixels.x = graphWidth;
+      render(graphWidth, graphHeight);
+   }
 
+   public void render(float plotWidth, float plotHeight)
+   {
+      outerBoundsDimensionsPixels.x = plotWidth;
+      outerBoundsDimensionsPixels.y = plotHeight;
       if (ImPlot.beginPlot(label, xLabel, yLabel, outerBoundsDimensionsPixels, flags, xFlags, yFlags))
       {
          boolean outside = true;
