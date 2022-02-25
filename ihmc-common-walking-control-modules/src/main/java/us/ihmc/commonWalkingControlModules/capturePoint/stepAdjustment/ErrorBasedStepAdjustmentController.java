@@ -93,6 +93,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
                                                                                                  worldFrame,
                                                                                                  registry);
    private final YoFrameVector2D deadbandedAdjustment = new YoFrameVector2D(yoNamePrefix + "DeadbandedAdjustment", worldFrame, registry);
+   private final YoFrameVector2D totalStepAdjustment = new YoFrameVector2D(yoNamePrefix + "TotalStepAdjustment", worldFrame, registry);
 
    private final YoFramePose3D footstepSolution = new YoFramePose3D(yoNamePrefix + "FootstepSolutionLocation", worldFrame, registry);
    private final YoFramePoint2D adjustedSolutionInControlPlane = new YoFramePoint2D(yoNamePrefix + "adjustedSolutionInControlPlane", worldFrame, registry);
@@ -322,6 +323,7 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
       reachabilityConstraintHandler.initializeReachabilityConstraint(supportSide, upcomingFootstep);
       speedUpTime.set(0.0);
       footstepSolution.set(upcomingFootstep);
+      totalStepAdjustment.setToZero();
    }
 
    @Override
@@ -473,6 +475,8 @@ public class ErrorBasedStepAdjustmentController implements StepAdjustmentControl
 
       adjustedSolutionInControlPlane.set(referencePositionInControlPlane);
       adjustedSolutionInControlPlane.add(deadbandedAdjustment);
+
+      totalStepAdjustment.add(deadbandedAdjustment);
 
       if (useICPControlPlaneInStepAdjustment.getValue())
          icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
