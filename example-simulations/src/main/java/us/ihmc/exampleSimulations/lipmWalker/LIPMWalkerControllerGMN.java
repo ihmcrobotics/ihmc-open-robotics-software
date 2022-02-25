@@ -216,10 +216,6 @@ public class LIPMWalkerControllerGMN implements RobotController
       DMatrixRMaj Tau = new DMatrixRMaj(3,1);
       CommonOps_DDRM.mult(Jleg,Ffoot,Tau); // tau = J-transpose * F
       
-//      /* Compute and set orbital energy YoDouble. Based on virtual spring-mass system. */
-//      double orbitalEnergyValue = 0.5 * mass * centerOfMassVelocity.lengthSquared() - 0.5 * g / desiredHeight.getDoubleValue() * centerOfMassPosition.distanceFromOriginSquared();
-//      orbitalEnergy.set(orbitalEnergyValue);
-
       // Skip 0 element as that is moment on body
       robot.setHipTorque(side, Tau.get(1, 0));
       robot.setKneeForce(side, Tau.get(2, 0));
@@ -231,7 +227,6 @@ public class LIPMWalkerControllerGMN implements RobotController
       
       // Dead-reckoning on foot x pos to desired:
       double dt_denom = (stepTime-0.1) - timeInSwing; // GMN: Added 0.1 sec arrive early...
-//      double dt_denom = stepTime - timeInSwing; // GMN: Added 0.1 sec arrive early...
       if (dt_denom < 0.001)
       {
          dt_denom = 0.001; // GMN
@@ -267,8 +262,6 @@ public class LIPMWalkerControllerGMN implements RobotController
       q_d.set(0,0,q_d.get(0,0)+qd_d.get(0,0)*dT);
       q_d.set(1,0,q_d.get(1,0)+qd_d.get(1,0)*dT);
       lrq_d.get(side).set(q_d);
-//      lrq_d.get(side).set(0,0,lrq_d.get(side).get(0,0)+qd_d.get(0,0)*dT); // Easier way?????
-//      lrq_d.get(side).set(1,0,lrq_d.get(side).get(1,0)+qd_d.get(1,0)*dT); // Easier way?????
       
       double q_hip = robot.getHipAngle(side);
       double qd_hip = robot.getHipVelocity(side);
@@ -297,8 +290,7 @@ public class LIPMWalkerControllerGMN implements RobotController
    double simpleTDLOStepLocation(double xLO)
    {
       // Simple TDLO:
-      return (kxTDLO*(xTD.getValue()-xLO)-bxTDLO*(xTD.getValue()+xLO));      
-//      return (kxTDLO*(xTD.getValue()-xLO)-bxTDLO*(xTD.getValue()+xLO) - 0.08);      
+      return (kxTDLO*(xTD.getValue()-xLO)-bxTDLO*(xTD.getValue()+xLO)); // -0.08);      
    }
 
    // predicted-LO TDLO (sort of like "Black Diamond" TDLO)
@@ -583,8 +575,6 @@ public class LIPMWalkerControllerGMN implements RobotController
          boolean result = ((robot.getFootZForce(this.side) > 10) &&
                            (inLiftState.get(side).getValue() == false));
          return (result);
-         
-//         LogTools.info("Side: {} getKneeForce(): {}", side, robot.getKneeForce(side));
       }
    }
 }
