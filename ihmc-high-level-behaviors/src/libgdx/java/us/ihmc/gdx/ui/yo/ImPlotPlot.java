@@ -9,11 +9,11 @@ import us.ihmc.gdx.ui.tools.ImPlotTools;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
-public class ImPlotDouble
+public class ImPlotPlot
 {
    private Consumer<String> dragAndDropPayloadConsumer;
    private Runnable popupContextWindowImGuiRenderer;
-   private final ArrayList<ImPlotDoubleLine> plotLines = new ArrayList<>();
+   private final ArrayList<ImPlotPlotLine> plotLines = new ArrayList<>();
    private final String xLabel;
    private final String yLabel;
    private final String label;
@@ -24,7 +24,7 @@ public class ImPlotDouble
    private int yFlags;
    private final ImVec2 outerBoundsDimensionsPixels;
 
-   public ImPlotDouble(String label)
+   public ImPlotPlot(String label)
    {
       this.label = label;
       ImPlotTools.ensureImPlotInitialized();
@@ -64,7 +64,7 @@ public class ImPlotDouble
          ImPlot.setLegendLocation(ImPlotLocation.SouthWest, ImPlotOrientation.Horizontal, outside);
 
          boolean showingLegendPopup = false;
-         for (ImPlotDoubleLine plotLine : plotLines)
+         for (ImPlotPlotLine plotLine : plotLines)
          {
             showingLegendPopup |= plotLine.render();
          }
@@ -101,7 +101,7 @@ public class ImPlotDouble
       this.popupContextWindowImGuiRenderer = popupContextWindowImGuiRenderer;
    }
 
-   public ArrayList<ImPlotDoubleLine> getPlotLines()
+   public ArrayList<ImPlotPlotLine> getPlotLines()
    {
       return plotLines;
    }
