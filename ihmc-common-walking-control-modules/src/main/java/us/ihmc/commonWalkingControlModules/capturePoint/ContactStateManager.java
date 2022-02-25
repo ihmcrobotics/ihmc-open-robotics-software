@@ -188,7 +188,7 @@ public class ContactStateManager
       if (shouldAdjustTimeFromTrackingError)
       {
          double minDuration = (inSingleSupport.getBooleanValue() ? minimumSwingDuration.getDoubleValue() : minimumTransferDuration.getDoubleValue());
-         double maxTotalAdjustment = currentStateDuration.getDoubleValue() - offsetTimeInState.getDoubleValue() - minDuration;
+         double maxTotalAdjustment = Math.max(currentStateDuration.getDoubleValue() - offsetTimeInState.getDoubleValue() - minDuration, 0.0);
 
          double remainingTimeAfterAdjustment = Math.max(remainingTimeInContactSequence.getDoubleValue() - totalTimeAdjustment.getDoubleValue(), 0.0);
          double maxAdjustment = Math.min(remainingTimeAfterAdjustment, maxTotalAdjustment - totalTimeAdjustment.getDoubleValue());

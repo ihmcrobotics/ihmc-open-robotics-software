@@ -90,6 +90,7 @@ public class AvatarSimulation
 
       for (OneDegreeOfFreedomJoint joint : joints)
       {
+         joint.setQ(0.0);
          joint.setQd(0.0);
          joint.setQdd(0.0);
          joint.setTau(0.0);
