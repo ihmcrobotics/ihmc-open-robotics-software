@@ -11,23 +11,18 @@
 // TODO:
 // ====
 // + ELIMINATE DUPLICATE CODE BTW LIFT & SWING STATES
+//   + Do we need a LIFT state?
 // + I have some controller state that is not rewindable - need to fix
 //   + YoVariables
 //   + check out YoMatrix
-// + Don't start var names with caps
 // + Make human-readable var names
-//
-// + Check-in code
 // + IMPROVE LOGGING SO CAN DEBUG BETTER
 //   + Q: How well hitting desired TD?
 //   + Q: How well hitting prescribed timing?
 // + General cleanup
 // + Predictive TDLO
-//   + Add pole-placement to TDLO
-//   + Get closer to desired pole-placement step dynamics
-// + Ground-speed matching at TD
-// + Tune-up swing tracking, both joints and TD (e.g. ground-speed matching)
-//   + Double-check swing IK control
+//   + Add full pole-placement to TDLO: convert from continuous -> discrete
+// + Better ground-speed matching at TD?
 // + Get away from z-cubic-spline for SWING
 // + Learn how to use Yo-variables
 // + More learning of SCS plotting/video tools
@@ -44,6 +39,8 @@
 // + Swing IK
 // + TDLO implementation
 // + Replace "robotSide" with just "side" everywhere
+// + Check-in code
+// + Tune-up swing tracking, both joints and TD (e.g. ground-speed matching)
 
  
 
