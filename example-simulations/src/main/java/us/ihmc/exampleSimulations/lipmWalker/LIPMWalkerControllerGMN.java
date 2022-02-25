@@ -54,7 +54,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-//import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -133,8 +132,8 @@ public class LIPMWalkerControllerGMN implements RobotController
 //      bx_TDLO = (1+Math.exp(2*LIPTipFreq*stepTime))/(2*Math.pow( 1+Math.exp(LIPTipFreq*stepTime),2));
       
       // Pole-placement:   GMN - Can't handle imaginary part yet!
-      double p1 = 0.08;
-      double p2 = 0.08;
+      double p1 = 0;
+      double p2 = 0;
       double k = LIPTipFreq;
       double Ts = stepTime;
       kx_TDLO = (1+Math.exp(2*k*Ts)+2*Math.exp(k*Ts)*(-p1-p2+p1*p2))/(2*Math.pow(-1+Math.exp(k*Ts),2));
@@ -315,9 +314,9 @@ public class LIPMWalkerControllerGMN implements RobotController
    {
       double k = LIPTipFreq;
       double Ts = stepTime;
-      if (t < 0.2*Ts)
+      if (t < 0.1*Ts)
       {
-         t = 0.2*Ts;
+         t = 0.1*Ts;
       }
       
       // See reMarkable notes Feb 23, 2022:
@@ -328,10 +327,10 @@ public class LIPMWalkerControllerGMN implements RobotController
       double xLOk = cTD*xTDk + cCoP*xCoP;
       
       // predicted final TDLO TD location r.t. body:
-      double xTDk1 = kx_TDLO*(xTDk-xLOk)-bx_TDLO*(xTDk+xLOk);
+      double xTDk1 = kx_TDLO*(xTDk-xLOk)-bx_TDLO*(xTDk+xLOk) - 0.2;
       
 //      // desired TD location: (attempt to get a location ideally fixed in the world)
-//      return (xCoP - xLOk + xTDk1);
+//      return (xCoP - xLOk + xTDk1);  // GMN: Does world-frame well, but dynamics not good (need to figure out why)
       return xTDk1;
    }
    
@@ -342,7 +341,7 @@ public class LIPMWalkerControllerGMN implements RobotController
       double zTD = 0;
       double zdTD = -1; //-1; // GMN
       
-      double tSH = 0.5*stepTime;
+      double tSH = 0.45*stepTime;
       double tTD = stepTime;
 
       // Cubic-spline fit:
@@ -483,11 +482,9 @@ public class LIPMWalkerControllerGMN implements RobotController
          
          double xCoP = getXcop(side.getOppositeSide());
          double desiredTD = simpleTDLOStepLocation(xCoP); // simple TDLO
-//         double desiredTD = predictedTDLOStepLocation(timeInState,xTD,xCoP); // predicted TDLO
+//         double desiredTD = predictedTDLOStepLocation(timeInState,xTD.getValue(),xCoP); // predicted TDLO
          desiredxTD.get(side).set(desiredTD); // logging
          controlSwingLeg(side,timeInState,dT,desiredTD);
-//         double stanceTime = timeInStance.get(side.getOppositeSide()).getValue();
-//         controlSwingLeg(side,stanceTime,dT,desiredTD);
       }
 
       @Override
@@ -523,11 +520,11 @@ public class LIPMWalkerControllerGMN implements RobotController
          LRlastTime.get(side).set(timeInState);
          
          double xCoP = getXcop(side.getOppositeSide());
+         double stanceTime = timeInStance.get(side.getOppositeSide()).getValue();
          double desiredTD = simpleTDLOStepLocation(xCoP); // simple TDLO
-//         double desiredTD = predictedTDLOStepLocation(timeInState,xTD,xCoP); // predicted TDLO
+//         double desiredTD = predictedTDLOStepLocation(stanceTime,xTD.getValue(),xCoP); // predicted TDLO
          desiredxTD.get(side).set(desiredTD); // logging
 //       controlSwingLeg(side,timeInState,dT,desiredTD);
-         double stanceTime = timeInStance.get(side.getOppositeSide()).getValue();
          controlSwingLeg(side,stanceTime,dT,desiredTD);
       }
 
@@ -552,7 +549,9 @@ public class LIPMWalkerControllerGMN implements RobotController
       public boolean testCondition(double timeInCurrentState)
       {
          Point3D pos_foot = robot.getFootPosition(side); // GMN: What is behind this function?  Super-sensing?
-         boolean result = (pos_foot.getZ() > SwingHeight/4); 
+         boolean result = (pos_foot.getZ() > SwingHeight/8); 
+//         boolean result = ((robot.getFootZForce(side) <= 0) && 
+//                           (inLiftState.get(side).getValue() == true));
          return (result);
       }
    }
