@@ -50,6 +50,7 @@ package us.ihmc.exampleSimulations.lipmWalker;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.trajectories.core.Polynomial;
@@ -265,27 +266,23 @@ public class LIPMWalkerControllerRG implements RobotController
       desiredFootZVelocity.set(swingLegLengthTrajectories.get(side).getVelocity());
 
       // Do diffIK; use measured th_body as FF term?
-      DMatrixRMaj Jleg = robot.getlegJacobian(robot.getBodyPitchAngle(),  // includes body-pitch
+      DMatrixRMaj baseToFootJacobian = robot.getlegJacobian(robot.getBodyPitchAngle(),  // includes body-pitch
                                               desiredSwingHipAngles.get(side).getDoubleValue(),
                                               desiredSwingKneeAngles.get(side).getDoubleValue());
-      DMatrixRMaj Jq = new DMatrixRMaj(2, 2); // just leg joints
-      Jq.set(0, 0, Jleg.get(0, 1));
-      Jq.set(0, 1, Jleg.get(0, 2));
-      Jq.set(1, 0, Jleg.get(1, 1));
-      Jq.set(1, 1, Jleg.get(1, 2));
-      CommonOps_DDRM.invert(Jq);  // Jq now holds its inverse
-      DMatrixRMaj RHS = new DMatrixRMaj(2, 1);
-      RHS.set(0, 0, desiredSwingFootVelocity - 0 * Jleg.get(0, 0) * thd_body); // GMN: including body-pitch rate bias
-      RHS.set(1, 0, desiredFootZVelocity.getValue() - 0 * Jleg.get(1, 0) * thd_body); // GMN: including body-pitch rate bias
-      DMatrixRMaj qd_d = new DMatrixRMaj(2, 1);
-      CommonOps_DDRM.mult(Jq, RHS, qd_d); // resolved-rate IK
-      desiredSwingHipAngles.get(side).add(dT * qd_d.get(0, 0));
-      desiredSwingKneeAngles.get(side).add(dT * qd_d.get(1, 0));
-      desiredSwingHipVelocities.get(side).set(qd_d.get(0, 0));
-      desiredSwingKneeVelocities.get(side).set(qd_d.get(1, 0));
-      //      LRq_d.get(side).set(0,0,LRq_d.get(side).get(0,0)+qd_d.get(0,0)*dT); // Easier way?????
-      //      LRq_d.get(side).set(1,0,LRq_d.get(side).get(1,0)+qd_d.get(1,0)*dT); // Easier way?????
+      DMatrixRMaj legJacobian = new DMatrixRMaj(2, 2); // just leg joints
+      DMatrixRMaj legJacobianInverse = new DMatrixRMaj(2, 2); // just leg joints
+      CommonOps_DDRM.extract(baseToFootJacobian, 0, 1, legJacobian);
+      CommonOps_DDRM.invert(legJacobian, legJacobianInverse);  // Jq now holds its inverse
+      DMatrixRMaj desiredFootVelocity = new DMatrixRMaj(2, 1);
+      desiredFootVelocity.set(0, 0, desiredSwingFootVelocity - 0 * baseToFootJacobian.get(0, 0) * thd_body); // GMN: including body-pitch rate bias
+      desiredFootVelocity.set(1, 0, desiredFootZVelocity.getValue() - 0 * baseToFootJacobian.get(1, 0) * thd_body); // GMN: including body-pitch rate bias
+      DMatrixRMaj desiredJointVelocities = new DMatrixRMaj(2, 1);
+      CommonOps_DDRM.mult(legJacobianInverse, desiredFootVelocity, desiredJointVelocities); // resolved-rate IK
 
+      desiredSwingHipAngles.get(side).add(dT * desiredJointVelocities.get(0, 0));
+      desiredSwingKneeAngles.get(side).add(dT * desiredJointVelocities.get(1, 0));
+      desiredSwingHipVelocities.get(side).set(desiredJointVelocities.get(0, 0));
+      desiredSwingKneeVelocities.get(side).set(desiredJointVelocities.get(1, 0));
 
       // Servo joints to the desired joint trajs:
       robot.setHipTorque(side,
@@ -301,10 +298,11 @@ public class LIPMWalkerControllerRG implements RobotController
    }
 
    // Get current foot x pos r.t. body wrt world:
-   double getXcop(RobotSide side)
+   private FramePoint3DReadOnly getCoPPositionInCoMFrame(RobotSide side)
    {
-      Point3DReadOnly pos_foot = robot.getFootPosition(side);
-      return pos_foot.getX() - robot.getBodyXPosition(); // xcop r.t. body
+      FramePoint3D foot = new FramePoint3D(stateEstimator.getFootFrame(side));
+      foot.changeFrame(stateEstimator.getCoMReferenceFrame());
+      return foot;
    }
 
    double simpleTDLOStepLocation(double xLO)
@@ -318,10 +316,7 @@ public class LIPMWalkerControllerRG implements RobotController
    {
       double k = omega.getDoubleValue();
       double Ts = stepDuration.getDoubleValue();
-      if (t < 0.2 * Ts)
-      {
-         t = 0.2 * Ts;
-      }
+      t = Math.max(0.2 * Ts, t);
 
       // See reMarkable notes Feb 23, 2022:
       double cTD = (Math.exp(k * Ts) - Math.exp(2 * k * (t - Ts))) / (1 - Math.exp(2 * k * t));
@@ -421,11 +416,10 @@ public class LIPMWalkerControllerRG implements RobotController
          feedBackBodyTorque.set(bodyServoController.compute(robot.getBodyPitchAngle(), 0.0, robot.getBodyPitchAngularVelocity(), 0.0));
          netBodyTorque.set(feedBackBodyTorque.getDoubleValue()); // GMN
 
-         FramePoint3D foot = new FramePoint3D(stateEstimator.getFootFrame(side));
-         foot.changeFrame(stateEstimator.getCoMReferenceFrame());
-         double xcop = foot.getX();
+         FramePoint3DReadOnly cop = getCoPPositionInCoMFrame(side);
 
-         netHorizontalForce.set(-1.0 / robot.getBodyZPosition() * (netHeightForce.getValue() * xcop + netBodyTorque.getDoubleValue()));  // Fx based on body-servo & current foot position
+         // compute the necessary horizontal force to achieve the vertical force, body torque, and cop location
+         netHorizontalForce.set(-1.0 / robot.getBodyZPosition() * (netHeightForce.getValue() * cop.getX() + netBodyTorque.getDoubleValue()));
 
          // Do implicit force control:
          DMatrixRMaj desiredFootForce = new DMatrixRMaj(2, 1);
@@ -474,15 +468,15 @@ public class LIPMWalkerControllerRG implements RobotController
          // Initialize the diff IK:
          desiredSwingHipAngles.get(side).set(robot.getHipAngle(side));
          desiredSwingKneeAngles.get(side).set(robot.getKneeLength(side));
-         desiredSwingFootPositions.get(side).set(getXcop(side));
+         desiredSwingFootPositions.get(side).set(getCoPPositionInCoMFrame(side).getX());
       }
 
       @Override
       public void doAction(double timeInState)
       {
-         double xCoP = getXcop(side.getOppositeSide());
+         double xCoP = getCoPPositionInCoMFrame(side.getOppositeSide()).getX();
          predictedTouchdownLocation.get(side).set(simpleTDLOStepLocation(xCoP)); // simple TDLO
-         //         double desiredTD = predictedTDLOStepLocation(timeInState,xTD,xCoP); // predicted TDLO
+//         predictedTouchdownLocation.get(side).set(predictedTDLOStepLocation(timeInState, stancePositionAtStartOfSupport.getX(), xCoP)); // predicted TDLO
          controlSwingLeg(side, timeInState, controlDT);
          //         double stanceTime = timeInStance.get(side.getOppositeSide()).getValue();
          //         controlSwingLeg(side,stanceTime,dT,desiredTD);
@@ -512,10 +506,9 @@ public class LIPMWalkerControllerRG implements RobotController
       @Override
       public void doAction(double timeInState)
       {
-         double xCoP = getXcop(side.getOppositeSide());
-         predictedTouchdownLocation.get(side).set(simpleTDLOStepLocation(xCoP)); // simple TDLO
-         //         double desiredTD = predictedTDLOStepLocation(timeInState,xTD,xCoP); // predicted TDLO
-         //       controlSwingLeg(side,timeInState,dT,desiredTD);
+         FramePoint3DReadOnly cop = getCoPPositionInCoMFrame(side.getOppositeSide());
+         predictedTouchdownLocation.get(side).set(simpleTDLOStepLocation(cop.getX())); // simple TDLO
+//         predictedTouchdownLocation.get(side).set(predictedTDLOStepLocation(timeInState, stancePositionAtStartOfSupport.getX(), cop.getX()));          //       controlSwingLeg(side,timeInState,dT,desiredTD);
          double stanceTime = timeInStanceState.get(side.getOppositeSide()).getValue();
          controlSwingLeg(side, stanceTime, controlDT);
       }
