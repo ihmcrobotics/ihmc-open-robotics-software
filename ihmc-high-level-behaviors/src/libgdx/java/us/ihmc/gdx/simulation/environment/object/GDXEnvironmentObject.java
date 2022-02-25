@@ -1,86 +1,289 @@
 package us.ihmc.gdx.simulation.environment.object;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.dynamics.btMultiBody;
+import com.badlogic.gdx.physics.bullet.dynamics.btMultiBodyLinkCollider;
+import com.badlogic.gdx.physics.bullet.dynamics.btRigidBody;
+import com.badlogic.gdx.physics.bullet.dynamics.btTypedConstraint;
+import com.badlogic.gdx.physics.bullet.linearmath.btMotionState;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
+import us.ihmc.gdx.simulation.bullet.GDXBulletPhysicsManager;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
-import us.ihmc.gdx.simulation.environment.object.objects.*;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.gizmo.StepCheckIsPointInsideAlgorithm;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.log.LogTools;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * TODO: This class probably needs renaming and setup as layers of interfaces.
+ */
 public class GDXEnvironmentObject
 {
-   private static final AtomicInteger INDEX = new AtomicInteger();
-   protected Model realisticModel;
+   private static final HashMap<String, AtomicInteger> OBJECT_INDEXES = new HashMap<>();
 
+   private String titleCasedName;
+   private final String pascalCasedName;
+   private final int objectIndex;
+   private final GDXEnvironmentObjectFactory factory;
+   private Model realisticModel;
    private GDXModelInstance realisticModelInstance;
    private GDXModelInstance collisionModelInstance;
-   private RigidBodyTransform collisionShapeOffset;
-   private RigidBodyTransform wholeThingOffset;
-   private Sphere3D boundingSphere;
+   private final StepCheckIsPointInsideAlgorithm stepCheckIsPointInsideAlgorithm = new StepCheckIsPointInsideAlgorithm();
+   private RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
+   private RigidBodyTransform realisticModelOffset = new RigidBodyTransform();
+   private Sphere3D boundingSphere = new Sphere3D(1.0);
    private Shape3DBasics collisionGeometryObject;
    private Function<Point3DReadOnly, Boolean> isPointInside;
    private Model collisionMesh;
-   private Material originalMaterial;
-   private Material highlightedMaterial;
-   private final Point3D tempRayOrigin = new Point3D();
-   private final Point3D firstSphereIntersection = new Point3D();
-   private final Point3D secondSphereIntersection = new Point3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final Matrix4 tempGDXTransform = new Matrix4();
    private final RigidBodyTransform placementTransform = new RigidBodyTransform();
-   private final ReferenceFrame placementFrame
-         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("placementFrame" + INDEX.getAndIncrement(),
-                                                                           ReferenceFrame.getWorldFrame(),
-                                                                           placementTransform);
+   private final ReferenceFrame placementFrame;
    private final FramePose3D placementFramePose = new FramePose3D();
    private ReferenceFrame realisticModelFrame;
    private ReferenceFrame collisionModelFrame;
+   private ReferenceFrame bulletCollisionFrame;
+   private ReferenceFrame bulletCollisionSpecificationFrame;
+   private final RigidBodyTransform bulletCollisionOffset = new RigidBodyTransform();
+   private final RigidBodyTransform bulletCollisionFrameTransformToWorld = new RigidBodyTransform();
+   private final FramePose3D bulletPose = new FramePose3D();
+   private btCollisionShape btCollisionShape;
+   private float mass = 0.0f;
+   private final Point3D centerOfMassInModelFrame = new Point3D();
+   private btRigidBody btRigidBody;
+   private btMultiBody btMultiBody;
+   private GDXBulletPhysicsManager bulletPhysicsManager;
+   private boolean isSelected = false;
+   private final ArrayList<btCollisionObject> addedCollisionObjects = new ArrayList<>();
+   private final ArrayList<btTypedConstraint> addedConstraints = new ArrayList<>();
+   private final btMotionState bulletMotionState = new btMotionState()
+   {
+      @Override
+      public void setWorldTransform(Matrix4 transformToWorld)
+      {
+         copyBulletTransformToThis(transformToWorld);
+      }
 
-   public void create(Model realisticModel)
+      @Override
+      public void getWorldTransform(Matrix4 transformToWorld)
+      {
+         getThisTransformForCopyToBullet(transformToWorld);
+      }
+   };
+
+   public void copyBulletTransformToThisMultiBody()
+   {
+      if (btMultiBody != null)
+         copyBulletTransformToThis(btMultiBody.getBaseWorldTransform());
+   }
+
+   public void copyThisTransformToBulletMultiBody()
+   {
+      if (btMultiBody != null)
+      {
+         getThisTransformForCopyToBullet(tempGDXTransform);
+         btMultiBody.setBaseWorldTransform(tempGDXTransform);
+      }
+   }
+
+   public void copyThisTransformToBulletMultiBodyParentOnly()
+   {
+      if (btMultiBody != null)
+      {
+         getThisTransformForCopyToBullet(tempGDXTransform);
+         btMultiBody.setBaseWorldTransform(tempGDXTransform);
+      }
+   }
+
+   public void copyBulletTransformToThis(Matrix4 transformToWorld)
+   {
+      GDXTools.toEuclid(transformToWorld, bulletCollisionFrameTransformToWorld);
+      bulletCollisionFrame.update();
+      bulletPose.setToZero(bulletCollisionFrame);
+      bulletPose.applyInverseTransform(bulletCollisionOffset);
+      bulletPose.changeFrame(ReferenceFrame.getWorldFrame());
+      bulletPose.get(tempTransform);
+      setTransformToWorld(tempTransform);
+   }
+
+   public void getThisTransformForCopyToBullet(Matrix4 transformToWorld)
+   {
+      getThisTransformForCopyToBullet(tempTransform);
+      GDXTools.toGDX(tempTransform, transformToWorld);
+   }
+
+   public void getThisTransformForCopyToBullet(RigidBodyTransform transformToWorld)
+   {
+      bulletCollisionSpecificationFrame.update();
+      transformToWorld.set(bulletCollisionSpecificationFrame.getTransformToWorldFrame());
+   }
+
+   public GDXEnvironmentObject(String titleCasedName, GDXEnvironmentObjectFactory factory)
+   {
+      this.titleCasedName = titleCasedName;
+      this.factory = factory;
+      pascalCasedName = FormattingTools.titleToKebabCase(titleCasedName);
+
+      AtomicInteger atomicIndex = OBJECT_INDEXES.get(pascalCasedName);
+      if (atomicIndex == null)
+      {
+         atomicIndex = new AtomicInteger(0);
+         OBJECT_INDEXES.put(pascalCasedName, atomicIndex);
+      }
+      objectIndex = atomicIndex.getAndIncrement();
+      placementFrame = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "PlacementFrame" + objectIndex,
+                                                                                       ReferenceFrame.getWorldFrame(),
+                                                                                       placementTransform);
+      realisticModelFrame
+            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "RealisticModelFrame" + objectIndex,
+                                                                              placementFrame,
+                                                                              realisticModelOffset);
+      collisionModelFrame
+            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "CollisionModelFrame" + objectIndex,
+                                                                              placementFrame,
+                                                                              collisionShapeOffset);
+      bulletCollisionFrame
+            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "BulletCollisionFrame" + objectIndex,
+                                                                              ReferenceFrame.getWorldFrame(),
+                                                                              bulletCollisionFrameTransformToWorld);
+      bulletCollisionSpecificationFrame
+            = ReferenceFrameTools.constructFrameWithChangingTransformToParent(pascalCasedName + "BulletCollisionSpecificationFrame" + objectIndex,
+                                                                              placementFrame,
+                                                                              bulletCollisionOffset);
+   }
+
+   public void setRealisticModel(Model realisticModel)
    {
       this.realisticModel = realisticModel;
       realisticModelInstance = new GDXModelInstance(realisticModel);
    }
 
-   public void create(Model realisticModel,
-                      RigidBodyTransform collisionShapeOffset,
-                      RigidBodyTransform wholeThingOffset,
-                      Sphere3D boundingSphere,
-                      Shape3DBasics collisionGeometryObject,
-                      Function<Point3DReadOnly, Boolean> isPointInside,
-                      Model collisionGraphic)
+   public void setCollisionModel(Model collisionGraphic)
    {
-      this.realisticModel = realisticModel;
-      this.collisionShapeOffset = collisionShapeOffset;
-      this.wholeThingOffset = wholeThingOffset;
-      this.boundingSphere = boundingSphere;
-      this.collisionGeometryObject = collisionGeometryObject;
-      this.isPointInside = isPointInside;
       this.collisionMesh = collisionGraphic;
-      realisticModelInstance = new GDXModelInstance(realisticModel);
       collisionModelInstance = new GDXModelInstance(collisionGraphic);
-      originalMaterial = new Material(realisticModelInstance.materials.get(0));
-      realisticModelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("realisticModelFrame" + INDEX.getAndIncrement(),
-                                                                                                placementFrame,
-                                                                                                wholeThingOffset);
-      collisionModelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("collisionModelFrame" + INDEX.getAndIncrement(),
-                                                                                                realisticModelFrame,
-                                                                                                collisionShapeOffset);
+   }
+
+   public void setCollisionModel(Consumer<GDXMultiColorMeshBuilder> meshBuilderConsumer)
+   {
+      Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilderConsumer, pascalCasedName + "CollisionModel" + getObjectIndex());
+      GDXTools.setTransparency(collisionGraphic, 0.4f);
+      setCollisionModel(collisionGraphic);
+   }
+
+   public void setCollisionGeometryObject(Shape3DBasics collisionGeometryObject)
+   {
+      this.collisionGeometryObject = collisionGeometryObject;
+      isPointInside = collisionGeometryObject::isPointInside;
+
+      if (collisionMesh == null)
+      {
+         setCollisionModel(meshBuilder ->
+         {
+            Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
+            if (collisionGeometryObject instanceof Box3D)
+            {
+               Box3D box3D = (Box3D) collisionGeometryObject;
+               meshBuilder.addBox((float) box3D.getSizeX(), (float) box3D.getSizeY(), (float) box3D.getSizeZ(), color);
+               meshBuilder.addMultiLineBox(box3D.getVertices(), 0.01, color); // so we can see it better
+            }
+            else if (collisionGeometryObject instanceof Sphere3D)
+            {
+               Sphere3D sphere3D = (Sphere3D) collisionGeometryObject;
+               meshBuilder.addSphere((float) sphere3D.getRadius(), color);
+            }
+         });
+      }
+   }
+
+   public void setPointIsInsideAlgorithm(Function<Point3DReadOnly, Boolean> isPointInside)
+   {
+      this.isPointInside = isPointInside;
+   }
+
+   public void addToBullet(GDXBulletPhysicsManager bulletPhysicsManager)
+   {
+      this.bulletPhysicsManager = bulletPhysicsManager;
+      if (btCollisionShape != null)
+      {
+         if (btRigidBody == null)
+            btRigidBody = bulletPhysicsManager.addRigidBody(btCollisionShape, mass, getBulletMotionState());
+      }
+   }
+
+   public void addBtMultiBody(GDXBulletPhysicsManager bulletPhysicsManager, btMultiBody btMultiBody)
+   {
+      this.bulletPhysicsManager = bulletPhysicsManager;
+      this.btMultiBody = btMultiBody;
+      bulletPhysicsManager.addMultiBody(btMultiBody);
+   }
+
+   public void addMultiBodyCollisionShape(GDXBulletPhysicsManager bulletPhysicsManager, btMultiBodyLinkCollider collisionObject)
+   {
+      this.bulletPhysicsManager = bulletPhysicsManager;
+      addedCollisionObjects.add(collisionObject);
+      bulletPhysicsManager.addMultiBodyCollisionShape(collisionObject);
+   }
+
+   public void addConstraint(GDXBulletPhysicsManager bulletPhysicsManager, btTypedConstraint constraint)
+   {
+      this.bulletPhysicsManager = bulletPhysicsManager;
+      addedConstraints.add(constraint);
+      bulletPhysicsManager.getMultiBodyDynamicsWorld().addConstraint(constraint);
+   }
+
+   public void getInertia(Vector3 inertiaToPack)
+   {
+      btCollisionShape.calculateLocalInertia(mass, inertiaToPack);
+   }
+
+   public void removeFromBullet()
+   {
+      if (btRigidBody != null)
+      {
+         bulletPhysicsManager.removeCollisionObject(btRigidBody);
+      }
+      if (btMultiBody != null)
+      {
+         bulletPhysicsManager.removeMultiBody(btMultiBody);
+      }
+      for (btCollisionObject addedCollisionObject : addedCollisionObjects)
+      {
+         bulletPhysicsManager.removeCollisionObject(addedCollisionObject);
+      }
+      addedCollisionObjects.clear();
+      for (btTypedConstraint addedConstraint : addedConstraints)
+      {
+         bulletPhysicsManager.getMultiBodyDynamicsWorld().removeConstraint(addedConstraint);
+      }
+      addedConstraints.clear();
    }
 
    /**
@@ -89,49 +292,22 @@ public class GDXEnvironmentObject
     */
    public boolean intersect(Line3DReadOnly pickRay, Point3D intersectionToPack)
    {
-      tempRayOrigin.setX(pickRay.getPoint().getX() - boundingSphere.getPosition().getX());
-      tempRayOrigin.setY(pickRay.getPoint().getY() - boundingSphere.getPosition().getY());
-      tempRayOrigin.setZ(pickRay.getPoint().getZ() - boundingSphere.getPosition().getZ());
-      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndEllipsoid3D(boundingSphere.getRadius(),
-                                                                                             boundingSphere.getRadius(),
-                                                                                             boundingSphere.getRadius(),
-                                                                                             tempRayOrigin,
-                                                                                             pickRay.getDirection(),
-                                                                                             firstSphereIntersection,
-                                                                                             secondSphereIntersection);
-      if (numberOfIntersections == 2)
-      {
-         firstSphereIntersection.add(boundingSphere.getPosition());
-         secondSphereIntersection.add(boundingSphere.getPosition());
-         for (int i = 0; i < 100; i++)
-         {
-            intersectionToPack.interpolate(firstSphereIntersection, secondSphereIntersection, i / 100.0);
-            if (isPointInside.apply(intersectionToPack))
-            {
-               return true;
-            }
-         }
-      }
-
-      return false;
+      stepCheckIsPointInsideAlgorithm.setup(boundingSphere.getRadius(), boundingSphere.getPosition());
+      return !Double.isNaN(stepCheckIsPointInsideAlgorithm.intersect(pickRay, 100, isPointInside, intersectionToPack, false));
    }
 
-   public void setHighlighted(boolean highlighted)
+   public void setSelected(boolean selected)
    {
-      if (highlighted)
+      isSelected = selected;
+      if (btRigidBody != null)
       {
-         if (highlightedMaterial == null)
-         {
-            highlightedMaterial = new Material();
-            highlightedMaterial.set(ColorAttribute.createDiffuse(Color.ORANGE));
-         }
+         bulletPhysicsManager.setKinematicObject(btRigidBody, selected);
+      }
+   }
 
-         realisticModelInstance.materials.get(0).set(highlightedMaterial);
-      }
-      else
-      {
-         realisticModelInstance.materials.get(0).set(originalMaterial);
-      }
+   public void setRawIsSelected(boolean selected)
+   {
+      isSelected = selected;
    }
 
    public RigidBodyTransform getCollisionShapeOffset()
@@ -139,109 +315,160 @@ public class GDXEnvironmentObject
       return collisionShapeOffset;
    }
 
-   public GDXModelInstance getRealisticModelInstance()
+   public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      return realisticModelInstance;
+      if (realisticModelInstance != null)
+         realisticModelInstance.getRenderables(renderables, pool);
    }
 
-   public GDXModelInstance getCollisionModelInstance()
+   public void getCollisionMeshRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      return collisionModelInstance;
+      if (collisionModelInstance != null)
+         collisionModelInstance.getRenderables(renderables, pool);
    }
 
-   public Shape3DBasics getCollisionGeometryObject()
+   public void setPositionInWorld(Point3DReadOnly positionInWorld)
    {
-      return collisionGeometryObject;
-   }
-
-   public void set(Point3DReadOnly translation)
-   {
-      placementTransform.getTranslation().set(translation);
+      placementTransform.getTranslation().set(positionInWorld);
       updateRenderablesPoses();
    }
 
-   public void set(Pose3D pose)
+   public void setPoseInWorld(Pose3D poseInWorld)
    {
-      pose.get(placementTransform);
+      poseInWorld.get(placementTransform);
       updateRenderablesPoses();
    }
 
-   public void set(RigidBodyTransform transform)
+   public void setTransformToWorld(Matrix4 transformToWorld)
    {
-      placementTransform.set(transform);
+      GDXTools.toEuclid(transformToWorld, tempTransform);
+      setTransformToWorld(tempTransform);
+   }
+
+   public void setTransformToWorld(RigidBodyTransform transformToWorld)
+   {
+      placementTransform.set(transformToWorld);
       updateRenderablesPoses();
    }
 
-   protected void updateRenderablesPoses()
+   public void updateRenderablesPoses()
    {
       placementFrame.update();
+      realisticModelFrame.update();
+      collisionModelFrame.update();
 
       placementFramePose.setFromReferenceFrame(realisticModelFrame);
-      GDXTools.toGDX(placementFramePose, tempTransform, getRealisticModelInstance().transform);
+      GDXTools.toGDX(placementFramePose, tempTransform, realisticModelInstance.transform);
 
       placementFramePose.setFromReferenceFrame(collisionModelFrame);
-      GDXTools.toGDX(placementFramePose, tempTransform, getCollisionModelInstance().transform);
-      getCollisionGeometryObject().getPose().set(placementFramePose);
+      GDXTools.toGDX(placementFramePose, tempTransform, collisionModelInstance.transform);
+      if (collisionGeometryObject.getPose() == null)
+      {
+         if (collisionGeometryObject instanceof Sphere3D)
+         {
+            Sphere3D sphere = (Sphere3D) collisionGeometryObject;
+            sphere.getPosition().set(placementFramePose.getPosition());
+         }
+      }
+      else
+      {
+         collisionGeometryObject.getPose().set(placementFramePose);
+      }
       boundingSphere.getPosition().set(placementFramePose.getPosition());
    }
 
-   public RigidBodyTransformReadOnly getObjectTransform()
+   public RigidBodyTransform getObjectTransform()
    {
       return placementTransform;
    }
 
    public GDXEnvironmentObject duplicate()
    {
-      GDXEnvironmentObject duplicate = new GDXEnvironmentObject();
-      duplicate.create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionGeometryObject, isPointInside, collisionMesh);
-      return duplicate;
+      return factory.getSupplier().get();
    }
 
-   public static GDXEnvironmentObject loadByName(String objectClassName)
+   public String getTitleCasedName()
    {
-      if (objectClassName.equals(GDXSmallCinderBlockRoughed.class.getSimpleName()))
-      {
-         return new GDXSmallCinderBlockRoughed();
-      }
-      else if (objectClassName.equals(GDXMediumCinderBlockRoughed.class.getSimpleName()))
-      {
-         return new GDXMediumCinderBlockRoughed();
-      }
-      else if (objectClassName.equals(GDXLargeCinderBlockRoughed.class.getSimpleName()))
-      {
-         return new GDXLargeCinderBlockRoughed();
-      }
-      else if (objectClassName.equals(GDXLabFloorObject.class.getSimpleName()))
-      {
-         return new GDXLabFloorObject();
-      }
-      else if (objectClassName.equals(GDXPalletObject.class.getSimpleName()))
-      {
-         return new GDXPalletObject();
-      }
-      else if (objectClassName.equals(GDXStairsObject.class.getSimpleName()))
-      {
-         return new GDXStairsObject();
-      }
-      else if (objectClassName.equals(GDXPushHandleRightDoorObject.class.getSimpleName()))
-      {
-         return new GDXPushHandleRightDoorObject();
-      }
-      else if (objectClassName.equals(GDXDoorFrameObject.class.getSimpleName()))
-      {
-         return new GDXDoorFrameObject();
-      }
-      else if (objectClassName.equals(GDXPointLightObject.class.getSimpleName()))
-      {
-         return new GDXPointLightObject();
-      }
-      else if (objectClassName.equals(GDXDirectionalLightObject.class.getSimpleName()))
-      {
-         return new GDXDirectionalLightObject();
-      }
-      else
-      {
-         throw new RuntimeException("There is no object of that name!");
-      }
+      return titleCasedName;
+   }
+
+   public String getPascalCasedName()
+   {
+      return pascalCasedName;
+   }
+
+   public int getObjectIndex()
+   {
+      return objectIndex;
+   }
+
+   public GDXEnvironmentObjectFactory getFactory()
+   {
+      return factory;
+   }
+
+   public btMotionState getBulletMotionState()
+   {
+      return bulletMotionState;
+   }
+
+   public RigidBodyTransform getBulletCollisionOffset()
+   {
+      return bulletCollisionOffset;
+   }
+
+   public void setMass(float mass)
+   {
+      this.mass = mass;
+   }
+
+   public float getMass()
+   {
+      return mass;
+   }
+
+   public Point3D getCenterOfMassInModelFrame()
+   {
+      return centerOfMassInModelFrame;
+   }
+
+   public void setBtCollisionShape(btCollisionShape btCollisionShape)
+   {
+      this.btCollisionShape = btCollisionShape;
+   }
+
+   public com.badlogic.gdx.physics.bullet.collision.btCollisionShape getBtCollisionShape()
+   {
+      return btCollisionShape;
+   }
+
+   public btRigidBody getBtRigidBody()
+   {
+      return btRigidBody;
+   }
+
+   public RigidBodyTransform getRealisticModelOffset()
+   {
+      return realisticModelOffset;
+   }
+
+   public Sphere3D getBoundingSphere()
+   {
+      return boundingSphere;
+   }
+
+   public boolean getIsSelected()
+   {
+      return isSelected;
+   }
+
+   public GDXModelInstance getRealisticModelInstance()
+   {
+      return realisticModelInstance;
+   }
+
+   public ReferenceFrame getBulletCollisionSpecificationFrame()
+   {
+      return bulletCollisionSpecificationFrame;
    }
 }

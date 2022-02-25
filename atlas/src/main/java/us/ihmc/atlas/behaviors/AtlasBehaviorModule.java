@@ -21,10 +21,12 @@ public class AtlasBehaviorModule
 
       BehaviorRegistry registry = BehaviorRegistry.DEFAULT_BEHAVIORS;
       registry.activateRegistry();
+      boolean enableROS1 = true;
       behaviorModule = new BehaviorModule(registry,
                                           createRobotModel(),
                                           CommunicationMode.INTERPROCESS,
-                                          CommunicationMode.INTERPROCESS);
+                                          CommunicationMode.INTERPROCESS,
+                                          enableROS1);
    }
 
    private void shutdown() // add cleanup actions here

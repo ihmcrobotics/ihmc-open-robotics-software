@@ -59,10 +59,32 @@ public class StepAdjustmentReachabilityConstraint
                                                SteppingParameters steppingParameters, String yoNamePrefix, boolean visualize,
                                                YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      lengthLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength());
-      lengthBackLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength());
-      innerLimit = new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth());
-      outerLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth());
+      this(soleZUpFrames,
+           icpOptimizationParameters,
+           new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength()),
+           new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength()),
+           new DoubleParameter(yoNamePrefix + "MinReachabilityWidth", registry, steppingParameters.getMinStepWidth()),
+           new DoubleParameter(yoNamePrefix + "MaxReachabilityWidth", registry, steppingParameters.getMaxStepWidth()),
+           yoNamePrefix,
+           visualize,
+           registry,
+           yoGraphicsListRegistry);
+   }
+
+   public StepAdjustmentReachabilityConstraint(SideDependentList<? extends ReferenceFrame> soleZUpFrames, ICPOptimizationParameters icpOptimizationParameters,
+                                               DoubleProvider lengthLimit,
+                                               DoubleProvider lengthBackLimit,
+                                               DoubleProvider innerLimit,
+                                               DoubleProvider outerLimit,
+                                               String yoNamePrefix,
+                                               boolean visualize,
+                                               YoRegistry registry,
+                                               YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this.lengthLimit = lengthLimit;
+      this.lengthBackLimit = lengthBackLimit;
+      this.innerLimit = innerLimit;
+      this.outerLimit = outerLimit;
 
       forwardAdjustmentLimit = new DoubleParameter(yoNamePrefix + "ForwardAdjustmentLimit", registry,
                                                    Math.min(SUFFICIENTLY_LARGE, icpOptimizationParameters.getMaximumStepAdjustmentForward()));

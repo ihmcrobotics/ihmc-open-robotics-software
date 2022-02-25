@@ -3,12 +3,14 @@ package us.ihmc.gdx.tools;
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Quaternion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,6 +34,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.log.LogTools;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
 
 import java.nio.FloatBuffer;
 
@@ -259,6 +262,14 @@ public class GDXTools
       gdxRotationMatrix.val[Matrix4.M22] = (float) euclidRotationMatrix.getM22();
    }
 
+   public static void toGDX(us.ihmc.euclid.tuple4D.Quaternion euclidQuaternion, Quaternion gdxQuaternion)
+   {
+      gdxQuaternion.x = euclidQuaternion.getX32();
+      gdxQuaternion.y = euclidQuaternion.getY32();
+      gdxQuaternion.z = euclidQuaternion.getZ32();
+      gdxQuaternion.w = euclidQuaternion.getS32();
+   }
+
    public static Vector3 toGDX(Tuple3DReadOnly euclidTuple)
    {
       return new Vector3(euclidTuple.getX32(), euclidTuple.getY32(), euclidTuple.getZ32());
@@ -338,6 +349,21 @@ public class GDXTools
       return gdxColor;
    }
 
+   public static Color toGDX(ColorDefinition colorDefinition)
+   {
+      Color gdxColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+      toGDX(colorDefinition, gdxColor);
+      return gdxColor;
+   }
+
+   public static void toGDX(ColorDefinition colorDefinition, Color gdxColor)
+   {
+      gdxColor.r = (float) colorDefinition.getRed();
+      gdxColor.g = (float) colorDefinition.getGreen();
+      gdxColor.b = (float) colorDefinition.getBlue();
+      gdxColor.a = (float) colorDefinition.getAlpha();
+   }
+
    public static Color toGDX(double red, double green, double blue, double alpha)
    {
       return new Color((float) red, (float) green, (float) blue, (float) alpha);
@@ -354,6 +380,11 @@ public class GDXTools
    public static void setTransparency(ModelInstance modelInstance, float transparency)
    {
       modelInstance.materials.get(0).set(new BlendingAttribute(true, transparency));
+   }
+
+   public static void setTransparency(Model model, float transparency)
+   {
+      model.materials.get(0).set(new BlendingAttribute(true, transparency));
    }
 
    public static void setDiffuseColor(ModelInstance modelInstance, Color color)

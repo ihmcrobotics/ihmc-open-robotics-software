@@ -1,7 +1,6 @@
 package us.ihmc.gdx.perception;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
@@ -176,7 +175,7 @@ public class GDXGPUPlanarRegionExtraction
       principalOffsetYPixels.set((float) cy);
 
       parametersBuffer = new OpenCLFloatBuffer(16);
-      calculateDetivativeParameters();
+      calculateDerivativeParameters();
       inputFloatDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1, sourceDepthByteBufferOfFloats);
       inputScaledFloatDepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_32FC1);
       inputU16DepthImage = new GDXBytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
@@ -255,10 +254,12 @@ public class GDXGPUPlanarRegionExtraction
       if (!enabled.get())
          return;
 
+      setParametersFromImGuiWidgets();
+
       wholeAlgorithmDurationStopwatch.start();
       gpuDurationStopwatch.start();
 
-      calculateDetivativeParameters();
+      calculateDerivativeParameters();
 
       // convert float to unint16
       // multiply by 1000 and cast to int
@@ -758,7 +759,7 @@ public class GDXGPUPlanarRegionExtraction
       }
    }
 
-   private void calculateDetivativeParameters()
+   private void calculateDerivativeParameters()
    {
       patchHeight = patchSize.get();
       patchWidth = patchSize.get();
@@ -816,29 +817,36 @@ public class GDXGPUPlanarRegionExtraction
       ImGui.sliderFloat(labels.get("Principal offset Y (px)"), principalOffsetYPixels.getData(), -imageHeight, imageHeight);
 
       ImGui.sliderFloat("Edge Length Threshold", edgeLengthTresholdSlider.getData(), 0, 0.5f);
-      concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthTresholdSlider.get());
       ImGui.sliderFloat("Triangulation Tolerance", triangulationToleranceSlider.getData(), 0, 0.3f);
-      concaveHullFactoryParameters.setTriangulationTolerance(triangulationToleranceSlider.get());
       ImGui.sliderInt("Max Number of Iterations", maxNumberOfIterationsSlider.getData(), 2000, 6000);
-      concaveHullFactoryParameters.setMaxNumberOfIterations(maxNumberOfIterationsSlider.get());
       ImGui.checkbox("Remove Degenerate Triangles", removeAllTrianglesWithTwoBorderEdgesChecked);
-      concaveHullFactoryParameters.setRemoveAllTrianglesWithTwoBorderEdges(removeAllTrianglesWithTwoBorderEdgesChecked.get());
       ImGui.checkbox("Split Concave Hull", allowSplittingConcaveHullChecked);
-      concaveHullFactoryParameters.setAllowSplittingConcaveHull(allowSplittingConcaveHullChecked.get());
 
       ImGui.sliderFloat("Concave Hull Threshold", concaveHullThresholdSlider.getData(), 0, 1);
-      polygonizerParameters.setConcaveHullThreshold(concaveHullThresholdSlider.get());
       ImGui.sliderFloat("Shallow Angle Threshold", shallowAngleThresholdSlider.getData(), 0, 2.0f * (float) Math.PI);
-      polygonizerParameters.setShallowAngleThreshold(shallowAngleThresholdSlider.get());
       ImGui.sliderFloat("Peak Angle Threshold", peakAngleThresholdSlider.getData(), 0, 2.0f * (float) Math.PI);
-      polygonizerParameters.setPeakAngleThreshold(peakAngleThresholdSlider.get());
       ImGui.sliderFloat("Length Threshold", lengthThresholdSlider.getData(), 0, 1);
-      polygonizerParameters.setLengthThreshold(lengthThresholdSlider.get());
       ImGui.sliderFloat("Depth Threshold", depthThresholdSlider.getData(), 0, 1);
-      polygonizerParameters.setDepthThreshold(depthThresholdSlider.get());
       ImGui.sliderInt("Min Number of Nodes", minNumberOfNodesSlider.getData(), 0, 100);
-      polygonizerParameters.setMinNumberOfNodes(minNumberOfNodesSlider.get());
       ImGui.checkbox("Cut Narrow Passage", cutNarrowPassageChecked);
+
+      setParametersFromImGuiWidgets();
+   }
+
+   private void setParametersFromImGuiWidgets()
+   {
+      concaveHullFactoryParameters.setEdgeLengthThreshold(edgeLengthTresholdSlider.get());
+      concaveHullFactoryParameters.setTriangulationTolerance(triangulationToleranceSlider.get());
+      concaveHullFactoryParameters.setMaxNumberOfIterations(maxNumberOfIterationsSlider.get());
+      concaveHullFactoryParameters.setRemoveAllTrianglesWithTwoBorderEdges(removeAllTrianglesWithTwoBorderEdgesChecked.get());
+      concaveHullFactoryParameters.setAllowSplittingConcaveHull(allowSplittingConcaveHullChecked.get());
+
+      polygonizerParameters.setConcaveHullThreshold(concaveHullThresholdSlider.get());
+      polygonizerParameters.setShallowAngleThreshold(shallowAngleThresholdSlider.get());
+      polygonizerParameters.setPeakAngleThreshold(peakAngleThresholdSlider.get());
+      polygonizerParameters.setLengthThreshold(lengthThresholdSlider.get());
+      polygonizerParameters.setDepthThreshold(depthThresholdSlider.get());
+      polygonizerParameters.setMinNumberOfNodes(minNumberOfNodesSlider.get());
       polygonizerParameters.setCutNarrowPassage(cutNarrowPassageChecked.get());
    }
 

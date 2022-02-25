@@ -26,6 +26,7 @@ import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.perception.GDXBytedecoImage;
 import us.ihmc.gdx.perception.GDXCVImagePanel;
+import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.DepthSensorShaderProvider;
@@ -65,6 +66,7 @@ public class GDXLowLevelDepthSensorSimulator
    private final Timer throttleTimer = new Timer();
    private final Vector3D32 noiseVector = new Vector3D32();
 
+   /** Simulated camera that observes the current GDX Scene **/
    private PerspectiveCamera camera;
    private RigidBodyTransform transformToWorldFrame = new RigidBodyTransform();
    private ModelBatch modelBatch;
@@ -83,9 +85,13 @@ public class GDXLowLevelDepthSensorSimulator
    // https://stackoverflow.com/questions/14435632/impulse-gaussian-and-salt-and-pepper-noise-with-opencv
    private Mat noiseLow;
    private Mat noiseHigh;
+   /** This generates a random matrix of uniformly distributed depth noise according to a random distribution **/
    private GDXBytedecoImage noiseImage; // TODO: Salt and pepper?
+   /** This contains a row major float buffer that has the depth of each pixel in the image **/
    private GDXBytedecoImage metersDepthImage;
+   /** This contains an int buffer that has a color for each point contains in {pointCloudRenderingBuffer} **/
    private GDXBytedecoImage rgba8888ColorImage;
+   /** This contains a float buffer that has the point cloud in world coordinates **/
    private OpenCLFloatBuffer pointCloudRenderingBuffer;
    private OpenCLFloatBuffer parametersBuffer;
    private boolean firstRender = true;
@@ -149,6 +155,7 @@ public class GDXLowLevelDepthSensorSimulator
          pointCloudRenderingBuffer = new OpenCLFloatBuffer(1);
       parametersBuffer = new OpenCLFloatBuffer(28);
 
+      // TODO these panels should be removable to a separate class
       depthPanel = new GDXCVImagePanel(depthWindowName, imageWidth, imageHeight);
       colorPanel = new ImGuiVideoPanel(colorWindowName, true);
       colorPanel.setTexture(frameBuffer.getColorTexture());
@@ -171,7 +178,17 @@ public class GDXLowLevelDepthSensorSimulator
       render(sceneManager, null, 0.01f);
    }
 
+   public void render(GDX3DSceneBasics sceneBasics)
+   {
+      render(sceneBasics, null, 0.01f);
+   }
+
    public void render(GDX3DSceneManager sceneManager, Color userPointColor, float pointSize)
+   {
+      render(sceneManager.getSceneBasics(), userPointColor, pointSize);
+   }
+
+   public void render(GDX3DSceneBasics sceneBasics, Color userPointColor, float pointSize)
    {
       boolean updateThisTick = throttleTimer.isExpired(updatePeriod);
       if (updateThisTick)
@@ -194,7 +211,7 @@ public class GDXLowLevelDepthSensorSimulator
       modelBatch.begin(camera);
       GL41.glViewport(0, 0, imageWidth, imageHeight);
 
-      sceneManager.getSceneBasics().renderExternalBatch(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
+      sceneBasics.renderExternalBatch(modelBatch, GDXSceneLevel.REAL_ENVIRONMENT);
 
       modelBatch.end();
 
@@ -337,6 +354,9 @@ public class GDXLowLevelDepthSensorSimulator
       return rgba8888ColorImage.getBackingDirectByteBuffer();
    }
 
+   /**
+    * Returns the actual point cloud
+    */
    public FloatBuffer getPointCloudBuffer()
    {
       return pointCloudRenderingBuffer.getBackingDirectFloatBuffer();

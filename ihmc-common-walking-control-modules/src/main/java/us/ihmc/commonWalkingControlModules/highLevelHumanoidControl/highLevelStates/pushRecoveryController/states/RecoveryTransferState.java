@@ -169,12 +169,14 @@ public class RecoveryTransferState extends PushRecoveryState
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
          feetManager.updateToeOffStatusDoubleSupport(trailingLeg,
                                                      nextFootstep,
+                                                     null,
                                                      trailingFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
                                                      desiredCoP,
                                                      balanceManager.getDesiredICP(),
                                                      capturePoint2d,
-                                                     balanceManager.getFinalDesiredICP());
+                                                     balanceManager.getFinalDesiredICP(),
+                                                     balanceManager.getLinearMomentumRateControlModuleInput().getPerfectCoP());
 
          if (feetManager.okForPointToeOff())
          {

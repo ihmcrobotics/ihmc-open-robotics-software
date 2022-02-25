@@ -21,7 +21,7 @@ mainDependencies {
    api("org.boofcv:boofcv-geo:0.36")
 
    api("us.ihmc:ihmc-graphics-description:0.19.4")
-   api("us.ihmc:simulation-construction-set:0.21.13")
+   api("us.ihmc:simulation-construction-set:0.21.16")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-communication:source")

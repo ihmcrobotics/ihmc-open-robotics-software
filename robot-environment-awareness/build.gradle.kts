@@ -34,7 +34,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.9")
+   api("us.ihmc:ihmc-robot-data-logger:0.23.0")
 
    apiBytedecoNatives("javacpp", "1.5.4")
    apiBytedecoNatives("openblas", "0.3.10-1.5.4")
@@ -61,8 +61,8 @@ applicationDependencies {
    api(ihmc.sourceSetProject("main"))
 
    api("us.ihmc:ihmc-ros-tools:source")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
-   api("us.ihmc:simulation-construction-set:0.21.13")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.8")
+   api("us.ihmc:simulation-construction-set:0.21.16")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 

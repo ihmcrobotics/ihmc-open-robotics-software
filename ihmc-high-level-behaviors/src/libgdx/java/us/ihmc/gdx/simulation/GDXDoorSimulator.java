@@ -8,8 +8,7 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
-import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXPushHandleRightDoorObject;
+import us.ihmc.gdx.simulation.environment.object.objects.door.GDXDoorObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -22,7 +21,7 @@ public class GDXDoorSimulator
    private final ImBoolean enabled = new ImBoolean(false);
    private final PausablePeriodicThread pausablePeriodicThread;
 
-   private GDXEnvironmentObject door;
+   private GDXDoorObject door;
 
    public GDXDoorSimulator(ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
    {
@@ -35,7 +34,7 @@ public class GDXDoorSimulator
    }
 
    // TODO: Maybe accept id with door and support multiple doors
-   public void setDoor(GDXPushHandleRightDoorObject door)
+   public void setDoor(GDXDoorObject door)
    {
       this.door = door;
    }

@@ -40,6 +40,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final int additionalFootstepsToConsider;
    private final Footstep nextFootstep = new Footstep();
+   private final Footstep nextNextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
    private double swingTime;
 
@@ -59,11 +60,6 @@ public class WalkingSingleSupportState extends SingleSupportState
 
    private final YoDouble fractionOfSwingToStraightenSwingLeg = new YoDouble("fractionOfSwingToStraightenSwingLeg", registry);
    private final YoDouble fractionOfSwingToCollapseStanceLeg = new YoDouble("fractionOfSwingToCollapseStanceLeg", registry);
-
-   private final YoDouble remainingSwingTimeAccordingToPlan = new YoDouble("remainingSwingTimeAccordingToPlan", registry);
-   private final YoDouble estimatedRemainingSwingTimeUnderDisturbance = new YoDouble("estimatedRemainingSwingTimeUnderDisturbance", registry);
-   private final YoDouble optimizedRemainingSwingTime = new YoDouble("optimizedRemainingSwingTime", registry);
-   private final YoDouble icpErrorThresholdToSpeedUpSwing = new YoDouble("icpErrorThresholdToSpeedUpSwing", registry);
 
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
    private final YoBoolean resubmitStepsInSwingEveryTick = new YoBoolean("resubmitStepsInSwingEveryTick", registry);
@@ -100,7 +96,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       fractionOfSwingToStraightenSwingLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfSwingToStraightenLeg());
       fractionOfSwingToCollapseStanceLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfSwingToCollapseStanceLeg());
 
-      icpErrorThresholdToSpeedUpSwing.set(walkingControllerParameters.getICPErrorThresholdToSpeedUpSwing());
       finishSingleSupportWhenICPPlannerIsDone.set(walkingControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
       minimizeAngularMomentumRateZDuringSwing = new BooleanParameter("minimizeAngularMomentumRateZDuringSwing",
                                                                      registry,
@@ -116,15 +111,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       additionalFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
       footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
-
-      setYoVariablesToNaN();
-   }
-
-   private void setYoVariablesToNaN()
-   {
-      optimizedRemainingSwingTime.setToNaN();
-      estimatedRemainingSwingTimeUnderDisturbance.setToNaN();
-      remainingSwingTimeAccordingToPlan.setToNaN();
    }
 
    @Override
@@ -149,7 +135,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       super.doAction(timeInState);
 
-      boolean requestSwingSpeedUp = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
+      boolean requestSwingSpeedUp = balanceManager.shouldAjudstTimeFromTrackingError();
 
       if (walkingMessageHandler.hasRequestedFootstepAdjustment())
       {
@@ -242,6 +228,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       swingTime = walkingMessageHandler.getNextSwingTime();
       walkingMessageHandler.poll(nextFootstep, footstepTiming);
+      if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
+         walkingMessageHandler.peekFootstep(0, nextNextFootstep);
 
       /**
        * 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the
@@ -346,8 +334,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       double initialPitch = tempOrientation.getPitch();
       double initialPitchVelocity = tempAngularVelocity.getY();
       feetManager.touchDown(nextFootstep.getRobotSide(), initialPitch, initialPitchVelocity, pitch, footstepTiming.getTouchdownDuration());
-
-      setYoVariablesToNaN();
    }
 
    private boolean doManualTouchdown()
@@ -373,7 +359,11 @@ public class WalkingSingleSupportState extends SingleSupportState
 
          FramePoint3DReadOnly supportFootExitCMP = balanceManager.getFirstExitCMPForToeOff(false);
 
+         Footstep nextNextFootstep = null;
+         if (walkingMessageHandler.getCurrentNumberOfFootsteps() > 0)
+            nextNextFootstep = this.nextNextFootstep;
          feetManager.updateToeOffStatusSingleSupport(nextFootstep,
+                                                     nextNextFootstep,
                                                      supportFootExitCMP,
                                                      balanceManager.getDesiredCMP(),
                                                      desiredCoP,
@@ -400,21 +390,19 @@ public class WalkingSingleSupportState extends SingleSupportState
     */
    private double requestSwingSpeedUpIfNeeded()
    {
-      remainingSwingTimeAccordingToPlan.set(balanceManager.getTimeRemainingInCurrentState());
+      double remainingSwingTimeAccordingToPlan = balanceManager.getTimeRemainingInCurrentState();
+      double adjustedRemainingTime = Math.max(0.0, balanceManager.getAdjustedTimeRemainingInCurrentSupportSequence() - balanceManager.getExtraTimeAdjustmentForSwing());
 
-      double remainingTime = balanceManager.estimateTimeRemainingForSwingUnderDisturbance();
-      estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
-
-      if (remainingTime > 1.0e-3)
+      if (adjustedRemainingTime > 1.0e-3)
       {
-         double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / remainingTime;
+         double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan / adjustedRemainingTime;
          return feetManager.requestSwingSpeedUp(swingSide, swingSpeedUpFactor);
       }
-      else if (remainingSwingTimeAccordingToPlan.getDoubleValue() > 1.0e-3)
+      else if (remainingSwingTimeAccordingToPlan > 1.0e-3)
       {
          return feetManager.requestSwingSpeedUp(swingSide, Double.POSITIVE_INFINITY);
       }
-      return remainingSwingTimeAccordingToPlan.getDoubleValue();
+      return remainingSwingTimeAccordingToPlan;
    }
 
    private void updateFootstepParameters()
@@ -435,7 +423,7 @@ public class WalkingSingleSupportState extends SingleSupportState
                                                                                                                                                 swingSide);
       transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());
       double extraToeOffHeight = 0.0;
-      if (feetManager.canDoSingleSupportToeOff(nextFootstep.getFootstepPose().getPosition(), swingSide) && feetManager.getToeOffManager().isSteppingUp())
+      if (feetManager.canDoSingleSupportToeOff(nextFootstep.getFootstepPose(), swingSide) && feetManager.getToeOffManager().isSteppingUp())
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }

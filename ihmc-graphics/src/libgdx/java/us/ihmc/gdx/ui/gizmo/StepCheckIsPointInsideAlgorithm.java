@@ -29,16 +29,25 @@ public class StepCheckIsPointInsideAlgorithm
 
    public double intersect(Line3DReadOnly pickRay, int resolution, Function<Point3DReadOnly, Boolean> isPointInside)
    {
+      return intersect(pickRay, resolution, isPointInside, interpolatedPoint, true);
+   }
+
+   public double intersect(Line3DReadOnly pickRay,
+                           int resolution,
+                           Function<Point3DReadOnly, Boolean> isPointInside,
+                           Point3D intersectionToPack,
+                           boolean calculateDistance)
+   {
       if (boundingSphereIntersection.intersect(pickRay))
       {
          for (int i = 0; i < resolution; i++)
          {
-            interpolatedPoint.interpolate(boundingSphereIntersection.getFirstIntersectionToPack(),
-                                          boundingSphereIntersection.getSecondIntersectionToPack(),
-                                          i / (double) resolution);
-            if (isPointInside.apply(interpolatedPoint))
+            intersectionToPack.interpolate(boundingSphereIntersection.getFirstIntersectionToPack(),
+                                           boundingSphereIntersection.getSecondIntersectionToPack(),
+                                           i / (double) resolution);
+            if (isPointInside.apply(intersectionToPack))
             {
-               return interpolatedPoint.distance(pickRay.getPoint());
+               return calculateDistance ? intersectionToPack.distance(pickRay.getPoint()) : 0.0;
             }
          }
       }

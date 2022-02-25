@@ -37,6 +37,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.sceneManager.GDX3DSceneBasics;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
@@ -214,6 +215,11 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
 
    public void render(GDX3DSceneManager sceneManager)
    {
+      render(sceneManager.getSceneBasics());
+   }
+
+   public void render(GDX3DSceneBasics sceneBasics)
+   {
       if (buffersCreated && sensorEnabled.get())
       {
          if (sensorFrame != null)
@@ -230,12 +236,12 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
          {
             pointColorFromPicker.set(color[0], color[1], color[2], color[3]);
             Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
-            depthSensorSimulator.render(sceneManager, pointColor, pointSize.get());
+            depthSensorSimulator.render(sceneBasics, pointColor, pointSize.get());
             pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
          }
          else
          {
-            depthSensorSimulator.render(sceneManager);
+            depthSensorSimulator.render(sceneBasics);
          }
          if (throttleTimer.isExpired(UnitConversions.hertzToSeconds(publishRateHz)))
          {
@@ -400,7 +406,7 @@ public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements Rend
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), getLowLevelSimulator().getColorPanel().getIsShowing());
       ImGui.checkbox("Use Sensor Color", useSensorColor);
-      ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.02f);
+      ImGui.sliderFloat("Point size", pointSize.getData(), 0.0001f, 0.10f);
       ImGui.colorPicker4("Color", color);
       ImGui.text("Publish:");
       if (ros1DepthImageTopic != null)

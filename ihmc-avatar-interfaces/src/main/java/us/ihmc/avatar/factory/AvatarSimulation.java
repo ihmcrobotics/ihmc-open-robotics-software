@@ -58,7 +58,8 @@ public class AvatarSimulation
 
    public void dispose()
    {
-      robotController.dispose();
+      if (robotController != null)
+         robotController.dispose();
       robotController = null;
    }
 
@@ -67,6 +68,7 @@ public class AvatarSimulation
       dispose();
       if (yoVariableServer != null)
          yoVariableServer.close();
+      yoVariableServer = null;
       ThreadTools.startAsDaemon(() -> simulationConstructionSet.stopSimulationThread(), "WaitForSimulationThreadToStop");
       simulationConstructionSet.closeAndDispose();
    }
@@ -88,6 +90,7 @@ public class AvatarSimulation
 
       for (OneDegreeOfFreedomJoint joint : joints)
       {
+         joint.setQ(0.0);
          joint.setQd(0.0);
          joint.setQdd(0.0);
          joint.setTau(0.0);

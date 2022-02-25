@@ -1,8 +1,19 @@
 package us.ihmc.tools.io.resources;
 
+import org.apache.commons.io.IOUtils;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ConfigurationBuilder;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * The system class loader, 99% of the time, is the same as your class's loader.
@@ -63,5 +74,55 @@ public class ResourceTools
    public static URL getResourceSystem(Path path)
    {
       return ClassLoader.getSystemResource(path.toString());
+   }
+
+   public static String readResourceToString(InputStream inputStream)
+   {
+      return ExceptionTools.handle(() -> IOUtils.toString(inputStream, StandardCharsets.UTF_8), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+
+   }
+   public static String readResourceToString(URL url)
+   {
+      return ExceptionTools.handle(() -> IOUtils.toString(url, StandardCharsets.UTF_8), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+   }
+
+   public static String readResourceToString(String path)
+   {
+      return readResourceToString(getResourceSystem(Paths.get(path)));
+   }
+
+   public static String sanitizeResourcePath(String resourcePath)
+   {
+      Path resourcePathAsPathRaw = Paths.get(resourcePath);
+      Path firstPart = resourcePathAsPathRaw.getName(0);
+      Path normalizedAbsoluteResourceFolderPath = firstPart.resolve(firstPart.relativize(resourcePathAsPathRaw).normalize());
+      return normalizedAbsoluteResourceFolderPath.toString();
+   }
+
+   public static Set<String> listResources()
+   {
+      return listResources("", ".*");
+   }
+
+   /**
+    * Using the Reflections library seems to be the only way to do this:
+    * https://github.com/ronmamo/reflections
+    */
+   public static Set<String> listResources(String packagePathWithDots, String filterRegex)
+   {
+      Reflections reflections = new Reflections(new ConfigurationBuilder().forPackage(packagePathWithDots).setScanners(Scanners.Resources));
+      String withSlashes = packagePathWithDots.replaceAll("\\.", "/");
+      if (!withSlashes.isEmpty())
+         withSlashes += "/";
+      TreeSet<String> resources = new TreeSet<>();
+      for (String resource : reflections.getResources(filterRegex))
+      {
+         if (resource.startsWith(withSlashes))
+         {
+            String subsequentPath = resource.replaceFirst(withSlashes, "");
+            resources.add(subsequentPath);
+         }
+      }
+      return resources;
    }
 }

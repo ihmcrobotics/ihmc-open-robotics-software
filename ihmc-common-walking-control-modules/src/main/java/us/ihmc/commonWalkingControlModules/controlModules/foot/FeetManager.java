@@ -25,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -100,7 +101,7 @@ public class FeetManager
 
       toeOffCalculator = new WrapperForMultipleToeOffCalculators(toeOffCalculators, registry);
 
-      toeOffManager = new ToeOffManager(controllerToolbox, toeOffCalculator, walkingControllerParameters, feet, registry);
+      toeOffManager = new ToeOffManager(controllerToolbox, toeOffCalculator, walkingControllerParameters, feet, registry, null);
 
       this.footSwitches = controllerToolbox.getFootSwitches();
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
@@ -400,26 +401,26 @@ public class FeetManager
 
    /**
     * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
-    * Calls {@link ToeOffManager#canDoDoubleSupportToeOff(FramePoint3DReadOnly, RobotSide)}.
+    * Calls {@link ToeOffManager#canDoDoubleSupportToeOff(FramePose3DReadOnly, RobotSide)}.
     *
     * @param nextFootstep footstep to consider.
     * @param transferToSide upcoming support side.
     * @return whether or not the footstep location is ok.
     */
-   public boolean canDoDoubleSupportToeOff(FramePoint3DReadOnly nextFootstep, RobotSide transferToSide)
+   public boolean canDoDoubleSupportToeOff(FramePose3DReadOnly nextFootstep, RobotSide transferToSide)
    {
       return toeOffManager.canDoDoubleSupportToeOff(nextFootstep, transferToSide);
    }
 
    /**
     * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
-    * Calls {@link ToeOffManager#canDoSingleSupportToeOff(FramePoint3DReadOnly, RobotSide)}.
+    * Calls {@link ToeOffManager#canDoSingleSupportToeOff(FramePose3DReadOnly, RobotSide)}.
     *
     * @param nextFootstep footstep to consider.
     * @param transferToSide upcoming support side.
     * @return whether or not the footstep location is ok.
     */
-   public boolean canDoSingleSupportToeOff(FramePoint3DReadOnly nextFootstep, RobotSide transferToSide)
+   public boolean canDoSingleSupportToeOff(FramePose3DReadOnly nextFootstep, RobotSide transferToSide)
    {
       return toeOffManager.canDoSingleSupportToeOff(nextFootstep, transferToSide);
    }
@@ -454,6 +455,7 @@ public class FeetManager
     * @param finalDesiredICP the desired ICP location at the end of the current state.
     */
    public void updateToeOffStatusSingleSupport(Footstep nextFootstep,
+                                               Footstep nextNextFootstep,
                                                FramePoint3DReadOnly exitCMP,
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly desiredCoP,
@@ -461,7 +463,7 @@ public class FeetManager
                                                FramePoint2DReadOnly currentICP,
                                                FramePoint2DReadOnly finalDesiredICP)
    {
-      toeOffManager.submitNextFootstep(nextFootstep);
+      toeOffManager.submitNextFootstep(nextFootstep, nextNextFootstep);
       toeOffManager.updateToeOffStatusSingleSupport(exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP);
    }
 
@@ -495,15 +497,17 @@ public class FeetManager
     */
    public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg,
                                                Footstep nextFootstep,
+                                               Footstep nextNextFootstep,
                                                FramePoint3DReadOnly exitCMP,
                                                FramePoint2DReadOnly desiredECMP,
                                                FramePoint2DReadOnly desiredCoP,
                                                FramePoint2DReadOnly desiredICP,
                                                FramePoint2DReadOnly currentICP,
-                                               FramePoint2DReadOnly finalDesiredICP)
+                                               FramePoint2DReadOnly finalDesiredICP,
+                                               FramePoint2DReadOnly perfectCoP)
    {
-      toeOffManager.submitNextFootstep(nextFootstep);
-      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP);
+      toeOffManager.submitNextFootstep(nextFootstep, nextNextFootstep);
+      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP, perfectCoP);
    }
 
    /**

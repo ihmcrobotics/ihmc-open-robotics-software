@@ -9,8 +9,11 @@ import us.ihmc.gdx.imgui.GDXImGuiWindowAndDockSystem;
 import us.ihmc.gdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
+import us.ihmc.tools.io.HybridResourceMode;
+import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
@@ -65,8 +68,8 @@ public class GDXImGuiPerspectiveManager
       if (needToReindexPerspectives)
       {
          needToReindexPerspectives = false;
-         reindexPerspectives(versionControlPerspectives, configurationBaseDirectory.getWorkspaceDirectory(), true);
-         reindexPerspectives(userHomePerspectives, configurationBaseDirectory.getExternalDirectory(), false);
+         reindexPerspectives(versionControlPerspectives, HybridResourceMode.WORKSPACE, true);
+         reindexPerspectives(userHomePerspectives, HybridResourceMode.EXTERNAL, false);
          if (firstReindex)
          {
             firstReindex = false;
@@ -95,38 +98,61 @@ public class GDXImGuiPerspectiveManager
       }
    }
 
-   private void reindexPerspectives(TreeSet<String> perspectives, Path directory, boolean addMainEvenIfItsNotThere)
+   private void reindexPerspectives(TreeSet<String> perspectives, HybridResourceMode resourceMode, boolean addMainEvenIfItsNotThere)
    {
       perspectives.clear();
       if (addMainEvenIfItsNotThere)
          perspectives.add("Main");
-      PathTools.walkFlat(directory, new BasicPathVisitor()
+      TreeSet<String> fileNames = new TreeSet<>();
+      TreeSet<String> directoryNames = new TreeSet<>();
+      if (resourceMode == HybridResourceMode.WORKSPACE)
       {
-         @Override
-         public FileVisitResult visitPath(Path path, PathType pathType)
+         configurationBaseDirectory.walkResourcesFlat((path, pathType) ->
          {
-            if (pathType == PathType.FILE)
+            if (pathType == BasicPathVisitor.PathType.DIRECTORY)
+               directoryNames.add(path);
+            else
+               fileNames.add(path);;
+         });
+      }
+      else
+      {
+         PathTools.walkFlat(configurationBaseDirectory.getExternalDirectory(), new BasicPathVisitor()
+         {
+            @Override
+            public FileVisitResult visitPath(Path path, PathType pathType)
             {
-               String fileName = path.getFileName().toString();
-               if (fileName.equals(GDXImGuiWindowAndDockSystem.IMGUI_SETTINGS_INI_FILE_NAME))
+               if (pathType == PathType.FILE)
                {
-                  perspectives.add("Main");
+                  String fileName = path.getFileName().toString();
+                  fileNames.add(fileName);
                }
-            }
-            if (pathType == PathType.DIRECTORY)
-            {
-               String directoryName = path.getFileName().toString();
-               String matchString = "Perspective";
-               if (directoryName.endsWith(matchString))
+               if (pathType == PathType.DIRECTORY)
                {
-                  String perspectiveName = directoryName.substring(0, directoryName.lastIndexOf(matchString));
-                  LogTools.info("Found perspective {}", perspectiveName);
-                  perspectives.add(perspectiveName);
+                  String directoryName = path.getFileName().toString();
+                  directoryNames.add(directoryName);
                }
+               return FileVisitResult.CONTINUE;
             }
-            return FileVisitResult.CONTINUE;
+         });
+      }
+      for (String fileName : fileNames)
+      {
+         if (fileName.equals(GDXImGuiWindowAndDockSystem.IMGUI_SETTINGS_INI_FILE_NAME))
+         {
+            perspectives.add("Main");
          }
-      });
+      }
+      for (String directoryName : directoryNames)
+      {
+         String matchString = "Perspective";
+         if (directoryName.endsWith(matchString))
+         {
+            String perspectiveName = directoryName.substring(0, directoryName.lastIndexOf(matchString));
+            LogTools.info("Found perspective {}", perspectiveName);
+            perspectives.add(perspectiveName);
+         }
+      }
    }
 
    private void renderPerspectiveManager(TreeSet<String> perspectives, ImGuiConfigurationLocation configurationLocation, ImString perspectiveNameToSave)
@@ -184,6 +210,11 @@ public class GDXImGuiPerspectiveManager
    public void reloadPerspective()
    {
       applyPerspectiveDirectory();
-      load.accept(currentConfigurationLocation);
+      Path directory = currentConfigurationLocation == ImGuiConfigurationLocation.VERSION_CONTROL
+            ? perspectiveDirectory.getWorkspaceDirectory() : perspectiveDirectory.getExternalDirectory();
+      if (Files.exists(directory))
+      {
+         load.accept(currentConfigurationLocation);
+      }
    }
 }
