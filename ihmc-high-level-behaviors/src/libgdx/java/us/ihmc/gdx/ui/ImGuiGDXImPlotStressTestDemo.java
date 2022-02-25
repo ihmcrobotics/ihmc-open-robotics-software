@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.gdx.ui.tools.ImPlotTools;
 import us.ihmc.log.LogTools;
 
 import java.util.*;
@@ -37,7 +38,7 @@ public class ImGuiGDXImPlotStressTestDemo
          public void create()
          {
             baseUI.create();
-            ImPlot.createContext();
+            ImPlotTools.ensureImPlotInitialized();
 
             timer.scheduleAtFixedRate(new TimerTask()
             {

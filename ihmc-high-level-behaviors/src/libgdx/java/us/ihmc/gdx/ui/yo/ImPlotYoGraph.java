@@ -75,8 +75,6 @@ public class ImPlotYoGraph
       if (!shouldGraphExist)
          return;
 
-      ImPlot.setCurrentContext(imPlotContext);
-
       int currentValueIndex = currentIndex.getAndIncrement();
       float graphWidth = ImGui.getColumnWidth();
       float graphHeight = 60;

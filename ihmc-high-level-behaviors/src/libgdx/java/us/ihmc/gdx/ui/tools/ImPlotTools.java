@@ -1,5 +1,8 @@
 package us.ihmc.gdx.ui.tools;
 
+import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.ImPlotContext;
+
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,6 +10,26 @@ import java.util.Objects;
 
 public final class ImPlotTools
 {
+   private static ImPlotContext context = null;
+
+   /**
+    * We are assuming we don't ever need more than one context.
+    */
+   public static ImPlotContext ensureImPlotInitialized()
+   {
+      if (context == null)
+      {
+         context = ImPlot.createContext();
+         ImPlot.setCurrentContext(context);
+      }
+      return context;
+   }
+
+   public static ImPlotContext getContext()
+   {
+      return context;
+   }
+
    //Despite being identical code-wise, these need different methods because of casts from different primitive types
    public static Double[] convertArray(int[] array)
    {
