@@ -74,7 +74,7 @@ public class WalkingTrajectoryPath
    public static final String WALKING_TRAJECTORY_FRAME_NAMEID = worldFrame.getNameId() + ReferenceFrame.SEPARATOR + WALKING_TRAJECTORY_PATH_FRAME_NAME;
    public static final int WALKING_TRAJECTORY_FRAME_ID = WALKING_TRAJECTORY_FRAME_NAMEID.hashCode();
 
-   private static final int MAX_NUMBER_OF_FOOTSTEPS = 2;
+   private static final int MAX_NUMBER_OF_FOOTSTEPS = 4;
 
    private final String namePrefix = "walkingTrajectoryPath";
 
@@ -109,6 +109,7 @@ public class WalkingTrajectoryPath
    private final YoFrameVector3D currentHeadingViz;
    private final YoBoolean isInDoubleSupport = new YoBoolean(namePrefix + "DoubleSupport", registry);
    private final YoEnum<RobotSide> supportSide = new YoEnum<>(namePrefix + "SupportSide", registry, RobotSide.class, true);
+   private final YoBoolean isLastWaypointOpen = new YoBoolean(namePrefix + "IsLastWaypointOpen", registry);
 
    private final MovingReferenceFrame walkingTrajectoryPathFrame = new MovingReferenceFrame(WALKING_TRAJECTORY_PATH_FRAME_NAME, worldFrame, true)
    {
@@ -215,6 +216,9 @@ public class WalkingTrajectoryPath
    public void addFootsteps(WalkingMessageHandler walkingMessageHandler)
    {
       dirtyFootsteps = true;
+
+      setLastWaypointOpen(footsteps.remaining() < walkingMessageHandler.getCurrentNumberOfFootsteps());
+
       for (int i = 0; i < walkingMessageHandler.getCurrentNumberOfFootsteps(); i++)
       {
          if (footsteps.remaining() == 0)
@@ -233,6 +237,20 @@ public class WalkingTrajectoryPath
       dirtyFootsteps = true;
       footsteps.add().set(footstep);
       footstepTimings.add().set(footstepTiming);
+   }
+
+   /**
+    * Sets whether the last waypoint is open or not.
+    * <p>
+    * The last waypoint should be open when the last footstep added to the trajectory is not the last
+    * footstep of the current walking sequence. When the last waypoint is open, the final velocity of
+    * the trajectory is left unconstrained. When the last waypoint is closed, the final velocity is
+    * constrained to 0, such as to plan for the robot coming to a stop.
+    * </p>
+    */
+   public void setLastWaypointOpen(boolean isOpen)
+   {
+      isLastWaypointOpen.set(isOpen);
    }
 
    private final SideDependentList<Pose3D> supportFootPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
@@ -323,7 +341,7 @@ public class WalkingTrajectoryPath
       }
       else
       {
-         trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints);
+         trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints, isLastWaypointOpen.getValue());
          trajectoryManager.computePosition(currentTime, currentPosition);
          trajectoryManager.computeLinearVelocity(currentTime, currentLinearVelocity);
          currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
@@ -530,7 +548,7 @@ public class WalkingTrajectoryPath
 
    private static interface TrajectoryManager
    {
-      void initialize(Vector3DReadOnly initialLinearVelocity, double initialYawRate, YoPreallocatedList<WaypointData> waypoints);
+      void initialize(Vector3DReadOnly initialLinearVelocity, double initialYawRate, YoPreallocatedList<WaypointData> waypoints, boolean isLastWaypointOpen);
 
       void computePosition(double time, Tuple3DBasics positionToPack);
 
@@ -550,7 +568,10 @@ public class WalkingTrajectoryPath
       private double totalDuration;
 
       @Override
-      public void initialize(Vector3DReadOnly initialLinearVelocity, double initialYawRate, YoPreallocatedList<WaypointData> waypoints)
+      public void initialize(Vector3DReadOnly initialLinearVelocity,
+                             double initialYawRate,
+                             YoPreallocatedList<WaypointData> waypoints,
+                             boolean isLastWaypointOpen)
       {
          WaypointData firstWaypoint = waypoints.getFirst();
          WaypointData lastWaypoint = waypoints.getLast();
@@ -565,6 +586,8 @@ public class WalkingTrajectoryPath
                                       initialLinearVelocity.getElement(axis) * totalDuration,
                                       lastWaypoint.getPosition(axis),
                                       0.0);
+            if (isLastWaypointOpen)
+               linearSolver.setEndpointWeights(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.0);
 
             for (int i = 1; i < waypoints.size() - 1; i++)
             {
@@ -578,6 +601,8 @@ public class WalkingTrajectoryPath
          yawSolver.clearWaypoints();
          yawSolver.clearWeights();
          yawSolver.setEndpoints(firstWaypoint.yaw.getValue(), initialYawRate * totalDuration, lastWaypoint.yaw.getValue(), 0.0);
+         if (isLastWaypointOpen)
+            yawSolver.setEndpointWeights(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, 0.0);
 
          for (int i = 1; i < waypoints.size() - 1; i++)
          {
@@ -626,7 +651,10 @@ public class WalkingTrajectoryPath
       private double totalDuration;
 
       @Override
-      public void initialize(Vector3DReadOnly initialLinearVelocity, double initialYawRate, YoPreallocatedList<WaypointData> waypoints)
+      public void initialize(Vector3DReadOnly initialLinearVelocity,
+                             double initialYawRate,
+                             YoPreallocatedList<WaypointData> waypoints,
+                             boolean isLastWaypointOpen)
       {
          WaypointData lastWaypoint = waypoints.getLast();
          totalDuration = lastWaypoint.time.getValue();
