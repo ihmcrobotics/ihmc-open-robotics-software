@@ -1,7 +1,9 @@
 package us.ihmc.gdx.ui.tools;
 
+import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
+import imgui.extension.implot.ImPlotStyle;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -28,6 +30,15 @@ public final class ImPlotTools
    public static ImPlotContext getContext()
    {
       return context;
+   }
+
+   public static void setSCSStyle()
+   {
+      ImPlotStyle style = ImPlot.getStyle();
+      style.setPlotPadding(new ImVec2(0, 0));
+      style.setLabelPadding(new ImVec2(3, 0));
+      style.setLegendPadding(new ImVec2(0, 0));
+      style.setLegendInnerPadding(new ImVec2(5, 0));
    }
 
    //Despite being identical code-wise, these need different methods because of casts from different primitive types
@@ -92,6 +103,17 @@ public final class ImPlotTools
       }
 
       return output;
+   }
+
+   public static Integer[] createIndex(int bufferSize)
+   {
+      Integer[] index = new Integer[bufferSize];
+      for (int i = 0; i < bufferSize; i++)
+      {
+         index[i] = i;
+      }
+
+      return index;
    }
 
    /** @deprecated THIS METHOD IS SUPER EXPENSIVE, DON'T USE */
