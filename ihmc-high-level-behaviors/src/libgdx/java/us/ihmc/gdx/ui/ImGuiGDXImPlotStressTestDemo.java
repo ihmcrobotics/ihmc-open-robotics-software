@@ -9,22 +9,18 @@ import us.ihmc.log.LogTools;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ImGuiGDXImPlotStressTestDemo //Seizure warning - this stress test generates rapidly flashing, random colors
+/**
+ * Seizure warning - this stress test generates rapidly flashing, random colors
+ */
+public class ImGuiGDXImPlotStressTestDemo
 {
-
    private final String WINDOW_NAME = "ImPlot Stress Test";
-
    private GDXImGuiBasedUI baseUI;
-
    private AtomicInteger numPlotsToShow = new AtomicInteger(50);
-
    private final Timer timer = new Timer();
-
    private final Double[] xs = new Double[500];
    private final Double[] ys = new Double[500];
-
    private final Random random = new Random();
-
    private boolean recalculate = true;
 
    public ImGuiGDXImPlotStressTestDemo()
