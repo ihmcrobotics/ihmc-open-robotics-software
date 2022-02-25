@@ -46,6 +46,25 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+/**
+ * This class sets up a trajectory that aims providing a reference frame that similar to
+ * {@link CommonHumanoidReferenceFrames#getMidFeetZUpFrame()} follows the robot as it walks, but
+ * while following a smooth trajectory. {@link WalkingTrajectoryPath} will be used in the controller
+ * <p>
+ * The reference frame satisfies the following:
+ * <ul>
+ * <li>It is a z-up frame.
+ * <li>It tends to be between the feet at ground height.
+ * <li>It is a smooth trajectory.
+ * <li>It is equivalent to {@link CommonHumanoidReferenceFrames#getMidFeetZUpFrame()} when the robot
+ * is standing.
+ * <li>It can be used in trajectory commands by providing {@value #WALKING_TRAJECTORY_FRAME_ID} as
+ * the reference frame ID.
+ * </ul>
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ */
 public class WalkingTrajectoryPath
 {
    private static final boolean VISUALIZE = false;
@@ -55,7 +74,7 @@ public class WalkingTrajectoryPath
    public static final String WALKING_TRAJECTORY_FRAME_NAMEID = worldFrame.getNameId() + ReferenceFrame.SEPARATOR + WALKING_TRAJECTORY_PATH_FRAME_NAME;
    public static final int WALKING_TRAJECTORY_FRAME_ID = WALKING_TRAJECTORY_FRAME_NAMEID.hashCode();
 
-   private static final int MAX_NUMBER_OF_FOOTSTEPS = 4;
+   private static final int MAX_NUMBER_OF_FOOTSTEPS = 2;
 
    private final String namePrefix = "walkingTrajectoryPath";
 
