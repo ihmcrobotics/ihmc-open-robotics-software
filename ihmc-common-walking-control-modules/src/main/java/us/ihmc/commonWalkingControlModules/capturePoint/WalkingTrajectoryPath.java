@@ -311,11 +311,6 @@ public class WalkingTrajectoryPath
          initialSupportFootYaw = soleFrames.get(supportSide).getTransformToRoot().getRotation().getYaw();
          firstWaypointInSupportFootFrame.setIncludingFrame(waypoint.position);
          firstWaypointInSupportFootFrame.changeFrame(soleFrames.get(supportSide));
-
-         if (!footsteps.isEmpty())
-         { // We already did the transfer, we're zeroing it out to shift the first waypoint time.
-            footstepTimings.getFirst().setTransferTime(0.0);
-         }
       }
 
       updateFootstepsInternal();
@@ -378,6 +373,11 @@ public class WalkingTrajectoryPath
          for (RobotSide robotSide : RobotSide.values)
          {
             tempFootPoses.get(robotSide).set(supportFootPoses.get(robotSide));
+         }
+
+         if (!isInDoubleSupport.getValue())
+         {// We already did the first transfer, we're zeroing it out to shift the first waypoint time.
+            footstepTimings.getFirst().setTransferTime(0.0);
          }
 
          for (int i = 0; i < footsteps.size(); i++)
