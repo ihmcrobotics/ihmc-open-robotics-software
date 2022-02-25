@@ -4,26 +4,26 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.imgui.ImGuiGlfwWindow;
 import us.ihmc.gdx.imgui.ImGuiPanel;
-import us.ihmc.gdx.ui.yo.ImPlotDouble;
-import us.ihmc.gdx.ui.yo.ImPlotDoubleLine;
+import us.ihmc.gdx.ui.yo.ImPlotPlot;
+import us.ihmc.gdx.ui.yo.ImPlotDoublePlotLine;
 import us.ihmc.tools.time.FrequencyCalculator;
 
-public class ImPlotDemo
+public class ImPlotPlotDemo
 {
    private final ImGuiGlfwWindow baseUI = new ImGuiGlfwWindow(getClass(),
                                                               "ihmc-open-robotics-software",
                                                               "ihmc-high-level-behaviors/src/test/resources");
-   private ImPlotDouble imPlotDouble = new ImPlotDouble("ImPlot 1");
-   private final ImPlotDoubleLine linePlot = new ImPlotDoubleLine("Variable");
-   private ImPlotDouble fpsPlot = new ImPlotDouble("Frames per second");
-   private final ImPlotDoubleLine fpsPlotLine = new ImPlotDoubleLine("Frames per second");
+   private ImPlotPlot imPlotPlot = new ImPlotPlot("ImPlot 1");
+   private final ImPlotDoublePlotLine linePlot = new ImPlotDoublePlotLine("Variable");
+   private ImPlotPlot fpsPlot = new ImPlotPlot("Frames per second");
+   private final ImPlotDoublePlotLine fpsPlotLine = new ImPlotDoublePlotLine("Frames per second");
    private double value = 0.0;
    private Stopwatch stopwatch = new Stopwatch().start();
    private FrequencyCalculator fpsCalculator = new FrequencyCalculator();
 
-   public ImPlotDemo()
+   public ImPlotPlotDemo()
    {
-      imPlotDouble.getPlotLines().add(linePlot);
+      imPlotPlot.getPlotLines().add(linePlot);
       fpsPlot.getPlotLines().add(fpsPlotLine);
 
       ImGuiPanel mainPanel = new ImGuiPanel("ImPlots A", this::renderImGuiWidgets);
@@ -44,12 +44,12 @@ public class ImPlotDemo
 
    private void renderImGuiWidgets()
    {
-      imPlotDouble.render();
+      imPlotPlot.render();
       fpsPlot.render();
    }
 
    public static void main(String[] args)
    {
-      new ImPlotDemo();
+      new ImPlotPlotDemo();
    }
 }

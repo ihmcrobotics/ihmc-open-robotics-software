@@ -5,7 +5,7 @@ import us.ihmc.gdx.ui.tools.ImPlotTools;
 
 import java.text.DecimalFormat;
 
-public class ImPlotDoubleLine
+public class ImPlotDoublePlotLine implements ImPlotPlotLine
 {
    private Runnable legendPopupImGuiRenderer;
    private String variableNameBase;
@@ -20,7 +20,7 @@ public class ImPlotDoubleLine
    private boolean isA = true;
    private int filledIndex = 0;
 
-   public ImPlotDoubleLine(String variableName)
+   public ImPlotDoublePlotLine(String variableName)
    {
       this.variableName = variableName;
       variableNameBase = variableName + " ";
@@ -52,6 +52,7 @@ public class ImPlotDoubleLine
       }
    }
 
+   @Override
    public boolean render()
    {
       int offset = 0; // This is believed to be the index in the array we are passing in which implot will start reading
