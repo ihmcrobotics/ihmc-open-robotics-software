@@ -39,6 +39,7 @@ public final class ImPlotTools
       style.setLabelPadding(new ImVec2(3, 0));
       style.setLegendPadding(new ImVec2(0, 0));
       style.setLegendInnerPadding(new ImVec2(5, 0));
+      style.setAntiAliasedLines(true);
    }
 
    //Despite being identical code-wise, these need different methods because of casts from different primitive types
