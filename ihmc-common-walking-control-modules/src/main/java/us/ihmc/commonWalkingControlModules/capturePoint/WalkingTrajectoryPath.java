@@ -74,10 +74,6 @@ public class WalkingTrajectoryPath
    private final YoDouble currentYaw = new YoDouble(namePrefix + "CurrentYaw", registry);
    private final YoFrameVector3D currentLinearVelocity = new YoFrameVector3D(namePrefix + "CurrentLinearVelocity", worldFrame, registry);
    private final YoDouble currentYawRate = new YoDouble(namePrefix + "CurrentYawRate", registry);
-   private final YoFramePoint3D lastPosition = new YoFramePoint3D(namePrefix + "LastPosition", worldFrame, registry);
-   private final YoDouble lastYaw = new YoDouble(namePrefix + "LastYaw", registry);
-   private final YoFrameVector3D lastLinearVelocity = new YoFrameVector3D(namePrefix + "LastLinearVelocity", worldFrame, registry);
-   private final YoDouble lastYawRate = new YoDouble(namePrefix + "LastYawRate", registry);
 
    private double initialSupportFootYaw;
    private final FramePoint3D firstWaypointInSupportFootFrame = new FramePoint3D();
@@ -242,10 +238,10 @@ public class WalkingTrajectoryPath
       }
       else
       {
-         waypoint.position.set(lastPosition);
-         waypoint.setYaw(lastYaw.getValue());
-         waypoint.linearVelocity.set(lastLinearVelocity);
-         waypoint.setYawRate(lastYawRate.getValue());
+         waypoint.position.set(currentPosition);
+         waypoint.setYaw(currentYaw.getValue());
+         waypoint.linearVelocity.set(currentLinearVelocity);
+         waypoint.setYawRate(currentYawRate.getValue());
       }
 
       waypoint.updateViz();
@@ -332,11 +328,6 @@ public class WalkingTrajectoryPath
          currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
          currentYawRate.set(trajectoryManager.computeYawRate(currentTime));
       }
-
-      lastPosition.set(currentPosition);
-      lastYaw.set(currentYaw.getValue());
-      lastLinearVelocity.set(currentLinearVelocity);
-      lastYawRate.set(currentYawRate.getValue());
 
       walkingTrajectoryPathFrame.update();
 
