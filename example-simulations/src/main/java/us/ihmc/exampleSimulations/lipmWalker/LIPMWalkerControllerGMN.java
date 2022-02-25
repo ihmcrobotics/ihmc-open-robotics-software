@@ -295,7 +295,7 @@ public class LIPMWalkerControllerGMN implements RobotController
    // Get current foot x pos r.t. body ewrt world:
    double getXcop(RobotSide side)
    {
-      Point3D pos_foot = robot.getFootPosition(side);
+      Point3DReadOnly pos_foot = robot.getFootPosition(side);
       double xcop = pos_foot.getX() - robot.getBodyXPosition(); // xcop r.t. body
 //      Point3DReadOnly pos_CoM = robot.getCenterOfMassPosition();
 //      double xcop = pos_foot.getX() - pos_CoM.getX(); // xcop r.t. CoM
@@ -458,7 +458,7 @@ public class LIPMWalkerControllerGMN implements RobotController
          LRlastTime.get(side).set(-1.0);
 
          // Build the z-spline:
-         Point3D pos_foot = robot.getFootPosition(side);
+         Point3DReadOnly pos_foot = robot.getFootPosition(side);
          LRSwingCoeffs.get(side).set(buildSwingZdot(pos_foot.getZ()));
          
          // Initialize the diff IK:
@@ -551,7 +551,7 @@ public class LIPMWalkerControllerGMN implements RobotController
       @Override
       public boolean testCondition(double timeInCurrentState)
       {
-         Point3D pos_foot = robot.getFootPosition(side); // GMN: What is behind this function?  Super-sensing?
+         Point3DReadOnly pos_foot = robot.getFootPosition(side); // GMN: What is behind this function?  Super-sensing?
          boolean result = (pos_foot.getZ() > SwingHeight/4); 
          return (result);
       }

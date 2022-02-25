@@ -9,6 +9,8 @@ import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -115,9 +117,9 @@ public class LIPMWalkerRobot
       return mass;
    }
 
-   public Point3DReadOnly getCenterOfMassPosition()
+   public FramePoint3DReadOnly getCenterOfMassPosition()
    {
-      Point3DBasics comPosition = new Point3D();
+      FramePoint3D comPosition = new FramePoint3D();
       robot.computeCenterOfMass(comPosition);
       return comPosition;
    }
@@ -185,9 +187,11 @@ public class LIPMWalkerRobot
       kneeJoints.get(robotSide).setTau(force);
    }
 
-   public Point3D getFootPosition(RobotSide robotSide)
+   public FramePoint3DReadOnly getFootPosition(RobotSide robotSide)
    {
-      return heelPoints.get(robotSide).getPositionCopy();
+      FramePoint3D position = new FramePoint3D();
+      heelPoints.get(robotSide).getPosition(position);
+      return position;
    }
 
    public double getFootZForce(RobotSide robotSide)
@@ -331,13 +335,13 @@ public class LIPMWalkerRobot
 
    public double getCenterOfMassXDistanceFromSupportFoot()
    {
-      Point3D leftFootPosition = getFootPosition(RobotSide.LEFT);
-      Point3D rightFootPosition = getFootPosition(RobotSide.RIGHT);
+      Point3DReadOnly leftFootPosition = getFootPosition(RobotSide.LEFT);
+      Point3DReadOnly rightFootPosition = getFootPosition(RobotSide.RIGHT);
 
       double leftForce = getFootZForce(RobotSide.LEFT);
       double rightForce = getFootZForce(RobotSide.RIGHT);
 
-      Point3D loadedFootPosition = leftFootPosition;
+      Point3DReadOnly loadedFootPosition = leftFootPosition;
       if (Math.abs(rightForce) > Math.abs(leftForce))
       {
          loadedFootPosition = rightFootPosition;
