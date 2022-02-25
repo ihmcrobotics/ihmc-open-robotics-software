@@ -74,7 +74,7 @@ public class WalkingTrajectoryPath
    public static final String WALKING_TRAJECTORY_FRAME_NAMEID = worldFrame.getNameId() + ReferenceFrame.SEPARATOR + WALKING_TRAJECTORY_PATH_FRAME_NAME;
    public static final int WALKING_TRAJECTORY_FRAME_ID = WALKING_TRAJECTORY_FRAME_NAMEID.hashCode();
 
-   private static final int MAX_NUMBER_OF_FOOTSTEPS = 4;
+   private static final int MAX_NUMBER_OF_FOOTSTEPS = 2;
 
    private final String namePrefix = "walkingTrajectoryPath";
 
