@@ -170,13 +170,14 @@ public class GDXEnvironmentBuilder extends ImGuiPanel
    public void update()
    {
       bulletPhysicsManager.simulate(Gdx.graphics.getDeltaTime());
-      if (bulletPhysicsManager.getSimulate().get())
+      for (GDXEnvironmentObject allObject : allObjects)
       {
-         for (GDXEnvironmentObject allObject : allObjects)
+         if (bulletPhysicsManager.getSimulate().get())
          {
             allObject.copyBulletTransformToThisMultiBody();
-            allObject.afterSimulate();
+            allObject.afterSimulate(bulletPhysicsManager);
          }
+         allObject.update(bulletPhysicsManager);
       }
    }
 
