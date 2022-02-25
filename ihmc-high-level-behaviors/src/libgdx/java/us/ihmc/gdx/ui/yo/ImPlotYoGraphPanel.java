@@ -48,7 +48,7 @@ public class ImPlotYoGraphPanel
 
    public void create()
    {
-      context = ImPlot.createContext();
+      context = ImPlotTools.ensureImPlotInitialized();
       ImPlotStyle style = ImPlot.getStyle();
       style.setPlotPadding(new ImVec2(0, 0));
    }
