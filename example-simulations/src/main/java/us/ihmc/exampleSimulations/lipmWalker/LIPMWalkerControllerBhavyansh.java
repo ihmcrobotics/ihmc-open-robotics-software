@@ -119,7 +119,7 @@ public class LIPMWalkerControllerBhavyansh implements RobotController
       kdKnee.set(100.0);
 
       kpHip.set(1000.0);
-      kdHip.set(1.0);
+      kdHip.set(10.0);
 
       q_d_leftKnee.set(0.8);
       q_d_rightKnee.set(0.7);
