@@ -596,12 +596,12 @@ public class SwingState extends AbstractFootControlState
             BlendedWaypointPositionTrajectoryGenerator positionTrajectory = blendedSwingTrajectory.getPositionTrajectoryGenerator();
             orientationTrajectory.blendFinalConstraint(rateLimitedAdjustedPose.getOrientation(), swingDuration, swingDuration);
 
+            positionTrajectory.clear();
             positionTrajectory.addBlendWaypoint(swingTrajectoryCalculator.getSwingTrajectory().getPositionTrajectory().getWaypoint(0).getPosition(), 0.0);
             positionTrajectory.addBlendWaypoint(desiredPositionWhenAdjusted, swingDuration - timeRemainingWhenAdjusted.getValue());
             positionTrajectory.addBlendWaypoint(rateLimitedAdjustedPose.getPosition(), swingDuration);
             positionTrajectory.initializeBlendingTrajectory();
 
-//            blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, timeRemainingWhenAdjusted.getDoubleValue());
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),
                                                     swingTrajectoryCalculator.getFinalLinearVelocity(),
