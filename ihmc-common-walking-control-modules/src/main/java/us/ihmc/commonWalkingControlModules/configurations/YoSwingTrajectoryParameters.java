@@ -124,7 +124,7 @@ public class YoSwingTrajectoryParameters
                                                                registry,
                                                                walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
 
-      velocityAdjustmentDamping = new DoubleParameter(namePrefix + "VelocityAdjustmentDamping", registry, 0.0);//parameters.getSwingFootVelocityAdjustmentDamping());
+      velocityAdjustmentDamping = new DoubleParameter(namePrefix + "VelocityAdjustmentDamping", registry, parameters.getSwingFootVelocityAdjustmentDamping());
    }
 
    public boolean doToeTouchdownIfPossible()
