@@ -132,7 +132,7 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
-      walkingTrajectoryPath.computeTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+      updateWalkingTrajectoryPath();
 
       super.doAction(timeInState);
 
@@ -207,6 +207,15 @@ public class WalkingSingleSupportState extends SingleSupportState
       walkingMessageHandler.clearFootTrajectory();
 
       switchToToeOffIfPossible(supportSide);
+   }
+
+   private void updateWalkingTrajectoryPath()
+   {
+      walkingTrajectoryPath.clearFootsteps();
+      walkingTrajectoryPath.addFootstep(nextFootstep, footstepTiming);
+      walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
+      walkingTrajectoryPath.updateFootsteps(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+      walkingTrajectoryPath.computeTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
    }
 
    @Override

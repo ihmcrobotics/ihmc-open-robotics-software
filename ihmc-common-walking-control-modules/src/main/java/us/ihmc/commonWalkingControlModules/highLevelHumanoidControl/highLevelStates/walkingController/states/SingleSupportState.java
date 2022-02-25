@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.WalkingTrajectoryPath;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -29,7 +28,6 @@ public abstract class SingleSupportState extends WalkingState
    protected final FullHumanoidRobotModel fullRobotModel;
 
    protected final BalanceManager balanceManager;
-   private final FeetManager feetManager;
    private final CenterOfMassHeightManager comHeightManager;
 
    public SingleSupportState(WalkingStateEnum singleSupportStateEnum,
@@ -51,7 +49,6 @@ public abstract class SingleSupportState extends WalkingState
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
-      feetManager = managerFactory.getOrCreateFeetManager();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
    }
 
@@ -104,6 +101,6 @@ public abstract class SingleSupportState extends WalkingState
    {
       walkingTrajectoryPath.clearFootsteps();
       walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
-      walkingTrajectoryPath.updateFootsteps(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+      walkingTrajectoryPath.initializeSingleSupport(supportSide);
    }
 }

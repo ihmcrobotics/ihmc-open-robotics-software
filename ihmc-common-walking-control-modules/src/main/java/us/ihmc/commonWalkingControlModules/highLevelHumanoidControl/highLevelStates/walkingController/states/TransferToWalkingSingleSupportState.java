@@ -175,8 +175,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
       feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
-      walkingTrajectoryPath.computeTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT),
-                                              feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+      updateWalkingTrajectoryPath();
 
       if (!doManualLiftOff())
       {
@@ -208,6 +207,14 @@ public class TransferToWalkingSingleSupportState extends TransferState
          tempAngularVelocity.changeFrame(soleZUpFrame); // The y component is equivalent to the pitch rate since the yaw and roll rate are 0.0
          feetManager.liftOff(transferToSide.getOppositeSide(), tempOrientation.getPitch(), tempAngularVelocity.getY(), toeOffDuration);
       }
+   }
+
+   private void updateWalkingTrajectoryPath()
+   {
+      walkingTrajectoryPath.clearFootsteps();
+      walkingTrajectoryPath.addFootsteps(walkingMessageHandler);
+      walkingTrajectoryPath.updateFootsteps(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
+      walkingTrajectoryPath.computeTrajectory(feetManager.getCurrentConstraintType(RobotSide.LEFT), feetManager.getCurrentConstraintType(RobotSide.RIGHT));
    }
 
    private boolean doManualLiftOff()

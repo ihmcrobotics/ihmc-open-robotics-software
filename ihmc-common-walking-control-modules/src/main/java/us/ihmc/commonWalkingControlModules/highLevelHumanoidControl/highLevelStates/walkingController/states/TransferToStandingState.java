@@ -223,7 +223,7 @@ public class TransferToStandingState extends WalkingState
    {
       WalkingTrajectoryPath walkingTrajectoryPath = controllerToolbox.getWalkingTrajectoryPath();
       walkingTrajectoryPath.clearFootsteps();
-      walkingTrajectoryPath.initialize();
+      walkingTrajectoryPath.initializeDoubleSupport();
    }
 
    @Override
