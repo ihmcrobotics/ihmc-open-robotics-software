@@ -219,7 +219,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       magnitude = pushMagnitude;
       duration = 0.05;
       double percentInSwing = 0.4;
-      side = RobotSide.LEFT;
+      side = RobotSide.RIGHT;
 
       // apply the push
       testPush(forceDirection, magnitude, duration, percentInSwing, side, swingStartConditions, swingTime);
