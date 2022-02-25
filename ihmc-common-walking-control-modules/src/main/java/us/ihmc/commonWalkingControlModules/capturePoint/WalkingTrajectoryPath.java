@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
@@ -74,6 +75,9 @@ public class WalkingTrajectoryPath
    private final YoDouble currentYaw = new YoDouble(namePrefix + "CurrentYaw", registry);
    private final YoFrameVector3D currentLinearVelocity = new YoFrameVector3D(namePrefix + "CurrentLinearVelocity", worldFrame, registry);
    private final YoDouble currentYawRate = new YoDouble(namePrefix + "CurrentYawRate", registry);
+
+   private final YoFrameVector3D initialLinearVelocity = new YoFrameVector3D(namePrefix + "InitialLinearVelocity", worldFrame, registry);
+   private final YoDouble initialYawRate = new YoDouble(namePrefix + "InitialYawRate", registry);
 
    private double initialSupportFootYaw;
    private final FramePoint3D firstWaypointInSupportFootFrame = new FramePoint3D();
@@ -233,15 +237,15 @@ public class WalkingTrajectoryPath
       {
          reset.set(false);
          waypoint.setYaw(computeAverage(supportFootPoses, waypoint.position));
-         waypoint.linearVelocity.setToZero();
-         waypoint.setYawRate(0.0);
+         initialLinearVelocity.setToZero();
+         initialYawRate.set(0.0);
       }
       else
       {
          waypoint.position.set(currentPosition);
          waypoint.setYaw(currentYaw.getValue());
-         waypoint.linearVelocity.set(currentLinearVelocity);
-         waypoint.setYawRate(currentYawRate.getValue());
+         initialLinearVelocity.set(currentLinearVelocity);
+         initialYawRate.set(currentYawRate.getValue());
       }
 
       waypoint.updateViz();
@@ -292,13 +296,12 @@ public class WalkingTrajectoryPath
             previousWaypoint = waypoint;
          }
 
-         waypoints.getLast().linearVelocity.setToZero();
-         waypoints.getLast().setYawRate(0.0);
          totalDuration.set(previousWaypoint.time.getValue());
       }
       else
       {
-         waypoints.getFirst().linearVelocity.setToZero();
+         initialLinearVelocity.setToZero();
+         initialYawRate.set(0.0);
          totalDuration.set(0.0);
       }
    }
@@ -309,7 +312,6 @@ public class WalkingTrajectoryPath
 
       updateSupportFootPoses(leftFootConstraintType, rightFootConstraintType);
       updateWaypoints();
-      updatePolynomials();
 
       double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
 
@@ -317,12 +319,13 @@ public class WalkingTrajectoryPath
       {
          WaypointData firstWaypoint = waypoints.getFirst();
          currentPosition.set(firstWaypoint.position);
-         currentLinearVelocity.set(firstWaypoint.linearVelocity);
+         currentLinearVelocity.set(initialLinearVelocity);
          currentYaw.set(AngleTools.trimAngleMinusPiToPi(firstWaypoint.getYaw()));
-         currentYawRate.set(firstWaypoint.getYawRate());
+         currentYawRate.set(initialYawRate.getValue());
       }
       else
       {
+         trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints);
          trajectoryManager.computePosition(currentTime, currentPosition);
          trajectoryManager.computeLinearVelocity(currentTime, currentLinearVelocity);
          currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
@@ -411,20 +414,6 @@ public class WalkingTrajectoryPath
       waypoint.setYaw(AngleTools.interpolateAngle(newYaw, waypoint.getYaw(), alpha));
    }
 
-   private void updatePolynomials()
-   {
-      if (!footsteps.isEmpty())
-      {
-         trajectoryManager.initialize(waypoints);
-         for (int i = 1; i < waypoints.size() - 1; i++)
-         {
-            WaypointData waypoint = waypoints.get(i);
-            trajectoryManager.computeLinearVelocity(waypoint.time.getValue(), waypoint.linearVelocity);
-            waypoint.setYawRate(trajectoryManager.computeYawRate(waypoint.time.getValue()));
-         }
-      }
-   }
-
    public MovingReferenceFrame getWalkingTrajectoryPathFrame()
    {
       return walkingTrajectoryPathFrame;
@@ -436,8 +425,6 @@ public class WalkingTrajectoryPath
       private final YoDouble time;
       private final YoFramePoint3D position;
       private final YoDouble yaw;
-      private final YoFrameVector3D linearVelocity;
-      private final YoDouble yawRate;
 
       private final YoFrameVector3D zUpViz;
       private final YoFrameVector3D headingViz;
@@ -450,8 +437,6 @@ public class WalkingTrajectoryPath
          time = new YoDouble(namePrefix + "Time" + nameSuffix, registry);
          position = new YoFramePoint3D(namePrefix + "Position" + nameSuffix, worldFrame, registry);
          yaw = new YoDouble(namePrefix + "Yaw" + nameSuffix, registry);
-         linearVelocity = new YoFrameVector3D(namePrefix + "LinearVelocity" + nameSuffix, worldFrame, registry);
-         yawRate = new YoDouble(namePrefix + "YawRate" + nameSuffix, registry);
 
          if (yoGraphicsList != null)
          {
@@ -478,8 +463,6 @@ public class WalkingTrajectoryPath
          time.setToNaN();
          position.setToNaN();
          yaw.setToNaN();
-         linearVelocity.setToNaN();
-         yawRate.setToNaN();
       }
 
       public void updateViz()
@@ -501,42 +484,21 @@ public class WalkingTrajectoryPath
          return yaw.getValue();
       }
 
-      public double getLinearVelocity(Axis3D axis)
-      {
-         return linearVelocity.getElement(axis);
-      }
-
-      public double getYawRate()
-      {
-         return yawRate.getValue();
-      }
-
       public void setYaw(double yaw)
       {
          this.yaw.set(yaw);
       }
 
-      public void setLinearVelocity(Axis3D axis, double value)
-      {
-         linearVelocity.setElement(axis, value);
-      }
-
-      public void setYawRate(double yawRate)
-      {
-         this.yawRate.set(yawRate);
-      }
-
       @Override
       public String toString()
       {
-         return name + ", time: " + time.getValue() + ", pos: " + EuclidCoreIOTools.getTuple3DString(position) + ", yaw: " + yaw.getValue() + ", lin. vel.: "
-               + EuclidCoreIOTools.getTuple3DString(linearVelocity) + ", yaw rate: " + yawRate.getValue();
+         return name + ", time: " + time.getValue() + ", pos: " + EuclidCoreIOTools.getTuple3DString(position) + ", yaw: " + yaw.getValue();
       }
    }
 
    private static interface TrajectoryManager
    {
-      void initialize(YoPreallocatedList<WaypointData> waypoints);
+      void initialize(Vector3DReadOnly initialLinearVelocity, double initialYawRate, YoPreallocatedList<WaypointData> waypoints);
 
       void computePosition(double time, Tuple3DBasics positionToPack);
 
@@ -556,7 +518,7 @@ public class WalkingTrajectoryPath
       private double totalDuration;
 
       @Override
-      public void initialize(YoPreallocatedList<WaypointData> waypoints)
+      public void initialize(Vector3DReadOnly initialLinearVelocity, double initialYawRate, YoPreallocatedList<WaypointData> waypoints)
       {
          WaypointData firstWaypoint = waypoints.getFirst();
          WaypointData lastWaypoint = waypoints.getLast();
@@ -568,9 +530,9 @@ public class WalkingTrajectoryPath
             linearSolver.clearWaypoints();
             linearSolver.clearWeights();
             linearSolver.setEndpoints(firstWaypoint.getPosition(axis),
-                                      firstWaypoint.getLinearVelocity(axis) * totalDuration,
+                                      initialLinearVelocity.getElement(axis) * totalDuration,
                                       lastWaypoint.getPosition(axis),
-                                      lastWaypoint.getLinearVelocity(axis) * totalDuration);
+                                      0.0);
 
             for (int i = 1; i < waypoints.size() - 1; i++)
             {
@@ -583,10 +545,7 @@ public class WalkingTrajectoryPath
 
          yawSolver.clearWaypoints();
          yawSolver.clearWeights();
-         yawSolver.setEndpoints(firstWaypoint.yaw.getValue(),
-                                firstWaypoint.yawRate.getValue() * totalDuration,
-                                lastWaypoint.yaw.getValue(),
-                                lastWaypoint.yawRate.getValue() * totalDuration);
+         yawSolver.setEndpoints(firstWaypoint.yaw.getValue(), initialYawRate * totalDuration, lastWaypoint.yaw.getValue(), 0.0);
 
          for (int i = 1; i < waypoints.size() - 1; i++)
          {
@@ -635,7 +594,7 @@ public class WalkingTrajectoryPath
       private double totalDuration;
 
       @Override
-      public void initialize(YoPreallocatedList<WaypointData> waypoints)
+      public void initialize(Vector3DReadOnly initialLinearVelocity, double initialYawRate, YoPreallocatedList<WaypointData> waypoints)
       {
          WaypointData lastWaypoint = waypoints.getLast();
          totalDuration = lastWaypoint.time.getValue();
@@ -660,7 +619,7 @@ public class WalkingTrajectoryPath
                int row = 0;
 
                polynomial.setPositionRow(row++, 0.0, waypoints.getFirst().getPosition(axis));
-               polynomial.setVelocityRow(row++, 0.0, waypoints.getFirst().getLinearVelocity(axis));
+               polynomial.setVelocityRow(row++, 0.0, initialLinearVelocity.getElement(axis));
 
                for (int i = 1; i < waypoints.size(); i++)
                {
@@ -669,13 +628,6 @@ public class WalkingTrajectoryPath
                polynomial.setVelocityRow(row++, totalDuration, 0.0);
                polynomial.setIsConstraintMatrixUpToDate(true);
                polynomial.initialize();
-
-               for (int i = 1; i < waypoints.size() - 1; i++)
-               {
-                  WaypointData waypoint = waypoints.get(i);
-                  polynomial.compute(waypoint.time.getValue());
-                  waypoint.setLinearVelocity(axis, polynomial.getVelocity());
-               }
             }
 
             yawPolynomial.setTime(0, totalDuration);
@@ -683,7 +635,7 @@ public class WalkingTrajectoryPath
             int row = 0;
 
             yawPolynomial.setPositionRow(row++, 0.0, waypoints.getFirst().yaw.getValue());
-            yawPolynomial.setVelocityRow(row++, 0.0, waypoints.getFirst().yawRate.getValue());
+            yawPolynomial.setVelocityRow(row++, 0.0, initialYawRate);
 
             for (int i = 1; i < waypoints.size(); i++)
             {
@@ -692,13 +644,6 @@ public class WalkingTrajectoryPath
             yawPolynomial.setVelocityRow(row++, totalDuration, 0.0);
             yawPolynomial.setIsConstraintMatrixUpToDate(true);
             yawPolynomial.initialize();
-
-            for (int i = 1; i < waypoints.size() - 1; i++)
-            {
-               WaypointData waypoint = waypoints.get(i);
-               yawPolynomial.compute(waypoint.time.getValue());
-               waypoint.yawRate.set(yawPolynomial.getVelocity());
-            }
          }
       }
 
