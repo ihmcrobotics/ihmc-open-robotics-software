@@ -30,7 +30,7 @@ public class ImGuiGDXImPlotStressTestDemo //Seizure warning - this stress test g
    public ImGuiGDXImPlotStressTestDemo()
    {
       LogTools.info("Starting UI");
-      baseUI = new GDXImGuiBasedUI(getClass(), "atlas-user-interface", "src/libgdx/resources", WINDOW_NAME);
+      baseUI = new GDXImGuiBasedUI(getClass(), "ihmc-open-robotics-software", "ihmc-high-level-behaviors/src/libgdx/resources", WINDOW_NAME);
    }
 
    public void launch()
