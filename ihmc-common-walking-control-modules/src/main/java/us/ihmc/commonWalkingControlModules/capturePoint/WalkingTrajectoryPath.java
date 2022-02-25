@@ -48,6 +48,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class WalkingTrajectoryPath
 {
+   private static final boolean VISUALIZE = false;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final String WALKING_TRAJECTORY_PATH_FRAME_NAME = "walkingTrajectoryPathFrame";
    public static final String WALKING_TRAJECTORY_FRAME_NAMEID = worldFrame.getNameId() + ReferenceFrame.SEPARATOR + WALKING_TRAJECTORY_PATH_FRAME_NAME;
@@ -62,6 +64,7 @@ public class WalkingTrajectoryPath
 
    private final YoPreallocatedList<WaypointData> waypoints;
 
+   private boolean dirtyFootsteps = false;
    private final PreallocatedList<Footstep> footsteps = new PreallocatedList<>(Footstep.class, Footstep::new, MAX_NUMBER_OF_FOOTSTEPS);
    private final PreallocatedList<FootstepTiming> footstepTimings = new PreallocatedList<>(FootstepTiming.class, FootstepTiming::new, MAX_NUMBER_OF_FOOTSTEPS);
 
@@ -118,34 +121,47 @@ public class WalkingTrajectoryPath
                                 YoRegistry parentRegistry)
    {
       this.time = time;
-      this.dt = updateDT;
+      dt = updateDT;
       this.soleFrames = soleFrames;
 
       YoGraphicsList yoGraphicList;
+
       if (yoGraphicsListRegistry != null)
-         yoGraphicList = new YoGraphicsList(namePrefix);
+      {
+         if (VISUALIZE)
+         {
+            yoGraphicList = new YoGraphicsList(namePrefix);
+
+            currentZUpViz = new YoFrameVector3D(namePrefix + "CurrentZUp", worldFrame, registry);
+            currentHeadingViz = new YoFrameVector3D(namePrefix + "CurrentHeading", worldFrame, registry);
+            yoGraphicList.add(new YoGraphicVector(namePrefix + "CurrentHeadingViz", currentPosition, currentHeadingViz, 0.35, YoAppearance.Blue()));
+            yoGraphicList.add(new YoGraphicVector(namePrefix + "CurrentZUpViz", currentPosition, currentZUpViz, 0.25, YoAppearance.Blue()));
+            trajectoryPositionViz = new BagOfBalls(100, 0.005, "walkingPathViz", YoAppearance.Red(), registry, yoGraphicsListRegistry);
+            yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
+         }
+         else
+         {
+            yoGraphicList = null;
+
+            currentZUpViz = null;
+            currentHeadingViz = null;
+            trajectoryPositionViz = null;
+         }
+      }
       else
+      {
          yoGraphicList = null;
+
+         currentZUpViz = null;
+         currentHeadingViz = null;
+         trajectoryPositionViz = null;
+      }
+
       waypoints = new YoPreallocatedList<>(WaypointData.class,
                                            SupplierBuilder.indexedSupplier(i -> new WaypointData(namePrefix, Integer.toString(i), registry, yoGraphicList)),
                                            "walkingPath",
                                            registry,
                                            MAX_NUMBER_OF_FOOTSTEPS + 1);
-      if (yoGraphicList != null)
-      {
-         currentZUpViz = new YoFrameVector3D(namePrefix + "CurrentZUp", worldFrame, registry);
-         currentHeadingViz = new YoFrameVector3D(namePrefix + "CurrentHeading", worldFrame, registry);
-         yoGraphicList.add(new YoGraphicVector(namePrefix + "CurrentHeadingViz", currentPosition, currentHeadingViz, 0.35, YoAppearance.Blue()));
-         yoGraphicList.add(new YoGraphicVector(namePrefix + "CurrentZUpViz", currentPosition, currentZUpViz, 0.25, YoAppearance.Blue()));
-         trajectoryPositionViz = new BagOfBalls(100, 0.005, "walkingPathViz", YoAppearance.Red(), registry, yoGraphicsListRegistry);
-         yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
-      }
-      else
-      {
-         currentZUpViz = null;
-         currentHeadingViz = null;
-         trajectoryPositionViz = null;
-      }
 
       filterBreakFrequency = new DoubleParameter(namePrefix + "FilterBreakFrequency", registry, 0.5);
 
@@ -172,12 +188,14 @@ public class WalkingTrajectoryPath
 
    public void clearFootsteps()
    {
+      dirtyFootsteps = true;
       footsteps.clear();
       footstepTimings.clear();
    }
 
    public void addFootsteps(WalkingMessageHandler walkingMessageHandler)
    {
+      dirtyFootsteps = true;
       for (int i = 0; i < walkingMessageHandler.getCurrentNumberOfFootsteps(); i++)
       {
          if (footsteps.remaining() == 0)
@@ -193,6 +211,7 @@ public class WalkingTrajectoryPath
       if (footsteps.remaining() == 0)
          return;
 
+      dirtyFootsteps = true;
       footsteps.add().set(footstep);
       footstepTimings.add().set(footstepTiming);
    }
@@ -265,14 +284,55 @@ public class WalkingTrajectoryPath
       updateFootstepsInternal();
    }
 
-   public void updateFootsteps(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
+   public void computeTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
    {
+      timer.startMeasurement();
+
       updateSupportFootPoses(leftFootConstraintType, rightFootConstraintType);
       updateFootstepsInternal();
+      updateWaypoints();
+
+      double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
+
+      if (footsteps.isEmpty())
+      {
+         WaypointData firstWaypoint = waypoints.getFirst();
+         currentPosition.set(firstWaypoint.position);
+         currentLinearVelocity.set(initialLinearVelocity);
+         currentYaw.set(AngleTools.trimAngleMinusPiToPi(firstWaypoint.getYaw()));
+         currentYawRate.set(initialYawRate.getValue());
+      }
+      else
+      {
+         trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints);
+         trajectoryManager.computePosition(currentTime, currentPosition);
+         trajectoryManager.computeLinearVelocity(currentTime, currentLinearVelocity);
+         currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
+         currentYawRate.set(trajectoryManager.computeYawRate(currentTime));
+      }
+
+      walkingTrajectoryPathFrame.update();
+
+      updateViz();
+
+      timer.stopMeasurement();
+   }
+
+   private void updateSupportFootPoses(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
+   {
+      if (leftFootConstraintType == ConstraintType.FULL)
+         supportFootPoses.get(RobotSide.LEFT).set(soleFrames.get(RobotSide.LEFT).getTransformToRoot());
+      if (rightFootConstraintType == ConstraintType.FULL)
+         supportFootPoses.get(RobotSide.RIGHT).set(soleFrames.get(RobotSide.RIGHT).getTransformToRoot());
    }
 
    private void updateFootstepsInternal()
    {
+      if (!dirtyFootsteps)
+         return;
+
+      dirtyFootsteps = false;
+
       if (!footsteps.isEmpty())
       {
          WaypointData waypoint = waypoints.getFirst();
@@ -304,47 +364,6 @@ public class WalkingTrajectoryPath
          initialYawRate.set(0.0);
          totalDuration.set(0.0);
       }
-   }
-
-   public void computeTrajectory(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
-   {
-      timer.startMeasurement();
-
-      updateSupportFootPoses(leftFootConstraintType, rightFootConstraintType);
-      updateWaypoints();
-
-      double currentTime = MathTools.clamp(time.getValue() - startTime.getValue(), 0.0, totalDuration.getValue());
-
-      if (footsteps.isEmpty())
-      {
-         WaypointData firstWaypoint = waypoints.getFirst();
-         currentPosition.set(firstWaypoint.position);
-         currentLinearVelocity.set(initialLinearVelocity);
-         currentYaw.set(AngleTools.trimAngleMinusPiToPi(firstWaypoint.getYaw()));
-         currentYawRate.set(initialYawRate.getValue());
-      }
-      else
-      {
-         trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints);
-         trajectoryManager.computePosition(currentTime, currentPosition);
-         trajectoryManager.computeLinearVelocity(currentTime, currentLinearVelocity);
-         currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
-         currentYawRate.set(trajectoryManager.computeYawRate(currentTime));
-      }
-
-      walkingTrajectoryPathFrame.update();
-
-      updateViz();
-
-      timer.stopMeasurement();
-   }
-
-   public void updateSupportFootPoses(ConstraintType leftFootConstraintType, ConstraintType rightFootConstraintType)
-   {
-      if (leftFootConstraintType == ConstraintType.FULL)
-         supportFootPoses.get(RobotSide.LEFT).set(soleFrames.get(RobotSide.LEFT).getTransformToRoot());
-      if (rightFootConstraintType == ConstraintType.FULL)
-         supportFootPoses.get(RobotSide.RIGHT).set(soleFrames.get(RobotSide.RIGHT).getTransformToRoot());
    }
 
    private final Point3D tempBallPosition = new Point3D();
@@ -406,12 +425,6 @@ public class WalkingTrajectoryPath
          updateFilteredWaypoint(secondWaypoint, newWaypointPosition, newYaw, filterAlpha);
          secondWaypoint.setYaw(firstWaypoint.getYaw() + AngleTools.computeAngleDifferenceMinusPiToPi(secondWaypoint.getYaw(), firstWaypoint.getYaw()));
       }
-   }
-
-   public static void updateFilteredWaypoint(WaypointData waypoint, Point3DReadOnly newPosition, double newYaw, double alpha)
-   {
-      waypoint.position.interpolate(newPosition, waypoint.position, alpha);
-      waypoint.setYaw(AngleTools.interpolateAngle(newYaw, waypoint.getYaw(), alpha));
    }
 
    public MovingReferenceFrame getWalkingTrajectoryPathFrame()
@@ -682,6 +695,12 @@ public class WalkingTrajectoryPath
          yawPolynomial.compute(time);
          return yawPolynomial.getVelocity();
       }
+   }
+
+   private static void updateFilteredWaypoint(WaypointData waypoint, Point3DReadOnly newPosition, double newYaw, double alpha)
+   {
+      waypoint.position.interpolate(newPosition, waypoint.position, alpha);
+      waypoint.setYaw(AngleTools.interpolateAngle(newYaw, waypoint.getYaw(), alpha));
    }
 
    private static double computeAverage(SideDependentList<? extends Pose3DReadOnly> input, Point3DBasics output)
