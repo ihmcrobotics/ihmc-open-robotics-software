@@ -10,6 +10,7 @@ import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.RotationMatrixTools;
@@ -42,6 +43,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class WalkingTrajectoryPath
 {
@@ -77,9 +79,14 @@ public class WalkingTrajectoryPath
    private final YoFrameVector3D lastLinearVelocity = new YoFrameVector3D(namePrefix + "LastLinearVelocity", worldFrame, registry);
    private final YoDouble lastYawRate = new YoDouble(namePrefix + "LastYawRate", registry);
 
+   private double initialSupportFootYaw;
+   private final FramePoint3D firstWaypointInSupportFootFrame = new FramePoint3D();
+
    private final BagOfBalls trajectoryPositionViz;
    private final YoFrameVector3D currentZUpViz;
    private final YoFrameVector3D currentHeadingViz;
+   private final YoBoolean isInDoubleSupport = new YoBoolean(namePrefix + "DoubleSupport", registry);
+   private final YoEnum<RobotSide> supportSide = new YoEnum<>(namePrefix + "SupportSide", registry, RobotSide.class, true);
 
    private final MovingReferenceFrame walkingTrajectoryPathFrame = new MovingReferenceFrame(WALKING_TRAJECTORY_PATH_FRAME_NAME, worldFrame, true)
    {
@@ -193,13 +200,32 @@ public class WalkingTrajectoryPath
    private final SideDependentList<Pose3D> supportFootPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
    private final SideDependentList<Pose3D> tempFootPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
 
-   public void initialize()
+   public void initializeDoubleSupport()
+   {
+      initializeInternal(true, null);
+   }
+
+   public void initializeSingleSupport(RobotSide supportSide)
+   {
+      initializeInternal(false, supportSide);
+   }
+
+   private void initializeInternal(boolean isInDoubleSupport, RobotSide supportSide)
    {
       startTime.set(time.getValue());
+      this.isInDoubleSupport.set(isInDoubleSupport);
+      this.supportSide.set(supportSide);
 
-      for (RobotSide robotSide : RobotSide.values)
+      if (isInDoubleSupport)
       {
-         supportFootPoses.get(robotSide).set(soleFrames.get(robotSide).getTransformToRoot());
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            supportFootPoses.get(robotSide).set(soleFrames.get(robotSide).getTransformToRoot());
+         }
+      }
+      else
+      {
+         supportFootPoses.get(supportSide).set(soleFrames.get(supportSide).getTransformToRoot());
       }
 
       clearWaypoints();
@@ -210,19 +236,31 @@ public class WalkingTrajectoryPath
       if (reset.getValue())
       {
          reset.set(false);
-         waypoint.yaw.set(computeAverage(supportFootPoses, waypoint.position));
+         waypoint.setYaw(computeAverage(supportFootPoses, waypoint.position));
          waypoint.linearVelocity.setToZero();
-         waypoint.yawRate.set(0.0);
+         waypoint.setYawRate(0.0);
       }
       else
       {
          waypoint.position.set(lastPosition);
-         waypoint.yaw.set(lastYaw.getValue());
+         waypoint.setYaw(lastYaw.getValue());
          waypoint.linearVelocity.set(lastLinearVelocity);
-         waypoint.yawRate.set(lastYawRate.getValue());
+         waypoint.setYawRate(lastYawRate.getValue());
       }
 
       waypoint.updateViz();
+
+      if (!isInDoubleSupport)
+      {
+         initialSupportFootYaw = soleFrames.get(supportSide).getTransformToRoot().getRotation().getYaw();
+         firstWaypointInSupportFootFrame.setIncludingFrame(waypoint.position);
+         firstWaypointInSupportFootFrame.changeFrame(soleFrames.get(supportSide));
+
+         if (!footsteps.isEmpty())
+         { // We already did the transfer, we're zeroing it out to shift the first waypoint time.
+            footstepTimings.getFirst().setTransferTime(0.0);
+         }
+      }
 
       updateFootstepsInternal();
    }
@@ -252,14 +290,14 @@ public class WalkingTrajectoryPath
             Footstep footstep = footsteps.get(i);
             tempFootPoses.get(footstep.getRobotSide()).set(footstep.getFootstepPose());
             double yaw = computeAverage(tempFootPoses, waypoint.position);
-            waypoint.yaw.set(previousWaypoint.yaw.getValue() + AngleTools.computeAngleDifferenceMinusPiToPi(yaw, previousWaypoint.yaw.getValue()));
+            waypoint.setYaw(previousWaypoint.getYaw() + AngleTools.computeAngleDifferenceMinusPiToPi(yaw, previousWaypoint.getYaw()));
             waypoint.time.set(previousWaypoint.time.getValue() + footstepTimings.get(i).getStepTime());
             waypoint.updateViz();
             previousWaypoint = waypoint;
          }
 
          waypoints.getLast().linearVelocity.setToZero();
-         waypoints.getLast().yawRate.set(0.0);
+         waypoints.getLast().setYawRate(0.0);
          totalDuration.set(previousWaypoint.time.getValue());
       }
       else
@@ -284,8 +322,8 @@ public class WalkingTrajectoryPath
          WaypointData firstWaypoint = waypoints.getFirst();
          currentPosition.set(firstWaypoint.position);
          currentLinearVelocity.set(firstWaypoint.linearVelocity);
-         currentYaw.set(AngleTools.trimAngleMinusPiToPi(firstWaypoint.yaw.getValue()));
-         currentYawRate.set(firstWaypoint.yawRate.getValue());
+         currentYaw.set(AngleTools.trimAngleMinusPiToPi(firstWaypoint.getYaw()));
+         currentYawRate.set(firstWaypoint.getYawRate());
       }
       else
       {
@@ -348,26 +386,38 @@ public class WalkingTrajectoryPath
 
       double filterAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
 
-      double newYaw = computeAverage(tempFootPoses, newWaypointPosition);
       WaypointData firstWaypoint = waypoints.getFirst();
-      updateFilteredWaypoint(firstWaypoint, newWaypointPosition, newYaw, filterAlpha);
+
+      if (isInDoubleSupport.getValue())
+      {
+         double newYaw = computeAverage(tempFootPoses, newWaypointPosition);
+         updateFilteredWaypoint(firstWaypoint, newWaypointPosition, newYaw, filterAlpha);
+      }
+      else
+      {
+         MovingReferenceFrame supportFootFrame = soleFrames.get(supportSide.getValue());
+         newWaypointPosition.set(firstWaypointInSupportFootFrame);
+         supportFootFrame.transformFromThisToDesiredFrame(worldFrame, newWaypointPosition);
+         double firstWaypointYaw = firstWaypoint.getYaw() - initialSupportFootYaw;
+         double newYaw = firstWaypointYaw + supportFootFrame.getTransformToRoot().getRotation().getYaw();
+         updateFilteredWaypoint(firstWaypoint, newWaypointPosition, newYaw, filterAlpha);
+      }
 
       if (!footsteps.isEmpty())
       {
          Footstep firstFootstep = footsteps.get(0);
          tempFootPoses.get(firstFootstep.getRobotSide()).set(firstFootstep.getFootstepPose());
-         newYaw = computeAverage(tempFootPoses, newWaypointPosition);
+         double newYaw = computeAverage(tempFootPoses, newWaypointPosition);
          WaypointData secondWaypoint = waypoints.get(1);
          updateFilteredWaypoint(secondWaypoint, newWaypointPosition, newYaw, filterAlpha);
-         secondWaypoint.yaw.set(firstWaypoint.yaw.getValue()
-               + AngleTools.computeAngleDifferenceMinusPiToPi(secondWaypoint.yaw.getValue(), firstWaypoint.yaw.getValue()));
+         secondWaypoint.setYaw(firstWaypoint.getYaw() + AngleTools.computeAngleDifferenceMinusPiToPi(secondWaypoint.getYaw(), firstWaypoint.getYaw()));
       }
    }
 
    public static void updateFilteredWaypoint(WaypointData waypoint, Point3DReadOnly newPosition, double newYaw, double alpha)
    {
       waypoint.position.interpolate(newPosition, waypoint.position, alpha);
-      waypoint.yaw.set(AngleTools.interpolateAngle(newYaw, waypoint.yaw.getValue(), alpha));
+      waypoint.setYaw(AngleTools.interpolateAngle(newYaw, waypoint.getYaw(), alpha));
    }
 
    private void updatePolynomials()
@@ -379,7 +429,7 @@ public class WalkingTrajectoryPath
          {
             WaypointData waypoint = waypoints.get(i);
             trajectoryManager.computeLinearVelocity(waypoint.time.getValue(), waypoint.linearVelocity);
-            waypoint.yawRate.set(trajectoryManager.computeYawRate(waypoint.time.getValue()));
+            waypoint.setYawRate(trajectoryManager.computeYawRate(waypoint.time.getValue()));
          }
       }
    }
@@ -436,6 +486,7 @@ public class WalkingTrajectoryPath
       {
          time.setToNaN();
          position.setToNaN();
+         yaw.setToNaN();
          linearVelocity.setToNaN();
          yawRate.setToNaN();
       }
@@ -445,7 +496,7 @@ public class WalkingTrajectoryPath
          if (headingViz != null)
          {
             zUpViz.set(Axis3D.Z);
-            RotationMatrixTools.applyYawRotation(yaw.getValue(), Axis3D.X, headingViz);
+            RotationMatrixTools.applyYawRotation(getYaw(), Axis3D.X, headingViz);
          }
       }
 
@@ -454,14 +505,34 @@ public class WalkingTrajectoryPath
          return position.getElement(axis);
       }
 
+      public double getYaw()
+      {
+         return yaw.getValue();
+      }
+
       public double getLinearVelocity(Axis3D axis)
       {
          return linearVelocity.getElement(axis);
       }
 
+      public double getYawRate()
+      {
+         return yawRate.getValue();
+      }
+
+      public void setYaw(double yaw)
+      {
+         this.yaw.set(yaw);
+      }
+
       public void setLinearVelocity(Axis3D axis, double value)
       {
          linearVelocity.setElement(axis, value);
+      }
+
+      public void setYawRate(double yawRate)
+      {
+         this.yawRate.set(yawRate);
       }
 
       @Override
