@@ -36,8 +36,7 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
-import us.ihmc.robotics.math.trajectories.BlendedPositionTrajectoryGeneratorVisualizer;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.*;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSE3TrajectoryPointBasics;
@@ -91,6 +90,7 @@ public class SwingState extends AbstractFootControlState
    private final YoDouble currentTime;
    private final YoDouble currentTimeWithSwingSpeedUp;
    private final YoDouble timeRemainingWhenAdjusted;
+   private final YoFramePoint3D desiredPositionWhenAdjusted;
 
    private final double controlDT;
 
@@ -204,6 +204,7 @@ public class SwingState extends AbstractFootControlState
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
+      desiredPositionWhenAdjusted = new YoFramePoint3D(namePrefix + "DesiredPositionWhenAdjusted", worldFrame, registry);
       timeRemainingWhenAdjusted = new YoDouble(namePrefix + "TimeRemainingWhenStepAdjusted", registry);
       swingTrajectoryCalculator = footControlHelper.getSwingTrajectoryCalculator();
       blendedSwingTrajectory = new MultipleWaypointsBlendedPoseTrajectoryGenerator(namePrefix, swingTrajectoryCalculator.getSwingTrajectory(), worldFrame, registry);
@@ -332,6 +333,7 @@ public class SwingState extends AbstractFootControlState
       yoDesiredLinearVelocity.setToNaN();
 
       footstepWasAdjusted.set(false);
+      desiredPositionWhenAdjusted.setToNaN();
       timeRemainingWhenAdjusted.setToNaN();;
    }
 
@@ -530,6 +532,7 @@ public class SwingState extends AbstractFootControlState
    {
       replanTrajectory.set(true);
       footstepWasAdjusted.set(true);
+      desiredPositionWhenAdjusted.set(yoDesiredSolePosition);
       timeRemainingWhenAdjusted.set(Math.max(0.05, swingTime - currentTime.getValue()));
 
       adjustedFootstepPose.setIncludingFrame(adjustedFootstep.getFootstepPose());
@@ -589,7 +592,16 @@ public class SwingState extends AbstractFootControlState
          }
          else
          {
-            blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, timeRemainingWhenAdjusted.getDoubleValue());
+            BlendedOrientationTrajectoryGenerator orientationTrajectory = blendedSwingTrajectory.getOrientationTrajectoryGenerator();
+            BlendedWaypointPositionTrajectoryGenerator positionTrajectory = blendedSwingTrajectory.getPositionTrajectoryGenerator();
+            orientationTrajectory.blendFinalConstraint(rateLimitedAdjustedPose.getOrientation(), swingDuration, swingDuration);
+
+            positionTrajectory.addBlendWaypoint(swingTrajectoryCalculator.getSwingTrajectory().getPositionTrajectory().getWaypoint(0).getPosition(), 0.0);
+            positionTrajectory.addBlendWaypoint(desiredPositionWhenAdjusted, swingDuration - timeRemainingWhenAdjusted.getValue());
+            positionTrajectory.addBlendWaypoint(rateLimitedAdjustedPose.getPosition(), swingDuration);
+            positionTrajectory.initializeBlendingTrajectory();
+
+//            blendedSwingTrajectory.blendFinalConstraint(rateLimitedAdjustedPose, swingDuration, timeRemainingWhenAdjusted.getDoubleValue());
             touchdownTrajectory.setLinearTrajectory(swingDuration,
                                                     rateLimitedAdjustedPose.getPosition(),
                                                     swingTrajectoryCalculator.getFinalLinearVelocity(),
