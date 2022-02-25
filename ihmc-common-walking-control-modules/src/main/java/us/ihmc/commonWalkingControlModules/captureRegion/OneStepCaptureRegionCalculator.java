@@ -18,6 +18,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OneStepCaptureRegionCalculator
@@ -40,11 +41,13 @@ public class OneStepCaptureRegionCalculator
    // necessary variables for the reachable region and capture calculation:
 //   private final double midFootAnkleXOffset;
    private final double footWidth;
-   private final double kinematicStepRange;
+   private final DoubleProvider kinematicStepRange;
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final SideDependentList<FrameConvexPolygon2D> reachableRegions = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
 
    private final RecyclingArrayList<FramePoint2D> visibleVertices = new RecyclingArrayList<>(MAX_CAPTURE_REGION_POLYGON_POINTS, FramePoint2D.class);
+
+   private boolean haveReachableRegionsBeenCalculated = false;
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
@@ -82,15 +85,31 @@ public class OneStepCaptureRegionCalculator
       this(footWidth, kinematicStepRange, soleZUpFrames, "", parentRegistry, yoGraphicsListRegistry);
    }
 
-   public OneStepCaptureRegionCalculator(double footWidth, double kinematicStepRange,
-         SideDependentList<? extends ReferenceFrame> soleZUpFrames, String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public OneStepCaptureRegionCalculator(double footWidth,
+                                         double kinematicStepRange,
+                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                         String suffix,
+                                         YoRegistry parentRegistry,
+                                         YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(footWidth,
+           () -> kinematicStepRange,
+           soleZUpFrames,
+           suffix,
+           parentRegistry,
+           yoGraphicsListRegistry);
+   }
+
+   public OneStepCaptureRegionCalculator(double footWidth,
+                                         DoubleProvider kinematicStepRange,
+                                         SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                         String suffix, YoRegistry parentRegistry,
+                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.kinematicStepRange = kinematicStepRange;
       this.soleZUpFrames = soleZUpFrames;
 //      this.midFootAnkleXOffset = midFootAnkleXOffset;
       this.footWidth = footWidth;
-
-      calculateReachableRegions(footWidth);
 
       // set up registry and visualizer
       parentRegistry.addChild(registry);
@@ -111,8 +130,8 @@ public class OneStepCaptureRegionCalculator
          for (int i = 0; i < MAX_CAPTURE_REGION_POLYGON_POINTS - 1; i++)
          {
             double angle = sign * reachableRegionCutoffAngle * Math.PI * (i) / (MAX_CAPTURE_REGION_POLYGON_POINTS - 2);
-            double x = kinematicStepRange * Math.cos(angle);
-            double y = kinematicStepRange * Math.sin(angle);
+            double x = kinematicStepRange.getValue() * Math.cos(angle);
+            double y = kinematicStepRange.getValue() * Math.sin(angle);
             if (Math.abs(y) < footWidth / 2.0)
                y = sign * footWidth / 2.0;
             reachableRegion.addVertex(soleZUpFrames.get(side), x, y);
@@ -137,6 +156,12 @@ public class OneStepCaptureRegionCalculator
    public void calculateCaptureRegion(RobotSide swingSide, double swingTimeRemaining, FramePoint2DReadOnly icp, double omega0, FrameConvexPolygon2DReadOnly footPolygon)
    {
       globalTimer.startMeasurement();
+
+      if (!haveReachableRegionsBeenCalculated)
+      {
+         calculateReachableRegions(footWidth);
+         haveReachableRegionsBeenCalculated = true;
+      }
 
       // 1. Set up all needed variables and reference frames for the calculation:
       ReferenceFrame supportSoleZUp = soleZUpFrames.get(swingSide.getOppositeSide());
@@ -177,7 +202,7 @@ public class OneStepCaptureRegionCalculator
          rawCaptureRegion.addVertexMatchingFrame(predictedICP, false);
 
          // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
-         int intersections = EuclidCoreMissingTools.intersectionBetweenRay2DAndCircle(APPROXIMATION_MULTIPLIER * kinematicStepRange, footCentroid, copExtreme,
+         int intersections = EuclidCoreMissingTools.intersectionBetweenRay2DAndCircle(APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, copExtreme,
                                                                                       predictedICP, kinematicExtreme, null);
          if (intersections > 1)
             throw new RuntimeException("The cop was outside of the reachable range.");
@@ -201,7 +226,7 @@ public class OneStepCaptureRegionCalculator
       {
          double alphaFromAToB = ((double) (i + 1)) / ((double) (KINEMATIC_LIMIT_POINTS + 1));
          captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection, lastKinematicExtremeDirection, alphaFromAToB,
-                                                                              APPROXIMATION_MULTIPLIER * kinematicStepRange, footCentroid, additionalKinematicPoint);
+                                                                              APPROXIMATION_MULTIPLIER * kinematicStepRange.getValue(), footCentroid, additionalKinematicPoint);
          rawCaptureRegion.addVertexMatchingFrame(additionalKinematicPoint, false);
       }
 
@@ -260,7 +285,7 @@ public class OneStepCaptureRegionCalculator
 
    public double getKinematicStepRange()
    {
-      return kinematicStepRange;
+      return kinematicStepRange.getValue();
    }
 
    public double getCaptureRegionArea()
