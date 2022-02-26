@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ImGuiPanelManager
 {
    private final TreeSet<ImGuiPanel> panels = new TreeSet<>(Comparator.comparing(ImGuiPanel::getPanelName));
+   private final ConcurrentLinkedQueue<ImGuiPanel> removalQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<ImGuiPanel> addQueue = new ConcurrentLinkedQueue<>();
 
    public void addPanel(ImGuiPanel panel)
    {
@@ -24,9 +27,14 @@ public class ImGuiPanelManager
       panels.add(new ImGuiPanel(windowName));
    }
 
-   public void removePanel(ImGuiPanel panel)
+   public void queueRemovePanel(ImGuiPanel panel)
    {
-      panels.remove(panel);
+      removalQueue.add(panel);
+   }
+
+   public void queueAddPanel(ImGuiPanel panel)
+   {
+      addQueue.add(panel);
    }
 
    public void renderPanelMenu()
@@ -39,6 +47,12 @@ public class ImGuiPanelManager
 
    public void renderPanels(ImGuiDockspacePanel justClosedPanel)
    {
+      while (!removalQueue.isEmpty())
+         panels.remove(removalQueue.poll());
+
+      while (!addQueue.isEmpty())
+         panels.add(addQueue.poll());
+
       for (ImGuiPanel panel : panels)
       {
          panel.renderPanelAndChildren(justClosedPanel);
